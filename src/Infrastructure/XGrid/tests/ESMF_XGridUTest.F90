@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.37 2012/03/06 15:18:06 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.38 2012/03/14 01:51:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -931,7 +931,7 @@ contains
     integer, intent(out), optional            :: rc
 
 
-    integer                                   :: localrc, i, j, nsrc, ndst
+    integer                                   :: localrc, i, j, nsrc, ndst, lpet, npet
     type(ESMF_Field)                          :: f_xgrid
     type(ESMF_Grid), allocatable              :: srcGrid(:)
     type(ESMF_Field), allocatable             :: srcFrac(:), srcArea(:)
@@ -942,6 +942,19 @@ contains
     type(ESMF_RouteHandle), allocatable       :: s2x_rh(:), x2s_rh(:)
     type(ESMF_RouteHandle), allocatable       :: d2x_rh(:), x2d_rh(:)
     real(ESMF_KIND_R8), pointer               :: src(:,:), dst(:,:), exf(:)
+    real(ESMF_KIND_R8), pointer               :: src_area(:,:), dst_area(:,:), exf_area(:)
+    real(ESMF_KIND_R8), pointer               :: src_frac(:,:), dst_frac(:,:), exf_frac(:)
+    real(ESMF_KIND_R8)                        :: srcsum(3), allsrcsum(3), scale
+    type(ESMF_VM)                             :: vm
+
+    call ESMF_VMGetCurrent(vm=vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_VMGet(vm, localpet=lpet, petCount=npet, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     !------------------------------------
     ! build Fields on the Grids
@@ -1062,7 +1075,6 @@ contains
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-
       src = 2.0
     enddo
 
@@ -1076,14 +1088,20 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
     ! make sure flux is conserved on XGrid
-    !do i = 1, size(exf)
-    !  if(exf(i) /= 2.0) then
-    !    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-    !       msg="- Incorrect flux in XGrid", &
-    !       ESMF_CONTEXT, rcToReturn=rc)
-    !    return
-    !  endif
-    !enddo
+    allocate(exf_area(lbound(exf,1):ubound(exf,1)))
+    allocate(exf_frac(lbound(exf,1):ubound(exf,1)))
+    call ESMF_XGridGet(xgrid, area=exf_area, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    exf_frac = 1.0
+    call compute_flux1D(vm, exf, exf_area, exf_frac, allsrcsum, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    if(lpet == 0) print *, ' xgrid flux and area: ', allsrcsum
+    deallocate(exf_area, exf_frac)
+
     do i = 1, size(dstField)
       call ESMF_FieldRegrid(srcField=f_xgrid, dstField=dstField(i), &
         routehandle=x2d_rh(i), rc=localrc)
@@ -1154,5 +1172,71 @@ contains
     if(present(rc)) rc = ESMF_SUCCESS
 
   end subroutine flux_exchange
+
+!----------------------------------------------------
+  subroutine compute_flux1D(vm, flux_density, area, fraction, allsum, rc)
+    type(ESMF_VM), intent(in)        :: vm
+    real(ESMF_KIND_R8), pointer      :: flux_density(:) 
+    real(ESMF_KIND_R8), pointer      :: area(:) 
+    real(ESMF_KIND_R8), pointer      :: fraction(:) 
+    real(ESMF_KIND_R8), intent(out)  :: allsum(3)
+    integer, intent(out), optional   :: rc
+
+    real(ESMF_KIND_R8)               :: sum(3)
+    integer                          :: i,j, localrc
+
+    if(present(rc)) rc = ESMF_SUCCESS
+
+    sum = 0.
+    do i = lbound(flux_density, 1), ubound(flux_density, 1)
+      sum(1) = sum(1) + flux_density(i)*area(i)*fraction(i)
+      sum(2) = sum(2) +                 area(i)*fraction(i)
+      sum(3) = sum(3) +                 area(i)
+    enddo
+
+    call ESMF_VMAllReduce(vm, sum, allsum, 3, ESMF_REDUCE_SUM, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine compute_flux1D
+
+  subroutine compute_flux2D(vm, flux_density, area, fraction, allsum, rc)
+    type(ESMF_VM), intent(in)        :: vm
+    real(ESMF_KIND_R8), pointer      :: flux_density(:,:) 
+    real(ESMF_KIND_R8), pointer      :: area(:,:) 
+    real(ESMF_KIND_R8), pointer      :: fraction(:,:) 
+    real(ESMF_KIND_R8), intent(out)  :: allsum(3)
+    integer, intent(out), optional   :: rc
+
+    real(ESMF_KIND_R8)               :: sum(3)
+    integer                          :: i,j, localrc, npet, lpet
+
+    if(present(rc)) rc = ESMF_SUCCESS
+
+    call ESMF_VMGet(vm, petCount=npet, localPet=lpet, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+  
+    !if(lpet == 0) write(*, '(A, 4I5)') 'compute_flux2D bounds: ', &
+    !  lbound(flux_density, 1), ubound(flux_density, 1), &
+    !  lbound(flux_density, 2), ubound(flux_density, 2)
+
+    sum = 0.
+    do i = lbound(flux_density, 1), ubound(flux_density, 1)
+      do j = lbound(flux_density, 2), ubound(flux_density, 2)
+        sum(1) = sum(1) + flux_density(i,j)*area(i,j)*fraction(i,j)
+        sum(2) = sum(2) +                 area(i,j)*fraction(i,j)
+        sum(3) = sum(3) +                 area(i,j)
+      enddo
+    enddo
+
+    call ESMF_VMAllReduce(vm, sum, allsum, 3, ESMF_REDUCE_SUM, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine compute_flux2D
 
 end program ESMF_XGridUTest
