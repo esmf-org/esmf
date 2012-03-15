@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.47 2012/03/09 21:29:27 w6ws Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.48 2012/03/15 19:27:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -39,6 +39,7 @@ module ESMF_XGridCreateMod
   use ESMF_BaseMod
   use ESMF_LogErrMod
   use ESMF_DistGridMod
+  use ESMF_ArrayMod
   use ESMF_GridMod
   use ESMF_GridUtilMod
   use ESMF_MeshMod
@@ -78,7 +79,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.47 2012/03/09 21:29:27 w6ws Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.48 2012/03/15 19:27:48 feiliu Exp $'
 
 !==============================================================================
 !
@@ -420,6 +421,8 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
     real(ESMF_KIND_R8)            :: fraction = 1.0
     type(ESMF_FracPtr), allocatable :: sideAfrac(:), sideBfrac(:)
     type(ESMF_INDEX_FLAG)         :: indexflag
+    type(ESMF_DistGrid)           :: distgridTmp
+    !real(ESMF_KIND_R8), pointer   :: fracFptr(:,:)
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -714,6 +717,42 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Retrieve fraction Arrays for store use, only for online
+    allocate(xgtype%fracA2X(ngrid_a), xgtype%fracB2X(ngrid_b))
+    allocate(xgtype%fracX2A(ngrid_a), xgtype%fracX2B(ngrid_b))
+    do i = 1, ngrid_A
+      call ESMF_GridGet(sideA(i), distgrid=distgridTmp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      xgtype%fracA2X(i) = ESMF_ArrayCreate(distgridTmp, typekind=ESMF_TYPEKIND_R8, &
+        indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      xgtype%fracX2A(i) = ESMF_ArrayCreate(distgridTmp, typekind=ESMF_TYPEKIND_R8, &
+       indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+    do i = 1, ngrid_B
+      call ESMF_GridGet(sideB(i), distgrid=distgridTmp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      xgtype%fracB2X(i) = ESMF_ArrayCreate(distgridTmp, typekind=ESMF_TYPEKIND_R8, &
+        indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      xgtype%fracX2B(i) = ESMF_ArrayCreate(distgridTmp, typekind=ESMF_TYPEKIND_R8, &
+        indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
     !allocate(indicies(2,nentries))
     !allocate(weights(nentries))
 
@@ -787,6 +826,10 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
       !  enddo
       !  deallocate(sidemesharea)
       endif
+      call ESMF_XGridGetFracInt(sideA(i), mesh=meshAt(i), array=xgtype%fracA2X(i), &
+           staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+           ESMF_CONTEXT, rcToReturn=rc)) return
       
       ! Now the reverse direction
       call c_esmc_xgridregrid_create(vm, mesh, meshAt(i), &
@@ -806,6 +849,10 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
         xgtype%sparseMatX2A(i)%factorIndexList(1,1), &
         xgtype%sparseMatX2A(i)%factorList(1))
       endif
+      call ESMF_XGridGetFracInt(sideA(i), mesh=meshAt(i), array=xgtype%fracX2A(i), &
+           staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
       deallocate(sideAfrac(i)%fraclist)
     enddo
@@ -835,6 +882,10 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
         !    sideBfrac(i)%fraclist(xgtype%sparseMatB2X(i)%factorIndexList(1,j))
         !enddo
       endif
+      call ESMF_XGridGetFracInt(sideB(i), mesh=meshBt(i), array=xgtype%fracB2X(i), &
+           staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+           ESMF_CONTEXT, rcToReturn=rc)) return
     
       ! Now the reverse direction
       call c_esmc_xgridregrid_create(vm, mesh, meshBt(i), &
@@ -854,6 +905,14 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
         xgtype%sparseMatX2B(i)%factorIndexList(1,1), &
         xgtype%sparseMatX2B(i)%factorList(1))
       endif
+      call ESMF_XGridGetFracInt(sideB(i), mesh=meshBt(i), array=xgtype%fracX2B(i), &
+           staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      !call ESMF_ArrayGet(xgtype%fracX2B(i), localDe=0, farrayPtr=fracFptr, rc=localrc)
+      !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+      !     ESMF_CONTEXT, rcToReturn=rc)) return
 
       deallocate(sideBfrac(i)%fraclist)
     enddo
@@ -911,6 +970,7 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
     deallocate(mesharea)
 
     ! Finalize XGrid Creation
+    xgtype%online = 1
     xgtype%status = ESMF_STATUS_READY
     ESMF_XGridCreateDefault%xgtypep => xgtype 
     ESMF_INIT_SET_CREATED(ESMF_XGridCreateDefault)
@@ -1048,6 +1108,7 @@ integer, intent(out), optional             :: rc
 
 
     ! Finalize XGrid Creation
+    xgtype%online = 0
     xgtype%status = ESMF_STATUS_READY
     ESMF_XGridCreateOffline%xgtypep => xgtype 
     ESMF_INIT_SET_CREATED(ESMF_XGridCreateOffline)
@@ -1126,6 +1187,7 @@ integer, intent(out), optional             :: rc
   integer :: localrc, ngrid_a, ngrid_b
   integer :: ndim, ncells, i
   logical :: l_offline
+  real(ESMF_KIND_R8), pointer :: xgrid_frac(:)
 
   localrc = ESMF_SUCCESS
 
@@ -1222,6 +1284,22 @@ integer, intent(out), optional             :: rc
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  ! Create the fracX here because we have a non-vanishing distgridM at this point and
+  ! we know its entries should always be 1.0. This could be left for the user but it's 
+  ! provided here so regridstore call retrieve this Field directly either as src or dst Frac.
+  if(.not. l_offline) then
+    xgtype%fracX = ESMF_ArrayCreate(xgtype%distgridM, typekind=ESMF_TYPEKIND_R8, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    ! mesh distgrid should always 1 de/pet
+    call ESMF_ArrayGet(xgtype%fracX, localDe=0, farrayPtr=xgrid_frac, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    xgrid_frac = 1.0
   endif
 
   if(present(rc)) rc = ESMF_SUCCESS
@@ -2067,6 +2145,66 @@ end subroutine compute_mesharea
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridGetFracInt"
+!BOPI
+! !IROUTINE: ESMF_XGridGetFracInt - Gets the frac of grid cells after a regrid from a Mesh
+
+! !INTERFACE:
+      subroutine ESMF_XGridGetFracInt(Grid, Mesh, Array, staggerLoc, &
+                 rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in)         :: Grid
+      type(ESMF_Mesh), intent(inout)         :: Mesh
+      type(ESMF_Array), intent(inout)        :: Array
+      type(ESMF_StaggerLoc), intent(in)      :: staggerLoc
+      integer, intent(out), optional         :: rc
+!
+! !DESCRIPTION:
+!     The arguments are:
+!     \begin{description}
+!     \item[Mesh]
+!          The mesh.
+!     \item[Array]
+!          The grid array.
+!     \item[{rc}]
+!          Return code.
+!     \end{description}
+!EOPI
+       integer :: localrc
+       type(ESMF_VM)        :: vm
+       logical :: isMemFreed
+
+       ! Logic to determine if valid optional args are passed.  
+
+       ! Initialize return code; assume failure until success is certain
+       localrc = ESMF_RC_NOT_IMPL
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+       ! Make sure the srcMesh has its internal bits in place
+       call ESMF_MeshGet(Mesh, isMemFreed=isMemFreed, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       if (isMemFreed)  then
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+                 msg="- Mesh has had its coordinate and connectivity info freed", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+          return 
+       endif
+
+       ! Call through to the C++ object that does the work
+       call c_ESMC_xgrid_getfrac(Grid, Mesh, Array, staggerLoc, &
+                                  localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+      rc = ESMF_SUCCESS
+
+      end subroutine ESMF_XGridGetFracInt
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridConstructBaseObj()"
 !BOPI
 ! !IROUTINE:  ESMF_XGridConstructBaseObj - Allocate xgtype pointer and its base object
@@ -2227,7 +2365,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           enddo
         endif
 
-      endif
+      endif ! proxy
 
       if(associated(xgrid%xgtypep%centroid)) then
           deallocate(xgrid%xgtypep%centroid)
@@ -2249,7 +2387,47 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           deallocate(xgrid%xgtypep%sparseMatX2B)
       endif
 
-    endif
+      ! destroy all the fraction arrays for Xgrid created online
+      if(xgrid%xgtypep%online == 1) then
+        if(associated(xgrid%xgtypep%fracA2X)) then
+          do i = 1, size(xgrid%xgtypep%fracA2X,1)
+            call ESMF_ArrayDestroy(xgrid%xgtypep%fracA2X(i), rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+        endif
+        if(associated(xgrid%xgtypep%fracB2X)) then
+          do i = 1, size(xgrid%xgtypep%fracB2X,1)
+            call ESMF_ArrayDestroy(xgrid%xgtypep%fracB2X(i), rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+        endif
+        if(associated(xgrid%xgtypep%fracX2A)) then
+          do i = 1, size(xgrid%xgtypep%fracX2A,1)
+            call ESMF_ArrayDestroy(xgrid%xgtypep%fracX2A(i), rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+        endif
+        if(associated(xgrid%xgtypep%fracX2B)) then
+          do i = 1, size(xgrid%xgtypep%fracX2B,1)
+            call ESMF_ArrayDestroy(xgrid%xgtypep%fracX2B(i), rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+        endif
+        call ESMF_ArrayDestroy(xgrid%xgtypep%fracX, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      endif ! online
+
+    endif ! valid status
 
     ! mark object invalid
     call ESMF_BaseSetStatus(xgrid%xgtypep%base, ESMF_STATUS_INVALID, rc=localrc)

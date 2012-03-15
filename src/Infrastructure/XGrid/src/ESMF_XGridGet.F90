@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.25 2012/01/06 20:18:37 svasquez Exp $
+! $Id: ESMF_XGridGet.F90,v 1.26 2012/03/15 19:27:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -40,6 +40,8 @@ module ESMF_XGridGetMod
   use ESMF_LogErrMod
   use ESMF_DistGridMod
   use ESMF_DELayoutMod
+  use ESMF_StaggerLocMod
+  use ESMF_ArrayMod
   use ESMF_GridMod
   use ESMF_XGridMod
   use ESMF_InitMacrosMod
@@ -63,7 +65,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.25 2012/01/06 20:18:37 svasquez Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.26 2012/03/15 19:27:48 feiliu Exp $'
 
 !==============================================================================
 !
@@ -81,7 +83,7 @@ module ESMF_XGridGetMod
         module procedure ESMF_XGridGetDefault
         module procedure ESMF_XGridGetDG
         module procedure ESMF_XGridGetEle
-        module procedure ESMF_XGridGetSMMSpec
+        module procedure ESMF_XGridGetSMMSpecFrac
 
 
 ! !DESCRIPTION:
@@ -408,25 +410,27 @@ end subroutine ESMF_XGridGetDefault
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_XGridGetSMMSpec()"
+#define ESMF_METHOD "ESMF_XGridGetSMMSpecFrac()"
 !BOPI
 ! !IROUTINE:  ESMF_XGridGet - Get an individual SparseMatSpec
 
 ! !INTERFACE: ESMF_XGridGet
 
-subroutine ESMF_XGridGetSMMSpec(xgrid, sparseMat, srcSide, srcGridIndex, &
-    dstSide, dstGridIndex, &
+subroutine ESMF_XGridGetSMMSpecFrac(xgrid, srcSide, srcGridIndex, &
+    dstSide, dstGridIndex, sparseMat, srcFracArray, dstFracArray, &
     rc) 
 
 !
 ! !ARGUMENTS:
-type(ESMF_XGrid), intent(in)                 :: xgrid
-type(ESMF_XGridSpec), intent(out)            :: sparseMat
-type(ESMF_XGridSide_Flag), intent(in)        :: srcSide
-integer, intent(in)                          :: srcGridIndex
-type(ESMF_XGridSide_Flag), intent(in)        :: dstSide
-integer, intent(in)                          :: dstGridIndex
-integer, intent(out), optional               :: rc 
+type(ESMF_XGrid),          intent(in)               :: xgrid
+type(ESMF_XGridSide_Flag), intent(in)               :: srcSide
+integer,                   intent(in)               :: srcGridIndex
+type(ESMF_XGridSide_Flag), intent(in)               :: dstSide
+integer,                   intent(in)               :: dstGridIndex
+type(ESMF_XGridSpec),      intent(out),   optional  :: sparseMat
+type(ESMF_Array),          intent(inout), optional  :: srcFracArray
+type(ESMF_Array),          intent(inout), optional  :: dstFracArray
+integer,                   intent(out),   optional  :: rc 
 !
 ! !DESCRIPTION:
 !      Get information about XGrid
@@ -435,21 +439,24 @@ integer, intent(out), optional               :: rc
 !     \begin{description}
 !     \item [xgrid]
 !       The xgrid object used to retrieve information from.
-!     \item [distgrid]
-!       Distgrid whose sequence index list is an overlap between gridIndex-th Grid
-!       on xgridSide and the xgrid object.
-!     \item [{[srcSide]}] 
+!     \item [srcSide] 
 !       Side of the XGrid from (either ESMF\_XGRIDSIDE\_A,
 !       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED).
-!     \item [{[srcGridIndex]}] 
+!     \item [srcGridIndex] 
 !       If xgridSide is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on
 !       that side.
-!     \item [{[dstSide]}] 
+!     \item [dstSide]
 !       Side of the XGrid from (either ESMF\_XGRIDSIDE\_A,
 !       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED).
-!     \item [{[dstGridIndex]}] 
+!     \item [dstGridIndex] 
 !       If xgridSide is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on
 !       that side.
+!     \item [{[sparseMat]}]
+!       SparseMat corresponding to the src and dst Grid or Mesh.
+!     \item [{[srcFracArray]}]
+!       src Frac Array corresponding to the src Grid or Mesh.
+!     \item [{[dstFracArray]}]
+!       dst Frac Array corresponding to the dst Grid or Mesh.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
 !       is created.
@@ -458,6 +465,7 @@ integer, intent(out), optional               :: rc
 !EOPI
 
     type(ESMF_XGridType), pointer :: xgtypep
+    integer                       :: localrc
 
     ! Initialize return code   
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -468,25 +476,122 @@ integer, intent(out), optional               :: rc
     xgtypep => xgrid%xgtypep
 
     if(srcSide .eq. ESMF_XGRIDSIDE_A .and. dstSide .eq. ESMF_XGRIDSIDE_BALANCED) then
-        sparseMat = xgtypep%SparseMatA2X(srcGridIndex)
+        if(present(sparseMat)) sparseMat = xgtypep%SparseMatA2X(srcGridIndex)
+
+        if(present(srcFracArray)) then
+          if(xgtypep%online == 0) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- Cannot query srcFracArray for xgrid created offline", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+          call CpArray2DR8(xgtypep%fracA2X(srcGridIndex), srcFracArray, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        if(present(dstFracArray)) then
+          if(xgtypep%online == 0) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- Cannot query dstFracArray for xgrid created offline", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+          call CpArray1DR8(xgtypep%fracX, dstFracArray, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
     endif
 
     if(srcSide .eq. ESMF_XGRIDSIDE_B .and. dstSide .eq. ESMF_XGRIDSIDE_BALANCED) then
-        sparseMat = xgtypep%SparseMatB2X(srcGridIndex)
+        if(present(sparseMat)) sparseMat = xgtypep%SparseMatB2X(srcGridIndex)
+        if(present(srcFracArray)) then
+          if(xgtypep%online == 0) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- Cannot query srcFracArray for xgrid created offline", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+          call CpArray2DR8(xgtypep%fracB2X(srcGridIndex), srcFracArray, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        if(present(dstFracArray)) then
+          if(xgtypep%online == 0) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- Cannot query dstFracArray for xgrid created offline", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+          call CpArray1DR8(xgtypep%fracX, dstFracArray, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
     endif
 
     if(srcSide .eq. ESMF_XGRIDSIDE_BALANCED .and. dstSide .eq. ESMF_XGRIDSIDE_A) then
-        sparseMat = xgtypep%SparseMatX2A(dstGridIndex)
+        if(present(sparseMat)) sparseMat = xgtypep%SparseMatX2A(dstGridIndex)
+        if(present(srcFracArray)) then
+          if(xgtypep%online == 0) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- Cannot cannot query srcFracArray for xgrid created offline", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+          call CpArray1DR8(xgtypep%fracX, srcFracArray, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        if(present(dstFracArray)) then
+          if(xgtypep%online == 0) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- Cannot cannot query dstFracArray for xgrid created offline", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+          call CpArray2DR8(xgtypep%fracX2A(dstGridIndex), dstFracArray, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
     endif
 
     if(srcSide .eq. ESMF_XGRIDSIDE_BALANCED .and. dstSide .eq. ESMF_XGRIDSIDE_B) then
-        sparseMat = xgtypep%SparseMatX2B(dstGridIndex)
+        if(present(sparseMat)) sparseMat = xgtypep%SparseMatX2B(dstGridIndex)
+        if(present(srcFracArray)) then
+          if(xgtypep%online == 0) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- Cannot cannot query srcFracArray for xgrid created offline", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+          call CpArray1DR8(xgtypep%fracX, srcFracArray, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        if(present(dstFracArray)) then
+          if(xgtypep%online == 0) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- Cannot cannot query dstFracArray for xgrid created offline", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+          call CpArray2DR8(xgtypep%fracX2B(dstGridIndex), dstFracArray, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
     endif
 
     ! success
     if(present(rc)) rc = ESMF_SUCCESS
 
-end subroutine ESMF_XGridGetSMMSpec
+end subroutine ESMF_XGridGetSMMSpecFrac
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -705,5 +810,199 @@ integer, intent(out), optional               :: rc
 
     end subroutine ESMF_XGridGetEle
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "CpArray2DR8()"
+!BOPI
+! !IROUTINE:  CpArray - Cp data from src to det Array
+
+! !INTERFACE: CpArray
+
+subroutine CpArray2DR8(srcArray, dstArray, rc)
+
+!
+! !ARGUMENTS:
+type(ESMF_Array),          intent(in)               :: srcArray
+type(ESMF_Array),          intent(inout)            :: dstArray
+integer,                   intent(out),   optional  :: rc 
+!
+! !DESCRIPTION:
+!      Get information about XGrid
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [srcArray]
+!       Source Array
+!     \item [dstArray] 
+!       Destination Array
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
+!       is created.
+!     \end{description}
+!
+!EOPI
+
+    integer                         :: srcRank, dstRank
+    type(ESMF_TYPEKIND_Flag)        :: srcTK, dstTK
+    integer                         :: localrc
+    real(ESMF_KIND_R8), pointer     :: srcFP(:,:), dstFP(:,:)
+
+    ! Initialize return code   
+    if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! check init status of input Arrays
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,srcArray,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,dstArray,rc)
+
+    call ESMF_ArrayGet(srcArray, typekind=srcTK, rank=srcRank, &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_ArrayGet(dstArray, typekind=dstTK, rank=dstRank, &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if(.not. (srcRank == dstRank .and. srcRank == 2)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="- srcRank is not equal to dstRank", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+        return
+    endif
+    if(.not. (srcTK == dstTK .and. srcTK == ESMF_TYPEKIND_R8)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="- srcTK is not equal to dstTK", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+        return
+    endif
+
+    ! More error checking needed
+
+    ! regridstore only provide fraction on 1de/pet basis
+    call ESMF_ArrayGet(srcArray, localde=0, farrayPtr=srcFP, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_ArrayGet(dstArray, localde=0, farrayPtr=dstFP, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if((ubound(srcFP,1)-lbound(srcFP,1)) /= (ubound(dstFP,1)-lbound(dstFP,1))) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+       msg="- data size mismatch in first dimension", &
+       ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+    if((ubound(srcFP,2)-lbound(srcFP,2)) /= (ubound(dstFP,2)-lbound(dstFP,2))) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+       msg="- data size mismatch in second dimension", &
+       ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+    
+    ! block copy
+    dstFP(lbound(dstFP,1):ubound(dstFP,1), lbound(dstFP,2):ubound(dstFP,2)) = &
+      srcFP(lbound(srcFP,1):ubound(srcFP,1), lbound(srcFP,2):ubound(srcFP,2))
+
+    if(present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine CpArray2DR8      
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "CpArray1DR8()"
+!BOPI
+! !IROUTINE:  CpArray - Cp data from src to det Array
+
+! !INTERFACE: CpArray
+
+subroutine CpArray1DR8(srcArray, dstArray, rc)
+
+!
+! !ARGUMENTS:
+type(ESMF_Array),          intent(in)               :: srcArray
+type(ESMF_Array),          intent(inout)            :: dstArray
+integer,                   intent(out),   optional  :: rc 
+!
+! !DESCRIPTION:
+!      Get information about XGrid
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [srcArray]
+!       Source Array
+!     \item [dstArray] 
+!       Destination Array
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
+!       is created.
+!     \end{description}
+!
+!EOPI
+
+    integer                         :: srcRank, dstRank
+    type(ESMF_TYPEKIND_Flag)        :: srcTK, dstTK
+    integer                         :: localrc
+    real(ESMF_KIND_R8), pointer     :: srcFP(:), dstFP(:)
+
+    ! Initialize return code   
+    if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! check init status of input Arrays
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,srcArray,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,dstArray,rc)
+
+    call ESMF_ArrayGet(srcArray, typekind=srcTK, rank=srcRank, &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_ArrayGet(dstArray, typekind=dstTK, rank=dstRank, &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if(.not. (srcRank == dstRank .and. srcRank == 1)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="- srcRank is not equal to dstRank", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+        return
+    endif
+    if(.not. (srcTK == dstTK .and. srcTK == ESMF_TYPEKIND_R8)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="- srcTK is not equal to dstTK", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+        return
+    endif
+
+    ! More error checking needed
+
+    ! regridstore only provide fraction on 1de/pet basis
+    call ESMF_ArrayGet(srcArray, localde=0, farrayPtr=srcFP, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_ArrayGet(dstArray, localde=0, farrayPtr=dstFP, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if((ubound(srcFP,1)-lbound(srcFP,1)) /= (ubound(dstFP,1)-lbound(dstFP,1))) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+       msg="- data size mismatch in first dimension", &
+       ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+    
+    ! block copy
+    dstFP(lbound(dstFP,1):ubound(dstFP,1)) = srcFP(lbound(srcFP,1):ubound(srcFP,1))
+
+    if(present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine CpArray1DR8      
 !------------------------------------------------------------------------------ 
 end module ESMF_XGridGetMod

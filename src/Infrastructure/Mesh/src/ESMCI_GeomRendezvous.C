@@ -1,4 +1,4 @@
-// $Id: ESMCI_GeomRendezvous.C,v 1.14 2012/03/02 01:56:48 feiliu Exp $
+// $Id: ESMCI_GeomRendezvous.C,v 1.15 2012/03/15 19:28:35 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_GeomRendezvous.C,v 1.14 2012/03/02 01:56:48 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_GeomRendezvous.C,v 1.15 2012/03/15 19:28:35 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -486,6 +486,12 @@ void GeomRend::prep_meshes() {
       srcmesh_rend.RegisterField("elem_area", src_elem_area->GetMEFamily(),
        MeshObj::ELEMENT, src_elem_area->GetContext(), src_elem_area->dim());
     }
+
+    MEField<> *src_elem_frac2 = srcmesh.GetField("elem_frac2");
+    if (src_elem_frac2 != NULL) {
+      srcmesh_rend.RegisterField("elem_frac2", src_elem_frac2->GetMEFamily(),
+       MeshObj::ELEMENT, src_elem_frac2->GetContext(), src_elem_frac2->dim());
+    }
   }
 
 
@@ -519,6 +525,12 @@ void GeomRend::prep_meshes() {
                                  MeshObj::ELEMENT, dst_elem_area->GetContext(), dst_elem_area->dim());
     }
 
+    MEField<> *dst_elem_frac2 = dstmesh.GetField("elem_frac2");
+    if (dst_elem_frac2 != NULL) {
+      dstmesh_rend.RegisterField("elem_frac2", dst_elem_frac2->GetMEFamily(),
+                                 MeshObj::ELEMENT, dst_elem_frac2->GetContext(), dst_elem_frac2->dim());
+    }
+
   } else {
     
      MEField<> &dcoord = *dstmesh.GetCoordField();
@@ -550,7 +562,7 @@ void GeomRend::migrate_meshes() {
 
     {
       int num_snd=0;
-      MEField<> *snd[4],*rcv[4];
+      MEField<> *snd[5],*rcv[5];
 
       MEField<> *sc = srcmesh.GetCoordField();
       MEField<> *sc_r = srcmesh_rend.GetCoordField();
@@ -593,6 +605,17 @@ void GeomRend::migrate_meshes() {
         num_snd++;            
       }
 
+      // Do elem creeped frac if necessary
+      MEField<> *sef = srcmesh.GetField("elem_frac2");
+      if (sef != NULL) {
+        MEField<> *sef_r = srcmesh_rend.GetField("elem_frac2");
+
+        // load mask fields
+        snd[num_snd]=sef;
+        rcv[num_snd]=sef_r;
+        num_snd++;            
+      }
+
        srcmesh_rend.Commit();
     
        srcComm.SendFields(num_snd, snd, rcv);
@@ -614,7 +637,7 @@ void GeomRend::migrate_meshes() {
   
   if (iter_is_obj) {    
     int num_snd=0;
-    MEField<> *snd[4],*rcv[4];
+    MEField<> *snd[5],*rcv[5];
 
     MEField<> *dc = dstmesh.GetCoordField();
     MEField<> *dc_r = dstmesh_rend.GetCoordField();
@@ -654,6 +677,17 @@ void GeomRend::migrate_meshes() {
       // load mask fields
       snd[num_snd]=dea;
       rcv[num_snd]=dea_r;
+      num_snd++;            
+    }
+
+    // Do elem creeped frac if necessary
+    MEField<> *def = dstmesh.GetField("elem_frac2");
+    if (def != NULL) {
+      MEField<> *def_r = dstmesh_rend.GetField("elem_frac2");
+
+      // load mask fields
+      snd[num_snd]=def;
+      rcv[num_snd]=def_r;
       num_snd++;            
     }
 

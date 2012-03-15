@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGrid_F.C,v 1.12 2012/01/26 16:24:36 feiliu Exp $
+// $Id: ESMCI_XGrid_F.C,v 1.13 2012/03/15 19:27:46 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -33,12 +33,14 @@ using namespace std;
 #include "Mesh/include/ESMCI_XGridUtil.h"
 #include "Mesh/include/ESMCI_MeshRegrid.h"
 #include "Mesh/include/ESMCI_MeshMerge.h"
+#include "ESMCI_GridToMesh.h"
+#include "ESMCI_Grid.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_XGrid_F.C,v 1.12 2012/01/26 16:24:36 feiliu Exp $";
+             "$Id: ESMCI_XGrid_F.C,v 1.13 2012/03/15 19:27:46 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -63,7 +65,7 @@ extern "C" {
 // non-method functions
 void FTN_X(c_esmc_xgridserialize)(
                 int * s, 
-                int * ngridA, int * ngridB, int * flag,
+                int * ngridA, int * ngridB, int * online, int * flag,
                 char *buffer, int *length, int *offset,
                 ESMC_InquireFlag *inquireflag, int *localrc,
                 ESMCI_FortranStrLenArg buf_l){
@@ -88,6 +90,9 @@ void FTN_X(c_esmc_xgridserialize)(
       memcpy((void *)ptr, (const void *)ngridB, sizeof(int));
     ptr += sizeof(int);
     if (linquireflag != ESMF_INQUIREONLY)
+      memcpy((void *)ptr, (const void *)online, sizeof(int));
+    ptr += sizeof(int);
+    if (linquireflag != ESMF_INQUIREONLY)
       memcpy((void *)ptr, (const void *)flag, sizeof(int));
     ptr += sizeof(int);
 
@@ -104,7 +109,7 @@ void FTN_X(c_esmc_xgridserialize)(
 
 void FTN_X(c_esmc_xgriddeserialize)(
                 int * s, 
-                int * ngridA, int * ngridB, int * flag,
+                int * ngridA, int * ngridB, int * online, int * flag,
                 char *buffer, int *offset, int *localrc,
                 ESMCI_FortranStrLenArg buffer_l){
 
@@ -121,6 +126,8 @@ void FTN_X(c_esmc_xgriddeserialize)(
     memcpy((void *)ngridA, (const void *)ptr, sizeof(int));
     ptr += sizeof(int);
     memcpy((void *)ngridB, (const void *)ptr, sizeof(int));
+    ptr += sizeof(int);
+    memcpy((void *)online, (const void *)ptr, sizeof(int));
     ptr += sizeof(int);
     memcpy((void *)flag, (const void *)ptr, sizeof(int));
     ptr += sizeof(int);
@@ -368,6 +375,54 @@ void FTN_X(c_esmc_meshsetfraction)(Mesh **meshpp, double * fraction,
       "- Caught unknown exception", rc);
     return;
   }
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+// Assumes array is center stagger loc
+extern "C" void FTN_X(c_esmc_xgrid_getfrac)(Grid **gridpp,
+                   Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
+                   int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_regrid_getfrac()" 
+  Trace __trace(" FTN_X(regrid_getfrac)()");
+
+  ESMCI::Array &array = **arraypp;
+  Mesh &mesh = **meshpp;
+  Grid &grid = **gridpp;
+
+  try {
+
+
+    // Get the integration weights
+    MEField<> *frac = mesh.GetField("elem_frac");
+    if (!frac) Throw() << "Could not find elem_frac field on this mesh"
+                             <<std::endl; 
+
+    CpMeshElemDataToArray(grid, *staggerLoc, mesh, array, frac);
+ 
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), rc);
+    } else {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", rc);
+    }
+
+    return;
+  } catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", rc);
+    return;
+  }
+
   // Set return code 
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 

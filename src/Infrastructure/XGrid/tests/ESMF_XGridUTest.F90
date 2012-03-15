@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.38 2012/03/14 01:51:06 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.39 2012/03/15 19:27:52 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -76,7 +76,7 @@
     write(name, *) "Creating an XGrid in 3D with Grid merging"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-    call ESMF_Finalize(rc=rc)
+    call ESMF_TestEnd(result, ESMF_SRCLINE)
   
 contains 
 #define ESMF_METHOD "ESMF_TESTS"
@@ -302,19 +302,19 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        print *, lpet, eleCount, elb, eub
+        !print *, lpet, eleCount, elb, eub
 
-        call ESMF_DistGridPrint(distgrid, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+        !call ESMF_DistGridPrint(distgrid, rc=localrc)
+        !if (ESMF_LogFoundError(localrc, &
+        !    ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
 
-        do i = 1, 2
-            call ESMF_DistGridPrint(l_sideAdg(i), rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-        enddo
+        !do i = 1, 2
+        !    call ESMF_DistGridPrint(l_sideAdg(i), rc=localrc)
+        !    if (ESMF_LogFoundError(localrc, &
+        !        ESMF_ERR_PASSTHRU, &
+        !        ESMF_CONTEXT, rcToReturn=rc)) return
+        !enddo
 
         call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRIDSIDE_A, gridIndex=1, &
             distgrid=distgrid, rc=localrc)
@@ -344,10 +344,10 @@ contains
 
         xfptr = 0.0
 
-        call ESMF_FieldPrint(field, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+        !call ESMF_FieldPrint(field, rc=localrc)
+        !if (ESMF_LogFoundError(localrc, &
+        !    ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldDestroy(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -944,7 +944,7 @@ contains
     real(ESMF_KIND_R8), pointer               :: src(:,:), dst(:,:), exf(:)
     real(ESMF_KIND_R8), pointer               :: src_area(:,:), dst_area(:,:), exf_area(:)
     real(ESMF_KIND_R8), pointer               :: src_frac(:,:), dst_frac(:,:), exf_frac(:)
-    real(ESMF_KIND_R8)                        :: srcsum(3), allsrcsum(3), scale
+    real(ESMF_KIND_R8)                        :: srcsum(3), allsrcsum(3), scale=2.0, exf_tarea, exf_tflux
     type(ESMF_VM)                             :: vm
 
     call ESMF_VMGetCurrent(vm=vm, rc=localrc)
@@ -999,6 +999,10 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       dstFrac(i) = ESMF_FieldCreate(dstGrid(i), typekind=ESMF_TYPEKIND_R8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldGet(dstFrac(i), localDe=0, farrayPtr=dst_frac, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1059,7 +1063,7 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       call ESMF_FieldRegridStore(xgrid, srcField=f_xgrid, dstField=dstField(i), &
-        routehandle=x2d_rh(i), rc=localrc)
+        routehandle=x2d_rh(i), dstFracField=dstFrac(i), rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1075,7 +1079,7 @@ contains
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      src = 2.0
+      src = scale
     enddo
 
     ! Perform flux exchange
@@ -1087,6 +1091,7 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
+
     ! make sure flux is conserved on XGrid
     allocate(exf_area(lbound(exf,1):ubound(exf,1)))
     allocate(exf_frac(lbound(exf,1):ubound(exf,1)))
@@ -1100,8 +1105,17 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     if(lpet == 0) print *, ' xgrid flux and area: ', allsrcsum
+    if(abs(allsrcsum(1) - allsrcsum(2)*scale) .gt. 1.e-10) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="- inconsistent flux and area found", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+    exf_tflux = allsrcsum(1)
+    exf_tarea = allsrcsum(2)
     deallocate(exf_area, exf_frac)
 
+    !make sure flux is conserved on dst Fields
     do i = 1, size(dstField)
       call ESMF_FieldRegrid(srcField=f_xgrid, dstField=dstField(i), &
         routehandle=x2d_rh(i), rc=localrc)
@@ -1112,14 +1126,35 @@ contains
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-    enddo
-    !make sure flux is conserved on dst Fields
-    do i = 1, size(dstField)
-      call ESMF_FieldGet(dstField(i), farrayPtr=dst, rc=localrc)
+
+      ! fraction
+      call ESMF_FieldGet(dstFrac(i), farrayPtr=dst_frac, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! area
+      call ESMF_FieldGet(dstArea(i), farrayPtr=dst_area, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call compute_flux2D(vm, dst, dst_area, dst_frac, allsrcsum, rc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      if(lpet == 0) print *, 'dst flux and area: ', allsrcsum
+      ! In general, dst flux cannot be guarannteed to be conserved when
+      ! interpolating from high resolution Grid/XGrid to low resolution Grid
+      ! due to undersampling nature of the process
+      if(abs(exf_tarea - allsrcsum(2)) .gt. 1.e-10) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+           msg="- inconsistent flux and area found", &
+           ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif
     enddo
+
     do i = 1, size(dstField)
       call ESMF_FieldRegrid(srcField=dstField(i), dstField=f_xgrid, &
         routehandle=d2x_rh(i), &
