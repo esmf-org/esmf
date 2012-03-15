@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.89 2012/03/09 21:17:03 w6ws Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.90 2012/03/15 18:47:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -83,6 +83,7 @@ module ESMF_ArrayCreateMod
 ! - ESMF-public methods:
   public operator(==)
   public operator(/=)
+  public ESMF_ArrayCopy
   public ESMF_ArrayCreate
   public ESMF_ArrayDestroy
 
@@ -102,7 +103,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.89 2012/03/09 21:17:03 w6ws Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.90 2012/03/15 18:47:44 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -361,6 +362,58 @@ contains
 
   end function ESMF_ArrayNE
 !-------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayCopy()"
+!BOP
+! !IROUTINE: ESMF_ArrayCopy - Copy data from one Array object to another
+
+! !INTERFACE:
+  subroutine ESMF_ArrayCopy(arrayOut, arrayIn, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+       type(ESMF_Array),  intent(inout)          :: arrayOut
+       type(ESMF_Array),  intent(in)             :: arrayIn
+       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+       integer,           intent(out),  optional :: rc
+!
+! !DESCRIPTION:
+! Copy data from one {\tt ESMF\_Array} object to another.
+!
+! The arguments are:
+! \begin{description}
+! \item[arrayOut] 
+!     {\tt ESMF\_Array} object into which to copy the data. The incoming 
+!     {\tt arrayOut} must already references a matching memory allocation.
+! \item[arrayIn] 
+!     {\tt ESMF\_Array} object that holds the data to be copied.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc    ! local return code
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ESMF_INIT_CHECK_DEEP_SHORT (ESMF_ArrayGetInit, arrayIn, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT (ESMF_ArrayGetInit, arrayOut, rc)
+
+    ! Call into the C++ interface
+    call c_ESMC_ArrayCopy(arrayOut, arrayIn, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_ArrayCopy
+!------------------------------------------------------------------------------
 
 
 !===============================================================================

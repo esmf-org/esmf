@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.66 2012/02/09 19:22:46 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.67 2012/03/15 18:47:39 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -258,6 +258,8 @@ namespace ESMCI {
       InterfaceInt *undistUBoundArg, int *rc);
     static Array *create(Array *array, int *rc=NULL);
     static int destroy(Array **array);
+    // data copy()
+    int copy(Array const *arrayIn);
     // get() and set()
     ESMC_TypeKind getTypekind()             const {return typekind;}
     int getRank()                           const {return rank;}
@@ -298,7 +300,7 @@ namespace ESMCI {
     const char *getName()               const {return ESMC_BaseGetName();}
     int setName(const char *name){return ESMC_BaseSetName(name, "Array");}
     // misc.
-    static bool match(Array *array1, Array *array2, int *rc=NULL);
+    static bool match(Array const *array1, Array const *array2, int *rc=NULL);
     static int read(Array *array, char *file, char *variableName,
          int *timeslice, ESMC_IOFmtFlag *iofmt);
     static int write(Array *array, char *file, char *variableName, bool *append,

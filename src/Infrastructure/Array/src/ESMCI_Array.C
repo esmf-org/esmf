@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.142 2012/03/08 23:52:40 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.143 2012/03/15 18:47:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.142 2012/03/08 23:52:40 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.143 2012/03/15 18:47:51 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1849,6 +1849,79 @@ int Array::destroy(
 
 //-----------------------------------------------------------------------------
 //
+// data copy()
+//
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::copy()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::copy
+//
+// !INTERFACE:
+//
+int Array::copy(
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  Array const *arrayIn                // (in) Array to copy data from
+  ){
+//
+// !DESCRIPTION:
+//    Copy data from one Array object to another
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  try{
+  
+    if (!match(this, arrayIn)){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "- Arrays must match for data copy", &rc);
+      return rc;
+    }
+    
+    // do the actual data copy
+    int const dataSize = ESMC_TypeKindSize(typekind);
+    int const localDeCount = delayout->getLocalDeCount();
+    int const *localDeToDeMap = delayout->getLocalDeToDeMap();
+    for (int i=0; i<localDeCount; i++){
+      int de = localDeToDeMap[i];
+      int size =
+        exclusiveElementCountPDe[de]*tensorElementCount*dataSize;  // bytes
+//    sendBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
+      memcpy(larrayBaseAddrList[i], arrayIn->larrayBaseAddrList[i], size);
+    }
+      
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    return rc;
+  }catch(exception &x){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      x.what(), &rc);
+    return rc;
+  }catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", &rc);
+    return rc;
+  }
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
 // get() and set()
 //
 //-----------------------------------------------------------------------------
@@ -2387,8 +2460,8 @@ bool Array::match(
 //
 // !ARGUMENTS:
 //
-  Array *array1,                          // in
-  Array *array2,                          // in
+  Array const *array1,                    // in
+  Array const *array2,                    // in
   int *rc                                 // (out) return code
   ){
 //
@@ -3099,7 +3172,6 @@ int Array::gather(
 
   // size in bytes of each piece of data
   int dataSize = ESMC_TypeKindSize(typekind);
-
   
   // distgrid and delayout values
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();

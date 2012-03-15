@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataUTest.F90,v 1.26 2012/01/06 20:15:24 svasquez Exp $
+! $Id: ESMF_ArrayDataUTest.F90,v 1.27 2012/03/15 18:47:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayDataUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayDataUTest.F90,v 1.26 2012/01/06 20:15:24 svasquez Exp $'
+    '$Id: ESMF_ArrayDataUTest.F90,v 1.27 2012/03/15 18:47:52 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -55,10 +55,10 @@ program ESMF_ArrayDataUTest
   ! Fortran array pointer of 4-byte integers
   integer (ESMF_KIND_I4),dimension(:), pointer :: fdata
   integer (ESMF_KIND_I4),dimension(:), pointer :: fdataSlice
-  integer (ESMF_KIND_I4),dimension(:), pointer :: fptr
+  integer (ESMF_KIND_I4),dimension(:), pointer :: fptr, fptrOut
 
   type(ESMF_DistGrid) :: distgrid
-  type(ESMF_Array)    :: array
+  type(ESMF_Array)    :: array, arrayOut
   type(ESMF_VM)       :: vm
 
   character, allocatable :: buffer(:)
@@ -506,6 +506,48 @@ program ESMF_ArrayDataUTest
       attreconflag, inquireflag, rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Creating an Array that matches the existing Array"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  arrayOut = ESMF_ArrayCreate(distgrid, ESMF_TYPEKIND_I4, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Obtaining access to data in arrayOut via Fortran array pointer"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayGet(arrayOut, farrayPtr=fptrOut, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  ! initialize data in arrayOut to something obvious
+  fptrOut = -999
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Copy data from one Array to another"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayCopy(arrayOut=arrayOut, arrayIn=array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verifying data match between array and arrayOut"
+  write(failMsg, *) "Incorrect data detected"
+  looptest = .true.
+  do i = lbound(fptr,1), ubound(fptr,1)
+    print *, fptrOut(i), fptr(i)
+    if (fptrOut(i) /= fptr(i)) looptest = .false.
+  enddo
+  call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  
+! TODO -> move the internal methods here
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
