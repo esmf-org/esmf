@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.51 2012/02/15 23:11:38 svasquez Exp $
+! $Id: ESMF_FieldEx.F90,v 1.52 2012/03/15 19:53:57 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -442,7 +442,9 @@
 !EOE
 !BOC
     ! Test the status of the Field
-    if (fstatus /= ESMF_FIELDSTATUS_EMPTY) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    if (fstatus /= ESMF_FIELDSTATUS_EMPTY) then
+         call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    endif
 !EOC
 
 !BOE
@@ -466,7 +468,9 @@
 
 !BOC
     ! Test the status of the Field
-    if (fstatus /= ESMF_FIELDSTATUS_GRIDSET) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    if (fstatus /= ESMF_FIELDSTATUS_GRIDSET) then
+         call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    endif
 !EOC
 
 !BOE
@@ -492,7 +496,9 @@
 
 !BOC
     ! Test the status of the Field
-    if (fstatus /= ESMF_FIELDSTATUS_COMPLETE) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    if (fstatus /= ESMF_FIELDSTATUS_COMPLETE) then
+         call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    endif
 !EOC
 
     print *, "Complete a Field created by ESMF_FieldEmptyCreate returned"
