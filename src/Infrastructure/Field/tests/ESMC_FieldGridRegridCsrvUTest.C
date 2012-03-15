@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegridUTest.C,v 1.2 2012/03/15 19:24:15 rokuingh Exp $
+// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.1 2012/03/15 19:24:15 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -84,8 +84,8 @@ int main(void){
   //----------------------------------------------------------------------------
   //EX_UTest
   // Create a Grid
-  double ub_x, lb_x, max_x, min_x, cellwidth_x, cellcenter_x, cellcorner_x;
-  double ub_y, lb_y, max_y, min_y, cellwidth_y, cellcenter_y, cellcorner_y;
+  double ub_x, lb_x, max_x, min_x, cellwidth_x, cellcenter_x;
+  double ub_y, lb_y, max_y, min_y, cellwidth_y, cellcenter_y;
   ub_x = 9;
   ub_y = 9;
   lb_x = 1;
@@ -99,8 +99,6 @@ int main(void){
   cellwidth_y = (max_y-min_y)/(ub_y-lb_y);
   cellcenter_x = cellwidth_x/double(2);
   cellcenter_y = cellwidth_y/double(2);
-  cellcorner_x = cellwidth_x;
-  cellcorner_y = cellwidth_y;
 
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = int(ub_x);
@@ -142,24 +140,15 @@ int main(void){
                                                    ESMC_STAGGERLOC_CENTER,
                                                    exLBound, exUBound, &rc);
 
-  //printf("exLBounds = [%d,%d]\n", exLBound[0], exLBound[1]);
-  //printf("exUBounds = [%d,%d]\n", exUBound[0], exUBound[1]);
+  printf("exLBounds = [%d,%d]\n", exLBound[0], exLBound[1]);
+  printf("exUBounds = [%d,%d]\n", exUBound[0], exUBound[1]);
 
   p = 0;
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
     for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      /*
-      // this is for corner stagger
-      gridXCoord[p]=(double)(i0)*cellwidth_x - cellcorner_x;
-      printf("PET%d - set gridXCoord[%d] = %f (%f)\n", localPet, p, 
-        (double)(i0)*cellwidth_x - cellcorner_x, gridXCoord[p]);
-      */
-      // this is for center stagger
       gridXCoord[p]=(double)(i0)*cellwidth_x - cellcenter_x;
-      /*
       printf("PET%d - set gridXCoord[%d] = %f (%f)\n", localPet, p, 
         (double)(i0)*cellwidth_x - cellcenter_x, gridXCoord[p]);
-      */
       ++p;
     }
   }
@@ -179,26 +168,15 @@ int main(void){
   p = 0;
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
     for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      /*
-      // this is for corner stagger
-      gridYCoord[p]=(double)(i1)*cellwidth_y - cellcorner_y;
-      printf("PET%d - set gridYCoord[%d] = %f (%f)\n", localPet, p, 
-        (double)(i1)*cellwidth_y - cellcorner_y, gridYCoord[p]);
-      */
-      // this is for center stagger
       gridYCoord[p]=(double)(i1)*cellwidth_y - cellcenter_y;
-      /*
       printf("PET%d - set gridYCoord[%d] = %f (%f)\n", localPet, p, 
         (double)(i1)*cellwidth_y - cellcenter_y, gridYCoord[p]);
-      */
       ++p;
     }
   }
 
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-
-
 
   //              Destination Mesh
   // 
@@ -355,7 +333,7 @@ int main(void){
   strcpy(name, "Create ESMC_Field object from a Mesh via TypeKind");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dstfield = ESMC_FieldCreateMeshTypeKind(dstmesh, 
-    ESMC_TYPEKIND_R8, ESMC_MESHLOC_NODE,
+    ESMC_TYPEKIND_R8, ESMC_MESHLOC_ELEMENT,
     i_gridToFieldMap, i_ungriddedLBound,
     i_ungriddedUBound, "dstfield", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -410,7 +388,7 @@ int main(void){
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &routehandle, 
-                        ESMC_REGRIDMETHOD_BILINEAR, ESMC_UNMAPPEDACTION_IGNORE);
+                        ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_IGNORE);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -504,7 +482,6 @@ int main(void){
   ESMC_InterfaceIntDestroy(&i_ungriddedUBound);
   free(ungriddedUBound);
 #endif
-
   //----------------------------------------------------------------------------
   ESMC_TestEnd(result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

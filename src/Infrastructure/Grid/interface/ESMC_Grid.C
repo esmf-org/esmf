@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.C,v 1.5 2012/03/08 18:53:44 rokuingh Exp $
+// $Id: ESMC_Grid.C,v 1.6 2012/03/15 19:24:18 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -27,16 +27,30 @@
 #include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_VM.h"
+#include "ESMC_Array.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Grid.C,v 1.5 2012/03/08 18:53:44 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Grid.C,v 1.6 2012/03/15 19:24:18 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
 
 extern "C" {
+// fortran interface functions to attribute objects
+  void FTN_X(c_esmc_gridgetcoordbounds)(ESMCI::Grid **_grid, int *_localDE,
+                                        int *_coord, int *_staggerloc,
+                                        ESMCI::InterfaceInt **_exclusiveLBound,
+                                        ESMCI::InterfaceInt **_exclusiveUBound,
+                                        ESMCI::InterfaceInt **_exclusiveCount,
+                                        ESMCI::InterfaceInt **_computationalLBound,
+                                        ESMCI::InterfaceInt **_computationalUBound,
+                                        ESMCI::InterfaceInt **_computationalCount,
+                                        ESMCI::InterfaceInt **_totalLBound,
+                                        ESMCI::InterfaceInt **_totalUBound,
+                                        ESMCI::InterfaceInt **_totalCount,
+                                        int *_rc);
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -59,6 +73,9 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt maxIndex,
     return grid; // bail out
 
 #if 0
+  ESMCI::InterfaceInt *mi = (ESMCI::InterfaceInt *)(maxIndex.ptr);
+  printf("maxindex->array = [%d,%d]\n", mi->array[0], mi->array[1]);
+
   ESMCI::Grid *gridp = reinterpret_cast<ESMCI::Grid *>(grid.ptr);
   printf("\n\nnoperidim gridstatus = %d\n\n", gridp->getStatus());
   printf("\n\nnoperidim gridname   = %s\n\n", gridp->getName());
@@ -188,10 +205,14 @@ void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim,
       return NULL; // bail out
   }
 
-  // this code is technically more correct, but I can't find the symbol for some reason..
 #if 0
+  // TODO: use this instead of the above, it is more correct because the Fortran
+  //       layer does additional bounds checking.
+  ESMCI::InterfaceInt *computationalLBound;
+  ESMCI::InterfaceInt *computationalUBound;
+  // this code is technically more correct, but I can't find the symbol for some reason..
   int localDe = 0;
-  c_esmc_gridgetcoordbounds(&gridp, &localDe, &coordDim, &stagger,
+  FTN_X(c_esmc_gridgetcoordbounds)(&gridp, &localDe, &coordDim, &stagger,
                             NULL, NULL, NULL,
                             &computationalLBound, &computationalUBound,
                             NULL, NULL, NULL, NULL, &localrc);
@@ -206,4 +227,4 @@ void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim,
 //-----------------------------------------------------------------------------
 
 } // extern "C"
-// $Id: ESMC_Grid.C,v 1.5 2012/03/08 18:53:44 rokuingh Exp $
+// $Id: ESMC_Grid.C,v 1.6 2012/03/15 19:24:18 rokuingh Exp $

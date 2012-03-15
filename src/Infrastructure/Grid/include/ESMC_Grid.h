@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.h,v 1.18 2012/03/08 18:25:24 rokuingh Exp $
+// $Id: ESMC_Grid.h,v 1.19 2012/03/15 19:24:17 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,14 +47,6 @@ extern "C" {
 typedef struct{
   void *ptr;
 }ESMC_Grid;
-
-#if 0
-// MESH ELEMENT TYPES
-#define ESMC_MESHELEMTYPE_TRI  5
-#define ESMC_MESHELEMTYPE_QUAD 9
-#define ESMC_MESHELEMTYPE_TETRA 10
-#define ESMC_MESHELEMTYPE_HEX  12
-#endif
 
 // Class API
 

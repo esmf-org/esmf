@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.42 2012/03/08 18:25:30 rokuingh Exp $
+// $Id: ESMC_Util.h,v 1.43 2012/03/15 19:24:22 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -72,6 +72,13 @@ enum ESMC_StaggerLoc {ESMC_STAGGERLOC_INVALID=-2,
                       ESMC_STAGGERLOC_EDGE2,
                       ESMC_STAGGERLOC_CORNER,
 };
+
+enum ESMC_GridStatus {ESMC_GRIDSTATUS_INVALID=-1,
+                      ESMC_GRIDSTATUS_UNINIT,
+                      ESMC_GRIDSTATUS_NOT_READY,
+                      ESMC_GRIDSTATUS_SHAPE_READY
+};
+
 
 // ESMF platform-dependent data types
 #if (ESMC_POINTER_SIZE == 4)

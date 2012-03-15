@@ -1,4 +1,4 @@
-// $Id: ESMC_Interface.C,v 1.8 2012/01/06 20:18:19 svasquez Exp $
+// $Id: ESMC_Interface.C,v 1.9 2012/03/15 19:24:23 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -30,11 +30,12 @@
 #include "ESMCI_Macros.h"
 #include "ESMCI_F90Interface.h"
 
+#include <stdio.h>
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Interface.C,v 1.8 2012/01/06 20:18:19 svasquez Exp $";
+static const char *const version = "$Id: ESMC_Interface.C,v 1.9 2012/03/15 19:24:23 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -45,6 +46,14 @@ ESMC_InterfaceInt ESMC_InterfaceIntCreate(int *arrayArg, int lenArg, int *rc){
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   ESMC_InterfaceInt interfaceInt;
+
+  /*
+  // this is a test to see if the data is passed in correctly
+  printf("ESMC_InterfaceIntCreate - arrayArg = [");
+  for (int i=0; i<lenArg; ++i)
+    printf("%d,", arrayArg[i]);
+  printf("], length = %d\n", lenArg);
+  */
   
   interfaceInt.ptr = (void *)(new ESMCI::InterfaceInt(arrayArg, lenArg));
 

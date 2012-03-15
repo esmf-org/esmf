@@ -1,5 +1,5 @@
 
-// $Id: ESMCI_Field.h,v 1.13 2012/03/07 16:44:07 rokuingh Exp $
+// $Id: ESMCI_Field.h,v 1.14 2012/03/15 19:24:14 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -65,6 +65,7 @@ namespace ESMCI{
     Field(F90ClassHolder fc){
       fortranclass = fc;
     }
+    // TODO: ESMC objects should be cast to ESMCI objects in the ESMC layer
     static Field* create(ESMC_Grid *grid, ESMC_ArraySpec arrayspec,
       ESMC_StaggerLoc staggerloc, ESMC_InterfaceInt *gridToFieldMap, 
       ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 

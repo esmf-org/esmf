@@ -1,4 +1,4 @@
-// $Id: ESMC_GridUTest.C,v 1.1 2012/03/07 16:47:18 rokuingh Exp $
+// $Id: ESMC_GridUTest.C,v 1.2 2012/03/15 19:24:20 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -93,7 +93,7 @@ int main(void){
   //EX_UTest
   strcpy(name, "GridAddCoord");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridAddCoord(grid_np, ESMC_STAGGERLOC_CENTER);
+  rc = ESMC_GridAddCoord(grid_np, ESMC_STAGGERLOC_CORNER);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Interface.h,v 1.8 2012/01/06 20:18:17 svasquez Exp $
+// $Id: ESMC_Interface.h,v 1.9 2012/03/15 19:24:22 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -45,6 +45,7 @@ typedef struct{
 }ESMC_InterfaceInt;
 
 // Class API
+void TestArrayPassing(int *array, int len);
 ESMC_InterfaceInt ESMC_InterfaceIntCreate(int *arrayArg, int lenArg, int *rc);
 int ESMC_InterfaceIntDestroy(ESMC_InterfaceInt *interfaceIntArg);
 

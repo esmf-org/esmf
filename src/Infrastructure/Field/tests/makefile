@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.89 2012/03/07 16:44:18 rokuingh Exp $ 
+# $Id: makefile,v 1.90 2012/03/15 19:24:15 rokuingh Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -7,10 +7,12 @@ run_uni:  run_unit_tests_uni
 LOCDIR	  = src/Infrastructure/Field/tests
 
 TESTS_BUILD   = \
-                $(ESMF_TESTDIR)/ESMF_FieldUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldRegridUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldGridRegridUTest \
+		$(ESMF_TESTDIR)/ESMC_FieldGridRegridCsrvUTest \
+		$(ESMF_TESTDIR)/ESMC_FieldGridRegridParUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldCreateGetUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridCsrvUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridUTest \
@@ -40,6 +42,7 @@ TESTS_RUN     = \
 		RUN_ESMC_FieldUTest \
 		RUN_ESMC_FieldRegridUTest \
 		RUN_ESMC_FieldGridRegridUTest \
+		RUN_ESMC_FieldGridRegridCsrvUTest \
     RUN_ESMF_FieldGatherUTest \
     RUN_ESMF_FieldRedistUTest \
     RUN_ESMF_FieldLSSMMUTest \
@@ -47,6 +50,8 @@ TESTS_RUN     = \
     RUN_ESMF_FieldRedistArbUTest \
     RUN_ESMF_FieldMeshSMMUTest \
     RUN_ESMF_FieldHaloUTest
+
+#		RUN_ESMC_FieldGridRegridParUTest \
 
 TESTS_RUN_UNI = \
                 RUN_ESMF_FieldStressUTestUNI \
@@ -57,6 +62,7 @@ TESTS_RUN_UNI = \
                 RUN_ESMC_FieldUTestUNI \
                 RUN_ESMC_FieldRegridUTestUNI \
                 RUN_ESMC_FieldGridRegridUTestUNI \
+                RUN_ESMC_FieldGridRegridCsrvUTestUNI \
                 RUN_ESMF_FieldRedistArbUTestUNI
 
 #
@@ -102,11 +108,20 @@ RUN_ESMC_FieldRegridUTest:
 RUN_ESMC_FieldRegridUTestUNI:
 	$(MAKE) TNAME=FieldRegrid NP=1 ctest
 
+RUN_ESMC_FieldGridRegridParUTest:
+	$(MAKE) TNAME=FieldGridRegridPar NP=4 ctest
+
 RUN_ESMC_FieldGridRegridUTest:
-	$(MAKE) TNAME=FieldGridRegrid NP=2 ctest
+	$(MAKE) TNAME=FieldGridRegrid NP=1 ctest
 
 RUN_ESMC_FieldGridRegridUTestUNI:
 	$(MAKE) TNAME=FieldGridRegrid NP=1 ctest
+
+RUN_ESMC_FieldGridRegridCsrvUTest:
+	$(MAKE) TNAME=FieldGridRegridCsrv NP=1 ctest
+
+RUN_ESMC_FieldGridRegridCsrvUTestUNI:
+	$(MAKE) TNAME=FieldGridRegridCsrv NP=1 ctest
 
 RUN_ESMF_FieldCreateGetUTest:
 	$(MAKE) TNAME=FieldCreateGet NP=4 ftest
