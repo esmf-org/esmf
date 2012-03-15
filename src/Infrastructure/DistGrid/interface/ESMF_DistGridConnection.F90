@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridConnection.F90,v 1.14 2012/01/06 20:16:30 svasquez Exp $
+! $Id: ESMF_DistGridConnection.F90,v 1.15 2012/03/15 23:09:05 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -174,13 +174,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     positionVector, keywordEnforcer, orientationVector, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_DistGridConnection), intent(out)           :: connection
-    integer,                       intent(in)            :: tileIndexA
-    integer,                       intent(in)            :: tileIndexB
-    integer,                       intent(in)            :: positionVector(:)
+    type(ESMF_DistGridConnection),intent(out)         :: connection
+    integer,                     intent(in)           :: tileIndexA
+    integer,                     intent(in)           :: tileIndexB
+    integer,                     intent(in)           :: positionVector(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                       intent(in),  optional :: orientationVector(:)
-    integer,                       intent(out), optional :: rc
+    integer,                     intent(in), optional :: orientationVector(:)
+    integer,                     intent(out), optional:: rc
 !         
 ! !STATUS:
 ! \begin{itemize}
