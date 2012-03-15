@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.1 2012/03/15 19:24:15 rokuingh Exp $
+// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.2 2012/03/15 21:19:26 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -124,7 +124,7 @@ int main(void){
   //EX_UTest
   strcpy(name, "GridAddCoord");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_GridAddCoord(srcgrid, ESMC_STAGGERLOC_CENTER);
+  rc = ESMC_GridAddCoord(srcgrid, ESMC_STAGGERLOC_CORNER);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -137,7 +137,7 @@ int main(void){
   strcpy(name, "GridGetCoord - X");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridXCoord = (double *)ESMC_GridGetCoord(srcgrid, 1,
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CORNER,
                                                    exLBound, exUBound, &rc);
 
   printf("exLBounds = [%d,%d]\n", exLBound[0], exLBound[1]);
@@ -162,7 +162,7 @@ int main(void){
   strcpy(name, "GridGetCoord - Y");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridYCoord = (double *)ESMC_GridGetCoord(srcgrid, 2,
-                                                   ESMC_STAGGERLOC_CENTER,
+                                                   ESMC_STAGGERLOC_CORNER,
                                                    NULL, NULL, &rc);
 
   p = 0;
