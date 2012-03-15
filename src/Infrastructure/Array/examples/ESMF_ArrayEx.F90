@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.85 2012/02/15 22:55:11 svasquez Exp $
+! $Id: ESMF_ArrayEx.F90,v 1.86 2012/03/15 23:17:57 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -412,7 +412,8 @@ program ESMF_ArrayEx
        datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     do i=1, size(myFarray, 1)
       do j=1, size(myFarray, 2)
-        print *, "localPET=", localPet, " localDE=", localDe, ": array(",i,",",j,")=", myFarray(i,j)
+        print *, "localPET=", localPet, " localDE=", &
+            localDe, ": array(",i,",",j,")=", myFarray(i,j)
       enddo
     enddo
   enddo
@@ -1192,9 +1193,11 @@ program ESMF_ArrayEx
        datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     myFarray3D = 0.0 ! initialize
     myFarray3D(exclusiveLBound(1,localDe):exclusiveUBound(1,localDe), &
-      exclusiveLBound(2,localDe):exclusiveUBound(2,localDe), 1) = 5.1 ! dummy assignment
+      exclusiveLBound(2,localDe):exclusiveUBound(2,localDe), &
+      1) = 5.1 ! dummy assignment
     myFarray3D(exclusiveLBound(1,localDe):exclusiveUBound(1,localDe), &
-      exclusiveLBound(2,localDe):exclusiveUBound(2,localDe), 2) = 2.5 ! dummy assignment
+      exclusiveLBound(2,localDe):exclusiveUBound(2,localDe), &
+      2) = 2.5 ! dummy assignment
   enddo
   deallocate(larrayList)
 !EOC
@@ -1265,9 +1268,11 @@ program ESMF_ArrayEx
     call ESMF_LocalArrayGet(larrayList(localDe), myFarray3D, &
        datacopyflag=ESMF_DATACOPY_REFERENCE, rc=rc)
     myFarray3D(exclusiveLBound(1,localDe):exclusiveUBound(1,localDe), &
-      1, exclusiveLBound(2,localDe):exclusiveUBound(2,localDe)) = 10.5 !dummy assignment
+      1, exclusiveLBound(2,localDe):exclusiveUBound(2, &
+      localDe)) = 10.5 !dummy assignment
     myFarray3D(exclusiveLBound(1,localDe):exclusiveUBound(1,localDe), &
-      2, exclusiveLBound(2,localDe):exclusiveUBound(2,localDe)) = 23.3 !dummy assignment
+      2, exclusiveLBound(2,localDe):exclusiveUBound(2, &
+      localDe)) = 23.3 !dummy assignment
   enddo
   deallocate(exclusiveLBound, exclusiveUBound)
   deallocate(arrayToDistGridMap)

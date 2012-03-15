@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.52 2012/02/15 23:19:04 svasquez Exp $
+! $Id: ESMF_MeshEx.F90,v 1.53 2012/03/15 23:13:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -821,7 +821,8 @@ program ESMF_MeshEx
 #ifdef ESMF_NETCDF
 !BOC
    mesh = ESMF_MeshCreate(filename="data/ne4np4-esmf.nc", &
-            filetypeflag=ESMF_FILEFORMAT_ESMFMESH, convert3D=.true., rc=localrc)
+            filetypeflag=ESMF_FILEFORMAT_ESMFMESH, &
+            convert3D=.true., rc=localrc)
 !EOC
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
