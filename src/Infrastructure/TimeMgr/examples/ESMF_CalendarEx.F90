@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.53 2012/02/16 20:17:12 svasquez Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.54 2012/03/15 23:04:48 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -182,7 +182,8 @@
 !BOC
       ! Get the result in sols (2774 = (3+1)*668.5921 + 100)
       call ESMF_TimeGet(marsTime, d=sols, rc=rc)
-      print *, "For Mars, 3 solar years, 100 sols + 1 solar year = ", sols, "sols."
+      print *, "For Mars, 3 solar years, 100 sols + 1 solar year = ", &
+                sols, "sols."
 !EOC
 
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

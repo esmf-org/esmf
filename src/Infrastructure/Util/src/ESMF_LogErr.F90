@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.114 2012/01/06 20:18:20 svasquez Exp $
+! $Id: ESMF_LogErr.F90,v 1.115 2012/03/15 23:03:49 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -628,7 +628,7 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_Log), intent(inout)	        :: log
-type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
       integer,        intent(out), optional :: rc
 
 !
@@ -742,7 +742,7 @@ end subroutine ESMF_LogFinalize
 !
 !
 ! !ARGUMENTS:
-type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
       type(ESMF_Log), intent(inout), optional :: log
       integer,        intent(out),   optional :: rc
 
@@ -1858,20 +1858,20 @@ end subroutine ESMF_LogSetError
 
 ! !INTERFACE: 
       recursive subroutine ESMF_LogWrite(msg, logmsgFlag, &
-                                         logmsgList,      & ! DEPRECATED ARGUMENT
+                        logmsgList,      & ! DEPRECATED ARGUMENT
                         keywordEnforcer, line, file, method, log, rc)
 !
 !
 ! !ARGUMENTS:
-      character(len=*),       intent(in)             :: msg
-      type(ESMF_LogMsg_Flag), intent(in),   optional :: logmsgFlag
-      type(ESMF_LogMsg_Flag), intent(in),   optional :: logmsgList ! DEPRECATED ARGUMENT
+      character(len=*),      intent(in)             :: msg
+      type(ESMF_LogMsg_Flag),intent(in),optional    :: logmsgFlag
+      type(ESMF_LogMsg_Flag),intent(in),optional::logmsgList ! DEPRECATED ARG
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,                intent(in),   optional :: line
-      character(len=*),       intent(in),   optional :: file
-      character(len=*),       intent(in),   optional :: method
-      type(ESMF_Log),         intent(inout),optional :: log
-      integer,                intent(out),  optional :: rc
+      integer,               intent(in),   optional :: line
+      character(len=*),      intent(in),   optional :: file
+      character(len=*),      intent(in),   optional :: method
+      type(ESMF_Log),        intent(inout),optional :: log
+      integer,               intent(out),  optional :: rc
 
 !
 ! !STATUS:

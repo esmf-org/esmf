@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.114 2012/03/09 21:39:54 w6ws Exp $
+! $Id: ESMF_DELayout.F90,v 1.115 2012/03/15 23:02:55 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DELayout.F90,v 1.114 2012/03/09 21:39:54 w6ws Exp $'
+    '$Id: ESMF_DELayout.F90,v 1.115 2012/03/15 23:02:55 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -1011,10 +1011,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Pin_Flag),      intent(out), optional :: pinflag
     integer,                  intent(out), optional :: localDeCount
     integer, target,          intent(out), optional :: localDeToDeMap(:)
-    integer, target,          intent(out), optional :: localDeList(:)     ! DEPRECATED ARGUMENT
+    integer, target, intent(out), optional :: localDeList(:)  !DEPRECATED ARG
     integer,                  intent(out), optional :: vasLocalDeCount
     integer, target,          intent(out), optional :: vasLocalDeToDeMap(:)
-    integer, target,          intent(out), optional :: vasLocalDeList(:)  ! DEPRECATED ARGUMENT
+    integer, target, intent(out), optional :: vasLocalDeList(:) !DEPRECATED ARG
     integer,                  intent(out), optional :: rc  
 !
 ! !STATUS:

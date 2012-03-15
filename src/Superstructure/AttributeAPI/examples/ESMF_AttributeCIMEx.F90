@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.48 2012/02/16 22:53:05 svasquez Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.49 2012/03/15 23:05:52 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -60,6 +60,7 @@ program ESMF_AttributeCIMEx
       character(ESMF_MAXSTR), dimension(2)  :: compPropAtt
       character(ESMF_MAXSTR)  :: testname
       character(ESMF_MAXSTR)  :: failMsg
+!EOC
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -68,11 +69,12 @@ program ESMF_AttributeCIMEx
       write(testname, *) "Example ESMF_AttributeCIMEx"
 
 
-! ------------------------------------------------------------------------------
-! ------------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
 
 
 
+!BOC
 
       
       ! initialize ESMF
@@ -253,7 +255,7 @@ program ESMF_AttributeCIMEx
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'SimulationRationale', &
-    'EarthSys-ESMF simulation run in repsect to CMIP5 core experiment 1.1 ()', &
+  'EarthSys-ESMF simulation run in repsect to CMIP5 core experiment 1.1 ()', &
         convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -587,7 +589,6 @@ program ESMF_AttributeCIMEx
       call ESMF_GridCompDestroy(gridcomp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
 
 
       if (localPet==0) then
@@ -602,6 +603,7 @@ program ESMF_AttributeCIMEx
       call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
 
+!BOC
 
       call ESMF_Finalize(rc=rc)
 

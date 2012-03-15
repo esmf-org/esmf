@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.105 2012/03/09 21:34:06 w6ws Exp $
+! $Id: ESMF_DistGrid.F90,v 1.106 2012/03/15 23:02:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -147,7 +147,7 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_DistGrid.F90,v 1.105 2012/03/09 21:34:06 w6ws Exp $'
+    '$Id: ESMF_DistGrid.F90,v 1.106 2012/03/15 23:02:03 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -1080,15 +1080,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDB
 !
 ! !ARGUMENTS:
-    integer,                       intent(in)            :: minIndex(:)
-    integer,                       intent(in)            :: maxIndex(:)
-    integer,                       intent(in)            :: deBlockList(:,:,:)
+    integer,                       intent(in)           :: minIndex(:)
+    integer,                       intent(in)           :: maxIndex(:)
+    integer,                       intent(in)           :: deBlockList(:,:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                       intent(in),  optional :: deLabelList(:)
-    type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
-    type(ESMF_DistGridConnection), intent(in),  optional ::connectionList(:)
-    type(ESMF_DELayout),           intent(in),  optional :: delayout
-    type(ESMF_VM),                 intent(in),  optional :: vm
+    integer,                       intent(in), optional :: deLabelList(:)
+    type(ESMF_Index_Flag),         intent(in), optional :: indexflag
+    type(ESMF_DistGridConnection), intent(in), optional ::connectionList(:)
+    type(ESMF_DELayout),           intent(in), optional :: delayout
+    type(ESMF_VM),                 intent(in), optional :: vm
     integer,                       intent(out), optional :: rc
 !
 ! !STATUS:
@@ -1570,19 +1570,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRDT
 !
 ! !ARGUMENTS:
-    integer,             intent(in)            :: minIndexPTile(:,:)
-    integer,             intent(in)            :: maxIndexPTile(:,:)
+    integer,            intent(in)           :: minIndexPTile(:,:)
+    integer,            intent(in)           :: maxIndexPTile(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,             intent(in),  optional :: regDecompPTile(:,:)
-    type(ESMF_Decomp_Flag), target, intent(in),  optional ::decompflagPTile(:,:)
-    integer,     target, intent(in),  optional :: regDecompFirstExtraPTile(:,:)
-    integer,     target, intent(in),  optional :: regDecompLastExtraPTile(:,:)
-    integer,             intent(in),  optional :: deLabelList(:)
-    type(ESMF_Index_Flag), intent(in),  optional :: indexflag
-    type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
-    type(ESMF_DELayout), intent(in),  optional :: delayout
-    type(ESMF_VM),       intent(in),  optional :: vm
-    integer,             intent(out), optional :: rc
+    integer,            intent(in), optional :: regDecompPTile(:,:)
+    type(ESMF_Decomp_Flag),target,intent(in), optional ::decompflagPTile(:,:)
+    integer,    target, intent(in), optional :: regDecompFirstExtraPTile(:,:)
+    integer,     target, intent(in),optional :: regDecompLastExtraPTile(:,:)
+    integer,             intent(in),optional :: deLabelList(:)
+    type(ESMF_Index_Flag),intent(in),optional :: indexflag
+    type(ESMF_DistGridConnection), intent(in), optional :: connectionList(:)
+    type(ESMF_DELayout),intent(in), optional :: delayout
+    type(ESMF_VM),      intent(in), optional :: vm
+    integer,            intent(out),optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}

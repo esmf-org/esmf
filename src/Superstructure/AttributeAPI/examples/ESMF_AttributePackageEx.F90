@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.37 2012/02/16 23:38:04 svasquez Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.38 2012/03/15 23:06:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -107,12 +107,12 @@ program ESMF_AttributePackageEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
       importState = ESMF_StateCreate(name="importState",  &
-                                     stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
+                             stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
       exportState = ESMF_StateCreate(name="exportState",  &
-                                     stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
+                             stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -600,7 +600,7 @@ program ESMF_AttributePackageEx
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
     call ESMF_AttributeSet(gridcomp, 'ComponentLongName', &
-      'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core', &
+    'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core', &
         convention=convESMF, purpose=purpGen, rc=rc)
 !EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
