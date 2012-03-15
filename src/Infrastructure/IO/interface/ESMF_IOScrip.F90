@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.40 2012/03/02 23:41:10 oehmke Exp $
+! $Id: ESMF_IOScrip.F90,v 1.41 2012/03/15 17:59:49 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -56,6 +56,7 @@
   public ESMF_ScripGetVar
   public ESMF_OutputScripWeightFile
   public ESMF_GetMeshFromFile
+  public ESMF_OutputScripVarFile
   public ESMF_EsmfInq
 
 !==============================================================================
@@ -1907,6 +1908,94 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
     return
 end subroutine ESMF_OutputScripWeightFile
 
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_OutputScripVarFile"
+!
+subroutine ESMF_OutputScripVarFile(filename, varname, varbuffer, rc)
+
+    character(len=*), intent(in)   :: filename
+    character(len=*), intent(in)   :: varname
+    real(ESMF_KIND_R8), pointer    :: varbuffer(:)
+    integer                       :: rc
+
+    integer :: ncid, dimid, varid
+    integer :: localrc, ncStatus
+    integer :: varsize
+    character(len=256) :: errmsg
+
+#ifdef ESMF_NETCDF
+
+    ncStatus = nf90_open (path=trim(filename), mode=nf90_write, ncid=ncid)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, trim(filename), &
+      rc)) return
+
+    ! define a new varilable with dimension 'n_b'
+    ncStatus = nf90_inq_dimid(ncid, 'n_b', dimid)
+    errmsg = "Dimension n_b in "//trim(filename)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, errmsg, &
+      rc)) return
+
+   ncStatus = nf90_inquire_dimension (ncid, dimid, len=varsize)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, errmsg, &
+      rc)) return
+
+   if (size(varbuffer,1) /= varsize) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+           msg="- the variable size is inconsistent with the dest grid dimension", &
+           ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif 
+	  	      
+    ncStatus = nf90_redef(ncid)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, trim(filename), &
+      rc)) return
+    
+    ncStatus = nf90_def_var(ncid, varname, NF90_DOUBLE, (/dimid/), varid)
+    errmsg = "Variable src_grid_dims in "//trim(filename)
+         if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+	   errmsg,&
+           rc)) return
+
+    ncStatus = nf90_enddef(ncid)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, trim(filename), &
+      rc)) return
+
+    ncStatus = nf90_put_var(ncid, varid, varbuffer)
+    errmsg = "Variable "//trim(varname)//" in "//trim(filename)
+         if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+	   errmsg,&
+           rc)) return
+    ncStatus = nf90_close(ncid)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, &
+      trim(filename), &
+      rc)) return
+    rc=ESMF_SUCCESS
+    return
+#else
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+    return
+#endif
+
+end subroutine ESMF_OutputScripVarFile 
+ 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_EsmfInq"
 !BOPI
