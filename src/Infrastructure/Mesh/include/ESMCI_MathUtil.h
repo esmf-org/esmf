@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.h,v 1.6.2.2 2012/01/06 20:44:35 svasquez Exp $
+// $Id: ESMCI_MathUtil.h,v 1.6.2.3 2012/03/16 22:09:55 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -38,6 +38,12 @@ namespace ESMCI {
   double great_circle_area(int n, double *pnts);
 
   void get_elem_coords(const MeshObj *elem, MEField<>  *cfield, int sdim, int max_num_nodes, int *num_nodes, double *coords);
+
+  void get_elem_coords_2D_ccw(const MeshObj *elem, MEField<>  *cfield, int max_num_nodes,double *tmp_coords, 
+                              int *num_nodes, double *coords);
+
+  void get_elem_coords_3D_ccw(const MeshObj *elem, MEField<>  *cfield, int max_num_nodes,double *tmp_coords, 
+                              int *num_nodes, double *coords);
 
   void remove_0len_edges3D(int *num_p, double *p);
 

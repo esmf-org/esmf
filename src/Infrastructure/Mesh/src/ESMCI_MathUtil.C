@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.10.2.2 2012/01/06 20:44:38 svasquez Exp $
+// $Id: ESMCI_MathUtil.C,v 1.10.2.3 2012/03/16 22:09:58 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.10.2.2 2012/01/06 20:44:38 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.10.2.3 2012/03/16 22:09:58 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -832,8 +832,108 @@ template int triangulate_poly<GEOM_SPH2D3D>(int num_p, double *p, double *td, in
 
 
 
+  // Get coords, but flip so always counter clockwise
+  // Also gets rid of degenerate edges
+  // This version only works for elements of parametric_dimension = 2 and spatial_dim=2
+  void get_elem_coords_2D_ccw(const MeshObj *elem, MEField<>  *cfield, int max_num_nodes,double *tmp_coords, 
+                              int *num_nodes, double *coords) {
+    int num_tmp_nodes;
+
+    // Get element coords
+    get_elem_coords(elem, cfield, 2, max_num_nodes, &num_tmp_nodes, tmp_coords);
+
+    // Remove degenerate edges
+    remove_0len_edges2D(&num_tmp_nodes, tmp_coords);
+
+    // Check if degenerate
+    // (if there's less than 3 no notion of CCW or CW)
+    if (num_tmp_nodes <3) {
+      Throw() << " Degenerate cell in conservative interpolation!\n";
+    }
+    
+    // Get elem rotation
+    bool left_turn;
+    bool right_turn;
+    rot_2D_2D_cart(num_tmp_nodes, tmp_coords, &left_turn, &right_turn);
+
+    // Copy to output array swapping if necessary
+    if (left_turn) {
+      // Don't Swap
+      int j=0;
+      for (int i=0; i<num_tmp_nodes; i++) {
+        coords[j]=tmp_coords[j];
+        j++;
+        coords[j]=tmp_coords[j];
+        j++;
+      }
+    } else {
+      // Swap
+      int j=0; int k=2*(num_tmp_nodes-1); 
+      for (int i=0; i<num_tmp_nodes; i++) {
+        coords[j]=tmp_coords[k];
+        coords[j+1]=tmp_coords[k+1];
+        j+=2; k-=2;
+      }
+    }
+
+   
+  // Output num nodes
+  *num_nodes=num_tmp_nodes;
+}
+
+
+
+  // Get coords, but flip so always counter clockwise
+  // Also gets rid of degenerate edges
+  // This version only works for elements of parametric_dimension = 2 and spatial_dim=2
+  void get_elem_coords_3D_ccw(const MeshObj *elem, MEField<>  *cfield, int max_num_nodes,double *tmp_coords, 
+                              int *num_nodes, double *coords) {
+    int num_tmp_nodes;
+
+    // Get element coords
+    get_elem_coords(elem, cfield, 3, max_num_nodes, &num_tmp_nodes, tmp_coords);
+
+    // Remove degenerate edges
+    remove_0len_edges3D(&num_tmp_nodes, tmp_coords);
+
+    // Check if degenerate
+    // (if there's less than 3 no notion of CCW or CW)
+    if (num_tmp_nodes <3) {
+      Throw() << " Degenerate cell in conservative interpolation!\n";
+    }
+    
+    // Get elem rotation
+    bool left_turn;
+    bool right_turn;
+    rot_2D_3D_sph(num_tmp_nodes, tmp_coords, &left_turn, &right_turn);
+
+    // Copy to output array swapping if necessary
+    if (left_turn) {
+      // Don't Swap
+      int j=0;
+      for (int i=0; i<num_tmp_nodes; i++) {
+        coords[j]=tmp_coords[j];
+        j++;
+        coords[j]=tmp_coords[j];
+        j++;
+        coords[j]=tmp_coords[j];
+        j++;
+      }
+    } else {
+      // Swap
+      int j=0; int k=3*(num_tmp_nodes-1); 
+      for (int i=0; i<num_tmp_nodes; i++) {
+        coords[j]=tmp_coords[k];
+        coords[j+1]=tmp_coords[k+1];
+        coords[j+2]=tmp_coords[k+2];
+        j+=3; k-=3;
+      }
+    }
+
+   
+  // Output num nodes
+  *num_nodes=num_tmp_nodes;
+}
+
   
-
-
-
 } // namespace

@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridToMesh.C,v 1.13.2.2 2012/01/06 20:43:52 svasquez Exp $
+// $Id: ESMCI_GridToMesh.C,v 1.13.2.3 2012/03/16 22:09:53 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -867,7 +867,7 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
     
     int num_poly_nodes;
     double poly_coords[MAX_NUM_POLY_COORDS];
-
+    double tmp_coords[MAX_NUM_POLY_COORDS];
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
@@ -909,13 +909,15 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
       // Get area depending on dimensions
       double area;
-      
       if (pdim==2) {
 	if (sdim==2) {
-	  get_elem_coords(&elem, cfield, 2, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
+          // get_elem_coords(&elem, cfield, 2, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
+          get_elem_coords_2D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_2D, tmp_coords, &num_poly_nodes, poly_coords);
+	  remove_0len_edges2D(&num_poly_nodes, poly_coords);
           area=area_of_flat_2D_polygon(num_poly_nodes, poly_coords);
 	} else if (sdim==3) {
-	  get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
+          // get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
+          get_elem_coords_3D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_3D, tmp_coords, &num_poly_nodes, poly_coords);
 	  remove_0len_edges3D(&num_poly_nodes, poly_coords);
 	  area=great_circle_area(num_poly_nodes, poly_coords);
 	}
