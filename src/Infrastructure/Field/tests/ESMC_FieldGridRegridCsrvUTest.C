@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.2 2012/03/15 21:19:26 oehmke Exp $
+// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.3 2012/03/16 00:19:40 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -86,10 +86,10 @@ int main(void){
   // Create a Grid
   double ub_x, lb_x, max_x, min_x, cellwidth_x, cellcenter_x;
   double ub_y, lb_y, max_y, min_y, cellwidth_y, cellcenter_y;
-  ub_x = 9;
-  ub_y = 9;
-  lb_x = 1;
-  lb_y = 1;
+  ub_x = 4;
+  ub_y = 4;
+  lb_x = 0;
+  lb_y = 0;
   max_x = 4;
   max_y = 4;
   min_x = 0;
@@ -143,15 +143,26 @@ int main(void){
   printf("exLBounds = [%d,%d]\n", exLBound[0], exLBound[1]);
   printf("exUBounds = [%d,%d]\n", exUBound[0], exUBound[1]);
 
+// if I iterate with <= i get a segfault in destroy (this doesnt' work in python because the bounds are all wrong)
+// if i iterate with <, i get the log message about concave elements.., same in python
+
+// try setting the first row of coords first, then using the iteration to set others..
+
+// this is all overly complicated by the fact that indices are coming back 1 based, change that..
+
+  printf("gridXCoord = \n");
   p = 0;
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
     for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      gridXCoord[p]=(double)(i0)*cellwidth_x - cellcenter_x;
-      printf("PET%d - set gridXCoord[%d] = %f (%f)\n", localPet, p, 
-        (double)(i0)*cellwidth_x - cellcenter_x, gridXCoord[p]);
+      if (i0==exLBound[0]) gridXCoord[p] = lb_x;
+      gridXCoord[p]=(double)(i0-1)*cellwidth_x;
+      printf("%f, ", gridXCoord[p]); 
+//      printf("PET%d - set gridXCoord[%d] = %f (%f)\n", localPet, p, 
+//        (double)(i0)*cellwidth_x - cellcenter_x, gridXCoord[p]);
       ++p;
     }
   }
+  printf("\n");
 
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -165,15 +176,19 @@ int main(void){
                                                    ESMC_STAGGERLOC_CORNER,
                                                    NULL, NULL, &rc);
 
+  printf("gridYCoord = \n");
   p = 0;
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
     for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      gridYCoord[p]=(double)(i1)*cellwidth_y - cellcenter_y;
-      printf("PET%d - set gridYCoord[%d] = %f (%f)\n", localPet, p, 
-        (double)(i1)*cellwidth_y - cellcenter_y, gridYCoord[p]);
+      if (i1==exLBound[1]) gridYCoord[p] = lb_y;
+      gridYCoord[p]=(double)(i1-1)*cellwidth_y;
+      printf("%f, ", gridYCoord[p]); 
+//      printf("PET%d - set gridYCoord[%d] = %f (%f)\n", localPet, p, 
+//        (double)(i1)*cellwidth_y - cellcenter_y, gridYCoord[p]);
       ++p;
     }
   }
+  printf("\n");
 
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -441,7 +456,6 @@ int main(void){
   }
   ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-
 
   //----------------------------------------------------------------------------
   //EX_UTest
