@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ESMC.h"
+
 // size of maximum input line
 #define MAX_LINE 1024
 
@@ -27,6 +29,16 @@ int main(int argc, char * argv[])
 	  printf ("\nmissing filenames on command line");
 	  exit (-1);
 	}
+
+        // Dummy call to ESMF lib to make linking in some environments
+        // (e.g., NAG v5.3) work in the ESMF build environment.  (In the
+        // case of NAG v5.3, it avoids unsatisfied libm calls from the
+        // NAG libf53.so.)
+        if (argc < 0) {
+          int localrc;
+          ESMC_Initialize (&localrc);
+          ESMC_Finalize ();
+        }
 
 	// open output files
 	InFile = fopen (argv[1], "rb");
