@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.3 2012/03/16 00:19:40 rokuingh Exp $
+// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.4 2012/03/16 02:37:58 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -82,7 +82,7 @@ int main(void){
 
 #ifdef ESMF_TESTEXHAUSTIVE
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   // Create a Grid
   double ub_x, lb_x, max_x, min_x, cellwidth_x, cellcenter_x;
   double ub_y, lb_y, max_y, min_y, cellwidth_y, cellcenter_y;
@@ -121,7 +121,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "GridAddCoord");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_GridAddCoord(srcgrid, ESMC_STAGGERLOC_CORNER);
@@ -129,7 +129,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   // get and fill first coord array and computational bounds
   int *exLBound = (int *)malloc(dimcount*sizeof(int));
   int *exUBound = (int *)malloc(dimcount*sizeof(int));
@@ -168,7 +168,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   // get and fill second coord array
   strcpy(name, "GridGetCoord - Y");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -243,7 +243,7 @@ int main(void){
               11,12,16,15};
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "MeshCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dstmesh = ESMC_MeshCreate(pdim,sdim,&rc);
@@ -251,7 +251,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "MeshAddNodes");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_MeshAddNodes(dstmesh, num_node, nodeId, nodeCoord, nodeOwner);
@@ -259,7 +259,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_MeshAddElements(dstmesh, num_elem, elemId, elemType, elemConn);
@@ -267,7 +267,7 @@ int main(void){
   //----------------------------------------------------------------------------
  
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "MeshGetLocalNodeCount");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int num_node_out;
@@ -278,7 +278,7 @@ int main(void){
   printf("num_node = %d\nnum_node_out=%d\n", num_node, num_node_out);
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "MeshGetLocalElementCount");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int num_elem_out;
@@ -294,7 +294,7 @@ int main(void){
 
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   // Set the arrayspec
   strcpy(name, "ArraySpecSet");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -303,7 +303,7 @@ int main(void){
   //----------------------------------------------------------------------------
     
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "Set up gridToFieldMap");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   gridToFieldMap = (int *)malloc(sizeof(int));
@@ -313,7 +313,7 @@ int main(void){
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "Set up ungriddedLBound");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ungriddedLBound = (int *)malloc(2*sizeof(int));
@@ -324,7 +324,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "Set up ungriddedUBound");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ungriddedUBound = (int *)malloc(2*sizeof(int));
@@ -335,7 +335,7 @@ int main(void){
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "Create ESMC_Field object from a Grid via TypeKind");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   srcfield = ESMC_FieldCreateGridTypeKind(srcgrid, ESMC_TYPEKIND_R8, 
@@ -344,7 +344,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "Create ESMC_Field object from a Mesh via TypeKind");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dstfield = ESMC_FieldCreateMeshTypeKind(dstmesh, 
@@ -363,7 +363,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "Get a void * C pointer to data from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double * srcfieldptr = (double *)ESMC_FieldGetPtr(srcfield, 0, &rc);
@@ -384,7 +384,7 @@ int main(void){
 
   
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "Get a void * C pointer to data from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double * dstfieldptr = (double *)ESMC_FieldGetPtr(dstfield, 0, &rc);
@@ -399,7 +399,7 @@ int main(void){
   }
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &routehandle, 
@@ -408,7 +408,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "Execute ESMC_FieldRegrid()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle);
@@ -416,7 +416,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "Execute ESMC_RouteHandlePrint()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_RouteHandlePrint(routehandle);
@@ -424,7 +424,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "Release an ESMC_RouteHandle via ESMC_FieldRegridRelease()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldRegridRelease(&routehandle);
@@ -435,7 +435,7 @@ int main(void){
   //----------------------------------------------------------------------------
   //-------------------------- REGRID VALIDATION -------------------------------
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "Regridding Validation");
   strcpy(failMsg, "Did not have acceptable accuracy");
 
@@ -458,7 +458,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "Destroy ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldDestroy(&srcfield);
@@ -466,7 +466,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "Destroy ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldDestroy(&dstfield);
@@ -474,7 +474,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "Destroy ESMC_Grid object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_GridDestroy(&srcgrid);
@@ -482,7 +482,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //EX_disable_UTest
   strcpy(name, "Destroy ESMC_Mesh object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_MeshDestroy(&dstmesh);

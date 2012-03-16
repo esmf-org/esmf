@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.90 2012/03/15 19:24:15 rokuingh Exp $ 
+# $Id: makefile,v 1.91 2012/03/16 02:37:58 rokuingh Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -7,12 +7,12 @@ run_uni:  run_unit_tests_uni
 LOCDIR	  = src/Infrastructure/Field/tests
 
 TESTS_BUILD   = \
-		$(ESMF_TESTDIR)/ESMF_FieldUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldRegridUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldGridRegridUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldGridRegridCsrvUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldGridRegridParUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldCreateGetUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridCsrvUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridUTest \
@@ -21,15 +21,18 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridXGUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridXGOnlineUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldStressUTest \
-    $(ESMF_TESTDIR)/ESMF_FieldGatherUTest \
-    $(ESMF_TESTDIR)/ESMF_FieldRedistUTest \
-    $(ESMF_TESTDIR)/ESMF_FieldLSSMMUTest \
-    $(ESMF_TESTDIR)/ESMF_FieldSMMUTest   \
-    $(ESMF_TESTDIR)/ESMF_FieldRedistArbUTest \
-    $(ESMF_TESTDIR)/ESMF_FieldMeshSMMUTest \
-    $(ESMF_TESTDIR)/ESMF_FieldHaloUTest
+		$(ESMF_TESTDIR)/ESMF_FieldGatherUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldRedistUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldLSSMMUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldSMMUTest   \
+		$(ESMF_TESTDIR)/ESMF_FieldRedistArbUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldMeshSMMUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldHaloUTest
                
 TESTS_RUN     = \
+		RUN_ESMC_FieldUTest \
+		RUN_ESMC_FieldRegridUTest \
+		RUN_ESMC_FieldGridRegridUTest \
                 RUN_ESMF_FieldUTest \
 		RUN_ESMF_FieldCreateGetUTest \
 		RUN_ESMF_FieldRegridUTest \
@@ -39,31 +42,29 @@ TESTS_RUN     = \
 		RUN_ESMF_FieldStressUTest \
 		RUN_ESMF_FieldRegridXGUTest \
 		RUN_ESMF_FieldRegridXGOnlineUTest \
-		RUN_ESMC_FieldUTest \
-		RUN_ESMC_FieldRegridUTest \
-		RUN_ESMC_FieldGridRegridUTest \
-		RUN_ESMC_FieldGridRegridCsrvUTest \
-    RUN_ESMF_FieldGatherUTest \
-    RUN_ESMF_FieldRedistUTest \
-    RUN_ESMF_FieldLSSMMUTest \
-    RUN_ESMF_FieldSMMUTest   \
-    RUN_ESMF_FieldRedistArbUTest \
-    RUN_ESMF_FieldMeshSMMUTest \
-    RUN_ESMF_FieldHaloUTest
+		RUN_ESMF_FieldGatherUTest \
+		RUN_ESMF_FieldRedistUTest \
+		RUN_ESMF_FieldLSSMMUTest \
+		RUN_ESMF_FieldSMMUTest   \
+		RUN_ESMF_FieldRedistArbUTest \
+		RUN_ESMF_FieldMeshSMMUTest \
+		RUN_ESMF_FieldHaloUTest
 
 #		RUN_ESMC_FieldGridRegridParUTest \
+#		RUN_ESMC_FieldGridRegridCsrvUTest \
 
 TESTS_RUN_UNI = \
-                RUN_ESMF_FieldStressUTestUNI \
-                RUN_ESMF_FieldRegridUTestUNI \
-                RUN_ESMF_FieldRegridCsrvUTestUNI \
-                RUN_ESMF_FieldArbGridUTestUNI \
-                RUN_ESMF_FieldRegridXGOnlineUTestUNI \
-                RUN_ESMC_FieldUTestUNI \
-                RUN_ESMC_FieldRegridUTestUNI \
-                RUN_ESMC_FieldGridRegridUTestUNI \
-                RUN_ESMC_FieldGridRegridCsrvUTestUNI \
-                RUN_ESMF_FieldRedistArbUTestUNI
+		RUN_ESMC_FieldUTestUNI \
+		RUN_ESMC_FieldRegridUTestUNI \
+		RUN_ESMC_FieldGridRegridUTestUNI \
+		RUN_ESMC_FieldGridRegridCsrvUTestUNI \
+		RUN_ESMF_FieldStressUTestUNI \
+		RUN_ESMF_FieldRegridUTestUNI \
+		RUN_ESMF_FieldArbGridUTestUNI \
+		RUN_ESMF_FieldRegridXGOnlineUTestUNI \
+		RUN_ESMF_FieldRedistArbUTestUNI
+
+#		RUN_ESMF_FieldRegridCsrvUTestUNI \
 
 #
 # check ESMF_TESTHARNESS_FIELD for default, 
