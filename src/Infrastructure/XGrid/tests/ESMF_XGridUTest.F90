@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.39 2012/03/15 19:27:52 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.40 2012/03/16 18:03:37 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -468,6 +468,30 @@ contains
     ! partially overlap
     xgrid = ESMF_XGridCreate((/make_grid(4,4,1.,1.,0.,0.,field=srcField(1),rc=localrc), &
                                make_grid(4,4,0.5,1.,3.5,3.5,field=srcField(2),rc=localrc)/), &
+      (/make_grid(32,32,0.25,0.25,0.,0.,field=dstField(1),rc=localrc)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call flux_exchange(xgrid, srcField(1:2), dstField(1:1), rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    xgrid = ESMF_XGridCreate((/make_grid(4,4,1.,1.,0.,0.,field=srcField(1),rc=localrc), &
+                               make_grid(4,4,0.5,1.,3.5,3.5,field=srcField(2),rc=localrc)/), &
+      (/make_grid(16,16,0.5,0.5,0.,0.,field=dstField(1),rc=localrc)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call flux_exchange(xgrid, srcField(1:2), dstField(1:1), rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    xgrid = ESMF_XGridCreate((/make_grid(4,4,1.,1.,0.,0.,field=srcField(1),rc=localrc), &
+                               make_grid(4,4,0.5,1.,3.5,3.5,field=srcField(2),rc=localrc)/), &
       (/make_grid(8,8,1.,1.,0.,0.,field=dstField(1),rc=localrc)/), &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -643,6 +667,11 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    call flux_exchange_sph(xgrid, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     xgrid = ESMF_XGridCreate((/make_grid_sph(4,4,1.,1.,0.,0.,rc=localrc), make_grid_sph(4,4,0.6,1.,2.9,3.5,rc=localrc)/), &
       (/make_grid_sph(8,8,1.,1.,0.,0.,rc=localrc)/), &
       sideAToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
@@ -652,11 +681,21 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    call flux_exchange_sph(xgrid, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     xgrid = ESMF_XGridCreate((/make_grid_sph(4,4,1.,1.,0.,0.,rc=localrc), make_grid_sph(4,4,0.6,1.,2.9,2.5,rc=localrc)/), &
       (/make_grid_sph(8,8,1.,1.,0.,0.,rc=localrc)/), &
       sideAToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       sideBToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call flux_exchange_sph(xgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -679,6 +718,11 @@ contains
       sideAToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       sideBToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call flux_exchange_sph(xgrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -925,7 +969,7 @@ contains
 
   subroutine flux_exchange(xgrid, srcField, dstField, rc)
 
-    type(ESMF_XGrid), intent(in)              :: xgrid
+    type(ESMF_XGrid), intent(inout)           :: xgrid
     type(ESMF_Field), intent(inout)           :: srcField(:)
     type(ESMF_Field), intent(inout)           :: dstField(:)
     integer, intent(out), optional            :: rc
@@ -1204,6 +1248,8 @@ contains
     deallocate(s2x_rh, x2s_rh)
     deallocate(d2x_rh, x2d_rh)
 
+    call ESMF_XGridDestroy(xgrid,rc=localrc)
+
     if(present(rc)) rc = ESMF_SUCCESS
 
   end subroutine flux_exchange
@@ -1273,5 +1319,306 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine compute_flux2D
+
+  subroutine flux_exchange_sph(xgrid, scheme, rc)
+
+    type(ESMF_XGrid), intent(inout)           :: xgrid
+    integer, intent(in),  optional            :: scheme
+    integer, intent(out), optional            :: rc
+
+
+    integer                                   :: localrc, i, j, nsrc, ndst, lpet, npet
+    type(ESMF_Field)                          :: f_xgrid
+    type(ESMF_Grid), allocatable              :: srcGrid(:)
+    type(ESMF_Field), allocatable             :: srcFrac(:), srcArea(:)
+    type(ESMF_Grid), allocatable              :: dstGrid(:)
+    type(ESMF_Field), allocatable             :: dstFrac(:), dstArea(:)
+    type(ESMF_RouteHandle), allocatable       :: s2d_rh(:,:)
+    type(ESMF_RouteHandle), allocatable       :: d2s_rh(:,:)
+    type(ESMF_RouteHandle), allocatable       :: s2x_rh(:), x2s_rh(:)
+    type(ESMF_RouteHandle), allocatable       :: d2x_rh(:), x2d_rh(:)
+    real(ESMF_KIND_R8), pointer               :: src(:,:), dst(:,:), exf(:)
+    real(ESMF_KIND_R8), pointer               :: src_area(:,:), dst_area(:,:), exf_area(:)
+    real(ESMF_KIND_R8), pointer               :: src_frac(:,:), dst_frac(:,:), exf_frac(:)
+    real(ESMF_KIND_R8)                        :: srcsum(3), allsrcsum(3), scale=2.0, exf_tarea, exf_tflux
+    type(ESMF_VM)                             :: vm
+    type(ESMF_Field), allocatable             :: srcField(:)
+    type(ESMF_Field), allocatable             :: dstField(:)
+    integer                                   :: l_scheme
+
+    l_scheme = ESMF_REGRID_SCHEME_REGION3D
+    if(present(scheme)) l_scheme = scheme
+
+    call ESMF_VMGetCurrent(vm=vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_VMGet(vm, localpet=lpet, petCount=npet, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    !------------------------------------
+    ! build Fields on the Grids
+    !------------------------------------
+
+    ! create a Field on the xgrid
+    f_xgrid = ESMF_FieldCreate(xgrid=xgrid, TYPEKIND=ESMF_TYPEKIND_R8, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_FieldGet(f_xgrid, farrayPtr=exf, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_XGridGet(xgrid, ngridA=nsrc, ngridB=ndst, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    allocate(srcGrid(nsrc), srcField(nsrc), srcFrac(nsrc), srcArea(nsrc))
+    allocate(dstGrid(ndst), dstField(ndst), dstFrac(ndst), dstArea(ndst))
+
+    call ESMF_XGridGet(xgrid, sideA=srcGrid, sideB=dstGrid, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    do i = 1, nsrc
+      srcField(i) = ESMF_FieldCreate(srcGrid(i), typekind=ESMF_TYPEKIND_R8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      srcFrac(i) = ESMF_FieldCreate(srcGrid(i), typekind=ESMF_TYPEKIND_R8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      srcArea(i) = ESMF_FieldCreate(srcGrid(i), typekind=ESMF_TYPEKIND_R8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldRegridGetArea(srcArea(i), rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
+    do i = 1, ndst
+      dstField(i) = ESMF_FieldCreate(dstGrid(i), typekind=ESMF_TYPEKIND_R8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      dstFrac(i) = ESMF_FieldCreate(dstGrid(i), typekind=ESMF_TYPEKIND_R8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldGet(dstFrac(i), localDe=0, farrayPtr=dst_frac, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      dstArea(i) = ESMF_FieldCreate(dstGrid(i), typekind=ESMF_TYPEKIND_R8, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldRegridGetArea(dstArea(i), rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
+    allocate(s2d_rh(size(srcField), size(dstField)), d2s_rh(size(dstField), size(srcField)))
+    allocate(s2x_rh(size(srcField)), x2s_rh(size(srcField)))
+    allocate(d2x_rh(size(dstField)), x2d_rh(size(dstField)))
+
+    do i = 1, size(srcField)
+      do j = 1, size(dstField)
+        call ESMF_FieldRegridStore(srcField=srcField(i), dstField=dstField(j), &
+          regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
+          routehandle=s2d_rh(i,j), &
+          unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
+          srcFracField=srcFrac(i), dstFracField=dstFrac(j), & 
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        call ESMF_FieldRegridStore(srcField=dstField(j), dstField=srcField(i), &
+          regridmethod=ESMF_REGRIDMETHOD_CONSERVE, &
+          routehandle=d2s_rh(j,i), &
+          unmappedaction = ESMF_UNMAPPEDACTION_IGNORE, &
+          srcFracField=dstFrac(j), dstFracField=srcFrac(i), & 
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      enddo
+    enddo
+
+    do i = 1, size(srcField)
+      call ESMF_FieldRegridStore(xgrid, srcField=srcField(i), dstField=f_xgrid, &
+        routehandle=s2x_rh(i), rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldRegridStore(xgrid, srcField=f_xgrid, dstField=srcField(i), &
+        routehandle=x2s_rh(i), rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+    do i = 1, size(dstField)
+      call ESMF_FieldRegridStore(xgrid, srcField=dstField(i), dstField=f_xgrid, &
+        routehandle=d2x_rh(i), rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldRegridStore(xgrid, srcField=f_xgrid, dstField=dstField(i), &
+        routehandle=x2d_rh(i), dstFracField=dstFrac(i), rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
+    !----------------------------------------------------
+    ! Compute flux integrals
+    ! Initialize src flux to constant
+    !----------------------------------------------------
+    exf = 0.
+    do i = 1, size(srcField)
+      call ESMF_FieldGet(srcField(i), farrayPtr=src, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      src = scale
+    enddo
+
+    ! Perform flux exchange
+    do i = 1, size(srcField)
+      call ESMF_FieldRegrid(srcField=srcField(i), dstField=f_xgrid, &
+        routehandle=s2x_rh(i), zeroregion=ESMF_REGION_EMPTY, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
+    ! make sure flux is conserved on XGrid
+    allocate(exf_area(lbound(exf,1):ubound(exf,1)))
+    allocate(exf_frac(lbound(exf,1):ubound(exf,1)))
+    call ESMF_XGridGet(xgrid, area=exf_area, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    exf_frac = 1.0
+    call compute_flux1D(vm, exf, exf_area, exf_frac, allsrcsum, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    if(lpet == 0) print *, ' xgrid flux and area: ', allsrcsum
+    if(abs(allsrcsum(1) - allsrcsum(2)*scale) .gt. 1.e-10) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="- inconsistent flux and area found", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+    exf_tflux = allsrcsum(1)
+    exf_tarea = allsrcsum(2)
+    deallocate(exf_area, exf_frac)
+
+    !make sure flux is conserved on dst Fields
+    do i = 1, size(dstField)
+      call ESMF_FieldRegrid(srcField=f_xgrid, dstField=dstField(i), &
+        routehandle=x2d_rh(i), rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldGet(dstField(i), farrayPtr=dst, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! fraction
+      call ESMF_FieldGet(dstFrac(i), farrayPtr=dst_frac, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! area
+      call ESMF_FieldGet(dstArea(i), farrayPtr=dst_area, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call compute_flux2D(vm, dst, dst_area, dst_frac, allsrcsum, rc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      if(lpet == 0) print *, 'dst flux and area: ', allsrcsum
+      ! In general, dst flux cannot be guarannteed to be conserved when
+      ! interpolating from high resolution Grid/XGrid to low resolution Grid
+      ! due to undersampling nature of the process
+      if(abs(exf_tarea - allsrcsum(2)) .gt. 1.e-10) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+           msg="- inconsistent flux and area found", &
+           ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif
+    enddo
+
+    do i = 1, size(dstField)
+      call ESMF_FieldRegrid(srcField=dstField(i), dstField=f_xgrid, &
+        routehandle=d2x_rh(i), &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+    do i = 1, size(srcField)
+      call ESMF_FieldRegrid(srcField=f_xgrid, dstField=srcField(i), &
+        routehandle=x2s_rh(i), rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldGet(srcField(i), farrayPtr=src, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
+    !----------------------------------------------------
+    ! clean up
+    !----------------------------------------------------
+    do i = 1, size(srcField)
+      call ESMF_FieldDestroy(srcField(i), rc=localrc)
+      call ESMF_FieldDestroy(srcArea(i), rc=localrc)
+      call ESMF_FieldDestroy(srcFrac(i), rc=localrc)
+      call ESMF_RoutehandleRelease(s2x_rh(i), rc=localrc)
+      call ESMF_RoutehandleRelease(x2s_rh(i), rc=localrc)
+    enddo
+    do i = 1, size(dstField)
+      call ESMF_FieldDestroy(dstField(i), rc=localrc)
+      call ESMF_FieldDestroy(dstArea(i), rc=localrc)
+      call ESMF_FieldDestroy(dstFrac(i), rc=localrc)
+      call ESMF_RoutehandleRelease(d2x_rh(i), rc=localrc)
+      call ESMF_RoutehandleRelease(x2d_rh(i), rc=localrc)
+    enddo
+    do i = 1, size(srcField)
+      do j = 1, size(dstField)
+        call ESMF_RoutehandleRelease(s2d_rh(i,j), rc=localrc)
+        call ESMF_RoutehandleRelease(d2s_rh(j,i), rc=localrc)
+      enddo
+    enddo
+
+    deallocate(srcArea, srcFrac, dstArea, dstFrac)
+    deallocate(s2d_rh, d2s_rh)
+    deallocate(s2x_rh, x2s_rh)
+    deallocate(d2x_rh, x2d_rh)
+
+    call ESMF_XGridDestroy(xgrid,rc=localrc)
+
+    if(present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine flux_exchange_sph
 
 end program ESMF_XGridUTest

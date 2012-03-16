@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.26 2012/03/15 19:27:48 feiliu Exp $
+! $Id: ESMF_XGridGet.F90,v 1.27 2012/03/16 18:03:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.26 2012/03/15 19:27:48 feiliu Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.27 2012/03/16 18:03:32 feiliu Exp $'
 
 !==============================================================================
 !
@@ -607,11 +607,11 @@ subroutine ESMF_XGridGetDG(xgrid, distgrid, xgridside, gridindex, &
 
 !
 ! !ARGUMENTS:
-type(ESMF_XGrid), intent(in)                 :: xgrid
-type(ESMF_DistGrid), intent(out)             :: distgrid
+type(ESMF_XGrid), intent(in)                      :: xgrid
+type(ESMF_DistGrid), intent(out)                  :: distgrid
 type(ESMF_XGridSide_Flag), intent(in), optional   :: xgridside
-integer, intent(in), optional                :: gridindex
-integer, intent(out), optional               :: rc 
+integer, intent(in), optional                     :: gridindex
+integer, intent(out), optional                    :: rc 
 !
 ! !DESCRIPTION:
 !      Get a distgrid from XGrid from a specific side. 
