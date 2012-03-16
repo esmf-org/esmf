@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegridParUTest.C,v 1.1 2012/03/15 19:24:15 rokuingh Exp $
+// $Id: ESMC_FieldGridRegridParUTest.C,v 1.2 2012/03/16 16:39:09 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -43,10 +43,6 @@ int main(void){
   // Field variables
   ESMC_ArraySpec arrayspec;
   ESMC_RouteHandle routehandle;
-  int *gridToFieldMap, *ungriddedLBound, *ungriddedUBound;
-  ESMC_InterfaceInt i_gridToFieldMap, i_ungriddedLBound, i_ungriddedUBound;
-  int *gridToFieldMap2, *ungriddedLBound2, *ungriddedUBound2;
-  ESMC_InterfaceInt i_gridToFieldMap2, i_ungriddedLBound2, i_ungriddedUBound2;
   ESMC_Field srcfield, dstfield;
 
   // Grid variables
@@ -455,38 +451,6 @@ int main(void){
     
   //----------------------------------------------------------------------------
   //EX_disable_UTest_Multi_Proc_Only
-  strcpy(name, "Set up gridToFieldMap");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  gridToFieldMap = (int *)malloc(sizeof(int));
-  gridToFieldMap[0] = 1;
-  i_gridToFieldMap = ESMC_InterfaceIntCreate(gridToFieldMap, 1, &rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-  
-  //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
-  strcpy(name, "Set up ungriddedLBound");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ungriddedLBound = (int *)malloc(2*sizeof(int));
-  ungriddedLBound[0] = 0;
-  ungriddedLBound[1] = 0;
-  i_ungriddedLBound = ESMC_InterfaceIntCreate(ungriddedLBound, 0, &rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
-  strcpy(name, "Set up ungriddedUBound");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ungriddedUBound = (int *)malloc(2*sizeof(int));
-  ungriddedUBound[0] = 0;
-  ungriddedUBound[1] = 0;
-  i_ungriddedUBound = ESMC_InterfaceIntCreate(ungriddedUBound, 0, &rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-  
-  //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
   strcpy(name, "Create ESMC_Field object from a Grid via TypeKind");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   srcfield = ESMC_FieldCreateGridTypeKind(srcgrid, ESMC_TYPEKIND_R8, 
@@ -499,9 +463,7 @@ int main(void){
   strcpy(name, "Create ESMC_Field object from a Mesh via TypeKind");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dstfield = ESMC_FieldCreateMeshTypeKind(dstmesh, 
-    ESMC_TYPEKIND_R8, ESMC_MESHLOC_NODE,
-    i_gridToFieldMap, i_ungriddedLBound,
-    i_ungriddedUBound, "dstfield", &rc);
+    ESMC_TYPEKIND_R8, ESMC_MESHLOC_NODE, NULL, NULL, NULL, "dstfield", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -640,14 +602,6 @@ int main(void){
   //rc = ESMC_MeshDestroy(&dstmesh);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-/*
-  ESMC_InterfaceIntDestroy(&i_gridToFieldMap);
-  free(gridToFieldMap);
-  ESMC_InterfaceIntDestroy(&i_ungriddedLBound);
-  free(ungriddedLBound);
-  ESMC_InterfaceIntDestroy(&i_ungriddedUBound);
-  free(ungriddedUBound);
-*/
 #endif
 
   //----------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 
-// $Id: ESMCI_Field.h,v 1.14 2012/03/15 19:24:14 rokuingh Exp $
+// $Id: ESMCI_Field.h,v 1.15 2012/03/16 16:39:05 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -75,11 +75,11 @@ namespace ESMCI{
       ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
       const char *name, int *rc); 
     static Field* create(ESMC_Mesh mesh, ESMC_ArraySpec arrayspec,
-      ESMC_InterfaceInt gridToFieldMap, ESMC_InterfaceInt ungriddedLBound,
-      ESMC_InterfaceInt ungriddedUBound, const char *name, int *rc); 
+      ESMC_InterfaceInt *gridToFieldMap, ESMC_InterfaceInt *ungriddedLBound,
+      ESMC_InterfaceInt *ungriddedUBound, const char *name, int *rc); 
     static Field* create(ESMC_Mesh mesh, ESMC_TypeKind typekind,
-      ESMC_MeshLoc_Flag meshloc, ESMC_InterfaceInt gridToFieldMap, 
-      ESMC_InterfaceInt ungriddedLBound, ESMC_InterfaceInt ungriddedUBound, 
+      ESMC_MeshLoc_Flag meshloc, ESMC_InterfaceInt *gridToFieldMap, 
+      ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
       const char *name, int *rc); 
     static int destroy(Field *field);
     ESMC_Mesh getMesh(int *rc);

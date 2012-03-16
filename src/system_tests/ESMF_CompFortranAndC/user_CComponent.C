@@ -1,4 +1,4 @@
-// $Id: user_CComponent.C,v 1.19 2011/12/23 21:06:03 theurich Exp $
+// $Id: user_CComponent.C,v 1.20 2012/03/16 16:39:15 rokuingh Exp $
 //
 // Example/test code which shows User Component calls.
 
@@ -145,8 +145,8 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   if (*rc!=ESMF_SUCCESS) return;  // bail out
 
   // Finally create Field  
-  field = ESMC_FieldCreateMeshArraySpec(mesh, arrayspec, i_gridToFieldMap, i_ungriddedLBound,
-    i_ungriddedUBound, "Field from C", rc);
+  field = ESMC_FieldCreateMeshArraySpec(mesh, arrayspec, &i_gridToFieldMap, 
+    &i_ungriddedLBound, &i_ungriddedUBound, "Field from C", rc);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
   
   // Add Field to the export State

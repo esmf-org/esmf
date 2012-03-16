@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.34 2012/03/07 16:44:12 rokuingh Exp $
+// $Id: ESMC_Field.C,v 1.35 2012/03/16 16:39:07 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -99,8 +99,8 @@ extern "C" {
 #define ESMC_METHOD "ESMC_FieldCreateMeshArraySpec()"
   ESMC_Field ESMC_FieldCreateMeshArraySpec(ESMC_Mesh mesh, 
     ESMC_ArraySpec arrayspec,
-    ESMC_InterfaceInt gridToFieldMap, 
-    ESMC_InterfaceInt ungriddedLBound, ESMC_InterfaceInt ungriddedUBound, 
+    ESMC_InterfaceInt *gridToFieldMap, 
+    ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
     const char *name, int *rc){
     // Initialize return code. Assume routine not implemented
     if (rc) *rc = ESMF_RC_NOT_IMPL;
@@ -127,8 +127,8 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldCreateMeshTypeKind()"
   ESMC_Field ESMC_FieldCreateMeshTypeKind(ESMC_Mesh mesh, enum ESMC_TypeKind typekind,
-    enum ESMC_MeshLoc_Flag meshloc, ESMC_InterfaceInt gridToFieldMap, 
-    ESMC_InterfaceInt ungriddedLBound, ESMC_InterfaceInt ungriddedUBound, 
+    enum ESMC_MeshLoc_Flag meshloc, ESMC_InterfaceInt *gridToFieldMap, 
+    ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
     const char *name, int *rc){
     // Initialize return code. Assume routine not implemented
     if (rc) *rc = ESMF_RC_NOT_IMPL;

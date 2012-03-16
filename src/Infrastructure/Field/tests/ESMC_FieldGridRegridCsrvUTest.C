@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.4 2012/03/16 02:37:58 rokuingh Exp $
+// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.5 2012/03/16 16:39:09 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -43,10 +43,6 @@ int main(void){
   // Field variables
   ESMC_ArraySpec arrayspec;
   ESMC_RouteHandle routehandle;
-  int *gridToFieldMap, *ungriddedLBound, *ungriddedUBound;
-  ESMC_InterfaceInt i_gridToFieldMap, i_ungriddedLBound, i_ungriddedUBound;
-  int *gridToFieldMap2, *ungriddedLBound2, *ungriddedUBound2;
-  ESMC_InterfaceInt i_gridToFieldMap2, i_ungriddedLBound2, i_ungriddedUBound2;
   ESMC_Field srcfield, dstfield;
 
   // Grid variables
@@ -84,8 +80,8 @@ int main(void){
   //----------------------------------------------------------------------------
   //EX_disable_UTest
   // Create a Grid
-  double ub_x, lb_x, max_x, min_x, cellwidth_x, cellcenter_x;
-  double ub_y, lb_y, max_y, min_y, cellwidth_y, cellcenter_y;
+  double ub_x, lb_x, max_x, min_x, cellwidth_x;
+  double ub_y, lb_y, max_y, min_y, cellwidth_y;
   ub_x = 4;
   ub_y = 4;
   lb_x = 0;
@@ -97,8 +93,6 @@ int main(void){
 
   cellwidth_x = (max_x-min_x)/(ub_x-lb_x);
   cellwidth_y = (max_y-min_y)/(ub_y-lb_y);
-  cellcenter_x = cellwidth_x/double(2);
-  cellcenter_y = cellwidth_y/double(2);
 
   maxIndex = (int *)malloc(dimcount*sizeof(int));
   maxIndex[0] = int(ub_x);
@@ -142,13 +136,6 @@ int main(void){
 
   printf("exLBounds = [%d,%d]\n", exLBound[0], exLBound[1]);
   printf("exUBounds = [%d,%d]\n", exUBound[0], exUBound[1]);
-
-// if I iterate with <= i get a segfault in destroy (this doesnt' work in python because the bounds are all wrong)
-// if i iterate with <, i get the log message about concave elements.., same in python
-
-// try setting the first row of coords first, then using the iteration to set others..
-
-// this is all overly complicated by the fact that indices are coming back 1 based, change that..
 
   printf("gridXCoord = \n");
   p = 0;
@@ -304,38 +291,6 @@ int main(void){
     
   //----------------------------------------------------------------------------
   //EX_disable_UTest
-  strcpy(name, "Set up gridToFieldMap");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  gridToFieldMap = (int *)malloc(sizeof(int));
-  gridToFieldMap[0] = 1;
-  i_gridToFieldMap = ESMC_InterfaceIntCreate(gridToFieldMap, 1, &rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-  
-  //----------------------------------------------------------------------------
-  //EX_disable_UTest
-  strcpy(name, "Set up ungriddedLBound");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ungriddedLBound = (int *)malloc(2*sizeof(int));
-  ungriddedLBound[0] = 0;
-  ungriddedLBound[1] = 0;
-  i_ungriddedLBound = ESMC_InterfaceIntCreate(ungriddedLBound, 0, &rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_disable_UTest
-  strcpy(name, "Set up ungriddedUBound");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ungriddedUBound = (int *)malloc(2*sizeof(int));
-  ungriddedUBound[0] = 0;
-  ungriddedUBound[1] = 0;
-  i_ungriddedUBound = ESMC_InterfaceIntCreate(ungriddedUBound, 0, &rc);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-  
-  //----------------------------------------------------------------------------
-  //EX_disable_UTest
   strcpy(name, "Create ESMC_Field object from a Grid via TypeKind");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   srcfield = ESMC_FieldCreateGridTypeKind(srcgrid, ESMC_TYPEKIND_R8, 
@@ -348,9 +303,7 @@ int main(void){
   strcpy(name, "Create ESMC_Field object from a Mesh via TypeKind");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dstfield = ESMC_FieldCreateMeshTypeKind(dstmesh, 
-    ESMC_TYPEKIND_R8, ESMC_MESHLOC_ELEMENT,
-    i_gridToFieldMap, i_ungriddedLBound,
-    i_ungriddedUBound, "dstfield", &rc);
+    ESMC_TYPEKIND_R8, ESMC_MESHLOC_ELEMENT, NULL, NULL, NULL, "dstfield", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
@@ -394,7 +347,7 @@ int main(void){
   // initialize destination field
   {
     int i;
-    for(i=0;i<num_node;++i)
+    for(i=0;i<num_elem;++i)
       dstfieldptr[i] = 0.0;
   }
 
@@ -444,7 +397,7 @@ int main(void){
     double x,y;
     int i;
     // 2. check destination field against source field
-    for(i=0;i<num_node;++i) {
+    for(i=0;i<num_elem;++i) {
       x=nodeCoord[2*i];
       y=nodeCoord[2*i+1];
       // if error is too big report an error
@@ -489,12 +442,6 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-  ESMC_InterfaceIntDestroy(&i_gridToFieldMap);
-  free(gridToFieldMap);
-  ESMC_InterfaceIntDestroy(&i_ungriddedLBound);
-  free(ungriddedLBound);
-  ESMC_InterfaceIntDestroy(&i_ungriddedUBound);
-  free(ungriddedUBound);
 #endif
   //----------------------------------------------------------------------------
   ESMC_TestEnd(result, __FILE__, __LINE__, 0);
