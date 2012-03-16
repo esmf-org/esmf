@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.3 2012/03/14 02:23:53 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.4 2012/03/16 19:35:20 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile2.F90,v 1.3 2012/03/14 02:23:53 w6ws Exp $'
+      '$Id: ESMF_StateReconcile2.F90,v 1.4 2012/03/16 19:35:20 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
@@ -89,11 +89,11 @@
         logical, pointer :: needs(:) => null ()
       end type
 
-!     ! ESMF_StateIDInfo
+!     ! ESMF_ReconcileIDInfo
 !
 !     ! ID/VMId pair, plus other global PET info
 
-      type ESMF_StateIDInfo
+      type ESMF_ReconcileIDInfo
         integer,         pointer :: id(:) => null ()
         type(ESMF_VMId), pointer :: vmid(:) => null ()
         logical,         pointer :: needed(:) => null ()
@@ -256,7 +256,7 @@
     integer,     allocatable :: ids_recv(:), itemtypes_recv(:)
     type(ESMF_VMId), pointer :: vmids_recv(:)
 
-    type(ESMF_StateIDInfo), pointer :: id_info(:)
+    type(ESMF_ReconcileIDInfo), pointer :: id_info(:)
 
     logical, pointer :: recvd_needs_matrix(:,:)
 
@@ -290,8 +290,6 @@ print *, ESMF_METHOD, ': nitems_buf(', lbound (nitems_buf,1), ',', ubound (nitem
     ! Note that element zero is reserved for the State itself.
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     ': *** Step 1 - Build send arrays')
-print *, 'proceed?'
-read (*,*)
     itemtypes_send => null ()
     ids_send   => null ()
     vmids_send => null ()      
@@ -307,7 +305,7 @@ read (*,*)
     ! 2.) All PETs send their items Ids and VMIds to all the other PETs,
     ! then create local directories of which PETs have which ids/VMIds.
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': *** Step 2 - AllToAllVing Ids on PET ' // iTos (mypet), ask=.true.)
+    ': *** Step 2 - Exchange Ids/VMIds')
 
     id_info => null ()
     call ESMF_ReconcileExchangeIDInfo (vm,  &
@@ -345,7 +343,7 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     ! 4.) Communicate needs back to the offering PETs
 
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': *** Step 4 - Communicate needs')
+    ': *** Step 4 - Exchange needs')
 
     ! Send to each offering PET a buffer containing 'needed' array
     ! specifying which items are needed.  The array is the same size as,
@@ -369,7 +367,7 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     ': *** Step 5 - Serialize needs, send PET = ' // iTos (send_pet))
     do, i=0, npets-1
       call ESMF_ReconcileSerialize (state, siwrap, &
-	  needs_list=recvd_needs_matrix(i,:), attreconflag=attreconflag,  &
+	  needs_list=recvd_needs_matrix(:,i), attreconflag=attreconflag,  &
 	  obj_buffer=id_info(i)%item_buffer, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
 	  ESMF_CONTEXT,  &
@@ -380,7 +378,7 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     ! 6.) Send/receive serialized objects to whoever needed them
 
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': *** Step 6 - Communicate serialized objects, send PET = ' // iTos (send_pet))
+    ': *** Step 6 - Exchange serialized objects')
 
     call ESMF_ReconcileSendItems (vm,  &
         id_info=id_info,  &
@@ -395,7 +393,7 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     !     nested States as needed
 
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': *** Step 7 - Deserialize needs, send PET = ' // iTos (send_pet))
+    ': *** Step 7 - Deserialize needs')
 
 ! !!! DO NOT REMOVE THIS BARRIER !!!
 ! All serialization and communications must be complete before
@@ -418,8 +416,8 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
       end if
     end do
 
-print *, ESMF_METHOD //  &
-    ': Deallocating recvd_needs_matrix, PET = ' // iTos (mypet)
+call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+    ': Deallocating recvd_needs_matrix')
       deallocate (recvd_needs_matrix, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
@@ -434,11 +432,21 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
         rcToReturn=rc)) return
 #endif
 
-    deallocate (ids_send, itemtypes_send, vmids_send)
+    deallocate (ids_send, itemtypes_send, vmids_send, stat=memstat)
+    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
     do, i=0, ubound (id_info, 1)
-      deallocate (id_info(i)%id, id_info(i)%vmid)
+      deallocate (id_info(i)%id, id_info(i)%vmid, stat=memstat)
+      if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
     end do
-    deallocate (id_info)
+    deallocate (id_info, stat=memstat)
+    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
 
     if (associated (siwrap)) then
       deallocate (siwrap, stat=memstat)
@@ -464,7 +472,7 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': at the end without crashing!')
     type(ESMF_VM),     intent(in)   :: vm
     integer,           intent(in)   :: id(0:)
     type(ESMF_VMId),   intent(in)   :: vmid(0:)
-    type(ESMF_StateIDInfo), intent(inout) :: id_info(0:)
+    type(ESMF_ReconcileIDInfo), intent(inout) :: id_info(0:)
     integer,           intent(out)  :: rc
 !
 ! !DESCRIPTION:
@@ -550,6 +558,8 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 
     ! Go through the list of needed IDs/VMIds and select an offerer for each.
 
+    ! call needs_list_select (needs_list, id_info)
+
 do, j=0, npets-1
   if (j == myPet) then
     do, i=0, ubound (id_info, 1)
@@ -612,8 +622,8 @@ end do
     end subroutine needs_list_insert
 
     subroutine needs_list_select (needs_list_1, id_info_1)
-      type(needsList_t),      pointer       :: needs_list_1  ! intent(in)
-      type(ESMF_StateIDInfo), intent(inout) :: id_info_1(:)
+      type(needsList_t),          pointer       :: needs_list_1  ! intent(in)
+      type(ESMF_ReconcileIDInfo), intent(inout) :: id_info_1(0:)
 
       ! For each needed Id/VMId pair, select an offering PET and set it in
       ! the id_info_array.
@@ -651,12 +661,12 @@ end do
       attreconflag, rc)
 !
 ! !ARGUMENTS:
-    type (ESMF_State), intent(inout)  :: state
-    type (ESMF_VM),    intent(in)  :: vm
-    character,         pointer     :: obj_buffer(:) ! intent(in)
-    type(ESMF_VMId),   pointer     :: vm_ids(:)     ! intent(in)
-    type(ESMF_AttReconcileFlag),intent(in) :: attreconflag
-    integer,           intent(out) :: rc
+    type (ESMF_State), intent(inout):: state			 	  
+    type (ESMF_VM),    intent(in)   :: vm			 	  
+    character,         pointer      :: obj_buffer(:) ! intent(in)	  
+    type(ESMF_VMId),   pointer      :: vm_ids(:)     ! intent(in)	  
+    type(ESMF_AttReconcileFlag),intent(in)   :: attreconflag
+    integer,           intent(out)  :: rc
 !
 ! !DESCRIPTION:
 !   Builds proxy items for each of the items in the buffer.
@@ -858,12 +868,12 @@ print *, "deserialization error in default case.  Returning ESMF_RC_INTNRL_INCON
       nitems_buf, id, vmid, id_info, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),     intent(in)   :: vm
-    integer,           intent(in)   :: nitems_buf(0:)
-    integer,           intent(in)   :: id(0:)
-    type(ESMF_VMId),   intent(in)   :: vmid(0:)
-    type(ESMF_StateIDInfo), pointer :: id_info(:) ! intent(out)
-    integer,           intent(out)  :: rc
+    type(ESMF_VM),          intent(in)  :: vm
+    integer,                intent(in)  :: nitems_buf(0:)
+    integer,                intent(in)  :: id(0:)
+    type(ESMF_VMId),        intent(in)  :: vmid(0:)
+    type(ESMF_ReconcileIDInfo), pointer :: id_info(:) ! intent(out)
+    integer,                intent(out) :: rc
 !
 ! !DESCRIPTION:
 !
@@ -926,7 +936,7 @@ print *, "deserialization error in default case.  Returning ESMF_RC_INTNRL_INCON
       allocate (  &
           id_info(i)%  id  (0:nitems_buf(i)), &
           id_info(i)%vmid  (0:nitems_buf(i)), &
-          id_info(i)%needed(0:nitems_buf(i)), &
+          id_info(i)%needed(  nitems_buf(i)), &
           stat=memstat)
       if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
@@ -1092,10 +1102,10 @@ end do
   subroutine ESMF_ReconcileExchangeNeeds (vm, id_info, recv_needs, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),          intent(in)  :: vm
-    type(ESMF_StateIDInfo), intent(in)  :: id_info(0:)
-    logical,                pointer     :: recv_needs(:,:) ! intent(out)
-    integer,                intent(out) :: rc
+    type(ESMF_VM),              intent(in)  :: vm
+    type(ESMF_ReconcileIDInfo), intent(in)  :: id_info(0:)
+    logical,                    pointer     :: recv_needs(:,:) ! intent(out)
+    integer,                    intent(out) :: rc
 !
 ! !DESCRIPTION:
 !
@@ -1524,10 +1534,10 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
   subroutine ESMF_ReconcileSendItems (vm, id_info, recv_items, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM),          intent(in)  :: vm
-    type(ESMF_StateIDInfo), intent(in)  :: id_info(0:)
-    type(ESMF_ItemBuffer),  pointer     :: recv_items(:) ! intent(out)
-    integer,                intent(out) :: rc
+    type(ESMF_VM),              intent(in)  :: vm
+    type(ESMF_ReconcileIDInfo), intent(in)  :: id_info(0:)
+    type(ESMF_ItemBuffer),      pointer     :: recv_items(:) ! intent(out)
+    integer,                    intent(out) :: rc
 !
 ! !DESCRIPTION:
 !
@@ -1557,8 +1567,6 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     integer,   allocatable :: counts_recv(:),  counts_send(:)
     integer,   allocatable :: offsets_recv(:), offsets_send(:)
     character, allocatable :: buffer_recv(:),  buffer_send(:)
-
-    integer, allocatable :: bufsize_recv(:)
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -1608,8 +1616,8 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     end do
 
 !   Set up recv counts, offsets, and buffer.  Since there will be a different
-!   buffer size from each remote PET, a communication is necessary to inform
-!   the PETs of the buffer sizes.
+!   buffer size from each remote PET, an AllToAll communication is necessary
+!   for PETs to exchange the buffer sizes they are sending to each other.
 
     allocate (  &
         counts_recv(0:npets-1),  &
@@ -1625,10 +1633,13 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+print *, ESMF_METHOD, ': PET', mypet, ': serialized buffer sizes',  &
+   ': counts_send =', counts_send,  &
+   ', counts_recv =', counts_recv
 
     allocate (  &
         offsets_recv(0:npets-1),  &
-        buffer_recv(0:sum (bufsize_recv)-1),  &
+        buffer_recv(0:sum (counts_recv)-1),  &
         stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
@@ -1732,8 +1743,8 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 ! Sanity check: siwrap and needs list must be the same size.
 
     if (ubound (siwrap, 1) /= ubound (needs_list, 1)) then
-print *, ESMF_METHOD, ': siwrap ubound =', ubound (siwrap, 1),  &
-    ', needs_list =', ubound (needs_list, 1)
+print *, ESMF_METHOD, ': error - siwrap ubound =', ubound (siwrap, 1),  &
+    '/= needs_list =', ubound (needs_list, 1)
       if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, &
           msg="ubound (siwrap) /= ubound (needs_list)", &
           ESMF_CONTEXT,  &
