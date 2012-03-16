@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.57 2012/02/29 23:21:07 oehmke Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.58 2012/03/16 21:42:36 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.57 2012/02/29 23:21:07 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.58 2012/03/16 21:42:36 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1408,6 +1408,7 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *
 #define  MAX_NUM_POLY_NODES_3D  20  // MAX_NUM_POLY_COORDS/3
   int num_poly_nodes;
   double poly_coords[MAX_NUM_POLY_COORDS];
+  double tmp_coords[MAX_NUM_POLY_COORDS];
   
   
   try {
@@ -1471,10 +1472,13 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *
       double area;
       if (pdim==2) {
 	if (sdim==2) {
-	  get_elem_coords(&elem, cfield, 2, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
+          // get_elem_coords(&elem, cfield, 2, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
+          get_elem_coords_2D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_2D, tmp_coords, &num_poly_nodes, poly_coords);
+	  remove_0len_edges2D(&num_poly_nodes, poly_coords);
           area=area_of_flat_2D_polygon(num_poly_nodes, poly_coords);
 	} else if (sdim==3) {
-	  get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
+	  //get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
+          get_elem_coords_3D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_3D, tmp_coords, &num_poly_nodes, poly_coords);
 	  remove_0len_edges3D(&num_poly_nodes, poly_coords);
 	  area=great_circle_area(num_poly_nodes, poly_coords);
 	}
