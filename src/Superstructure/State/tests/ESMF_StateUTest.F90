@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.106 2012/01/06 20:19:22 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.107 2012/03/17 01:12:34 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.106 2012/01/06 20:19:22 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.107 2012/03/17 01:12:34 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -75,11 +75,12 @@
       type(ESMF_FieldBundle) :: fbundle1x
       type(ESMF_RouteHandle) :: routehandle11, routehandle12
       type(ESMF_RouteHandle) :: routehandle1x
-      type(ESMF_State)       :: state10, state11, state12
+      type(ESMF_State)       :: state10, state11, state12, state_attr
       type(ESMF_State)       :: state1x
       type(ESMF_State)       :: state20, state30
 
       integer :: i
+      integer :: linkcount
 #endif
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1101,6 +1102,64 @@
       write (name, *) "Remove a nested State FieldBundle which pre-exists test"
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
         result, ESMF_SRCLINE)
+
+      ! StateRemove on a State that has attributes
+
+      !EX_UTest
+      ! Test create an empty State with attribute
+      state_attr = ESMF_StateCreate (name="ImportState",  &
+        stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
+      write (failmsg, *) "Creating state_attr"
+      write (name, *) "Creating state_attr test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test attribute count
+      call ESMF_AttributeGet(state_attr, count=linkcount, &
+          attcountflag=ESMF_ATTGETCOUNT_ATTLINK,  &
+          rc=localrc)
+      write (failmsg, *) "Attribute link count /= 0 (", linkcount, ")"
+      write (name, *) "Empty state attribute count test"
+      call ESMF_Test (linkcount == 0, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Add an Array
+      call ESMF_StateAdd (state_attr, (/array10/), rc=rc)
+      write (failmsg, *) "Adding an Array for Attribute count testing"
+      write (name, *) "Adding an Array for attribute count testing"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test attribute count
+      call ESMF_AttributeGet(state_attr, count=linkcount, &
+          attcountflag=ESMF_ATTGETCOUNT_ATTLINK,  &
+          rc=localrc)
+      write (failmsg, *) "Attribute link count /= 1 (", linkcount, ")"
+      write (name, *) "State with Array item attribute count test"
+      call ESMF_Test (linkcount == 1, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Remove the Array
+      call ESMF_StateRemove (state_attr, itemName='temperatures', rc=rc)
+      write (failmsg, *) "Removinging an Array for Attribute count testing"
+      write (name, *) "Removing an Array for attribute count testing"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test attribute count
+      call ESMF_AttributeGet(state_attr, count=linkcount, &
+          attcountflag=ESMF_ATTGETCOUNT_ATTLINK,  &
+          rc=localrc)
+      write (failmsg, *) "Attribute link count /= 0 (", linkcount, ")"
+      write (name, *) "State with Array item attribute count test"
+      call ESMF_Test (linkcount == 0, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
 
       !------------------------------------------------------------------------
       ! Test StateAddReplace on Array
