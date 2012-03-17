@@ -1,4 +1,4 @@
-! $Id: ESMF_VMAllToAllUTest.F90,v 1.1 2012/03/14 17:08:41 w6ws Exp $
+! $Id: ESMF_VMAllToAllUTest.F90,v 1.2 2012/03/17 00:44:50 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_VMAllToAllUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMAllToAllUTest.F90,v 1.1 2012/03/14 17:08:41 w6ws Exp $'
+    '$Id: ESMF_VMAllToAllUTest.F90,v 1.2 2012/03/17 00:44:50 w6ws Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -50,11 +50,10 @@ program ESMF_VMAllToAllUTest
   type(ESMF_VM):: vm
   integer:: localPet, petCount
   integer:: nlen1, nlen2, nsize, i, j, k
-  integer, allocatable:: iarray1(:), iarray2(:), iarray3(:)
+  integer,            allocatable:: iarray1(:),  iarray2(:),  iarray3(:)
+  real(ESMF_KIND_R4), allocatable:: r4array1(:), r4array2(:), r4array3(:)
+  real(ESMF_KIND_R8), allocatable:: r8array1(:), r8array2(:), r8array3(:)
      
-  integer   :: idData
-  character :: keyData
-  logical   :: all_verify
 
 
 !------------------------------------------------------------------------------
@@ -77,11 +76,27 @@ program ESMF_VMAllToAllUTest
   allocate(iarray2(0:petCount-1))
   allocate(iarray3(0:petCount-1))
 
+  allocate(r4array1(0:petCount-1))
+  allocate(r4array2(0:petCount-1))
+  allocate(r4array3(0:petCount-1))
+
+  allocate(r8array1(0:petCount-1))
+  allocate(r8array2(0:petCount-1))
+  allocate(r8array3(0:petCount-1))
+
   ! prepare data arrays
 
   iarray1 = localPet
   iarray2 = -1
   iarray3 = -2
+
+  r4array1 = localPet+localPet/100.0_ESMF_KIND_R4
+  r4array2 = -1.1_ESMF_KIND_R4
+  r4array3 = -2.2_ESMF_KIND_R4
+
+  r8array1 = localPet+localPet/100.0_ESMF_KIND_R8
+  r8array2 = -1.1_ESMF_KIND_R8
+  r8array3 = -2.2_ESMF_KIND_R8
 
   !Testing with Integer arguments
   !==============================
@@ -133,11 +148,119 @@ program ESMF_VMAllToAllUTest
   enddo
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+  !Testing with single precision real arguments
+  !============================================
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "AllToAll Test r4array1 -> r4array2"
+  write(failMsg, *) "Did not return ESMF_SUCCESS."
+  call ESMF_VMAllToAll(vm,  &
+      sendData=r4array1, sendCount=1, &
+      recvData=r4array2, recvCount=1, &
+      rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Verify r4array2 data after alltoall
+  write(failMsg, *) "Wrong data."
+  write(name, *) "Verify r4array2 data after alltoall"
+  rc = ESMF_SUCCESS
+  do i=0, petCount-1
+    if (r4array2(i) /= i+i/100.0) then
+      rc = ESMF_FAILURE
+      print *, i, r4array2(i)
+    endif
+  enddo
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "AllToAll Test r4array2 -> r4array3"
+  write(failMsg, *) "Did not return ESMF_SUCCESS."
+  call ESMF_VMAllToAll(vm,  &
+      sendData=r4array2, sendCount=1, &
+      recvData=r4array3, recvCount=1, &
+      rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Verify r4array3 data against r4array1 after alltoallv
+  write(failMsg, *) "Wrong data."
+  write(name, *) "Verify r4array3 data against r4array1 after alltoallv"
+  rc = ESMF_SUCCESS
+  do i=0, petCount-1
+    if (r4array3(i)/=r4array1(i)) then
+      rc = ESMF_FAILURE
+      print *, i, r4array1(i), r4array3(i)
+    endif
+  enddo
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !Testing with double precision real arguments
+  !============================================
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "AllToAll Test r8array1 -> r8array2"
+  write(failMsg, *) "Did not return ESMF_SUCCESS."
+  call ESMF_VMAllToAll(vm,  &
+      sendData=r8array1, sendCount=1, &
+      recvData=r8array2, recvCount=1, &
+      rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Verify r8array2 data after alltoall
+  write(failMsg, *) "Wrong data."
+  write(name, *) "Verify r8array2 data after alltoall"
+  rc = ESMF_SUCCESS
+  do i=0, petCount-1
+    if (r8array2(i) /= i+i/100.0) then
+      rc = ESMF_FAILURE
+      print *, i, r8array2(i)
+    endif
+  enddo
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "AllToAll Test r8array2 -> r8array3"
+  write(failMsg, *) "Did not return ESMF_SUCCESS."
+  call ESMF_VMAllToAll(vm,  &
+      sendData=r8array2, sendCount=1, &
+      recvData=r8array3, recvCount=1, &
+      rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  ! Verify r8array3 data against r8array1 after alltoallv
+  write(failMsg, *) "Wrong data."
+  write(name, *) "Verify r8array3 data against r8array1 after alltoallv"
+  rc = ESMF_SUCCESS
+  do i=0, petCount-1
+    if (r8array3(i)/=r8array1(i)) then
+      rc = ESMF_FAILURE
+      print *, i, r8array1(i), r8array3(i)
+    endif
+  enddo
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
   call ESMF_TestEnd(result, ESMF_SRCLINE)
 
   ! garbage collection
   deallocate(iarray1)
   deallocate(iarray2)
   deallocate(iarray3)
+
+  deallocate(r4array1)
+  deallocate(r4array2)
+  deallocate(r4array3)
+
+  deallocate(r8array1)
+  deallocate(r8array2)
+  deallocate(r8array3)
 
 end program ESMF_VMAllToAllUTest
