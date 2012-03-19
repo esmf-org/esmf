@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.40 2012/03/16 18:03:37 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.41 2012/03/19 17:09:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -762,7 +762,7 @@ contains
 
     xgrid = ESMF_XGridCreate((/make_grid_sph(4,2,1.,1.,0.,0.,rc=localrc), make_grid_sph(4,2,0.5,1.,3.,0.3,rc=localrc), &
                                make_grid_sph(4,4,1.,1.,-2.,-2.,rc=localrc)/), &
-      (/make_grid(8,8,0.7,0.7,0.,0.,rc=localrc), make_grid(8,8,0.5,0.7,0.9,3.6,rc=localrc)/), &
+      (/make_grid_sph(8,8,0.7,0.7,0.,0.,rc=localrc), make_grid_sph(8,8,0.5,0.7,0.9,3.6,rc=localrc)/), &
       sideAToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       sideBToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       rc=localrc)
