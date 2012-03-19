@@ -1,4 +1,4 @@
-! $Id: ESMF_VMAllToAllUTest.F90,v 1.2 2012/03/17 00:44:50 w6ws Exp $
+! $Id: ESMF_VMAllToAllUTest.F90,v 1.3 2012/03/19 15:00:51 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_VMAllToAllUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMAllToAllUTest.F90,v 1.2 2012/03/17 00:44:50 w6ws Exp $'
+    '$Id: ESMF_VMAllToAllUTest.F90,v 1.3 2012/03/19 15:00:51 w6ws Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -167,7 +167,7 @@ program ESMF_VMAllToAllUTest
   write(name, *) "Verify r4array2 data after alltoall"
   rc = ESMF_SUCCESS
   do i=0, petCount-1
-    if (r4array2(i) /= i+i/100.0) then
+    if (r4array2(i) /= i+i/100.0_ESMF_KIND_R4) then
       rc = ESMF_FAILURE
       print *, i, r4array2(i)
     endif
@@ -217,7 +217,7 @@ program ESMF_VMAllToAllUTest
   write(name, *) "Verify r8array2 data after alltoall"
   rc = ESMF_SUCCESS
   do i=0, petCount-1
-    if (r8array2(i) /= i+i/100.0) then
+    if (r8array2(i) /= i+i/100.0_ESMF_KIND_R8) then
       rc = ESMF_FAILURE
       print *, i, r8array2(i)
     endif
