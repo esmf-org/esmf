@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.48 2012/03/15 19:27:48 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.49 2012/03/19 18:05:13 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -79,7 +79,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.48 2012/03/15 19:27:48 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.49 2012/03/19 18:05:13 feiliu Exp $'
 
 !==============================================================================
 !
@@ -251,39 +251,66 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
 
 !
 ! !DESCRIPTION:
-!      Create an XGrid from user input: the list of Grids on side A and side B, 
+!      Create an XGrid from user supplied input: the list of Grids on side A and side B, 
 !  and other optional arguments. By default, XGrid is created online with user supplied
-!  list of Grids, i.e. the sparse matrix matmul coefficients are internally computed.
+!  list of Grids, i.e. the sparse matrix multiply coefficients are internally computed.
+!  Grid objects in {\tt sideA} and {\tt sideB} arguments must have coordinates defined for
+!  the corners of a Grid cell. XGrid created online can be potentially memory expensive, one
+!  way to save memory is to destroy XGrid after necesary routehandles are computed from
+!  {\tt ESMF\_FieldRegridStore} method.
+! 
 !  User can also turn on offline creation of XGrid in which case, sparse matrix matmul
-!  coefficients are supplied by the user. 
+!  coefficients need to be supplied by the user. 
+!
+!  Masking is not fully tested and is not supported right now. Specifying {\tt sideAMaskValues}
+!  or {\tt sideBMaskValues} will result in an error returned from this method. 
+!
+!  It is erroneous to specify identical Grid object in {\tt sideA} and
+!  {\tt sideA} arguments.
+!
+!  This call is {\em collective} across the current VM.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [sideA]
-!           2D Grids on side A
+!           Parametric 2D Grids on side A, for example, these Grids can be either Cartesian 2D or Spherical.
 !     \item [sideB]
-!           2D Grids on side B
+!           Parametric 2D Grids on side B, for example, these Grids can be either Cartesian 2D or Spherical.
 !     \item [{[sideAToXGridScheme]}]
-!           Specify the geometry and unit of metric of the Grids on A side. 
+!           Specify the geometry and unit of metric of the Grids on A side in relation to XGrid created. 
+!           Possible values are
+!                            {\tt ESMF\_REGRID\_SCHEME\_FULL3D},
+!                            {\tt ESMF\_REGRID\_SCHEME\_NATIVE},
+!                            {\tt ESMF\_REGRID\_SCHEME\_REGION3D},
+!                            {\tt ESMF\_REGRID\_SCHEME\_FULLTOREG3D},
+!                            {\tt ESMF\_REGRID\_SCHEME\_REGTOFULL3D}.
 !     \item [{[sideBToXGridScheme]}]
-!           Specify the geometry and unit of metric of the Grids on B side. 
+!           Specify the geometry and unit of metric of the Grids on B side in relation to XGrid created. 
+!           Possible values are
+!                            {\tt ESMF\_REGRID\_SCHEME\_FULL3D},
+!                            {\tt ESMF\_REGRID\_SCHEME\_NATIVE},
+!                            {\tt ESMF\_REGRID\_SCHEME\_REGION3D},
+!                            {\tt ESMF\_REGRID\_SCHEME\_FULLTOREG3D},
+!                            {\tt ESMF\_REGRID\_SCHEME\_REGTOFULL3D}.
 !     \item [{[sideAPriority]}]
-!           Priority array of Grids on sideA during overlay generation.
+!           Priority array of Grids on {\tt sideA} during overlay generation.
 !           The priority arrays describe the priorities of Grids at the overlapping region.
-!           Flux contributions at the overlapping region are computed from the Grid of the
-!           highest priority.
+!           Flux contributions at the overlapping region are computed in the order from the Grid of the
+!           highest priority to the lowest priority.
 !     \item [{[sideBPriority]}]
-!           priority of Grids on sideB during overlay generation
+!           Priority of Grids on {\tt sideB} during overlay generation
 !           The priority arrays describe the priorities of Grids at the overlapping region.
-!           Flux contributions at the overlapping region are computed from the Grid of the
-!           highest priority.
+!           Flux contributions at the overlapping region are computed in the order from the Grid of the
+!           highest priority to the lowest priority.
 !     \item [{[storeOverlay]}]
-!           Setting the storeOverlay optional argument to .false. (default) 
-!           allows a user to bypass internal calculation of the fully 
-!           unstructured grid and its storage.
+!           Setting the {\tt storeOverlay} optional argument to .false. (default) 
+!           allows a user to bypass storage of the ESMF_Mesh used to represent the XGrid.
+!           Only a {\tt ESMF\_DistGrid} is stored to allow Field to be built on the XGrid.
+!           If the temporary mesh object is of interest, {\tt storeOverlay} can be set to .true.
+!           so a user can retrieve it for future use.
 !     \item [{[offline]}]
-!           Turn on offline XGrid creation and will use user supplied Sparse
-!           MatMul, area, centroid information.
+!           Turn on offline XGrid creation and use user supplied Sparse
+!           Matrix Multiply coefficients and index pairs, area, and centroid information.
 !     \item [{[sparseMatA2X]}]
 !           indexlist from a Grid index space on side A to xgrid index space;
 !           indexFactorlist from a Grid index space on side A to xgrid index space.
@@ -429,6 +456,13 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
 
     ! Initialize return code   
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    if(present(sideAMaskValues) .or. present(sideBMaskValues)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
+         msg="- masking is not fully tested and supported with XGrid", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
 
     ! check init status of input Grids
     ngrid_a = size(sideA, 1)
