@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldUTest.C,v 1.22 2012/03/16 16:39:09 rokuingh Exp $
+// $Id: ESMC_FieldUTest.C,v 1.23 2012/03/19 14:20:43 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -159,13 +159,14 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
  
-  // TODO: This interface fails when using the NULL (optional) for gridToFieldMap
-  //       and the ungriddedXBounds 
+  // TODO: This interface fails when using the NULL (optional) for 
+  //       gridToFieldMap and the ungriddedXBounds 
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Create ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   field = ESMC_FieldCreateMeshArraySpec(mesh, arrayspec,
+    //NULL, NULL, NULL, "field1", &rc);
     &i_gridToFieldMap, &i_ungriddedLBound,
     &i_ungriddedUBound, "field1", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
