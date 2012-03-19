@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.47 2012/03/16 16:39:05 rokuingh Exp $
+// $Id: ESMC_Field.h,v 1.48 2012/03/19 14:19:15 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -196,10 +196,10 @@ ESMC_Field ESMC_FieldCreateGridTypeKind(
 //EOP
 //-----------------------------------------------------------------------------
 
-  // TODO: This interface fails when using the NULL (optional) for gridToFieldMap
-  //       and the ungriddedXBounds 
+  // TODO: This interface fails when using the NULL (optional) for 
+  //       gridToFieldMap and the ungriddedXBounds 
 //-----------------------------------------------------------------------------
-//BOPI
+//BOP
 // !IROUTINE: ESMC_FieldCreateMeshArraySpec - Create a Field from Mesh and ArraySpec
 //
 // !INTERFACE:
@@ -264,7 +264,7 @@ ESMC_Field ESMC_FieldCreateMeshArraySpec(
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
-//EOPI
+//EOP
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
