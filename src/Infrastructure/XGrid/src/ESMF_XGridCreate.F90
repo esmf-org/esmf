@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.50 2012/03/19 22:24:41 svasquez Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.51 2012/03/20 13:54:29 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -79,7 +79,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.50 2012/03/19 22:24:41 svasquez Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.51 2012/03/20 13:54:29 feiliu Exp $'
 
 !==============================================================================
 !
@@ -263,7 +263,7 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
 !  coefficients need to be supplied by the user. 
 !
 !  Masking is not fully tested and is not supported right now. Specifying {\tt sideAMaskValues}
-!  or {\tt sideBMaskValues} will result in an error returned from this method. 
+!  or {\tt sideBMaskValues} will result in an error returned from this method for online XGrid creation. 
 !
 !  It is erroneous to specify identical Grid object in {\tt sideA} and
 !  {\tt sideA} arguments.
@@ -304,7 +304,7 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
 !           highest priority to the lowest priority.
 !     \item [{[storeOverlay]}]
 !           Setting the {\tt storeOverlay} optional argument to .false. (default) 
-!           allows a user to bypass storage of the ESMF\_Mesh used to represent the XGrid.
+!           allows a user to bypass storage of the {\tt ESMF\_Mesh} used to represent the XGrid.
 !           Only a {\tt ESMF\_DistGrid} is stored to allow Field to be built on the XGrid.
 !           If the temporary mesh object is of interest, {\tt storeOverlay} can be set to .true.
 !           so a user can retrieve it for future use.
