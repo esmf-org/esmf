@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridGetUTest.F90,v 1.1 2012/03/20 23:07:38 rokuingh Exp $
+! $Id: ESMF_AttributeGridGetUTest.F90,v 1.2 2012/03/20 23:56:10 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.1 2012/03/20 23:07:38 rokuingh Exp $'
+  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.2 2012/03/20 23:56:10 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -230,6 +230,7 @@ print *, "arbDimCount= ", outI4
   !EX_UTest
   ! this should fail because arbIndexCount is not available for non-arbitrarily
   !  distributed grids
+  inputList(:) = ''
   inputList(1) = 'localde:0'
   call ESMF_AttributeGet(grid, name="ESMF:arbIndexCount", &
                          value=outI4, inputList=inputList, rc=rc)
@@ -351,6 +352,7 @@ print *, "gridAlign=", gridAlign
   !------------------------------------------------------------------------
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'tile:1'
   call ESMF_AttributeGet(grid, name="ESMF:minIndex", &
                          valueList=minIndex, inputList=inputList, rc=rc)
@@ -361,6 +363,7 @@ print *, "gridAlign=", gridAlign
 print *, "minIndex=", minIndex
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'tile:1'
   call ESMF_AttributeGet(grid, name="ESMF:maxIndex", &
                          valueList=maxIndex, inputList=inputList, rc=rc)
@@ -371,6 +374,7 @@ print *, "minIndex=", minIndex
 print *, "maxIndex=", maxIndex
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   call ESMF_AttributeGet(grid, name="ESMF:exclusiveLBound", &
                          valueList=exclusiveLBound, inputList=inputList, rc=rc)
@@ -381,6 +385,7 @@ print *, "maxIndex=", maxIndex
 print *, "exclusiveLBound=", exclusiveLBound
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(2) = 'coorddim:1'
   call ESMF_AttributeGet(grid, name="ESMF:exclusiveLBound", &
@@ -392,6 +397,7 @@ print *, "exclusiveLBound=", exclusiveLBound
 print *, "exclusiveLBound=", exclusiveLBound
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
   inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
@@ -404,6 +410,7 @@ print *, "exclusiveLBound=", exclusiveLBound
 print *, "exclusiveLBound=", exclusiveLBound
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   call ESMF_AttributeGet(grid, name="ESMF:exclusiveUBound", &
                          valueList=exclusiveUBound, inputList=inputList, rc=rc)
@@ -414,6 +421,7 @@ print *, "exclusiveLBound=", exclusiveLBound
 print *, "exclusiveUBound=", exclusiveUBound
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(1) = 'coorddim:1'
   call ESMF_AttributeGet(grid, name="ESMF:exclusiveUBound", &
@@ -425,6 +433,7 @@ print *, "exclusiveUBound=", exclusiveUBound
 print *, "exclusiveUBound=", exclusiveUBound
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
   inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
@@ -437,6 +446,7 @@ print *, "exclusiveUBound=", exclusiveUBound
 print *, "exclusiveUBound=", exclusiveUBound
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   call ESMF_AttributeGet(grid, name="ESMF:exclusiveCount", &
                          valueList=exclusiveCount, inputList=inputList, rc=rc)
@@ -447,6 +457,7 @@ print *, "exclusiveUBound=", exclusiveUBound
 print *, "exclusiveCount=", exclusiveCount
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(2) = 'coorddim:1'
   call ESMF_AttributeGet(grid, name="ESMF:exclusiveCount", &
@@ -458,6 +469,7 @@ print *, "exclusiveCount=", exclusiveCount
 print *, "exclusiveCount=", exclusiveCount
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
   inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
@@ -470,6 +482,7 @@ print *, "exclusiveCount=", exclusiveCount
 print *, "exclusiveCount=", exclusiveCount
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   call ESMF_AttributeGet(grid, name="ESMF:computationalLBound", &
                          valueList=computationalLBound, inputList=inputList, rc=rc)
@@ -480,6 +493,7 @@ print *, "exclusiveCount=", exclusiveCount
 print *, "computationalLBound=", computationalLBound
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(2) = 'coorddim:1'
   call ESMF_AttributeGet(grid, name="ESMF:computationalLBound", &
@@ -491,6 +505,7 @@ print *, "computationalLBound=", computationalLBound
 print *, "computationalLBound=", computationalLBound
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
   inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
@@ -503,6 +518,7 @@ print *, "computationalLBound=", computationalLBound
 print *, "computationalLBound=", computationalLBound
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   call ESMF_AttributeGet(grid, name="ESMF:computationalUBound", &
                          valueList=computationalUBound, inputList=inputList, rc=rc)
@@ -513,6 +529,7 @@ print *, "computationalLBound=", computationalLBound
 print *, "computationalUBound=", computationalUBound
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(1) = 'coorddim:1'
   call ESMF_AttributeGet(grid, name="ESMF:computationalUBound", &
@@ -524,6 +541,7 @@ print *, "computationalUBound=", computationalUBound
 print *, "computationalUBound=", computationalUBound
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
   inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
@@ -536,6 +554,7 @@ print *, "computationalUBound=", computationalUBound
 print *, "computationalUBound=", computationalUBound
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   call ESMF_AttributeGet(grid, name="ESMF:computationalCount", &
                          valueList=computationalCount, inputList=inputList, rc=rc)
@@ -546,6 +565,7 @@ print *, "computationalUBound=", computationalUBound
 print *, "computationalCount=", computationalCount
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(2) = 'coorddim:1'
   call ESMF_AttributeGet(grid, name="ESMF:computationalCount", &
@@ -557,6 +577,7 @@ print *, "computationalCount=", computationalCount
 print *, "computationalCount=", computationalCount
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
   inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
@@ -569,6 +590,7 @@ print *, "computationalCount=", computationalCount
 print *, "computationalCount=", computationalCount
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(2) = 'coorddim:1'
   call ESMF_AttributeGet(grid, name="ESMF:totalLBound", &
@@ -580,6 +602,7 @@ print *, "computationalCount=", computationalCount
 print *, "totalLBound=", totalLBound
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
   inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
@@ -592,6 +615,7 @@ print *, "totalLBound=", totalLBound
 print *, "totalLBound=", totalLBound
   
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(1) = 'coorddim:1'
   call ESMF_AttributeGet(grid, name="ESMF:totalUBound", &
@@ -603,6 +627,7 @@ print *, "totalLBound=", totalLBound
 print *, "totalUBound=", totalUBound
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
   inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
@@ -616,6 +641,7 @@ print *, "totalUBound=", totalUBound
   
   
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(2) = 'coorddim:1'                                              
   call ESMF_AttributeGet(grid, name="ESMF:totalCount", &
@@ -627,6 +653,7 @@ print *, "totalUBound=", totalUBound
 print *, "totalCount=", totalCount
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
   inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
@@ -639,6 +666,7 @@ print *, "totalCount=", totalCount
 print *, "totalCount=", totalCount
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   call ESMF_AttributeGet(grid, name="ESMF:isLBound", &
                          valueList=isLBound, inputList=inputList, rc=rc)
@@ -649,6 +677,7 @@ print *, "totalCount=", totalCount
 print *, "isLBound=", isLBound
 
   !EX_UTest
+  inputList(:) = ''
   inputList(1) = 'localDe:0'
   call ESMF_AttributeGet(grid, name="ESMF:isUBound", &
                          valueList=isUBound, inputList=inputList, rc=rc)
