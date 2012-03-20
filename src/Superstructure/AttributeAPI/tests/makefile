@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2011/07/20 20:33:37 rokuingh Exp $ 
+# $Id: makefile,v 1.15 2012/03/20 23:06:40 rokuingh Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -6,14 +6,15 @@ run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Superstructure/AttributeAPI/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
+TESTS_BUILD  =  $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeABundleUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeCplCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeDistGridUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeFBundleUTest \
-        $(ESMF_TESTDIR)/ESMF_AttributeFieldUTest \
+		$(ESMF_TESTDIR)/ESMF_AttributeFieldUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeGridCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeGridUTest \
+		$(ESMF_TESTDIR)/ESMF_AttributeGridGetUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeStateUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdateUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdate2UTest \
@@ -22,7 +23,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
 		$(ESMF_TESTDIR)/ESMF_AttReadGridCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttReadFieldUTest
 
-TESTS_RUN     = RUN_ESMF_AttributeArrayUTest \
+TESTS_RUN  =    RUN_ESMF_AttributeArrayUTest \
 		RUN_ESMF_AttributeABundleUTest \
 		RUN_ESMF_AttributeCplCompUTest \
 		RUN_ESMF_AttributeDistGridUTest \
@@ -30,6 +31,7 @@ TESTS_RUN     = RUN_ESMF_AttributeArrayUTest \
 		RUN_ESMF_AttributeFBundleUTest \
 		RUN_ESMF_AttributeGridCompUTest \
 		RUN_ESMF_AttributeGridUTest \
+		RUN_ESMF_AttributeGridGetUTest \
 		RUN_ESMF_AttributeStateUTest \
 		RUN_ESMF_AttributeUpdateUTest \
 		RUN_ESMF_AttributeUpdateRemoveOnlyUTest \
@@ -39,13 +41,15 @@ TESTS_RUN     = RUN_ESMF_AttributeArrayUTest \
 		RUN_ESMF_AttReadGridCompUTest \
 		RUN_ESMF_AttReadFieldUTest
 
-TESTS_RUN_UNI = RUN_ESMF_AttributeArrayUTestUNI \
+TESTS_RUN_UNI = RUN_ESMF_AttributeGridGetUTestUNI \
+		RUN_ESMF_AttributeArrayUTestUNI \
 		RUN_ESMF_AttributeABundleUTestUNI \
 		RUN_ESMF_AttributeCplCompUTestUNI \
 		RUN_ESMF_AttributeDistGridUTestUNI \
 		RUN_ESMF_AttributeFieldUTestUNI \
 		RUN_ESMF_AttributeFBundleUTestUNI \
 		RUN_ESMF_AttributeGridCompUTestUNI \
+		RUN_ESMF_AttributeGridGetUTestUNI \
 		RUN_ESMF_AttributeGridUTestUNI \
 		RUN_ESMF_AttributeStateUTestUNI \
 		RUN_ESMF_AttributeXMLUTestUNI \
@@ -174,6 +178,12 @@ RUN_ESMF_AttributeXMLUTestUNI:
 	$(MAKE) TNAME=AttributeXML NP=1 ftest
 
 # --- Grid
+
+RUN_ESMF_AttributeGridGetUTest:
+	$(MAKE) TNAME=AttributeGridGet NP=4 ftest
+
+RUN_ESMF_AttributeGridGetUTestUNI:
+	$(MAKE) TNAME=AttributeGridGet NP=1 ftest
 
 RUN_ESMF_AttributeGridUTest:
 	$(MAKE) TNAME=AttributeGrid NP=4 ftest

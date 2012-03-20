@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.257 2012/03/15 23:00:49 svasquez Exp $
+! $Id: ESMF_Grid.F90,v 1.258 2012/03/20 23:06:32 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -189,7 +189,7 @@
 integer,parameter :: ESMF_DIM_ARB = -1
 
 !------------------------------------------------------------------------------
-! ! ESMF_GridStatus_Flag
+! ! ESMF_GridMatch_Flag
 !
 !------------------------------------------------------------------------------
   type ESMF_GridMatch_Flag
@@ -239,6 +239,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !
 ! - ESMF-public methods:
 
+  public assignment(=)
   public operator(==)
   public operator(/=)
   public operator(>)
@@ -301,7 +302,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.257 2012/03/15 23:00:49 svasquez Exp $'
+      '$Id: ESMF_Grid.F90,v 1.258 2012/03/20 23:06:32 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -646,6 +647,20 @@ interface ESMF_GridSetCommitShapeTile
 !EOPI 
 end interface
 !==============================================================================
+!BOPI
+! !INTERFACE:
+      interface assignment (=)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridStatusAssignment
+
+! !DESCRIPTION:
+!     This interface overloads the assignment operator for ESMF_GridStatus_Flag
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
       interface operator (==)
@@ -1071,6 +1086,8 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 
 
 !-------------------------------------------------------------------------------
@@ -4218,6 +4235,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: i, deCount, distDimCount, arbDim
     type(ESMF_DELayout) :: delayout
 
+    character(ESMF_MAXSTR), dimension(2) :: callbacktest
+    integer, dimension(2) :: callbacktest_lens
+
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -4309,6 +4329,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       indexflag, intDestroyDistGrid, intDestroyDELayout, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+#if 0
+    ! set Attributes for some of the basic information    
+		if (present(coordSys)) then
+      call c_esmc_attributesetvalue(grid%this, 'coordSys', ESMF_TYPEKIND_I4, &
+                                    1, coordSys%coordsys, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+		if (present(coordTypeKind)) then
+			callbacktest(1) = "CALLBACKESMF_GridGet"
+			callbacktest_lens(1)=8
+			callbacktest_lens(2)=12
+			
+      call c_esmc_attributesetcharlist(grid%this, 'coordTypeKind', ESMF_TYPEKIND_CHARACTER, &
+                             2, callbacktest, callbacktest_lens, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+		if (present(indexflag)) then
+      call c_esmc_attributesetvalue(grid%this, 'indexflag', ESMF_TYPEKIND_I4, &
+                             1, indexflag%i_type, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+#endif
 
     ! Deallocate helper variables
     call ESMF_InterfaceIntDestroy(gridEdgeLWidthArg, rc=localrc)
@@ -21401,6 +21449,38 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
+
+!-------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridStatusAssignment"
+!BOPI
+! !IROUTINE: ESMF_GridStatusAssignment - Assign the string value
+!
+! !INTERFACE:
+  ! Private name; call using assignment(=)
+  subroutine ESMF_GridStatusAssignment(string, gsval)
+
+! !ARGUMENTS:
+    character(len=*), intent(out) :: string
+    type(ESMF_GridStatus_Flag), intent(in) :: gsval
+
+! !DESCRIPTION:
+!   Assign the string value of an ESMF_GridStatus_Flag 
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    if (gsval == ESMF_GRIDSTATUS_INVALID) then
+      write(string,'(a)') 'ESMF_GRIDSTATUS_INVALID'
+    elseif (gsval == ESMF_GRIDSTATUS_UNINIT) then
+      write(string,'(a)') 'ESMF_GRIDSTATUS_UNINIT'
+    elseif (gsval == ESMF_GRIDSTATUS_EMPTY) then
+      write(string,'(a)') 'ESMF_GRIDSTATUS_EMPTY'
+    elseif (gsval == ESMF_GRIDSTATUS_COMPLETE) then
+      write(string,'(a)') 'ESMF_GRIDSTATUS_COMPLETE'
+    endif
+
+  end subroutine ESMF_GridStatusAssignment
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.144 2012/02/22 21:55:55 w6ws Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.145 2012/03/20 23:06:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -447,7 +447,7 @@
 
       type ESMF_Index_Flag
       sequence
-      private
+      !private
         integer :: i_type
       end type
 
@@ -849,6 +849,7 @@ end interface
 interface assignment (=)
   module procedure ESMF_bfas
   module procedure ESMF_dkas
+  module procedure ESMF_dkas_string
   module procedure ESMF_tfas
   module procedure ESMF_tfas_v
   module procedure ESMF_tfas2
@@ -856,6 +857,7 @@ interface assignment (=)
   module procedure ESMF_ptas
   module procedure ESMF_ptas2
   module procedure ESMF_ioas
+  module procedure ESMF_ifas_string
 end interface  
 
 
@@ -1023,6 +1025,38 @@ subroutine ESMF_dkas(intval, dkval)
  type(ESMF_TypeKind_Flag), intent(in) :: dkval
 
  intval = dkval%dkind
+end subroutine
+
+!------------------------------------------------------------------------------
+! subroutine to assign string value of an ESMF_TypeKind_Flag
+
+subroutine ESMF_dkas_string(string, dkval)
+ character(len=*), intent(out) :: string
+ type(ESMF_TypeKind_Flag), intent(in) :: dkval
+
+#ifndef ESMF_NO_INTEGER_1_BYTE 
+ if (dkval == ESMF_TYPEKIND_I1) then
+   write(string,'(a)') 'ESMF_TYPEKIND_I1'
+ endif
+#endif
+#ifndef ESMF_NO_INTEGER_2_BYTE 
+ if (dkval == ESMF_TYPEKIND_I2) then
+   write(string,'(a)') 'ESMF_TYPEKIND_I2'
+ endif
+#endif
+ if (dkval == ESMF_TYPEKIND_I4) then
+   write(string,'(a)') 'ESMF_TYPEKIND_I4'
+ elseif (dkval == ESMF_TYPEKIND_I8) then
+   write(string,'(a)') 'ESMF_TYPEKIND_I8'
+ elseif (dkval == ESMF_TYPEKIND_R4) then
+   write(string,'(a)') 'ESMF_TYPEKIND_R4'
+ elseif (dkval == ESMF_TYPEKIND_I8) then
+   write(string,'(a)') 'ESMF_TYPEKIND_I8'
+ elseif (dkval == ESMF_TYPEKIND_C8) then
+   write(string,'(a)') 'ESMF_TYPEKIND_C8'
+ elseif (dkval == ESMF_TYPEKIND_C16) then
+   write(string,'(a)') 'ESMF_TYPEKIND_C16'
+ endif
 end subroutine
 
 
@@ -1204,6 +1238,23 @@ function ESMF_ifeq(if1, if2)
 
   ESMF_ifeq = (if1%i_type == if2%i_type)
 end function
+
+!------------------------------------------------------------------------------
+! subroutine to assign string value of an ESMF_Index_Flag
+
+subroutine ESMF_ifas_string(string, ifval)
+ character(len=*), intent(out) :: string
+ type(ESMF_Index_Flag), intent(in) :: ifval
+
+ if (ifval == ESMF_INDEX_DELOCAL) then
+   write(string,'(a)') 'ESMF_INDEX_DELOCAL'
+ elseif (ifval == ESMF_INDEX_GLOBAL) then
+   write(string,'(a)') 'ESMF_INDEX_GLOBAL'
+ elseif (ifval == ESMF_INDEX_USER) then
+   write(string,'(a)') 'ESMF_INDEX_USER'
+ endif
+
+end subroutine
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_InquireFlag types
