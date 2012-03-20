@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.51 2012/03/20 13:54:29 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.52 2012/03/20 21:01:41 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -79,7 +79,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.51 2012/03/20 13:54:29 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.52 2012/03/20 21:01:41 feiliu Exp $'
 
 !==============================================================================
 !
@@ -253,20 +253,27 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
 ! !DESCRIPTION:
 !      Create an XGrid from user supplied input: the list of Grids on side A and side B, 
 !  and other optional arguments. By default, XGrid is created online with user supplied
-!  list of Grids, i.e. the sparse matrix multiply coefficients are internally computed.
+!  list of Grids. Sparse matrix multiply coefficients are internally computed and
+!  uniquely determined by the Grids provided in {\tt sideA} and {\tt sideB}. User can supply
+!  a single {\tt ESMF\_Grid} or an array of {\tt ESMF\_Grid} on either side of the 
+!  {\tt ESMF\_XGrid}. For an array of {\tt ESMF\_Grid} in {\tt sideA} or {\tt sideB},
+!  a merging process concatenates all the {\tt ESMF\_Grid}s into a super mesh represented
+!  by {\tt ESMF\_Mesh}. The super mesh is then used to compute the XGrid. 
 !  Grid objects in {\tt sideA} and {\tt sideB} arguments must have coordinates defined for
-!  the corners of a Grid cell. XGrid created online can be potentially memory expensive, one
-!  way to save memory is to destroy XGrid after necesary routehandles are computed from
+!  the corners of a Grid cell. XGrid created online can be potentially memory expensive, 
+!  memory can be released by destroying XGrid after necesary routehandles are computed from
 !  {\tt ESMF\_FieldRegridStore} method.
 ! 
-!  User can also turn on offline creation of XGrid in which case, sparse matrix matmul
+!  User can also turn on offline creation of XGrid. In this case, sparse matrix matmul
 !  coefficients need to be supplied by the user. 
 !
 !  Masking is not fully tested and is not supported right now. Specifying {\tt sideAMaskValues}
 !  or {\tt sideBMaskValues} will result in an error returned from this method for online XGrid creation. 
 !
 !  It is erroneous to specify identical Grid object in {\tt sideA} and
-!  {\tt sideA} arguments.
+!  {\tt sideB} arguments. If {\tt sideA} and {\tt sideB} have a single Grid object, then it's erroneous
+!  if the two Grids do not overlap. It is also erroneous to specify Grid object in {\tt sideA} or {\tt sideB} 
+!  that is spatially disjoint from the {\tt ESMF\_XGrid}.  
 !
 !  This call is {\em collective} across the current VM.
 !
