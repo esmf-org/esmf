@@ -1,7 +1,7 @@
-! $Id: ESMF_AttributeInternals.F90,v 1.1 2012/03/20 23:07:37 rokuingh Exp $
+! $Id: ESMF_AttributeInternals.F90,v 1.2 2012/03/21 21:26:52 oehmke Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2011, University Corporation for Atmospheric Research,
+! Copyright 2002-2012, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -31,13 +31,6 @@ module ESMF_AttributeInternalsMod
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include "ESMF.h"
-#include "ESMF_TypeKindMacros.hcppF90"
-#ifndef ESMF_NO_INTEGER_1_BYTE
-#define ESMF_NO_INTEGER_1_BYTE
-#endif
-#ifndef ESMF_NO_INTEGER_2_BYTE
-#define ESMF_NO_INTEGER_2_BYTE
-#endif
 
 !==============================================================================
 !BOPI
@@ -92,7 +85,7 @@ module ESMF_AttributeInternalsMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_AttributeInternals.F90,v 1.1 2012/03/20 23:07:37 rokuingh Exp $'
+               '$Id: ESMF_AttributeInternals.F90,v 1.2 2012/03/21 21:26:52 oehmke Exp $'
 !------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
