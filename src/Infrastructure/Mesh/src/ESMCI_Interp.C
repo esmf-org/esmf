@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.40 2012/03/08 19:41:14 feiliu Exp $
+// $Id: ESMCI_Interp.C,v 1.41 2012/03/21 16:42:07 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.40 2012/03/08 19:41:14 feiliu Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.41 2012/03/21 16:42:07 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -791,9 +791,7 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
       for (int i=0; i<sr.elems.size(); i++) {
         const MeshObj &dst_elem = *sr.elems[i];
         double *dst_frac2=dst_frac2_field->data(dst_elem);
-        if (*dst_frac2 == 0.0) {
-          continue; 
-        }
+        if (*dst_frac2 == 0.0) valid[i] = 0;
       }
     }
 
@@ -952,7 +950,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
       for (int i=0; i<sr.elems.size(); i++) {
         const MeshObj &dst_elem = *sr.elems[i];
         double *dst_frac2=dst_frac2_field->data(dst_elem);
-        if (*dst_frac2 == 0.0) continue; 
+        if (*dst_frac2 == 0.0) valid[i] = 0;
       }
     }
 
