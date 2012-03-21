@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.109 2012/02/22 17:52:38 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.110 2012/03/21 18:03:57 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -51,6 +51,7 @@
       use ESMF_StateTypesMod
       use ESMF_StateMod
       use ESMF_StateContainerMod
+      use ESMF_StateItemMod
       use ESMF_InitMacrosMod
       implicit none
 
@@ -116,7 +117,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.109 2012/02/22 17:52:38 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.110 2012/03/21 18:03:57 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -208,6 +209,13 @@
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
+
+    ! Remove all of the proxy objects in the State so that when
+    ! re-reconciling, any removed items will not get re-proxied.
+    call ESMF_StateZapProxies(state, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+	ESMF_ERR_PASSTHRU, &
+	ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! This turns off the fast option on Regrid; it is working now for
     !  exclusive components, but if there is any reason we should turn
@@ -1266,7 +1274,73 @@ itemloop:  do k=attreconstart, si%theircount
       if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_StateZapEmptyNests
 #endif
-  
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateZapProxies"
+!BOPI
+! !IROUTINE: ESMF_StateZapProxies -- Zap proxies from State
+!
+! !INTERFACE:
+    subroutine ESMF_StateZapProxies(state, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout)         :: state
+      integer,          intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[state]
+!       {\tt ESMF\_State} to clear proxies out of.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+      integer :: localrc, i
+      integer :: memstat
+      type(ESMF_StateClass),    pointer :: stypep
+      type(ESMF_StateItemWrap), pointer :: itemList(:)
+      character(len=ESMF_MAXSTR) :: thisname
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      stypep => state%statep
+
+      itemList => null ()
+      call ESMF_ContainerGet(container=stypep%stateContainer, itemList=itemList, &
+	  rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+	  ESMF_ERR_PASSTHRU, &
+	  ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (associated(itemList)) then
+	do i=1, size(itemList)
+	  if (itemList(i)%si%proxyFlag) then
+	    call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
+	    if (ESMF_LogFoundError(localrc, &
+	        ESMF_ERR_PASSTHRU, &
+	        ESMF_CONTEXT, rcToReturn=rc)) return
+
+            call ESMF_StateRemove (state, itemName=thisname, rc=localrc)
+	    if (ESMF_LogFoundError(localrc, &
+	        ESMF_ERR_PASSTHRU, &
+	        ESMF_CONTEXT, rcToReturn=rc)) return
+	  end if
+	end do
+	deallocate(itemList, stat=memstat)
+	if (ESMF_LogFoundDeallocError(memstat, &
+	    ESMF_ERR_PASSTHRU, &
+	    ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+    end subroutine ESMF_StateZapProxies
+
 end module ESMF_StateReconcileMod
 
 
