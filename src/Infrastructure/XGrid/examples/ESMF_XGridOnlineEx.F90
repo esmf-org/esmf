@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridOnlineEx.F90,v 1.1 2012/03/21 16:08:59 feiliu Exp $
+! $Id: ESMF_XGridOnlineEx.F90,v 1.2 2012/03/21 16:44:55 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -10,16 +10,16 @@
 !
 !==============================================================================
 !
-    program ESMF_XGridEx
+    program ESMF_XGridOnlineEx
 
 !------------------------------------------------------------------------------
-!ESMF_Disable_MULTI_PROC_EXAMPLE        String used by test script to count examples.
+!ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
 !==============================================================================
-! !PROGRAM: ESMF_XGridEx - XGrid Examples
+! !PROGRAM: ESMF_XGridOnlineEx - XGrid Examples
 !
 ! !DESCRIPTION:
 !
-! This program shows examples of XGrid get data pointer methods
+! This program shows examples of XGrid creation and usage
 !-----------------------------------------------------------------------------
 #include "ESMF.h"
     ! ESMF Framework module
@@ -64,7 +64,7 @@
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
 !\subsubsection{Create an XGrid online from user input data then use it for regridding}
-!\label{sec:xgrid:usage:xgrid_createraw}
+!\label{sec:xgrid:usage:xgrid_createonline}
 !
 ! XGrid can be created online from Grids on either side, internally the
 ! weight matrics and index mapping are computed and stored in the XGrid.
@@ -440,8 +440,8 @@
 !-------------------------------------------------------------------------
 
     if (finalrc.EQ.ESMF_SUCCESS) then
-        print *, "PASS: ESMF_XGridEx.F90"
+        print *, "PASS: ESMF_XGridOnlineEx.F90"
     else
-        print *, "FAIL: ESMF_XGridEx.F90"
+        print *, "FAIL: ESMF_XGridOnlineEx.F90"
     end if
-end program ESMF_XGridEx
+end program ESMF_XGridOnlineEx
