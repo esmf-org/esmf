@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_TypeKindMacros.hcppF90,v 1.13 2012/03/20 23:06:35 rokuingh Exp $
+! $Id: ESMF_TypeKindMacros.hcppF90,v 1.14 2012/03/21 21:27:26 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -198,8 +198,9 @@ funcname##Macro(real, R8, userp1, userp2, userp3) @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
 
-! these were removed from the macro above and added the macro below
 #if 0
+! these were removed from the macro above and added the macro below
+
 !funcname##Macro(integer, I4, userp1, userp2, userp3)
 #endif
 
@@ -211,5 +212,5 @@ funcname##Macro(real, R8, userp1, userp2, userp3) @\
  @\
 funcname##BMacro(integer, I4, userp1, userp2, userp3) @\
  @\
-! < end macro - do not edit directly >  @\
+! < end macro - do not edit directly > @\
 !------------------------------------------------------------------------------ @\
