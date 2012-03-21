@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.45 2012/01/06 20:19:22 svasquez Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.46 2012/03/21 18:12:52 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -158,10 +158,14 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     ! Local variables
     integer :: rc
-    type(ESMF_State) :: state1
+    type(ESMF_State) :: state1, state2
     type(ESMF_GridComp) :: comp1, comp2
+    type(ESMF_ArraySpec) :: arrayspec
+    type(ESMF_Array)     :: array1, array1_alternate, array2
+    type(ESMF_DistGrid)  :: distgrid
     type(ESMF_VM) :: vm
     character(len=ESMF_MAXSTR) :: comp1name, comp2name, statename
+    character(len=ESMF_MAXSTR) :: array1name
     logical :: reconcile_needed, recneeded_expected
 
     ! individual test failure message
@@ -769,6 +773,81 @@ program ESMF_StateReconcileUTest
     write(name, *) "Calling StateDestroy"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+
+    !-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
+
+
+    !-------------------------------------------------------------------------
+    ! Simple re-reconcile test section
+    !-------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    state2 = ESMF_StateCreate ()
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling StateCreate for rereconcile tests"
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    rc = ESMF_SUCCESS
+    array1name = 'Array_for_reconciling'
+    if (localPet == 0) then
+      call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, &
+          rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/15,23/), &
+          regDecomp=(/2,2/), rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      array1 = ESMF_ArrayCreate(arrayspec=arrayspec, name=array1name,  &
+          distgrid=distgrid, &
+          indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      call ESMF_StateAdd (state2, (/array1/), rc=rc)
+    end if
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating PET 0 Array for rereconcile tests"
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_StateReconcile (state2, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling initial reconcile for rereconcile tests"
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_StateGet (state2, itemName=array1name,  &
+    	array=array1_alternate, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "PET", localpet, ": Calling StateGet to access proxies"
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    if (localPet == 0) then
+      call ESMF_StateRemove (state2, itemName=array1name, rc=rc)
+    end if
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Removing non-proxy item test"
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_StateReconcile (state2, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Re-reconciling State test"
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    call ESMF_StateGet (state2, itemName=array1name,  &
+        array=array2, rc=rc)
+    write(failMsg, *) "Returned ESMF_SUCCESS by mistake"
+    write(name, *) "Checking for empty State tests"
+    call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 10  continue
