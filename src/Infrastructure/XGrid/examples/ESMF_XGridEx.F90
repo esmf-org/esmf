@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.36 2012/01/06 20:18:34 svasquez Exp $
+! $Id: ESMF_XGridEx.F90,v 1.37 2012/03/21 16:08:59 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -68,10 +68,10 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create an XGrid from user input data then use it for regridding}
+!\subsubsection{Create an XGrid offline from user input data then use it for regridding}
 !\label{sec:xgrid:usage:xgrid_createraw}
 !
-! XGrid can be created from user input data, such as Grids on either side,
+! XGrid can be created offline from user input data, such as Grids on either side,
 ! area and centroid information of XGrid cells, sparse matrix matmul information
 ! such as factorList and factorIndexList. The functionalities provided by the
 ! XGrid object is constrained by the user supplied input during its creation time.
