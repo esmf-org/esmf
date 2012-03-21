@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.92 2012/03/19 20:08:42 oehmke Exp $ 
+# $Id: makefile,v 1.93 2012/03/21 19:48:23 rokuingh Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -105,7 +105,7 @@ RUN_ESMC_FieldUTestUNI:
 	$(MAKE) TNAME=Field NP=1 ctest
 
 RUN_ESMC_FieldRegridUTest:
-	$(MAKE) TNAME=FieldRegrid NP=4 ctest
+	$(MAKE) TNAME=FieldRegrid NP=1 ctest
 
 RUN_ESMC_FieldRegridUTestUNI:
 	$(MAKE) TNAME=FieldRegrid NP=1 ctest
