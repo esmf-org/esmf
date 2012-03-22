@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridOnlineEx.F90,v 1.4 2012/03/22 17:50:32 feiliu Exp $
+! $Id: ESMF_XGridOnlineEx.F90,v 1.5 2012/03/22 21:09:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -58,7 +58,7 @@
     finalrc = ESMF_SUCCESS
 
     write(failMsg, *) "Example failure"
-    write(testname, *) "Example ESMF_FieldArbGridEx"
+    write(testname, *) "Example ESMF_XGridOnlineEx"
 
     call ESMF_Initialize(defaultlogfilename="XGridOnlineEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
