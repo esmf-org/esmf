@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridOnlineEx.F90,v 1.3 2012/03/22 15:56:26 feiliu Exp $
+! $Id: ESMF_XGridOnlineEx.F90,v 1.4 2012/03/22 17:50:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -51,9 +51,14 @@
 
     real(ESMF_KIND_R8), pointer         :: coordX(:,:), coordY(:,:)
 
-    integer :: finalrc
+    integer                             :: finalrc, result
+    character(ESMF_MAXSTR)              :: testname
+    character(ESMF_MAXSTR)              :: failMsg
 !   !Set finalrc to success
     finalrc = ESMF_SUCCESS
+
+    write(failMsg, *) "Example failure"
+    write(testname, *) "Example ESMF_FieldArbGridEx"
 
     call ESMF_Initialize(defaultlogfilename="XGridOnlineEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
@@ -415,6 +420,10 @@
 
     if(localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     print *, "Regridding through XGrid example returned"
+
+    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
+    ! file that the scripts grep for.
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
     call ESMF_Finalize(rc=localrc)
