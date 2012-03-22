@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldUTest.C,v 1.24 2012/03/22 20:26:11 rokuingh Exp $
+// $Id: ESMC_FieldUTest.C,v 1.25 2012/03/22 21:33:18 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -125,7 +125,7 @@ int main(void){
   // Set the arrayspec
   strcpy(name, "ArraySpecSet");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_ArraySpecSet(&arrayspec, 3, ESMC_TYPEKIND_I4);
+  rc = ESMC_ArraySpecSet(&arrayspec, 1, ESMC_TYPEKIND_I4);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
     
@@ -168,9 +168,9 @@ int main(void){
   strcpy(name, "Create ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   field = ESMC_FieldCreateMeshArraySpec(mesh, arrayspec,
-    //NULL, NULL, NULL, "field1", &rc);
-    &i_gridToFieldMap, &i_ungriddedLBound,
-    &i_ungriddedUBound, "field1", &rc);
+    &i_gridToFieldMap,
+    NULL, NULL,
+    "field1", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
