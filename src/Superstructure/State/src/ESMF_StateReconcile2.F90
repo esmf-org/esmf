@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.4 2012/03/16 19:35:20 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.5 2012/03/22 20:20:10 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -11,8 +11,8 @@
 !
 #define ESMF_FILENAME "ESMF_StateReconcile2.F90"
 !
-!     ESMF StateReconcile module
-      module ESMF_StateReconcile2Mod
+! ESMF StateReconcile module
+module ESMF_StateReconcile2Mod
 !
 !==============================================================================
 !
@@ -40,65 +40,66 @@
 !
 !
 ! !USES:
-      use ESMF_BaseMod
-      use ESMF_InitMacrosMod
-      use ESMF_LogErrMod
-      use ESMF_StateMod
-      use ESMF_StateContainerMod
-      use ESMF_StateTypesMod
-      use ESMF_VMMod
-      use ESMF_UtilTypesMod
+  use ESMF_BaseMod
+  use ESMF_InitMacrosMod
+  use ESMF_LogErrMod
+  use ESMF_StateMod
+  use ESMF_StateContainerMod
+  use ESMF_StateItemMod
+  use ESMF_StateTypesMod
+  use ESMF_VMMod
+  use ESMF_UtilTypesMod
 
-      use ESMF_ArrayMod
-      use ESMF_ArrayBundleMod
-      use ESMF_FieldMod
-      use ESMF_FieldBundleMod
-      use ESMF_RHandleMod
+  use ESMF_ArrayMod
+  use ESMF_ArrayBundleMod
+  use ESMF_FieldMod
+  use ESMF_FieldBundleMod
+  use ESMF_RHandleMod
 
-      implicit none
-      private
+  implicit none
+  private
 
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public :: ESMF_StateReconcile2 ! make State consistent for concurrent apps
+  public :: ESMF_StateReconcile2 ! make State consistent for concurrent apps
 
-      ! These are only public for unit testing.  They are not intended
-      ! to be called by ESMF users.
-      public :: ESMF_ReconcileDeserialize, ESMF_ReconcileSerialize
-      public :: ESMF_ReconcileSendItems
+  ! These are only public for unit testing.  They are not intended
+  ! to be called by ESMF users.
+  public :: ESMF_ReconcileDeserialize, ESMF_ReconcileSerialize
+  public :: ESMF_ReconcileSendItems
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile2.F90,v 1.4 2012/03/16 19:35:20 w6ws Exp $'
+  character(*), parameter, private :: version = &
+  '$Id: ESMF_StateReconcile2.F90,v 1.5 2012/03/22 20:20:10 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
 !------------------------------------------------------------------------------
-!     ! ESMF_ItemBuffer
-      type ESMF_ItemBuffer
-        character, pointer :: item_buffer(:) => null ()
-      end type
+! ! ESMF_ItemBuffer
+  type ESMF_ItemBuffer
+    character, pointer :: item_buffer(:) => null ()
+  end type
 
-!     ! ESMF_NeedsBuffer
-      type ESMF_NeedsBuffer
-        logical, pointer :: needs(:) => null ()
-      end type
+! ! ESMF_NeedsBuffer
+  type ESMF_NeedsBuffer
+    logical, pointer :: needs(:) => null ()
+  end type
 
-!     ! ESMF_ReconcileIDInfo
+! ! ESMF_ReconcileIDInfo
 !
-!     ! ID/VMId pair, plus other global PET info
+! ! ID/VMId pair, plus other global PET info
 
-      type ESMF_ReconcileIDInfo
-        integer,         pointer :: id(:) => null ()
-        type(ESMF_VMId), pointer :: vmid(:) => null ()
-        logical,         pointer :: needed(:) => null ()
-        character,       pointer :: item_buffer(:) => null ()
-      end type
+  type ESMF_ReconcileIDInfo
+    integer,         pointer :: id(:) => null ()
+    type(ESMF_VMId), pointer :: vmid(:) => null ()
+    logical,         pointer :: needed(:) => null ()
+    character,       pointer :: item_buffer(:) => null ()
+  end type
 
 !==============================================================================
 ! 
@@ -109,7 +110,7 @@
 
 !==============================================================================
 
-      contains
+contains
 
 !==============================================================================
 
@@ -121,13 +122,13 @@
 ! !IROUTINE: ESMF_StateReconcile -- Reconcile State data across all PETs in a VM
 !
 ! !INTERFACE:
-      subroutine ESMF_StateReconcile2(state, vm, attreconflag, rc)
+  subroutine ESMF_StateReconcile2(state, vm, attreconflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State),            intent(inout)         :: state
-      type(ESMF_VM),               intent(in),  optional :: vm
-      type(ESMF_AttReconcileFlag), intent(in),  optional :: attreconflag
-      integer,                     intent(out), optional :: rc               
+    type(ESMF_State),		 intent(inout)         :: state
+    type(ESMF_VM),		 intent(in),  optional :: vm
+    type(ESMF_AttReconcileFlag), intent(in),  optional :: attreconflag
+    integer,			 intent(out), optional :: rc		   
 !
 !
 ! !DESCRIPTION:
@@ -206,9 +207,9 @@
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-!    if (present(rc)) rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
-    end subroutine ESMF_StateReconcile2
+  end subroutine ESMF_StateReconcile2
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -362,10 +363,12 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 
     ! 5.) Serialized needed objects
 
-send_pet = mypet
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': *** Step 5 - Serialize needs, send PET = ' // iTos (send_pet))
+    ': *** Step 5 - Serialize needs')
     do, i=0, npets-1
+write (6,*) '  PET', mypet, ': needs that PET', i, ' requested are:', recvd_needs_matrix(:,i)
+flush (6)
+      id_info(i)%item_buffer => null ()
       call ESMF_ReconcileSerialize (state, siwrap, &
 	  needs_list=recvd_needs_matrix(:,i), attreconflag=attreconflag,  &
 	  obj_buffer=id_info(i)%item_buffer, rc=localrc)
@@ -380,6 +383,7 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     ': *** Step 6 - Exchange serialized objects')
 
+    items_recv => null ()
     call ESMF_ReconcileSendItems (vm,  &
         id_info=id_info,  &
         recv_items=items_recv,  &
@@ -405,7 +409,7 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 	rcToReturn=rc)) return
 
     do, i=0, npets-1
-      if (size (items_recv(i)%item_buffer) > 0) then
+      if (associated (items_recv(i)%item_buffer)) then
 	call ESMF_ReconcileDeserialize (state, vm,  &
             obj_buffer=items_recv(i)%item_buffer,  &
             vm_ids=id_info(i)%vmid,  &
@@ -455,7 +459,10 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           rcToReturn=rc)) return
     end if
 
+    state%statep%reconcileneededflag = .false.
+
 call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': at the end without crashing!')
+    rc = ESMF_SUCCESS
 
   end subroutine ESMF_StateReconcile_driver
 
@@ -520,7 +527,6 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': at the end without crashing!')
 
 ! Check other PETs contents to see if there are objects this PET needs
 
-    npets = size (id_info)
     call ESMF_VMGet (vm, localPet=mypet, petCount=npets, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
@@ -531,6 +537,8 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': at the end without crashing!')
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
     end if
+
+    ! TODO: Sanity check
 
 ! When 'needed' ID/VMId pairs are found, create a list of 'offering' PETs who can
 ! provide it.
@@ -558,7 +566,10 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 
     ! Go through the list of needed IDs/VMIds and select an offerer for each.
 
-    ! call needs_list_select (needs_list, id_info)
+    call needs_list_select (needs_list, id_info)
+
+    ! TODO: clean up
+    ! deallocate needs_list
 
 do, j=0, npets-1
   if (j == myPet) then
@@ -606,13 +617,15 @@ end do
           needslist_p%offerers(pet_1) = .true.
           needslist_p%position(pet_1) = position
           needslist_p%id = id_1
+          call ESMF_VMIdCreate (needslist_p%vmid)
           needslist_p%vmid = vmid_1
           return
         else
           if (id_1 == needslist_p%id) then
             if (ESMF_VMIdCompare (vmid_1, needslist_p%vmid)) then
               needslist_p%offerers(pet_1) = .true.
-              needslist_p%position(pet_1) = k
+              needslist_p%position(pet_1) = position
+              return
             end if
           end if
         end if
@@ -918,10 +931,30 @@ print *, "deserialization error in default case.  Returning ESMF_RC_INTNRL_INCON
 
     localrc = ESMF_RC_NOT_IMPL
 
+    ! Sanity checks
+
+    if (size (id) /= size (vmid)) then
+      if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, ESMF_ERR_PASSTHRU,  &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+    end if
+
+    if (associated (id_info)) then
+      if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, ESMF_ERR_PASSTHRU,  &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+    end if
+
     call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+
+    if (size (nitems_buf) /= npets) then
+      if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, ESMF_ERR_PASSTHRU,  &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+    end if
 
     ! Broadcast each Id to all the other PETs.  Since the number of items per
     ! PET can vary, use AllToAllV.
@@ -1055,7 +1088,7 @@ print *, 'pet', mypet, ': recv_offset:', recv_offset, ', recv_count =', recv_cou
 #else
 ! AllToAllVVMId version
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': AllToAllVVMIds broadcast')
+    ': AllToAllVVMIds broadcast (using VMAllToAllVVMId)')
     call ESMF_VMAllToAllVVMId (vm,  &
        vmid     , counts_buf_send, displs_buf_send,  &
        vmid_recv, counts_buf_recv, displs_buf_recv,  &
@@ -1333,7 +1366,7 @@ end do
 
 ! Loop over each item
 
-    do, i=1, size (siwrap)
+    do, i=1, nitems
 
       itemtype(i) = siwrap(i)%si%otype%ot
 
@@ -1447,11 +1480,11 @@ end do
       siwrap, nitems_all, rc)
 !
 ! !ARGUMENTS:
-    type (ESMF_State), intent(in)  :: state
-    type (ESMF_VM),    intent(in)  :: vm
-    type (ESMF_StateItemWrap), pointer :: siwrap(:) ! intent(out)
-    integer,           pointer     :: nitems_all(:) ! intent(out)
-    integer,           intent(out) :: rc
+    type (ESMF_State), intent(inout)   :: state
+    type (ESMF_VM),    intent(in)      :: vm
+    type (ESMF_StateItemWrap), pointer :: siwrap(:)     ! intent(out)
+    integer,                   pointer :: nitems_all(:) ! intent(out)
+    integer,           intent(out)     :: rc
 !
 ! !DESCRIPTION:
 !
@@ -1482,19 +1515,26 @@ end do
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
+    ! Brute force removal of all existing proxies from the State
+    ! to handle the re-reconcile case.  If State items were removed
+    ! between reconciles, there should be no proxies for them.
+    !
+    ! TODO: Consider maintaining a flag in the state.  Perform
+    ! a communication step to see if any removals have taken place.
+    ! Conditionally zap the proxies depending on whether it is actually
+    ! needed.
+    call ESMF_ReconcileZapProxies (state, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    ! Obtain local PET item list
     siwrap => null ()
     call ESMF_ContainerGet (state%statep%stateContainer,  &
         itemList=siwrap, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-
-    ! TODO: If this State has been previously reconciled, zap all the
-    ! proxys from the previous reconcile.
-
-    !   0.) Do a communication to see if other PETs have changed
-    !   1.) Search for any proxys and do a ESMF_StateRemove on them
-    !   2.) If proxys were present, redo the ContainerGet
 
     if (associated (siwrap)) then
       nitems_local(1) = size (siwrap)
@@ -1594,7 +1634,11 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
         rcToReturn=rc)) return
 
     do, i=0, npets-1
-      counts_send(i) = size (id_info(i)%item_buffer)
+      if (associated (id_info(i)%item_buffer)) then
+        counts_send(i) = size (id_info(i)%item_buffer)
+      else
+        counts_send(i) = 0
+      end if
     end do
 
     itemcount_local = counts_send(mypet)
@@ -1611,7 +1655,9 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     do, i=0, npets-1
       itemcount = counts_send(i)
       offsets_send(i) = offset_pos
-      buffer_send(offset_pos:offset_pos+itemcount-1) = id_info(i)%item_buffer
+      if (associated (id_info(i)%item_buffer)) then
+        buffer_send(offset_pos:offset_pos+itemcount-1) = id_info(i)%item_buffer
+      end if
       offset_pos = offset_pos + itemcount
     end do
 
@@ -1671,14 +1717,18 @@ print *, ESMF_METHOD, ': PET', mypet, ': serialized buffer sizes',  &
 
     do, i=0, npets-1
       itemcount = counts_recv(i)
-      allocate (  &
-          recv_items(i)%item_buffer(0:itemcount-1),  &
-          stat=memstat)
-      if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
-      offset_pos = offsets_recv(i)
-      recv_items(i)%item_buffer = buffer_recv(offset_pos:offset_pos+itemcount-1)
+      if (itemcount > 0) then
+	allocate (  &
+            recv_items(i)%item_buffer(0:itemcount-1),  &
+            stat=memstat)
+	if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) return
+	offset_pos = offsets_recv(i)
+	recv_items(i)%item_buffer = buffer_recv(offset_pos:offset_pos+itemcount-1)
+      else
+        recv_items(i)%item_buffer => null ()
+      end if
     end do
 
     rc = localrc
@@ -1756,6 +1806,12 @@ print *, ESMF_METHOD, ': error - siwrap ubound =', ubound (siwrap, 1),  &
 ! serialization.
 
     needs_count = count (needs_list)
+    if (needs_count == 0) then
+      obj_buffer => null ()
+      rc = ESMF_SUCCESS
+      return
+    end if
+
 !    allocate (offsets(0:needs_count), stat=memstat)
 !    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
 !	ESMF_CONTEXT,  &
@@ -1771,7 +1827,7 @@ print *, ESMF_METHOD, ': error - siwrap ubound =', ubound (siwrap, 1),  &
       case (1)
         ! Allocate a very small buffer to avoid possible null pointer
         ! references in the serialization routines.
-        allocate (obj_buffer(0:ESMF_SIZEOF_DEFINT), stat=memstat)
+        allocate (obj_buffer(0:ESMF_SIZEOF_DEFINT-1), stat=memstat)
 	if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
@@ -1909,6 +1965,72 @@ print *, "serialization error in default case.  Returning ESMF_RC_INTNRL_INCONS"
     rc = ESMF_SUCCESS
 
   end subroutine ESMF_ReconcileSerialize
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ReconcileZapProxies"
+!BOPI
+! !IROUTINE: ESMF_ReconcileZapProxies -- Zap proxies from State
+!
+! !INTERFACE:
+    subroutine ESMF_ReconcileZapProxies(state, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout)         :: state
+      integer,          intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[state]
+!       {\tt ESMF\_State} to clear proxies out of.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+      integer :: localrc, i
+      integer :: memstat
+      type(ESMF_StateClass),    pointer :: stypep
+      type(ESMF_StateItemWrap), pointer :: itemList(:)
+      character(len=ESMF_MAXSTR) :: thisname
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      stypep => state%statep
+
+      itemList => null ()
+      call ESMF_ContainerGet(container=stypep%stateContainer, itemList=itemList, &
+	  rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+	  ESMF_ERR_PASSTHRU, &
+	  ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (associated(itemList)) then
+	do i=1, size(itemList)
+	  if (itemList(i)%si%proxyFlag) then
+	    call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
+	    if (ESMF_LogFoundError(localrc, &
+	        ESMF_ERR_PASSTHRU, &
+	        ESMF_CONTEXT, rcToReturn=rc)) return
+
+            call ESMF_StateRemove (state, itemName=thisname, rc=localrc)
+	    if (ESMF_LogFoundError(localrc, &
+	        ESMF_ERR_PASSTHRU, &
+	        ESMF_CONTEXT, rcToReturn=rc)) return
+	  end if
+	end do
+	deallocate(itemList, stat=memstat)
+	if (ESMF_LogFoundDeallocError(memstat, &
+	    ESMF_ERR_PASSTHRU, &
+	    ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+    end subroutine ESMF_ReconcileZapProxies
 
 
 !------------------------------------------------------------------------------
