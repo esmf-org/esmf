@@ -1,4 +1,4 @@
-% $Id: XGrid_refdoc.ctex,v 1.7 2012/03/21 16:10:00 feiliu Exp $
+% $Id: XGrid_refdoc.ctex,v 1.8 2012/03/22 16:31:31 feiliu Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -52,12 +52,12 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 %\input{XGrid_usage}
-\input{ESMF_XGridEx_fapi}
 \input{ESMF_XGridOnlineEx_fapi}
+\input{ESMF_XGridEx_fapi}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/XGrid/doc/XGrid_usage}
-\input{../Infrastructure/XGrid/doc/ESMF_XGridEx_fapi}
 \input{../Infrastructure/XGrid/doc/ESMF_XGridOnlineEx_fapi}
+\input{../Infrastructure/XGrid/doc/ESMF_XGridEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
