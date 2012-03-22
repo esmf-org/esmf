@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.145 2012/03/20 23:06:37 rokuingh Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.146 2012/03/22 23:31:37 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -666,7 +666,8 @@
         ESMF_FILEFORMAT_SCRIP = ESMF_FileFormat_Flag(2), &
         ESMF_FILEFORMAT_ESMFMESH = ESMF_FileFormat_Flag(3), &
         ESMF_FILEFORMAT_ESMFGRID = ESMF_FileFormat_Flag(4), &
-        ESMF_FILEFORMAT_UGRID = ESMF_FileFormat_Flag(5)
+        ESMF_FILEFORMAT_UGRID = ESMF_FileFormat_Flag(5), &
+        ESMF_FILEFORMAT_GRIDSPEC = ESMF_FileFormat_Flag(6)
 
 
 !------------------------------------------------------------------------------
@@ -800,7 +801,7 @@
 
       public ESMF_FileFormat_Flag, ESMF_FILEFORMAT_VTK, ESMF_FILEFORMAT_SCRIP, &
 		 ESMF_FILEFORMAT_ESMFMESH, ESMF_FILEFORMAT_ESMFGRID, &
-    	 	ESMF_FILEFORMAT_UGRID
+    	 	ESMF_FILEFORMAT_UGRID, ESMF_FILEFORMAT_GRIDSPEC
 
       
 !  Overloaded = operator functions
