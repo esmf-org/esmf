@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.258 2012/03/20 23:06:32 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.259 2012/03/22 23:30:29 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,6 +49,11 @@
       use ESMF_F90InterfaceMod  ! ESMF F90-C++ interface helper
       use ESMF_ArraySpecMod
       use ESMF_IOScripMod
+      use ESMF_IOGridspecMod
+
+#ifdef ESMF_NETCDF
+      use netcdf
+#endif
 
 !     NEED TO ADD MORE HERE
       implicit none
@@ -265,7 +270,6 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
   public ESMF_GridGetCoord
   public ESMF_GridGetCoordBounds
 
-
 !  public ESMF_GridGetCoordInd ! HOPEFULLY TEMPORARY SEPARATE INTERFACE
   public ESMF_GridGetDecompType
   
@@ -302,7 +306,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.258 2012/03/20 23:06:32 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.259 2012/03/22 23:30:29 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -364,8 +368,7 @@ interface ESMF_GridCreate
       module procedure ESMF_GridCreateFrmDistGrid
       module procedure ESMF_GridCreateFrmDistGridArb
       module procedure ESMF_GridCreateFrmFile
-      module procedure ESMF_GridCreateFrmScripDistGrd
-      module procedure ESMF_GridCreateFrmScripReg
+      module procedure ESMF_GridCreateFrmNCFile
       module procedure ESMF_GridCreateEdgeConnR
       module procedure ESMF_GridCreateEdgeConnI
       module procedure ESMF_GridCreateEdgeConnA      
@@ -625,7 +628,6 @@ interface ESMF_GridSetItem
 !  types of {\tt ESMF\_GridSetItem} functions.   
 !EOPI 
 end interface
-
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
@@ -4972,206 +4974,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end function ESMF_GridCreateFrmFile
 
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateFrmScripDistGrd"
-!BOP
-! !IROUTINE: ESMF_GridCreate - Create a Grid from a SCRIP grid file and a DistGrid
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridCreate()
-  function ESMF_GridCreateFrmScripDistGrd(distgrid, filename, &
-    keywordEnforcer, rc)
-
-! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateFrmScripDistGrd
-!
-! !ARGUMENTS:
- 
-    type(ESMF_DistGrid), intent(in)             :: distgrid
-    character(len=*),    intent(in)             :: filename
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,             intent(out), optional  :: rc
-
-! !DESCRIPTION:
-! This function creates a {\tt ESMF\_Grid} object using the grid definition from
-! a SCRIP grid file. The grid distribution is defined by a DistGrid object. The
-! distrgrid has to match the grid  defined in the file.  This means the distgrid 
-! should consist of one 2D tile with the same size in each dimension as the grid in the file.
-! The grid defined in the file has to be a 2D logically rectangular grid (i.e. {\tt grid\_rank}
-! in the file needs to be 2).
-!
-! This call is {\em collective} across the current VM.
-!
-! The arguments are:
-! \begin{description}
-! \item[distgrid]
-!      {\tt ESMF\_DistGrid} object that describes how the array is decomposed and
-!      distributed over DEs. 
-! \item[filename]
-!     The SCRIP Grid filename.
-! \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!
-!EOP
-
-#ifdef ESMF_NETCDF
-    integer :: ncid
-    integer :: ncStatus
-    integer :: totalpoints,totaldims
-    integer, pointer :: dims(:)
-    integer :: DimId, VarId
-    real(ESMF_KIND_R8),  allocatable:: coordX(:),coordY(:)
-    integer, allocatable:: imask(:), mask2D(:,:)
-    type(ESMF_Grid)  :: grid
-    type(ESMF_Array) :: array
-    real(ESMF_KIND_R8), allocatable :: coord2D(:,:)
-    type(ESMF_VM) :: vm
-    integer :: numDim, minInd(2,1), maxInd(2,1), buf(1)
-    integer :: localrc
-    integer :: PetNo, PetCnt
-
-    ! Initialize return code; assume failure until success is certain
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! get global vm information
-    !
-    call ESMF_VMGetGlobal(vm, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! set up local pet info
-    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! get dimension from distgrid
-    call ESMF_DistGridGet(distgrid, dimCount=numDim, minIndexPTile=minInd,&
-		         maxIndexPTile=maxInd, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (numDim /=2) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_RANK, &
-	  msg="- The distgrid dimCount has to be 2", ESMF_CONTEXT, rcToReturn=rc)
-	return
-    endif
-
-    if (minInd(1,1) /= 1 .and. minInd(2,1) /=1) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_RANK, &
-	  msg="- The minIndex of distgrip has to be 1", ESMF_CONTEXT, rcToReturn=rc)
-	return
-    endif
-
-    if (PetNo == 0) then
-       call ESMF_ScripInq(filename, grid_dims=dims, grid_rank=totaldims, &
-   	  grid_size=totalpoints, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
-
-       ! check if the grid_dim matches with the distgrid dimension
-       if (dims(1) /= maxInd(1,1) .and. dims(2) /= maxInd(2,1) ) then
-	  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
-	   msg="- The grid_dims does not match with distgrid dimension", &
- 	    ESMF_CONTEXT, rcToReturn=rc)
-            return
-       endif
-	
-       ! if grid_rank is not equal to 2, return error 
-       ! Does SCRIP allow 3D datasets?  What will be the format??
-       if (totaldims /= 2) then
-	  call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_RANK,msg="- The grip has to be 2D", &
-	  ESMF_CONTEXT, rcToReturn=rc)
-	  return
-       endif
-
-       ! Get the cell_center lat and lan, if in radians, convert to degree
-       allocate(coordX(totalpoints), coordY(totalpoints))
-       allocate(imask(totalpoints), stat=localrc)
-       if (ESMF_LogFoundAllocError(localrc, msg="Allocating imask", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_ScripGetVar(filename, grid_center_lon=coordX, &	
-          grid_center_lat=coordY, grid_imask=imask,  &
-	  convertToDeg=.TRUE., rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! Create Grid based on the input distgrid
-    grid = ESMF_GridCreate(distgrid=distgrid, &
-		gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
-		indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
-    ! Set coordinate tables 
-    ! Longitude
-    call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-	array = array, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (PetNo == 0) then
-       allocate(coord2D(dims(1),dims(2)))
-       coord2D = RESHAPE(coordX,(/dims(1), dims(2)/))
-    endif
-    call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
-    !print *, "Finish ArrayScatter 1st dim coord"
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! Latitude
-    call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
-	array = array, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
-    if (PetNo == 0) then
-       coord2D = RESHAPE(coordY,(/dims(1), dims(2)/))
-    endif
-    call ESMF_ArrayScatter(array, coord2D, rootPet=0, rc=localrc)
-    !print *, "Finish ArrayScatter 1st dim coord"
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
-    if (PetNo == 0)  deallocate(coord2D, coordX, coordY)
-
-    ! Mask
-    call ESMF_GridAddItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-	itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER,  &
-	itemflag=ESMF_GRIDITEM_MASK, array = array, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (PetNo == 0) then
-       allocate(mask2D(dims(1),dims(2)))
-       mask2D = RESHAPE(imask,(/dims(1), dims(2)/))
-    endif
-    call ESMF_ArrayScatter(array, mask2D, rootPet=0, rc=localrc)
-    !print *, "Finish ArrayScatter 1st dim coord"
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
-    if (PetNo == 0)  deallocate(imask, mask2D)
-    
-    ESMF_GridCreateFrmScripDistGrd = grid
-    if (present(rc)) rc=ESMF_SUCCESS
-    return
-#else
-    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
-#endif
-
-    return
-end function ESMF_GridCreateFrmScripDistGrd
-
-
-
-
-
+!-------------------------------------------------------------------------------------------
 ! Internal subroutine to convert the 2D corner coordinate arrays which contain all the corners
 ! surrounding each center point into a 1D Array without repeats. 
 ! This assumes that all the corners are in the same order around each center
@@ -5438,20 +5241,144 @@ end subroutine convert_corner_arrays_to_1D
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateFrmScripReg"
+#define ESMF_METHOD "ESMF_GridCreateFrmNCFile"
 !BOP
-! !IROUTINE: ESMF_GridCreate - Create a Grid from a SCRIP grid file with a regular distribution
-
+! !IROUTINE: ESMF_GridCreate - Create a Grid from a NetCDF Grid File in either SCRIP
+!  or CF/GridSpec convention
+!
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-  function ESMF_GridCreateFrmScripReg(filename, regDecomp, keywordEnforcer, &
+  function ESMF_GridCreateFrmNCFile(filename, fileFormat, regDecomp, keywordEnforcer, &
+    decompflag, isSphere, addCornerStagger, addMask, varname, rc)
+
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateFrmNCFile
+!
+! !ARGUMENTS:
+! !DESCRIPTION:
+! This function creates a {\tt ESMF\_Grid} object using the grid definition from
+! a grid file in NetCDF that is either in the SCRIP format or in the CF convention. 
+! To specify the distribution, the user passes in an array 
+! ({\tt regDecomp}) specifying the number of DEs to divide each 
+! dimension into. The array {\tt decompflag} indicates how the division into DEs is to
+! occur.  The default is to divide the range as evenly as possible.
+! The grid defined in the file has to be a 2D logically rectangular
+! grid.
+!
+! This call is {\em collective} across the current VM.
+!
+! The arguments are:
+! \begin{description}
+! \item[filename]
+!     The NetCDF Grid filename.
+!\item[fileFormat]
+!     The Grid file format, either ESMF_FILEFORMAT_SCRIP or ESMF_FILEFORMAT_GRIDSPEC
+! \item[regDecomp] 
+!      A 2 element array specifying how the grid is decomposed.
+!      Each entry is the number of decounts for that dimension.
+! \item[{[decompflag]}]
+!      List of decomposition flags indicating how each dimension of the
+!      tile is to be divided between the DEs. The default setting
+!      is {\tt ESMF\_DECOMP\_BALANCED} in all dimensions. Please see
+!      Section~\ref{const:decompflag} for a full description of the 
+!      possible options. 
+! \item[{[isSphere]}]
+!      If .true. is a spherical grid, if .false. is regional. Defaults to .true.
+! \item[{[addCornerStagger]}]
+!      Uses the information in the SCRIP file to add the Corner stagger to 
+!      the Grid. If not specified, defaults to false. 
+! \item[{[addMask]}]
+!      If .true., generate the mask using the missing value defined for varname
+! \item[{[varname]}]
+!      If addMask is true, provide a variable name stored in the grid file and
+!      the mask will be generated using the missing value of the data value of
+!      this variable.  The first two dimensions of the variable has to be the
+!      the longitude and the latitude dimension and the mask is derived from the
+!      first 2D values of this variable even if this data is 3D, or 4D array.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+
+    character(len=*),       intent(in)             :: filename
+    type(ESMF_FileFormat_Flag) 			   :: fileFormat
+    integer,                intent(in)             :: regDecomp(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Decomp_Flag), intent(in),  optional  :: decompflag(:)
+    logical,                intent(in),  optional  :: isSphere
+    logical,                intent(in),  optional  :: addCornerStagger
+    logical,                intent(in),  optional  :: addMask
+    character(len=*),       intent(in),  optional  :: varname
+    integer,                intent(out), optional  :: rc
+
+    type(ESMF_Grid) :: grid
+    integer         :: localrc
+    logical         :: localIsSphere, localAddCorner
+    type(ESMF_Decomp_Flag) :: localDecompFlag(2)
+    
+    if (present(rc)) rc=ESMF_FAILURE
+
+    if (present(isSphere)) then
+	localIsSphere = isSphere
+    else
+	localIsSphere = .false.
+    endif
+
+    if (present(addCornerStagger)) then
+	localAddCorner = AddCornerStagger
+    else
+	localAddCorner = .false.
+    endif
+
+    if (present(decompFlag)) then
+	localDecompFlag = decompflag
+    else
+        localDecompFlag(:) = ESMF_DECOMP_BALANCED
+    endif
+
+    if (fileformat == ESMF_FILEFORMAT_SCRIP) then
+	grid = ESMF_GridCreateFrmScrip(trim(filename), regDecomp, decompflag=localDecompflag, &
+		isSphere=localIsSphere, addCornerStagger=localAddCorner, rc=localrc)
+    else if (fileformat == ESMF_FILEFORMAT_GRIDSPEC) then
+	if (present(addMask)) then
+  	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecomp, decompflag=localDecompflag, &
+		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
+		addMask=addMask, varname=varname, rc=localrc)
+        else
+  	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecomp, decompflag=localDecompflag, &
+		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
+		rc=localrc)
+	endif
+    else
+	call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	    msg="- The fileformat has to be either ESMF_FILEFORMAT_SCRIP or ESMF_FILEFORMAT_GRIDSPEC", &
+	  ESMF_CONTEXT, rcToReturn=rc)
+	return
+    endif
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_GridCreateFrmNCFile = grid
+
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+
+end function ESMF_GridCreateFrmNCFile
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateFrmScrip"
+!IBOP
+! !IROUTINE: ESMF_GridCreateFrmScrip - Private function that create a Grid from a SRIP Grid File 
+  function ESMF_GridCreateFrmScrip(filename, regDecomp, keywordEnforcer, &
     decompflag, isSphere, addCornerStagger, rc)
 
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateFrmScripReg
+      type(ESMF_Grid) :: ESMF_GridCreateFrmScrip
 !
 ! !ARGUMENTS:
- 
+
     character(len=*),       intent(in)             :: filename
     integer,                intent(in)             :: regDecomp(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -5494,7 +5421,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!IEOP
 
 #ifdef ESMF_NETCDF
     integer :: ncid
@@ -5761,7 +5688,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        endif
     endif
 
-    ESMF_GridCreateFrmScripReg = grid
+    ESMF_GridCreateFrmScrip = grid
 
     if (present(rc)) rc=ESMF_SUCCESS
     return
@@ -5770,8 +5697,324 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
 
     return
-end function ESMF_GridCreateFrmScripReg
+end function ESMF_GridCreateFrmScrip
 
+!------------------------------------------------------------------------------
+! NetCDF formatted GridSpec regularly distributed grid support up to 4 dim.
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateFrmGridspec"
+!IBOP
+! !IROUTINE: ESMF_GridCreateFrmGridspec - Create a Grid from a GridSpec grid file 
+!  with a regular distribution
+
+! !INTERFACE:
+  ! Private function
+  function ESMF_GridCreateFrmGridspec(grid_filename, &
+                                        regDecomp, keywordEnforcer, decompflag, &
+					addMask, varname, &
+                                        isSphere, addCornerStagger, rc)
+
+! !RETURN VALUE:
+    type(ESMF_Grid) :: ESMF_GridCreateFrmGridspec
+!
+! !ARGUMENTS:
+ 
+    character(len=*),      intent(in)             :: grid_filename
+    integer,               intent(in)             :: regDecomp(:)
+    type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
+    type(ESMF_Decomp_Flag), intent(in),   optional:: decompflag(:)
+    logical,                intent(in),  optional  :: addMask
+    character(len=*),       intent(in),  optional  :: varname
+    logical,               intent(in),  optional  :: isSphere
+    logical,               intent(in),  optional  :: addCornerStagger
+    integer,               intent(out), optional  :: rc
+
+! !DESCRIPTION:
+! This function creates a {\tt ESMF\_Grid} object using the grid definition from
+! a GridSpec grid file. 
+! To specify the distribution, the user passes in an array 
+! ({\tt regDecomp}) specifying the number of DEs to divide each 
+! dimension into. The array {\tt decompflag} indicates how the division into DEs is to
+! occur.  The default is to divide the range as evenly as possible.
+! The grid defined in the file has to be a *** GENERALIZE  2D logically rectangular
+! grid (i.e. {\tt grid\_rank} in the file needs to be 2 ***).
+!
+! This call is {\em collective} across the current VM.
+!
+! The arguments are:
+! \begin{description}
+! \item[{[grid_filename]}]
+!      The GridSpec grid tile filename.
+! \item[{[regDecomp]}] 
+!      A ndims-element array specifying how the grid is decomposed.
+!      Each entry is the number of decounts for that dimension.
+! \item[{[decompflag]}]
+!      List of decomposition flags indicating how each dimension of the
+!      tile is to be divided between the DEs. The default setting
+!      is {\tt ESMF\_DECOMP\_HOMOGEN} in all dimensions. Please see
+!      Section~\ref{opt:decompflag} for a full description of the 
+!      possible options. 
+! \item[{[addMask]}]
+!      If .true., generate the mask using the missing value defined for varname
+! \item[{[varname]}]
+!      If addMask is true, provide a variable name stored in the grid file and
+!      the mask will be generated using the missing value of the data value of
+!      this variable.  The first two dimensions of the variable has to be the
+!      the longitude and the latitude dimension and the mask is derived from the
+!      first 2D values of this variable even if this data is 3D, or 4D array.
+! \item[{[isSphere]}]
+!      If .true. is a spherical grid, if .false. is regional. Defaults to .true.
+! \item[{[addCornerStagger]}]
+!      Uses the information in the GridSpec file to add the Corner stagger to 
+!      the Grid. If not specified, defaults to true (since GridSpec defaults to
+!      vertex-centered grids).
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+
+#ifdef ESMF_NETCDF
+    integer :: gridid, mosaicid, DimId, VarId, localrc, PetNo, PetCnt, ncStatus
+    Integer :: dimids(2), coordids(2), dims(2)
+    integer :: ndims
+    real(ESMF_KIND_R8),  allocatable :: loncoord1D(:), latcoord1D(:)
+    real(ESMF_KIND_R8),  allocatable :: loncoord2D(:,:), latcoord2D(:,:)
+    integer :: msgbuf(3)
+    type(ESMF_CommHandle) :: commHandle
+    integer :: localMinIndex(2), gridEdgeLWidth(2), gridEdgeUWidth(2)
+    type(ESMF_Grid)  :: grid
+    type(ESMF_Array) :: array
+    type(ESMF_VM) :: vm
+    type(ESMF_DistGrid) :: distgrid
+    type(ESMF_Decomp_Flag):: decompflagLocal(2)
+    type(ESMF_StaggerLoc) :: localStaggerLoc
+    logical :: localAddCornerStagger, localIsSphere, localAddMask
+    real(ESMF_KIND_R8), allocatable :: varBuffer(:,:)
+    integer, allocatable :: mask2D(:,:)
+    real(ESMF_KIND_R8) :: missing_value
+    integer :: i,j
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! get global vm information
+    call ESMF_VMGetGlobal(vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(decompFlag)) then
+        decompFlagLocal(:)=decompFlag(:)
+    else
+        decompFlagLocal(:)=ESMF_DECOMP_BALANCED
+    endif
+
+    if (present(addCornerStagger)) then
+        localAddCornerStagger=addCornerStagger
+    else
+        localAddCornerStagger=.false.
+    endif
+
+    if (present(isSphere)) then
+        localIsSphere=isSphere
+    else
+        localIsSphere=.true.
+    endif
+
+    localAddMask = .false.
+    if (present(addMask)) then
+	if (addMask) then
+	  if (.not. present(varname)) then
+	     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+		  msg="- need varname argument to create mask", &
+		  ESMF_CONTEXT, rcToReturn=rc)
+             return
+          end if
+          localAddMask = .true.
+	endif
+     endif
+
+    ! Get the grid rank and dimensions from the GridSpec file on PET 0, broadcast the
+    ! data to all the PETs
+    if (PetNo == 0) then
+        call ESMF_GridspecInq(grid_filename, ndims, dims, dimids=dimids, &
+		coordids = coordids, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        ! broadcast the values to other PETs (generalized)
+        msgbuf(1)=ndims
+        msgbuf(2:3) = dims(:)
+        call ESMF_VMBroadcast(vm, msgbuf, 3, 0, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+        call ESMF_VMBroadcast(vm, msgbuf, 3, 0, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        ndims = msgbuf(1)
+        dims = msgbuf(2:3)
+    endif
+
+    if (PetNo == 0) then
+    ! Get coordinate info from the GridSpec file, if in radians, convert to degrees
+        if (ndims==1) then
+            allocate(loncoord1D(dims(1)), latcoord1D(dims(2)))
+            call ESMF_GridspecGetVar1D(grid_filename, coordids, loncoord1D, &
+                                    latcoord1D, rc=localrc)
+        elseif (ndims==2) then
+            allocate(loncoord2D(dims(1),dims(2)), latcoord2D(dims(1),dims(2)))
+            call ESMF_GridspecGetVar2D(grid_filename, coordids, loncoord2D, &
+                                    latcoord2D, rc=localrc)
+        end if
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+    end if    
+
+    ! Create Grid based on the input distgrid
+    gridEdgeLWidth=(/0,0/)
+    if (localIsSphere) then
+       gridEdgeUWidth=(/0,1/)
+    else
+       gridEdgeUWidth=(/1,1/)
+    endif
+    
+    if (ndims == 1) then
+	if (localIsSphere) then
+	   grid = ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=dims, &
+		regDecomp=regDecomp, &
+                gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
+	        coordDep1=(/1/), coordDep2=(/2/), &
+		coordSys=ESMF_COORDSYS_SPH_DEG, &
+                indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+	else 
+	    grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=dims, &
+		regDecomp=regDecomp, &
+                gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
+	        coordDep1=(/1/), coordDep2=(/2/), &
+		coordSys=ESMF_COORDSYS_SPH_DEG, &
+                indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+	endif
+    else
+	if (localIsSphere) then
+            grid = ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=dims, &
+		regDecomp=regDecomp, &
+                gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
+		coordSys=ESMF_COORDSYS_SPH_DEG, &
+                indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+   	else
+            grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=dims, &
+		regDecomp=regDecomp, &
+                gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
+		coordSys=ESMF_COORDSYS_SPH_DEG, &
+                indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+	endif
+    end if
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set coordinate tables -  Put Corners into coordinates
+    localStaggerLoc = ESMF_STAGGERLOC_CENTER
+
+    call ESMF_GridAddCoord(grid, staggerloc=localStaggerLoc, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set longitude coordinate
+    call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=1, &
+                     array=array, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+    if (ndims == 1) then
+      call ESMF_ArrayScatter(array, loncoord1D, rootPet=0, rc=localrc)
+    else
+      call ESMF_ArrayScatter(array, loncoord2D, rootPet=0, rc=localrc)
+    end if
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set longitude coordinate
+    call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=2, &
+                     array=array, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+    if (ndims == 1) then
+      call ESMF_ArrayScatter(array, latcoord1D, rootPet=0, rc=localrc)
+    else
+      call ESMF_ArrayScatter(array, latcoord2D, rootPet=0, rc=localrc)
+    end if
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (PetNo == 0) then
+      if (ndims==1) then
+        deallocate(loncoord1D, latcoord1D)
+      else
+        deallocate(loncoord2D, latcoord2D)
+      endif
+    endif
+
+    ! Add mask
+    call ESMF_GridAddItem(grid, staggerloc=localStaggerLoc, &
+                        itemflag = ESMF_GRIDITEM_MASK, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_GridGetItem(grid, staggerloc=localStaggerLoc,  &
+                        itemflag=ESMF_GRIDITEM_MASK, array=array, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                        ESMF_CONTEXT, rcToReturn=rc)) return
+    if (PetNo == 0) then
+	allocate(mask2D(dims(1),dims(2)))
+	mask2D(:,:)=1
+    endif
+ 
+    ! Check if we want to extract mask from a data variable
+    if (localAddMask) then
+        if (PetNo == 0) then        ! Assume GridSpec masking is array of same
+          allocate(varBuffer(dims(1),dims(2)))
+          call ESMF_GridspecGetVarByName(grid_filename, varname, dimids, &
+			        varBuffer, missing_value = missing_value, &
+                                rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+	  !print *, 'missing value: ', missing_value
+	  do i=1,size(varBuffer,2)
+	    do j=1,size(varBuffer,1)
+	      if (varBuffer(j,i) == missing_value) then
+	         mask2D(j,i)=0
+              endif
+            enddo
+          enddo
+	deallocate(varBuffer)
+        endif
+    endif
+    call ESMF_ArrayScatter(array, mask2D, rootPet=0, rc=localrc)
+
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (PetNo == 0) then
+           deallocate(mask2D)
+    end if
+
+    ESMF_GridCreateFrmGridspec = grid
+
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+#else
+    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+#endif
+
+    return
+end function ESMF_GridCreateFrmGridspec
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
