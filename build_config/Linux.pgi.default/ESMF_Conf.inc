@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.17 2012/01/06 20:14:49 svasquez Exp $
+$Id: ESMF_Conf.inc,v 1.18 2012/03/22 16:51:32 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -45,7 +45,9 @@ PGI 11.5 and previous have a bug when creating named constants which
 are arrays of zero length.  See ticket #3341575.
 #endif
 
+#if (ESMF_PGIVERSION_MAJOR < 12)
 #define ESMF_PGI_NAMEDCONSTANT_BUG
+#endif
 
 #if 0
 Older PGI compiler were strict F90, and did not allow derived type
