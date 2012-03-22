@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridOnlineEx.F90,v 1.2 2012/03/21 16:44:55 feiliu Exp $
+! $Id: ESMF_XGridOnlineEx.F90,v 1.3 2012/03/22 15:56:26 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -74,7 +74,9 @@
 ! to the other side of the XGrid. 
 !
 ! We start by creating the Grids on both sides and associate coordinates with
-! the Grids in the corner stagger. For details of Grid creation and coordinate use, 
+! the Grids on the corner stagger. The Grids use global indexing and padding 
+! for coordinates on the corner stagger.
+! For details of Grid creation and coordinate use, 
 ! please refer to Grid class documentation.
 !EOE
 !BOC
@@ -255,8 +257,7 @@
 ! The current implementation requires that Grids used to generate the XGrid
 ! must not match, i.e. they are different either topologically or geometrically or both.
 ! In this example, the first source Grid is topologically identical to the destination
-! Grid but their geometric coordinates are different. This requirement will be relaxed
-! in a future release.
+! Grid but their geometric coordinates are different. 
 !
 ! First we compute the regrid routehandles, these routehandles can be used repeatedly
 ! afterwards. Then we initialize the values in the Fields. Finally we execute the Regrid.
@@ -346,12 +347,6 @@
 ! to the destination side.
 !EOE
 
-!BOE
-!\subsubsection{Query the XGrid for its internal information}
-!\label{sec:xgrid:usage:xgrid_get}
-! One can query the XGrid for its internal information:
-!EOE
-!BOC
     call ESMF_XGridGet(xgrid, &
       ngridA=ngridA, &    ! number of Grids on side A
       ngridB=ngridB, &    ! number of Grids on side B
@@ -362,28 +357,23 @@
       sparseMatA2X=l_sparseMatA2X, & !sparse matrix matmul parameters A to X
       sparseMatX2B=l_sparseMatX2B, & !sparse matrix matmul parameters X to B
       rc=localrc)
-!EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
       endflag=ESMF_END_ABORT)
 
-!BOC
     call ESMF_XGridGet(xgrid, localDe=0, &
       elementCount=eleCount, &    ! elementCount on the localDE
       exclusiveCount=ec, &        ! exclusive count
       exclusiveLBound=elb, &      ! exclusive lower bound
       exclusiveUBound=eub, &      ! exclusive upper bound
       rc=localrc)
-!EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
       endflag=ESMF_END_ABORT)
 
-!BOC
     call ESMF_XGridGet(xgrid, &
       xgridSide=ESMF_XGRIDSIDE_A, & ! side of the XGrid to query
       gridIndex=1, &              ! index of the distgrid
       distgrid=distgrid, &        ! the distgrid returned
       rc=localrc)
-!EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
       endflag=ESMF_END_ABORT)
     call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRIDSIDE_A, gridIndex=2, &
@@ -395,12 +385,6 @@
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
       endflag=ESMF_END_ABORT)
 
-!BOE
-!\subsubsection{Destroying the XGrid and other resources}
-!\label{sec:xgrid:usage:xgrid_destroy}
-! Clean up the resources by destroy the XGrid and other objects:
-!EOE
-!BOC
     ! After the regridding is successful. 
     ! Clean up all the allocated resources:
     call ESMF_FieldDestroy(field, rc=localrc)
@@ -428,8 +412,6 @@
       if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
         endflag=ESMF_END_ABORT)
     enddo
-
-!EOC
 
     if(localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     print *, "Regridding through XGrid example returned"
