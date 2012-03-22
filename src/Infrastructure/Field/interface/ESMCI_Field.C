@@ -50,7 +50,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.21 2012/03/22 20:26:09 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.22 2012/03/22 23:06:59 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -65,33 +65,33 @@ extern "C" {
 // Prototypes of the Fortran interface functions.
 void FTN_X(f_esmf_fieldcreategridas)(ESMCI::Field *fieldp, ESMCI::Grid **grid, 
     ESMC_ArraySpec *arrayspec, ESMC_StaggerLoc *staggerloc,
-    int *gridToFieldMap, int *len1, int *gtfmpresent, 
-    int *ungriddedLBound, int *len2, int *uglbpresent,
-    int *ungriddedUBound, int *len3, int *ugubpresent,
+    int *gridToFieldMap, int *len1, int *gtfm_present, 
+    int *ungriddedLBound, int *len2, int *uglb_present,
+    int *ungriddedUBound, int *len3, int *ugub_present,
     char *name, int *rc,
     ESMCI_FortranStrLenArg nlen);
 
 void FTN_X(f_esmf_fieldcreategridtk)(ESMCI::Field *fieldp, ESMCI::Grid **grid, 
     ESMC_TypeKind *typekind, ESMC_StaggerLoc *staggerloc,
-    int *gridToFieldMap, int *len1, int *gtfmpresent, 
-    int *ungriddedLBound, int *len2, int *uglbpresent,
-    int *ungriddedUBound, int *len3, int *ugubpresent,
+    int *gridToFieldMap, int *len1, int *gtfm_present, 
+    int *ungriddedLBound, int *len2, int *uglb_present,
+    int *ungriddedUBound, int *len3, int *ugub_present,
     char *name, int *rc,
     ESMCI_FortranStrLenArg nlen);
 
 void FTN_X(f_esmf_fieldcreatemeshas)(ESMCI::Field *fieldp, void *mesh_pointer, 
     ESMC_ArraySpec *arrayspec, 
-    int *gridToFieldMap, int *len1, int *gtfmpresent, 
-    int *ungriddedLBound, int *len2, int *uglbpresent,
-    int *ungriddedUBound, int *len3, int *ugubpresent,
+    int *gridToFieldMap, int *len1, int *gtfm_present, 
+    int *ungriddedLBound, int *len2, int *uglb_present,
+    int *ungriddedUBound, int *len3, int *ugub_present,
     char *name, int *rc,
     ESMCI_FortranStrLenArg nlen);
 
 void FTN_X(f_esmf_fieldcreatemeshtk)(ESMCI::Field *fieldp, void *mesh_pointer, 
     ESMC_TypeKind *typekind, ESMC_MeshLoc_Flag *meshloc,
-    int *gridToFieldMap, int *len1, int *gtfmpresent, 
-    int *ungriddedLBound, int *len2, int *uglbpresent,
-    int *ungriddedUBound, int *len3, int *ugubpresent,
+    int *gridToFieldMap, int *len1, int *gtfm_present, 
+    int *ungriddedLBound, int *len2, int *uglb_present,
+    int *ungriddedUBound, int *len3, int *ugub_present,
     char *name, int *rc,
     ESMCI_FortranStrLenArg nlen);
 
@@ -164,10 +164,14 @@ namespace ESMCI {
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
 
-    int gtfmpresent, uglbpresent, ugubpresent;
-    gtfmpresent = 0;
-    uglbpresent = 0;
-    ugubpresent = 0;
+    int gtfm_present, uglb_present, ugub_present;
+    bool gtfm_created, uglb_created, ugub_created;
+    gtfm_present = 0;
+    uglb_present = 0;
+    ugub_present = 0;
+    gtfm_created = false;
+    uglb_created = false;
+    ugub_created = false;
     ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
 
     if (gridToFieldMap != NULL) {
@@ -177,7 +181,7 @@ namespace ESMCI {
            "- gridToFieldMap array must be of rank 1", rc);
          return ESMC_NULL_POINTER;
       }
-      gtfmpresent = 1;
+      gtfm_present = 1;
     } else
       gtfm = new ESMCI::InterfaceInt();
 
@@ -188,7 +192,7 @@ namespace ESMCI {
            "- ungriddedLBound array must be of rank 1", rc);
          return ESMC_NULL_POINTER;
       }
-      uglbpresent = 1;
+      uglb_present = 1;
     } else
       uglb = new ESMCI::InterfaceInt();
 
@@ -199,7 +203,7 @@ namespace ESMCI {
            "- ungriddedUBound array must be of rank 1", rc);
          return ESMC_NULL_POINTER;
       }
-      ugubpresent = 1;
+      ugub_present = 1;
     } else
       ugub = new ESMCI::InterfaceInt();
 
@@ -207,9 +211,9 @@ namespace ESMCI {
     char * fName = new char[slen];
     localrc = ESMC_CtoF90string(name, fName, slen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
-      delete gtfm;
-      delete uglb;
-      delete ugub;
+      if (gtfm_created) if (gtfm_created) delete gtfm;
+      if (uglb_created) if (uglb_created) delete uglb;
+      if (ugub_created) if (ugub_created) delete ugub;
       delete[] fName;
       return ESMC_NULL_POINTER;
     }
@@ -221,9 +225,9 @@ namespace ESMCI {
     }catch(...){
       // allocation error
       ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", rc);
-      delete gtfm;
-      delete uglb;
-      delete ugub;
+      if (gtfm_created) delete gtfm;
+      if (uglb_created) delete uglb;
+      if (ugub_created) delete ugub;
       delete[] fName;
       return ESMC_NULL_POINTER;
     }
@@ -233,21 +237,21 @@ namespace ESMCI {
  
     FTN_X(f_esmf_fieldcreategridas)(field, &gridp,
         &arrayspec, &staggerloc,
-        gtfm->array, &gtfm->extent[0], &gtfmpresent,
-        uglb->array, &uglb->extent[0], &uglbpresent,
-        ugub->array, &ugub->extent[0], &ugubpresent,
+        gtfm->array, &gtfm->extent[0], &gtfm_present,
+        uglb->array, &uglb->extent[0], &uglb_present,
+        ugub->array, &ugub->extent[0], &ugub_present,
         fName, &localrc, slen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
-      delete gtfm;
-      delete uglb;
-      delete ugub;
+      if (gtfm_created) delete gtfm;
+      if (uglb_created) delete uglb;
+      if (ugub_created) delete ugub;
       delete[] fName;
       return ESMC_NULL_POINTER;
     }
   
-    delete gtfm;
-    delete uglb;
-    delete ugub;
+    if (gtfm_created) delete gtfm;
+    if (uglb_created) delete uglb;
+    if (ugub_created) delete ugub;
     delete[] fName;
   
     if (rc) *rc = localrc;
@@ -289,10 +293,14 @@ namespace ESMCI {
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
   
-    int gtfmpresent, uglbpresent, ugubpresent;
-    gtfmpresent = 0;
-    uglbpresent = 0;
-    ugubpresent = 0;
+    int gtfm_present, uglb_present, ugub_present;
+    bool gtfm_created, uglb_created, ugub_created;
+    gtfm_present = 0;
+    uglb_present = 0;
+    ugub_present = 0;
+    gtfm_created = false;
+    uglb_created = false;
+    ugub_created = false;
     ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
 
     if (gridToFieldMap != NULL) {
@@ -302,7 +310,7 @@ namespace ESMCI {
            "- gridToFieldMap array must be of rank 1", rc);
          return ESMC_NULL_POINTER;
       }
-      gtfmpresent = 1;
+      gtfm_present = 1;
     } else
       gtfm = new ESMCI::InterfaceInt();
 
@@ -313,7 +321,7 @@ namespace ESMCI {
            "- ungriddedLBound array must be of rank 1", rc);
          return ESMC_NULL_POINTER;
       }
-      uglbpresent = 1;
+      uglb_present = 1;
     } else
       uglb = new ESMCI::InterfaceInt();
 
@@ -324,7 +332,7 @@ namespace ESMCI {
            "- ungriddedUBound array must be of rank 1", rc);
          return ESMC_NULL_POINTER;
       }
-      ugubpresent = 1;
+      ugub_present = 1;
     } else
       ugub = new ESMCI::InterfaceInt();
 
@@ -332,9 +340,9 @@ namespace ESMCI {
     char * fName = new char[slen];
     localrc = ESMC_CtoF90string(name, fName, slen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
-      delete gtfm;
-      delete uglb;
-      delete ugub;
+      if (gtfm_created) delete gtfm;
+      if (uglb_created) delete uglb;
+      if (ugub_created) delete ugub;
       delete[] fName;
       return ESMC_NULL_POINTER;
     }
@@ -346,9 +354,9 @@ namespace ESMCI {
     }catch(...){
       // allocation error
       ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", rc);
-      delete gtfm;
-      delete uglb;
-      delete ugub;
+      if (gtfm_created) delete gtfm;
+      if (uglb_created) delete uglb;
+      if (ugub_created) delete ugub;
       delete[] fName;
       return ESMC_NULL_POINTER;
     }
@@ -358,21 +366,21 @@ namespace ESMCI {
 
     FTN_X(f_esmf_fieldcreategridtk)(field, &gridp, 
         &typekind, &staggerloc,
-        gtfm->array, &gtfm->extent[0], &gtfmpresent,
-        uglb->array, &uglb->extent[0], &uglbpresent,
-        ugub->array, &ugub->extent[0], &ugubpresent,
+        gtfm->array, &gtfm->extent[0], &gtfm_present,
+        uglb->array, &uglb->extent[0], &uglb_present,
+        ugub->array, &ugub->extent[0], &ugub_present,
         fName, &localrc, slen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
-      delete gtfm;
-      delete uglb;
-      delete ugub;
+      if (gtfm_created) delete gtfm;
+      if (uglb_created) delete uglb;
+      if (ugub_created) delete ugub;
       delete[] fName;
       return ESMC_NULL_POINTER;
     }
   
-    delete gtfm;
-    delete uglb;
-    delete ugub;
+    if (gtfm_created) delete gtfm;
+    if (uglb_created) delete uglb;
+    if (ugub_created) delete ugub;
     delete[] fName;
   
     if (rc) *rc = localrc;
@@ -413,10 +421,14 @@ namespace ESMCI {
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
   
-    int gtfmpresent, uglbpresent, ugubpresent;
-    gtfmpresent = 0;
-    uglbpresent = 0;
-    ugubpresent = 0;
+    int gtfm_present, uglb_present, ugub_present;
+    bool gtfm_created, uglb_created, ugub_created;
+    gtfm_present = 0;
+    uglb_present = 0;
+    ugub_present = 0;
+    gtfm_created = false;
+    uglb_created = false;
+    ugub_created = false;
     ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
 
     if (gridToFieldMap != NULL) {
@@ -426,7 +438,7 @@ namespace ESMCI {
            "- gridToFieldMap array must be of rank 1", rc);
          return ESMC_NULL_POINTER;
       }
-      gtfmpresent = 1;
+      gtfm_present = 1;
     } else
       gtfm = new ESMCI::InterfaceInt();
 
@@ -437,7 +449,7 @@ namespace ESMCI {
            "- ungriddedLBound array must be of rank 1", rc);
          return ESMC_NULL_POINTER;
       }
-      uglbpresent = 1;
+      uglb_present = 1;
     } else
       uglb = new ESMCI::InterfaceInt();
 
@@ -448,7 +460,7 @@ namespace ESMCI {
            "- ungriddedUBound array must be of rank 1", rc);
          return ESMC_NULL_POINTER;
       }
-      ugubpresent = 1;
+      ugub_present = 1;
     } else
       ugub = new ESMCI::InterfaceInt();
 
@@ -457,9 +469,9 @@ namespace ESMCI {
     localrc = ESMC_CtoF90string(name, fName, slen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
       delete[] fName;
-      delete gtfm;
-      delete uglb;
-      delete ugub;
+      if (gtfm_created) delete gtfm;
+      if (uglb_created) delete uglb;
+      if (ugub_created) delete ugub;
       return ESMC_NULL_POINTER;
     }
 
@@ -470,28 +482,28 @@ namespace ESMCI {
       // allocation error
       ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", rc);
       delete[] fName;
-      delete gtfm;
-      delete uglb;
-      delete ugub;
+      if (gtfm_created) delete gtfm;
+      if (uglb_created) delete uglb;
+      if (ugub_created) delete ugub;
       return ESMC_NULL_POINTER;
     }
   
     FTN_X(f_esmf_fieldcreatemeshas)(field, mesh.ptr, &arrayspec, 
-      gtfm->array, &gtfm->extent[0], &gtfmpresent,
-      uglb->array, &uglb->extent[0], &uglbpresent,
-      ugub->array, &ugub->extent[0], &ugubpresent,
+      gtfm->array, &gtfm->extent[0], &gtfm_present,
+      uglb->array, &uglb->extent[0], &uglb_present,
+      ugub->array, &ugub->extent[0], &ugub_present,
       fName, &localrc, slen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
       delete[] fName;
-      delete gtfm;
-      delete uglb;
-      delete ugub;
+      if (gtfm_created) delete gtfm;
+      if (uglb_created) delete uglb;
+      if (ugub_created) delete ugub;
       return ESMC_NULL_POINTER;
     }
   
-    delete gtfm;
-    delete uglb;
-    delete ugub;
+    if (gtfm_created) delete gtfm;
+    if (uglb_created) delete uglb;
+    if (ugub_created) delete ugub;
     delete[] fName;
   
     if (rc) *rc = localrc;
@@ -533,10 +545,14 @@ namespace ESMCI {
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
   
-    int gtfmpresent, uglbpresent, ugubpresent;
-    gtfmpresent = 0;
-    uglbpresent = 0;
-    ugubpresent = 0;
+    int gtfm_present, uglb_present, ugub_present;
+    bool gtfm_created, uglb_created, ugub_created;
+    gtfm_present = 0;
+    uglb_present = 0;
+    ugub_present = 0;
+    gtfm_created = false;
+    uglb_created = false;
+    ugub_created = false;
     ESMCI::InterfaceInt *gtfm, *uglb, *ugub;
 
     if (gridToFieldMap != NULL) {
@@ -546,7 +562,7 @@ namespace ESMCI {
            "- gridToFieldMap array must be of rank 1", rc);
          return ESMC_NULL_POINTER;
       }
-      gtfmpresent = 1;
+      gtfm_present = 1;
     } else
       gtfm = new ESMCI::InterfaceInt();
 
@@ -557,7 +573,7 @@ namespace ESMCI {
            "- ungriddedLBound array must be of rank 1", rc);
          return ESMC_NULL_POINTER;
       }
-      uglbpresent = 1;
+      uglb_present = 1;
     } else
       uglb = new ESMCI::InterfaceInt();
 
@@ -568,7 +584,7 @@ namespace ESMCI {
            "- ungriddedUBound array must be of rank 1", rc);
          return ESMC_NULL_POINTER;
       }
-      ugubpresent = 1;
+      ugub_present = 1;
     } else
       ugub = new ESMCI::InterfaceInt();
 
@@ -577,9 +593,9 @@ namespace ESMCI {
     localrc = ESMC_CtoF90string(name, fName, slen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
       delete[] fName;
-      delete gtfm;
-      delete uglb;
-      delete ugub;
+      if (gtfm_created) delete gtfm;
+      if (uglb_created) delete uglb;
+      if (ugub_created) delete ugub;
       return ESMC_NULL_POINTER;
     }
 
@@ -590,29 +606,29 @@ namespace ESMCI {
       // allocation error
       ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", rc);
       delete[] fName;
-      delete gtfm;
-      delete uglb;
-      delete ugub;
+      if (gtfm_created) delete gtfm;
+      if (uglb_created) delete uglb;
+      if (ugub_created) delete ugub;
       return ESMC_NULL_POINTER;
     }
 
     FTN_X(f_esmf_fieldcreatemeshtk)(field, mesh.ptr, &typekind, &meshloc,
-      gtfm->array, &gtfm->extent[0], &gtfmpresent,
-      uglb->array, &uglb->extent[0], &uglbpresent,
-      ugub->array, &ugub->extent[0], &ugubpresent,
+      gtfm->array, &gtfm->extent[0], &gtfm_present,
+      uglb->array, &uglb->extent[0], &uglb_present,
+      ugub->array, &ugub->extent[0], &ugub_present,
       fName, &localrc, slen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
       delete[] fName;
-      delete gtfm;
-      delete uglb;
-      delete ugub;
+      if (gtfm_created) delete gtfm;
+      if (uglb_created) delete uglb;
+      if (ugub_created) delete ugub;
       return ESMC_NULL_POINTER;
     }
   
     delete[] fName;
-    delete gtfm;
-    delete uglb;
-    delete ugub;
+    if (gtfm_created) delete gtfm;
+    if (uglb_created) delete uglb;
+    if (ugub_created) delete ugub;
   
     if (rc) *rc = localrc;
   
