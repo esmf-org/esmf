@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldUTest.C,v 1.23 2012/03/19 14:20:43 rokuingh Exp $
+// $Id: ESMC_FieldUTest.C,v 1.24 2012/03/22 20:26:11 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -58,6 +58,8 @@ int main(void){
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  ESMC_LogSet(true);
 
   //----------------------------------------------------------------------------
   //NEX_UTest

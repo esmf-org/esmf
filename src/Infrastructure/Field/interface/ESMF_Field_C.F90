@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.35 2012/03/16 16:39:07 rokuingh Exp $
+!  $Id: ESMF_Field_C.F90,v 1.36 2012/03/22 20:26:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -24,57 +24,15 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.35 2012/03/16 16:39:07 rokuingh Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.36 2012/03/22 20:26:09 rokuingh Exp $'
 !==============================================================================
-
-#undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_fieldcreategridas_opt"
-  subroutine f_esmf_fieldcreategridas_opt(field, grid_pointer, arrayspec, &
-    staggerloc, name, rc)
-
-    use ESMF_UtilTypesMod
-    use ESMF_BaseMod
-    use ESMF_LogErrMod
-    use ESMF_ArraySpecMod
-    use ESMF_StaggerLocMod
-    use ESMF_GridMod
-    use ESMF_FieldMod
-    use ESMF_FieldCreateMod
-
-    implicit none
-
-    ! arguments
-    type(ESMF_Field)               :: field
-    type(ESMF_Pointer)             :: grid_pointer
-    type(ESMF_ArraySpec)           :: arrayspec
-    type(ESMF_StaggerLoc)          :: staggerloc
-    character(len=*),intent(in)    :: name
-    integer, intent(out)           :: rc              
-  
-    ! local variables  
-    type(ESMF_Grid)          :: grid
-  
-    ! initialize return code; assume routine not implemented
-    rc = ESMF_RC_NOT_IMPL
-
-    grid%this = grid_pointer
-
-    ESMF_INIT_SET_CREATED(grid)
-  
-    field = ESMF_FieldCreate(grid, arrayspec=arrayspec, staggerloc=staggerloc, &
-        name=name, rc=rc)    
-    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-   
-    rc = ESMF_SUCCESS
-  
-  end subroutine f_esmf_fieldcreategridas_opt
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_fieldcreategridas"
   subroutine f_esmf_fieldcreategridas(field, grid_pointer, arrayspec, &
-    staggerloc, gridToFieldMap, len1, &
-    ungriddedLBound, len2, ungriddedUBound, len3, name, rc)
+    staggerloc, gridToFieldMap, len1, gtfmpresent, &
+    ungriddedLBound, len2, uglbpresent, &
+    ungriddedUBound, len3, ugubpresent, name, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_BaseMod
@@ -93,6 +51,7 @@
     type(ESMF_ArraySpec)           :: arrayspec
     type(ESMF_StaggerLoc)          :: staggerloc
     integer, intent(in)            :: len1, len2, len3
+    integer, intent(in)            :: gtfmpresent, uglbpresent, ugubpresent
     integer                        :: gridToFieldMap(1:len1), &
                                       ungriddedLBound(1:len2), &
                                       ungriddedUBound(1:len3)
@@ -108,11 +67,44 @@
     grid%this = grid_pointer
 
     ESMF_INIT_SET_CREATED(grid)
-  
-    field = ESMF_FieldCreate(grid, arrayspec=arrayspec, staggerloc=staggerloc, &
+    
+    if (gtfmpresent == 0 .and. uglbpresent == 0 .and. ugubpresent == 0) then
+      field = ESMF_FieldCreate(grid, arrayspec=arrayspec, staggerloc=staggerloc, &
+        name=name, rc=rc)
+    else if (gtfmpresent == 1 .and. uglbpresent == 0 .and. ugubpresent == 0) then
+      field = ESMF_FieldCreate(grid, arrayspec=arrayspec, staggerloc=staggerloc, &
         gridToFieldMap=gridToFieldMap, &
-        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
-        name=name, rc=rc)    
+        name=name, rc=rc)
+    else if (gtfmpresent == 0 .and. uglbpresent == 1 .and. ugubpresent == 0) then
+      field = ESMF_FieldCreate(grid, arrayspec=arrayspec, staggerloc=staggerloc, &
+        ungriddedLBound=ungriddedLBound, &
+        name=name, rc=rc)
+    else if (gtfmpresent == 0 .and. uglbpresent == 0 .and. ugubpresent == 1) then
+      field = ESMF_FieldCreate(grid, arrayspec=arrayspec, staggerloc=staggerloc, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)
+    else if (gtfmpresent == 1 .and. uglbpresent == 1 .and. ugubpresent == 0) then
+      field = ESMF_FieldCreate(grid, arrayspec=arrayspec, staggerloc=staggerloc, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, &
+        name=name, rc=rc)
+    else if (gtfmpresent == 0 .and. uglbpresent == 1 .and. ugubpresent == 1) then
+      field = ESMF_FieldCreate(grid, arrayspec=arrayspec, staggerloc=staggerloc, &
+        ungriddedLBound=ungriddedLBound, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)
+    else if (gtfmpresent == 1 .and. uglbpresent == 0 .and. ugubpresent == 1) then
+      field = ESMF_FieldCreate(grid, arrayspec=arrayspec, staggerloc=staggerloc, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)
+    else if (gtfmpresent == 1 .and. uglbpresent == 1 .and. ugubpresent == 1) then
+      field = ESMF_FieldCreate(grid, arrayspec=arrayspec, staggerloc=staggerloc, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)
+    endif
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
    
@@ -121,52 +113,11 @@
   end subroutine f_esmf_fieldcreategridas
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_fieldcreategridtk_opt"
-  subroutine f_esmf_fieldcreategridtk_opt(field, grid_pointer, typekind, &
-    staggerloc, name, rc)
-
-    use ESMF_UtilTypesMod
-    use ESMF_BaseMod
-    use ESMF_LogErrMod
-    use ESMF_FieldMod
-    use ESMF_FieldCreateMod
-    use ESMF_StaggerLocMod
-    use ESMF_GridMod
-
-    implicit none
-
-    ! arguments
-    type(ESMF_Field)               :: field
-    type(ESMF_Pointer)             :: grid_pointer
-    type(ESMF_TypeKind_Flag)       :: typekind
-    type(ESMF_StaggerLoc)          :: staggerloc
-    character(len=*),intent(in)    :: name
-    integer, intent(out)           :: rc              
-  
-    ! local variables  
-    type(ESMF_Grid)          :: grid
- 
-  ! initialize return code; assume routine not implemented
-    rc = ESMF_RC_NOT_IMPL
-
-    grid%this = grid_pointer
-
-    ESMF_INIT_SET_CREATED(grid)
- 
-    field = ESMF_FieldCreate(grid, typekind=typekind, staggerloc=staggerloc, &
-                             name=name, rc=rc)    
-    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-   
-    rc = ESMF_SUCCESS
-  
-  end subroutine f_esmf_fieldcreategridtk_opt
-
-#undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_fieldcreategridtk"
   subroutine f_esmf_fieldcreategridtk(field, grid_pointer, typekind, &
-    staggerloc, gridToFieldMap, len1, ungriddedLBound, len2, &
-    ungriddedUBound, len3, name, rc)
+    staggerloc, gridToFieldMap, len1, gtfmpresent, &
+    ungriddedLBound, len2, uglbpresent, &
+    ungriddedUBound, len3, ugubpresent, name, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_BaseMod
@@ -184,6 +135,7 @@
     type(ESMF_TypeKind_Flag)       :: typekind
     type(ESMF_StaggerLoc)          :: staggerloc
     integer, intent(in)            :: len1, len2, len3
+    integer, intent(in)            :: gtfmpresent, uglbpresent, ugubpresent
     integer                        :: gridToFieldMap(1:len1), &
                                       ungriddedLBound(1:len2), &
                                       ungriddedUBound(1:len3)
@@ -200,10 +152,43 @@
 
     ESMF_INIT_SET_CREATED(grid)
  
+    if (gtfmpresent == 0 .and. uglbpresent == 0 .and. ugubpresent == 0) then
+    field = ESMF_FieldCreate(grid, typekind=typekind, staggerloc=staggerloc, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 1 .and. uglbpresent == 0 .and. ugubpresent == 0) then
     field = ESMF_FieldCreate(grid, typekind=typekind, staggerloc=staggerloc, &
         gridToFieldMap=gridToFieldMap, &
-        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
         name=name, rc=rc)    
+    else if (gtfmpresent == 0 .and. uglbpresent == 1 .and. ugubpresent == 0) then
+    field = ESMF_FieldCreate(grid, typekind=typekind, staggerloc=staggerloc, &
+        ungriddedLBound=ungriddedLBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 0 .and. uglbpresent == 0 .and. ugubpresent == 1) then
+    field = ESMF_FieldCreate(grid, typekind=typekind, staggerloc=staggerloc, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 1 .and. uglbpresent == 1 .and. ugubpresent == 0) then
+    field = ESMF_FieldCreate(grid, typekind=typekind, staggerloc=staggerloc, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 0 .and. uglbpresent == 1 .and. ugubpresent == 1) then
+    field = ESMF_FieldCreate(grid, typekind=typekind, staggerloc=staggerloc, &
+        ungriddedLBound=ungriddedLBound, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 1 .and. uglbpresent == 0 .and. ugubpresent == 1) then
+    field = ESMF_FieldCreate(grid, typekind=typekind, staggerloc=staggerloc, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 1 .and. uglbpresent == 1 .and. ugubpresent == 1) then
+    field = ESMF_FieldCreate(grid, typekind=typekind, staggerloc=staggerloc, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)    
+    endif
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
    
@@ -212,47 +197,11 @@
   end subroutine f_esmf_fieldcreategridtk
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_fieldcreatemeshas_opt"
-  subroutine f_esmf_fieldcreatemeshas_opt(field, mesh_pointer, arrayspec, &
-    name, rc)
-
-    use ESMF_UtilTypesMod
-    use ESMF_BaseMod
-    use ESMF_LogErrMod
-    use ESMF_ArraySpecMod
-    use ESMF_MeshMod
-    use ESMF_FieldMod
-    use ESMF_FieldCreateMod
-
-    implicit none
-
-    ! arguments
-    type(ESMF_Field)               :: field
-    type(ESMF_Pointer)             :: mesh_pointer
-    type(ESMF_ArraySpec)           :: arrayspec
-    character(len=*),intent(in)    :: name
-    integer, intent(out)           :: rc              
-  
-    ! local variables  
-    type(ESMF_Mesh)          :: mesh
-  
-  ! initialize return code; assume routine not implemented
-    rc = ESMF_RC_NOT_IMPL
-
-    mesh = ESMF_MeshCreate(mesh_pointer)
-  
-    field = ESMF_FieldCreate(mesh, arrayspec=arrayspec, name=name, rc=rc)
-    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-   
-    rc = ESMF_SUCCESS
-  
-  end subroutine f_esmf_fieldcreatemeshas_opt
-
-#undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_fieldcreatemeshas"
   subroutine f_esmf_fieldcreatemeshas(field, mesh_pointer, arrayspec, &
-    gridToFieldMap, len1, ungriddedLBound, len2, ungriddedUBound, len3, name, rc)
+    gridToFieldMap, len1, gtfmpresent, &
+    ungriddedLBound, len2, uglbpresent, &
+    ungriddedUBound, len3, ugubpresent, name, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_BaseMod
@@ -269,6 +218,7 @@
     type(ESMF_Pointer)             :: mesh_pointer
     type(ESMF_ArraySpec)           :: arrayspec
     integer, intent(in)            :: len1, len2, len3
+    integer, intent(in)            :: gtfmpresent, uglbpresent, ugubpresent
     integer                        :: gridToFieldMap(1:len1), &
                                       ungriddedLBound(1:len2), &
                                       ungriddedUBound(1:len3)
@@ -283,9 +233,43 @@
 
     mesh = ESMF_MeshCreate(mesh_pointer)
   
-    field = ESMF_FieldCreate(mesh, arrayspec=arrayspec, gridToFieldMap=gridToFieldMap, &
-        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+    if (gtfmpresent == 0 .and. uglbpresent == 0 .and. ugubpresent == 0) then
+    field = ESMF_FieldCreate(mesh, arrayspec=arrayspec, &
         name=name, rc=rc)    
+    else if (gtfmpresent == 1 .and. uglbpresent == 0 .and. ugubpresent == 0) then
+    field = ESMF_FieldCreate(mesh, arrayspec=arrayspec, &
+        gridToFieldMap=gridToFieldMap, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 0 .and. uglbpresent == 1 .and. ugubpresent == 0) then
+    field = ESMF_FieldCreate(mesh, arrayspec=arrayspec, &
+        ungriddedLBound=ungriddedLBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 0 .and. uglbpresent == 0 .and. ugubpresent == 1) then
+    field = ESMF_FieldCreate(mesh, arrayspec=arrayspec, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 1 .and. uglbpresent == 1 .and. ugubpresent == 0) then
+    field = ESMF_FieldCreate(mesh, arrayspec=arrayspec, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 0 .and. uglbpresent == 1 .and. ugubpresent == 1) then
+    field = ESMF_FieldCreate(mesh, arrayspec=arrayspec, &
+        ungriddedLBound=ungriddedLBound, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 1 .and. uglbpresent == 0 .and. ugubpresent == 1) then
+    field = ESMF_FieldCreate(mesh, arrayspec=arrayspec, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 1 .and. uglbpresent == 1 .and. ugubpresent == 1) then
+    field = ESMF_FieldCreate(mesh, arrayspec=arrayspec, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)    
+    endif
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
    
@@ -294,48 +278,11 @@
   end subroutine f_esmf_fieldcreatemeshas
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_fieldcreatemeshtk_opt"
-  subroutine f_esmf_fieldcreatemeshtk_opt(field, mesh_pointer, typekind, meshloc, &
-    name, rc)
-
-    use ESMF_UtilTypesMod
-    use ESMF_BaseMod
-    use ESMF_LogErrMod
-    use ESMF_MeshMod
-    use ESMF_FieldMod
-    use ESMF_FieldCreateMod
-
-    implicit none
-
-    ! arguments
-    type(ESMF_Field)               :: field
-    type(ESMF_Pointer)             :: mesh_pointer
-    type(ESMF_TypeKind_Flag)       :: typekind
-    type(ESMF_MeshLoc)             :: meshloc
-    character(len=*),intent(in)    :: name
-    integer, intent(out)           :: rc              
-  
-    ! local variables  
-    type(ESMF_Mesh)          :: mesh
-  
-  ! initialize return code; assume routine not implemented
-    rc = ESMF_RC_NOT_IMPL
-
-    mesh = ESMF_MeshCreate(mesh_pointer)
-
-    field = ESMF_FieldCreate(mesh, typekind=typekind, &
-        meshloc=meshloc, name=name, rc=rc)    
-    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-   
-    rc = ESMF_SUCCESS
-  
-  end subroutine f_esmf_fieldcreatemeshtk_opt
-
-#undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_fieldcreatemeshtk"
   subroutine f_esmf_fieldcreatemeshtk(field, mesh_pointer, typekind, meshloc, &
-    gridToFieldMap, len1, ungriddedLBound, len2, ungriddedUBound, len3, name, rc)
+    gridToFieldMap, len1, gtfmpresent, &
+    ungriddedLBound, len2, uglbpresent, &
+    ungriddedUBound, len3, ugubpresent, name, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_BaseMod
@@ -352,6 +299,7 @@
     type(ESMF_TypeKind_Flag)       :: typekind
     type(ESMF_MeshLoc)             :: meshloc
     integer, intent(in)            :: len1, len2, len3
+    integer, intent(in)            :: gtfmpresent, uglbpresent, ugubpresent
     integer                        :: gridToFieldMap(1:len1), &
                                       ungriddedLBound(1:len2), &
                                       ungriddedUBound(1:len3)
@@ -366,10 +314,43 @@
 
     mesh = ESMF_MeshCreate(mesh_pointer)
 
-    field = ESMF_FieldCreate(mesh, typekind=typekind, &
-        meshloc=meshloc, gridToFieldMap=gridToFieldMap, &
-        ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+    if (gtfmpresent == 0 .and. uglbpresent == 0 .and. ugubpresent == 0) then
+    field = ESMF_FieldCreate(mesh, typekind=typekind, meshloc=meshloc, &
         name=name, rc=rc)    
+    else if (gtfmpresent == 1 .and. uglbpresent == 0 .and. ugubpresent == 0) then
+    field = ESMF_FieldCreate(mesh, typekind=typekind, meshloc=meshloc, &
+        gridToFieldMap=gridToFieldMap, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 0 .and. uglbpresent == 1 .and. ugubpresent == 0) then
+    field = ESMF_FieldCreate(mesh, typekind=typekind, meshloc=meshloc, &
+        ungriddedLBound=ungriddedLBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 0 .and. uglbpresent == 0 .and. ugubpresent == 1) then
+    field = ESMF_FieldCreate(mesh, typekind=typekind, meshloc=meshloc, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 1 .and. uglbpresent == 1 .and. ugubpresent == 0) then
+    field = ESMF_FieldCreate(mesh, typekind=typekind, meshloc=meshloc, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 0 .and. uglbpresent == 1 .and. ugubpresent == 1) then
+    field = ESMF_FieldCreate(mesh, typekind=typekind, meshloc=meshloc, &
+        ungriddedLBound=ungriddedLBound, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 1 .and. uglbpresent == 0 .and. ugubpresent == 1) then
+    field = ESMF_FieldCreate(mesh, typekind=typekind, meshloc=meshloc, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)    
+    else if (gtfmpresent == 1 .and. uglbpresent == 1 .and. ugubpresent == 1) then
+    field = ESMF_FieldCreate(mesh, typekind=typekind, meshloc=meshloc, &
+        gridToFieldMap=gridToFieldMap, &
+        ungriddedLBound=ungriddedLBound, &
+        ungriddedUBound=ungriddedUBound, &
+        name=name, rc=rc)    
+    endif
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
    
