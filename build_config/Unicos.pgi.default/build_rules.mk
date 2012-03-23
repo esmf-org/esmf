@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.16 2011/07/08 19:24:54 theurich Exp $
+# $Id: build_rules.mk,v 1.16.2.1 2012/03/23 15:08:40 theurich Exp $
 #
 # Unicos.pgi.default
 #
@@ -108,13 +108,17 @@ ESMF_CXXLINKRPATHS      =
 
 ############################################################
 # Determine where pgf90's libraries are located
-#
-ESMF_CXXLINKPATHS += -L$(shell $(ESMF_DIR)/scripts/libpath.pgf90 $(ESMF_F90COMPILER))
+#gjt: Commented out following line after ORNL support indicated
+#gjt: that it is okay to mix different PGI versions for library
+#gjt: build and application build.
+#ESMF_CXXLINKPATHS += -L$(shell $(ESMF_DIR)/scripts/libpath.pgf90 $(ESMF_F90COMPILER))
 
 ############################################################
 # Determine where pgCC's libraries are located
-#
-ESMF_F90LINKPATHS += -L$(shell $(ESMF_DIR)/scripts/libpath.pgCC $(ESMF_CXXCOMPILER))
+#gjt: Commented out following line after ORNL support indicated
+#gjt: that it is okay to mix different PGI versions for library
+#gjt: build and application build.
+#ESMF_F90LINKPATHS += -L$(shell $(ESMF_DIR)/scripts/libpath.pgCC $(ESMF_CXXCOMPILER))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
