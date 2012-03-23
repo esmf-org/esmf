@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.263 2012/03/23 15:39:42 svasquez Exp $
+! $Id: ESMF_Grid.F90,v 1.264 2012/03/23 16:01:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -306,7 +306,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.263 2012/03/23 15:39:42 svasquez Exp $'
+      '$Id: ESMF_Grid.F90,v 1.264 2012/03/23 16:01:15 svasquez Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5283,7 +5283,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[filename]
 !     The NetCDF Grid filename.
 ! \item[fileFormat]
-!     The Grid file format, either ESMF\_FILEFORMAT_SCRIP or ESMF\_FILEFORMAT\_GRIDSPEC
+!     The Grid file format, either ESMF\_FILEFORMAT\_SCRIP or ESMF\_FILEFORMAT\_GRIDSPEC
 ! \item[regDecomp] 
 !      A 2 element array specifying how the grid is decomposed.
 !      Each entry is the number of decounts for that dimension.
