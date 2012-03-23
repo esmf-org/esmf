@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.264 2012/03/23 16:01:15 svasquez Exp $
+! $Id: ESMF_Grid.F90,v 1.265 2012/03/23 16:20:06 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -306,7 +306,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.264 2012/03/23 16:01:15 svasquez Exp $'
+      '$Id: ESMF_Grid.F90,v 1.265 2012/03/23 16:20:06 svasquez Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5299,7 +5299,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Uses the information in the SCRIP file to add the Corner stagger to 
 !      the Grid. If not specified, defaults to false. 
 ! \item[{[addMask]}]
-!      If .true., generate the mask using the missing_value attribute defined in 'varname'
+!      If .true., generate the mask using the missing\_value attribute defined in 'varname'
 ! \item[{[varname]}]
 !      If addMask is true, provide a variable name stored in the grid file and
 !      the mask will be generated using the missing value of the data value of
