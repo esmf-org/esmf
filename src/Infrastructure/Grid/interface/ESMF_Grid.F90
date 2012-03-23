@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.260 2012/03/23 01:49:31 peggyli Exp $
+! $Id: ESMF_Grid.F90,v 1.261 2012/03/23 03:34:26 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -306,7 +306,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.260 2012/03/23 01:49:31 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.261 2012/03/23 03:34:26 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5244,11 +5244,11 @@ end subroutine convert_corner_arrays_to_1D
 #define ESMF_METHOD "ESMF_GridCreateFrmNCFile"
 !BOP
 ! !IROUTINE: ESMF_GridCreate - Create a Grid from a SCRIP or GRIDSPEC format grid file
-!
+
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-  function ESMF_GridCreateFrmNCFile(filename, fileFormat, regDecomp, keywordEnforcer, &
-    decompflag, isSphere, addCornerStagger, addMask, varname, rc)
+     function ESMF_GridCreateFrmNCFile(filename, fileFormat, regDecomp, keywordEnforcer, &
+       decompflag, isSphere, addCornerStagger, addMask, varname, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmNCFile
@@ -5270,7 +5270,7 @@ end subroutine convert_corner_arrays_to_1D
 ! \begin{description}
 ! \item[filename]
 !     The NetCDF Grid filename.
-!\item[fileFormat]
+! \item[fileFormat]
 !     The Grid file format, either ESMF_FILEFORMAT_SCRIP or ESMF_FILEFORMAT_GRIDSPEC
 ! \item[regDecomp] 
 !      A 2 element array specifying how the grid is decomposed.
@@ -5882,13 +5882,13 @@ end function ESMF_GridCreateFrmScrip
         elseif (ndims==2) then
 	  if (localAddCornerStagger) then
             allocate(loncoord2D(dims(1),dims(2)), latcoord2D(dims(1),dims(2)))
-            call ESMF_GridspecGetVar2D(grid_filename, coordids, loncoord2D, &
-                                    latcoord2D, rc=localrc)
-	  else
-            allocate(loncoord2D(dims(1),dims(2)), latcoord2D(dims(1),dims(2)))
      	    allocate(cornerlon3D(4,dims(1),dims(2)), cornerlat3D(4, dims(1), dims(2)))
             call ESMF_GridspecGetVar2D(grid_filename, coordids, loncoord2D, loncoord2D, &
                                     cornerlon=cornerlon3D, cornerlat=cornerlat3D, rc=localrc)
+	  else
+            allocate(loncoord2D(dims(1),dims(2)), latcoord2D(dims(1),dims(2)))
+            call ESMF_GridspecGetVar2D(grid_filename, coordids, loncoord2D, &
+                                    latcoord2D, rc=localrc)
 	  endif
         end if
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
