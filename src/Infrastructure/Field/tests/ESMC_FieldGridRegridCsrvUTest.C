@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.5 2012/03/16 16:39:09 rokuingh Exp $
+// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.6 2012/03/23 15:45:30 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 // ESMF header
 #include "ESMC.h"
@@ -41,7 +42,6 @@ int main(void){
   ESMC_VM vm;
   
   // Field variables
-  ESMC_ArraySpec arrayspec;
   ESMC_RouteHandle routehandle;
   ESMC_Field srcfield, dstfield;
 
@@ -282,15 +282,6 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //EX_disable_UTest
-  // Set the arrayspec
-  strcpy(name, "ArraySpecSet");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_ArraySpecSet(&arrayspec, 2, ESMC_TYPEKIND_R8);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-    
-  //----------------------------------------------------------------------------
-  //EX_disable_UTest
   strcpy(name, "Create ESMC_Field object from a Grid via TypeKind");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   srcfield = ESMC_FieldCreateGridTypeKind(srcgrid, ESMC_TYPEKIND_R8, 
@@ -323,6 +314,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+  printf("\nGrid coords: \n");
   // define analytic field on source field
   p = 0;
   double x,y;
@@ -330,11 +322,15 @@ int main(void){
     for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
       x = gridXCoord[p];
       y = gridYCoord[p];
-      srcfieldptr[p] = 20.0+x+y;
+      printf("[%f,%f]\n", x, y); 
+      //srcfieldptr[p] = 20.0+x+y; // this has 8 points that don't map
+      //srcfieldptr[p] = 20.0+x;   // this has 8 points that don't map
+      //srcfieldptr[p] = 20.0+pow(y,2); // this has 2 points that don't map
+      srcfieldptr[p] = 20.0+y; // this maps all points
       ++p;
     }
   }
-
+  printf("\n");
   
   //----------------------------------------------------------------------------
   //EX_disable_UTest
@@ -356,7 +352,7 @@ int main(void){
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &routehandle, 
-                        ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_IGNORE);
+                        ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -392,23 +388,35 @@ int main(void){
   strcpy(name, "Regridding Validation");
   strcpy(failMsg, "Did not have acceptable accuracy");
 
+  printf("\nMesh coords (num_elem = %d): ", num_elem);
   bool correct = true;
   {
-    double x,y;
+    double x,y,exact;
     int i;
+    for(i=0;i<num_elem;++i) {
+      x=nodeCoord[2*i];
+      y=nodeCoord[2*i+1];
+      printf("[%f,%f]\n", x, y); 
+    }
     // 2. check destination field against source field
     for(i=0;i<num_elem;++i) {
       x=nodeCoord[2*i];
       y=nodeCoord[2*i+1];
+      //exact = 20.0+x+y;
+      //exact = 20.0+x;
+      //exact = 20.0+pow(y,2);
+      exact = 20.0+y;
       // if error is too big report an error
-      if ( abs((long)( dstfieldptr[i]-(x+y+20.0)) ) > 0.0001) {
-        printf("dstfieldptr[%d] = %f\n and it should be = %f\n", i, dstfieldptr[i], x+y+20.0);
+      if ( abs((long)( dstfieldptr[i]-exact) ) > 0.0001) {
+        printf("dstfieldptr[%d] = %f\n and it should be = %f\n", i, dstfieldptr[i], exact);
         correct=false;
       }
     }
   }
+  printf("\n");
   ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
 
   //----------------------------------------------------------------------------
   //EX_disable_UTest
