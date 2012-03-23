@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.25 2012/02/24 16:37:04 oehmke Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.26 2012/03/23 16:32:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -660,7 +660,7 @@ contains
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call compute_flux2D(vm, ocn, dstAreaPtr, dstFracPtr, allsrcsum, rc=localrc)
+    call compute_flux2D(vm, ocn, dstAreaPtr, dstFracPtr, allsrcsum, dstflux=.true.,rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -742,7 +742,7 @@ contains
     !print *, 'x2o ocn', lpet, ocn
 
     ! Compute flux integrals
-    call compute_flux2D(vm, ocn, dstAreaPtr, dstFracPtr, allsrcsum, rc=localrc)
+    call compute_flux2D(vm, ocn, dstAreaPtr, dstFracPtr, allsrcsum, dstflux=.true.,rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -790,7 +790,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     !print *, 'x2a atm', lpet, atm
-    call compute_flux2D(vm, atm, srcAreaPtr, srcFracPtr, allsrcsum, rc=localrc)
+    call compute_flux2D(vm, atm, srcAreaPtr, srcFracPtr, allsrcsum, dstflux=.true.,rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1352,7 +1352,7 @@ contains
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call compute_flux2D(vm, ocn, dstAreaPtr, dstFracPtr, allsrcsum, rc=localrc)
+    call compute_flux2D(vm, ocn, dstAreaPtr, dstFracPtr, allsrcsum, dstflux=.true., rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1453,7 +1453,7 @@ contains
     !print *, 'x2o ocn', lpet, ocn
 
     ! Compute flux integrals
-    call compute_flux2D(vm, ocn, dstAreaPtr, dstFracPtr, allsrcsum, rc=localrc)
+    call compute_flux2D(vm, ocn, dstAreaPtr, dstFracPtr, allsrcsum, dstflux=.true., rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1475,7 +1475,7 @@ contains
     !endif
     error = abs(dstFlux - dstFlux_reg)/abs(dstFlux_reg) 
     if(lpet == 0) write(*,'(A,4E18.10)') 'Verify: ', dstFlux_reg, dstFlux, error, abs(totalXArea-totalSrcArea)/totalSrcArea
-    if(error > 1.e-4) then
+    if(error > 1.e-5) then
       print *, 'Regrid through XGrid doesnot agree with direct Regrid'
       if(present(rc)) rc = ESMF_RC_NOT_VALID
       return
@@ -1514,7 +1514,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     !print *, 'x2a atm', lpet, atm
-    call compute_flux2D(vm, atm, srcAreaPtr, srcFracPtr, allsrcsum, rc=localrc)
+    call compute_flux2D(vm, atm, srcAreaPtr, srcFracPtr, allsrcsum, dstflux=.true., rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1650,18 +1650,22 @@ contains
 
   end subroutine compute_flux1D
 
-  subroutine compute_flux2D(vm, flux_density, area, fraction, allsum, rc)
+  subroutine compute_flux2D(vm, flux_density, area, fraction, allsum, dstflux, rc)
     type(ESMF_VM), intent(in)        :: vm
     real(ESMF_KIND_R8), pointer      :: flux_density(:,:) 
     real(ESMF_KIND_R8), pointer      :: area(:,:) 
     real(ESMF_KIND_R8), pointer      :: fraction(:,:) 
     real(ESMF_KIND_R8), intent(out)  :: allsum(3)
+    logical, intent(in) , optional   :: dstflux
     integer, intent(out), optional   :: rc
 
     real(ESMF_KIND_R8)               :: sum(3)
     integer                          :: i,j, localrc, npet, lpet
+    logical                          :: l_dstflux
 
     if(present(rc)) rc = ESMF_SUCCESS
+    l_dstflux = .false.
+    if(present(dstflux)) l_dstflux = dstflux
 
     call ESMF_VMGet(vm, petCount=npet, localPet=lpet, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1675,7 +1679,11 @@ contains
     sum = 0.
     do i = lbound(flux_density, 1), ubound(flux_density, 1)
       do j = lbound(flux_density, 2), ubound(flux_density, 2)
-        sum(1) = sum(1) + flux_density(i,j)*area(i,j)*fraction(i,j)
+        if(l_dstflux) then
+          sum(1) = sum(1) + flux_density(i,j)*area(i,j)
+        else
+          sum(1) = sum(1) + flux_density(i,j)*area(i,j)*fraction(i,j)
+        endif
         sum(2) = sum(2) +                 area(i,j)*fraction(i,j)
         sum(3) = sum(3) +                 area(i,j)
       enddo

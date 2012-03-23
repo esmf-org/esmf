@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.42 2012/03/22 18:12:27 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.43 2012/03/23 16:32:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -577,6 +577,18 @@ contains
     !  ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(npet == 1) then
+    xgrid = ESMF_XGridCreate((/make_grid(2,2,1.,1.,0.,0.,field=srcField(1),rc=localrc), &
+                               make_grid(2,2,0.5,1.,1.5,1.5,field=srcField(2),rc=localrc)/), &
+      (/make_grid(3,3,1.,1.,0.,0.,field=dstField(1),rc=localrc)/), &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call flux_exchange(xgrid, srcField(1:2), dstField(1:1), rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! complicated merging, these triggers a condition in rend mesh that currently does not support two distant Grids
     ! for multi-pet
     xgrid = ESMF_XGridCreate((/make_grid(4,2,1.,1.,0.,0.,rc=localrc), make_grid(4,2,0.5,1.,4.,0.,rc=localrc), &
@@ -823,14 +835,14 @@ contains
     starty = atm_sy
     ! compute coord
     ! X center
-    call ESMF_GridGetCoord(make_grid, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-        coordDim=1, farrayPtr=coordX, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    do i = lbound(coordX,1), ubound(coordX,1)
-      coordX(i) = startx + atm_dx/2. + (i-1)*atm_dx
-    enddo
+    !call ESMF_GridGetCoord(make_grid, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+    !    coordDim=1, farrayPtr=coordX, rc=localrc)
+    !if (ESMF_LogFoundError(localrc, &
+    !    ESMF_ERR_PASSTHRU, &
+    !    ESMF_CONTEXT, rcToReturn=rc)) return
+    !do i = lbound(coordX,1), ubound(coordX,1)
+    !  coordX(i) = startx + atm_dx/2. + (i-1)*atm_dx
+    !enddo
     !print *, 'coordX: ', coordX
     ! X corner
     call ESMF_GridGetCoord(make_grid, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
@@ -843,14 +855,14 @@ contains
     enddo
     !print *, 'startx: ', startx, lbound(coordX, 1), 'coordX: ', coordX
     ! Y center
-    call ESMF_GridGetCoord(make_grid, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-        coordDim=2, farrayPtr=coordY, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    do i = lbound(coordY,1), ubound(coordY,1)
-      coordY(i) = starty + atm_dy/2. + (i-1)*atm_dy
-    enddo
+    !call ESMF_GridGetCoord(make_grid, localDE=0, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+    !    coordDim=2, farrayPtr=coordY, rc=localrc)
+    !if (ESMF_LogFoundError(localrc, &
+    !    ESMF_ERR_PASSTHRU, &
+    !    ESMF_CONTEXT, rcToReturn=rc)) return
+    !do i = lbound(coordY,1), ubound(coordY,1)
+    !  coordY(i) = starty + atm_dy/2. + (i-1)*atm_dy
+    !enddo
     ! Y corner
     call ESMF_GridGetCoord(make_grid, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
         coordDim=2, farrayPtr=coordY, rc=localrc)
@@ -1185,15 +1197,13 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-      call compute_flux2D(vm, dst, dst_area, dst_frac, allsrcsum, rc)
+      call compute_flux2D(vm, dst, dst_area, dst_frac, allsrcsum, dstflux=.true., rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       if(lpet == 0) print *, 'dst flux and area: ', allsrcsum
-      ! In general, dst flux cannot be guarannteed to be conserved when
-      ! interpolating from high resolution Grid/XGrid to low resolution Grid
-      ! due to undersampling nature of the process
-      if(abs(exf_tarea - allsrcsum(2)) .gt. 1.e-10) then
+      if((abs(exf_tarea - allsrcsum(2)) .gt. 1.e-10) .or. &
+         (abs(exf_tflux - allsrcsum(1)) .gt. 1.e-10)) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
            msg="- inconsistent flux and area found", &
            ESMF_CONTEXT, rcToReturn=rc) 
@@ -1284,18 +1294,22 @@ contains
 
   end subroutine compute_flux1D
 
-  subroutine compute_flux2D(vm, flux_density, area, fraction, allsum, rc)
+  subroutine compute_flux2D(vm, flux_density, area, fraction, allsum, dstflux, rc)
     type(ESMF_VM), intent(in)        :: vm
     real(ESMF_KIND_R8), pointer      :: flux_density(:,:) 
     real(ESMF_KIND_R8), pointer      :: area(:,:) 
     real(ESMF_KIND_R8), pointer      :: fraction(:,:) 
     real(ESMF_KIND_R8), intent(out)  :: allsum(3)
+    logical, intent(in),  optional   :: dstflux
     integer, intent(out), optional   :: rc
 
     real(ESMF_KIND_R8)               :: sum(3)
     integer                          :: i,j, localrc, npet, lpet
+    logical                          :: l_dstflux
 
     if(present(rc)) rc = ESMF_SUCCESS
+    l_dstflux = .false.
+    if(present(dstflux)) l_dstflux = dstflux
 
     call ESMF_VMGet(vm, petCount=npet, localPet=lpet, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1309,7 +1323,11 @@ contains
     sum = 0.
     do i = lbound(flux_density, 1), ubound(flux_density, 1)
       do j = lbound(flux_density, 2), ubound(flux_density, 2)
-        sum(1) = sum(1) + flux_density(i,j)*area(i,j)*fraction(i,j)
+        if(l_dstflux) then
+          sum(1) = sum(1) + flux_density(i,j)*area(i,j)
+        else
+          sum(1) = sum(1) + flux_density(i,j)*area(i,j)*fraction(i,j)
+        endif
         sum(2) = sum(2) +                 area(i,j)*fraction(i,j)
         sum(3) = sum(3) +                 area(i,j)
       enddo
@@ -1552,15 +1570,13 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-      call compute_flux2D(vm, dst, dst_area, dst_frac, allsrcsum, rc)
+      call compute_flux2D(vm, dst, dst_area, dst_frac, allsrcsum, dstflux=.true., rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       if(lpet == 0) print *, 'dst flux and area: ', allsrcsum
-      ! In general, dst flux cannot be guarannteed to be conserved when
-      ! interpolating from high resolution Grid/XGrid to low resolution Grid
-      ! due to undersampling nature of the process
-      if(abs(exf_tarea - allsrcsum(2)) .gt. 1.e-10) then
+      if((abs(exf_tarea - allsrcsum(2)) .gt. 1.e-10) .or. &
+         (abs(exf_tflux - allsrcsum(1)) .gt. 1.e-10)) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
            msg="- inconsistent flux and area found", &
            ESMF_CONTEXT, rcToReturn=rc) 
