@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.261 2012/03/23 03:34:26 peggyli Exp $
+! $Id: ESMF_Grid.F90,v 1.262 2012/03/23 05:49:22 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -306,7 +306,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.261 2012/03/23 03:34:26 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.262 2012/03/23 05:49:22 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5254,6 +5254,18 @@ end subroutine convert_corner_arrays_to_1D
       type(ESMF_Grid) :: ESMF_GridCreateFrmNCFile
 !
 ! !ARGUMENTS:
+
+    character(len=*),       intent(in)             :: filename
+    type(ESMF_FileFormat_Flag) 			   :: fileFormat
+    integer,                intent(in)             :: regDecomp(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Decomp_Flag), intent(in),  optional  :: decompflag(:)
+    logical,                intent(in),  optional  :: isSphere
+    logical,                intent(in),  optional  :: addCornerStagger
+    logical,                intent(in),  optional  :: addMask
+    character(len=*),       intent(in),  optional  :: varname
+    integer,                intent(out), optional  :: rc
+
 ! !DESCRIPTION:
 ! This function creates a {\tt ESMF\_Grid} object using the grid definition from
 ! a grid file in NetCDF that is either in the SCRIP format or in the CF convention. 
@@ -5300,16 +5312,6 @@ end subroutine convert_corner_arrays_to_1D
 !
 !EOP
 
-    character(len=*),       intent(in)             :: filename
-    type(ESMF_FileFormat_Flag) 			   :: fileFormat
-    integer,                intent(in)             :: regDecomp(:)
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Decomp_Flag), intent(in),  optional  :: decompflag(:)
-    logical,                intent(in),  optional  :: isSphere
-    logical,                intent(in),  optional  :: addCornerStagger
-    logical,                intent(in),  optional  :: addMask
-    character(len=*),       intent(in),  optional  :: varname
-    integer,                intent(out), optional  :: rc
 
     type(ESMF_Grid) :: grid
     integer         :: localrc
@@ -5719,7 +5721,6 @@ end function ESMF_GridCreateFrmScrip
     type(ESMF_Grid) :: ESMF_GridCreateFrmGridspec
 !
 ! !ARGUMENTS:
- 
     character(len=*),      intent(in)             :: grid_filename
     integer,               intent(in)             :: regDecomp(:)
     type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
@@ -6061,10 +6062,10 @@ end function ESMF_GridCreateFrmScrip
 	      corner2D(maxIndex2D(1), 1:dims(2)) = cornerlon3D(2,dims(1),:)
 	    end if
 	    if (maxIndex2D(2) > dims(2)) then
-	      corner2D(1:dims(1), maxIndex2D(2)) = cornerlon3D(3,:,dims(2))
+	      corner2D(1:dims(1), maxIndex2D(2)) = cornerlon3D(4,:,dims(2))
 	    end if
 	    if (maxIndex2D(1) > dims(1) .and. maxIndex2D(2) > dims(2)) then
-		corner2D(maxIndex2D(1),maxIndex2D(2))=cornerlon3D(4, dims(1), dims(2))
+		corner2D(maxIndex2D(1),maxIndex2D(2))=cornerlon3D(3, dims(1), dims(2))
             endif
           endif        
 
@@ -6100,10 +6101,10 @@ end function ESMF_GridCreateFrmScrip
 	      corner2D(maxIndex2D(1), 1:dims(2)) = cornerlat3D(2,dims(1),:)
 	    end if
 	    if (maxIndex2D(2) > dims(2)) then
-	      corner2D(1:dims(1), maxIndex2D(2)) = cornerlat3D(3,:,dims(2))
+	      corner2D(1:dims(1), maxIndex2D(2)) = cornerlat3D(4,:,dims(2))
 	    end if
 	    if (maxIndex2D(1) > dims(1) .and. maxIndex2D(2) > dims(2)) then
-		corner2D(maxIndex2D(1),maxIndex2D(2))=cornerlat3D(4, dims(1), dims(2))
+		corner2D(maxIndex2D(1),maxIndex2D(2))=cornerlat3D(3, dims(1), dims(2))
             endif
           endif        
 
