@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridOnlineEx.F90,v 1.5 2012/03/22 21:09:43 svasquez Exp $
+! $Id: ESMF_XGridOnlineEx.F90,v 1.6 2012/03/26 20:10:26 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -41,6 +41,7 @@
     type(ESMF_DistGrid)                 :: l_sideAdg(2), l_sideBdg(1)
     type(ESMF_XGridSpec)                :: l_sparseMatA2X(2), l_sparseMatX2B(1)
     type(ESMF_Field)                    :: field, srcField(2), dstField(1)
+    type(ESMF_Field)                    :: dstFrac, dstFrac2
 
     integer                             :: eleCount, ngridA, ngridB
     integer                             :: elb, eub, ec
@@ -71,8 +72,12 @@
 !\subsubsection{Create an XGrid online from user input data then use it for regridding}
 !\label{sec:xgrid:usage:xgrid_createonline}
 !
-! XGrid can be created online from Grids on either side, internally the
-! weight matrics and index mapping are computed and stored in the XGrid.
+! An {\tt ESMF\_XGrid} object can be created online from Grids on either side
+! of the exchange grid. Internally the
+! weight matrics and index mapping are computed and stored in the XGrid, along
+! with other necessary information for flux exchange calculation between
+!
+! any pair of model components used for the XGrid creation. 
 ! 
 ! In this example, we create an XGrid from overlapping Grids on
 ! either side of the XGrid. Then we perform a flux exchange from one side
@@ -81,6 +86,7 @@
 ! We start by creating the Grids on both sides and associate coordinates with
 ! the Grids on the corner stagger. The Grids use global indexing and padding 
 ! for coordinates on the corner stagger.
+!
 ! For details of Grid creation and coordinate use, 
 ! please refer to Grid class documentation.
 !EOE
@@ -207,7 +213,7 @@
 !EOC
 
 !BOE
-! Create an XGrid from the two lists of Grids on side A and B.
+! Create an {\tt ESMF\_XGrid} object from the two lists of Grids on side A and B.
 !EOE
 !BOC
     xgrid = ESMF_XGridCreate(sideA, sideB, rc=localrc)
@@ -256,6 +262,15 @@
           endflag=ESMF_END_ABORT)
     enddo
 !EOC
+    dstFrac = ESMF_FieldCreate(sideB(1), &
+      typekind=ESMF_TYPEKIND_R8, rc=localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+      endflag=ESMF_END_ABORT)
+    dstFrac2 = ESMF_FieldCreate(sideB(1), &
+      typekind=ESMF_TYPEKIND_R8, rc=localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+      endflag=ESMF_END_ABORT)
+
 
 !BOE
 !
@@ -278,9 +293,10 @@
       if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
         endflag=ESMF_END_ABORT)
     enddo
-    ! from X -> B
+    ! from X -> B, retrieve the destination $f_1$ and $f_2$ Fields.
     do i = 1, 1
       call ESMF_FieldRegridStore(xgrid, field, dstField(i), &
+        dstFracField=dstFrac, dstFrac2Field=dstFrac2, &
         routehandle=rh_xgrid2dst(i), rc = localrc)
       if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
         endflag=ESMF_END_ABORT)
@@ -336,7 +352,8 @@
     ! Execute the regrid store
     do i = 1, 1
       call ESMF_FieldRegrid(field, dstField(i), &
-        routehandle=rh_xgrid2dst(i), rc = localrc)
+        routehandle=rh_xgrid2dst(i), &
+        rc = localrc)
       if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
         endflag=ESMF_END_ABORT)
     enddo
@@ -344,6 +361,24 @@
 
     !print *, '- B after SMM from X -> B'
     !print *, farrayPtr ! should be 1/B_area
+
+!BOE
+! After the regridding calls, the routehandle can be released by calling the
+! {\tt ESMF\_FieldRegridRelease()} method.
+!EOE
+!BOC
+    do i = 1, 2
+      call ESMF_FieldRegridRelease(routehandle=rh_src2xgrid(i), rc=localrc)
+!EOC
+      if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+        endflag=ESMF_END_ABORT)
+!BOC
+    enddo
+    call ESMF_FieldRegridRelease(routehandle=rh_xgrid2dst(1), rc=localrc)
+!EOC
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+      endflag=ESMF_END_ABORT)
+!EOC
 
 !BOE
 ! In the above example, we first set up all the required paramters to create an XGrid from user
@@ -417,6 +452,12 @@
       if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
         endflag=ESMF_END_ABORT)
     enddo
+    call ESMF_FieldDestroy(dstFrac, rc = localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+      endflag=ESMF_END_ABORT)
+    call ESMF_FieldDestroy(dstFrac2, rc = localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+      endflag=ESMF_END_ABORT)
 
     if(localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     print *, "Regridding through XGrid example returned"
