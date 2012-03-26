@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGrid_F.C,v 1.13 2012/03/15 19:27:46 feiliu Exp $
+// $Id: ESMCI_XGrid_F.C,v 1.14 2012/03/26 15:49:01 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_XGrid_F.C,v 1.13 2012/03/15 19:27:46 feiliu Exp $";
+             "$Id: ESMCI_XGrid_F.C,v 1.14 2012/03/26 15:49:01 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -428,4 +428,53 @@ extern "C" void FTN_X(c_esmc_xgrid_getfrac)(Grid **gridpp,
 
 }
 
+////////////////////////////////////////////////////////////////////////////
+// Assumes array is center stagger loc
+extern "C" void FTN_X(c_esmc_xgrid_getfrac2)(Grid **gridpp,
+                   Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
+                   int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_regrid_getfrac2()" 
+  Trace __trace(" FTN_X(regrid_getfrac2)()");
+
+  ESMCI::Array &array = **arraypp;
+  Mesh &mesh = **meshpp;
+  Grid &grid = **gridpp;
+
+  try {
+
+
+    // Get the integration weights
+    MEField<> *frac = mesh.GetField("elem_frac2");
+    if (!frac) Throw() << "Could not find elem_frac2 field on this mesh"
+                             <<std::endl; 
+
+    CpMeshElemDataToArray(grid, *staggerLoc, mesh, array, frac);
+ 
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), rc);
+    } else {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", rc);
+    }
+
+    return;
+  } catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
 }
+
+} // end extern "C"

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.101 2012/03/20 21:02:01 feiliu Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.102 2012/03/26 15:49:45 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.101 2012/03/20 21:02:01 feiliu Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.102 2012/03/26 15:49:45 feiliu Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -965,7 +965,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridStore()
       subroutine ESMF_FieldRegridStoreX(xgrid, srcField, dstField, &
-                    keywordEnforcer, routehandle, srcFracField, dstFracField, rc)
+                    keywordEnforcer, routehandle, srcFracField, dstFracField, &
+                    srcFrac2Field, dstFrac2Field, rc)
 !      
 ! !ARGUMENTS:
       type(ESMF_XGrid),       intent(in)              :: xgrid
@@ -975,6 +976,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_RouteHandle), intent(inout), optional :: routehandle
       type(ESMF_Field),       intent(inout), optional :: srcFracField
       type(ESMF_Field),       intent(inout), optional :: dstFracField
+      type(ESMF_Field),       intent(inout), optional :: srcFrac2Field
+      type(ESMF_Field),       intent(inout), optional :: dstFrac2Field
       integer,                intent(out),   optional :: rc 
 !
 ! !STATUS:
@@ -982,7 +985,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[5.3.0] Added arguments {\tt srcFracField} and {\tt dstFracField}.
+! \item[5.3.0] Added arguments {\tt srcFracField}, {\tt dstFracField}, {\tt srcFrac2Field}, and {\tt dstFrac2Field}.
 ! \end{description}
 ! \end{itemize}
 !
@@ -1029,6 +1032,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           as the srcField.
 !     \item [{[dstFracField]}] 
 !           The fraction of each destination cell participating in the regridding. 
+!           This Field needs to be created on the same Grid and location (e.g staggerloc) 
+!           as the dstField.
+!     \item [{[srcFrac2Field]}] 
+!           The fraction of each source cell as a result of Grid merge.
+!           This Field needs to be created on the same Grid and location (e.g staggerloc) 
+!           as the srcField.
+!     \item [{[dstFrac2Field]}] 
+!           The fraction of each destination cell as a result of Grid merge.
 !           This Field needs to be created on the same Grid and location (e.g staggerloc) 
 !           as the dstField.
 !     \item [{[rc]}]
@@ -1264,6 +1275,56 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           call ESMF_XGridGet(xgrid, srcSide, srcIdx, &
               dstSide, dstIdx, dstFracArray=dstFracArray, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        ! retrieve regridding fraction2 Fields on demand
+        if(present(srcFrac2Field)) then
+          call ESMF_FieldGet(srcFrac2Field, staggerloc=fracFieldStaggerloc, &
+               array=srcFracArray, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          call ESMF_FieldGet(srcField, staggerloc=interpFieldStaggerloc, &
+               rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+               ESMF_CONTEXT, rcToReturn=rc)) return
+    
+          ! Make sure the staggerlocs match
+          if (interpFieldStaggerloc .ne. fracFieldStaggerloc) then
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                  msg="- fracField Field staggerloc must match interpField staggerloc", &
+                  ESMF_CONTEXT, rcToReturn=rc)
+             return
+          endif
+
+          call ESMF_XGridGet(xgrid, srcSide, srcIdx, &
+              dstSide, dstIdx, srcFrac2Array=srcFracArray, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        if(present(dstFrac2Field)) then
+          call ESMF_FieldGet(dstFrac2Field, staggerloc=fracFieldStaggerloc, &
+               array=dstFracArray, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          call ESMF_FieldGet(dstField, staggerloc=interpFieldStaggerloc, &
+               rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+               ESMF_CONTEXT, rcToReturn=rc)) return
+    
+          ! Make sure the staggerlocs match
+          if (interpFieldStaggerloc .ne. fracFieldStaggerloc) then
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                  msg="- fracField Field staggerloc must match interpField staggerloc", &
+                  ESMF_CONTEXT, rcToReturn=rc)
+             return
+          endif
+
+          call ESMF_XGridGet(xgrid, srcSide, srcIdx, &
+              dstSide, dstIdx, dstFrac2Array=dstFracArray, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif

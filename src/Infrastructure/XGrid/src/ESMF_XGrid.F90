@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.35 2012/03/15 19:27:48 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.36 2012/03/26 15:49:08 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -97,6 +97,7 @@ module ESMF_XGridMod
     type(ESMF_Array), pointer              :: fracA2X(:), fracB2X(:)       ! src fraction 
     type(ESMF_Array), pointer              :: fracX2A(:), fracX2B(:)       ! dst fraction 
     type(ESMF_Array)                       :: fracX
+    type(ESMF_Array), pointer              :: frac2A(:), frac2B(:)
     logical                                :: is_proxy         ! .true. for a proxy xgrid
     logical                                :: storeOverlay    
     integer                                :: online           ! 1 if Xgrid is computed based on user input, 0 offline
@@ -148,7 +149,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.35 2012/03/15 19:27:48 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.36 2012/03/26 15:49:08 feiliu Exp $'
 
 !==============================================================================
 !
@@ -959,6 +960,29 @@ contains
                                  ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
+      ! serialize the Frac2s
+      if(associated(fp%frac2A)) then
+          ngridA = size(fp%frac2A,1)
+          do i = 1, ngridA
+            call c_esmc_arrayserialize (fp%frac2A(i), buffer, length, offset,  &
+                lattreconflag, linquireflag, localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+      endif
+
+      if(associated(fp%frac2B)) then
+          ngridB = size(fp%frac2B,1)
+          do i = 1, ngridB
+            call c_esmc_arrayserialize (fp%frac2B(i), buffer, length, offset,  &
+                lattreconflag, linquireflag, localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+      endif
+
       if(fp%storeOverlay) then
         call ESMF_MeshSerialize(mesh=fp%mesh, buffer=buffer, &
            length=length, offset=offset, &
@@ -1084,6 +1108,8 @@ contains
         allocate(fp%fracB2X(ngridB))
         allocate(fp%fracX2A(ngridA))
         allocate(fp%fracX2B(ngridB))
+        allocate(fp%frac2A(ngridA))
+        allocate(fp%frac2B(ngridB))
       endif
 
       ! Deserialize the rest of the XGrid members
@@ -1172,6 +1198,24 @@ contains
           if (ESMF_LogFoundError(localrc, &
                                    ESMF_ERR_PASSTHRU, &
                                    ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      if(associated(fp%frac2A)) then
+          do i = 1, ngridA
+            call c_ESMC_ArrayDeserialize(fp%frac2A(i), buffer, offset, &
+                lattreconflag, localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+      endif
+      if(associated(fp%frac2B)) then
+          do i = 1, ngridB
+            call c_ESMC_ArrayDeserialize(fp%frac2B(i), buffer, offset, &
+                lattreconflag, localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
       endif
 
       if(flag == 1) then
@@ -1265,6 +1309,8 @@ contains
         nullify(xgtypep%fracB2X)
         nullify(xgtypep%fracX2A)
         nullify(xgtypep%fracX2B)
+        nullify(xgtypep%frac2A)
+        nullify(xgtypep%frac2B)
         nullify(xgtypep%area)
         nullify(xgtypep%centroid)
         nullify(xgtypep%sparseMatA2X)

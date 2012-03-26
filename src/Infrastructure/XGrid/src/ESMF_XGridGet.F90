@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.27 2012/03/16 18:03:32 feiliu Exp $
+! $Id: ESMF_XGridGet.F90,v 1.28 2012/03/26 15:49:08 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.27 2012/03/16 18:03:32 feiliu Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.28 2012/03/26 15:49:08 feiliu Exp $'
 
 !==============================================================================
 !
@@ -418,6 +418,7 @@ end subroutine ESMF_XGridGetDefault
 
 subroutine ESMF_XGridGetSMMSpecFrac(xgrid, srcSide, srcGridIndex, &
     dstSide, dstGridIndex, sparseMat, srcFracArray, dstFracArray, &
+    srcFrac2Array, dstFrac2Array, &
     rc) 
 
 !
@@ -430,6 +431,8 @@ integer,                   intent(in)               :: dstGridIndex
 type(ESMF_XGridSpec),      intent(out),   optional  :: sparseMat
 type(ESMF_Array),          intent(inout), optional  :: srcFracArray
 type(ESMF_Array),          intent(inout), optional  :: dstFracArray
+type(ESMF_Array),          intent(inout), optional  :: srcFrac2Array
+type(ESMF_Array),          intent(inout), optional  :: dstFrac2Array
 integer,                   intent(out),   optional  :: rc 
 !
 ! !DESCRIPTION:
@@ -457,6 +460,10 @@ integer,                   intent(out),   optional  :: rc
 !       src Frac Array corresponding to the src Grid or Mesh.
 !     \item [{[dstFracArray]}]
 !       dst Frac Array corresponding to the dst Grid or Mesh.
+!     \item [{[srcFrac2Array]}]
+!       src Frac2 Array corresponding to the src Grid or Mesh.
+!     \item [{[dstFrac2Array]}]
+!       dst Frac2 Array corresponding to the dst Grid or Mesh.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
 !       is created.
@@ -502,6 +509,31 @@ integer,                   intent(out),   optional  :: rc
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
+
+        if(present(srcFrac2Array)) then
+          if(xgtypep%online == 0) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- Cannot query srcFrac2Array for xgrid created offline", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+          call CpArray2DR8(xgtypep%frac2A(srcGridIndex), srcFrac2Array, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        if(present(dstFrac2Array)) then
+          if(xgtypep%online == 0) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- Cannot query dstFracArray for xgrid created offline", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+          call CpArray1DR8(xgtypep%fracX, dstFrac2Array, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
     endif
 
     if(srcSide .eq. ESMF_XGRIDSIDE_B .and. dstSide .eq. ESMF_XGRIDSIDE_BALANCED) then
@@ -526,6 +558,31 @@ integer,                   intent(out),   optional  :: rc
             return
           endif
           call CpArray1DR8(xgtypep%fracX, dstFracArray, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        if(present(srcFrac2Array)) then
+          if(xgtypep%online == 0) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- Cannot query srcFrac2Array for xgrid created offline", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+          call CpArray2DR8(xgtypep%frac2B(srcGridIndex), srcFrac2Array, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        if(present(dstFrac2Array)) then
+          if(xgtypep%online == 0) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- Cannot query dstFrac2Array for xgrid created offline", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+          call CpArray1DR8(xgtypep%fracX, dstFrac2Array, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -558,6 +615,31 @@ integer,                   intent(out),   optional  :: rc
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
         endif
+
+        if(present(srcFrac2Array)) then
+          if(xgtypep%online == 0) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- Cannot cannot query srcFrac2Array for xgrid created offline", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+          call CpArray1DR8(xgtypep%fracX, srcFrac2Array, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        if(present(dstFrac2Array)) then
+          if(xgtypep%online == 0) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- Cannot cannot query dstFrac2Array for xgrid created offline", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+          call CpArray2DR8(xgtypep%frac2A(dstGridIndex), dstFrac2Array, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
     endif
 
     if(srcSide .eq. ESMF_XGRIDSIDE_BALANCED .and. dstSide .eq. ESMF_XGRIDSIDE_B) then
@@ -582,6 +664,31 @@ integer,                   intent(out),   optional  :: rc
             return
           endif
           call CpArray2DR8(xgtypep%fracX2B(dstGridIndex), dstFracArray, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        if(present(srcFrac2Array)) then
+          if(xgtypep%online == 0) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- Cannot cannot query srcFrac2Array for xgrid created offline", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+          call CpArray1DR8(xgtypep%fracX, srcFrac2Array, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+        if(present(dstFrac2Array)) then
+          if(xgtypep%online == 0) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- Cannot cannot query dstFrac2Array for xgrid created offline", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+          call CpArray2DR8(xgtypep%frac2B(dstGridIndex), dstFrac2Array, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
