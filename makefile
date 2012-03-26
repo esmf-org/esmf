@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.124.2.1 2011/12/13 23:28:31 theurich Exp $
+# $Id: makefile,v 1.124.2.2 2012/03/26 23:07:16 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -103,6 +103,8 @@ script_info:
 	-@echo "ESMF_TESTHARNESS_ARRAY: $(ESMF_TESTHARNESS_ARRAY)"
 	-@echo "ESMF_TESTHARNESS_FIELD: $(ESMF_TESTHARNESS_FIELD)"
 	-@echo "ESMF_MPIRUN:            $(ESMF_MPIRUN)"
+	-@if [ "$(ESMF_TESTMPMD)" = "ON" ] ; then \
+	  echo "ESMF_MPIMPMDRUN:        $(ESMF_MPIMPMDRUN)" ; fi
 	-@if [ -n "$(ESMF_MPISCRIPTOPTIONS)" ] ; then \
 	  echo "ESMF_MPISCRIPTOPTIONS:  $(ESMF_MPISCRIPTOPTIONS)" ; fi
 	-@if [ -n "$(ESMF_MPIBATCHOPTIONS)" ] ; then \
