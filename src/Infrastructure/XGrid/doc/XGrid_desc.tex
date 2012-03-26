@@ -1,4 +1,4 @@
-% $Id: XGrid_desc.tex,v 1.5 2012/03/26 17:06:52 feiliu Exp $
+% $Id: XGrid_desc.tex,v 1.6 2012/03/26 19:41:40 feiliu Exp $
 
 An exchange grid represents the 2D boundary layer usually between the
 atmosphere on one side and ocean and land on the other in an Earth
@@ -42,9 +42,9 @@ In addition to the matrix multiply communication routehandle,
 {\tt ESMF\_XGrid} exports both $f_1$ and $f_2$ to the user through the {\tt ESMF\_FieldRegridStore()} method
 because each remapping pair has different $f_1$ and $f_2$ associated with it. $f_2$ from source Grid is 
 folded directly in the calculated weight matrices since its used to calculate destination point flux
-density $F$. The global source flux is defined as $\sum_{g=1}^{g=n_srcgrid}\sum_{s=1}^{s=n_srccell}{ f_{1s} f_{2s} A_s F_s }$.
+density $F$. The global source flux is defined as $\sum_{g=1}^{g=n\_srcgrid}\sum_{s=1}^{s=n\_srccell}{ f_{1s} f_{2s} A_s F_s }$.
 The global destination flux is defined as: 
-$\sum_{g=1}^{g=n_dstgrid}\sum_{d=1}^{d=n_dstcell}{ \sum_{s=1}^{s=n_intersect}(w_{sd} F_s) f_{2d} A_d}$, $w_{sd}$ is the
+$\sum_{g=1}^{g=n\_dstgrid}\sum_{d=1}^{d=n\_dstcell}{ \sum_{s=1}^{s=n\_intersect}(w_{sd} F_s) f_{2d} A_d}$, $w_{sd}$ is the
 $f_2$ modified weight intersecting s-th source Grid cell with d-th destination Grid cell.
 It can be proved both analytically and numerically that this formulation of the fractions and 
 weight calculation ensures global conservation of
