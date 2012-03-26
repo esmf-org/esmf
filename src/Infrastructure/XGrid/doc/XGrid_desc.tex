@@ -1,4 +1,4 @@
-% $Id: XGrid_desc.tex,v 1.3 2010/10/14 20:53:58 rokuingh Exp $
+% $Id: XGrid_desc.tex,v 1.4 2012/03/26 15:05:08 feiliu Exp $
 
 An exchange grid represents the 2D boundary layer usually between the
 atmosphere on one side and ocean and land on the other in an Earth
@@ -14,3 +14,37 @@ between atmosphere and ocean/land\cite{BalajiXGrid}. These cells can have irregu
 and can be broken down into triangles facilitating a finite element
 approach. In practice, there is a threshold of minimum cell area below
 which intersections are discarded.
+
+The ESMF exchange grid is implemented as the {\tt ESMF\_XGrid} class. 
+An {\tt ESMF\_XGrid} object can be created either online or offline from
+user supplied information. Online creation of {\tt ESMF\_XGrid} takes
+two lists of {\tt ESMF\_Grid} that represent the model component grids on
+either side of the exchange grid. From the two lists of {\tt ESMF\_Grid},
+information required for flux exchange calculation between any pair of the 
+model components from either side of the exchange grid is computed. A later
+call to {\tt ESMF\_FieldRegridStore()} with the xgrid and source and destination
+{\tt ESMF\_Field}s computes the {\tt ESMF\_Routehandle} object for matrix
+multiply operation used in model remapping.
+
+The {\tt ESMF\_XGrid} deals with 2 distinctive kinds of fraction for each Grid cell
+involved in its creation. The first fraction quantity $f_1$ is the same as defined in direct
+Field regrid between a source and destination {\tt ESMF\_Field} pair, namely the fraction
+of a total Grid cell area that is used in weight generation. The second fraction quantity $f_2$
+is a result of the Grid merging process when multiple {\tt ESMF\_Grid}s or model components
+exist on one side of the exchange grid. To compute XGrid, the multiple {\tt ESMF\_Grid}s
+are first merged together to form a super mesh. During the merging process, Grids that are
+of a higher priority clips into lower priority Grids, creating fractional cells in the lower
+priority Grids. Priority is a mechanism to resolve the claim of a surface region by multiple
+Grids. To conserve flux, any surface area can only be claimed by a unique Grid. This is
+a typical practice in earth system modelling, e.g. to handle land and ocean boundary.
+
+In addition to the matrix multiply communication routehandle, 
+{\tt ESMF\_XGrid} exports both $f_1$ and $f_2$ to the user through the {\tt ESMF\_FieldRegridStore()} method
+because each remapping pair has different $f_1$ and $f_2$ associated with it. $f_2$ from source Grid is 
+folded directly in the calculated weight matrices since its used to calculate destination point flux
+density. The formulation of the fractions and weight calculation ensures global conservation of
+flux transfered from source grids to exchange grid, and from exchange grid to destination grids.
+
+In the offline mode, the user is required to supply all necessary information to 
+compute communiction routehandle.
+
