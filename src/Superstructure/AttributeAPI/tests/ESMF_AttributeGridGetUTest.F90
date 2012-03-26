@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridGetUTest.F90,v 1.2 2012/03/20 23:56:10 rokuingh Exp $
+! $Id: ESMF_AttributeGridGetUTest.F90,v 1.3 2012/03/26 18:31:52 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.2 2012/03/20 23:56:10 rokuingh Exp $'
+  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.3 2012/03/26 18:31:52 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -134,7 +134,7 @@ print *, "dimCount= ", outI4
   
   !EX_UTest
   call ESMF_AttributeSet(grid, name="dimCount", value=4, rc=rc)
-  if (rc /= ESMF_SUCCESS) return
+  if (rc /= ESMF_SUCCESS) call ESMF_TestEnd(result, ESMF_SRCLINE)
   outI4=42
   call ESMF_AttributeGet(grid, name="dimCount", value=outI4, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -152,7 +152,7 @@ print *, "dimCount= ", outI4
   
   !EX_UTest
   call ESMF_AttributeSet(grid, name="ESMF:dimCount", value=4, rc=rc)
-  if (rc /= ESMF_SUCCESS) return
+  if (rc /= ESMF_SUCCESS) call ESMF_TestEnd(result, ESMF_SRCLINE)
   outI4=42
   call ESMF_AttributeGet(grid, name="ESMF:dimCount", value=outI4, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
