@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.5 2012/03/22 20:20:10 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.6 2012/03/26 20:47:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_StateReconcile2Mod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-  '$Id: ESMF_StateReconcile2.F90,v 1.5 2012/03/22 20:20:10 w6ws Exp $'
+  '$Id: ESMF_StateReconcile2.F90,v 1.6 2012/03/26 20:47:36 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
@@ -834,8 +834,6 @@ print *, "deserializing arraybundle"
               ESMF_CONTEXT,  &
               rcToReturn=rc)) return
 
-! TODO: Routehandle...
-
         case (ESMF_STATEITEM_STATE%ot)
 print *, "deserializing substate"
           substate = ESMF_StateDeserialize(vm, obj_buffer, buffer_offset, &
@@ -995,7 +993,7 @@ print *, "deserialization error in default case.  Returning ESMF_RC_INTNRL_INCON
     counts_buf_send = nitems_buf(mypet) + 1
     counts_buf_recv = nitems_buf + 1
 
-    displs_buf_send    = 0 ! Always zero, since we are broadcasting
+    displs_buf_send    = 0 ! Always zero, since local PET is broadcasting
     displs_buf_recv(0) = 0
     do, i=1, npets-1
       displs_buf_recv(i) = displs_buf_recv(i-1) + counts_buf_recv(i-1)
@@ -1003,6 +1001,8 @@ print *, "deserialization error in default case.  Returning ESMF_RC_INTNRL_INCON
 
 ! do, i=0, npets-1
 !   if (i == mypet) then
+!     write (6,*) ESMF_METHOD, ': pet', mypet, ': counts_buf_send =', counts_buf_send
+!     write (6,*) ESMF_METHOD, ': pet', mypet, ': displs_buf_send =', displs_buf_send
 !     write (6,*) ESMF_METHOD, ': pet', mypet, ': counts_buf_recv =', counts_buf_recv
 !     write (6,*) ESMF_METHOD, ': pet', mypet, ': displs_buf_recv =', displs_buf_recv
 !     flush (6)
@@ -1010,10 +1010,10 @@ print *, "deserialization error in default case.  Returning ESMF_RC_INTNRL_INCON
 !   call ESMF_VMBarrier (vm)
 ! end do
 
-    !  - Send all IDs to all PETs
+    ! Exchange Ids
 
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': AllToAllVing Ids on PET ' // iTos (mypet))
+    ': AllToAllVing Ids')
 
     allocate (id_recv(0:sum (counts_buf_recv+1)-1),  &
         stat=memstat)
@@ -1035,12 +1035,52 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
       ipos = ipos + counts_buf_recv(i)
     end do
 
-    ! Interchange VMIds
+! do, j=0, npets-1
+!   if (j == myPet) then
+!     do, i=0, ubound (id_info, 1)
+!       write (6,*) 'pet', j, ': id_info%id     =', id_info(i)%id
+!       flush (6)
+!     end do
+!   end if
+!   call ESMF_VMBarrier (vm)
+! end do
 
-    !  - Send all VMIDs to all PETs
+    ! Exchange VMIds
 
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': AllToAllVing VMIds on PET ' // iTos (mypet))
+    ': AllToAllVing VMIds')
+
+#if 1
+! VMBcastVMId version
+call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+    ': AllToAllVVMIds exchange (using VMBcastVMId)')
+call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+    ':   VMIdCopying...')
+    call ESMF_VMIdCopy (  &
+        dest=id_info(mypet)%vmid,  &
+        source=vmid,  &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    do, send_pet=0, npets-1
+call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+    ':   broadcasting VMId, using rootPet ' // iToS (send_pet), ask=.false.)
+      call ESMF_VMBcastVMId (vm,  &
+	  bcstData=id_info(send_pet)%vmid,  &
+	  count=size (id_info(send_pet)%vmid),  &
+          rootPet=send_pet, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+    end do
+#else
+
+! AllToAllVVMId version
+call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+    ': AllToAllVVMIds exchange (using VMAllToAllVVMId)')
+
     allocate (vmid_recv(0:sum (counts_buf_recv+1)-1),  &
               stat=memstat)
     if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1051,44 +1091,6 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-
-#if 0
-! VMBcastVMId version
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': AllToAllVVMIds broadcast (using VMBcastVMId)')
-    do, send_pet=0, npets-1
-      recv_offset = displs_buf_recv(send_pet)
-      recv_count  = counts_buf_recv(send_pet)
-      if (mypet == send_pet) then
-#define ALIAS_VMID
-#if defined (ALIAS_VMID)
-! use alias to sending vmids.  Not sure this will work for passes
-! past PET 0.
-        vmid_recv = vmid
-#else
-! can not use simple assignment here because we need a deep copy
-        call ESMF_VMIdCopy (  &  ! deep copy
-            dest=vmid_recv(recv_offset:recv_offset+recv_count-1),  &
-            source=vmid,  &
-            rc=localrc)
-	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT,  &
-            rcToReturn=rc)) return
-#endif
-      end if
-
-print *, 'pet', mypet, ': recv_offset:', recv_offset, ', recv_count =', recv_count, ', ubound (vmid_recv) =', ubound (vmid_recv, 1)
-      call ESMF_VMBcastVMId (vm,  &
-	bcstData=vmid_recv(recv_offset:recv_offset+recv_count-1),  &
-	count=recv_count, rootPet=send_pet, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
-    end do
-#else
-! AllToAllVVMId version
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': AllToAllVVMIds broadcast (using VMAllToAllVVMId)')
     call ESMF_VMAllToAllVVMId (vm,  &
        vmid     , counts_buf_send, displs_buf_send,  &
        vmid_recv, counts_buf_recv, displs_buf_recv,  &
@@ -1096,7 +1098,6 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-#endif
 
 call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     ': copying VMIds into id_info array')
@@ -1110,16 +1111,7 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           rcToReturn=rc)) return
       ipos = ipos + counts_buf_recv(i)
     end do
-      
-do, j=0, npets-1
-  if (j == myPet) then
-    do, i=0, ubound (id_info, 1)
-      write (6,*) 'pet', j, ': id_info%id     =', id_info(i)%id
-      flush (6)
-    end do
-  end if
-  call ESMF_VMBarrier (vm)
-end do
+#endif
 
     rc = localrc
 
@@ -1872,7 +1864,7 @@ print *, ESMF_METHOD, ': obj_buffer bounds = (0:', buffer_offset, ')'
         ! Item type
         if (inqflag == ESMF_NOINQUIRE) then
 	  obj_buffer(buffer_offset:buffer_offset+ESMF_SIZEOF_DEFINT-1) =  &
-	      transfer (stateitem%otype%ot, obj_buffer(1:4))
+	      transfer (stateitem%otype%ot, obj_buffer(1:ESMF_SIZEOF_DEFINT))
         end if
         buffer_offset = buffer_offset + ESMF_SIZEOF_DEFINT
 
@@ -2086,7 +2078,7 @@ print *, "serialization error in default case.  Returning ESMF_RC_INTNRL_INCONS"
 
     if (localask) then
       if (mypet == 0) then
-	write (ESMF_UtilIOStdout,'(a)', advance='no') 'Proceed?'
+	write (ESMF_UtilIOStdout,'(a)') 'Proceed?'
 	flush (ESMF_UtilIOStdout)
 	read (ESMF_UtilIOStdin,'(a)') answer
       end if
