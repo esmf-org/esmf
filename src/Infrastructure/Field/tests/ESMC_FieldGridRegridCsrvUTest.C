@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.6 2012/03/23 15:45:30 rokuingh Exp $
+// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.7 2012/03/26 16:02:22 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -407,7 +407,7 @@ int main(void){
       //exact = 20.0+pow(y,2);
       exact = 20.0+y;
       // if error is too big report an error
-      if ( abs((long)( dstfieldptr[i]-exact) ) > 0.0001) {
+      if ( abs((double)( dstfieldptr[i]-exact) ) > 0.0001) {
         printf("dstfieldptr[%d] = %f\n and it should be = %f\n", i, dstfieldptr[i], exact);
         correct=false;
       }
