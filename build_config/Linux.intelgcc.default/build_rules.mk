@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.20 2011/03/16 18:36:46 theurich Exp $
+# $Id: build_rules.mk,v 1.20.2.1 2012/03/26 23:07:57 theurich Exp $
 #
 # Linux.intelgcc.default
 #
@@ -25,13 +25,6 @@ ESMF_F90COMPILECPPFLAGS+= -DESMF_MPIUNI
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_MPIUNI
 ESMF_CXXCOMPILEPATHS   += -I$(ESMF_DIR)/src/Infrastructure/stubs/mpiuni
 ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
-else
-ifeq ($(ESMF_COMM),mpi)
-# Vendor MPI -----------------------------------------------
-ESMF_F90LINKLIBS       += -lmpi -lmpi++
-ESMF_CXXLINKLIBS       += -lmpi -lmpi++
-ESMF_MPIRUNDEFAULT      = mpiexec $(ESMF_MPILAUNCHOPTIONS)
-ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich ----------------------------------------------------
@@ -78,7 +71,6 @@ ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
 else
 $(error Invalid ESMF_COMM setting: $(ESMF_COMM))
-endif
 endif
 endif
 endif
