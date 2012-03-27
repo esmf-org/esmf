@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.102 2012/03/26 15:49:45 feiliu Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.103 2012/03/27 20:46:56 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.102 2012/03/26 15:49:45 feiliu Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.103 2012/03/27 20:46:56 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1357,13 +1357,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridGetArea()
-      subroutine ESMF_FieldRegridGetArea(areaField, MaskValues, rc)
+      subroutine ESMF_FieldRegridGetArea(areaField, rc)
 !
 ! !RETURN VALUE:
 !      
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout)                 :: areaField
-      integer(ESMF_KIND_I4), intent(in), optional     :: MaskValues(:)
       integer, intent(out), optional                  :: rc 
 !
 ! !DESCRIPTION:
@@ -1477,7 +1476,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           ! Convert Grid to Mesh
           Mesh = ESMF_GridToMesh(Grid, staggerlocG2M, isSphere, isLatLonDeg, &
-                      maskValues=MaskValues, regridConserve=ESMF_REGRID_CONSERVE_OFF, rc=localrc)
+                                 regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 

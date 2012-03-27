@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridToMesh.C,v 1.19 2012/03/16 21:43:07 oehmke Exp $
+// $Id: ESMCI_GridToMesh.C,v 1.20 2012/03/27 20:47:00 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -693,7 +693,7 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
          
          // Get Mask value from grid
          gci->getItem(ESMC_GRIDITEM_AREA, &ga);
-        
+
          // Set value
          *a=ga;
        }
@@ -873,6 +873,47 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
     ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
       throw localrc;  // bail out with exception
+
+
+    // Setup interator to Loop elemets of the grid.  Here we loop all elements, both owned and not.
+    ESMCI::GridCellIter *gci=new ESMCI::GridCellIter(&grid,staggerLoc);
+
+
+    // If an area field exists use that instead
+    // TODO: replace this with something that doesn't require building a mesh first
+    MEField<> *area_field = mesh.GetField("elem_area");
+    if (area_field) {
+    
+      // loop through all nodes in the Grid
+      for(gci->toBeg(); !gci->isDone(); gci->adv()) {   
+      
+        // get the global id of this Grid node
+        int gid=gci->getGlobalID(); 
+      
+        //  Find the corresponding Mesh element
+        Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, gid);
+        if (mi == mesh.map_end(MeshObj::ELEMENT)) {
+          Throw() << "Grid entry not in mesh";
+        }
+      
+        // Get the element
+        const MeshObj &elem = *mi; 
+        
+        // Only put it in if it's locally owned
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        
+        // Get area from field
+        double *area=area_field->data(elem);
+      
+        // Put it into the Array
+        gci->setArrayData(&array, *area);
+      }
+
+      return;
+    }
+
+
+    ////// Otherwise calculate areas..... 
     
     // Get coord field
     MEField<> *cfield = mesh.GetCoordField();
@@ -881,12 +922,8 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
     int sdim=mesh.spatial_dim();
     int pdim=mesh.parametric_dim();
     
-    // Loop elemets of the grid.  Here we loop all elements, both owned and not.
-    ESMCI::GridCellIter *gci=new ESMCI::GridCellIter(&grid,staggerLoc);
-    
     // loop through all nodes in the Grid
     for(gci->toBeg(); !gci->isDone(); gci->adv()) {   
-      //     if(!gni->isLocal()) continue;
       
       // get the global id of this Grid node
       int gid=gci->getGlobalID(); 
@@ -908,12 +945,10 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
       
       if (pdim==2) {
 	if (sdim==2) {
-          // get_elem_coords(&elem, cfield, 2, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
           get_elem_coords_2D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_2D, tmp_coords, &num_poly_nodes, poly_coords);
 	  remove_0len_edges2D(&num_poly_nodes, poly_coords);
           area=area_of_flat_2D_polygon(num_poly_nodes, poly_coords);
 	} else if (sdim==3) {
-          // get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
           get_elem_coords_3D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_3D, tmp_coords, &num_poly_nodes, poly_coords);
 	  remove_0len_edges3D(&num_poly_nodes, poly_coords);
 	  area=great_circle_area(num_poly_nodes, poly_coords);

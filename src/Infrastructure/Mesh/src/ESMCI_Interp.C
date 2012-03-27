@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.41 2012/03/21 16:42:07 feiliu Exp $
+// $Id: ESMCI_Interp.C,v 1.42 2012/03/27 20:47:04 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.41 2012/03/21 16:42:07 feiliu Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.42 2012/03/27 20:47:04 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -791,7 +791,9 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
       for (int i=0; i<sr.elems.size(); i++) {
         const MeshObj &dst_elem = *sr.elems[i];
         double *dst_frac2=dst_frac2_field->data(dst_elem);
-        if (*dst_frac2 == 0.0) valid[i] = 0;
+        if (*dst_frac2 == 0.0) {
+          continue; 
+        }
       }
     }
 
@@ -872,11 +874,13 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
   // Get dst coord field
   MEField<> *dst_cfield = dstmesh.GetCoordField();
 
-  // Get dst mask field
+  // Get src and dst mask field
   MEField<> *dst_mask_field = dstmesh.GetField("elem_mask");
-
-  // Get src mask field
   MEField<> *src_mask_field = srcmesh.GetField("elem_mask");
+
+  // Get src and dst area field
+  MEField<> *dst_area_field = dstmesh.GetField("elem_area");
+  MEField<> *src_area_field = srcmesh.GetField("elem_area");
 
   // src and dst frac2 fields
   MEField<> * src_frac2_field = srcmesh.GetField("elem_frac2");
@@ -895,6 +899,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
 
     // If there are no associated dst elements then skip it
     if (sr.elems.size() == 0) continue;
+
 
     // If this source element is masked then skip it
     if (src_mask_field) {
@@ -922,17 +927,20 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
     std::vector<int> valid;
     std::vector<double> wgts;
     std::vector<double> areas;
+    std::vector<double> dst_areas;
 
     // Allocate space for weight calc output arrays
     valid.resize(sr.elems.size(),0);
     wgts.resize(sr.elems.size(),0.0);
     areas.resize(sr.elems.size(),0.0);
+    dst_areas.resize(sr.elems.size(),0.0);
 
     // Calculate weights
     std::vector<sintd_node *> tmp_nodes;  
     std::vector<sintd_cell *> tmp_cells;  
-    calc_1st_order_weights_2D_3D_sph(sr.elem,src_cfield,sr.elems,dst_cfield,
-                                     &src_elem_area, &valid, &wgts, &areas,
+    calc_1st_order_weights_2D_3D_sph(sr.elem,src_cfield,
+                                     sr.elems,dst_cfield,
+                                     &src_elem_area, &valid, &wgts, &areas, &dst_areas,
                                      midmesh, &tmp_nodes, &tmp_cells, zz);
 
     // Invalidate masked destination elements
@@ -950,7 +958,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
       for (int i=0; i<sr.elems.size(); i++) {
         const MeshObj &dst_elem = *sr.elems[i];
         double *dst_frac2=dst_frac2_field->data(dst_elem);
-        if (*dst_frac2 == 0.0) valid[i] = 0;
+        if (*dst_frac2 == 0.0) continue; 
       }
     }
 
@@ -994,17 +1002,35 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
       src_frac.InsertRowMerge(row, col);       
     }
 
+
+    // Calculate source user area adjustment
+    double src_user_area_adj=1.0;
+    if (src_area_field) {
+        const MeshObj &src_elem = *sr.elem;
+        double *area=src_area_field->data(src_elem);
+        src_user_area_adj=*area/src_elem_area;
+    }
+
     
     // Put weights into row column and then add
     for (int i=0; i<sr.elems.size(); i++) {
       if (valid[i]==1) {
+
+        // Calculate dest user area adjustment
+        double dst_user_area_adj=1.0;
+        if (dst_area_field) {
+          const MeshObj &dst_elem = *(sr.elems[i]);
+          double *area=dst_area_field->data(dst_elem);
+          if (*area==0.0) Throw() << "0.0 user area in destination grid";
+          dst_user_area_adj=dst_areas[i]/(*area);
+        }
 
 	// Allocate column of empty entries
 	std::vector<IWeights::Entry> col;
 	col.resize(1,col_empty);
 
 	col[0].id=sr.elem->get_id();
-	col[0].value=src_frac2*wgts[i];
+	col[0].value=src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i];
 
 	// Set row info
 	IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);

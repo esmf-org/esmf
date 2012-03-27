@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.C,v 1.15 2012/02/23 23:39:15 oehmke Exp $
+// $Id: ESMCI_ConserveInterp.C,v 1.16 2012/03/27 20:47:04 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.15 2012/02/23 23:39:15 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.16 2012/03/27 20:47:04 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -746,7 +746,8 @@ void norm_poly3D(int num_p, double *p) {
   void calc_1st_order_weights_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
                                            std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
                                            double *src_elem_area,
-                                           std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas, 
+                                           std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *sintd_areas_out, 
+                                           std::vector<double> *dst_areas_out, 
                                            Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes, 
                                            std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct *zz) {
 
@@ -832,7 +833,8 @@ void norm_poly3D(int num_p, double *p) {
       if (num_dst_nodes<1) {
 	(*valid)[i]=0;
 	(*wgts)[i]=0.0;
-	(*areas)[i]=0.0;
+	(*sintd_areas_out)[i]=0.0;
+	(*dst_areas_out)[i]=0.0;
         sintd_areas[i]=0.0;
 	continue;
       }
@@ -852,7 +854,8 @@ void norm_poly3D(int num_p, double *p) {
      if (dst_areas[i]==0.0) {
        (*valid)[i]=0;
        (*wgts)[i]=0.0;
-       (*areas)[i]=0.0;
+       (*sintd_areas_out)[i]=0.0;
+       (*dst_areas_out)[i]=0.0;
        sintd_areas[i]=0.0;
        continue;
      }
@@ -887,7 +890,8 @@ void norm_poly3D(int num_p, double *p) {
       if (num_sintd_nodes < 3) {
 	(*valid)[i]=0;
 	(*wgts)[i]=0.0;
-	(*areas)[i]=0.0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
         sintd_areas[i]=0.0;
 	continue;
       }
@@ -938,7 +942,8 @@ void norm_poly3D(int num_p, double *p) {
     for (int i=0; i<dst_elems.size(); i++) {
       if ((*valid)[i]==1) {
         // return weight
-        (*areas)[i]=sintd_areas[i];
+        (*sintd_areas_out)[i]=sintd_areas[i];
+        (*dst_areas_out)[i]=dst_areas[i];
       }
     }
 
