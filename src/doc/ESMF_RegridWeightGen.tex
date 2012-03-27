@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.57 2012/03/27 18:29:49 oehmke Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.58 2012/03/27 19:36:38 oehmke Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -136,10 +136,10 @@ is treated as a constant. The weights for a particular destination cell are the 
 source cell with the destination cell divided by the area of the destination cell.
 Areas in this case are calculated by connecting the corner coordinates of each grid cell (obtained from the grid file) with great circles. If the user doesn't specify
 the user area's option (``--user\_areas''), then the conservation will hold for the great circle areas calculated by 
-ESMF (and these are output to the weight file). This means the following equation will hold:  sum-over-all-source-cells$(V_{si}*A'_{si})$ = sum-over-all-destination-cells$(V_{dj}*A'_{dj})$, where
-$V$ is the variable being regridded and $A'$ is the area of a cell as calculated by ESMF.  The subscripts $s$ and $d$ refer to source and destination values, and the $i$ and $j$ are the source 
+ESMF (and these are output to the weight file). This means the following equation will hold:  sum-over-all-source-cells(Vsi*Asi) = sum-over-all-destination-cells(Vdj*A'dj), where
+V is the variable being regridded and A' is the area of a cell as calculated by ESMF.  The subscripts s and d refer to source and destination values, and the i and j are the source 
 and destination grid cell indices (flattening the arrays to 1 dimension). If the user does specify the user area's option, then the conservation will be adjusted to work for the areas 
-provided by the user in the grid files (and these areas are output to the weight file). This means the following equation will hold:  sum-over-all-source-cells$(V_{si}*A_{si})$ = sum-over-all-destination-cells$(V_{dj}*A_{dj})$, where $A$ is the area of a cell as provided by the user.  
+provided by the user in the grid files (and these areas are output to the weight file). This means the following equation will hold:  sum-over-all-source-cells(Vsi*Asi) = sum-over-all-destination-cells(Vdj*Adj), where A is the area of a cell as provided by the user.  
 
 Note that since the conservative assumes great circle edges to cells, the edges of a cell won't necessarily be
 the same as a straight line in latitude longitude. For small edges, this difference will be small, but for long edges it could be significant. This means if
