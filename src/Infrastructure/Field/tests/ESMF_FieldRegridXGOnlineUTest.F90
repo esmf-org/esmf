@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.26 2012/03/23 16:32:35 feiliu Exp $
+! $Id: ESMF_FieldRegridXGOnlineUTest.F90,v 1.27 2012/03/27 17:44:40 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -1475,7 +1475,7 @@ contains
     !endif
     error = abs(dstFlux - dstFlux_reg)/abs(dstFlux_reg) 
     if(lpet == 0) write(*,'(A,4E18.10)') 'Verify: ', dstFlux_reg, dstFlux, error, abs(totalXArea-totalSrcArea)/totalSrcArea
-    if(error > 1.e-5) then
+    if(error > 1.e-4) then
       print *, 'Regrid through XGrid doesnot agree with direct Regrid'
       if(present(rc)) rc = ESMF_RC_NOT_VALID
       return
