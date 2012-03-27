@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUsageEx.F90,v 1.108 2012/02/15 23:15:22 svasquez Exp $
+! $Id: ESMF_GridUsageEx.F90,v 1.109 2012/03/27 23:44:55 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -1248,7 +1248,8 @@ endif
 
 #ifdef ESMF_NETCDF
 !BOC
-   grid2D = ESMF_GridCreate(filename="data/T42_grid.nc", &
+   grid2D = ESMF_GridCreate(filename="data/T42_grid.nc",  &
+              fileFormat=ESMF_FILEFORMAT_SCRIP,  &
               regDecomp=(/PetCount,1/), addCornerStagger=.true., rc=rc)
 !EOC
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
