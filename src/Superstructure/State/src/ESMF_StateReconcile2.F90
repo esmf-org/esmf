@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.6 2012/03/26 20:47:36 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.7 2012/03/27 16:49:21 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_StateReconcile2Mod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-  '$Id: ESMF_StateReconcile2.F90,v 1.6 2012/03/26 20:47:36 w6ws Exp $'
+  '$Id: ESMF_StateReconcile2.F90,v 1.7 2012/03/27 16:49:21 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
@@ -511,6 +511,7 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': at the end without crashing!')
 !EOPI
 
     integer :: localrc
+    integer :: memstat
     integer :: mypet, npets
     integer :: i, j, k
     logical :: needed
@@ -528,12 +529,12 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': at the end without crashing!')
 ! Check other PETs contents to see if there are objects this PET needs
 
     call ESMF_VMGet (vm, localPet=mypet, petCount=npets, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
     if (npets /= size (id_info)) then
-      if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, msg='size (id_info) /= npets', &
+      if (ESMF_LogFoundError (ESMF_RC_INTNRL_INCONS, msg='size (id_info) /= npets', &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
     end if
@@ -545,22 +546,35 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': at the end without crashing!')
 
     needs_list => null ()
 
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': computing id_info%needed')
+! call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+!     ': computing id_info%needed')
     do, i=0, npets-1
       id_info(i)%needed = .false.
       if (i == mypet) cycle
-      do, j = 1, ubound (id, 1)
-        do, k = 1, ubound (id_info(i)%id, 1)
-          needed = id(j) /= id_info(i)%id(k)
-          needed = needed .or. ESMF_VMIdCompare (vmid(j), id_info(i)%vmid(k))
-          if (needed) then
-            call needs_list_insert (needs_list, pet_1=i,  &
-                id_1=id_info(i)%id(k), vmid_1=id_info(i)%vmid(k),  &
-                position=k)
+
+      do, j = 1, ubound (id_info(i)%id, 1)
+        needed = .true.
+! print *, '  PET', mypet, ': setting needed to .true.', j, k
+        do, k = 1, ubound (id, 1)
+          if (id(k) == id_info(i)%id(j)) then
+            if (ESMF_VMIdCompare (vmid(k), id_info(i)%vmid(j))) then
+! print *, '  PET', mypet, ': setting needed to .false.', j, k
+              needed = .false.
+              exit
+            end if
           end if
-!          id_info(i)%needed(k) = needed
         end do
+
+        if (needed) then
+! print *, '  PET', mypet, ': calling insert, associated =', associated (needs_list)
+          call needs_list_insert (needs_list, pet_1=i,  &
+                id_1=id_info(i)%id(j),  &
+              vmid_1=id_info(i)%vmid(j),  &
+              position=j, rc_1=localrc)
+	  if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+        end if
       end do
     end do
 
@@ -568,34 +582,75 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 
     call needs_list_select (needs_list, id_info)
 
-    ! TODO: clean up
-    ! deallocate needs_list
+    call needs_list_deallocate (needs_list, rc_1=localrc)
+    if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    if (associated (needs_list)) then
+      deallocate (needs_list, stat=memstat)
+      if (ESMF_LogFoundDeallocError (memstat, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+    end if
 
-do, j=0, npets-1
-  if (j == myPet) then
-    do, i=0, ubound (id_info, 1)
-      write (6,*) ESMF_METHOD, ': pet', j, ': id_info%needed =', id_info(i)%needed
-      flush (6)
-    end do
-  end if
-  call ESMF_VMBarrier (vm)
-end do
+! do, j=0, npets-1
+!   if (j == myPet) then
+!     do, i=0, ubound (id_info, 1)
+!       write (6,*) ESMF_METHOD, ': pet', j, ': id_info%needed =', id_info(i)%needed
+!       flush (6)
+!     end do
+!   end if
+!   call ESMF_VMBarrier (vm)
+! end do
 
     rc = localrc
 
   contains
 
+    recursive subroutine needs_list_deallocate (needs_list_1, rc_1)
+      type(NeedsList_t),  pointer :: needs_list_1  ! intent(inout)
+      integer :: rc_1
+
+      integer :: localrc_1
+      integer :: memstat_1
+
+      if (.not. associated (needs_list_1)) return
+
+      deallocate (  &
+          needs_list_1%offerers,  &
+          needs_list_1%position,  &
+          stat=memstat_1)
+      if (ESMF_LogFoundDeallocError (memstat_1, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc_1)) return
+
+      if (associated (needs_list_1%next)) then
+! print *, 'pet', mypet, ': needs_list_deallocate: recursing'
+        call needs_list_deallocate (needs_list_1%next, rc_1=localrc_1)
+	if (ESMF_LogFoundError (localrc_1, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT,  &
+            rcToReturn=rc_1)) return
+        deallocate (needs_list_1%next,  &
+            stat=memstat_1)
+	if (ESMF_LogFoundDeallocError (memstat_1, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT,  &
+            rcToReturn=rc_1)) return
+      end if
+        
+    end subroutine needs_list_deallocate
+
     subroutine needs_list_insert (needs_list_1, pet_1,  &
-        id_1, vmid_1, position)
+        id_1, vmid_1, position, rc_1)
       type(NeedsList_t),  pointer :: needs_list_1  ! intent(inout)
       integer,         intent(in) :: pet_1
       integer,         intent(in) :: id_1
       type(ESMF_VMId), intent(in) :: vmid_1
       integer,         intent(in) :: position
+      integer,         intent(out):: rc_1
 
       type(NeedsList_t), pointer :: needslist_p
       logical :: needs
-      integer :: memstat
+      integer :: memstat_1
 
     ! Called when a Id/VMId is offered by some remote PET, and is needed
     ! by the local PET.
@@ -603,34 +658,68 @@ end do
     ! If the Id/VMId is not in the needs list, create a new needs_list
     ! entry.   If it is present, add that this PET is also offering it.
 
+      if (.not. associated (needs_list_1)) then
+! print *, 'pet', mypet, ': needs_list_insert: creating needs_list_1'
+        allocate (needs_list_1, stat=memstat_1)
+	if (ESMF_LogFoundAllocError (memstat_1, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT,  &
+            rcToReturn=rc_1)) return
+        allocate (  &
+            needs_list_1%offerers(0:npets-1),  &
+            needs_list_1%position(0:npets-1),  &
+            stat=memstat_1)
+	if (ESMF_LogFoundAllocError (memstat_1, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT,  &
+            rcToReturn=rc_1)) return
+        needs_list_1%offerers = .false.
+        needs_list_1%position = 0
+        needs_list_1%id = id_1
+        call ESMF_VMIdCreate (needs_list_1%vmid)
+        needs_list_1%vmid = vmid_1
+
+        needs_list_1%offerers(pet_1) = .true.
+        needs_list_1%position(pet_1) = position
+        return
+      end if
+         
       needslist_p => needs_list_1
       do
-        if (.not. associated (needslist_p)) then
-          ! At end of list, so create a new entry
-          allocate (needslist_p, stat=memstat)
-          allocate (  &
-              needslist_p%offerers(0:npets-1),  &
-              needslist_p%position(0:npets-1),  &
-              stat=memstat)
-          needslist_p%offerers = .false.
-          needslist_p%position = 0
+        if (id_1 == needslist_p%id .and.  &
+            ESMF_VMIdCompare (vmid_1, needslist_p%vmid)) then
+! print *, 'pet', mypet, ': needs_list_insert: marking match and returing'
           needslist_p%offerers(pet_1) = .true.
           needslist_p%position(pet_1) = position
-          needslist_p%id = id_1
-          call ESMF_VMIdCreate (needslist_p%vmid)
-          needslist_p%vmid = vmid_1
           return
-        else
-          if (id_1 == needslist_p%id) then
-            if (ESMF_VMIdCompare (vmid_1, needslist_p%vmid)) then
-              needslist_p%offerers(pet_1) = .true.
-              needslist_p%position(pet_1) = position
-              return
-            end if
-          end if
         end if
+
+        if (.not. associated (needslist_p%next)) exit
+! print *, 'pet', mypet, ': needs_list_insert: advancing to next entry'
         needslist_p => needslist_p%next
       end do
+
+      ! At the end of the list, but no matches found.  So add new entry.
+
+! print *, 'pet', mypet, ': needs_list_insert: creating needslist_p entry'
+      allocate (needslist_p%next, stat=memstat_1)
+      if (ESMF_LogFoundAllocError (memstat_1, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc_1)) return
+      needslist_p => needslist_p%next
+      allocate (  &
+          needslist_p%offerers(0:npets-1),  &
+          needslist_p%position(0:npets-1),  &
+          stat=memstat_1)
+      if (ESMF_LogFoundAllocError (memstat_1, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc_1)) return
+      needslist_p%offerers = .false.
+      needslist_p%position = 0
+      needslist_p%id = id_1
+      call ESMF_VMIdCreate (needslist_p%vmid)
+      needslist_p%vmid = vmid_1
+
+      needslist_p%offerers(pet_1) = .true.
+      needslist_p%position(pet_1) = position
 
     end subroutine needs_list_insert
 
@@ -652,6 +741,7 @@ end do
         if (.not. associated (needslist_p)) exit
         do, i=0, npets-1
           if (needslist_p%offerers(i)) then
+! print *, 'pet', mypet, ': needs_list_select: setting position', i, ' to true'
             id_info_1(i)%needed(needslist_p%position(i)) = .true.
             exit
           end if
