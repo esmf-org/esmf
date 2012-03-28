@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridOnlineEx.F90,v 1.6 2012/03/26 20:10:26 feiliu Exp $
+! $Id: ESMF_XGridOnlineEx.F90,v 1.7 2012/03/28 18:01:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -239,11 +239,6 @@
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		endflag=ESMF_END_ABORT)
-
-!BOC
-    ! Initialize the data on exchange grid.
-    xfarrayPtr = 0.0
-!EOC
 
 !BOE
 ! Create src and dst Fields on side A and side B Grids.
