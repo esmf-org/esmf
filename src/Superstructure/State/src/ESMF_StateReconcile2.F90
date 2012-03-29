@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.8 2012/03/29 00:51:12 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.9 2012/03/29 20:06:44 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_StateReconcile2Mod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-  '$Id: ESMF_StateReconcile2.F90,v 1.8 2012/03/29 00:51:12 w6ws Exp $'
+  '$Id: ESMF_StateReconcile2.F90,v 1.9 2012/03/29 20:06:44 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
@@ -395,7 +395,6 @@ contains
 	  ESMF_CONTEXT,  &
 	  rcToReturn=rc)) return
     end do
-call ESMF_VMBarrier (vm)
 
     ! 6.) Send/receive serialized objects to whoever needed them
 
@@ -619,7 +618,6 @@ call ESMF_VMBarrier (vm)
 
     call needs_list_select (needs_list, id_info)
 
-#if 0
     call needs_list_deallocate (needs_list, rc_1=localrc)
     if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
@@ -630,17 +628,18 @@ call ESMF_VMBarrier (vm)
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
     end if
-#endif
 
-! do, j=0, npets-1
-!   if (j == myPet) then
-!     do, i=0, ubound (id_info, 1)
-!       write (6,*) ESMF_METHOD, ': pet', j, ': id_info%needed =', id_info(i)%needed
-!       flush (6)
-!     end do
-!   end if
-!   call ESMF_VMBarrier (vm)
-! end do
+    if (debug) then
+      do, j=0, npets-1
+	if (j == myPet) then
+	  do, i=0, ubound (id_info, 1)
+	    write (6,*) ESMF_METHOD, ': pet', j, ': id_info%needed =', id_info(i)%needed
+	    flush (6)
+	  end do
+	end if
+	call ESMF_VMBarrier (vm)
+      end do
+    end if
 
     rc = localrc
 
@@ -846,11 +845,9 @@ call ESMF_VMBarrier (vm)
     integer :: stateitem_type
 
     needs_count = transfer (obj_buffer(0:ESMF_SIZEOF_DEFINT-1), needs_count)
-!    allocate (offsets(0:needs_count))
-!    offsets = transfer (obj_buffer(0:(needs_count+1)*ESMF_SIZEOF_DEFINT-1), offsets)
-!    buffer_offset = (needs_count+1)*ESMF_SIZEOF_DEFINT
-!    print *, '   offsets =', offsets, ', initial buffer offset =', buffer_offset
-    print *, '  needs_count =', needs_count
+    if (debug) then
+      print *, '  needs_count =', needs_count
+    end if
     buffer_offset = ESMF_SIZEOF_DEFINT
 
     if (needs_count /= ubound (vm_ids, 1)) then
@@ -877,7 +874,9 @@ call ESMF_VMBarrier (vm)
       ! Item itself
       select case (stateitem_type)
         case (ESMF_STATEITEM_FIELDBUNDLE%ot)
-print *, "deserializing fieldbundle"
+	  if (debug) then
+	    print *, "deserializing fieldbundle"
+	  end if
           fieldbundle = ESMF_FieldBundleDeserialize(obj_buffer, buffer_offset, &
               attreconflag=attreconflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, msg="nested fieldbundle deserialize", &
@@ -897,7 +896,9 @@ print *, "deserializing fieldbundle"
               rcToReturn=rc)) return
 
         case (ESMF_STATEITEM_FIELD%ot)
-print *, "deserializing field"
+	  if (debug) then
+	    print *, "deserializing field"
+	  end if
           field = ESMF_FieldDeserialize(obj_buffer, buffer_offset, &
               attreconflag=attreconflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, msg="nested Field deserialize", &
@@ -918,7 +919,9 @@ print *, "deserializing field"
               rcToReturn=rc)) return
 
         case (ESMF_STATEITEM_ARRAY%ot)
-print *, "deserializing array"
+	  if (debug) then
+	    print *, "deserializing array"
+	  end if
           call c_ESMC_ArrayDeserialize(array, obj_buffer, buffer_offset, &
               attreconflag, localrc)
           if (ESMF_LogFoundError(localrc, msg="nested Array deserialize", &
@@ -944,7 +947,9 @@ print *, "deserializing array"
               rcToReturn=rc)) return
 
         case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
-print *, "deserializing arraybundle"
+	  if (debug) then
+	    print *, "deserializing arraybundle"
+	  end if
           call c_ESMC_ArrayBundleDeserialize(arraybundle, obj_buffer, &
               buffer_offset, attreconflag, localrc)
           if (ESMF_LogFoundError(localrc, msg="nested arraybundle deserialize", &
@@ -970,7 +975,9 @@ print *, "deserializing arraybundle"
               rcToReturn=rc)) return
 
         case (ESMF_STATEITEM_STATE%ot)
-print *, "deserializing substate"
+	  if (debug) then
+	    print *, "deserializing substate"
+	  end if
           substate = ESMF_StateDeserialize(vm, obj_buffer, buffer_offset, &
               attreconflag=attreconflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, msg="nested Substate deserialize", &
@@ -990,15 +997,16 @@ print *, "deserializing substate"
               rcToReturn=rc)) return
 
         case (ESMF_STATEITEM_UNKNOWN%ot)
-print *, "deserializing unknown type"
-          localrc = ESMF_RC_INTNRL_INCONS
+          if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, msg="unknown type", &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
 
         case default
-          localrc = ESMF_RC_INTNRL_INCONS
-print *, "deserialization error in default case.  Returning ESMF_RC_INTNRL_INCONS"
+          if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, msg="unsupported type", &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
       end select
 
-!      buffer_offset = buffer_offset + offsets(i)
     end do
 
   end subroutine ESMF_ReconcileDeserialize
@@ -1059,7 +1067,7 @@ print *, "deserialization error in default case.  Returning ESMF_RC_INTNRL_INCON
     integer :: memstat
     logical :: needed
 
-    integer, allocatable :: id_recv(:)
+    integer,         allocatable ::   id_recv(:)
     type(ESMF_VMId), allocatable :: vmid_recv(:)
 
     localrc = ESMF_RC_NOT_IMPL
@@ -1153,26 +1161,19 @@ print *, "deserialization error in default case.  Returning ESMF_RC_INTNRL_INCON
     if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
+    call ESMF_VMIdCreate (vmid_recv, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
 
-#if 1
     if (debug) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ':   Exchanging Ids (using ESMF_VMAllGatherV)')
     end if
     call ESMF_VMAllGatherV (vm,  &
-       sendData=id     , sendCount =size (id),  &
-       recvData=id_recv, recvCounts=counts_buf_recv, recvOffsets=displs_buf_recv,  &
-       rc=localrc)
-#else
-    if (debug) then
-      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-          ':   Exchanging Ids (using ESMF_VMAllToAllV)')
-    end if
-    call ESMF_VMAllToAllV (vm,  &
-       sendData=id     , sendCounts=counts_buf_send, sendOffsets=displs_buf_send,  &
-       recvData=id_recv, recvCounts=counts_buf_recv, recvOffsets=displs_buf_recv,  &
-       rc=localrc)
-#endif
+        sendData=id     , sendCount =size (id),  &
+        recvData=id_recv, recvCounts=counts_buf_recv, recvOffsets=displs_buf_recv,  &
+        rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
@@ -1196,6 +1197,41 @@ print *, "deserialization error in default case.  Returning ESMF_RC_INTNRL_INCON
     ! Exchange VMIds
 
 #if 1
+    if (debug) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ':   Exchanging VMIds (using VMBcastVMId)')
+    end if
+
+    allocate (vmid_recv(0:sum (counts_buf_recv+1)-1),  &
+        stat=memstat)
+    if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    call ESMF_VMIdCreate (vmid_recv, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    call ESMF_VMAllGatherV (vm,  &
+        sendData=vmid, sendCount=size (vmid),  &
+        recvData=vmid_recv, recvCounts=counts_buf_recv, recvOffsets=displs_buf_recv,  &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    ipos = 0
+    do, i=0, npets-1
+      call ESMF_VMIdCopy (  &
+          dest  =id_info(i)%vmid,  &
+          source=vmid_recv(ipos:ipos+counts_buf_recv(i)-1),  &
+          rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+      ipos = ipos + counts_buf_recv(i)
+    end do
+#elif 0
 ! VMBcastVMId version
     if (debug) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
@@ -1227,7 +1263,7 @@ print *, "deserialization error in default case.  Returning ESMF_RC_INTNRL_INCON
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
     end do
-#else
+#elif 0
 
 ! AllToAllVVMId version
     if (debug) then
@@ -1939,8 +1975,9 @@ print *, "deserialization error in default case.  Returning ESMF_RC_INTNRL_INCON
 ! Sanity check: siwrap and needs list must be the same size.
 
     if (ubound (siwrap, 1) /= ubound (needs_list, 1)) then
-print *, ESMF_METHOD, ': error - siwrap ubound =', ubound (siwrap, 1),  &
-    '/= needs_list =', ubound (needs_list, 1)
+      print *, ESMF_METHOD,  &
+          ': error - siwrap ubound =', ubound (siwrap, 1),  &
+          '/= needs_list =', ubound (needs_list, 1)
       if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, &
           msg="ubound (siwrap) /= ubound (needs_list)", &
           ESMF_CONTEXT,  &
@@ -1958,13 +1995,6 @@ print *, ESMF_METHOD, ': error - siwrap ubound =', ubound (siwrap, 1),  &
       return
     end if
 
-!    allocate (offsets(0:needs_count), stat=memstat)
-!    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
-!	ESMF_CONTEXT,  &
-!	rcToReturn=rc)) return
-!    offsets = 0
-!    offsets(0) = needs_count
-
   pass_loop:  &
     do, pass = 1, 2
       select case (pass)
@@ -1978,7 +2008,6 @@ print *, ESMF_METHOD, ': error - siwrap ubound =', ubound (siwrap, 1),  &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
         ! leave room 
-!        buffer_offset = (needs_count+1)*ESMF_SIZEOF_DEFINT
         buffer_offset = ESMF_SIZEOF_DEFINT
         inqflag = ESMF_INQUIREONLY
 
@@ -1990,17 +2019,17 @@ print *, ESMF_METHOD, ': error - siwrap ubound =', ubound (siwrap, 1),  &
 	if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
-print *, ESMF_METHOD, ': obj_buffer bounds = (0:', buffer_offset, ')'
+        if (debug) then
+          print *, ESMF_METHOD, ': obj_buffer bounds = (0:', buffer_offset, ')'
+        end if
 
         allocate (obj_buffer(0:buffer_offset-1), stat=memstat)
 	if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
-!        obj_buffer(0:(needs_count+1)*ESMF_SIZEOF_DEFINT-1) =  &
-!            transfer (offsets, obj_buffer(0:(needs_count+1)*ESMF_SIZEOF_DEFINT-1))
-!        buffer_offset = (needs_count+1)*ESMF_SIZEOF_DEFINT
 
-        obj_buffer(0:ESMF_SIZEOF_DEFINT-1) = transfer (needs_count, obj_buffer(0:ESMF_SIZEOF_DEFINT-1))
+        obj_buffer(0:ESMF_SIZEOF_DEFINT-1) =  &
+            transfer (needs_count, obj_buffer(0:ESMF_SIZEOF_DEFINT-1))
         buffer_offset = ESMF_SIZEOF_DEFINT
         inqflag = ESMF_NOINQUIRE
       end select
