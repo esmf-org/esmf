@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.121 2012/01/06 20:16:40 svasquez Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.122 2012/03/29 19:39:13 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -61,6 +61,7 @@ module ESMF_FieldCreateMod
   public operator(==)
   public operator(/=)
 
+  public ESMF_FieldCopy
   public ESMF_FieldCreate
   public ESMF_FieldDestroy            ! Destroy a Field
   public ESMF_FieldDestruct           ! For internal ESMF use only
@@ -69,7 +70,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.121 2012/01/06 20:16:40 svasquez Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.122 2012/03/29 19:39:13 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -347,6 +348,57 @@ contains
 
   end function ESMF_FieldNE
 !-------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_FieldCopy()"
+!BOP
+! !IROUTINE: ESMF_FieldCopy - Copy data from one Field object to another
+
+! !INTERFACE:
+  subroutine ESMF_FieldCopy(fieldOut, fieldIn, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+       type(ESMF_Field),  intent(inout)          :: fieldOut
+       type(ESMF_Field),  intent(in)             :: fieldIn
+       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+       integer,           intent(out),  optional :: rc
+!
+! !DESCRIPTION:
+! Copy data from one {\tt ESMF\_Field} object to another.
+!
+! The arguments are:
+! \begin{description}
+! \item[fieldOut] 
+!     {\tt ESMF\_Field} object into which to copy the data. The incoming 
+!     {\tt fieldOut} must already references a matching memory allocation.
+! \item[fieldIn] 
+!     {\tt ESMF\_Field} object that holds the data to be copied.
+! \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc    ! local return code
+
+    ! Initialize return code; assume failure until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ESMF_INIT_CHECK_DEEP_SHORT (ESMF_FieldGetInit, fieldIn, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT (ESMF_FieldGetInit, fieldOut, rc)
+
+    ! Call into the Array method
+    call ESMF_ArrayCopy(fieldOut%ftypep%array, fieldIn%ftypep%array, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_FieldCopy
+!------------------------------------------------------------------------------
 
 ! ESMF_FieldCreateGe
 !------------------------------------------------------------------------------
@@ -4662,6 +4714,5 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   end subroutine ESMF_FieldDestruct
 !------------------------------------------------------------------------------
-
 
 end module ESMF_FieldCreateMod
