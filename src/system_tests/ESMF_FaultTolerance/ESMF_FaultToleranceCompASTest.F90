@@ -1,4 +1,4 @@
-! $Id: ESMF_FaultToleranceCompASTest.F90,v 1.2 2012/03/13 03:02:07 theurich Exp $
+! $Id: ESMF_FaultToleranceCompASTest.F90,v 1.3 2012/03/29 23:35:20 theurich Exp $
 !
 !=========================================================================
 
@@ -273,12 +273,8 @@ program ESMF_FaultToleranceCompASTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  call ESMF_GridCompServiceLoop(actualComp, port=60000, userRc=userRc, &
-    rc=localrc)
+  call ESMF_GridCompServiceLoop(actualComp, port=60000, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  if (ESMF_LogFoundError(userRc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
