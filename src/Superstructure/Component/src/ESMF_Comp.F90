@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.231 2012/03/13 02:52:35 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.232 2012/03/29 23:41:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -95,7 +95,8 @@ module ESMF_CompMod
     ESMF_METHOD_READRESTARTIC   = ESMF_Method_Flag(11), &
     ESMF_METHOD_SERVICELOOPIC   = ESMF_Method_Flag(12), &
     ESMF_METHOD_SETVM           = ESMF_Method_Flag(13), &
-    ESMF_METHOD_SETSERVICES     = ESMF_Method_Flag(14)
+    ESMF_METHOD_SETSERVICES     = ESMF_Method_Flag(14), &
+    ESMF_METHOD_WAIT            = ESMF_Method_Flag(15)
     
 !------------------------------------------------------------------------------
 ! ! ESMF_CompStatus
@@ -197,6 +198,7 @@ module ESMF_CompMod
                                    ! .true.  : PET participates in comp
 
     logical             :: vm_released      ! flag whether vm is running
+    real(ESMF_KIND_R8)  :: startTime        ! startTime used for timeouts
 
     type(ESMF_Context_Flag)   :: contextflag      ! contextflag
     type(ESMF_CompStatus)     :: compStatus       ! isPresent bits
@@ -243,7 +245,7 @@ module ESMF_CompMod
   public ESMF_METHOD_INITIALIZEIC, ESMF_METHOD_RUNIC, ESMF_METHOD_FINALIZEIC
   public ESMF_METHOD_WRITERESTARTIC, ESMF_METHOD_READRESTARTIC
   public ESMF_METHOD_SERVICELOOPIC
-  public ESMF_METHOD_SETVM, ESMF_METHOD_SETSERVICES
+  public ESMF_METHOD_SETVM, ESMF_METHOD_SETSERVICES, ESMF_METHOD_WAIT
   
   ! These have to be public so other component types can use them, but 
   ! are not intended to be used outside the Framework code.
@@ -288,7 +290,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.231 2012/03/13 02:52:35 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.232 2012/03/29 23:41:11 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -767,10 +769,12 @@ contains
 ! !IROUTINE: ESMF_CompDestruct - Release resources associated with a Component
 
 ! !INTERFACE:
-  subroutine ESMF_CompDestruct(compp, rc)
+  subroutine ESMF_CompDestruct(compp, timeout, timeoutFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), pointer               :: compp
+    integer,              intent(in),  optional :: timeout
+    logical,              intent(out), optional :: timeoutFlag
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -781,6 +785,15 @@ contains
 !     \begin{description}
 !     \item[compp]
 !      Component internal structure to be freed.
+!     \item[{[timeout]}]
+!      The maximum period in seconds that this call will wait for any
+!      communication with the actual component, before returning with a timeout
+!      condition. The default is 3600, i.e. 1 hour.
+!     \item[{[timeoutFlag]}]
+!      Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
+!      If {\tt timeoutFlag} was not provided a timeout condition will lead to
+!      an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!      {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -789,6 +802,7 @@ contains
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     type(ESMF_Status) :: baseStatus
+    integer :: timeoutArg
 
     ! Assume not implemented until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -808,15 +822,30 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcTOReturn=rc)) return
         
+    if (present(timeoutFlag)) then
+      timeoutFlag = .false. ! initialize in any case
+    endif
+
     if (baseStatus == ESMF_STATUS_READY) then
     
       ! dual component must terminate the service loop of the actual component
       if (compp%compTunnel%this /= ESMF_NULL_POINTER) then
         ! this is indeed a dual component with an open component tunnel
-        call ESMF_CompExecute(compp, method=ESMF_METHOD_NONE, rc=localrc)
+        timeoutArg = 3600 ! default 1h timeout !!!!!!!!!!!
+        if (present(timeout)) timeoutArg = timeout
+        call ESMF_CompExecute(compp, method=ESMF_METHOD_NONE, &
+          timeout=timeoutArg, rc=localrc) ! disregard userRc - invalid here!
+        if (present(timeoutFlag)) then
+          timeoutFlag = .false. ! initialize
+          if ((localrc==ESMF_RC_TIMEOUT).or.(localrc==ESMC_RC_TIMEOUT)) then
+            timeoutFlag = .true.      ! indicate timeout through flag argument
+            localrc = ESMF_SUCCESS    ! do not raise error condition on user level
+          endif
+        endif
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcTOReturn=rc)) return
+          
         ! call the tunnel destructor
         call c_ESMC_CompTunnelDestroy(compp%compTunnel, localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -881,7 +910,7 @@ contains
 
 ! !INTERFACE:
   recursive subroutine ESMF_CompExecute(compp, method, &
-    importState, exportState, clock, syncflag, phase, userRc, rc)
+    importState, exportState, clock, syncflag, phase, port, timeout, userRc, rc)
 !
 !
 ! !ARGUMENTS:
@@ -892,6 +921,8 @@ contains
     type(ESMF_Clock),        intent(in),    optional :: clock
     type(ESMF_Sync_Flag),    intent(in),    optional :: syncflag
     integer,                 intent(in),    optional :: phase
+    integer,                 intent(in),    optional :: port
+    integer,                 intent(in),    optional :: timeout
     integer,                 intent(out),   optional :: userRc
     integer,                 intent(out),   optional :: rc
 !
@@ -925,7 +956,11 @@ contains
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS.
 ! \item[{[phase]}]
-!   If multiple-phase methods, which phase number this is. Default is 1.
+!   The phase of a multi-phase method. Default is 1.
+! \item[{[port]}]
+!   Port number. Only used for ESMF\_METHOD\_SERVICELOOP.
+! \item[{[timeout]}]
+!   Time out in seconds.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -939,7 +974,9 @@ contains
     type(ESMF_Sync_Flag)    :: blocking     ! local blocking flag
     type(ESMF_VM)           :: vm           ! VM for current context
     integer                 :: phaseArg
-    integer                 :: phasePortArg
+    integer                 :: portArg
+    integer                 :: timeoutArg
+    real(ESMF_KIND_R8)      :: usedTime
         
     ! dummys that will provide initializer values if args are not present
     type(ESMF_State)        :: dummyis, dummyes
@@ -969,6 +1006,16 @@ contains
     if (baseStatus /= ESMF_STATUS_READY) then
       call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
         msg="uninitialized or destroyed Component object", &
+        ESMF_CONTEXT, rcTOReturn=rc) 
+      return
+    endif
+    
+    ! check if this is a supported combination of conditions
+    if (compp%vm_released.and. &
+      (method/=ESMF_METHOD_WAIT).and. &
+      (method/=ESMF_METHOD_NONE)) then
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+        msg="cannot call this method while the component is executing", &
         ESMF_CONTEXT, rcTOReturn=rc) 
       return
     endif
@@ -1010,23 +1057,50 @@ contains
     endif
 
     ! set phase and port number
+    phaseArg = 1 ! default phase
+    if (present(phase)) phaseArg = phase
+    
     if ((method==ESMF_METHOD_SERVICELOOP) .or. &
       (method==ESMF_METHOD_SERVICELOOPIC)) then
       ! deal with special phase/port argument combination
-      phaseArg = 1 ! always use phase 1 for serviceloop method
-      if (present(phase)) then
-        phasePortArg = phase  ! port
+      if (phaseArg /= 1) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Phase must be 1 for ServiceLoop() call.", &
+          ESMF_CONTEXT, rcTOReturn=rc) 
+        return
+      endif
+      if (present(port)) then
+        if (port < 1024 .or. port > 65535) then
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="The 'port' argument is outside valid range [1024, 65535]", &
+            ESMF_CONTEXT, rcTOReturn=rc)
+          return
+        endif
+        portArg = port    ! valid port number
       else
-        phasePortArg = -1     ! indicate no port was specified
+        portArg = -1      ! indicate that no port was specified
       endif
     else
       ! all other component methods have regular phase arguments
-      if (present(phase)) then
-        phaseArg = phase
-      else
-        phaseArg = 1  ! default phase
+      if (present(port)) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="Port is only allowed for ServiceLoop() call.", &
+          ESMF_CONTEXT, rcTOReturn=rc) 
+        return
       endif
-      phasePortArg = phaseArg
+      portArg = -1        ! indicate that no port was specified
+    endif
+    
+    ! Timeout argument
+    timeoutArg = 0; ! default timeout to flag issue if it is really used later
+    if (present(timeout)) then
+      if (timeout < 0) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="The 'timeout' argument must be positive", &
+          ESMF_CONTEXT, rcTOReturn=rc)
+        return
+      endif
+      timeoutArg = timeout    ! valid timeout
     endif
 
     ! Wrap comp so it's passed to C++ correctly.
@@ -1045,25 +1119,44 @@ contains
     endif
     
     localUserRc = ESMF_SUCCESS  ! initialize to success
+    ! pass back the initialized value of userRc, just in case of a bail out
+    if (present(userRc)) userRc = localUserRc
     
     ! All of the participating PETs must call in, but also non-participating
     ! PETs that hold a valid VM and show up here enter the callback mechanism.
     if (compp%iAmParticipant .or. compp%compStatus%vmIsPresent) then
-      ! callback into user code
-      call c_ESMC_FTableCallEntryPointVM(compp%compw, compp%vm_parent, &
-        compp%vmplan, compp%vm_info, compp%vm_cargo, compp%ftable, method, &
-        phasePortArg, compp%vm_recursionCount, localrc)
+      ! store the start time
+      call ESMF_VMWtime(compp%startTime, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcTOReturn=rc)) return
-      ! for threaded VMs (single- or multi-threaded) the child VM will 
+      ! callback into user code
+!print *, "ESMF_CompExecute(), calling c_ESMC_FTableCallEntryPointVM(): timeoutArg=",timeoutArg
+      call c_ESMC_FTableCallEntryPointVM(compp%compw, compp%vm_parent, &
+        compp%vmplan, compp%vm_info, compp%vm_cargo, compp%ftable, method, &
+        phaseArg, portArg, timeoutArg, compp%vm_recursionCount, localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcTOReturn=rc)) return
+      ! For threaded VMs (single- or multi-threaded) the child VM will 
       ! now be running concurrently with the parent VM.
+      ! Also for component tunnels, the actual component will now be executing
+      ! concurrently with the dual component that came in to this call.
 
       ! wait for blocking modes
       if (blocking == ESMF_SYNC_VASBLOCKING .or. blocking == ESMF_SYNC_BLOCKING) then
         ! wait for all child PETs that run in this parent's PET VAS to finish
+        ! determine how long the component has been released already
+        call ESMF_VMWTime(usedTime, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcTOReturn=rc)) return
+        usedTime = usedTime - compp%startTime
+        ! allow remaining time for timeout, but at least 1 second to wrap up
+        timeoutArg = max(timeoutArg - int(usedTime), 1)
+!print *, "ESMF_CompExecute(), calling c_ESMC_CompWait(): usedTime=",usedTime,"timeoutArg=",timeoutArg
         call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-          compp%vm_cargo, localUserRc, localrc)
+          compp%vm_cargo, timeoutArg, localUserRc, localrc)
         ! localUserRc - return code of registered user callback method
         ! localrc     - return code of ESMF internal callback stack
         if (ESMF_LogFoundError(localrc, &
@@ -1111,8 +1204,8 @@ contains
   recursive subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, &
     vm_info, contextflag, grid, gridIsPresent, importState, &
     exportState, clock, dirPath, configFile, config, configIsPresent, &
-    compType, currentMethod, currentPhase, localPet, petCount, petList, &
-    compStatus, compTunnel, rc)
+    compType, currentMethod, currentPhase, timeout, &
+    localPet, petCount, petList, compStatus, compTunnel, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass),     pointer               :: compp
@@ -1134,6 +1227,7 @@ contains
     type(ESMF_CompType_Flag), intent(out), optional :: compType
     type(ESMF_Method_Flag),   intent(out), optional :: currentMethod
     integer,                  intent(out), optional :: currentPhase
+    integer,                  intent(out), optional :: timeout
     integer,                  intent(out), optional :: localPet
     integer,                  intent(out), optional :: petCount
     integer,                  pointer,     optional :: petList(:)
@@ -1151,6 +1245,7 @@ contains
     type(ESMF_Status)       :: baseStatus
     type(ESMF_Method_Flag)  :: currentMethodArg
     integer                 :: currentPhaseArg
+    integer                 :: timeoutArg
 
     ! Initialize return code; assume not implemented until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1300,10 +1395,12 @@ contains
       configFile = compp%configFile
     endif
 
-    ! access currentMethod and currentPhase
-    if (present(currentMethod) .or. present(currentPhase)) then
+    ! access currentMethod, currentPhase, timeout
+    if (present(currentMethod) &
+      .or. present(currentPhase) &
+      .or. present(timeout)) then
       call c_ESMC_CompGet(compp%vm_cargo, currentMethodArg, currentPhaseArg, &
-        localrc)
+        timeoutArg, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcTOReturn=rc)) return
@@ -1313,6 +1410,9 @@ contains
     endif
     if (present(currentPhase)) then
       currentPhase = currentPhaseArg
+    endif
+    if (present(timeout)) then
+      timeout = timeoutArg
     endif
 
     ! access localPet
@@ -1951,13 +2051,14 @@ contains
 ! !IROUTINE: ESMF_CompWait - Wait for component to return
 
 ! !INTERFACE:
-  subroutine ESMF_CompWait(compp, syncflag, userRc, rc)
+  subroutine ESMF_CompWait(compp, syncflag, timeout, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_CompClass),    pointer               :: compp
+    type(ESMF_CompClass), pointer               :: compp
     type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
-    integer,                 intent(out), optional :: userRc
-    integer,                 intent(out), optional :: rc
+    integer,              intent(in),  optional :: timeout
+    integer,              intent(out), optional :: userRc
+    integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Wait for component to return
@@ -1970,6 +2071,12 @@ contains
 !   The blocking behavior determines exactly what this call waits for. The
 !   default is {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs across each VAS.
 !   See section \ref{const:sync} for a list of valid blocking options.
+! \item[{[timeout]}]
+!   The maximum period in seconds the actual component is allowed to execute
+!   a previously envoked component method before it must communicate back to
+!   the dual component. If the actual component does not communicate back in
+!   the specified time, a timeout condition is raised on the dual side (this
+!   side). The default is 3600, i.e. 1 hour.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}] 
@@ -1983,7 +2090,9 @@ contains
     type(ESMF_Sync_Flag)    :: blocking     ! local blocking flag
     type(ESMF_VM)           :: vm           ! VM for current context
     type(ESMF_Status)       :: baseStatus
-
+    integer                 :: timeoutArg
+    real(ESMF_KIND_R8)      :: usedTime
+    
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2020,14 +2129,26 @@ contains
 
     localUserRc = ESMF_SUCCESS  ! initialize to success
     
+    timeoutArg = 3600 ! default 1h
+    if (present(timeout)) timeoutArg = timeout
+    
     ! check if the child VM, i.e. the VM of this component, is currently marked
     ! as running...
     if (compp%vm_released) then
       ! check if the calling PET has a present VM (i.e. was SetServices called)
       if (compp%compStatus%vmIsPresent) then
         ! wait for all child PETs that run in this parent's PET VAS to finish
+        ! determine how long the component has been released already
+        call ESMF_VMWTime(usedTime, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcTOReturn=rc)) return
+        usedTime = usedTime - compp%startTime
+        ! allow remaining time for timeout, but at least 1 second to wrap up
+        timeoutArg = max(timeoutArg - int(usedTime), 1)
+!print *, "ESMF_CompWait(), calling c_ESMC_CompWait(): usedTime=",usedTime,"timeoutArg=",timeoutArg
         call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-          compp%vm_cargo, localUserRc, localrc)
+          compp%vm_cargo, timeoutArg, localUserRc, localrc)
         ! localUserRc - return code of registered user callback method
         ! localrc     - return code of ESMF internal callback stack
         if (ESMF_LogFoundError(localrc, &

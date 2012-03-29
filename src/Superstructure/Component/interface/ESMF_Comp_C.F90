@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.76 2012/03/13 02:52:38 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.77 2012/03/29 23:41:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.76 2012/03/13 02:52:38 theurich Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.77 2012/03/29 23:41:09 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -40,6 +40,28 @@
 ! 
 !EOP
 !------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_compresetvmreleased"
+recursive subroutine f_esmf_compresetvmreleased(comp, rc)
+  use ESMF_UtilTypesMod      ! ESMF utility types
+  use ESMF_BaseMod           ! ESMF base class
+  use ESMF_CompMod
+
+  implicit none
+
+  type(ESMF_CWrap)   :: comp
+  integer            :: rc
+
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  comp%compp%vm_released = .false.  ! reset
+  
+  ! return successfully
+  rc = ESMF_SUCCESS
+
+end subroutine f_esmf_compresetvmreleased
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_compsetvminfo"
@@ -79,6 +101,25 @@ recursive subroutine f_esmf_compgetcurrentphase(comp, currentPhase, rc)
 
   call ESMF_CompGet(compp=comp%compp, currentPhase=currentPhase, rc=rc)
 end subroutine f_esmf_compgetcurrentphase
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_compgettimeout"
+recursive subroutine f_esmf_compgettimeout(comp, timeout, rc)
+  use ESMF_UtilTypesMod      ! ESMF utility types
+  use ESMF_BaseMod           ! ESMF base class
+  use ESMF_CompMod
+
+  implicit none
+
+  type(ESMF_CWrap)   :: comp
+  integer            :: timeout
+  integer            :: rc
+
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  call ESMF_CompGet(compp=comp%compp, timeout=timeout, rc=rc)
+end subroutine f_esmf_compgettimeout
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_compgetvminfo"
@@ -382,9 +423,11 @@ subroutine f_esmf_compcollectgarbage(comp, rc)
   implicit none
 
   type(ESMF_CWrap)     :: comp
-  integer, intent(out) :: rc     
+  integer, intent(out) :: rc
 
-  integer :: localrc              
+  integer :: localrc
+  integer :: timeout
+  logical :: timeoutFlag
 
   ! initialize return code; assume routine not implemented
   localrc = ESMF_RC_NOT_IMPL
@@ -393,7 +436,10 @@ subroutine f_esmf_compcollectgarbage(comp, rc)
   !print *, "collecting Component garbage"
 
   ! destruct internal data allocations
-  call ESMF_CompDestruct(comp%compp, rc=localrc)
+  timeout = 10  ! allow for 10s timeout
+  ! calling with 'timeoutFlag' prevents timeout to propagate as error condition
+  call ESMF_CompDestruct(comp%compp, timeout=timeout, timeoutFlag=timeoutFlag, &
+    rc=localrc)
   if (ESMF_LogFoundError(localrc, &
     ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
@@ -415,7 +461,7 @@ end subroutine f_esmf_compcollectgarbage
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_compexecute"
 subroutine f_esmf_compexecute(comp, method, importState, exportState, clock, &
-  syncflag, phase, userRc, rc)
+  syncflag, phase, timeout, userRc, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_ClockMod
@@ -434,6 +480,7 @@ subroutine f_esmf_compexecute(comp, method, importState, exportState, clock, &
   type(ESMF_Clock)      :: clock
   type(ESMF_Sync_Flag)  :: syncflag
   integer               :: phase
+  integer               :: timeout
   integer               :: userRc
   integer               :: rc
 
@@ -450,7 +497,7 @@ subroutine f_esmf_compexecute(comp, method, importState, exportState, clock, &
 
   call ESMF_CompExecute(comp%compp, method=method, importState=importState, &
     exportState=exportState, clock=local_clock, &
-    syncflag=syncflag, phase=phase, userRc=userRc, rc=rc)
+    syncflag=syncflag, phase=phase, timeout=timeout, userRc=userRc, rc=rc)
 
 end subroutine f_esmf_compexecute
 

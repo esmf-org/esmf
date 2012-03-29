@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.25 2012/03/13 02:52:38 theurich Exp $
+// $Id: ESMCI_Comp.C,v 1.26 2012/03/29 23:41:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.25 2012/03/13 02:52:38 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.26 2012/03/29 23:41:09 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -52,10 +52,12 @@ extern "C" {
     enum ESMCI::method *method,
     ESMCI::State *importState, ESMCI::State *exportState, 
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
-    int *userRc, int *rc);
+    int *timeout, int *userRc, int *rc);
   
   void FTN_X(f_esmf_compgetcurrentphase)(const ESMCI::Comp *compp,
     int *currentPhase, int *rc);
+  void FTN_X(f_esmf_compgettimeout)(const ESMCI::Comp *compp,
+    int *timeout, int *rc);
   void FTN_X(f_esmf_compgetvminfo)(const ESMCI::Comp *compp, void **vm_info,
     int *rc);
   void FTN_X(f_esmf_compgetvm)(const ESMCI::Comp *compp, ESMCI::VM **vm,
@@ -341,6 +343,7 @@ int Comp::execute(
     Clock *clock,
     ESMC_BlockingFlag blockingFlag,
     int phase,
+    int timeout,
     int *userRc
   )const{
 //
@@ -363,7 +366,7 @@ int Comp::execute(
   if (userRc) localUserRc = *userRc;
   
   FTN_X(f_esmf_compexecute)(this, &method, importState, exportState, &clock,
-    &blockingFlag, &phase, &localUserRc, &localrc);
+    &blockingFlag, &phase, &timeout, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -409,6 +412,49 @@ int Comp::getCurrentPhase(
   }
   
   FTN_X(f_esmf_compgetcurrentphase)(this, currentPhase, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp:getTimeout()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp:getTimeout
+//
+// !INTERFACE:
+int Comp::getTimeout(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    int *timeout
+  )const{
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (this==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid comp argument", &rc);
+    return rc;
+  }
+  
+  FTN_X(f_esmf_compgettimeout)(this, timeout, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   

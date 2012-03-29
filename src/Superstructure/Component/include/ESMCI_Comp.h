@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.28 2012/03/13 02:52:36 theurich Exp $
+// $Id: ESMCI_Comp.h,v 1.29 2012/03/29 23:41:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -52,7 +52,7 @@ enum method { METHOD_NONE=0,
   METHOD_WRITERESTART, METHOD_READRESTART, METHOD_SERVICELOOP,
   METHOD_INITIALIZEIC, METHOD_RUNIC, METHOD_FINALIZEIC, 
   METHOD_WRITERESTARTIC, METHOD_READRESTARTIC, METHOD_SERVICELOOPIC,
-  METHOD_SETSERVICES, METHOD_WAIT};
+  METHOD_SETVM, METHOD_SETSERVICES, METHOD_WAIT};
 
 
 // class definition
@@ -68,9 +68,11 @@ class Comp{
     int setInternalState(void *data);
     int execute(enum method method, ESMCI::State *importState, 
       ESMCI::State *exportState, ESMCI::Clock *clock, 
-      ESMC_BlockingFlag blockingFlag, int phase, int *userRc) const;
+      ESMC_BlockingFlag blockingFlag, int phase, int timeout, 
+      int *userRc) const;
     
     int getCurrentPhase(int *currentPhase) const;
+    int getTimeout(int *timeout) const;
     int getVmInfo(void **vm_info) const;
     int getVm(VM **vm) const;
     int getVmParent(VM **vmparent) const;

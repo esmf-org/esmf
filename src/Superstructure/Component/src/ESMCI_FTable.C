@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.68 2012/03/13 02:52:35 theurich Exp $
+// $Id: ESMCI_FTable.C,v 1.69 2012/03/29 23:41:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ using std::string;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.68 2012/03/13 02:52:35 theurich Exp $";
+static const char *const version = "$Id: ESMCI_FTable.C,v 1.69 2012/03/29 23:41:11 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -57,6 +57,7 @@ static const char *const version = "$Id: ESMCI_FTable.C,v 1.68 2012/03/13 02:52:
 //TODO: eventually move these calls into the ESMCI::Comp class
 extern "C" {
   void FTN_X(f_esmf_compsetvminfo)(ESMCI::Comp *compp, void *vm_info, int *rc);
+  void FTN_X(f_esmf_compresetvmreleased)(ESMCI::Comp *compp, int *rc);
   void FTN_X(f_esmf_compinsertvm)(ESMCI::Comp *compp, void *vm, int *rc);
   void FTN_X(f_esmf_compgetctype)(ESMCI::Comp *compp, ESMCI::CompType *ctype,
     int *rc);
@@ -322,9 +323,8 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     if (*compTunnel != NULL){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "- Component is already associated with an Actual Component", rc);
-      return;
+      delete *compTunnel; // clean-up
+      *compTunnel = NULL; // mark clean
     }
     // The compTunnel object must be created on all the PETs that execute
     // this routine, which are potentially all parent PETs, not just those
@@ -340,10 +340,16 @@ extern "C" {
     // call into setServices with the internal CompTunnel::SetServices wrapper
     int userRc;
     localrc =dualComp->setServices(ESMCI::CompTunnel::setServicesWrap, &userRc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
+      delete *compTunnel; // clean-up
+      *compTunnel = NULL; // mark clean
       return; // bail out
-    if (ESMC_LogDefault.MsgFoundError(userRc, ESMCI_ERR_PASSTHRU, rc)) 
+    }
+    if (ESMC_LogDefault.MsgFoundError(userRc, ESMCI_ERR_PASSTHRU, rc)){
+      delete *compTunnel; // clean-up
+      *compTunnel = NULL; // mark clean
       return; // bail out on userRc b/c setServicesWrap is an internal routine
+    }
     
     // Now that everything has returned successfully, mark the tunnel as
     // connected.
@@ -359,12 +365,16 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_setservicessock"
   void FTN_X(c_esmc_setservicessock)(ESMCI::Comp *dualComp, 
     ESMCI::CompTunnel **compTunnel, int *port, char const *serverArg,
-    int *rc, ESMCI_FortranStrLenArg len){
+    int *timeout, int *rc, ESMCI_FortranStrLenArg len){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     if (*compTunnel != NULL){
+      delete *compTunnel; // clean-up
+      *compTunnel = NULL; // mark clean
+    }
+    if (*port<1024 || *port>65535){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "- Component is already associated with an Actual Component", rc);
+        "- The port argument is outside valid range [1024, 65535]", rc);
       return;
     }
     // server name
@@ -379,13 +389,27 @@ extern "C" {
       ESMC_LogDefault.MsgAllocError("- CompTunnel allocation", rc);  
       return; // bail out
     }
+    (*compTunnel)->setTimeout(*timeout);  // set dual side timeout for setServ.
     // call into setServices with the internal CompTunnel::SetServices wrapper
     int userRc;
     localrc =dualComp->setServices(ESMCI::CompTunnel::setServicesWrap, &userRc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
+      delete *compTunnel; // clean-up
+      *compTunnel = NULL; // mark clean
       return; // bail out
-    if (ESMC_LogDefault.MsgFoundError(userRc, ESMCI_ERR_PASSTHRU, rc)) 
+    }
+    // CompTunnel::setServicesWrap() is a framework internal method, therefore
+    // the code returned in userRc is a framework internal return code and must
+    // be treated as such. 
+    // Do not filter the RC_TIMEOUT at this level, since a timeout needs to
+    // bail out until it gets to the upper ESMF level, right before returning
+    // to the user, where the filtering is done according to the presence of
+    // a timeoutFlag argument.
+    if (ESMC_LogDefault.MsgFoundError(userRc, ESMCI_ERR_PASSTHRU, rc)){
+      delete *compTunnel; // clean-up
+      *compTunnel = NULL; // mark clean
       return; // bail out on userRc b/c setServicesWrap is an internal routine
+    }
     
     // Now that everything has returned successfully, mark the tunnel as
     // connected.
@@ -697,7 +721,8 @@ void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
     // ...the user return code will not be available until wait() is called
     
   }else{
-    // this is a regular component, use the local ftable for user code callback
+    // a regular component or a dual component that needs to connect still,
+    // use the local ftable for user code or system code callback
     localrc = ftable->callVFuncPtr(name, (ESMCI::VM*)vm, &userrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &esmfrc)){
       cargo->esmfrc[mytid] = esmfrc;  // put esmf return code into cargo
@@ -726,7 +751,9 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
   void **vm_cargo,            // p2 to member which holds cargo
   ESMCI::FTable **ptr,        // p2 to the ftable of this component
   enum ESMCI::method *method, // method type
-  int *phase_,                // phase selector
+  int *phase,                 // phase selector
+  int *port,                  // port number
+  int *timeout,               // time out in seconds
   int *recursionCount,        // keeping track of recursion level of component
   int *rc                     // return code
   ){
@@ -746,21 +773,6 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
   if (rc) *rc = ESMC_RC_NOT_IMPL;
   localrc = ESMC_RC_NOT_IMPL;
 
-  // the following construct ensures that this routine does not modify
-  // the phase variable on the caller side
-  int phaseVar;
-  int *phase = &phaseVar;
-  if (phase_)
-    phaseVar = *phase_;
-  else
-    phase = NULL;
-    
-  int port;
-  if (phase && (*method == ESMCI::METHOD_SERVICELOOP)){
-    port = *phase;  // incoming phase actually indicates port number
-    *phase = 1;     // serviceloop only has phase 1
-  }
-
   char const *methodString = ESMCI::FTable::methodString(*method);
 
   int slen = strlen(methodString);
@@ -778,10 +790,19 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
   if (i > -1)
     currentMethod = ftable->methodFromIndex(i);
   
-  // support for recursion _and_ re-enterance for non-blocking mode
+  // support for recursion _and_ re-entrance for non-blocking mode
+  // - recursion:   A component may call into any of its standard methods from 
+  //                within the context of already executing a standard method.
+  //                There is no practical limit to the recursion depth.
+  // - re-entrance: This refers to the situation where there is an outstanding
+  //                non-blocking call, but the parent calls into the standard
+  //                child component method again. This really only happens
+  //                on the dual side of dual-actual pairs connected by a 
+  //                component tunnel. The dual side then may re-enter with an
+  //                associated wait call.
   bool newCargoFlag = true;   // initialize
   if (recursionCount && *recursionCount==0 && *vm_cargo)
-    newCargoFlag = false; // this not a recusion but a re-enterance
+    newCargoFlag = false; // this is not a recursion but a re-entrance
   
   if (newCargoFlag){
     ESMCI::cargotype *cargo = new ESMCI::cargotype;
@@ -798,7 +819,7 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
     cargo->currentMethod = currentMethod;
     if (*method == ESMCI::METHOD_SERVICELOOP){
       // for serviceloop method the currentPhase carries the port argument
-      cargo->currentPhase = port;
+      cargo->currentPhase = *port;
     }else{
       // for all other methods the currentPhase is the current phase
       if (phase)
@@ -806,7 +827,9 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
       else
         cargo->currentPhase = 1;    // default
     }
-    *vm_cargo=(void*)cargo;           // store pointer to the cargo structure
+    
+    // store pointer to the cargo structure
+    *vm_cargo=(void*)cargo;
   
     if (cargo->previousCargo != NULL){
       // this is a recursive method invocation
@@ -815,6 +838,13 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
     }
   }
   delete[] name;  // delete memory that "newtrim" allocated above
+  
+  // store the current timeout in the cargo structure
+  ESMCI::cargotype *cargo = (ESMCI::cargotype *)*vm_cargo;
+  if (timeout)
+    cargo->timeout = *timeout;
+  else
+    cargo->timeout = -1;          // indicate invalid timeout
 
   // increment recursionCount before entering child VM
   if (recursionCount) (*recursionCount)++;
@@ -848,6 +878,7 @@ void FTN_X(c_esmc_compwait)(
   ESMCI::VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
   void **vm_info,             // p2 to member which holds info
   void **vm_cargo,            // p2 to member which holds cargo
+  int *timeout,               // time out in seconds
   int *userrc,                // return code of the user component method
   int *rc){                   // esmf internal return error code
 
@@ -882,6 +913,12 @@ void FTN_X(c_esmc_compwait)(
     // this is a dual component with a compTunnel that is connected
     // -> execute compTunnel::wait() on dual components VM.
     
+    if (timeout == NULL){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+        " - Must provide valid timeout argument", rc);
+      return;
+    }
+    
     ESMCI::State *is = compTunnel->getImportState();
     ESMCI::State *es = compTunnel->getImportState();
     ESMCI::Clock **clock = compTunnel->getClock();
@@ -892,12 +929,13 @@ void FTN_X(c_esmc_compwait)(
     int userRc = ESMC_RC_NOT_IMPL;
     
     localrc = f90comp->execute(ESMCI::METHOD_WAIT, is, es, clockP, 
-      ESMF_NONBLOCKING, 1, &userRc);  // nonblocking or else endless recursion
+      ESMF_NONBLOCKING,       // nonblocking or else endless recursion!!!
+      1, *timeout, &userRc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
       return;
+    // TODO: in case of threading the userRc in not immediatly available!
     if (ESMC_LogDefault.MsgFoundError(userRc, ESMCI_ERR_PASSTHRU, rc)) 
       return; // bail out too because this is for an internal routine
-    
   }
   
   // Now call the vmk_exit function which will block respective PETs
@@ -929,6 +967,7 @@ void FTN_X(c_esmc_compget)(
   void **vm_cargo,            // p2 to member which holds cargo
   enum ESMCI::method *method, // method type
   int *phase,                 // phase selector
+  int *timeout,               // timeout
   int *rc){                   // esmf internal return error code
 
   // initialize the return codes
@@ -939,9 +978,11 @@ void FTN_X(c_esmc_compget)(
   if (cargo){
     *method = cargo->currentMethod;
     *phase = cargo->currentPhase;
+    *timeout = cargo->timeout;
   }else{
     *method = ESMCI::METHOD_NONE;
     *phase = 0;
+    *timeout = 0;
   }
 
   // return successfully
@@ -1157,16 +1198,20 @@ void FTable::setServices(void *ptr, void (*func)(), int *userRc, int *rc) {
   }
   // ...now the component's VM is started up and placed on hold.
   
+  // reset a flag in the component structure
+  FTN_X(f_esmf_compresetvmreleased)(f90comp, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
+  
   // call into register routine using the component's VM
   void *vm_cargo = NULL;
   enum method reg = METHOD_SETSERVICES;
   FTN_X(c_esmc_ftablecallentrypointvm)(f90comp, &vm_parent, &vmplan_p, &vm_info,
-    &vm_cargo, &tabptr, &reg, NULL, NULL, &localrc);
+    &vm_cargo, &tabptr, &reg, NULL, NULL, NULL, NULL, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
   
   // wait for the register routine to return
-  FTN_X(c_esmc_compwait)(&vm_parent, &vmplan_p, &vm_info, &vm_cargo, userRc,
-    &localrc);
+  FTN_X(c_esmc_compwait)(&vm_parent, &vmplan_p, &vm_info, &vm_cargo, NULL,
+    userRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) return;
   
   // return successfully
@@ -1697,13 +1742,14 @@ int FTable::callVFuncPtr(
           complianceCheckFlag |= !strcmp(envVar, "ON");  // turn on
         }
         if (complianceCheckFlag){
+          int registerIcUserRc;
           
 //TODO: for now disable the DLFCN based lookup until we correctly build PIC
 //TODO: on all combos for which we have DLFCN enabled
 #define ESMF_NO_DLFCNdummy
           
 #ifdef ESMF_NO_DLFCNdummy
-          FTN_X(esmf_complianceicregister)((void *)comp, userrc);
+          FTN_X(esmf_complianceicregister)((void *)comp, &registerIcUserRc);
 #else
           
 #define QUOTEMACRO_(x) #x
@@ -1731,8 +1777,12 @@ int FTable::callVFuncPtr(
           }
           
           VoidP1IntPFunc vf = (VoidP1IntPFunc)pointer;
-          (*vf)((void *)comp, userrc);
+          (*vf)((void *)comp, &registerIcUserRc);
 #endif
+          
+          // compliance IC for register is an internal routine -> look at rc
+          if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
+            ESMCI_ERR_PASSTHRU, &rc)) return rc; // bail out
         }
       }
       

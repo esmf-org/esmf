@@ -1,4 +1,4 @@
-// $Id: ESMCI_CompTunnel.h,v 1.7 2012/03/13 02:52:36 theurich Exp $
+// $Id: ESMCI_CompTunnel.h,v 1.8 2012/03/29 23:41:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -80,6 +80,7 @@ class CompTunnel{
     int sock;
     int port;
     std::string server;
+    double timeout;     // timeout of current dual operation in seconds
     bool masterFlag;
     //--------------
   private:
@@ -131,6 +132,8 @@ class CompTunnel{
       socketBased = true;
     }
     ~CompTunnel(void){
+      //TODO: It may be good to move this into CompTunnel.C and to call
+      //TODO: socketFinal() on the masterPet for a socketBased tunnel.
       connected = false;
       dual = NULL;
       actual = NULL;
@@ -150,9 +153,11 @@ class CompTunnel{
     void setImportState(State *state){ importState=state;}
     void setExportState(State *state){ exportState=state;}
     void setClock(Clock **clock_){ clock=clock_;}
+    void setTimeout(double timeout_){ timeout=timeout_;}
     State *getImportState()const{ return importState; }
     State *getExportState()const{ return exportState; }
     Clock **getClock()const{ return clock; }
+    double getTimeout()const{ return timeout; }
     //--------------
     int print(void)const;
     static void setServicesWrap(Comp *dualComp, int *rc);
@@ -161,9 +166,9 @@ class CompTunnel{
     static void waitWrap(Comp *dualComp, int *rc);
     int wait(cargotype *cargo);
     // --- comm methods --------------
-    int negotiate();
-    int dual2actual(void *msg, int len);
-    int actual2dual(void *msg, int len);
+    int negotiate(double timeout);
+    int dual2actual(void *msg, int len, double timeout);
+    int actual2dual(void *msg, int len, double timeout);
 };
 
 //==============================================================================

@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.h,v 1.26 2012/01/06 20:18:57 svasquez Exp $
+// $Id: ESMCI_FTable.h,v 1.27 2012/03/29 23:41:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -159,6 +159,7 @@ typedef struct{
   int previousParentFlag; // support for recursive entering of methods
   enum method currentMethod;
   int currentPhase;
+  int timeout;          // timeout in seconds
 }cargotype;
 
   

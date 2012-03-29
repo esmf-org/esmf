@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMC_ReturnCodes.h,v 1.7 2012/01/06 20:18:17 svasquez Exp $
+$Id: ESMC_ReturnCodes.h,v 1.8 2012/03/29 23:41:06 theurich Exp $
 
   Earth System Modeling Framework
   Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -89,6 +89,7 @@ Fortran Symmetric Return Codes 1-500
 #define  ESMF_RC_ATTR_ITEMSOFF     59
 #define  ESMF_RC_ATTR_LINK         60
 #define  ESMF_RC_BUFFER_SHORT      61
+#define  ESMF_RC_TIMEOUT           62
 
 #if 0
 62-499 reserved for future Fortran symmetric return code definitions
@@ -161,6 +162,7 @@ C/C++ Symmetric Return Codes 501-999
 #define  ESMC_RC_ATTR_ITEMSOFF    559
 #define  ESMC_RC_ATTR_LINK        560
 #define  ESMC_RC_BUFFER_SHORT     561
+#define  ESMC_RC_TIMEOUT          562
 
 #if 0
 562-999 reserved for future C/C++ symmetric return code definitions
