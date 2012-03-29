@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.7 2012/03/27 16:49:21 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.8 2012/03/29 00:51:12 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_StateReconcile2Mod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-  '$Id: ESMF_StateReconcile2.F90,v 1.7 2012/03/27 16:49:21 w6ws Exp $'
+  '$Id: ESMF_StateReconcile2.F90,v 1.8 2012/03/29 00:51:12 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
@@ -109,6 +109,13 @@ module ESMF_StateReconcile2Mod
 
 
 !==============================================================================
+!
+! Misc
+!
+!==============================================================================
+
+  logical, parameter :: trace=.false.
+  logical, parameter :: debug=.false.
 
 contains
 
@@ -218,7 +225,7 @@ contains
 ! !IROUTINE: ESMF_StateReconcile_driver
 !
 ! !INTERFACE:
-    recursive subroutine ESMF_StateReconcile_driver (state, vm, attreconflag, rc)
+    subroutine ESMF_StateReconcile_driver (state, vm, attreconflag, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_State), intent(inout) :: state
@@ -255,7 +262,6 @@ contains
     integer,         pointer :: ids_send(:), itemtypes_send(:)
     type(ESMF_VMId), pointer :: vmids_send(:)
     integer,     allocatable :: ids_recv(:), itemtypes_recv(:)
-    type(ESMF_VMId), pointer :: vmids_recv(:)
 
     type(ESMF_ReconcileIDInfo), pointer :: id_info(:)
 
@@ -273,8 +279,10 @@ contains
         rcToReturn=rc)) return
 
     ! 0.) Interchange item counts between PETs.  Set up counts/displacements
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': *** Step 0: Initialize item counts and siwrappers')
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+	  ': *** Step 0: Initialize item counts and siwrappers')
+    end if
     siwrap     => null ()
     nitems_buf => null ()
     call ESMF_ReconcileInitialize (state, vm,  &
@@ -283,14 +291,16 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-print *, ESMF_METHOD, ': siwrap(', lbound (siwrap,1), ',', ubound (siwrap,1), ')'
-print *, ESMF_METHOD, ': nitems_buf(', lbound (nitems_buf,1), ',', ubound (nitems_buf,1), ')'
+! print *, ESMF_METHOD, ': siwrap(', lbound (siwrap,1), ',', ubound (siwrap,1), ')'
+! print *, ESMF_METHOD, ': nitems_buf(', lbound (nitems_buf,1), ',', ubound (nitems_buf,1), ')'
 
     ! 1.) Each PET constructs its send arrays containing local Id
     ! and VMId info for each object contained in the State
     ! Note that element zero is reserved for the State itself.
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': *** Step 1 - Build send arrays')
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': *** Step 1 - Build send arrays')
+    end if
     itemtypes_send => null ()
     ids_send   => null ()
     vmids_send => null ()      
@@ -305,9 +315,10 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 
     ! 2.) All PETs send their items Ids and VMIds to all the other PETs,
     ! then create local directories of which PETs have which ids/VMIds.
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': *** Step 2 - Exchange Ids/VMIds')
-
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': *** Step 2 - Exchange Ids/VMIds')
+    end if
     id_info => null ()
     call ESMF_ReconcileExchangeIDInfo (vm,  &
         nitems_buf=nitems_buf,  &
@@ -328,8 +339,10 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     ! currently-being-processed sending PET.  Note that multiple PETs
     ! can 'offer' an item.
 
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': *** Step 3 - Compare and create needs arrays')
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': *** Step 3 - Compare and create needs arrays')
+    end if
 
     call ESMF_ReconcileCompareNeeds (vm,  &
 	  id=  ids_send,  &
@@ -343,8 +356,10 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 
     ! 4.) Communicate needs back to the offering PETs
 
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': *** Step 4 - Exchange needs')
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': *** Step 4 - Exchange needs')
+    end if
 
     ! Send to each offering PET a buffer containing 'needed' array
     ! specifying which items are needed.  The array is the same size as,
@@ -363,11 +378,15 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 
     ! 5.) Serialized needed objects
 
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': *** Step 5 - Serialize needs')
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': *** Step 5 - Serialize needs')
+    end if
     do, i=0, npets-1
-write (6,*) '  PET', mypet, ': needs that PET', i, ' requested are:', recvd_needs_matrix(:,i)
-flush (6)
+      if (debug) then
+        write (6,*) '  PET', mypet, ': needs that PET', i, ' requested are:', recvd_needs_matrix(:,i)
+        flush (6)
+      end if
       id_info(i)%item_buffer => null ()
       call ESMF_ReconcileSerialize (state, siwrap, &
 	  needs_list=recvd_needs_matrix(:,i), attreconflag=attreconflag,  &
@@ -376,12 +395,14 @@ flush (6)
 	  ESMF_CONTEXT,  &
 	  rcToReturn=rc)) return
     end do
-
+call ESMF_VMBarrier (vm)
 
     ! 6.) Send/receive serialized objects to whoever needed them
 
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': *** Step 6 - Exchange serialized objects')
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': *** Step 6 - Exchange serialized objects')
+    end if
 
     items_recv => null ()
     call ESMF_ReconcileSendItems (vm,  &
@@ -396,17 +417,10 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     ! 7.) Deserialize received objects and create proxies (recurse on
     !     nested States as needed
 
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': *** Step 7 - Deserialize needs')
-
-! !!! DO NOT REMOVE THIS BARRIER !!!
-! All serialization and communications must be complete before
-! deserialization can begin.
-
-    call ESMF_VMBarrier (vm, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-	ESMF_CONTEXT,  &
-	rcToReturn=rc)) return
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': *** Step 7 - Deserialize needs')
+    end if
 
     do, i=0, npets-1
       if (associated (items_recv(i)%item_buffer)) then
@@ -420,39 +434,59 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
       end if
     end do
 
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': Deallocating recvd_needs_matrix')
-      deallocate (recvd_needs_matrix, stat=memstat)
-      if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
+! Clean up
 
-#if !defined (ALIAS_VMID)
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': Destroying vmids_recv')
-    call ESMF_VMIdDestroy (vmids_recv, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': At clean up.', ask=.false.)
+    end if
+
+    if (debug) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': Deallocating recvd_needs_matrix')
+    end if
+    deallocate (recvd_needs_matrix, stat=memstat)
+    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-#endif
 
+    if (debug) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': Deallocating vmids_send')
+    end if
     deallocate (ids_send, itemtypes_send, vmids_send, stat=memstat)
     if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
+    if (debug) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': Deallocating id_info interior')
+    end if
     do, i=0, ubound (id_info, 1)
+      call ESMF_VMIdDestroy (id_info(i)%vmid, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
       deallocate (id_info(i)%id, id_info(i)%vmid, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
     end do
+    if (debug) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': Deallocating id_info')
+    end if
     deallocate (id_info, stat=memstat)
     if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
     if (associated (siwrap)) then
+    if (debug) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': Deallocating siwrap')
+    end if
       deallocate (siwrap, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
@@ -461,7 +495,10 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 
     state%statep%reconcileneededflag = .false.
 
-call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': at the end without crashing!')
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': at the end without crashing!')
+      call ESMF_VMBarrier (vm)
+    end if
     rc = ESMF_SUCCESS
 
   end subroutine ESMF_StateReconcile_driver
@@ -582,6 +619,7 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': at the end without crashing!')
 
     call needs_list_select (needs_list, id_info)
 
+#if 0
     call needs_list_deallocate (needs_list, rc_1=localrc)
     if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
@@ -592,6 +630,7 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': at the end without crashing!')
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
     end if
+#endif
 
 ! do, j=0, npets-1
 !   if (j == myPet) then
@@ -814,12 +853,18 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD // ': at the end without crashing!')
     print *, '  needs_count =', needs_count
     buffer_offset = ESMF_SIZEOF_DEFINT
 
-    if (needs_count /= size (vm_ids)) then
-      print *, ESMF_METHOD, ': WARNING - size mismatch between needs_count and vm_ids'
+    if (needs_count /= ubound (vm_ids, 1)) then
+      print *, ESMF_METHOD, ': WARNING - size mismatch between needs_count and vm_ids', needs_count, ubound (vm_ids, 1)
+      if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, msg='needs_count /= ubound (vm_ids, 1)', &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
     end if
 
     if (attreconflag == ESMF_ATTRECONCILE_ON) then
       ! TODO: For the State itself
+      if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, msg='attreconflag not supported yet', &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
     end if
 
     do, i=1, needs_count
@@ -1102,8 +1147,6 @@ print *, "deserialization error in default case.  Returning ESMF_RC_INTNRL_INCON
 
     ! Exchange Ids
 
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': AllToAllVing Ids')
 
     allocate (id_recv(0:sum (counts_buf_recv+1)-1),  &
         stat=memstat)
@@ -1111,10 +1154,25 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-    call ESMF_VMAllToAllV (vm,  &
-       id     , counts_buf_send, displs_buf_send,  &
-       id_recv, counts_buf_recv, displs_buf_recv,  &
+#if 1
+    if (debug) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ':   Exchanging Ids (using ESMF_VMAllGatherV)')
+    end if
+    call ESMF_VMAllGatherV (vm,  &
+       sendData=id     , sendCount =size (id),  &
+       recvData=id_recv, recvCounts=counts_buf_recv, recvOffsets=displs_buf_recv,  &
        rc=localrc)
+#else
+    if (debug) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ':   Exchanging Ids (using ESMF_VMAllToAllV)')
+    end if
+    call ESMF_VMAllToAllV (vm,  &
+       sendData=id     , sendCounts=counts_buf_send, sendOffsets=displs_buf_send,  &
+       recvData=id_recv, recvCounts=counts_buf_recv, recvOffsets=displs_buf_recv,  &
+       rc=localrc)
+#endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
@@ -1137,15 +1195,16 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 
     ! Exchange VMIds
 
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': AllToAllVing VMIds')
-
 #if 1
 ! VMBcastVMId version
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': AllToAllVVMIds exchange (using VMBcastVMId)')
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ':   VMIdCopying...')
+    if (debug) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ':   Exchanging VMIds (using VMBcastVMId)')
+    end if
+    if (debug) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ':     VMIdCopying...')
+    end if
     call ESMF_VMIdCopy (  &
         dest=id_info(mypet)%vmid,  &
         source=vmid,  &
@@ -1155,8 +1214,11 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
         rcToReturn=rc)) return
 
     do, send_pet=0, npets-1
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ':   broadcasting VMId, using rootPet ' // iToS (send_pet), ask=.false.)
+      if (debug) then
+	call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+            ':     broadcasting VMId, using rootPet ' // iToS (send_pet),  &
+            ask=.false.)
+      end if
       call ESMF_VMBcastVMId (vm,  &
 	  bcstData=id_info(send_pet)%vmid,  &
 	  count=size (id_info(send_pet)%vmid),  &
@@ -1168,8 +1230,10 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 #else
 
 ! AllToAllVVMId version
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': AllToAllVVMIds exchange (using VMAllToAllVVMId)')
+    if (debug) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': Exchanging VMIds (using VMAllToAllVVMId)')
+    end if
 
     allocate (vmid_recv(0:sum (counts_buf_recv+1)-1),  &
               stat=memstat)
@@ -1189,8 +1253,10 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': copying VMIds into id_info array')
+    if (debug) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': copying VMIds into id_info array')
+    end if
     ipos = 0
     do, i=0, npets-1
       call ESMF_VMIdCopy (dest=id_info(i)%vmid, &
@@ -1321,7 +1387,7 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
         rcToReturn=rc)) return
 
     counts_recv = itemcount_local
-    offsets_recv = offsets_send
+    offsets_recv = itemcount_local * (/ (i,i=0, npets-1) /)
     buffer_recv = .false.
 
     ! AlltoAllV
@@ -1637,12 +1703,9 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-write (6,*) ' PET', mypet, ': nitems_all =', nitems_all
-flush (6)
-call ESMF_VMBarrier (vm)
-
-call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-    ': complete')
+! write (6,*) ' PET', mypet, ': nitems_all =', nitems_all
+! flush (6)
+! call ESMF_VMBarrier (vm)
 
   end subroutine ESMF_ReconcileInitialize
     
@@ -1706,7 +1769,6 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
 
 !   Set up send counts, offsets, and buffer.
 
-
     allocate (  &
         counts_send (0:npets-1),  &
         offsets_send(0:npets-1),  &
@@ -1761,9 +1823,11 @@ call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-print *, ESMF_METHOD, ': PET', mypet, ': serialized buffer sizes',  &
-   ': counts_send =', counts_send,  &
-   ', counts_recv =', counts_recv
+    if (debug) then
+      print *, ESMF_METHOD, ': PET', mypet, ': serialized buffer sizes',  &
+          ': counts_send =', counts_send,  &
+          ', counts_recv =', counts_recv
+    end if
 
     allocate (  &
         offsets_recv(0:npets-1),  &
@@ -1969,7 +2033,7 @@ print *, ESMF_METHOD, ': obj_buffer bounds = (0:', buffer_offset, ')'
         	ESMF_CONTEXT,  &
         	rcToReturn=rc)) return
 
-print *, 'serialized fieldbundle, pass =', pass
+! print *, 'serialized fieldbundle, pass =', pass
 
           case (ESMF_STATEITEM_FIELD%ot)
             call ESMF_FieldSerialize(stateitem%datap%fp,  &
@@ -1980,7 +2044,7 @@ print *, 'serialized fieldbundle, pass =', pass
         	ESMF_CONTEXT,  &
         	rcToReturn=rc)) return
 
-print *, 'serialized field, pass =', pass
+! print *, 'serialized field, pass =', pass
 
           case (ESMF_STATEITEM_ARRAY%ot)
             call c_ESMC_ArraySerialize(stateitem%datap%ap,  &
@@ -1991,7 +2055,7 @@ print *, 'serialized field, pass =', pass
         	ESMF_CONTEXT,  &
         	rcToReturn=rc)) return
 
-print *, 'serialized array, pass =', pass
+! print *, 'serialized array, pass =', pass
 
           case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
             call c_ESMC_ArrayBundleSerialize(stateitem%datap%abp,  &
@@ -2004,7 +2068,7 @@ print *, 'serialized array, pass =', pass
 
 ! TODO: Routehandle...
 
-print *, 'serialized arraybundle, pass =', pass
+! print *, 'serialized arraybundle, pass =', pass
 
           case (ESMF_STATEITEM_STATE%ot)
             wrapper%statep => stateitem%datap%spp
@@ -2017,7 +2081,7 @@ print *, 'serialized arraybundle, pass =', pass
         	ESMF_CONTEXT,  &
         	rcToReturn=rc)) return
 
-print *, 'serialized substate, pass =', pass
+! print *, 'serialized substate, pass =', pass
 
           case (ESMF_STATEITEM_UNKNOWN%ot)
             call c_ESMC_StringSerialize(stateitem%namep,  &
@@ -2028,11 +2092,11 @@ print *, 'serialized substate, pass =', pass
         	ESMF_CONTEXT,  &
         	rcToReturn=rc)) return
 
-print *, "serialized unknown type, name=", trim(stateitem%namep)
+! print *, "serialized unknown type, name=", trim(stateitem%namep)
 
           case default
             localrc = ESMF_RC_INTNRL_INCONS
-print *, "serialization error in default case.  Returning ESMF_RC_INTNRL_INCONS"
+! print *, "serialization error in default case.  Returning ESMF_RC_INTNRL_INCONS"
 
           end select
 
