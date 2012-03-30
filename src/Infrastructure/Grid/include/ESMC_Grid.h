@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.h,v 1.19 2012/03/15 19:24:17 rokuingh Exp $
+// $Id: ESMC_Grid.h,v 1.20 2012/03/30 19:03:30 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -140,6 +140,69 @@ int ESMC_GridDestroy(
 //  \begin{description}
 //  \item[grid]
 //    Grid object whose memory is to be freed. 
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_GridAddItem - Add items to a Grid
+//
+// !INTERFACE:
+int ESMC_GridAddItem(
+  ESMC_Grid grid,                   // in
+  enum ESMC_GridItem_Flag itemflag, // in
+  enum ESMC_StaggerLoc staggerloc   // in
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//  Add coordinates to the Grid.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[grid]
+//    Grid object to which the coordinates will be added
+//  \item[itemflag]
+//    The grid item to add.
+//  \item[staggerloc]
+//    The stagger location to add.  If not present, defaults to ESMC_STAGGERLOC_CENTER.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_GridGetItem - Get item from a Grid
+//
+// !INTERFACE:
+void * ESMC_GridGetItem(
+  ESMC_Grid grid,                         // in
+  enum ESMC_GridItem_Flag itemflag,       // in
+  enum ESMC_StaggerLoc staggerloc,        // in
+  int *rc                                 // out
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//  Get coordinatess from the Grid.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[grid]
+//    Grid object from which to obtain the coordinates.
+//  \item[itemflag]
+//    The grid item to add.
+//  \item[staggerloc]
+//    The stagger location to add.  If not present, defaults to ESMC_STAGGERLOC_CENTER.
+//  \item[rc]
+//  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 //  \end{description}
 //
 //EOP

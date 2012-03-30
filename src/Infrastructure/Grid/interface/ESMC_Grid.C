@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.C,v 1.6 2012/03/15 19:24:18 rokuingh Exp $
+// $Id: ESMC_Grid.C,v 1.7 2012/03/30 19:03:32 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Grid.C,v 1.6 2012/03/15 19:24:18 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Grid.C,v 1.7 2012/03/30 19:03:32 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -226,5 +226,72 @@ void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim,
 }
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GridAddItem()"
+int ESMC_GridAddItem(ESMC_Grid grid, enum ESMC_GridItem_Flag itemflag, 
+                                      enum ESMC_StaggerLoc staggerloc){
+  // Initialize return code. Assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;
+  int rc=ESMC_RC_NOT_IMPL;
+
+  // convert the ESMC_Grid to an ESMCI::Grid
+  ESMCI::Grid *gridp = reinterpret_cast<ESMCI::Grid *>(grid.ptr);
+
+  // convert the enums to ints
+  int stagger = static_cast<int>(staggerloc);
+  int item = static_cast<int>(itemflag);
+
+  // add coords
+  localrc=gridp->ESMCI::Grid::addItemArray(&stagger, &item, 
+                                           NULL, NULL, NULL, NULL, NULL);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc; // bail out
+
+  // return successfully
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GridGetItem()"
+void * ESMC_GridGetItem(ESMC_Grid grid,
+                      enum ESMC_GridItem_Flag itemflag, 
+                      enum ESMC_StaggerLoc staggerloc, 
+                      int *rc){
+
+  // Initialize return code. Assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;
+
+  // convert the ESMC_Grid to an ESMCI::Grid
+  ESMCI::Grid *gridp = reinterpret_cast<ESMCI::Grid *>(grid.ptr);
+  //printf("\n\ngridstatus = %d\n\n", gridp->getStatus());
+
+  // convert the enums to ints
+  int stagger = static_cast<int>(staggerloc);
+  int item = static_cast<int>(itemflag);
+
+  // get coord array
+  ESMCI::Array *itemArray; 
+  itemArray = ((gridp)->getItemArray(&stagger, &item, NULL, &localrc));
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+    return NULL; // bail out
+
+  // create an ESMF_Array and cast into pointer access
+  ESMC_Array arrayPtr;
+  arrayPtr.ptr = reinterpret_cast<void *>(itemArray);
+
+  // get the Array pointer to return
+  void *itemPtr = ESMC_ArrayGetPtr(arrayPtr, 0, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+    return NULL; // bail out
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return itemPtr;
+}
+//-----------------------------------------------------------------------------
+
 } // extern "C"
-// $Id: ESMC_Grid.C,v 1.6 2012/03/15 19:24:18 rokuingh Exp $
+// $Id: ESMC_Grid.C,v 1.7 2012/03/30 19:03:32 rokuingh Exp $

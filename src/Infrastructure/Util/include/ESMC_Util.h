@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.43 2012/03/15 19:24:22 rokuingh Exp $
+// $Id: ESMC_Util.h,v 1.44 2012/03/30 19:03:35 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -78,6 +78,13 @@ enum ESMC_GridStatus {ESMC_GRIDSTATUS_INVALID=-1,
                       ESMC_GRIDSTATUS_NOT_READY,
                       ESMC_GRIDSTATUS_SHAPE_READY
 };
+
+enum ESMC_GridItem_Flag {ESMC_GRIDITEM_INVALID=-2,
+                         ESMC_GRIDITEM_UNINIT,
+                         ESMC_GRIDITEM_MASK,
+                         ESMC_GRIDITEM_AREA
+};
+
 
 
 // ESMF platform-dependent data types
