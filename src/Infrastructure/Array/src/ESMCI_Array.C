@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.143 2012/03/15 18:47:51 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.144 2012/03/30 21:06:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.143 2012/03/15 18:47:51 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.144 2012/03/30 21:06:58 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1890,12 +1890,9 @@ int Array::copy(
     // do the actual data copy
     int const dataSize = ESMC_TypeKindSize(typekind);
     int const localDeCount = delayout->getLocalDeCount();
-    int const *localDeToDeMap = delayout->getLocalDeToDeMap();
     for (int i=0; i<localDeCount; i++){
-      int de = localDeToDeMap[i];
       int size =
-        exclusiveElementCountPDe[de]*tensorElementCount*dataSize;  // bytes
-//    sendBuffer[i] = (char *)larrayBaseAddrList[i]; // default: contiguous
+        totalElementCountPLocalDe[i]*tensorElementCount*dataSize;  // bytes
       memcpy(larrayBaseAddrList[i], arrayIn->larrayBaseAddrList[i], size);
     }
       
