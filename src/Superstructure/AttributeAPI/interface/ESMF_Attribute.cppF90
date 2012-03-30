@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.105 2012/03/20 23:06:38 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.106 2012/03/30 16:59:15 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -120,7 +120,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.105 2012/03/20 23:06:38 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.106 2012/03/30 16:59:15 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -2751,7 +2751,7 @@ contains
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
           msg="len(name) cannot be larger than ESMF_MAXSTR for now", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
@@ -2901,7 +2901,7 @@ contains
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
           msg="len(name) cannot be larger than ESMF_MAXSTR for now", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
@@ -3209,7 +3209,7 @@ contains
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
           msg="len(name) cannot be larger than ESMF_MAXSTR for now", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
@@ -3384,7 +3384,7 @@ contains
 @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
           msg="len(name) cannot be larger than ESMF_MAXSTR for now", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
@@ -5360,6 +5360,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: attpack @\
       integer :: count @\
+      character (len=ESMF_MAXSTR) :: modName @\
 @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -5370,7 +5371,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       count = 1 @\
- @\
+@\
+      !!!! TODO: this can go away once modName is dynamically sized !!! @\
+      if (len(name) > ESMF_MAXSTR) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+          msg="len(name) cannot be larger than ESMF_MAXSTR for now", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+      ! If internal info is implied, bail out, cannot set Attribute starting with 'ESMF:'@\
+      if (AttributeInternalInfo(name, modName)) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+          msg="Attribute names starting with 'ESMF:' are not allowed!", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\ 
+@\
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
@@ -5455,6 +5471,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc, litemCount @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: attpack @\
+      character (len=ESMF_MAXSTR) :: modName @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -5464,6 +5481,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
+      !!!! TODO: this can go away once modName is dynamically sized !!! @\
+      if (len(name) > ESMF_MAXSTR) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+          msg="len(name) cannot be larger than ESMF_MAXSTR for now", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+      ! If internal info is implied, bail out, cannot set Attribute starting with 'ESMF:'@\
+      if (AttributeInternalInfo(name, modName)) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+          msg="Attribute names starting with 'ESMF:' are not allowed!", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+@\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
@@ -5566,6 +5598,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Logical) :: localvalue @\
       type(ESMF_Logical) :: attpack @\
       integer :: count @\
+      character (len=ESMF_MAXSTR) :: modName @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -5575,7 +5608,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      count = 1 @\
+       !!!! TODO: this can go away once modName is dynamically sized !!! @\
+      if (len(name) > ESMF_MAXSTR) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+          msg="len(name) cannot be larger than ESMF_MAXSTR for now", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+      ! If internal info is implied, bail out, cannot set Attribute starting with 'ESMF:'@\
+      if (AttributeInternalInfo(name, modName)) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+          msg="Attribute names starting with 'ESMF:' are not allowed!", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+@\
+     count = 1 @\
  @\
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
@@ -5662,6 +5710,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc, litemCount @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: attpack @\
+      character (len=ESMF_MAXSTR) :: modName @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -5671,6 +5720,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
+      !!!! TODO: this can go away once modName is dynamically sized !!! @\
+      if (len(name) > ESMF_MAXSTR) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+          msg="len(name) cannot be larger than ESMF_MAXSTR for now", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+      ! If internal info is implied, bail out, cannot set Attribute starting with 'ESMF:'@\
+      if (AttributeInternalInfo(name, modName)) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+          msg="Attribute names starting with 'ESMF:' are not allowed!", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+@\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
@@ -5773,6 +5837,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, dimension(1) :: lens @\
       type(ESMF_Logical) :: attpack @\
       integer :: count @\
+      character (len=ESMF_MAXSTR) :: modName @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -5782,6 +5847,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
+      !!!! TODO: this can go away once modName is dynamically sized !!! @\
+      if (len(name) > ESMF_MAXSTR) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+          msg="len(name) cannot be larger than ESMF_MAXSTR for now", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+      ! If internal info is implied, bail out, cannot set Attribute starting with 'ESMF:'@\
+      if (AttributeInternalInfo(name, modName)) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+          msg="Attribute names starting with 'ESMF:' are not allowed!", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+@\
       lens(1) = len_trim(value) @\
       count = 1 @\
  @\
@@ -5871,6 +5951,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
       type(ESMF_Logical) :: attpack @\
+      character (len=ESMF_MAXSTR) :: modName @\
 @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -5880,6 +5961,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
+      !!!! TODO: this can go away once modName is dynamically sized !!! @\
+      if (len(name) > ESMF_MAXSTR) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+          msg="len(name) cannot be larger than ESMF_MAXSTR for now", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+      ! If internal info is implied, bail out, cannot set Attribute starting with 'ESMF:'@\
+      if (AttributeInternalInfo(name, modName)) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+          msg="Attribute names starting with 'ESMF:' are not allowed!", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+@\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\

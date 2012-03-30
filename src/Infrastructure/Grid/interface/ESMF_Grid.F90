@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.265 2012/03/23 16:20:06 svasquez Exp $
+! $Id: ESMF_Grid.F90,v 1.266 2012/03/30 16:59:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -96,6 +96,8 @@
 ! ! ESMF_GridItem_Flag
 !
 !------------------------------------------------------------------------------
+! There is an assignment operator for the flag, please check that
+! if you are making changes to this flag.
   type ESMF_GridItem_Flag
   sequence
 !  private
@@ -306,7 +308,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.265 2012/03/23 16:20:06 svasquez Exp $'
+      '$Id: ESMF_Grid.F90,v 1.266 2012/03/30 16:59:09 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -655,9 +657,11 @@ end interface
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridStatusAssignment
+         module procedure ESMF_GridItemAssignment
 
 ! !DESCRIPTION:
 !     This interface overloads the assignment operator for ESMF_GridStatus_Flag
+!     It also overloads to assign a string value to an ESMF_GridItem_Flag
 !
 !EOPI
       end interface
@@ -24462,6 +24466,43 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  PoleType2%polekind)
 
       end function ESMF_PoleTypeNotEqual
+#undef  ESMF_METHOD
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridItemAssignment"
+!BOPI
+! !IROUTINE: ESMF_GridItemAssignment - Assign string to ESMF_GridItem_Flag
+!
+! !INTERFACE:
+      subroutine ESMF_GridItemAssignment(gival, string)
+
+! !ARGUMENTS:
+      type(ESMF_GridItem_Flag), intent(out) :: gival
+      character(len=*), intent(in) :: string
+
+! !DESCRIPTION:
+!     This routine assigns a string to an ESMF_GridItem_Flag
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[string]
+!       String value representing an ESMF_GridItem_Flag
+!     \end{description}
+!
+!EOPI
+
+        if (string == "ESMF_GRIDITEM_INVALID") then
+          gival = ESMF_GRIDITEM_INVALID
+        else if (string == "ESMF_GRIDITEM_UNINIT") then
+          gival = ESMF_GRIDITEM_UNINIT
+        else if (string == "ESMF_GRIDITEM_MASK") then
+          gival = ESMF_GRIDITEM_MASK
+        else if (string == "ESMF_GRIDITEM_AREA") then
+          gival = ESMF_GRIDITEM_AREA
+        endif
+
+      end subroutine ESMF_GridItemAssignment
 #undef  ESMF_METHOD
 
 end module ESMF_GridMod

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridGetUTest.F90,v 1.3 2012/03/26 18:31:52 rokuingh Exp $
+! $Id: ESMF_AttributeGridGetUTest.F90,v 1.4 2012/03/30 16:58:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.3 2012/03/26 18:31:52 rokuingh Exp $'
+  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.4 2012/03/30 16:58:49 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -122,16 +122,36 @@ print *, "dimCount= ", outI4
   !EX_UTest
   outR4 = 42
   call ESMF_AttributeGet(grid, name="ESMF:dimCount", value=outR4, rc=rc)
-  write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+  write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET"
   write(name, *) "Incorrectly getting internal info from a Grid via Attribute Test"
   call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET).and.(outR4==42), &
                   name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
+  !EX_UTest
+  outI4 = 42
+  call ESMF_AttributeGet(grid, name="dimCount", value=outI4, rc=rc)
+  write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET"
+  write(name, *) "Getting 'dimCount' from a Grid via Attribute Test"
+  call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET).and.(outI4==42), &
+                  name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+print *, "dimCount= ", outI4
+
+  ! An attempt is made to retrieve a misspelled piece of Grid information.
+  !EX_UTest
+  outI4 = 42
+  call ESMF_AttributeGet(grid, name="ESMF:dmiCount", value=outI4, rc=rc)
+  write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET"
+  write(name, *) "Getting 'dimCount' from a Grid via Attribute Test"
+  call ESMF_Test((rc==ESMF_RC_NOT_VALID).and.(outI4==42), &
+                  name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+print *, "dimCount= ", outI4
+
   ! An attempt is made to retrieve a piece of internal Grid info masked by an
   ! Attribute, the Attribute is retrieved, not the internal Grid info.  This
   ! happens because the attribute name does not have 'ESMF:' prepended.
-  
   !EX_UTest
   call ESMF_AttributeSet(grid, name="dimCount", value=4, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_TestEnd(result, ESMF_SRCLINE)
@@ -146,21 +166,13 @@ print *, "dimCount= ", outI4
 
   ! An attempt is made to retrieve a piece of internal Grid info masked by an
   ! Attribute.  This is different from the previous test because the user
-  ! manually prepends 'ESMF:' to the Attribute name.  The test returns the 
-  ! actual dimcount of the Grid, there is no way to retrieve the user's 
-  ! Attribute by name.
-  
+  ! manually prepends 'ESMF:' to the Attribute name.  
+  ! The AttributeSet should fail for this call..
   !EX_UTest
   call ESMF_AttributeSet(grid, name="ESMF:dimCount", value=4, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_TestEnd(result, ESMF_SRCLINE)
-  outI4=42
-  call ESMF_AttributeGet(grid, name="ESMF:dimCount", value=outI4, rc=rc)
-  write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+  write(failMsg, *) "Did not return ESMF_RC_NOT_VALID"
   write(name, *) "Attempted masking 2 of Attribute internal Grid info Test"
-  call ESMF_Test((rc==ESMF_SUCCESS).and.(outI4==2), &
-                  name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-print *, "dimCount= ", outI4
+  call ESMF_Test((rc==ESMF_RC_NOT_VALID), name, failMsg, result, ESMF_SRCLINE)
 
   !EX_UTest
   outI4 = 42
@@ -352,10 +364,20 @@ print *, "gridAlign=", gridAlign
   !------------------------------------------------------------------------
 
   !EX_UTest
+  call ESMF_AttributeGet(grid, name="ESMF:coord", valueList=minIndex, rc=rc)
+  write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+  write(name, *) "Getting unimplemented 'coord' from a Grid via Attribute Test"
+  call ESMF_Test(rc==ESMF_RC_NOT_VAlID, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  ! Test that Fortran sublisting works
+  !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'tile:1'
+  inputList(1) = 'junk:blah'
+  inputList(2) = 'junk:blah'
+  inputList(3) = 'tile:1'
   call ESMF_AttributeGet(grid, name="ESMF:minIndex", &
-                         valueList=minIndex, inputList=inputList, rc=rc)
+                         valueList=minIndex, inputList=inputList(3:3), rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
   write(name, *) "Getting 'minIndex' from a Grid via Attribute Test"
   call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)

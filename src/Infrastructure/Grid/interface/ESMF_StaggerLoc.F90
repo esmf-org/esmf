@@ -1,4 +1,4 @@
-! $Id: ESMF_StaggerLoc.F90,v 1.29 2012/01/06 20:16:59 svasquez Exp $
+! $Id: ESMF_StaggerLoc.F90,v 1.30 2012/03/30 16:59:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -64,6 +64,7 @@
   public ESMF_StaggerLocString
   public ESMF_StaggerLocSet
   public ESMF_StaggerLocPrint
+  public assignment(=)
   public operator(==), operator(/=) 
   public operator(>), operator(>=) 
   public operator(<), operator(<=) 
@@ -104,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StaggerLoc.F90,v 1.29 2012/01/06 20:16:59 svasquez Exp $'
+      '$Id: ESMF_StaggerLoc.F90,v 1.30 2012/03/30 16:59:09 rokuingh Exp $'
 
 
 !==============================================================================
@@ -115,6 +116,19 @@
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+!BOPI
+! !INTERFACE:
+      interface assignment (=)
+         module procedure ESMF_StaggerLocAssignment
+
+! !PRIVATE MEMBER FUNCTIONS:
+
+! !DESCRIPTION:
+!     This interface assigns a string value to an ESMF_StaggerLoc
+!
+!EOPI
+      end interface
+!------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
       interface operator (==)
@@ -418,6 +432,46 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         end subroutine ESMF_StaggerLocString
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StaggerLocAssignment"
+!BOPI
+! !IROUTINE: ESMF\_StaggerLocAssignment - Assignment of an ESMF\_StaggerLoc from a string
+!
+! !INTERFACE:
+      subroutine ESMF_StaggerLocAssignment(slval, string)
+
+! !ARGUMENTS:
+      type(ESMF_StaggerLoc), intent(out) :: slval 
+      character(len=*), intent(in) :: string
+
+! !DESCRIPTION:
+!     This routine assigns an ESMF\_StaggerLoc from a string value
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[string]
+!       String value to assign to the ESMF\_StaggerLoc
+!     \end{description}
+!
+!EOPI
+
+
+      if (string == "ESMF_STAGGERLOC_INVALID") then
+        slval = ESMF_STAGGERLOC_INVALID
+      else if (string == "ESMF_STAGGERLOC_UNINIT") then
+        slval = ESMF_STAGGERLOC_UNINIT
+      else if (string == "ESMF_STAGGERLOC_CENTER") then
+        slval = ESMF_STAGGERLOC_CENTER
+      else if (string == "ESMF_STAGGERLOC_EDGE1") then
+        slval = ESMF_STAGGERLOC_EDGE1
+      else if (string == "ESMF_STAGGERLOC_EDGE2") then
+        slval = ESMF_STAGGERLOC_EDGE2
+      else if (string == "ESMF_STAGGERLOC_CORNER") then
+        slval = ESMF_STAGGERLOC_CORNER
+      endif
+
+      end subroutine ESMF_StaggerLocAssignment
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StaggerLocEqual"

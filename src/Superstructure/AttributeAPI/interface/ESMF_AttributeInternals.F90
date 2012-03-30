@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeInternals.F90,v 1.2 2012/03/21 21:26:52 oehmke Exp $
+! $Id: ESMF_AttributeInternals.F90,v 1.3 2012/03/30 16:59:15 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -65,7 +65,7 @@ module ESMF_AttributeInternalsMod
       
   public ESMF_AttributeGetInfo
   public AttributeInternalInfo
-  public extractInfoInt, extractInfoStagger, extractInfoItem
+  public extractInfoInt, extractInfoValueString
     
   interface ESMF_AttributeGetInfo
     module procedure ESMF_GridAttGetInfoInt
@@ -85,7 +85,7 @@ module ESMF_AttributeInternalsMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_AttributeInternals.F90,v 1.2 2012/03/21 21:26:52 oehmke Exp $'
+               '$Id: ESMF_AttributeInternals.F90,v 1.3 2012/03/30 16:59:15 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -150,6 +150,7 @@ contains
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+      ! setting default values
       localDel = 0
       staggerlocl = ESMF_STAGGERLOC_CENTER
       tilel = 1
@@ -160,23 +161,35 @@ contains
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
+      ! looking for required input parameters
       if (present(inputList)) then
         do i=1,size(inputList)
+          !!!! TODO: this can go away once modName is dynamically sized !!! @\
+          if (len(inputList(i)) > ESMF_MAXSTR) then @\
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+              msg="len(inputList(i)) cannot be larger than ESMF_MAXSTR for now", & @\
+              ESMF_CONTEXT, rcToReturn=rc) @\
+            return @\
+          endif @\
+          ! set the parameters based on the inputList
           if (index(inputList(i), "localDe") /= 0) then
             localDel = extractInfoInt(inputList(i))
           elseif (index(inputList(i), "staggerloc") /= 0) then
-            staggerlocl = extractInfoStagger(inputList(i))
+            staggerlocl = extractInfoValueString(inputList(i))
           elseif (index(inputList(i), "tile") /= 0) then
             tilel = extractInfoInt(inputList(i))
           elseif (index(inputList(i), "coorddim") /= 0) then
             coordDiml = extractInfoInt(inputList(i))
             getCoord = .true.
           elseif (index(inputList(i), "itemflag") /= 0) then
-            itemflagl = extractInfoItem(inputList(i))
+            itemflagl = extractInfoValueString(inputList(i))
             getItem = .true.
           endif
         enddo
       endif
+
+      ! if both getCoord and getItem are both true fault
+      
 
         ! retrieve list style input that requires additional inputs
           !
@@ -238,7 +251,7 @@ contains
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         case ("gridAlign")
-          call ESMF_GridGet(grid, gridAlign=valueList, rc=localrc)
+	call ESMF_GridGet(grid, gridAlign=valueList, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
       ! retrieve list type info that DOES require additional inputs
@@ -769,7 +782,6 @@ contains
       end function extractInfoInt
 !------------------------------------------------------------------------------
 
-!TODO: this routine should go in Util with the Flag definition
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "extractInfo"
@@ -778,13 +790,14 @@ contains
 ! !IROUTINE: extractInfo - Get information out of string for AttributeGetInternal
 !
 ! !INTERFACE:
-      function extractInfoItem(string)
+      function extractInfoValueString(string)
 
 ! !RETURN VALUE:
-      type(ESMF_GridItem_Flag) :: extractInfoItem
+      ! TODO remove ESMF_MAXSTR
+      character (len=ESMF_MAXSTR) :: extractInfoValueString
 
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: string
+      character (len=*), intent(in) :: string
 
 !
 ! !DESCRIPTION:
@@ -800,81 +813,13 @@ contains
 !EOPI
 
       integer :: ind
-      ! TODO remove ESMF_MAXSTR
-      character(len=ESMF_MAXSTR) :: temp
 
       ! take everything after the colon, minus whitespace
       ind = index(string, ":")
-      temp = trim(adjustl(string((ind+1):len(string))))
+      extractInfoValueString = trim(adjustl(string((ind+1):len(string))))
       
-      if (temp == "ESMF_GRIDITEM_INVALID") then
-        extractInfoItem = ESMF_GRIDITEM_INVALID
-      else if (temp == "ESMF_GRIDITEM_UNINIT") then
-        extractInfoItem = ESMF_GRIDITEM_UNINIT
-      else if (temp == "ESMF_GRIDITEM_MASK") then
-        extractInfoItem = ESMF_GRIDITEM_MASK
-      else if (temp == "ESMF_GRIDITEM_AREA") then
-        extractInfoItem = ESMF_GRIDITEM_AREA
-      endif
-
-      end function extractInfoItem
+      end function extractInfoValueString
 !------------------------------------------------------------------------------
-
-!TODO: this routine should go in Util with the Flag definition
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "extractInfo"
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: extractInfo - Get information out of string for AttributeGetInternal
-!
-! !INTERFACE:
-      function extractInfoStagger(string)
-
-! !RETURN VALUE:
-      type(ESMF_StaggerLoc) :: extractInfoStagger
-
-! !ARGUMENTS:
-      character (len = *), intent(in) :: string
-
-!
-! !DESCRIPTION:
-!     Returns relevant information in proper format from the input string.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [string]
-!           The string containing the information to be extracted.
-!     \end{description}
-!
-!
-!EOPI
-
-      integer :: ind
-      ! TODO remove ESMF_MAXSTR
-      character(len=ESMF_MAXSTR) :: temp
-
-      ! take everything after the colon, minus whitespace
-      ind = index(string, ":")
-      temp = trim(adjustl(string((ind+1):len(string))))
-
-      if (temp == "ESMF_STAGGERLOC_INVALID") then
-        extractInfoStagger = ESMF_STAGGERLOC_INVALID
-      else if (temp == "ESMF_STAGGERLOC_UNINIT") then
-        extractInfoStagger = ESMF_STAGGERLOC_UNINIT
-      else if (temp == "ESMF_STAGGERLOC_CENTER") then
-        extractInfoStagger = ESMF_STAGGERLOC_CENTER
-      else if (temp == "ESMF_STAGGERLOC_EDGE1") then
-        extractInfoStagger = ESMF_STAGGERLOC_EDGE1
-      else if (temp == "ESMF_STAGGERLOC_EDGE2") then
-        extractInfoStagger = ESMF_STAGGERLOC_EDGE2
-      else if (temp == "ESMF_STAGGERLOC_CORNER") then
-        extractInfoStagger = ESMF_STAGGERLOC_CORNER
-      endif
-
-      end function extractInfoStagger
-!------------------------------------------------------------------------------
-
 
 !------------------------------------------------------------------------------
 end module ESMF_AttributeInternalsMod
