@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.88 2012/01/06 20:16:42 svasquez Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.89 2012/03/30 17:37:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -4678,7 +4678,7 @@ contains
         logical, optional                 :: fieldget
 
         real(ESMF_KIND_R8), dimension(:,:,:,:,:,:,:), allocatable :: farray
-        type(ESMF_Field)    :: field
+        type(ESMF_Field)    :: field, dstField
         type(ESMF_Grid)     :: grid
         type(ESMF_DistGrid) :: distgrid
         integer             :: localrc
@@ -4762,6 +4762,55 @@ contains
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+        dstField = ESMF_FieldCreate(grid, farray=farray, indexflag=ESMF_INDEX_DELOCAL, &
+            ungriddedLBound=ungriddedLBound, ungriddedUBound=ungriddedUBound, &
+            totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
+            gridToFieldMap=gridToFieldMap, &
+            datacopyflag=ESMF_DATACOPY_VALUE, &
+            staggerloc=staggerloc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_FieldGet(dstField, localDe=0, farrayPtr=farray1, &
+          totalLBound=ftlb, totalUBound=ftub, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        farray1 = 0.
+
+        call ESMF_FieldCopy(dstField, field, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+  
+        ! Verify fieldCopy copies the values correctly
+        if(present(fieldget)) then
+          if(fieldget) then
+            do ip = ftlb(7), ftub(7)
+             do io = ftlb(6), ftub(6)
+              do im = ftlb(5), ftub(5)
+               do il = ftlb(4), ftub(4)
+                do ik = ftlb(3), ftub(3)
+                 do ij = ftlb(2), ftub(2)
+                  do ii = ftlb(1), ftub(1)
+                    n = ii+ij*2+ik+il*2+im+io*2+ip
+                    if(farray1(ii,ij,ik,il,im,io,ip) /= n) then
+                      call ESMF_LogSetError(ESMF_RC_PTR_BAD, &
+                        msg="- dst Field pointer value is different from src Field value", &
+                        ESMF_CONTEXT, rcToReturn=rc)
+                      return
+                    endif
+                  enddo
+                 enddo
+                enddo
+               enddo
+              enddo
+             enddo
+            enddo
+          endif
+        endif
 
         if(present(fieldget)) then
           if(fieldget) then
