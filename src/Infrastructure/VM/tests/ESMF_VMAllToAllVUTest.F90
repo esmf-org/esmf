@@ -1,4 +1,4 @@
-! $Id: ESMF_VMAllToAllVUTest.F90,v 1.19 2012/02/29 17:19:44 w6ws Exp $
+! $Id: ESMF_VMAllToAllVUTest.F90,v 1.20 2012/04/02 19:21:50 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_VMAllToAllVUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_VMAllToAllVUTest.F90,v 1.19 2012/02/29 17:19:44 w6ws Exp $'
+    '$Id: ESMF_VMAllToAllVUTest.F90,v 1.20 2012/04/02 19:21:50 w6ws Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -268,9 +268,9 @@ program ESMF_VMAllToAllVUTest
 
   !Test with VMId arguments
   !===========================
-
+#if 0
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX____noUTest
   ! Create VMid arrays on both root and destinations
   write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
   write(name, *) "Creating VMId array1 Test"
@@ -279,7 +279,7 @@ program ESMF_VMAllToAllVUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX____noUTest
   ! Create VMid arrays on both root and destinations
   write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
   write(name, *) "Creating VMId array2 Test"
@@ -288,7 +288,7 @@ program ESMF_VMAllToAllVUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX____noUTest
   ! Create VMid arrays on both root and destinations
   write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
   write(name, *) "Creating VMId array3 Test"
@@ -297,7 +297,7 @@ program ESMF_VMAllToAllVUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX____noUTest
   ! Create VMid arrays on both root and destinations
   write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
   write(name, *) "Creating VMId array3 Test"
@@ -319,7 +319,7 @@ program ESMF_VMAllToAllVUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX____noUTest
   write(name, *) "AllToAllVMId Test vmids_array1 -> vmids_array2"
   write(failMsg, *) "Did not return ESMF_SUCCESS."
 ! print *, 'sendCounts: ', sendCounts
@@ -333,7 +333,7 @@ program ESMF_VMAllToAllVUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX____noUTest
   write(name, *) "AllToAllVMId Test vmids_array2 -> vmids_array3"
   write(failMsg, *) "Did not return ESMF_SUCCESS."
   call ESMF_VMAllToAllVVMId(vm,  &
@@ -343,7 +343,7 @@ program ESMF_VMAllToAllVUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX____noUTest
   ! Verify iarray3 data against iarray1 after alltoallvmid
   write(failMsg, *) "Wrong data."
   write(name, *) "Verify iarray3 data against iarray1 after alltoallv"
@@ -358,7 +358,7 @@ program ESMF_VMAllToAllVUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX____noUTest
   ! Release VMId resources
   write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
   write(name, *) "Releasing VMId array1 Test"
@@ -367,7 +367,7 @@ program ESMF_VMAllToAllVUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX____noUTest
   ! Release VMId resources
   write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
   write(name, *) "Releasing VMId array2 Test"
@@ -376,13 +376,14 @@ program ESMF_VMAllToAllVUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  !NEX_UTest
+  !NEX____noUTest
   ! Release VMId resources
   write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
   write(name, *) "Releasing VMId array3 Test"
   call ESMF_VMIdDestroy (vmids_array3, rc=rc)
   deallocate (vmids_array3)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   call ESMF_TestEnd(result, ESMF_SRCLINE)
 

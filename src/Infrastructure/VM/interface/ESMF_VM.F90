@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.160 2012/03/17 00:45:46 w6ws Exp $
+! $Id: ESMF_VM.F90,v 1.161 2012/04/02 19:21:49 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -179,7 +179,6 @@ module ESMF_VMMod
   public ESMF_VMIdDestroy
   public ESMF_VMSendVMId
   public ESMF_VMRecvVMId
-  public ESMF_VMAllToAllVVMId
   public ESMF_VMBcastVMId
 
   public ESMF_CommHandleGetInit
@@ -190,7 +189,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.160 2012/03/17 00:45:46 w6ws Exp $"
+      "$Id: ESMF_VM.F90,v 1.161 2012/04/02 19:21:49 w6ws Exp $"
 
 !==============================================================================
 
@@ -251,6 +250,7 @@ module ESMF_VMMod
       module procedure ESMF_VMAllGatherVI4
       module procedure ESMF_VMAllGatherVR4
       module procedure ESMF_VMAllGatherVR8
+      module procedure ESMF_VMAllGatherVVMId
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -311,7 +311,6 @@ module ESMF_VMMod
       module procedure ESMF_VMAllToAllVR8
       module procedure ESMF_VMAllToAllVCharArray
       module procedure ESMF_VMAllToAllVFLogical
-      module procedure ESMF_VMAllToAllVVMId
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -1639,6 +1638,68 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllGatherVR8
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllGatherVVMId()"
+!BOPI
+! !IROUTINE: ESMF_VMAllGatherV - AllGatherV VMIds
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllGatherV()
+  subroutine ESMF_VMAllGatherVVMId(vm, sendData, sendCount, recvData, &
+    recvCounts, recvOffsets, keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),              intent(in)            :: vm
+    type(ESMF_VMId),    target, intent(in)            :: sendData(:)
+    integer,                    intent(in)            :: sendCount
+    type(ESMF_VMId),    target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: recvCounts(:)
+    integer,                    intent(in)            :: recvOffsets(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Not implemented features
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+            msg="- non-blocking mode not yet implemented", &
+            ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMAllGatherVVMId (vm,  &
+        sendData, sendCount,  &
+        recvData, recvCounts, recvOffsets,  &
+        localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMAllGatherVVMId
 !------------------------------------------------------------------------------
 
 
@@ -8201,10 +8262,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Call into the C++ interface.
-    call c_ESMC_VMAllToAllVVMId(vm,  &
-        sendData, sendCounts, sendOffsets, &
-        recvData, recvCounts, recvOffsets, &
-        localrc)
+    localrc = ESMF_RC_INTNRL_BAD
+!    call c_ESMC_VMAllToAllVVMId(vm,  &
+!        sendData, sendCounts, sendOffsets, &
+!        recvData, recvCounts, recvOffsets, &
+!        localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

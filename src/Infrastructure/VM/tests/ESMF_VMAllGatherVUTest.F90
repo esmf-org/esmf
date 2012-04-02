@@ -1,4 +1,4 @@
-! $Id: ESMF_VMAllGatherVUTest.F90,v 1.11 2012/01/06 20:18:32 svasquez Exp $
+! $Id: ESMF_VMAllGatherVUTest.F90,v 1.12 2012/04/02 19:21:50 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMAllGatherVUTest.F90,v 1.11 2012/01/06 20:18:32 svasquez Exp $'
+      '$Id: ESMF_VMAllGatherVUTest.F90,v 1.12 2012/04/02 19:21:50 w6ws Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -47,15 +47,22 @@
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      integer::  rc
+      integer::  localrc, rc
       type(ESMF_VM):: vm
       integer:: localPet, petCount
-      integer:: nlen, nsize, i
+      integer:: nlen, nsize
+      integer:: i, j, idx
+
       integer, allocatable:: array1(:), array2(:), array3(:), array4(:), array5(:)
       real(ESMF_KIND_I4), allocatable:: i4array1(:), i4array2(:), i4array5(:)
       real(ESMF_KIND_R8), allocatable:: farray1(:), farray2(:), farray5(:)
       real(ESMF_KIND_R4), allocatable:: f4array1(:), f4array2(:), f4array5(:)
-     
+      type(ESMF_VMId),    allocatable:: vmidarray1(:), vmidarray2(:), vmidarray3(:)
+
+      integer   :: idData
+      character :: keyData
+      logical:: all_verify
+
 
 !------------------------------------------------------------------------------
 !   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -79,10 +86,14 @@
       allocate(i4array1(nlen))
       allocate(farray1(nlen))
       allocate(f4array1(nlen))
+      allocate(vmidarray1(nlen))
+
       allocate(array2(localPet+1))
       allocate(i4array2(localPet+1))
       allocate(farray2(localPet+1))
       allocate(f4array2(localPet+1))
+      allocate(vmidarray2(localPet+1))
+
       allocate(array3(petCount))
       allocate(array4(petCount))
       allocate(array5(nlen))
@@ -130,7 +141,6 @@
       	farray5 = (/1,3,4,5,6,7,7,8,9,10/)
       	f4array5 = (/1,3,4,5,6,7,7,8,9,10/)
       end if
-
 
       !Testing with Integer arguments
       !==============================
@@ -245,6 +255,110 @@
         do i=1,nlen
           print *, localPet,' f4array1: ', f4array1(i)
         end do
+
+      !------------------------------------------------------------------------
+
+      !Testing with ESMF_VMId arguments
+      !===================================
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Initialize deep data
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Creating VMId solutions array"
+      call ESMF_VMIdCreate (vmidarray1, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Insert dummy data for the purposes of the test.  Only
+      ! the first character of the key is set.
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Initializing VMId solutions array Test"
+      rc = ESMF_SUCCESS
+      do, i=1, size (vmidarray1)
+        call c_ESMCI_VMIdSet (vmidarray1(i), 0, 0, localrc)
+        if (localrc /= ESMF_SUCCESS) rc = localrc
+      end do
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Initialize deep data
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Creating VMId source array"
+      call ESMF_VMIdCreate (vmidarray2, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Insert dummy data for the purposes of the test.  Only
+      ! the first character of the key is set.
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Inserting dummy data into VMId source array Test"
+      rc = ESMF_SUCCESS
+      do, i=1, size (vmidarray2)
+        call c_ESMCI_VMIdSet (vmidarray2(i), i, achar (i+10), localrc)
+        if (localrc /= ESMF_SUCCESS) rc = localrc
+      end do
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! AllGatherV - each PET broadcasts to all other PETs
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "AllGatherVing VMId data Test"
+      call ESMF_VMAllGatherV (vm,  &
+          sendData=vmidarray2, sendCount=size (vmidarray2),  &
+          recvData=vmidarray1, recvCounts=array3, recvOffsets=array4,  &
+          rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify localData after VM AllGatherV.  Only
+      ! the first character of the key is tested.
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "ID/Key extraction VMId data after broadcast Test"
+      all_verify = .true.
+      rc = ESMF_SUCCESS
+      idx = 1
+      do, i=1, petCount
+        do, j=1, i
+          call c_ESMCI_VMIdGet (vmidarray1(idx), idData, keyData, localrc)
+          if (localrc /= ESMF_SUCCESS) rc = localrc
+          if (idData /= j .or. iachar (keyData) /= j+10) then
+            print *, 'PET', localPet, ' - non-compare: index =', i,  &
+                     ', idData =', idData, ', keyData =', iachar(keyData)
+            all_verify = .false.
+          end if
+          idx = idx+1
+        end do
+      end do
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify localData after VM Broadcast.  Only
+      ! the first character of the key is tested.
+      write(failMsg, *) "Wrong Local Data"
+      write(name, *) "Verify VMId data after broadcast Test"
+      call ESMF_Test(all_verify, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Release VMId resources
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Releasing VMId result array Test"
+      call ESMF_VMIdDestroy (vmidarray1, rc=rc)
+      call ESMF_Test(all_verify, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Release VMId resources
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Releasing VMId source array Test"
+      call ESMF_VMIdDestroy (vmidarray2, rc=rc)
+      call ESMF_Test(all_verify, name, failMsg, result, ESMF_SRCLINE)
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
 
