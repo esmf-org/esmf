@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.h,v 1.39 2012/01/25 22:59:24 oehmke Exp $
+// $Id: ESMC_Mesh.h,v 1.40 2012/04/02 16:44:58 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -67,7 +67,8 @@ int ESMC_MeshAddElements(
   int  elementCount,        // in
   int *elementIds,          // in
   int *elementTypes,        // in
-  int *elementConn          // in
+  int *elementConn,         // in
+  int *elementMask          // in
 );
 
 // !RETURN VALUE:
@@ -120,6 +121,12 @@ int ESMC_MeshAddElements(
 //         {\tt elementTypes}. The nodes for each element
 //         are in sequence in this array (e.g. the nodes for element 1 are elementConn(1),
 //         elementConn(2), etc.).
+//   \item[elementMask]
+//         An array containing values which can be used for element masking. 
+//         Which values indicate masking are chosen via the srcMaskValues or 
+//         dstMaskValues arguments to ESMF_FieldRegridStore() call. This input 
+//         consists of a 1D array the size of the number of elements on this 
+//         PET.
 //   \end{description}
 //
 //EOP

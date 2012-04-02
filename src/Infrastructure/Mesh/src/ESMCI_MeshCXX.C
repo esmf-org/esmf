@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.C,v 1.26 2012/01/25 22:59:27 oehmke Exp $
+// $Id: ESMCI_MeshCXX.C,v 1.27 2012/04/02 16:45:01 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@ using std::endl;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.26 2012/01/25 22:59:27 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.27 2012/04/02 16:45:01 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -188,7 +188,7 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
 
 // TODO: most of this routine is duplicated in ESMCI_Mesh_F.C - should be merged  
 int MeshCXX::addElements(int numElems, int *elemId, 
-                         int *elemType, int *elemConn){
+                         int *elemType, int *elemConn, int *elemMask){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::MeshCXX::addElements()"
 
@@ -340,9 +340,68 @@ int MeshCXX::addElements(int numElems, int *elemId,
     MEField<> *elem_frac = mesh.RegisterField("elem_frac",
                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
+  // Handle element masking
+  bool has_elem_mask=false;
+  if (elemMask != NULL) { // if masks exist
+#if 0
+    // invalid without InterfaceInt
+    // Error checking
+    if ((*elemMask)->dimCount !=1) {
+      int localrc;
+      if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+                "- elementMask array must be 1D ", &localrc)) throw localrc;
+    }
+
+    if ((*elemMaskII)->extent[0] != num_elems) {
+      int localrc;
+      if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+                "- elementMask array must be the same size as elementIds array ", &localrc)) throw localrc;
+    }
+#endif
+    // Context for new fields
+    Context ctxt; ctxt.flip();
+
+    // Add element mask values field
+    MEField<> *elem_mask_val = mesh.RegisterField("elem_mask_val",
+                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    // Add element mask field
+    MEField<> *elem_mask = mesh.RegisterField("elem_mask",
+                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    // Record the fact that it has masks
+    has_elem_mask=true;
+  }
+
     // Perhaps commit will be a separate call, but for now commit the mesh here.
     mesh.build_sym_comm_rel(MeshObj::NODE);
     mesh.Commit();
+
+  // Set Mask values
+  if (has_elem_mask) {
+    // Get Fields
+    MEField<> *elem_mask_val=mesh.GetField("elem_mask_val");
+    MEField<> *elem_mask=mesh.GetField("elem_mask");
+
+    // Loop through elements setting values
+    // Here we depend on the fact that data index for elements
+    // is set as the position in the local array above
+    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+      // Set mask value to input array
+      double *mv=elem_mask_val->data(elem);
+      int data_index = elem.get_data_index();
+      *mv=(double)elemMask[data_index];
+
+        // Init mask to 0.0
+      double *m=elem_mask->data(elem);
+      *m=0.0;
+    }
+  }
+
 
     // Mark Mesh as finshed
     level=MeshCXXLevel_Finished;
