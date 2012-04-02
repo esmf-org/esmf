@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.18 2012/01/25 22:59:29 oehmke Exp $
+// $Id: ESMC_MeshVTKUTest.C,v 1.1 2012/04/02 16:42:26 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -204,7 +204,7 @@ int main(void){
   // Add element information to the mesh
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn);
+  rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
