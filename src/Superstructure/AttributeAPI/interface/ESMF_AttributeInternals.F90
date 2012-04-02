@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeInternals.F90,v 1.3 2012/03/30 16:59:15 rokuingh Exp $
+! $Id: ESMF_AttributeInternals.F90,v 1.4 2012/04/02 15:59:43 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -85,7 +85,7 @@ module ESMF_AttributeInternalsMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_AttributeInternals.F90,v 1.3 2012/03/30 16:59:15 rokuingh Exp $'
+               '$Id: ESMF_AttributeInternals.F90,v 1.4 2012/04/02 15:59:43 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -164,13 +164,13 @@ contains
       ! looking for required input parameters
       if (present(inputList)) then
         do i=1,size(inputList)
-          !!!! TODO: this can go away once modName is dynamically sized !!! @\
-          if (len(inputList(i)) > ESMF_MAXSTR) then @\
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
-              msg="len(inputList(i)) cannot be larger than ESMF_MAXSTR for now", & @\
-              ESMF_CONTEXT, rcToReturn=rc) @\
-            return @\
-          endif @\
+          !!!! TODO: this can go away once modName is dynamically sized !!!
+          if (len(inputList(i)) > ESMF_MAXSTR) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
+              msg="len(inputList(i)) cannot be larger than ESMF_MAXSTR for now", &
+              ESMF_CONTEXT, rcToReturn=rc)
+            return
+          endif
           ! set the parameters based on the inputList
           if (index(inputList(i), "localDe") /= 0) then
             localDel = extractInfoInt(inputList(i))
