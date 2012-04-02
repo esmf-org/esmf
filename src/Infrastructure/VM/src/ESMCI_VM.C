@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.29 2012/01/06 20:18:30 svasquez Exp $
+// $Id: ESMCI_VM.C,v 1.30 2012/04/02 19:20:47 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.29 2012/01/06 20:18:30 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.30 2012/04/02 19:20:47 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -1054,6 +1054,74 @@ int VM::alltoallvVMId(
 }
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::allgathervVMId()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::allgathervVMId
+//
+// !INTERFACE:
+int VM::allgathervVMId(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  VMId **sendvmid,               // in - VMIds
+  int sendcount,                 // in  - VMId count
+  VMId **recvvmid,               // out - VMIds
+  int *recvcounts,               // in  - VMId count
+  int *recvoffsets               // in  - VMId offsets
+  ){
+//
+// !DESCRIPTION:
+//    AllGatherV {\tt ESMCI::VMId}.  Assumes that the receive VMId
+// array has been pre-allocated and initialized.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  if (sendvmid==ESMC_NULL_POINTER){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Invalid VMId", &rc);
+    return rc;
+  }
+  for (int i=0; i<sendcount; i++) {
+    if (sendvmid[i]==ESMC_NULL_POINTER){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+	"- Invalid VMId", &rc);
+      return rc;
+    }
+  }
+  int petCount = GlobalVM->getNpets();
+  int mypet    = GlobalVM->getMypet();
+  if (sendcount != recvcounts[mypet]){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- non-matching send/recv count", &rc);
+    return rc;
+  }
+
+  // TODO: Convert this to a real AllGatherV 
+
+  // Each PET copies its send data into its receive area, then broadcast
+  for (int i=0; i<recvcounts[mypet]; i++) {
+    int localrc = VMIdCopy (recvvmid[recvoffsets[mypet]+i], sendvmid[i]);
+    if (localrc != ESMF_SUCCESS){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+	"- Bad VMIdCopy", &rc);
+      return rc;
+    }
+  }
+  for (int root=0; root<petCount; root++) {
+    bcastVMId(recvvmid+recvoffsets[root], recvcounts[root], root);
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
