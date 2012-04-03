@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.195 2012/04/03 00:49:32 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.196 2012/04/03 16:03:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.195 2012/04/03 00:49:32 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.196 2012/04/03 16:03:13 theurich Exp $'
 
 !==============================================================================
 !
@@ -2855,7 +2855,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              The new arguments provide access to the fault-tolerant component
 !              features.
 ! \end{description}
-! \end{itemize}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
