@@ -1,4 +1,4 @@
-// $Id: ESMC_GridUTest.C,v 1.3 2012/03/30 19:03:34 rokuingh Exp $
+// $Id: ESMC_GridUTest.C,v 1.4 2012/04/03 03:11:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -251,16 +251,16 @@ int main(void){
   // get and fill item array
   strcpy(name, "GridGetItem");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  double *gridMask = (double *)ESMC_GridGetItem(grid_1p, ESMC_GRIDITEM_MASK,
+  int *gridMask = (int *)ESMC_GridGetItem(grid_1p, ESMC_GRIDITEM_MASK,
                                                    ESMC_STAGGERLOC_CENTER,
                                                    &rc);
 
   p = 0;
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
     for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      gridMask[p]=(double)(i0);
-      printf("PET%d - set gridMask[%d] = %f (%f)\n", localPet, p, 
-        (double)(i0), gridMask[p]);
+      gridMask[p]=(int)(i0);
+      printf("PET%d - set gridMask[%d] = %d (%d)\n", localPet, p, 
+        (int)(i0), gridMask[p]);
       ++p;
     }
   }
