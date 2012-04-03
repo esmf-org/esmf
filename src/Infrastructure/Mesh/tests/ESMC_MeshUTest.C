@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.20 2012/04/02 16:42:26 rokuingh Exp $
+// $Id: ESMC_MeshUTest.C,v 1.21 2012/04/03 22:09:30 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -45,10 +45,10 @@ int main(void){
   int localPet, petCount;
   ESMC_VM vm;
 
-
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
 
   // Get parallel information
   vm=ESMC_VMGetGlobal(&rc);
@@ -172,7 +172,7 @@ int main(void){
   printf("num_elem = %d\nnum_elem_owned_out=%d\n", num_elem, num_elem_owned_out);
 
   //----------------------------------------------------------------------------
-  //NEX_UTest_Multi_Proc_Only
+  //NEX_UTest
   // Write out the internal mesh data
   strcpy(name, "MeshWrite");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -181,7 +181,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //NEX_UTest_Multi_Proc_Only
+  //NEX_UTest
   // TODO: This call fails if called before nodes and elements have been added
   // Free internal mesh memory
   strcpy(name, "MeshFreeMemory");
@@ -191,7 +191,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //NEX_UTest_Multi_Proc_Only
+  //NEX_UTest
   // Destroy mesh object
   strcpy(name, "MeshDestroy");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");

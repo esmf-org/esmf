@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2012/04/02 16:46:15 rokuingh Exp $ 
+# $Id: makefile,v 1.13 2012/04/03 22:09:30 rokuingh Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -42,7 +42,7 @@ RUN_ESMCI_IntegrateUTest:
 	$(MAKE) TNAME=Integrate NP=1 citest
 
 RUN_ESMCI_IntegrateUTestUNI:
-	$(MAKE) TNAME=IntegrateUNI NP=1 citest
+	$(MAKE) TNAME=Integrate NP=1 citest
 
 RUN_ESMF_MeshUTest:
 	$(MAKE) TNAME=Mesh NP=4 ftest
@@ -59,5 +59,5 @@ RUN_ESMC_MeshUTest:
 	$(MAKE) TNAME=Mesh NP=1 ctest
 
 RUN_ESMC_MeshUTestUNI:
-	$(MAKE) TNAME=MeshUNI NP=1 ctest
+	$(MAKE) TNAME=Mesh NP=1 ctest
 
