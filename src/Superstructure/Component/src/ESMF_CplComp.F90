@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.167 2012/04/03 00:49:32 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.168 2012/04/03 19:26:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.167 2012/04/03 00:49:32 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.168 2012/04/03 19:26:38 theurich Exp $'
 
 !==============================================================================
 !
@@ -517,7 +517,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
 !   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
 !   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -648,7 +648,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
 !   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
 !   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
@@ -1022,7 +1022,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
 !   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
 !   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
@@ -1317,7 +1317,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
 !   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
 !   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
@@ -1446,7 +1446,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
 !   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
 !   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
@@ -1608,7 +1608,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
 !   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
 !   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 !   (NOTE: Currently this option is only available for socket based component
 !   tunnels. This means that the {\tt port} argument is required.)
@@ -2196,7 +2196,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
 !   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
 !   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2758,7 +2758,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
 !   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
 !   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
@@ -2881,7 +2881,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
 !   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
 !   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.

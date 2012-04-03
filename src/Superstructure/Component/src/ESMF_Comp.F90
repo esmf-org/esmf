@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.232 2012/03/29 23:41:11 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.233 2012/04/03 19:26:38 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -290,7 +290,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.232 2012/03/29 23:41:11 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.233 2012/04/03 19:26:38 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -792,7 +792,7 @@ contains
 !     \item[{[timeoutFlag]}]
 !      Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
 !      If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!      an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!      an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
 !      {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
