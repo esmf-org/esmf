@@ -1,4 +1,4 @@
-! $Id: ESMF_StdCompMethodsUTest.F90,v 1.9 2012/01/06 20:19:02 svasquez Exp $
+! $Id: ESMF_StdCompMethodsUTest.F90,v 1.10 2012/04/03 22:56:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -327,7 +327,7 @@ program ESMF_StdCompMethodsUTest
 !------------------------------------------------------------------------------
   ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_StdCompMethodsUTest.F90,v 1.9 2012/01/06 20:19:02 svasquez Exp $'
+    '$Id: ESMF_StdCompMethodsUTest.F90,v 1.10 2012/04/03 22:56:57 theurich Exp $'
 !------------------------------------------------------------------------------
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -389,10 +389,24 @@ program ESMF_StdCompMethodsUTest
 
   !----------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "Gridded Component Initialize() Test - with timeout"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_GridCompInitialize(gcomp, timeout=10, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !----------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Gridded Component Run() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_GridCompRun(gcomp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !----------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Gridded Component Run() Test - with timeout"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_GridCompRun(gcomp, timeout=10, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !----------------------------------------------------------------
   !NEX_UTest
@@ -403,6 +417,13 @@ program ESMF_StdCompMethodsUTest
 
   !----------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "Gridded Component Finalize() Test - with timeout"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_GridCompFinalize(gcomp, timeout=10, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !----------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Gridded Component WriteRestart() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_GridCompWriteRestart(gcomp, rc=rc)
@@ -410,10 +431,24 @@ program ESMF_StdCompMethodsUTest
 
   !----------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "Gridded Component WriteRestart() Test - with timeout"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_GridCompWriteRestart(gcomp, timeout=10, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !----------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Gridded Component ReadRestart() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_GridCompReadRestart(gcomp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !----------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Gridded Component ReadRestart() Test - with timeout"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_GridCompReadRestart(gcomp, timeout=10, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !----------------------------------------------------------------
   !NEX_UTest
@@ -455,10 +490,24 @@ program ESMF_StdCompMethodsUTest
 
   !----------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "Coupler Component Initialize() Test - with timeout"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_CplCompInitialize(cplcomp, timeout=10, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !----------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Coupler Component Run() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_CplCompRun(cplcomp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !----------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Coupler Component Run() Test - with timeout"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_CplCompRun(cplcomp, timeout=10, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !----------------------------------------------------------------
   !NEX_UTest
@@ -469,6 +518,13 @@ program ESMF_StdCompMethodsUTest
 
   !----------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "Coupler Component Finalize() Test - with timeout"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_CplCompFinalize(cplcomp, timeout=10, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !----------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Coupler Component WriteRestart() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_CplCompWriteRestart(cplcomp, rc=rc)
@@ -476,10 +532,24 @@ program ESMF_StdCompMethodsUTest
 
   !----------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "Coupler Component WriteRestart() Test - with timeout"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_CplCompWriteRestart(cplcomp, timeout=10, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !----------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Coupler Component ReadRestart() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_CplCompReadRestart(cplcomp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !----------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Coupler Component ReadRestart() Test - with timeout"
+  write(failMsg, *) "Did return ESMF_SUCCESS"
+  call ESMF_CplCompReadRestart(cplcomp, timeout=10, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !----------------------------------------------------------------
   !NEX_UTest

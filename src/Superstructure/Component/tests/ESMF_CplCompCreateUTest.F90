@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.38 2012/01/06 20:19:02 svasquez Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.39 2012/04/03 22:56:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -343,6 +343,18 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Wait for a Coupler Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   ! Verifing that a CplCompDestroy for a regular component catches timeout
+    
+    call ESMF_CplCompDestroy(cpl, timeout=10, rc=rc)
+    
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+    write(name, *) "Destroying a Coupler Component - with timeout"
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest

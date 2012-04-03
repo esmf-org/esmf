@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.168 2012/04/03 19:26:38 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.169 2012/04/03 22:56:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.168 2012/04/03 19:26:38 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.169 2012/04/03 22:56:55 theurich Exp $'
 
 !==============================================================================
 !
@@ -511,14 +511,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   and mark the object as invalid.  It is an error to pass this
 !   object into any other routines after being destroyed.
 ! \item[{[timeout]}]
-!   The maximum period in seconds that this call will wait for any
-!   communication with the actual component, before returning with a timeout
-!   condition. The default is 3600, i.e. 1 hour.
+!   The maximum period in seconds that this call will wait in communications
+!   with the actual component, before returning with a timeout condition. 
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
-!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
-!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
+!   If {\tt timeoutFlag} was {\em not} provided, a timeout condition will lead
+!   to a return code of {\tt rc \textbackslash = ESMF\_SUCCESS}. Otherwise the
+!   return value of {\tt timeoutFlag} is the sole indicator of a timeout
+!   condition.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -538,6 +540,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
         msg="CplComp not initialized or already destroyed", &
         ESMF_CONTEXT, rcTOReturn=rc)) return
+    endif
+
+    ! check consistency between timeout argument and component argument
+    if (present(timeout).and. &
+      .not.ESMF_CompIsDualConnected(cplcomp%compp, rc=localrc)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="'timeout' argument is only allowed for connected dual components",&
+        ESMF_CONTEXT, rcTOReturn=rc)
+      return
     endif
 
     ! call Comp method
@@ -642,14 +653,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   For single-phase child components this argument is optional. The default is
 !   1.
 ! \item[{[timeout]}]
-!   The maximum period in seconds that this call will block due to
-!   communication with the actual component, before returning with a timeout
-!   condition. The default is 3600, i.e. 1 hour.
+!   The maximum period in seconds that this call will wait in communications
+!   with the actual component, before returning with a timeout condition. 
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
-!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
-!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
+!   If {\tt timeoutFlag} was {\em not} provided, a timeout condition will lead
+!   to a return code of {\tt rc \textbackslash = ESMF\_SUCCESS}. Otherwise the
+!   return value of {\tt timeoutFlag} is the sole indicator of a timeout
+!   condition.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -666,6 +679,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+
+    ! check consistency between timeout argument and component argument
+    if (present(timeout).and. &
+      .not.ESMF_CompIsDualConnected(cplcomp%compp, rc=localrc)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="'timeout' argument is only allowed for connected dual components",&
+        ESMF_CONTEXT, rcTOReturn=rc)
+      return
+    endif
 
     timeoutArg = 3600 ! default 1h
     if (present(timeout)) timeoutArg = timeout
@@ -1016,14 +1038,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   For single-phase child components this argument is optional. The default is
 !   1.
 ! \item[{[timeout]}]
-!   The maximum period in seconds that this call will block due to
-!   communication with the actual component, before returning with a timeout
-!   condition. The default is 3600, i.e. 1 hour.
+!   The maximum period in seconds that this call will wait in communications
+!   with the actual component, before returning with a timeout condition. 
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
-!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
-!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
+!   If {\tt timeoutFlag} was {\em not} provided, a timeout condition will lead
+!   to a return code of {\tt rc \textbackslash = ESMF\_SUCCESS}. Otherwise the
+!   return value of {\tt timeoutFlag} is the sole indicator of a timeout
+!   condition.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -1040,6 +1064,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+
+    ! check consistency between timeout argument and component argument
+    if (present(timeout).and. &
+      .not.ESMF_CompIsDualConnected(cplcomp%compp, rc=localrc)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="'timeout' argument is only allowed for connected dual components",&
+        ESMF_CONTEXT, rcTOReturn=rc)
+      return
+    endif
 
     timeoutArg = 3600 ! default 1h
     if (present(timeout)) timeoutArg = timeout
@@ -1311,14 +1344,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   For single-phase child components this argument is optional. The default is
 !   1.
 ! \item[{[timeout]}]
-!   The maximum period in seconds that this call will block due to
-!   communication with the actual component, before returning with a timeout
-!   condition. The default is 3600, i.e. 1 hour.
+!   The maximum period in seconds that this call will wait in communications
+!   with the actual component, before returning with a timeout condition. 
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
-!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
-!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
+!   If {\tt timeoutFlag} was {\em not} provided, a timeout condition will lead
+!   to a return code of {\tt rc \textbackslash = ESMF\_SUCCESS}. Otherwise the
+!   return value of {\tt timeoutFlag} is the sole indicator of a timeout
+!   condition.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -1335,6 +1370,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+
+    ! check consistency between timeout argument and component argument
+    if (present(timeout).and. &
+      .not.ESMF_CompIsDualConnected(cplcomp%compp, rc=localrc)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="'timeout' argument is only allowed for connected dual components",&
+        ESMF_CONTEXT, rcTOReturn=rc)
+      return
+    endif
 
     timeoutArg = 3600 ! default 1h
     if (present(timeout)) timeoutArg = timeout
@@ -1440,14 +1484,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   For single-phase child components this argument is optional. The default is
 !   1.
 ! \item[{[timeout]}]
-!   The maximum period in seconds that this call will block due to
-!   communication with the actual component, before returning with a timeout
-!   condition. The default is 3600, i.e. 1 hour.
+!   The maximum period in seconds that this call will wait in communications
+!   with the actual component, before returning with a timeout condition. 
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
-!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
-!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
+!   If {\tt timeoutFlag} was {\em not} provided, a timeout condition will lead
+!   to a return code of {\tt rc \textbackslash = ESMF\_SUCCESS}. Otherwise the
+!   return value of {\tt timeoutFlag} is the sole indicator of a timeout
+!   condition.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -1464,6 +1510,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+
+    ! check consistency between timeout argument and component argument
+    if (present(timeout).and. &
+      .not.ESMF_CompIsDualConnected(cplcomp%compp, rc=localrc)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="'timeout' argument is only allowed for connected dual components",&
+        ESMF_CONTEXT, rcTOReturn=rc)
+      return
+    endif
 
     timeoutArg = 3600 ! default 1h
     if (present(timeout)) timeoutArg = timeout
@@ -1600,18 +1655,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   tunnel" is established within the same executable using local communication
 !   methods (e.g. MPI).
 ! \item[{[timeout]}]
-!   The maximum period in seconds that this call will wait for any
-!   communication with the dual component, before returning with a timeout
-!   condition. The default is 3600, i.e. 1 hour.
+!   The maximum period in seconds that this call will wait for communications
+!   with the dual component, before returning with a timeout condition. 
+!   The default is 3600, i.e. 1 hour.
 !   (NOTE: Currently this option is only available for socket based component
-!   tunnels. This means that the {\tt port} argument is required.)
+!   tunnels.)
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
-!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
-!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
-!   (NOTE: Currently this option is only available for socket based component
-!   tunnels. This means that the {\tt port} argument is required.)
+!   If {\tt timeoutFlag} was {\em not} provided, a timeout condition will lead
+!   to a return code of {\tt rc \textbackslash = ESMF\_SUCCESS}. Otherwise the
+!   return value of {\tt timeoutFlag} is the sole indicator of a timeout
+!   condition.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1628,16 +1682,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
     
-    if (.not.present(port).and.(present(timeout).or.present(timeoutFlag))) then
+    if (.not.present(port).and.(present(timeout))) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="Currently the 'timeout' and 'timeoutFlag' arguments require 'port'", &
+        msg="Currently the 'timeout' argument requires the 'port' argument", &
         ESMF_CONTEXT, rcTOReturn=rc)
       return  ! bail out
     endif
     
-    timeoutArg = 3600 ! default 3600s timeout
-    if (present(timeout)) &
-      timeoutArg = timeout  ! validity will be checked in ESMF_CompExecute()
+    timeoutArg = 3600 ! default 1h
+    if (present(timeout)) timeoutArg = timeout
     
     ! call Comp method
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_SERVICELOOP, &
@@ -2190,14 +2243,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Server name where the actual component is being served. The default, i.e.
 !   if the {\tt server} argument was not provided, is {\tt localhost}.
 ! \item[{[timeout]}]
-!   The maximum period in seconds that this call will wait for any
-!   communication with the actual component, before returning with a timeout
-!   condition. The default is 3600, i.e. 1 hour.
+!   The maximum period in seconds that this call will wait in communications
+!   with the actual component, before returning with a timeout condition. 
+!   The default is 3600, i.e. 1 hour.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
-!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
-!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
+!   If {\tt timeoutFlag} was {\em not} provided, a timeout condition will lead
+!   to a return code of {\tt rc \textbackslash = ESMF\_SUCCESS}. Otherwise the
+!   return value of {\tt timeoutFlag} is the sole indicator of a timeout
+!   condition.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2213,9 +2267,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
     
-    timeoutArg = 3600 ! default 3600s timeout
-    if (present(timeout)) &
-      timeoutArg = timeout  ! validity will be checked in ESMF_CompExecute()
+    timeoutArg = 3600 ! default 1h
+    if (present(timeout)) timeoutArg = timeout
 
     if (present(server)) then
       call c_ESMC_SetServicesSock(cplcomp, cplcomp%compp%compTunnel, &
@@ -2754,12 +2807,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   a previously envoked component method before it must communicate back to
 !   the dual component. If the actual component does not communicate back in
 !   the specified time, a timeout condition is raised on the dual side (this
-!   side). The default is 3600, i.e. 1 hour.
+!   side). The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only
+!   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
-!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
-!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
+!   If {\tt timeoutFlag} was {\em not} provided, a timeout condition will lead
+!   to a return code of {\tt rc \textbackslash = ESMF\_SUCCESS}. Otherwise the
+!   return value of {\tt timeoutFlag} is the sole indicator of a timeout
+!   condition.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}] 
@@ -2775,6 +2830,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+
+    ! check consistency between timeout argument and component argument
+    if (present(timeout).and. &
+      .not.ESMF_CompIsDualConnected(cplcomp%compp, rc=localrc)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="'timeout' argument is only allowed for connected dual components",&
+        ESMF_CONTEXT, rcTOReturn=rc)
+      return
+    endif
 
     ! call Comp method
     call ESMF_CompWait(cplcomp%compp, syncflag=syncflag, timeout=timeout, &
@@ -2875,14 +2939,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   For single-phase child components this argument is optional. The default is
 !   1.
 ! \item[{[timeout]}]
-!   The maximum period in seconds that this call will block due to
-!   communication with the actual component, before returning with a timeout
-!   condition. The default is 3600, i.e. 1 hour.
+!   The maximum period in seconds that this call will wait in communications
+!   with the actual component, before returning with a timeout condition. 
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
-!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!   an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
-!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
+!   If {\tt timeoutFlag} was {\em not} provided, a timeout condition will lead
+!   to a return code of {\tt rc \textbackslash = ESMF\_SUCCESS}. Otherwise the
+!   return value of {\tt timeoutFlag} is the sole indicator of a timeout
+!   condition.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -2900,6 +2966,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
+
+    ! check consistency between timeout argument and component argument
+    if (present(timeout).and. &
+      .not.ESMF_CompIsDualConnected(cplcomp%compp, rc=localrc)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="'timeout' argument is only allowed for connected dual components",&
+        ESMF_CONTEXT, rcTOReturn=rc)
+      return
+    endif
 
     timeoutArg = 3600 ! default 1h
     if (present(timeout)) timeoutArg = timeout

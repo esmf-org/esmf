@@ -1,4 +1,4 @@
-! $Id: ESMF_CompTunnelUTest.F90,v 1.11 2012/03/29 23:37:07 theurich Exp $
+! $Id: ESMF_CompTunnelUTest.F90,v 1.12 2012/04/03 22:56:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -249,7 +249,7 @@ program ESMF_CompTunnelUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_CompTunnelUTest.F90,v 1.11 2012/03/29 23:37:07 theurich Exp $'
+    '$Id: ESMF_CompTunnelUTest.F90,v 1.12 2012/04/03 22:56:57 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -935,6 +935,14 @@ program ESMF_CompTunnelUTest
   !------------------------------------------------------------------------
 
   ! --- connect A's ---
+
+  !------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ServiceLoop for the Actual Component A - with timeout"
+  write(failMsg, *) "Did return ESMF_SUCCESS" 
+  call ESMF_GridCompServiceLoop(actualCompA, timeout=10, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only

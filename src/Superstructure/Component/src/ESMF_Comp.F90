@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.233 2012/04/03 19:26:38 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.234 2012/04/03 22:56:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -273,6 +273,7 @@ module ESMF_CompMod
   public ESMF_CompExecute
   public ESMF_CompGet
   public ESMF_CompIsPetLocal
+  public ESMF_CompIsDualConnected
   public ESMF_CompPrint
   public ESMF_CompSet
   public ESMF_CompSetVMMaxPEs
@@ -290,7 +291,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.233 2012/04/03 19:26:38 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.234 2012/04/03 22:56:55 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -1499,7 +1500,6 @@ contains
 !
 !  The return value is {\tt .true.} if the component is to execute on the 
 !  calling PET, {\tt .false.} otherwise.
-!    
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -1542,6 +1542,73 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_CompIsPetLocal
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompIsDualConnected"
+!BOPI
+! !IROUTINE: ESMF_CompIsDualConnected -- Inquire if this component a connected dual component
+!
+! !INTERFACE:
+  recursive function ESMF_CompIsDualConnected(compp, rc)
+!
+! !RETURN VALUE:
+    logical :: ESMF_CompIsDualConnected
+!
+! !ARGUMENTS:
+    type(ESMF_CompClass), pointer               :: compp
+    integer,              intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!  Inquire if this component is a connected dual component.
+!
+!  The return value is {\tt .true.} if the component is a connected dual
+!  component, {\tt .false.} otherwise.
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_Status)       :: baseStatus
+
+    ! Initialize return code; assume not implemented until success is certain
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+        
+    ! Initialize output in case of error
+    ESMF_CompIsDualConnected = .false.
+
+    ! Test incoming compp object
+    if (.not.associated(compp)) then
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+        msg="Not a valid pointer to ESMF Component object", &
+        ESMF_CONTEXT, rcTOReturn=rc)
+      return
+    endif
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_CompClassGetInit, compp, rc)
+
+    call ESMF_BaseGetStatus(compp%base, baseStatus, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcTOReturn=rc)) return
+        
+    if (baseStatus /= ESMF_STATUS_READY) then
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, &
+        msg="uninitialized or destroyed Component object", &
+        ESMF_CONTEXT, rcTOReturn=rc)
+      return
+    endif
+    
+    ESMF_CompIsDualConnected = (compp%compTunnel%this /= ESMF_NULL_POINTER)
+ 
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_CompIsDualConnected
 !------------------------------------------------------------------------------
 
 
