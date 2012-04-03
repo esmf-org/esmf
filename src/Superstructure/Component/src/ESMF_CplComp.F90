@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.166 2012/01/06 20:19:00 svasquez Exp $
+! $Id: ESMF_CplComp.F90,v 1.167 2012/04/03 00:49:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.166 2012/01/06 20:19:00 svasquez Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.167 2012/04/03 00:49:32 theurich Exp $'
 
 !==============================================================================
 !
@@ -104,6 +104,8 @@ module ESMF_CplCompMod
   interface ESMF_CplCompSetServices
     module procedure ESMF_CplCompSetServices
     module procedure ESMF_CplCompSetServicesShObj
+    module procedure ESMF_CplCompSetServicesComp
+    module procedure ESMF_CplCompSetServicesSock
   end interface
 !------------------------------------------------------------------------------
 
@@ -476,16 +478,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_CplCompDestroy - Release resources associated with a CplComp
 
 ! !INTERFACE:
-  subroutine ESMF_CplCompDestroy(cplcomp, keywordEnforcer, rc)
+  subroutine ESMF_CplCompDestroy(cplcomp, keywordEnforcer, &
+    timeout, timeoutFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp), intent(inout)          :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(in),   optional :: timeout
+    logical,            intent(out),  optional :: timeoutFlag
     integer,            intent(out),  optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.3.0] Added argument {\tt timeout}.
+!              Added argument {\tt timeoutFlag}.
+!              The new arguments provide access to the fault-tolerant component
+!              features.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -498,6 +510,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Release all resources associated with this {\tt ESMF\_CplComp}
 !   and mark the object as invalid.  It is an error to pass this
 !   object into any other routines after being destroyed.
+! \item[{[timeout]}]
+!   The maximum period in seconds that this call will wait for any
+!   communication with the actual component, before returning with a timeout
+!   condition. The default is 3600, i.e. 1 hour.
+! \item[{[timeoutFlag]}]
+!   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
+!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
+!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -520,7 +541,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! call Comp method
-    call ESMF_CompDestruct(cplcomp%compp, rc=localrc)
+    call ESMF_CompDestruct(cplcomp%compp, timeout=timeout, &
+      timeoutFlag=timeoutFlag, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcTOReturn=rc)) return
@@ -549,7 +571,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   recursive subroutine ESMF_CplCompFinalize(cplcomp, keywordEnforcer, &
-    importState, exportState, clock, syncflag, phase, userRc, rc)
+    importState, exportState, clock, syncflag, phase, timeout, timeoutFlag, &
+    userRc, rc)
 !
 !
 ! !ARGUMENTS:
@@ -560,12 +583,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
     integer,              intent(in),    optional :: phase
+    integer,              intent(in),    optional :: timeout
+    logical,              intent(out),   optional :: timeoutFlag
     integer,              intent(out),   optional :: userRc
     integer,              intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.3.0] Added argument {\tt timeout}.
+!              Added argument {\tt timeoutFlag}.
+!              The new arguments provide access to the fault-tolerant component
+!              features.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -609,6 +641,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
+! \item[{[timeout]}]
+!   The maximum period in seconds that this call will block due to
+!   communication with the actual component, before returning with a timeout
+!   condition. The default is 3600, i.e. 1 hour.
+! \item[{[timeoutFlag]}]
+!   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
+!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
+!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -618,6 +659,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local return code
+    integer :: timeoutArg
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -625,9 +667,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
+    timeoutArg = 3600 ! default 1h
+    if (present(timeout)) timeoutArg = timeout
+
+    ! call Comp method
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_FINALIZEIC, &
       importState=importState, exportState=exportState, clock=clock, &
-      syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
+      syncflag=syncflag, phase=phase, timeout=timeoutArg, &
+      userRc=userRc, rc=localrc)
+    ! conditionally filter out the RC_TIMEOUT and return success
+    if (present(timeoutFlag)) then
+      timeoutFlag = .false. ! initialize
+      if ((localrc==ESMF_RC_TIMEOUT).or.(localrc==ESMC_RC_TIMEOUT)) then
+        timeoutFlag = .true.      ! indicate timeout through flag argument
+        localrc = ESMF_SUCCESS    ! do not raise error condition on user level
+      endif
+    endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -673,6 +728,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
+    ! call Comp method
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_FINALIZE, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
@@ -730,7 +786,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[cplcomp]
 !   The {\tt ESMF\_CplComp} object being queried.
 ! \item[{[configIsPresent]}]
-!   {\tt .true.} if {\tt config} was set in GridComp object,
+!   {\tt .true.} if {\tt config} was set in CplComp object,
 !   {\tt .false.} otherwise.
 ! \item[{[config]}]
 !   Return the associated Config.
@@ -738,7 +794,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   the CplComp. If unsure, get {\tt configIsPresent} first to determine
 !   the status.
 ! \item[{[configFileIsPresent]}]
-!   {\tt .true.} if {\tt configFile} was set in GridComp object,
+!   {\tt .true.} if {\tt configFile} was set in CplComp object,
 !   {\tt .false.} otherwise.
 ! \item[{[configFile]}]
 !   Return the associated configuration filename.
@@ -746,7 +802,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   the CplComp. If unsure, get {\tt configFileIsPresent} first to determine
 !   the status.
 ! \item[{[clockIsPresent]}]
-!   {\tt .true.} if {\tt clock} was set in GridComp object,
+!   {\tt .true.} if {\tt clock} was set in CplComp object,
 !   {\tt .false.} otherwise.
 ! \item[{[clock]}]
 !   Return the associated Clock.
@@ -766,7 +822,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[currentPhase]}]
 !   Return the current {\tt phase} of the {\tt ESMF\_CplComp} execution.
 ! \item[{[vmIsPresent]}]
-!   {\tt .true.} if {\tt vm} was set in GridComp object,
+!   {\tt .true.} if {\tt vm} was set in CplComp object,
 !   {\tt .false.} otherwise.
 ! \item[{[vm]}]
 !   Return the associated VM.
@@ -889,7 +945,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   recursive subroutine ESMF_CplCompInitialize(cplcomp, keywordEnforcer, &
-    importState, exportState, clock, syncflag, phase, userRc, rc)
+    importState, exportState, clock, syncflag, phase, timeout, timeoutFlag, &
+    userRc, rc)
 !
 !
 ! !ARGUMENTS:
@@ -900,12 +957,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
     integer,              intent(in),    optional :: phase
+    integer,              intent(in),    optional :: timeout
+    logical,              intent(out),   optional :: timeoutFlag
     integer,              intent(out),   optional :: userRc
     integer,              intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.3.0] Added argument {\tt timeout}.
+!              Added argument {\tt timeoutFlag}.
+!              The new arguments provide access to the fault-tolerant component
+!              features.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -949,6 +1015,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
+! \item[{[timeout]}]
+!   The maximum period in seconds that this call will block due to
+!   communication with the actual component, before returning with a timeout
+!   condition. The default is 3600, i.e. 1 hour.
+! \item[{[timeoutFlag]}]
+!   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
+!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
+!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -958,6 +1033,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
+    integer :: timeoutArg
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -965,9 +1041,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
+    timeoutArg = 3600 ! default 1h
+    if (present(timeout)) timeoutArg = timeout
+
+    ! call Comp method
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_INITIALIZEIC, &
       importState=importState, exportState=exportState, clock=clock, &
-      syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
+      syncflag=syncflag, phase=phase, timeout=timeoutArg, &
+      userRc=userRc, rc=localrc)
+    ! conditionally filter out the RC_TIMEOUT and return success
+    if (present(timeoutFlag)) then
+      timeoutFlag = .false. ! initialize
+      if ((localrc==ESMF_RC_TIMEOUT).or.(localrc==ESMC_RC_TIMEOUT)) then
+        timeoutFlag = .true.      ! indicate timeout through flag argument
+        localrc = ESMF_SUCCESS    ! do not raise error condition on user level
+      endif
+    endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1013,6 +1102,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
+    ! call Comp method
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_INITIALIZE, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
@@ -1151,7 +1241,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   recursive subroutine ESMF_CplCompReadRestart(cplcomp, keywordEnforcer, &
-    importState, exportState, clock, syncflag, phase, userRc, rc)
+    importState, exportState, clock, syncflag, phase, timeout, timeoutFlag, &
+    userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),   intent(inout)           :: cplcomp
@@ -1161,12 +1252,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
     integer,              intent(in),    optional :: phase
+    integer,              intent(in),    optional :: timeout
+    logical,              intent(out),   optional :: timeoutFlag
     integer,              intent(out),   optional :: userRc
     integer,              intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.3.0] Added argument {\tt timeout}.
+!              Added argument {\tt timeoutFlag}.
+!              The new arguments provide access to the fault-tolerant component
+!              features.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1210,6 +1310,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
+! \item[{[timeout]}]
+!   The maximum period in seconds that this call will block due to
+!   communication with the actual component, before returning with a timeout
+!   condition. The default is 3600, i.e. 1 hour.
+! \item[{[timeoutFlag]}]
+!   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
+!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
+!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -1219,17 +1328,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                  ! local return code
+    integer :: timeoutArg
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
-    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
+    timeoutArg = 3600 ! default 1h
+    if (present(timeout)) timeoutArg = timeout
+
+    ! call Comp method
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_READRESTART, &
       importState=importState, exportState=exportState, clock=clock, &
-      syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
+      syncflag=syncflag, phase=phase, timeout=timeoutArg, &
+      userRc=userRc, rc=localrc)
+    ! conditionally filter out the RC_TIMEOUT and return success
+    if (present(timeoutFlag)) then
+      timeoutFlag = .false. ! initialize
+      if ((localrc==ESMF_RC_TIMEOUT).or.(localrc==ESMC_RC_TIMEOUT)) then
+        timeoutFlag = .true.      ! indicate timeout through flag argument
+        localrc = ESMF_SUCCESS    ! do not raise error condition on user level
+      endif
+    endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1248,7 +1370,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   recursive subroutine ESMF_CplCompRun(cplcomp, keywordEnforcer, &
-    importState, exportState, clock, syncflag, phase, userRc, rc)
+    importState, exportState, clock, syncflag, phase, timeout, timeoutFlag, &
+    userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),   intent(inout)           :: cplcomp
@@ -1258,12 +1381,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
     integer,              intent(in),    optional :: phase
+    integer,              intent(in),    optional :: timeout
+    logical,              intent(out),   optional :: timeoutFlag
     integer,              intent(out),   optional :: userRc
     integer,              intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.3.0] Added argument {\tt timeout}.
+!              Added argument {\tt timeoutFlag}.
+!              The new arguments provide access to the fault-tolerant component
+!              features.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1307,6 +1439,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
+! \item[{[timeout]}]
+!   The maximum period in seconds that this call will block due to
+!   communication with the actual component, before returning with a timeout
+!   condition. The default is 3600, i.e. 1 hour.
+! \item[{[timeoutFlag]}]
+!   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
+!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
+!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -1316,6 +1457,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                     ! local return code
+    integer :: timeoutArg
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1323,9 +1465,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
+    timeoutArg = 3600 ! default 1h
+    if (present(timeout)) timeoutArg = timeout
+
+    ! call Comp method
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_RUNIC, &
       importState=importState, exportState=exportState, clock=clock, &
-      syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
+      syncflag=syncflag, phase=phase, timeout=timeoutArg, &
+      userRc=userRc, rc=localrc)
+    ! conditionally filter out the RC_TIMEOUT and return success
+    if (present(timeoutFlag)) then
+      timeoutFlag = .false. ! initialize
+      if ((localrc==ESMF_RC_TIMEOUT).or.(localrc==ESMC_RC_TIMEOUT)) then
+        timeoutFlag = .true.      ! indicate timeout through flag argument
+        localrc = ESMF_SUCCESS    ! do not raise error condition on user level
+      endif
+    endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1370,6 +1525,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
+    ! call Comp method
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_RUN, &
       importState=importState, exportState=exportState, clock=clock, &
       syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
@@ -1380,6 +1536,135 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_CplCompRunAct
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompServiceLoop"
+!BOP
+! !IROUTINE: ESMF_CplCompServiceLoop - Call the CplComp's service loop routine
+
+! !INTERFACE:
+  recursive subroutine ESMF_CplCompServiceLoop(cplcomp, keywordEnforcer, &
+    importState, exportState, clock, syncflag, port, timeout, timeoutFlag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp),   intent(inout)           :: cplcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_State),     intent(inout), optional :: importState
+    type(ESMF_State),     intent(inout), optional :: exportState
+    type(ESMF_Clock),     intent(inout), optional :: clock
+    type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
+    integer,              intent(in),    optional :: port
+    integer,              intent(in),    optional :: timeout
+    logical,              intent(out),   optional :: timeoutFlag
+    integer,              intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+! Call the ServiceLoop routine for an {\tt ESMF\_CplComp}.
+! This tries to establish a "component tunnel" between the {\em actual}
+! Component (calling this routine) and a {\tt dual} Component connecting to it
+! through a matching SetServices call.
+!   
+! The arguments are:
+! \begin{description}
+! \item[cplcomp]
+!   {\tt ESMF\_CplComp} to call service loop routine for.
+! \item[{[importState]}]  
+!   {\tt ESMF\_State} containing import data for coupling. If not present, a dummy
+!   argument will be passed to the user-supplied routine.  The 
+!   importState argument in the user code cannot be optional. 
+! \item[{[exportState]}]  
+!   {\tt ESMF\_State} containing export data for coupling. If not present, a dummy
+!   argument will be passed to the user-supplied routine.  The 
+!   exportState argument in the user code cannot be optional. 
+! \item[{[clock]}]  
+!   External {\tt ESMF\_Clock} for passing in time information.  
+!   This is generally the parent component's clock, and will be treated
+!   as read-only by the child component.  The child component can maintain
+!   a private clock for its own internal time computations. If not present, a dummy
+!   argument will be passed to the user-supplied routine.  The 
+!   clock argument in the user code cannot be optional. 
+! \item[{[syncflag]}]
+!   Blocking behavior of this method call. See section \ref{const:sync} 
+!   for a list of valid blocking options. Default option is
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   across each VAS but does not synchronize PETs that run in different VASs.
+! \item[{[port]}]
+!   In case a port number is provided, the "component tunnel" is established 
+!   using sockets. The actual component side, i.e. the side that calls into
+!   {\tt ESMF\_CplCompServiceLoop()}, starts to listen on the specified port
+!   as the server. The valid port range is [1024, 65535].
+!   In case the {\tt port} argument is {\em not} specified, the "component
+!   tunnel" is established within the same executable using local communication
+!   methods (e.g. MPI).
+! \item[{[timeout]}]
+!   The maximum period in seconds that this call will wait for any
+!   communication with the dual component, before returning with a timeout
+!   condition. The default is 3600, i.e. 1 hour.
+!   (NOTE: Currently this option is only available for socket based component
+!   tunnels. This means that the {\tt port} argument is required.)
+! \item[{[timeoutFlag]}]
+!   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
+!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
+!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
+!   (NOTE: Currently this option is only available for socket based component
+!   tunnels. This means that the {\tt port} argument is required.)
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: localrc2                       ! local return code
+    integer :: timeoutArg
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
+    
+    if (.not.present(port).and.(present(timeout).or.present(timeoutFlag))) then
+      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
+        msg="Currently the 'timeout' and 'timeoutFlag' arguments require 'port'", &
+        ESMF_CONTEXT, rcTOReturn=rc)
+      return  ! bail out
+    endif
+    
+    timeoutArg = 3600 ! default 3600s timeout
+    if (present(timeout)) &
+      timeoutArg = timeout  ! validity will be checked in ESMF_CompExecute()
+    
+    ! call Comp method
+    call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_SERVICELOOP, &
+      importState=importState, exportState=exportState, clock=clock, &
+      syncflag=syncflag, port=port, timeout=timeoutArg, userRc=localrc2, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! ESMF_METHOD_SERVICELOOP is a framework internal method, therefore
+    ! the code returned in userRc is a framework internal return code and must
+    ! be treated as such. However, the treatment of RC_TIMEOUT depends
+    ! on the presence/absence of timeoutFlag.
+    if (present(timeoutFlag)) then
+      timeoutFlag = .false. ! initialize
+      if ((localrc2==ESMF_RC_TIMEOUT).or.(localrc2==ESMC_RC_TIMEOUT)) then
+        timeoutFlag = .true.      ! indicate timeout through flag argument
+        localrc2 = ESMF_SUCCESS   ! do not raise error condition on user level
+      endif
+    endif
+    if (ESMF_LogFoundError(localrc2, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_CplCompServiceLoop
 !------------------------------------------------------------------------------
 
 
@@ -1524,7 +1809,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
@@ -1547,7 +1831,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine
+  end subroutine ESMF_CplCompSetEntryPoint
 !------------------------------------------------------------------------------
 
 
@@ -1664,7 +1948,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
@@ -1689,7 +1972,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine
+  end subroutine ESMF_CplCompSetServices
 !------------------------------------------------------------------------------
 
 
@@ -1762,7 +2045,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
@@ -1794,7 +2076,172 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine
+  end subroutine ESMF_CplCompSetServicesShObj
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompSetServicesComp"
+!BOP
+! !IROUTINE: ESMF_CplCompSetServices - Set to serve as Dual Component for an Actual Component
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_CplCompSetServices()
+  recursive subroutine ESMF_CplCompSetServicesComp(cplcomp, &
+    actualCplcomp, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp), intent(inout)         :: cplcomp
+    type(ESMF_CplComp), intent(in)            :: actualCplcomp
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,            intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Set the services of a Coupler Component to serve a "dual" Component for an
+! "actual" Component. The component tunnel is VM based.
+!    
+! The arguments are:
+! \begin{description}
+! \item[cplcomp]
+!   Dual Coupler Component.
+! \item[actualCplcomp]
+!   Actual Coupler Component.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local error status
+    integer, pointer :: actualCompPetList(:)
+    integer :: actualCompRootPet, i
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, actualCplcomp, rc)
+    
+    ! access the petList of the actualCplcomp and find the lowest PET
+    ! -> this is going to be the rendezvous PET for the component tunnel setup
+    nullify(actualCompPetList)
+    ! call Comp method
+    call ESMF_CompGet(actualCplcomp%compp, petList=actualCompPetList, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    actualCompRootPet = actualCompPetList(1)  ! prime the search variable
+    do i=2, size(actualCompPetList)
+      if (actualCompPetList(i) < actualCompRootPet) &
+        actualCompRootPet = actualCompPetList(i)
+    enddo
+    deallocate(actualCompPetList)
+    
+    call c_ESMC_SetServicesComp(cplcomp, cplcomp%compp%compTunnel, &
+      actualCplcomp, actualCompRootPet, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! now indicate that this Component has a VM associated
+    cplcomp%compp%compStatus%vmIsPresent = .true.
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_CplCompSetServicesComp
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompSetServicesSock"
+!BOP
+! !IROUTINE: ESMF_CplCompSetServices - Set to serve as Dual Component for an Actual Component through sockets
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_CplCompSetServices()
+  recursive subroutine ESMF_CplCompSetServicesSock(cplcomp, port, &
+    keywordEnforcer, server, timeout, timeoutFlag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_CplComp), intent(inout)         :: cplcomp
+    integer,            intent(in)            :: port
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len=*),   intent(in),  optional :: server
+    integer,            intent(in),  optional :: timeout
+    logical,            intent(out), optional :: timeoutFlag
+    integer,            intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Set the services of a Coupler Component to serve a "dual" Component for an
+! "actual" Component. The component tunnel is socket based.
+!    
+! The arguments are:
+! \begin{description}
+! \item[cplcomp]
+!   Dual Coupler Component.
+! \item[port]
+!   Port number under which the actual component is being served. The valid
+!   port range is [1024, 65535].
+! \item[{[server]}]
+!   Server name where the actual component is being served. The default, i.e.
+!   if the {\tt server} argument was not provided, is {\tt localhost}.
+! \item[{[timeout]}]
+!   The maximum period in seconds that this call will wait for any
+!   communication with the actual component, before returning with a timeout
+!   condition. The default is 3600, i.e. 1 hour.
+! \item[{[timeoutFlag]}]
+!   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
+!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
+!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
+! \item[{[rc]}]
+!   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local error status
+    integer :: timeoutArg
+
+    ! initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
+    
+    timeoutArg = 3600 ! default 3600s timeout
+    if (present(timeout)) &
+      timeoutArg = timeout  ! validity will be checked in ESMF_CompExecute()
+
+    if (present(server)) then
+      call c_ESMC_SetServicesSock(cplcomp, cplcomp%compp%compTunnel, &
+        port, server, timeoutArg, localrc)
+    else
+      call c_ESMC_SetServicesSock(cplcomp, cplcomp%compp%compTunnel, &
+        port, "localhost", timeoutArg, localrc)
+    endif
+    ! conditionally filter out the RC_TIMEOUT and return success
+    if (present(timeoutFlag)) then
+      timeoutFlag = .false. ! initialize
+      if ((localrc==ESMF_RC_TIMEOUT).or.(localrc==ESMC_RC_TIMEOUT)) then
+        timeoutFlag = .true.      ! indicate timeout through flag argument
+        localrc = ESMF_SUCCESS    ! do not raise error condition on user level
+      endif
+    endif
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! now indicate that this Component has a VM associated
+    cplcomp%compp%compStatus%vmIsPresent = .true.
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_CplCompSetServicesSock
 !------------------------------------------------------------------------------
 
 
@@ -1852,7 +2299,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
@@ -1874,7 +2320,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine
+  end subroutine ESMF_CplCompSetVM
 !------------------------------------------------------------------------------
 
 
@@ -1943,7 +2389,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
@@ -1972,7 +2417,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine
+  end subroutine ESMF_CplCompSetVMShObj
 !------------------------------------------------------------------------------
 
 
@@ -2085,7 +2530,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   PETs as the parent Component provided to the child. The threading level of
 !   the child PETs however is adjusted according to the above rule.
 !
-!   The typical use of {\tt ESMF\_GridCompSetVMMaxThreads()} is to run a 
+!   The typical use of {\tt ESMF\_CplCompSetVMMaxThreads()} is to run a 
 !   Component multi-threaded with groups of PETs executing within a common
 !   virtual address space.
 !
@@ -2136,7 +2581,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompSetVMMinThreads"
 !BOP
-! !IROUTINE: ESMF_CplCompSetVMMinThreads - Set a reduced threading level in GridComp VM
+! !IROUTINE: ESMF_CplCompSetVMMinThreads - Set a reduced threading level in CplComp VM
 !
 ! !INTERFACE:
   subroutine ESMF_CplCompSetVMMinThreads(cplcomp, keywordEnforcer, &
@@ -2162,7 +2607,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   cannot increase, only decrease, 4) PETs cannot migrate between virtual
 !   address spaces (VASs), nor can VASs migrate between SSIs.
 !
-!   The typical use of {\tt ESMF\_GridCompSetVMMinThreads()} is to run a 
+!   The typical use of {\tt ESMF\_CplCompSetVMMinThreads()} is to run a 
 !   Component across a set of single-threaded PETs.
 !
 ! The arguments are:
@@ -2268,18 +2713,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_CplCompWait - Wait for a CplComp to return
 !
 ! !INTERFACE:
-  subroutine ESMF_CplCompWait(cplcomp, keywordEnforcer, syncflag, userRc, rc)
+  subroutine ESMF_CplCompWait(cplcomp, keywordEnforcer, syncflag, &
+    timeout, timeoutFlag, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),   intent(inout)         :: cplcomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
+    integer,              intent(in),  optional :: timeout
+    logical,              intent(out), optional :: timeoutFlag
     integer,              intent(out), optional :: userRc
     integer,              intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.3.0] Added argument {\tt timeout}.
+!              Added argument {\tt timeoutFlag}.
+!              The new arguments provide access to the fault-tolerant component
+!              features.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2294,6 +2749,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   for a list of valid blocking options. Default option is
 !   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
 !   across each VAS but does not synchronize PETs that run in different VASs.
+! \item[{[timeout]}]
+!   The maximum period in seconds the actual component is allowed to execute
+!   a previously envoked component method before it must communicate back to
+!   the dual component. If the actual component does not communicate back in
+!   the specified time, a timeout condition is raised on the dual side (this
+!   side). The default is 3600, i.e. 1 hour.
+! \item[{[timeoutFlag]}]
+!   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
+!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
+!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}] 
@@ -2311,8 +2777,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
     ! call Comp method
-    call ESMF_CompWait(cplcomp%compp, syncflag=syncflag, &
+    call ESMF_CompWait(cplcomp%compp, syncflag=syncflag, timeout=timeout, &
       userRc=userRc, rc=localrc)
+    ! conditionally filter out the RC_TIMEOUT and return success
+    if (present(timeoutFlag)) then
+      timeoutFlag = .false. ! initialize
+      if ((localrc==ESMF_RC_TIMEOUT).or.(localrc==ESMC_RC_TIMEOUT)) then
+        timeoutFlag = .true.      ! indicate timeout through flag argument
+        localrc = ESMF_SUCCESS    ! do not raise error condition on user level
+      endif
+    endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcTOReturn=rc)) return
@@ -2331,7 +2805,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   recursive subroutine ESMF_CplCompWriteRestart(cplcomp, keywordEnforcer, &
-    importState, exportState, clock, syncflag, phase, userRc, rc)
+    importState, exportState, clock, syncflag, phase, timeout, timeoutFlag, &
+    userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),   intent(inout)           :: cplcomp
@@ -2341,12 +2816,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Clock),     intent(inout), optional :: clock
     type(ESMF_Sync_Flag), intent(in),    optional :: syncflag
     integer,              intent(in),    optional :: phase
+    integer,              intent(in),    optional :: timeout
+    logical,              intent(out),   optional :: timeoutFlag
     integer,              intent(out),   optional :: userRc
     integer,              intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.3.0] Added argument {\tt timeout}.
+!              Added argument {\tt timeoutFlag}.
+!              The new arguments provide access to the fault-tolerant component
+!              features.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2390,6 +2874,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
+! \item[{[timeout]}]
+!   The maximum period in seconds that this call will block due to
+!   communication with the actual component, before returning with a timeout
+!   condition. The default is 3600, i.e. 1 hour.
+! \item[{[timeoutFlag]}]
+!   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
+!   If {\tt timeoutFlag} was not provided a timeout condition will lead to
+!   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
+!   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -2399,6 +2892,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
+    integer :: timeoutArg
 
     ! Initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2407,9 +2901,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
+    timeoutArg = 3600 ! default 1h
+    if (present(timeout)) timeoutArg = timeout
+
+    ! call Comp method
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_WRITERESTART, &
       importState=importState, exportState=exportState, clock=clock, &
-      syncflag=syncflag, phase=phase, userRc=userRc, rc=localrc)
+      syncflag=syncflag, phase=phase, timeout=timeoutArg, &
+      userRc=userRc, rc=localrc)
+    ! conditionally filter out the RC_TIMEOUT and return success
+    if (present(timeoutFlag)) then
+      timeoutFlag = .false. ! initialize
+      if ((localrc==ESMF_RC_TIMEOUT).or.(localrc==ESMC_RC_TIMEOUT)) then
+        timeoutFlag = .true.      ! indicate timeout through flag argument
+        localrc = ESMF_SUCCESS    ! do not raise error condition on user level
+      endif
+    endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

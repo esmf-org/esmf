@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.194 2012/03/29 23:41:11 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.195 2012/04/03 00:49:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.194 2012/03/29 23:41:11 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.195 2012/04/03 00:49:32 theurich Exp $'
 
 !==============================================================================
 !
@@ -505,6 +505,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.3.0] Added argument {\tt timeout}.
+!              Added argument {\tt timeoutFlag}.
+!              The new arguments provide access to the fault-tolerant component
+!              features.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -597,6 +604,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.3.0] Added argument {\tt timeout}.
+!              Added argument {\tt timeoutFlag}.
+!              The new arguments provide access to the fault-tolerant component
+!              features.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1068,6 +1082,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.3.0] Added argument {\tt timeout}.
+!              Added argument {\tt timeoutFlag}.
+!              The new arguments provide access to the fault-tolerant component
+!              features.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1355,6 +1376,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.3.0] Added argument {\tt timeout}.
+!              Added argument {\tt timeoutFlag}.
+!              The new arguments provide access to the fault-tolerant component
+!              features.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1398,13 +1426,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
+! \item[{[timeout]}]
+!   The maximum period in seconds that this call will block due to
+!   communication with the actual component, before returning with a timeout
+!   condition. The default is 3600, i.e. 1 hour.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
 !   If {\tt timeoutFlag} was not provided a timeout condition will lead to
 !   an {\tt rc \= ESMF\_SUCCESS}, otherwise the return value of
 !   {\tt timeoutFlag} is the indicator whether timeout was reached or not.
-! \item[{[userRc]}]
-!   Return code set by {\tt userRoutine} before returning.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -1475,6 +1505,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.3.0] Added argument {\tt timeout}.
+!              Added argument {\tt timeoutFlag}.
+!              The new arguments provide access to the fault-tolerant component
+!              features.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1809,6 +1846,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
     ! call Comp method
     call ESMF_CompSet(gridcomp%compp, name=name, &
@@ -2810,6 +2848,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.3.0] Added argument {\tt timeout}.
+!              Added argument {\tt timeoutFlag}.
+!              The new arguments provide access to the fault-tolerant component
+!              features.
+! \end{description}
+! \end{itemize}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2899,6 +2945,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[5.3.0] Added argument {\tt timeout}.
+!              Added argument {\tt timeoutFlag}.
+!              The new arguments provide access to the fault-tolerant component
+!              features.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
