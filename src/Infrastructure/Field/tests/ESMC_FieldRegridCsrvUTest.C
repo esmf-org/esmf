@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldRegridUTest.C,v 1.14 2012/04/04 16:58:22 rokuingh Exp $
+// $Id: ESMC_FieldRegridCsrvUTest.C,v 1.1 2012/04/04 16:58:22 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -20,9 +20,11 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
+#define masking
+
 //==============================================================================
 //BOP
-// !PROGRAM: ESMC_FieldRegridUTest - Check ESMC_FieldRegrid functionality
+// !PROGRAM: ESMC_FieldRegridCsrvUTest - Check ESMC_FieldRegrid functionality
 //
 // !DESCRIPTION:
 //
@@ -98,6 +100,7 @@ int main(void){
               2,3,6,5,
               4,5,8,7,
               5,6,9,8};
+  int elemMask [] = {0,0,1,0};
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -119,7 +122,11 @@ int main(void){
   //NEX_UTest
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef masking
+  rc = ESMC_MeshAddElements(srcmesh, num_elem_s, elemId_s, elemType_s, elemConn_s, elemMask);
+#else
   rc = ESMC_MeshAddElements(srcmesh, num_elem_s, elemId_s, elemType_s, elemConn_s, NULL);
+#endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
  
@@ -252,7 +259,7 @@ int main(void){
   strcpy(name, "Create ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   srcfield = ESMC_FieldCreateMeshTypeKind(srcmesh, ESMC_TYPEKIND_R8,
-    ESMC_MESHLOC_NODE, NULL, NULL, NULL, "srcfield", &rc);
+    ESMC_MESHLOC_ELEMENT, NULL, NULL, NULL, "srcfield", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -261,11 +268,10 @@ int main(void){
   strcpy(name, "Create ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dstfield = ESMC_FieldCreateMeshTypeKind(dstmesh, 
-    ESMC_TYPEKIND_R8, ESMC_MESHLOC_NODE, NULL, NULL, NULL, "dstfield", &rc);
+    ESMC_TYPEKIND_R8, ESMC_MESHLOC_ELEMENT, NULL, NULL, NULL, "dstfield", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
-
   //----------------------------------------------------------------------------
   //-------------------------- REGRIDDING --------------------------------------
   //----------------------------------------------------------------------------
@@ -279,14 +285,14 @@ int main(void){
   //----------------------------------------------------------------------------
 
   // define analytic field on source field
-  {
-    double x,y;
-    int i;
-    for(i=0;i<num_node_s;++i) {
-      x=nodeCoord_s[2*i];
-      y=nodeCoord_s[2*i+1];
-      srcfieldptr[i] = 20.0+x+y;
-    }
+  for(int i=0; i<num_elem_s; ++i) {
+#ifdef masking
+    if (elemMask[i] == 1) {
+      srcfieldptr[i] = 100000000.0;
+      printf("Mask applied at position %d\n", i);
+    } else
+#endif
+      srcfieldptr[i] = 20.0;
   }
   
   //----------------------------------------------------------------------------
@@ -298,11 +304,8 @@ int main(void){
   //----------------------------------------------------------------------------
 
   // initialize destination field
-  {
-    int i;
-    for(i=0;i<num_node_d;++i)
-      dstfieldptr[i] = 0.0;
-  }
+  for(int i=0; i<num_elem_d; ++i)
+    dstfieldptr[i] = 0.0;
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -318,9 +321,19 @@ int main(void){
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldRegridStore(srcfield, dstfield, 
+#ifdef masking
+                             &i_maskValues, NULL,
+#else
                              NULL, NULL,
+#endif
                              &routehandle,
-                             ESMC_REGRIDMETHOD_BILINEAR, ESMC_UNMAPPEDACTION_ERROR);
+#ifdef masking
+                             // TODO: this is required until mesh can accept masked
+                             //       elements on the source side
+                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_IGNORE);
+#else
+                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR);
+#endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -329,14 +342,6 @@ int main(void){
   strcpy(name, "Execute ESMC_FieldRegrid()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //NEX_UTest
-  strcpy(name, "Execute ESMC_RouteHandlePrint()");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_RouteHandlePrint(routehandle);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -355,16 +360,18 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  double x,y;
-  int i;
+  strcpy(name, "Validate regridding");
+  strcpy(failMsg, "Did not return correct analytic values");
   bool correct = true;
   // 2. check destination field against source field
-  for(i=0;i<num_node_d;++i) {
-    x=nodeCoord_d[2*i];
-    y=nodeCoord_d[2*i+1];
+  for(int i=0;i<num_elem_d;++i) {
     // if error is too big report an error
-    if ( abs((long)( dstfieldptr[i]-(x+y+20.0)) ) > 0.0001) {
-      printf("dstfieldptr[%d] = %f\n and it should be = %f\n", i, dstfieldptr[i], x+y+20.0);
+#ifdef masking
+    if ( abs((long)( dstfieldptr[i]-(20.0)) ) > 100) {
+#else
+    if ( abs((long)( dstfieldptr[i]-(20.0)) ) > .0001) {
+#endif
+      printf("dstfieldptr[%d] = %f\n and it should be = %f\n", i, dstfieldptr[i], 20.0);
       correct=false;
     }
   }

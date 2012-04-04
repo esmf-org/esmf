@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.36 2012/03/22 20:26:09 rokuingh Exp $
+!  $Id: ESMF_Field_C.F90,v 1.37 2012/04/04 16:58:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.36 2012/03/22 20:26:09 rokuingh Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.37 2012/04/04 16:58:17 rokuingh Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -558,8 +558,11 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_regridstore"
-  subroutine f_esmf_regridstore(srcField, dstField, routehandle, &
-                                     regridmethod, unmappedaction, rc)
+  subroutine f_esmf_regridstore(srcField, dstField, &
+                                srcMaskValues, len1, smvpresent, &
+                                dstMaskValues, len2, dmvpresent, &
+                                routehandle, &
+                                regridmethod, unmappedaction, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_BaseMod
@@ -570,12 +573,16 @@
 
     implicit none
 
-      type(ESMF_Field)  :: srcField
-      type(ESMF_Field)  :: dstField
-      type(ESMF_RouteHandle)  :: routehandle
-      type(ESMF_RegridMethod_Flag)  :: regridmethod
-      type(ESMF_UnmappedAction_Flag)  :: unmappedaction
-      integer  :: rc 
+      type(ESMF_Field)               :: srcField
+      type(ESMF_Field)               :: dstField
+      integer, intent(in)            :: len1, len2
+      integer, intent(in)            :: smvpresent, dmvpresent
+      integer                        :: srcMaskValues(1:len1), &
+                                        dstMaskValues(1:len2)
+      type(ESMF_RouteHandle)         :: routehandle
+      type(ESMF_RegridMethod_Flag)   :: regridmethod
+      type(ESMF_UnmappedAction_Flag) :: unmappedaction
+      integer                        :: rc 
 
     integer :: localrc
     type(ESMF_RouteHandle) :: l_routehandle
@@ -585,11 +592,31 @@
     localrc = ESMF_RC_NOT_IMPL
 
     ! handle the regridmethod and unmappedaction flags
-
-    call ESMF_FieldRegridStore(srcField, dstField, &
-                               regridmethod=regridmethod, &
-                               unmappedaction=unmappedaction, &
-                               routehandle=l_routehandle, rc=localrc)
+    if (smvpresent == 0 .and. dmvpresent == 0) then
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 regridmethod=regridmethod, &
+                                 unmappedaction=unmappedaction, &
+                                 routehandle=l_routehandle, rc=localrc)
+    else if (smvpresent == 1 .and. dmvpresent == 0) then
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 srcMaskValues=srcMaskValues, &
+                                 regridmethod=regridmethod, &
+                                 unmappedaction=unmappedaction, &
+                                 routehandle=l_routehandle, rc=localrc)
+    else if (smvpresent == 0 .and. dmvpresent == 1) then
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 dstMaskValues=dstMaskValues, &
+                                 regridmethod=regridmethod, &
+                                 unmappedaction=unmappedaction, &
+                                 routehandle=l_routehandle, rc=localrc)
+    else if (smvpresent == 1 .and. dmvpresent == 1) then
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 srcMaskValues=srcMaskValues, &
+                                 dstMaskValues=dstMaskValues, &
+                                 regridmethod=regridmethod, &
+                                 unmappedaction=unmappedaction, &
+                                 routehandle=l_routehandle, rc=localrc)
+    endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  

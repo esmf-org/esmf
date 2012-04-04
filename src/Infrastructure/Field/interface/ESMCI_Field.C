@@ -50,7 +50,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.22 2012/03/22 23:06:59 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.23 2012/04/04 16:58:17 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -112,6 +112,8 @@ void FTN_X(f_esmf_fieldcast)(ESMCI::F90ClassHolder *fieldOut,
   ESMCI::Field *fieldIn, int *rc);
 
 void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
+  int *srcMaskValues, int *len1, int *smv_present,
+  int *dstMaskValues, int *len2, int *dmv_present,
   ESMCI::RouteHandle **routehandlep, ESMC_RegridMethod *regridmethod, 
   ESMC_UnmappedAction *unmappedaction, int *rc);
 
@@ -825,6 +827,8 @@ namespace ESMCI {
 // !ARGUMENTS:
     Field *fieldpsrc, 
     Field *fieldpdst, 
+    ESMC_InterfaceInt *srcMaskValues, 
+    ESMC_InterfaceInt *dstMaskValues, 
     RouteHandle **routehandlep, 
     ESMC_RegridMethod *regridMethod, 
     ESMC_UnmappedAction *unmappedAction) {
@@ -837,11 +841,46 @@ namespace ESMCI {
     int rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
   
-    // TODO: why are fields.ptr and routehandle by reference??  from create.. 
-    FTN_X(f_esmf_regridstore)(fieldpsrc, fieldpdst, routehandlep,
-        regridMethod, unmappedAction, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    int smv_present, dmv_present;
+    bool smv_created, dmv_created;
+    smv_present = 0;
+    dmv_present = 0;
+    smv_created = false;
+    dmv_created = false;
+    ESMCI::InterfaceInt *smv, *dmv;
+
+    if (srcMaskValues != NULL) {
+      smv = (ESMCI::InterfaceInt *)(srcMaskValues->ptr);
+      if(smv->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- srcMaskValues array must be of rank 1", &rc);
+         return ESMC_NULL_POINTER;
+      }
+      smv_present = 1;
+    } else
+      smv = new ESMCI::InterfaceInt();
+
+    if (dstMaskValues != NULL) {
+      dmv = (ESMCI::InterfaceInt *)(dstMaskValues->ptr);
+      if(dmv->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- dstMaskValues array must be of rank 1", &rc);
+         return ESMC_NULL_POINTER;
+      }
+      dmv_present = 1;
+    } else
+      dmv = new ESMCI::InterfaceInt();
+
+    FTN_X(f_esmf_regridstore)(fieldpsrc, fieldpdst, 
+                              smv->array, &smv->extent[0], &smv_present,
+                              dmv->array, &dmv->extent[0], &dmv_present,
+                              routehandlep,
+                              regridMethod, unmappedAction, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+      if (smv_created) delete smv;
+      if (dmv_created) delete dmv;
       return rc;
+    }
 
     rc = ESMF_SUCCESS;
     return rc;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.C,v 1.27 2012/04/02 16:45:01 rokuingh Exp $
+// $Id: ESMCI_MeshCXX.C,v 1.28 2012/04/04 16:58:30 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@ using std::endl;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.27 2012/04/02 16:45:01 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.28 2012/04/04 16:58:30 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -343,21 +343,7 @@ int MeshCXX::addElements(int numElems, int *elemId,
   // Handle element masking
   bool has_elem_mask=false;
   if (elemMask != NULL) { // if masks exist
-#if 0
-    // invalid without InterfaceInt
-    // Error checking
-    if ((*elemMask)->dimCount !=1) {
-      int localrc;
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-                "- elementMask array must be 1D ", &localrc)) throw localrc;
-    }
 
-    if ((*elemMaskII)->extent[0] != num_elems) {
-      int localrc;
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-                "- elementMask array must be the same size as elementIds array ", &localrc)) throw localrc;
-    }
-#endif
     // Context for new fields
     Context ctxt; ctxt.flip();
 
@@ -386,6 +372,8 @@ int MeshCXX::addElements(int numElems, int *elemId,
     // Loop through elements setting values
     // Here we depend on the fact that data index for elements
     // is set as the position in the local array above
+    // rlo:  the data_index was always being set to -1, added a counter
+    int counter = 0;
     Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
       MeshObj &elem = *ei;
@@ -394,11 +382,13 @@ int MeshCXX::addElements(int numElems, int *elemId,
       // Set mask value to input array
       double *mv=elem_mask_val->data(elem);
       int data_index = elem.get_data_index();
-      *mv=(double)elemMask[data_index];
+      //*mv=(double)elemMask[data_index];
+      *mv=(double)elemMask[counter];
 
-        // Init mask to 0.0
+      // Init mask to 0.0
       double *m=elem_mask->data(elem);
       *m=0.0;
+      counter++;
     }
   }
 

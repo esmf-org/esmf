@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.48 2012/03/19 14:19:15 rokuingh Exp $
+// $Id: ESMC_Field.h,v 1.49 2012/04/04 16:58:15 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -482,12 +482,14 @@ int ESMC_FieldPrint(
 // !IROUTINE: ESMC_FieldRegridStore - Precompute a Field regridding operation and return a RouteHandle
 //
 // !INTERFACE:
-  int ESMC_FieldRegridStore( 
-    ESMC_Field srcField,          // in
-    ESMC_Field dstField,          // in
-    ESMC_RouteHandle *routehandle, // inout
-	  enum ESMC_RegridMethod regridmethod,              // in
-	  enum ESMC_UnmappedAction unmappedaction);           // in
+int ESMC_FieldRegridStore( 
+    ESMC_Field srcField,                       // in
+    ESMC_Field dstField,                       // in
+    ESMC_InterfaceInt *srcMaskValues,          // in
+    ESMC_InterfaceInt *dstMaskValues,          // in
+    ESMC_RouteHandle *routehandle,             // inout
+    enum ESMC_RegridMethod regridmethod,       // in
+    enum ESMC_UnmappedAction unmappedaction);  // in
 
 // !RETURN VALUE:
 //   Return code; equals ESMF_SUCCESS if there are no errors.
@@ -505,6 +507,12 @@ int ESMC_FieldPrint(
 //    ESMC\_Field with source data.
 //  \item[dstField]
 //    ESMC\_Field with destination data.
+//  \item[srcMaskValues]
+//    List of values that indicate a source point should be masked out. 
+//    If not specified, no masking will occur.
+//  \item[dstMaskValues]
+//    List of values that indicate a destination point should be masked out. 
+//    If not specified, no masking will occur.
 //  \item[routehandle]
 //    The handle that implements the regrid, to be used in ESMC\_FieldRegrid().
 //  \item[regridmethod]
