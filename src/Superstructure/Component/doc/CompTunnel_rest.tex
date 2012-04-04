@@ -1,0 +1,17 @@
+% $Id: CompTunnel_rest.tex,v 1.1 2012/04/04 15:55:44 theurich Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2012, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+%\subsubsection{Restrictions and Future Work}
+
+\begin{enumerate}
+
+\item {\bf No data flow through States.} The current implementation does not support data flow (Fields, FieldBundles, etc.) between actual and dual Components. The current work-around is to employ user controlled, file based transfer methods. The next implementation phase will offer transparent data flow through the Component Tunnel, where the user code interacts with the States on the actual and dual side in the same way as if they were the same Component.
+
+\end{enumerate}

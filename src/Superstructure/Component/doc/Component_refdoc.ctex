@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.51 2012/01/06 20:18:53 svasquez Exp $
+% $Id: Component_refdoc.ctex,v 1.52 2012/04/04 15:55:44 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -121,6 +121,32 @@
 \input{ESMF_CplComp_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/Component/doc/ESMF_CplComp_fapi}
+#endif
+
+%%%%%%%%%%%%% Fault-tolerant Component Tunnel %%%%%%%%%
+\section{Fault-tolerant Component Tunnel}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{CompTunnel_desc}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/Component/doc/CompTunnel_desc}
+#endif
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{CompTunnel_usage}
+\input{ESMF_CompTunnelEx_fapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/Component/doc/CompTunnel_usage}
+\input{../Superstructure/Component/doc/ESMF_CompTunnelEx_fapi}
+#endif
+
+\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+\input{CompTunnel_rest}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/Component/doc/CompTunnel_rest}
 #endif
 
 %%%%%%% end class sections %%%%%%%%
