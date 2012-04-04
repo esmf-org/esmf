@@ -1,4 +1,4 @@
-! $Id: ESMF_CompTunnelUTest.F90,v 1.12 2012/04/03 22:56:57 theurich Exp $
+! $Id: ESMF_CompTunnelUTest.F90,v 1.13 2012/04/04 00:32:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -84,10 +84,6 @@ module ESMF_CompTunnelUTest_comp_mod
     type(ESMF_Clock):: clock
     integer, intent(out):: rc
     
-    ! local variables
-    character(ESMF_MAXSTR) :: failMsg
-    character(ESMF_MAXSTR) :: name
-
     ! Initialize
     rc = ESMF_SUCCESS
         
@@ -106,10 +102,6 @@ module ESMF_CompTunnelUTest_comp_mod
     type(ESMF_Clock):: clock
     integer, intent(out):: rc
     
-    ! local variables
-    character(ESMF_MAXSTR) :: failMsg
-    character(ESMF_MAXSTR) :: name
-
     ! Initialize
     rc = ESMF_SUCCESS
     
@@ -132,8 +124,6 @@ module ESMF_CompTunnelUTest_comp_mod
     integer, intent(out):: rc
     
     ! local variables
-    character(ESMF_MAXSTR) :: failMsg
-    character(ESMF_MAXSTR) :: name
     type(ESMF_VM)          :: vm 
 
     ! Initialize
@@ -183,8 +173,6 @@ module ESMF_CompTunnelUTest_comp_mod
     integer, intent(out):: rc
     
     ! local variables
-    character(ESMF_MAXSTR) :: failMsg
-    character(ESMF_MAXSTR) :: name
     type(ESMF_VM)          :: vm 
 
     ! Initialize
@@ -249,7 +237,7 @@ program ESMF_CompTunnelUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_CompTunnelUTest.F90,v 1.12 2012/04/03 22:56:57 theurich Exp $'
+    '$Id: ESMF_CompTunnelUTest.F90,v 1.13 2012/04/04 00:32:32 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
