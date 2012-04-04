@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.C,v 1.28 2012/04/04 16:58:30 rokuingh Exp $
+// $Id: ESMCI_MeshCXX.C,v 1.29 2012/04/04 18:11:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@ using std::endl;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.28 2012/04/04 16:58:30 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.29 2012/04/04 18:11:31 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -285,7 +285,7 @@ int MeshCXX::addElements(int numElems, int *elemId,
 
       // The object
       long eid = elemId[e];
-      MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid);
+      MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid, e);
 
       for (int n = 0; n < nnodes; ++n) {
 
@@ -372,8 +372,6 @@ int MeshCXX::addElements(int numElems, int *elemId,
     // Loop through elements setting values
     // Here we depend on the fact that data index for elements
     // is set as the position in the local array above
-    // rlo:  the data_index was always being set to -1, added a counter
-    int counter = 0;
     Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
       MeshObj &elem = *ei;
@@ -382,13 +380,10 @@ int MeshCXX::addElements(int numElems, int *elemId,
       // Set mask value to input array
       double *mv=elem_mask_val->data(elem);
       int data_index = elem.get_data_index();
-      //*mv=(double)elemMask[data_index];
-      *mv=(double)elemMask[counter];
-
+      *mv=(double)elemMask[data_index];
       // Init mask to 0.0
       double *m=elem_mask->data(elem);
       *m=0.0;
-      counter++;
     }
   }
 
