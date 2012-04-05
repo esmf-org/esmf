@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.10.2.3 2012/03/16 22:09:58 oehmke Exp $
+// $Id: ESMCI_MathUtil.C,v 1.10.2.4 2012/04/05 17:09:27 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.10.2.3 2012/03/16 22:09:58 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.10.2.4 2012/04/05 17:09:27 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -596,6 +596,7 @@ void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
   // init flags                                                            
   *left_turn=false;
   *right_turn=false;
+  int n_left = 0, n_right = 0;
 
   // Loop through polygon                    
   for (int i=0; i<num_p; i++) {
@@ -625,14 +626,20 @@ void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
     double dir=DOT_PRODUCT3D(cross,pntip1);
 
     // Interpret direction
-    if (dir > 0.0) {
+    if (dir >= 0.0) {
       *left_turn=true;
+      n_left ++;
     } else if (dir < 0.0) {
       *right_turn=true;
+      n_right ++;
     }
   }
 
-
+  if(n_left == num_p) *left_turn = true;
+  else{
+    if(n_right == num_p) *right_turn = true;
+    else Throw() << "Cannot determine the rotation sense of a concave polygon\n";
+  }
 #undef CROSS_PRODUCT3D
 
 }
