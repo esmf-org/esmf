@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.61 2012/03/22 23:29:33 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.62 2012/04/05 04:35:30 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -51,13 +51,13 @@ program ESMF_RegridWeightGen
       real(ESMF_KIND_R8), pointer :: dstArea(:)
       real(ESMF_KIND_R8), pointer :: dstFrac(:), srcFrac(:)
       character(len=256) :: commandbuf1(5)
-      integer            :: commandbuf2(15)
+      integer            :: commandbuf2(16)
       integer            :: regridScheme
       integer            :: i, bigFac, xpets, ypets, xpart, ypart, xdim, ydim
       logical            :: wasCompacted, largeFileFlag
       integer(ESMF_KIND_I4), pointer:: compactedFactorIndexList(:,:)
       real(ESMF_KIND_R8), pointer :: compactedFactorList(:)
-      logical :: ignoreUnmapped
+      logical 		 :: ignoreUnmapped, userAreaFlag
       type(ESMF_UnmappedAction_Flag) :: unmappedaction
       logical :: srcMissingValue, dstMissingValue
       character(len=80) :: srcvarname, dstvarname
@@ -334,6 +334,25 @@ program ESMF_RegridWeightGen
 	   largeFileFlag = .false.
         end if
 
+        ! --user_area - to use user-defined area for the cells
+ 	call ESMF_UtilGetArgIndex('--user_area', argindex=index, rc=rc)
+	if (index /= -1) then
+	   userAreaFlag = .true.
+	else
+	   userAreaFlag = .false.
+        endif
+
+	! user area only applies to SCRIP and ESMF file formats
+        if (userAreaFlag .and. (srcFileType /= ESMF_FILEFORMAT_SCRIP .and. &
+ 	    srcFileType /= ESMF_FILEFORMAT_ESMFMESH) .and. &
+	    (dstFileType /= ESMF_FILEFORMAT_SCRIP .and. &
+ 	    dstFileType /= ESMF_FILEFORMAT_ESMFMESH)) then
+             write(*,*)
+	     print *, 'ERROR: --user_area is supported only when the source or destination'
+	     print *, '       grid are in SCRIP of ESMF format.'
+	     call ESMF_Finalize(endflag=ESMF_END_ABORT)
+	endif
+
         ! Should I have only PetNO=0 to open the file and find out the size?
          if (srcFileType == ESMF_FILEFORMAT_SCRIP) then
 	   call ESMF_ScripInq(srcfile, grid_rank= srcrank, grid_dims=srcdims, rc=rc)
@@ -456,6 +475,9 @@ program ESMF_RegridWeightGen
 	if (largeFileFlag) then
 	       print *, "  Output weight file in 64bit offset NetCDF file format"
         endif
+	if (userAreaFlag) then
+		print *, "  Use user defined cell area for both the source and destination grids"
+        endif
         write(*,*)
 
         ! Group the command line arguments and broadcast to other PETs
@@ -502,9 +524,9 @@ program ESMF_RegridWeightGen
            endif
         endif
         if (ignoreUnmapped) commandbuf2(15) = 1
+	if (userAreaFlag)   commandbuf2(16) = 1
 
-
-        call ESMF_VMBroadcast(vm, commandbuf2, 15, 0, rc=rc)
+        call ESMF_VMBroadcast(vm, commandbuf2, 16, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
      else
         call ESMF_VMBroadcast(vm, commandbuf1, 256*5, 0, rc=rc)
@@ -515,7 +537,7 @@ program ESMF_RegridWeightGen
         srcMeshName = commandbuf1(4)
 	dstMeshName = commandbuf1(5)
 
-        call ESMF_VMBroadcast(vm, commandbuf2, 15, 0, rc=rc)
+        call ESMF_VMBroadcast(vm, commandbuf2, 16, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	srcFileType%fileformat = commandbuf2(1)
         if (commandbuf2(2)==1) then
@@ -572,6 +594,12 @@ program ESMF_RegridWeightGen
            ignoreUnmapped=.true.
         else
            ignoreUnmapped=.false.
+        endif
+
+        if (commandbuf2(16) == 1) then
+           userAreaFlag=.true.
+        else
+           userAreaFlag=.false.
         endif
      endif
 
@@ -673,7 +701,7 @@ program ESMF_RegridWeightGen
 	if(srcIsReg) then
            srcGrid = ESMF_GridCreate(srcfile, srcFileType, (/xpart,ypart/), &
 			addCornerStagger=addCorners, &
-                        isSphere=srcIsSphere, rc=rc)
+                        isSphere=srcIsSphere, addUserArea =userAreaFlag, rc=rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
           ! call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CORNER, filename="srcGrid", isSphere=.false., &
@@ -1015,7 +1043,8 @@ subroutine computeAreaGrid(grid, petNo, area, regridScheme, rc)
 
 
   ! Get size of Grid
-  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CENTER, minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
+  call ESMF_GridGet(grid, tile=1, staggerloc=ESMF_STAGGERLOC_CENTER, &
+	minIndex=minIndex, maxIndex=maxIndex, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=localrc
       return
