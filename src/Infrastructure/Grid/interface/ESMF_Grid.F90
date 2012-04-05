@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.266 2012/03/30 16:59:09 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.267 2012/04/05 04:22:50 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -308,7 +308,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.266 2012/03/30 16:59:09 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.267 2012/04/05 04:22:50 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5252,7 +5252,7 @@ end subroutine convert_corner_arrays_to_1D
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
      function ESMF_GridCreateFrmNCFile(filename, fileFormat, regDecomp, keywordEnforcer, &
-       decompflag, isSphere, addCornerStagger, addMask, varname, rc)
+       decompflag, isSphere, addCornerStagger, addUserArea, addMask, varname, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmNCFile
@@ -5266,6 +5266,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Decomp_Flag), intent(in),  optional  :: decompflag(:)
     logical,                intent(in),  optional  :: isSphere
     logical,                intent(in),  optional  :: addCornerStagger
+    logical,                intent(in),  optional  :: addUserArea
     logical,                intent(in),  optional  :: addMask
     character(len=*),       intent(in),  optional  :: varname
     integer,                intent(out), optional  :: rc
@@ -5300,8 +5301,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[isSphere]}]
 !      If .true. is a spherical grid, if .false. is regional. Defaults to .true.
 ! \item[{[addCornerStagger]}]
-!      Uses the information in the SCRIP file to add the Corner stagger to 
-!      the Grid. If not specified, defaults to false. 
+!      Uses the information in the grid file to add the Corner stagger to 
+!      the Grid. The coordinates for the corner stagger is required for conservative
+!      regridding. If not specified, defaults to false. 
+! \item[{[addUserArea]}]
+!      If .true., read in the cell area from the Grid file, otherwise, ESMF will calculate it
 ! \item[{[addMask]}]
 !      If .true., generate the mask using the missing\_value attribute defined in 'varname'
 ! \item[{[varname]}]
@@ -5327,7 +5331,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(isSphere)) then
 	localIsSphere = isSphere
     else
-	localIsSphere = .false.
+	localIsSphere = .true.
     endif
 
     if (present(addCornerStagger)) then
@@ -5344,7 +5348,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (fileformat == ESMF_FILEFORMAT_SCRIP) then
 	grid = ESMF_GridCreateFrmScrip(trim(filename), regDecomp, decompflag=localDecompflag, &
-		isSphere=localIsSphere, addCornerStagger=localAddCorner, rc=localrc)
+		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
+		addUserArea=addUserArea, rc=localrc)
     else if (fileformat == ESMF_FILEFORMAT_GRIDSPEC) then
 	if (present(addMask)) then
   	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecomp, decompflag=localDecompflag, &
@@ -5377,7 +5382,7 @@ end function ESMF_GridCreateFrmNCFile
 !IBOP
 ! !IROUTINE: ESMF_GridCreateFrmScrip - Private function that create a Grid from a SRIP Grid File 
   function ESMF_GridCreateFrmScrip(filename, regDecomp, keywordEnforcer, &
-    decompflag, isSphere, addCornerStagger, rc)
+    decompflag, isSphere, addCornerStagger, addUserArea, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmScrip
@@ -5390,6 +5395,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Decomp_Flag), intent(in),  optional  :: decompflag(:)
     logical,                intent(in),  optional  :: isSphere
     logical,                intent(in),  optional  :: addCornerStagger
+    logical,                intent(in),  optional  :: addUserArea
     integer,                intent(out), optional  :: rc
 
 ! !DESCRIPTION:
@@ -5422,6 +5428,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[addCornerStagger]}]
 !      Uses the information in the SCRIP file to add the Corner stagger to 
 !      the Grid. If not specified, defaults to false. 
+! \item[{[addUserArea]}]
+!      If .true., use the cell area defined in the SCRIP file.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -5436,6 +5444,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: DimId, VarId
     real(ESMF_KIND_R8),  allocatable:: coordX(:),coordY(:)
     integer, allocatable:: imask(:), mask2D(:,:)
+    real(ESMF_KIND_R8),  allocatable:: area(:), area2D(:,:)
     real(ESMF_KIND_R8),  allocatable:: cornerX2D(:,:),cornerY2D(:,:)
     real(ESMF_KIND_R8),  allocatable:: cornerX(:),cornerY(:)
     type(ESMF_Grid)  :: grid
@@ -5449,6 +5458,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localrc
     integer :: PetNo, PetCnt
     logical :: localAddCornerStagger
+    logical :: localAddUserArea
     logical :: localIsSphere
     integer :: grid_corners
     integer :: maxIndex(2)
@@ -5486,6 +5496,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         localIsSphere=isSphere
     else
         localIsSphere=.true.
+    endif
+
+    if (present(addUserArea)) then
+        localAddUserArea = addUserArea
+    else
+        localAddUserArea =.false.
     endif
 
     ! Get the grid rank and dimensions from the SCRIP file on PET 0, broadcast the
@@ -5566,7 +5582,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              ESMF_CONTEXT, rcToReturn=rc)) return
 
           deallocate(cornerX2D, cornerY2D)          
-     else ! get just centers
+      else ! get just centers
           allocate(coordX(totalpoints), coordY(totalpoints))
           allocate(imask(totalpoints),stat=localrc)
           if (ESMF_LogFoundAllocError(localrc, msg="Allocating imask", &
@@ -5692,7 +5708,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (PetNo == 0) then
           deallocate(corner2D, cornerX, cornerY)
        endif
-    endif
+     endif
+
+     if (localAddUserArea) then
+        call ESMF_GridAddItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+	     itemflag=ESMF_GRIDITEM_AREA, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER,  &
+	     itemflag=ESMF_GRIDITEM_AREA, array = array, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+ 	if (PetNo == 0) then
+	  allocate(area(totalpoints), area2D(dims(1), dims(2)), stat=localrc)
+          if (ESMF_LogFoundAllocError(localrc, msg="Allocating imask", &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_ScripGetVar(filename, grid_area=area, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+               ESMF_CONTEXT, rcToReturn=rc)) return
+     	  area2D = RESHAPE(area, (/dims(1), dims(2)/))
+        endif
+	call ESMF_ArrayScatter(array, area2D, rootPet=0, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+        if (PetNo == 0) deallocate(area, area2D)
+     endif
 
     ESMF_GridCreateFrmScrip = grid
 
