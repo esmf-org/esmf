@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseUTest.F90,v 1.39 2012/01/06 20:15:58 svasquez Exp $
+! $Id: ESMF_BaseUTest.F90,v 1.40 2012/04/05 00:29:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BaseUTest.F90,v 1.39 2012/01/06 20:15:58 svasquez Exp $'
+      '$Id: ESMF_BaseUTest.F90,v 1.40 2012/04/05 00:29:05 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -60,11 +60,11 @@
       character(ESMF_MAXSTR) :: validate_options
       character(ESMF_MAXSTR) :: name_set, name_get
       ! instantiate a Base 
-      type(ESMF_Base) :: base1
+      type(ESMF_Base) :: base1, base2
       type(ESMF_AttReconcileFlag) :: attreconflag
       character, allocatable   :: buffer(:)
       integer :: buff_size
-      integer :: offset
+      integer :: offset1, offset2, offset3
 #endif
 
 !-------------------------------------------------------------------------------
@@ -221,30 +221,62 @@
       attreconflag = ESMF_ATTRECONCILE_OFF
       buff_size = 1
       allocate (buffer(buff_size))
-      offset = 0
-      call c_ESMC_BaseSerialize (base, buffer, buff_size, offset, &
-        attreconflag, ESMF_INQUIREONLY, rc)
-      write(name, *) "c_ESMC_BaseSerialize - inquire only option"
-      write(failMsg, *) "rc =", rc, ", offset =", offset
+      offset1 = 0
+      call ESMF_BaseSerialize (base, buffer, offset1, &
+          attreconflag, ESMF_INQUIREONLY, rc=rc)
+      write(name, *) "ESMF_BaseSerialize - inquire only option"
+      write(failMsg, *) "rc =", rc, ", offset =", offset1
       call ESMF_Test((rc == ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      print *, '  offset returned =', offset, ' bytes'
+      print *, '  offset returned =', offset1, ' bytes'
       deallocate (buffer)
 
       !EX_UTest
-      ! test doing a serialize
+      ! test doing a serialize for real.
       ! WARNING: This is testing an INTERNAL method.  It is NOT
       ! part of the supported ESMF user API!
-      buff_size = offset ! from previous inquiry
+      buff_size = offset1 ! from previous inquiry
       allocate (buffer(buff_size))
-      offset = 0
-      call c_ESMC_BaseSerialize (base, buffer, buff_size, offset, &
-        attreconflag, ESMF_NOINQUIRE, rc)
-      write(name, *) "c_ESMC_BaseSerialize - perform serialization"
-      write(failMsg, *) "rc =", rc, ", offset =", offset
+      offset2 = 0
+      call ESMF_BaseSerialize (base, buffer, offset2, &
+          attreconflag, ESMF_NOINQUIRE, rc)
+      write(name, *) "ESMF_BaseSerialize - perform serialization"
+      write(failMsg, *) "rc =", rc, ", offset =", offset2
       call ESMF_Test((rc == ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      print *, '  offset returned =', offset, ' bytes'
+      print *, '  offset returned =', offset2, ' bytes'
+
+      !EX_UTest
+      ! Compare inquired size with actual size.  Note that the two
+      ! sizes will not be equal because the inquire option currently
+      ! overestimates the space needed - which is ok.
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Compare calculated buffer size with actual size"
+      write(failMsg, *) 'offsets', offset1, ' >', offset2
+      call ESMF_Test(offset1 >= offset2, &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! test doing a serialize for real.
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      offset3 = 0
+      base2 = ESMF_BaseDeserialize (buffer, offset3, &
+          attreconflag, rc)
+      write(name, *) "ESMF_BaseDeserialize - perform deserialization"
+      write(failMsg, *) "rc =", rc, ", offset =", offset2
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Compare calculated serialed offset with actual deserialed offset.
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Compare serialize/deserialize offsets"
+      write(failMsg, *) 'offset', offset2, ' /=', offset3
+      call ESMF_Test(offset2 == offset3, &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! END of tests of INTERNAL methods.
 

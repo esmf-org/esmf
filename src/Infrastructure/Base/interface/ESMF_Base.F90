@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.152 2012/01/06 20:15:55 svasquez Exp $
+! $Id: ESMF_Base.F90,v 1.153 2012/04/05 00:29:01 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -106,6 +106,9 @@ module ESMF_BaseMod
        public ESMF_BaseGetInit
        public ESMF_BaseSetInitCreated
 
+       public ESMF_BaseSerialize
+       public ESMF_BaseDeserialize
+
 !   Virtual methods to be defined by derived classes
 !      public ESMF_Read
 !      public ESMF_Write
@@ -127,7 +130,7 @@ module ESMF_BaseMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.152 2012/01/06 20:15:55 svasquez Exp $'
+               '$Id: ESMF_Base.F90,v 1.153 2012/04/05 00:29:01 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -740,6 +743,128 @@ module ESMF_BaseMod
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_BaseSetInitCreated
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseSerialize"
+!BOPI
+! !IROUTINE: ESMF_BaseSerialize - serialize into a byte stream
+!
+! !INTERFACE:
+  subroutine ESMF_BaseSerialize(base, buffer, offset, &
+      attreconflag, inquireflag, rc) 
+!
+! !ARGUMENTS:
+    type(ESMF_Base), intent(in)    :: base
+    character,       intent(inout) :: buffer(:)
+    integer,         intent(inout) :: offset
+    type(ESMF_AttReconcileFlag), intent(in) :: attreconflag
+    type(ESMF_InquireFlag),      intent(in) :: inquireflag
+    integer,         intent(out), optional  :: rc 
+!
+! !DESCRIPTION:
+!      Takes an {\tt ESMF\_Base} object and adds all the information needed
+!      to save the information to a file or recreate the object based on this
+!      information.   Expected to be used by {\tt ESMF\_StateReconcile()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [base]
+!           {\tt ESMF\_Base} object to be serialized.
+!     \item [buffer]
+!           Data buffer which will hold the serialized information.
+!     \item [offset]
+!           Current write offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           available byte in the buffer.  Note that the offset might be
+!           overestimated when the ESMF\_INQUIREONLY option is used.
+!     \item[attreconflag]
+!           Flag to tell if Attribute serialization is to be done
+!     \item[inquireflag]
+!           Flag to tell if serialization is to be done (ESMF\_NOINQUIRE)
+!           or if this is simply a size inquiry (ESMF\_INQUIREONLY)
+!     \item [rc]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+    integer :: localrc
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    call c_ESMC_BaseSerialize(base, buffer, size (buffer), offset, &
+        attreconflag, inquireflag, localrc)
+    if (ESMF_LogFoundError(localrc, &
+        msg="Top level Base serialize", &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present (rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_BaseSerialize
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_BaseDeserialize"
+!BOPI
+! !IROUTINE: ESMF_BaseDeserialize - Deserialize from a buffer
+!
+! !INTERFACE:
+  function ESMF_BaseDeserialize (buffer, offset, attreconflag, rc) 
+!
+! !RETURN VALUE:
+    type(ESMF_Base) :: ESMF_BaseDeserialize
+!
+! !ARGUMENTS:
+    character,       intent(in)    :: buffer(:)
+    integer,         intent(inout) :: offset
+    type(ESMF_AttReconcileFlag), intent(in) :: attreconflag
+    integer,         intent(out), optional  :: rc
+!
+! !DESCRIPTION:
+!      Recreates a {\tt ESMF\_Base} object from a serialized byte stream.
+!      Expected to be used by {\tt ESMF\_StateReconcile()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [buffer]
+!           Data buffer of serialized information.
+!     \item [offset]
+!           Current read offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           available byte in the buffer.
+!     \item[attreconflag]
+!           Flag to tell if Attribute deserialization is to be done
+!     \item [rc]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+    integer :: localrc
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    call c_ESMC_BaseDeserialize(ESMF_BaseDeserialize,  &
+        buffer, offset, &
+        attreconflag, localrc)
+    if (ESMF_LogFoundError(localrc, &
+        msg="Top level Base Deserialize", &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present (rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_BaseDeserialize
 !------------------------------------------------------------------------------
 
 
