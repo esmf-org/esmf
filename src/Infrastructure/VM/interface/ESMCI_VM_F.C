@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM_F.C,v 1.26 2012/04/02 19:21:49 w6ws Exp $
+// $Id: ESMCI_VM_F.C,v 1.27 2012/04/05 04:30:57 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -120,9 +120,11 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_vmallgatherv)(ESMCI::VM **vm, void *sendData, int *sendCount,
-    void *recvData, int *recvCounts, int *recvOffsets, ESMC_TypeKind *dtk, 
-    int *rc){
+  void FTN_X(c_esmc_vmallgatherv)(ESMCI::VM **vm,
+    void *sendData, int *sendCount,
+    void *recvData, int *recvCounts, int *recvOffsets,
+    ESMC_TypeKind *dtk, int *rc,
+    ESMCI_FortranStrLenArg sendData_len, ESMCI_FortranStrLenArg recvData_len){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmallgatherv()"
     // Initialize return code; assume routine not implemented
@@ -140,6 +142,12 @@ extern "C" {
       break;
     case ESMC_TYPEKIND_R8:
       vmt = vmR8;
+      break;
+    case ESMC_TYPEKIND_CHARACTER:
+      if (sendData_len == 1 && recvData_len == 1)
+        vmt = vmBYTE;
+      else
+        localrc = ESMF_RC_ARG_SIZE;  // TODO: fix this
       break;
     default:
       localrc = ESMC_RC_ARG_BAD;
@@ -260,7 +268,10 @@ extern "C" {
       vmt = vmR8;
       break;
     case ESMC_TYPEKIND_CHARACTER:
-      vmt = vmBYTE;
+      if (sendData_len == 1 && recvData_len == 1)
+        vmt = vmBYTE;
+      else
+        localrc = ESMF_RC_ARG_SIZE;  // TODO: fix this
       break;
     default:
       localrc = ESMC_RC_ARG_BAD;

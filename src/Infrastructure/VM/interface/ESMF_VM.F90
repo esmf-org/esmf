@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.161 2012/04/02 19:21:49 w6ws Exp $
+! $Id: ESMF_VM.F90,v 1.162 2012/04/05 04:30:57 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -189,7 +189,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.161 2012/04/02 19:21:49 w6ws Exp $"
+      "$Id: ESMF_VM.F90,v 1.162 2012/04/05 04:30:57 w6ws Exp $"
 
 !==============================================================================
 
@@ -250,6 +250,7 @@ module ESMF_VMMod
       module procedure ESMF_VMAllGatherVI4
       module procedure ESMF_VMAllGatherVR4
       module procedure ESMF_VMAllGatherVR8
+      module procedure ESMF_VMAllGatherVCharArray
       module procedure ESMF_VMAllGatherVVMId
 
 ! !DESCRIPTION: 
@@ -1638,6 +1639,68 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMAllGatherVR8
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllGatherVCharArray()"
+!BOPI
+! !IROUTINE: ESMF_VMAllGatherV - AllGatherV CHARACTER array
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllGatherV()
+  subroutine ESMF_VMAllGatherVCharArray(vm, sendData, sendCount, recvData, &
+    recvCounts, recvOffsets, keywordEnforcer, syncflag, commhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),              intent(in)            :: vm
+    character(*),       target, intent(in)            :: sendData(:)
+    integer,                    intent(in)            :: sendCount
+    character(*),       target, intent(out)           :: recvData(:)
+    integer,                    intent(in)            :: recvCounts(:)
+    integer,                    intent(in)            :: recvOffsets(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Sync_Flag),       intent(in),  optional :: syncflag
+    type(ESMF_CommHandle),      intent(out), optional :: commhandle
+    integer,                    intent(out), optional :: rc
+!         
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+
+    ! Initialize commhandle to an invalid pointer
+    if (present(commhandle)) commhandle%this = ESMF_NULL_POINTER
+
+    ! Not implemented features
+    if (present(syncflag)) then
+      if (syncflag == ESMF_SYNC_NONBLOCKING) then
+        call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
+          msg="- non-blocking mode not yet implemented", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface.
+    call c_ESMC_VMAllGatherV(vm,  &
+        sendData, sendCount, &
+        recvData, recvCounts(1), recvOffsets(1),  &
+        ESMF_TYPEKIND_CHARACTER, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMAllGatherVCharArray
 !------------------------------------------------------------------------------
 
 
