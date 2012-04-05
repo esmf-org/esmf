@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.86 2012/03/02 23:41:11 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.87 2012/04/05 04:37:44 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.86 2012/03/02 23:41:11 oehmke Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.87 2012/04/05 04:37:44 peggyli Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -172,7 +172,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.86 2012/03/02 23:41:11 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.87 2012/04/05 04:37:44 peggyli Exp $'
 
 !==============================================================================
 ! 
@@ -1160,6 +1160,7 @@ end function ESMF_MeshCreateFromFile
     integer, allocatable                :: ElemId(:)
     integer, allocatable                :: ElemType(:)
     integer, allocatable                :: ElemConn(:)
+    integer, pointer                    :: elementMask(:), ElemMask(:)
     integer, allocatable                :: LocalElmTable(:)
     integer                             :: sndBuf(1)
     type(ESMF_VM)                       :: vm
@@ -1179,6 +1180,7 @@ end function ESMF_MeshCreateFromFile
     type(ESMF_FileFormat_Flag)          :: filetypelocal
     integer                             :: coordDim
     logical                             :: convertToDeg
+    logical                             :: haveMask
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1212,7 +1214,7 @@ end function ESMF_MeshCreateFromFile
  
     if (filetypelocal == ESMF_FILEFORMAT_ESMFMESH) then
        ! Get coordDim
-       call ESMF_EsmfInq(filename,coordDim=coordDim, rc=localrc)
+       call ESMF_EsmfInq(filename,coordDim=coordDim, haveMask=haveMask, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1224,8 +1226,15 @@ end function ESMF_MeshCreateFromFile
        endif
 
        ! Get information from file
-       call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, &
+       if (haveMask) then
+           call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, &
+                                 startElmt, elementMask=elementMask, &
+	 			 convertToDeg=convertToDeg, rc=localrc)
+       else
+           call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, &
                                  startElmt, convertToDeg=convertToDeg, rc=localrc)
+       endif
+
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (filetypelocal == ESMF_FILEFORMAT_UGRID) then
@@ -1414,6 +1423,7 @@ end function ESMF_MeshCreateFromFile
     allocate (ElemId(TotalElements))
     allocate (ElemType(TotalElements))
     allocate (ElemConn(TotalConnects))
+    if (haveMask) allocate (ElemMask(TotalElements))
 
     ! figure out if there are split elements globally
     !! Fake logical allreduce .or. with MAX
@@ -1458,6 +1468,7 @@ end function ESMF_MeshCreateFromFile
                 ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
              end do
              if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
+	     if (haveMask) ElemMask(ElemNo) = elementMask(j)
              ElemNo=ElemNo+1
              ConnNo=ConnNo+3
           elseif (elmtNum(j)==4) then
@@ -1467,6 +1478,7 @@ end function ESMF_MeshCreateFromFile
                 ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
              end do
              if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
+	     if (haveMask) ElemMask(ElemNo) = elementMask(j)
              ElemNo=ElemNo+1
              ConnNo=ConnNo+4
           else
@@ -1516,6 +1528,7 @@ end function ESMF_MeshCreateFromFile
                 ElemConn (ConnNo+2) = NodeUsed(elementConn(triInd(ti+2)+1,j))
                 ElemConn (ConnNo+3) = NodeUsed(elementConn(triInd(ti+3)+1,j))
                 if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
+ 	        if (haveMask) ElemMask(ElemNo) = elementMask(j)
                 ElemNo=ElemNo+1
                 ConnNo=ConnNo+3
                 ti=ti+3
@@ -1539,6 +1552,7 @@ end function ESMF_MeshCreateFromFile
              ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
           end do
           ElemId(ElemNo) = myStartElmt+ElemNo
+          if (haveMask) ElemMask(ElemNo) = elementMask(j)
           ElemNo=ElemNo+1
           ConnNo=ConnNo+elmtNum(j)
        end do
@@ -1551,7 +1565,12 @@ end function ESMF_MeshCreateFromFile
     end if
 
     ! Add elements
-    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, rc=localrc)
+    if (haveMask) then
+	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+			elementMask=ElemMask, rc=localrc)
+    else
+	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, rc=localrc)
+    end if
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1564,7 +1583,7 @@ end function ESMF_MeshCreateFromFile
 
     deallocate(NodeUsed, NodeId, NodeCoords1D, NodeOwners, NodeOwners1)
     deallocate(ElemId, ElemType, ElemConn)
-
+    if (haveMask) deallocate(elementMask, ElemMask)
     ESMF_MeshCreateFromUnstruct = Mesh
 
     if (present(rc)) rc=ESMF_SUCCESS
