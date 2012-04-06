@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.106 2012/03/30 16:59:15 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.107 2012/04/06 00:04:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -120,7 +120,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.106 2012/03/30 16:59:15 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.107 2012/04/06 00:04:47 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -5385,7 +5385,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           msg="Attribute names starting with 'ESMF:' are not allowed!", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
-      endif @\ 
+      endif @\
 @\
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
@@ -6429,12 +6429,9 @@ AttAddPackCustomMacro(ESMF_Grid, grid, grid)
 AttAddPackCustomNMacro(ESMF_Grid, grid, grid)
 AttAddPackCustomN1Macro(ESMF_Grid, grid, grid)
 
-#TypeKind3DeclarationMacro(AttGet, ESMF_Grid, grid, grid)
 TypeKind3ADeclarationMacro(AttGet, ESMF_Grid, grid, grid)
 TypeKind3BDeclarationMacro(AttGet, ESMF_Grid, grid, grid)
-#AttGetLogicalMacro(ESMF_Grid, grid, grid)
 AttGetLogicalBMacro(ESMF_Grid, grid, grid)
-#AttGetCharacterMacro(ESMF_Grid, grid, grid)
 AttGetCharacterBMacro(ESMF_Grid, grid, grid)
 
 GetCountNameNumberMacro(ESMF_Grid, grid, grid)
