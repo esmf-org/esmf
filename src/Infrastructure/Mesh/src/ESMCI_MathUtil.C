@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.20 2012/04/05 20:27:55 feiliu Exp $
+// $Id: ESMCI_MathUtil.C,v 1.21 2012/04/06 22:23:23 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.20 2012/04/05 20:27:55 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.21 2012/04/06 22:23:23 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -688,6 +688,7 @@ void rot_2D_2D_cart(int num_p, double *p, bool *left_turn, bool *right_turn) {
 
   // Define Cross product                                                                                                                    
 #define CROSS_PRODUCT2D(out,a,b) out=a[0]*b[1]-a[1]*b[0];
+#define TOL 1.0E-17
 
   // init flags                                                            
   *left_turn=false;
@@ -714,16 +715,20 @@ void rot_2D_2D_cart(int num_p, double *p, bool *left_turn, bool *right_turn) {
     double cross;
     CROSS_PRODUCT2D(cross,v12,v10);
 
-    if (cross > 0.0) {
+    // Interpret direction
+    if (cross > TOL) {
       *left_turn=true;
-    } else if (cross < 0.0) {
+    } else if (cross < -TOL) {
       *right_turn=true;
     }
   }
 
+  // If no turns default to left
+  if (!(*right_turn) && !(*left_turn)) *left_turn=true;
+
 
 #undef CROSS_PRODUCT2D
-
+#undef TOL
 }
 
 
@@ -735,11 +740,11 @@ void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
   // Define Cross product                                                                                                                   
 #define CROSS_PRODUCT3D(out,a,b) out[0]=a[1]*b[2]-a[2]*b[1]; out[1]=a[2]*b[0]-a[0]*b[2]; out[2]=a[0]*b[1]-a[1]*b[0];
 #define DOT_PRODUCT3D(a,b) a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+#define TOL 1.0E-17
 
   // init flags                                                            
   *left_turn=false;
   *right_turn=false;
-  int n_left = 0, n_right = 0, n_und=0;
 
   // Loop through polygon                    
   for (int i=0; i<num_p; i++) {
@@ -769,23 +774,18 @@ void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
     double dir=DOT_PRODUCT3D(cross,pntip1);
 
     // Interpret direction
-    if (dir > 1.e-20) {
+    if (dir > TOL) {
       *left_turn=true;
-      n_left ++;
-    } else {
-      if (dir < -1.e-20) {
-        *right_turn=true;
-        n_right ++;
-      } else n_und ++;
+    } else if (dir < -TOL) {
+      *right_turn=true;
     }
   }
 
-  if( (n_left+n_und) == num_p) *left_turn = true;
-  else{
-    if((n_right+n_und) == num_p) *right_turn = true;
-    else Throw() << "Cannot determine the rotation sense of a concave polygon\n";
-  }
+  // If no turns default to left
+  if (!(*right_turn) && !(*left_turn)) *left_turn=true;
+
 #undef CROSS_PRODUCT3D
+#undef TOL
 
 }
 
