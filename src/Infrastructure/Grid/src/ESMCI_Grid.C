@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.133 2012/03/27 20:46:59 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.134 2012/04/06 18:30:09 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.133 2012/03/27 20:46:59 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.134 2012/04/06 18:30:09 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -6326,6 +6326,8 @@ int construct(
         k=j*localArbIndexCount+i;
 	localArbIndex[i][j]=localArbIndexArg->array[k];
       }
+  } else {
+    localArbIndex = ESMC_NULL_POINTER;
   }
 
   distDim=ESMC_NULL_POINTER;
