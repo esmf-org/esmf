@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.10.2.5 2012/04/05 17:15:22 feiliu Exp $
+// $Id: ESMCI_MathUtil.C,v 1.10.2.6 2012/04/06 22:34:00 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.10.2.5 2012/04/05 17:15:22 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.10.2.6 2012/04/06 22:34:00 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -571,13 +571,17 @@ void rot_2D_2D_cart(int num_p, double *p, bool *left_turn, bool *right_turn) {
     double cross;
     CROSS_PRODUCT2D(cross,v12,v10);
 
-    if (cross > 0.0) {
+    // Interpret direction
+    if (cross > 1.e-17) {
       *left_turn=true;
-    } else if (cross < 0.0) {
+    } else if (cross < -1.e-17) {
       *right_turn=true;
-    }
+    } 
   }
 
+
+  // if neither make default left
+  if (!(*right_turn) && !(*left_turn)) *left_turn=true;
 
 #undef CROSS_PRODUCT2D
 
@@ -596,7 +600,6 @@ void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
   // init flags                                                            
   *left_turn=false;
   *right_turn=false;
-  int n_left = 0, n_right = 0, n_und=0;
 
   // Loop through polygon                    
   for (int i=0; i<num_p; i++) {
@@ -626,22 +629,16 @@ void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
     double dir=DOT_PRODUCT3D(cross,pntip1);
 
     // Interpret direction
-    if (dir > 1.e-20) {
+    if (dir > 1.e-17) {
       *left_turn=true;
-      n_left ++;
-    } else {
-      if (dir < -1.e-20) {
-        *right_turn=true;
-        n_right ++;
-      } else n_und ++;
-    }
+    } else if (dir < -1.e-17) {
+      *right_turn=true;
+    } 
   }
 
-  if( (n_left+n_und) == num_p) *left_turn = true;
-  else{
-    if((n_right+n_und) == num_p) *right_turn = true;
-    else Throw() << "Cannot determine the rotation sense of a concave polygon\n";
-  }
+  // if neither make default left
+  if (!(*right_turn) && !(*left_turn)) *left_turn=true;
+
 #undef CROSS_PRODUCT3D
 
 }
