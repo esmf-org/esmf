@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.29.2.1 2012/01/06 20:42:13 svasquez Exp $
+! $Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.29.2.2 2012/04/06 05:47:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayArbIdxSMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.29.2.1 2012/01/06 20:42:13 svasquez Exp $'
+    '$Id: ESMF_ArrayArbIdxSMMUTest.F90,v 1.29.2.2 2012/04/06 05:47:46 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -536,7 +536,11 @@ program ESMF_ArrayArbIdxSMMUTest
     ! There is always a slight chance that finishedflag comes back with .false.
     ! even at this point (execution effects). But under normal circumstances
     ! one expects the exchange to be finished here.
-    if (.not. finishedflag) evalflag = .false.
+    !
+    ! Turns out that the PET 0 test really fails on a somewhat frequent basis
+    ! on some machines. Since it is not really deterministic I am taking it out
+    ! now:
+    !if (.not. finishedflag) evalflag = .false.
   else if (localPet==1 .or. localPet==5) then
     ! PETs 1 and 5 depend on data from PET 0, and should return with 
     ! finishedflag .false. because PET 0 is still blocked by the barrier,
