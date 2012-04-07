@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.116 2012/04/06 21:51:34 w6ws Exp $
+! $Id: ESMF_LogErr.F90,v 1.117 2012/04/07 04:17:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -1623,8 +1623,9 @@ end subroutine ESMF_LogOpen
 !            Default is to log all error codes. 
 !      \item [{[trace]}]
 !	     \begin{sloppypar}
-!            If set to {\tt .true.}, calls such as {\tt ESMF\_LogFoundError,
-!            ESMF\_LogFoundAllocError, and ESMF\_LogFoundDeallocError
+!            If set to {\tt .true.}, calls such as {\tt ESMF\_LogFoundError()},
+!            {\tt ESMF\_LogFoundAllocError()}, and 
+!            {\tt ESMF\_LogFoundDeallocError()}
 !            will be logged in the default log files.  This option is intended
 !            to be used as a tool for debugging and program flow tracing
 !            within the ESMF library. Voluminous output may appear in the log,
