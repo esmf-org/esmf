@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.103 2012/03/27 20:46:56 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.104 2012/04/09 19:00:40 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.103 2012/03/27 20:46:56 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.104 2012/04/09 19:00:40 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1352,11 +1352,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRegridGetArea"
 
-!BOPI
-! !IROUTINE: ESMF_FieldRegridGetArea - Get the integration area
+!BOP
+! !IROUTINE: ESMF_FieldRegridGetArea - Get the area of the cells used for conservative interpolation
 !
 ! !INTERFACE:
-  !   Private name; call using ESMF_FieldRegridGetArea()
       subroutine ESMF_FieldRegridGetArea(areaField, rc)
 !
 ! !RETURN VALUE:
@@ -1364,23 +1363,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout)                 :: areaField
       integer, intent(out), optional                  :: rc 
+
 !
 ! !DESCRIPTION:
+!     This subroutine gets the area of the cells used for conservative interpolation for the grid object 
+!     associated with {\tt areaField} and puts them into {\tt areaField}. If created on a 2D Grid, it must 
+!     be built on the {\tt ESMF\_STAGGERLOC\_CENTER} stagger location. 
+!     If created on a 3D Grid, it must be built on the {\tt ESMF\_STAGGERLOC\_CENTER\_VCENTER} stagger 
+!     location. If created on a Mesh, it must be built on the {\tt ESMF\_MESHLOC\_ELEMENT} mesh location. 
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [Field]
-!           The Field.
-!     \item [{[regridScheme]}]
-!           Whether to convert to spherical coordinates 
-!           ({\tt ESMF\_REGRID\_SCHEME\_FULL3D}), 
-!           or to leave in native coordinates 
-!           ({\tt ESMF\_REGRID\_SCHEME\_NATIVE}). 
+!     \item [areaField]
+!           The Field to put the area values in. 
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
         integer :: localrc
         integer              :: lregridScheme
         type(ESMF_GeomType_Flag)  :: geomtype
