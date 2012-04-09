@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldRegridUTest.C,v 1.14 2012/04/04 16:58:22 rokuingh Exp $
+// $Id: ESMC_FieldRegridUTest.C,v 1.15 2012/04/09 23:10:17 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -370,6 +370,8 @@ int main(void){
   }
   ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  free(maskValues);
 
   //----------------------------------------------------------------------------
   //NEX_UTest

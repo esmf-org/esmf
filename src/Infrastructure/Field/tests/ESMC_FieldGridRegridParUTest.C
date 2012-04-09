@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegridParUTest.C,v 1.4 2012/04/04 16:58:22 rokuingh Exp $
+// $Id: ESMC_FieldGridRegridParUTest.C,v 1.5 2012/04/09 23:10:17 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -20,9 +20,11 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
+#define corner
+
 //==============================================================================
 //BOP
-// !PROGRAM: ESMC_FieldRegridUTest - Check ESMC_FieldRegrid functionality
+// !PROGRAM: ESMC_FieldRegridParUTest - Check ESMC_FieldRegrid functionality
 //
 // !DESCRIPTION:
 //
@@ -50,7 +52,6 @@ int main(void){
   int dimcount = 2;
   int *maxIndex;
   ESMC_InterfaceInt i_maxIndex;
-  int p;
 
   // Mesh variables
   int pdim=2;
@@ -58,6 +59,10 @@ int main(void){
   ESMC_Mesh dstmesh;
   int num_elem, num_node;
 
+
+  // computation variables
+  int p;
+  double x, y, exact, tol;
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -82,12 +87,12 @@ int main(void){
   // Create a Grid
   double ub_x, lb_x, max_x, min_x, cellwidth_x, cellcenter_x;
   double ub_y, lb_y, max_y, min_y, cellwidth_y, cellcenter_y;
-  ub_x = 9;
-  ub_y = 9;
-  lb_x = 1;
-  lb_y = 1;
-  max_x = 4;
-  max_y = 4;
+  ub_x = 21;
+  ub_y = 21;
+  lb_x = 0;
+  lb_y = 0;
+  max_x = 21;
+  max_y = 21;
   min_x = 0;
   min_y = 0;
   cellwidth_x = (max_x-min_x)/(ub_x-lb_x);
@@ -123,49 +128,99 @@ int main(void){
   strcpy(name, "GridAddCoord");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_GridAddCoord(srcgrid, ESMC_STAGGERLOC_CENTER);
+  rc = ESMC_GridAddCoord(srcgrid, ESMC_STAGGERLOC_CORNER);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  // CORNERS
 
   //----------------------------------------------------------------------------
   //EX_disable_UTest_Multi_Proc_Only
   // get and fill first coord array and computational bounds
-  int *exLBound = (int *)malloc(dimcount*sizeof(int));
-  int *exUBound = (int *)malloc(dimcount*sizeof(int));
+  int *exLB_corner = (int *)malloc(dimcount*sizeof(int));
+  int *exUB_corner = (int *)malloc(dimcount*sizeof(int));
 
   strcpy(name, "GridGetCoord - X");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  double *gridXCoord = (double *)ESMC_GridGetCoord(srcgrid, 1,
-                                                   ESMC_STAGGERLOC_CENTER,
-                                                   exLBound, exUBound, &rc);
+  double *gridXCorner = (double *)ESMC_GridGetCoord(srcgrid, 1,
+                                                    ESMC_STAGGERLOC_CORNER,
+                                                    exLB_corner, exUB_corner, &rc);
 
   p = 0;
-  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
-    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      gridXCoord[p]=(double)(i0)*cellwidth_x - cellcenter_x;
-      /*printf("PET%d - set gridXCoord[%d] = %f (%f)\n", localPet, p, 
-        (double)(i0)*cellwidth_x - cellcenter_x, gridXCoord[p]);*/
+  for (int i1=exLB_corner[1]; i1<=exUB_corner[1]; ++i1) {
+    for (int i0=exLB_corner[0]; i0<=exUB_corner[0]; ++i0) {
+      gridXCorner[p]=(double)(i0-1)*cellwidth_x;
       ++p;
     }
   }
 
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+  printf("exLB_corner = [%d,%d]\n", exLB_corner[0], exLB_corner[1]);
+  printf("exUB_corner = [%d,%d]\n", exUB_corner[0], exUB_corner[1]);
 
   //----------------------------------------------------------------------------
   //EX_disable_UTest_Multi_Proc_Only
   // get and fill second coord array
   strcpy(name, "GridGetCoord - Y");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  double *gridYCoord = (double *)ESMC_GridGetCoord(srcgrid, 2,
-                                                   ESMC_STAGGERLOC_CENTER,
-                                                   NULL, NULL, &rc);
+  double *gridYCorner = (double *)ESMC_GridGetCoord(srcgrid, 2,
+                                                    ESMC_STAGGERLOC_CORNER,
+                                                    NULL, NULL, &rc);
 
   p = 0;
-  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
-    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      gridYCoord[p]=(double)(i1)*cellwidth_y - cellcenter_y;
-      /*printf("PET%d - set gridYCoord[%d] = %f (%f)\n", localPet, p, 
-        (double)(i1)*cellwidth_y - cellcenter_y, gridYCoord[p]);*/
+  for (int i1=exLB_corner[1]; i1<=exUB_corner[1]; ++i1) {
+    for (int i0=exLB_corner[0]; i0<=exUB_corner[0]; ++i0) {
+      gridYCorner[p]=(double)(i1-1)*cellwidth_y;
+      ++p;
+    }
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  // CENTERS
+
+  //----------------------------------------------------------------------------
+  //EX_disable_UTest_Multi_Proc_Only
+  // get and fill first coord array and computational bounds
+  int *exLB_center = (int *)malloc(dimcount*sizeof(int));
+  int *exUB_center = (int *)malloc(dimcount*sizeof(int));
+
+  strcpy(name, "GridGetCoord - X");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  double *gridXCenter = (double *)ESMC_GridGetCoord(srcgrid, 1,
+                                                    ESMC_STAGGERLOC_CENTER,
+                                                    exLB_center, exUB_center, &rc);
+
+  p = 0;
+  for (int i1=exLB_center[1]; i1<=exUB_center[1]; ++i1) {
+    for (int i0=exLB_center[0]; i0<=exUB_center[0]; ++i0) {
+      gridXCenter[p]=(double)(i0-1)*cellwidth_x + (double)(cellwidth_x/2.0);
+      ++p;
+    }
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  printf("exLB_center = [%d,%d]\n", exLB_center[0], exLB_center[1]);
+  printf("exUB_center = [%d,%d]\n", exUB_center[0], exUB_center[1]);
+
+  //----------------------------------------------------------------------------
+  //EX_disable_UTest_Multi_Proc_Only
+  // get and fill second coord array
+  strcpy(name, "GridGetCoord - Y");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  double *gridYCenter = (double *)ESMC_GridGetCoord(srcgrid, 2,
+                                                    ESMC_STAGGERLOC_CENTER,
+                                                    NULL, NULL, &rc);
+
+  p = 0;
+  for (int i1=exLB_center[1]; i1<=exUB_center[1]; ++i1) {
+    for (int i0=exLB_center[0]; i0<=exUB_center[0]; ++i0) {
+      gridYCenter[p]=(double)(i1-1)*cellwidth_y + (double)(cellwidth_y/2.0);
       ++p;
     }
   }
@@ -175,33 +230,36 @@ int main(void){
 
 
 
+
   //              Destination Mesh
   // 
   //
-  //  3.0   13 ------ 14 ------ 15     [15] ----------- 16    
-  //        |         |         |       |               |
-  //        |         |         |       |               |
-  //        |    8    |    9    |       |       10      |
-  //        |         |         |       |               |
-  //        |         |         |       |               |
-  //  2.0  [9] ----- [10] ---- [11]    [11] ---------- [12]
-  //                                                          
-  //       1.0       1.5       2.0     2.0             3.0 
-  //      
-  //                PET 2                      PET 3
-  //      
-  //      
-  //  2.0   9 ------- 10 ------ 11     [11] ----------- 12      
-  //        |         |         |       |               |
-  //        |    5    |    6    |       |       7       |
-  //        |         |         |       |               |
-  //  1.5   5 ------- 6 ------- 7      [7] -----------  8
-  //        |         |  \   3  |       |               |
-  //        |    1    |    \    |       |       4       |
-  //        |         | 2    \  |       |               |
-  //  1.0   1 ------- 2 ------- 3      [3] ------------ 4
-  //                                                
-  //       1.0       1.5       2.0     2.0             3.0 
+  //  20.0 3.0   13 ------ 14 ------ 15     [15] ----------- 16    
+  //             |         |         |       |               |
+  //             |         |         |       |               |
+  //             |    8    |    9    |       |       10      |
+  //             |         |         |       |               |
+  //             |         |         |       |               |
+  //  15.0 2.0  [9] ----- [10] ---- [11]    [11] ---------- [12]
+  //                                                              
+  //           1.0       1.5       2.0     2.0             3.0 
+  //           1.0       10.0      15.0    15.0            20.0 
+  //          
+  //                    PET 2                      PET 3
+  //          
+  //          
+  //  15.0 2.0   9 ------- 10 ------ 11     [11] ----------- 12      
+  //             |         |         |       |               |
+  //             |    5    |    6    |       |       7       |
+  //             |         |         |       |               |
+  //  10.0 1.5   5 ------- 6 ------- 7      [7] -----------  8
+  //             |         |  \   3  |       |               |
+  //             |    1    |    \    |       |       4       |
+  //             |         | 2    \  |       |               |
+  //  1.0  1.0   1 ------- 2 ------- 3      [3] ------------ 4
+  //                                                    
+  //           1.0       1.5       2.0     2.0             3.0 
+  //           1.0       10.0       15.0    15.0            20.0 
   // 
   //                PET 0                      PET 1
   //
@@ -240,6 +298,15 @@ int main(void){
     nodeId[7]=10;
     nodeId[8]=11;
     nodeCoord[0]=1.0;nodeCoord[1]=1.0;
+    nodeCoord[2]=10.0;nodeCoord[3]=1.0;
+    nodeCoord[4]=15.0;nodeCoord[5]=1.0;
+    nodeCoord[6]=1.0;nodeCoord[7]=10.0;
+    nodeCoord[8]=10.0;nodeCoord[9]=10.0;
+    nodeCoord[10]=15.0;nodeCoord[11]=10.0;
+    nodeCoord[12]=1.0;nodeCoord[13]=15.0;
+    nodeCoord[14]=10.0;nodeCoord[15]=15.0;
+    nodeCoord[16]=15.0;nodeCoord[17]=15.0;
+/*    nodeCoord[0]=1.0;nodeCoord[1]=1.0;
     nodeCoord[2]=1.5;nodeCoord[3]=1.0;
     nodeCoord[4]=2.0;nodeCoord[5]=1.0;
     nodeCoord[6]=1.0;nodeCoord[7]=1.5;
@@ -247,7 +314,7 @@ int main(void){
     nodeCoord[10]=2.0;nodeCoord[11]=1.5;
     nodeCoord[12]=1.0;nodeCoord[13]=2.0;
     nodeCoord[14]=1.5;nodeCoord[15]=2.0;
-    nodeCoord[16]=2.0;nodeCoord[17]=2.0;
+    nodeCoord[16]=2.0;nodeCoord[17]=2.0;*/
     nodeOwner[0]=0;
     nodeOwner[1]=0;
     nodeOwner[2]=0;
@@ -270,6 +337,7 @@ int main(void){
     // ESMF_MESHELEMTYPE_QUAD=9
     // ESMF_MESHELEMTYPE_TRI=5
     elemConn[0]=1;elemConn[1]=2;elemConn[2]=5;elemConn[3]=4;
+
     elemConn[4]=2;elemConn[5]=3;elemConn[6]=5;
     elemConn[7]=3;elemConn[8]=6;elemConn[9]=5;
     elemConn[10]=4;elemConn[11]=5;elemConn[12]=8;elemConn[13]=7;
@@ -292,12 +360,18 @@ int main(void){
     nodeId[3]=8;
     nodeId[4]=11;
     nodeId[5]=12;
-    nodeCoord[0]=2.0;nodeCoord[1]=1.0;
+    nodeCoord[0]=15.0;nodeCoord[1]=1.0;
+    nodeCoord[2]=20.0;nodeCoord[3]=1.0;
+    nodeCoord[4]=15.0;nodeCoord[5]=10.0;
+    nodeCoord[6]=20.0;nodeCoord[7]=10.0;
+    nodeCoord[8]=15.0;nodeCoord[9]=15.0;
+    nodeCoord[10]=20.0;nodeCoord[11]=15.0;
+    /*nodeCoord[0]=2.0;nodeCoord[1]=1.0;
     nodeCoord[2]=3.0;nodeCoord[3]=1.0;
     nodeCoord[4]=2.0;nodeCoord[5]=1.5;
     nodeCoord[6]=3.0;nodeCoord[7]=1.5;
     nodeCoord[8]=2.0;nodeCoord[9]=2.0;
-    nodeCoord[10]=3.0;nodeCoord[11]=2.0;
+    nodeCoord[10]=3.0;nodeCoord[11]=2.0;*/
     nodeOwner[0]=0;
     nodeOwner[1]=1;
     nodeOwner[2]=0;
@@ -330,12 +404,18 @@ int main(void){
     nodeId[3]=13;
     nodeId[4]=14;
     nodeId[5]=15;
-    nodeCoord[0]=1.0;nodeCoord[1]=2.0;
+    nodeCoord[0]=1.0;nodeCoord[1]=15.0;
+    nodeCoord[2]=10.0;nodeCoord[3]=15.0;
+    nodeCoord[4]=15.0;nodeCoord[5]=15.0;
+    nodeCoord[6]=1.0;nodeCoord[7]=20.0;
+    nodeCoord[8]=10.0;nodeCoord[9]=20.0;
+    nodeCoord[10]=15.0;nodeCoord[11]=20.0;
+    /*nodeCoord[0]=1.0;nodeCoord[1]=2.0;
     nodeCoord[2]=1.5;nodeCoord[3]=2.0;
     nodeCoord[4]=2.0;nodeCoord[5]=2.0;
     nodeCoord[6]=1.0;nodeCoord[7]=3.0;
     nodeCoord[8]=1.5;nodeCoord[9]=3.0;
-    nodeCoord[10]=2.0;nodeCoord[11]=3.0;
+    nodeCoord[10]=2.0;nodeCoord[11]=3.0;*/
     nodeOwner[0]=0;
     nodeOwner[1]=0;
     nodeOwner[2]=0;
@@ -366,10 +446,14 @@ int main(void){
     nodeId[1]=12;
     nodeId[2]=15;
     nodeId[3]=16;
-    nodeCoord[0]=2.0;nodeCoord[1]=2.0;
+    nodeCoord[0]=15.0;nodeCoord[1]=15.0;
+    nodeCoord[2]=20.0;nodeCoord[3]=15.0;
+    nodeCoord[4]=15.0;nodeCoord[5]=20.0;
+    nodeCoord[6]=20.0;nodeCoord[7]=20.0;
+    /*nodeCoord[0]=2.0;nodeCoord[1]=2.0;
     nodeCoord[2]=3.0;nodeCoord[3]=2.0;
     nodeCoord[4]=2.0;nodeCoord[5]=3.0;
-    nodeCoord[6]=3.0;nodeCoord[7]=3.0;
+    nodeCoord[6]=3.0;nodeCoord[7]=3.0;*/
     nodeOwner[0]=0;
     nodeOwner[1]=1;
     nodeOwner[2]=2;
@@ -427,14 +511,7 @@ int main(void){
   //----------------------------------------------------------------------------
   printf("num_elem = %d\nnum_elem_out=%d\n", num_elem, num_elem_out);
 
-/*
-  free(nodeId);
-  free(nodeCoord);
-  free(nodeOwner);
-  free(elemId);
-  free(elemType);
-  free(elemConn);
-*/
+
   //----------------------------------------------------------------------------
   //---------------------- FIELD CREATION --------------------------------------
   //----------------------------------------------------------------------------
@@ -442,19 +519,16 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //EX_disable_UTest_Multi_Proc_Only
-  // Set the arrayspec
-  strcpy(name, "ArraySpecSet");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_ArraySpecSet(&arrayspec, 2, ESMC_TYPEKIND_R8);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-    
-  //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
   strcpy(name, "Create ESMC_Field object from a Grid via TypeKind");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef corner
+  srcfield = ESMC_FieldCreateGridTypeKind(srcgrid, ESMC_TYPEKIND_R8, 
+    ESMC_STAGGERLOC_CORNER, NULL, NULL, NULL, "srcfield", &rc);
+#endif
+#ifdef center
   srcfield = ESMC_FieldCreateGridTypeKind(srcgrid, ESMC_TYPEKIND_R8, 
     ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "srcfield", &rc);
+#endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -467,10 +541,6 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
-
-//  rc = ESMC_FieldPrint(srcfield);
-//  rc = ESMC_FieldPrint(dstfield);
-
   //----------------------------------------------------------------------------
   //-------------------------- REGRIDDING --------------------------------------
   //----------------------------------------------------------------------------
@@ -483,18 +553,32 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+#ifdef corner
   // define analytic field on source field
   p = 0;
-  double x,y;
-  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
-    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      x = gridXCoord[p];
-      y = gridYCoord[p];
+  for (int i1=exLB_corner[1]; i1<=exUB_corner[1]; ++i1) {
+    for (int i0=exLB_corner[0]; i0<=exUB_corner[0]; ++i0) {
+      x = gridXCorner[p];
+      y = gridYCorner[p];
+      //srcfieldptr[p] = 20.0;
       srcfieldptr[p] = 20.0+x+y;
       ++p;
     }
   }
-
+#endif
+#ifdef center
+  // define analytic field on source field
+  p = 0;
+  for (int i1=exLB_center[1]; i1<=exUB_center[1]; ++i1) {
+    for (int i0=exLB_center[0]; i0<=exUB_center[0]; ++i0) {
+      x = gridXCenter[p];
+      y = gridYCenter[p];
+      //srcfieldptr[p] = 20.0;
+      srcfieldptr[p] = 20.0+x+y;
+      ++p;
+    }
+  }
+#endif
   
   //----------------------------------------------------------------------------
   //EX_disable_UTest_Multi_Proc_Only
@@ -505,11 +589,8 @@ int main(void){
   //----------------------------------------------------------------------------
 
   // initialize destination field
-  {
-    int i;
-    for(i=0;i<num_node;++i)
-      dstfieldptr[i] = 0.0;
-  }
+  for(int i=0; i<num_node; ++i)
+    dstfieldptr[i] = 0.0;
 
   //----------------------------------------------------------------------------
   //EX_disable_UTest_Multi_Proc_Only
@@ -530,14 +611,6 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //EX_disable_UTest_Multi_Proc_Only
-  strcpy(name, "Execute ESMC_RouteHandlePrint()");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_RouteHandlePrint(routehandle);
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
   strcpy(name, "Release an ESMC_RouteHandle via ESMC_FieldRegridRelease()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldRegridRelease(&routehandle);
@@ -553,29 +626,38 @@ int main(void){
   strcpy(failMsg, "Did not have acceptable accuracy");
 
   bool correct = true;
-  {
-    double x,y;
-    int i;
-    // 2. check destination field against source field
-    for(i=0;i<num_node;++i) {
-      x=nodeCoord[2*i];
-      y=nodeCoord[2*i+1];
-      // if error is too big report an error
-      if ( abs((long)( dstfieldptr[i]-(x+y+20.0)) ) > 0.0001) {
-        printf("dstfieldptr[%d] = %f\n and it should be = %f\n", i, dstfieldptr[i], x+y+20.0);
-        correct=false;
-      }
+  // check destination field against analytic field
+  for(int i=0; i<num_node; ++i) {
+    x=nodeCoord[2*i];
+    y=nodeCoord[2*i+1];
+    //exact = 20.0;
+    exact = 20.0+x+y;
+    tol = .0001;
+    if ( abs((double)( dstfieldptr[i]-exact) ) > tol) {
+      printf("dstfieldptr[%d]:\n%f /= %f\n", 
+             i, dstfieldptr[i], exact);
+      correct=false;
     }
   }
   ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+  free(nodeId);
+  free(nodeCoord);
+  free(nodeOwner);
+  free(elemId);
+  free(elemType);
+  free(elemConn);
+  free(exLB_center);
+  free(exUB_center);
+  free(exLB_corner);
+  free(exUB_corner);
 
   //----------------------------------------------------------------------------
   //EX_disable_UTest_Multi_Proc_Only
   strcpy(name, "Destroy ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  //rc = ESMC_FieldDestroy(&srcfield);
+  rc = ESMC_FieldDestroy(&srcfield);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -583,7 +665,7 @@ int main(void){
   //EX_disable_UTest_Multi_Proc_Only
   strcpy(name, "Destroy ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  //rc = ESMC_FieldDestroy(&dstfield);
+  rc = ESMC_FieldDestroy(&dstfield);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -591,7 +673,7 @@ int main(void){
   //EX_disable_UTest_Multi_Proc_Only
   strcpy(name, "Destroy ESMC_Grid object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  //rc = ESMC_GridDestroy(&srcgrid);
+  rc = ESMC_GridDestroy(&srcgrid);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -599,7 +681,7 @@ int main(void){
   //EX_disable_UTest_Multi_Proc_Only
   strcpy(name, "Destroy ESMC_Mesh object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  //rc = ESMC_MeshDestroy(&dstmesh);
+  rc = ESMC_MeshDestroy(&dstmesh);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 #endif
