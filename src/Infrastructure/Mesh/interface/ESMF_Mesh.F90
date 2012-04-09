@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.87 2012/04/05 04:37:44 peggyli Exp $
+! $Id: ESMF_Mesh.F90,v 1.88 2012/04/09 22:50:49 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.87 2012/04/05 04:37:44 peggyli Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.88 2012/04/09 22:50:49 oehmke Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -172,7 +172,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.87 2012/04/05 04:37:44 peggyli Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.88 2012/04/09 22:50:49 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -455,16 +455,17 @@ contains
 !
 ! !INTERFACE:
     subroutine ESMF_MeshAddElements(mesh, elementIds, elementTypes, &
-                 elementConn, elementMask, rc)
+                 elementConn, elementMask, elementArea, rc)
 
 !
 ! !ARGUMENTS:
-    type(ESMF_Mesh), intent(inout)         :: mesh
-    integer,         intent(in) 	   :: elementIds(:)
-    integer,         intent(in) 	   :: elementTypes(:)
-    integer,         intent(in) 	   :: elementConn(:)
-    integer,         intent(in),  optional :: elementMask(:)
-    integer,         intent(out), optional :: rc
+    type(ESMF_Mesh),    intent(inout)         :: mesh
+    integer,            intent(in)            :: elementIds(:)
+    integer,            intent(in)            :: elementTypes(:)
+    integer,            intent(in)            :: elementConn(:)
+    integer,            intent(in),  optional :: elementMask(:)
+    real(ESMF_KIND_R8), intent(in),  optional :: elementArea(:)
+    integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   This call is the third and last part of the three part mesh create
@@ -516,6 +517,9 @@ contains
 !          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to 
 !          {\tt ESMF\_FieldRegridStore()} call. This input consists of a 1D array the
 !          size of the number of elements on this PET.
+!   \item [{[elementArea]}]
+!          An array containing element areas. If not specified, the element areas are internally calculated. 
+!          This input consists of a 1D array the size of the number of elements on this PET.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -526,6 +530,9 @@ contains
     integer                 :: num_elems, num_elementConn
     type(ESMF_RegridConserve) :: lregridConserve
     type(ESMF_InterfaceInt) :: elementMaskII
+    real(ESMF_KIND_R8) :: tmpArea(2)
+    integer :: areaPresent
+
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -572,14 +579,31 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return
 
 
+    ! get sizes of lists
     num_elems = size(elementIds)
     num_elementConn = size(elementConn)
-    call C_ESMC_MeshAddElements(mesh%this, num_elems, &
+    
+    ! set element area if it's present.
+    if (present(elementArea)) then
+       areaPresent=1
+       call C_ESMC_MeshAddElements(mesh%this, num_elems, &
                              elementIds, elementTypes, elementMaskII, &
+                             areaPresent, elementArea, &
                              num_elementConn, elementConn, &
                              lregridConserve%regridconserve, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+       areaPresent=0
+       call C_ESMC_MeshAddElements(mesh%this, num_elems, &
+                             elementIds, elementTypes, elementMaskII, &
+                             areaPresent, tmpArea, &
+                             num_elementConn, elementConn, &
+                             lregridConserve%regridconserve, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
 
     ! We create two dist grids, one for nodal one for element
     call C_ESMC_MeshCreateDistGrids(mesh%this, mesh%nodal_distgrid, &
@@ -794,7 +818,7 @@ contains
     function ESMF_MeshCreate1Part(parametricDim, spatialDim, &
                          nodeIds, nodeCoords, nodeOwners, &
                          elementIds, elementTypes, elementConn, &
-                         elementMask, rc)
+                         elementMask, elementArea, rc)
 !
 !
 ! !RETURN VALUE:
@@ -804,11 +828,12 @@ contains
     integer,            intent(in)            :: spatialDim
     integer,            intent(in)            :: nodeIds(:)
     real(ESMF_KIND_R8), intent(in)            :: nodeCoords(:)
-    integer,            intent(in) 	      :: nodeOwners(:)
-    integer,            intent(in) 	      :: elementIds(:)
-    integer,            intent(in) 	      :: elementTypes(:)
-    integer,            intent(in) 	      :: elementConn(:)
+    integer,            intent(in)            :: nodeOwners(:)
+    integer,            intent(in)            :: elementIds(:)
+    integer,            intent(in)            :: elementTypes(:)
+    integer,            intent(in)            :: elementConn(:)
     integer,            intent(in),  optional :: elementMask(:)
+    real(ESMF_KIND_R8), intent(in),  optional :: elementArea(:)  
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -892,6 +917,9 @@ contains
 !          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to 
 !          {\tt ESMF\_FieldRegridStore()} call. This input consists of a 1D array the
 !          size of the number of elements on this PET.
+!   \item [{[elementArea]}]
+!          An array containing element areas. If not specified, the element areas are internally calculated. 
+!          This input consists of a 1D array the size of the number of elements on this PET.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -903,6 +931,9 @@ contains
     integer                 :: num_elems, num_elementConn
     type(ESMF_RegridConserve) :: lregridConserve
     type(ESMF_InterfaceInt) :: elementMaskII
+    real(ESMF_KIND_R8) :: tmpArea(2)
+    integer :: areaPresent
+
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -947,14 +978,45 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-    num_elems = size(elementTypes)
+    ! get sizes of lists
+    num_elems = size(elementIds)
     num_elementConn = size(elementConn)
-    call C_ESMC_MeshAddElements(ESMF_MeshCreate1Part%this, num_elems, &
+    
+
+#if 0
+    call C_ESMC_MeshAddElements(ESMF_MeshCreate1Part%this, 
+num_elems, &
                              elementIds, elementTypes, elementMaskII, &
                              num_elementConn, elementConn, &
                              lregridConserve%regridconserve, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+
+
+    ! set element area if it's present.
+    if (present(elementArea)) then
+       areaPresent=1
+       call C_ESMC_MeshAddElements(ESMF_MeshCreate1Part%this, num_elems, &
+                             elementIds, elementTypes, elementMaskII, &
+                             areaPresent, elementArea, &
+                             num_elementConn, elementConn, &
+                             lregridConserve%regridconserve, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+       areaPresent=0
+       call C_ESMC_MeshAddElements(ESMF_MeshCreate1Part%this, num_elems, &
+                             elementIds, elementTypes, elementMaskII, &
+                             areaPresent, tmpArea, &
+                             num_elementConn, elementConn, &
+                             lregridConserve%regridconserve, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+
+
 
     ! We create two dist grids, one for nodal one for element
     call C_ESMC_MeshCreateDistGrids(ESMF_MeshCreate1Part%this, ESMF_MeshCreate1Part%nodal_distgrid, &

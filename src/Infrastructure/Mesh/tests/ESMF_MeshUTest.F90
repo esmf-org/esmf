@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshUTest.F90,v 1.32 2012/01/06 20:17:53 svasquez Exp $
+! $Id: ESMF_MeshUTest.F90,v 1.33 2012/04/09 22:50:51 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_MeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshUTest.F90,v 1.32 2012/01/06 20:17:53 svasquez Exp $'
+    '$Id: ESMF_MeshUTest.F90,v 1.33 2012/04/09 22:50:51 oehmke Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -63,14 +63,16 @@ program ESMF_MeshUTest
   integer :: numElems,numOwnedElemsTst
   integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
   type(ESMF_ArraySpec) :: arrayspec
-  type(ESMF_Field)  ::  field
+  type(ESMF_Field)  ::  field, areaField
   logical :: isMemFreed
   integer :: bufCount, offset
   character, pointer :: buf(:)
   integer :: i,j,pntCount
   real(ESMF_KIND_R8), pointer :: pntList(:)
+  real(ESMF_KIND_R8), pointer :: elemAreas(:)
+  real(ESMF_KIND_R8), pointer :: fieldAreaPtr(:)
   integer, pointer :: petList(:)
-  integer :: spatialDim, parametricDim
+  integer :: spatialDim, parametricDim, cu(1),cl(1)
   logical:: meshBool
 
 
@@ -175,6 +177,10 @@ program ESMF_MeshUTest
   allocate(elemTypes(numElems))
   elemTypes=ESMF_MESHELEMTYPE_QUAD
 
+  !! elem area
+  allocate(elemAreas(numElems))
+  elemAreas=(/2.0,3.0,4.0,5.0/)
+
   !! elem conn
   allocate(elemConn(numElems*4))
   elemConn=(/1,2,5,4, & 
@@ -183,13 +189,15 @@ program ESMF_MeshUTest
              5,6,9,8/)
 
   ! Add Elements
-  call ESMF_MeshAddElements(mesh,elemIds,elemTypes,elemConn,rc=localrc)
+  call ESMF_MeshAddElements(mesh,elemIds,elemTypes,elemConn,&
+                            elementArea=elemAreas, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! deallocate elem data
   deallocate(elemIds)
   deallocate(elemTypes)
   deallocate(elemConn)
+  deallocate(elemAreas)
 
   !! Write mesh for debugging
   ! call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
@@ -294,6 +302,11 @@ program ESMF_MeshUTest
   endif 
 
   call ESMF_Test(meshBool, name, failMsg, result, ESMF_SRCLINE)
+
+
+
+
+
   
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -890,6 +903,152 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test setting and getting area of Mesh"
+  write(failMsg, *) "Incorrect result"
+
+  !!!!!!!!!!!!!!!!!!!!!
+  ! 
+  !              Mesh Ids
+  !
+  !  2.0   7 ------- 8 -------- 9
+  !        |         |          |
+  !        |    3    |    4     |
+  !        |         |          |
+  !  1.0   4 ------- 5 -------- 6
+  !        |         |          |
+  !        |    1    |    2     |
+  !        |         |          |
+  !  0.0   1 ------- 2 -------- 3
+  !
+  !       0.0       1.0        2.0 
+  !
+  !      Node Ids at corners
+  !      Element Ids in centers
+  !
+  !!!
+  !      ( Everything owned by PET 0) 
+  !!!!! 
+
+  ! init success flag
+  rc=ESMF_SUCCESS
+  correct=.true.
+
+  ! Only do this if we have 1 processor
+  if (petCount .eq. 1) then
+
+  ! Create Mesh structure
+  mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Fill in node data
+  numNodes=9
+
+  !! node ids
+  allocate(nodeIds(numNodes))
+  nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+  !! node Coords
+  allocate(nodeCoords(numNodes*2))
+  nodeCoords=(/0.0,0.0, &
+               1.0,0.0, &
+               2.0,0.0, &
+               0.0,1.0, &
+               1.0,1.0, &
+               2.0,1.0, &
+               0.0,2.0, &
+               1.0,2.0, &
+               2.0,2.0 /)
+
+  !! node owners
+  allocate(nodeOwners(numNodes))
+  nodeOwners=0 ! everything on proc 0
+
+  ! Add nodes
+  call ESMF_MeshAddNodes(mesh,nodeIds,nodeCoords,nodeOwners,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! deallocate node data
+  deallocate(nodeIds)
+  deallocate(nodeCoords)
+  deallocate(nodeOwners)
+
+  ! Fill in elem data
+  numElems=4
+
+  !! elem ids
+  allocate(elemIds(numElems))
+  elemIds=(/1,2,3,4/) 
+
+  !! elem types
+  allocate(elemTypes(numElems))
+  elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+  !! elem area
+  allocate(elemAreas(numElems))
+  elemAreas=(/2.0,3.0,4.0,5.0/)
+
+  !! elem conn
+  allocate(elemConn(numElems*4))
+  elemConn=(/1,2,5,4, & 
+             2,3,6,5, & 
+             4,5,8,7, & 
+             5,6,9,8/)
+
+  ! Add Elements
+  call ESMF_MeshAddElements(mesh,elemIds,elemTypes,elemConn,&
+                            elementArea=elemAreas, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Create field to hold area
+  areaField = ESMF_FieldCreate(mesh, typekind=ESMF_TYPEKIND_R8, meshloc=ESMF_MESHLOC_ELEMENT, &
+                                rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+
+  ! Get area
+  call ESMF_FieldRegridGetArea(areaField, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+
+  ! get pointer to area
+  call ESMF_FieldGet(areaField, 0, fieldAreaPtr,       & 
+       computationalLBound=cl, computationalUBound=cu, & 
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+
+
+  ! Init results
+  correct=.true.
+   
+  ! Check results
+  if ((cu(1)-cl(1)+1) .ne. numElems) correct=.false.
+
+  j=1
+  do i=cl(1), cu(1)
+     if (fieldAreaPtr(i) .ne. elemAreas(j)) correct=.false.
+     j=j+1
+  enddo
+   
+  ! deallocate elem data
+  deallocate(elemIds)
+  deallocate(elemTypes)
+  deallocate(elemConn)
+  deallocate(elemAreas)
+
+
+  ! Destroy the area Field
+  call ESMF_FieldDestroy(areaField, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE  
+
+  ! Destroy the Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE  
+
+  ! endif for skip for >1 proc
+  endif 
+
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
 
   !------------------------------------------------------------------------

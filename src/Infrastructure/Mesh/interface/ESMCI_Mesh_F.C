@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.58 2012/03/16 21:42:36 oehmke Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.59 2012/04/09 22:50:49 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.58 2012/03/16 21:42:36 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.59 2012/04/09 22:50:49 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -283,6 +283,7 @@ extern "C" void FTN_X(c_esmc_meshwrite)(Mesh **meshpp, char *fname, int *rc,
 
 extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp, 
                                               int *_num_elems, int *elemId, int *elemType, InterfaceInt **elemMaskII ,
+                                              int *areaPresent, double *elemArea, 
                                               int *_num_elemConn, int *elemConn, int *regridConserve, int *rc) 
 {
    try {
@@ -473,6 +474,22 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
   } 
 
 
+  // Handle element masking
+  bool has_elem_area=false;
+  if (*areaPresent == 1) { // if areas exist
+    // Context for new fields
+    Context ctxt; ctxt.flip();
+
+    // Add element mask field
+    MEField<> *elem_area = mesh.RegisterField("elem_area",
+                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    // Record the fact that it has masks
+    has_elem_area=true;   
+  } 
+
+
+
   // Perhaps commit will be a separate call, but for now commit the mesh here.
   mesh.build_sym_comm_rel(MeshObj::NODE);
   mesh.Commit();
@@ -505,6 +522,28 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
       *m=0.0;      
     }
   }
+
+
+  // Set area values
+  if (has_elem_area) {
+    // Get Fields
+    MEField<> *elem_area=mesh.GetField("elem_area"); 
+    
+    // Loop through elements setting values
+    // Here we depend on the fact that data index for elements
+    // is set as the position in the local array above
+    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+      // Set mask value to input array
+      double *av=elem_area->data(elem);
+      int data_index = elem.get_data_index();
+      *av=(double)elemArea[data_index];
+    }
+  }
+
 
 
   } catch(std::exception &x) {
@@ -1427,6 +1466,7 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *
     // Get Mesh reference
     Mesh &mesh = *meshp;
     
+
     // Declare id vector
     std::vector<int> egids; 
     
@@ -1443,6 +1483,43 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *
     if (*num_elem != egids.size()) {
       Throw() << "Number of elements doesn't match size of input array for areas";
     }
+    
+    
+    // If an area field exists use that instead
+    MEField<> *area_field = mesh.GetField("elem_area");
+    if (area_field) {
+      
+      // Loop through elements and put areas into array
+      for (int i=0; i<egids.size(); i++) {
+        // Get element gid
+        int elem_gid=egids[i];
+        
+        //  Find the corresponding Mesh element
+        Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, elem_gid);
+        if (mi == mesh.map_end(MeshObj::ELEMENT)) {
+          Throw() << "Element not in mesh";
+        }
+        
+        // Get the element
+        const MeshObj &elem = *mi; 
+        
+        // Only put it in if it's locally owned
+        if (!GetAttr(elem).is_locally_owned()) continue;
+        
+        // Get area from field
+        double *area=area_field->data(elem);
+        
+        // Put area into area array
+        elem_areas[i]=*area;
+      }
+
+      if (rc!=NULL) *rc = ESMF_SUCCESS;      
+      return;
+    }
+    
+
+    ////// Otherwise calculate areas..... 
+
 
     // Get coord field
     MEField<> *cfield = mesh.GetCoordField();
