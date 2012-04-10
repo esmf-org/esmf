@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.10 2012/04/09 23:10:17 rokuingh Exp $
+// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.11 2012/04/10 23:02:45 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -22,6 +22,7 @@
 #include "ESMC_Test.h"
 
 #define masking
+//#define areas
 
 //==============================================================================
 //BOP
@@ -260,6 +261,39 @@ int main(void){
   }
 #endif
 
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridAddItem - area");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef areas
+  rc = ESMC_GridAddItem(srcgrid, ESMC_GRIDITEM_AREA, ESMC_STAGGERLOC_CENTER);
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridGetItem - area");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef areas
+  double *area = (double *)ESMC_GridGetItem(srcgrid, ESMC_GRIDITEM_AREA,
+                                      ESMC_STAGGERLOC_CENTER, &rc);
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+#ifdef areas
+  // set the areas of the grid
+  p = 0;
+  for (int i1=exLB_center[1]; i1<=exUB_center[1]; ++i1) {
+    for (int i0=exLB_center[0]; i0<=exUB_center[0]; ++i0) {
+      area[p] = 1.0;
+      printf("Area at [%f,%f] = %f\n", gridXCenter[p], gridYCenter[p], area[p]);
+      ++p;
+    }
+  }
+#endif
+
 
 
 
@@ -311,6 +345,9 @@ int main(void){
               9,10,14,13,
               10,11,15,14,
               11,12,16,15};
+#ifdef areas
+  double cellAreas [] ={.25, .5, .25, .5, 1, .5, .25, .5, .25};
+#endif
 
   //----------------------------------------------------------------------------
   //EX_UTest
