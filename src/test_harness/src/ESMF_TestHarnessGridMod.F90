@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessGridMod.F90,v 1.38 2012/01/06 20:19:44 svasquez Exp $
+! $Id: ESMF_TestHarnessGridMod.F90,v 1.39 2012/04/10 04:49:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -786,7 +786,8 @@
   ! as long as the current row is within the bounds of the table process entry
   !-----------------------------------------------------------------------------
   out_counter = 0
-  do while(irow <= nrows .and. new_row(irow) /= 0 )
+  do while(irow <= nrows)
+     if (new_row(irow) == 0 ) exit
      !--------------------------------------------------------------------------
      ! new grid specification - not continuation symbol and not end of row
      !--------------------------------------------------------------------------
