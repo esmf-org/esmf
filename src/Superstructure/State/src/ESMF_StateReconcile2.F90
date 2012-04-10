@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.10 2012/04/05 05:53:26 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.11 2012/04/10 23:30:18 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_StateReconcile2Mod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-  '$Id: ESMF_StateReconcile2.F90,v 1.10 2012/04/05 05:53:26 w6ws Exp $'
+  '$Id: ESMF_StateReconcile2.F90,v 1.11 2012/04/10 23:30:18 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
@@ -114,7 +114,7 @@ module ESMF_StateReconcile2Mod
 !
 !==============================================================================
 
-  logical, parameter :: trace=.true.
+  logical, parameter :: trace=.false.
   logical, parameter :: debug=.false.
 
 contains
@@ -294,17 +294,6 @@ contains
 ! print *, ESMF_METHOD, ': siwrap(', lbound (siwrap,1), ',', ubound (siwrap,1), ')'
 ! print *, ESMF_METHOD, ': nitems_buf(', lbound (nitems_buf,1), ',', ubound (nitems_buf,1), ')'
 
-    if (trace) then
-      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
-          ': *** Step 0.5 - Exchange Base Attributes')
-    end if
-    if (attreconflag == ESMF_ATTRECONCILE_ON) then
-      call ESMF_ReconcileExchangeAttributes (state, vm, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
-    end if
-
     ! 1.) Each PET constructs its send arrays containing local Id
     ! and VMId info for each object contained in the State
     ! Note that element zero is reserved for the State itself.
@@ -479,6 +468,17 @@ contains
     if (associated (siwrap)) then
       deallocate (siwrap, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+    end if
+
+    if (trace) then
+      call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
+          ': *** Step 8 - Exchange Base Attributes')
+    end if
+    if (attreconflag == ESMF_ATTRECONCILE_ON) then
+      call ESMF_ReconcileExchangeAttributes (state, vm, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
     end if
@@ -1122,17 +1122,20 @@ rc = ESMF_RC_NOT_IMPL
     do, i=0, npets-1
        base_temp = ESMF_BaseDeserialize (buffer, offset=recv_offsets(i),  &
            attreconflag=ESMF_ATTRECONCILE_ON, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+	   ESMF_ERR_PASSTHRU, &
+	   ESMF_CONTEXT, rcToReturn=rc)) return
 
        call ESMF_BaseSetInitCreated(base_temp, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
-	 ESMF_ERR_PASSTHRU, &
-	 ESMF_CONTEXT, rcToReturn=rc)) return
+	   ESMF_ERR_PASSTHRU, &
+	   ESMF_CONTEXT, rcToReturn=rc)) return
 
        call c_ESMC_AttributeCopy(base_temp, base, &
 	 ESMF_COPY_VALUE, ESMF_ATTTREE_OFF, localrc)
        if (ESMF_LogFoundError(localrc, &
-	 ESMF_ERR_PASSTHRU, &
-	 ESMF_CONTEXT, rcToReturn=rc)) return
+	   ESMF_ERR_PASSTHRU, &
+	   ESMF_CONTEXT, rcToReturn=rc)) return
     end do
 
     ! Reset the change flags in the Attribute hierarchy
@@ -1204,7 +1207,7 @@ rc = ESMF_RC_NOT_IMPL
     integer,         allocatable ::   id_recv(:)
     type(ESMF_VMId), allocatable :: vmid_recv(:)
 
-logical, parameter :: debug = .true.
+logical, parameter :: debug = .false.
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -1296,10 +1299,6 @@ logical, parameter :: debug = .true.
     if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-    call ESMF_VMIdCreate (vmid_recv, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
 
     if (debug) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
@@ -1331,7 +1330,7 @@ logical, parameter :: debug = .true.
 
     ! Exchange VMIds
 
-#if 1
+#if 0
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ':   Exchanging VMIds (using ESMF_VMAllGatherVMId)')
@@ -1366,7 +1365,7 @@ logical, parameter :: debug = .true.
           rcToReturn=rc)) return
       ipos = ipos + counts_buf_recv(i)
     end do
-#elif 0
+#else
 ! VMBcastVMId version
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
