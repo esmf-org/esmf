@@ -1,4 +1,4 @@
-! $Id: ESMF_CompTunnelEx.F90,v 1.1 2012/04/04 15:55:50 theurich Exp $
+! $Id: ESMF_CompTunnelEx.F90,v 1.2 2012/04/10 18:56:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -11,7 +11,7 @@
 !==============================================================================
 
 !==============================================================================
-!ESMF_EXAMPLE        String used by test script to count examples.
+!ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
 !==============================================================================
 
 #define FILENAME "src/Superstructure/Component/examples/ESMF_CompTunnelEx.F90"
