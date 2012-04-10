@@ -1,4 +1,4 @@
-! $Id: NUOPC_MediatorExplicit.F90,v 1.6 2011/07/19 22:16:53 theurich Exp $
+! $Id: NUOPC_MediatorExplicit.F90,v 1.7 2012/04/10 17:35:16 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_MediatorExplicit.F90"
 
@@ -12,6 +12,7 @@ module NUOPC_MediatorExplicit
   use NUOPC
   use NUOPC_ModelExplicitBase, only: &
     ModelExB_routine_SS             => routine_SetServices, &
+                                       routine_Run, &
     ModelExB_label_CheckImport      => label_CheckImport, &
     label_Advance                   => label_Advance
 
@@ -19,7 +20,7 @@ module NUOPC_MediatorExplicit
   
   private
   
-  public routine_SetServices
+  public routine_SetServices, routine_Run
   public label_DataInitialize, label_Advance
   
   character(*), parameter :: &

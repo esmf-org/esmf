@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicitAtmOcnMed.F90,v 1.4 2011/07/19 22:16:53 theurich Exp $
+! $Id: NUOPC_DriverExplicitAtmOcnMed.F90,v 1.5 2012/04/10 17:35:16 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicitAtmOcnMed.F90"
 
@@ -16,8 +16,9 @@ module NUOPC_DriverExplicitAtmOcnMed
     DrivEx_routine_ARE            => routine_AddRunElement, &
     DrivEx_type_IS                => type_InternalState, &
     DrivEx_label_IS               => label_InternalState, &
-    DrivEx_label_SetModelServices => label_SetModelServices, &
     DrivEx_label_SetModelCount    => label_SetModelCount, &
+    DrivEx_label_SetModelPetLists => label_SetModelPetLists, &
+    DrivEx_label_SetModelServices => label_SetModelServices, &
     DrivEx_label_Finalize         => label_Finalize
 
   implicit none
@@ -26,22 +27,32 @@ module NUOPC_DriverExplicitAtmOcnMed
   
   public routine_SetServices
   public type_InternalState, type_InternalStateStruct
-  public label_InternalState, label_SetModelServices, label_Finalize
+  public label_InternalState, label_SetModelPetLists
+  public label_SetModelServices, label_Finalize
   
   character(*), parameter :: &
     label_InternalState = "DriverExplicitAtmOcnMed_InternalState"
+  character(*), parameter :: &
+    label_SetModelPetLists = "DriverExplicitAtmOcnMed_SetModelPetLists"
   character(*), parameter :: &
     label_SetModelServices = "DriverExplicitAtmOcnMed_SetModelServices"
   character(*), parameter :: &
     label_Finalize = "DriverExplicitAtmOcnMed_Finalize"
   
   type type_InternalStateStruct
+    integer, pointer    :: atmPetList(:)
+    integer, pointer    :: ocnPetList(:)
+    integer, pointer    :: medPetList(:)
     type(ESMF_GridComp) :: atm
-    type(ESMF_State)    :: atmIS, atmES
     type(ESMF_GridComp) :: ocn
-    type(ESMF_State)    :: ocnIS, ocnES
     type(ESMF_GridComp) :: med
+    type(ESMF_State)    :: atmIS, atmES
+    type(ESMF_State)    :: ocnIS, ocnES
     type(ESMF_State)    :: medIS, medES
+    integer, pointer    :: atm2medPetList(:)
+    integer, pointer    :: ocn2medPetList(:)
+    integer, pointer    :: med2atmPetList(:)
+    integer, pointer    :: med2ocnPetList(:)
     type(ESMF_CplComp)  :: atm2med, ocn2med
     type(ESMF_CplComp)  :: med2atm, med2ocn
   end type
@@ -70,6 +81,12 @@ module NUOPC_DriverExplicitAtmOcnMed
     ! attach specializing method(s)
     call ESMF_MethodAdd(gcomp, label=DrivEx_label_SetModelCount, &
       userRoutine=SetModelCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    call ESMF_MethodAdd(gcomp, label=DrivEx_label_SetModelPetLists, &
+      userRoutine=SetModelPetLists, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -110,6 +127,72 @@ module NUOPC_DriverExplicitAtmOcnMed
       
     ! set the modelCount for ATM-OCN-MED coupling
     superIS%wrap%modelCount = 3
+    
+  end subroutine
+  
+  !-----------------------------------------------------------------------------
+  
+  subroutine SetModelPetLists(gcomp, rc)
+    type(ESMF_GridComp)  :: gcomp
+    integer, intent(out) :: rc
+    
+    ! local variables
+    integer                   :: localrc, stat
+    type(type_InternalState)  :: is
+    type(DrivEx_type_IS)      :: superIS
+    logical                   :: existflag
+
+    rc = ESMF_SUCCESS
+    
+    ! allocate memory for this internal state and set it in the Component
+    allocate(is%wrap, stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of internal state memory failed.", &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    call ESMF_UserCompSetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    ! nullify the petLists
+    nullify(is%wrap%atmPetList)
+    nullify(is%wrap%ocnPetList)
+    nullify(is%wrap%medPetList)
+    nullify(is%wrap%atm2medPetList)
+    nullify(is%wrap%ocn2medPetList)
+    nullify(is%wrap%med2atmPetList)
+    nullify(is%wrap%med2ocnPetList)
+    
+    ! SPECIALIZE by calling into optional attached method to set modelPetLists
+    call ESMF_MethodExecute(gcomp, label=label_SetModelPetLists, &
+      existflag=existflag, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    if (existflag) then
+      ! query Component for super internal State
+      nullify(superIS%wrap)
+      call ESMF_UserCompGetInternalState(gcomp, DrivEx_label_IS, superIS, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      
+      ! set the petLists
+      superIS%wrap%modelPetLists(1)%petList => is%wrap%atmPetList
+      superIS%wrap%modelPetLists(2)%petList => is%wrap%ocnPetList
+      superIS%wrap%modelPetLists(3)%petList => is%wrap%medPetList
+      superIS%wrap%connectorPetLists(1,3)%petList => is%wrap%atm2medPetList
+      superIS%wrap%connectorPetLists(2,3)%petList => is%wrap%ocn2medPetList
+      superIS%wrap%connectorPetLists(3,1)%petList => is%wrap%med2atmPetList
+      superIS%wrap%connectorPetLists(3,2)%petList => is%wrap%med2ocnPetList
+    endif
     
   end subroutine
   

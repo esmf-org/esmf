@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicitAtmOcn.F90,v 1.9 2011/10/12 22:59:54 theurich Exp $
+! $Id: NUOPC_DriverExplicitAtmOcn.F90,v 1.10 2012/04/10 17:35:16 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicitAtmOcn.F90"
 
@@ -44,6 +44,8 @@ module NUOPC_DriverExplicitAtmOcn
     type(ESMF_GridComp) :: ocn
     type(ESMF_State)    :: atmIS, atmES
     type(ESMF_State)    :: ocnIS, ocnES
+    integer, pointer    :: atm2ocnPetList(:)
+    integer, pointer    :: ocn2atmPetList(:)
     type(ESMF_CplComp)  :: atm2ocn, ocn2atm
   end type
 
@@ -148,9 +150,11 @@ module NUOPC_DriverExplicitAtmOcn
       file=FILENAME)) &
       return  ! bail out
     
-    ! nullify ATM and OCN petLists
+    ! nullify the petLists
     nullify(is%wrap%atmPetList)
     nullify(is%wrap%ocnPetList)
+    nullify(is%wrap%atm2ocnPetList)
+    nullify(is%wrap%ocn2atmPetList)
     
     ! SPECIALIZE by calling into optional attached method to set modelPetLists
     call ESMF_MethodExecute(gcomp, label=label_SetModelPetLists, &
@@ -169,9 +173,11 @@ module NUOPC_DriverExplicitAtmOcn
         file=FILENAME)) &
         return  ! bail out
       
-      ! set the ATM and OCN petLists
+      ! set the petLists
       superIS%wrap%modelPetLists(1)%petList => is%wrap%atmPetList
       superIS%wrap%modelPetLists(2)%petList => is%wrap%ocnPetList
+      superIS%wrap%connectorPetLists(1,2)%petList => is%wrap%atm2ocnPetList
+      superIS%wrap%connectorPetLists(2,1)%petList => is%wrap%ocn2atmPetList
     endif
     
   end subroutine

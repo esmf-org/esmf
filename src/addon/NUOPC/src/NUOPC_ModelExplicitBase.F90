@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelExplicitBase.F90,v 1.9 2011/11/11 23:10:18 theurich Exp $
+! $Id: NUOPC_ModelExplicitBase.F90,v 1.10 2012/04/10 17:35:16 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicitBase.F90"
 
@@ -15,7 +15,7 @@ module NUOPC_ModelExplicitBase
   
   private
   
-  public routine_SetServices
+  public routine_SetServices, routine_Run
   public label_CheckImport, label_Advance, label_TimestampExport
   
   character(*), parameter :: &
@@ -50,7 +50,7 @@ module NUOPC_ModelExplicitBase
       return  ! bail out
     
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_RUN, &
-      userRoutine=Run, rc=rc)
+      userRoutine=routine_Run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -78,7 +78,7 @@ module NUOPC_ModelExplicitBase
   
   !-----------------------------------------------------------------------------
 
-  subroutine Run(gcomp, importState, exportState, clock, rc)
+  subroutine routine_Run(gcomp, importState, exportState, clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock

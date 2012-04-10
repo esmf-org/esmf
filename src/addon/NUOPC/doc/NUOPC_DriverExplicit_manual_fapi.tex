@@ -63,15 +63,17 @@ Driver component that drives model and connector components by explicit time ste
   \item Initialize internal state.
   \item Set default internal clock to be a copy of the incoming clock.
   \item {\it Required specialization} to set number of model components: {\tt label\_SetModelCount}.
+  \item Allocate internal storage accrording to {\tt modelCount}.
+  \item {\it Optional specialization} to provide model and connector {\tt petList} members: {\tt label\_SetModelPetList}.
   \item Create model components, their import and export states and connector components.
   \item Initialize default run sequence.
-  \item {\it Required specialization} to set model component services: {\tt label\_SetModelServices}. Must call into SetServices() for all model and connector components. May overwrite default clock.
-  \item Execute model components' Initialize() phase 0, in order from 1 to number of model components.
+  \item {\it Required specialization} to set model component services: {\tt label\_SetModelServices}. Must call into SetServices() for all model and connector components. Optionally replace default clock. Optionally replace default run sequence.
+  \item Execute model components' Initialize() phase 0, in order.
   \item Execute connector components' Initialize() phase 0, in order.
-  \item Execute model components' Initialize() phase 1, in order from 1 to number of model components.
+  \item Execute model components' Initialize() phase 1, in order.
   \item Execute connector components' Initialize() phase 1, in order.
-  \item Execute model components' Initialize() phase 2, in order from 1 to number of model components.
-  \item Execute model components' Initialize() phase 3, in order from 1 to number of model components.
+  \item Execute model components' Initialize() phase 2, in order.
+  \item Execute model components' Initialize() phase 3, in order.
   \end{itemize}  
 \end{itemize}
 
@@ -107,6 +109,9 @@ Driver component that drives model and connector components by explicit time ste
 
   type type_InternalStateStruct
     integer                         :: modelCount
+    type(type_PetList),  pointer    :: modelPetLists(:)
+    type(type_PetList),  pointer    :: connectorPetLists(:,:)
+    !--- private members -------------
     type(ESMF_GridComp), pointer    :: modelComp(:)
     type(ESMF_State),    pointer    :: modelIS(:), modelES(:)
     type(ESMF_CplComp),  pointer    :: connectorComp(:,:)

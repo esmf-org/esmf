@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelExplicit.F90,v 1.12 2011/08/19 18:21:07 theurich Exp $
+! $Id: NUOPC_ModelExplicit.F90,v 1.13 2012/04/10 17:35:16 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicit.F90"
 
@@ -12,6 +12,7 @@ module NUOPC_ModelExplicit
   use NUOPC
   use NUOPC_ModelExplicitBase, only: &
     ModelExB_routine_SS             => routine_SetServices, &
+                                       routine_Run, &
     ModelExB_label_CheckImport      => label_CheckImport, &
     label_Advance                   => label_Advance, &
     ModelExB_label_TimestampExport  => label_TimestampExport
@@ -20,7 +21,7 @@ module NUOPC_ModelExplicit
   
   private
   
-  public routine_SetServices
+  public routine_SetServices, routine_Run
   public label_DataInitialize, label_Advance, label_SetClock
   
   character(*), parameter :: &

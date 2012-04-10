@@ -1,11 +1,11 @@
-! $Id: NUOPC_DriverExplicit.F90,v 1.18 2012/04/10 17:35:16 theurich Exp $
+! $Id: NUOPC_Driver.F90,v 1.2 2012/04/10 17:35:16 theurich Exp $
 
-#define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicit.F90"
+#define FILENAME "src/addon/NUOPC/NUOPC_Driver.F90"
 
-module NUOPC_DriverExplicit
+module NUOPC_Driver
 
   !-----------------------------------------------------------------------------
-  ! Generic Driver Component with explicit time stepping
+  ! Generic Driver Component
   !-----------------------------------------------------------------------------
 
   use ESMF
@@ -16,33 +16,33 @@ module NUOPC_DriverExplicit
   private
   
   public routine_SetServices
-  public routine_AddRunElement, routine_DeallocateRunSequence
   public type_InternalState, type_InternalStateStruct
-  public type_PetList, type_RunElement
+  public type_PetList
   public label_InternalState
   public label_SetModelCount, label_SetModelPetLists
   public label_SetModelServices, label_Finalize
   
   character(*), parameter :: &
-    label_InternalState = "DriverExplicit_InternalState"
+    label_InternalState = "Driver_InternalState"
   character(*), parameter :: &
-    label_SetModelCount = "DriverExplicit_SetModelCount"
+    label_SetModelCount = "Driver_SetModelCount"
   character(*), parameter :: &
-    label_SetModelPetLists = "DriverExplicit_SetModelPetLists"
+    label_SetModelPetLists = "Driver_SetModelPetLists"
   character(*), parameter :: &
-    label_SetModelServices = "DriverExplicit_SetModelServices"
+    label_SetModelServices = "Driver_SetModelServices"
   character(*), parameter :: &
-    label_Finalize = "DriverExplicit_Finalize"
+    label_Finalize = "Driver_Finalize"
     
   type type_InternalStateStruct
-    integer                         :: modelCount
-    type(type_PetList),  pointer    :: modelPetLists(:)
-    type(type_PetList),  pointer    :: connectorPetLists(:,:)
-    !--- private members -------------
-    type(ESMF_GridComp), pointer    :: modelComp(:)
-    type(ESMF_State),    pointer    :: modelIS(:), modelES(:)
-    type(ESMF_CplComp),  pointer    :: connectorComp(:,:)
-    type(type_RunElement), pointer  :: runSequence
+    integer                           :: modelCount
+    type(type_PetList),  pointer      :: modelPetLists(:)
+    type(type_PetList),  pointer      :: connectorPetLists(:,:)
+    !--- private members ----------------------------------------
+    type(ESMF_GridComp), pointer      :: modelComp(:)
+    type(ESMF_State),    pointer      :: modelIS(:), modelES(:)
+    type(ESMF_CplComp),  pointer      :: connectorComp(:,:)
+    type(NUOPC_RunSequence), pointer  :: runSeq(:)  ! size may increase dynamic.
+    integer                           :: runPhaseToRunSeqMap(10)
   end type
 
   type type_InternalState
@@ -50,21 +50,9 @@ module NUOPC_DriverExplicit
   end type
   
   type type_PetList
-    integer, pointer :: petList(:)  ! list that are set here transfer ownership
+    integer, pointer :: petList(:)  ! lists that are set here transfer ownership
   end type
   
-  type type_RunElement
-    integer :: i ! model component index, or src model index if connector
-    integer :: j ! if 0 then model component, if > 0 then connector for i->j
-    integer :: phase  ! run phase
-    type(type_RunElement), pointer :: next ! next RunElement in linked list
-  end type
-  
-  interface routine_AddRunElement
-    module procedure AddRunElementIJP
-    module procedure AddRunElementType
-  end interface
-
   !-----------------------------------------------------------------------------
   contains
   !-----------------------------------------------------------------------------
@@ -107,7 +95,6 @@ module NUOPC_DriverExplicit
     integer                   :: i, j, k, l, cIndex
     character(ESMF_MAXSTR)    :: iString, jString, compName, msgString
     character(ESMF_MAXSTR)    :: petListBuffer(100)
-    type(type_RunElement), pointer  :: runElement
     integer, pointer          :: i_petList(:), j_petList(:), c_petList(:)
     logical                   :: existflag
     integer                   :: rootPet, rootVas
@@ -327,19 +314,30 @@ module NUOPC_DriverExplicit
         endif
       enddo
     enddo
-    
+
     ! initialize the default Run Sequence: grouped connectors before models
-    nullify(is%wrap%runSequence)  ! initialize
+    nullify(is%wrap%runSeq) ! initialize
+    is%wrap%runPhaseToRunSeqMap = 0 ! initialize
+    
+    ! add one run sequence element
+    call NUOPC_RunSequenceAdd(is%wrap%runSeq, 1, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    
+    ! map run phase 1 to first run sequence element
+    is%wrap%runPhaseToRunSeqMap(1) = 1
+    
+    ! add run elements to the one run sequence element
     do i=1, is%wrap%modelCount
       do j=1, is%wrap%modelCount
         if (j==i) cycle ! skip self connection
-        call routine_AddRunElement(gcomp, i=i, j=j, phase=1, rc=rc)
+        call NUOPC_RunElementAdd(is%wrap%runSeq(1), i=i, j=j, phase=1, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
       enddo
     enddo
     do i=1, is%wrap%modelCount
-      call routine_AddRunElement(gcomp, i=i, j=0, phase=1, rc=rc)
+      call NUOPC_RunElementAdd(is%wrap%runSeq(1), i=i, j=0, phase=1, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     enddo
@@ -495,6 +493,14 @@ module NUOPC_DriverExplicit
       endif
     enddo
         
+#define DEBUGPRINT
+#ifdef DEBUGPRINT
+    ! print the entire runSeq structure
+    call NUOPC_RunSequencePrint(is%wrap%runSeq, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+#endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -506,17 +512,17 @@ module NUOPC_DriverExplicit
     integer, intent(out) :: rc
 
     ! local variables
-    integer                   :: localrc
-    type(type_InternalState)  :: is
-    type(ESMF_Clock)          :: internalClock
-    integer                   :: i, j, phase
-    character(ESMF_MAXSTR)    :: iString, jString, pString, msgString
-    type(type_RunElement), pointer  :: runElement
-    character(ESMF_MAXSTR)    :: modelName
+    integer                         :: localrc
+    type(type_InternalState)        :: is
+    type(ESMF_Clock)                :: internalClock
+    integer                         :: i, j, phase, runPhase, runSeqIndex
+    character(ESMF_MAXSTR)          :: iString, jString, pString, msgString
+    type(NUOPC_RunElement), pointer :: runElement
+    character(ESMF_MAXSTR)          :: modelName
 
     rc = ESMF_SUCCESS
     
-    call ESMF_GridCompGet(gcomp, name=modelName, rc=rc)
+    call ESMF_GridCompGet(gcomp, name=modelName, currentPhase=runPhase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -540,76 +546,72 @@ module NUOPC_DriverExplicit
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+    ! determine the correct run sequence index for the current runPhase    
+    runSeqIndex = is%wrap%runPhaseToRunSeqMap(runPhase)
     
-    ! time stepping loop
-    do while (.not. ESMF_ClockIsStopTime(internalClock, rc=rc))
+    ! alias the component's internalClock in this runPhase run sequence
+    call NUOPC_RunSequenceSet(is%wrap%runSeq(runSeqIndex), internalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    ! use RunSequence iterator to execute the actual time stepping loop
+    nullify(runElement) ! prepare runElement for iterator use
+    do while (NUOPC_RunSequenceIterate(is%wrap%runSeq, runSeqIndex, runElement,&
+      rc=rc))
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        
-      ! execute Run Sequence
-      if (associated(is%wrap%runSequence)) then
-        runElement => is%wrap%runSequence
-        do while (associated(runElement))
-          i = runElement%i
-          phase = runElement%phase
-          if (runElement%j > 0) then
-            ! connector component
-            j = runElement%j
-            if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
-              write (iString, *) i
-              write (jString, *) j
-              write (pString, *) phase
-              call ESMF_CplCompRun(is%wrap%connectorComp(i,j), &
-                importState=is%wrap%modelES(i), exportState=is%wrap%modelIS(j), &
-                clock=internalClock, phase=phase, userRc=localrc, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, &
-                msg="Failed calling phase "//trim(adjustl(pString))// &
-                " Run for connectorComp "//trim(adjustl(iString))// &
-                " -> "//trim(adjustl(jString)), &
-                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-              if (ESMF_LogFoundError(rcToCheck=localrc,  msg="Phase "// &
-                trim(adjustl(pString))//" Run for connectorComp "// &
-                trim(adjustl(iString))//" -> "//trim(adjustl(jString))// &
-                " did not return ESMF_SUCCESS", &
-                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-            endif
-          else
-            ! model or mediator component
-            if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
-              write (iString, *) i
-              write (pString, *) phase
-              call ESMF_GridCompRun(is%wrap%modelComp(i), &
-                importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
-                clock=internalClock, phase=phase, userRc=localrc, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, &
-                msg="Failed calling phase "//trim(adjustl(pString))// &
-                " Run for modelComp "//trim(adjustl(iString)), &
-                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-              if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase "// &
-                trim(adjustl(pString))//" Run for modelComp "// &
-                trim(adjustl(iString))//" did not return ESMF_SUCCESS", &
-                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-            endif
-          endif
-          ! advance to next element in Run Sequence
-          runElement => runElement%next
-        enddo
+      
+      ! now interpret and act on the current runElement
+      
+print *, runElement%i, runElement%j, runElement%phase
+call NUOPC_ClockPrintCurrTime(runElement%runSeq%clock, "NUOPC_Driver.Run() "// &
+  "RunSequence iterator loop at current time: ", rc=rc)
+      
+      i = runElement%i
+      phase = runElement%phase
+      internalClock = runElement%runSeq%clock
+      if (runElement%j > 0) then
+        ! connector component
+        j = runElement%j
+        if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
+          write (iString, *) i
+          write (jString, *) j
+          write (pString, *) phase
+          call ESMF_CplCompRun(is%wrap%connectorComp(i,j), &
+            importState=is%wrap%modelES(i), exportState=is%wrap%modelIS(j), &
+            clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, &
+            msg="Failed calling phase "//trim(adjustl(pString))// &
+            " Run for connectorComp "//trim(adjustl(iString))// &
+            " -> "//trim(adjustl(jString)), &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          if (ESMF_LogFoundError(rcToCheck=localrc,  msg="Phase "// &
+            trim(adjustl(pString))//" Run for connectorComp "// &
+            trim(adjustl(iString))//" -> "//trim(adjustl(jString))// &
+            " did not return ESMF_SUCCESS", &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        endif
+      else
+        ! model or mediator component
+        if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
+          write (iString, *) i
+          write (pString, *) phase
+          call ESMF_GridCompRun(is%wrap%modelComp(i), &
+            importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
+            clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, &
+            msg="Failed calling phase "//trim(adjustl(pString))// &
+            " Run for modelComp "//trim(adjustl(iString)), &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase "// &
+            trim(adjustl(pString))//" Run for modelComp "// &
+            trim(adjustl(iString))//" did not return ESMF_SUCCESS", &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        endif
       endif
 
-      ! advance to next time step
-      call ESMF_ClockAdvance(internalClock, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    
-      call NUOPC_ClockPrintCurrTime(internalClock, &
-        trim(modelName)//" time stepping loop, current time: ", msgString, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        
-    enddo ! end of time stepping loop
+    enddo
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
@@ -738,10 +740,10 @@ module NUOPC_DriverExplicit
       msg="Deallocation of internal state memory failed.", &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
-    ! deallocate RunSequence
-    call routine_DeallocateRunSequence(gcomp, rc=rc)
+    ! deallocate run sequence data structures
+    call NUOPC_RunSequenceDeallocate(is%wrap%runSeq, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
 
     ! deallocate internal state memory
     deallocate(is%wrap, stat=stat)
@@ -751,81 +753,4 @@ module NUOPC_DriverExplicit
       
   end subroutine
   
-  !-----------------------------------------------------------------------------
-
-  subroutine AddRunElementIJP(gcomp, i, j, phase, rc)
-    type(ESMF_GridComp)  :: gcomp
-    integer, intent(in)  :: i, j, phase
-    integer, intent(out) :: rc
-    ! local variables
-    integer                   :: stat
-    type(type_RunElement), pointer  :: runElement
-    allocate(runElement, stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="Allocation of RunElement for RunSequence.", &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    runElement%i = i
-    runElement%j = j
-    runElement%phase = phase
-    call routine_AddRunElement(gcomp, element=runElement, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-  end subroutine
-
-  !-----------------------------------------------------------------------------
-
-  subroutine AddRunElementType(gcomp, element, rc)
-    type(ESMF_GridComp)  :: gcomp
-    type(type_RunElement), pointer:: element
-    integer, intent(out) :: rc
-    ! local variables
-    type(type_InternalState)  :: is
-    type(type_RunElement), pointer  :: runElement
-    ! query Component for this internal State
-    nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    ! find the last element in current list and point to added element
-    if (.not.associated(is%wrap%runSequence)) then
-      is%wrap%runSequence => element
-    else
-      runElement => is%wrap%runSequence
-      do while (associated(runElement%next))
-        runElement => runElement%next
-      enddo
-      runElement%next => element
-    endif
-    nullify(element%next) ! make sure to terminate the linked list properly
-  end subroutine
-
-  !-----------------------------------------------------------------------------
-
-  subroutine routine_DeallocateRunSequence(gcomp, rc)
-    type(ESMF_GridComp)  :: gcomp
-    integer, intent(out) :: rc
-    ! local variables
-    integer                   :: stat
-    type(type_InternalState)  :: is
-    type(type_RunElement), pointer  :: runElement, runElementNext
-    ! query Component for this internal State
-    nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    ! deallocate RunSequence
-    if (associated(is%wrap%runSequence)) then
-      runElement => is%wrap%runSequence
-      do while (associated(runElement))
-        runElementNext => runElement%next
-        deallocate(runElement, stat=stat)
-        if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
-          msg="Deallocation of runElement in runSequence.", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        runElement => runElementNext
-      enddo
-      nullify(is%wrap%runSequence)  ! ensure well defined pointer status
-    endif
-  end subroutine
-
 end module

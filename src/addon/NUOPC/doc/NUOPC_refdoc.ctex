@@ -1,4 +1,4 @@
-% $Id: NUOPC_refdoc.ctex,v 1.6 2011/08/18 15:24:54 theurich Exp $ 
+% $Id: NUOPC_refdoc.ctex,v 1.7 2012/04/10 17:35:11 theurich Exp $ 
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -61,12 +61,7 @@
 \input{../addon/NUOPC/doc/NUOPC_FieldDictionaryDef_fapi}
 #endif
 
-\subsection{Utility API}
-#ifdef STANDALONE
-\input{NUOPC_fapi}
-#elif defined(CONSTITUENT)
-\input{../addon/NUOPC/doc/NUOPC_fapi}
-#endif
+\newpage
 
 \subsection{Generic Component API: NUOPC\_DriverExplicit}
 #ifdef STANDALONE
@@ -115,6 +110,36 @@
 %\input{NUOPC_Connector_fapi}
 #elif defined(CONSTITUENT)
 %\input{../addon/NUOPC/doc/NUOPC_Connector_fapi}
+#endif
+
+\newpage
+
+\subsection{Utility Class API: NUOPC\_RunSequence}
+
+The {\tt NUOPC\_RunSequence} class provides a unified data structure that allows simple as well as complex time loops to be encoded and executed. There are entry points that allow different run phases to be mapped against distinctly different time loops. 
+
+Figure \ref{fig:NUOPCRunSequence} depicts the data structures surrounding the {\tt NUOPC\_RunSequence}, starting with the InternalState of the {\tt NUOPC\_Driver} generic component.
+\begin{figure}
+\begin{center}
+\scalebox{0.6}{\includegraphics{NUOPC_RunSequence}}
+\end{center}
+\caption{NUOPC\_RunSequence class as it relates to the surrounding data structures.}
+\label{fig:NUOPCRunSequence}
+\end{figure}
+
+#ifdef STANDALONE
+\input{NUOPC_RunSequenceDef_fapi}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_RunSequenceDef_fapi}
+#endif
+
+\newpage
+
+\subsection{Utility API}
+#ifdef STANDALONE
+\input{NUOPC_Base_fapi}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_Base_fapi}
 #endif
 
 %#ifdef STANDALONE
