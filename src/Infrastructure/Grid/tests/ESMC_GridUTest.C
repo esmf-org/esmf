@@ -1,4 +1,4 @@
-// $Id: ESMC_GridUTest.C,v 1.5 2012/04/04 16:58:24 rokuingh Exp $
+// $Id: ESMC_GridUTest.C,v 1.6 2012/04/10 23:03:19 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -235,7 +235,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //  GridAddItem to grid_1p
+  //  GridAddItem mask to grid_1p
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -260,6 +260,40 @@ int main(void){
     for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
       gridMask[p]=i0;
       printf("PET%d - set gridMask[%d] = %d (%d)\n", localPet, p, 
+        i0, gridMask[p]);
+      ++p;
+    }
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //  GridAddItem area to grid_1p
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridAddItem");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridAddItem(grid_1p, ESMC_GRIDITEM_AREA, ESMC_STAGGERLOC_CENTER);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // get and fill item array
+  strcpy(name, "GridGetItem");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  double *gridArea = (double *)ESMC_GridGetItem(grid_1p, ESMC_GRIDITEM_AREA,
+                                                   ESMC_STAGGERLOC_CENTER,
+                                                   &rc);
+
+  p = 0;
+  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
+    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
+      gridArea[p]=1;
+      printf("PET%d - set gridMask[%d] = %d (%d)\n", localPet, p,
         i0, gridMask[p]);
       ++p;
     }
