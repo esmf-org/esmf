@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.10 2012/01/06 20:14:17 svasquez Exp $
+$Id: ESMF_Conf.inc,v 1.11 2012/04/11 18:29:28 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -10,12 +10,6 @@ NASA Goddard Space Flight Center.
 Licensed under the University of Illinois-NCSA License.
 #endif
 
-#if 0
-the GNU G95 compiler has a bug which prevents forward pointer references from
-working if also using the sequence keyword.  for PGI and G95 only, do not sequence
-the State derived types.
-
-#define ESMF_SEQUENCE_BUG 0
+#if (__GNUC__ == 4) && (__GNUC_MINOR__ < 3)
+#error "The gfortran compiler must be version 4.3 or newer."
 #endif
-
-

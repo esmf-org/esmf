@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.12 2012/01/06 20:14:22 svasquez Exp $
+$Id: ESMF_Conf.inc,v 1.13 2012/04/11 18:29:33 w6ws Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -10,10 +10,6 @@ NASA Goddard Space Flight Center.
 Licensed under the University of Illinois-NCSA License.
 #endif
 
-#if 0
- // define this if needed.
- // #define ESMF_SEQUENCE_BUG 0
+#if (__GNUC__ == 4) && (__GNUC_MINOR__ < 3)
+#error "The gfortran compiler must be version 4.3 or newer."
 #endif
-
-
-
