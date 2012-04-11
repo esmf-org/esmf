@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.44 2012/03/26 15:49:13 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.45 2012/04/11 15:18:54 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -261,7 +261,7 @@ contains
         B_area(2,2) = 3./4
 
         ! Finally ready to do an flux exchange from A side to B side
-        xgrid = ESMF_XGridCreate(sideA, sideB, offline=.true., &
+        xgrid = ESMF_XGridCreateFromSparseMat(sideA, sideB, &
             area=xgrid_area, centroid=centroid, &
             sparseMatA2X=sparseMatA2X, sparseMatX2B=sparseMatX2B, rc=localrc)
         if (ESMF_LogFoundError(localrc, &

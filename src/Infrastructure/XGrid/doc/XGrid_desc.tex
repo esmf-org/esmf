@@ -1,5 +1,6 @@
-% $Id: XGrid_desc.tex,v 1.7 2012/03/27 18:43:32 feiliu Exp $
+% $Id: XGrid_desc.tex,v 1.8 2012/04/11 15:18:40 feiliu Exp $
 
+\label{sec:xgrid:desc}
 An exchange grid represents the 2D boundary layer usually between the
 atmosphere on one side and ocean and land on the other in an Earth
 system model. There are dynamical and thermodynamical processes on
@@ -9,22 +10,22 @@ boundary conditions for the model components involved. For climate modeling,
 it is critical that the fluxes transferred by the boundary layer are
 conservative.
 
-The exchange grid is implemented as a collection of the intersected cells
+The ESMF exchange grid is implemented as the {\tt ESMF\_XGrid} class. 
+Internally it's represented by a collection of the intersected cells
 between atmosphere and ocean/land\cite{BalajiXGrid}. These cells can have irregular shapes
 and can be broken down into triangles facilitating a finite element
-approach. In practice, there is a threshold of minimum cell area below
-which intersections are discarded.
+approach. 
 
-The ESMF exchange grid is implemented as the {\tt ESMF\_XGrid} class. 
-An {\tt ESMF\_XGrid} object can be created either online or offline from
-user supplied information. Online creation of {\tt ESMF\_XGrid} takes
+There are two ways to create an {\tt ESMF\_XGrid} object from
+user supplied information. The first way to create an {\tt ESMF\_XGrid} takes
 two lists of {\tt ESMF\_Grid} that represent the model component grids on
 either side of the exchange grid. From the two lists of {\tt ESMF\_Grid},
 information required for flux exchange calculation between any pair of the 
 model components from either side of the exchange grid is computed. A later
 call to {\tt ESMF\_FieldRegridStore()} with the xgrid and source and destination
 {\tt ESMF\_Field}s computes the {\tt ESMF\_Routehandle} object for matrix
-multiply operation used in model remapping.
+multiply operation used in model remapping. The second way to create an {\tt ESMF\_XGrid}
+requires user to supply all necessary information to compute communication routehandle.
 
 The {\tt ESMF\_XGrid} deals with 2 distinctive kinds of fraction for each Grid cell
 involved in its creation. The first fraction quantity $f_1$ is the same as defined in direct
@@ -49,7 +50,4 @@ $f_2$ modified weight intersecting s-th source Grid cell with d-th destination G
 It can be proved that this formulation of the fractions and 
 weight calculation ensures first order global conservation of
 flux $\mathcal{F}$ transfered from source grids to exchange grid, and from exchange grid to destination grids.
-
-In the offline mode, the user is required to supply all necessary information to 
-compute communiction routehandle.
 

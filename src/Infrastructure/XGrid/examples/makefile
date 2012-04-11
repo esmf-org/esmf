@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2012/03/23 16:38:54 svasquez Exp $ 
+# $Id: makefile,v 1.4 2012/04/11 15:18:46 feiliu Exp $ 
 
 ALL:      build_examples
 run:      run_examples
@@ -6,11 +6,11 @@ run_uni:  run_examples_uni
 
 LOCDIR	  = src/Infrastructure/XGrid/examples
 
-EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_XGridEx $(ESMF_EXDIR)/ESMF_XGridOnlineEx
+EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_XGridEx $(ESMF_EXDIR)/ESMF_XGridSparseMatEx
 
-EXAMPLES_RUN = run_ESMF_XGridEx run_ESMF_XGridOnlineEx
+EXAMPLES_RUN = run_ESMF_XGridEx run_ESMF_XGridSparseMatEx
 
-EXAMPLES_RUN_UNI = run_ESMF_XGridEx_uni
+EXAMPLES_RUN_UNI = run_ESMF_XGridSparseMatEx_uni
 
 include $(ESMF_DIR)/makefile
 
@@ -23,14 +23,14 @@ CLOBBERDIRS =
 #
 # ESMF_XGridEx
 #
+run_ESMF_XGridSparseMatEx:
+	$(MAKE) EXNAME=XGridSparseMat NP=1 exfrun
+
+run_ESMF_XGridSparseMatEx_uni:
+	$(MAKE) EXNAME=XGridSparseMat NP=1 exfrun
+
+#
+# ESMF_XGrid
+#
 run_ESMF_XGridEx:
-	$(MAKE) EXNAME=XGrid NP=1 exfrun
-
-run_ESMF_XGridEx_uni:
-	$(MAKE) EXNAME=XGrid NP=1 exfrun
-
-#
-# ESMF_XGridOnline
-#
-run_ESMF_XGridOnlineEx:
-	$(MAKE) EXNAME=XGridOnline NP=4 exfrun
+	$(MAKE) EXNAME=XGrid NP=4 exfrun

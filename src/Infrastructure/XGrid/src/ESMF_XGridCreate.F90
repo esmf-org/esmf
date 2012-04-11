@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.53 2012/03/26 15:49:08 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.54 2012/04/11 15:18:52 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -71,6 +71,7 @@ module ESMF_XGridCreateMod
 !
 ! - ESMF-public methods:
     public ESMF_XGridCreate                 ! Create
+    public ESMF_XGridCreateFromSparseMat    ! Create
     public ESMF_XGridDestroy                ! Destroy
 !
 !
@@ -79,7 +80,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.53 2012/03/26 15:49:08 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.54 2012/04/11 15:18:52 feiliu Exp $'
 
 !==============================================================================
 !
@@ -221,9 +222,6 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
     sideAPriority,      sideBPriority, &
     sideAMaskValues,    sideBMaskValues, &
     storeOverlay, &
-    offline, &
-    sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, &
-    area, centroid, &
     name, rc)
 !
 ! !RETURN VALUE:
@@ -239,21 +237,13 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
   integer(ESMF_KIND_I4),intent(in), optional :: sideAMaskValues(:)
   integer(ESMF_KIND_I4),intent(in), optional :: sideBMaskValues(:)
   logical,              intent(in), optional :: storeOverlay
-  logical,              intent(in), optional :: offline
-  type(ESMF_XGridSpec), intent(in), optional :: sparseMatA2X(:)
-  type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2A(:)
-  type(ESMF_XGridSpec), intent(in), optional :: sparseMatB2X(:)
-  type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2B(:)
-  real(ESMF_KIND_R8),   intent(in), optional :: area(:)
-  real(ESMF_KIND_R8),   intent(in), optional :: centroid(:,:)
   character(len=*),     intent(in), optional :: name
   integer,              intent(out),optional :: rc
 
 !
 ! !DESCRIPTION:
 !      Create an XGrid from user supplied input: the list of Grids on side A and side B, 
-!  and other optional arguments. By default, XGrid is created online with user supplied
-!  list of Grids. Sparse matrix multiply coefficients are internally computed and
+!  and other optional arguments. Sparse matrix multiply coefficients are internally computed and
 !  uniquely determined by the Grids provided in {\tt sideA} and {\tt sideB}. User can supply
 !  a single {\tt ESMF\_Grid} or an array of {\tt ESMF\_Grid} on either side of the 
 !  {\tt ESMF\_XGrid}. For an array of {\tt ESMF\_Grid} in {\tt sideA} or {\tt sideB},
@@ -264,9 +254,6 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
 !  memory can be released by destroying XGrid after necesary routehandles are computed from
 !  {\tt ESMF\_FieldRegridStore} method.
 ! 
-!  User can also turn on offline creation of XGrid. In this case, sparse matrix matmul
-!  coefficients need to be supplied by the user. 
-!
 !  Masking is not fully tested and is not supported right now. Specifying {\tt sideAMaskValues}
 !  or {\tt sideBMaskValues} will result in an error returned from this method for online XGrid creation. 
 !
@@ -275,7 +262,10 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
 !  if the two Grids do not overlap. It is also erroneous to specify Grid object in {\tt sideA} or {\tt sideB} 
 !  that is spatially disjoint from the {\tt ESMF\_XGrid}.  
 !
-!  This call is {\em collective} across the current VM.
+!  This call is {\em collective} across the current VM. Refer to \ref{sec:xgrid:desc} for the description 
+!  of the XGrid class. For an example and associated documentation using this method see section 
+!  \ref{sec:xgrid:usage:xgrid_create}
+
 !
 !     The arguments are:
 !     \begin{description}
@@ -315,25 +305,6 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
 !           Only a {\tt ESMF\_DistGrid} is stored to allow Field to be built on the XGrid.
 !           If the temporary mesh object is of interest, {\tt storeOverlay} can be set to .true.
 !           so a user can retrieve it for future use.
-!     \item [{[offline]}]
-!           Turn on offline XGrid creation and use user supplied Sparse
-!           Matrix Multiply coefficients and index pairs, area, and centroid information.
-!     \item [{[sparseMatA2X]}]
-!           indexlist from a Grid index space on side A to xgrid index space;
-!           indexFactorlist from a Grid index space on side A to xgrid index space.
-!     \item [{[sparseMatX2A]}]
-!           indexlist from xgrid index space to a Grid index space on side A;
-!           indexFactorlist from xgrid index space to a Grid index space on side A.
-!     \item [{[sparseMatB2X]}]
-!           indexlist from a Grid index space on side B to xgrid index space;
-!           indexFactorlist from a Grid index space on side B to xgrid index space.
-!     \item [{[sparseMatX2B]}]
-!           indexlist from xgrid index space to a Grid index space on side B;
-!           indexFactorlist from xgrid index space to a Grid index space on side B.
-!     \item [{[area]}]
-!           area of the xgrid cells.
-!     \item [{[centroid]}]
-!           coordinates at the area weighted center of the xgrid cells.
 !     \item [{[name]}]
 !           name of the xgrid object.
 !     \item [{[rc]}]
@@ -344,27 +315,14 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
 !EOP
 
   integer                    :: localrc
-  logical                    :: l_offline
-  
-  l_offline = .false.
-  if(present(offline)) l_offline = offline
 
-  if(.not. l_offline) then
-    ESMF_XGridCreate = ESMF_XGridCreateDefault(sideA, sideB, & 
-      sideAToXGridScheme=sideAToXGridScheme, sideBToXGridScheme=sideBToXGridScheme, &
-      sideAPriority=sideAPriority, sideBPriority=sideBPriority, &
-      sideAMaskValues=sideAMaskValues, sideBMaskValues=sideBMaskValues, &
-      storeOverlay=storeOverlay, name=name, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-  else
-    ESMF_XGridCreate = ESMF_XGridCreateOffline(sideA, sideB, &
-      sparseMatA2X=sparseMatA2X, sparseMatX2A=sparseMatX2A, &
-      sparseMatB2X=sparseMatB2X, sparseMatX2B=sparseMatX2B, &
-      area=area, centroid=centroid, name=name, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-  endif
+  ESMF_XGridCreate = ESMF_XGridCreateDefault(sideA, sideB, & 
+    sideAToXGridScheme=sideAToXGridScheme, sideBToXGridScheme=sideBToXGridScheme, &
+    sideAPriority=sideAPriority, sideBPriority=sideBPriority, &
+    sideAMaskValues=sideAMaskValues, sideBMaskValues=sideBMaskValues, &
+    storeOverlay=storeOverlay, name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   if(present(rc)) rc = ESMF_SUCCESS
 
@@ -1049,13 +1007,13 @@ end function ESMF_XGridCreateDefault
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_XGridCreateOffline()"
-!BOPI
-! !IROUTINE:  ESMF_XGridCreateOfflineCreate an XGrid from raw input parameters
+#define ESMF_METHOD "ESMF_XGridCreateFromSparseMat()"
+!BOP
+! !IROUTINE:  ESMF_XGridCreateFromSparseMat an XGrid from raw input parameters
 
 ! !INTERFACE:
 
-function ESMF_XGridCreateOffline(sideA, sideB, &
+function ESMF_XGridCreateFromSparseMat(sideA, sideB, &
     sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, &
     area, centroid, &
     name, &
@@ -1063,7 +1021,7 @@ function ESMF_XGridCreateOffline(sideA, sideB, &
 
 !
 ! !RETURN VALUE:
-    type(ESMF_XGrid) :: ESMF_XGridCreateOffline
+    type(ESMF_XGrid) :: ESMF_XGridCreateFromSparseMat
 !
 ! !ARGUMENTS:
 type(ESMF_Grid), intent(in)                :: sideA(:), sideB(:)
@@ -1078,7 +1036,10 @@ integer, intent(out), optional             :: rc
 
 !
 ! !DESCRIPTION:
-!      Create an XGrid directly from raw input parameters
+!      Create an XGrid directly from user supplied sparse matrix parameters. User
+!      is responsible to supply all information necessary for communication calculation. 
+!      For an example and associated documentation using this method see section 
+!      \ref{sec:xgrid:usage:xgrid_createfromsparsemat}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1086,8 +1047,6 @@ integer, intent(out), optional             :: rc
 !           2D Grids on side A.
 !     \item [sideB]
 !           2D Grids on side B.
-!     \item [offline]
-!           Indicate this is offline XGrid creation.
 !     \item [{[sparseMatA2X]}]
 !           indexlist from a Grid index space on side A to xgrid index space;
 !           indexFactorlist from a Grid index space on side A to xgrid index space.
@@ -1111,7 +1070,7 @@ integer, intent(out), optional             :: rc
 !           is created.
 !     \end{description}
 !
-!EOPI
+!EOP
 
     integer :: localrc, ngrid_a, ngrid_b
     integer :: i
@@ -1155,7 +1114,7 @@ integer, intent(out), optional             :: rc
 
     ! initialize XGridType object and its base object
     nullify(xgtype)
-    nullify(ESMF_XGridCreateOffline%xgtypep)
+    nullify(ESMF_XGridCreateFromSparseMat%xgtypep)
     call ESMF_XGridConstructBaseObj(xgtype, name, localrc)
     if (ESMF_LogFoundAllocError(localrc, &
       msg="Constructing xgtype base object ", &
@@ -1172,17 +1131,17 @@ integer, intent(out), optional             :: rc
     ! Finalize XGrid Creation
     xgtype%online = 0
     xgtype%status = ESMF_STATUS_READY
-    ESMF_XGridCreateOffline%xgtypep => xgtype 
-    ESMF_INIT_SET_CREATED(ESMF_XGridCreateOffline)
+    ESMF_XGridCreateFromSparseMat%xgtypep => xgtype 
+    ESMF_INIT_SET_CREATED(ESMF_XGridCreateFromSparseMat)
 
-    call ESMF_XGridValidate(ESMF_XGridCreateOffline, rc=localrc)
+    call ESMF_XGridValidate(ESMF_XGridCreateFromSparseMat, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(present(rc)) rc = ESMF_SUCCESS
 
-end function ESMF_XGridCreateOffline
+end function ESMF_XGridCreateFromSparseMat
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
