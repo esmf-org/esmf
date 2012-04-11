@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.2 2012/04/10 17:35:16 theurich Exp $
+! $Id: NUOPC_Base.F90,v 1.2.2.1 2012/04/11 22:00:08 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -46,7 +46,7 @@ module NUOPC_Base
   public NUOPC_StateBuildStdList
   public NUOPC_StateIsAllConnected
   public NUOPC_StateIsFieldConnected
-  public NUOPC_StateIsCurrentTimestamp
+  public NUOPC_StateIsAtTime
   public NUOPC_StateRealizeField
   public NUOPC_StateSetTimestamp
   public NUOPC_StateUpdateTimestamp
@@ -1327,34 +1327,28 @@ module NUOPC_Base
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_StateIsCurrentTimestamp - Check if fields in state are at current time
+! !IROUTINE: NUOPC_StateIsAtTime - Check if all fields in the state are at the given time
 ! !INTERFACE:
-  function NUOPC_StateIsCurrentTimestamp(state, clock, rc)
+  function NUOPC_StateIsAtTime(state, time, rc)
 ! !ARGUMENTS:
-    logical :: NUOPC_StateIsCurrentTimestamp
+    logical :: NUOPC_StateIsAtTime
     type(ESMF_State), intent(in)            :: state
-    type(ESMF_Clock), intent(in)            :: clock
+    type(ESMF_Time),  intent(in)            :: time
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Returns {\tt .true.} if all Fields in {\tt state} have a timestamp that
-!   matches {\tt clock}. Otherwise returns {\tt .false.}.
+!   matches {\tt time}. Otherwise returns {\tt .false.}.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
     character(ESMF_MAXSTR), pointer       :: stdAttrNameList(:)
     character(ESMF_MAXSTR), pointer       :: stdItemNameList(:)
     type(ESMF_Field)                      :: field
-    type(ESMF_Time)         :: time, fieldTime
+    type(ESMF_Time)         :: fieldTime
     integer                 :: i, valueList(9)
-    logical                 :: isCurrent
+    logical                 :: isMatch
     
     if (present(rc)) rc = ESMF_SUCCESS
-    
-    call ESMF_ClockGet(clock, currTime=time, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
     
     nullify(stdAttrNameList)
     nullify(stdItemNameList)
@@ -1366,7 +1360,7 @@ module NUOPC_Base
       file=FILENAME)) &
       return  ! bail out
       
-    isCurrent = .true. ! initialize
+    isMatch = .true. ! initialize
     
     if (associated(stdItemNameList)) then
       do i=1, size(stdItemNameList)
@@ -1394,7 +1388,7 @@ module NUOPC_Base
           file=FILENAME)) &
           return  ! bail out
         if (fieldTime /= time) then
-          isCurrent = .false.
+          isMatch = .false.
           exit
         endif
       enddo
@@ -1403,7 +1397,7 @@ module NUOPC_Base
     if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
     if (associated(stdItemNameList)) deallocate(stdItemNameList)
     
-    NUOPC_StateIsCurrentTimestamp = isCurrent
+    NUOPC_StateIsAtTime = isMatch
     
   end function
   !-----------------------------------------------------------------------------

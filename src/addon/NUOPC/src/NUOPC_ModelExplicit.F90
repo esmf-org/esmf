@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelExplicit.F90,v 1.13 2012/04/10 17:35:16 theurich Exp $
+! $Id: NUOPC_ModelExplicit.F90,v 1.13.2.1 2012/04/11 22:00:08 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicit.F90"
 
@@ -12,8 +12,8 @@ module NUOPC_ModelExplicit
   use NUOPC
   use NUOPC_ModelExplicitBase, only: &
     ModelExB_routine_SS             => routine_SetServices, &
-                                       routine_Run, &
-    ModelExB_label_CheckImport      => label_CheckImport, &
+    routine_Run                     => routine_Run, &
+    label_CheckImport               => label_CheckImport, &
     label_Advance                   => label_Advance, &
     ModelExB_label_TimestampExport  => label_TimestampExport
 
@@ -21,8 +21,15 @@ module NUOPC_ModelExplicit
   
   private
   
-  public routine_SetServices, routine_Run
-  public label_DataInitialize, label_Advance, label_SetClock
+  public &
+    routine_Run, &
+    routine_SetServices
+    
+  public &
+    label_Advance, &
+    label_CheckImport, &
+    label_DataInitialize, &
+    label_SetClock
   
   character(*), parameter :: &
     label_DataInitialize = "ModelExplicit_DataInitialize"
@@ -63,7 +70,7 @@ module NUOPC_ModelExplicit
       return  ! bail out
     
     ! Specialize Run -> checking import Fields
-    call ESMF_MethodAdd(gcomp, label=ModelExB_label_CheckImport, &
+    call ESMF_MethodAdd(gcomp, label=label_CheckImport, &
       userRoutine=CheckImport, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -191,10 +198,18 @@ module NUOPC_ModelExplicit
     type(ESMF_GridComp)   :: gcomp
     integer, intent(out)  :: rc
     
+    ! This is the routine that enforces the explicit time dependence on the
+    ! import fields. This simply means that the timestamps on the Fields in the
+    ! importState are checked against the currentTime on the Component's 
+    ! internalClock. Consequenty, this model starts out with forcing fields
+    ! at the current time as it does its forward step from currentTime to 
+    ! currentTime + timeStep.
+    
     ! local variables
-    type(ESMF_Clock)      :: clock
-    type(ESMF_State)      :: importState
-    logical               :: allCurrent
+    type(ESMF_Clock)        :: clock
+    type(ESMF_Time)         :: time
+    type(ESMF_State)        :: importState
+    logical                 :: allCurrent
 
     rc = ESMF_SUCCESS
     
@@ -205,8 +220,15 @@ module NUOPC_ModelExplicit
       file=__FILE__)) &
       return  ! bail out
 
+    ! get the current time out of the clock
+    call ESMF_ClockGet(clock, currTime=time, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
     ! check that Fields in the importState show correct timestamp
-    allCurrent = NUOPC_StateIsCurrentTimestamp(importState, clock, rc=rc)
+    allCurrent = NUOPC_StateIsAtTime(importState, time, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &

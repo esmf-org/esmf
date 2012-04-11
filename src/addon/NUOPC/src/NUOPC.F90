@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.27 2012/04/10 17:35:16 theurich Exp $
+! $Id: NUOPC.F90,v 1.27.2.1 2012/04/11 22:00:08 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -43,7 +43,7 @@ module NUOPC
   public NUOPC_StateBuildStdList
   public NUOPC_StateIsAllConnected
   public NUOPC_StateIsFieldConnected
-  public NUOPC_StateIsCurrentTimestamp
+  public NUOPC_StateIsAtTime
   public NUOPC_StateRealizeField
   public NUOPC_StateSetTimestamp
   public NUOPC_StateUpdateTimestamp
