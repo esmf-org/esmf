@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.48 2012/01/18 00:53:59 oehmke Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.49 2012/04/11 15:27:12 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -403,7 +403,7 @@ contains
         B_area(2,2) = 3./4
 
         ! Finally ready to do an flux exchange from A side to B side
-        xgrid = ESMF_XGridCreate(sideA, sideB, offline=.true., &
+        xgrid = ESMF_XGridCreateFromSparseMat(sideA, sideB, &
             area=xgrid_area, centroid=centroid, &
             sparseMatA2X=sparseMatA2X, sparseMatX2B=sparseMatX2B, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -876,7 +876,7 @@ contains
         B_area(2,2) = 3./4
 
         ! Finally ready to do an flux exchange from A side to B side
-        xgrid = ESMF_XGridCreate(sideA, sideB, offline=.true., &
+        xgrid = ESMF_XGridCreateFromSparseMat(sideA, sideB, &
             area=xgrid_area, centroid=centroid, &
             sparseMatA2X=sparseMatA2X, sparseMatX2B=sparseMatX2B, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -1292,8 +1292,7 @@ contains
       enddo
     enddo
     sparseMatA2X(1)%factorList=>weights
-    xgrid = ESMF_XGridCreate(sideA=(/grid_atm/), sideB=(/grid_ocn/), &
-        offline=.true., &
+    xgrid = ESMF_XGridCreateFromSparseMat(sideA=(/grid_atm/), sideB=(/grid_ocn/), &
         sparseMatA2X=sparseMatA2X, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -1592,8 +1591,7 @@ contains
       enddo
     enddo
     sparseMatA2X(1)%factorList=>weights
-    xgrid = ESMF_XGridCreate(sideA=(/grid_atm/), sideB=(/grid_ocn/), &
-        offline=.true., &
+    xgrid = ESMF_XGridCreateFromSparseMat(sideA=(/grid_atm/), sideB=(/grid_ocn/), &
         sparseMatA2X=sparseMatA2X, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -1892,8 +1890,7 @@ contains
       enddo
     enddo
     sparseMatA2X(1)%factorList=>weights
-    xgrid = ESMF_XGridCreate(sideA=(/grid_atm/), sideB=(/grid_ocn/), &
-        offline=.true., &
+    xgrid = ESMF_XGridCreateFromSparseMat(sideA=(/grid_atm/), sideB=(/grid_ocn/), &
         sparseMatA2X=sparseMatA2X, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -2205,8 +2202,7 @@ contains
       enddo
     enddo
     sparseMatA2X(1)%factorList=>weights
-    xgrid = ESMF_XGridCreate(sideA=(/grid_atm/), sideB=(/grid_ocn/), &
-        offline=.true., &
+    xgrid = ESMF_XGridCreateFromSparseMat(sideA=(/grid_atm/), sideB=(/grid_ocn/), &
         sparseMatA2X=sparseMatA2X, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -2525,8 +2521,8 @@ contains
     sideB(1) = grid_atm
     A2X(1)%factorIndexList = indices
     A2X(1)%factorList = weights
-    xgrid = ESMF_XGridCreate(sideA, sideB, &
-      offline=.true., sparseMatA2X=A2X, rc=localrc)
+    xgrid = ESMF_XGridCreateFromSparseMat(sideA, sideB, &
+      sparseMatA2X=A2X, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
