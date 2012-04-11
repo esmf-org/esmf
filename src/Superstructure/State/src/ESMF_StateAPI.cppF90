@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.30 2012/03/21 17:11:10 w6ws Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.31 2012/04/11 14:53:03 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.30 2012/03/21 17:11:10 w6ws Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.31 2012/04/11 14:53:03 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1868,14 +1868,10 @@ StateGetMacro(ESMF_State,State,nestedState,spp)
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
 
-       if (debugflag) then
-         write (mypet_string,'(i8)') mypet
-         mypet_string = adjustl (mypet_string)
-         write (ESMF_UtilIOStdout,*)  &
-             "StatePrint (pet ", trim (mypet_string), "):"
-       else
-         write (ESMF_UtilIOStdout,*) "StatePrint:"
-       end if
+       write (mypet_string,'(i8)') mypet
+       mypet_string = adjustl (mypet_string)
+       write (ESMF_UtilIOStdout,*)  &
+           "StatePrint (pet ", trim (mypet_string), "):"
 
        call statePrintWorker (state%statep, level=0, rc1=rc)
 
