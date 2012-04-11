@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.h,v 1.13 2012/03/27 22:37:28 oehmke Exp $
+// $Id: ESMCI_ConserveInterp.h,v 1.14 2012/04/11 22:29:20 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -28,7 +28,7 @@ namespace ESMCI {
   void calc_1st_order_weights_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
                                            std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
                                            double *src_elem_area,
-                                        std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas,
+                                        std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas, std::vector<double> *dst_areas,
                                         Mesh * midmesh, std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, 
                                         struct Zoltan_Struct * zz);
 
@@ -42,7 +42,7 @@ namespace ESMCI {
   void calc_1st_order_weights_3D_3D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
                                            std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
                                            double *src_elem_area,
-                                           std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas, 
+                                           std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas, std::vector<double> *dst_areas,
                                            Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes, 
                                          std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct *zz);
 

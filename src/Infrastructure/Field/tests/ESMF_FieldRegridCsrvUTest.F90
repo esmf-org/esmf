@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.32 2012/03/27 20:46:57 oehmke Exp $
+! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.33 2012/04/11 22:29:18 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -306,7 +306,7 @@
 
       
       ! return result
-      call ESMF_Test((itrp.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
+      call ESMF_Test((itrp .eqv. .true. .and. rc.eq.ESMF_SUCCESS), name, &
                       failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -317,7 +317,7 @@
 
       
       ! return result
-      call ESMF_Test((itrp.eqv..true. .and. rc.eq.ESMF_SUCCESS), name, &
+      call ESMF_Test((csrv .eqv. .true. .and. rc.eq.ESMF_SUCCESS), name, &
                       failMsg, result, ESMF_SRCLINE)
 
 
@@ -4554,6 +4554,8 @@ contains
 
   integer, pointer :: larrayList(:)
   integer :: localPet, petCount
+  integer :: src_num, dst_num
+  integer :: tmp(1), gtmp(1)
 
   ! result code
   integer :: finalrc
@@ -4779,8 +4781,8 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Source Grid
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! Construct 3D Grid A
   ! (Get memory and set coords for src)
+  src_num=0
   do lDE=0,localDECount-1
  
      !! get coord 1
@@ -4843,12 +4845,6 @@ contains
         return
      endif
 
-     call ESMF_GridGetItem(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           itemflag=ESMF_GRIDITEM_AREA, farrayPtr=srcAreaPtr, rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-        rc=ESMF_FAILURE
-        return
-     endif
 
      !! set coords, interpolated function
      do i1=clbnd(1),cubnd(1)
@@ -4873,7 +4869,7 @@ contains
        ! farrayPtr(i1,i2) = 1.
        farrayPtr(i1,i2) = 2. + cos(theta)**2.*cos(2.*phi)
 
-#if 0 
+#if 1
         if ((lat>-45) .and. (lat<45)) then
            srcMask(i1,i2)=1
         else
@@ -4884,8 +4880,40 @@ contains
 #endif      
   
         ! Set user area
-        srcAreaPtr(i1,i2)=1.0
+        src_num=src_num+1
+     enddo
+     enddo
+  enddo    ! lDE
 
+
+  ! Sum number of src elements
+  tmp(1)=src_num
+  call ESMF_VMAllReduce(vm, tmp, gtmp, 1, ESMF_REDUCE_SUM, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+  src_num=gtmp(1)
+
+
+  ! Set src areas 
+  do lDE=0,localDECount-1
+
+     !! Get area pointer
+     call ESMF_GridGetItem(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+          itemflag=ESMF_GRIDITEM_AREA, farrayPtr=srcAreaPtr, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+     !! Set area, so total area is 1.0
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+           
+        ! Set user area
+        srcAreaPtr(i1,i2)=1.0/REAL(src_num)
+           
      enddo
      enddo
   enddo    ! lDE
@@ -4895,8 +4923,8 @@ contains
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Destination grid
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
   ! Get memory and set coords for dst
+  dst_num=0
   do lDE=0,localDECount-1
  
      !! get coords
@@ -4951,12 +4979,6 @@ contains
         return
      endif
 
-     call ESMF_GridGetItem(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                           itemflag=ESMF_GRIDITEM_AREA, farrayPtr=dstAreaPtr, rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-        rc=ESMF_FAILURE
-        return
-     endif
 
      ! get dst pointer
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=fclbnd, &
@@ -5001,7 +5023,7 @@ contains
        ! xfarrayPtr(i1,i2) = 1.0
 
 
-#if 0
+#if 1
         if ((lon>-45) .and. (lon<45)) then
            dstMask(i1,i2)=1
         else 
@@ -5011,13 +5033,41 @@ contains
            dstMask(i1,i2)=0
 #endif
 
-
-     dstAreaPtr(i1,i2)=2.0
-
+           dst_num=dst_num+1
      enddo
      enddo
-
   enddo    ! lDE
+
+
+  ! Sum number of dst elements
+  tmp(1)=dst_num
+  call ESMF_VMAllReduce(vm, tmp, gtmp, 1, ESMF_REDUCE_SUM, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+    rc=ESMF_FAILURE
+    return
+  endif
+  dst_num=gtmp(1)
+
+
+  ! Set dst areas 
+  do lDE=0,localDECount-1
+
+     !! Get dst area
+     call ESMF_GridGetItem(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+                           itemflag=ESMF_GRIDITEM_AREA, farrayPtr=dstAreaPtr, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=ESMF_FAILURE
+        return
+     endif
+
+    !! Set dst area so total is 1.0
+     do i1=clbnd(1),cubnd(1)
+     do i2=clbnd(2),cubnd(2)
+        dstAreaPtr(i1,i2)=1.0/REAL(dst_num)
+     enddo
+     enddo
+  enddo    ! lDE
+
 
 
 
@@ -5066,6 +5116,10 @@ contains
 
 
   ! Check if the values are close
+  minerror(1) = 100000.
+  maxerror(1) = 0.
+  error = 0.
+  dstmass = 0.
   do lDE=0,localDECount-1
 
      ! get dst Field
@@ -5113,17 +5167,11 @@ contains
         return
      endif
 
-
-     minerror(1) = 100000.
-     maxerror(1) = 0.
-     error = 0.
-     dstmass = 0.
-
- 
      ! destination grid
      !! check relative error
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
+         
         ! skip if masked
         if (dstMask(i1,i2) .eq. 1) cycle
 
@@ -5192,10 +5240,7 @@ contains
 
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
-! FOR TESTING THE BELOW
-!        srcmass(1) = srcmass(1) + srcFracptr(i1,i2)*srcAreaptr(i1,i2)*farrayPtr(i1,i2)
-
-        srcmass(1) = srcmass(1) + srcAreaptr(i1,i2)*farrayPtr(i1,i2)
+        srcmass(1) = srcmass(1) + srcFracptr(i1,i2)*srcAreaptr(i1,i2)*farrayPtr(i1,i2)
      enddo
      enddo
 

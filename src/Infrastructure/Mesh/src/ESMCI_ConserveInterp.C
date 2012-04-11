@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.C,v 1.16 2012/03/27 20:47:04 oehmke Exp $
+// $Id: ESMCI_ConserveInterp.C,v 1.17 2012/04/11 22:29:21 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.16 2012/03/27 20:47:04 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.17 2012/04/11 22:29:21 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -248,7 +248,8 @@ namespace ESMCI {
   void calc_1st_order_weights_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
                                            std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
                                            double *src_elem_area,
-                                           std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas,
+                                           std::vector<int> *valid, std::vector<double> *wgts, 
+                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
                                            Mesh * midmesh, 
                                            std::vector<sintd_node *> * sintd_nodes, 
                                            std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct *zz) {
@@ -278,17 +279,33 @@ namespace ESMCI {
     // Get rid of degenerate edges
     remove_0len_edges2D(&num_src_nodes, src_coords);
 
-    // if less than a triangle complain
+    // If less than a triangle invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
     if (num_src_nodes<3) {
-      Throw() << "Source Element is degenerate";
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*wgts)[i]=0.0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
     }
 
     // calculate dst area
     double src_area=area_of_flat_2D_polygon(num_src_nodes, src_coords); 
 
-    // if the src_area is 0 freak out
+    // If src area is 0.0 invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
     if (src_area == 0.0) {
-      Throw() << "Source Element has 0 area";
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*wgts)[i]=0.0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
     }
 
     // Output src_elem_area
@@ -323,7 +340,6 @@ namespace ESMCI {
       if (num_dst_nodes<1) {
 	(*valid)[i]=0;
 	(*wgts)[i]=0.0;
-	(*areas)[i]=0.0;
         sintd_areas[i]=0.0;
 	continue;
       }
@@ -333,7 +349,10 @@ namespace ESMCI {
       
       // if less than a triangle complain
       if (num_dst_nodes<3) {
-	Throw() << "Source Element is degenerate";
+        (*valid)[i]=0;
+        (*wgts)[i]=0.0;
+        sintd_areas[i]=0.0;
+        continue;
       }
       
       // calculate dst area
@@ -343,7 +362,6 @@ namespace ESMCI {
      if (dst_areas[i]==0.0) {
        (*valid)[i]=0;
        (*wgts)[i]=0.0;
-       (*areas)[i]=0.0;
        sintd_areas[i]=0.0;
        continue;
      }
@@ -379,7 +397,6 @@ namespace ESMCI {
       if (num_sintd_nodes < 3) {
 	(*valid)[i]=0;
 	(*wgts)[i]=0.0;
-	(*areas)[i]=0.0;
         sintd_areas[i]=0.0;
 	continue;
       }
@@ -414,8 +431,8 @@ namespace ESMCI {
     // Loop setting areas
     for (int i=0; i<dst_elems.size(); i++) {
       if ((*valid)[i]==1) {
-        // return weight
-        (*areas)[i]=sintd_areas[i];
+        (*sintd_areas_out)[i]=sintd_areas[i];
+        (*dst_areas_out)[i]=dst_areas[i];
       }
     }
 
@@ -746,8 +763,8 @@ void norm_poly3D(int num_p, double *p) {
   void calc_1st_order_weights_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
                                            std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
                                            double *src_elem_area,
-                                           std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *sintd_areas_out, 
-                                           std::vector<double> *dst_areas_out, 
+                                           std::vector<int> *valid, std::vector<double> *wgts, 
+                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out, 
                                            Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes, 
                                            std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct *zz) {
 
@@ -776,32 +793,37 @@ void norm_poly3D(int num_p, double *p) {
     // Get rid of degenerate edges
     remove_0len_edges3D(&num_src_nodes, src_coords);
 
-    // if less than a triangle complain
+
+    // If less than a triangle invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
     if (num_src_nodes<3) {
-      Throw() << " Source element is degenerate (has less than 3 distinct nodes)";
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*wgts)[i]=0.0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
     }
 
-    //    if (src_elem->get_id()==8969) mathutil_debug=true;
     // calculate dst area
     double src_area=great_circle_area(num_src_nodes, src_coords); 
-    // mathutil_debug=false;
 
-    //    if (src_elem->get_id()==8969) {
-    //  printf("%d area=%20.17f\n",src_elem->get_id(),src_area);
-    //  write_3D_poly_to_vtk("bad_src_elem", src_elem->get_id(), num_src_nodes, src_coords);
-    //}
 
-    // if the src_area is 0 freak out
+    // If src area is 0.0 invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
     if (src_area == 0.0) {
- /* XMRKX */
-      printf(" src_elem=%d \n",src_elem->get_id());
-	for (int j=0; j<num_src_nodes; j++) {
-	  printf(" [%20.17f,%20.17f,%20.17f] ",src_coords[3*j],src_coords[3*j+1],src_coords[3*j+2]);
-	}      
-        printf("\n");
-
-        Throw() << "Source Element has 0 area";
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*wgts)[i]=0.0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
     }
+
 
     // Output src_elem_area
     *src_elem_area=src_area;    
@@ -833,8 +855,6 @@ void norm_poly3D(int num_p, double *p) {
       if (num_dst_nodes<1) {
 	(*valid)[i]=0;
 	(*wgts)[i]=0.0;
-	(*sintd_areas_out)[i]=0.0;
-	(*dst_areas_out)[i]=0.0;
         sintd_areas[i]=0.0;
 	continue;
       }
@@ -844,7 +864,10 @@ void norm_poly3D(int num_p, double *p) {
       
       // if less than a triangle complain
       if (num_dst_nodes<3) {
-	Throw() << " Destination element is degenerate (has less than 3 distinct nodes)";
+        (*valid)[i]=0;
+        (*wgts)[i]=0.0;
+        sintd_areas[i]=0.0;
+        continue;
       }
       
       // calculate dst area
@@ -854,8 +877,6 @@ void norm_poly3D(int num_p, double *p) {
      if (dst_areas[i]==0.0) {
        (*valid)[i]=0;
        (*wgts)[i]=0.0;
-       (*sintd_areas_out)[i]=0.0;
-       (*dst_areas_out)[i]=0.0;
        sintd_areas[i]=0.0;
        continue;
      }
@@ -890,8 +911,6 @@ void norm_poly3D(int num_p, double *p) {
       if (num_sintd_nodes < 3) {
 	(*valid)[i]=0;
 	(*wgts)[i]=0.0;
-        (*sintd_areas_out)[i]=0.0;
-        (*dst_areas_out)[i]=0.0;
         sintd_areas[i]=0.0;
 	continue;
       }
@@ -1073,7 +1092,8 @@ void convert_hex(double *pnts, double *tris) {
   void calc_1st_order_weights_3D_3D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
                                            std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
                                            double *src_elem_area,
-                                           std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas, 
+                                           std::vector<int> *valid, std::vector<double> *wgts, 
+                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out, 
                                            Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes, 
                                            std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct *zz) {
 
@@ -1081,16 +1101,33 @@ void convert_hex(double *pnts, double *tris) {
  
     Phedra src_phedra=create_phedra_from_elem(src_elem, src_cfield);
 
+    // If less than a tetrahedra invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
     if (src_phedra.is_degenerate()) {
-      Throw() << " Source element is degenerate (has less than 4 faces))";
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*wgts)[i]=0.0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
     }
 
     // calculate src volume
     double src_area=src_phedra.calc_volume(); 
 
-    // if the src_volume is 0 freak out
+    // If src area is 0.0 invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
     if (src_area == 0.0) {
-      Throw() << "Source Element has 0 volume";
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*wgts)[i]=0.0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
     }
 
     // Output src_elem_area
@@ -1110,27 +1147,21 @@ void convert_hex(double *pnts, double *tris) {
       // Create Phedra      
       Phedra dst_phedra=create_phedra_from_elem(dst_elem, dst_cfield);
       
-      // if less than a triangle complain
+      // If less than a tetrahedra invalidate and go to next
       if (dst_phedra.is_degenerate()) {
-	Throw() << " Destination element is degenerate (has less than 4 faces)";
+	(*valid)[i]=0;
+	(*wgts)[i]=0.0;
+        sintd_areas[i]=0.0;
+	continue;
       }
  
       // calculate dst area
      dst_areas[i]=dst_phedra.calc_volume(); 
 
-#if 0
-     if (dst_elem->get_id()==2011) {
-        char new_filename[1000];
-        sprintf(new_filename,"dst_phedra%d",i);
-        dst_phedra.write_to_vtk(new_filename);
-     }
-#endif
-
      // if destination area is 0.0, invalidate and go to next
      if (dst_areas[i]==0.0) {
        (*valid)[i]=0;
        (*wgts)[i]=0.0;
-       (*areas)[i]=0.0;
        sintd_areas[i]=0.0;
        continue;
      }
@@ -1146,11 +1177,10 @@ void convert_hex(double *pnts, double *tris) {
      phedra_debug=false;
 #endif
 
-      // if intersected element isn't a complete polygon then go to next
+      // if intersected element isn't a complete polyhedra then go to next
      if (dst_phedra.is_degenerate()) {
        (*valid)[i]=0;
        (*wgts)[i]=0.0;
-       (*areas)[i]=0.0;
        sintd_areas[i]=0.0;
        continue;
      }
@@ -1161,7 +1191,6 @@ void convert_hex(double *pnts, double *tris) {
      if (sintd_areas[i] <1.0E-20) {
        (*valid)[i]=0;
        (*wgts)[i]=0.0;
-       (*areas)[i]=0.0;
        sintd_areas[i]=0.0;
        continue;
      }
@@ -1204,23 +1233,12 @@ void convert_hex(double *pnts, double *tris) {
     for (int i=0; i<dst_elems.size(); i++) {
       if ((*valid)[i]==1) {
         // return weight
-        (*areas)[i]=sintd_areas[i];
+        (*sintd_areas_out)[i]=sintd_areas[i];
+        (*dst_areas_out)[i]=dst_areas[i];
       }
     }
     
   }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
