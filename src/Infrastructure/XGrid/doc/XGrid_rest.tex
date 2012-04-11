@@ -1,15 +1,13 @@
-% $Id: XGrid_rest.tex,v 1.4 2010/10/20 03:17:55 theurich Exp $
+% $Id: XGrid_rest.tex,v 1.5 2012/04/11 19:52:46 feiliu Exp $
 
 \subsubsection{Restrictions and Future Work}
 
 \begin{enumerate}
 \label{XGrid:rest}
 
-\item {\bf CAUTION:} The XGrid class and its APIs are only tested in a 
-uni-processor setup, however in principle it should also work multi-processor. 
-This limitation will be removed in a future release.
-\item More convenient {\tt ESMF\_XGridCreate()} API will be provided in
-the future that will not require a user to supply the interpolation matrix.
+\item {\bf CAUTION:} The XGrid class currently does not support merging of two global Grids. 
+\item {\bf CAUTION:} The XGrid class currently does not support masking.
+\item {\bf CAUTION:} Any Grid pair on either side of the XGrid cannot be identical topologically and geometrically.
 
 \end{enumerate}
 
