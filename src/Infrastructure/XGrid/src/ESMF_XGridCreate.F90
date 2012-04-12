@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.55 2012/04/12 17:01:19 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.56 2012/04/12 17:03:13 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.55 2012/04/12 17:01:19 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.56 2012/04/12 17:03:13 feiliu Exp $'
 
 !==============================================================================
 !
@@ -260,7 +260,7 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
 !  that is spatially disjoint from the {\tt ESMF\_XGrid}.  
 !
 !  This call is {\em collective} across the current VM. For more details please refer to the description 
-!  of the XGrid class. For an example and associated documentation using this method see section 
+!  \ref{sec:xgrid:desc} of the XGrid class. For an example and associated documentation using this method see section 
 !  \ref{sec:xgrid:usage:xgrid_create}
 
 !
