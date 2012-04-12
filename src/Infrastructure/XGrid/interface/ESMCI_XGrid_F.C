@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGrid_F.C,v 1.15 2012/04/12 17:01:13 feiliu Exp $
+// $Id: ESMCI_XGrid_F.C,v 1.16 2012/04/12 21:56:07 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_XGrid_F.C,v 1.15 2012/04/12 17:01:13 feiliu Exp $";
+             "$Id: ESMCI_XGrid_F.C,v 1.16 2012/04/12 21:56:07 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -214,7 +214,7 @@ void FTN_X(c_esmc_xgridregrid_create)(ESMCI::VM **vmpp,
     IWeights wts;
 
     if(!online_regrid_xgrid(srcmesh, dstmesh, *mesh, wts, &regridConserve, regridMethod,
-                      unmappedaction))
+                      NULL, unmappedaction))
       Throw() << "Online regridding error" << std::endl;
 
     // Firstly, the index list
