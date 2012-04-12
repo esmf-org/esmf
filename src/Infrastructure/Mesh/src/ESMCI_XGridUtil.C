@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.13 2012/03/08 19:41:15 feiliu Exp $
+// $Id: ESMCI_XGridUtil.C,v 1.14 2012/04/12 22:26:55 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -1197,7 +1197,7 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
 
 // A different path for online regrid
 int online_regrid_xgrid(Mesh &srcmesh, Mesh &dstmesh, Mesh * midmesh, IWeights &wts,
-                  int *regridConserve, int *regridMethod, int *regridScheme,
+                  int *regridConserve, int *regridMethod, 
                   int *unmappedaction) {
 
   // Conservative regridding
@@ -1205,7 +1205,8 @@ int online_regrid_xgrid(Mesh &srcmesh, Mesh &dstmesh, Mesh * midmesh, IWeights &
   // This is the current layer cut off subroutine
   int regridPoleType = 0;
   int regridPoleNPnts = 1;
-  if (!regrid(srcmesh, dstmesh, midmesh, wts, regridMethod, regridScheme, 
+  int regridScheme = 0;
+  if (!regrid(srcmesh, dstmesh, midmesh, wts, regridMethod, &regridScheme, 
             &regridPoleType, &regridPoleNPnts, unmappedaction))
     Throw() << "Regridding error" << std::endl;
 

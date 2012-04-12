@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.h,v 1.7 2012/02/22 15:51:22 feiliu Exp $
+// $Id: ESMCI_XGridUtil.h,v 1.8 2012/04/12 22:26:54 feiliu Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -66,11 +66,10 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
  * @param[out] wts               weight matrices (?)
  * @param[in] regridConserve     use new conservative scheme
  * @param[in] regridMethod       regrid method
- * @param[in] regridScheme       regrid scheme
  * @param[in] unmappedaction     unmapped action
  */
 int online_regrid_xgrid(Mesh &srcmesh, Mesh &dstmesh, Mesh * midmesh, IWeights &wts,
-  int *regridConserve, int *regridMethod, int *regridScheme,
+  int *regridConserve, int *regridMethod, 
   int *unmappedaction);
 
 /**
