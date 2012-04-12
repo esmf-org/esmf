@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.11 2012/04/10 23:02:45 rokuingh Exp $
+// $Id: ESMC_FieldGridRegridCsrvUTest.C,v 1.12 2012/04/12 18:33:23 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -369,7 +369,7 @@ int main(void){
   //EX_UTest
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshAddElements(dstmesh, num_elem, elemId, elemType, elemConn, NULL);
+  rc = ESMC_MeshAddElements(dstmesh, num_elem, elemId, elemType, elemConn, NULL, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
  

@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.27 2012/04/02 16:45:00 rokuingh Exp $
+// $Id: ESMC_Mesh.C,v 1.28 2012/04/12 18:33:31 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Mesh.C,v 1.27 2012/04/02 16:45:00 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Mesh.C,v 1.28 2012/04/12 18:33:31 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -92,7 +92,8 @@ int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshAddElements()"
 int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
-  int *elementTypes, int *elementConn, int *elementMask){
+                         int *elementTypes, int *elementConn, 
+                         int *elementMask, double *elementArea){
    
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -103,7 +104,7 @@ int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
   
   // call into ESMCI method
   localrc = mep->addElements(elementCount, elementIds, elementTypes, 
-                             elementConn, elementMask);
+                             elementConn, elementMask, elementArea);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
 

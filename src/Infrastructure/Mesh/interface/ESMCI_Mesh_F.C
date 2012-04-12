@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.59 2012/04/09 22:50:49 oehmke Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.60 2012/04/12 18:33:31 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.59 2012/04/09 22:50:49 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.60 2012/04/12 18:33:31 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -474,7 +474,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
   } 
 
 
-  // Handle element masking
+  // Handle element area
   bool has_elem_area=false;
   if (*areaPresent == 1) { // if areas exist
     // Context for new fields

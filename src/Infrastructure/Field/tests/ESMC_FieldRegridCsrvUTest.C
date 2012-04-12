@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldRegridCsrvUTest.C,v 1.2 2012/04/09 23:10:17 rokuingh Exp $
+// $Id: ESMC_FieldRegridCsrvUTest.C,v 1.3 2012/04/12 18:33:23 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -123,9 +123,9 @@ int main(void){
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef masking
-  rc = ESMC_MeshAddElements(srcmesh, num_elem_s, elemId_s, elemType_s, elemConn_s, elemMask);
+  rc = ESMC_MeshAddElements(srcmesh, num_elem_s, elemId_s, elemType_s, elemConn_s, elemMask, NULL);
 #else
-  rc = ESMC_MeshAddElements(srcmesh, num_elem_s, elemId_s, elemType_s, elemConn_s, NULL);
+  rc = ESMC_MeshAddElements(srcmesh, num_elem_s, elemId_s, elemType_s, elemConn_s, NULL, NULL);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -223,7 +223,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshAddElements(dstmesh, num_elem_d, elemId_d, elemType_d, elemConn_d, NULL);
+  rc = ESMC_MeshAddElements(dstmesh, num_elem_d, elemId_d, elemType_d, elemConn_d, NULL, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
  

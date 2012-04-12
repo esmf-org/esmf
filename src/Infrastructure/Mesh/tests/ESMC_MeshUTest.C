@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.21 2012/04/03 22:09:30 rokuingh Exp $
+// $Id: ESMC_MeshUTest.C,v 1.22 2012/04/12 18:33:39 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -98,6 +98,7 @@ int main(void){
   int elemId_s [] ={1,2,3,4};
   // ESMF_MESHELEMTYPE_QUAD=9  could not get ESMC version
   int elemType_s [] ={9,9,9,9};
+  double elemArea_s [] ={1.0,2.0,3.0,4.0}; // Wrong area, but just to test
   int elemConn_s [] ={1,2,5,4,
               2,3,6,5,
               4,5,8,7,
@@ -123,7 +124,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshAddElements(mesh, num_elem, elemId_s, elemType_s, elemConn_s, NULL);
+  rc = ESMC_MeshAddElements(mesh, num_elem, elemId_s, elemType_s, elemConn_s, NULL, elemArea_s);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.C,v 1.29 2012/04/04 18:11:31 rokuingh Exp $
+// $Id: ESMCI_MeshCXX.C,v 1.30 2012/04/12 18:33:38 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@ using std::endl;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.29 2012/04/04 18:11:31 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.30 2012/04/12 18:33:38 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -188,7 +188,8 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
 
 // TODO: most of this routine is duplicated in ESMCI_Mesh_F.C - should be merged  
 int MeshCXX::addElements(int numElems, int *elemId, 
-                         int *elemType, int *elemConn, int *elemMask){
+                         int *elemType, int *elemConn, 
+                         int *elemMask, double *elemArea){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::MeshCXX::addElements()"
 
@@ -359,9 +360,27 @@ int MeshCXX::addElements(int numElems, int *elemId,
     has_elem_mask=true;
   }
 
+
+  // Handle element area
+  bool has_elem_area=false;
+  if (elemArea != NULL) { // if areas exist
+    // Context for new fields
+    Context ctxt; ctxt.flip();
+
+    // Add element mask field
+    MEField<> *elem_area = mesh.RegisterField("elem_area",
+                         MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    // Record the fact that it has masks
+    has_elem_area=true;   
+  } 
+
+
     // Perhaps commit will be a separate call, but for now commit the mesh here.
     mesh.build_sym_comm_rel(MeshObj::NODE);
     mesh.Commit();
+
+
 
   // Set Mask values
   if (has_elem_mask) {
@@ -384,6 +403,27 @@ int MeshCXX::addElements(int numElems, int *elemId,
       // Init mask to 0.0
       double *m=elem_mask->data(elem);
       *m=0.0;
+    }
+  }
+
+
+  // Set area values
+  if (has_elem_area) {
+    // Get Fields
+    MEField<> *elem_area=mesh.GetField("elem_area"); 
+    
+    // Loop through elements setting values
+    // Here we depend on the fact that data index for elements
+    // is set as the position in the local array above
+    Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem = *ei;
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+      // Set mask value to input array
+      double *av=elem_area->data(elem);
+      int data_index = elem.get_data_index();
+      *av=(double)elemArea[data_index];
     }
   }
 
