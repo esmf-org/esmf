@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridSparseMatEx.F90,v 1.2 2012/04/12 17:01:09 feiliu Exp $
+! $Id: ESMF_XGridSparseMatEx.F90,v 1.3 2012/04/12 17:01:58 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -87,7 +87,7 @@
 !\begin{center}
 !\begin{figure}
 !\center
-!\scalebox{0.6}{\includegraphics{XGridSparseMatEx1}}
+!\scalebox{0.6}{\includegraphics{XGridEx1}}
 !\caption{Grid layout for simple XGrid creation example. Overlapping of 3 Grids
 !(Green 2x2, Red 2x1, Blue 2x2). Green and red Grids on side A, blue Grid on side
 !B, black indicates the resulting XGrid. Color coded sequence indices are shown.
