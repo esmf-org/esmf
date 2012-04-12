@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.45 2012/04/11 15:18:54 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.46 2012/04/12 17:01:24 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -674,8 +674,6 @@ contains
     ! partially overlap
     xgrid = ESMF_XGridCreate((/make_grid_sph(4,4,1.,1.,0.,0.,rc=localrc), make_grid_sph(4,4,0.6,1.,3.5,3.5,rc=localrc)/), &
       (/make_grid_sph(8,8,1.,1.,0.,0.,rc=localrc)/), &
-      sideAToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
-      sideBToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -688,8 +686,6 @@ contains
 
     xgrid = ESMF_XGridCreate((/make_grid_sph(4,4,1.,1.,0.,0.,rc=localrc), make_grid_sph(4,4,0.6,1.,2.9,3.5,rc=localrc)/), &
       (/make_grid_sph(8,8,1.,1.,0.,0.,rc=localrc)/), &
-      sideAToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
-      sideBToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -702,8 +698,6 @@ contains
 
     xgrid = ESMF_XGridCreate((/make_grid_sph(4,4,1.,1.,0.,0.,rc=localrc), make_grid_sph(4,4,0.6,1.,2.9,2.5,rc=localrc)/), &
       (/make_grid_sph(8,8,1.,1.,0.,0.,rc=localrc)/), &
-      sideAToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
-      sideBToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -716,8 +710,6 @@ contains
 
     xgrid = ESMF_XGridCreate((/make_grid_sph(4,4,1.,1.,0.,0.,rc=localrc), make_grid_sph(8,4,0.6,1.,1.9,1.5,rc=localrc)/), &
       (/make_grid_sph(8,8,1.,1.,0.,0.,rc=localrc)/), &
-      sideAToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
-      sideBToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -729,8 +721,6 @@ contains
         make_grid_sph(4,4,1.,1.,0.,0.,rc=localrc) &
       /), &
       (/make_grid_sph(30,30,0.3,0.3,0.,0.,rc=localrc)/), &
-      sideAToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
-      sideBToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -747,8 +737,6 @@ contains
         make_grid_sph(4,4,0.5,1.,2.8,1.4,rc=localrc), &
         make_grid_sph(4,4,1.,1.,0.,0.,rc=localrc) &
       /), &
-      sideAToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
-      sideBToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -763,8 +751,6 @@ contains
     xgrid = ESMF_XGridCreate((/make_grid_sph(4,2,1.,1.,0.,0.,rc=localrc), make_grid_sph(4,2,0.5,1.,4.,0.,rc=localrc), &
                                make_grid_sph(4,2,1.,1.,6.,0.,rc=localrc)/), &
       (/make_grid_sph(8,8,0.7,0.7,0.,0.,rc=localrc), make_grid_sph(8,8,0.7,0.7,0.,5.6,rc=localrc)/), &
-      sideAToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
-      sideBToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -773,8 +759,6 @@ contains
     xgrid = ESMF_XGridCreate((/make_grid_sph(4,2,1.,1.,0.,0.,rc=localrc), make_grid_sph(4,2,0.5,1.,3.,0.3,rc=localrc), &
                                make_grid_sph(4,4,1.,1.,-2.,-2.,rc=localrc)/), &
       (/make_grid_sph(8,8,0.7,0.7,0.,0.,rc=localrc), make_grid_sph(8,8,0.7,0.7,0.,5.6,rc=localrc)/), &
-      sideAToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
-      sideBToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -784,8 +768,6 @@ contains
       (/make_grid_sph(8,8,0.7,0.7,0.,0.,rc=localrc), make_grid_sph(8,8,0.7,0.7,0.,5.6,rc=localrc)/), &
       (/make_grid_sph(4,2,1.,1.,0.,0.,rc=localrc), make_grid_sph(4,2,0.5,1.,3.,0.3,rc=localrc), &
                                make_grid_sph(4,4,1.,1.,-2.,-2.,rc=localrc)/), &
-      sideAToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
-      sideBToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -794,8 +776,6 @@ contains
     xgrid = ESMF_XGridCreate((/make_grid_sph(4,2,1.,1.,0.,0.,rc=localrc), make_grid_sph(4,2,0.5,1.,3.,0.3,rc=localrc), &
                                make_grid_sph(4,4,1.,1.,-2.,-2.,rc=localrc)/), &
       (/make_grid_sph(8,8,0.7,0.7,0.,0.,rc=localrc), make_grid_sph(8,8,0.5,0.7,0.9,3.6,rc=localrc)/), &
-      sideAToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
-      sideBToXGridScheme=ESMF_REGRID_SCHEME_REGION3D, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &

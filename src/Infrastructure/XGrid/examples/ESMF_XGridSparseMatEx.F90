@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridSparseMatEx.F90,v 1.1 2012/04/11 15:18:46 feiliu Exp $
+! $Id: ESMF_XGridSparseMatEx.F90,v 1.2 2012/04/12 17:01:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -73,10 +73,10 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create an XGrid offline from user input data then use it for regridding}
+!\subsubsection{Create an XGrid from user input data then use it for regridding}
 !\label{sec:xgrid:usage:xgrid_createfromsparsemat}
 !
-! Alternatively, XGrid can be created Grids on either side,
+! Alternatively, XGrid can be created from Grids on either side,
 ! area and centroid information of XGrid cells, sparse matrix matmul information.
 ! The functionalities provided by the
 ! XGrid object is constrained by the user supplied input during its creation time.

@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGrid_F.C,v 1.14 2012/03/26 15:49:01 feiliu Exp $
+// $Id: ESMCI_XGrid_F.C,v 1.15 2012/04/12 17:01:13 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@ using namespace std;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_XGrid_F.C,v 1.14 2012/03/26 15:49:01 feiliu Exp $";
+             "$Id: ESMCI_XGrid_F.C,v 1.15 2012/04/12 17:01:13 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -189,7 +189,6 @@ void FTN_X(c_esmc_xgridregrid_create)(ESMCI::VM **vmpp,
                    Mesh **mesh,
                    int *compute_midmesh,
                    int *regridMethod, 
-                   int *regridScheme,
                    int *unmappedaction,
                    int *nentries, ESMCI::TempWeights **tweights,
                    int*rc) {
@@ -215,7 +214,7 @@ void FTN_X(c_esmc_xgridregrid_create)(ESMCI::VM **vmpp,
     IWeights wts;
 
     if(!online_regrid_xgrid(srcmesh, dstmesh, *mesh, wts, &regridConserve, regridMethod,
-                      regridScheme, unmappedaction))
+                      unmappedaction))
       Throw() << "Online regridding error" << std::endl;
 
     // Firstly, the index list
@@ -306,7 +305,6 @@ void FTN_X(c_esmc_copy_tempweights_xgrid)(ESMCI::TempWeights **_tw, int *ii, dou
 // mesh merge
 void FTN_X(c_esmc_meshmerge)(Mesh **srcmeshpp, Mesh **dstmeshpp,
                    Mesh **meshpp,
-                   //int *regridScheme,
                    int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshmerge()" 
