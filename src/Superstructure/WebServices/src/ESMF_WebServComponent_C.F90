@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServComponent_C.F90,v 1.10 2012/03/14 14:44:06 ksaint Exp $
+! $Id: ESMF_WebServComponent_C.F90,v 1.11 2012/04/12 21:17:20 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -165,7 +165,7 @@
     integer :: localrc
 
     proctype = 'I'
-    call ESMF_WebServCplCompProcessRequest(comp, impstate, expstate, clock, &
+    call ESMF_WebServCplCompProcessRqst(comp, impstate, expstate, clock, &
                                            phase, proctype, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
@@ -317,7 +317,7 @@
     integer :: localrc
 
     proctype = 'R'
-    call ESMF_WebServCplCompProcessRequest(comp, impstate, expstate, clock, &
+    call ESMF_WebServCplCompProcessRqst(comp, impstate, expstate, clock, &
                                            phase, proctype, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
@@ -469,7 +469,7 @@
     integer :: localrc
 
     proctype = 'F'
-    call ESMF_WebServCplCompProcessRequest(comp, impstate, expstate, clock, &
+    call ESMF_WebServCplCompProcessRqst(comp, impstate, expstate, clock, &
                                            phase, proctype, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &

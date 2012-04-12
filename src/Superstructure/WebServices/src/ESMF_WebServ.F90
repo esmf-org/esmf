@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServ.F90,v 1.27 2012/03/14 14:44:06 ksaint Exp $
+! $Id: ESMF_WebServ.F90,v 1.28 2012/04/12 21:17:20 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@ module ESMF_WebServMod
   private
 
   public ESMF_WebServProcessRequest, ESMF_WebServWaitForRequest
-  public ESMF_WebServCplCompProcessRequest, ESMF_WebServCplCompWaitForRequest
+  public ESMF_WebServCplCompProcessRqst, ESMF_WebServCplCompWaitForRqst
   public ESMF_WebServicesLoop
   public ESMF_WebServicesCplCompLoop
   public ESMF_WebServAddOutputData
@@ -161,12 +161,12 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_WebServCplCompProcessRequest()"
+#define ESMF_METHOD "ESMF_WebServCplCompProcessRqst()"
 !BOPI
-! !IROUTINE: ESMF_WebServCplCompProcessRequest 
+! !IROUTINE: ESMF_WebServCplCompProcessRqst 
 !
 ! !INTERFACE:
-  subroutine ESMF_WebServCplCompProcessRequest(comp, importState, exportState, &
+  subroutine ESMF_WebServCplCompProcessRqst(comp, importState, exportState, &
                                                clock, phase, procType, rc)
 
 !
@@ -417,12 +417,12 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_WebServCplCompWaitForRequest()"
+#define ESMF_METHOD "ESMF_WebServCplCompWaitForRqst()"
 !BOPI
-! !IROUTINE: ESMF_WebServCplCompWaitForRequest 
+! !IROUTINE: ESMF_WebServCplCompWaitForRqst 
 !
 ! !INTERFACE:
-  subroutine ESMF_WebServCplCompWaitForRequest(comp, importState, exportState, &
+  subroutine ESMF_WebServCplCompWaitForRqst(comp, importState, exportState, &
                                                clock, syncflag, phase, rc)
 
 !
@@ -1186,7 +1186,7 @@ contains
 
        print *, "KDS: Exited Service Loop"
 
-       call ESMF_WebServCplCompProcessRequest(comp, &
+       call ESMF_WebServCplCompProcessRqst(comp, &
              importState=importState, exportState=exportState, &
              clock=clock, phase=phase, procType="E", rc=localrc)
 
@@ -1199,7 +1199,7 @@ contains
 
     else
 
-       call ESMF_WebServCplCompWaitForRequest(comp, importState=importState, &
+       call ESMF_WebServCplCompWaitForRqst(comp, importState=importState, &
              exportState=exportState, clock=clock, syncflag=syncflag, &
              phase=phase, rc=localrc)
        if (ESMF_LogFoundError(localrc, &
