@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUGrid.F90,v 1.6 2012/03/06 17:29:47 peggyli Exp $
+! $Id: ESMF_IOUGrid.F90,v 1.7 2012/04/13 20:45:02 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -418,18 +418,37 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
 !---------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_UGridGetVarByName"
-subroutine ESMF_UGridGetVarByName (filename, varname, varbuffer, rc)
+subroutine ESMF_UGridGetVarByName (filename, varname, varbuffer, &
+	                           startind, count, location, missingvalue, rc)
 
     character(len=*), intent(in)   :: filename
     character(len=*), intent(in)   :: varname
     real(ESMF_KIND_R8), pointer    :: varbuffer (:)
+    integer, intent(in), optional  :: startind
+    integer, intent(in), optional  :: count
+    character(len=*), intent(in), optional:: location
+    real(ESMF_KIND_R8), intent(out), optional:: missingvalue
     integer                       :: rc
 
     integer   :: ncid, VarId
     integer   :: ncStatus
     character(len=256) :: errmsg
+    character(len=80) :: attstr
+    integer   :: ndims, dimids(3), dimsize, length
+    integer, pointer   :: starts(:), counts(:)
+    integer, parameter :: nf90_noerror=0
+
 #ifdef ESMF_NETCDF
 
+    if (present(startind)) then
+	if (.not. present(count)) then
+           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
+                msg="- optional argument count is missing", &
+		ESMF_CONTEXT, rcToReturn=rc) 
+          return
+        endif
+    endif
+           
     ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
@@ -442,11 +461,83 @@ subroutine ESMF_UGridGetVarByName (filename, varname, varbuffer, rc)
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
-    ncStatus = nf90_get_var (ncid, VarId, varbuffer)  
+
+    ! if location is given, check if the location attribute of the variable match with the
+    ! input value
+    if (present(location)) then
+	ncStatus = nf90_get_att(ncid, VarId, "location", attstr)
+        if (CDFCheckError (ncStatus, &
+           ESMF_METHOD,  &
+           ESMF_SRCLINE, errmsg, &
+           rc)) return
+	length =len(location)
+        if (attstr(1:length) .ne. location) then
+	  errmsg = "- location attribute does not match with input location "//location
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
+                 msg=errmsg, ESMF_CONTEXT, rcToReturn=rc) 
+          return
+        endif
+    endif
+
+    ! check if the variable dimension matches with the allocated array
+    errmsg = "Variable "//varname//" in "//trim(filename)
+    ncStatus = nf90_inquire_variable(ncid, VarId, ndims=ndims, dimids=dimids)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
+    
+    ! get the first dimension length of the variable
+    ncStatus = nf90_inquire_dimension (ncid, dimids(1), len=dimsize)
+    if (CDFCheckError (ncStatus, &
+            ESMF_METHOD, &
+            ESMF_SRCLINE,&
+            errmsg,&
+            rc)) return
+
+    if (present(startind)) then
+      if (size(varbuffer) < count) then
+	call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+	       msg="- the varbuffer is too small", &
+	       ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
+    else if (dimsize /= size(varbuffer)) then
+	call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+	       msg="- the variable array dimension does not match with dimension length", &
+	       ESMF_CONTEXT, rcToReturn=rc)
+        return
+    endif
+
+    allocate(starts(ndims), counts(ndims))
+    starts(:)=1
+    counts(:)=1
+    counts(1)=dimsize
+    if (present(startind)) then
+        starts(1)=startind
+        counts(1)=count
+    endif
+    ncStatus = nf90_get_var (ncid, VarId, varbuffer, start=starts, count=counts)  
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, errmsg, &
+      rc)) return
+
+    deallocate(starts, counts)
+
+    ! get missisng value 
+    if (present(missingvalue)) then
+      ncStatus = nf90_get_att(ncid, VarId, "_FillValue", missingvalue)
+      if (ncStatus /= nf90_noerror) then
+	  ncStatus = nf90_get_att(ncid, varid, "missing_value", missingvalue)
+          errmsg = "missing value attribute does not exist for "//trim(varname)
+          if (CDFCheckError (ncStatus, &
+            ESMF_METHOD, &
+            ESMF_SRCLINE,&
+            errmsg, &
+            rc)) return
+      end if
+    end if  
 
     ncStatus = nf90_close (ncid=ncid)
     if (CDFCheckError (ncStatus, &
@@ -503,7 +594,7 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     if (present(convertToDeg)) convertToDegLocal = convertToDeg
 
     ! Get VM information
-    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGetCurrent(vm, rc=rc)
     if (rc /= ESMF_SUCCESS) return
     ! set up local pet info
     call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
@@ -745,7 +836,7 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
 
 #ifdef ESMF_NETCDF
     if ( ncStatus .ne. nf90_noerror) then
-        call ESMF_LogWrite (msg="netCDF Status Return Error", logmsgList=ESMF_LOGMSG_ERROR, &
+        call ESMF_LogWrite (msg="netCDF Status Return Error", logmsgFlag=ESMF_LOGMSG_ERROR, &
             line=lineNo, file=fileName, method=module)
         print '("NetCDF Error: ", A, " : ", A)', &
 	trim(errmsg),trim(nf90_strerror(ncStatus))
