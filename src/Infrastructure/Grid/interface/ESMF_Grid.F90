@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.267 2012/04/05 04:22:50 peggyli Exp $
+! $Id: ESMF_Grid.F90,v 1.268 2012/04/13 20:37:17 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -308,7 +308,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.267 2012/04/05 04:22:50 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.268 2012/04/13 20:37:17 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -3162,7 +3162,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        regDecompLocal(:)=regDecomp(:)
     else
        ! The default is 1D divided among all the Pets
-       call ESMF_VMGetGlobal(vm,rc=localrc)
+       call ESMF_VMGetCurrent(vm,rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_VMGet(vm,petCount=regDecompLocal(1),rc=localrc)
@@ -5471,7 +5471,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! get global vm information
     !
-    call ESMF_VMGetGlobal(vm, rc=localrc)
+    call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5852,7 +5852,7 @@ end function ESMF_GridCreateFrmScrip
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! get global vm information
-    call ESMF_VMGetGlobal(vm, rc=localrc)
+    call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -10043,7 +10043,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        regDecompLocal(:)=regDecomp(:)
     else
        ! The default is 1D divided among all the Pets
-       call ESMF_VMGetGlobal(vm,rc=localrc)
+       call ESMF_VMGetCurrent(vm,rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_VMGet(vm,petCount=regDecompLocal(1),rc=localrc)
@@ -20134,7 +20134,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        regDecompLocal(:)=regDecomp(:)
     else
        ! The default is 1D divided among all the Pets
-       call ESMF_VMGetGlobal(vm,rc=localrc)
+       call ESMF_VMGetCurrent(vm,rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_VMGet(vm,petCount=regDecompLocal(1),rc=localrc)
@@ -22914,7 +22914,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        regDecompLocal(:)=regDecomp(:)
     else
        ! The default is 1D divided among all the Pets
-       call ESMF_VMGetGlobal(vm,rc=localrc)
+       call ESMF_VMGetCurrent(vm,rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_VMGet(vm,petCount=regDecompLocal(1),rc=localrc)
