@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.60 2012/04/12 18:33:31 oehmke Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.61 2012/04/13 23:07:25 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.60 2012/04/12 18:33:31 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.61 2012/04/13 23:07:25 peggyli Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1887,8 +1887,6 @@ extern "C" void FTN_X(c_esmc_meshturnoncellmask)(Mesh **meshpp, ESMCI::Interface
 
 }
 
-
-
 // Turn OFF masking
 extern "C" void FTN_X(c_esmc_meshturnoffcellmask)(Mesh **meshpp, int *rc) {
 
@@ -1961,4 +1959,17 @@ extern "C" void FTN_X(c_esmc_meshturnoffcellmask)(Mesh **meshpp, int *rc) {
 
 }
 
+extern "C" void FTN_X(c_esmc_get_polygon_area)(int *spatialdim, int *nedges, 
+						 double *points, double *area, int *rc) {
+  if (*spatialdim == 2) {
+    *area = area_of_flat_2D_polygon(*nedges, points);
+  } else if (*spatialdim == 3) {
+    *area = great_circle_area(*nedges, points);
+  } else {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "- Spatial dimension > 3", rc);
+    return;
+  }
 
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
