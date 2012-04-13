@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.57 2012/04/13 16:45:49 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.58 2012/04/13 18:36:41 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.57 2012/04/13 16:45:49 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.58 2012/04/13 18:36:41 feiliu Exp $'
 
 !==============================================================================
 !
@@ -393,8 +393,8 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Presumably no longer useful
-    AisSphere = 1
-    BisSphere = 1
+    AisSphere = 0
+    BisSphere = 0
 
     if(present(sideAMaskValues) .or. present(sideBMaskValues)) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
