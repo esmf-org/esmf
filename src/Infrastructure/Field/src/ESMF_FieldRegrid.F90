@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.104 2012/04/09 19:00:40 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.105 2012/04/13 16:31:19 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.104 2012/04/09 19:00:40 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.105 2012/04/13 16:31:19 rokuingh Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -366,14 +366,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item [srcField]
 !           Source Field.
+!     \item [dstField]
+!           Destination Field.
 !     \item [{[srcMaskValues]}]
 !           List of values that indicate a source point should be masked out. 
 !           If not specified, no masking will occur. 
-!     \item [dstField]
-!           Destination Field.
 !     \item [{[dstMaskValues]}]
 !           List of values that indicate a destination point should be masked out. 
 !           If not specified, no masking will occur.
+!     \item [{[regridmethod]}]
+!           The type of interpolation. Please see Section~\ref{opt:regridmethod} 
+!           for a list of valid options. If not specified, defaults to 
+!           {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
+!     \item [{[polemethod]}]
+!           Which type of artificial pole
+!           to construct on the source Grid for regridding. Please see 
+!           Section~\ref{const:polemethod} for a list of
+!           valid options. If not specified, defaults to {\tt ESMF\_POLEMETHOD\_ALLAVG}. 
+!     \item [{[regridPoleNPnts]}]
+!           If {\tt polemethod} is {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
+!           This parameter indicates how many points should be averaged
+!           over. Must be specified if {\tt polemethod} is 
+!           {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
 !     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Options are 
@@ -417,20 +431,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           valid when regridmethod is {\tt ESMF\_REGRIDMETHOD\_CONSERVE}.
 !           This Field needs to be created on the same location (e.g staggerloc) 
 !           as the dstField.
-!     \item [{[regridmethod]}]
-!           The type of interpolation. Please see Section~\ref{opt:regridmethod} 
-!           for a list of valid options. If not specified, defaults to 
-!           {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
-!     \item [{[polemethod]}]
-!           Which type of artificial pole
-!           to construct on the source Grid for regridding. Please see 
-!           Section~\ref{const:polemethod} for a list of
-!           valid options. If not specified, defaults to {\tt ESMF\_POLEMETHOD\_ALLAVG}. 
-!     \item [{[regridPoleNPnts]}]
-!           If {\tt polemethod} is {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
-!           This parameter indicates how many points should be averaged
-!           over. Must be specified if {\tt polemethod} is 
-!           {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
