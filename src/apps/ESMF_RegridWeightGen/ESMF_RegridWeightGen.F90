@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.63 2012/04/13 20:51:31 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.64 2012/04/13 22:20:51 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -276,7 +276,7 @@ program ESMF_RegridWeightGen
             endif
          endif
 
-         ! If the src grid type is GRIDSPEC, check if --src_missingvalue argument is given
+         ! If the src grid type is GRIDSPEC or UGRID, check if --src_missingvalue argument is given
          call ESMF_UtilGetArgIndex('--src_missingvalue', argindex=index, rc=rc)
          if (index == -1) then
 	    srcMissingValue = .false.
@@ -285,7 +285,25 @@ program ESMF_RegridWeightGen
              call ESMF_UtilGetArg(index+1, argvalue=srcVarName)	   
          endif
 
-         ! If the dst grid type is GRIDSPEC, check if --dst_missingvalue argument is given
+         ! missing area only supported for GRIDSPEC and UGRID file.  When the grid
+         ! file is UGRID, it only support the missing value when doing conservative regrid
+         if (srcMissingValue) then
+	   if (srcFileType /= ESMF_FILEFORMAT_GRIDSPEC .and. &
+	      srcFileType /= ESMF_FILEFORMAT_UGRID) then
+              write(*,*)
+	      print *, 'ERROR: --src_missingvalue is supported only when the source grid is in'
+	      print *, '       UGRID or GRIDSPEC format.'
+	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+           else if (srcFileType == ESMF_FILEFORMAT_UGRID .and. (method .ne. 'conserve')) then
+              write(*,*)
+	      print *, 'ERROR: --mask is supported on the mesh elment in a unstructured grid, so'
+	      print *, '       it only works with the conservative regridding if the src grid is'
+              print *, '       a UGRID'
+	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+           endif
+	 endif
+
+         ! If the dst grid type is GRIDSPEC or UGRID, check if --dst_missingvalue argument is given
 	 call ESMF_UtilGetArgIndex('--dst_missingvalue', argindex=index, rc=rc)
          if (index == -1) then
 	    dstMissingValue = .false.
@@ -293,6 +311,24 @@ program ESMF_RegridWeightGen
 	     dstMissingValue = .true.
              call ESMF_UtilGetArg(index+1, argvalue=dstVarName)	   
          endif
+
+         ! missing area only supported for GRIDSPEC and UGRID file.  When the grid
+         ! file is UGRID, it only support the missing value when doing conservative regrid
+         if (dstMissingValue) then
+	   if (dstFileType /= ESMF_FILEFORMAT_GRIDSPEC .and. &
+	      dstFileType /= ESMF_FILEFORMAT_UGRID) then
+              write(*,*)
+	      print *, 'ERROR: --dst_missingvalue is supported only when the source grid is in'
+	      print *, '       UGRID or GRIDSPEC format.'
+	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+           else if (dstFileType == ESMF_FILEFORMAT_UGRID .and. (method .ne. 'conserve')) then
+              write(*,*)
+	      print *, 'ERROR: -- mask is only supported on the mesh elements, so it only'
+	      print *, '       with the conservative regridding when the dst grid is'
+              print *, '       a UGRID'
+	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+           endif
+	 endif
 
          ignoreUnmapped=.false.
          call ESMF_UtilGetArgIndex('-i', argindex=index, rc=rc)
@@ -332,20 +368,27 @@ program ESMF_RegridWeightGen
         end if
 
         ! --user_area - to use user-defined area for the cells
- 	call ESMF_UtilGetArgIndex('--user_area', argindex=index, rc=rc)
+ 	call ESMF_UtilGetArgIndex('--user_areas', argindex=index, rc=rc)
 	if (index /= -1) then
 	   userAreaFlag = .true.
 	else
 	   userAreaFlag = .false.
         endif
 
-	! user area only applies to SCRIP and ESMF file formats
+	! user area only needed for conservative regridding
+        if (userAreaFlag .and. (method .ne. 'conserve')) then
+             write(*,*)
+	     print *, 'WARNING: --user_areas is only needed in conservative remapping'
+	     print *, '       The flag is ignored'
+	     userAreaFlag = .false.
+        endif
+
         if (userAreaFlag .and. (srcFileType /= ESMF_FILEFORMAT_SCRIP .and. &
  	    srcFileType /= ESMF_FILEFORMAT_ESMFMESH) .and. &
 	    (dstFileType /= ESMF_FILEFORMAT_SCRIP .and. &
  	    dstFileType /= ESMF_FILEFORMAT_ESMFMESH)) then
              write(*,*)
-	     print *, 'ERROR: --user_area is supported only when the source or destination'
+	     print *, 'ERROR: --user_areas is supported only when the source or destination'
 	     print *, '       grid are in SCRIP of ESMF format.'
 	     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 	endif
@@ -1837,14 +1880,23 @@ subroutine PrintUsage()
      print *, "--dst_meshname  - required if the destination grid type is UGRID. It defines the"
      print *, "             dummy variable name that has all the topology information stored in its"
      print *, "             attributes."
-     print *, "--src_missingvalue  - an optional argument used only when the src file type is GRIDSPEC"
-     print *, "             It defines the variable name whose 'missing_value' or '_FillValue' attribute"
-     print *, "             will be used to construct the mask for the source grid. Without this argument,"
-     print *, "             a GRIDSPEC file is not masked."
-     print *, "--dst_missingvalue  - an optional argument used only when the dest file type is GRIDSPEC"
-     print *, "             It defines the variable name whose 'missing_value' or '_FillValue' attribute"
-     print *, "             will be used to construct the mask for the destination grid. Without this"
-     print *, "             argument, a GRIDSPEC file is not masked."
+     print *, "--src_missingvalue  - an optional argument used when the src file type is GRIDSPEC"
+     print *, "             or UGRID. It defines the variable name whose 'missing_value' or"
+     print *, "             '_FillValue' attribute will be used to construct the mask for the source"
+     print *, "             grid.  If the grid is a UGRID, the variable has to be defined on the"
+     print *, "             element ('face') because ESMF only support masking on the element"
+     print *, "             Without this argument,a GRIDSPEC file or a UGRID file is not masked."
+     print *, "--dst_missingvalue  - an optional argument used when the destination file type is"
+     print *, "             GRIDSPEC or UGRID. It defines the variable name whose 'missing_value' or"
+     print *, "             '_FillValue' attribute will be used to construct the mask for the source"
+     print *, "             grid.  If the grid is a UGRID, the variable has to be defined on the"
+     print *, "             element ('face') because ESMF only support masking on the element"
+     print *, "             Without this argument,a GRIDSPEC file or a UGRID file is not masked."
+     print *, "--user_areas  - an optional argument specifying that the conservation is adjusted to"
+     print *, "             hold for the user areas provided in the grid files.  If not specified,"
+     print *, "             then the conservation will hold for the ESMF calculated (great circle)"
+     print *, "             areas.  Whichever areas the conservation holds for are output to the"
+     print *, "             weight file."
      print *, "--help     - Print this help message and exit."
      print *, "--version  - Print ESMF version and license information and exit."
      print *, ""
