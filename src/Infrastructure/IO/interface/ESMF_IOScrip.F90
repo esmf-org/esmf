@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.43 2012/04/05 04:34:09 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.44 2012/04/13 20:42:50 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -650,7 +650,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
         largeFileFlaglocal = .false.
       endif
 
-      call ESMF_VMGetGlobal(vm, rc=rc)
+      call ESMF_VMGetCurrent(vm, rc=rc)
       if (rc /= ESMF_SUCCESS) return
 
       ! set up local pet info
@@ -2479,7 +2479,8 @@ end subroutine ESMF_EsmfInqUnits
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GetMeshFromFile"
 subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
-				    elmtNums, startElmt, elementMask, convertToDeg, rc)
+				 elmtNums, startElmt, elementMask, &
+				 elementArea, convertToDeg, rc)
 
     character(len=*), intent(in)   :: filename
     real(ESMF_KIND_R8), pointer    :: nodeCoords (:,:)
@@ -2487,6 +2488,7 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
     integer(ESMF_KIND_I4), pointer :: elmtNums (:)
     integer,           intent(out) :: startElmt
     integer(ESMF_KIND_I4), pointer, optional :: elementMask (:)
+    real(ESMF_KIND_R8), pointer, optional :: elementArea (:)
     logical, intent(in), optional  :: convertToDeg
     integer, intent(out), optional :: rc
 
@@ -2509,7 +2511,7 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
     convertToDegLocal = .false.
     if (present(convertToDeg)) convertToDegLocal = convertToDeg
 
-    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGetCurrent(vm, rc=rc)
     if (rc /= ESMF_SUCCESS) return
     ! set up local pet info
     call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
@@ -2686,6 +2688,23 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
           rc)) return
     end if
 
+    if (present(elementArea)) then
+       allocate(elementArea(localcount))
+       ncStatus = nf90_inq_varid (ncid, "elementArea", VarNo)
+       errmsg = "Variable elementArea in "//trim(filename)
+       if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+
+       ncStatus = nf90_get_var (ncid, VarNo, elementArea, start=(/startElmt/), &
+			        count=(/localcount/))
+       if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+    end if
+
     ncStatus = nf90_close (ncid=ncid)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
@@ -2810,7 +2829,7 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
 
 #ifdef ESMF_NETCDF
     if ( ncStatus .ne. nf90_noerror) then
-        call ESMF_LogWrite (msg="netCDF Status Return Error", logmsgList=ESMF_LOGMSG_ERROR, &
+        call ESMF_LogWrite (msg="netCDF Status Return Error", logmsgFlag=ESMF_LOGMSG_ERROR, &
             line=lineNo, file=fileName, method=module)
         print '("NetCDF Error: ", A, " : ", A)', &
 	trim(errmsg),trim(nf90_strerror(ncStatus))
