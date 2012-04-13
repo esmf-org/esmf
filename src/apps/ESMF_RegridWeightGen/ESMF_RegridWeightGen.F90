@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.62 2012/04/05 04:35:30 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.63 2012/04/13 20:51:31 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -61,9 +61,6 @@ program ESMF_RegridWeightGen
       type(ESMF_UnmappedAction_Flag) :: unmappedaction
       logical :: srcMissingValue, dstMissingValue
       character(len=80) :: srcvarname, dstvarname
-
-      integer :: lbnd(2), ubnd(2), cnt(2)
-
 
       !real(ESMF_KIND_R8) :: starttime, endtime
       !------------------------------------------------------------------------
@@ -420,6 +417,9 @@ program ESMF_RegridWeightGen
         elseif (srcFileType == ESMF_FILEFORMAT_UGRID) then
             print *, "  Source File is in UGRID format, dummy variable: ", &
 		trim(srcMeshName)
+	    if (srcMissingValue) then
+	      print *, "    Use attribute 'missing_value' of variable '", trim(srcVarName),"' as the mask"
+	    endif
 	else 
 	    print *, "  Source File is in GRIDSPEC foramt"
 	    if (srcMissingValue) then
@@ -443,6 +443,9 @@ program ESMF_RegridWeightGen
         elseif (srcFileType == ESMF_FILEFORMAT_UGRID) then
             print *, "  Destination File is in UGRID format, dummy variable: ", & 
 		trim(dstMeshName)
+	    if (dstMissingValue) then
+	      print *, "  Use the missing value of ", trim(dstVarName)," as the mask"
+            endif	
         else
 	    print *, "  Destination File is in GRIDSPEC format"
 	    if (dstMissingValue) then
@@ -714,7 +717,7 @@ program ESMF_RegridWeightGen
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	else
            srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, convert3D=.true., &
-                       convertToDual=convertToDual, rc=rc)
+                       convertToDual=convertToDual, addUserArea=userAreaFlag, rc=rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
            ! call ESMF_MeshWrite(srcMesh, "srcMesh", rc)
            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
@@ -723,8 +726,14 @@ program ESMF_RegridWeightGen
 	endif
       else
 	! if srcfile is not SCRIP, it is always unstructured
-	srcMesh = ESMF_MeshCreate(srcfile, srcFileType, convert3D=.true., &
+	if (srcMissingValue) then
+	   srcMesh = ESMF_MeshCreate(srcfile, srcFileType, convert3D=.true., &
+                    meshname = trim(srcMeshName), addMask=.true., &
+		    varname=trim(srcVarName), rc=rc)
+	else
+	   srcMesh = ESMF_MeshCreate(srcfile, srcFileType, convert3D=.true., &
                     meshname = trim(srcMeshName), rc=rc)
+	endif
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
         srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=rc)
@@ -777,7 +786,7 @@ program ESMF_RegridWeightGen
 	if(dstIsReg) then
            dstGrid = ESMF_GridCreate(dstfile, dstFileType,(/xpart, ypart/), &
 			addCornerStagger=addCorners, &
-                        isSphere=dstIsSphere, rc=rc)
+                        isSphere=dstIsSphere, addUserArea = userAreaFlag, rc=rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
@@ -785,7 +794,7 @@ program ESMF_RegridWeightGen
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	else
            dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, convert3D=.true., &
-                       convertToDual=convertToDual, rc=rc)
+                       convertToDual=convertToDual, addUserArea=userAreaFlag, rc=rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
@@ -794,8 +803,14 @@ program ESMF_RegridWeightGen
 	endif
       else
 	! if dstfile is not SCRIP, it is always unstructured
-	dstMesh = ESMF_MeshCreate(dstfile, dstFileType, convert3D=.true., &
+	if (dstMissingValue) then
+ 	   dstMesh = ESMF_MeshCreate(dstfile, dstFileType, convert3D=.true., &
+                    meshname = trim(dstMeshName), addMask=.true., &
+		    varname=trim(dstVarName), rc=rc)
+	else
+	   dstMesh = ESMF_MeshCreate(dstfile, dstFileType, convert3D=.true., &
                     meshname = trim(dstMeshName), rc=rc)
+        endif
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
@@ -835,10 +850,6 @@ program ESMF_RegridWeightGen
       maskvals(1) = 0
       if (poleptrs <= 0) poleptrs = 1
 
-      ! print local array dimension of the src field
-      call ESMF_FieldGetBounds(srcField, totalLBound=lbnd, totalUBound=ubnd,&
-	 totalCount=cnt, rc=rc)
-    
       if (trim(method) .eq. 'bilinear') then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
