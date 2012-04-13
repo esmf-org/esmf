@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.88 2012/04/09 22:50:49 oehmke Exp $
+! $Id: ESMF_Mesh.F90,v 1.89 2012/04/13 20:36:22 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.88 2012/04/09 22:50:49 oehmke Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.89 2012/04/13 20:36:22 peggyli Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -172,7 +172,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.88 2012/04/09 22:50:49 oehmke Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.89 2012/04/13 20:36:22 peggyli Exp $'
 
 !==============================================================================
 ! 
@@ -1061,18 +1061,21 @@ num_elems, &
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromFile(filename, filetypeflag, convert3D, &
-                 convertToDual, meshname, rc)
+    function ESMF_MeshCreateFromFile(filename, fileTypeFlag, convert3D, &
+                 convertToDual, addUserArea, meshname, addMask, varname, rc)
 !
 !
 ! !RETURN VALUE:
     type(ESMF_Mesh)         :: ESMF_MeshCreateFromFile
 ! !ARGUMENTS:
     character(len=*),           intent(in)            :: filename
-    type(ESMF_FileFormat_Flag), intent(in)            :: filetypeflag
+    type(ESMF_FileFormat_Flag), intent(in)            :: fileTypeFlag
     logical,                    intent(in),  optional :: convert3D
     logical,                    intent(in),  optional :: convertToDual
+    logical,                    intent(in),  optional :: addUserArea
     character(len=*),           intent(in),  optional :: meshname
+    logical,                    intent(in),  optional :: addMask
+    character(len=*),           intent(in),  optional :: varname
     integer,                    intent(out), optional :: rc
 ! 
 ! !DESCRIPTION:
@@ -1095,9 +1098,20 @@ num_elems, &
 !         defaults to true. Converting to dual is not supported with
 !         file type {\tt ESMF\_FILEFORMAT\_ESMFMESH}, so when using that file type
 !         this parameter has no effect.
+!   \item[{[addUserArea]}] 
+!         if TRUE, the cell area will be read in from the GRID file.  This feature is
+!         only supported when the grid file is in the SCRIP or ESMF format. 
 !   \item[{[meshname]}]
 !         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
 !         is {\tt ESMF\_FILEFORMAT\_UGRID}
+!   \item[{[addMask]}]
+!      If .true., generate the mask using the missing\_value attribute defined in 'varname'
+!   \item[{[varname]}]
+!      If addMask is true, provide a variable name stored in the grid file and
+!      the mask will be generated using the missing value of the data value of
+!      this variable.  The first two dimensions of the variable has to be the
+!      the longitude and the latitude dimension and the mask is derived from the
+!      first 2D values of this variable even if this data is 3D, or 4D array.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1106,6 +1120,7 @@ num_elems, &
 !------------------------------------------------------------------------------
     logical::  localConvert3D      ! local flag
     logical::  localConvertToDual      ! local flag
+    logical::  localAddUserArea  
     integer::  localrc
 
     ! Set Defaults
@@ -1121,20 +1136,43 @@ num_elems, &
 	localConvertToDual = .true.
     endif
 
+    if (present(addUserArea)) then
+	localAddUserArea = addUserArea
+    else
+	localAddUserArea = .false.
+    endif
+
+    if (present(addMask)) then
+	if (addMask) then
+	  if (.not. present(varname)) then
+	     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+		  msg="- need varname argument to create mask", &
+		  ESMF_CONTEXT, rcToReturn=rc)
+             return
+          end if
+        endif
+    endif
 
     if (filetypeflag == ESMF_FILEFORMAT_SCRIP) then
 	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromScrip(filename, localConvert3D, &
-          localConvertToDual, localrc)
+          localConvertToDual, addUserArea=localAddUserArea, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (filetypeflag == ESMF_FILEFORMAT_ESMFMESH) then
 	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromUnstruct(filename, &
-	   localConvert3D, filetype=filetypeflag, rc=localrc)
+	   localConvert3D, addUserArea=localAddUserArea, &
+	   filetype=filetypeflag, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (filetypeflag == ESMF_FILEFORMAT_UGRID) then
-        ESMF_MeshCreateFromFile = ESMF_MeshCreateFromUnstruct(filename, &
-	   localConvert3D, filetype=filetypeflag, meshname = meshname, rc=localrc)
+	if (present(addMask)) then
+           ESMF_MeshCreateFromFile = ESMF_MeshCreateFromUnstruct(filename, &
+	     localConvert3D, filetype=filetypeflag, meshname = meshname, &
+	     addMask=addMask, varname=varname, rc=localrc)
+	else
+           ESMF_MeshCreateFromFile = ESMF_MeshCreateFromUnstruct(filename, &
+	     localConvert3D, filetype=filetypeflag, meshname = meshname, rc=localrc)
+	endif 
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     else
@@ -1168,7 +1206,8 @@ end function ESMF_MeshCreateFromFile
 !  the mesh
 ! !INTERFACE:
 ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromUnstruct(filename, convert3D, filetype, meshname, rc)
+    function ESMF_MeshCreateFromUnstruct(filename, convert3D, filetype, meshname, &
+			addUserArea, addMask, varname, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1178,6 +1217,9 @@ end function ESMF_MeshCreateFromFile
     logical, intent(in)                       :: convert3D
     type(ESMF_FileFormat_Flag), optional, intent(in) :: filetype
     character(len=*), optional, intent(in)    :: meshname
+    logical, intent(in), optional	      :: addUserArea
+    logical, intent(in), optional	      :: addMask
+    character(len=*), optional, intent(in)    :: varname
     integer, intent(out), optional            :: rc
 !
 ! !DESCRIPTION:
@@ -1189,11 +1231,22 @@ end function ESMF_MeshCreateFromFile
 !   \item[convert3D] 
 !         if TRUE, the node coordinates will be converted into 3D Cartisian, which
 !         is required for a global grid
+!   \item[{[addUserArea]}] 
+!         if TRUE, the cell area will be read in from the GRID file.  This feature is
+!         only supported when the grid file is in the SCRIP or ESMF format. 
 !   \item [{[filetype]}]
 !         The type of grid file
 !   \item[{[meshname]}]
 !         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
 !         is {\tt ESMF\_FILEFORMAT\_UGRID}
+!   \item[{[addMask]}]
+!      If .true., generate the mask using the missing\_value attribute defined in 'varname'
+!   \item[{[varname]}]
+!      If addMask is true, provide a variable name stored in the grid file and
+!      the mask will be generated using the missing value of the data value of
+!      this variable.  The first two dimensions of the variable has to be the
+!      the longitude and the latitude dimension and the mask is derived from the
+!      first 2D values of this variable even if this data is 3D, or 4D array.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1215,14 +1268,15 @@ end function ESMF_MeshCreateFromFile
     integer, allocatable                :: NodeOwners(:)
     integer, allocatable                :: NodeOwners1(:)
 
-    integer                             :: ElemNo, TotalElements
-    integer                             :: ElemCnt,i,j,k,dim
+    integer                             :: ElemNo, TotalElements, startElemNo
+    integer                             :: ElemCnt,i,j,k,dim, nedges
     integer				:: localNodes, myStartElmt
     integer                             :: ConnNo, TotalConnects
     integer, allocatable                :: ElemId(:)
     integer, allocatable                :: ElemType(:)
     integer, allocatable                :: ElemConn(:)
     integer, pointer                    :: elementMask(:), ElemMask(:)
+    real(ESMF_KIND_R8), pointer         :: elementArea(:), ElemArea(:)
     integer, allocatable                :: LocalElmTable(:)
     integer                             :: sndBuf(1)
     type(ESMF_VM)                       :: vm
@@ -1234,19 +1288,37 @@ end function ESMF_MeshCreateFromFile
     integer                             :: numPoly
     real(ESMF_KIND_R8)                  :: polyCoords(3*maxNumPoly)
     real(ESMF_KIND_R8)                  :: polyDblBuf(3*maxNumPoly)
+    real(ESMF_KIND_R8)                  :: area(maxNumPoly)
+    real(ESMF_KIND_R8)                  :: totalarea
     integer                             :: polyIntBuf(maxNumPoly)
     integer                             :: triInd(3*(maxNumPoly-2))
     integer                             :: spatialDim
     integer                             :: parametricDim
-    integer                             :: lni,ti
+    integer                             :: lni,ti,tk
     type(ESMF_FileFormat_Flag)          :: filetypelocal
     integer                             :: coordDim
     logical                             :: convertToDeg
     logical                             :: haveMask
-
+    logical 				:: localAddUserArea
+    logical				:: localAddMask
+    real(ESMF_KIND_R8), pointer         :: varbuffer(:)
+    real(ESMF_KIND_R8)                  :: missingvalue
+    
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    if (present(addUserArea)) then
+	localAddUserArea = addUserArea
+    else
+	localAddUserArea = .false.
+    endif
+
+    if (present(addMask)) then
+	localAddMask = addMask
+    else
+	localAddMask = .false.
+    endif
 
     ! Read the mesh definition from the file
     if (present(filetype)) then
@@ -1265,7 +1337,7 @@ end function ESMF_MeshCreateFromFile
 
     ! get global vm information
     !
-    call ESMF_VMGetGlobal(vm, rc=localrc)
+    call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1289,12 +1361,24 @@ end function ESMF_MeshCreateFromFile
 
        ! Get information from file
        if (haveMask) then
+	if (localAddUserArea) then
+           call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, &
+                                 startElmt, elementMask=elementMask, elementArea=elementArea, &
+	 			 convertToDeg=convertToDeg, rc=localrc)
+	else
            call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, &
 	 			 convertToDeg=convertToDeg, rc=localrc)
+	endif
        else
+	if (localAddUserArea) then
+           call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, &
+                                 startElmt, elementArea=elementArea, &
+				 convertToDeg=convertToDeg, rc=localrc)
+	else
            call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, &
                                  startElmt, convertToDeg=convertToDeg, rc=localrc)
+	endif
        endif
 
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1302,12 +1386,32 @@ end function ESMF_MeshCreateFromFile
     elseif (filetypelocal == ESMF_FILEFORMAT_UGRID) then
        ! For now assume that we're 2D
        coordDim=2
-       
+       haveMask = .false.       
        ! Get information from file
        call ESMF_GetMeshFromUGridFile(filename, meshname, nodeCoords, elementConn, &
                                    elmtNum, startElmt, convertToDeg=.TRUE., rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
+
+       if (localAddMask) then
+	  !Get the variable and the missing value attribute from file
+	  ! Total number of local elements
+          ElemCnt = ubound (elementConn, 2)
+          allocate(varbuffer(ElemCnt))
+	  call ESMF_UGridGetVarByName(filename, varname, varbuffer, startind=startElmt, &
+		count=ElemCnt, location="face", &
+		missingvalue=missingvalue, rc=rc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+	  ! Create local mask 
+	  allocate(elementMask(ElemCnt))
+	  elementMask(:)=1
+	  do i=1,ElemCnt
+	    if (varbuffer(i) == missingvalue) elementMask(i)=0
+          enddo
+          haveMask = .true.
+	  deallocate(varbuffer)
+	endif 
     else
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                              msg="- unrecognized filetype", & 
@@ -1486,6 +1590,7 @@ end function ESMF_MeshCreateFromFile
     allocate (ElemType(TotalElements))
     allocate (ElemConn(TotalConnects))
     if (haveMask) allocate (ElemMask(TotalElements))
+    if (localAddUserArea) allocate(ElemArea(TotalElements))
 
     ! figure out if there are split elements globally
     !! Fake logical allreduce .or. with MAX
@@ -1531,6 +1636,7 @@ end function ESMF_MeshCreateFromFile
              end do
              if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
 	     if (haveMask) ElemMask(ElemNo) = elementMask(j)
+	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
              ElemNo=ElemNo+1
              ConnNo=ConnNo+3
           elseif (elmtNum(j)==4) then
@@ -1541,6 +1647,7 @@ end function ESMF_MeshCreateFromFile
              end do
              if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
 	     if (haveMask) ElemMask(ElemNo) = elementMask(j)
+	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
              ElemNo=ElemNo+1
              ConnNo=ConnNo+4
           else
@@ -1572,6 +1679,7 @@ end function ESMF_MeshCreateFromFile
                    ti=ti+3
                 enddo
              endif
+
              ! Checking for other spatialDims above, not here in a loop
 
              ! call triangulation routine
@@ -1583,6 +1691,7 @@ end function ESMF_MeshCreateFromFile
 
              ! translate triangulation out of output list
              ti=0
+	     startElemNo = ElemNo
              do k=1,numPoly-2
                 ElemId(ElemNo)=myStartElmt+ElemNo
                 ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
@@ -1591,10 +1700,45 @@ end function ESMF_MeshCreateFromFile
                 ElemConn (ConnNo+3) = NodeUsed(elementConn(triInd(ti+3)+1,j))
                 if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
  	        if (haveMask) ElemMask(ElemNo) = elementMask(j)
+              !!!!!! Need to calculate the portion of the area for the split triangle !!!!!!
+  	        if (localAddUserArea) then 
+                   if (spatialDim==2) then
+		     tk=0
+		     do i=1,3
+                       lni=2*(ElemConn(ConnNo+i)-1) ! get the index of the node coords in the local list
+      	               polyCoords(tk+1)=NodeCoords1D(lni+1)
+                       polyCoords(tk+2)=NodeCoords1D(lni+2)
+                       tk=tk+2
+                     enddo
+	           else if (spatialDim==3) then
+                     tk=0
+                     do i=1,3
+                       lni=3*(ElemConn(ConnNo+i)-1) ! get the index of the node coords in the local list
+                       polyCoords(tk+1)=NodeCoords1D(lni+1)
+                       polyCoords(tk+2)=NodeCoords1D(lni+2)
+                       polyCoords(tk+3)=NodeCoords1D(lni+3)
+                       tk=tk+3
+                     enddo
+                   endif
+                   nEdges = 3
+                   call c_ESMC_get_polygon_area(spatialDim, nEdges, polyCoords, area(k), localrc) 
+	           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        	          ESMF_CONTEXT, rcToReturn=rc)) return
+	        endif
                 ElemNo=ElemNo+1
                 ConnNo=ConnNo+3
                 ti=ti+3
              enddo
+             !!! set the area for each splitted triangle
+	     if (localAddUserArea) then
+	        totalarea = 0
+		do k=1,numPoly-2
+	          totalarea = totalarea + area(k)
+                enddo
+                do k=1, numPoly-2
+                  elemArea(startElemNo+k) = elementArea(j)*(area(k)/totalarea)
+                enddo
+              endif
           end if
        end do
     else ! If not parametricDim==2, assuming parmetricDim==3
@@ -1615,6 +1759,7 @@ end function ESMF_MeshCreateFromFile
           end do
           ElemId(ElemNo) = myStartElmt+ElemNo
           if (haveMask) ElemMask(ElemNo) = elementMask(j)
+          if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
           ElemNo=ElemNo+1
           ConnNo=ConnNo+elmtNum(j)
        end do
@@ -1627,12 +1772,20 @@ end function ESMF_MeshCreateFromFile
     end if
 
     ! Add elements
-    if (haveMask) then
+    ! print *, PetNo, ' before MeshAddElments()'
+    if (haveMask .and. localAddUserArea) then
+	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+			elementMask=ElemMask, elementArea=ElemArea, rc=localrc)
+    elseif (haveMask) then
 	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
 			elementMask=ElemMask, rc=localrc)
+    elseif (localAddUserArea) then
+	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+			elementArea=ElemArea, rc=localrc)
     else
 	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, rc=localrc)
     end if
+    ! print *, PetNo, ' after MeshAddElments()'
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1645,7 +1798,8 @@ end function ESMF_MeshCreateFromFile
 
     deallocate(NodeUsed, NodeId, NodeCoords1D, NodeOwners, NodeOwners1)
     deallocate(ElemId, ElemType, ElemConn)
-    if (haveMask) deallocate(elementMask, ElemMask)
+    if (haveMask) deallocate(elementMask, ElemMask) 
+    if (localAddUserArea) deallocate(elementArea, ElemArea)
     ESMF_MeshCreateFromUnstruct = Mesh
 
     if (present(rc)) rc=ESMF_SUCCESS
@@ -1662,7 +1816,7 @@ end function ESMF_MeshCreateFromUnstruct
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromScrip(filename, convert3D, convertToDual, rc)
+    function ESMF_MeshCreateFromScrip(filename, convert3D, convertToDual, addUserArea, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1671,6 +1825,7 @@ end function ESMF_MeshCreateFromUnstruct
     character(len=*), intent(in)              :: filename
     logical, intent(in)                       :: convert3D
     logical, intent(in), optional             :: convertToDual
+    logical, intent(in), optional             :: addUSerArea
     integer, intent(out), optional            :: rc
 !
 ! !DESCRIPTION:
@@ -1685,6 +1840,9 @@ end function ESMF_MeshCreateFromUnstruct
 !   \item[convertToDual] 
 !         if TRUE, the mesh will be converted to it's dual. If not specified,
 !         defaults to true. 
+!   \item[addUserArea] 
+!         if TRUE, the grid_area defined in the grid file will be added into the mesh.
+!         If not specified, defaults to false. 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1717,7 +1875,7 @@ end function ESMF_MeshCreateFromUnstruct
 
     ! get global vm information
     !
-    call ESMF_VMGetGlobal(vm, rc=localrc)
+    call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1737,7 +1895,7 @@ end function ESMF_MeshCreateFromUnstruct
     endif
     call ESMF_VMBarrier(vm)
     ESMF_MeshCreateFromScrip=ESMF_MeshCreateFromUnstruct(esmffilename,&
-	convert3D, rc=localrc)
+	convert3D, addUserArea=addUserArea, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     if (PetNo == 0) then
