@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.37 2012/04/04 16:58:17 rokuingh Exp $
+!  $Id: ESMF_Field_C.F90,v 1.38 2012/04/13 16:32:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.37 2012/04/04 16:58:17 rokuingh Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.38 2012/04/13 16:32:17 rokuingh Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -557,12 +557,44 @@
   end subroutine f_esmf_fieldcollectgarbage
 
 #undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_regridgetarea"
+  subroutine f_esmf_regridgetarea(field, rc)
+
+    use ESMF_UtilTypesMod
+    use ESMF_BaseMod
+    use ESMF_LogErrMod
+    use ESMF_FieldRegridMod
+    use ESMF_FieldMod
+
+    implicit none
+
+    type(ESMF_Field)        :: field
+    integer                 :: rc
+
+    integer :: localrc
+
+    ! initialize return code; assume routine not implemented
+    rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    call ESMF_FieldRegridGetArea(field, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    rc = ESMF_SUCCESS
+
+  end subroutine f_esmf_regridgetarea
+
+
+#undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_regridstore"
   subroutine f_esmf_regridstore(srcField, dstField, &
                                 srcMaskValues, len1, smvpresent, &
                                 dstMaskValues, len2, dmvpresent, &
                                 routehandle, &
-                                regridmethod, unmappedaction, rc)
+                                regridmethod, unmappedaction, &
+                                srcFracField, sffpresent, &
+                                dstFracField, dffpresent, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_BaseMod
@@ -577,11 +609,14 @@
       type(ESMF_Field)               :: dstField
       integer, intent(in)            :: len1, len2
       integer, intent(in)            :: smvpresent, dmvpresent
+      integer, intent(in)            :: sffpresent, dffpresent
       integer                        :: srcMaskValues(1:len1), &
                                         dstMaskValues(1:len2)
       type(ESMF_RouteHandle)         :: routehandle
       type(ESMF_RegridMethod_Flag)   :: regridmethod
       type(ESMF_UnmappedAction_Flag) :: unmappedaction
+      type(ESMF_Field)               :: srcFracField
+      type(ESMF_Field)               :: dstFracField
       integer                        :: rc 
 
     integer :: localrc
@@ -592,30 +627,150 @@
     localrc = ESMF_RC_NOT_IMPL
 
     ! handle the regridmethod and unmappedaction flags
-    if (smvpresent == 0 .and. dmvpresent == 0) then
+    if (smvpresent == 0 .and. dmvpresent == 0 &
+        .and. sffpresent == 0 .and. dffpresent == 0) then
       call ESMF_FieldRegridStore(srcField, dstField, &
                                  regridmethod=regridmethod, &
                                  unmappedaction=unmappedaction, &
-                                 routehandle=l_routehandle, rc=localrc)
-    else if (smvpresent == 1 .and. dmvpresent == 0) then
+                                 routehandle=l_routehandle, &
+                                 rc=localrc)
+    else if (smvpresent == 0 .and. dmvpresent == 0 &
+             .and. sffpresent == 0 .and. dffpresent == 1) then
       call ESMF_FieldRegridStore(srcField, dstField, &
-                                 srcMaskValues=srcMaskValues, &
                                  regridmethod=regridmethod, &
                                  unmappedaction=unmappedaction, &
-                                 routehandle=l_routehandle, rc=localrc)
-    else if (smvpresent == 0 .and. dmvpresent == 1) then
+                                 routehandle=l_routehandle, &
+                                 dstFracField=dstFracField, &
+                                 rc=localrc)
+    else if (smvpresent == 0 .and. dmvpresent == 0 &
+             .and. sffpresent == 1 .and. dffpresent == 0) then
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 regridmethod=regridmethod, &
+                                 unmappedaction=unmappedaction, &
+                                 routehandle=l_routehandle, &
+                                 srcFracField=srcFracField, &
+                                 rc=localrc)
+    else if (smvpresent == 0 .and. dmvpresent == 1 &
+             .and. sffpresent == 0 .and. dffpresent == 0) then
       call ESMF_FieldRegridStore(srcField, dstField, &
                                  dstMaskValues=dstMaskValues, &
                                  regridmethod=regridmethod, &
                                  unmappedaction=unmappedaction, &
-                                 routehandle=l_routehandle, rc=localrc)
-    else if (smvpresent == 1 .and. dmvpresent == 1) then
+                                 routehandle=l_routehandle, &
+                                 rc=localrc)
+    else if (smvpresent == 1 .and. dmvpresent == 0 &
+             .and. sffpresent == 0 .and. dffpresent == 0) then
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 srcMaskValues=srcMaskValues, &
+                                 regridmethod=regridmethod, &
+                                 unmappedaction=unmappedaction, &
+                                 routehandle=l_routehandle, &
+                                 rc=localrc)
+    else if (smvpresent == 0 .and. dmvpresent == 0 &
+             .and. sffpresent == 1 .and. dffpresent == 1) then
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 regridmethod=regridmethod, &
+                                 unmappedaction=unmappedaction, &
+                                 routehandle=l_routehandle, &
+                                 srcFracField=srcFracField, &
+                                 dstFracField=dstFracField, &
+                                 rc=localrc)
+    else if (smvpresent == 0 .and. dmvpresent == 1 &
+             .and. sffpresent == 0 .and. dffpresent == 1) then
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 dstMaskValues=dstMaskValues, &
+                                 regridmethod=regridmethod, &
+                                 unmappedaction=unmappedaction, &
+                                 routehandle=l_routehandle, &
+                                 dstFracField=dstFracField, &
+                                 rc=localrc)
+    else if (smvpresent == 1 .and. dmvpresent == 0 &
+             .and. sffpresent == 0 .and. dffpresent == 1) then
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 srcMaskValues=srcMaskValues, &
+                                 regridmethod=regridmethod, &
+                                 unmappedaction=unmappedaction, &
+                                 routehandle=l_routehandle, &
+                                 dstFracField=dstFracField, &
+                                 rc=localrc)
+    else if (smvpresent == 0 .and. dmvpresent == 1 &
+             .and. sffpresent == 1 .and. dffpresent == 0) then
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 dstMaskValues=dstMaskValues, &
+                                 regridmethod=regridmethod, &
+                                 unmappedaction=unmappedaction, &
+                                 routehandle=l_routehandle, &
+                                 srcFracField=srcFracField, &
+                                 rc=localrc)
+    else if (smvpresent == 1 .and. dmvpresent == 0 &
+             .and. sffpresent == 1 .and. dffpresent == 0) then
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 srcMaskValues=srcMaskValues, &
+                                 regridmethod=regridmethod, &
+                                 unmappedaction=unmappedaction, &
+                                 routehandle=l_routehandle, &
+                                 srcFracField=srcFracField, &
+                                 rc=localrc)
+    else if (smvpresent == 1 .and. dmvpresent == 1 &
+             .and. sffpresent == 0 .and. dffpresent == 0) then
       call ESMF_FieldRegridStore(srcField, dstField, &
                                  srcMaskValues=srcMaskValues, &
                                  dstMaskValues=dstMaskValues, &
                                  regridmethod=regridmethod, &
                                  unmappedaction=unmappedaction, &
-                                 routehandle=l_routehandle, rc=localrc)
+                                 routehandle=l_routehandle, &
+                                 rc=localrc)
+    else if (smvpresent == 0 .and. dmvpresent == 1 &
+             .and. sffpresent == 1 .and. dffpresent == 1) then
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 dstMaskValues=dstMaskValues, &
+                                 regridmethod=regridmethod, &
+                                 unmappedaction=unmappedaction, &
+                                 routehandle=l_routehandle, &
+                                 srcFracField=srcFracField, &
+                                 dstFracField=dstFracField, &
+                                 rc=localrc)
+    else if (smvpresent == 1 .and. dmvpresent == 1 &
+             .and. sffpresent == 1 .and. dffpresent == 0) then
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 srcMaskValues=srcMaskValues, &
+                                 dstMaskValues=dstMaskValues, &
+                                 regridmethod=regridmethod, &
+                                 unmappedaction=unmappedaction, &
+                                 routehandle=l_routehandle, &
+                                 srcFracField=srcFracField, &
+                                 rc=localrc)
+    else if (smvpresent == 1 .and. dmvpresent == 0 &
+             .and. sffpresent == 1 .and. dffpresent == 1) then
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 srcMaskValues=srcMaskValues, &
+                                 regridmethod=regridmethod, &
+                                 unmappedaction=unmappedaction, &
+                                 routehandle=l_routehandle, &
+                                 srcFracField=srcFracField, &
+                                 dstFracField=dstFracField, &
+                                 rc=localrc)
+    else if (smvpresent == 1 .and. dmvpresent == 1 &
+             .and. sffpresent == 0 .and. dffpresent == 1) then
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 srcMaskValues=srcMaskValues, &
+                                 dstMaskValues=dstMaskValues, &
+                                 regridmethod=regridmethod, &
+                                 unmappedaction=unmappedaction, &
+                                 routehandle=l_routehandle, &
+                                 dstFracField=dstFracField, &
+                                 rc=localrc)
+    else if (smvpresent == 1 .and. dmvpresent == 1 &
+             .and. sffpresent == 1 .and. dffpresent == 1) then
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 srcMaskValues=srcMaskValues, &
+                                 dstMaskValues=dstMaskValues, &
+                                 regridmethod=regridmethod, &
+                                 unmappedaction=unmappedaction, &
+                                 routehandle=l_routehandle, &
+                                 srcFracField=srcFracField, &
+                                 dstFracField=dstFracField, &
+                                 rc=localrc)
     endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return

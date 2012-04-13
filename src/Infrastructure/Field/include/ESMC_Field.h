@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.49 2012/04/04 16:58:15 rokuingh Exp $
+// $Id: ESMC_Field.h,v 1.50 2012/04/13 16:32:15 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -479,6 +479,35 @@ int ESMC_FieldPrint(
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE: ESMC_FieldRegridGetArea - Get the area of the cells used for 
+//                                      conservative interpolation
+//
+// !INTERFACE:
+int ESMC_FieldRegridGetArea(
+  ESMC_Field field      // in
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//     This subroutine gets the area of the cells used for conservative interpolation for the grid object 
+//     associated with {\tt areaField} and puts them into {\tt areaField}. If created on a 2D Grid, it must 
+//     be built on the {\tt ESMF\_STAGGERLOC\_CENTER} stagger location. 
+//     If created on a 3D Grid, it must be built on the {\tt ESMF\_STAGGERLOC\_CENTER\_VCENTER} stagger 
+//     location. If created on a Mesh, it must be built on the {\tt ESMF\_MESHLOC\_ELEMENT} mesh location. 
+//
+//     The arguments are:
+//     \begin{description}
+//     \item [areaField]
+//           The Field to put the area values in. 
+//     \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE: ESMC_FieldRegridStore - Precompute a Field regridding operation and return a RouteHandle
 //
 // !INTERFACE:
@@ -489,7 +518,9 @@ int ESMC_FieldRegridStore(
     ESMC_InterfaceInt *dstMaskValues,          // in
     ESMC_RouteHandle *routehandle,             // inout
     enum ESMC_RegridMethod regridmethod,       // in
-    enum ESMC_UnmappedAction unmappedaction);  // in
+    enum ESMC_UnmappedAction unmappedaction,   // in
+    ESMC_Field *srcFracField,                  // out
+    ESMC_Field *dstFracField);                 // out
 
 // !RETURN VALUE:
 //   Return code; equals ESMF_SUCCESS if there are no errors.
@@ -521,6 +552,16 @@ int ESMC_FieldRegridStore(
 //    Specifies what should happen if there are destination points that can't 
 //    be mapped to a source cell. Options are ESMF\_UNMAPPEDACTION\_ERROR or 
 //    ESMF\_UNMAPPEDACTION\_IGNORE. If not specified, defaults to ESMF\_UNMAPPEDACTION\_ERROR.
+//  \item [{[srcFracField]}] 
+//    The fraction of each source cell participating in the regridding. Only 
+//    valid when regridmethod is {\tt ESMC\_REGRIDMETHOD\_CONSERVE}.
+//    This Field needs to be created on the same location (e.g staggerloc) 
+//    as the srcField.
+//  \item [{[dstFracField]}] 
+//    The fraction of each destination cell participating in the regridding. Only 
+//    valid when regridmethod is {\tt ESMF\_REGRIDMETHOD\_CONSERVE}.
+//    This Field needs to be created on the same location (e.g staggerloc) 
+//    as the dstField.
 //  \end{description}
 //
 //EOP

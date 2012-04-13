@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegridCsrv2UTest.C,v 1.2 2012/04/12 18:33:23 oehmke Exp $
+// $Id: ESMC_FieldGridRegridCsrv2UTest.C,v 1.3 2012/04/13 16:32:21 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -50,7 +50,8 @@ int main(void){
   
   // Field variables
   ESMC_RouteHandle routehandle;
-  ESMC_Field srcfield, dstfield;
+  ESMC_Field srcfield, dstfield, srcAreaField, dstAreaField, 
+             srcFracField, dstFracField;
 
   // Grid variables
   ESMC_Grid grid;
@@ -493,21 +494,31 @@ int main(void){
   //EX_UTest
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
+  srcFracField = ESMC_FieldCreateMeshTypeKind(mesh, ESMC_TYPEKIND_R8,
+    ESMC_MESHLOC_ELEMENT, NULL, NULL, NULL, "srcFracField", &rc);
+  dstFracField = ESMC_FieldCreateGridTypeKind(grid, ESMC_TYPEKIND_R8, 
+    ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "dstFracField", &rc);
+
 #ifdef meshmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, NULL, &routehandle, 
-                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR);
+                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR,
+                             &srcFracField, &dstFracField);
 #endif
 #ifdef gridmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, &i_maskValues, &routehandle, 
-                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR);
+                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR,
+                             &srcFracField, &dstFracField);
 #endif
 #ifdef bothmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, &i_maskValues, &routehandle, 
-                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR);
+                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR,
+                             &srcFracField, &dstFracField);
 #endif
 #ifdef nomasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle, 
-                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR);
+                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR,
+                             &srcFracField, &dstFracField);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -528,6 +539,53 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "Execute ESMC_FieldRegridGetArea() - source");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
+  srcAreaField = ESMC_FieldCreateMeshTypeKind(mesh, ESMC_TYPEKIND_R8,
+    ESMC_MESHLOC_ELEMENT, NULL, NULL, NULL, "srcAreaField", &rc);
+
+  rc = ESMC_FieldRegridGetArea(srcAreaField);
+
+  //printf("Source Area Field pointer\n");
+  double *srcAreaFieldPtr = (double *)ESMC_FieldGetPtr(srcAreaField, 0, &rc);
+  bool pass = true;
+  for(int i=0; i<num_elem; ++i) {
+    //printf("%f\n",srcAreaFieldPtr[p]);
+    if (srcAreaFieldPtr[i] <= 0.0) pass = false;
+  }
+  //printf("\n");
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "Execute ESMC_FieldRegridGetArea() - destination");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
+  dstAreaField = ESMC_FieldCreateGridTypeKind(grid, ESMC_TYPEKIND_R8,
+    ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "dstAreaField", &rc);
+
+  rc = ESMC_FieldRegridGetArea(dstAreaField);
+
+  //printf("Destination Area Field pointer\n");
+  double * dstAreaFieldPtr = (double *)ESMC_FieldGetPtr(dstAreaField, 0, &rc);
+  pass = true;
+  p = 0;
+  for (int i1=exLB_center[1]; i1<=exUB_center[1]; ++i1) {
+    for (int i0=exLB_center[0]; i0<=exUB_center[0]; ++i0) {
+    //printf("%f\n",dstAreaFieldPtr[i]);
+    if (dstAreaFieldPtr[p] <= 0.0) pass = false;
+      ++p;
+    }
+  }
+  //printf("\n");
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //-------------------------- REGRID VALIDATION -------------------------------
@@ -536,12 +594,23 @@ int main(void){
   strcpy(name, "Regridding Validation");
   strcpy(failMsg, "Did not have acceptable accuracy");
 
+  // get the fraction fields
+  double * srcFracFieldPtr = (double *)ESMC_FieldGetPtr(srcFracField, 0, &rc);
+  double * dstFracFieldPtr = (double *)ESMC_FieldGetPtr(dstFracField, 0, &rc);
+
+  double srcmass = 0;
+  for (int i=0; i<num_elem; ++i)
+    srcmass += srcfieldptr[i]*srcAreaFieldPtr[i]*srcFracFieldPtr[i];
 
   // check destination field against analytic field
   bool correct = true;
+  double dstmass = 0;
   p = 0;
   for (int i1=exLB_center[1]; i1<=exUB_center[1]; ++i1) {
     for (int i0=exLB_center[0]; i0<=exUB_center[0]; ++i0) {
+      // compute the mass
+      dstmass += dstfieldptr[p]*dstAreaFieldPtr[p];
+      //printf("%f - %f\n", dstfieldptr[p], dstAreaFieldPtr[p]);
       x = gridXCenter[p];
       y = gridYCenter[p];
       exact = 20.0 + x + y;
@@ -557,6 +626,10 @@ int main(void){
       ++p;
     }
   }
+  // check that the mass is conserved
+  if (abs(srcmass - dstmass) > .0001) correct = false;
+  //printf("srcmass = %f, dstmass = %f\n", srcmass, dstmass);
+
   ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

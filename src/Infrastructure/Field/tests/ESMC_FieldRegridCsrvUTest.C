@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldRegridCsrvUTest.C,v 1.3 2012/04/12 18:33:23 oehmke Exp $
+// $Id: ESMC_FieldRegridCsrvUTest.C,v 1.4 2012/04/13 16:32:21 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -42,7 +42,8 @@ int main(void){
   // Field variables
   ESMC_ArraySpec arrayspec;
   ESMC_RouteHandle routehandle;
-  ESMC_Field srcfield, dstfield;
+  ESMC_Field srcfield, dstfield, srcAreaField, dstAreaField, 
+             srcFracField, dstFracField;
 
   // Mesh variables
   int pdim=2;
@@ -123,9 +124,11 @@ int main(void){
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef masking
-  rc = ESMC_MeshAddElements(srcmesh, num_elem_s, elemId_s, elemType_s, elemConn_s, elemMask, NULL);
+  rc = ESMC_MeshAddElements(srcmesh, num_elem_s, elemId_s, elemType_s, 
+                            elemConn_s, elemMask, NULL);
 #else
-  rc = ESMC_MeshAddElements(srcmesh, num_elem_s, elemId_s, elemType_s, elemConn_s, NULL, NULL);
+  rc = ESMC_MeshAddElements(srcmesh, num_elem_s, elemId_s, elemType_s, 
+                            elemConn_s, NULL, NULL);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -139,7 +142,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS) && num_node_s==num_node_out_s, 
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  printf("num_node_s = %d\nnum_node_out_s=%d\n", num_node_s, num_node_out_s);
+  //printf("num_node_s = %d\nnum_node_out_s=%d\n", num_node_s, num_node_out_s);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -150,7 +153,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS) && num_elem_s==num_elem_out_s, 
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  printf("num_elem_s = %d\nnum_elem_out_s=%d\n", num_elem_s, num_elem_out_s);
+  //printf("num_elem_s = %d\nnum_elem_out_s=%d\n", num_elem_s, num_elem_out_s);
 
 
 
@@ -236,7 +239,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS) && num_node_d==num_node_out_d, 
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  printf("num_node_d = %d\nnum_node_out_d=%d\n", num_node_d, num_node_out_d);
+  //printf("num_node_d = %d\nnum_node_out_d=%d\n", num_node_d, num_node_out_d);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -247,7 +250,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS) && num_elem_d==num_elem_out_d, 
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  printf("num_elem_d = %d\nnum_elem_out_d=%d\n", num_elem_d, num_elem_out_d);
+  //printf("num_elem_d = %d\nnum_elem_out_d=%d\n", num_elem_d, num_elem_out_d);
 
   //----------------------------------------------------------------------------
   //---------------------- FIELD CREATION --------------------------------------
@@ -280,7 +283,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Get a void * C pointer to data from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  double * srcfieldptr = (double *)ESMC_FieldGetPtr(srcfield, 0, &rc);
+  double * srcFieldPtr = (double *)ESMC_FieldGetPtr(srcfield, 0, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -288,24 +291,24 @@ int main(void){
   for(int i=0; i<num_elem_s; ++i) {
 #ifdef masking
     if (elemMask[i] == 1) {
-      srcfieldptr[i] = 100000000.0;
-      printf("Mask applied at position %d\n", i);
+      srcFieldPtr[i] = 100000000.0;
+      //printf("Mask applied at position %d\n", i);
     } else
 #endif
-      srcfieldptr[i] = 20.0;
+      srcFieldPtr[i] = 20.0;
   }
   
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Get a void * C pointer to data from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  double * dstfieldptr = (double *)ESMC_FieldGetPtr(dstfield, 0, &rc);
+  double * dstFieldPtr = (double *)ESMC_FieldGetPtr(dstfield, 0, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   // initialize destination field
   for(int i=0; i<num_elem_d; ++i)
-    dstfieldptr[i] = 0.0;
+    dstFieldPtr[i] = 0.0;
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -320,19 +323,24 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
+  srcFracField = ESMC_FieldCreateMeshTypeKind(srcmesh, ESMC_TYPEKIND_R8,
+    ESMC_MESHLOC_ELEMENT, NULL, NULL, NULL, "dstFracField", &rc);
+  dstFracField = ESMC_FieldCreateMeshTypeKind(dstmesh, ESMC_TYPEKIND_R8,
+    ESMC_MESHLOC_ELEMENT, NULL, NULL, NULL, "dstFracField", &rc);
+
+#ifdef masking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, 
-#ifdef masking
                              &i_maskValues, NULL,
-#else
-                             NULL, NULL,
-#endif
                              &routehandle,
-#ifdef masking
-                             // TODO: this is required until mesh can accept masked
-                             //       elements on the source side
-                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_IGNORE);
+                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_IGNORE,
+                             &srcFracField, &dstFracField);
 #else
-                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR);
+  rc = ESMC_FieldRegridStore(srcfield, dstfield, 
+                             NULL, NULL,
+                             &routehandle,
+                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR,
+                             &srcFracField, &dstFracField);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -353,6 +361,49 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Execute ESMC_FieldRegridGetArea() - source");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
+  srcAreaField = ESMC_FieldCreateMeshTypeKind(srcmesh, ESMC_TYPEKIND_R8,
+    ESMC_MESHLOC_ELEMENT, NULL, NULL, NULL, "srcAreaField", &rc);
+
+  rc = ESMC_FieldRegridGetArea(srcAreaField);
+
+  //printf("Source Area Field pointer\n");
+  double *srcAreaFieldPtr = (double *)ESMC_FieldGetPtr(srcAreaField, 0, &rc);
+  bool pass = true;
+  for(int i=0; i<num_elem_s; ++i) {
+    //printf("%f\n",srcAreaFieldPtr[i]);
+    if (srcAreaFieldPtr[i] <= 0.0) pass = false;
+  }
+  //printf("\n");
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Execute ESMC_FieldRegridGetArea() - destination");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
+  dstAreaField = ESMC_FieldCreateMeshTypeKind(dstmesh, ESMC_TYPEKIND_R8,
+    ESMC_MESHLOC_ELEMENT, NULL, NULL, NULL, "dstAreaField", &rc);
+
+  rc = ESMC_FieldRegridGetArea(dstAreaField);
+
+  //printf("Destination Area Field pointer\n");
+  double * dstAreaFieldPtr = (double *)ESMC_FieldGetPtr(dstAreaField, 0, &rc);
+  pass = true;
+  for(int i=0; i<num_elem_d; ++i) {
+    //printf("%f\n",dstAreaFieldPtr[i]);
+    if (dstAreaFieldPtr[i] <= 0.0) pass = false;
+  }
+  //printf("\n");
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //-------------------------- REGRID VALIDATION -------------------------------
@@ -362,19 +413,34 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Validate regridding");
   strcpy(failMsg, "Did not return correct analytic values");
+
+  // get the fraction fields
+  double * srcFracFieldPtr = (double *)ESMC_FieldGetPtr(srcFracField, 0, &rc);
+  double * dstFracFieldPtr = (double *)ESMC_FieldGetPtr(dstFracField, 0, &rc);
+
+  double srcmass = 0;
+  for (int i=0; i<num_elem_s; ++i)
+    srcmass += srcFieldPtr[i]*srcAreaFieldPtr[i]*srcFracFieldPtr[i];
+
   bool correct = true;
-  // 2. check destination field against source field
+  double dstmass = 0;
+  // check destination field against source field
   for(int i=0;i<num_elem_d;++i) {
+    // compute the mass
+    dstmass += dstFieldPtr[i]*dstAreaFieldPtr[i];
     // if error is too big report an error
 #ifdef masking
-    if ( abs((long)( dstfieldptr[i]-(20.0)) ) > 100) {
+    if ( abs((long)( dstFieldPtr[i]-(20.0)) ) > 100) {
 #else
-    if ( abs((long)( dstfieldptr[i]-(20.0)) ) > .0001) {
+    if ( abs((long)( dstFieldPtr[i]-(20.0)) ) > .0001) {
 #endif
-      printf("dstfieldptr[%d] = %f\n and it should be = %f\n", i, dstfieldptr[i], 20.0);
+      printf("dstfieldptr[%d] = %f\n and it should be = %f\n", i, dstFieldPtr[i], 20.0);
       correct=false;
     }
   }
+  // check that the mass is conserved
+  if (abs(srcmass - dstmass) > .0001) correct = false;
+  //printf("srcmass = %f, dstmass = %f\n", srcmass, dstmass);
   ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

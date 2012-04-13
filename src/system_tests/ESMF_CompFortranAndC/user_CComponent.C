@@ -1,4 +1,4 @@
-// $Id: user_CComponent.C,v 1.21 2012/04/02 16:46:30 rokuingh Exp $
+// $Id: user_CComponent.C,v 1.22 2012/04/13 16:32:26 rokuingh Exp $
 //
 // Example/test code which shows User Component calls.
 
@@ -107,7 +107,7 @@ void myInitInC(ESMC_GridComp gcomp, ESMC_State importState,
   if (*rc!=ESMF_SUCCESS) return;  // bail out
   
   // Add element information to the mesh
-  *rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn, NULL);
+  *rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn, NULL, NULL);
   if (*rc!=ESMF_SUCCESS) return;  // bail out
   
   // garbage collection of temporary variables used to create Mesh object

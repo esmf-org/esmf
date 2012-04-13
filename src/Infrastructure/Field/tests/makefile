@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.96 2012/04/09 23:10:17 rokuingh Exp $ 
+# $Id: makefile,v 1.97 2012/04/13 16:32:21 rokuingh Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -154,13 +154,13 @@ RUN_ESMC_FieldGridRegridCsrv2UTestUNI:
 	$(MAKE) TNAME=FieldGridRegridCsrv2 NP=1 ctest
 
 RUN_ESMC_FieldGridGridRegridUTest:
-	$(MAKE) TNAME=FieldGridGridRegrid NP=1 ctest
+	$(MAKE) TNAME=FieldGridGridRegrid NP=4 ctest
 
 RUN_ESMC_FieldGridGridRegridUTestUNI:
 	$(MAKE) TNAME=FieldGridGridRegrid NP=1 ctest
 
 RUN_ESMC_FieldGridGridRegridCsrvUTest:
-	$(MAKE) TNAME=FieldGridGridRegridCsrv NP=1 ctest
+	$(MAKE) TNAME=FieldGridGridRegridCsrv NP=4 ctest
 
 RUN_ESMC_FieldGridGridRegridCsrvUTestUNI:
 	$(MAKE) TNAME=FieldGridGridRegridCsrv NP=1 ctest

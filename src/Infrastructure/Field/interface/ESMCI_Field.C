@@ -50,7 +50,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.23 2012/04/04 16:58:17 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.24 2012/04/13 16:32:17 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -111,11 +111,15 @@ void FTN_X(f_esmf_fieldprint)(ESMCI::Field *fieldp, int *rc);
 void FTN_X(f_esmf_fieldcast)(ESMCI::F90ClassHolder *fieldOut,
   ESMCI::Field *fieldIn, int *rc);
 
+void FTN_X(f_esmf_regridgetarea)(ESMCI::Field *fieldp, int *rc);
+
 void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   int *srcMaskValues, int *len1, int *smv_present,
   int *dstMaskValues, int *len2, int *dmv_present,
-  ESMCI::RouteHandle **routehandlep, ESMC_RegridMethod *regridmethod, 
-  ESMC_UnmappedAction *unmappedaction, int *rc);
+  ESMCI::RouteHandle **routehandlep, 
+  ESMC_RegridMethod *regridmethod, ESMC_UnmappedAction *unmappedaction, 
+  ESMCI::Field *srcfracfieldp, int *sff_present, 
+  ESMCI::Field *dstfracfieldp, int *dff_present, int *rc);
 
 void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   ESMCI::RouteHandle **routehandlep, int *rc);
@@ -814,6 +818,40 @@ namespace ESMCI {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::regridgetarea()"
+//BOP
+// !IROUTINE:  ESMCI::Field::regridgetarea - get the area of cells used for
+//                                           conservative interpolation
+//
+// !INTERFACE:
+  int Field::regridgetarea(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+    Field *fieldp) {
+//
+// !DESCRIPTION:
+//
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    FTN_X(f_esmf_regridgetarea)(fieldp, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+      return rc;
+
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Field::regridstore()"
 //BOP
 // !IROUTINE:  ESMCI::Field::regridstore - precompute a regriddding operation
@@ -831,7 +869,9 @@ namespace ESMCI {
     ESMC_InterfaceInt *dstMaskValues, 
     RouteHandle **routehandlep, 
     ESMC_RegridMethod *regridMethod, 
-    ESMC_UnmappedAction *unmappedAction) {
+    ESMC_UnmappedAction *unmappedAction,
+    Field *srcFracField, 
+    Field *dstFracField) {
 //
 // !DESCRIPTION:
 //
@@ -842,12 +882,19 @@ namespace ESMCI {
     int localrc = ESMC_RC_NOT_IMPL;
   
     int smv_present, dmv_present;
+    int sff_present, dff_present;
     bool smv_created, dmv_created;
+    bool sff_created, dff_created;
     smv_present = 0;
     dmv_present = 0;
+    sff_present = 0;
+    dff_present = 0;
     smv_created = false;
     dmv_created = false;
+    sff_created = false;
+    dff_created = false;
     ESMCI::InterfaceInt *smv, *dmv;
+    ESMCI::Field *sff, *dff;
 
     if (srcMaskValues != NULL) {
       smv = (ESMCI::InterfaceInt *)(srcMaskValues->ptr);
@@ -857,31 +904,58 @@ namespace ESMCI {
          return ESMC_NULL_POINTER;
       }
       smv_present = 1;
-    } else
+    } else {
       smv = new ESMCI::InterfaceInt();
-
+      smv_created = true;
+    }
+ 
     if (dstMaskValues != NULL) {
       dmv = (ESMCI::InterfaceInt *)(dstMaskValues->ptr);
       if(dmv->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
            "- dstMaskValues array must be of rank 1", &rc);
+         if (smv_created) delete smv;
          return ESMC_NULL_POINTER;
       }
       dmv_present = 1;
-    } else
+    } else {
       dmv = new ESMCI::InterfaceInt();
+      dmv_created = true;
+    }
+
+    if (srcFracField != NULL) {
+      sff_present = 1;
+    } else {
+      sff = new ESMCI::Field();
+      sff_created = true;
+    }
+
+    if (dstFracField != NULL) {
+      dff_present = 1;
+    } else {
+      dff = new ESMCI::Field();
+      sff_created = true;
+    }
 
     FTN_X(f_esmf_regridstore)(fieldpsrc, fieldpdst, 
                               smv->array, &smv->extent[0], &smv_present,
                               dmv->array, &dmv->extent[0], &dmv_present,
                               routehandlep,
-                              regridMethod, unmappedAction, &localrc);
+                              regridMethod, unmappedAction, 
+                              srcFracField, &sff_present,
+                              dstFracField, &dff_present, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
       if (smv_created) delete smv;
       if (dmv_created) delete dmv;
+      if (sff_created) delete sff;
+      if (dff_created) delete dff;
       return rc;
     }
 
+    if (smv_created) delete smv;
+    if (dmv_created) delete dmv;
+    if (sff_created) delete sff;
+    if (dff_created) delete dff;
     rc = ESMF_SUCCESS;
     return rc;
   }

@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.36 2012/04/04 16:58:17 rokuingh Exp $
+// $Id: ESMC_Field.C,v 1.37 2012/04/13 16:32:17 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -271,27 +271,60 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
 
 //--------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_FieldRegridStore()"
-  int ESMC_FieldRegridStore(ESMC_Field srcField, ESMC_Field dstField,
-                            ESMC_InterfaceInt *srcMaskValues, 
-                            ESMC_InterfaceInt *dstMaskValues,
-                            ESMC_RouteHandle *routehandle, 
-                            enum ESMC_RegridMethod regridmethod, 
-                            enum ESMC_UnmappedAction unmappedaction){
+#define ESMC_METHOD "ESMC_FieldRegridGetArea()"
+  int ESMC_FieldRegridGetArea(ESMC_Field field) {
 
     // Initialize return code. Assume routine not implemented
     int rc = ESMF_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
     // typecase into ESMCI type
+    ESMCI::Field *fieldp = reinterpret_cast<ESMCI::Field *>(field.ptr);
+
+    // Invoque the C++ interface
+    localrc = ESMCI::Field::regridgetarea(fieldp);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+      return rc;  // bail out
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//--------------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldRegridStore()"
+  int ESMC_FieldRegridStore(ESMC_Field srcField, ESMC_Field dstField,
+                            ESMC_InterfaceInt *srcMaskValues, 
+                            ESMC_InterfaceInt *dstMaskValues,
+                            ESMC_RouteHandle *routehandle, 
+                            enum ESMC_RegridMethod regridmethod, 
+                            enum ESMC_UnmappedAction unmappedaction,
+                            ESMC_Field *srcFracField,
+                            ESMC_Field *dstFracField){
+
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMF_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    ESMCI::Field *srcfracp = NULL;
+    ESMCI::Field *dstfracp = NULL;
+    // typecase into ESMCI type
     ESMCI::Field *fieldpsrc = reinterpret_cast<ESMCI::Field *>(srcField.ptr);
     ESMCI::Field *fieldpdst = reinterpret_cast<ESMCI::Field *>(dstField.ptr);
+    if (srcFracField != NULL)
+      srcfracp = reinterpret_cast<ESMCI::Field *>(srcFracField->ptr);
+    if (dstFracField != NULL)
+      dstfracp = reinterpret_cast<ESMCI::Field *>(dstFracField->ptr);
     ESMCI::RouteHandle *rhPtr;
     rhPtr=NULL;   
- 
+
     // Invoque the C++ interface
     localrc = ESMCI::Field::regridstore(fieldpsrc, fieldpdst, 
-      srcMaskValues, dstMaskValues, &rhPtr, &regridmethod, &unmappedaction);
+      srcMaskValues, dstMaskValues, &rhPtr, &regridmethod, &unmappedaction,
+      srcfracp, dstfracp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;  // bail out
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridGridRegridCsrvUTest.C,v 1.1 2012/04/09 23:10:17 rokuingh Exp $
+// $Id: ESMC_FieldGridGridRegridCsrvUTest.C,v 1.2 2012/04/13 16:32:21 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -46,7 +46,8 @@ int main(void){
   
   // Field variables
   ESMC_RouteHandle routehandle;
-  ESMC_Field srcfield, dstfield;
+  ESMC_Field srcfield, dstfield, srcAreaField, dstAreaField, 
+             srcFracField, dstFracField;
 
   // Grid variables
   ESMC_Grid srcgrid, dstgrid;
@@ -159,8 +160,8 @@ int main(void){
                                                     exLBound_corner, 
                                                     exUBound_corner, &rc);
 
-  printf("exLBound_corner = [%d,%d]\n", exLBound_corner[0], exLBound_corner[1]);
-  printf("exUBound_corner = [%d,%d]\n", exUBound_corner[0], exUBound_corner[1]);
+  //printf("exLBound_corner = [%d,%d]\n", exLBound_corner[0], exLBound_corner[1]);
+  //printf("exUBound_corner = [%d,%d]\n", exUBound_corner[0], exUBound_corner[1]);
 
   p = 0;
   for (int i1=exLBound_corner[1]; i1<=exUBound_corner[1]; ++i1) {
@@ -208,8 +209,8 @@ int main(void){
                                                     exLBound_center, 
                                                     exUBound_center, &rc);
 
-  printf("exLBound_center = [%d,%d]\n", exLBound_center[0], exLBound_center[1]);
-  printf("exUBound_center = [%d,%d]\n", exUBound_center[0], exUBound_center[1]);
+  //printf("exLBound_center = [%d,%d]\n", exLBound_center[0], exLBound_center[1]);
+  //printf("exUBound_center = [%d,%d]\n", exUBound_center[0], exUBound_center[1]);
 
   p = 0;
   for (int i1=exLBound_center[1]; i1<=exUBound_center[1]; ++i1) {
@@ -251,7 +252,7 @@ int main(void){
     for (int i0=exLBound_center[0]; i0<=exUBound_center[0]; ++i0) {
       if (i0 == 2) {
         mask[p] = 1;
-        printf("Masked value at [%f,%f]\n", gridXCenter[p], gridYCenter[p]);
+        //printf("Masked value at [%f,%f]\n", gridXCenter[p], gridYCenter[p]);
       } else mask[p] = 0;
       ++p;
     }
@@ -323,8 +324,8 @@ int main(void){
                                                      exLBound_dcorner, 
                                                      exUBound_dcorner, &rc);
 
-  printf("exLBound_dcorner = [%d,%d]\n", exLBound_dcorner[0], exLBound_dcorner[1]);
-  printf("exUBound_dcorner = [%d,%d]\n", exUBound_dcorner[0], exUBound_dcorner[1]);
+  //printf("exLBound_dcorner = [%d,%d]\n", exLBound_dcorner[0], exLBound_dcorner[1]);
+  //printf("exUBound_dcorner = [%d,%d]\n", exUBound_dcorner[0], exUBound_dcorner[1]);
 
   p = 0;
   for (int i1=exLBound_dcorner[1]; i1<=exUBound_dcorner[1]; ++i1) {
@@ -372,8 +373,8 @@ int main(void){
                                                      exLBound_dcenter, 
                                                      exUBound_dcenter, &rc);
 
-  printf("exLBound_dcenter = [%d,%d]\n", exLBound_dcenter[0], exLBound_dcenter[1]);
-  printf("exUBound_dcenter = [%d,%d]\n", exUBound_dcenter[0], exUBound_dcenter[1]);
+  //printf("exLBound_dcenter = [%d,%d]\n", exLBound_dcenter[0], exLBound_dcenter[1]);
+  //printf("exUBound_dcenter = [%d,%d]\n", exUBound_dcenter[0], exUBound_dcenter[1]);
 
   p = 0;
   for (int i1=exLBound_dcenter[1]; i1<=exUBound_dcenter[1]; ++i1) {
@@ -408,6 +409,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+#if 0
   printf("\nSource Grid corner coords: \n");
   p = 0;
   for (int i1=exLBound_corner[1]; i1<=exUBound_corner[1]; ++i1) {
@@ -455,7 +457,7 @@ int main(void){
     }
   }
   printf("\n");
-
+#endif
 
   //----------------------------------------------------------------------------
   //---------------------- FIELD CREATION --------------------------------------
@@ -534,12 +536,20 @@ int main(void){
   //EX_UTest
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
+  srcFracField = ESMC_FieldCreateGridTypeKind(srcgrid, ESMC_TYPEKIND_R8, 
+    ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "srcFracField", &rc);
+  dstFracField = ESMC_FieldCreateGridTypeKind(dstgrid, ESMC_TYPEKIND_R8,
+    ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "dstFracField", &rc);
+
 #ifdef masking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, NULL, &routehandle, 
-                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_IGNORE);
+                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_IGNORE,
+                             &srcFracField, &dstFracField);
 #else
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle, 
-                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR);
+                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR,
+                             &srcFracField, &dstFracField);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -560,6 +570,57 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "Execute ESMC_FieldRegridGetArea() - source");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
+  srcAreaField = ESMC_FieldCreateGridTypeKind(srcgrid, ESMC_TYPEKIND_R8,
+    ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "srcAreaField", &rc);
+
+  rc = ESMC_FieldRegridGetArea(srcAreaField);
+
+  //printf("Source Area Field pointer\n");
+  double * srcAreaFieldPtr = (double *)ESMC_FieldGetPtr(srcAreaField, 0, &rc);
+  bool pass = true;
+  p = 0;
+  for (int i1=exLBound_center[1]; i1<=exUBound_center[1]; ++i1) {
+    for (int i0=exLBound_center[0]; i0<=exUBound_center[0]; ++i0) {
+    //printf("%f\n",srcAreaFieldPtr[i]);
+    if (srcAreaFieldPtr[p] <= 0.0) pass = false;
+      ++p;
+    }
+  }
+  //printf("\n");
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "Execute ESMC_FieldRegridGetArea() - destination");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
+  dstAreaField = ESMC_FieldCreateGridTypeKind(dstgrid, ESMC_TYPEKIND_R8,
+    ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "dstAreaField", &rc);
+
+  rc = ESMC_FieldRegridGetArea(dstAreaField);
+
+  //printf("Destination Area Field pointer\n");
+  double * dstAreaFieldPtr = (double *)ESMC_FieldGetPtr(dstAreaField, 0, &rc);
+  pass = true;
+  p = 0;
+  for (int i1=exLBound_dcenter[1]; i1<=exUBound_dcenter[1]; ++i1) {
+    for (int i0=exLBound_dcenter[0]; i0<=exUBound_dcenter[0]; ++i0) {
+    //printf("%f\n",dstAreaFieldPtr[i]);
+    if (dstAreaFieldPtr[p] <= 0.0) pass = false;
+      ++p;
+    }
+  }
+  //printf("\n");
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //-------------------------- REGRID VALIDATION -------------------------------
@@ -568,11 +629,29 @@ int main(void){
   strcpy(name, "Regridding Validation");
   strcpy(failMsg, "Did not have acceptable accuracy");
 
-  // validate against analytic values on destination field
-  bool correct = true;
+  // get the fraction fields
+  double * srcFracFieldPtr = (double *)ESMC_FieldGetPtr(srcFracField, 0, &rc);
+  double * dstFracFieldPtr = (double *)ESMC_FieldGetPtr(dstFracField, 0, &rc);
+
+  double srcmass = 0;
   p = 0;
   for (int i1=exLBound_dcenter[1]; i1<=exUBound_dcenter[1]; ++i1) {
     for (int i0=exLBound_dcenter[0]; i0<=exUBound_dcenter[0]; ++i0) {
+      srcmass += srcfieldptr[p]*srcAreaFieldPtr[p]*srcFracFieldPtr[p];
+      printf("%f - %f - %f\n", dstfieldptr[p], dstAreaFieldPtr[p], dstFracFieldPtr[p]);
+      ++p;
+    }
+  }
+
+  // validate against analytic values on destination field
+  bool correct = true;
+  double dstmass = 0;
+  p = 0;
+  for (int i1=exLBound_dcenter[1]; i1<=exUBound_dcenter[1]; ++i1) {
+    for (int i0=exLBound_dcenter[0]; i0<=exUBound_dcenter[0]; ++i0) {
+      // compute the mass
+      dstmass += dstfieldptr[p]*dstAreaFieldPtr[p];
+      //printf("%f - %f\n", dstfieldptr[p], dstAreaFieldPtr[p]);
       x = gridXCenter_d[p];
       y = gridYCenter_d[p];
       //exact = 20.0;
@@ -594,6 +673,9 @@ int main(void){
       ++p;
     }
   }
+  // check that the mass is conserved
+  //if (abs(srcmass - dstmass) > .0001) correct = false;
+  //printf("srcmass = %f, dstmass = %f, srcmass-dstmass = %f\n", srcmass, dstmass, srcmass-dstmass);
 
   ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
