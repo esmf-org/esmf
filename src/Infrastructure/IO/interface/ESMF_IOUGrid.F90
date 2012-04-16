@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUGrid.F90,v 1.7 2012/04/13 20:45:02 peggyli Exp $
+! $Id: ESMF_IOUGrid.F90,v 1.8 2012/04/16 22:31:01 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -105,15 +105,20 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
 
     ! get number of nodes
     if (present(nodeCount) .or. present(units)) then
-      ncStatus = nf90_get_att (ncid, meshId, "node_coordinates", nodeCoordString)
+      ncStatus = nf90_inquire_attribute(ncid, meshId, "node_coordinates", len=len)
       errmsg = "Attribute node_coordinates in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD,  &
+        ESMF_SRCLINE, errmsg, &
+        rc)) return
+      ncStatus = nf90_get_att (ncid, meshId, "node_coordinates", nodeCoordString)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
       pos = index(nodeCoordString(1:)," ")
       nodeCoordNames(1) = nodeCoordString(1:pos-1)
-      nodeCoordNames(2)=nodeCoordString(pos+1:)
+      nodeCoordNames(2)=nodeCoordString(pos+1:len)
 
       ! Get dimension (# nodes) used to define the node coordinates
       errmsg = "Variable "//trim(nodeCoordNames(1))//" in "//trim(filename)
@@ -155,21 +160,25 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
     end if
 
     if (present(elementCount) .or. present(maxNodePElement) .or. present(fillvalue)) then
+      ncStatus = nf90_inquire_attribute(ncid, meshId, "face_node_connectivity", len=len)
       errmsg = "Attribute face_node_connectivity in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD,  &
+        ESMF_SRCLINE, errmsg, &
+        rc)) return
       ncStatus = nf90_get_att (ncid, meshId, "face_node_connectivity", values=elmtConnName)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
       ! Get element connectivity 
-      errmsg = "Variable "//trim(elmtConnName)//" in "//trim(filename)
-      ncStatus = nf90_inq_varid (ncid, trim(elmtConnName), VarId)
+      errmsg = "Variable "//elmtConnName(1:len)//" in "//trim(filename)
+      ncStatus = nf90_inq_varid (ncid, elmtConnName(1:len), VarId)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
       ! Get dimensions of element connectivity 
-      errmsg = "Dimensions of "//trim(elmtConnName)//" in "//trim(filename)
       ncStatus = nf90_inquire_variable (ncid, VarId, dimids=DimIds)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
@@ -235,7 +244,7 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
     integer :: i,j,dim1,dim2
     integer, allocatable :: elemConn(:,:)
     integer:: localrc, ncStatus
-    integer :: VarId, meshId, pos
+    integer :: VarId, meshId, pos, len
     integer :: ncid, local_rank
     integer :: localFillValue, indexBase, offset
     real(ESMF_KIND_R8), pointer :: nodeXcoordsLocal(:), nodeYcoordsLocal(:)
@@ -260,15 +269,20 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
 
     ! get number of nodes
     if (present(nodeXcoords) .or. present(nodeYcoords) .or. present(faceNodeConnX)) then
-      ncStatus = nf90_get_att (ncid, meshId, "node_coordinates", nodeCoordString)
+      ncStatus = nf90_inquire_attribute(ncid, meshId, "node_coordinates", len=len)
       errmsg = "Attribute node_coordinates in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD,  &
+        ESMF_SRCLINE, errmsg, &
+        rc)) return
+      ncStatus = nf90_get_att (ncid, meshId, "node_coordinates", nodeCoordString)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
       pos = index(nodeCoordString(1:)," ")
       nodeCoordNames(1) = nodeCoordString(1:pos-1)
-      nodeCoordNames(2)=nodeCoordString(pos+1:)
+      nodeCoordNames(2)=nodeCoordString(pos+1:len)
 
       errmsg = "Variable "//trim(nodeCoordNames(1))//" in "//trim(filename)
       ncStatus = nf90_inq_varid (ncid, nodeCoordNames(1), VarId)
@@ -315,20 +329,25 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
       ! file in the SCRIP format.
       if (present(faceNodeConnX)) then 
         errmsg = "Attribute face_node_connectivity in "//trim(filename)
+        ncStatus = nf90_inquire_attribute(ncid, meshId, "face_node_connectivity", len=len)
+        if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
         ncStatus = nf90_get_att (ncid, meshId, "face_node_connectivity", values=elmtConnName)
         if (CDFCheckError (ncStatus, &
           ESMF_METHOD,  &
           ESMF_SRCLINE, errmsg, &
           rc)) return
         ! Get element connectivity
-        errmsg = "Variable "//trim(elmtConnName)//" in "//trim(filename)
-        ncStatus = nf90_inq_varid (ncid, trim(elmtConnName), VarId)
+        errmsg = "Variable "//elmtConnName(1:len)//" in "//trim(filename)
+        ncStatus = nf90_inq_varid (ncid, elmtConnName(1:len), VarId)
         if (CDFCheckError (ncStatus, &
           ESMF_METHOD,  &
           ESMF_SRCLINE, errmsg, &
           rc)) return
         ! Get elmt conn fill value
-        errmsg = "Attribute "//trim(elmtConnName)//"_FillValue in "//trim(filename)
+        errmsg = "Attribute "//elmtConnName(1:len)//"_FillValue in "//trim(filename)
         ncStatus = nf90_get_att (ncid, VarId, "_FillValue", values=localFillValue)
 	if (ncStatus /= nf90_noerror) localFillValue = 0
         ! Get start_index attribute to find out the index base (0 or 1)
@@ -367,15 +386,20 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
 
     ! get number of face
     if (present(faceXcoords) .or. present(faceYcoords)) then
-      ncStatus = nf90_get_att (ncid, meshId, "face_coordinates", nodeCoordString)
+      ncStatus = nf90_inquire_attribute(ncid, meshId, "face_coordinates", len=len)
       errmsg = "Attribute face_coordinates in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD,  &
+        ESMF_SRCLINE, errmsg, &
+        rc)) return
+      ncStatus = nf90_get_att (ncid, meshId, "face_coordinates", nodeCoordString)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
         ESMF_SRCLINE, errmsg, &
         rc)) return
       pos = index(nodeCoordString(1:)," ")
       nodeCoordNames(1) = nodeCoordString(1:pos-1)
-      nodeCoordNames(2)=nodeCoordString(pos+1:)
+      nodeCoordNames(2)=nodeCoordString(pos+1:len)
 
       errmsg = "Variable "//trim(nodeCoordNames(1))//" in "//trim(filename)
       ncStatus = nf90_inq_varid (ncid, nodeCoordNames(1), VarId)
@@ -630,6 +654,12 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     endif
 
     ! Get node coordinates
+    ncStatus = nf90_inquire_attribute(ncid, meshId, "node_coordinates", len=len)
+    errmsg = "Attribute node_coordinates in "//trim(filename)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, errmsg, &
+      rc)) return
     allocate( nodeCoordNames(2) )
     ncStatus = nf90_get_att (ncid, meshId, "node_coordinates", nodeCoordString)
     errmsg = "Attribute node_coordinates in "//trim(filename)
@@ -640,7 +670,7 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     ! Parse the attribute to find the varible names for node_coordinates
     pos = index(nodeCoordString(1:)," ")
     nodeCoordNames(1) = nodeCoordString(1:pos-1)
-    nodeCoordNames(2)=nodeCoordString(pos+1:)
+    nodeCoordNames(2)=nodeCoordString(pos+1:len)
 
     ! Get dimension (# nodes) used to define the node coordinates
     errmsg = "Variable "//trim(nodeCoordNames(1))//" in "//trim(filename)
@@ -714,14 +744,15 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
 
     ! Get element connectivity, if it does not exist, bail out
     errmsg = "Attribute face_node_connectivity in "//trim(filename)
+    ncStatus = nf90_inquire_attribute(ncid, meshId, "face_node_connectivity", len=len)
     ncStatus = nf90_get_att (ncid, meshId, "face_node_connectivity", values=elmtConnName)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
     ! Get element connectivity (UGRID convention is transposed compared to others)
-    errmsg = "Variable "//trim(elmtConnName)//" in "//trim(filename)
-    ncStatus = nf90_inq_varid (ncid, trim(elmtConnName), VarId)
+    errmsg = "Variable "//elmtConnName(1:len)//" in "//trim(filename)
+    ncStatus = nf90_inq_varid (ncid, elmtConnName(1:len), VarId)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
@@ -729,7 +760,7 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     ! Get elmt conn fill value (if there are triangles mixed with squares, eg)
     ! _FillValue is optional.  It is not needed if all the elements have the same
     ! number of corner nodes
-    errmsg = "Attribute "//trim(elmtConnName)//" _FillValue in "//trim(filename)
+    errmsg = "Attribute "//elmtConnName(1:len)//" _FillValue in "//trim(filename)
     ncStatus = nf90_get_att (ncid, VarId, "_FillValue", values=localFillValue)
     if (ncStatus /= nf90_noerror) localFillValue = 0
     ! Get start_index attribute to find out the index base (0 or 1)
