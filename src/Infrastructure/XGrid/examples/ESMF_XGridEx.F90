@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.42 2012/04/11 15:18:46 feiliu Exp $
+! $Id: ESMF_XGridEx.F90,v 1.43 2012/04/16 14:48:11 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -213,6 +213,9 @@
 
 !BOE
 ! Create an {\tt ESMF\_XGrid} object from the two lists of Grids on side A and B.
+! In this example both Grids on side A overlaps with the Grid on side B. It's an error to have a Grid
+! on either side that is spatially disjoint with the XGrid. Neither of the Grid on side A is
+! identical to the Grid on side B. Calling the {\tt ESMF\_XGridCreate()} method is straightforward:
 !EOE
 !BOC
     xgrid = ESMF_XGridCreate(sideA, sideB, rc=localrc)
