@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.269 2012/04/16 19:09:08 svasquez Exp $
+! $Id: ESMF_Grid.F90,v 1.270 2012/04/16 19:18:26 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -308,7 +308,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.269 2012/04/16 19:09:08 svasquez Exp $'
+      '$Id: ESMF_Grid.F90,v 1.270 2012/04/16 19:18:26 svasquez Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -11990,25 +11990,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
       type(ESMF_Grid),            intent(in)            :: grid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_TypeKind_Flag),   intent(out), optional :: coordTypeKind
-      integer,                    intent(out), optional :: dimCount
-      integer,                    intent(out), optional :: tileCount
-      integer,                    intent(out), optional :: staggerlocCount
-      integer,                    intent(out), optional :: localDECount
-      type(ESMF_DistGrid),        intent(out), optional :: distgrid
-      integer,       target,      intent(out), optional :: distgridToGridMap(:)
-      integer,       target,      intent(out), optional :: coordDimCount(:)
-      integer,       target,      intent(out), optional :: coordDimMap(:,:)
-      integer,                    intent(out), optional :: arbDim
-      integer,                    intent(out), optional :: rank
-      integer,                    intent(out), optional :: arbDimCount
-      integer,       target,      intent(out), optional :: gridEdgeLWidth(:)
-      integer,       target,      intent(out), optional :: gridEdgeUWidth(:)
-      integer,       target,      intent(out), optional :: gridAlign(:)
-      type(ESMF_Index_Flag),      intent(out), optional :: indexflag
-      type(ESMF_GridStatus_Flag), intent(out), optional :: status
-      character (len=*),          intent(out), optional :: name
-      integer,                    intent(out), optional :: rc
+      type(ESMF_TypeKind_Flag),  intent(out), optional :: coordTypeKind
+      integer,                   intent(out), optional :: dimCount
+      integer,                   intent(out), optional :: tileCount
+      integer,                   intent(out), optional :: staggerlocCount
+      integer,                   intent(out), optional :: localDECount
+      type(ESMF_DistGrid),       intent(out), optional :: distgrid
+      integer,       target,     intent(out), optional :: distgridToGridMap(:)
+      integer,       target,     intent(out), optional :: coordDimCount(:)
+      integer,       target,     intent(out), optional :: coordDimMap(:,:)
+      integer,                   intent(out), optional :: arbDim
+      integer,                   intent(out), optional :: rank
+      integer,                   intent(out), optional :: arbDimCount
+      integer,       target,     intent(out), optional :: gridEdgeLWidth(:)
+      integer,       target,     intent(out), optional :: gridEdgeUWidth(:)
+      integer,       target,     intent(out), optional :: gridAlign(:)
+      type(ESMF_Index_Flag),     intent(out), optional :: indexflag
+      type(ESMF_GridStatus_Flag),intent(out), optional :: status
+      character (len=*),         intent(out), optional :: name
+      integer,                   intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
