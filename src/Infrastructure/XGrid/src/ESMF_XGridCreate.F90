@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.58 2012/04/13 18:36:41 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.59 2012/04/16 14:19:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -60,10 +60,6 @@ module ESMF_XGridCreateMod
   sequence
     type(ESMF_Pointer) :: this
   end type
-  type ESMF_FracPtr
-  sequence
-    real(ESMF_KIND_R8), pointer :: fraclist(:)
-  end type
 
 !------------------------------------------------------------------------------
 !
@@ -80,7 +76,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.58 2012/04/13 18:36:41 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.59 2012/04/16 14:19:35 feiliu Exp $'
 
 !==============================================================================
 !
@@ -224,10 +220,10 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
     name, rc)
 !
 ! !RETURN VALUE:
-  type(ESMF_XGrid)              :: ESMF_XGridCreate
+  type(ESMF_XGrid)                           :: ESMF_XGridCreate
 !
 ! !ARGUMENTS:
-  type(ESMF_Grid), intent(in)                 :: sideA(:), sideB(:)
+  type(ESMF_Grid), intent(in)                :: sideA(:), sideB(:)
   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer,              intent(in), optional :: sideAPriority(:)
   integer,              intent(in), optional :: sideBPriority(:)
@@ -248,8 +244,8 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
 !  by {\tt ESMF\_Mesh}. The super mesh is then used to compute the XGrid. 
 !  Grid objects in {\tt sideA} and {\tt sideB} arguments must have coordinates defined for
 !  the corners of a Grid cell. XGrid created online can be potentially memory expensive, 
-!  memory can be released by destroying XGrid after necesary routehandles are computed from
-!  {\tt ESMF\_FieldRegridStore} method.
+!  memory can be released by destroying XGrid after communication routehandles are computed using
+!  {\tt ESMF\_FieldRegridStore()} method.
 ! 
 !  Masking is not fully tested and is not supported right now. Specifying {\tt sideAMaskValues}
 !  or {\tt sideBMaskValues} will result in an error returned from this method for online XGrid creation. 
@@ -380,8 +376,7 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
     integer                       :: AisSphere, BisSphere
     integer, allocatable          :: l_sideAPriority(:), l_sideBPriority(:)
     integer                       :: compute_midmesh
-    real(ESMF_KIND_R8)            :: fraction = 1.0
-    type(ESMF_FracPtr), allocatable :: sideAfrac(:), sideBfrac(:)
+    real(ESMF_KIND_R8)            :: fraction = 1.0 ! all newly created Mesh has 1.0 frac2
     type(ESMF_INDEX_FLAG)         :: indexflag
     type(ESMF_DistGrid)           :: distgridTmp
     !real(ESMF_KIND_R8), pointer   :: fracFptr(:,:)
@@ -398,8 +393,8 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
 
     if(present(sideAMaskValues) .or. present(sideBMaskValues)) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-         msg="- masking is not fully tested and supported with XGrid", &
-         ESMF_CONTEXT, rcToReturn=rc) 
+       msg="- masking is not fully tested and supported with XGrid in the current version", &
+       ESMF_CONTEXT, rcToReturn=rc) 
       return
     endif
 
@@ -429,7 +424,7 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
 
     ! Can only do conservative on 2D right now
     ! Make sure all Grids are 2 dimensional and 
-    ! has enough data points on a PET to clip
+    ! has enough data points in each dimension for every de-element on a PET to clip
     do i = 1, ngrid_a
       call checkGrid(sideA(i), ESMF_STAGGERLOC_CORNER, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -475,14 +470,10 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
       enddo
     endif
 
-    ! allocate the temporary meshes and frac ptr
+    ! allocate the temporary meshes
     allocate(meshAt(ngrid_a), meshBt(ngrid_b), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
       msg="- Allocating temporary meshes for Xgrid creation", &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    allocate(sideAfrac(ngrid_a), sideBfrac(ngrid_b), stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, &
-      msg="- Allocating temporary frac ptr type for Xgrid creation", &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     !TODO: Create the src/dst Mesh, take care of maskValues
@@ -497,12 +488,6 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     meshA = meshAt(1)
-    ! retrieve frac list, for the highest priority mesh, fraction is always 1.
-    allocate(sideAfrac(1)%fraclist(meshAt(1)%numownedelements), stat=localrc)
-    if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    sideAfrac(1)%fraclist=1.0
 
     do i = 2, ngrid_a
       meshAt(i) = ESMF_GridToMesh(sideA(l_sideAPriority(i)), &
@@ -531,16 +516,6 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
             ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-      ! retrieve frac list
-      allocate(sideAfrac(i)%fraclist(meshAt(i)%numownedelements), stat=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_MeshGetElemFrac(meshAt(i), sideAfrac(i)%fraclist, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
       meshA = tmpmesh
     enddo
 
@@ -555,12 +530,6 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     meshB = meshBt(1)
-    ! retrieve frac list, for the highest priority mesh, fraction is always 1.
-    allocate(sideBfrac(1)%fraclist(meshBt(1)%numownedelements), stat=localrc)
-    if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    sideBfrac(1)%fraclist=1.0
 
     do i = 2, ngrid_b
       meshBt(i) = ESMF_GridToMesh(sideB(l_sideBPriority(i)), &
@@ -587,16 +556,6 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
       endif
-
-      ! retrieve frac list
-      allocate(sideBfrac(i)%fraclist(meshBt(i)%numownedelements), stat=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_MeshGetElemFrac(meshBt(i), sideBfrac(i)%fraclist, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
 
       meshB = tmpmesh
     enddo
@@ -696,21 +655,8 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
            ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
 
-    !allocate(indicies(2,nentries))
-    !allocate(weights(nentries))
-
-    !call c_ESMC_Copy_TempWeights_xgrid(tweights, &
-    !  indicies(1,1), weights(1))
-
-    !do i = 1, size(indicies,2)
-    !   print *, indicies(1,i), '->', indicies(2,i), weights(i), mesharea(i)
-    !enddo
-    !deallocate(indicies, weights)
-
-    ! TODO: loop through sideA and sideB to compute the interpolation
-    ! Compute regrid weights in 4 directions? (2 directions have constant wgt matrix).
-    ! This time we don't need the midmesh which would just be the mesh that 
-    ! overlaps with sideA or sideB.
+    ! TODO: investigate the possibility of optimization for the general case of multiple Grids.
+    ! When there is only 1 grid per side, optimization can be done but it's not clear for multiple Grids.
     compute_midmesh = 0
     do i = 1, ngrid_a
       call c_esmc_xgridregrid_create(vm, meshAt(i), mesh, &
@@ -724,49 +670,10 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       allocate(xgtype%sparseMatA2X(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatA2X(i)%factorList(nentries))
-      !allocate(xgtype%sparseMatX2A(i)%factorIndexList(2,nentries))
-      !allocate(xgtype%sparseMatX2A(i)%factorList(nentries))
       if(nentries .ge. 1) then
         call c_ESMC_Copy_TempWeights_xgrid(tweights, &
         xgtype%sparseMatA2X(i)%factorIndexList(1,1), &
         xgtype%sparseMatA2X(i)%factorList(1))
-      
-        ! apply src fraction due to creeping, this quantity is typically 1.
-        !do j = 1, nentries
-        !  xgtype%sparseMatA2X(i)%factorList(j) = xgtype%sparseMatA2X(i)%factorList(j) * &
-        !    sideAfrac(i)%fraclist(xgtype%sparseMatA2X(i)%factorIndexList(1,j))
-        !enddo
-
-      ! Now the reverse direction
-
-      !  ! an immediate optimization is to use the A side area to simply invert the weight
-      !  call compute_mesharea(meshAt(i), sidemesharea, rc=localrc)
-      !  if (ESMF_LogFoundError(localrc, &
-      !      ESMF_ERR_PASSTHRU, &
-      !      ESMF_CONTEXT, rcToReturn=rc)) return
-      !  if(size(sideAfrac(i)%fraclist) /= size(sidemesharea)) then
-      !    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-      !       msg="- number of area elements not equal to frac elements", &
-      !       ESMF_CONTEXT, rcToReturn=rc) 
-      !    return
-      !  endif
-      !  do j = 1, nentries
-      !    xgtype%sparseMatX2A(i)%factorIndexList(1,j) = xgtype%sparseMatA2X(i)%factorIndexList(2,j)
-      !    xgtype%sparseMatX2A(i)%factorIndexList(2,j) = xgtype%sparseMatA2X(i)%factorIndexList(1,j)
-      !    ! If src area is not completely creeped out, invert the destination area weighted weights.
-      !    ! TODO: take care of masking here
-      !    if(sideAfrac(i)%fraclist(xgtype%sparseMatX2A(i)%factorIndexList(2,j)) .gt. 0.) then
-      !      xgtype%sparseMatX2A(i)%factorList(j) = &
-      !        mesharea(xgtype%sparseMatX2A(i)%factorIndexList(1,j))&
-      !        /(sidemesharea(xgtype%sparseMatX2A(i)%factorIndexList(2,j)) &
-      !        * sideAfrac(i)%fraclist(xgtype%sparseMatX2A(i)%factorIndexList(2,j)))
-      !    else
-      !      xgtype%sparseMatX2A(i)%factorList(j) = 0.0
-      !    endif
-      !    ! weight cannot exceed 1., renormalize due to fractional clipping
-      !    if( xgtype%sparseMatX2A(i)%factorList(j) .gt. 1.0) xgtype%sparseMatX2A(i)%factorList(j) = 1.0
-      !  enddo
-      !  deallocate(sidemesharea)
       endif
       call ESMF_XGridGetFracInt(sideA(i), mesh=meshAt(i), array=xgtype%fracA2X(i), &
            staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
@@ -794,8 +701,6 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
            staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
            ESMF_CONTEXT, rcToReturn=rc)) return
-
-      deallocate(sideAfrac(i)%fraclist)
     enddo
 
     ! now do the B side
@@ -815,12 +720,6 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
         call c_ESMC_Copy_TempWeights_xgrid(tweights, &
         xgtype%sparseMatB2X(i)%factorIndexList(1,1), &
         xgtype%sparseMatB2X(i)%factorList(1))
-      
-        ! apply src fraction due to creeping, this quantity is typically 1.
-        !do j = 1, nentries
-        !  xgtype%sparseMatB2X(i)%factorList(j) = xgtype%sparseMatB2X(i)%factorList(j) * &
-        !    sideBfrac(i)%fraclist(xgtype%sparseMatB2X(i)%factorIndexList(1,j))
-        !enddo
       endif
       call ESMF_XGridGetFracInt(sideB(i), mesh=meshBt(i), array=xgtype%fracB2X(i), &
            staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
@@ -848,15 +747,7 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
            staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
            ESMF_CONTEXT, rcToReturn=rc)) return
-
-      !call ESMF_ArrayGet(xgtype%fracX2B(i), localDe=0, farrayPtr=fracFptr, rc=localrc)
-      !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-      !     ESMF_CONTEXT, rcToReturn=rc)) return
-
-      deallocate(sideBfrac(i)%fraclist)
     enddo
-
-    deallocate(sideAfrac, sideBfrac)
 
     xgtype%storeOverlay = .false.
     if(present(storeOverlay)) then
@@ -873,10 +764,6 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Should we store routehandle instead for online generation of XGrid?
-    ! Routehandle can't (shouldn't) be reconciled. Storing SMM parameters
-    ! allows XGrid to be redistributed.
 
     ! store the middle mesh if needed
     ! and clean up temporary memory used

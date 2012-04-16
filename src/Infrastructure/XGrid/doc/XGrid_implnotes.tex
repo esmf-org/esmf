@@ -1,4 +1,4 @@
-% $Id: XGrid_implnotes.tex,v 1.3 2012/04/11 19:52:46 feiliu Exp $
+% $Id: XGrid_implnotes.tex,v 1.4 2012/04/16 14:19:27 feiliu Exp $
 
 %\subsection{Design and Implementation Notes}
 
@@ -14,6 +14,6 @@ communication routehandle.
 {\it unison} creation and operation rule: All PETs which are
 part of the currently executing VM must create the
 same XGrids at the same point in their execution. 
-XGrid creation internally does inter-PET
-communication due to the nature of the process.  
+In addition to the unison rule, XGrid creation also performs inter-PET
+communication within the current executing VM. 
 \end{enumerate}
