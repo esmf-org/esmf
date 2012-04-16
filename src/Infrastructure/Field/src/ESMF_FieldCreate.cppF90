@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.123 2012/03/30 00:34:21 theurich Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.124 2012/04/16 18:50:02 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.123 2012/03/30 00:34:21 theurich Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.124 2012/04/16 18:50:02 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -1899,8 +1899,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateGridArray(grid, array, keywordEnforcer, datacopyflag, &
-    staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, totalLWidth, &
-    totalUWidth, name, rc)
+    staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    totalLWidth, totalUWidth, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateGridArray    
