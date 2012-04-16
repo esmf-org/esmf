@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.268 2012/04/13 20:37:17 peggyli Exp $
+! $Id: ESMF_Grid.F90,v 1.269 2012/04/16 19:09:08 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -308,7 +308,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.268 2012/04/13 20:37:17 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.269 2012/04/16 19:09:08 svasquez Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5252,7 +5252,8 @@ end subroutine convert_corner_arrays_to_1D
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
      function ESMF_GridCreateFrmNCFile(filename, fileFormat, regDecomp, keywordEnforcer, &
-       decompflag, isSphere, addCornerStagger, addUserArea, addMask, varname, rc)
+       decompflag, isSphere, addCornerStagger, addUserArea, addMask, &
+       varname, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmNCFile
