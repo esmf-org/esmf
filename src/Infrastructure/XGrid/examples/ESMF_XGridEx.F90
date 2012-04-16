@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.43 2012/04/16 14:48:11 feiliu Exp $
+! $Id: ESMF_XGridEx.F90,v 1.44 2012/04/16 19:33:45 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -125,14 +125,16 @@
 !BOC
     ! SideA first grid spans (0-20, 0-20) with 1.0x1.0 degree resolution
     ! X corner
-    call ESMF_GridGetCoord(sideA(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-        coordDim=1, farrayPtr=coordX, rc=localrc)
+    call ESMF_GridGetCoord(sideA(1), localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
+        farrayPtr=coordX, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 !BOC
     ! Y corner
-    call ESMF_GridGetCoord(sideA(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-        coordDim=2, farrayPtr=coordY, rc=localrc)
+    call ESMF_GridGetCoord(sideA(1), localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
+        farrayPtr=coordY, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 !BOC
@@ -147,14 +149,16 @@
 !BOC
     ! SideA second grid spans (14.3-24.3, 14.2-24.2) with 0.5x1.0 degree resolution
     ! X corner
-    call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-        coordDim=1, farrayPtr=coordX, rc=localrc)
+    call ESMF_GridGetCoord(sideA(2), localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
+        farrayPtr=coordX, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 !BOC
     ! Y corner
-    call ESMF_GridGetCoord(sideA(2), localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-        coordDim=2, farrayPtr=coordY, rc=localrc)
+    call ESMF_GridGetCoord(sideA(2), localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
+        farrayPtr=coordY, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 !BOC
@@ -192,14 +196,16 @@
 !BOC
     ! SideB grid spans (0-30, 0-30) with 1.0x1.0 degree resolution
     ! X corner
-    call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-        coordDim=1, farrayPtr=coordX, rc=localrc)
+    call ESMF_GridGetCoord(sideB(1), localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
+        farrayPtr=coordX, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 !BOC
     ! Y corner
-    call ESMF_GridGetCoord(sideB(1), localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
-        coordDim=2, farrayPtr=coordY, rc=localrc)
+    call ESMF_GridGetCoord(sideB(1), localDE=0, &
+        staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
+        farrayPtr=coordY, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 !BOC
