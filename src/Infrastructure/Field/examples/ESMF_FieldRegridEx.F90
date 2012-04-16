@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.60 2012/02/15 23:11:38 svasquez Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.61 2012/04/16 22:49:34 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.60 2012/02/15 23:11:38 svasquez Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.61 2012/04/16 22:49:34 oehmke Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -299,20 +299,23 @@ program ESMF_FieldRegridEx
 !
 ! ESMF currently supports regridding only on a subset of the full range of Grids and Meshes it supports. 
 ! 
+!\medskip
 !
-! In 2D, ESMF supports regridding between any combination of the following:
+! In 2D, ESMF supports bilinear, patch, and conservative regridding between any combination of the following:
 ! \begin{itemize}
 ! \item Structured Grids composed of a single logically rectangular patch
 ! \item Unstructured Meshes composed of any combination of triangles and quadralaterals (e.g. rectangles)
 ! \end{itemize}
 !
+!\medskip
 !
-! In 3D, ESMF supports bilinear or conservative regridding between any combination of the following:
+! In 3D, ESMF supports bilinear and conservative regridding between any combination of the following:
 ! \begin{itemize}
 ! \item Structured Grids composed of a single logically rectangular patch
-! \item Unstructured Meshes composed of hexahedrons (e.g. cubes). 
+! \item Unstructured Meshes composed of hexahedrons (e.g. cubes) and just for conservative also tetrahedra 
 ! \end{itemize}
-! Note that regridding involving tetrahedra is currently NOT supported. 
+!
+!\medskip
 !
 ! In the case that the Grid is on a sphere (coordSys=ESMF\_COORDSYS\_SPH\_DEG or ESMF\_COORDSYS\_SPH\_DEG)
 ! then the coordinates given in the Grid are interpretted as latitude and longitude values. The coordinates can either be in degrees or radians as indicated by the 
@@ -343,17 +346,31 @@ program ESMF_FieldRegridEx
 ! the bilinear matrix). This can be an issue when performing a regrid operation close to the memory
 ! limit on a machine. 
 ! 
+! First-order conservative interpolation~\cite{ConservativeOrder1} is also available as a regridding method. This method will typically have  
+! a larger local interpolation error than the previous two methods, but will do a much better job of preserving the value of the 
+! integral of data between the source and destination grid. In this method the value across each source cell
+! is treated as a constant. The weights for a particular destination cell are the area of intersection of each 
+! source cell with the destination cell divided by the area of the destination cell. For cartesian grids, the area of a grid cell is the typical cartesian area. 
+! For grids on a sphere, cell areas are calculated by connecting the corner coordinates of each grid cell with great circles. If the user doesn't specify
+! cell areas in the involved Grids or Meshes, then the conservation will hold for the areas as calculated by 
+! ESMF. This means the following equation will hold:  sum-over-all-source-cells(Vsi*Asi) = sum-over-all-destination-cells(Vdj*A'dj), where
+! V is the variable being regridded and A' is the area of a cell as calculated by ESMF.  The subscripts s and d refer to source and destination values, and the i and j are the source 
+! and destination grid cell indices (flattening the arrays to 1 dimension). If the user does specify the area's in the Grid or Mesh, then the conservation will be adjusted to work for the areas 
+! provided by the user. This means the following equation will hold:  sum-over-all-source-cells(Vsi*Asi) = sum-over-all-destination-cells(Vdj*Adj),
+! where A is the area of a cell as provided by the user.  
 !
-! First-order conservative interpolation~\cite{ConservativeOrder1} is also available as a regridding method. This method will 
-! typically have  a larger interpolation error than the previous two methods, but will do a much better job of preserving the 
-! value of the integral of data between the source and destination grid. In this method the value across each source cell
-! is treated as a constant. The weights for a particular destination cell, are the area of intersection of each 
-! source cell with the destination cell divided by the area of the destination cell.
-! Areas in this case are the great circle areas of the polygons which make up the cells (the cells around each center are 
-! defined by the corner coordinates in the grid file). To use this method the user must have created their Fields on the center 
-! stagger location ({\tt ESMF\_STAGGERLOC\_CENTER}) for Grids  or the element location ({\tt ESMF\_MESHLOC\_ELEMENT}) for Meshes.
-! For Grids, the corner stagger location ({\tt ESMF\_STAGGERLOC\_CORNER}) must contain coordinates describing the outer perimeter of the
-! Grid cells. Currently conservative interpolation is only supported for 2D Grids and Meshes. 
+! Note that for grids on a sphere the conservative interpolation assumes great circle edges to cells. This means that the edges of a cell won't necessarily be
+! the same as a straight line in latitude longitude. For small edges, this difference will be small, but for long edges it could be significant. This means if
+! the user expects cell edges as straight lines in latitude longitude space, they should avoid using one large cell with long edges to compute an average over a region (e.g. over an ocean basin). The 
+! user should also avoid using cells which contain one edge that runs half way or more around the earth, because the regrid weight calculation assumes the 
+! edge follows the shorter great circle path. Also, there isn't a unique great circle edge defined between points on the exact opposite side of the earth from one another (antipodal points). 
+! However, the user can work around both of these problem by breaking the long edge into two smaller edges by inserting an extra node, or by breaking the large target grid cells into two or more 
+! smaller grid cells. This allows the application to resolve the ambiguity in edge direction. 
+!
+! To use the conservative method the user must have created their Fields on the center 
+! stagger location ({\tt ESMF\_STAGGERLOC\_CENTER} in 2D or {\tt ESMF\_STAGGERLOC\_CENTER\_VCENTER} in 3D) for Grids  or the element location ({\tt ESMF\_MESHLOC\_ELEMENT}) for Meshes.
+! For Grids, the corner stagger location ({\tt ESMF\_STAGGERLOC\_CORNER} in 2D or {\tt ESMF\_STAGGERLOC\_CORNER\_VFACE} in 3D) must contain coordinates describing the outer perimeter of the Grid cells. 
+!
 !
 !\begin{table}[ht]
 !\centering
@@ -365,7 +382,7 @@ program ESMF_FieldRegridEx
 !2D Polygons & Triangles & $\surd$ & $\surd$ \\
 !& Quadrilaterals & $\surd$ & $\surd$ \\
 !\hline
-!3D Polygons & Hexahedrons & $\surd$ & \\
+!3D Polygons & Hexahedrons & $\surd$ & $\surd$ \\
 !\hline
 !Regridding & Bilinear & $\surd$ & $\surd$ \\
 !& Patch & $\surd$ & $\surd$ \\
