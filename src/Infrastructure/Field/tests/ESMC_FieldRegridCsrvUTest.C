@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldRegridCsrvUTest.C,v 1.4 2012/04/13 16:32:21 rokuingh Exp $
+// $Id: ESMC_FieldRegridCsrvUTest.C,v 1.5 2012/04/16 16:06:07 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -40,7 +40,6 @@ int main(void){
   int rc;
   
   // Field variables
-  ESMC_ArraySpec arrayspec;
   ESMC_RouteHandle routehandle;
   ESMC_Field srcfield, dstfield, srcAreaField, dstAreaField, 
              srcFracField, dstFracField;
@@ -439,7 +438,7 @@ int main(void){
     }
   }
   // check that the mass is conserved
-  if (abs(srcmass - dstmass) > .0001) correct = false;
+  if (abs((long)(srcmass - dstmass)) > .0001) correct = false;
   //printf("srcmass = %f, dstmass = %f\n", srcmass, dstmass);
   ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
