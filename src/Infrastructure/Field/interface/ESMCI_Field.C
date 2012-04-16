@@ -50,7 +50,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.24 2012/04/13 16:32:17 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.25 2012/04/16 15:43:53 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -934,7 +934,7 @@ namespace ESMCI {
       dff_present = 1;
     } else {
       dff = new ESMCI::Field();
-      sff_created = true;
+      dff_created = true;
     }
 
     FTN_X(f_esmf_regridstore)(fieldpsrc, fieldpdst, 
