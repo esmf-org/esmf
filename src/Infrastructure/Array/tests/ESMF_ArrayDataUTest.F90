@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataUTest.F90,v 1.27 2012/03/15 18:47:52 theurich Exp $
+! $Id: ESMF_ArrayDataUTest.F90,v 1.28 2012/04/17 16:59:20 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayDataUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayDataUTest.F90,v 1.27 2012/03/15 18:47:52 theurich Exp $'
+    '$Id: ESMF_ArrayDataUTest.F90,v 1.28 2012/04/17 16:59:20 w6ws Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -58,11 +58,11 @@ program ESMF_ArrayDataUTest
   integer (ESMF_KIND_I4),dimension(:), pointer :: fptr, fptrOut
 
   type(ESMF_DistGrid) :: distgrid
-  type(ESMF_Array)    :: array, arrayOut
+  type(ESMF_Array)    :: array, arrayOut, array_new
   type(ESMF_VM)       :: vm
 
   character, allocatable :: buffer(:)
-  integer :: buff_len, offset
+  integer :: buff_len, offset1, offset2, offset3
   integer :: alloc_err
   type(ESMF_AttReconcileFlag) :: attreconflag
   type(ESMF_InquireFlag) :: inquireflag
@@ -457,10 +457,11 @@ program ESMF_ArrayDataUTest
     if (fptr(j) /= fdata(i)-57) looptest = .false.
   enddo
   call ESMF_Test(looptest, name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
   ! BEGIN tests of certain INTERNAL methods.  They are subject
   ! to change and are NOT part of the ESMF user API.
+  !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -471,12 +472,12 @@ program ESMF_ArrayDataUTest
   write(failMsg, *) "Size could not be determined"
   buff_len = 1
   allocate (buffer(buff_len))
-  offset = 0
+  offset1 = 0
   attreconflag = ESMF_ATTRECONCILE_OFF
   inquireflag  = ESMF_INQUIREONLY
-  call c_esmc_arrayserialize (array, buffer, buff_len, offset,  &
+  call c_esmc_arrayserialize (array, buffer, buff_len, offset1,  &
       attreconflag, inquireflag, rc)
-  print *, 'computed serialization buffer length =', offset, ' bytes'
+  print *, 'computed serialization buffer length =', offset1, ' bytes'
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   deallocate (buffer)
   !-----------------------------------------------------------------------------
@@ -485,7 +486,7 @@ program ESMF_ArrayDataUTest
   !NEX_UTest
   write(name, *) "Allocate serialization buffer"
   write(failMsg, *) "Size was illegal"
-  buff_len = offset
+  buff_len = offset1
   allocate (buffer(buff_len), stat=alloc_err)
   rc = merge (ESMF_SUCCESS, ESMF_FAILURE, alloc_err == 0)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -493,18 +494,50 @@ program ESMF_ArrayDataUTest
   
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  ! test actually doing the serialization
+  ! test doing the serialization for real
   ! WARNING: This is testing an INTERNAL method.  It is NOT 
   ! part of the supported ESMF user API!
   write(name, *) "Serialization Array data"
   write(failMsg, *) "Serialization failed"
   buff_len = size (buffer)
-  offset = 0
+  offset2 = 0
   attreconflag = ESMF_ATTRECONCILE_OFF
   inquireflag  = ESMF_NOINQUIRE
-  call c_esmc_arrayserialize (array, buffer, buff_len, offset,  &
+  call c_esmc_arrayserialize (array, buffer, buff_len, offset2,  &
       attreconflag, inquireflag, rc)
+  print *, 'actual serialization buffer length =', offset2, ' bytes'
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+ 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  ! compare offset estimate with offset actual
+  write(name, *) "Compare serialization offset actual vs estimate"
+  write(failMsg, *) "Actual serialization offset > estimate"
+  call ESMF_Test(offset1 >= offset2, name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  ! test doing the deserialization
+  ! WARNING: This is testing an INTERNAL method.  It is NOT 
+  ! part of the supported ESMF user API!
+  write(name, *) "Deserialize Array data"
+  write(failMsg, *) "Deserialization failed"
+  buff_len = size (buffer)
+  offset3 = 0
+  attreconflag = ESMF_ATTRECONCILE_OFF
+  inquireflag  = ESMF_NOINQUIRE
+  call c_esmc_arraydeserialize (array_new, buffer, offset3, attreconflag, rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+ 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  ! compare serialize/deserialize offsets
+  write(name, *) "Compare serialization offset to deserialization offset"
+  write(failMsg, *) "deserialization offset /= serialization offset"
+  call ESMF_Test(offset3 == offset2, name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
