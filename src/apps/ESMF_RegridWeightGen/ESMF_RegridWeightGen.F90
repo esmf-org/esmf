@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.64 2012/04/13 22:20:51 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.65 2012/04/17 20:58:03 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -50,8 +50,8 @@ program ESMF_RegridWeightGen
       real(ESMF_KIND_R8), pointer :: srcArea(:)
       real(ESMF_KIND_R8), pointer :: dstArea(:)
       real(ESMF_KIND_R8), pointer :: dstFrac(:), srcFrac(:)
-      character(len=256) :: commandbuf1(5)
-      integer            :: commandbuf2(16)
+      character(len=256) :: commandbuf1(7)
+      integer            :: commandbuf2(18)
       integer            :: regridScheme
       integer            :: i, bigFac, xpets, ypets, xpart, ypart, xdim, ydim
       logical            :: wasCompacted, largeFileFlag
@@ -532,9 +532,11 @@ program ESMF_RegridWeightGen
         commandbuf1(3)=wgtfile
         commandbuf1(4)=srcMeshName
 	commandbuf1(5)=dstMeshName
+        commandbuf1(6)=srcVarName
+	commandbuf1(7)=dstVarName
 
         ! Broadcast the command line arguments to all the PETs
-        call ESMF_VMBroadcast(vm, commandbuf1, 256*5, 0, rc=rc)
+        call ESMF_VMBroadcast(vm, commandbuf1, 256*7, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
         commandbuf2(:)=0
@@ -571,19 +573,23 @@ program ESMF_RegridWeightGen
         endif
         if (ignoreUnmapped) commandbuf2(15) = 1
 	if (userAreaFlag)   commandbuf2(16) = 1
+        if (srcMissingValue) commandbuf2(17) = 1
+        if (dstMissingValue) commandbuf2(18) = 1
 
-        call ESMF_VMBroadcast(vm, commandbuf2, 16, 0, rc=rc)
+        call ESMF_VMBroadcast(vm, commandbuf2, 18, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
      else
-        call ESMF_VMBroadcast(vm, commandbuf1, 256*5, 0, rc=rc)
+        call ESMF_VMBroadcast(vm, commandbuf1, 256*7, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         srcfile = commandbuf1(1)
         dstfile = commandbuf1(2)
         wgtfile = commandbuf1(3)
         srcMeshName = commandbuf1(4)
 	dstMeshName = commandbuf1(5)
+        srcVarName = commandbuf1(6)
+	dstVarName = commandbuf1(7)
 
-        call ESMF_VMBroadcast(vm, commandbuf2, 16, 0, rc=rc)
+        call ESMF_VMBroadcast(vm, commandbuf2, 18, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	srcFileType%fileformat = commandbuf2(1)
         if (commandbuf2(2)==1) then
@@ -646,6 +652,18 @@ program ESMF_RegridWeightGen
            userAreaFlag=.true.
         else
            userAreaFlag=.false.
+        endif
+
+        if (commandbuf2(17) == 1) then
+           srcMissingValue=.true.
+        else
+           srcMissingValue=.false.
+        endif
+
+        if (commandbuf2(18) == 1) then
+           dstMissingValue=.true.
+        else
+           dstMissingValue=.false.
         endif
      endif
 
