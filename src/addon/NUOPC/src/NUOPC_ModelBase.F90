@@ -1,11 +1,11 @@
-! $Id: NUOPC_ModelExplicitBase.F90,v 1.11 2012/04/17 18:42:14 theurich Exp $
+! $Id: NUOPC_ModelBase.F90,v 1.1 2012/04/17 22:03:06 theurich Exp $
 
-#define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicitBase.F90"
+#define FILENAME "src/addon/NUOPC/NUOPC_ModelBase.F90"
 
-module NUOPC_ModelExplicitBase
+module NUOPC_ModelBase
 
   !-----------------------------------------------------------------------------
-  ! Generic Model Component for explicit integration
+  ! Generic Model Component Base implementation
   !-----------------------------------------------------------------------------
 
   use ESMF
@@ -31,15 +31,15 @@ module NUOPC_ModelExplicitBase
     label_TimestampExport
   
   character(*), parameter :: &
-    label_InternalState = "ModelExplictBase_InternalState"
+    label_InternalState = "ModelBase_InternalState"
   character(*), parameter :: &
-    label_Advance = "ModelExplicitBase_Advance"
+    label_Advance = "ModelBase_Advance"
   character(*), parameter :: &
-    label_CheckImport = "ModelExplicitBase_CheckImport"
+    label_CheckImport = "ModelBase_CheckImport"
   character(*), parameter :: &
-    label_SetRunClock = "ModelExplicitBase_SetRunClock"
+    label_SetRunClock = "ModelBase_SetRunClock"
   character(*), parameter :: &
-    label_TimestampExport = "ModelExplicitBase_TimestampExport"
+    label_TimestampExport = "ModelBase_TimestampExport"
 
   type type_InternalStateStruct
     type(ESMF_Clock)      :: driverClock

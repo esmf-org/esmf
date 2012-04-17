@@ -1,16 +1,16 @@
-! $Id: NUOPC_MediatorExplicit.F90,v 1.9 2012/04/17 18:42:14 theurich Exp $
+! $Id: NUOPC_Mediator.F90,v 1.1 2012/04/17 22:03:06 theurich Exp $
 
-#define FILENAME "src/addon/NUOPC/NUOPC_MediatorExplicit.F90"
+#define FILENAME "src/addon/NUOPC/NUOPC_Mediator.F90"
 
-module NUOPC_MediatorExplicit
+module NUOPC_Mediator
 
   !-----------------------------------------------------------------------------
-  ! Generic Model Component for explicit integration
+  ! Generic Mediator Component
   !-----------------------------------------------------------------------------
 
   use ESMF
   use NUOPC
-  use NUOPC_ModelExplicitBase, only: &
+  use NUOPC_ModelBase, only: &
     ModelExB_routine_SS             => routine_SetServices, &
     routine_Run                     => routine_Run, &
     label_CheckImport               => label_CheckImport, &
@@ -30,7 +30,7 @@ module NUOPC_MediatorExplicit
     label_DataInitialize
 
   character(*), parameter :: &
-    label_DataInitialize = "MediatorExplicit_DataInitialize"
+    label_DataInitialize = "Mediator_DataInitialize"
 
   !-----------------------------------------------------------------------------
   contains

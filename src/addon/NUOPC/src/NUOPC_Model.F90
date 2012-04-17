@@ -1,16 +1,16 @@
-! $Id: NUOPC_ModelExplicit.F90,v 1.15 2012/04/17 18:42:14 theurich Exp $
+! $Id: NUOPC_Model.F90,v 1.1 2012/04/17 22:03:06 theurich Exp $
 
-#define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicit.F90"
+#define FILENAME "src/addon/NUOPC/NUOPC_Model.F90"
 
-module NUOPC_ModelExplicit
+module NUOPC_Model
 
   !-----------------------------------------------------------------------------
-  ! Generic Model Component for explicit integration
+  ! Generic Model Component
   !-----------------------------------------------------------------------------
 
   use ESMF
   use NUOPC
-  use NUOPC_ModelExplicitBase, only: &
+  use NUOPC_ModelBase, only: &
     ModelExB_routine_SS             => routine_SetServices, &
     routine_Run                     => routine_Run, &
     type_InternalState              => type_InternalState, &
@@ -42,9 +42,9 @@ module NUOPC_ModelExplicit
     label_SetRunClock
   
   character(*), parameter :: &
-    label_DataInitialize = "ModelExplicit_DataInitialize"
+    label_DataInitialize = "Model_DataInitialize"
   character(*), parameter :: &
-    label_SetClock = "ModelExplicit_SetClock"
+    label_SetClock = "Model_SetClock"
     
   !-----------------------------------------------------------------------------
   contains
