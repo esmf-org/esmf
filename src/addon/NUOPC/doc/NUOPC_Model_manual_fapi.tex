@@ -32,18 +32,18 @@
 \def\tr{\mathop{\rm tr}}
 %-------------------------------------------------------------
 
-\markboth{Left}{Source File: NUOPC\_ModelExplicit.F90,  Date: Mon Mar 28 16:35:43 PDT 2011
+\markboth{Left}{Source File: NUOPC\_Model.F90,  Date: Mon Mar 28 16:35:43 PDT 2011
 }
 
 \bigskip{\sf MODULE:}
-\begin{verbatim}  module NUOPC_ModelExplicit
+\begin{verbatim}  module NUOPC_Model
 \end{verbatim}
 
 \bigskip{\sf DESCRIPTION:\\}
-Model component that is driven by explicit time stepping. Each time the {\tt Run} method is called the model integrates one timeStep forward on the provided Clock. The Clock must be advanced between {\tt Run} calls. The component's {\tt Run} method flags incompatibility if the current time of the incoming Clock does not match the current time of the model.
+Model component with a default {\em explicit} time dependency. Each time the {\tt Run} method is called the model integrates one timeStep forward on the provided Clock. The Clock must be advanced between {\tt Run} calls. The component's {\tt Run} method flags incompatibility if the current time of the incoming Clock does not match the current time of the model.
 
 \bigskip{\sf SUPER:}
-\begin{verbatim}  NUOPC_ModelExplicitBase
+\begin{verbatim}  NUOPC_ModelBase
 \end{verbatim}
 
 \bigskip{\sf USE DEPENDENCIES:}
