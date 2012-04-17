@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.h,v 1.20 2012/03/30 19:03:30 rokuingh Exp $
+// $Id: ESMC_Grid.h,v 1.21 2012/04/17 04:16:45 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -58,8 +58,8 @@ typedef struct{
 // !INTERFACE:
 ESMC_Grid ESMC_GridCreateNoPeriDim(
   ESMC_InterfaceInt maxIndex,  // in
-  enum ESMC_CoordSys coordSys,      // in
-  enum ESMC_TypeKind coordTypeKind, // in
+  enum ESMC_CoordSys *coordSys,      // in
+  enum ESMC_TypeKind *coordTypeKind, // in
   int *rc                      // out
 );
 // !RETURN VALUE:
@@ -93,8 +93,8 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(
 // !INTERFACE:
 ESMC_Grid ESMC_GridCreate1PeriDim(
   ESMC_InterfaceInt maxIndex,  // in
-  enum ESMC_CoordSys coordSys,      // in
-  enum ESMC_TypeKind coordTypeKind, // in
+  enum ESMC_CoordSys *coordSys,      // in
+  enum ESMC_TypeKind *coordTypeKind, // in
   int *rc                      // out
 );
 // !RETURN VALUE:

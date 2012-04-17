@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.C,v 1.7 2012/03/30 19:03:32 rokuingh Exp $
+// $Id: ESMC_Grid.C,v 1.8 2012/04/17 04:16:47 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Grid.C,v 1.7 2012/03/30 19:03:32 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Grid.C,v 1.8 2012/04/17 04:16:47 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -56,8 +56,8 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreateNoPeriDim()"
 ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt maxIndex,
-                                   enum ESMC_CoordSys coordSys,
-                                   enum ESMC_TypeKind coordTypeKind, 
+                                   enum ESMC_CoordSys *coordSys,
+                                   enum ESMC_TypeKind *coordTypeKind, 
                                    int *rc){
   // Initialize return code. Assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
@@ -72,15 +72,6 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt maxIndex,
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return grid; // bail out
 
-#if 0
-  ESMCI::InterfaceInt *mi = (ESMCI::InterfaceInt *)(maxIndex.ptr);
-  printf("maxindex->array = [%d,%d]\n", mi->array[0], mi->array[1]);
-
-  ESMCI::Grid *gridp = reinterpret_cast<ESMCI::Grid *>(grid.ptr);
-  printf("\n\nnoperidim gridstatus = %d\n\n", gridp->getStatus());
-  printf("\n\nnoperidim gridname   = %s\n\n", gridp->getName());
-#endif
-
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
   return grid;
@@ -91,8 +82,8 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt maxIndex,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreate1PeriDim()"
 ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt maxIndex,
-                                   enum ESMC_CoordSys coordSys,
-                                   enum ESMC_TypeKind coordTypeKind, 
+                                   enum ESMC_CoordSys *coordSys,
+                                   enum ESMC_TypeKind *coordTypeKind, 
                                    int *rc){
   int localrc = ESMC_RC_NOT_IMPL;
   if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
@@ -294,4 +285,4 @@ void * ESMC_GridGetItem(ESMC_Grid grid,
 //-----------------------------------------------------------------------------
 
 } // extern "C"
-// $Id: ESMC_Grid.C,v 1.7 2012/03/30 19:03:32 rokuingh Exp $
+// $Id: ESMC_Grid.C,v 1.8 2012/04/17 04:16:47 rokuingh Exp $

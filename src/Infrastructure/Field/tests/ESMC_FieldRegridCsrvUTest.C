@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldRegridCsrvUTest.C,v 1.5 2012/04/16 16:06:07 rokuingh Exp $
+// $Id: ESMC_FieldRegridCsrvUTest.C,v 1.6 2012/04/17 04:16:43 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -328,17 +328,19 @@ int main(void){
   dstFracField = ESMC_FieldCreateMeshTypeKind(dstmesh, ESMC_TYPEKIND_R8,
     ESMC_MESHLOC_ELEMENT, NULL, NULL, NULL, "dstFracField", &rc);
 
+  ESMC_RegridMethod regridmethod = ESMC_REGRIDMETHOD_CONSERVE;
+  ESMC_UnmappedAction unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
 #ifdef masking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, 
                              &i_maskValues, NULL,
                              &routehandle,
-                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_IGNORE,
+                             &regridmethod, &unmappedaction,
                              &srcFracField, &dstFracField);
 #else
   rc = ESMC_FieldRegridStore(srcfield, dstfield, 
                              NULL, NULL,
                              &routehandle,
-                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR,
+                             &regridmethod, NULL,
                              &srcFracField, &dstFracField);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);

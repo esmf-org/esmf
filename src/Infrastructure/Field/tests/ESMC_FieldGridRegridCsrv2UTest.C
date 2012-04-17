@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegridCsrv2UTest.C,v 1.4 2012/04/16 16:06:07 rokuingh Exp $
+// $Id: ESMC_FieldGridRegridCsrv2UTest.C,v 1.5 2012/04/17 04:16:43 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -112,8 +112,9 @@ int main(void){
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  grid = ESMC_GridCreateNoPeriDim(i_maxIndex, ESMC_COORDSYS_CART,
-                                         ESMC_TYPEKIND_R8, &rc);
+  ESMC_CoordSys coordsys = ESMC_COORDSYS_CART;
+  ESMC_TypeKind typekind = ESMC_TYPEKIND_R8;
+  grid = ESMC_GridCreateNoPeriDim(i_maxIndex, &coordsys, &typekind, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // free memory
@@ -500,24 +501,25 @@ int main(void){
   dstFracField = ESMC_FieldCreateGridTypeKind(grid, ESMC_TYPEKIND_R8, 
     ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "dstFracField", &rc);
 
+  ESMC_RegridMethod regridmethod = ESMC_REGRIDMETHOD_CONSERVE;
 #ifdef meshmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, NULL, &routehandle, 
-                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR,
+                             &regridmethod, NULL,
                              &srcFracField, &dstFracField);
 #endif
 #ifdef gridmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, &i_maskValues, &routehandle, 
-                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR,
+                             &regridmethod, NULL,
                              &srcFracField, &dstFracField);
 #endif
 #ifdef bothmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, &i_maskValues, &routehandle, 
-                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR,
+                             &regridmethod, NULL,
                              &srcFracField, &dstFracField);
 #endif
 #ifdef nomasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle, 
-                             ESMC_REGRIDMETHOD_CONSERVE, ESMC_UNMAPPEDACTION_ERROR,
+                             &regridmethod, NULL,
                              &srcFracField, &dstFracField);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);

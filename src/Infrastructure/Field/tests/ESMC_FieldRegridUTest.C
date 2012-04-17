@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldRegridUTest.C,v 1.18 2012/04/16 16:06:07 rokuingh Exp $
+// $Id: ESMC_FieldRegridUTest.C,v 1.19 2012/04/17 04:16:43 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -319,7 +319,7 @@ int main(void){
   rc = ESMC_FieldRegridStore(srcfield, dstfield, 
                              NULL, NULL,
                              &routehandle,
-                             ESMC_REGRIDMETHOD_BILINEAR, ESMC_UNMAPPEDACTION_ERROR,
+                             NULL, NULL,
                              NULL, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.83 2012/03/15 19:24:17 rokuingh Exp $
+// $Id: ESMCI_Grid.h,v 1.84 2012/04/17 04:16:45 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -242,12 +242,12 @@ template <class TYPE>
 
   // ESMC interface:
   static Grid* createnoperidim(ESMC_InterfaceInt maxIndex, 
-                               ESMC_CoordSys coordSys,
-                               ESMC_TypeKind coordTypeKind, 
+                               ESMC_CoordSys *coordSys,
+                               ESMC_TypeKind *coordTypeKind, 
                                int *rc);
   static Grid* create1peridim(ESMC_InterfaceInt maxIndex, 
-                              ESMC_CoordSys coordSys,
-                              ESMC_TypeKind coordTypeKind, 
+                              ESMC_CoordSys *coordSys,
+                              ESMC_TypeKind *coordTypeKind, 
                               int *rc);
 
   // accessor methods

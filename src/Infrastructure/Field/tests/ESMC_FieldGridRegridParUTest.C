@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegridParUTest.C,v 1.7 2012/04/16 16:06:07 rokuingh Exp $
+// $Id: ESMC_FieldGridRegridParUTest.C,v 1.8 2012/04/17 04:16:43 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -110,8 +110,9 @@ int main(void){
   //EX_disable_UTest_Multi_Proc_Only
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  srcgrid = ESMC_GridCreateNoPeriDim(i_maxIndex, ESMC_COORDSYS_CART,
-                                         ESMC_TYPEKIND_R8, &rc);
+  ESMC_CoordSys coordsys = ESMC_COORDSYS_CART;
+  ESMC_TypeKind typekind = ESMC_TYPEKIND_R8;
+  srcgrid = ESMC_GridCreateNoPeriDim(i_maxIndex, &coordsys, &typekind, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // free memory

@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.37 2012/04/13 16:32:17 rokuingh Exp $
+// $Id: ESMC_Field.C,v 1.38 2012/04/17 04:16:41 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -300,8 +300,8 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
                             ESMC_InterfaceInt *srcMaskValues, 
                             ESMC_InterfaceInt *dstMaskValues,
                             ESMC_RouteHandle *routehandle, 
-                            enum ESMC_RegridMethod regridmethod, 
-                            enum ESMC_UnmappedAction unmappedaction,
+                            enum ESMC_RegridMethod *regridmethod, 
+                            enum ESMC_UnmappedAction *unmappedaction,
                             ESMC_Field *srcFracField,
                             ESMC_Field *dstFracField){
 
@@ -323,7 +323,7 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
 
     // Invoque the C++ interface
     localrc = ESMCI::Field::regridstore(fieldpsrc, fieldpdst, 
-      srcMaskValues, dstMaskValues, &rhPtr, &regridmethod, &unmappedaction,
+      srcMaskValues, dstMaskValues, &rhPtr, regridmethod, unmappedaction,
       srcfracp, dstfracp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;  // bail out

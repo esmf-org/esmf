@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.134 2012/04/06 18:30:09 oehmke Exp $
+// $Id: ESMCI_Grid.C,v 1.135 2012/04/17 04:16:48 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.134 2012/04/06 18:30:09 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.135 2012/04/17 04:16:48 rokuingh Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -66,14 +66,14 @@ static const char *const version = "$Id: ESMCI_Grid.C,v 1.134 2012/04/06 18:30:0
 extern "C" {
 void FTN_X(f_esmf_gridcreatenoperidim)(ESMCI::Grid **grid,
     int *maxIndex, int *len1, 
-    ESMC_CoordSys *coordSys,
-    ESMC_TypeKind *coordTypeKind,
+    ESMC_CoordSys *coordSys, int *cs_present,
+    ESMC_TypeKind *coordTypeKind, int *ctk_present,
     int *rc);
 
 void FTN_X(f_esmf_gridcreate1peridim)(ESMCI::Grid **grid,
     int *maxIndex, int *len1, 
-    ESMC_CoordSys *coordSys,
-    ESMC_TypeKind *coordTypeKind,
+    ESMC_CoordSys *coordSys, int *cs_present,
+    ESMC_TypeKind *coordTypeKind, int *ctk_present,
     int *rc);
 }
 
@@ -167,8 +167,8 @@ int setDefaultsLUA(int dimCount,
 //
 // !ARGUMENTS:
     ESMC_InterfaceInt maxIndex, 
-    ESMC_CoordSys coordSys,
-    ESMC_TypeKind coordTypeKind,
+    ESMC_CoordSys *coordSys,
+    ESMC_TypeKind *coordTypeKind,
     int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -182,6 +182,10 @@ int setDefaultsLUA(int dimCount,
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
   
+    int cs_present, ctk_present;
+    cs_present = 0;
+    ctk_present = 0;
+
     ESMCI::InterfaceInt *mi = (ESMCI::InterfaceInt *)(maxIndex.ptr);
   
     if(mi->dimCount != 1){
@@ -190,33 +194,24 @@ int setDefaultsLUA(int dimCount,
        return ESMC_NULL_POINTER;
     }
 
-/*
-    if (coordSys == NULL) *coordSys = ESMC_COORSYS_SPH_DEG;
-    if (coordTypeKind == NULL) *coordTypeKind = ESMC_TYPEKIND_R8;    
-*/
-/* 
-    int slen = strlen(name);
-    char * gName = new char[slen];
-    localrc = ESMC_CtoF90string(name, gName, slen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
-        delete[] gName;
-        return ESMC_NULL_POINTER;
-    }
-*/
+    // handle the optional arguments
+    if (coordSys != NULL)
+      cs_present = 1;
+    if (coordTypeKind != NULL)
+      ctk_present = 1; 
 
     // allocate the grid object
     Grid *grid;
 
     FTN_X(f_esmf_gridcreatenoperidim)(&grid, 
                                       mi->array, &mi->extent[0],
-                                      &coordSys, &coordTypeKind,
+                                      coordSys, &cs_present,
+                                      coordTypeKind, &ctk_present,
                                       &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
         return ESMC_NULL_POINTER;
     }
   
-    //delete[] gName;
-
     if (rc) *rc = localrc;
   
     return grid;
@@ -237,8 +232,8 @@ int setDefaultsLUA(int dimCount,
 //
 // !ARGUMENTS:
     ESMC_InterfaceInt maxIndex, 
-    ESMC_CoordSys coordSys,
-    ESMC_TypeKind coordTypeKind,
+    ESMC_CoordSys *coordSys,
+    ESMC_TypeKind *coordTypeKind,
     int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -251,7 +246,11 @@ int setDefaultsLUA(int dimCount,
     // Initialize return code. Assume routine not implemented
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
-  
+
+    int cs_present, ctk_present;
+    cs_present = 0;
+    ctk_present = 0;
+
     ESMCI::InterfaceInt *mi = (ESMCI::InterfaceInt *)(maxIndex.ptr);
   
     if(mi->dimCount != 1){
@@ -259,28 +258,24 @@ int setDefaultsLUA(int dimCount,
          "- maxIndex array must be of rank 1", rc);
        return ESMC_NULL_POINTER;
     }
-/* 
-    int slen = strlen(name);
-    char * gName = new char[slen];
-    localrc = ESMC_CtoF90string(name, gName, slen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
-        delete[] gName;
-        return ESMC_NULL_POINTER;
-    }
-*/
+
+    // handle the optional arguments
+    if (coordSys != NULL)
+      cs_present = 1;
+    if (coordTypeKind != NULL)
+      ctk_present = 1; 
 
     // allocate the grid object
     Grid *grid;
   
     FTN_X(f_esmf_gridcreate1peridim)(&grid, 
                                      mi->array, &mi->extent[0], 
-                                     &coordSys, &coordTypeKind,
+                                     coordSys, &cs_present,
+                                     coordTypeKind, &ctk_present,
                                      &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
         return grid;
     }
-  
-    //delete[] gName;
   
     if (rc) *rc = localrc;
   

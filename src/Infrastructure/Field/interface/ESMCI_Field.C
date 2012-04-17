@@ -50,7 +50,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.25 2012/04/16 15:43:53 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.26 2012/04/17 04:16:41 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -117,7 +117,8 @@ void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   int *srcMaskValues, int *len1, int *smv_present,
   int *dstMaskValues, int *len2, int *dmv_present,
   ESMCI::RouteHandle **routehandlep, 
-  ESMC_RegridMethod *regridmethod, ESMC_UnmappedAction *unmappedaction, 
+  ESMC_RegridMethod *regridmethod, int *rm_present,
+  ESMC_UnmappedAction *unmappedaction, int *ua_present,
   ESMCI::Field *srcfracfieldp, int *sff_present, 
   ESMCI::Field *dstfracfieldp, int *dff_present, int *rc);
 
@@ -883,12 +884,15 @@ namespace ESMCI {
   
     int smv_present, dmv_present;
     int sff_present, dff_present;
+    int rm_present, ua_present;
     bool smv_created, dmv_created;
     bool sff_created, dff_created;
     smv_present = 0;
     dmv_present = 0;
     sff_present = 0;
     dff_present = 0;
+    rm_present = 0;
+    ua_present = 0;
     smv_created = false;
     dmv_created = false;
     sff_created = false;
@@ -937,11 +941,18 @@ namespace ESMCI {
       dff_created = true;
     }
 
+    if (regridMethod != NULL)
+      rm_present = 1;
+
+    if (unmappedAction != NULL)
+      ua_present = 1;
+
     FTN_X(f_esmf_regridstore)(fieldpsrc, fieldpdst, 
                               smv->array, &smv->extent[0], &smv_present,
                               dmv->array, &dmv->extent[0], &dmv_present,
                               routehandlep,
-                              regridMethod, unmappedAction, 
+                              regridMethod, &rm_present,
+                              unmappedAction, &ua_present,
                               srcFracField, &sff_present,
                               dstFracField, &dff_present, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {

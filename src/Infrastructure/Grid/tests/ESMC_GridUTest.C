@@ -1,4 +1,4 @@
-// $Id: ESMC_GridUTest.C,v 1.6 2012/04/10 23:03:19 rokuingh Exp $
+// $Id: ESMC_GridUTest.C,v 1.7 2012/04/17 04:16:50 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -76,8 +76,9 @@ int main(void){
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  grid_np = ESMC_GridCreateNoPeriDim(i_maxIndex, ESMC_COORDSYS_CART, 
-                                         ESMC_TYPEKIND_R8, &rc);
+  ESMC_CoordSys coordsys = ESMC_COORDSYS_CART;
+  ESMC_TypeKind typekind = ESMC_TYPEKIND_R8;
+  grid_np = ESMC_GridCreateNoPeriDim(i_maxIndex, &coordsys, &typekind, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // free memory
@@ -123,8 +124,7 @@ int main(void){
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  grid_1p = ESMC_GridCreate1PeriDim(i_maxIndex, ESMC_COORDSYS_CART,
-                                    ESMC_TYPEKIND_R8, &rc);
+  grid_1p = ESMC_GridCreate1PeriDim(i_maxIndex, &coordsys, &typekind, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   // free memory
   free(maxIndex);

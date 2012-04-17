@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegrid2UTest.C,v 1.3 2012/04/13 16:32:21 rokuingh Exp $
+// $Id: ESMC_FieldGridRegrid2UTest.C,v 1.4 2012/04/17 04:16:43 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -113,8 +113,9 @@ int main(void){
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  grid = ESMC_GridCreateNoPeriDim(i_maxIndex, ESMC_COORDSYS_CART,
-                                         ESMC_TYPEKIND_R8, &rc);
+  ESMC_CoordSys coordsys = ESMC_COORDSYS_CART;
+  ESMC_TypeKind typekind = ESMC_TYPEKIND_R8;
+  grid = ESMC_GridCreateNoPeriDim(i_maxIndex, &coordsys, &typekind, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // free memory
@@ -412,24 +413,25 @@ int main(void){
   //EX_UTest
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  ESMC_UnmappedAction unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
 #ifdef gridmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, NULL, &routehandle, 
-                        ESMC_REGRIDMETHOD_BILINEAR, ESMC_UNMAPPEDACTION_IGNORE,
+                        NULL, &unmappedaction,
                         NULL, NULL);
 #endif
 #ifdef meshmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, &i_maskValues, &routehandle, 
-                        ESMC_REGRIDMETHOD_BILINEAR, ESMC_UNMAPPEDACTION_IGNORE,
+                        NULL, &unmappedaction,
                         NULL, NULL);
 #endif
 #ifdef bothmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, &i_maskValues, &routehandle, 
-                        ESMC_REGRIDMETHOD_BILINEAR, ESMC_UNMAPPEDACTION_IGNORE,
+                        NULL, &unmappedaction,
                         NULL, NULL);
 #endif
 #ifdef nomasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle, 
-                        ESMC_REGRIDMETHOD_BILINEAR, ESMC_UNMAPPEDACTION_IGNORE,
+                        NULL, &unmappedaction,
                         NULL, NULL);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);

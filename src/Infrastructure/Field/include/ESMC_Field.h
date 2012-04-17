@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.50 2012/04/13 16:32:15 rokuingh Exp $
+// $Id: ESMC_Field.h,v 1.51 2012/04/17 04:16:39 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -517,8 +517,8 @@ int ESMC_FieldRegridStore(
     ESMC_InterfaceInt *srcMaskValues,          // in
     ESMC_InterfaceInt *dstMaskValues,          // in
     ESMC_RouteHandle *routehandle,             // inout
-    enum ESMC_RegridMethod regridmethod,       // in
-    enum ESMC_UnmappedAction unmappedaction,   // in
+    enum ESMC_RegridMethod *regridmethod,       // in
+    enum ESMC_UnmappedAction *unmappedaction,   // in
     ESMC_Field *srcFracField,                  // out
     ESMC_Field *dstFracField);                 // out
 

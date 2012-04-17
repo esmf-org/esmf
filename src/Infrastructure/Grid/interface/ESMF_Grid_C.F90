@@ -1,4 +1,4 @@
-!  $Id: ESMF_Grid_C.F90,v 1.2 2012/03/13 23:59:04 theurich Exp $
+!  $Id: ESMF_Grid_C.F90,v 1.3 2012/04/17 04:16:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -24,14 +24,15 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Grid_C.F90,v 1.2 2012/03/13 23:59:04 theurich Exp $'
+!      '$Id: ESMF_Grid_C.F90,v 1.3 2012/04/17 04:16:47 rokuingh Exp $'
 !==============================================================================
 
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_gridcreatenoperidim"
   subroutine f_esmf_gridcreatenoperidim(gridp, maxIndex, len1, &
-                                        coordSys, coordTypeKind, rc)
+                                        coordSys, cspresent, &
+                                        coordTypeKind, ctkpresent, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_LogErrMod
@@ -43,6 +44,7 @@
     type(ESMF_Pointer)             :: gridp
     integer, intent(in)            :: len1
     integer                        :: maxIndex(1:len1)
+    integer                        :: cspresent, ctkpresent
     type(ESMF_CoordSys_Flag)       :: coordSys
     type(ESMF_TypeKind_Flag)       :: coordTypeKind
     integer, intent(out)           :: rc              
@@ -52,9 +54,24 @@
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
 
-    grid = ESMF_GridCreateNoPeriDim(maxIndex=maxIndex, coordSys=coordSys, &
-                                    coordTypeKind=coordTypeKind, &
-                                    indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+    ! handle the optional arguments
+    if (cspresent == 0 .and. ctkpresent == 0) then
+      grid = ESMF_GridCreateNoPeriDim(maxIndex=maxIndex, &
+                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+    elseif (cspresent == 0 .and. ctkpresent == 1) then
+      grid = ESMF_GridCreateNoPeriDim(maxIndex=maxIndex, &
+                                      coordTypeKind=coordTypeKind, &
+                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+    elseif (cspresent == 1 .and. ctkpresent == 0) then
+      grid = ESMF_GridCreateNoPeriDim(maxIndex=maxIndex, &
+                                      coordSys=coordSys, &
+                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+    elseif (cspresent == 1 .and. ctkpresent == 1) then
+      grid = ESMF_GridCreateNoPeriDim(maxIndex=maxIndex, &
+                                      coordSys=coordSys, &
+                                      coordTypeKind=coordTypeKind, &
+                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+    endif
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -67,7 +84,8 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_gridcreate1peridim"
   subroutine f_esmf_gridcreate1peridim(gridp, maxIndex, len1, &
-                                        coordSys, coordTypeKind, rc)
+                                        coordSys, cspresent, &
+                                        coordTypeKind, ctkpresent, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_LogErrMod
@@ -79,6 +97,7 @@
     type(ESMF_Pointer)             :: gridp
     integer, intent(in)            :: len1
     integer                        :: maxIndex(1:len1)
+    integer                        :: cspresent, ctkpresent
     type(ESMF_CoordSys_Flag)       :: coordSys
     type(ESMF_TypeKind_Flag)       :: coordTypeKind
     integer, intent(out)           :: rc              
@@ -88,9 +107,24 @@
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
 
-    grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, coordSys=coordSys, &
-                                    coordTypeKind=coordTypeKind, &
-                                    indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+    ! handle the optional arguments
+    if (cspresent == 0 .and. ctkpresent == 0) then
+      grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
+                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+    elseif (cspresent == 0 .and. ctkpresent == 1) then
+      grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
+                                      coordTypeKind=coordTypeKind, &
+                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+    elseif (cspresent == 1 .and. ctkpresent == 0) then
+      grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
+                                      coordSys=coordSys, &
+                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+    elseif (cspresent == 1 .and. ctkpresent == 1) then
+      grid = ESMF_GridCreate1PeriDim(maxIndex=maxIndex, &
+                                      coordSys=coordSys, &
+                                      coordTypeKind=coordTypeKind, &
+                                      indexflag=ESMF_INDEX_GLOBAL, rc=rc)    
+    endif
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
