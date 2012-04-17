@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.3 2012/04/12 16:38:32 theurich Exp $
+! $Id: NUOPC_Base.F90,v 1.4 2012/04/17 18:36:42 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -967,7 +967,7 @@ module NUOPC_Base
       return  ! bail out
     endif
     
-    ! ensure that the check timestep is still a multiple of the internal one
+    ! ensure that the check timestep is a multiple of the internal one
     if (ceiling(checkTimeStep/timeStep) /= floor(checkTimeStep/timeStep))&
       then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
