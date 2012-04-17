@@ -1,4 +1,4 @@
-// $Id: ESMCI_MethodTable.C,v 1.3 2012/01/06 20:19:00 svasquez Exp $
+// $Id: ESMCI_MethodTable.C,v 1.4 2012/04/17 18:33:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -28,6 +28,7 @@
 
 // insert higher level, 3rd party or system includes
 #include <string>
+#include <sstream>
 #ifndef ESMF_NO_DLFCN
 #include <dlfcn.h>
 #endif
@@ -79,13 +80,18 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtableadd"
   void FTN_X(c_esmc_methodtableadd)(ESMCI::MethodTable **ptr,
-    char const *labelArg, void *pointer, int *rc,
+    char const *labelArg, int *index, void *pointer, int *rc,
     ESMCI_FortranStrLenArg labelLen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     if (labelLen>=0){
       std::string label(labelArg, labelLen);
       label.resize(label.find_last_not_of(" ")+1);
+      if (index){
+        std::stringstream indexString;
+        indexString << "::ESMF::index::" << *index;
+        label += indexString.str();
+      }
       localrc = (*ptr)->add(label, pointer);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
         return;
@@ -108,7 +114,8 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtableaddshobj"
   void FTN_X(c_esmc_methodtableaddshobj)(ESMCI::MethodTable **ptr,
-    char const *labelArg, char const *nameArg, char const *sharedObjArg,
+    char const *labelArg, int *index, char const *nameArg,
+    char const *sharedObjArg,
     int *rc, ESMCI_FortranStrLenArg labelLen, ESMCI_FortranStrLenArg nameLen,
     ESMCI_FortranStrLenArg sharedObjLen){
     int localrc = ESMC_RC_NOT_IMPL;
@@ -116,6 +123,11 @@ extern "C" {
     if (labelLen>=0){
       std::string label(labelArg, labelLen);
       label.resize(label.find_last_not_of(" ")+1);
+      if (index){
+        std::stringstream indexString;
+        indexString << "::ESMF::index::" << *index;
+        label += indexString.str();
+      }
       std::string name(nameArg, nameLen);
       name.resize(name.find_last_not_of(" ")+1);
       std::string sharedObj(sharedObjArg, sharedObjLen);
@@ -142,13 +154,18 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtableremove"
   void FTN_X(c_esmc_methodtableremove)(ESMCI::MethodTable **ptr,
-    char const *label, int *rc, ESMCI_FortranStrLenArg labelLen){
+    char const *labelArg, int *index, int *rc, ESMCI_FortranStrLenArg labelLen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     if (labelLen>=0){
-      std::string labelArg(label, labelLen);
-      labelArg.resize(labelArg.find_last_not_of(" ")+1);
-      localrc = (*ptr)->remove(labelArg);
+      std::string label(labelArg, labelLen);
+      label.resize(label.find_last_not_of(" ")+1);
+      if (index){
+        std::stringstream indexString;
+        indexString << "::ESMF::index::" << *index;
+        label += indexString.str();
+      }
+      localrc = (*ptr)->remove(label);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
         return;
     }else{
@@ -170,14 +187,19 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtableexecute"
   void FTN_X(c_esmc_methodtableexecute)(ESMCI::MethodTable **ptr,
-    char const *label, void *object, int *userRc, int *rc,
+    char const *labelArg, int *index, void *object, int *userRc, int *rc,
     ESMCI_FortranStrLenArg labelLen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     if (labelLen>=0){
-      std::string labelArg(label, labelLen);
-      labelArg.resize(labelArg.find_last_not_of(" ")+1);
-      localrc = (*ptr)->execute(labelArg, object, userRc);
+      std::string label(labelArg, labelLen);
+      label.resize(label.find_last_not_of(" ")+1);
+      if (index){
+        std::stringstream indexString;
+        indexString << "::ESMF::index::" << *index;
+        label += indexString.str();
+      }
+      localrc = (*ptr)->execute(label, object, userRc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
         return;
     }else{
@@ -199,16 +221,21 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_methodtableexecuteef"
   void FTN_X(c_esmc_methodtableexecuteef)(ESMCI::MethodTable **ptr,
-    char const *label, void *object, ESMC_Logical *existflag,
+    char const *labelArg, int *index, void *object, ESMC_Logical *existflag,
     int *userRc, int *rc,
     ESMCI_FortranStrLenArg labelLen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     if (labelLen>=0){
       bool existing;
-      std::string labelArg(label, labelLen);
-      labelArg.resize(labelArg.find_last_not_of(" ")+1);
-      localrc = (*ptr)->execute(labelArg, object, userRc, &existing);
+      std::string label(labelArg, labelLen);
+      label.resize(label.find_last_not_of(" ")+1);
+      if (index){
+        std::stringstream indexString;
+        indexString << "::ESMF::index::" << *index;
+        label += indexString.str();
+      }
+      localrc = (*ptr)->execute(label, object, userRc, &existing);
       if (existing)
         *existflag = ESMF_TRUE;
       else

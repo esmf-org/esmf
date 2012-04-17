@@ -1,4 +1,4 @@
-! $Id: ESMF_AttachMethods.F90,v 1.7 2012/01/06 20:18:46 svasquez Exp $
+! $Id: ESMF_AttachMethods.F90,v 1.8 2012/04/17 18:33:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_AttachMethodsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_AttachMethods.F90,v 1.7 2012/01/06 20:18:46 svasquez Exp $'
+    '$Id: ESMF_AttachMethods.F90,v 1.8 2012/04/17 18:33:33 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -101,11 +101,12 @@ module ESMF_AttachMethodsMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodAdd()
-  subroutine ESMF_MethodStateAdd(state, label, userRoutine, rc)
+  subroutine ESMF_MethodStateAdd(state, label, index, userRoutine, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State)                        :: state
     character(len=*), intent(in)            :: label
+    integer,          intent(in),  optional :: index
     interface
       subroutine userRoutine(state, rc)
         use ESMF_StateMod
@@ -125,6 +126,8 @@ module ESMF_AttachMethodsMod
 !   The {\tt ESMF\_State} to attach to.
 ! \item[label]
 !   Label of method.
+! \item[{[index]}]
+!   Integer modifier to distinguish multiple entries with the same {\tt label}.
 ! \item[userRoutine]
 !   The user-supplied subroutine to be associated with the {\tt label}.
 !
@@ -142,6 +145,7 @@ module ESMF_AttachMethodsMod
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
+    integer :: indexArg
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -149,8 +153,11 @@ module ESMF_AttachMethodsMod
 
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit, state, rc)
     
-    call c_ESMC_MethodTableAdd(state%statep%methodTable, label, userRoutine, &
-      localrc)
+    indexArg = -987654  ! unique default index
+    if (present(index)) indexArg = index
+    
+    call c_ESMC_MethodTableAdd(state%statep%methodTable, label, indexArg, &
+      userRoutine, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -168,12 +175,13 @@ module ESMF_AttachMethodsMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodAdd()
-  subroutine ESMF_MethodStateAddShObj(state, label, userRoutine, &
+  subroutine ESMF_MethodStateAddShObj(state, label, index, userRoutine, &
 		sharedObj, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State)                        :: state
     character(len=*), intent(in)            :: label
+    integer,          intent(in),  optional :: index
     character(len=*), intent(in)            :: userRoutine
     character(len=*), intent(in),  optional :: sharedObj
     integer,          intent(out), optional :: rc 
@@ -187,6 +195,8 @@ module ESMF_AttachMethodsMod
 !   The {\tt ESMF\_State} to attach to.
 ! \item[label]
 !   Label of method.
+! \item[{[index]}]
+!   Integer modifier to distinguish multiple entries with the same {\tt label}.
 ! \item[userRoutine]
 !   Name of user-supplied subroutine to be associated with the {\tt label},
 !   specified as a character string.
@@ -209,6 +219,7 @@ module ESMF_AttachMethodsMod
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
+    integer :: indexArg
     character(len=0) :: emptyString
 
     ! initialize return code; assume routine not implemented
@@ -217,12 +228,15 @@ module ESMF_AttachMethodsMod
 
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit, state, rc)
     
+    indexArg = -987654  ! unique default index
+    if (present(index)) indexArg = index
+    
     if (present(sharedObj)) then
       call c_ESMC_MethodTableAddShObj(state%statep%methodTable, label, &
-        userRoutine, sharedObj, localrc)
+        indexArg, userRoutine, sharedObj, localrc)
     else
       call c_ESMC_MethodTableAddShObj(state%statep%methodTable, label, &
-        userRoutine, emptyString, localrc)
+        indexArg, userRoutine, emptyString, localrc)
     endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -241,11 +255,12 @@ module ESMF_AttachMethodsMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodExecute()
-  subroutine ESMF_MethodStateExecute(state, label, existflag, userRc, rc)
+  subroutine ESMF_MethodStateExecute(state, label, index, existflag, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State)                        :: state
     character(len=*), intent(in)            :: label
+    integer,          intent(in),  optional :: index
     logical,          intent(out), optional :: existflag
     integer,          intent(out), optional :: userRc
     integer,          intent(out), optional :: rc
@@ -259,6 +274,8 @@ module ESMF_AttachMethodsMod
 !   The {\tt ESMF\_State} to attach to.
 ! \item[label]
 !   Label of method.
+! \item[{[index]}]
+!   Integer modifier to distinguish multiple entries with the same {\tt label}.
 ! \item[{[existflag]}]
 !   Returned {\tt .true.} indicates that the method specified by {\tt label}
 !   exists and was executed. A return value of {\tt .false.} indicates that
@@ -277,6 +294,7 @@ module ESMF_AttachMethodsMod
 !------------------------------------------------------------------------------
     integer             :: localrc          ! local error status
     integer             :: localUserRc
+    integer             :: indexArg
     type(ESMF_Logical)  :: opt_existflag    ! helper variable
 
     ! initialize return code; assume routine not implemented
@@ -285,16 +303,19 @@ module ESMF_AttachMethodsMod
 
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit, state, rc)
     
+    indexArg = -987654  ! unique default index
+    if (present(index)) indexArg = index
+    
     if (present(existflag)) then
-      call c_ESMC_MethodTableExecuteEF(state%statep%methodTable, label, state, &
-        opt_existflag, localUserRc, localrc)
+      call c_ESMC_MethodTableExecuteEF(state%statep%methodTable, label, &
+        indexArg, state, opt_existflag, localUserRc, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       existflag = opt_existflag ! translate logicals
     else
-      call c_ESMC_MethodTableExecute(state%statep%methodTable, label, state, &
-        localUserRc, localrc)
+      call c_ESMC_MethodTableExecute(state%statep%methodTable, label, &
+        indexArg, state, localUserRc, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -316,11 +337,12 @@ module ESMF_AttachMethodsMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodRemove()
-  subroutine ESMF_MethodStateRemove(state, label, rc)
+  subroutine ESMF_MethodStateRemove(state, label, index, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State)                        :: state
     character(len=*), intent(in)            :: label
+    integer,          intent(in),  optional :: index
     integer,          intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -332,6 +354,8 @@ module ESMF_AttachMethodsMod
 !   The {\tt ESMF\_State} to attach to.
 ! \item[label]
 !   Label of method.
+! \item[{[index]}]
+!   Integer modifier to distinguish multiple entries with the same {\tt label}.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -339,14 +363,19 @@ module ESMF_AttachMethodsMod
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
-
+    integer :: indexArg
+    
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit, state, rc)
     
-    call c_ESMC_MethodTableRemove(state%statep%methodTable, label, localrc)
+    indexArg = -987654  ! unique default index
+    if (present(index)) indexArg = index
+    
+    call c_ESMC_MethodTableRemove(state%statep%methodTable, label, indexArg, &
+      localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -365,11 +394,12 @@ module ESMF_AttachMethodsMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodAdd()
-  subroutine ESMF_MethodGridCompAdd(gcomp, label, userRoutine, rc)
+  subroutine ESMF_MethodGridCompAdd(gcomp, label, index, userRoutine, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                     :: gcomp
     character(len=*), intent(in)            :: label
+    integer,          intent(in),  optional :: index
     interface
       subroutine userRoutine(gcomp, rc)
         use ESMF_CompMod
@@ -389,6 +419,8 @@ module ESMF_AttachMethodsMod
 !   The {\tt ESMF\_GridComp} to attach to.
 ! \item[label]
 !   Label of method.
+! \item[{[index]}]
+!   Integer modifier to distinguish multiple entries with the same {\tt label}.
 ! \item[userRoutine]
 !   The user-supplied subroutine to be associated with the {\tt label}.
 !
@@ -406,6 +438,7 @@ module ESMF_AttachMethodsMod
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
+    integer :: indexArg
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -413,8 +446,11 @@ module ESMF_AttachMethodsMod
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gcomp, rc)
     
-    call c_ESMC_MethodTableAdd(gcomp%compp%methodTable, label, userRoutine, &
-      localrc)
+    indexArg = -987654  ! unique default index
+    if (present(index)) indexArg = index
+    
+    call c_ESMC_MethodTableAdd(gcomp%compp%methodTable, label, indexArg, &
+      userRoutine, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -432,12 +468,13 @@ module ESMF_AttachMethodsMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodAdd()
-  subroutine ESMF_MethodGridCompAddShObj(gcomp, label, userRoutine, &
+  subroutine ESMF_MethodGridCompAddShObj(gcomp, label, index, userRoutine, &
 	sharedObj, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                     :: gcomp
     character(len=*), intent(in)            :: label
+    integer,          intent(in),  optional :: index
     character(len=*), intent(in)            :: userRoutine
     character(len=*), intent(in),  optional :: sharedObj
     integer,          intent(out), optional :: rc 
@@ -451,6 +488,8 @@ module ESMF_AttachMethodsMod
 !   The {\tt ESMF\_GridComp} to attach to.
 ! \item[label]
 !   Label of method.
+! \item[{[index]}]
+!   Integer modifier to distinguish multiple entries with the same {\tt label}.
 ! \item[userRoutine]
 !   Name of user-supplied subroutine to be associated with the {\tt label},
 !   specified as a character string.
@@ -473,6 +512,7 @@ module ESMF_AttachMethodsMod
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
+    integer :: indexArg
     character(len=0) :: emptyString
 
     ! initialize return code; assume routine not implemented
@@ -481,12 +521,15 @@ module ESMF_AttachMethodsMod
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gcomp, rc)
     
+    indexArg = -987654  ! unique default index
+    if (present(index)) indexArg = index
+    
     if (present(sharedObj)) then
       call c_ESMC_MethodTableAddShObj(gcomp%compp%methodTable, label, &
-        userRoutine, sharedObj, localrc)
+        indexArg, userRoutine, sharedObj, localrc)
     else
       call c_ESMC_MethodTableAddShObj(gcomp%compp%methodTable, label, &
-        userRoutine, emptyString, localrc)
+        indexArg, userRoutine, emptyString, localrc)
     endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -505,11 +548,12 @@ module ESMF_AttachMethodsMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodAdd()
-  subroutine ESMF_MethodCplCompAdd(cplcomp, label, userRoutine, rc)
+  subroutine ESMF_MethodCplCompAdd(cplcomp, label, index, userRoutine, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)                      :: cplcomp
     character(len=*), intent(in)            :: label
+    integer,          intent(in),  optional :: index
     interface
       subroutine userRoutine(cplcomp, rc)
         use ESMF_CompMod
@@ -529,6 +573,8 @@ module ESMF_AttachMethodsMod
 !   The {\tt ESMF\_CplComp} to attach to.
 ! \item[label]
 !   Label of method.
+! \item[{[index]}]
+!   Integer modifier to distinguish multiple entries with the same {\tt label}.
 ! \item[userRoutine]
 !   The user-supplied subroutine to be associated with the {\tt label}.
 !
@@ -546,6 +592,7 @@ module ESMF_AttachMethodsMod
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
+    integer :: indexArg
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -553,8 +600,11 @@ module ESMF_AttachMethodsMod
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
     
-    call c_ESMC_MethodTableAdd(cplcomp%compp%methodTable, label, userRoutine, &
-      localrc)
+    indexArg = -987654  ! unique default index
+    if (present(index)) indexArg = index
+    
+    call c_ESMC_MethodTableAdd(cplcomp%compp%methodTable, label, indexArg, &
+      userRoutine, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -572,12 +622,13 @@ module ESMF_AttachMethodsMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodAdd()
-  subroutine ESMF_MethodCplCompAddShObj(cplcomp, label, userRoutine, &
+  subroutine ESMF_MethodCplCompAddShObj(cplcomp, label, index, userRoutine, &
 		sharedObj, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)                      :: cplcomp
     character(len=*), intent(in)            :: label
+    integer,          intent(in),  optional :: index
     character(len=*), intent(in)            :: userRoutine
     character(len=*), intent(in),  optional :: sharedObj
     integer,          intent(out), optional :: rc 
@@ -591,6 +642,8 @@ module ESMF_AttachMethodsMod
 !   The {\tt ESMF\_CplComp} to attach to.
 ! \item[label]
 !   Label of method.
+! \item[{[index]}]
+!   Integer modifier to distinguish multiple entries with the same {\tt label}.
 ! \item[userRoutine]
 !   Name of user-supplied subroutine to be associated with the {\tt label},
 !   specified as a character string.
@@ -613,6 +666,7 @@ module ESMF_AttachMethodsMod
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
+    integer :: indexArg
     character(len=0) :: emptyString
 
     ! initialize return code; assume routine not implemented
@@ -621,12 +675,15 @@ module ESMF_AttachMethodsMod
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
     
+    indexArg = -987654  ! unique default index
+    if (present(index)) indexArg = index
+    
     if (present(sharedObj)) then
       call c_ESMC_MethodTableAddShObj(cplcomp%compp%methodTable, label, &
-        userRoutine, sharedObj, localrc)
+        indexArg, userRoutine, sharedObj, localrc)
     else
       call c_ESMC_MethodTableAddShObj(cplcomp%compp%methodTable, label, &
-        userRoutine, emptyString, localrc)
+        indexArg, userRoutine, emptyString, localrc)
     endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -645,11 +702,13 @@ module ESMF_AttachMethodsMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodExecute()
-  subroutine ESMF_MethodGridCompExecute(gcomp, label, existflag, userRc, rc)
+  subroutine ESMF_MethodGridCompExecute(gcomp, label, index, existflag, &
+    userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                     :: gcomp
     character(len=*), intent(in)            :: label
+    integer,          intent(in),  optional :: index
     logical,          intent(out), optional :: existflag
     integer,          intent(out), optional :: userRc
     integer,          intent(out), optional :: rc
@@ -663,6 +722,8 @@ module ESMF_AttachMethodsMod
 !   The {\tt ESMF\_GridComp} to attach to.
 ! \item[label]
 !   Label of method.
+! \item[{[index]}]
+!   Integer modifier to distinguish multiple entries with the same {\tt label}.
 ! \item[{[existflag]}]
 !   Returned {\tt .true.} indicates that the method specified by {\tt label}
 !   exists and was executed. A return value of {\tt .false.} indicates that
@@ -681,6 +742,7 @@ module ESMF_AttachMethodsMod
 !------------------------------------------------------------------------------
     integer             :: localrc          ! local error status
     integer             :: localUserRc
+    integer             :: indexArg
     type(ESMF_Logical)  :: opt_existflag    ! helper variable
 
     ! initialize return code; assume routine not implemented
@@ -689,16 +751,19 @@ module ESMF_AttachMethodsMod
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gcomp, rc)
     
+    indexArg = -987654  ! unique default index
+    if (present(index)) indexArg = index
+    
     if (present(existflag)) then
-      call c_ESMC_MethodTableExecuteEF(gcomp%compp%methodTable, label, gcomp, &
-        opt_existflag, localUserRc, localrc)
+      call c_ESMC_MethodTableExecuteEF(gcomp%compp%methodTable, label, &
+        indexArg, gcomp, opt_existflag, localUserRc, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       existflag = opt_existflag ! translate logicals
     else
-      call c_ESMC_MethodTableExecute(gcomp%compp%methodTable, label, gcomp, &
-        localUserRc, localrc)
+      call c_ESMC_MethodTableExecute(gcomp%compp%methodTable, label, indexArg, &
+        gcomp, localUserRc, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -720,11 +785,13 @@ module ESMF_AttachMethodsMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodExecute()
-  subroutine ESMF_MethodCplCompExecute(cplcomp, label, existflag, userRc, rc)
+  subroutine ESMF_MethodCplCompExecute(cplcomp, label, index, existflag, &
+    userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)                      :: cplcomp
     character(len=*), intent(in)            :: label
+    integer,          intent(in),  optional :: index
     logical,          intent(out), optional :: existflag
     integer,          intent(out), optional :: userRc
     integer,          intent(out), optional :: rc
@@ -738,6 +805,8 @@ module ESMF_AttachMethodsMod
 !   The {\tt ESMF\_CplComp} to attach to.
 ! \item[label]
 !   Label of method.
+! \item[{[index]}]
+!   Integer modifier to distinguish multiple entries with the same {\tt label}.
 ! \item[{[existflag]}]
 !   Returned {\tt .true.} indicates that the method specified by {\tt label}
 !   exists and was executed. A return value of {\tt .false.} indicates that
@@ -756,6 +825,7 @@ module ESMF_AttachMethodsMod
 !------------------------------------------------------------------------------
     integer             :: localrc          ! local error status
     integer             :: localUserRc
+    integer             :: indexArg
     type(ESMF_Logical)  :: opt_existflag    ! helper variable
 
     ! initialize return code; assume routine not implemented
@@ -764,16 +834,19 @@ module ESMF_AttachMethodsMod
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
     
+    indexArg = -987654  ! unique default index
+    if (present(index)) indexArg = index
+    
     if (present(existflag)) then
       call c_ESMC_MethodTableExecuteEF(cplcomp%compp%methodTable, label, &
-        cplcomp, opt_existflag, localUserRc, localrc)
+        indexArg, cplcomp, opt_existflag, localUserRc, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       existflag = opt_existflag ! translate logicals
     else
       call c_ESMC_MethodTableExecute(cplcomp%compp%methodTable, label, &
-        cplcomp, localUserRc, localrc)
+        indexArg, cplcomp, localUserRc, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -795,12 +868,13 @@ module ESMF_AttachMethodsMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodRemove()
-  subroutine ESMF_MethodGridCompRemove(gcomp, label, rc)
+  subroutine ESMF_MethodGridCompRemove(gcomp, label, index, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                     :: gcomp
-    character(len=*), intent(in)            :: label
-    integer,          intent(out), optional :: rc 
+    type(ESMF_GridComp)                      :: gcomp
+    character(len=*),  intent(in)            :: label
+     integer,          intent(in),  optional :: index
+   integer,            intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 ! Remove attached method.
@@ -811,6 +885,8 @@ module ESMF_AttachMethodsMod
 !   The {\tt ESMF\_GridComp} to attach to.
 ! \item[label]
 !   Label of method.
+! \item[{[index]}]
+!   Integer modifier to distinguish multiple entries with the same {\tt label}.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -818,6 +894,7 @@ module ESMF_AttachMethodsMod
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
+    integer :: indexArg
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -825,7 +902,11 @@ module ESMF_AttachMethodsMod
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gcomp, rc)
     
-    call c_ESMC_MethodTableRemove(gcomp%compp%methodTable, label, localrc)
+    indexArg = -987654  ! unique default index
+    if (present(index)) indexArg = index
+    
+    call c_ESMC_MethodTableRemove(gcomp%compp%methodTable, label, indexArg, &
+      localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -843,11 +924,12 @@ module ESMF_AttachMethodsMod
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MethodRemove()
-  subroutine ESMF_MethodCplCompRemove(cplcomp, label, rc)
+  subroutine ESMF_MethodCplCompRemove(cplcomp, label, index, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)                      :: cplcomp
     character(len=*), intent(in)            :: label
+    integer,          intent(in),  optional :: index
     integer,          intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -859,6 +941,8 @@ module ESMF_AttachMethodsMod
 !   The {\tt ESMF\_CplComp} to attach to.
 ! \item[label]
 !   Label of method.
+! \item[{[index]}]
+!   Integer modifier to distinguish multiple entries with the same {\tt label}.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -866,6 +950,7 @@ module ESMF_AttachMethodsMod
 !EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
+    integer :: indexArg
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -873,7 +958,11 @@ module ESMF_AttachMethodsMod
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
     
-    call c_ESMC_MethodTableRemove(cplcomp%compp%methodTable, label, localrc)
+    indexArg = -987654  ! unique default index
+    if (present(index)) indexArg = index
+    
+    call c_ESMC_MethodTableRemove(cplcomp%compp%methodTable, label, indexArg, &
+      localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
