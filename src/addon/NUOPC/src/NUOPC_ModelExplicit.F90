@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelExplicit.F90,v 1.14 2012/04/12 16:38:32 theurich Exp $
+! $Id: NUOPC_ModelExplicit.F90,v 1.15 2012/04/17 18:42:14 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelExplicit.F90"
 
@@ -13,8 +13,12 @@ module NUOPC_ModelExplicit
   use NUOPC_ModelExplicitBase, only: &
     ModelExB_routine_SS             => routine_SetServices, &
     routine_Run                     => routine_Run, &
-    label_CheckImport               => label_CheckImport, &
+    type_InternalState              => type_InternalState, &
+    type_InternalStateStruct        => type_InternalStateStruct, &
+    label_InternalState             => label_InternalState, &
     label_Advance                   => label_Advance, &
+    label_CheckImport               => label_CheckImport, &
+    label_SetRunClock               => label_SetRunClock, &
     ModelExB_label_TimestampExport  => label_TimestampExport
 
   implicit none
@@ -26,10 +30,16 @@ module NUOPC_ModelExplicit
     routine_SetServices
     
   public &
+    type_InternalState, &
+    type_InternalStateStruct
+    
+  public &
+    label_InternalState, &
     label_Advance, &
     label_CheckImport, &
     label_DataInitialize, &
-    label_SetClock
+    label_SetClock, &
+    label_SetRunClock
   
   character(*), parameter :: &
     label_DataInitialize = "ModelExplicit_DataInitialize"
@@ -69,14 +79,6 @@ module NUOPC_ModelExplicit
       file=FILENAME)) &
       return  ! bail out
     
-    ! Specialize Run -> checking import Fields
-    call ESMF_MethodAdd(gcomp, label=label_CheckImport, &
-      userRoutine=CheckImport, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-      
     ! Specialize Run -> timestamp export Fields
     call ESMF_MethodAdd(gcomp, label=ModelExB_label_TimestampExport, &
       userRoutine=TimestampExport, rc=rc)
@@ -194,60 +196,6 @@ module NUOPC_ModelExplicit
   
   !-----------------------------------------------------------------------------
   
-  subroutine CheckImport(gcomp, rc)
-    type(ESMF_GridComp)   :: gcomp
-    integer, intent(out)  :: rc
-    
-    ! This is the routine that enforces the explicit time dependence on the
-    ! import fields. This simply means that the timestamps on the Fields in the
-    ! importState are checked against the currentTime on the Component's 
-    ! internalClock. Consequenty, this model starts out with forcing fields
-    ! at the current time as it does its forward step from currentTime to 
-    ! currentTime + timeStep.
-    
-    ! local variables
-    type(ESMF_Clock)        :: clock
-    type(ESMF_Time)         :: time
-    type(ESMF_State)        :: importState
-    logical                 :: allCurrent
-
-    rc = ESMF_SUCCESS
-    
-    ! query the Component for its clock and importState
-    call ESMF_GridCompGet(gcomp, clock=clock, importState=importState, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=__FILE__)) &
-      return  ! bail out
-
-    ! get the current time out of the clock
-    call ESMF_ClockGet(clock, currTime=time, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    
-    ! check that Fields in the importState show correct timestamp
-    allCurrent = NUOPC_StateIsAtTime(importState, time, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-      
-    if (.not.allCurrent) then
-      !TODO: introduce and use INCOMPATIBILITY return codes!!!!
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="NUOPC INCOMPATIBILITY DETECTED: Import Fields not at current time", &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
-    endif
-    
-  end subroutine
-    
-  !-----------------------------------------------------------------------------
-  
   subroutine TimestampExport(gcomp, rc)
     type(ESMF_GridComp)   :: gcomp
     integer, intent(out)  :: rc
@@ -262,7 +210,7 @@ module NUOPC_ModelExplicit
     call ESMF_GridCompGet(gcomp, clock=clock, exportState=exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! update timestamp on export Fields
