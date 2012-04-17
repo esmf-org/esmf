@@ -1,4 +1,4 @@
-// $Id: ESMCI_MethodTable.C,v 1.4 2012/04/17 18:33:36 theurich Exp $
+// $Id: ESMCI_MethodTable.C,v 1.5 2012/04/17 21:48:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -412,7 +412,7 @@ namespace ESMCI {
       MethodElement *prev = table;  // initialize
       while (element){
         if (element->label == labelArg){
-          if (prev == table)
+          if (element == table)
             table = element->nextElement;
           else
             prev->nextElement = element->nextElement;
