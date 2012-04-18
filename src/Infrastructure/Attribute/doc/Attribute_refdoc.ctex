@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.32 2012/01/06 20:15:45 svasquez Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.33 2012/04/18 22:00:42 rokuingh Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -72,6 +72,13 @@
 \input{Attribute_export}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Attribute/doc/Attribute_export}
+#endif
+
+\subsection{Internal Class Information}
+#ifdef STANDALONE
+\input{Attribute_internalinfo}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Attribute/doc/Attribute_internalinfo}
 #endif
 
 \subsection{Constants}

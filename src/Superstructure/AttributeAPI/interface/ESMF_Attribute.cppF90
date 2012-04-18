@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.107 2012/04/06 00:04:47 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.108 2012/04/18 22:00:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -120,7 +120,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.107 2012/04/06 00:04:47 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.108 2012/04/18 22:00:44 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -933,7 +933,12 @@ contains
 ! !DESCRIPTION:
 !     Return an Attribute {\tt value} from the <object>, or from an Attribute 
 !     package on the <object>, specified by {\tt convention} and {\tt purpose},
-!     and optionally {\tt attPackInstanceName}.  A {\tt defaultvalue} argument
+!     and optionally {\tt attPackInstanceName}.  Internal information can also
+!     be retrieved from Grid objects by prepending 'ESMF:' to the name of the 
+!     piece of information that is requested.  See 
+!     Section~\ref{sec:InternalInfo} for more information
+!     on which pieces of Grid data can be retrieved through this interface.
+!     A {\tt defaultvalue} argument
 !     may be given if a return code is not desired when the Attribute is not
 !     found.  See Section~\ref{sec:AttPacks} for a description of Attribute 
 !     packages and their conventions, purposes, and object types.
@@ -1020,7 +1025,11 @@ contains
 ! !DESCRIPTION:
 !     Return an Attribute {\tt valueList} from the <object>, or from an
 !     Attribute package on the <object>, specified by {\tt convention} and
-!     {\tt purpose}, and optionally {\tt attPackInstanceName}.
+!     {\tt purpose}, and optionally {\tt attPackInstanceName}.  Internal
+!     information can also be retrieved from Grid objects by prepending 'ESMF:' 
+!     to the name of the piece of information that is requested.  See 
+!     Section~\ref{sec:InternalInfo} for more information
+!     on which pieces of Grid data can be retrieved through this interface.
 !     A {\tt defaultvalueList} list argument may be given if
 !     a return code is not desired when the Attribute is not found.
 !     See Section~\ref{sec:AttPacks} for a description of Attribute packages
@@ -1922,7 +1931,14 @@ contains
 !     integer,       intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Update an Attribute hierarchy during runtime.  
+!     Update an Attribute hierarchy during runtime.  This call will not work
+!     if changes have been made to the underlying object hierarchy and 
+!     ESMF\_StateReconcile() has not already been called.  There is a check
+!     that will fail if this case is encountered.  The information from 
+!     the PETs in the 'rootList' is transferred to the PETs that are not
+!     in the 'rootList'.  Care should be taken to ensure that the information
+!     contained in the Attributes on the PETs in the 'rootList' is consistent.
+! 
 !     Supported values for <object> are:
 !     \begin{description}
 !     \item type(ESMF\_Array), intent(inout) :: array
