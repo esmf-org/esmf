@@ -1,4 +1,4 @@
-// $Id: ESMC_Test.C,v 1.14 2012/04/18 22:30:30 rokuingh Exp $
+// $Id: ESMC_Test.C,v 1.15 2012/04/18 22:44:34 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,    
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Test.C,v 1.14 2012/04/18 22:30:30 rokuingh Exp $";
+static const char *const version = "$Id: ESMC_Test.C,v 1.15 2012/04/18 22:44:34 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -125,7 +125,7 @@ int ESMC_TestStart(
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_fabs - absolute value of a float
 //
 // !INTERFACE:   
@@ -140,7 +140,7 @@ float ESMC_fabs(
 // !DESCRIPTION:
 //    Returns the absolute value of a floating point value
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
 
   float negone = -1;
@@ -151,7 +151,7 @@ float ESMC_fabs(
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_dabs - absolute value of a double
 //
 // !INTERFACE:   
@@ -166,7 +166,7 @@ double ESMC_dabs(
 // !DESCRIPTION:
 //    Returns the absolute value of a double value
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
 
   double negone = -1;
