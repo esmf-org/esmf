@@ -1,4 +1,4 @@
-// $Id: ESMC_Test.C,v 1.13 2012/01/06 20:19:39 svasquez Exp $
+// $Id: ESMC_Test.C,v 1.14 2012/04/18 22:30:30 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,    
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Test.C,v 1.13 2012/01/06 20:19:39 svasquez Exp $";
+static const char *const version = "$Id: ESMC_Test.C,v 1.14 2012/04/18 22:30:30 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -121,6 +121,58 @@ int ESMC_TestStart(
 //EOP
 //-----------------------------------------------------------------------------
   return ESMCI::TestStart(file, line, only);
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_fabs - absolute value of a float
+//
+// !INTERFACE:   
+float ESMC_fabs(
+//
+// !RETURN VALUE:
+//    absolute value
+//
+// !ARGUMENTS:
+  float val) { 
+// 
+// !DESCRIPTION:
+//    Returns the absolute value of a floating point value
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+  float negone = -1;
+
+  if (val < 0) return val*negone;
+  else return val;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_dabs - absolute value of a double
+//
+// !INTERFACE:   
+double ESMC_dabs(
+//
+// !RETURN VALUE:
+//    absolute value
+//
+// !ARGUMENTS:
+  double val) { 
+// 
+// !DESCRIPTION:
+//    Returns the absolute value of a double value
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+  double negone = -1;
+
+  if (val < 0) return val*negone;
+  else return val;
 }
 //-----------------------------------------------------------------------------
 
