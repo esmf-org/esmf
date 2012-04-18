@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridGridRegridUTest.C,v 1.5 2012/04/17 04:16:43 rokuingh Exp $
+// $Id: ESMC_FieldGridGridRegridUTest.C,v 1.6 2012/04/18 22:30:58 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -13,7 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <math.h>
 
 // ESMF header
 #include "ESMC.h"
@@ -443,7 +442,7 @@ int main(void){
 #ifdef masking
       tol = 100;
 #endif
-      if ( abs((long)(dstfieldptr[p]-exact)) > tol) {
+      if (ESMC_dabs(dstfieldptr[p]-exact) > tol) {
         printf("dstfieldptr [%f,%f]:\n%f /= %f\n", 
                x, y, dstfieldptr[p], exact);
         correct=false;

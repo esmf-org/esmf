@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegridParUTest.C,v 1.8 2012/04/17 04:16:43 rokuingh Exp $
+// $Id: ESMC_FieldGridRegridParUTest.C,v 1.9 2012/04/18 22:30:58 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -635,7 +635,7 @@ int main(void){
     //exact = 20.0;
     exact = 20.0+x+y;
     tol = .0001;
-    if ( abs((long)(dstfieldptr[i]-exact)) > tol) {
+    if (ESMC_dabs(dstfieldptr[i]-exact) > tol) {
       printf("dstfieldptr[%d]:\n%f /= %f\n", 
              i, dstfieldptr[i], exact);
       correct=false;

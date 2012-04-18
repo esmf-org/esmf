@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridGridRegridCsrvUTest.C,v 1.4 2012/04/17 04:16:43 rokuingh Exp $
+// $Id: ESMC_FieldGridGridRegridCsrvUTest.C,v 1.5 2012/04/18 22:30:58 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -13,7 +13,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <math.h>
 
 // ESMF header
 #include "ESMC.h"
@@ -667,7 +666,7 @@ int main(void){
 #ifdef masking
       tol = 100;
 #endif
-      if ( abs((long)(dstfieldptr[p]-exact)) > tol) {
+      if (ESMC_dabs(dstfieldptr[p]-exact) > tol) {
         printf("dstfieldptr [%f,%f]:\n%f /= %f\n", 
                x, y, dstfieldptr[p], exact);
         correct=false;
@@ -676,7 +675,7 @@ int main(void){
     }
   }
   // check that the mass is conserved
-  //if (abs((long)(srcmass - dstmass)) > .0001) correct = false;
+  //if (ESMC_dabs(srcmass - dstmass) > .0001) correct = false;
   //printf("srcmass = %f, dstmass = %f, srcmass-dstmass = %f\n", srcmass, dstmass, srcmass-dstmass);
 
   ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);

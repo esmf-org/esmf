@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldRegridUTest.C,v 1.19 2012/04/17 04:16:43 rokuingh Exp $
+// $Id: ESMC_FieldRegridUTest.C,v 1.20 2012/04/18 22:30:58 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -363,7 +363,7 @@ int main(void){
     x=nodeCoord_d[2*i];
     y=nodeCoord_d[2*i+1];
     // if error is too big report an error
-    if ( abs((long)( dstfieldptr[i]-(x+y+20.0)) ) > 0.0001) {
+    if (ESMC_dabs(dstfieldptr[i]-(x+y+20.0)) > 0.0001) {
       printf("dstfieldptr[%d] = %f\n and it should be = %f\n", i, dstfieldptr[i], x+y+20.0);
       correct=false;
     }

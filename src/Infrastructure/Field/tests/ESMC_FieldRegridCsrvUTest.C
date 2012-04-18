@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldRegridCsrvUTest.C,v 1.6 2012/04/17 04:16:43 rokuingh Exp $
+// $Id: ESMC_FieldRegridCsrvUTest.C,v 1.7 2012/04/18 22:30:58 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -431,16 +431,16 @@ int main(void){
     dstmass += dstFieldPtr[i]*dstAreaFieldPtr[i];
     // if error is too big report an error
 #ifdef masking
-    if ( abs((long)( dstFieldPtr[i]-(20.0)) ) > 100) {
+    if (ESMC_dabs(dstFieldPtr[i]-(20.0)) > 100) {
 #else
-    if ( abs((long)( dstFieldPtr[i]-(20.0)) ) > .0001) {
+    if (ESMC_dabs(dstFieldPtr[i]-(20.0)) > .0001) {
 #endif
       printf("dstfieldptr[%d] = %f\n and it should be = %f\n", i, dstFieldPtr[i], 20.0);
       correct=false;
     }
   }
   // check that the mass is conserved
-  if (abs((long)(srcmass - dstmass)) > .0001) correct = false;
+  if (ESMC_dabs(srcmass - dstmass) > .0001) correct = false;
   //printf("srcmass = %f, dstmass = %f\n", srcmass, dstmass);
   ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
