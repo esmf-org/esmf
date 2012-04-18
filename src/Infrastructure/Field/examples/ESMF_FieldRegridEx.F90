@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.61 2012/04/16 22:49:34 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.62 2012/04/18 04:34:11 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.61 2012/04/16 22:49:34 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.62 2012/04/18 04:34:11 oehmke Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -270,7 +270,8 @@ program ESMF_FieldRegridEx
 ! In constrast to offline regridding, integrated regridding is a process whereby interpolation weights are generated via subroutine calls during the
 ! execution of the user's code. The integrated regridding can also perform the parallel sparse 
 ! matrix multiply. In other words, ESMF integrated regridding allows a user to perform the whole process of interpolation within their code.
-! The rest of this section further describes ESMF integrated regridding.
+! The rest of this section further describes ESMF integrated regridding. Figure~\ref{Regriddingcapabilities} shows a comparison of the capabilities 
+! of offline and integrated regridding. 
 !
 ! The basic flow of using ESMF integerated regridding is as follows. First a source and destination grid object are created, both can be either a Grid or Mesh. 
 ! Coordinates are set during Mesh creation, but for the Grid they must be set separately using the {\tt ESMF\_GridAddCoord()} and {\tt ESMF\_GridGetCoord()} methods. 
@@ -297,34 +298,14 @@ program ESMF_FieldRegridEx
 ! {\tt ESMF\_FieldRegridRelease()} should be used to 
 ! free the associated memory. 
 !
-! ESMF currently supports regridding only on a subset of the full range of Grids and Meshes it supports. 
-! 
-!\medskip
-!
-! In 2D, ESMF supports bilinear, patch, and conservative regridding between any combination of the following:
-! \begin{itemize}
-! \item Structured Grids composed of a single logically rectangular patch
-! \item Unstructured Meshes composed of any combination of triangles and quadralaterals (e.g. rectangles)
-! \end{itemize}
-!
-!\medskip
-!
-! In 3D, ESMF supports bilinear and conservative regridding between any combination of the following:
-! \begin{itemize}
-! \item Structured Grids composed of a single logically rectangular patch
-! \item Unstructured Meshes composed of hexahedrons (e.g. cubes) and just for conservative also tetrahedra 
-! \end{itemize}
-!
-!\medskip
-!
 ! In the case that the Grid is on a sphere (coordSys=ESMF\_COORDSYS\_SPH\_DEG or ESMF\_COORDSYS\_SPH\_DEG)
 ! then the coordinates given in the Grid are interpretted as latitude and longitude values. The coordinates can either be in degrees or radians as indicated by the 
 ! {\tt coordSys} flag set during Grid creation. As is true with many global models, this application currently assumes the latitude and longitude refer to positions on a 
 ! perfect sphere, as opposed to a more complex and accurate representation of the earth's true shape such as would be used in a GIS system. (ESMF's current user base doesn't 
 ! require this level of detail in representing the earth's shape, but it could be added in the future if necessary.)
 !
-! In terms of masking, ESMF regrid currently supports masking for Fields built on structured Grids. The user may mask out points in 
-! the source Field or destination Field or both. The user also has the option to return an error for unmapped destination points or
+! In terms of masking, ESMF regrid currently supports masking for Fields built on structured Grids and element masking for Fields built on unstructured Meshes. 
+! The user may mask out points in  the source Field or destination Field or both. The user also has the option to return an error for unmapped destination points or
 ! to ignore them. At this point ESMF does not support extrapolation to destination points outside the unmasked source Field. 
 !
 ! ESMF currently supports three options for interpolation: bilinear, patch, and conservative. 
@@ -332,6 +313,27 @@ program ESMF_FieldRegridEx
 ! destination point as a combination of multiple linear interpolations, one for each dimension of the Grid. Note that for ease of 
 ! use, the term bilinear interpolation is used for 3D interpolation in ESMF as well, although it should more properly be referred 
 ! to as trilinear interpolation.
+!
+!\smallskip
+!
+! In 2D, ESMF supports bilinear regridding between any combination of the following:
+! \begin{itemize}
+! \item Structured Grids composed of a single logically rectangular patch
+! \item Unstructured Meshes composed of any combination of triangles and quadralaterals (e.g. rectangles)
+! \end{itemize}
+!
+!\smallskip
+!
+! In 3D, ESMF supports bilinear regridding between any combination of the following:
+! \begin{itemize}
+! \item Structured Grids composed of a single logically rectangular patch
+! \item Unstructured Meshes composed of hexahedrons (e.g. cubes)
+! \end{itemize}
+!
+!\smallskip
+!
+! To use the bilinear method the user may created their Fields on any stagger location for Grids or the node location ({\tt ESMF\_MESHLOC\_NODE}) for Meshes.
+! For Grids, the stagger location upon which the Field was built must contain coordinates. 
 !
 ! Patch (or higher-order) interpolation is the ESMF version of a technique called ``patch recovery'' commonly
 ! used in finite element modeling~\cite{PatchInterp1}~\cite{PatchInterp2}. It typically results in better approximations to 
@@ -344,8 +346,25 @@ program ESMF_FieldRegridEx
 ! stencil than the bilinear, for this reason the patch weight matrix can be correspondingly larger
 ! than the bilinear matrix (e.g. for a quadrilateral grid the patch matrix is around 4x the size of
 ! the bilinear matrix). This can be an issue when performing a regrid operation close to the memory
-! limit on a machine. 
-! 
+! limit on a machine.  
+!
+!\smallskip
+!
+! In 2D, ESMF supports patch regridding between any combination of the following:
+! \begin{itemize}
+! \item Structured Grids composed of a single logically rectangular patch
+! \item Unstructured Meshes composed of any combination of triangles and quadralaterals (e.g. rectangles)
+! \end{itemize}
+!
+!\smallskip
+!
+! Patch regridding is currently not supported in 3D.
+!
+!\smallskip
+!
+! To use the patch method the user may created their Fields on any stagger location for Grids or the node location ({\tt ESMF\_MESHLOC\_NODE}) for Meshes.
+! For Grids, the stagger location upon which the Field was built must contain coordinates. 
+!
 ! First-order conservative interpolation~\cite{ConservativeOrder1} is also available as a regridding method. This method will typically have  
 ! a larger local interpolation error than the previous two methods, but will do a much better job of preserving the value of the 
 ! integral of data between the source and destination grid. In this method the value across each source cell
@@ -367,10 +386,27 @@ program ESMF_FieldRegridEx
 ! However, the user can work around both of these problem by breaking the long edge into two smaller edges by inserting an extra node, or by breaking the large target grid cells into two or more 
 ! smaller grid cells. This allows the application to resolve the ambiguity in edge direction. 
 !
+!\smallskip
+!
+! In 2D, ESMF supports conservative regridding between any combination of the following:
+! \begin{itemize}
+! \item Structured Grids composed of a single logically rectangular patch
+! \item Unstructured Meshes composed of any combination of triangles and quadralaterals (e.g. rectangles)
+! \end{itemize}
+!
+!\smallskip
+!
+! In 3D, ESMF supports conservative regridding between any combination of the following:
+! \begin{itemize}
+! \item Structured Grids composed of a single logically rectangular patch
+! \item Unstructured Meshes composed of hexahedrons (e.g. cubes) and tetrahedras.
+! \end{itemize}
+!
+!\smallskip
+!
 ! To use the conservative method the user must have created their Fields on the center 
 ! stagger location ({\tt ESMF\_STAGGERLOC\_CENTER} in 2D or {\tt ESMF\_STAGGERLOC\_CENTER\_VCENTER} in 3D) for Grids  or the element location ({\tt ESMF\_MESHLOC\_ELEMENT}) for Meshes.
 ! For Grids, the corner stagger location ({\tt ESMF\_STAGGERLOC\_CORNER} in 2D or {\tt ESMF\_STAGGERLOC\_CORNER\_VFACE} in 3D) must contain coordinates describing the outer perimeter of the Grid cells. 
-!
 !
 !\begin{table}[ht]
 !\centering
