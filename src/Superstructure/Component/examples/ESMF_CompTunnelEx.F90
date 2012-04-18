@@ -1,4 +1,4 @@
-! $Id: ESMF_CompTunnelEx.F90,v 1.2 2012/04/10 18:56:50 theurich Exp $
+! $Id: ESMF_CompTunnelEx.F90,v 1.3 2012/04/18 05:31:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -166,11 +166,10 @@ program ESMF_CompTunnelEx
 ! \label{sec:CompTunnelActualCreate}
 !
 ! The creation process of an {\em actual} Gridded Component, which will become
-! one of the two end points of a Component Tunnel, uses the exact same
-! method as is used for the creation of a regular Gridded Components. In fact,
-! in the application context of the actual side, an actual Component is really 
-! no different from a regular Component. Here the actual Component is created
-! with a custom petList.
+! one of the two end points of a Component Tunnel, is identical to the creation
+! of a regular Gridded Component. On the actual side, an actual Component is 
+! very similar to a regular Component. Here the actual Component is created
+! with a custom {\tt petList}.
 !EOE
 !BOC
   petList = (/0,1,2/)
@@ -184,9 +183,9 @@ program ESMF_CompTunnelEx
 ! 
 ! \label{sec:CompTunnelDualCreate}
 !
-! The same way that an actual Component is really just a regular Component in
-! the context of the actual side application, so is a {\em dual} Component
-! simply a regular Component in the application context on the dual side. 
+! The same way an actual Component appears as a regular Component in
+! the context of the actual side application, a {\em dual} Component
+! is creaed as a regular Component on the dual side.
 ! A dual Gridded Component with custom {\tt petList} is created using the
 ! regular create call.
 !EOE
@@ -214,7 +213,8 @@ program ESMF_CompTunnelEx
 !BOE
 ! So far the {\tt actualComp} object is no different from a regular Gridded
 ! Component. In order to turn it into the {\em actual} end point of a Component
-! Tunnel the {\tt ServiceLoop()} method is called.
+! Tunnel the {\tt ServiceLoop()} method is called. Here the socket-based
+! implementation is chosen.
 !EOE
 !BOC
   call ESMF_GridCompServiceLoop(actualComp, port=60000, timeout=20, rc=rc)
@@ -224,10 +224,11 @@ program ESMF_CompTunnelEx
 ! This call opens the actual side of the Component Tunnel, in form of a
 ! socket-based server, listening on {\tt port} 60000. The {\tt timeout} argument
 ! specifies how long the actual side will wait for the dual side
-! to communicate, before it returns with a time out condition. Here the time out
+! to communicate, before it returns with a time out condition. The time out
 ! is set to 20 seconds.
 !
-! At this point, before a dual Component connects to the Component Tunnel, it is
+! At this point, before a dual Component connects to the other side of the 
+! Component Tunnel, it is
 ! possible to manually connect to the waiting actual Component. This can be
 ! useful when debugging connection issues. A convenient tool for this is the 
 ! standard {\tt telnet} application. Below is a transcript of such a connection.
@@ -251,7 +252,7 @@ program ESMF_CompTunnelEx
 ! If at any point the {\tt telnet} session is manually shut down, the 
 ! {\tt ServiceLoop()} will return with an error condition. The clean way to
 ! disconnect the {\tt telnet} session, and to have the {\tt ServiceLoop()}
-! wait for a new connection, e.g. from a dual Component, is to give the
+! wait for a new connection, e.g. from a dual Component, is to send the
 ! {\tt reconnect} command. This will automatically shut down the {\tt telnet}
 ! connection.
 !
@@ -263,7 +264,7 @@ program ESMF_CompTunnelEx
 ! \end{verbatim}
 !
 ! At this point the actual Component is back in listening mode, with a time out
-! of 20 seconds.
+! of 20 seconds, as specified during the ServiceLoop() call.
 !EOE
 
 !-----------------------------------------------------------------------------
@@ -287,8 +288,9 @@ program ESMF_CompTunnelEx
 ! actual Component. The time out of 10 seconds ensures that if the actual
 ! Component is not available, a time out condition is returned instead of
 ! resulting in a hang. The {\tt timeoutFlag} argument further absorbs the time
-! out condition into a {\tt logical}. In this mode the standard return code
-! will indicate success even when a time out was reached.
+! out condition, either returning as {\tt .true.} or {\tt .false.}. In this mode
+! the standard {\tt rc} will indicate success even when a time out condition
+! was reached.
 !EOE
 
 !-----------------------------------------------------------------------------
@@ -297,11 +299,17 @@ program ESMF_CompTunnelEx
 ! 
 ! \label{sec:CompTunnelInvoking}
 !
-! While the actual Component is inside the {\tt ServiceLoop()}, the connected
-! dual side can invoke any of the standard Component methods that the actual
-! side had registered. The connected {\tt dualComp} object serves as a portal
-! through which the connected {\tt actualComp} is accessible. Typically the
-! first method called is the standard {\tt CompInitialize()}.
+! Once a Component Tunnel is established, the actual Component is fully under
+! the control of the dual Component. A standard Component method invoked on the
+! dual Component is not executed by the dual Component itself, but by the 
+! actual Component instead. In fact, it is the entry points registered with
+! the actual Component that are executed when standard methods are invoked on
+! the dual Component. The connected {\tt dualComp} object serves as a portal
+! through which the connected {\tt actualComp} becomes accessible on the dual
+! side.
+!
+! Typically the first standard method called is the {\tt CompInitialize()}
+! routine.
 !EOE
 !BOC
   call ESMF_GridCompInitialize(dualComp, timeout=10, timeoutFlag=timeoutFlag, &
@@ -310,11 +318,12 @@ program ESMF_CompTunnelEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (userRc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Again, the {\tt timeout} argument serves to prevent
-! the dual side from hanging if the actual Component application has experienced
-! a catastrophic condition and is no longer available. The presence of the
-! {\tt timeoutFlag} allows time out conditions to be caught gracefully so the
-! dual side can deal with it in an orderly fashion.
+! Again, the {\tt timeout} argument serves to prevent the dual side from 
+! hanging if the actual Component application has experienced a catastrophic
+! condition and is no longer available, or takes longer than expected. The
+! presence of the {\tt timeoutFlag} allows time out conditions to be caught
+! gracefully, so the dual side can deal with it in an orderly fashion, instead
+! of triggering an application abort due to an error condition.
 !
 ! The {\tt CompRun()} and {\tt CompFinalize()} methods follow the same format.
 !
@@ -327,6 +336,115 @@ program ESMF_CompTunnelEx
 !BOC
   call ESMF_GridCompFinalize(dualComp, timeout=10, timeoutFlag=timeoutFlag, &
     userRc=userRc, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (userRc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!-----------------------------------------------------------------------------
+!BOE
+!\subsubsection{Non-blocking option when invoking standard Component methods through a Component Tunnel}
+! 
+! \label{sec:CompTunnelInvokingNonblocking}
+!
+! Standard Component methods called on a connected dual Component are executed
+! on the actual side, across the PETs of the actual Component. By default the
+! dual Component PETs are blocked until the actual Component has finished
+! executing the invoked Component method, or until a time out condition has been
+! reached. In many practical applications a more loose synchronization between
+! dual and actual Components is useful. Having the PETs of a dual
+! Component return immediatly from a standard Component method allows multiple
+! dual Component, on the same PETs, to control multiple actual Components. 
+! If the actual Components are executing in separate executables, or the same 
+! executable but on exclusive sets of PETs, they can execute concurrently, even
+! with the controlling dual Components all running on the same PETs.
+! The non-blocking dual side regains control over the actual Component by 
+! synchronizing through the CompWait() call.
+!
+! To invoke any of the standard Component methods in the non-blocking mode, the
+! optional {\tt syncflag} argument is set to {\tt ESMF\_SYNC\_NONBLOCKING}. 
+!EOE
+!BOC
+  call ESMF_GridCompInitialize(dualComp, syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+!
+! This call will return immediately on all of the dual Component PETs, while the
+! actual Component continues to execute the invoked Component method, {\em if}
+! communication between dual and actual Component was successful. However, if there
+! were difficulties reaching the actual Component, the call will block on all 
+! dual PETs until successful contact was made, or the default time out of 3600
+! seconds, i.e. 1 hour, has been reached. In most cases a more robust approach
+! is to specify a shorter time out together with the non-blocking option.
+!
+! The dual Component must first wait for the outstanding method.
+!EOE
+!BOC
+  call ESMF_GridCompWait(dualComp, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+!
+! The same non-blocking CompInitialize() call is issued again, but this time
+! with an explicit 10 second time out.
+!EOE
+!BOC
+  call ESMF_GridCompInitialize(dualComp, syncflag=ESMF_SYNC_NONBLOCKING, &
+    timeout=10, timeoutFlag=timeoutFlag, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+!
+! This call is guaranteed to return within 10 seconds on the dual Component
+! PETs, either without time out condition, indicating that the actual Component
+! has been contacted successfully, or with time out condition, indicating that
+! the actual Component was unreachable at the time. Either way, the dual 
+! Component PETs are back under user control quickly.
+!
+! Calling the CompWait() method on the dual Component causes the dual Component
+! PETs to block until the actual Component method has returned, or a time out
+! condition has been reached.
+!EOE
+!BOC
+  call ESMF_GridCompWait(dualComp, userRc=userRc, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (userRc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+!
+! The default time out for CompWait() is 3600 seconds, i.e. 1 hour, just like
+! for the other Component methods. However, the semantics of a time out 
+! condition under CompWait() is different from the sother Component methods. Typically the {\tt timeout} is simply the 
+! maximum time that any communication between dual and actual Component is allowed 
+! to take before a time out condition is raised. For CompWait(), the {\tt timeout}
+! is the maximum time that an actual Component is allowed to execute before
+! reporting back to the dual Component. Here, even with the default time out, 
+! the dual Component would return from CompWait() immediatly with a time out
+! condition if the actual Component has already been executing for over 1 hour, 
+! and is not already waiting to report back when the dual Component calls 
+! CompWait(). On the other hand, if it has only been 30 minutes since 
+! CompInitialize() was called on the dual Component, then the actual Component
+! still has 30 minutes before CompWait() returns with a time out condition.
+! During this time (or until the actual Component returns) the dual Component
+! PETs are blocked.
+!
+! A standard Component method is invoked in non-blocking mode.
+!EOE
+!BOC
+  call ESMF_GridCompRun(dualComp, syncflag=ESMF_SYNC_NONBLOCKING, &
+    timeout=10, timeoutFlag=timeoutFlag, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+!
+! Once the user code on the dual side is ready to regain control over the
+! actual Component it calls CompWait() on the dual Component. Here a
+! {\tt timeout} of 60s is specified, meaning that the total execution time the
+! actual Component spends in the registered Run() routine may not exceed 60s
+! before CompWait() returns with a time out condition.
+!EOE
+!BOC
+  call ESMF_GridCompWait(dualComp, timeout=60, userRc=userRc, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   if (userRc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -365,7 +483,8 @@ program ESMF_CompTunnelEx
 ! dual Component calls its {\tt CompDestroy()} method, or if the
 ! {\tt ServiceLoop()} reaches the specified time out condition. Either way,
 ! once control has been returned to the user code, the actual Component is 
-! destroyed in the same way a regular Component is.
+! destroyed in the same way a regular Component is, by calling the destroy
+! method.
 !EOE
 !BOC
   call ESMF_GridCompDestroy(actualComp, rc=rc)
