@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.63 2012/04/19 22:35:58 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.64 2012/04/19 23:08:56 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.63 2012/04/19 22:35:58 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.64 2012/04/19 23:08:56 oehmke Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -388,8 +388,12 @@ program ESMF_FieldRegridEx
 ! the user expects cell edges as straight lines in latitude longitude space, they should avoid using one large cell with long edges to compute an average over a region (e.g. over an ocean basin). The 
 ! user should also avoid using cells which contain one edge that runs half way or more around the earth, because the regrid weight calculation assumes the 
 ! edge follows the shorter great circle path. Also, there isn't a unique great circle edge defined between points on the exact opposite side of the earth from one another (antipodal points). 
-! However, the user can work around both of these problem by breaking the long edge into two smaller edges by inserting an extra node, or by breaking the large target grid cells into two or more 
-! smaller grid cells. This allows the application to resolve the ambiguity in edge direction. 
+! However, the user can work around both of these problem by breaking the long edge into two smaller edges by inserting an extra node, or by breaking the large target grid cells 
+! into two or more smaller grid cells. This allows the application to resolve the ambiguity in edge direction. 
+!
+! It is important to note that the current implementation of conservative regridding doesn't normalize the interpolation weights by the destination fraction. This means that for a destination
+! grid which only partially overlaps the source grid the destination field which is output from the regrid operation should be divided by the corresponding destination fraction to yield the 
+! true interpolated values for cells which are only partially covered by the source grid. 
 !
 !\smallskip
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.107 2012/04/19 14:12:01 feiliu Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.108 2012/04/19 23:08:57 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.107 2012/04/19 14:12:01 feiliu Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.108 2012/04/19 23:08:57 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -430,7 +430,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The fraction of each destination cell participating in the regridding. Only 
 !           valid when regridmethod is {\tt ESMF\_REGRIDMETHOD\_CONSERVE}.
 !           This Field needs to be created on the same location (e.g staggerloc) 
-!           as the dstField.
+!           as the dstField. It is important to note that the current implementation
+!           of conservative regridding doesn't normalize the interpolation weights by the destination fraction. This means that for a destination
+!           grid which only partially overlaps the source grid the destination field which is output from the 
+!           regrid operation should be divided by the corresponding destination fraction to yield the 
+!           true interpolated values for cells which are only partially covered by the source grid. 
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
