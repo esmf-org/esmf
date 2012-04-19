@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.106 2012/04/16 19:01:47 svasquez Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.107 2012/04/19 14:12:01 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.106 2012/04/16 19:01:47 svasquez Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.107 2012/04/19 14:12:01 feiliu Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -966,7 +966,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   !   Private name; call using ESMF_FieldRegridStore()
       subroutine ESMF_FieldRegridStoreX(xgrid, srcField, dstField, &
                     keywordEnforcer, routehandle, srcFracField, dstFracField, &
-                    srcFrac2Field, dstFrac2Field, rc)
+                    srcMergeFracField, dstMergeFracField, rc)
 !      
 ! !ARGUMENTS:
       type(ESMF_XGrid),       intent(in)              :: xgrid
@@ -976,8 +976,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_RouteHandle), intent(inout), optional :: routehandle
       type(ESMF_Field),       intent(inout), optional :: srcFracField
       type(ESMF_Field),       intent(inout), optional :: dstFracField
-      type(ESMF_Field),       intent(inout), optional :: srcFrac2Field
-      type(ESMF_Field),       intent(inout), optional :: dstFrac2Field
+      type(ESMF_Field),       intent(inout), optional :: srcMergeFracField
+      type(ESMF_Field),       intent(inout), optional :: dstMergeFracField
       integer,                intent(out),   optional :: rc 
 !
 ! !STATUS:
@@ -985,7 +985,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[5.3.0] Added arguments {\tt srcFracField}, {\tt dstFracField}, {\tt srcFrac2Field}, and {\tt dstFrac2Field}.
+! \item[5.3.0] Added arguments {\tt srcFracField}, {\tt dstFracField}, {\tt srcMergeFracField}, and {\tt dstMergeFracField}.
+! These fraction Fields allow a user to calculate correct flux regridded through {\tt ESMF\_XGrid}.
 ! \end{description}
 ! \end{itemize}
 !
@@ -1027,19 +1028,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The handle that implements the regrid and that can be used in later 
 !           {\tt ESMF\_FieldRegrid}.
 !     \item [{[srcFracField]}] 
-!           The fraction of each source cell participating in the regridding. 
+!           The fraction of each source cell participating in the regridding returned from this call. 
 !           This Field needs to be created on the same Grid and location (e.g staggerloc) 
 !           as the srcField.
 !     \item [{[dstFracField]}] 
-!           The fraction of each destination cell participating in the regridding. 
+!           The fraction of each destination cell participating in the regridding returned from this call. 
 !           This Field needs to be created on the same Grid and location (e.g staggerloc) 
 !           as the dstField.
-!     \item [{[srcFrac2Field]}] 
-!           The fraction of each source cell as a result of Grid merge.
+!     \item [{[srcMergeFracField]}] 
+!           The fraction of each source cell as a result of Grid merge returned from this call.
 !           This Field needs to be created on the same Grid and location (e.g staggerloc) 
 !           as the srcField.
-!     \item [{[dstFrac2Field]}] 
-!           The fraction of each destination cell as a result of Grid merge.
+!     \item [{[dstMergeFracField]}] 
+!           The fraction of each destination cell as a result of Grid merge returned from this call.
 !           This Field needs to be created on the same Grid and location (e.g staggerloc) 
 !           as the dstField.
 !     \item [{[rc]}]
@@ -1280,8 +1281,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
         ! retrieve regridding fraction2 Fields on demand
-        if(present(srcFrac2Field)) then
-          call ESMF_FieldGet(srcFrac2Field, staggerloc=fracFieldStaggerloc, &
+        if(present(srcMergeFracField)) then
+          call ESMF_FieldGet(srcMergeFracField, staggerloc=fracFieldStaggerloc, &
                array=srcFracArray, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1304,8 +1305,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        if(present(dstFrac2Field)) then
-          call ESMF_FieldGet(dstFrac2Field, staggerloc=fracFieldStaggerloc, &
+        if(present(dstMergeFracField)) then
+          call ESMF_FieldGet(dstMergeFracField, staggerloc=fracFieldStaggerloc, &
                array=dstFracArray, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                ESMF_CONTEXT, rcToReturn=rc)) return
