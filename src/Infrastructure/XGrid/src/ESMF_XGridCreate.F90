@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.61 2012/04/19 19:53:36 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.62 2012/04/19 19:58:28 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.61 2012/04/19 19:53:36 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.62 2012/04/19 19:58:28 feiliu Exp $'
 
 !==============================================================================
 !
@@ -276,6 +276,12 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
 !           The priority arrays describe the priorities of Grids at the overlapping region.
 !           Flux contributions at the overlapping region are computed in the order from the Grid of the
 !           highest priority to the lowest priority.
+!     \item [{[sideAMaskValues]}]
+!           List of values that indicate a side A point should be masked out.
+!           If not specified, no masking will occur.
+!     \item [{[sideBMaskValues]}]
+!           List of values that indicate a side B point should be masked out.
+!           If not specified, no masking will occur. 
 !     \item [{[storeOverlay]}]
 !           Setting the {\tt storeOverlay} optional argument to .false. (default) 
 !           allows a user to bypass storage of the {\tt ESMF\_Mesh} used to represent the XGrid.
