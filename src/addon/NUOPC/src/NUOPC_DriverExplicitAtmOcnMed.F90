@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicitAtmOcnMed.F90,v 1.5 2012/04/10 17:35:16 theurich Exp $
+! $Id: NUOPC_DriverExplicitAtmOcnMed.F90,v 1.6 2012/04/19 05:17:15 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicitAtmOcnMed.F90"
 
@@ -10,10 +10,8 @@ module NUOPC_DriverExplicitAtmOcnMed
 
   use ESMF
   use NUOPC
-  use NUOPC_DriverExplicit, only: &
+  use NUOPC_Driver, only: &
     DrivEx_routine_SS             => routine_SetServices, &
-    DrivEx_routine_DRS            => routine_DeallocateRunSequence, &
-    DrivEx_routine_ARE            => routine_AddRunElement, &
     DrivEx_type_IS                => type_InternalState, &
     DrivEx_label_IS               => label_InternalState, &
     DrivEx_label_SetModelCount    => label_SetModelCount, &
@@ -55,6 +53,7 @@ module NUOPC_DriverExplicitAtmOcnMed
     integer, pointer    :: med2ocnPetList(:)
     type(ESMF_CplComp)  :: atm2med, ocn2med
     type(ESMF_CplComp)  :: med2atm, med2ocn
+    type(NUOPC_RunSequence), pointer  :: runSeq(:)
   end type
 
   type type_InternalState
@@ -283,41 +282,48 @@ module NUOPC_DriverExplicitAtmOcnMed
       file=FILENAME)) &
       return  ! bail out
       
-    ! The default RunSequence defined by the DriverExplicit is not suitable
-    ! for the ATM-OCN-MED case. The default RunSequence must be overridden here.
-    call DrivEx_routine_DRS(gcomp, rc=rc) ! deallocate default RunSequence
+    ! The default run sequence defined by the generic Driver Component is not 
+    ! suitable for the ATM-OCN-MED case. The default RunSeq must be overwritten.
+    call NUOPC_RunSequenceDeallocate(superIS%wrap%runSeq, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    ! atm2med
-    call DrivEx_routine_ARE(gcomp, i=1, j=3, phase=1, rc=rc)
+    ! add a single run sequence elements
+    call NUOPC_RunSequenceAdd(superIS%wrap%runSeq, 1, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out    
+    ! atm2med in runSeq(1)
+    call NUOPC_RunElementAdd(superIS%wrap%runSeq(1), i=1, j=3, phase=1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    ! ocn2med
-    call DrivEx_routine_ARE(gcomp, i=2, j=3, phase=1, rc=rc)
+    ! ocn2med in runSeq(1)
+    call NUOPC_RunElementAdd(superIS%wrap%runSeq(1), i=2, j=3, phase=1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    ! med
-    call DrivEx_routine_ARE(gcomp, i=3, j=0, phase=1, rc=rc)
+    ! med in runSeq(1)
+    call NUOPC_RunElementAdd(superIS%wrap%runSeq(1), i=3, j=0, phase=1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    ! med2atm
-    call DrivEx_routine_ARE(gcomp, i=3, j=1, phase=1, rc=rc)
+    ! med2atm in runSeq(1)
+    call NUOPC_RunElementAdd(superIS%wrap%runSeq(1), i=3, j=1, phase=1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    ! med2ocn
-    call DrivEx_routine_ARE(gcomp, i=3, j=2, phase=1, rc=rc)
+    ! med2ocn in runSeq(1)
+    call NUOPC_RunElementAdd(superIS%wrap%runSeq(1), i=3, j=2, phase=1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    ! atm
-    call DrivEx_routine_ARE(gcomp, i=1, j=0, phase=1, rc=rc)
+    ! atm in runSeq(1)
+    call NUOPC_RunElementAdd(superIS%wrap%runSeq(1), i=1, j=0, phase=1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    ! ocn
-    call DrivEx_routine_ARE(gcomp, i=2, j=0, phase=1, rc=rc)
+    ! ocn in runSeq(1)
+    call NUOPC_RunElementAdd(superIS%wrap%runSeq(1), i=2, j=0, phase=1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     
-    ! SPECIALIZE by calling into attached method to SetServices for modelComps
+    ! nullify the runSeq
+    nullify(is%wrap%runSeq)
+    
+    ! SPECIALIZE by calling into attached method to SetModelServices
     call ESMF_MethodExecute(gcomp, label=label_SetModelServices, &
       userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -329,6 +335,16 @@ module NUOPC_DriverExplicitAtmOcnMed
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
+      
+    ! optionally overwrite the default run sequence
+    if (associated(is%wrap%runSeq)) then
+      call NUOPC_RunSequenceDeallocate(superIS%wrap%runSeq, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      superIS%wrap%runSeq => is%wrap%runSeq
+    endif
       
   end subroutine
     

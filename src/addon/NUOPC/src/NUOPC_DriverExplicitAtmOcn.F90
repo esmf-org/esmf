@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverExplicitAtmOcn.F90,v 1.10 2012/04/10 17:35:16 theurich Exp $
+! $Id: NUOPC_DriverExplicitAtmOcn.F90,v 1.11 2012/04/19 05:17:15 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicitAtmOcn.F90"
 
@@ -10,7 +10,7 @@ module NUOPC_DriverExplicitAtmOcn
 
   use ESMF
   use NUOPC
-  use NUOPC_DriverExplicit, only: &
+  use NUOPC_Driver, only: &
     DrivEx_routine_SS             => routine_SetServices, &
     DrivEx_type_IS                => type_InternalState, &
     DrivEx_label_IS               => label_InternalState, &
@@ -47,6 +47,7 @@ module NUOPC_DriverExplicitAtmOcn
     integer, pointer    :: atm2ocnPetList(:)
     integer, pointer    :: ocn2atmPetList(:)
     type(ESMF_CplComp)  :: atm2ocn, ocn2atm
+    type(NUOPC_RunSequence), pointer  :: runSeq(:)
   end type
 
   type type_InternalState
@@ -242,8 +243,11 @@ module NUOPC_DriverExplicitAtmOcn
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+      
+    ! nullify the runSeq
+    nullify(is%wrap%runSeq)
     
-    ! SPECIALIZE by calling into attached method to SetServices for modelComps
+    ! SPECIALIZE by calling into attached method to SetModelServices
     call ESMF_MethodExecute(gcomp, label=label_SetModelServices, &
       userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -255,6 +259,16 @@ module NUOPC_DriverExplicitAtmOcn
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
+      
+    ! optionally overwrite the default run sequence
+    if (associated(is%wrap%runSeq)) then
+      call NUOPC_RunSequenceDeallocate(superIS%wrap%runSeq, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      superIS%wrap%runSeq => is%wrap%runSeq
+    endif
       
   end subroutine
     

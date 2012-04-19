@@ -1,4 +1,4 @@
-! $Id: NUOPC_RunSequenceDef.F90,v 1.2 2012/04/10 17:35:16 theurich Exp $
+! $Id: NUOPC_RunSequenceDef.F90,v 1.3 2012/04/19 05:17:15 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_RunSequenceDef.F90"
 
@@ -341,13 +341,17 @@ module NUOPC_RunSequenceDef
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ! deallocate the individual run sequences
-    do i=1, size(runSeq)
-      call NUOPC_RunSequenceSingleDeallocate(runSeq(i))
-    enddo
+    if (associated(runSeq)) then
     
-    deallocate(runSeq)  ! finally deallocate the actual runSeq array
-    nullify(runSeq)     ! ensure recognizable condition
+      ! deallocate the individual run sequences
+      do i=1, size(runSeq)
+        call NUOPC_RunSequenceSingleDeallocate(runSeq(i))
+      enddo
+    
+      deallocate(runSeq)  ! finally deallocate the actual runSeq array
+      nullify(runSeq)     ! ensure recognizable condition
+      
+    endif
     
   end subroutine
   !-----------------------------------------------------------------------------
