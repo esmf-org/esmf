@@ -1,0 +1,139 @@
+% $Id: Attribute_internalinfo.tex,v 1.1 2012/04/19 14:50:06 rokuingh Exp $
+
+\label{sec:InternalInfo}
+
+Internal information can be retrieved for Grid objects through the Attribute 
+class.  This is done by specifying the name of the Attribute to be retrieved
+as the name of the keyword of the desired argument from one of the {\tt ESMF\_GridGet()}
+interfaces.  The 'value' of the Attribute must be of the corresponding type
+that is required to retrieve the desired piece of information.
+
+The name of an Attribute that represents internal class information must have 
+'ESMF:' prepended.  This is to indicate that the information should be retrieved
+directly from class methods.  The input arguments do not need to have the 'ESMF:'
+tab prepended, and they should be specified as a character string with the name
+and value separated by a colon.  For example, the localDe would be specified 
+like this: {\tt 'localDe:0'}.
+
+This access to internal class information does not
+have the normal Attribute restriction that the values of the Attributes must be
+consistent across the current VM.  If consistency is desired for information that
+was retrieved through this method, then the {\tt ESMF\_AttributeUpdate()} method
+must be used.
+
+The name, type, corresponding grid interface, and input arguments required for each of 
+the pieces of internal
+Grid information that can be retrieved through the Attribute class are listed
+in Tables \ref{AttributeInternalInfo-Get} - \ref{AttributeInternalInfo-Item}.
+
+\begin{tabular}{|l|l|l|l|}
+    {\bf Name} & {\bf Type} & {\bf Grid interface} & {\bf Input arguments}\\
+    \hline\hline
+%%%
+%%% GET
+%%%
+    coordTypeKind & {\tt ESMF\_TypeKind\_Flag} & {\tt ESMF\_GridGet} & \\
+    dimCount & {\tt integer} & {\tt ESMF\_GridGet} & \\
+    tileCount & {\tt integer} & {\tt ESMF\_GridGet} & \\
+    staggerlocCount & {\tt integer} & {\tt ESMF\_GridGet} & \\
+    localDECount & {\tt integer} & {\tt ESMF\_GridGet} & \\
+    % distgrid & {\tt ESMF\_DistGrid} & {\tt ESMF\_GridGet} & \\
+    distgridToGridMap & {\tt integer(:)} & {\tt ESMF\_GridGet} & \\
+    coordDimCount & {\tt integer(:)} & {\tt ESMF\_GridGet} & \\
+    % coordDimMap & {\tt integer(:,:)} & {\tt ESMF\_GridGet} & \\
+    arbDim & {\tt integer} & {\tt ESMF\_GridGet} & \\
+    rank & {\tt integer} & {\tt ESMF\_GridGet} & \\
+    arbDimCount & {\tt integer} & {\tt ESMF\_GridGet} & \\
+    gridEdgeLWidth & {\tt integer(:)} & {\tt ESMF\_GridGet} & \\
+    gridEdgeUWidth & {\tt integer(:)} & {\tt ESMF\_GridGet} & \\
+    gridAlign & {\tt integer(:)} & {\tt ESMF\_GridGet} & \\
+    indexflag & {\tt ESMF\_Index\_Flag} & {\tt ESMF\_GridGet} & \\
+    status & {\tt ESMF\_GridStatus\_Flag} & {\tt ESMF\_GridGet} & \\
+    name & {\tt character} & {\tt ESMF\_GridGet} & \\
+%%%
+    isLBound & {\tt logical} & {\tt ESMF\_GridGet} & localDe\\
+    isUBound & {\tt logical} & {\tt ESMF\_GridGet} & localDe\\
+    arbIndexCount & {\tt integer} & {\tt ESMF\_GridGet} & localDe\\
+    %arbIndexList & {\tt integer(:,:)} & {\tt ESMF\_GridGet} & localDe\\
+%%%
+    exclusiveLBound & {\tt integer(:)} & {\tt ESMF\_GridGet} & staggerloc, localDe\\
+    exclusiveUBound & {\tt integer(:)} & {\tt ESMF\_GridGet} & staggerloc, localDe\\
+    exclusiveCount & {\tt integer(:)} & {\tt ESMF\_GridGet} & staggerloc, localDe\\
+    computationalLBound & {\tt integer(:)} & {\tt ESMF\_GridGet} & staggerloc, localDe\\
+    computationalUBound & {\tt integer(:)} & {\tt ESMF\_GridGet} & staggerloc, localDe\\
+    computationalCount & {\tt integer(:)} & {\tt ESMF\_GridGet} & staggerloc, localDe\\
+%%%
+    % distgrid & {\tt ESMF\_DistGrid} & {\tt ESMF\_GridGet} & staggerloc,localDe\\
+%%%
+    minIndex & {\tt integer(:)} & {\tt ESMF\_GridGet} & tile, staggerloc\\
+    maxIndex & {\tt integer(:)} & {\tt ESMF\_GridGet} & tile, staggerloc\\
+    \hline\hline
+    \label{AttributeInternalInfo-Get}
+\end{tabular}
+
+%%%
+%%% COORD
+%%%
+\begin{tabular}{|l|l|l|l|}
+    {\bf Name} & {\bf Type} & {\bf Grid interface} & {\bf Input arguments}\\
+    \hline\hline
+    exclusiveLBound & {\tt integer(:)} & {\tt ESMF\_GridGetCoord} & coordDim, (optional) staggerloc, (optional) localDe\\
+    exclusiveUBound & {\tt integer(:)} & {\tt ESMF\_GridGetCoord} & coordDim, (optional) staggerloc, (optional) localDe\\
+    exclusiveCount & {\tt integer(:)} & {\tt ESMF\_GridGetCoord} & coordDim, (optional) staggerloc, (optional) localDe\\
+    computationalLBound & {\tt integer(:)} & {\tt ESMF\_GridGetCoord} & coordDim, (optional) staggerloc, (optional) localDe\\
+    computationalUBound & {\tt integer(:)} & {\tt ESMF\_GridGetCoord} & coordDim, (optional) staggerloc, (optional) localDe\\
+    computationalCount & {\tt integer(:)} & {\tt ESMF\_GridGetCoord} & coordDim, (optional) staggerloc, (optional) localDe\\
+    totalLBound & {\tt integer(:)} & {\tt ESMF\_GridGetCoord} & coordDim, (optional) staggerloc, (optional) localDe\\
+    totalUBound & {\tt integer(:)} & {\tt ESMF\_GridGetCoord} & coordDim, (optional) staggerloc, (optional) localDe\\
+    totalCount & {\tt integer(:)} & {\tt ESMF\_GridGetCoord} & coordDim, (optional) staggerloc, (optional) localDe\\
+%%%
+    % array & {\tt ESMF\_Array} & {\tt ESMF\_GridGetCoord} & coordDim, (optional) staggerloc\\
+%%%
+    % coord & {\tt ESMF\_KIND\_R[4/8](:)} & {\tt ESMF\_GridGetCoord} & index(:), (optional) staggerloc, (optional) localDe\\
+%%%
+    exclusiveLBound & {\tt integer(:)} & {\tt ESMF\_GridGetCoordBounds} & coordDim, (optional) staggerloc, (optional) localDe\\
+    exclusiveUBound & {\tt integer(:)} & {\tt ESMF\_GridGetCoordBounds} & coordDim, (optional) staggerloc, (optional) localDe\\
+    exclusiveCount & {\tt integer(:)} & {\tt ESMF\_GridGetCoordBounds} & coordDim, (optional) staggerloc, (optional) localDe\\
+    computationalLBound & {\tt integer(:)} & {\tt ESMF\_GridGetCoordBounds} & coordDim, (optional) staggerloc, (optional) localDe\\
+    computationalUBound & {\tt integer(:)} & {\tt ESMF\_GridGetCoordBounds} & coordDim, (optional) staggerloc, (optional) localDe\\
+    computationalCount & {\tt integer(:)} & {\tt ESMF\_GridGetCoordBounds} & coordDim, (optional) staggerloc, (optional) localDe\\
+    totalLBound & {\tt integer(:)} & {\tt ESMF\_GridGetCoordBounds} & coordDim, (optional) staggerloc, (optional) localDe\\
+    totalUBound & {\tt integer(:)} & {\tt ESMF\_GridGetCoordBounds} & coordDim, (optional) staggerloc, (optional) localDe\\
+    totalCount & {\tt integer(:)} & {\tt ESMF\_GridGetCoordBounds} & coordDim, (optional) staggerloc, (optional) localDe\\
+    \hline\hline
+    \label{AttributeInternalInfo-Coord}
+\end{tabular}
+
+%%%
+%%% ITEM
+%%%
+\begin{tabular}{|l|l|l|l|}
+    {\bf Name} & {\bf Type} & {\bf Grid interface} & {\bf Input arguments}\\
+    \hline\hline
+    exclusiveLBound & {\tt integer(:)} & {\tt ESMF\_GridGetItem} & itemflag, (optional) staggerloc, (optional) localDe\\
+    exclusiveUBound & {\tt integer(:)} & {\tt ESMF\_GridGetItem} & itemflag, (optional) staggerloc, (optional) localDe\\
+    exclusiveCount & {\tt integer(:)} & {\tt ESMF\_GridGetItem} & itemflag, (optional) staggerloc, (optional) localDe\\
+    computationalLBound & {\tt integer(:)} & {\tt ESMF\_GridGetItem} & itemflag, (optional) staggerloc, (optional) localDe\\
+    computationalUBound & {\tt integer(:)} & {\tt ESMF\_GridGetItem} & itemflag, (optional) staggerloc, (optional) localDe\\
+    computationalCount & {\tt integer(:)} & {\tt ESMF\_GridGetItem} & itemflag, (optional) staggerloc, (optional) localDe\\
+    totalLBound & {\tt integer(:)} & {\tt ESMF\_GridGetItem} & itemflag, (optional) staggerloc, (optional) localDe\\
+    totalUBound & {\tt integer(:)} & {\tt ESMF\_GridGetItem} & itemflag, (optional) staggerloc, (optional) localDe\\
+    totalCount & {\tt integer(:)} & {\tt ESMF\_GridGetItem} & itemflag, (optional) staggerloc, (optional) localDe\\
+%%%
+    % array & {\tt ESMF\_Array} & {\tt ESMF\_GridGetItem} & itemflag, (optional) staggerloc\\
+%%%
+    exclusiveLBound & {\tt integer(:)} & {\tt ESMF\_GridGetItemBounds} & itemflag, (optional) staggerloc, (optional) localDe\\
+    exclusiveUBound & {\tt integer(:)} & {\tt ESMF\_GridGetItemBounds} & itemflag, (optional) staggerloc, (optional) localDe\\
+    exclusiveCount & {\tt integer(:)} & {\tt ESMF\_GridGetItemBounds} & itemflag, (optional) staggerloc, (optional) localDe\\
+    computationalLBound & {\tt integer(:)} & {\tt ESMF\_GridGetItemBounds} & itemflag, (optional) staggerloc, (optional) localDe\\
+    computationalUBound & {\tt integer(:)} & {\tt ESMF\_GridGetItemBounds} & itemflag, (optional) staggerloc, (optional) localDe\\
+    computationalCount & {\tt integer(:)} & {\tt ESMF\_GridGetItemBounds} & itemflag, (optional) staggerloc, (optional) localDe\\
+    totalLBound & {\tt integer(:)} & {\tt ESMF\_GridGetItemBounds} & itemflag, (optional) staggerloc, (optional) localDe\\
+    totalUBound & {\tt integer(:)} & {\tt ESMF\_GridGetItemBounds} & itemflag, (optional) staggerloc, (optional) localDe\\
+    totalCount & {\tt integer(:)} & {\tt ESMF\_GridGetItemBounds} & itemflag, (optional) staggerloc, (optional) localDe \\
+    \hline\hline
+    \label{AttributeInternalInfo-Item}
+\end{tabular}
+
+\vspace{.20in}
+
