@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.44 2012/04/16 19:33:45 svasquez Exp $
+! $Id: ESMF_XGridEx.F90,v 1.45 2012/04/19 15:47:04 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -305,7 +305,7 @@
     ! from X -> B, retrieve the destination fraction Fields.
     do i = 1, 1
       call ESMF_FieldRegridStore(xgrid, field, dstField(i), &
-        dstFracField=dstFrac, dstFrac2Field=dstFrac2, &
+        dstFracField=dstFrac, dstMergeFracField=dstFrac2, &
         routehandle=rh_xgrid2dst(i), rc = localrc)
 !EOC
       if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
