@@ -1,4 +1,4 @@
-! $Id: NUOPC_Model.F90,v 1.1 2012/04/17 22:03:06 theurich Exp $
+! $Id: NUOPC_Model.F90,v 1.2 2012/04/19 05:25:45 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Model.F90"
 
@@ -11,7 +11,7 @@ module NUOPC_Model
   use ESMF
   use NUOPC
   use NUOPC_ModelBase, only: &
-    ModelExB_routine_SS             => routine_SetServices, &
+    ModelBase_routine_SS            => routine_SetServices, &
     routine_Run                     => routine_Run, &
     type_InternalState              => type_InternalState, &
     type_InternalStateStruct        => type_InternalStateStruct, &
@@ -19,7 +19,7 @@ module NUOPC_Model
     label_Advance                   => label_Advance, &
     label_CheckImport               => label_CheckImport, &
     label_SetRunClock               => label_SetRunClock, &
-    ModelExB_label_TimestampExport  => label_TimestampExport
+    ModelBase_label_TimestampExport => label_TimestampExport
 
   implicit none
   
@@ -57,7 +57,7 @@ module NUOPC_Model
     rc = ESMF_SUCCESS
     
     ! SetServices of generic component deriving from
-    call ModelExB_routine_SS(gcomp, rc=rc)
+    call ModelBase_routine_SS(gcomp, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -80,7 +80,7 @@ module NUOPC_Model
       return  ! bail out
     
     ! Specialize Run -> timestamp export Fields
-    call ESMF_MethodAdd(gcomp, label=ModelExB_label_TimestampExport, &
+    call ESMF_MethodAdd(gcomp, label=ModelBase_label_TimestampExport, &
       userRoutine=TimestampExport, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &

@@ -1,4 +1,4 @@
-! $Id: NUOPC_Mediator.F90,v 1.1 2012/04/17 22:03:06 theurich Exp $
+! $Id: NUOPC_Mediator.F90,v 1.2 2012/04/19 05:25:45 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Mediator.F90"
 
@@ -11,7 +11,7 @@ module NUOPC_Mediator
   use ESMF
   use NUOPC
   use NUOPC_ModelBase, only: &
-    ModelExB_routine_SS             => routine_SetServices, &
+    ModelBase_routine_SS            => routine_SetServices, &
     routine_Run                     => routine_Run, &
     label_CheckImport               => label_CheckImport, &
     label_Advance                   => label_Advance
@@ -43,7 +43,7 @@ module NUOPC_Mediator
     rc = ESMF_SUCCESS
     
     ! SetServices of generic component deriving from
-    call ModelExB_routine_SS(gcomp, rc=rc)
+    call ModelBase_routine_SS(gcomp, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
