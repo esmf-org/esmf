@@ -32,15 +32,15 @@
 \def\tr{\mathop{\rm tr}}
 %-------------------------------------------------------------
 
-\markboth{Left}{Source File: NUOPC\_DriverExplicit.F90,  Date: Mon Mar 28 16:35:43 PDT 2011
+\markboth{Left}{Source File: NUOPC\_Driver.F90,  Date: Mon Mar 28 16:35:43 PDT 2011
 }
 
 \bigskip{\sf MODULE:}
-\begin{verbatim}  module NUOPC_DriverExplicit
+\begin{verbatim}  module NUOPC_Driver
 \end{verbatim}
 
 \bigskip{\sf DESCRIPTION:\\}
-Driver component that drives model and connector components by explicit time stepping. Each time step the same sequence of model and connector components' {\tt Run} methods are called. The run sequence is fully customizable.
+Driver component that drives model and connector components. The default is to use explicit time stepping. Each time step the same sequence of model and connector components' {\tt Run} methods are called. The run sequence is fully customizable.
 
 \bigskip{\sf SUPER:}
 \begin{verbatim}  ESMF_GridComp
@@ -108,14 +108,15 @@ Driver component that drives model and connector components by explicit time ste
   end type
 
   type type_InternalStateStruct
-    integer                         :: modelCount
-    type(type_PetList),  pointer    :: modelPetLists(:)
-    type(type_PetList),  pointer    :: connectorPetLists(:,:)
-    !--- private members -------------
-    type(ESMF_GridComp), pointer    :: modelComp(:)
-    type(ESMF_State),    pointer    :: modelIS(:), modelES(:)
-    type(ESMF_CplComp),  pointer    :: connectorComp(:,:)
-    type(type_RunElement), pointer  :: runSequence
+    integer                           :: modelCount
+    type(type_PetList),  pointer      :: modelPetLists(:)
+    type(type_PetList),  pointer      :: connectorPetLists(:,:)
+    !--- private members ----------------------------------------
+    type(ESMF_GridComp), pointer      :: modelComp(:)
+    type(ESMF_State),    pointer      :: modelIS(:), modelES(:)
+    type(ESMF_CplComp),  pointer      :: connectorComp(:,:)
+    type(NUOPC_RunSequence), pointer  :: runSeq(:)  ! size may increase dynamic.
+    integer                           :: runPhaseToRunSeqMap(10)
   end type
 
 \end{verbatim}

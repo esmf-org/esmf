@@ -1,4 +1,4 @@
-% $Id: NUOPC_refdoc.ctex,v 1.8 2012/04/17 22:13:36 theurich Exp $ 
+% $Id: NUOPC_refdoc.ctex,v 1.9 2012/04/19 05:46:37 theurich Exp $ 
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -65,30 +65,23 @@
 
 \subsection{Generic Component API: NUOPC\_Driver}
 #ifdef STANDALONE
-%\input{NUOPC_Driver_manual_fapi}
+\input{NUOPC_Driver_manual_fapi}
 #elif defined(CONSTITUENT)
-%\input{../addon/NUOPC/doc/NUOPC_Driver_manual_fapi}
+\input{../addon/NUOPC/doc/NUOPC_Driver_manual_fapi}
 #endif
 
-\subsection{Generic Component API: NUOPC\_DriverExplicit}
+\subsection{Generic Component API: NUOPC\_DriverAtmOcn}
 #ifdef STANDALONE
-\input{NUOPC_DriverExplicit_manual_fapi}
+%\input{NUOPC_DriverAtmOcn_fapi}
 #elif defined(CONSTITUENT)
-\input{../addon/NUOPC/doc/NUOPC_DriverExplicit_manual_fapi}
+%\input{../addon/NUOPC/doc/NUOPC_DriverAtmOcn_fapi}
 #endif
 
-\subsection{Generic Component API: NUOPC\_DriverExplicitAtmOcn}
+\subsection{Generic Component API: NUOPC\_DriverAtmOcnMed}
 #ifdef STANDALONE
-%\input{NUOPC_DriverExplicitAtmOcn_fapi}
+%\input{NUOPC_DriverAtmOcnMed_fapi}
 #elif defined(CONSTITUENT)
-%\input{../addon/NUOPC/doc/NUOPC_DriverExplicitAtmOcn_fapi}
-#endif
-
-\subsection{Generic Component API: NUOPC\_DriverExplicitAtmOcnMed}
-#ifdef STANDALONE
-%\input{NUOPC_DriverExplicitAtmOcnMed_fapi}
-#elif defined(CONSTITUENT)
-%\input{../addon/NUOPC/doc/NUOPC_DriverExplicitAtmOcnMed_fapi}
+%\input{../addon/NUOPC/doc/NUOPC_DriverAtmOcnMed_fapi}
 #endif
 
 \subsection{Generic Component API: NUOPC\_ModelBase}
