@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.62 2012/04/18 04:34:11 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.63 2012/04/19 22:35:58 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.62 2012/04/18 04:34:11 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.63 2012/04/19 22:35:58 oehmke Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -376,7 +376,12 @@ program ESMF_FieldRegridEx
 ! V is the variable being regridded and A' is the area of a cell as calculated by ESMF.  The subscripts s and d refer to source and destination values, and the i and j are the source 
 ! and destination grid cell indices (flattening the arrays to 1 dimension). If the user does specify the area's in the Grid or Mesh, then the conservation will be adjusted to work for the areas 
 ! provided by the user. This means the following equation will hold:  sum-over-all-source-cells(Vsi*Asi) = sum-over-all-destination-cells(Vdj*Adj),
-! where A is the area of a cell as provided by the user.  
+! where A is the area of a cell as provided by the user. 
+!
+! The user should be aware that because of the conservation relationship between the source and destination fields, the more the total source area
+! differs from the total destination area the more the values of the source field will differ from the corresponding values of the destination field, likely giving a higher 
+! interpolation error. It is best to have the total source and destination areas the same (this will automatically be true if no user areas are specified). For source and destination grids 
+! which only partially overlap the areas which should be the same are the areas of the overlapping regions of the source and destination. 
 !
 ! Note that for grids on a sphere the conservative interpolation assumes great circle edges to cells. This means that the edges of a cell won't necessarily be
 ! the same as a straight line in latitude longitude. For small edges, this difference will be small, but for long edges it could be significant. This means if
