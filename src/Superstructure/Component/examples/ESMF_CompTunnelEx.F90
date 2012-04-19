@@ -1,4 +1,4 @@
-! $Id: ESMF_CompTunnelEx.F90,v 1.3 2012/04/18 05:31:45 theurich Exp $
+! $Id: ESMF_CompTunnelEx.F90,v 1.4 2012/04/19 03:58:17 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -342,7 +342,7 @@ program ESMF_CompTunnelEx
 
 !-----------------------------------------------------------------------------
 !BOE
-!\subsubsection{Non-blocking option when invoking standard Component methods through a Component Tunnel}
+!\subsubsection{The non-blocking option to invoke standard Component methods through a Component Tunnel}
 ! 
 ! \label{sec:CompTunnelInvokingNonblocking}
 !
@@ -360,8 +360,9 @@ program ESMF_CompTunnelEx
 ! The non-blocking dual side regains control over the actual Component by 
 ! synchronizing through the CompWait() call.
 !
-! To invoke any of the standard Component methods in the non-blocking mode, the
-! optional {\tt syncflag} argument is set to {\tt ESMF\_SYNC\_NONBLOCKING}. 
+! Any of the standard Component methods can be called in non-blocking mode
+! by setting the optional {\tt syncflag} argument to 
+! {\tt ESMF\_SYNC\_NONBLOCKING}. 
 !EOE
 !BOC
   call ESMF_GridCompInitialize(dualComp, syncflag=ESMF_SYNC_NONBLOCKING, rc=rc)
@@ -369,15 +370,16 @@ program ESMF_CompTunnelEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 !
-! This call will return immediately on all of the dual Component PETs, while the
-! actual Component continues to execute the invoked Component method, {\em if}
-! communication between dual and actual Component was successful. However, if there
-! were difficulties reaching the actual Component, the call will block on all 
-! dual PETs until successful contact was made, or the default time out of 3600
-! seconds, i.e. 1 hour, has been reached. In most cases a more robust approach
-! is to specify a shorter time out together with the non-blocking option.
+! {\em If} communication between the dual and the actual Component was successful, 
+! this call will return immediately on all of the dual Component PETs, while the
+! actual Component continues to execute the invoked Component method.
+! However, if the dual Component has difficulties reaching the actual Component,
+! the call will block on all dual PETs until successful contact was made, or the
+! default time out (3600 seconds, i.e. 1 hour) has been reached. In most cases a 
+! shorter time out condition is desired with the non-blocking option, as shown
+! below.
 !
-! The dual Component must first wait for the outstanding method.
+! First the dual Component must wait for the outstanding method.
 !EOE
 !BOC
   call ESMF_GridCompWait(dualComp, rc=rc)
@@ -385,7 +387,7 @@ program ESMF_CompTunnelEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 !
-! The same non-blocking CompInitialize() call is issued again, but this time
+! Now the same non-blocking CompInitialize() call is issued again, but this time
 ! with an explicit 10 second time out.
 !EOE
 !BOC
@@ -395,7 +397,7 @@ program ESMF_CompTunnelEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 !
-! This call is guaranteed to return within 10 seconds on the dual Component
+! This call is guaranteed to return within 10 seconds, or less, on the dual Component
 ! PETs, either without time out condition, indicating that the actual Component
 ! has been contacted successfully, or with time out condition, indicating that
 ! the actual Component was unreachable at the time. Either way, the dual 
