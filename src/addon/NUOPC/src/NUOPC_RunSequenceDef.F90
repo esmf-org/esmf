@@ -1,4 +1,4 @@
-! $Id: NUOPC_RunSequenceDef.F90,v 1.3 2012/04/19 05:17:15 theurich Exp $
+! $Id: NUOPC_RunSequenceDef.F90,v 1.4 2012/04/19 19:27:01 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_RunSequenceDef.F90"
 
@@ -91,7 +91,7 @@ module NUOPC_RunSequenceDef
     allocate(runElement, stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of RunElement in NUOPC_RunElementAdd.", &
-      line=__LINE__, file=__FILE__, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     ! initialize the new run element
     runElement%i = i
     runElement%j = j
@@ -158,7 +158,7 @@ module NUOPC_RunSequenceDef
       allocate(runElement, stat=stat)
       if (ESMF_LogFoundAllocError(statusToCheck=stat, &
         msg="Allocation of RunElement in NUOPC_RunElementAdd.", &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)) return  ! bail out
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       ! initialize the new run element to be "ENDDO"
       runElement%i = -i
       runElement%j = 0
