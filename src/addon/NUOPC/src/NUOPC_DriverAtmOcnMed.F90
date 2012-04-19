@@ -1,23 +1,23 @@
-! $Id: NUOPC_DriverExplicitAtmOcnMed.F90,v 1.6 2012/04/19 05:17:15 theurich Exp $
+! $Id: NUOPC_DriverAtmOcnMed.F90,v 1.1 2012/04/19 05:32:18 theurich Exp $
 
-#define FILENAME "src/addon/NUOPC/NUOPC_DriverExplicitAtmOcnMed.F90"
+#define FILENAME "src/addon/NUOPC/NUOPC_DriverAtmOcnMed.F90"
 
-module NUOPC_DriverExplicitAtmOcnMed
+module NUOPC_DriverAtmOcnMed
 
   !-----------------------------------------------------------------------------
-  ! Generic Driver Component for ATM, OCN, MED with explicit time stepping
+  ! Generic Driver Component for ATM, OCN, MED with default explicit time stepping
   !-----------------------------------------------------------------------------
 
   use ESMF
   use NUOPC
   use NUOPC_Driver, only: &
-    DrivEx_routine_SS             => routine_SetServices, &
-    DrivEx_type_IS                => type_InternalState, &
-    DrivEx_label_IS               => label_InternalState, &
-    DrivEx_label_SetModelCount    => label_SetModelCount, &
-    DrivEx_label_SetModelPetLists => label_SetModelPetLists, &
-    DrivEx_label_SetModelServices => label_SetModelServices, &
-    DrivEx_label_Finalize         => label_Finalize
+    Driver_routine_SS             => routine_SetServices, &
+    Driver_type_IS                => type_InternalState, &
+    Driver_label_IS               => label_InternalState, &
+    Driver_label_SetModelCount    => label_SetModelCount, &
+    Driver_label_SetModelPetLists => label_SetModelPetLists, &
+    Driver_label_SetModelServices => label_SetModelServices, &
+    Driver_label_Finalize         => label_Finalize
 
   implicit none
   
@@ -29,13 +29,13 @@ module NUOPC_DriverExplicitAtmOcnMed
   public label_SetModelServices, label_Finalize
   
   character(*), parameter :: &
-    label_InternalState = "DriverExplicitAtmOcnMed_InternalState"
+    label_InternalState = "DriverAtmOcnMed_InternalState"
   character(*), parameter :: &
-    label_SetModelPetLists = "DriverExplicitAtmOcnMed_SetModelPetLists"
+    label_SetModelPetLists = "DriverAtmOcnMed_SetModelPetLists"
   character(*), parameter :: &
-    label_SetModelServices = "DriverExplicitAtmOcnMed_SetModelServices"
+    label_SetModelServices = "DriverAtmOcnMed_SetModelServices"
   character(*), parameter :: &
-    label_Finalize = "DriverExplicitAtmOcnMed_Finalize"
+    label_Finalize = "DriverAtmOcnMed_Finalize"
   
   type type_InternalStateStruct
     integer, pointer    :: atmPetList(:)
@@ -70,33 +70,33 @@ module NUOPC_DriverExplicitAtmOcnMed
     
     rc = ESMF_SUCCESS
     
-    ! NUOPC_DriverExplicit registers the generic methods
-    call DrivEx_routine_SS(gcomp, rc=rc)
+    ! NUOPC_Driver registers the generic methods
+    call Driver_routine_SS(gcomp, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
       
     ! attach specializing method(s)
-    call ESMF_MethodAdd(gcomp, label=DrivEx_label_SetModelCount, &
+    call ESMF_MethodAdd(gcomp, label=Driver_label_SetModelCount, &
       userRoutine=SetModelCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    call ESMF_MethodAdd(gcomp, label=DrivEx_label_SetModelPetLists, &
+    call ESMF_MethodAdd(gcomp, label=Driver_label_SetModelPetLists, &
       userRoutine=SetModelPetLists, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    call ESMF_MethodAdd(gcomp, label=DrivEx_label_SetModelServices, &
+    call ESMF_MethodAdd(gcomp, label=Driver_label_SetModelServices, &
       userRoutine=SetModelServices, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    call ESMF_MethodAdd(gcomp, label=DrivEx_label_Finalize, &
+    call ESMF_MethodAdd(gcomp, label=Driver_label_Finalize, &
       userRoutine=Finalize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -112,13 +112,13 @@ module NUOPC_DriverExplicitAtmOcnMed
     integer, intent(out) :: rc
     
     ! local variables
-    type(DrivEx_type_IS)  :: superIS
+    type(Driver_type_IS)  :: superIS
 
     rc = ESMF_SUCCESS
     
     ! query Component for super internal State
     nullify(superIS%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, DrivEx_label_IS, superIS, rc)
+    call ESMF_UserCompGetInternalState(gcomp, Driver_label_IS, superIS, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -138,7 +138,7 @@ module NUOPC_DriverExplicitAtmOcnMed
     ! local variables
     integer                   :: localrc, stat
     type(type_InternalState)  :: is
-    type(DrivEx_type_IS)      :: superIS
+    type(Driver_type_IS)      :: superIS
     logical                   :: existflag
 
     rc = ESMF_SUCCESS
@@ -177,7 +177,7 @@ module NUOPC_DriverExplicitAtmOcnMed
     if (existflag) then
       ! query Component for super internal State
       nullify(superIS%wrap)
-      call ESMF_UserCompGetInternalState(gcomp, DrivEx_label_IS, superIS, rc)
+      call ESMF_UserCompGetInternalState(gcomp, Driver_label_IS, superIS, rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -203,14 +203,14 @@ module NUOPC_DriverExplicitAtmOcnMed
     
     ! local variables
     integer                   :: localrc, stat
-    type(DrivEx_type_IS)      :: superIS
+    type(Driver_type_IS)      :: superIS
     type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
     
     ! query Component for super internal State
     nullify(superIS%wrap)
-    call ESMF_UserCompGetInternalState(gcomp, DrivEx_label_IS, superIS, rc)
+    call ESMF_UserCompGetInternalState(gcomp, Driver_label_IS, superIS, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
