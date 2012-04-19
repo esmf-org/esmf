@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.33 2012/04/18 22:00:42 rokuingh Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.34 2012/04/19 22:12:44 rokuingh Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@
 \input{../Infrastructure/Attribute/doc/Attribute_export}
 #endif
 
-\subsection{Internal Class Information}
+\subsection{Accesing object information through Attribute}
 #ifdef STANDALONE
 \input{Attribute_internalinfo}
 #elif defined(CONSTITUENT)
