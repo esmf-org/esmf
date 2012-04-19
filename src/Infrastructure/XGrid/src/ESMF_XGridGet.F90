@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.28 2012/03/26 15:49:08 feiliu Exp $
+! $Id: ESMF_XGridGet.F90,v 1.29 2012/04/19 14:06:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.28 2012/03/26 15:49:08 feiliu Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.29 2012/04/19 14:06:09 feiliu Exp $'
 
 !==============================================================================
 !
@@ -113,6 +113,7 @@ contains
 ! ! Private name; call using ESMF_XGridGet()
 
 subroutine ESMF_XGridGetDefault(xgrid, &
+    keywordEnforcer, &
     sideA, sideB, ngridA, ngridB, area, centroid, &
     distgridA, distgridB, distgridM, &
     dimCount, localDECount, &
@@ -123,6 +124,7 @@ subroutine ESMF_XGridGetDefault(xgrid, &
 !
 ! !ARGUMENTS:
 type(ESMF_XGrid), intent(in)                :: xgrid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_Grid), intent(out), optional      :: sideA(:), sideB(:)
 integer, intent(out), optional              :: ngridA, ngridB
 real*8, intent(out), optional               :: area(:)
@@ -417,7 +419,8 @@ end subroutine ESMF_XGridGetDefault
 ! !INTERFACE: ESMF_XGridGet
 
 subroutine ESMF_XGridGetSMMSpecFrac(xgrid, srcSide, srcGridIndex, &
-    dstSide, dstGridIndex, sparseMat, srcFracArray, dstFracArray, &
+    dstSide, dstGridIndex, keywordEnforcer, &
+    sparseMat, srcFracArray, dstFracArray, &
     srcFrac2Array, dstFrac2Array, &
     rc) 
 
@@ -428,6 +431,7 @@ type(ESMF_XGridSide_Flag), intent(in)               :: srcSide
 integer,                   intent(in)               :: srcGridIndex
 type(ESMF_XGridSide_Flag), intent(in)               :: dstSide
 integer,                   intent(in)               :: dstGridIndex
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_XGridSpec),      intent(out),   optional  :: sparseMat
 type(ESMF_Array),          intent(inout), optional  :: srcFracArray
 type(ESMF_Array),          intent(inout), optional  :: dstFracArray
@@ -709,13 +713,15 @@ end subroutine ESMF_XGridGetSMMSpecFrac
 ! !INTERFACE: ESMF_XGridGet
 ! ! Private name; call using ESMF_XGridGet()
 
-subroutine ESMF_XGridGetDG(xgrid, distgrid, xgridside, gridindex, &
+subroutine ESMF_XGridGetDG(xgrid, distgrid, keywordEnforcer, &
+    xgridside, gridindex, &
     rc) 
 
 !
 ! !ARGUMENTS:
 type(ESMF_XGrid), intent(in)                      :: xgrid
 type(ESMF_DistGrid), intent(out)                  :: distgrid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_XGridSide_Flag), intent(in), optional   :: xgridside
 integer, intent(in), optional                     :: gridindex
 integer, intent(out), optional                    :: rc 
@@ -816,15 +822,15 @@ end subroutine ESMF_XGridGetDG
 ! !INTERFACE: ESMF_XGridGet
 ! ! Private name; call using ESMF_XGridGet()
 
-subroutine ESMF_XGridGetEle(xgrid, &
-    localDE, elementCount, &
-    exclusiveCount, exclusiveLBound, exclusiveUBound, &
+subroutine ESMF_XGridGetEle(xgrid, localDE, keywordEnforcer, &
+    elementCount, exclusiveCount, exclusiveLBound, exclusiveUBound, &
     rc) 
 
 !
 ! !ARGUMENTS:
 type(ESMF_XGrid), intent(in)                 :: xgrid
 integer, intent(in)                          :: localDE
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 integer, intent(out), optional               :: elementCount
 integer, intent(out), optional               :: exclusiveCount
 integer, intent(out), optional               :: exclusiveLBound

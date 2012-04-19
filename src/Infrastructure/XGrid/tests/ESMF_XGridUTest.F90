@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.46 2012/04/12 17:01:24 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.47 2012/04/19 14:06:10 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -1128,7 +1128,7 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       call ESMF_FieldRegridStore(xgrid, srcField=f_xgrid, dstField=dstField(i), &
-        routehandle=x2d_rh(i), dstFracField=dstFrac(i), dstFrac2Field=dstFrac2(i), &
+        routehandle=x2d_rh(i), dstFracField=dstFrac(i), dstMergeFracField=dstFrac2(i), &
         rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -1521,7 +1521,7 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       call ESMF_FieldRegridStore(xgrid, srcField=f_xgrid, dstField=dstField(i), &
-        routehandle=x2d_rh(i), dstFracField=dstFrac(i), dstFrac2Field=dstFrac2(i), &
+        routehandle=x2d_rh(i), dstFracField=dstFrac(i), dstMergeFracField=dstFrac2(i), &
         rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &

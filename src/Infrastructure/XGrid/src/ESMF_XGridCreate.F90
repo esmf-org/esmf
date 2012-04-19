@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.59 2012/04/16 14:19:35 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.60 2012/04/19 14:06:09 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.59 2012/04/16 14:19:35 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.60 2012/04/19 14:06:09 feiliu Exp $'
 
 !==============================================================================
 !
@@ -243,12 +243,12 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
 !  a merging process concatenates all the {\tt ESMF\_Grid}s into a super mesh represented
 !  by {\tt ESMF\_Mesh}. The super mesh is then used to compute the XGrid. 
 !  Grid objects in {\tt sideA} and {\tt sideB} arguments must have coordinates defined for
-!  the corners of a Grid cell. XGrid created online can be potentially memory expensive, 
+!  the corners of a Grid cell. XGrid created this way can be potentially memory expensive, 
 !  memory can be released by destroying XGrid after communication routehandles are computed using
 !  {\tt ESMF\_FieldRegridStore()} method.
 ! 
 !  Masking is not fully tested and is not supported right now. Specifying {\tt sideAMaskValues}
-!  or {\tt sideBMaskValues} will result in an error returned from this method for online XGrid creation. 
+!  or {\tt sideBMaskValues} will result in an error returned from this method.
 !
 !  It is erroneous to specify identical Grid object in {\tt sideA} and
 !  {\tt sideB} arguments. If {\tt sideA} and {\tt sideB} have a single Grid object, then it's erroneous
@@ -819,7 +819,7 @@ end function ESMF_XGridCreateDefault
 
 ! !INTERFACE:
 
-function ESMF_XGridCreateFromSparseMat(sideA, sideB, &
+function ESMF_XGridCreateFromSparseMat(sideA, sideB, keywordEnforcer, &
     sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, &
     area, centroid, &
     name, &
@@ -831,6 +831,7 @@ function ESMF_XGridCreateFromSparseMat(sideA, sideB, &
 !
 ! !ARGUMENTS:
 type(ESMF_Grid), intent(in)                :: sideA(:), sideB(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatA2X(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2A(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatB2X(:)
