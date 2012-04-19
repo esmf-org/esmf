@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridSparseMatEx.F90,v 1.4 2012/04/19 14:06:03 feiliu Exp $
+! $Id: ESMF_XGridSparseMatEx.F90,v 1.5 2012/04/19 16:12:55 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -121,8 +121,10 @@
     do i = 1, 2
         call ESMF_GridAddCoord(sideA(i), staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
+!EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 						endflag=ESMF_END_ABORT)
+!BOC
     enddo
 !EOC
 
