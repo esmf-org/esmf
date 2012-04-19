@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.29 2012/04/19 14:06:09 feiliu Exp $
+! $Id: ESMF_XGridGet.F90,v 1.30 2012/04/19 19:53:36 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.29 2012/04/19 14:06:09 feiliu Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.30 2012/04/19 19:53:36 feiliu Exp $'
 
 !==============================================================================
 !
@@ -112,8 +112,7 @@ contains
 ! !INTERFACE: ESMF_XGridGet
 ! ! Private name; call using ESMF_XGridGet()
 
-subroutine ESMF_XGridGetDefault(xgrid, &
-    keywordEnforcer, &
+subroutine ESMF_XGridGetDefault(xgrid, keywordEnforcer, &
     sideA, sideB, ngridA, ngridB, area, centroid, &
     distgridA, distgridB, distgridM, &
     dimCount, localDECount, &
