@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.41 2012/03/13 02:44:09 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.42 2012/04/20 21:54:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -5359,6 +5359,7 @@ namespace ESMCI {
       // try to open connection 
       if (connect(sock, (struct sockaddr *) &name, sizeof(name)) < 0){
         // connection has not (yet) been established
+        perror("socketClientInit connect(), not yet established... continue");
 #if !defined (ESMF_OS_MinGW)
         if (errno==ECONNABORTED){
           // on some systems, e.g. linux, repeated call to connect may give this
@@ -5373,7 +5374,10 @@ namespace ESMCI {
           perror("socketClientInit: connect()");
           return SOCKERR_UNSPEC;  // bail out
         }
-        // wait in select
+        bool refusedFlag = false; // initialize
+        if (errno==ECONNREFUSED)
+          refusedFlag = true;
+        // wait in select for socket to become writable
         fd_set sendfds;
         FD_ZERO(&sendfds);
         FD_SET(sock, &sendfds);
@@ -5383,6 +5387,7 @@ namespace ESMCI {
           return SOCKERR_UNSPEC;  // bail out
         }
         if (FD_ISSET(sock, &sendfds)){
+          // socket is now indicated as writable, still could be success or not
           // look at SO_ERROR to determine success or failure to connect
           int error;
           socklen_t len = sizeof(error);
@@ -5394,11 +5399,15 @@ namespace ESMCI {
           VMK::wtime(&t1);
           fprintf(stderr, "socketClientInit: getsockopt() at %g SO_ERROR: "
             "%s\n", t1-t0, strerror(error));
-          if (error==0){
+          if (error==0 && !refusedFlag){
             // successful connection was made
             connected = true;
             break;
-          }else if (error!=ECONNREFUSED){
+          }else if (error==0 && refusedFlag){
+            // this happens on IBM, where geetsockopt() doesn't return error
+            // but the sock variable has become invalid due to failed connect()
+            sock = socket(PF_INET, SOCK_STREAM, 0);
+          }else if (error && error!=ECONNREFUSED){
             // bail if this wasn't just a straight refusal due to absent server
             fprintf(stderr, "socketClientInit: getsockopt() error and bail: "
               "%s\n", strerror(error));
