@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.98 2012/04/19 14:12:44 feiliu Exp $ 
+# $Id: makefile,v 1.99 2012/04/23 14:59:34 feiliu Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -74,7 +74,7 @@ TESTS_RUN_UNI = \
 		RUN_ESMC_FieldGridGridRegridCsrvUTestUNI \
 		RUN_ESMF_FieldStressUTestUNI \
 		RUN_ESMF_FieldRegridUTestUNI \
-		RUN_ESMF_FieldRegridXGSMMUTestUNI \
+		RUN_ESMF_FieldRegridXGUTestUNI \
 		RUN_ESMF_FieldArbGridUTestUNI \
 		RUN_ESMF_FieldRedistArbUTestUNI \
 		RUN_ESMF_FieldRegridCsrvUTestUNI
@@ -183,10 +183,10 @@ RUN_ESMF_FieldRegridCsrvUTest:
 RUN_ESMF_FieldRegridCsrvUTestUNI:
 	$(MAKE) TNAME=FieldRegridCsrv NP=1 ftest
 
-RUN_ESMF_FieldRegridXGUTest:
+RUN_ESMF_FieldRegridXGSMMUTest:
 	$(MAKE) TNAME=FieldRegridXGSMM NP=2 ftest
 
-RUN_ESMF_FieldRegridXGSMMUTest:
+RUN_ESMF_FieldRegridXGUTest:
 	$(MAKE) TNAME=FieldRegridXG NP=4 ftest
 
 RUN_ESMF_FieldRegridXGUTestUNI:
