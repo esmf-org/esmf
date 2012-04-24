@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.58 2012/03/27 19:36:38 oehmke Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.59 2012/04/24 23:01:24 oehmke Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -378,9 +378,7 @@ unstructured grid. The integer array {\tt grid\_dims} gives the number of grid c
 The number of corners (vertices) in each grid cell is given by {\tt grid\_corners}.
 Note that if your grid has a variable number of corners on grid cells, then
 you should set {\tt grid\_corners} to be the highest value and use redundant points
-on cells with fewer corners. The grid corner coordinates must be
-written in an order which traces the outside of a grid cell in a counterclockwise
-order. 
+on cells with fewer corners. 
 
 The integer array {\tt grid\_imask} is used to mask out grid cells which should
 not participate in the regridding. The array should by zero for any points
@@ -459,12 +457,11 @@ Variables ended with "{\tt \_a}" are the variables for the source grid and the o
 are the variables for the destination grid. For instance, {\tt xc\_a} and {\tt yc\_a} are corresponding
 to the {\tt grid\_center\_lon} and {\tt grid\_center\_lat} variables in the source grid file.
 The grid information includes the center and corner coordinates and the grid mask 
-array from the input grid file and
-the grid area and grid frac arrays calculated by {\tt ESMF\_RegridWeightGen}. 
-The grid area array currently is only
-computed by the conservative remapping option. The values of the area
-array are set to zeros for bilinear
-and patch remappings.
+arrays ({\tt mask\_a} and {\tt mask\_b}) from the input grid files.
+The grid areas ({\tt area\_a} and {\tt area\_b}) are either provided by the user or computed by 
+{\tt ESMF\_RegridWeightGen}. The grid area array is only output when the conservative remapping 
+option is used. The values of the area array are set to zero for bilinear and patch remappings.
+The grid frac arrays ({\tt frac\_a} and {\tt frac\_b}) are calculated by {\tt ESMF\_RegridWeightGen}. 
 For conservative remapping, the grid frac array 
 returns the area fraction of the grid cell which participates in the remapping. 
 For bilinear and patch remapping, the
