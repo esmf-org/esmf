@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.53 2012/03/15 23:13:39 svasquez Exp $
+! $Id: ESMF_MeshEx.F90,v 1.54 2012/04/24 23:01:55 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -732,10 +732,6 @@ program ESMF_MeshEx
 ! The grid cells are organized as a one dimensional array ({\tt grid\_rank = 1}). The
 ! cell connection is defined using {\tt grid\_corner\_lat} and {\tt grid\_corner\_lon} with
 ! the maximum number of corners defined in {\tt grid\_corners}.
-! Note that the grid corner coordinates must be
-! written in an order which traces the outside of a grid cell in a counterclockwise order.
-! {\tt grid\_imask} is not used 
-! in the Mesh object in the current implementation.  
 ! The data is located at the center of the grid cell in a SCRIP grid; whereas
 ! the data is located at the corner of a cell in an ESMF Mesh object.  Therefore,
 ! we create a Mesh object by default by constructing a "dual" mesh using {\tt grid\_center\_lat} and
@@ -774,8 +770,6 @@ program ESMF_MeshEx
 ! connectivity array {\tt elementConn}, and they are 1-based. 
 ! While in the SCRIP format, the two are combined into 
 ! {\tt grid\_corner\_lon} and {\tt grid\_corner\_lat} arrays.  
-! Note that the {\tt elementConn} array must be defined in an order such that the nodes it references trace
-! the outside of a grid cell in a counterclockwise order.
 !
 ! The ESMF file format works
 ! better with the methods used to create an ESMF Mesh object, so less conversion needs to be done to create a Mesh. 
