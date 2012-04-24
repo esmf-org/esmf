@@ -1,4 +1,4 @@
-! $Id: ESMF_CompTunnelUTest.F90,v 1.13 2012/04/04 00:32:32 theurich Exp $
+! $Id: ESMF_CompTunnelUTest.F90,v 1.14 2012/04/24 20:26:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -237,7 +237,7 @@ program ESMF_CompTunnelUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_CompTunnelUTest.F90,v 1.13 2012/04/04 00:32:32 theurich Exp $'
+    '$Id: ESMF_CompTunnelUTest.F90,v 1.14 2012/04/24 20:26:12 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -301,7 +301,7 @@ program ESMF_CompTunnelUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Create the Actual Component"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  actualComp = ESMF_GridCompCreate(petList=petList, rc=rc)
+  actualComp = ESMF_GridCompCreate(petList=petList, name="actualComp", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -345,7 +345,7 @@ program ESMF_CompTunnelUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Create the Dual Component"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  dualComp = ESMF_GridCompCreate(petList=petList, rc=rc)
+  dualComp = ESMF_GridCompCreate(petList=petList, name="dualComp", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
   
@@ -588,7 +588,7 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Create the Actual Component A"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  actualCompA = ESMF_GridCompCreate(petList=petList, rc=rc)
+  actualCompA = ESMF_GridCompCreate(petList=petList, name="actualCompA", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -630,7 +630,7 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Create the Dual Component A"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  dualCompA = ESMF_GridCompCreate(petList=petList, rc=rc)
+  dualCompA = ESMF_GridCompCreate(petList=petList, name="dualCompA", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
   
@@ -651,7 +651,7 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Create the Actual Component B"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  actualCompB = ESMF_GridCompCreate(petList=petList, rc=rc)
+  actualCompB = ESMF_GridCompCreate(petList=petList, name="actualCompB", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -693,7 +693,7 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Create the Dual Component B"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  dualCompB = ESMF_GridCompCreate(petList=petList, rc=rc)
+  dualCompB = ESMF_GridCompCreate(petList=petList, name="dualCompB", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
   
@@ -714,7 +714,7 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Create the Actual Component C"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  actualCompC = ESMF_GridCompCreate(petList=petList, rc=rc)
+  actualCompC = ESMF_GridCompCreate(petList=petList, name="actualCompC", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -756,7 +756,7 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Create the Dual Component C"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  dualCompC = ESMF_GridCompCreate(petList=petList, rc=rc)
+  dualCompC = ESMF_GridCompCreate(petList=petList, name="dualCompC", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
   
@@ -777,7 +777,7 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Create the Actual Component D"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  actualCompD = ESMF_GridCompCreate(petList=petList, rc=rc)
+  actualCompD = ESMF_GridCompCreate(petList=petList, name="actualCompD", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -819,7 +819,7 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Create the Dual Component D"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  dualCompD = ESMF_GridCompCreate(petList=petList, rc=rc)
+  dualCompD = ESMF_GridCompCreate(petList=petList, name="dualCompD", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
   
@@ -840,7 +840,7 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Create the Actual Component E"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  actualCompE = ESMF_GridCompCreate(petList=petList, rc=rc)
+  actualCompE = ESMF_GridCompCreate(petList=petList, name="actualCompE", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -882,7 +882,7 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Create the Dual Component E"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  dualCompE = ESMF_GridCompCreate(petList=petList, rc=rc)
+  dualCompE = ESMF_GridCompCreate(petList=petList, name="dualCompE", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
   
@@ -903,7 +903,7 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Create the Union Component E"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  unionCompE = ESMF_GridCompCreate(petList=petList, rc=rc)
+  unionCompE = ESMF_GridCompCreate(petList=petList, name="unionCompE", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
   
