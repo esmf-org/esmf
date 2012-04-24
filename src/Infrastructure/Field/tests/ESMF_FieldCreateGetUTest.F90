@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.90 2012/04/23 18:26:51 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.91 2012/04/24 18:00:16 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -1110,9 +1110,9 @@
         !------------------------------------------------------------------------
         !EX_UTest_Multi_Proc_Only
         ! Create a 7D field from a 5D grid and 2D ungridded bounds
-        call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/1,4,3,4,2/), &
+        call test7d2_generic(rc, minIndex=(/1,1,1,1,1/), maxIndex=(/3,4,3,4,2/), &
             regDecomp=(/2,1,2,1,1/), &
-            ungriddedLBound=(/1,2/), ungriddedUBound=(/4,5/), &
+            ungriddedLBound=(/1,2/), ungriddedUBound=(/2,5/), &
             totalLWidth=(/1,1,1,2,2/), totalUWidth=(/1,2,3,4,5/), &
             gridEdgeLWidth=(/1,0,1,0,1/), gridEdgeUWidth=(/0,1,2,1,0/), &
             staggerloc=ESMF_STAGGERLOC_EDGE1, &
