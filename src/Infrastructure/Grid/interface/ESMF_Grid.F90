@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.270 2012/04/16 19:18:26 svasquez Exp $
+! $Id: ESMF_Grid.F90,v 1.271 2012/04/25 22:45:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -308,7 +308,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.270 2012/04/16 19:18:26 svasquez Exp $'
+      '$Id: ESMF_Grid.F90,v 1.271 2012/04/25 22:45:17 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -11977,6 +11977,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetDefault"
 !BOP
+!\label{API:GridGet}
 ! !IROUTINE: ESMF_GridGet - Get object-wide Grid information
 
 ! !INTERFACE:
@@ -12309,6 +12310,7 @@ end subroutine ESMF_GridGetDefault
 #undef  ESMF_METHOD  
 #define ESMF_METHOD "ESMF_GridGetPLocalDe"
 !BOP
+!\label{API:GridGetPLocalDe}
 ! !IROUTINE: ESMF_GridGet - Get DE-local Grid information
 
 ! !INTERFACE:
@@ -12458,6 +12460,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD  
 #define ESMF_METHOD "ESMF_GridGetPLocalDePSloc"
 !BOP
+!\label{API:GridGetPLocalDePSloc}
 ! !IROUTINE: ESMF_GridGet - Get DE-local information for a specific stagger location in a Grid
 
 ! !INTERFACE:
@@ -12631,6 +12634,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD  
 #define ESMF_METHOD "ESMF_GridGetPSloc"
 !BOP
+!\label{API:GridGetPSloc}
 ! !IROUTINE: ESMF_GridGet - Get information about a specific stagger location in a Grid
 
 ! !INTERFACE:
@@ -12708,6 +12712,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD  
 #define ESMF_METHOD "ESMF_GridGetPSlocPTile"
 !BOP
+!\label{API:GridGetPSlocPTile}
 ! !IROUTINE: ESMF_GridGet - Get information about a specific stagger location and tile in a Grid
 
 ! !INTERFACE:
@@ -12831,6 +12836,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 !BOP
+!\label{API:GridGetCoord}
 ! !IROUTINE: ESMF_GridGetCoord - Get a DE-local Fortran array pointer to Grid coord data and coord bounds
 !
 ! !INTERFACE:
@@ -14706,6 +14712,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoordIntoArray"
 !BOP
+!\label{API:GridGetCoordIntoArray}
 ! !IROUTINE: ESMF_GridGetCoord - Get coordinates and put into an Array
 
 ! !INTERFACE:
@@ -14807,6 +14814,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoordR4"
 !BOP
+!\label{API:GridGetCoordR4}
 ! !IROUTINE: ESMF_GridGetCoord - Get DE-local coordinates from a specific index location in a Grid
 
 ! !INTERFACE:
@@ -14894,6 +14902,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetCoordR8"
 !BOP
+!\label{API:GridGetCoordR8}
 ! !IROUTINE: ESMF_GridGetCoord - Get DE-local coordinates from a specific index location in a Grid
 
 ! !INTERFACE:
@@ -15191,6 +15200,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 !BOP
+!\label{API:GridGetItem}
 ! !IROUTINE: ESMF_GridGetItem - Get a DE-local Fortran array pointer to Grid item data and item bounds
 ! !INTERFACE:
 !      subroutine ESMF_GridGetItem(grid, itemflag,  keywordEnforcer, &
@@ -17660,6 +17670,7 @@ endif
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridGetItemIntoArray"
 !BOP
+!\label{API:GridGetItemIntoArray}
 ! !IROUTINE: ESMF_GridGetItem - Get a Grid item and put into an Array
 
 ! !INTERFACE:
