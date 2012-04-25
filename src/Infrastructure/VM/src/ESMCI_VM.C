@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.30 2012/04/02 19:20:47 w6ws Exp $
+// $Id: ESMCI_VM.C,v 1.31 2012/04/25 05:08:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.30 2012/04/02 19:20:47 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.31 2012/04/25 05:08:24 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -71,7 +71,8 @@ extern "C" {
   void FTN_X(f_esmf_geombasecollectgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_locstreamcollectgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_statecollectgarbage)(void *fobject, int *localrc);
-  void FTN_X(f_esmf_compcollectgarbage)(void *fobject, int *localrc);
+  void FTN_X(f_esmf_compcollectgarbage1)(void *fobject, int *localrc);
+  void FTN_X(f_esmf_compcollectgarbage2)(void *fobject, int *localrc);
 }
 //==============================================================================
 
@@ -668,7 +669,21 @@ void VM::shutdown(
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_COMPONENT.objectID){
-              FTN_X(f_esmf_compcollectgarbage)(
+              FTN_X(f_esmf_compcollectgarbage1)(
+                &(matchTable_FObjects[i][k].fobject), &localrc);
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+                return;
+            }
+          }
+          // second time through the list fully shuts down components
+          // the call to f_esmf_compcollectgarbage2() may be collective on some
+          // MPI implementations and therefore must be done in a second loop
+          // in order to allow the first loop to perform any inter component
+          // wrap up communication
+          for (int k=matchTable_FObjects[i].size()-1; k>=0; k--){
+            if (matchTable_FObjects[i][k].objectID ==
+              ESMC_ID_COMPONENT.objectID){
+              FTN_X(f_esmf_compcollectgarbage2)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
                 return;
@@ -1802,7 +1817,21 @@ void VM::finalize(
           return;
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_COMPONENT.objectID){
-        FTN_X(f_esmf_compcollectgarbage)(
+        FTN_X(f_esmf_compcollectgarbage1)(
+          &(matchTable_FObjects[0][k].fobject), &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+          return;
+      }
+    }
+    // second time through the list fully shuts down components
+    // the call to f_esmf_compcollectgarbage2() may be collective on some
+    // MPI implementations and therefore must be done in a second loop
+    // in order to allow the first loop to perform any inter component
+    // wrap up communication
+    for (int k=matchTable_FObjects[0].size()-1; k>=0; k--){
+      if (matchTable_FObjects[0][k].objectID ==
+        ESMC_ID_COMPONENT.objectID){
+        FTN_X(f_esmf_compcollectgarbage2)(
           &(matchTable_FObjects[0][k].fobject), &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return;

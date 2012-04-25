@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.234 2012/04/03 22:56:55 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.235 2012/04/25 05:08:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -291,7 +291,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.234 2012/04/03 22:56:55 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.235 2012/04/25 05:08:22 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -770,41 +770,53 @@ contains
 ! !IROUTINE: ESMF_CompDestruct - Release resources associated with a Component
 
 ! !INTERFACE:
-  subroutine ESMF_CompDestruct(compp, timeout, timeoutFlag, rc)
+  subroutine ESMF_CompDestruct(compp, interCompComm, fullShutdown, &
+    timeout, timeoutFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), pointer               :: compp
+    logical,              intent(in),  optional :: interCompComm
+    logical,              intent(in),  optional :: fullShutdown
     integer,              intent(in),  optional :: timeout
     logical,              intent(out), optional :: timeoutFlag
     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Destroys an {\tt ESMF\_Component}, releasing the resources associated
-!     with the object.
+!   Destroys an {\tt ESMF\_Component}, releasing the resources associated
+!   with the object.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[compp]
-!      Component internal structure to be freed.
-!     \item[{[timeout]}]
-!      The maximum period in seconds that this call will wait for any
-!      communication with the actual component, before returning with a timeout
-!      condition. The default is 3600, i.e. 1 hour.
-!     \item[{[timeoutFlag]}]
-!      Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
-!      If {\tt timeoutFlag} was not provided a timeout condition will lead to
-!      an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
-!      {\tt timeoutFlag} is the indicator whether timeout was reached or not.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[compp]
+!     Component internal structure to be freed.
+!   \item[{[interCompComm]}]
+!     Participate in inter-component wrap up communication. May require that
+!     this call be not collective! Default is {\tt .true.}.
+!   \item[{[fullShutdown]}]
+!     Fully shut down everything, including the component's VM. Depending on
+!     the MPI implementation this may make this call collective.
+!     Default is {\tt .true.}.
+!   \item[{[timeout]}]
+!     The maximum period in seconds that this call will wait for any
+!     communication with the actual component, before returning with a timeout
+!     condition. The default is 3600, i.e. 1 hour.
+!   \item[{[timeoutFlag]}]
+!     Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
+!     If {\tt timeoutFlag} was not provided a timeout condition will lead to
+!     an {\tt rc \\= ESMF\_SUCCESS}, otherwise the return value of
+!     {\tt timeoutFlag} is the indicator whether timeout was reached or not.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     type(ESMF_Status) :: baseStatus
     integer :: timeoutArg
-
+    logical :: interCompCommArg
+    logical :: fullShutdownArg
+    
     ! Assume not implemented until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
@@ -817,20 +829,28 @@ contains
       return
     endif
     
+    ! Set defaults
+    if (present(timeoutFlag)) then
+      timeoutFlag = .false. ! initialize in any case
+    endif
+    interCompCommArg = .true.
+    if (present(interCompComm)) interCompCommArg = interCompComm
+    fullShutdownArg = .true.
+    if (present(fullShutdown)) fullShutdownArg = fullShutdown
+
     ! Now deal with garbage collection
     call ESMF_BaseGetStatus(compp%base, baseStatus, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcTOReturn=rc)) return
         
-    if (present(timeoutFlag)) then
-      timeoutFlag = .false. ! initialize in any case
-    endif
-
     if (baseStatus == ESMF_STATUS_READY) then
     
+      call ESMF_LogSet(trace=.true.)
+    
       ! dual component must terminate the service loop of the actual component
-      if (compp%compTunnel%this /= ESMF_NULL_POINTER) then
+      if (interCompCommArg .and. &
+        (compp%compTunnel%this /= ESMF_NULL_POINTER)) then
         ! this is indeed a dual component with an open component tunnel
         timeoutArg = 3600 ! default 1h timeout !!!!!!!!!!!
         if (present(timeout)) timeoutArg = timeout
@@ -854,45 +874,51 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
     
-      if (compp%vm_info /= ESMF_NULL_POINTER) then
-        ! shut down this component's VM
-        call ESMF_VMShutdown(vm=compp%vm_parent, vmplan=compp%vmplan, &
-          vm_info=compp%vm_info, rc=localrc)
+      if (fullShutdownArg) then
+
+        if (compp%vm_info /= ESMF_NULL_POINTER) then
+          ! shut down this component's VM
+          call ESMF_VMShutdown(vm=compp%vm_parent, vmplan=compp%vmplan, &
+            vm_info=compp%vm_info, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcTOReturn=rc)) return
+        endif
+
+        ! destruct the VMPlan
+        call ESMF_VMPlanDestruct(vmplan=compp%vmplan, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcTOReturn=rc)) return
-      endif
 
-      ! destruct the VMPlan
-      call ESMF_VMPlanDestruct(vmplan=compp%vmplan, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcTOReturn=rc)) return
+        ! deallocate space held for petlist
+        deallocate(compp%petlist, stat=localrc)
+        if (ESMF_LogFoundDeallocError(localrc, msg="local petlist", &
+          ESMF_CONTEXT, rcTOReturn=rc)) return 
 
-      ! deallocate space held for petlist
-      deallocate(compp%petlist, stat=localrc)
-      if (ESMF_LogFoundDeallocError(localrc, msg="local petlist", &
-        ESMF_CONTEXT, rcTOReturn=rc)) return 
-
-      ! call C++ to release function and data pointer tables.
-      call c_ESMC_FTableDestroy(compp%ftable, localrc)
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcTOReturn=rc)) return
-
-      ! Release attributes on config
-      if(compp%configFile /= "uninitialized" ) then !TODO use is present here
-        call ESMF_ConfigDestroy(compp%config, rc=localrc)
+        ! call C++ to release function and data pointer tables.
+        call c_ESMC_FTableDestroy(compp%ftable, localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcTOReturn=rc)) return
+
+        ! Release attributes on config
+        if(compp%configFile /= "uninitialized" ) then !TODO use is present here
+          call ESMF_ConfigDestroy(compp%config, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcTOReturn=rc)) return
+        endif
+
+        ! destroy the methodTable object
+        call c_ESMC_MethodTableDestroy(compp%methodTable, localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        
       endif
 
-      ! destroy the methodTable object
-      call c_ESMC_MethodTableDestroy(compp%methodTable, localrc)
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_LogSet(trace=.false.)
 
     endif
 

@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.77 2012/03/29 23:41:09 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.78 2012/04/25 05:08:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.77 2012/03/29 23:41:09 theurich Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.78 2012/04/25 05:08:21 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -413,8 +413,8 @@ end subroutine f_esmf_compdelete
 
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_compcollectgarbage()"
-subroutine f_esmf_compcollectgarbage(comp, rc)
+#define ESMF_METHOD "f_esmf_compcollectgarbage1()"
+subroutine f_esmf_compcollectgarbage1(comp, rc)
   use ESMF_UtilTypesMod
   use ESMF_BaseMod
   use ESMF_LogErrMod
@@ -433,13 +433,53 @@ subroutine f_esmf_compcollectgarbage(comp, rc)
   localrc = ESMF_RC_NOT_IMPL
   rc = ESMF_RC_NOT_IMPL
 
-  !print *, "collecting Component garbage"
+  !print *, "collecting Component garbage #1"
 
-  ! destruct internal data allocations
+  ! only wrap up the inter component communications, but do no take down
+  ! data structures that may render this call collective
   timeout = 10  ! allow for 10s timeout
   ! calling with 'timeoutFlag' prevents timeout to propagate as error condition
-  call ESMF_CompDestruct(comp%compp, timeout=timeout, timeoutFlag=timeoutFlag, &
-    rc=localrc)
+  call ESMF_CompDestruct(comp%compp, interCompComm=.true., &
+    fullShutdown=.false., timeout=timeout, timeoutFlag=timeoutFlag, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+    ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! return successfully  
+  rc = ESMF_SUCCESS
+
+end subroutine f_esmf_compcollectgarbage1
+  
+  
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_compcollectgarbage2()"
+subroutine f_esmf_compcollectgarbage2(comp, rc)
+  use ESMF_UtilTypesMod
+  use ESMF_BaseMod
+  use ESMF_LogErrMod
+  use ESMF_CompMod
+  
+  implicit none
+
+  type(ESMF_CWrap)     :: comp
+  integer, intent(out) :: rc
+
+  integer :: localrc
+  integer :: timeout
+  logical :: timeoutFlag
+
+  ! initialize return code; assume routine not implemented
+  localrc = ESMF_RC_NOT_IMPL
+  rc = ESMF_RC_NOT_IMPL
+
+  !print *, "collecting Component garbage #2"
+
+  ! destruct internal data allocations and perform full shut down, making this
+  ! call collective on some MPI implementations
+  timeout = 10  ! allow for 10s timeout
+  ! calling with 'timeoutFlag' prevents timeout to propagate as error condition
+  call ESMF_CompDestruct(comp%compp, interCompComm=.false., &
+    fullShutdown=.true., timeout=timeout, timeoutFlag=timeoutFlag, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
     ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
@@ -455,7 +495,7 @@ subroutine f_esmf_compcollectgarbage(comp, rc)
   ! return successfully  
   rc = ESMF_SUCCESS
 
-end subroutine f_esmf_compcollectgarbage
+end subroutine f_esmf_compcollectgarbage2
   
   
 #undef  ESMF_METHOD
