@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.235 2012/04/25 05:08:22 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.236 2012/04/25 05:34:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -291,7 +291,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.235 2012/04/25 05:08:22 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.236 2012/04/25 05:34:37 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -846,8 +846,6 @@ contains
         
     if (baseStatus == ESMF_STATUS_READY) then
     
-      call ESMF_LogSet(trace=.true.)
-    
       ! dual component must terminate the service loop of the actual component
       if (interCompCommArg .and. &
         (compp%compTunnel%this /= ESMF_NULL_POINTER)) then
@@ -917,8 +915,6 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
         
       endif
-
-      call ESMF_LogSet(trace=.false.)
 
     endif
 
