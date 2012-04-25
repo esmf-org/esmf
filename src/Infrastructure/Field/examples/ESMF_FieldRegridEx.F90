@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.64 2012/04/19 23:08:56 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.65 2012/04/25 21:57:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.64 2012/04/19 23:08:56 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.65 2012/04/25 21:57:10 oehmke Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -393,7 +393,35 @@ program ESMF_FieldRegridEx
 !
 ! It is important to note that the current implementation of conservative regridding doesn't normalize the interpolation weights by the destination fraction. This means that for a destination
 ! grid which only partially overlaps the source grid the destination field which is output from the regrid operation should be divided by the corresponding destination fraction to yield the 
-! true interpolated values for cells which are only partially covered by the source grid. 
+! true interpolated values for cells which are only partially covered by the source grid. The fraction also needs to be included when computing the total source and destination integrals. 
+!
+! The following pseudo-code shows how to compute the total source integral ({\tt src\_total}) given the source field values ({\tt src\_field}), the source area ({\tt src\_area}) from the {\tt ESMF\_FieldRegridGetArea()} call, and the source fraction ({\tt src\_frac}) from the {\tt ESMF\_FieldRegridStore()} call:
+!
+!\begin{verbatim}
+! src_total=0.0
+! for each source element i
+!    src_total=src_total+src_field(i)*src_area(i)*src_frac(i)
+! end for
+!\end{verbatim}
+!
+! The following pseudo-code shows how to compute the total destination integral ({\tt dst\_total}) given the destination field values ({\tt dst\_field}) resulting
+! from the {\tt ESMF\_FieldRegrid()} call, the destination area ({\tt dst\_area}) from the {\tt ESMF\_FieldRegridGetArea()} call,
+! and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldRegridStore()} call. It also 
+! shows how to adjust the destination field ({\tt dst\_field}) resulting from the {\tt ESMF\_FieldRegrid()} call by the fraction 
+! ({\tt dst\_frac}) from the {\tt ESMF\_FieldRegridStore()} call: 
+!
+!\begin{verbatim}
+!
+! dst_total=0.0
+! for each destination element i
+!    if (dst_frac(i) not equal to 0.0) then
+!       dst_total=dst_total+dst_field(i)*dst_area(i) 
+!       dst_field(i)=dst_field(i)/dst_frac(i)
+!       ! If mass computed here after dst_field adjust, would need to be:
+!       ! dst_total=dst_total+dst_field(i)*dst_area(i)*dst_frac(i) 
+!    end if
+! end for
+!\end{verbatim}
 !
 !\smallskip
 !
