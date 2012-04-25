@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.35 2012/04/24 23:45:49 rokuingh Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.36 2012/04/25 22:45:50 rokuingh Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -15,6 +15,8 @@
 \usepackage{html}
 \usepackage{times}
 \usepackage{alltt}
+
+\usepackage{hyperref}
 
 \usepackage[T1]{fontenc}
 \usepackage[dvips]{graphics,color}

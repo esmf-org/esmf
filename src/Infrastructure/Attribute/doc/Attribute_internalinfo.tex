@@ -1,9 +1,10 @@
-% $Id: Attribute_internalinfo.tex,v 1.3 2012/04/24 23:45:49 rokuingh Exp $
+% $Id: Attribute_internalinfo.tex,v 1.4 2012/04/25 22:45:50 rokuingh Exp $
 
 \label{sec:InternalInfo}
 
-Internal information can be retrieved for Grid objects through the Attribute 
-class with the {\tt ESMF\_AttributeGet()} interface.  This is done by 
+Internal ESMF class information can be retrieved through the Attribute 
+class with the {\tt ESMF\_AttributeGet()} interface.  The Grid class is
+the prototype for this capability.  Internal information is retrieved by 
 specifying the name in {\tt ESMF\_AttributeGet()} as the keyword of the 
 desired argument from one of the {\tt ESMF\_GridGet()}interfaces.  
 The 'value' of the Attribute must be of the corresponding type
@@ -15,69 +16,69 @@ determine what is currently available.
 
 The name of an Attribute that represents internal class information must have 
 'ESMF:' prepended.  This is to indicate that the information should be retrieved
-directly from class methods.  The input arguments do not need to have the 'ESMF:'
+directly from class methods.  The input arguments must not have the 'ESMF:'
 string prepended, and they should be specified as a character string with the name
-and value separated by a colon.  For example, the localDe would be specified 
+and value separated by a colon.  For example, the {\tt localDe=0} would be specified 
 like this: {\tt 'localDe:0'}.
 
-This access to internal class information does not
+Note: Attribute access to internal class information does not
 have the normal Attribute restriction that the values of the Attributes must be
-consistent across the current VM.  If consistency is desired for information that
-was retrieved through this method, then the {\tt ESMF\_AttributeUpdate()} method
-must be used.
+consistent across the current VM.
 
-The name, type, and input arguments for each of the pieces of internal
-Grid information that can be retrieved through the Attribute class are listed
-in Tables \ref{AttributeInternalInfo-Get} - \ref{AttributeInternalInfo-Item}.
+The name, type, input arguments and original Grid interface for each of the 
+pieces of internal Grid information that can be retrieved through the Attribute 
+class are listed in Tables \ref{AttributeInternalInfo-Get} - 
+\ref{AttributeInternalInfo-Item}.
 The name of the Attribute is specified by the character strings in the first 
 column, and the type of the output is specified in the second column.
-The third column specifies which input information is 
-required (or optional) to retrieve the information.
+The third column specifies which input information is required (or optional) 
+to retrieve the information and the fourth column gives a link to a detailed
+description of the input arguments.
 
 \begin{table}[h!p!b!]
   \caption{This table shows general Grid information that can be retrieved with character string inputs to the {\tt ESMF\_AttributeGet()} interface}
-  \begin{tabular}{|l|l|l|}
+  \begin{tabular}{|l|l|l|l|}
     \hline
-    {\bf Name} & {\bf Type} & {\bf Input arguments}\\
+    {\bf Name} & {\bf Type} & {\bf Input arguments} & {\bf Original Interface}\\
     \hline
 %%%
 %%% GET
 %%%
-    coordTypeKind & {\tt ESMF\_TypeKind\_Flag} & \\
-    dimCount & {\tt integer} & \\
-    tileCount & {\tt integer} & \\
-    staggerlocCount & {\tt integer} & \\
-    localDECount & {\tt integer} & \\
-    % distgrid & {\tt ESMF\_DistGrid} & \\
-    distgridToGridMap & {\tt integer(:)} & \\
-    coordDimCount & {\tt integer(:)} & \\
-    % coordDimMap & {\tt integer(:,:)} & \\
-    arbDim & {\tt integer} & \\
-    rank & {\tt integer} & \\
-    arbDimCount & {\tt integer} & \\
-    gridEdgeLWidth & {\tt integer(:)} & \\
-    gridEdgeUWidth & {\tt integer(:)} & \\
-    gridAlign & {\tt integer(:)} & \\
-    indexflag & {\tt ESMF\_Index\_Flag} & \\
-    status & {\tt ESMF\_GridStatus\_Flag} & \\
-    name & {\tt character} & \\
+    coordTypeKind & {\tt ESMF\_TypeKind\_Flag} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    dimCount & {\tt integer} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    tileCount & {\tt integer} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    staggerlocCount & {\tt integer} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    localDECount & {\tt integer} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    % distgrid & {\tt ESMF\_DistGrid} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    distgridToGridMap & {\tt integer(:)} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    coordDimCount & {\tt integer(:)} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    % coordDimMap & {\tt integer(:,:)} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    arbDim & {\tt integer} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    rank & {\tt integer} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    arbDimCount & {\tt integer} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    gridEdgeLWidth & {\tt integer(:)} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    gridEdgeUWidth & {\tt integer(:)} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    gridAlign & {\tt integer(:)} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    indexflag & {\tt ESMF\_Index\_Flag} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    status & {\tt ESMF\_GridStatus\_Flag} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
+    name & {\tt character} & & \hyperref[API:GridGet]{\tt ESMF\_GridGet()}\\
 %%%
-    isLBound & {\tt logical} & localDe\\
-    isUBound & {\tt logical} & localDe\\
-    arbIndexCount & {\tt integer} & localDe\\
-    %arbIndexList & {\tt integer(:,:)} & localDe\\
+    isLBound & {\tt logical} & localDe & \hyperref[API:GridGetPLocalDe]{\tt ESMF\_GridGet()}\\
+    isUBound & {\tt logical} & localDe & \hyperref[API:GridGetPLocalDe]{\tt ESMF\_GridGet()}\\
+    arbIndexCount & {\tt integer} & localDe & \hyperref[API:GridGetPLocalDe]{\tt ESMF\_GridGet()}\\
+    %arbIndexList & {\tt integer(:,:)} & localDe & \hyperref[API:GridGetPLocalDe]{\tt ESMF\_GridGet()}\\
 %%%
-    exclusiveLBound & {\tt integer(:)} & staggerloc, localDe\\
-    exclusiveUBound & {\tt integer(:)} & staggerloc, localDe\\
-    exclusiveCount & {\tt integer(:)} & staggerloc, localDe\\
-    computationalLBound & {\tt integer(:)} & staggerloc, localDe\\
-    computationalUBound & {\tt integer(:)} & staggerloc, localDe\\
-    computationalCount & {\tt integer(:)} & staggerloc, localDe\\
+    exclusiveLBound & {\tt integer(:)} & staggerloc, localDe & \hyperref[API:GridGetPLocalDePSloc]{\tt ESMF\_GridGet()}\\
+    exclusiveUBound & {\tt integer(:)} & staggerloc, localDe & \hyperref[API:GridGetPLocalDePSloc]{\tt ESMF\_GridGet()}\\
+    exclusiveCount & {\tt integer(:)} & staggerloc, localDe & \hyperref[API:GridGetPLocalDePSloc]{\tt ESMF\_GridGet()}\\
+    computationalLBound & {\tt integer(:)} & staggerloc, localDe & \hyperref[API:GridGetPLocalDePSloc]{\tt ESMF\_GridGet()}\\
+    computationalUBound & {\tt integer(:)} & staggerloc, localDe & \hyperref[API:GridGetPLocalDePSloc]{\tt ESMF\_GridGet()}\\
+    computationalCount & {\tt integer(:)} & staggerloc, localDe & \hyperref[API:GridGetPLocalDePSloc]{\tt ESMF\_GridGet()}\\
 %%%
-    % distgrid & {\tt ESMF\_DistGrid} & staggerloc,localDe\\
+    % distgrid & {\tt ESMF\_DistGrid} & staggerloc,localDe & \hyperref[API:GridGetPSloc]{\tt ESMF\_GridGet()}\\
 %%%
-    minIndex & {\tt integer(:)} & tile, staggerloc\\
-    maxIndex & {\tt integer(:)} & tile, staggerloc\\
+    minIndex & {\tt integer(:)} & tile, staggerloc & \hyperref[API:GridGetPSlocPTile]{\tt ESMF\_GridGet()}\\
+    maxIndex & {\tt integer(:)} & tile, staggerloc & \hyperref[API:GridGetPSlocPTile]{\tt ESMF\_GridGet()}\\
     \hline
   \end{tabular}
   \label{AttributeInternalInfo-Get}
@@ -88,23 +89,23 @@ required (or optional) to retrieve the information.
 %%%
 \begin{table}[h!p!b!]
   \caption{This table shows Grid coordinate information that can be retrieved with character string inputs to the {\tt ESMF\_AttributeGet()} interface}
-  \begin{tabular}{|l|l|l|}
+  \begin{tabular}{|l|l|l|l|}
     \hline
-    {\bf Name} & {\bf Type} & {\bf Input arguments}\\
+    {\bf Name} & {\bf Type} & {\bf Input arguments} & {\bf Original Interface}\\
     \hline
-    exclusiveLBound & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe\\
-    exclusiveUBound & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe\\
-    exclusiveCount & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe\\
-    computationalLBound & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe\\
-    computationalUBound & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe\\
-    computationalCount & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe\\
-    totalLBound & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe\\
-    totalUBound & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe\\
-    totalCount & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe\\
+    exclusiveLBound & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetCoord]{\tt ESMF\_GridGetCoord()}\\
+    exclusiveUBound & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetCoord]{\tt ESMF\_GridGetCoord()}\\
+    exclusiveCounr & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetCoord]{\tt ESMF\_GridGetCoord()}\\
+    computationalLBound & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetCoord]{\tt ESMF\_GridGetCoord()}\\
+    computationalUBound & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetCoord]{\tt ESMF\_GridGetCoord()}\\
+    computationalCount & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetCoord]{\tt ESMF\_GridGetCoord()}\\
+    totalLBound & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetCoord]{\tt ESMF\_GridGetCoord()}\\
+    totalUBound & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetCoord]{\tt ESMF\_GridGetCoord()}\\
+    totalCount & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetCoord]{\tt ESMF\_GridGetCoord()}\\
 %%%
-    % array & {\tt ESMF\_Array} & coordDim, (optional) staggerloc\\
+    % array & {\tt ESMF\_Array} & coordDim, (optional) staggerloc & \hyperref[API:GridGetCoordIntoArray]{\tt ESMF\_GridGetCoord()}\\
 %%%
-    % coord & {\tt ESMF\_KIND\_R[4/8](:)} & index(:), (optional) staggerloc, (optional) localDe\\
+    % coord & {\tt ESMF\_KIND\_R[4/8](:)} & index(:), (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetCoordR8]{\tt ESMF\_GridGetCoord()}\\
 %%%
     \hline
   \end{tabular}
@@ -116,21 +117,21 @@ required (or optional) to retrieve the information.
 %%%
 \begin{table}[h!p!b!]
   \caption{This table shows Grid item information that can be retrieved with character string inputs to the {\tt ESMF\_AttributeGet()} interface}
-  \begin{tabular}{|l|l|l|}
+  \begin{tabular}{|l|l|l|l|}
     \hline
-    {\bf Name} & {\bf Type} & {\bf Input arguments}\\
+    {\bf Name} & {\bf Type} & {\bf Input arguments} & {\bf Original Interface}\\
     \hline
-    exclusiveLBound & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe\\
-    exclusiveUBound & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe\\
-    exclusiveCount & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe\\
-    computationalLBound & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe\\
-    computationalUBound & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe\\
-    computationalCount & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe\\
-    totalLBound & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe\\
-    totalUBound & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe\\
-    totalCount & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe\\
+    exclusiveLBound & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetItem]{\tt ESMF\_GridGetItem()}\\
+    exclusiveUBounr & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetItem]{\tt ESMF\_GridGetItem()}\\
+    exclusiveCounr & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetItem]{\tt ESMF\_GridGetItem()}\\
+    computationalLBound & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetItem]{\tt ESMF\_GridGetItem()}\\
+    computationalUBound & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetItem]{\tt ESMF\_GridGetItem()}\\
+    computationalCount & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetItem]{\tt ESMF\_GridGetItem()}\\
+    totalLBound & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetItem]{\tt ESMF\_GridGetItem()}\\
+    totalUBound & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetItem]{\tt ESMF\_GridGetItem()}\\
+    totalCount & {\tt integer(:)} & itemflag, (optional) staggerloc, (optional) localDe & \hyperref[API:GridGetItem]{\tt ESMF\_GridGetItem()}\\
 %%%
-    % array & {\tt ESMF\_Array} & itemflag, (optional) staggerloc\\
+    % array & {\tt ESMF\_Array} & itemflag, (optional) staggerloc & \hyperref[API:GridGetItemIntoArray]{\tt ESMF\_GridGetItem()}\\
 %%%
     \hline
   \end{tabular}
