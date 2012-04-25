@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridGetUTest.F90,v 1.4 2012/03/30 16:58:49 rokuingh Exp $
+! $Id: ESMF_AttributeGridGetUTest.F90,v 1.5 2012/04/25 21:24:20 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.4 2012/03/30 16:58:49 rokuingh Exp $'
+  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.5 2012/04/25 21:24:20 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -92,17 +92,6 @@ program ESMF_AttributeGridGetUTest
                        name="AttributeTestGrid", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-#if 0
-
-  integer :: minIndex(3)
-  character(len=ESMF_MAXSTR) :: minIndexInput(2)
-  minIndexInput(1) = '1'
-  minIndexInput(2) = 'ESMF_STAGGERLOC_CENTER'
-  call ESMF_AttributeGet(grid, name="minIndex", value=minIndex, &
-                         auxInput=minIndexInput, rc=rc)
-
-#endif
-
 #ifdef ESMF_TESTEXHAUSTIVE
 
   !------------------------------------------------------------------------
@@ -120,39 +109,46 @@ program ESMF_AttributeGridGetUTest
 print *, "dimCount= ", outI4
 
   !EX_UTest
+  ! This routine should return in error, the output value is undefined
   outR4 = 42
   call ESMF_AttributeGet(grid, name="ESMF:dimCount", value=outR4, rc=rc)
   write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET"
   write(name, *) "Incorrectly getting internal info from a Grid via Attribute Test"
-  call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET).and.(outR4==42), &
+  call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), &
                   name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
+print *, "rc = ", rc
+print *, "outR4 = ", outR4
 
   !EX_UTest
+  ! This routine should return in error, the output value is undefined
   outI4 = 42
   call ESMF_AttributeGet(grid, name="dimCount", value=outI4, rc=rc)
   write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET"
   write(name, *) "Getting 'dimCount' from a Grid via Attribute Test"
-  call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET).and.(outI4==42), &
+  call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), &
                   name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
-print *, "dimCount= ", outI4
+print *, "rc = ", rc
+print *, "outI4 = ", outI4
 
-  ! An attempt is made to retrieve a misspelled piece of Grid information.
   !EX_UTest
+  ! An attempt is made to retrieve a misspelled piece of Grid information.
+  ! This routine should return in error, the output value is undefined
   outI4 = 42
   call ESMF_AttributeGet(grid, name="ESMF:dmiCount", value=outI4, rc=rc)
   write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET"
   write(name, *) "Getting 'dimCount' from a Grid via Attribute Test"
-  call ESMF_Test((rc==ESMF_RC_NOT_VALID).and.(outI4==42), &
+  call ESMF_Test((rc==ESMF_RC_NOT_VALID), &
                   name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
-print *, "dimCount= ", outI4
+print *, "rc = ", rc
+print *, "outI4 = ", outI4
 
+  !EX_UTest
   ! An attempt is made to retrieve a piece of internal Grid info masked by an
   ! Attribute, the Attribute is retrieved, not the internal Grid info.  This
   ! happens because the attribute name does not have 'ESMF:' prepended.
-  !EX_UTest
   call ESMF_AttributeSet(grid, name="dimCount", value=4, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_TestEnd(result, ESMF_SRCLINE)
   outI4=42
@@ -164,11 +160,11 @@ print *, "dimCount= ", outI4
   !------------------------------------------------------------------------
 print *, "dimCount= ", outI4
 
+  !EX_UTest
   ! An attempt is made to retrieve a piece of internal Grid info masked by an
   ! Attribute.  This is different from the previous test because the user
   ! manually prepends 'ESMF:' to the Attribute name.  
   ! The AttributeSet should fail for this call..
-  !EX_UTest
   call ESMF_AttributeSet(grid, name="ESMF:dimCount", value=4, rc=rc)
   write(failMsg, *) "Did not return ESMF_RC_NOT_VALID"
   write(name, *) "Attempted masking 2 of Attribute internal Grid info Test"
