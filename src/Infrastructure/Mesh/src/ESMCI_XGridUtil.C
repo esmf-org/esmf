@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.14 2012/04/12 22:26:55 feiliu Exp $
+// $Id: ESMCI_XGridUtil.C,v 1.15 2012/04/25 22:32:40 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -26,6 +26,10 @@
 #include <Mesh/include/ESMCI_MathUtil.h>
 
 #include <cmath>
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 #include <algorithm>
 
 #include <ESMCI_VM.h>

@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.h,v 1.13 2012/04/25 15:19:54 w6ws Exp $
+// $Id: ESMCI_MathUtil.h,v 1.14 2012/04/25 22:32:38 w6ws Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -21,10 +21,6 @@
 #include <Mesh/include/ESMCI_MCoord.h>
 
 #include <vector>
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
 
 namespace ESMCI {
 
