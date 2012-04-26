@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.65 2012/04/25 21:57:10 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.66 2012/04/26 17:59:29 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.65 2012/04/25 21:57:10 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.66 2012/04/26 17:59:29 oehmke Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -365,9 +365,10 @@ program ESMF_FieldRegridEx
 ! To use the patch method the user may created their Fields on any stagger location for Grids or the node location ({\tt ESMF\_MESHLOC\_NODE}) for Meshes.
 ! For Grids, the stagger location upon which the Field was built must contain coordinates. 
 !
-! First-order conservative interpolation~\cite{ConservativeOrder1} is also available as a regridding method. This method will typically have  
-! a larger local interpolation error than the previous two methods, but will do a much better job of preserving the value of the 
-! integral of data between the source and destination grid. In this method the value across each source cell
+! First-order conservative interpolation~\cite{ConservativeOrder1} is also available as a regridding method. This method 
+! will typically have  
+! a larger local interpolation error than the previous two methods, but will do a much better job of preserving the value
+! of the  integral of data between the source and destination grid. In this method the value across each source cell
 ! is treated as a constant. The weights for a particular destination cell are the area of intersection of each 
 ! source cell with the destination cell divided by the area of the destination cell. For cartesian grids, the area of a grid cell is the typical cartesian area. 
 ! For grids on a sphere, cell areas are calculated by connecting the corner coordinates of each grid cell with great circles. If the user doesn't specify
@@ -383,19 +384,30 @@ program ESMF_FieldRegridEx
 ! interpolation error. It is best to have the total source and destination areas the same (this will automatically be true if no user areas are specified). For source and destination grids 
 ! which only partially overlap the areas which should be the same are the areas of the overlapping regions of the source and destination. 
 !
-! Note that for grids on a sphere the conservative interpolation assumes great circle edges to cells. This means that the edges of a cell won't necessarily be
-! the same as a straight line in latitude longitude. For small edges, this difference will be small, but for long edges it could be significant. This means if
-! the user expects cell edges as straight lines in latitude longitude space, they should avoid using one large cell with long edges to compute an average over a region (e.g. over an ocean basin). The 
-! user should also avoid using cells which contain one edge that runs half way or more around the earth, because the regrid weight calculation assumes the 
-! edge follows the shorter great circle path. Also, there isn't a unique great circle edge defined between points on the exact opposite side of the earth from one another (antipodal points). 
-! However, the user can work around both of these problem by breaking the long edge into two smaller edges by inserting an extra node, or by breaking the large target grid cells 
+! Note that for grids on a sphere the conservative interpolation assumes great circle edges to cells. This means that the
+! edges of a cell won't necessarily be
+! the same as a straight line in latitude longitude. For small edges, this difference will be small, but for long edges it
+! could be significant. This means if
+! the user expects cell edges as straight lines in latitude longitude space, they should avoid using one large cell with 
+! long edges to compute an average over a region (e.g. over an ocean basin). The 
+! user should also avoid using cells which contain one edge that runs half way or more around the earth, because the 
+! regrid weight calculation assumes the 
+! edge follows the shorter great circle path. Also, there isn't a unique great circle edge defined between points on the 
+! exact opposite side of the earth from one another (antipodal points). 
+! However, the user can work around both of these problem by breaking the long edge into two smaller edges by inserting 
+! an extra node, or by breaking the large target grid cells 
 ! into two or more smaller grid cells. This allows the application to resolve the ambiguity in edge direction. 
 !
-! It is important to note that the current implementation of conservative regridding doesn't normalize the interpolation weights by the destination fraction. This means that for a destination
-! grid which only partially overlaps the source grid the destination field which is output from the regrid operation should be divided by the corresponding destination fraction to yield the 
-! true interpolated values for cells which are only partially covered by the source grid. The fraction also needs to be included when computing the total source and destination integrals. 
+! It is important to note that the current implementation of conservative regridding doesn't normalize the interpolation 
+! weights by the destination fraction. This means that for a destination
+! grid which only partially overlaps the source grid the destination field which is output from the regrid operation 
+! should be divided by the corresponding destination fraction to yield the 
+! true interpolated values for cells which are only partially covered by the source grid. The fraction also needs to be 
+! included when computing the total source and destination integrals. 
 !
-! The following pseudo-code shows how to compute the total source integral ({\tt src\_total}) given the source field values ({\tt src\_field}), the source area ({\tt src\_area}) from the {\tt ESMF\_FieldRegridGetArea()} call, and the source fraction ({\tt src\_frac}) from the {\tt ESMF\_FieldRegridStore()} call:
+! The following pseudo-code shows how to compute the total source integral ({\tt src\_total}) given the source field values
+! ({\tt src\_field}), the source area ({\tt src\_area}) from the {\tt ESMF\_FieldRegridGetArea()} call, and
+! the source fraction ({\tt src\_frac}) from the {\tt ESMF\_FieldRegridStore()} call:
 !
 !\begin{verbatim}
 ! src_total=0.0
@@ -404,11 +416,13 @@ program ESMF_FieldRegridEx
 ! end for
 !\end{verbatim}
 !
-! The following pseudo-code shows how to compute the total destination integral ({\tt dst\_total}) given the destination field values ({\tt dst\_field}) resulting
-! from the {\tt ESMF\_FieldRegrid()} call, the destination area ({\tt dst\_area}) from the {\tt ESMF\_FieldRegridGetArea()} call,
+! The following pseudo-code shows how to compute the total destination integral ({\tt dst\_total}) given the
+! destination field values ({\tt dst\_field}) resulting
+! from the {\tt ESMF\_FieldRegrid()} call, the destination area ({\tt dst\_area}) from the {\tt ESMF\_FieldRegridGetArea()}
+! call,
 ! and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldRegridStore()} call. It also 
-! shows how to adjust the destination field ({\tt dst\_field}) resulting from the {\tt ESMF\_FieldRegrid()} call by the fraction 
-! ({\tt dst\_frac}) from the {\tt ESMF\_FieldRegridStore()} call: 
+! shows how to adjust the destination field ({\tt dst\_field}) resulting from the {\tt ESMF\_FieldRegrid()} call by the
+! fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldRegridStore()} call: 
 !
 !\begin{verbatim}
 !
