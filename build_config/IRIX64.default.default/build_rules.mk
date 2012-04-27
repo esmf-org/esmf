@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.37 2010/03/11 20:04:48 theurich Exp $
+# $Id: build_rules.mk,v 1.38 2012/04/27 17:18:09 w6ws Exp $
 # 
 # IRIX64.default.default
 #
@@ -109,9 +109,9 @@ ESMF_F90OPTFLAG_O       += -OPT:Olimit=6500
 ############################################################
 # Help f90 to understand Fortran suffices
 #
-ESMF_F90COMPILEFREECPP   = -freeform -cpp
-ESMF_F90COMPILEFREENOCPP = -freeform -nocpp
-ESMF_F90COMPILEFIXCPP    = -fixedform -cpp -extend_source
+ESMF_F90COMPILEFREECPP   = -ftpp -macro_expand
+ESMF_F90COMPILEFREENOCPP = -nocpp
+ESMF_F90COMPILEFIXCPP    = -fixedform -ftpp -macro_expand -extend_source
 ESMF_F90COMPILEFIXNOCPP  = -fixedform -nocpp -extend_source
 
 ############################################################
