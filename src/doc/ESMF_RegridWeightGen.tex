@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.62 2012/04/26 19:08:33 peggyli Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.63 2012/04/27 18:03:55 svasquez Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -396,7 +396,8 @@ grid mask for a GRIDSPEC file and use user defined area for the conservative reg
 \begin{verbatim}
 
   mpirun -np 4 ./ESMF_RegridWeightGen -s src.nc -d dst.nc -m conserve \
-                 -w w.nc --src_type GRIDSPEC --src_missingvalue datavar --user_areas
+                 -w w.nc --src_type GRIDSPEC --src_missingvalue datavar \
+                 --user_areas
 
 \end{verbatim}
   
