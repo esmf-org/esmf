@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.49 2012/03/15 23:05:52 svasquez Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.50 2012/04/27 18:21:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -274,9 +274,9 @@ program ESMF_AttributeCIMEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
-      call ESMF_AttributeSet(gridcomp, 'SimulationNumberOfProcessingElements', &
-                                       '16', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+      call ESMF_AttributeSet(gridcomp, &
+         'SimulationNumberOfProcessingElements', '16', &
+          convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -487,8 +487,9 @@ program ESMF_AttributeCIMEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
-      call ESMF_AttributeSet(ozone, 'CouplingTarget', 'EarthSys_AtmosDynCore', &
-       convention=convCIM, purpose=purpField, rc=rc)
+      call ESMF_AttributeSet(ozone, 'CouplingTarget', &
+       'EarthSys_AtmosDynCore', convention=convCIM, &
+        purpose=purpField, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
