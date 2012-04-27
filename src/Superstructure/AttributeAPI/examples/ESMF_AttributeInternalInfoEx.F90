@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeInternalInfoEx.F90,v 1.2 2012/04/27 05:43:11 rokuingh Exp $
+! $Id: ESMF_AttributeInternalInfoEx.F90,v 1.3 2012/04/27 18:11:07 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -56,7 +56,8 @@ program ESMF_AttributeInternalInfoEx
       type(ESMF_DistGrid)     :: distgrid
       character(ESMF_MAXSTR)  :: name
       character(ESMF_MAXSTR),dimension(3) :: inputList 
-      integer(ESMF_KIND_I4)  :: exclusiveLBound(2), exclusiveUBound(2), exclusiveCount(2)
+      integer(ESMF_KIND_I4)  :: exclusiveLBound(2), exclusiveUBound(2)
+      integer(ESMF_KIND_I4)  :: exclusiveCount(2)
 
       character(ESMF_MAXSTR)               :: testname
       character(ESMF_MAXSTR)               :: failMsg
@@ -75,15 +76,17 @@ program ESMF_AttributeInternalInfoEx
 !BOC
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
-      call ESMF_Initialize(vm=vm, defaultlogfilename="AttributeInternalInfoEx.Log", &
-                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
+      call ESMF_Initialize(vm=vm, &
+                defaultlogfilename="AttributeInternalInfoEx.Log", &
+                logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 
       distgrid=ESMF_DistGridCreate(minIndex=(/1,1/),maxIndex=(/10,10/), rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
-      grid=ESMF_GridCreate(distgrid=distgrid, coordTypeKind=ESMF_TYPEKIND_I4, &
+      grid=ESMF_GridCreate(distgrid=distgrid, &
+                       coordTypeKind=ESMF_TYPEKIND_I4, &
                        name="AttributeTestGrid", rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
