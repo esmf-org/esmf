@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeInternalInfoEx.F90,v 1.1 2012/04/25 23:04:30 rokuingh Exp $
+! $Id: ESMF_AttributeInternalInfoEx.F90,v 1.2 2012/04/27 05:43:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -22,12 +22,17 @@ program ESMF_AttributeInternalInfoEx
 ! \label{ex:AttributeInternalInfoEx}
 !
 ! This example demonstrates the ability to access object information through
-! the Attribute class.  The
-! functionality that is demonstrated includes setting and getting Attributes, 
-! working with Attributes with different types and lists, removing Attributes,
-! and getting default Attributes.  Various other uses of 
-! {\tt ESMF\_AttributeGet()} is covered in detail in the last section.  The
-! first thing we must do is declare variables and initialize ESMF.
+! the Attribute class.  This capability is enabled only in the Grid class
+! at this point.  Internal Grid information is retrieved through the 
+! ESMF\_AttributeGet() interface by specifying the name as a character
+! string holding the keyword of the desired piece of Grid information.
+! Information that requires input arguments is retrieved by
+! specifying the input argument in a character array.
+!
+! Some examples of this capability are given in this section.  The first
+! shows how to get the name of a Grid, and the second shows how
+! to get a more complex parameter which requires inputs.  First, we must
+! initialize ESMF, declare some variables, and create a Grid:
 !EOE
 
 
@@ -94,7 +99,14 @@ program ESMF_AttributeInternalInfoEx
       endif
 
 !BOE
-!     Simple example
+!  This first call shows how to retrieve the name of a Grid.  The 
+!  return value is a character string in this case, which must be
+!  provided as the argument to 'value'.  The 'name' of the Attribute
+!  is specified as a character string whose value is the keyword of the piece
+!  of Grid information to retrieve preceded by a special tag.
+!  This tag, 'ESMF:', tells the ESMF\_AttributeGet() routine that it
+!  should be looking for class information, rather than an Attribute
+!  that was previously created with the ESMF\_AttributeSet() call.
 !EOE
 
 !BOC
@@ -104,7 +116,14 @@ program ESMF_AttributeInternalInfoEx
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-!     More complex example
+!  This second call demonstrates how to retrieve the exclusiveCount from
+!  a Grid.  As before, the 'name' of the Attribute is specified as the
+!  keyword of the information to retrieve, preceded by the 'ESMF:' tag.
+!  The value is an integer array, which must be allocated to a sufficient
+!  size to hold all of the requested information.  The exclusiveCount of
+!  a Grid requires three pieces of input information: localDe, itemflag, and
+!  staggerloc.  These are specified in an array of character strings.  The
+!  name of the input parameter is separated from the value by a ':'.
 !EOE
 
 !BOC
@@ -120,8 +139,13 @@ program ESMF_AttributeInternalInfoEx
       ! file that the scripts grep for.
       call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
+!BOE
+!  That all there is to it!  Now we just have to Finalize ESMF:
+!EOE
 
+!BOC
     call ESMF_Finalize(rc=rc)
+!EOC
 
   if (localPet==0) then
       print *, "------------------------------------------- "
