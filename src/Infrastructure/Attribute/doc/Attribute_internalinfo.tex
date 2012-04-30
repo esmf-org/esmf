@@ -1,4 +1,4 @@
-% $Id: Attribute_internalinfo.tex,v 1.6 2012/04/27 05:43:26 rokuingh Exp $
+% $Id: Attribute_internalinfo.tex,v 1.7 2012/04/30 16:32:01 rokuingh Exp $
 
 \label{sec:InternalInfo}
 
@@ -31,12 +31,15 @@ There is an example of how to use this capability in Section
 The name, type, input arguments and original Grid interface for each of the 
 pieces of internal Grid information that can be retrieved through the Attribute 
 class are listed in Tables \ref{AttributeInternalInfo-Get} - 
-\ref{AttributeInternalInfo-Item}.
+\ref{AttributeInternalInfo-Item}.  
 The name of the Attribute is specified by the character strings in the first 
 column, and the type of the output is specified in the second column.
 The third column specifies which input information is required (or optional) 
 to retrieve the information and the fourth column gives a link to a detailed
 description of the input arguments.
+
+Note: The following pieces of Grid information cannot be retrieved with this 
+method: distgrid, coordDimMap, arbIndexList, and coord.
 
 \begin{table}[h!p!b!]
   \caption{This table shows general Grid information that can be retrieved with character string inputs to the {\tt ESMF\_AttributeGet()} interface}
