@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.108 2012/04/19 23:08:57 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.109 2012/05/02 19:33:03 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.108 2012/04/19 23:08:57 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.109 2012/05/02 19:33:03 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -367,7 +367,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [srcField]
 !           Source Field.
 !     \item [dstField]
-!           Destination Field.
+!           Destination Field. The data in this Field may be overwritten by this call. 
 !     \item [{[srcMaskValues]}]
 !           List of values that indicate a source point should be masked out. 
 !           If not specified, no masking will occur. 
@@ -1027,7 +1027,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [srcField]
 !           Source Field.
 !     \item [dstField]
-!           Destination Field.
+!           Destination Field. The data in this Field may be overwritten by this call. 
 !     \item [{[routehandle]}]
 !           The handle that implements the regrid and that can be used in later 
 !           {\tt ESMF\_FieldRegrid}.
