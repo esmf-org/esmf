@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.109 2012/05/02 19:33:03 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.110 2012/05/02 22:30:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.109 2012/05/02 19:33:03 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.110 2012/05/02 22:30:13 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -369,11 +369,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [dstField]
 !           Destination Field. The data in this Field may be overwritten by this call. 
 !     \item [{[srcMaskValues]}]
-!           List of values that indicate a source point should be masked out. 
-!           If not specified, no masking will occur. 
+!           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask}) 
+!           upon which the {\tt srcField} is built. The {\tt srcMaskValues} argument specifies the values in that 
+!           mask information which indicate a source point should be masked out. In other words, a location is masked if and only if the
+!           value for that location in the mask information matches one of the values listed in {\tt srcMaskValues}.  
+!           If {\tt srcMaskValues} is not specified, no masking will occur. 
 !     \item [{[dstMaskValues]}]
-!           List of values that indicate a destination point should be masked out. 
-!           If not specified, no masking will occur.
+!           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask}) 
+!           upon which the {\tt dstField} is built. The {\tt dstMaskValues} argument specifies the values in that 
+!           mask information which indicate a destination point should be masked out. In other words, a location is masked if and only if the
+!           value for that location in the mask information matches one of the values listed in {\tt dstMaskValues}.  
+!           If {\tt dstMaskValues} is not specified, no masking will occur. 
 !     \item [{[regridmethod]}]
 !           The type of interpolation. Please see Section~\ref{opt:regridmethod} 
 !           for a list of valid options. If not specified, defaults to 

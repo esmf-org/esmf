@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.66 2012/04/26 17:59:29 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.67 2012/05/02 22:30:11 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.66 2012/04/26 17:59:29 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.67 2012/05/02 22:30:11 oehmke Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -304,9 +304,20 @@ program ESMF_FieldRegridEx
 ! perfect sphere, as opposed to a more complex and accurate representation of the earth's true shape such as would be used in a GIS system. (ESMF's current user base doesn't 
 ! require this level of detail in representing the earth's shape, but it could be added in the future if necessary.)
 !
-! In terms of masking, ESMF regrid currently supports masking for Fields built on structured Grids and element masking for Fields built on unstructured Meshes. 
-! The user may mask out points in  the source Field or destination Field or both. The user also has the option to return an error for unmapped destination points or
-! to ignore them. At this point ESMF does not support extrapolation to destination points outside the unmasked source Field. 
+! In terms of masking, ESMF regrid currently supports masking for Fields built on structured Grids and element masking for Fields built on 
+! unstructured Meshes. The user may mask out points in the source Field or destination Field or both. To do masking the user sets mask information
+! in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask}) upon which the Fields passed into the {\tt ESMF\_FieldRegridStore()} 
+! call are built. The {\tt srcMaskValues} and {\tt dstMaskValues} arguments can then be used to specify which values in that mask information
+! indicate that a location should be masked out. For example, if {\tt dstMaskValues} is set to 1, then any location that has a value of 1 in the 
+! Grid or Mesh upon which the destination Field is built will be masked out. 
+!
+! If a destination point can't be mapped to a location in the source grid, the user has two options. The user may ignore those destination points
+! that can't be mapped by setting the {\tt unmappedaction} argument to {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. (Ignored points won't be included in
+! the sparse matrix or routeHandle output from the {\tt ESMF\_FieldRegridStore()} call.)   The user also has the option to return
+! an error if unmapped destination points exist. This is the default behavior, so the user can either not set the {\tt unmappedaction} argument
+! or the user can set it to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. At this point ESMF does not support extrapolation to destination points outside 
+! the unmasked source Field. 
+!
 !
 ! ESMF currently supports three options for interpolation: bilinear, patch, and conservative. 
 ! Bilinear interpolation calculates the value for the 
