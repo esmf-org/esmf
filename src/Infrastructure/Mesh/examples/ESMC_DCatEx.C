@@ -1,4 +1,4 @@
-// $Id: ESMC_DCatEx.C,v 1.17 2012/01/26 16:25:20 feiliu Exp $
+// $Id: ESMC_DCatEx.C,v 1.18 2012/05/02 17:50:47 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ using namespace ESMCI;
 
 void usage(const std::string &pname) {
     std::cout << "Usage:" << pname << " file nparts" << std::endl;
-    std::exit(1);
+    exit(1);
 }
 
 /*---------------------------------------------------------------------*/
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
     usage(argv[0]);
   }
   std::string fname(argv[1]);
-  UInt npart = std::atoi(argv[2]);
+  UInt npart = atoi(argv[2]);
   std::cout << "Collecting mesh " << argv[1] << " from " << npart << " poritions" << std::endl;
   catmesh.set_filename("cat_" + fname);
 
