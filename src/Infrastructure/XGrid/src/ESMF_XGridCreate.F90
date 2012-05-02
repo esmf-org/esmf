@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.62 2012/04/19 19:58:28 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.63 2012/05/02 13:05:14 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.62 2012/04/19 19:58:28 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.63 2012/05/02 13:05:14 feiliu Exp $'
 
 !==============================================================================
 !
@@ -397,12 +397,12 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
     AisSphere = 0
     BisSphere = 0
 
-    if(present(sideAMaskValues) .or. present(sideBMaskValues)) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-       msg="- masking is not fully tested and supported with XGrid in the current version", &
-       ESMF_CONTEXT, rcToReturn=rc) 
-      return
-    endif
+    !if(present(sideAMaskValues) .or. present(sideBMaskValues)) then
+    !  call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
+    !   msg="- masking is not fully tested and supported with XGrid in the current version", &
+    !   ESMF_CONTEXT, rcToReturn=rc) 
+    !  return
+    !endif
 
     ! check init status of input Grids
     ngrid_a = size(sideA, 1)
@@ -485,27 +485,29 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
     !TODO: Create the src/dst Mesh, take care of maskValues
     meshAt(1) = ESMF_GridToMesh(sideA(l_sideAPriority(1)), &
       ESMF_STAGGERLOC_CORNER, AisSphere, &
+      maskValues=sideAMaskValues, &
       regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call c_esmc_meshsetfraction(meshAt(1), fraction, localrc)
-    if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+    !call c_esmc_meshsetfraction(meshAt(1), fraction, localrc)
+    !if (ESMF_LogFoundError(localrc, &
+    !    ESMF_ERR_PASSTHRU, &
+    !    ESMF_CONTEXT, rcToReturn=rc)) return
     meshA = meshAt(1)
 
     do i = 2, ngrid_a
       meshAt(i) = ESMF_GridToMesh(sideA(l_sideAPriority(i)), &
         ESMF_STAGGERLOC_CORNER, AisSphere, &
+        maskValues=sideAMaskValues, &
         regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      call c_esmc_meshsetfraction(meshAt(i), fraction, localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+      !call c_esmc_meshsetfraction(meshAt(i), fraction, localrc)
+      !if (ESMF_LogFoundError(localrc, &
+      !    ESMF_ERR_PASSTHRU, &
+      !    ESMF_CONTEXT, rcToReturn=rc)) return
       ! call into mesh merge with priority taken into account
       ! meshAt is truncated(if necessary) and concatenated onto meshA
       ! and result stored in tmpmesh
@@ -527,27 +529,29 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
 
     meshBt(1) = ESMF_GridToMesh(sideB(l_sideBPriority(1)), &
       ESMF_STAGGERLOC_CORNER, BisSphere, &
+      maskValues=sideBMaskValues, &
       regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call c_esmc_meshsetfraction(meshBt(1), fraction, localrc)
-    if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+    !call c_esmc_meshsetfraction(meshBt(1), fraction, localrc)
+    !if (ESMF_LogFoundError(localrc, &
+    !    ESMF_ERR_PASSTHRU, &
+    !    ESMF_CONTEXT, rcToReturn=rc)) return
     meshB = meshBt(1)
 
     do i = 2, ngrid_b
       meshBt(i) = ESMF_GridToMesh(sideB(l_sideBPriority(i)), &
         ESMF_STAGGERLOC_CORNER, BisSphere, &
+        maskValues=sideBMaskValues, &
         regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      call c_esmc_meshsetfraction(meshBt(i), fraction, localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+      !call c_esmc_meshsetfraction(meshBt(i), fraction, localrc)
+      !if (ESMF_LogFoundError(localrc, &
+      !    ESMF_ERR_PASSTHRU, &
+      !    ESMF_CONTEXT, rcToReturn=rc)) return
       ! call into mesh merge with priority taken into account
       ! meshBt is truncated(if necessary) and concatenated onto meshB 
       ! and result stored in tmpmesh

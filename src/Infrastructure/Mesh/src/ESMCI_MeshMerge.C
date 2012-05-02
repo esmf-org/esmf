@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshMerge.C,v 1.12 2012/03/21 16:42:07 feiliu Exp $
+// $Id: ESMCI_MeshMerge.C,v 1.13 2012/05/02 13:06:48 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -42,51 +42,51 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.12 2012/03/21 16:42:07 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.13 2012/05/02 13:06:48 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
 
-  struct interp_res{
-    const MeshObj * clip_elem;
-    int num_sintd_nodes;
-    int num_subject_nodes;
-    int num_clip_nodes;
-    int sdim;
-    double * subject_coords;
-    double * clip_coords;
-    double subject_elem_area;
-    double clip_elem_area;
-    double fraction;
+  //struct interp_res{
+  //  const MeshObj * clip_elem;
+  //  int num_sintd_nodes;
+  //  int num_subject_nodes;
+  //  int num_clip_nodes;
+  //  int sdim;
+  //  double * subject_coords;
+  //  double * clip_coords;
+  //  double subject_elem_area;
+  //  double clip_elem_area;
+  //  double fraction;
 
-    interp_res(const MeshObj * _clip_elem, int _num_sintd_nodes, int _num_subject_nodes, int _num_clip_nodes, 
-      int _sdim, double * _subject_coords, double * _clip_coords, 
-      double _subject_elem_area, double _clip_elem_area, double _fraction) : clip_elem(_clip_elem), 
-        num_sintd_nodes(_num_sintd_nodes), num_subject_nodes(_num_subject_nodes), num_clip_nodes(_num_clip_nodes),
-        sdim(_sdim), subject_elem_area(_subject_elem_area), clip_elem_area(_clip_elem_area), 
-        fraction(_fraction) {
+  //  interp_res(const MeshObj * _clip_elem, int _num_sintd_nodes, int _num_subject_nodes, int _num_clip_nodes, 
+  //    int _sdim, double * _subject_coords, double * _clip_coords, 
+  //    double _subject_elem_area, double _clip_elem_area, double _fraction) : clip_elem(_clip_elem), 
+  //      num_sintd_nodes(_num_sintd_nodes), num_subject_nodes(_num_subject_nodes), num_clip_nodes(_num_clip_nodes),
+  //      sdim(_sdim), subject_elem_area(_subject_elem_area), clip_elem_area(_clip_elem_area), 
+  //      fraction(_fraction) {
 
-      subject_coords = new double[num_subject_nodes*sdim];
-      for(int i = 0; i < num_subject_nodes*sdim; i ++) subject_coords[i] = _subject_coords[i];
+  //    subject_coords = new double[num_subject_nodes*sdim];
+  //    for(int i = 0; i < num_subject_nodes*sdim; i ++) subject_coords[i] = _subject_coords[i];
 
-      clip_coords = new double[num_clip_nodes*sdim];
-      for(int i = 0; i < num_clip_nodes*sdim; i ++) clip_coords[i] = _clip_coords[i];
+  //    clip_coords = new double[num_clip_nodes*sdim];
+  //    for(int i = 0; i < num_clip_nodes*sdim; i ++) clip_coords[i] = _clip_coords[i];
 
-    }
+  //  }
 
-    ~interp_res(){
-      delete[] subject_coords;
-      delete[] clip_coords;
-    }
+  //  ~interp_res(){
+  //    delete[] subject_coords;
+  //    delete[] clip_coords;
+  //  }
  
-  };
+  //};
 
-  typedef std::multimap<const MeshObj *, const interp_res *> interp_map;
-  typedef std::multimap<const MeshObj *, const interp_res *> * interp_mapp;
-  typedef std::multimap<const MeshObj *, const interp_res *>::const_iterator interp_map_citer;
-  typedef std::multimap<const MeshObj *, const interp_res *>::iterator interp_map_iter;
-  typedef std::pair<std::multimap<const MeshObj *, const interp_res *>::iterator, 
-                    std::multimap<const MeshObj *, const interp_res *>::iterator > interp_map_range;
+  //typedef std::multimap<const MeshObj *, const interp_res *> interp_map;
+  //typedef std::multimap<const MeshObj *, const interp_res *> * interp_mapp;
+  //typedef std::multimap<const MeshObj *, const interp_res *>::const_iterator interp_map_citer;
+  //typedef std::multimap<const MeshObj *, const interp_res *>::iterator interp_map_iter;
+  //typedef std::pair<std::multimap<const MeshObj *, const interp_res *>::iterator, 
+  //                  std::multimap<const MeshObj *, const interp_res *>::iterator > interp_map_range;
 
   typedef std::vector<sintd_node *> * Sintd_nodes;
   typedef std::vector<sintd_cell *> * Sintd_cells;
@@ -304,14 +304,24 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
   {
     //std::cout << "Traversing the source Mesh\n";
     const Mesh & mesh = srcmesh;
+
+    // Get mask and coord field
+    MEField<> *mask_field = mesh.GetField("elem_mask");
     MEField<> &coord = *mesh.GetCoordField();
+
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
       const MeshObj &elem = *ei;  //dump_elem(elem, sdim, coord);
-      const MeshObjTopo *topo = GetMeshObjTopo(elem);
-      double *cd = new double[sdim*topo->num_nodes];
       if(elem.get_owner() != me) continue;
       //if(!GetAttr(elem).is_locally_owned()) continue;
+
+      if(mask_field){ // do not sew an element if it's masked out
+        double *msk=mask_field->data(elem);
+        if (*msk>0.5) continue;
+      }
+
+      const MeshObjTopo *topo = GetMeshObjTopo(elem);
+      double *cd = new double[sdim*topo->num_nodes];
 
       for (UInt n = 0; n < topo->num_nodes; n++) {
 
@@ -345,14 +355,24 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
   {
     //std::cout << "Traversing the destination Mesh\n";
     const Mesh & mesh = dstmesh;
+
+    // Get mask and coord field
+    MEField<> *mask_field = mesh.GetField("elem_mask");
     MEField<> &coord = *mesh.GetCoordField();
+
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
       const MeshObj &elem = *ei;  //dump_elem(elem, sdim, coord);
-      const MeshObjTopo *topo = GetMeshObjTopo(elem);
-      double *cd = new double[sdim*topo->num_nodes];
       if(elem.get_owner() != me) continue;
       //if(!GetAttr(elem).is_locally_owned()) continue;
+
+      if(mask_field){ // do not sew an element if it's masked out
+        double *msk=mask_field->data(elem);
+        if (*msk>0.5) continue;
+      }
+
+      const MeshObjTopo *topo = GetMeshObjTopo(elem);
+      double *cd = new double[sdim*topo->num_nodes];
 
       for (UInt n = 0; n < topo->num_nodes; n++) {
 
@@ -417,13 +437,23 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
   {
     const Mesh & mesh = srcmesh;
     unsigned int ncells = 0;
+
+    // Get mask and coord field
+    MEField<> *mask_field = mesh.GetField("elem_mask");
     MEField<> &coord = *mesh.GetCoordField();
+
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
       const MeshObj &elem = *ei;
+      if(elem.get_owner() != me) continue;
+
+      if(mask_field){ // do not sew an element if it's masked out
+        double *msk=mask_field->data(elem);
+        if (*msk>0.5) continue;
+      }
+
       const MeshObjTopo *topo = GetMeshObjTopo(elem);
       double *cd = new double[sdim*topo->num_nodes];
-      if(elem.get_owner() != me) continue;
 
       for (UInt n = 0; n < topo->num_nodes; n++) {
 
@@ -455,11 +485,20 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
     MEField<> *elem_frac=mesh.GetField("elem_frac2");
     if (!elem_frac) Throw() << "Meshes involved in XGrid construction should have frac2 field";
 
+    // Get mask field
+    MEField<> *mask_field = mesh.GetField("elem_mask");
+
     // iterate through dst mesh element, construct its coordinates in 'cd'
     // used in both intersected or non-intersected cases
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
       const MeshObj &elem = *ei;
+
+      if(mask_field){ // do not sew an element if it's masked out
+        double *msk=mask_field->data(elem);
+        if (*msk>0.5) continue;
+      }
+
       const MeshObjTopo *topo = GetMeshObjTopo(elem);
       int subject_num_nodes = topo->num_nodes;
 
@@ -649,7 +688,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
     }
   }
   
-
+#if 0
   // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
   // this call. 
   void calc_inter_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
@@ -779,7 +818,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
 #undef  MAX_NUM_POLY_NODES
 #undef  MAX_NUM_POLY_COORDS_2D    
   }
-
+#endif
 
 
 
@@ -798,39 +837,69 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
   // Get src mask field
   MEField<> *src_mask_field = srcmesh.GetField("elem_mask");
 
+  // Get dst frac2 field
+  MEField<> * dst_frac2_field = dstmesh.GetField("elem_frac2");
 
   // Loop through search results
   SearchResult::iterator sb = sres.begin(), se = sres.end();
   for (; sb != se; sb++) {
     
-    // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
+    // NOTE: sr.elem is a passive element and sr.elems is a list of active elements
     Search_result &sr = **sb;
 
     // If there are no associated dst elements then skip it
     if (sr.elems.size() == 0) continue;
 
-#if 0
     // If this source element is masked then skip it
     if (src_mask_field) {
         const MeshObj &src_elem = *sr.elem;
         double *msk=src_mask_field->data(src_elem);
-        if (*msk>0.5) {
-          continue; // if this is masked, then go to next search result
-          // TODO: put code in ESMCI_Search.C, so the masked source elements, don't get here
-        }
+        if (*msk>0.5) continue; // if this is masked, then go to next search result
     }
-#endif
 
     // Calculate polys
-    calc_inter_2D_2D_cart(sr.elem,src_cfield,sr.elems,dst_cfield, num_pnts, pnts, num, sintd_nodes, sintd_cells, res_map);
+    double src_area;
+    std::vector<int> valid;             valid.resize(sr.elems.size(),0);
+    std::vector<double> wgts;           wgts.resize(sr.elems.size(), 0.0);
+    std::vector<double> sintd_areas;    sintd_areas.resize(sr.elems.size(),0.0);
+    std::vector<double> dst_areas;      dst_areas.resize(sr.elems.size(),0.0);
 
+    std::vector<sintd_node *> tmp_nodes;  
+    std::vector<sintd_cell *> tmp_cells;  
+
+    calc_1st_order_weights_2D_2D_cart(sr.elem,src_cfield,sr.elems,dst_cfield, dst_mask_field, dst_frac2_field,
+      &src_area, &valid, &wgts, &sintd_areas, &dst_areas, 0, &tmp_nodes, &tmp_cells, res_map, 0);
+
+    // Invalidate masked destination elements
+    if (dst_mask_field) {
+      for (int i=0; i<sr.elems.size(); i++) {
+        const MeshObj &dst_elem = *sr.elems[i];
+        double *msk=dst_mask_field->data(dst_elem);
+        if (*msk>0.5) {
+          valid[i]=0;
+        }
+      }
+    }
+
+    // Count number of valid weights
+    int num_valid=0;
+    for (int i=0; i<sr.elems.size(); i++) {
+      if (valid[i]==1) num_valid++;
+    }
+
+    // If none valid, then don't add weights
+    if (num_valid < 1) continue;
+
+    // Append only valid nodes/cells
+    std::copy(tmp_nodes.begin(), tmp_nodes.end(), std::back_inserter(*sintd_nodes));
+    std::copy(tmp_cells.begin(), tmp_cells.end(), std::back_inserter(*sintd_cells));
 
   } // for searchresult
 
 }
 
 
-
+#if 0
   void calc_inter_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
                             std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
                             int *num_pnts, std::vector<double> *pnts, std::vector<int> *num_pnts_in_poly,
@@ -974,7 +1043,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
 #undef  MAX_NUM_POLY_NODES
 #undef  MAX_NUM_POLY_COORDS_3D    
   }
-
+#endif
 
 
 
@@ -993,6 +1062,9 @@ void calc_clipped_poly_2D_3D_sph(const Mesh &srcmesh, Mesh &dstmesh, SearchResul
 
   // Get src mask field
   MEField<> *src_mask_field = srcmesh.GetField("elem_mask");
+
+  // Get dst frac2 field
+  MEField<> *dst_frac2_field = dstmesh.GetField("elem_frac2");
 
 
   // Loop through search results
@@ -1018,7 +1090,41 @@ void calc_clipped_poly_2D_3D_sph(const Mesh &srcmesh, Mesh &dstmesh, SearchResul
 #endif
 
     // Calculate weights
-    calc_inter_2D_3D_sph(sr.elem,src_cfield,sr.elems,dst_cfield, num_pnts, pnts,num, sintd_nodes, sintd_cells, res_map);
+    double src_area;
+    std::vector<int> valid;             valid.resize(sr.elems.size(),0);
+    std::vector<double> wgts;           wgts.resize(sr.elems.size(), 0.0);
+    std::vector<double> sintd_areas;    sintd_areas.resize(sr.elems.size(),0.0);
+    std::vector<double> dst_areas;      dst_areas.resize(sr.elems.size(),0.0);
+
+    std::vector<sintd_node *> tmp_nodes;  
+    std::vector<sintd_cell *> tmp_cells;  
+
+    calc_1st_order_weights_2D_3D_sph(sr.elem,src_cfield,sr.elems,dst_cfield, dst_mask_field, dst_frac2_field,
+      &src_area, &valid, &wgts, &sintd_areas, &dst_areas, 0, sintd_nodes, sintd_cells, res_map, 0);
+
+    // Invalidate masked destination elements
+    if (dst_mask_field) {
+      for (int i=0; i<sr.elems.size(); i++) {
+        const MeshObj &dst_elem = *sr.elems[i];
+        double *msk=dst_mask_field->data(dst_elem);
+        if (*msk>0.5) {
+          valid[i]=0;
+        }
+      }
+    }
+
+    // Count number of valid weights
+    int num_valid=0;
+    for (int i=0; i<sr.elems.size(); i++) {
+      if (valid[i]==1) num_valid++;
+    }
+
+    // If none valid, then don't add weights
+    if (num_valid < 1) continue;
+
+    // Append only valid nodes/cells
+    std::copy(tmp_nodes.begin(), tmp_nodes.end(), std::back_inserter(*sintd_nodes));
+    std::copy(tmp_cells.begin(), tmp_cells.end(), std::back_inserter(*sintd_cells));
 
 
   } // for searchresult

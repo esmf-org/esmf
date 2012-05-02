@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.C,v 1.17 2012/04/11 22:29:21 oehmke Exp $
+// $Id: ESMCI_ConserveInterp.C,v 1.18 2012/05/02 13:06:48 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.17 2012/04/11 22:29:21 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.18 2012/05/02 13:06:48 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -246,13 +246,13 @@ namespace ESMCI {
   // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
   // this call. 
   void calc_1st_order_weights_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
-                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
+                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
                                            double *src_elem_area,
                                            std::vector<int> *valid, std::vector<double> *wgts, 
                                            std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
                                            Mesh * midmesh, 
                                            std::vector<sintd_node *> * sintd_nodes, 
-                                           std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct *zz) {
+                                           std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz) {
 
 
 // Maximum size for a supported polygon
@@ -406,11 +406,46 @@ namespace ESMCI {
 
       (*valid)[i]=1;
 
-      if(midmesh)
+      // Invalidate masked destination elements
+      if (dst_mask_field) {
+        double *msk=dst_mask_field->data(*dst_elem);
+        if (*msk>0.5) {
+          (*valid)[i]=0;
+          continue;
+        }
+      }
+      // Invalidate creeped out dst element
+      if(dst_frac2_field){
+        double *dst_frac2=dst_frac2_field->data(*dst_elem);
+        if (*dst_frac2 == 0.0){
+          (*valid)[i] = 0;
+          continue;
+        }
+      }
+
+      if(midmesh || res_map)
         compute_sintd_nodes_cells(sintd_areas[i],
           num_sintd_nodes, sintd_coords, 2, 2,
           sintd_nodes, sintd_cells, zz);
+
+      // append result to a multi-map index-ed by passive mesh element for merging optimization
+      if(res_map){
+        interp_map_iter it = res_map->find(src_elem);
+        if(it != res_map->end()) { 
+          // check if this is a unique intersection
+          interp_map_range range = res_map->equal_range(src_elem);
+          for(interp_map_iter it = range.first; it != range.second; ++it){
+            if(it->second->clip_elem == dst_elem)
+              Throw() << "Duplicate src/dst elem pair found in res_map" << std::endl;
+          }
+        }
+        int sdim = 2;
+        res_map->insert(std::make_pair(src_elem, new interp_res(dst_elem, num_sintd_nodes, num_src_nodes, num_dst_nodes, sdim, src_coords, dst_coords, 
+          src_area, dst_areas[i], ((src_area == 0.)? 1.:sintd_areas[i]/src_area) ) ) ); 
+      }
     }
+
+    if(res_map) return;     // not intended for weight calculation
 
     // Loop calculating weights
     for (int i=0; i<dst_elems.size(); i++) {
@@ -761,12 +796,12 @@ void norm_poly3D(int num_p, double *p) {
   // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
   // this call. 
   void calc_1st_order_weights_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
-                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
+                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,  
                                            double *src_elem_area,
                                            std::vector<int> *valid, std::vector<double> *wgts, 
                                            std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out, 
                                            Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes, 
-                                           std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct *zz) {
+                                           std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz) {
 
 
 // Maximum size for a supported polygon
@@ -933,13 +968,48 @@ void norm_poly3D(int num_p, double *p) {
       }
 #endif
 
-	(*valid)[i]=1;
+      (*valid)[i]=1;
 
-      if(midmesh)
+      // Invalidate masked destination elements
+      if (dst_mask_field) {
+        double *msk=dst_mask_field->data(*dst_elem);
+        if (*msk>0.5) {
+          (*valid)[i]=0;
+          continue;
+        }
+      }
+      // Invalidate creeped out dst element
+      if(dst_frac2_field){
+        double *dst_frac2=dst_frac2_field->data(*dst_elem);
+        if (*dst_frac2 == 0.0){
+          (*valid)[i] = 0;
+          continue;
+        }
+      }
+
+      if(midmesh || res_map)
         compute_sintd_nodes_cells(sintd_areas[i],
           num_sintd_nodes, sintd_coords, 2, 3, 
           sintd_nodes, sintd_cells, zz);
+
+      // append result to a multi-map index-ed by passive mesh element for merging optimization
+      if(res_map){
+        interp_map_iter it = res_map->find(src_elem);
+        if(it != res_map->end()) { 
+          // check if this is a unique intersection
+          interp_map_range range = res_map->equal_range(src_elem);
+          for(interp_map_iter it = range.first; it != range.second; ++it){
+            if(it->second->clip_elem == dst_elem)
+              Throw() << "Duplicate src/dst elem pair found in res_map" << std::endl;
+          }
+        }
+        int sdim = 3;
+        res_map->insert(std::make_pair(src_elem, new interp_res(dst_elem, num_sintd_nodes, num_src_nodes, num_dst_nodes, sdim, src_coords, dst_coords, 
+          src_area, dst_areas[i], ((src_area == 0.)? 1.:sintd_areas[i]/src_area) ) ) ); 
+      }
     }
+
+    if(res_map) return;     // not intended for weight calculation
 
     // Loop calculating weights
     for (int i=0; i<dst_elems.size(); i++) {
@@ -1090,12 +1160,12 @@ void convert_hex(double *pnts, double *tris) {
   // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
   // this call. 
   void calc_1st_order_weights_3D_3D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
-                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
+                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
                                            double *src_elem_area,
                                            std::vector<int> *valid, std::vector<double> *wgts, 
                                            std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out, 
                                            Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes, 
-                                           std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct *zz) {
+                                           std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz) {
 
 
  

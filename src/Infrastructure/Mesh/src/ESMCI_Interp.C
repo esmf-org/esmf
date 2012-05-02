@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.45 2012/04/11 22:29:21 oehmke Exp $
+// $Id: ESMCI_Interp.C,v 1.46 2012/05/02 13:06:48 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.45 2012/04/11 22:29:21 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.46 2012/05/02 13:06:48 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -877,9 +877,9 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
     std::vector<sintd_node *> tmp_nodes;  
     std::vector<sintd_cell *> tmp_cells;  
     calc_1st_order_weights_2D_2D_cart(sr.elem,src_cfield,
-                                     sr.elems,dst_cfield,
+                                     sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
                                      &src_elem_area, &valid, &wgts, &areas, &dst_areas,
-                                     midmesh, &tmp_nodes, &tmp_cells, zz);
+                                     midmesh, &tmp_nodes, &tmp_cells, 0, zz);
 
 
 
@@ -1094,9 +1094,9 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
     std::vector<sintd_node *> tmp_nodes;  
     std::vector<sintd_cell *> tmp_cells;  
     calc_1st_order_weights_2D_3D_sph(sr.elem,src_cfield,
-                                     sr.elems,dst_cfield,
+                                     sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
                                      &src_elem_area, &valid, &wgts, &areas, &dst_areas,
-                                     midmesh, &tmp_nodes, &tmp_cells, zz);
+                                     midmesh, &tmp_nodes, &tmp_cells, 0, zz);
 
     // Invalidate masked destination elements
     if (dst_mask_field) {
@@ -1447,9 +1447,9 @@ void calc_conserve_mat_serial_3D_3D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
     std::vector<sintd_node *> tmp_nodes;  
     std::vector<sintd_cell *> tmp_cells;  
     calc_1st_order_weights_3D_3D_cart(sr.elem,src_cfield,
-                                     sr.elems,dst_cfield,
+                                     sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
                                      &src_elem_area, &valid, &wgts, &areas, &dst_areas,
-                                     midmesh, &tmp_nodes, &tmp_cells, zz);
+                                     midmesh, &tmp_nodes, &tmp_cells, 0, zz);
 
     // Invalidate masked destination elements
     if (dst_mask_field) {

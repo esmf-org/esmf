@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.15 2012/04/25 22:32:40 w6ws Exp $
+// $Id: ESMCI_XGridUtil.C,v 1.16 2012/05/02 13:06:48 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -97,7 +97,8 @@ double polygon::area(int sdim) const {
 
 xpoint polygon::centroid(int sdim) const {
   double area = this->area(sdim);
-  if(area <= 0.) Throw() << "Invalid polygon area found when computing centroid\n";
+  if(area <= 0.) 
+    Throw() << "Invalid polygon area found when computing centroid\n";
   int n = this->size();
   double sum[3]; for(int i = 0; i < 3; i ++) sum[i] = 0.;
 
@@ -1044,7 +1045,7 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
   int me = VM::getCurrent(&rc)->getLocalPet();
   int npet = VM::getCurrent(&rc)->getNpets();
   
-  if(npet != 1){
+  if(npet != 1 && zz){
     // determine if we want to build the nodes/cells on this proc
     int num_owned = 0;
     std::map<int,int> proc_owned;
