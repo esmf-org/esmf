@@ -1,4 +1,4 @@
-! $Id: NUOPC_RunSequenceDef.F90,v 1.4 2012/04/19 19:27:01 theurich Exp $
+! $Id: NUOPC_RunSequenceDef.F90,v 1.5 2012/05/02 00:27:38 w6ws Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_RunSequenceDef.F90"
 
@@ -52,8 +52,8 @@ module NUOPC_RunSequenceDef
   end interface
   
   interface NUOPC_RunSequenceDeallocate
-    module procedure NUOPC_RunSequenceSingleDeallocate
-    module procedure NUOPC_RunSequenceArrayDeallocate
+    module procedure NUOPC_RunSequenceSingleDeall
+    module procedure NUOPC_RunSequenceArrayDeall
   end interface
 
   !-----------------------------------------------------------------------------
@@ -298,10 +298,10 @@ module NUOPC_RunSequenceDef
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_RunSequenceSingleDeallocate - Deallocate a single RunSequence object
+! !IROUTINE: NUOPC_RunSequenceSingleDeall - Deallocate a single RunSequence object
 ! !INTERFACE:
   ! Private name; call using NUOPC_RunSequenceDeallocate()
-  subroutine NUOPC_RunSequenceSingleDeallocate(runSeq, rc)
+  subroutine NUOPC_RunSequenceSingleDeall(runSeq, rc)
 ! !ARGUMENTS:
     type(NUOPC_RunSequence), intent(inout)  :: runSeq
     integer, optional,       intent(out) :: rc
@@ -325,10 +325,10 @@ module NUOPC_RunSequenceDef
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_RunSequenceArrayDeallocate - Deallocate an entire RunSequence vector
+! !IROUTINE: NUOPC_RunSequenceArrayDeall - Deallocate an entire RunSequence vector
 ! !INTERFACE:
   ! Private name; call using NUOPC_RunSequenceDeallocate()
-  subroutine NUOPC_RunSequenceArrayDeallocate(runSeq, rc)
+  subroutine NUOPC_RunSequenceArrayDeall(runSeq, rc)
 ! !ARGUMENTS:
     type(NUOPC_RunSequence), pointer     :: runSeq(:)
     integer, optional,       intent(out) :: rc
@@ -345,7 +345,7 @@ module NUOPC_RunSequenceDef
     
       ! deallocate the individual run sequences
       do i=1, size(runSeq)
-        call NUOPC_RunSequenceSingleDeallocate(runSeq(i))
+        call NUOPC_RunSequenceSingleDeall(runSeq(i))
       enddo
     
       deallocate(runSeq)  ! finally deallocate the actual runSeq array
