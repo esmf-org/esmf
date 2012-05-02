@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cppF90,v 1.124 2012/04/16 18:50:02 svasquez Exp $
+! $Id: ESMF_FieldCreate.cppF90,v 1.125 2012/05/02 00:19:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_FieldCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldCreate.cppF90,v 1.124 2012/04/16 18:50:02 svasquez Exp $'
+    '$Id: ESMF_FieldCreate.cppF90,v 1.125 2012/05/02 00:19:11 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -386,8 +386,8 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
-    ESMF_INIT_CHECK_DEEP_SHORT (ESMF_FieldGetInit, fieldIn, rc)
-    ESMF_INIT_CHECK_DEEP_SHORT (ESMF_FieldGetInit, fieldOut, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit, fieldIn, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldGetInit, fieldOut, rc)
 
     ! Call into the Array method
     call ESMF_ArrayCopy(fieldOut%ftypep%array, fieldIn%ftypep%array, rc=localrc)
@@ -1360,6 +1360,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBData)
 
 
 !------------------------------------------------------------------------------ @\
+
 #define FieldCreateGBDataPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOPI @\
