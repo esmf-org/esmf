@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.h,v 1.8 2012/04/12 22:26:54 feiliu Exp $
+// $Id: ESMCI_XGridUtil.h,v 1.9 2012/05/02 00:21:19 w6ws Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -114,7 +114,14 @@ struct xpoint{
     double epsilon = 1.e-10;
     return (std::sqrt( (this->c[0]-that.c[0])*((this->c[0]-that.c[0])) +
                        (this->c[1]-that.c[1])*((this->c[1]-that.c[1])) +
-                       (this->c[2]-that.c[2])*((this->c[2]-that.c[2])) ) < epsilon);
+                       (this->c[2]-that.c[2])*((this->c[2]-that.c[2])) ) <= epsilon);
+  }
+
+  bool operator != (const xpoint & that) const{
+    double epsilon = 1.e-10;
+    return (std::sqrt( (this->c[0]-that.c[0])*((this->c[0]-that.c[0])) +
+                       (this->c[1]-that.c[1])*((this->c[1]-that.c[1])) +
+                       (this->c[2]-that.c[2])*((this->c[2]-that.c[2])) ) > epsilon);
   }
 
 };
