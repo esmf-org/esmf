@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.42 2012/04/20 21:54:20 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.43 2012/05/02 00:23:12 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -31,6 +31,7 @@
 
 #if !defined (ESMF_OS_MinGW)
 #include <unistd.h>
+#include <sys/time.h>
 #else
 #include <windows.h>
 #endif
