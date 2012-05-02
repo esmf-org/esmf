@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.137 2012/03/09 21:04:39 w6ws Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.138 2012/05/02 19:33:40 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.137 2012/03/09 21:04:39 w6ws Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.138 2012/05/02 19:33:40 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -3095,7 +3095,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     List of values that indicate a source point should be masked out. 
 !     If not specified, no masking will occur. 
 !   \item [dstFieldbundle]
-!     Destination {\tt ESMF\_FieldBundle}.
+!     Destination {\tt ESMF\_FieldBundle}. The data in this FieldBundle may be overwritten by this call. 
 !  \item [{[dstMaskValues]}]
 !     List of values that indicate a destination point should be masked out. 
 !     If not specified, no masking will occur.
