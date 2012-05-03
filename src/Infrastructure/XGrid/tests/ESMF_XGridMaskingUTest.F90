@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridMaskingUTest.F90,v 1.1 2012/05/02 13:04:46 feiliu Exp $
+! $Id: ESMF_XGridMaskingUTest.F90,v 1.2 2012/05/03 13:55:31 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -132,7 +132,8 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    xgrid = ESMF_XGridCreate((/make_grid(4,4,1.,1.,0.,0.,msx=3.,mex=4., msy=0., mey=4., maskvalue=2, field=srcField(1), rc=localrc), &
+    xgrid = ESMF_XGridCreate(  &
+      (/make_grid(4,4,1.,1.,0.,0.,msx=3.,mex=4., msy=0., mey=4., maskvalue=2, field=srcField(1), rc=localrc), &
         make_grid(4,4,1.,1.,0.,0.,msx=0.,mex=1., msy=0., mey=4., maskvalue=2, field=srcField(2), rc=localrc)/), &
       (/make_grid(8,8,1.,1.,0.,0.,field=dstField(1), rc=localrc)/), &
       sideAMaskValues=(/2,3,4/), sideBMaskValues=(/2,3,4/), &
