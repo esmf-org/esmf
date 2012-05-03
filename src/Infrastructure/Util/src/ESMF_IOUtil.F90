@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUtil.F90,v 1.18 2012/01/06 20:18:20 svasquez Exp $
+! $Id: ESMF_IOUtil.F90,v 1.19 2012/05/03 03:48:39 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -95,7 +95,7 @@ module ESMF_IOUtilMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
   character(*), parameter, private :: version = &
-      '$Id: ESMF_IOUtil.F90,v 1.18 2012/01/06 20:18:20 svasquez Exp $'
+      '$Id: ESMF_IOUtil.F90,v 1.19 2012/05/03 03:48:39 w6ws Exp $'
 !------------------------------------------------------------------------------
 
   contains
@@ -126,13 +126,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[unit]
-!       A Fortran I/O unit number.
+!       A Fortran I/O unit number.  If the unit is not connected to a file,
+!       no flushing occurs.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !EOP
     integer :: localrc
     integer :: localstat
+    logical :: connected
+
+
+    inquire (unit=unit, opened=connected)
+    if (.not. connected) then
+      if (present (rc)) then
+        rc = ESMF_SUCCESS
+      end if
+      return
+    end if
+
 
 !   By default, use the F2003 FLUSH statement.  For older compilers,
 !   use a macro defined in the configuration-specific ESMF_Conf.inc
