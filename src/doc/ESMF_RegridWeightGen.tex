@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.66 2012/05/04 17:52:07 peggyli Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.67 2012/05/04 18:33:42 peggyli Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -500,10 +500,10 @@ variables:
 In ESMF 5.3.0, two new NetCDF file formats are added to ESMF\_RegridWeightGen, i.e. the CF GRIDSPEC convention 
 for regularly rectangular lat/lon grid and the CF UGRID convention for the unstructured grid.
 
-GRIDSPEC is a draft proposal for a set of Climate and Forecast (CF) conventions for the representation of gridded data for Earth System Models.  The original GRIDSPEC standard was proposed by V. Balaji and Z. Liang of GFDL.  It was further developed by D. Kinley and A. Pletzer of Tech X (see \htmladdnormallink{ref} {https://ice.txcorp.com/trac/modave/wiki/CFProposalGridspec}. The support for GRIDSPEC has been integrated into the 
+GRIDSPEC is a draft proposal for a set of Climate and Forecast (CF) conventions for the representation of gridded data for Earth System Models.  The original GRIDSPEC standard was proposed by V. Balaji and Z. Liang of GFDL.  It was further developed by D. Kinley and A. Pletzer of Tech X (see \htmladdnormallink{ref} {https://ice.txcorp.com/trac/modave/wiki/CFProposalGridspec}). The support for GRIDSPEC has been integrated into the 
  \htmladdnormallink{Unidata libCF library} {http://www.unidata.ucar.edu/software/libcf}.
 
-GRIDSPEC extends the current CF convention  to define grid mosaics, i.e., a grid consisting of multiple logically 
+GRIDSPEC extends the current CF convention to support grid  mosaics, i.e., a grid consisting of multiple logically 
 rectangular grid tiles. It also provides a mechanism for storing a grid dataset into multiple files.  Therefore, 
 it introduces different types of files, such as a mosaic file that defines the multiple tiles and their 
 connectivity, a host file that aggregrates the grid mosiac and the data files, and a tile file for a single tile
