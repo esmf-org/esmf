@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.65 2012/05/04 17:19:37 oehmke Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.66 2012/05/04 17:52:07 peggyli Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -447,7 +447,7 @@ that do not participate in the regridding and one for all other points.
 Coordinate arrays provide the latitudes and longitudes of cell centers
 and cell corners. The unit of the coordinates can be either "{\tt radians}" or "{\tt degrees}". 
 
-\subsection{ESMF Unstructured Grid File Format}\label{sec:application:esmfgridformat}
+\subsection{ESMF Unstructured Grid File Format}\label{sec:fileformat:esmf}
 
 ESMF also supports a more general unstructured grid file format for describing meshes.
 In the ESMF file format, the node coordinates are defined in a separate array
@@ -500,9 +500,10 @@ variables:
 In ESMF 5.3.0, two new NetCDF file formats are added to ESMF\_RegridWeightGen, i.e. the CF GRIDSPEC convention 
 for regularly rectangular lat/lon grid and the CF UGRID convention for the unstructured grid.
 
-GRIDSPEC is a draft proposal for a set of Climate and Forecast (CF) conventions for the representation of gridded data for Earth System Models.  The original GRIDSPEC standard was proposed by V. Balaji and Z. Liang of GFDL.  It was further developed by D. Kinley and A. Pletzer of Tech X (see \htmladdnormallink{ref}{https://ice.txcorp.com/trac/modave/wiki/CFProposalGridspec} and the support for GRIDSPEC has been integrated into the Unidata libCF library.
+GRIDSPEC is a draft proposal for a set of Climate and Forecast (CF) conventions for the representation of gridded data for Earth System Models.  The original GRIDSPEC standard was proposed by V. Balaji and Z. Liang of GFDL.  It was further developed by D. Kinley and A. Pletzer of Tech X (see \htmladdnormallink{ref} {https://ice.txcorp.com/trac/modave/wiki/CFProposalGridspec}. The support for GRIDSPEC has been integrated into the 
+ \htmladdnormallink{Unidata libCF library} {http://www.unidata.ucar.edu/software/libcf}.
 
-GRIDSPEC extends the current CF convention to define grid mosaics, i.e., a grid consisting of multiple logically 
+GRIDSPEC extends the current CF convention  to define grid mosaics, i.e., a grid consisting of multiple logically 
 rectangular grid tiles. It also provides a mechanism for storing a grid dataset into multiple files.  Therefore, 
 it introduces different types of files, such as a mosaic file that defines the multiple tiles and their 
 connectivity, a host file that aggregrates the grid mosiac and the data files, and a tile file for a single tile
@@ -559,7 +560,7 @@ variables:
 \subsection{CF Convention UGRID File Format}\label{sec:fileformat:ugrid}
 
 The UGRID file format is a proposed extention to the CF metadata conventions for the unstructured grid data model. The latest proposal can be found \htmladdnormallink{here}{http://bit.ly/ugrid_cf}.  The proposal is still evolving, 
-the Mesh creation API and the offline regrid application in the ESFM 5.3.0 is based on the version updated on March 14, 2012.
+the Mesh creation API and ESMF\_RegridWeightGen in ESFM 5.3.0 is based on the version updated on March 14, 2012.
 
 In the UGRID proposal, a 1D, 2D, or 3D mesh topology can be defined for an unstructured grid.  Currently, ESMF 
 only supports the 2D flexible mesh topology where each cell (a.k.a. "face" as defined in the UGRID document)  
