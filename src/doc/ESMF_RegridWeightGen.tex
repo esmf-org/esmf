@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.64 2012/05/04 08:09:44 peggyli Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.65 2012/05/04 17:19:37 oehmke Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -497,10 +497,10 @@ variables:
 
 \subsection{CF Convention GRIDSPEC File Format}\label{sec:fileformat:gridspec}
 
-In ESMF 5.3.0, two new NetCDF file formats are added to ESMF_RegridWeightGen, i.e. the CF GRIDSPEC convention 
+In ESMF 5.3.0, two new NetCDF file formats are added to ESMF\_RegridWeightGen, i.e. the CF GRIDSPEC convention 
 for regularly rectangular lat/lon grid and the CF UGRID convention for the unstructured grid.
 
-GRIDSPEC is a draft proposal for a set of Climate and Forecast (CF) conventions for the representation of gridded data for Earth System Models.  The original GRIDSPEC standard was proposed by V. Balaji and Z. Liang of GFDL.  It was further developed by D. Kinley and A. Pletzer of Tech X (see \addhtmlnormallink{ref} {https://ice.txcorp.com/trac/modave/wiki/CFProposalGridspec} and the support for GRIDSPEC has been integrated into the Unidata libCF library.
+GRIDSPEC is a draft proposal for a set of Climate and Forecast (CF) conventions for the representation of gridded data for Earth System Models.  The original GRIDSPEC standard was proposed by V. Balaji and Z. Liang of GFDL.  It was further developed by D. Kinley and A. Pletzer of Tech X (see \htmladdnormallink{ref}{https://ice.txcorp.com/trac/modave/wiki/CFProposalGridspec} and the support for GRIDSPEC has been integrated into the Unidata libCF library.
 
 GRIDSPEC extends the current CF convention to define grid mosaics, i.e., a grid consisting of multiple logically 
 rectangular grid tiles. It also provides a mechanism for storing a grid dataset into multiple files.  Therefore, 
@@ -554,11 +554,11 @@ variables:
 		so:units = "psu" ;
 		so:missing_value = 1.e+20f ;
 }
-
+\end{verbatim}
 
 \subsection{CF Convention UGRID File Format}\label{sec:fileformat:ugrid}
 
-The UGRID file format is a proposed extention to the CF metadata conventions for the unstructured grid data model. The latest proposal can be found \htmladdnormallink{here} {\http://bit.ly/ugrid_cf}.  The proposal is still evolving, 
+The UGRID file format is a proposed extention to the CF metadata conventions for the unstructured grid data model. The latest proposal can be found \htmladdnormallink{here}{http://bit.ly/ugrid_cf}.  The proposal is still evolving, 
 the Mesh creation API and the offline regrid application in the ESFM 5.3.0 is based on the version updated on March 14, 2012.
 
 In the UGRID proposal, a 1D, 2D, or 3D mesh topology can be defined for an unstructured grid.  Currently, ESMF 
@@ -574,7 +574,7 @@ In the following example, the dummy mesh topology variable is {\tt fvcom\_mesh}.
 the node coordinate variable names to be {\tt lon} and {\tt lat} and the face center coordinate variable names {\tt lonc} 
 and {\tt latc}.  It also specifies the face/node connectivity variable name as {\tt nv}.
 
-The variable {\nv} is a two-dimensional array that defines the node indices of each face. The first dimension 
+The variable {\tt nv} is a two-dimensional array that defines the node indices of each face. The first dimension 
 defines the maximal number of nodes for each face. In this example, it is a 
 triangle mesh so the number of nodes per face is 3.  Since each face may have different number of corner nodes,
 some of the cells may have fewer nodes than the specified dimension. In that case, it is filled with the 
@@ -586,12 +586,12 @@ The coordinate variables follows the CF metadata convention for coordinates.  Th
 
 The UGRID files may also contain data variables.  The data may be located at the nodes or at the faces.  Two additional attributes are introduced in the UGRID extension for the data variables:  {\tt location} and {\tt mesh}.  The {\tt location}
 attribute defines where the data is located, it can be either {\tt face} or {\tt node}.  The {\tt mesh} attribute defines which mesh topology this variable belongs to since multiple mesh topologies may be defined in one
-file.  The ESMF_RegridWeightGen used the data variable on the face to derive the masks for the mesh cells 
+file.  The ESMF\_RegridWeightGen used the data variable on the face to derive the masks for the mesh cells 
 in the same way as for a GRIDSPEC file.  Currently, ESMF only supports mask on the cells, not on the nodes.   
 
 When creating a ESMF Mesh from a UGRID file, user has to provide the mesh topology mesh variable name to {\tt ESMF\_MeshCreate()}.
 
-\end{verbatim}
+\begin{verbatim}
 netcdf FVCOM_grid2d {
 dimensions:
 	node = 417642 ;
