@@ -1,4 +1,4 @@
-% $Id: Mesh_options.tex,v 1.12 2012/05/03 21:23:53 peggyli Exp $
+% $Id: Mesh_options.tex,v 1.13 2012/05/04 08:02:06 peggyli Exp $
 
 \subsubsection{ESMF\_MESHELEMTYPE}
 \label{const:meshelemtype}
@@ -78,11 +78,12 @@ ESMF\_MESHELEMTYPE\_HEX  & 8 & A hexahedron (e.g. a cube) \\
 \end{tabular}
 
 \subsubsection{ESMF\_FILEFORMAT}
-\label{const:fileformat}
+\label{const:mesh:fileformat}
 
 {\sf DESCRIPTION:\\}
 This option is used by {\tt ESMF\_MeshCreate} to specify the type of the input grid file.  See 
-section~\ref{sec:example:UnstructFromFile} for more detailed description of the three file formats.
+sections~\ref{sec:fileformat:scrip}, \ref{sec:fileformat:esmf} and \ref{sec:fileformat:ugrid} for more 
+detailed description of the supported file formats.
 
 The type of this flag is:
 
@@ -95,7 +96,6 @@ The valid values are:
 \item [ESMF\_FILEFORMAT\_ESMFMESH] ESMF unstructured grid file format. This format was developed by the ESMF team to match the capabilities of the Mesh class and to be efficient to convert to that class. 
 
 \item [ESMF\_FILEFORMAT\_UGRID] CF-convention unstructured grid file format. This format is a proposed extention to the 
-CF-conventions for unstructured grid data model 
-\htmladdnormallink{(UGRID)} {http://publicwiki.deltares.nl/display/NETCDF/Deltares+CF+proposal+for+Unstructured+Grid+data+model}. Currently, only the 2D flexible mesh topology is supported in ESMF.
+CF-conventions for unstructured grid data model. Currently, only the 2D flexible mesh topology is supported in ESMF.
 \end{description}
 
