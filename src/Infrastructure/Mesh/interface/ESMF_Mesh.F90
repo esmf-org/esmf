@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.89 2012/04/13 20:36:22 peggyli Exp $
+! $Id: ESMF_Mesh.F90,v 1.90 2012/05/04 08:03:18 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.89 2012/04/13 20:36:22 peggyli Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.90 2012/05/04 08:03:18 peggyli Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -172,7 +172,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.89 2012/04/13 20:36:22 peggyli Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.90 2012/05/04 08:03:18 peggyli Exp $'
 
 !==============================================================================
 ! 
@@ -1088,7 +1088,7 @@ num_elems, &
 !   \item [filename]
 !         The name of the grid file
 !   \item[filetypeflag] 
-!         The file type of the grid file to be read, please see Section~\ref{const:fileformat}
+!         The file type of the grid file to be read, please see Section~\ref{const:mesh:fileformat}
 !         for a list of valid options. 
 !   \item[{[convert3D]}] 
 !         if TRUE, the node coordinates will be converted into 3D Cartisian, which
