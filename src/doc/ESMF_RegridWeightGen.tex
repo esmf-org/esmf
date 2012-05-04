@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.63 2012/04/27 18:03:55 svasquez Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.64 2012/05/04 08:09:44 peggyli Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -404,7 +404,7 @@ grid mask for a GRIDSPEC file and use user defined area for the conservative reg
 In the above example, "datavar" is the variable name defined in the source grid that will
  be used to construct the mask using its missing values.  
 
-\subsection{SCRIP Grid File Format}\label{sec:scripgridformat}
+\subsection{SCRIP Grid File Format}\label{sec:fileformat:scrip}
 
 A SCRIP format grid file is a NetCDF file and the header of a sample grid file is shown as follows:
 
@@ -447,6 +447,190 @@ that do not participate in the regridding and one for all other points.
 Coordinate arrays provide the latitudes and longitudes of cell centers
 and cell corners. The unit of the coordinates can be either "{\tt radians}" or "{\tt degrees}". 
 
+\subsection{ESMF Unstructured Grid File Format}\label{sec:application:esmfgridformat}
+
+ESMF also supports a more general unstructured grid file format for describing meshes.
+In the ESMF file format, the node coordinates are defined in a separate array
+{\tt nodeCoords}. {\tt nodeCoords} is a two-dimensional array of dimension {\tt (nodeCount,coordDim)}.
+For a 2D Grid, {\tt coordDim} is 2. {\tt nodeCoords(:,1)} contains the longitude coordinates and
+{\tt nodeCoords(:,2)} contains the latitude coordinates.  The same order applies to {\tt centerCoords}.
+ The indices to the {\tt nodeCoords} array are used in the element
+connectivity array {\tt elementConn}, and they are 1-based. 
+While in the SCRIP format, the two are combined into 
+{\tt grid\_corner\_lon} and {\tt grid\_corner\_lat} arrays.  
+Note that the {\tt elementConn} array must be defined in an order such that the nodes it references trace
+the outside of a grid cell in a counterclockwise order.
+
+The ESMF format is more general than the SCRIP format because it supports higher dimension coordinates and 
+more general topologies.  
+The following is a sample header of a mesh described in the ESMF format.
+ 
+\begin{verbatim}
+netcdf ne4np4-esmf {
+dimensions:	
+	nodeCount = 866 ;
+	elementCount = 936 ;
+	maxNodePElement = 4 ;
+	coordDim = 2 ;
+variables:	
+	double 	nodeCoords(nodeCount, coordDim);
+		nodeCoords:units = "degrees" ;
+	int elementConn(elementCount, maxNodePElement) ;
+		elementConn:long_name = "Node Indices that define the element connectivity";
+		elementConn:_FillValue = -1 ;	
+	byte numElementConn(elementCount) ;
+		numElementConn:long_name = "Number of nodes per element" ;
+	double centerCoords(elementCount, coordDim) ;
+		centerCoords:units = "degrees" ;
+	double elementArea(elementCount) ;
+		elementArea:units = "radians^2" ;
+		elementArea:long_name = "area weights" ;
+	int elementMask(elementCount) ;
+		elementMask:_FillValue = -9999. ;
+// global attributes:
+		:gridType="unstructured";
+		:version = "0.9" ;
+		:inputFile = "ne4np4-pentagons.nc" ;
+		:timeGenerated = "Fri Apr 16 16:05:24 2010" ;
+}
+\end{verbatim}
+
+\subsection{CF Convention GRIDSPEC File Format}\label{sec:fileformat:gridspec}
+
+In ESMF 5.3.0, two new NetCDF file formats are added to ESMF_RegridWeightGen, i.e. the CF GRIDSPEC convention 
+for regularly rectangular lat/lon grid and the CF UGRID convention for the unstructured grid.
+
+GRIDSPEC is a draft proposal for a set of Climate and Forecast (CF) conventions for the representation of gridded data for Earth System Models.  The original GRIDSPEC standard was proposed by V. Balaji and Z. Liang of GFDL.  It was further developed by D. Kinley and A. Pletzer of Tech X (see \addhtmlnormallink{ref} {https://ice.txcorp.com/trac/modave/wiki/CFProposalGridspec} and the support for GRIDSPEC has been integrated into the Unidata libCF library.
+
+GRIDSPEC extends the current CF convention to define grid mosaics, i.e., a grid consisting of multiple logically 
+rectangular grid tiles. It also provides a mechanism for storing a grid dataset into multiple files.  Therefore, 
+it introduces different types of files, such as a mosaic file that defines the multiple tiles and their 
+connectivity, a host file that aggregrates the grid mosiac and the data files, and a tile file for a single tile
+grid defination.  
+
+Currently, the ESMF only supports the Grid creation and regridding from a single tile grid file.  A tile file 
+is a CF compliant NetCDF file for a logically rectangular lat/lon grid.  An example grid file is shown below.  
+The cell center coordinates is defined in the variables whose attribute {\tt standard\_name} or {\tt long\_name} is set to either {\tt latitude} or {\tt longitude}.  The latitude and the longitude variables are one-dimensional arrays if the grid is a regular lat/lon grid, two-dimensional arrays if the grid is curvilinear. The bound coordinate 
+variables define the bound or the corner coordinates of a cell.  The bound variable name is specified in the
+{\tt bounds} attribute of the latitude and longitude variables.  In the following example, the latitude bound 
+variable is {\tt lat\_bnds} and the longitude bound variable is {\tt lon\_bnds}.  The bound variables are 2D
+arrays for a regular lat/lon grid and a 3D array for a curvilinear grid.  The first dimension of the bound 
+array is 2 for a regular lat/lon grid and 4 for a curvilinear grid.  The bound coordinates for a curvilinear
+grid is defined in counterclockwise order.  In the example below, the grid is a regular lat/lon
+grid, thus the coordinate variables are 1D and the bound variables is 2D with the first dimension equal to 2.
+The bound coordinates will be read in as the corner stagger coordinates when doing a conservative regrid.
+
+Since a GRIDSPEC tile file does not have a way to specify the grid mask, the mask is usually derived by the missing values stored in a data variable.  The ESMF offline regrid application provides an option for users to
+derive the grid mask from a data variable's missing values.  The value of the missing value is defined by the
+variable attribue {\tt missing\_value} or {\tt \_FillValue}.  If the value of the data point is equal to the 
+missing value, the grid mask for that grid point is set to 0, otherwise, it is set to 1.   In the following
+grid, the variable {\tt so} can be used to derive the grid mask.  A data variable could be a 2D, 3D or 4D. 
+For example, it may have additional depth and time dimension for a data variable.    
+It is assumed that the first and the second dimensions of the data variable should be the latitude and the 
+longitude dimension.  The first 2D data values will be used to derive the grid mask.
+ 
+\begin{verbatim}
+netcdf single_tile_grid {
+dimensions:
+	time = 1 ;
+	bound = 2 ;
+	lat = 181 ;
+	lon = 360 ;
+variables:
+	double lat(lat) ;
+		lat:bounds = "lat_bnds" ;
+		lat:units = "degrees_north" ;
+		lat:long_name = "latitude" ;
+		lat:standard_name = "latitude" ;
+	double lat_bnds(lat, bound) ;
+	double lon(lon) ;
+		lon:bounds = "lon_bnds" ;
+		lon:long_name = "longitude" ;
+		lon:standard_name = "longitude" ;
+		lon:units = "degrees_east" ;
+	double lon_bnds(lon, bound) ;
+	float so(time, lat, lon) ;
+		so:standard_name = "sea_water_salinity" ;
+		so:units = "psu" ;
+		so:missing_value = 1.e+20f ;
+}
+
+
+\subsection{CF Convention UGRID File Format}\label{sec:fileformat:ugrid}
+
+The UGRID file format is a proposed extention to the CF metadata conventions for the unstructured grid data model. The latest proposal can be found \htmladdnormallink{here} {\http://bit.ly/ugrid_cf}.  The proposal is still evolving, 
+the Mesh creation API and the offline regrid application in the ESFM 5.3.0 is based on the version updated on March 14, 2012.
+
+In the UGRID proposal, a 1D, 2D, or 3D mesh topology can be defined for an unstructured grid.  Currently, ESMF 
+only supports the 2D flexible mesh topology where each cell (a.k.a. "face" as defined in the UGRID document)  
+in the mesh may have 
+differnt number of corner nodes.  The main addition of the UGRID extention is a dummy variable that defines the mesh 
+topology and its connectivity.  This additional variable has a required attribute {\tt standard\_name} with value {\tt "mesh\_topology"}.  In addition, it has three more required attributes: {\tt dimension}, {\tt node\_coordinates} and 
+{\tt face\_node\_connectivity}.  The value of {\tt dimension} attribute should be 2 for a 2D mesh.  The 
+value of attribute {\tt node\_coordinates} is the names of the node longitude and latitude variables.
+The value of attribute {\tt face\_node\_connectivity} is the variable name that defines the corner node indices for each face of the mesh.   
+
+In the following example, the dummy mesh topology variable is {\tt fvcom\_mesh}.  As described above, its {\tt standard\_name} attribute has to be {\tt mesh\_topology} and {\tt dimension} attribute has to be 2 for a 2D mesh.  It defines 
+the node coordinate variable names to be {\tt lon} and {\tt lat} and the face center coordinate variable names {\tt lonc} 
+and {\tt latc}.  It also specifies the face/node connectivity variable name as {\tt nv}.
+
+The variable {\nv} is a two-dimensional array that defines the node indices of each face. The first dimension 
+defines the maximal number of nodes for each face. In this example, it is a 
+triangle mesh so the number of nodes per face is 3.  Since each face may have different number of corner nodes,
+some of the cells may have fewer nodes than the specified dimension. In that case, it is filled with the 
+missing values defined by the attribute {\tt \_FillValue}.  The nodes are in counter clockwise order.  An optional attribute 
+{\tt start\_index} defines whether the node index is 1-based or 0-based.
+
+The coordinate variables follows the CF metadata convention for coordinates.  They are 1D array with attribute 
+{\tt standard\_name} being either {\tt latitutde} or {\tt longitude}.  The units of the coordinates can be either{\tt degrees} or {\tt radians}.
+
+The UGRID files may also contain data variables.  The data may be located at the nodes or at the faces.  Two additional attributes are introduced in the UGRID extension for the data variables:  {\tt location} and {\tt mesh}.  The {\tt location}
+attribute defines where the data is located, it can be either {\tt face} or {\tt node}.  The {\tt mesh} attribute defines which mesh topology this variable belongs to since multiple mesh topologies may be defined in one
+file.  The ESMF_RegridWeightGen used the data variable on the face to derive the masks for the mesh cells 
+in the same way as for a GRIDSPEC file.  Currently, ESMF only supports mask on the cells, not on the nodes.   
+
+When creating a ESMF Mesh from a UGRID file, user has to provide the mesh topology mesh variable name to {\tt ESMF\_MeshCreate()}.
+
+\end{verbatim}
+netcdf FVCOM_grid2d {
+dimensions:
+	node = 417642 ;
+	nele = 826866 ;
+	three = 3 ;
+        time  = 1 ;
+
+variables:
+// Mesh topology
+	int fvcom_mesh;
+		fvcom_mesh:standard_name = "mesh_topology" ;
+		fvcom_mesh:dimension = 2. ;
+		fvcom_mesh:node_coordinates = "lon lat" ;
+		fvcom_mesh:face_node_connectivity = "nv" ;
+	int nv(nele, three) ;
+		nv:standard_name = "face_node_connectivity" ;
+		nv:start_index = 1. ;
+
+// Mesh node coordinates
+	float lon(node) ;
+                lon:standard_name = "longitude" ;
+	        lon:units = "degrees_east" ;
+	float lat(node) ;
+                lat:standard_name = "latitude" ;
+		lat:units = "degrees_north" ;
+
+// Data variable
+	float ua(time, nele) ;
+		ua:standard_name = "barotropic_eastward_sea_water_velocity" ;
+		ua:missing_value = -999. ;
+		ua:location = "face" ;
+		ua:mesh = "fvcom_mesh" ;
+	float va(time, nele) ;
+		va:standard_name = "barotropic_northward_sea_water_velocity" ;
+		va:missing_value = -999. ;
+		va:location = "face" ;
+		va:mesh = "fvcom_mesh" ;
+}
+\end{verbatim}
 
 \subsection{Regrid Interpolation Weight File Format}\label{sec:weightfileformat}
 
