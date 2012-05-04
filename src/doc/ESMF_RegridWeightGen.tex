@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.67 2012/05/04 18:33:42 peggyli Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.68 2012/05/04 20:38:01 peggyli Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -24,10 +24,9 @@ For a discussion of installing and accessing ESMF applications such as this one 
 As described above, this tool reads in
 two grid files and outputs weights for interpolation
 between the two grids. The input and output files are all in NetCDF format. The grid files can be defined in four
-different formats:  the SCRIP format~\ref{sec:scripgridformat} as is used as an input to SCRIP~\cite{ref:SCRIP}, the GRIDSPEC Tile grid file following the
+different formats:  the SCRIP format~\ref{sec:fileformat:scrip} as is used as an input to SCRIP~\cite{ref:SCRIP}, the GRIDSPEC Tile grid file~\ref{sec:fileformat:gridspec} following the
 \htmladdnormallink{CF metadata conventions}{http://cf-pcmdi.llnl.gov}, 
-the ESMF unstructured grid format~\ref{sec:example:UnstructFromFile} or the proposed CF unstructured grid 
-\htmladdnormallink{(UGRID)}{http://publicwiki.deltares.nl/display/NETCDF/Deltares+CF+proposal+for+Unstructured+Grid+data+model}. The GRIDSPEC and the UGRID are the two new file types added 
+the ESMF unstructured grid format~\ref{sec:fileformat:esmf} or the proposed CF unstructured grid~\ref{sec:fileformat:ugrid} 
 in the ESMF 5.3.0 release.  GRIDSPEC is a proposed CF extention for the annotation of complex
 Earth system grids.  In 5.3.0, we only support a single tile grid file for rectangular lat/lon grid.  For UGRID, currently we only support the 2D flexible mesh topology with mixed triangles and quadrilaterals.
 
@@ -447,6 +446,8 @@ that do not participate in the regridding and one for all other points.
 Coordinate arrays provide the latitudes and longitudes of cell centers
 and cell corners. The unit of the coordinates can be either "{\tt radians}" or "{\tt degrees}". 
 
+Both the SCRIP grid file format and the SCRIP weight file format work with the SCRIP 1.4 tools.
+
 \subsection{ESMF Unstructured Grid File Format}\label{sec:fileformat:esmf}
 
 ESMF also supports a more general unstructured grid file format for describing meshes.
@@ -498,37 +499,37 @@ variables:
 \subsection{CF Convention GRIDSPEC File Format}\label{sec:fileformat:gridspec}
 
 In ESMF 5.3.0, two new NetCDF file formats are added to ESMF\_RegridWeightGen, i.e. the CF GRIDSPEC convention 
-for regularly rectangular lat/lon grid and the CF UGRID convention for the unstructured grid.
+for logically rectangular lat/lon grid and the CF UGRID convention for the unstructured grid.
 
-GRIDSPEC is a draft proposal for a set of Climate and Forecast (CF) conventions for the representation of gridded data for Earth System Models.  The original GRIDSPEC standard was proposed by V. Balaji and Z. Liang of GFDL.  It was further developed by D. Kinley and A. Pletzer of Tech X (see \htmladdnormallink{ref} {https://ice.txcorp.com/trac/modave/wiki/CFProposalGridspec}). The support for GRIDSPEC has been integrated into the 
- \htmladdnormallink{Unidata libCF library} {http://www.unidata.ucar.edu/software/libcf}.
+GRIDSPEC is a draft proposal to extend the Climate and Forecast (CF) metadata conventions for the representation of gridded data for Earth System Models.  The original GRIDSPEC standard was proposed by V. Balaji and Z. Liang of GFDL.  It was further developed by D. Kinley and A. Pletzer of Tech X (see \htmladdnormallink{ref} {https://ice.txcorp.com/trac/modave/wiki/CFProposalGridspec}).  The ESMF implementation is based on the GRIDSPEC document last updated on 2/9/2012.
 
 GRIDSPEC extends the current CF convention to support grid  mosaics, i.e., a grid consisting of multiple logically 
-rectangular grid tiles. It also provides a mechanism for storing a grid dataset into multiple files.  Therefore, 
+rectangular grid tiles. It also provides a mechanism for storing a grid dataset in multiple files.  Therefore, 
 it introduces different types of files, such as a mosaic file that defines the multiple tiles and their 
 connectivity, a host file that aggregrates the grid mosiac and the data files, and a tile file for a single tile
 grid defination.  
 
-Currently, the ESMF only supports the Grid creation and regridding from a single tile grid file.  A tile file 
-is a CF compliant NetCDF file for a logically rectangular lat/lon grid.  An example grid file is shown below.  
-The cell center coordinates is defined in the variables whose attribute {\tt standard\_name} or {\tt long\_name} is set to either {\tt latitude} or {\tt longitude}.  The latitude and the longitude variables are one-dimensional arrays if the grid is a regular lat/lon grid, two-dimensional arrays if the grid is curvilinear. The bound coordinate 
+Currently, ESMF only supports the Grid creation and regridding from a single tile grid file.  A tile file 
+is a CF compliant NetCDF file for a logically rectangular lat/lon grid based on the
+\htmladdnormallink{CF Metadat Conventions V1.6} {http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.html}.   An example grid file is shown below.  
+The cell center coordinates are defined in the variables whose attribute {\tt standard\_name} or {\tt long\_name} is set to either {\tt latitude} or {\tt longitude}.  The latitude and the longitude variables are one-dimensional arrays if the grid is a regular lat/lon grid, two-dimensional arrays if the grid is curvilinear. The bound coordinate 
 variables define the bound or the corner coordinates of a cell.  The bound variable name is specified in the
 {\tt bounds} attribute of the latitude and longitude variables.  In the following example, the latitude bound 
 variable is {\tt lat\_bnds} and the longitude bound variable is {\tt lon\_bnds}.  The bound variables are 2D
 arrays for a regular lat/lon grid and a 3D array for a curvilinear grid.  The first dimension of the bound 
 array is 2 for a regular lat/lon grid and 4 for a curvilinear grid.  The bound coordinates for a curvilinear
 grid is defined in counterclockwise order.  In the example below, the grid is a regular lat/lon
-grid, thus the coordinate variables are 1D and the bound variables is 2D with the first dimension equal to 2.
-The bound coordinates will be read in as the corner stagger coordinates when doing a conservative regrid.
+grid, thus the coordinate variables are 1D and the bound variables are 2D with the first dimension equal to 2.
+The bound coordinates will be read in and stored in a ESMF Grid object as the corner stagger coordinates when doing a conservative regrid.
 
-Since a GRIDSPEC tile file does not have a way to specify the grid mask, the mask is usually derived by the missing values stored in a data variable.  The ESMF offline regrid application provides an option for users to
+Since a GRIDSPEC tile file does not have a way to specify the grid mask, the mask is usually derived by the missing values stored in a data variable.  ESMF\_RegridWeightGen provides an option for users to
 derive the grid mask from a data variable's missing values.  The value of the missing value is defined by the
 variable attribue {\tt missing\_value} or {\tt \_FillValue}.  If the value of the data point is equal to the 
 missing value, the grid mask for that grid point is set to 0, otherwise, it is set to 1.   In the following
 grid, the variable {\tt so} can be used to derive the grid mask.  A data variable could be a 2D, 3D or 4D. 
-For example, it may have additional depth and time dimension for a data variable.    
-It is assumed that the first and the second dimensions of the data variable should be the latitude and the 
-longitude dimension.  The first 2D data values will be used to derive the grid mask.
+For example, it may have additional depth and time dimensions.    
+It is assumed that the first and the second dimensions of the data variable should be the longitude and the 
+latitude dimension.  ESMF\_RegridWeightGen will use the first 2D data values to derive the grid mask.
  
 \begin{verbatim}
 netcdf single_tile_grid {
@@ -560,7 +561,7 @@ variables:
 \subsection{CF Convention UGRID File Format}\label{sec:fileformat:ugrid}
 
 The UGRID file format is a proposed extention to the CF metadata conventions for the unstructured grid data model. The latest proposal can be found \htmladdnormallink{here}{http://bit.ly/ugrid_cf}.  The proposal is still evolving, 
-the Mesh creation API and ESMF\_RegridWeightGen in ESFM 5.3.0 is based on the version updated on March 14, 2012.
+the Mesh creation API and ESMF\_RegridWeightGen in ESMF 5.3.0 is based on the version updated on March 14, 2012.
 
 In the UGRID proposal, a 1D, 2D, or 3D mesh topology can be defined for an unstructured grid.  Currently, ESMF 
 only supports the 2D flexible mesh topology where each cell (a.k.a. "face" as defined in the UGRID document)  
@@ -572,8 +573,7 @@ value of attribute {\tt node\_coordinates} is the names of the node longitude an
 The value of attribute {\tt face\_node\_connectivity} is the variable name that defines the corner node indices for each face of the mesh.   
 
 In the following example, the dummy mesh topology variable is {\tt fvcom\_mesh}.  As described above, its {\tt standard\_name} attribute has to be {\tt mesh\_topology} and {\tt dimension} attribute has to be 2 for a 2D mesh.  It defines 
-the node coordinate variable names to be {\tt lon} and {\tt lat} and the face center coordinate variable names {\tt lonc} 
-and {\tt latc}.  It also specifies the face/node connectivity variable name as {\tt nv}.
+the node coordinate variable names to be {\tt lon} and {\tt lat}.  It also specifies the face/node connectivity variable name as {\tt nv}.
 
 The variable {\tt nv} is a two-dimensional array that defines the node indices of each face. The first dimension 
 defines the maximal number of nodes for each face. In this example, it is a 
@@ -583,11 +583,11 @@ missing values defined by the attribute {\tt \_FillValue}.  The nodes are in cou
 {\tt start\_index} defines whether the node index is 1-based or 0-based.
 
 The coordinate variables follows the CF metadata convention for coordinates.  They are 1D array with attribute 
-{\tt standard\_name} being either {\tt latitutde} or {\tt longitude}.  The units of the coordinates can be either{\tt degrees} or {\tt radians}.
+{\tt standard\_name} being either {\tt latitutde} or {\tt longitude}.  The units of the coordinates can be either {\tt degrees} or {\tt radians}.
 
 The UGRID files may also contain data variables.  The data may be located at the nodes or at the faces.  Two additional attributes are introduced in the UGRID extension for the data variables:  {\tt location} and {\tt mesh}.  The {\tt location}
 attribute defines where the data is located, it can be either {\tt face} or {\tt node}.  The {\tt mesh} attribute defines which mesh topology this variable belongs to since multiple mesh topologies may be defined in one
-file.  The ESMF\_RegridWeightGen used the data variable on the face to derive the masks for the mesh cells 
+file.  ESMF\_RegridWeightGen uses the data variable on the face to derive the masks for the mesh cells 
 in the same way as for a GRIDSPEC file.  Currently, ESMF only supports mask on the cells, not on the nodes.   
 
 When creating a ESMF Mesh from a UGRID file, user has to provide the mesh topology mesh variable name to {\tt ESMF\_MeshCreate()}.
