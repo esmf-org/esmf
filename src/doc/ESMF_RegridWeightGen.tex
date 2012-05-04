@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.68 2012/05/04 20:38:01 peggyli Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.69 2012/05/04 22:29:05 peggyli Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -511,7 +511,7 @@ grid defination.
 
 Currently, ESMF only supports the Grid creation and regridding from a single tile grid file.  A tile file 
 is a CF compliant NetCDF file for a logically rectangular lat/lon grid based on the
-\htmladdnormallink{CF Metadat Conventions V1.6} {http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.html}.   An example grid file is shown below.  
+\htmladdnormallink{CF Metadata Conventions V1.6} {http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.html}.   An example grid file is shown below.  
 The cell center coordinates are defined in the variables whose attribute {\tt standard\_name} or {\tt long\_name} is set to either {\tt latitude} or {\tt longitude}.  The latitude and the longitude variables are one-dimensional arrays if the grid is a regular lat/lon grid, two-dimensional arrays if the grid is curvilinear. The bound coordinate 
 variables define the bound or the corner coordinates of a cell.  The bound variable name is specified in the
 {\tt bounds} attribute of the latitude and longitude variables.  In the following example, the latitude bound 
