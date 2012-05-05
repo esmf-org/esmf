@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.12 2012/04/18 00:53:26 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.13 2012/05/05 03:33:59 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -75,7 +75,7 @@ module ESMF_StateReconcile2Mod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-  '$Id: ESMF_StateReconcile2.F90,v 1.12 2012/04/18 00:53:26 w6ws Exp $'
+  '$Id: ESMF_StateReconcile2.F90,v 1.13 2012/05/05 03:33:59 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
@@ -425,7 +425,7 @@ contains
     end if
 
     do, i=0, npets-1
-      if (trace) then
+      if (debug) then
         write (*, '(a,i0,a,i0,a,l1)')  &
             '   PET ', mypet, ': Deserializing from PET ', i,  &
             ', associated (items_recv(i)%item_buffer) =', associated (items_recv(i)%item_buffer)
@@ -571,7 +571,7 @@ contains
 
     type(NeedsList_t), pointer :: needs_list
 
-    logical, parameter :: debug = .true.
+    logical, parameter :: debug = .false.
 
     ! Sanity checks
 
@@ -676,7 +676,10 @@ end if
       integer :: localrc_1
       integer :: memstat_1
 
-      if (.not. associated (needs_list_1)) return
+      if (.not. associated (needs_list_1)) then
+        rc_1 = ESMF_SUCCESS
+        return
+      end if
 
       deallocate (  &
           needs_list_1%offerers,  &
@@ -698,6 +701,8 @@ end if
             ESMF_CONTEXT,  &
             rcToReturn=rc_1)) return
       end if
+
+      rc_1 = ESMF_SUCCESS
         
     end subroutine needs_list_deallocate
 
@@ -719,6 +724,8 @@ end if
     !
     ! If the Id/VMId is not in the needs list, create a new needs_list
     ! entry.   If it is present, add that this PET is also offering it.
+
+      rc_1 = ESMF_SUCCESS
 
       if (.not. associated (needs_list_1)) then
 ! print *, 'pet', mypet, ': needs_list_insert: creating needs_list_1'
@@ -1087,6 +1094,8 @@ end if
     integer :: mypet, npets
     integer :: offset
 
+    logical, parameter :: debug = .false.
+
     rc = ESMF_RC_NOT_IMPL
 
     call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
@@ -1142,6 +1151,11 @@ end if
         ESMF_ATTRECONCILE_ON, ESMF_NOINQUIRE,  &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    allocate (buffer_recv(0:sum (recv_sizes)-1), stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
@@ -1287,7 +1301,6 @@ logical, parameter :: debug = .false.
     ! Broadcast each Id to all the other PETs.  Since the number of items per
     ! PET can vary, use AllToAllV.
 
-print *, '  PET', mypet, ': nitems_buf =', nitems_buf
     allocate (id_info(0:npets-1),  &
         stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
@@ -2200,7 +2213,7 @@ print *, '  PET', mypet, ': nitems_buf =', nitems_buf
 
       lbufsize = size (obj_buffer)
 
-print *, 'buffer offset before serialization loop =', buffer_offset
+! print *, 'buffer offset before serialization loop =', buffer_offset
       do, i=1, size (needs_list)
 
         if (.not. needs_list(i)) cycle
