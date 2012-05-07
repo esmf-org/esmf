@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.C,v 1.20 2012/01/06 20:17:14 svasquez Exp $
+// $Id: ESMCI_IO_NetCDF.C,v 1.21 2012/05/07 22:30:08 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -23,9 +23,9 @@
 
  // higher level, 3rd party or system includes here
  #include <stdio.h>
- #include <string.h>
  #include <ctype.h>
  #include <iostream>
+ #include <string>
 
  #include <ESMC_Util.h>
  #include <ESMCI_LogErr.h>
@@ -43,7 +43,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.20 2012/01/06 20:17:14 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.21 2012/05/07 22:30:08 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -254,6 +254,10 @@ namespace ESMCI
     if (!(netCdfFile->is_valid()))
     {
       // TODO: throw error, or return
+      string errstr = "; Attempting to open NcFile: ";
+      errstr.append(this->fileName);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN,
+         errstr.c_str(), &rc);
       return ESMF_FAILURE;
     }
 
@@ -298,6 +302,9 @@ namespace ESMCI
       else
       {
         // TODO:  return ESMF error?
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'thisDim' pointer is not valid.", &rc);
+      return(ESMF_FAILURE);
       }
     }
 
@@ -319,6 +326,9 @@ namespace ESMCI
       else
       {
         // TODO:  return ESMF error?
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'thisArray' pointer is not valid.", &rc);
+      return(ESMF_FAILURE);
       }
     }
 
@@ -341,6 +351,9 @@ namespace ESMCI
       else
       {
         // TODO:  return ESMF error?
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'thisAtt' pointer is not valid.", &rc);
+      return(ESMF_FAILURE);
       }
     }
 
