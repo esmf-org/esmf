@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.272 2012/05/04 08:08:55 peggyli Exp $
+! $Id: ESMF_Grid.F90,v 1.273 2012/05/08 17:14:44 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -308,7 +308,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.272 2012/05/04 08:08:55 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.273 2012/05/08 17:14:44 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5196,6 +5196,115 @@ subroutine convert_corner_arrays_to_1D(isSphere,dim1,dim2,cornerX2D,cornerY2D,co
 	  ESMF_CONTEXT, rcToReturn=rc)
      return
   endif
+
+
+#if 0
+! Error check corner info from file to make sure corners are consistent throughout file
+if (isSphere) then
+   write(*,*) 
+   write(*,*) "Error checking spherical Grid..."
+   
+   ! Init to starting pos
+   inPos=0
+   
+   ! Check rows up to btm row
+   do i=1,dim2-1
+      do j=1,dim1-1
+         inPos=inPos+1
+         if ((cornerX2D(TopRightCorner,inPos) .ne. cornerX2D(TopCorner,inPos+1)) .and. &
+              (cornerY2D(TopRightCorner,inPos) .ne. cornerY2D(TopCorner,inPos+1))) then
+            write(*,*) "TopRightCorner of ",inPos," doesn't match TopCorner of ",inPos+1
+            write(*,*) cornerX2D(TopRightCorner,inPos),cornerY2D(TopRightCorner,inPos)," .ne. ", &
+                       cornerX2D(TopCorner,inPos+1),cornerY2D(TopCorner,inPos+1)
+            !              stop
+         endif
+         
+         if ((cornerX2D(BtmRightCorner,inPos) .ne. cornerX2D(BtmCorner,inPos+1)) .and. &
+              (cornerY2D(BtmRightCorner,inPos) .ne. cornerY2D(BtmCorner,inPos+1))) then
+            write(*,*) "BtmRightCorner of ",inPos," doesn't match BtmCorner of ",inPos+1
+            !           stop
+         endif
+         
+         if ((cornerX2D(BtmCorner,inPos) .ne. cornerX2D(TopCorner,inPos+dim1)) .and. &
+              (cornerY2D(BtmCorner,inPos) .ne. cornerY2D(TopCorner,inPos+dim1))) then
+            write(*,*) "BtmCorner of ",inPos," doesn't match TopCorner of ",inPos+dim1
+            !           stop
+         endif
+         
+         if ((cornerX2D(BtmRightCorner,inPos) .ne. cornerX2D(TopRightCorner,inPos+dim1)) .and. &
+              (cornerY2D(BtmRightCorner,inPos) .ne. cornerY2D(TopRightCorner,inPos+dim1))) then
+            write(*,*) "BtmRightCorner of ",inPos," doesn't match TopRightCorner of ",inPos+dim1
+            !           stop
+         endif
+      enddo
+      
+      ! Check last point in row with beginning of row 
+      inPos=inPos+1
+      if ((cornerX2D(TopRightCorner,inPos) .ne. cornerX2D(TopCorner,inPos-dim1+1)) .and. &
+           (cornerY2D(TopRightCorner,inPos) .ne. cornerY2D(TopCorner,inPos-dim1+1))) then
+         write(*,*) "TopRightCorner of ",inPos," doesn't match TopCorner of ",inPos-dim1+1
+         !        stop
+      endif
+      
+      if ((cornerX2D(BtmRightCorner,inPos) .ne. cornerX2D(BtmCorner,inPos-dim1+1)) .and. &
+           (cornerY2D(BtmRightCorner,inPos) .ne. cornerY2D(BtmCorner,inPos-dim1+1))) then
+         write(*,*) "BtmRightCorner of ",inPos," doesn't match BtmCorner of ",inPos-dim1+1
+         stop
+      endif
+      
+      
+      if ((cornerX2D(BtmCorner,inPos) .ne. cornerX2D(TopCorner,inPos+dim1)) .and. &
+           (cornerY2D(BtmCorner,inPos) .ne. cornerY2D(TopCorner,inPos+dim1))) then
+         write(*,*) "BtmCorner of ",inPos," doesn't match TopCorner of ",inPos+dim1
+         !        stop
+      endif
+      
+      if ((cornerX2D(BtmRightCorner,inPos) .ne. cornerX2D(TopRightCorner,inPos+dim1)) .and. &
+           (cornerY2D(BtmRightCorner,inPos) .ne. cornerY2D(TopRightCorner,inPos+dim1))) then
+         write(*,*) "BtmRightCorner of ",inPos," doesn't match TopRightCorner of ",inPos+dim1
+         !        stop
+      endif
+   enddo
+
+
+   ! Check bottom row
+   do j=1,dim1-1
+      inPos=inPos+1
+      if ((cornerX2D(TopRightCorner,inPos) .ne. cornerX2D(TopCorner,inPos+1)) .and. &
+           (cornerY2D(TopRightCorner,inPos) .ne. cornerY2D(TopCorner,inPos+1))) then
+         write(*,*) "TopRightCorner of ",inPos," doesn't match TopCorner of ",inPos+1
+         !              stop
+      endif
+      
+      if ((cornerX2D(BtmRightCorner,inPos) .ne. cornerX2D(BtmCorner,inPos+1)) .and. &
+           (cornerY2D(BtmRightCorner,inPos) .ne. cornerY2D(BtmCorner,inPos+1))) then
+         write(*,*) "BtmRightCorner of ",inPos," doesn't match BtmCorner of ",inPos+1
+         !           stop
+      endif
+   enddo
+
+
+   ! Check last point in row with beginning of row 
+   inPos=inPos+1
+   if ((cornerX2D(TopRightCorner,inPos) .ne. cornerX2D(TopCorner,inPos-dim1+1)) .and. &
+        (cornerY2D(TopRightCorner,inPos) .ne. cornerY2D(TopCorner,inPos-dim1+1))) then
+      write(*,*) "TopRightCorner of ",inPos," doesn't match TopCorner of ",inPos-dim1+1
+      !        stop
+   endif
+   
+   if ((cornerX2D(BtmRightCorner,inPos) .ne. cornerX2D(BtmCorner,inPos-dim1+1)) .and. &
+        (cornerY2D(BtmRightCorner,inPos) .ne. cornerY2D(BtmCorner,inPos-dim1+1))) then
+      write(*,*) "BtmRightCorner of ",inPos," doesn't match BtmCorner of ",inPos-dim1+1
+      !     stop
+   endif
+else
+   ! TODO: Check regional grid
+      
+      
+endif
+
+
+#endif
 
   ! Set Corner info
   if (isSphere) then
