@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.236 2012/04/25 05:34:37 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.237 2012/05/10 02:16:15 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -291,7 +291,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.236 2012/04/25 05:34:37 theurich Exp $'
+    '$Id: ESMF_Comp.F90,v 1.237 2012/05/10 02:16:15 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -312,6 +312,14 @@ module ESMF_CompMod
     module procedure ESMF_mene
     module procedure ESMF_ctne
   end interface
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+
+!  integer, parameter :: ESMF_DEFAULT_TIMEOUT = 3600
+  integer, parameter :: ESMF_DEFAULT_TIMEOUT = 300 ! Temporary
+
 !------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -850,7 +858,7 @@ contains
       if (interCompCommArg .and. &
         (compp%compTunnel%this /= ESMF_NULL_POINTER)) then
         ! this is indeed a dual component with an open component tunnel
-        timeoutArg = 3600 ! default 1h timeout !!!!!!!!!!!
+        timeoutArg = ESMF_DEFAULT_TIMEOUT ! default 1h timeout !!!!!!!!!!!
         if (present(timeout)) timeoutArg = timeout
         call ESMF_CompExecute(compp, method=ESMF_METHOD_NONE, &
           timeout=timeoutArg, rc=localrc) ! disregard userRc - invalid here!
@@ -2218,7 +2226,7 @@ contains
 
     localUserRc = ESMF_SUCCESS  ! initialize to success
     
-    timeoutArg = 3600 ! default 1h
+    timeoutArg = ESMF_DEFAULT_TIMEOUT ! default 1h
     if (present(timeout)) timeoutArg = timeout
     
     ! check if the child VM, i.e. the VM of this component, is currently marked

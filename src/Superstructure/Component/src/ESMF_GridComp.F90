@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.198 2012/04/03 22:56:55 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.199 2012/05/10 02:16:15 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.198 2012/04/03 22:56:55 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.199 2012/05/10 02:16:15 w6ws Exp $'
 
 !==============================================================================
 !
@@ -242,6 +242,14 @@ module ESMF_GridCompMod
     module procedure ESMF_GridCompNE
 
   end interface
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+
+!  integer, parameter :: ESMF_DEFAULT_TIMEOUT = 3600
+  integer, parameter :: ESMF_DEFAULT_TIMEOUT = 300 ! Temporary
+
 !------------------------------------------------------------------------------
 
 
@@ -702,7 +710,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
 
-    timeoutArg = 3600 ! default 1h
+    timeoutArg = ESMF_DEFAULT_TIMEOUT ! default 1h
     if (present(timeout)) timeoutArg = timeout
 
     ! call Comp method
@@ -1191,7 +1199,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
 
-    timeoutArg = 3600 ! default 1h
+    timeoutArg = ESMF_DEFAULT_TIMEOUT ! default 1h
     if (present(timeout)) timeoutArg = timeout
 
     ! call Comp method
@@ -1496,7 +1504,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
 
-    timeoutArg = 3600 ! default 1h
+    timeoutArg = ESMF_DEFAULT_TIMEOUT ! default 1h
     if (present(timeout)) timeoutArg = timeout
 
     ! call Comp method
@@ -1636,7 +1644,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
 
-    timeoutArg = 3600 ! default 1h
+    timeoutArg = ESMF_DEFAULT_TIMEOUT ! default 1h
     if (present(timeout)) timeoutArg = timeout
 
     ! call Comp method
@@ -1805,7 +1813,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return  ! bail out
     endif
     
-    timeoutArg = 3600 ! default 1h
+    timeoutArg = ESMF_DEFAULT_TIMEOUT ! default 1h
     if (present(timeout)) timeoutArg = timeout
     
     ! call Comp method
@@ -2386,7 +2394,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
     
-    timeoutArg = 3600 ! default 1h
+    timeoutArg = ESMF_DEFAULT_TIMEOUT ! default 1h
     if (present(timeout)) timeoutArg = timeout
 
     if (present(server)) then
@@ -3096,7 +3104,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
 
-    timeoutArg = 3600 ! default 1h
+    timeoutArg = ESMF_DEFAULT_TIMEOUT ! default 1h
     if (present(timeout)) timeoutArg = timeout
 
     ! call Comp method
