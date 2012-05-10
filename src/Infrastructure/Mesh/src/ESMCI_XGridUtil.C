@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.16 2012/05/02 13:06:48 feiliu Exp $
+// $Id: ESMCI_XGridUtil.C,v 1.17 2012/05/10 13:59:18 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -425,7 +425,8 @@ int insert_intersect(int pdim, int sdim, std::list<xpoint> & final_nodes, const 
     xvector v2=xvector(*end_point);
     double d1 = metric(vp-v1);
     double d2 = metric(v2-v1);
-    if(d2 == 0.) Throw() << "Cannot have degenerate polygon (2+ nodes have identical coords)\n";
+    if(d2 == 0.) 
+      Throw() << "Cannot have degenerate polygon (2+ nodes have identical coords)\n";
     double ratio = d1/d2;
     if((ratio > epsilon) && (ratio < (1-epsilon)) ){
       final_nodes.insert(end_point, xp);
@@ -792,8 +793,21 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
         it = tmpit;
 
         polygon nodal_poly = polygon(nodes);
-        if(nodal_poly.area(sdim) > 0.)
-          difference.push_back(nodal_poly);
+
+        // adjust degenerated polygons
+        int num_nodes = nodal_poly.size();
+        double * coords = new double[num_nodes*sdim];
+        polygon_to_coords(nodal_poly, sdim, coords);
+        if(sdim == 2) remove_0len_edges2D(&num_nodes, coords);
+        if(sdim == 3) remove_0len_edges3D(&num_nodes, coords);
+    
+        if(num_nodes >=3){
+          polygon res_poly;
+          coords_to_polygon(num_nodes, coords, sdim, res_poly);
+          if(res_poly.area(sdim) > 0.)
+            difference.push_back(res_poly);
+        }
+        delete[] coords;
 
         nodes.clear();
         on_subject = true;
@@ -877,13 +891,24 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
 void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_cell *> & sintd_cells, int pdim, int sdim, Mesh *midmesh){
 
   // Debug
-  //std::vector<sintd_node *>::iterator ib = sintd_nodes.begin();
-  //std::vector<sintd_node *>::iterator ie = sintd_nodes.end();
-  //
-  //for(; ib != ie; ib++){
-  //  *ib->print();
+  //if(false){
+  //  std::vector<sintd_node *>::iterator ib = sintd_nodes.begin();
+  //  std::vector<sintd_node *>::iterator ie = sintd_nodes.end();
+  //  
+  //  for(; ib != ie; ib++){
+  //    if((*ib)->get_dim() != 2 && (*ib)->get_dim() != 3) (*ib)->print();
+  //  }
   //}
-
+  //if(false){
+  //  std::vector<sintd_cell *>::iterator ib = sintd_cells.begin();
+  //  std::vector<sintd_cell *>::iterator ie = sintd_cells.end();
+  //  
+  //  for(; ib != ie; ib++){
+  //    for(int i = 0; i < (*ib)->num_edges(); i ++)
+  //      if((*ib)->operator[](i)->get_dim() != 2 && (*ib)->operator[](i)->get_dim() != 3) 
+  //        (*ib)->operator[](i)->print();
+  //  }
+  //}
   // collect all the unique intersection points
   std::vector<sintd_node *> tmpnodes;
   std::stable_sort(sintd_nodes.begin(), sintd_nodes.end(), sintd_node_less());
@@ -894,7 +919,7 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
 
       tmpnodes.push_back(*it);
       std::vector<sintd_node *>::iterator itt = it+1;
-      while(itt != sintd_nodes.end() && **itt == **it){
+      while(itt != sintd_nodes.end() && (**itt == **it)) {
         (*itt)->get_cell()->replace_node(*it);
         // delete the node pointed to; reset the pointer value
         delete (*itt); *itt = 0;
@@ -982,8 +1007,9 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
     // Set Owner
     cell->set_owner(me);
     std::vector<MeshObj *> nodes;
-    for(int in = 0; in < num_edges; in ++)
+    for(int in = 0; in < num_edges; in ++){
       nodes.push_back(sintd_cells[i]->operator[](in)->get_node());
+    }
 
     meshmid.add_element(cell, nodes, num_edges, sintd_cells[i]->get_topo(sdim, pdim));
     elem_list[i] = cell;
@@ -1087,7 +1113,7 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
     }
   }
 
-  construct_sintd(0., num_sintd_nodes, sintd_coords, pdim, sdim, 
+  construct_sintd(area, num_sintd_nodes, sintd_coords, pdim, sdim, 
     sintd_nodes, sintd_cells);
 
 }
@@ -1095,10 +1121,57 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
 void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim, 
   std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells){
 
+  // Get rid of degenerate edges
+  if(sdim == 2)
+    remove_0len_edges2D(&num_sintd_nodes, sintd_coords);
+  else
+    remove_0len_edges3D(&num_sintd_nodes, sintd_coords);
+
+  if(num_sintd_nodes < 3) return;
+
   // Ready to create nodes etc..
   // Break up the cell into triangles if it's got more than 4 nodes
   int break_threshold = 4;
   if(num_sintd_nodes > break_threshold){
+    //double * coords = new double[3*sdim];
+    //for(int i = 0; i < sdim; i ++)
+    //  coords[i] = sintd_coords[i];
+
+    //for(int start_node = 1; start_node < num_sintd_nodes-1; start_node ++){
+    //  std::vector<sintd_node *> cell_nodes;
+    //  sintd_node * root_node = new sintd_node(sdim, sintd_coords);
+    //  cell_nodes.push_back(root_node);
+
+    //  for(int i = 0; i < 2; i ++){
+    //    sintd_node * node = new sintd_node(sdim, sintd_coords+sdim*(i+start_node));
+    //    cell_nodes.push_back(node);
+    //  }
+    //  for(int i = 0; i < 2; i ++)
+    //    for(int j = 0; j < sdim; j ++)
+    //    coords[(i+1)*sdim+j] = cell_nodes[i+1]->operator[](j);
+
+    //  double split_area;
+    //  if(sdim == 2)
+    //    split_area = area_of_flat_2D_polygon(3, coords);
+    //  if(sdim == 3)
+    //    split_area = great_circle_area(3, coords);
+    //  if(split_area == 0.){
+    //    // release the nodes of this cell and continue split process
+    //    for(int i = 0; i < 3; i ++) delete cell_nodes[i];
+    //    continue;
+    //  }
+
+    //  // Ready to add the split cell
+    //  for(int i = 0; i < 3; i ++) sintd_nodes->push_back(cell_nodes[i]);
+
+    //  // every cell keeps track of the nodes enclosing it
+    //  sintd_cell * cell = new sintd_cell(split_area, cell_nodes);
+    //  sintd_cells->push_back(cell);
+
+    //  for(int in = 0; in < 3; in ++)
+    //    (*(cell_nodes[in])).set_cell(cell);
+    //}
+    //delete[] coords; 
 
     // Init variables for polygon triangulation
     int num_tri=num_sintd_nodes-2;
@@ -1211,6 +1284,8 @@ int online_regrid_xgrid(Mesh &srcmesh, Mesh &dstmesh, Mesh * midmesh, IWeights &
   int regridPoleType = 0;
   int regridPoleNPnts = 1;
   int regridScheme = 0;
+//WriteVTKMesh(srcmesh, "srcmesh");
+//WriteVTKMesh(dstmesh, "dstmesh");
   if (!regrid(srcmesh, dstmesh, midmesh, wts, regridMethod, &regridScheme, 
             &regridPoleType, &regridPoleNPnts, unmappedaction))
     Throw() << "Regridding error" << std::endl;

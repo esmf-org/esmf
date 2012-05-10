@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshMerge.C,v 1.13 2012/05/02 13:06:48 feiliu Exp $
+// $Id: ESMCI_MeshMerge.C,v 1.14 2012/05/10 13:59:18 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -42,56 +42,15 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.13 2012/05/02 13:06:48 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.14 2012/05/10 13:59:18 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
 
-  //struct interp_res{
-  //  const MeshObj * clip_elem;
-  //  int num_sintd_nodes;
-  //  int num_subject_nodes;
-  //  int num_clip_nodes;
-  //  int sdim;
-  //  double * subject_coords;
-  //  double * clip_coords;
-  //  double subject_elem_area;
-  //  double clip_elem_area;
-  //  double fraction;
-
-  //  interp_res(const MeshObj * _clip_elem, int _num_sintd_nodes, int _num_subject_nodes, int _num_clip_nodes, 
-  //    int _sdim, double * _subject_coords, double * _clip_coords, 
-  //    double _subject_elem_area, double _clip_elem_area, double _fraction) : clip_elem(_clip_elem), 
-  //      num_sintd_nodes(_num_sintd_nodes), num_subject_nodes(_num_subject_nodes), num_clip_nodes(_num_clip_nodes),
-  //      sdim(_sdim), subject_elem_area(_subject_elem_area), clip_elem_area(_clip_elem_area), 
-  //      fraction(_fraction) {
-
-  //    subject_coords = new double[num_subject_nodes*sdim];
-  //    for(int i = 0; i < num_subject_nodes*sdim; i ++) subject_coords[i] = _subject_coords[i];
-
-  //    clip_coords = new double[num_clip_nodes*sdim];
-  //    for(int i = 0; i < num_clip_nodes*sdim; i ++) clip_coords[i] = _clip_coords[i];
-
-  //  }
-
-  //  ~interp_res(){
-  //    delete[] subject_coords;
-  //    delete[] clip_coords;
-  //  }
- 
-  //};
-
-  //typedef std::multimap<const MeshObj *, const interp_res *> interp_map;
-  //typedef std::multimap<const MeshObj *, const interp_res *> * interp_mapp;
-  //typedef std::multimap<const MeshObj *, const interp_res *>::const_iterator interp_map_citer;
-  //typedef std::multimap<const MeshObj *, const interp_res *>::iterator interp_map_iter;
-  //typedef std::pair<std::multimap<const MeshObj *, const interp_res *>::iterator, 
-  //                  std::multimap<const MeshObj *, const interp_res *>::iterator > interp_map_range;
-
   typedef std::vector<sintd_node *> * Sintd_nodes;
   typedef std::vector<sintd_cell *> * Sintd_cells;
 
-  void calc_clipped_poly(const Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, int *num_pnts, std::vector<double> *pnts, std::vector<int> *num, Sintd_nodes sintd_nodes, Sintd_cells sintd_cells, interp_mapp res_map);
+  void calc_clipped_poly(const Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, Sintd_nodes sintd_nodes, Sintd_cells sintd_cells, interp_mapp res_map);
   void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh);
   void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh, const Mesh & mesh_src, const Mesh & mesh_dst, 
     SearchResult &sres, interp_mapp sres_map);
@@ -102,6 +61,7 @@ namespace ESMCI {
 void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
   Trace __trace("MeshMerge()");
   //WriteVTKMesh(srcmesh, "srcmesh.vtk");
+  //WriteVTKMesh(dstmesh, "dstmesh.vtk");
 
   // Set some parameters for seach, eventually move these to .h or get rid of
   // const double normexp = 0.15;
@@ -115,9 +75,6 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
   if (srcmesh.parametric_dim() != dstmesh.parametric_dim()) {
     Throw() << "Meshes must have same parametric dim for mesh merge";
   }  
-
-  //printf("Inside MeshMerge srcmesh.spatial_dim=%d \n",srcmesh.spatial_dim());
-  //printf("Inside MeshMerge dstmesh.spatial_dim=%d \n",dstmesh.spatial_dim());
 
   // Get dim info for mesh
   int sdim=srcmesh.spatial_dim();
@@ -232,7 +189,7 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
   // Calculate polygons from search results
   // because dst(subject) mesh is not migrated, the sres is calculated from src(clip) rendezvous mesh and dst mesh
   interp_map res_map;
-  calc_clipped_poly(dstmesh, *mesh_src, sres, &num_pnts, &pnts, &num_pnts_in_poly, &sintd_nodes, &sintd_cells, &res_map);
+  calc_clipped_poly(dstmesh, *mesh_src, sres, &sintd_nodes, &sintd_cells, &res_map);
 
   // check sres
   int nelem[2];
@@ -433,10 +390,10 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
   //  weiler_clip_difference(2,2,3,p,4,q,diff);
   //}
 
+  unsigned int ncells = 0;
   // go through all src mesh elements, clip (higher priority) mesh, save all clip cells
   {
     const Mesh & mesh = srcmesh;
-    unsigned int ncells = 0;
 
     // Get mask and coord field
     MEField<> *mask_field = mesh.GetField("elem_mask");
@@ -468,8 +425,9 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
         //ThrowRequire(imi != id2ord.end());
       }
 
-      construct_sintd(0., topo->num_nodes, cd, pdim, sdim, 
-        &sintd_nodes, &sintd_cells);
+      int num_nodes = topo->num_nodes;
+
+      construct_sintd(0., num_nodes, cd, pdim, sdim, &sintd_nodes, &sintd_cells);
       ncells ++;
       delete[] cd;
 
@@ -479,7 +437,6 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
   // Go through all dst mesh elements, subject (low priority) mesh, compute differentials
   {
     const Mesh & mesh = dstmesh;
-    unsigned int ncells = 0;
     MEField<> &coord = *mesh.GetCoordField();
     MEField<> &clip_coord = *srcmesh.GetCoordField();
     MEField<> *elem_frac=mesh.GetField("elem_frac2");
@@ -511,6 +468,14 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
         }
       }
 
+      // Get rid of degenerate edges
+      if(sdim == 2)
+        remove_0len_edges2D(&subject_num_nodes, cd);
+      else
+        remove_0len_edges3D(&subject_num_nodes, cd);
+
+      if(subject_num_nodes < 3) continue;
+
       // make sure the polygons are in CCW sense before going into Weiler algorithm
       //if(sdim == 2 && area_of_flat_2D_polygon(subject_num_nodes, cd) < 0)
       //  reverse_coord(sdim, subject_num_nodes, cd);
@@ -534,6 +499,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
         dstpolys.resize(1);
         coords_to_polygon(subject_num_nodes, cd, sdim, dstpolys[0]);
         delete[] cd;
+
         interp_map_range range = sres_map->equal_range(&elem);
         double fraction_deduction = 0.;
 
@@ -552,21 +518,22 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
         // triangulate the remaining polygon
         for(interp_map_iter it = range.first; it != range.second; ++it){
 
+          // debug
+          //const interp_res * dbg_interp_res = it->second;
+          //double * master_sub_sph = new double[dbg_interp_res->num_subject_nodes*2];
+          //double * master_clip_sph = new double[dbg_interp_res->num_clip_nodes*2];
+          //{
+          //  cart2sph(dbg_interp_res->num_subject_nodes, dbg_interp_res->subject_coords, master_sub_sph);
+          //  cart2sph(dbg_interp_res->num_clip_nodes, dbg_interp_res->clip_coords, master_clip_sph);
+          //}
+
+          //if(elem.get_id() == 2378 && it->second->clip_elem->get_id() == 3559) 
+          //  int nop = elem.get_id() - it->second->clip_elem->get_id();
+
           // construct clip element polygon from src element
           const MeshObj & clip_elem = *(it->second->clip_elem);
-          const MeshObjTopo *topo = GetMeshObjTopo(clip_elem);
-          int clip_num_nodes = topo->num_nodes;
+          int clip_num_nodes = it->second->num_clip_nodes;
           double *clip_cd = it->second->clip_coords;
-
-          //double *clip_cd = new double[sdim*topo->num_nodes];
-          //for (UInt n = 0; n < clip_num_nodes; n++) {
-
-          //  const MeshObj &node = *clip_elem.Relations[n].obj;
-          //  for(int i = 0; i < sdim; i ++) {
-          //    double * tmp = clip_coord.data(node);
-          //    clip_cd[(n*sdim)+i] = tmp[i];
-          //  }
-          //}
 
           // for each polygon in cutted dst element, compute residual diff polygons
           int num_p; int *ti, *tri_ind; double *pts, *td;
@@ -574,27 +541,39 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
           for(std::vector<polygon>::iterator dstpoly_it = dstpolys.begin();
             dstpoly_it != dstpolys.end(); ++ dstpoly_it){
 
+            diff.clear();
+
             // diff each dst element residual polygon with src element iteratively
             // this normally does not happen too deep.
-            subject_num_nodes = dstpoly_it->points.size();
-            cd = new double[sdim*dstpoly_it->points.size()];
+            int subject_num_nodes = dstpoly_it->points.size();
+            double * cd = new double[sdim*dstpoly_it->points.size()];
             polygon_to_coords(*dstpoly_it, sdim, cd);
-            diff.clear();
-            
+
+            // Get rid of degenerate edges
+            if(sdim == 2)
+              remove_0len_edges2D(&subject_num_nodes, cd);
+            else
+              remove_0len_edges3D(&subject_num_nodes, cd);
+
+            if(subject_num_nodes < 3) continue;
+          
             double *cd_sph, *clip_cd_sph;
             if(sdim == 2) weiler_clip_difference(pdim, sdim, subject_num_nodes, cd, clip_num_nodes, clip_cd, diff);
             if(sdim == 3){
-              clip_cd_sph = new double[clip_num_nodes*2]; cart2sph(clip_num_nodes, clip_cd, clip_cd_sph);
-              cd_sph = new double[subject_num_nodes*2];   cart2sph(subject_num_nodes, cd, cd_sph);
+              
+              //clip_cd_sph = new double[clip_num_nodes*2]; cart2sph(clip_num_nodes, clip_cd, clip_cd_sph);
+              //cd_sph = new double[subject_num_nodes*2];   cart2sph(subject_num_nodes, cd, cd_sph);
 
               //weiler_clip_difference(pdim, 2, subject_num_nodes, cd_sph, clip_num_nodes, clip_cd_sph, diff);
               //std::vector<polygon> diff_cart;
               //sph2cart(diff, diff_cart);
               //diff.clear(); diff.resize(diff_cart.size()); std::copy(diff_cart.begin(), diff_cart.end(), diff.begin());
 
+              double subject_area = great_circle_area(subject_num_nodes, cd);
+              if(subject_area <= 0.) { delete[] cd; continue; }
               weiler_clip_difference(pdim, sdim, subject_num_nodes, cd, clip_num_nodes, clip_cd, diff);
-              std::vector<polygon> diff_sph;
-              cart2sph(diff, diff_sph);
+              //std::vector<polygon> diff_sph;
+              //cart2sph(diff, diff_sph);
             }
             
             delete[] cd;
@@ -639,7 +618,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
               }
             }
 
-            if(sdim == 3) delete[] clip_cd_sph, cd_sph;
+            //if(sdim == 3) delete[] clip_cd_sph, cd_sph;
           } // for each dst poly
           // clear dst poly vector and copy all results triangles to it to intersect with the next src element
           dstpolys.clear(); dstpolys.resize(results.size());
@@ -688,141 +667,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
     }
   }
   
-#if 0
-  // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
-  // this call. 
-  void calc_inter_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
-                             std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
-                             int *num_pnts, std::vector<double> *pnts, std::vector<int> *num_pnts_in_poly, 
-                             Sintd_nodes sintd_nodes, Sintd_cells sintd_cells, interp_mapp res_map){
-
-
-// Maximum size for a supported polygon
-// Since the elements are of a small 
-// limited size. Fixed sized buffers seem 
-// the best way to handle them
-
-#define  MAX_NUM_POLY_NODES 40
-#define  MAX_NUM_POLY_COORDS_2D (2*MAX_NUM_POLY_NODES) 
-
-    // Declaration for src polygon
-    int num_src_nodes;
-    double src_coords[MAX_NUM_POLY_COORDS_2D];
-
-    // Get src coords
-    get_elem_coords(src_elem, src_cfield, 2, MAX_NUM_POLY_NODES, &num_src_nodes, src_coords);
-
-    // if no nodes then exit
-    if (num_src_nodes<1) return;
-
-    // Get rid of degenerate edges
-    remove_0len_edges2D(&num_src_nodes, src_coords);
-
-    // if less than a triangle complain
-    if (num_src_nodes<3) {
-      Throw() << "Source Element is degenerate";
-    }
-
-    // Declaration for dst polygon
-    int num_dst_nodes;
-    double dst_coords[MAX_NUM_POLY_COORDS_2D];
-
-    // Declaration for intersection polygon
-    int num_sintd_nodes;
-    double sintd_coords[MAX_NUM_POLY_COORDS_2D];
-
-    // Declaration for tmp polygon used in intersection routine
-    double tmp_coords[MAX_NUM_POLY_COORDS_2D];
-
- 
-    // Loop intersecting and computing areas of intersection
-    for (int i=0; i<dst_elems.size(); i++) {
-      const MeshObj *dst_elem = dst_elems[i];
-      
-      // Get dst coords
-      get_elem_coords(dst_elem, dst_cfield, 2, MAX_NUM_POLY_NODES, &num_dst_nodes, dst_coords);
-      
-      // if no nodes then go to next
-      if (num_dst_nodes<1) {
-	continue;
-      }
-
-      // Get rid of degenerate edges
-      remove_0len_edges2D(&num_dst_nodes, dst_coords);
-      
-      // if less than a triangle complain
-      if (num_dst_nodes<3) {
-	Throw() << "Source Element is degenerate";
-      }
-      
-     // Make sure that we aren't going to go over size of tmp buffers
-     if ((num_src_nodes + num_dst_nodes) > MAX_NUM_POLY_NODES) {
-       Throw() << " src and dst poly size too big for temp buffer";
-     }
-     
-     
-      // Intersect src with dst element
-      intersect_convex_poly2D(num_dst_nodes, dst_coords,
-                              num_src_nodes, src_coords,
-                              tmp_coords,
-                              &num_sintd_nodes, sintd_coords); 
-     
-
-      // Get rid of degenerate edges
-      remove_0len_edges2D(&num_sintd_nodes, sintd_coords);
-
-      // if intersected element isn't a complete polygon then go to next
-      if (num_sintd_nodes < 3)
-        continue;
-
-      // TODO chop into triangles if necessary
-      // calculate intersection area
-      double sintd_areas=area_of_flat_2D_polygon(num_sintd_nodes, sintd_coords); 
-
-      construct_sintd(sintd_areas,
-          num_sintd_nodes, sintd_coords, 2, 2,
-          sintd_nodes, sintd_cells);
-
-      double src_area = area_of_flat_2D_polygon(num_src_nodes, src_coords);
-      double dst_area = area_of_flat_2D_polygon(num_dst_nodes, dst_coords);
-
-      // because the calling routine MeshMerge has reversed src/dst sense, reverse here too
-      // to construct proper sres_map, here src->subject, dst->clip
-      interp_map_iter it = res_map->find(src_elem);
-      if(it != res_map->end()) { 
-        // check if this is a unique intersection
-        interp_map_range range = res_map->equal_range(src_elem);
-        for(interp_map_iter it = range.first; it != range.second; ++it){
-          if(it->second->clip_elem == dst_elem)
-            Throw() << "Duplicate src/dst elem pair found in res_map" << std::endl;
-        }
-      }
-      res_map->insert(std::make_pair(src_elem, new interp_res(dst_elem, num_sintd_nodes, num_src_nodes, num_dst_nodes, 2, src_coords, dst_coords, 
-        src_area, dst_area, ((src_area == 0.)? 1.:sintd_areas/src_area) ) ) ); 
-
-      // Add element to output list
-      //// Add number of points
-      *num_pnts += num_sintd_nodes;
-
-      //// Add number of points in poly
-      num_pnts_in_poly->push_back(num_sintd_nodes);
-
-      //// Add coords
-      pnts->reserve(pnts->size()+2*num_sintd_nodes);
-      for (int j=0; j<num_sintd_nodes; j++) {
-        pnts->push_back(sintd_coords[2*j]);
-        pnts->push_back(sintd_coords[2*j+1]);
-      }
-    }
-
-#undef  MAX_NUM_POLY_NODES
-#undef  MAX_NUM_POLY_COORDS_2D    
-  }
-#endif
-
-
-
-  void calc_clipped_poly_2D_2D_cart(const Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres,   int *num_pnts, std::vector<double> *pnts, std::vector<int> *num, Sintd_nodes sintd_nodes, Sintd_cells sintd_cells, interp_mapp res_map){
+  void calc_clipped_poly_2D_2D_cart(const Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, Sintd_nodes sintd_nodes, Sintd_cells sintd_cells, interp_mapp res_map){
   Trace __trace("calc_clipped_poly(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
     
   // Get src coord field
@@ -898,157 +743,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
 
 }
 
-
-#if 0
-  void calc_inter_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
-                            std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, 
-                            int *num_pnts, std::vector<double> *pnts, std::vector<int> *num_pnts_in_poly,
-                            Sintd_nodes sintd_nodes, Sintd_cells sintd_cells, interp_mapp res_map){
-
-
-// Maximum size for a supported polygon
-// Since the elements are of a small 
-// limited size. Fixed sized buffers seem 
-// the best way to handle them
-
-#define  MAX_NUM_POLY_NODES 40
-#define  MAX_NUM_POLY_COORDS_3D (3*MAX_NUM_POLY_NODES) 
-
-    // Declaration for src polygon
-    int num_src_nodes;
-    double src_coords[MAX_NUM_POLY_COORDS_3D];
-
-    // Get src coords
-    get_elem_coords(src_elem, src_cfield, 3, MAX_NUM_POLY_NODES, &num_src_nodes, src_coords);
-
-    // if no nodes then exit
-    if (num_src_nodes<1) return;
-
-    // Get rid of degenerate edges
-    remove_0len_edges3D(&num_src_nodes, src_coords);
-
-    // if less than a triangle complain
-    if (num_src_nodes<3) {
-      Throw() << "Source Element is degenerate";
-    }
-
-    // Declaration for dst polygon
-    int num_dst_nodes;
-    double dst_coords[MAX_NUM_POLY_COORDS_3D];
-
-    // Declaration for intersection polygon
-    int num_sintd_nodes;
-    double sintd_coords[MAX_NUM_POLY_COORDS_3D];
-
-    // Declaration for tmp polygon used in intersection routine
-    double tmp_coords[MAX_NUM_POLY_COORDS_3D];
-
- 
-
-    // Loop intersecting and computing areas of intersection
-    for (int i=0; i<dst_elems.size(); i++) {
-      const MeshObj *dst_elem = dst_elems[i];
-      
-      // Get dst coords
-      get_elem_coords(dst_elem, dst_cfield, 3, MAX_NUM_POLY_NODES, &num_dst_nodes, dst_coords);
-      
-      // if no nodes then go to next
-      if (num_dst_nodes<1) {
-	continue;
-      }
-
-      // Get rid of degenerate edges
-      remove_0len_edges3D(&num_dst_nodes, dst_coords);
-      
-      // if less than a triangle complain
-      if (num_dst_nodes<3) {
-	Throw() << "Source Element is degenerate";
-      }
-      
-     
-     // Make sure that we aren't going to go over size of tmp buffers
-     if ((num_src_nodes + num_dst_nodes) > MAX_NUM_POLY_NODES) {
-       Throw() << " src and dst poly size too big for temp buffer";
-     }
-     
-     
-     // Intersect src with dst element
-     intersect_convex_2D_3D_sph_gc_poly(num_dst_nodes, dst_coords,
-                                        num_src_nodes, src_coords,
-                                        tmp_coords,
-                                        &num_sintd_nodes, sintd_coords); 
-     
-
-      // Get rid of degenerate edges
-      remove_0len_edges3D(&num_sintd_nodes, sintd_coords);
-
-      // if intersected element isn't a complete polygon then go to next
-      if (num_sintd_nodes < 3) {
-	continue;
-      }
-
-      // TODO chop into triangles if necessary
-      // calculate intersection area
-      double sintd_areas=great_circle_area(num_sintd_nodes, sintd_coords); 
-
-      construct_sintd(sintd_areas,
-          num_sintd_nodes, sintd_coords, 2, 3,
-          sintd_nodes, sintd_cells);
-
-      double src_area = great_circle_area(num_src_nodes, src_coords);
-      double dst_area = great_circle_area(num_dst_nodes, dst_coords);
-
-      //interp_map_iter it = res_map->find(dst_elem);
-      //if(it != res_map->end()) { 
-      //  // check if this is a unique intersection
-      //  interp_map_range range = res_map->equal_range(dst_elem);
-      //  for(interp_map_iter it = range.first; it != range.second; ++it){
-      //    if(it->second->clip_elem == src_elem)
-      //      Throw() << "Duplicate src/dst elem pair found in res_map" << std::endl;
-      //  }
-      //}
-      //res_map->insert(std::make_pair(dst_elem, new interp_res(src_elem, num_sintd_nodes, num_dst_nodes, num_src_nodes, 3, dst_coords, src_coords, 
-      //  dst_area, src_area, ((src_area == 0.)? 1.:sintd_areas/src_area) ) ) ); 
-      // because the calling routine MeshMerge has reversed src/dst sense, reverse here too
-      // to construct proper sres_map, here src->subject, dst->clip
-      interp_map_iter it = res_map->find(src_elem);
-      if(it != res_map->end()) { 
-        // check if this is a unique intersection
-        interp_map_range range = res_map->equal_range(src_elem);
-        for(interp_map_iter it = range.first; it != range.second; ++it){
-          if(it->second->clip_elem == dst_elem)
-            Throw() << "Duplicate src/dst elem pair found in res_map" << std::endl;
-        }
-      }
-      res_map->insert(std::make_pair(src_elem, new interp_res(dst_elem, num_sintd_nodes, num_src_nodes, num_dst_nodes, 3, src_coords, dst_coords, 
-        src_area, dst_area, ((src_area == 0.)? 1.:sintd_areas/src_area) ) ) ); 
-
-      // Add element to output list
-      //// Add number of points
-      *num_pnts += num_sintd_nodes;
-
-      //// Add number of points in poly
-      num_pnts_in_poly->push_back(num_sintd_nodes);
-
-      //// Add coords
-      pnts->reserve(pnts->size()+3*num_sintd_nodes);
-      for (int j=0; j<num_sintd_nodes; j++) {
-        pnts->push_back(sintd_coords[3*j]);
-        pnts->push_back(sintd_coords[3*j+1]);
-        pnts->push_back(sintd_coords[3*j+2]);
-      }
-    }
-
-
-#undef  MAX_NUM_POLY_NODES
-#undef  MAX_NUM_POLY_COORDS_3D    
-  }
-#endif
-
-
-
-
-void calc_clipped_poly_2D_3D_sph(const Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres,   int *num_pnts, std::vector<double> *pnts, std::vector<int> *num, Sintd_nodes sintd_nodes, Sintd_cells sintd_cells, interp_mapp res_map){
+void calc_clipped_poly_2D_3D_sph(const Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, Sintd_nodes sintd_nodes, Sintd_cells sintd_cells, interp_mapp res_map){
   Trace __trace("calc_clipped_poly(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
     
   // Get src coord field
@@ -1077,17 +772,12 @@ void calc_clipped_poly_2D_3D_sph(const Mesh &srcmesh, Mesh &dstmesh, SearchResul
     // If there are no associated dst elements then skip it
     if (sr.elems.size() == 0) continue;
 
-#if 0
     // If this source element is masked then skip it
     if (src_mask_field) {
         const MeshObj &src_elem = *sr.elem;
         double *msk=src_mask_field->data(src_elem);
-        if (*msk>0.5) {
-          continue; // if this is masked, then go to next search result
-          // TODO: put code in ESMCI_Search.C, so the masked source elements, don't get here
-        }
+        if (*msk>0.5) continue; // if this is masked, then go to next search result
     }
-#endif
 
     // Calculate weights
     double src_area;
@@ -1132,7 +822,7 @@ void calc_clipped_poly_2D_3D_sph(const Mesh &srcmesh, Mesh &dstmesh, SearchResul
 }
 
 
-  void calc_clipped_poly(const Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, int *num_pnts,  std::vector<double> *pnts, std::vector<int> *num, Sintd_nodes sintd_nodes, Sintd_cells sintd_cells, interp_mapp res_map){
+  void calc_clipped_poly(const Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, Sintd_nodes sintd_nodes, Sintd_cells sintd_cells, interp_mapp res_map){
 
 
   // both meshes have to have the same dimensions
@@ -1151,9 +841,9 @@ void calc_clipped_poly_2D_3D_sph(const Mesh &srcmesh, Mesh &dstmesh, SearchResul
   // Get weights depending on dimension
   if (pdim==2) {
     if (sdim==2) {
-      calc_clipped_poly_2D_2D_cart(srcmesh, dstmesh, sres, num_pnts, pnts, num, sintd_nodes, sintd_cells, res_map);
+      calc_clipped_poly_2D_2D_cart(srcmesh, dstmesh, sres, sintd_nodes, sintd_cells, res_map);
     } else if (sdim==3) {
-      calc_clipped_poly_2D_3D_sph(srcmesh, dstmesh, sres, num_pnts, pnts, num, sintd_nodes, sintd_cells, res_map);
+      calc_clipped_poly_2D_3D_sph(srcmesh, dstmesh, sres, sintd_nodes, sintd_cells, res_map);
     }
   } else {
     Throw() << "Meshes with parametric dimension != 2 not supported for conservative regridding";
