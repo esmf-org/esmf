@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridMaskingUTest.F90,v 1.3 2012/05/10 13:58:55 feiliu Exp $
+! $Id: ESMF_XGridMaskingUTest.F90,v 1.4 2012/05/11 15:31:24 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -574,19 +574,22 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     do i = lbound(coordX,1), ubound(coordX,1)
-      do j = lbound(coordX, 2), ubound(coordX, 2)
+      do j = lbound(coordY, 2), ubound(coordY, 2)
         coordX(i,j) = startx + atm_dx/2. + (i-1)*atm_dx
         coordY(i,j) = starty + atm_dy/2. + (j-1)*atm_dy
-        if(present(maskvalue)) then
+      enddo
+    enddo
+    if(present(maskvalue) .and. present(msx) .and. present(mex) .and. &
+       present(msy) .and. present(mey)) then
+      do i = lbound(coordX,1), ubound(coordX,1)
+        do j = lbound(coordY, 2), ubound(coordY, 2)
           if((coordX(i,j) .ge. msx .and. coordX(i,j) .le. mex) .and. &
              (coordY(i,j) .ge. msy .and. coordY(i,j) .le. mey) ) then
             maskptr(i,j) = maskvalue
-          else
-            maskptr(i,j) = 0
           endif
-        endif
+        enddo
       enddo
-    enddo
+    endif
     !print *, 'startx: ', startx, lbound(coordX, 1), ubound(coordX, 1), 'coordX: ', coordX(:,1)
     ! X corner
     call ESMF_GridGetCoord(make_grid_sph, localDE=0, staggerLoc=ESMF_STAGGERLOC_CORNER, &
