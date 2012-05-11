@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridMaskingUTest.F90,v 1.4 2012/05/11 15:31:24 feiliu Exp $
+! $Id: ESMF_XGridMaskingUTest.F90,v 1.5 2012/05/11 17:19:29 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -84,7 +84,7 @@ contains
 !------------------------------------------------------------------------
   subroutine test2d_masking_single(rc)
     integer, intent(out)                :: rc
-    integer                             :: localrc, i, npet, lpet
+    integer                             :: localrc, npet, lpet
     type(ESMF_XGrid)                    :: xgrid
     type(ESMF_Grid)                     :: sideA(1), sideB(1)
 
@@ -148,7 +148,7 @@ contains
 
   subroutine test3d_masking_regional(rc)
     integer, intent(out)                :: rc
-    integer                             :: localrc, i, npet
+    integer                             :: localrc, npet
     type(ESMF_XGrid)                    :: xgrid
     type(ESMF_Grid)                     :: sideA(2), sideB(1)
 
@@ -291,7 +291,7 @@ contains
 
   subroutine test3d_masking_global(rc)
     integer, intent(out)                :: rc
-    integer                             :: localrc, i, npet
+    integer                             :: localrc, npet
     type(ESMF_XGrid)                    :: xgrid
     type(ESMF_Grid)                     :: sideA(2), sideB(1)
 
@@ -311,8 +311,10 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     xgrid = ESMF_XGridCreate((/ &
-        make_grid_sph(12,9,30.,20.,0.,-90.,msx=0., mex=160., msy=-90., mey=90.,maskvalue=3, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc), &
-        make_grid_sph(9,6,40.,30.,0.,-90., msx=200., mex=360., msy=-90., mey=90.,maskvalue=4, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
+        make_grid_sph(12,9,30.,20.,0.,-90.,msx=0., mex=160., msy=-90., mey=90., &
+          maskvalue=3, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc), &
+        make_grid_sph(9,6,40.,30.,0.,-90., msx=200., mex=360., msy=-90., mey=90., &
+          maskvalue=4, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
       (/make_grid_sph(12,18,30.,10.,0.,-90.,scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
       sideAMaskValues=(/2,3,4/), sideBMaskValues=(/2,3,4/), &
       rc=localrc)
@@ -326,8 +328,10 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     xgrid = ESMF_XGridCreate((/ &
-        make_grid_sph(12,9,30.,20.,0.,-90.,msx=0., mex=160., msy=-90., mey=90.,maskvalue=3, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc), &
-        make_grid_sph(9,9,40.,20.,0.,-90., msx=200., mex=360., msy=-90., mey=90.,maskvalue=4, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
+        make_grid_sph(12,9,30.,20.,0.,-90.,msx=0., mex=160., msy=-90., mey=90., &
+          maskvalue=3, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc), &
+        make_grid_sph(9,9,40.,20.,0.,-90., msx=200., mex=360., msy=-90., mey=90., &
+          maskvalue=4, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
       (/make_grid_sph(12,18,30.,10.,0.,-90.,scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
       sideAMaskValues=(/2,3,4/), sideBMaskValues=(/2,3,4/), &
       rc=localrc)
@@ -342,8 +346,10 @@ contains
 
     ! partially overlap
     xgrid = ESMF_XGridCreate((/ &
-        make_grid_sph(120,90,3.,2.,0.,-90.,msx=0., mex=160., msy=-90., mey=90.,maskvalue=3, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc), &
-        make_grid_sph(45,120,8.,1.5,0.,-90., msx=200., mex=360., msy=-90., mey=90.,maskvalue=4, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
+        make_grid_sph(120,90,3.,2.,0.,-90.,msx=0., mex=160., msy=-90., mey=90., &
+          maskvalue=3, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc), &
+        make_grid_sph(45,120,8.,1.5,0.,-90., msx=200., mex=360., msy=-90., mey=90., &
+          maskvalue=4, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
       (/make_grid_sph(120,120,3.,1.5,0.,-90.,scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
       sideAMaskValues=(/2,3,4/), sideBMaskValues=(/2,3,4/), &
       rc=localrc)
