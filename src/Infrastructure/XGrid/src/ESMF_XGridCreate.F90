@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.63 2012/05/02 13:05:14 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.64 2012/05/11 15:36:59 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.63 2012/05/02 13:05:14 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.64 2012/05/11 15:36:59 feiliu Exp $'
 
 !==============================================================================
 !
@@ -247,9 +247,6 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
 !  memory can be released by destroying XGrid after communication routehandles are computed using
 !  {\tt ESMF\_FieldRegridStore()} method.
 ! 
-!  Masking is not fully tested and is not supported right now. Specifying {\tt sideAMaskValues}
-!  or {\tt sideBMaskValues} will result in an error returned from this method.
-!
 !  It is erroneous to specify identical Grid object in {\tt sideA} and
 !  {\tt sideB} arguments. If {\tt sideA} and {\tt sideB} have a single Grid object, then it's erroneous
 !  if the two Grids do not overlap. It is also erroneous to specify Grid object in {\tt sideA} or {\tt sideB} 
@@ -396,13 +393,6 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
     ! Presumably no longer useful
     AisSphere = 0
     BisSphere = 0
-
-    !if(present(sideAMaskValues) .or. present(sideBMaskValues)) then
-    !  call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-    !   msg="- masking is not fully tested and supported with XGrid in the current version", &
-    !   ESMF_CONTEXT, rcToReturn=rc) 
-    !  return
-    !endif
 
     ! check init status of input Grids
     ngrid_a = size(sideA, 1)
