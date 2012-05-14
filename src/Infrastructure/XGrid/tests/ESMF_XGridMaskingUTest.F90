@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridMaskingUTest.F90,v 1.5 2012/05/11 17:19:29 feiliu Exp $
+! $Id: ESMF_XGridMaskingUTest.F90,v 1.6 2012/05/14 16:04:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -1281,8 +1281,8 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
       if(lpet == 0) print *, 'dst flux and area: ', allsrcsum
       if(ndst == 1) then
-        if((abs(exf_tarea - allsrcsum(2))/exf_tarea .gt. 1.e-8) .or. &
-           (abs(exf_tflux - allsrcsum(1))/exf_tflux .gt. 1.e-8)) then
+        if((abs(exf_tarea - allsrcsum(2))/exf_tarea .gt. 1.e-5) .or. &
+           (abs(exf_tflux - allsrcsum(1))/exf_tflux .gt. 1.e-5)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
              msg="- inconsistent flux and area found", &
              ESMF_CONTEXT, rcToReturn=rc) 
@@ -1301,7 +1301,7 @@ contains
 
     ! make sure going to multiple Grids also conserve global flux
     if(ndst .gt. 1) then
-        if ((abs(exf_tflux - global_sum)/exf_tflux .gt. 1.e-8)) then
+        if ((abs(exf_tflux - global_sum)/exf_tflux .gt. 1.e-5)) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
            msg="- inconsistent flux and area found", &
            ESMF_CONTEXT, rcToReturn=rc) 
