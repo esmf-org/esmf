@@ -1,4 +1,4 @@
-! $Id: atmos_comp.F90,v 1.8 2011/06/30 06:01:34 theurich Exp $
+! $Id: atmos_comp.F90,v 1.9 2012/05/14 19:34:25 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -16,6 +16,7 @@ module atmos_comp
 
   ! ESMF Framework module
   use ESMF
+  use util_mod, only : make_grid_sph
 
   implicit none
     
@@ -115,12 +116,10 @@ module atmos_comp
     ! Create the source Field and add it to the export State
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/2,2/), &
-      rc=rc)
+    ! 
+    grid = make_grid_sph(120,120,3.,1.5,0.,-90.,rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    grid = ESMF_GridCreate(distgrid=distgrid, destroyDistGrid=.true., &
-        indexflag=ESMF_INDEX_GLOBAL, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+    !
     field = ESMF_FieldCreate(arrayspec=arrayspec, grid=grid, &
       indexflag=ESMF_INDEX_GLOBAL, name="F_atm", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

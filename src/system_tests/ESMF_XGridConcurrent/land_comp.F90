@@ -1,4 +1,4 @@
-! $Id: land_comp.F90,v 1.8 2011/06/30 06:01:34 theurich Exp $
+! $Id: land_comp.F90,v 1.9 2012/05/14 19:34:25 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -16,6 +16,7 @@ module land_comp
 
   ! ESMF Framework module
   use ESMF
+  use util_mod
 
   implicit none
     
@@ -114,12 +115,11 @@ module land_comp
     ! Create the source Field and add it to the export State
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/1,2/), &
-      rc=rc)
+    !
+    grid = make_grid_sph(45,120,8.,1.5,0.,-90., msx=200., mex=360., msy=-90., mey=90., &
+          maskvalue=4, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    grid = ESMF_GridCreate(distgrid=distgrid, destroyDistGrid=.true., &
-        indexflag=ESMF_INDEX_GLOBAL, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+    !
     field = ESMF_FieldCreate(arrayspec=arrayspec, grid=grid, &
       indexflag=ESMF_INDEX_GLOBAL, name="F_lnd", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

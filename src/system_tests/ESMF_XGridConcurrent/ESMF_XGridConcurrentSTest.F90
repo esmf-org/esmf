@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridConcurrentSTest.F90,v 1.13 2011/06/30 06:01:34 theurich Exp $
+! $Id: ESMF_XGridConcurrentSTest.F90,v 1.14 2012/05/14 19:34:25 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
@@ -213,7 +213,7 @@ program ESMF_XGridConcurrentSTest
 !-------------------------------------------------------------------------
 
   ! land export state
-  land_export = ESMF_StateCreate(name="land export",  &
+  land_export = ESMF_StateCreate(name="land_export",  &
                                  stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -228,7 +228,7 @@ program ESMF_XGridConcurrentSTest
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! ocean export state
-  ocean_export = ESMF_StateCreate(name="ocean export",  &
+  ocean_export = ESMF_StateCreate(name="ocean_export",  &
                                   stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -243,7 +243,7 @@ program ESMF_XGridConcurrentSTest
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! nestted state with land and ocean attached inside
-  landocn_export = ESMF_StateCreate(name="landocn export",  &
+  landocn_export = ESMF_StateCreate(name="landocn_export",  &
                                     stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -260,7 +260,7 @@ program ESMF_XGridConcurrentSTest
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! atmosphere import state
-  atmos_import = ESMF_StateCreate(name="atmos import",  &
+  atmos_import = ESMF_StateCreate(name="atmos_import",  &
                                   stateintent=ESMF_STATEINTENT_IMPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -276,7 +276,7 @@ program ESMF_XGridConcurrentSTest
 
   ! note that the coupler's import is atmos's export state
   ! and coupler's export is land's import state
-  call ESMF_CplCompInitialize(cpl, landocn_export, atmos_import, userRc=userrc, rc=localrc)
+  call ESMF_CplCompInitialize(cpl, importState=landocn_export, exportState=atmos_import, userRc=userrc, rc=localrc)
   print *, "Coupler Initialize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -312,7 +312,7 @@ program ESMF_XGridConcurrentSTest
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! coupler run
-  call ESMF_CplCompRun(cpl, landocn_export, atmos_import, userRc=userrc, rc=localrc)
+  call ESMF_CplCompRun(cpl, importState=landocn_export, exportState=atmos_import, userRc=userrc, rc=localrc)
   print *, "Coupler Run returned, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -337,7 +337,7 @@ program ESMF_XGridConcurrentSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_CplCompFinalize(cpl, landocn_export, atmos_import, userRc=userrc, rc=localrc)
+  call ESMF_CplCompFinalize(cpl, importState=landocn_export, exportState=atmos_import, userRc=userrc, rc=localrc)
   print *, "Coupler Finalize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
