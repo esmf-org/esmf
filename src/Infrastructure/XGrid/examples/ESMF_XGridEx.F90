@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.45 2012/04/19 15:47:04 feiliu Exp $
+! $Id: ESMF_XGridEx.F90,v 1.46 2012/05/14 16:10:52 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -399,12 +399,51 @@
       endflag=ESMF_END_ABORT)
 !EOC
 
+    call ESMF_XGridDestroy(xgrid, rc=localrc)
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+      endflag=ESMF_END_ABORT)
+
 !BOE
 ! In the above example, we first set up all the required paramters to create an XGrid from user
 ! supplied input. Then we create Fields on the XGrid and the Grids on either side. Finally
 ! we use the {\tt ESMF\_FieldRegrid()} interface to perform a flux exchange from the source side
 ! to the destination side.
 !EOE
+
+!>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
+!BOE
+!\subsubsection{Using XGrid in Earth System modeling}
+!\label{sec:xgrid:usage:xgrid_create_masking}
+!
+! A typical application in Earth System Modeling is to calculate flux exchange 
+! through the planetary boundary layer that can be represented by {\tt ESMF\_XGrid}. 
+! Atmosphere is above the planetary boundary layer while land and ocean are below the boundary layer.
+! To create an XGrid, the land and ocean Grids that are usually different in resolution 
+! need to be merged first to create a super Mesh. This merging process is enabled through the support
+! of masking. 
+!
+! The global land and ocean Grids need to be created with masking enabled.
+! In practice, each Grid cell has an integer masking value attached to it. For examples using masking in
+! {\tt ESMF\_Grid} please refer to section \ref{sec:usage:items}.
+!
+! When calling the {\tt ESMF\_XGridCreate()} method, user can supply the optional arguments 
+! sideAMaskValues and sideBMaskValues. 
+! These arguments are one dimensional Fortran integer arrays. If any of the sideAMaskValues entry
+! matches the masking value used in sideA Grid, the sideA Grid cell is masked out, vice versa for sideB.
+! Thus by specifying different regions of a land and ocean Grids to be masked out, the two global Grids
+! can be merged into a new global Mesh covering the entire Earth.
+!
+! The following call shows how to use the {\tt ESMF\_XGridCreate()} method with the optional 
+! arguments sideAMaskValues and sideBMaskValues.
+! 
+!EOE
+
+!BOC
+    xgrid = ESMF_XGridCreate(sideA, sideB, &
+      sideAMaskValues=(/2/), sideBMaskValues=(/3,4/), rc=localrc)
+!EOC
+    if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
+      endflag=ESMF_END_ABORT)
 
     call ESMF_XGridGet(xgrid, &
       ngridA=ngridA, &    ! number of Grids on side A
