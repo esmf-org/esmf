@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.69 2012/01/06 20:18:13 svasquez Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.70 2012/05/14 20:46:16 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.69 2012/01/06 20:18:13 svasquez Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.70 2012/05/14 20:46:16 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -2136,6 +2136,6 @@
       ! return result  ! TODO: no way to do this in F90 ?
   
       ! finalize ESMF framework
-      call ESMF_TestEnd(result, ESMF_SRCLINE)
+      call ESMF_TestEnd(ESMF_SRCLINE)
 
       end program ESMF_CalendarUTest

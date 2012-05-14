@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshUTest.F90,v 1.33 2012/04/09 22:50:51 oehmke Exp $
+! $Id: ESMF_MeshUTest.F90,v 1.34 2012/05/14 20:46:15 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_MeshUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_MeshUTest.F90,v 1.33 2012/04/09 22:50:51 oehmke Exp $'
+    '$Id: ESMF_MeshUTest.F90,v 1.34 2012/05/14 20:46:15 svasquez Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -1061,7 +1061,7 @@ endif
   !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
-  call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
+  call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !------------------------------------------------------------------------
 
 

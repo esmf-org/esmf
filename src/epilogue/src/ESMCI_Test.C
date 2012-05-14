@@ -1,4 +1,4 @@
-// $Id: ESMCI_Test.C,v 1.19 2012/01/06 20:19:39 svasquez Exp $
+// $Id: ESMCI_Test.C,v 1.20 2012/05/14 20:46:34 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,    
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Test.C,v 1.19 2012/01/06 20:19:39 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Test.C,v 1.20 2012/05/14 20:46:34 svasquez Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -124,7 +124,6 @@ int TestEnd(
 //    ESMF_SUCCESS or ESMF_FAILURE
 //
 // !ARGUMENTS:
-  int result,       // in - cumulative failure count
   const char *file, // in - test filename
   int line,         // in - test line number in test filename
   int only) {       // in - if set to 0, print on stderr also
@@ -151,11 +150,6 @@ int TestEnd(
       fprintf(stderr, "%s", msgbuf);
     return(ESMF_FAILURE);
   }
-
-  sprintf(msgbuf, "Number of failed tests: %d\n", result);
-  whichLog->Write(msgbuf, ESMC_LOG_INFO);
-  if (!only)
-    fprintf(stderr, "%s", msgbuf);
 
   sprintf(msgbuf, "Ending Test, file %s, line %d\n", file, line);
   whichLog->Write(msgbuf, ESMC_LOG_INFO);

@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServUTest.F90,v 1.13 2011/08/15 16:01:04 w6ws Exp $
+! $Id: ESMF_WebServUTest.F90,v 1.14 2012/05/14 20:46:31 svasquez Exp $
 !
 ! Test code which creates a new Component.
 
@@ -315,7 +315,7 @@ program ESMF_WebServComponentUTest
     !------------------------------------------------------------------------
  
 
-    call ESMF_TestEnd(result, ESMF_SRCLINE)
+    call ESMF_TestEnd(ESMF_SRCLINE)
 
 end program ESMF_WebServComponentUTest
     

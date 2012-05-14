@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.46 2012/03/01 17:10:26 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.47 2012/05/14 20:46:01 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -409,7 +409,7 @@
       !------------------------------------------------------------------------
 
 #endif
-    call ESMF_TestEnd(result, ESMF_SRCLINE)
+    call ESMF_TestEnd(ESMF_SRCLINE)
 
 contains 
 #define ESMF_METHOD "ESMF_TESTS"

@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.37 2012/01/06 20:19:02 svasquez Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.38 2012/05/14 20:46:24 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -551,7 +551,7 @@ program ESMF_CompSetServUTest
 
     deallocate(petList)
 
-    call ESMF_TestEnd(result, ESMF_SRCLINE)
+    call ESMF_TestEnd(ESMF_SRCLINE)
 
 end program ESMF_CompSetServUTest
     

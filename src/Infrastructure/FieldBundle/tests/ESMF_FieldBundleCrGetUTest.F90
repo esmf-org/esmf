@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.32 2012/01/06 20:16:49 svasquez Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.33 2012/05/14 20:46:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -102,7 +102,7 @@
     write(failMsg, *) "Did not return SUCCESS"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
-    call ESMF_TestEnd(result, ESMF_SRCLINE)
+    call ESMF_TestEnd(ESMF_SRCLINE)
 
 contains 
 

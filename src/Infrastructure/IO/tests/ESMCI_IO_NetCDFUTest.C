@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDFUTest.C,v 1.3 2012/01/06 20:17:16 svasquez Exp $
+// $Id: ESMCI_IO_NetCDFUTest.C,v 1.4 2012/05/14 20:46:08 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@ int main(void)
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  TestEnd(result, __FILE__, __LINE__, 0);
+  TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   return 0;

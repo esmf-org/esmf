@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.31 2012/01/06 20:16:23 svasquez Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.32 2012/05/14 20:45:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -255,6 +255,6 @@ program ESMF_DELayoutWQUTest
   
  
   !---------------------------------------------------------------------------
-  call ESMF_TestEnd(result, ESMF_SRCLINE)
+  call ESMF_TestEnd(ESMF_SRCLINE)
   
 end program

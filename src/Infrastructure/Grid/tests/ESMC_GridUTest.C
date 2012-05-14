@@ -1,4 +1,4 @@
-// $Id: ESMC_GridUTest.C,v 1.7 2012/04/17 04:16:50 rokuingh Exp $
+// $Id: ESMC_GridUTest.C,v 1.8 2012/05/14 20:46:05 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -326,7 +326,7 @@ int main(void){
 #endif
 
   //----------------------------------------------------------------------------
-  ESMC_TestEnd(result, __FILE__, __LINE__, 0);
+  ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   return 0;

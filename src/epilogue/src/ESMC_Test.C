@@ -1,4 +1,4 @@
-// $Id: ESMC_Test.C,v 1.15 2012/04/18 22:44:34 rokuingh Exp $
+// $Id: ESMC_Test.C,v 1.16 2012/05/14 20:46:34 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,    
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Test.C,v 1.15 2012/04/18 22:44:34 rokuingh Exp $";
+static const char *const version = "$Id: ESMC_Test.C,v 1.16 2012/05/14 20:46:34 svasquez Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -80,19 +80,18 @@ int ESMC_TestEnd(
 //    ESMF_SUCCESS or ESMF_FAILURE
 //
 // !ARGUMENTS:
-  int result,       // in - cumulative failure count
   const char *file, // in - test filename
   int line,         // in - test line number in test filename
   int only) {       // in - if set to 0, print on stderr also
 // 
 // !DESCRIPTION:
-//    Prints summary message about total failures, and standard exit message.
+//    Prints a standard exit message.
 //    If {\tt only} is zero, also print same message to stderr as well
 //    as the normal output on stdout.  The default for {\tt only} is 1.
 //
 //EOP
 //-----------------------------------------------------------------------------
-  return ESMCI::TestEnd(result, file, line, only);
+  return ESMCI::TestEnd(file, line, only);
 }
 //-----------------------------------------------------------------------------
 

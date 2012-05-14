@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGatherUTest.F90,v 1.24 2012/01/06 20:15:24 svasquez Exp $
+! $Id: ESMF_ArrayGatherUTest.F90,v 1.25 2012/05/14 20:45:48 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArrayGatherUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_ArrayGatherUTest.F90,v 1.24 2012/01/06 20:15:24 svasquez Exp $'
+    '$Id: ESMF_ArrayGatherUTest.F90,v 1.25 2012/05/14 20:45:48 svasquez Exp $'
 !------------------------------------------------------------------------------
 
     ! cumulative result: count failures; no failures equals "all pass"
@@ -106,7 +106,7 @@ program ESMF_ArrayGatherUTest
     write(name, *) "ArrayGather 3d test, non-contiguous Array"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-    call ESMF_TestEnd(result, ESMF_SRCLINE)
+    call ESMF_TestEnd(ESMF_SRCLINE)
 
 
 contains

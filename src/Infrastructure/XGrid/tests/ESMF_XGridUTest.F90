@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.47 2012/04/19 14:06:10 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.48 2012/05/14 20:46:21 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -76,7 +76,7 @@
     write(name, *) "Creating an XGrid in 3D with Grid merging"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-    call ESMF_TestEnd(result, ESMF_SRCLINE)
+    call ESMF_TestEnd(ESMF_SRCLINE)
   
 contains 
 #define ESMF_METHOD "ESMF_TESTS"

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldStressUTest.F90,v 1.19 2012/01/06 20:16:42 svasquez Exp $
+! $Id: ESMF_FieldStressUTest.F90,v 1.20 2012/05/14 20:46:01 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -84,7 +84,7 @@
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 #endif
-    call ESMF_TestEnd(result, ESMF_SRCLINE)
+    call ESMF_TestEnd(ESMF_SRCLINE)
 
 contains 
 #define ESMF_METHOD "ESMF_TESTS"

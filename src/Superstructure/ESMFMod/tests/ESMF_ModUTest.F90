@@ -1,4 +1,4 @@
-! $Id: ESMF_ModUTest.F90,v 1.16 2012/01/06 20:19:08 svasquez Exp $
+! $Id: ESMF_ModUTest.F90,v 1.17 2012/05/14 20:46:26 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ModUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ModUTest.F90,v 1.16 2012/01/06 20:19:08 svasquez Exp $'
+      '$Id: ESMF_ModUTest.F90,v 1.17 2012/05/14 20:46:26 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -89,7 +89,7 @@ program ESMF_ModUTest
   call vm_type ()
 
       
-  call ESMF_TestEnd(result, ESMF_SRCLINE)
+  call ESMF_TestEnd(ESMF_SRCLINE)
 
 contains
 

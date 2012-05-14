@@ -1,4 +1,4 @@
-! $Id: ESMF_ContainerUTest.F90,v 1.25 2012/01/06 20:16:13 svasquez Exp $
+! $Id: ESMF_ContainerUTest.F90,v 1.26 2012/05/14 20:45:56 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ContainerUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ContainerUTest.F90,v 1.25 2012/01/06 20:16:13 svasquez Exp $'
+    '$Id: ESMF_ContainerUTest.F90,v 1.26 2012/05/14 20:45:56 svasquez Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -809,7 +809,7 @@ program ESMF_ContainerUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     
   !------------------------------------------------------------------------
-  call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
+  call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !------------------------------------------------------------------------
 
 end program ESMF_ContainerUTest

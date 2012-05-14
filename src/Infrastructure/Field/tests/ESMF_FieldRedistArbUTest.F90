@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArbUTest.F90,v 1.2 2012/01/06 20:16:42 svasquez Exp $
+! $Id: ESMF_FieldRedistArbUTest.F90,v 1.3 2012/05/14 20:46:01 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -388,7 +388,7 @@
 
   deallocate(localIndices, localIndices1)
   !-----------------------------------------------------------------------------
-  call ESMF_TestEnd(result, ESMF_SRCLINE)
+  call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
 end program ESMF_FieldRedistArbUTest

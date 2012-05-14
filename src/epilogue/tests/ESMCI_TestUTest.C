@@ -1,4 +1,4 @@
-// $Id: ESMCI_TestUTest.C,v 1.6 2012/01/06 20:19:41 svasquez Exp $
+// $Id: ESMCI_TestUTest.C,v 1.7 2012/05/14 20:46:36 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@ int main(void){
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  ESMCI::TestEnd(result, __FILE__, __LINE__, 0);
+  ESMCI::TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
   return 0;

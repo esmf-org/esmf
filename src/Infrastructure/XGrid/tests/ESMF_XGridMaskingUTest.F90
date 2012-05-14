@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridMaskingUTest.F90,v 1.6 2012/05/14 16:04:51 feiliu Exp $
+! $Id: ESMF_XGridMaskingUTest.F90,v 1.7 2012/05/14 20:46:21 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -76,7 +76,7 @@
     write(name, *) "Creating an XGrid in 3D with global Grid masking"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-    call ESMF_TestEnd(result, ESMF_SRCLINE)
+    call ESMF_TestEnd(ESMF_SRCLINE)
   
 contains 
 #define ESMF_METHOD "ESMF_TESTS"

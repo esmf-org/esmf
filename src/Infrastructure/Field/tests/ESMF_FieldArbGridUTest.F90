@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldArbGridUTest.F90,v 1.26 2012/01/06 20:16:42 svasquez Exp $
+! $Id: ESMF_FieldArbGridUTest.F90,v 1.27 2012/05/14 20:46:01 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -1308,7 +1308,7 @@
     ESMF_CONTEXT, rcToReturn=rc)
 
   !-----------------------------------------------------------------------------
-  call ESMF_TestEnd(result, ESMF_SRCLINE)
+  call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
 end program ESMF_FieldArbGridUTest

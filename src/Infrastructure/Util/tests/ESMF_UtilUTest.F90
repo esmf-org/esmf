@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.35 2012/01/06 20:18:22 svasquez Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.36 2012/05/14 20:46:18 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.35 2012/01/06 20:18:22 svasquez Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.36 2012/05/14 20:46:18 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -416,6 +416,6 @@
 
       ! This calls finalize before returning, so it must be the last
       ! ESMF-related thing the test does.
-      call ESMF_TestEnd(result, ESMF_SRCLINE)
+      call ESMF_TestEnd(ESMF_SRCLINE)
   
       end program ESMF_UtilUTest

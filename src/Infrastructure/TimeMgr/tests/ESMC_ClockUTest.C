@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockUTest.C,v 1.20 2012/01/06 20:18:13 svasquez Exp $
+// $Id: ESMC_ClockUTest.C,v 1.21 2012/05/14 20:46:16 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -284,7 +284,7 @@ int main(void){
 */
 
   //----------------------------------------------------------------------------
-  ESMC_TestEnd(result, __FILE__, __LINE__, 0);
+  ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   // return number of failures to environment; 0 = success (all pass)

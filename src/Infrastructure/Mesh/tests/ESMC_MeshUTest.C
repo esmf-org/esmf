@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.22 2012/04/12 18:33:39 oehmke Exp $
+// $Id: ESMC_MeshUTest.C,v 1.23 2012/05/14 20:46:15 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -201,7 +201,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  ESMC_TestEnd(result, __FILE__, __LINE__, 0);
+  ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   return 0;

@@ -1,4 +1,4 @@
-! $Id: ESMF_F90ArrayPtrUTest.F90,v 1.16 2012/01/06 20:19:43 svasquez Exp $
+! $Id: ESMF_F90ArrayPtrUTest.F90,v 1.17 2012/05/14 20:46:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -455,7 +455,7 @@
 
 #endif
 
-    call ESMF_TestEnd(result, ESMF_SRCLINE)
+    call ESMF_TestEnd(ESMF_SRCLINE)
 
     end program test
     

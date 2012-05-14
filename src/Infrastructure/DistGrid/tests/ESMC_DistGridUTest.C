@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGridUTest.C,v 1.8 2012/01/06 20:16:33 svasquez Exp $
+// $Id: ESMC_DistGridUTest.C,v 1.9 2012/05/14 20:45:59 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -116,7 +116,7 @@ int main(void){
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  ESMC_TestEnd(result, __FILE__, __LINE__, 0);
+  ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
   return 0;

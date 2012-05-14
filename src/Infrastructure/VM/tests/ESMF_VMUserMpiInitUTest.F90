@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiInitUTest.F90,v 1.21 2012/01/06 20:18:32 svasquez Exp $
+! $Id: ESMF_VMUserMpiInitUTest.F90,v 1.22 2012/05/14 20:46:19 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -525,7 +525,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUserMpiInitUTest.F90,v 1.21 2012/01/06 20:18:32 svasquez Exp $'
+      '$Id: ESMF_VMUserMpiInitUTest.F90,v 1.22 2012/05/14 20:46:19 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -624,6 +624,6 @@
       call test_AllReduce_max
 
 #endif
-      call ESMF_TestEnd(result, ESMF_SRCLINE)
+      call ESMF_TestEnd(ESMF_SRCLINE)
 
       end program ESMF_VMUTest

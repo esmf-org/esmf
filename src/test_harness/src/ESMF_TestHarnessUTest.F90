@@ -1,4 +1,4 @@
-! $Id: ESMF_TestHarnessUTest.F90,v 1.50 2012/01/06 20:19:44 svasquez Exp $
+! $Id: ESMF_TestHarnessUTest.F90,v 1.51 2012/05/14 20:46:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -286,7 +286,7 @@
   endif
 
   !------------------------------------------------------------------------
-  call ESMF_TestEnd(result, ESMF_SRCLINE) 
+  call ESMF_TestEnd(ESMF_SRCLINE) 
   !------------------------------------------------------------------------
 
 

@@ -307,7 +307,7 @@
 !------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
-  call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
+  call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
 !------------------------------------------------------------------------
 
 

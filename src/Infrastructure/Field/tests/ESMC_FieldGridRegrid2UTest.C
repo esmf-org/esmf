@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegrid2UTest.C,v 1.5 2012/04/18 22:30:58 rokuingh Exp $
+// $Id: ESMC_FieldGridRegrid2UTest.C,v 1.6 2012/05/14 20:46:01 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -529,7 +529,7 @@ int main(void){
 #endif
 
   //----------------------------------------------------------------------------
-  ESMC_TestEnd(result, __FILE__, __LINE__, 0);
+  ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
   return 0;

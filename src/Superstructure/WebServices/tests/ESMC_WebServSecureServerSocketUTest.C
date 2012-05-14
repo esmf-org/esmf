@@ -1,4 +1,4 @@
-/* $Id: ESMC_WebServSecureServerSocketUTest.C,v 1.1 2011/08/04 21:19:39 ksaint Exp $ */
+/* $Id: ESMC_WebServSecureServerSocketUTest.C,v 1.2 2012/05/14 20:46:31 svasquez Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -169,7 +169,7 @@ int main(int    argc,
 	server->disconnect();
 
   //----------------------------------------------------------------------------
-  ESMC_TestEnd(result, __FILE__, __LINE__, 0);
+  ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
    printf("\n-----------------------------------------------------\n");

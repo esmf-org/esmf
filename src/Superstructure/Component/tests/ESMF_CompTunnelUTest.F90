@@ -1,4 +1,4 @@
-! $Id: ESMF_CompTunnelUTest.F90,v 1.14 2012/04/24 20:26:12 theurich Exp $
+! $Id: ESMF_CompTunnelUTest.F90,v 1.15 2012/05/14 20:46:24 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -237,7 +237,7 @@ program ESMF_CompTunnelUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_CompTunnelUTest.F90,v 1.14 2012/04/24 20:26:12 theurich Exp $'
+    '$Id: ESMF_CompTunnelUTest.F90,v 1.15 2012/05/14 20:46:24 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1765,7 +1765,7 @@ program ESMF_CompTunnelUTest
 #endif
 
   !------------------------------------------------------------------------
-  call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
+  call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !------------------------------------------------------------------------
 
 end program ESMF_CompTunnelUTest

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.33 2012/01/06 20:15:24 svasquez Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.34 2012/05/14 20:45:48 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -616,7 +616,7 @@ program ESMF_ArrayIOUTest
 10 continue
 
   !-----------------------------------------------------------------------------
-  call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
+  call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !-----------------------------------------------------------------------------
 
   end program ESMF_ArrayIOUTest

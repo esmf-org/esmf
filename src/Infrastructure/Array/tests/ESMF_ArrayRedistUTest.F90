@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistUTest.F90,v 1.32 2012/02/16 19:36:45 theurich Exp $
+! $Id: ESMF_ArrayRedistUTest.F90,v 1.33 2012/05/14 20:45:48 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayRedistUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayRedistUTest.F90,v 1.32 2012/02/16 19:36:45 theurich Exp $'
+    '$Id: ESMF_ArrayRedistUTest.F90,v 1.33 2012/05/14 20:45:48 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -2191,7 +2191,7 @@ write(100+localPet,*) "NBWAITFINISH: finishedflag = ", finishedflag, &
 
 10 continue
   !------------------------------------------------------------------------
-  call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
+  call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !------------------------------------------------------------------------
 
 

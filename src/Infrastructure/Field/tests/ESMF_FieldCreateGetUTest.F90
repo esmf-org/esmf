@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.91 2012/04/24 18:00:16 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.92 2012/05/14 20:46:01 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -1975,7 +1975,7 @@
         write(name, *) "Testing field create when all entries in map are 0 pointer"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-    call ESMF_TestEnd(result, ESMF_SRCLINE)
+    call ESMF_TestEnd(ESMF_SRCLINE)
 
 contains 
 #define ESMF_METHOD "ESMF_TESTS"

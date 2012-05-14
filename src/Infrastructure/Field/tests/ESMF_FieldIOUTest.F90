@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.28 2012/01/06 20:16:42 svasquez Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.29 2012/05/14 20:46:01 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -520,7 +520,7 @@ program ESMF_FieldIOUTest
 10 continue
 
   !-----------------------------------------------------------------------------
-  call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
+  call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !-----------------------------------------------------------------------------
 
   end program ESMF_FieldIOUTest

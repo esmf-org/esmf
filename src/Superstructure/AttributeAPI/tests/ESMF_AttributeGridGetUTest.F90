@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridGetUTest.F90,v 1.5 2012/04/25 21:24:20 rokuingh Exp $
+! $Id: ESMF_AttributeGridGetUTest.F90,v 1.6 2012/05/14 20:46:23 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.5 2012/04/25 21:24:20 rokuingh Exp $'
+  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.6 2012/05/14 20:46:23 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -150,7 +150,7 @@ print *, "outI4 = ", outI4
   ! Attribute, the Attribute is retrieved, not the internal Grid info.  This
   ! happens because the attribute name does not have 'ESMF:' prepended.
   call ESMF_AttributeSet(grid, name="dimCount", value=4, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_TestEnd(result, ESMF_SRCLINE)
+  if (rc /= ESMF_SUCCESS) call ESMF_TestEnd(ESMF_SRCLINE)
   outI4=42
   call ESMF_AttributeGet(grid, name="dimCount", value=outI4, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -715,7 +715,7 @@ print *, "isUBound=", isUBound
   if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   !-----------------------------------------------------------------------------
-  call ESMF_TestEnd(result, ESMF_SRCLINE)
+  call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
   
 end program ESMF_AttributeGridGetUTest

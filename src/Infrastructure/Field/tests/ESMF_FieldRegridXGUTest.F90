@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.50 2012/04/19 14:12:44 feiliu Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.51 2012/05/14 20:46:01 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -215,7 +215,7 @@
     write(name, *) "Regrid then create xgrid and regrid through xgrid, full spherical grids"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
-    call ESMF_TestEnd(result, ESMF_SRCLINE)
+    call ESMF_TestEnd(ESMF_SRCLINE)
 
 contains 
 #define ESMF_METHOD "ESMF_TESTS"

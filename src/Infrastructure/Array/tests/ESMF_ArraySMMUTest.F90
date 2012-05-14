@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySMMUTest.F90,v 1.8 2012/01/06 20:15:24 svasquez Exp $
+! $Id: ESMF_ArraySMMUTest.F90,v 1.9 2012/05/14 20:45:48 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -470,7 +470,7 @@ program ESMF_ArraySMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArraySMMUTest.F90,v 1.8 2012/01/06 20:15:24 svasquez Exp $'
+    '$Id: ESMF_ArraySMMUTest.F90,v 1.9 2012/05/14 20:45:48 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -612,7 +612,7 @@ program ESMF_ArraySMMUTest
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
-  call ESMF_TestEnd(result, ESMF_SRCLINE) ! calls ESMF_Finalize() internally
+  call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !------------------------------------------------------------------------
 
 end program ESMF_ArraySMMUTest

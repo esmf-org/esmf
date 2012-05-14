@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.37 2012/01/06 20:16:49 svasquez Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.38 2012/05/14 20:46:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.37 2012/01/06 20:16:49 svasquez Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.38 2012/05/14 20:46:03 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -2079,6 +2079,6 @@
 
 #endif
 
-      call ESMF_TestEnd(result, ESMF_SRCLINE)
+      call ESMF_TestEnd(ESMF_SRCLINE)
 
       end program ESMF_FieldBundleUTest

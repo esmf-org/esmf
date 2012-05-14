@@ -1,4 +1,4 @@
-// $Id: ESMC_ComponentUTest.C,v 1.20 2012/01/06 20:19:02 svasquez Exp $
+// $Id: ESMC_ComponentUTest.C,v 1.21 2012/05/14 20:46:24 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -520,7 +520,7 @@ int main(void){
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  ESMC_TestEnd(result, __FILE__, __LINE__, 0);
+  ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
   return 0;

@@ -1,4 +1,4 @@
-// $Id: ESMC_ArrayUTest.C,v 1.11 2012/01/06 20:15:24 svasquez Exp $
+// $Id: ESMC_ArrayUTest.C,v 1.12 2012/05/14 20:45:48 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -135,7 +135,7 @@ int main(void){
   //----------------------------------------------------------------------------
   
   //----------------------------------------------------------------------------
-  ESMC_TestEnd(result, __FILE__, __LINE__, 0);
+  ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
   return 0;

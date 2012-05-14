@@ -1,4 +1,4 @@
-/* $Id: ESMC_WebServRegistrarClientUTest.C,v 1.2 2011/08/05 13:01:33 w6ws Exp $ */
+/* $Id: ESMC_WebServRegistrarClientUTest.C,v 1.3 2012/05/14 20:46:31 svasquez Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -258,7 +258,7 @@ int main(int    argc,
 
 
   //----------------------------------------------------------------------------
-  ESMC_TestEnd(result, __FILE__, __LINE__, 0);
+  ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
    printf("\n-----------------------------------------------------\n");

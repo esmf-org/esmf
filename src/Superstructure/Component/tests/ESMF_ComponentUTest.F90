@@ -1,4 +1,4 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.23 2011/06/30 05:59:47 theurich Exp $
+! $Id: ESMF_ComponentUTest.F90,v 1.24 2012/05/14 20:46:24 svasquez Exp $
 !
 ! Test code which creates a new Component.
 
@@ -200,7 +200,7 @@
 
 #endif
 
-    call ESMF_TestEnd(result, ESMF_SRCLINE)
+    call ESMF_TestEnd(ESMF_SRCLINE)
 
     end program ESMF_ComponentUTest
     
