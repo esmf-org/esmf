@@ -1,4 +1,4 @@
-! $Id: ESMF_StateRemRep.cppF90,v 1.9 2012/03/12 22:25:19 w6ws Exp $
+! $Id: ESMF_StateRemRep.cppF90,v 1.10 2012/05/14 18:56:22 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_StateRemRepMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateRemRep.cppF90,v 1.9 2012/03/12 22:25:19 w6ws Exp $'
+      '$Id: ESMF_StateRemRep.cppF90,v 1.10 2012/05/14 18:56:22 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -381,11 +381,11 @@ contains
 !     the responsibility of the user to manage their
 !     destruction when they are no longer in use.
 ! \item[{[relaxedflag]}]
-!      A setting of {\tt .true.} indicates a relaxed definition of "replace",
-!      where it is {\em not} an error if {\tt <itemList>} contains items
-!       with names that are not found in {\tt state}. The {\tt State}
-!      is left unchanged for these items. For {\tt .false.} this is treated
-!      as an error condition.  The default setting is {\tt .false.}.
+!     A setting of {\tt .true.} indicates a relaxed definition of "replace",
+!     where it is {\em not} an error if {\tt <itemList>} contains items
+!     with names that are not found in {\tt state}. The {\tt State}
+!     is left unchanged for these items. For {\tt .false.} this is treated
+!     as an error condition.  The default setting is {\tt .false.}.
 ! \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
