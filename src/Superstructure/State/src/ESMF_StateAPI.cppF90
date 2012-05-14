@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.31 2012/04/11 14:53:03 w6ws Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.32 2012/05/14 18:54:04 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.31 2012/04/11 14:53:03 w6ws Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.32 2012/05/14 18:54:04 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -635,6 +635,7 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 !    type(ESMF_State), intent(inout)          :: state 
 !    <itemList>, see below for supported values
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!    logical,          intent(in),   optional :: relaxedFlag
 !    integer,          intent(out),  optional :: rc     
 !
 ! !STATUS:
@@ -669,6 +670,12 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 !     Since <itemList> items can be added to multiple containers, it remains
 !     the responsibility of the user to manage their
 !     destruction when they are no longer in use.
+! \item[{[relaxedflag]}]
+!      A setting of {\tt .true.} indicates a relaxed definition of "add",
+!      where it is {\em not} an error if {\tt <itemList>} contains items
+!      with names that are found in {\tt state}. The {\tt State}
+!      is left unchanged for these items. For {\tt .false.} this is treated
+!      as an error condition.  The default setting is {\tt .false.}.
 ! \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
