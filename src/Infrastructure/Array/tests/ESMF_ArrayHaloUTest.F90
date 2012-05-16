@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHaloUTest.F90,v 1.21 2012/05/14 20:45:48 svasquez Exp $
+! $Id: ESMF_ArrayHaloUTest.F90,v 1.22 2012/05/16 22:09:31 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ArrayHaloUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayHaloUTest.F90,v 1.21 2012/05/14 20:45:48 svasquez Exp $'
+    '$Id: ESMF_ArrayHaloUTest.F90,v 1.22 2012/05/16 22:09:31 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -78,6 +78,7 @@ program ESMF_ArrayHaloUTest
 
   !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
   ! get global VM
   call ESMF_VMGetGlobal(vm, rc=rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.46 2012/05/14 20:45:48 svasquez Exp $
+! $Id: ESMF_ArrayCreateGetUTest.F90,v 1.47 2012/05/16 22:09:31 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_ArrayCreateGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.46 2012/05/14 20:45:48 svasquez Exp $'
+    '$Id: ESMF_ArrayCreateGetUTest.F90,v 1.47 2012/05/16 22:09:31 svasquez Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -86,6 +86,7 @@ program ESMF_ArrayCreateGetUTest
 
   !------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
   
   !------------------------------------------------------------------------

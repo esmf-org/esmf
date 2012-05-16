@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServUTest.F90,v 1.14 2012/05/14 20:46:31 svasquez Exp $
+! $Id: ESMF_WebServUTest.F90,v 1.15 2012/05/16 22:05:01 svasquez Exp $
 !
 ! Test code which creates a new Component.
 
@@ -277,6 +277,7 @@ program ESMF_WebServComponentUTest
 !   !  Quick Test - Setup the Web Services Loop
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
     !------------------------------------------------------------------------
     ! Setup data parameters for tests
