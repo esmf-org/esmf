@@ -1,4 +1,4 @@
-! $Id: ESMF_F95PtrUTest.F90,v 1.13 2012/05/14 20:46:38 svasquez Exp $
+! $Id: ESMF_F95PtrUTest.F90,v 1.14 2012/05/16 21:43:24 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_F95PTRUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_F95PtrUTest.F90,v 1.13 2012/05/14 20:46:38 svasquez Exp $'
+    '$Id: ESMF_F95PtrUTest.F90,v 1.14 2012/05/16 21:43:24 svasquez Exp $'
 !------------------------------------------------------------------------------
 
   integer, parameter :: int8_k = selected_int_kind (12)		! 8-byte integer
@@ -59,6 +59,7 @@ program ESMF_F95PTRUTest
  
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !-----------------------------------------------------------------------------
 
   call ptr_size_test ()

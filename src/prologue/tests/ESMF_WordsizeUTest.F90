@@ -1,4 +1,4 @@
-! $Id: ESMF_WordsizeUTest.F90,v 1.22 2012/05/14 20:46:38 svasquez Exp $
+! $Id: ESMF_WordsizeUTest.F90,v 1.23 2012/05/16 21:43:24 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -54,6 +54,7 @@
     result = 0
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
