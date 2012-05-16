@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.34 2012/05/14 20:46:01 svasquez Exp $
+! $Id: ESMF_FieldRegridCsrvUTest.F90,v 1.35 2012/05/16 22:33:56 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -51,6 +51,7 @@
     character(512) :: name
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
 #ifdef ESMF_TESTEXHAUSTIVE
       ! initialize 

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridArbitraryUTest.F90,v 1.39 2012/05/14 20:46:05 svasquez Exp $
+! $Id: ESMF_GridArbitraryUTest.F90,v 1.40 2012/05/16 22:40:00 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_GridArbitraryUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridArbitraryUTest.F90,v 1.39 2012/05/14 20:46:05 svasquez Exp $'
+    '$Id: ESMF_GridArbitraryUTest.F90,v 1.40 2012/05/16 22:40:00 svasquez Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -86,6 +86,7 @@ program ESMF_GridArbitraryUTest
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !-----------------------------------------------------------------------------
 
   ! get global VM

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.66 2012/05/14 20:46:11 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.67 2012/05/16 22:45:46 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -55,6 +55,7 @@
 
     
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !------------------------------------------------------------------------------
 !   !  Create based on an existing, allocated F90 pointer. 

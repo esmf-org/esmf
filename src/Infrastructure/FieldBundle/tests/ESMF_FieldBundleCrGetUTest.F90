@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.33 2012/05/14 20:46:03 svasquez Exp $
+! $Id: ESMF_FieldBundleCrGetUTest.F90,v 1.34 2012/05/16 22:37:48 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -52,6 +52,7 @@
 #endif
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
 #ifdef ESMF_TESTEXHAUSTIVE
     !------------------------------------------------------------------------

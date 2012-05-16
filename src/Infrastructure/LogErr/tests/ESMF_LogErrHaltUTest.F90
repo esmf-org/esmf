@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrHaltUTest.F90,v 1.17 2012/05/14 20:46:13 svasquez Exp $
+! $Id: ESMF_LogErrHaltUTest.F90,v 1.18 2012/05/16 22:48:03 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrHaltUTest.F90,v 1.17 2012/05/14 20:46:13 svasquez Exp $'
+      '$Id: ESMF_LogErrHaltUTest.F90,v 1.18 2012/05/16 22:48:03 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -66,6 +66,7 @@
       print *, "Starting LogErr Tests"
 
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 #ifdef ESMF_TESTEXHAUSTIVE
 

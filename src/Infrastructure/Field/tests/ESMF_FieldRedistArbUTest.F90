@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistArbUTest.F90,v 1.3 2012/05/14 20:46:01 svasquez Exp $
+! $Id: ESMF_FieldRedistArbUTest.F90,v 1.4 2012/05/16 22:33:56 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -69,6 +69,7 @@
     character(512) :: name
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   ! Calculate localIndices and localCount for a 100x200 2D arbitrary grid with 
   ! an optional undistributed 3rd dimenison of size 4
