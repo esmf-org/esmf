@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridMaskingUTest.F90,v 1.7 2012/05/14 20:46:21 svasquez Exp $
+! $Id: ESMF_XGridMaskingUTest.F90,v 1.8 2012/05/16 23:03:32 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -48,6 +48,7 @@
     character(512) :: name
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
     !------------------------------------------------------------------------
     !NEX_UTest
