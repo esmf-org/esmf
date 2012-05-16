@@ -1,4 +1,4 @@
-! $Id: ESMF_ModUTest.F90,v 1.17 2012/05/14 20:46:26 svasquez Exp $
+! $Id: ESMF_ModUTest.F90,v 1.18 2012/05/16 21:58:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_ModUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ModUTest.F90,v 1.17 2012/05/14 20:46:26 svasquez Exp $'
+      '$Id: ESMF_ModUTest.F90,v 1.18 2012/05/16 21:58:30 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -50,6 +50,7 @@ program ESMF_ModUTest
 !-------------------------------------------------------------------------------
 
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-------------------------------------------------------------------------------
 ! Test each of the major ESMF data types, when individually

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.42 2012/05/14 20:46:25 svasquez Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.43 2012/05/16 21:55:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -70,6 +70,7 @@
 !-------------------------------------------------------------------------------
         
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !------------------------------------------------------------------------
     !NEX_UTest

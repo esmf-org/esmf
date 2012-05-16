@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.38 2012/05/14 20:46:24 svasquez Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.39 2012/05/16 21:55:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -71,6 +71,7 @@ program ESMF_CompSetServUTest
 !-------------------------------------------------------------------------------
         
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 ! - construct petList according to petCount
     call ESMF_VMGetGlobal(vm, rc=rc)

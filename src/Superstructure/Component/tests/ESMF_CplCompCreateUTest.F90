@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.40 2012/05/14 20:46:25 svasquez Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.41 2012/05/16 21:55:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -74,7 +74,8 @@
 !-------------------------------------------------------------------------------
         
    ! Initialize framework
-   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+    call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !------------------------------------------------------------------------
     !NEX_UTest

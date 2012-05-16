@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.47 2012/05/14 20:46:30 svasquez Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.48 2012/05/16 22:02:38 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -176,6 +176,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize()
+    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     if (.not. ESMF_TestMinPETs(4, ESMF_SRCLINE)) goto 10
 
