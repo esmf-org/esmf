@@ -1,4 +1,4 @@
-% $Id: ESMF_systemreq.tex,v 1.11 2010/09/27 05:59:16 eschwab Exp $
+% $Id: ESMF_systemreq.tex,v 1.12 2012/05/17 21:28:44 rokuingh Exp $
 
 
 The following compilers and utilities are required for compiling, linking and
@@ -13,6 +13,14 @@ for a standard cpp preprocessor implementation;
 \item \htmladdnormallink{Perl}{http://www.perl.com/download.csp} - for running
 test scripts.
 \end{itemize} 
+
+The following packages are optional, and only used for selected capabilities:
+\begin{itemize}
+\item LAPACK - version 3.x or newer
+\item NetCDF - version 3.6.x or newer
+\item parallel-NetCDF - version 1.2.0 or newer 
+\item Xerces - version 3.1.0 or newer
+\end{itemize}
 
 Alternatively ESMF can be built using a single-processor MPI-bypass library
 that comes with ESMF. It allows ESMF applications to be linked and run in
