@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.237 2012/05/10 02:16:15 w6ws Exp $
+! $Id: ESMF_Comp.F90,v 1.238 2012/05/17 23:21:11 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -291,7 +291,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.237 2012/05/10 02:16:15 w6ws Exp $'
+    '$Id: ESMF_Comp.F90,v 1.238 2012/05/17 23:21:11 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================
@@ -616,7 +616,7 @@ contains
       call ESMF_LogWrite("Warning: only 1 of Config object or filename should be given.", &
         ESMF_LOGMSG_WARNING)
       call ESMF_LogWrite(msg="Using Config object; ignoring Config filename.", &
-        logmsgList=ESMF_LOGMSG_WARNING)
+        logmsgFlag=ESMF_LOGMSG_WARNING)
       compp%config = config
       compp%compStatus%configIsPresent = .true.
     else if (present(configFile)) then
