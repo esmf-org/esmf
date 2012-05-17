@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.84 2012/04/17 04:16:45 rokuingh Exp $
+// $Id: ESMCI_Grid.h,v 1.85 2012/05/17 17:23:49 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -249,6 +249,8 @@ template <class TYPE>
                               ESMC_CoordSys *coordSys,
                               ESMC_TypeKind *coordTypeKind, 
                               int *rc);
+
+  int write(ESMC_StaggerLoc staggerloc, const char *fname);
 
   // accessor methods
   // NOTE: For efficiencies sake the following functions don't error check

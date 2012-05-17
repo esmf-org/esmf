@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.135 2012/04/17 04:16:48 rokuingh Exp $
+// $Id: ESMCI_Grid.C,v 1.136 2012/05/17 17:23:55 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -25,6 +25,10 @@
 
 // include associated header file
 #include "ESMCI_Grid.h"
+#include "ESMCI_GridToMesh.h"
+#include "Mesh/include/ESMCI_Mesh.h"
+#include "Mesh/include/ESMCI_MeshRead.h"
+#include "Mesh/include/ESMCI_MeshRegrid.h" // only for the REGRID flags
 
 // include higher level, 3rd party or system headers
 #include <stdio.h>
@@ -48,7 +52,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.135 2012/04/17 04:16:48 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.136 2012/05/17 17:23:55 rokuingh Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -280,6 +284,72 @@ int setDefaultsLUA(int dimCount,
     if (rc) *rc = localrc;
   
     return grid;
+
+ }
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::write()"
+//BOP
+// !IROUTINE:  ESMCI::Grid::write - Write a grid in vtk format
+//
+// !INTERFACE:
+      int Grid::write(
+//
+// !RETURN VALUE:
+//     return value
+//
+// !ARGUMENTS:
+    ESMC_StaggerLoc staggerloc,
+    const char *fname) {
+//
+// !DESCRIPTION:
+//      Write a Grid
+//
+//      Note: this is a class helper function, not a class method
+//      (see declaration in ESMC\_Grid.h)
+//
+//      Note2:  this code is duplicated in ESMCI_GridUtil_F.C in gridio
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+    int rc = ESMC_RC_NOT_IMPL;
+
+  ESMCI::Grid &gridp = *this;
+
+  // Get VM
+  ESMCI::VM *vm = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+   throw localrc;  // bail out with exception
+
+  // Get pet info
+  int localPet = vm->getLocalPet();
+  int petCount = vm->getPetCount();
+
+  std::vector<ESMCI::Array*> arrays;
+
+  Mesh mesh;
+
+  try {
+
+    int regridConserve = ESMC_REGRID_CONSERVE_OFF;
+    ESMCI::GridToMesh(gridp, staggerloc, mesh, arrays, NULL, &regridConserve);
+
+    WriteMesh(mesh, fname);
+
+  }
+
+  catch(std::exception &x) {
+    std::cout << "Error!!! Exception, P:" << localPet << ", <" << x.what() << ">" << std::endl;
+    return ESMF_FAILURE;
+  }
+  catch(...) {
+    std::cout << "Error, unknown exception" << std::endl;
+    return ESMF_FAILURE;
+  }
+
+  return ESMF_SUCCESS;
 
  }
 

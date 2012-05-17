@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.C,v 1.8 2012/04/17 04:16:47 rokuingh Exp $
+// $Id: ESMC_Grid.C,v 1.9 2012/05/17 17:23:53 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Grid.C,v 1.8 2012/04/17 04:16:47 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Grid.C,v 1.9 2012/05/17 17:23:53 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -52,6 +52,16 @@ extern "C" {
                                         ESMCI::InterfaceInt **_totalCount,
                                         int *_rc);
 
+void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays,
+                          char*name, int *rc,
+                          ESMCI::Array **arraypp1,
+                          ESMCI::Array **arraypp2,
+                          ESMCI::Array **arraypp3,
+                          ESMCI::Array **arraypp4,
+                          ESMCI::Array **arraypp5,
+                          ESMCI::Array **arraypp6,
+                          int *spherical, int *islatlondeg,
+                          ESMCI_FortranStrLenArg nlen);
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreateNoPeriDim()"
@@ -284,5 +294,28 @@ void * ESMC_GridGetItem(ESMC_Grid grid,
 }
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GridWrite()"
+int ESMC_GridWrite(ESMC_Grid grid,
+                   enum ESMC_StaggerLoc staggerloc, 
+                   const char* fname) {
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  ESMCI::Grid *gridp = reinterpret_cast<ESMCI::Grid *>(grid.ptr);
+
+  localrc=gridp->ESMCI::Grid::write(staggerloc, fname);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;  // bail out    
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
 } // extern "C"
-// $Id: ESMC_Grid.C,v 1.8 2012/04/17 04:16:47 rokuingh Exp $
+// $Id: ESMC_Grid.C,v 1.9 2012/05/17 17:23:53 rokuingh Exp $

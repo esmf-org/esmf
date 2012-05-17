@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.h,v 1.21 2012/04/17 04:16:45 rokuingh Exp $
+// $Id: ESMC_Grid.h,v 1.22 2012/05/17 17:23:49 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -272,6 +272,38 @@ void * ESMC_GridGetCoord(
 //  \item[rc]
 //  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 //  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_GridWrite - Write a Grid to a VTK file
+//
+// !INTERFACE:
+int ESMC_GridWrite(
+  ESMC_Grid grid,                  // in
+  enum ESMC_StaggerLoc staggerloc, // in
+  const char* fname                // in
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+//
+// !DESCRIPTION:
+//   Write a grid to VTK file.
+//
+// The arguments are:
+//   \begin{description}
+//   \item [grid]
+//     The grid.
+//   \item[staggerloc]
+//     The stagger location to add.  If not present, defaults to 
+//     ESMC_STAGGERLOC_CENTER.
+//   \item[filename]
+//     The name of the output file.
+//   \end{description}
 //
 //EOP
 //-----------------------------------------------------------------------------

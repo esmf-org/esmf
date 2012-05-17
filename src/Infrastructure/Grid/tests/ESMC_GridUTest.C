@@ -1,4 +1,4 @@
-// $Id: ESMC_GridUTest.C,v 1.8 2012/05/14 20:46:05 svasquez Exp $
+// $Id: ESMC_GridUTest.C,v 1.9 2012/05/17 17:23:56 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -259,8 +259,8 @@ int main(void){
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
     for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
       gridMask[p]=i0;
-      printf("PET%d - set gridMask[%d] = %d (%d)\n", localPet, p, 
-        i0, gridMask[p]);
+      //printf("PET%d - set gridMask[%d] = %d (%d)\n", localPet, p, 
+        //i0, gridMask[p]);
       ++p;
     }
   }
@@ -293,8 +293,8 @@ int main(void){
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
     for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
       gridArea[p]=1;
-      printf("PET%d - set gridMask[%d] = %d (%d)\n", localPet, p,
-        i0, gridMask[p]);
+      //printf("PET%d - set gridMask[%d] = %d (%d)\n", localPet, p,
+        //i0, gridMask[p]);
       ++p;
     }
   }
@@ -302,6 +302,19 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+  //----------------------------------------------------------------------------
+  //  GridWrite
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // Write a Grid
+  strcpy(name, "GridWrite");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridWrite(grid_1p, ESMC_STAGGERLOC_CENTER, "gridfile");
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
   //----------------------------------------------------------------------------
   //  GridDestroy
   //----------------------------------------------------------------------------
