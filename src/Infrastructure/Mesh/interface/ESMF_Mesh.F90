@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.90 2012/05/04 08:03:18 peggyli Exp $
+! $Id: ESMF_Mesh.F90,v 1.91 2012/05/17 18:38:39 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.90 2012/05/04 08:03:18 peggyli Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.91 2012/05/17 18:38:39 feiliu Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -172,7 +172,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.90 2012/05/04 08:03:18 peggyli Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.91 2012/05/17 18:38:39 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -185,6 +185,7 @@ module ESMF_MeshMod
      module procedure ESMF_MeshCreate1Part
      module procedure ESMF_MeshCreateFromPointer
      module procedure ESMF_MeshCreateFromFile
+     module procedure ESMF_MeshCreateFromDG
    end interface
 
 !------------------------------------------------------------------------------
@@ -1055,6 +1056,67 @@ num_elems, &
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateFromDG()"
+!BOPI
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh from an elemental DistGrid
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MeshCreate()
+    function ESMF_MeshCreateFromDG(distgrid, parametricDim, spatialDim, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)         :: ESMF_MeshCreateFromDG
+! !ARGUMENTS:
+    type(ESMF_DistGrid),        intent(in)            :: distgrid
+    integer,                    intent(in), optional  :: parametricDim
+    integer,                    intent(in), optional  :: spatialDim
+    integer,                    intent(out), optional :: rc
+! 
+! !DESCRIPTION:
+!   Create a Mesh from an elemental distgrid. Such a mesh will have no coordinate or
+!   connectivity information stored.
+!
+!   \begin{description}
+!   \item [distgrid]
+!         The elemental distgrid.
+!   \item [{[parametricDim]}]
+!         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
+!         have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
+!         of 3.)
+!   \item [{[spatialDim]}]
+!         The number of coordinate dimensions needed to describe the locations of the nodes 
+!         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
+!         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer::  localrc, l_pdim, l_sdim
+
+    l_pdim = 2
+    l_sdim = 3
+    if(present(parametricDim)) l_pdim = parametricDim
+    if(present(spatialDim))    l_sdim = spatialDim
+
+    ESMF_MeshCreateFromDG = ESMF_MeshCreate3part(l_pdim, l_sdim, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_MeshCreateFromDG%isFullyCreated=.true.
+    ESMF_MeshCreateFromDG%element_distgrid = distgrid
+
+    ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromDG)
+
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+end function ESMF_MeshCreateFromDG
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateFromFile()"
 !BOP
 ! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a file
@@ -1116,7 +1178,7 @@ num_elems, &
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     logical::  localConvert3D      ! local flag
     logical::  localConvertToDual      ! local flag
