@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServProcCtrl.C,v 1.7 2012/05/18 20:14:23 w6ws Exp $
+// $Id: ESMCI_WebServProcCtrl.C,v 1.8 2012/05/18 21:19:36 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -34,6 +34,7 @@
 #include <netdb.h>
 #else
 #include <Winsock.h>
+typedef uint64_t u_int64_t;
 #endif
 
 #include "ESMCI_WebServSocketUtils.h"
@@ -49,7 +50,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServProcCtrl.C,v 1.7 2012/05/18 20:14:23 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_WebServProcCtrl.C,v 1.8 2012/05/18 21:19:36 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
