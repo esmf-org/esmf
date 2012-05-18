@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.169 2012/05/17 18:37:45 feiliu Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.170 2012/05/18 15:26:43 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.169 2012/05/17 18:37:45 feiliu Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.170 2012/05/18 15:26:43 feiliu Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -883,7 +883,7 @@
 #endif
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only 
+      !NEX_UTest_Multi_Proc_Only 
       call ESMF_VMGetCurrent(vm, rc=rc)
       call ESMF_VMGet(vm, localPet=lpet, rc=rc)
       allocate(arbseqlist(8))
@@ -898,14 +898,14 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only 
+      !NEX_UTest_Multi_Proc_Only 
       elem_mesh = ESMF_MeshCreate(elem_dg, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Create a mesh on the 1D elemental distgrid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-      !EX_UTest_Multi_Proc_Only 
+      !NEX_UTest_Multi_Proc_Only 
       elem_field = ESMF_FieldCreate(elem_mesh, typekind=ESMF_TYPEKIND_R8, &
         meshloc=ESMF_MESHLOC_ELEMENT, &
         ungriddedLBound=(/1/), ungriddedUBound=(/10/), &
