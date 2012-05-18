@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServSecureSocket.C,v 1.5 2012/01/06 20:19:29 svasquez Exp $
+// $Id: ESMCI_WebServSecureSocket.C,v 1.6 2012/05/18 20:14:23 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -38,6 +38,9 @@ typedef char* value_ptr_t;
 
 #include <fcntl.h>
 #include <unistd.h>
+// <sys/types.h> is not strictly required for POSIX 2001, but some
+// older systems - like Darwin - may need it.
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 typedef void* value_ptr_t;
@@ -52,7 +55,7 @@ typedef void* value_ptr_t;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServSecureSocket.C,v 1.5 2012/01/06 20:19:29 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WebServSecureSocket.C,v 1.6 2012/05/18 20:14:23 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

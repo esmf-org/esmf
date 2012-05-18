@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServCompSvrClient.C,v 1.12 2012/05/02 00:26:12 w6ws Exp $
+// $Id: ESMCI_WebServCompSvrClient.C,v 1.13 2012/05/18 20:14:23 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -30,17 +30,14 @@
 
 #include "ESMCI_WebServCompSvrClient.h"
 
+#include <stdint.h>
+#include <string.h>
+
 #if !defined (ESMF_OS_MinGW)
 #include <netdb.h>
-#if defined __mips
-typedef uint64_t u_int64_t;
-#endif
 #else
 #include <Winsock.h>
-#include <stdint.h>
-typedef uint64_t u_int64_t;
 #endif
-#include <string.h>
 
 #include "ESMCI_WebServSocketUtils.h"
 #include "ESMCI_Macros.h"
@@ -51,7 +48,7 @@ typedef uint64_t u_int64_t;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServCompSvrClient.C,v 1.12 2012/05/02 00:26:12 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_WebServCompSvrClient.C,v 1.13 2012/05/18 20:14:23 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -908,7 +905,7 @@ ESMCI_WebServDataDesc*  ESMCI_WebServCompSvrClient::dataDesc(
 
 				for (int i = 0; i < numLats; ++i)
 				{
-         		ntohll((u_int64_t)(lats[i]));
+         		ntohll((uint64_t)(lats[i]));
 					//printf("Lat Value: %g\n", lats[i]);
 
 					latValues[i] = lats[i];
@@ -956,7 +953,7 @@ ESMCI_WebServDataDesc*  ESMCI_WebServCompSvrClient::dataDesc(
 
 				for (int i = 0; i < numLons; ++i)
 				{
-         		ntohll((u_int64_t)(lons[i]));
+         		ntohll((uint64_t)(lons[i]));
 					//printf("Lon Value: %g\n", lons[i]);
 
 					lonValues[i] = lons[i];
@@ -1063,7 +1060,7 @@ ESMCI_WebServDataContent*  ESMCI_WebServCompSvrClient::outputData(
 	// Send the timestamp value
 	//***
 	double	netTimestamp = timestamp;
-	htonll((u_int64_t)netTimestamp);
+	htonll((uint64_t)netTimestamp);
 	bytesSent = 0;
 
 	if ((bytesSent = sendData(8, (unsigned char*)(&netTimestamp))) != 8)
@@ -1193,7 +1190,7 @@ printf("Data Size: %d\n", dataSize);
 
 			for (int j = 0; j < dataSize; ++j)
 			{
-        		ntohll((u_int64_t)(dataValues[j]));
+        		ntohll((uint64_t)(dataValues[j]));
 				//printf("Data Value: %g\n", dataValues[j]);
 			}
 
