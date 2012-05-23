@@ -1,4 +1,4 @@
-// $Id: ESMCI_State_F.C,v 1.14 2012/01/06 20:19:19 svasquez Exp $
+// $Id: ESMCI_State_F.C,v 1.15 2012/05/23 23:49:59 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_State_F.C,v 1.14 2012/01/06 20:19:19 svasquez Exp $";
+             "$Id: ESMCI_State_F.C,v 1.15 2012/05/23 23:49:59 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -148,16 +148,15 @@ void FTN_X(c_esmc_stateitemserialize)(int *otype,
 
     ip = (int *)(buffer + *offset);
     if (*inquireflag != ESMF_INQUIREONLY)
-      *ip++ = *otype;
-    else
-      ip++;
+      *ip = *otype;
+    ip++;
 
     cp = (char *)ip;
     if (*inquireflag != ESMF_INQUIREONLY)
       memcpy(cp, namep, clen);
     cp += clen;
 
-    *offset = (char *)ip - buffer;
+    *offset = cp - buffer;
 
     if (localrc) *localrc = ESMF_SUCCESS;
 
@@ -178,12 +177,12 @@ void FTN_X(c_esmc_stateitemdeserialize)(int *otype,
 
     ip = (int *)(buffer + *offset);
     *otype = *ip++;
+
     cp = (char *)ip;
     memcpy(namep, cp, clen);
     cp += clen;
-    ip = (int *)cp;
 
-    *offset = (char *)ip - buffer;
+    *offset = cp - buffer;
 
     if (localrc) *localrc = ESMF_SUCCESS;
 
