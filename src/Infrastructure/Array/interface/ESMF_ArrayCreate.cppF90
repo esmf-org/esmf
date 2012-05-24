@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.90 2012/03/15 18:47:44 theurich Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.91 2012/05/24 00:02:20 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.90 2012/03/15 18:47:44 theurich Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.91 2012/05/24 00:02:20 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -401,8 +401,8 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
-    ESMF_INIT_CHECK_DEEP_SHORT (ESMF_ArrayGetInit, arrayIn, rc)
-    ESMF_INIT_CHECK_DEEP_SHORT (ESMF_ArrayGetInit, arrayOut, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayGetInit, arrayIn, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayGetInit, arrayOut, rc)
 
     ! Call into the C++ interface
     call c_ESMC_ArrayCopy(arrayOut, arrayIn, localrc)
@@ -2346,7 +2346,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     ! Mark this Array object as invalid
     arrayOut%this = ESMF_NULL_POINTER
 
-    ESMF_INIT_CHECK_DEEP_SHORT (ESMF_ArrayGetInit, array, rc)
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayGetInit, array, rc)
 
     ! Call into the C++ interface
     call c_ESMC_ArrayCreateCopy(array, arrayOut, localrc)
