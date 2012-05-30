@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.70 2012/05/11 16:22:30 oehmke Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.71 2012/05/30 23:09:46 peggyli Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -210,6 +210,8 @@ ESMF_RegridWeightGen  [--help]
 		      --dst_meshname dummy_var_name
 		      --src_missingvalue var_name
 		      --dst_missingvalue var_name
+		      --src_coordinates lon_name,lat_name
+		      --dst_coordinates lon_name,var_name
                       --user_areas
 where
   --help              - Print the usage message and exit.
@@ -333,6 +335,24 @@ where
 			 values of the data variable.  The missing value is defined
 			 using an attribute called "_FillValue" or "missing_value"
 
+    --src_coordinates - an optional argument that defines the longitude and latitude
+                         variable names in the source grid file if the file type is 
+			 GRIDSPEC.  The variable names are separated by comma.  This
+			 argument is required in case there are multiple sets of
+			 coordinate variables defined in the file.  Without this
+			 argument, the offline regrid application will terminate
+			 with an error mesasge when multiple coordinate variables
+			 are found in the file.
+
+    --dst_coordinates - an optional argument that defines the longitude and latitude
+                         variable names in the destination grid file if the file type is 
+			 GRIDSPEC.  The variable names are separated by comma.  This
+			 argument is required in case there are multiple sets of
+			 coordinate variables defined in the file.  Without this
+			 argument, the offline regrid application will terminate
+			 with an error mesasge when multiple coordinate variables
+			 are found in the file.
+
     --user_areas      - an optional argument specifying that the conservation
                         is adjusted to hold for the user areas provided in 
                         the grid files. If not specified, then the conservation
@@ -387,18 +407,21 @@ Since the source grid is a UGRID, an additional argument "{\tt \verb+--+src\_mes
 grid file.
 
 The last example shows how to use the missing values of a data variable to generate the 
-grid mask for a GRIDSPEC file and use user defined area for the conservative regridding.
+grid mask for a GRIDSPEC file, how to specify the coordinate variable names 
+using "{\tt \verb+--+src_coordinates}"
+ and use user defined area for the conservative regridding.
 
 \begin{verbatim}
 
   mpirun -np 4 ./ESMF_RegridWeightGen -s src.nc -d dst.nc -m conserve \
                  -w w.nc --src_type GRIDSPEC --src_missingvalue datavar \
-                 --user_areas
+                 --src_coordinates lon,lat --user_areas
 
 \end{verbatim}
   
 In the above example, "datavar" is the variable name defined in the source grid that will
- be used to construct the mask using its missing values.  
+ be used to construct the mask using its missing values.  In addition, "{\tt lon}" and "{\tt lat}" are the
+variable names for the longitude and latitude values, respectively.
 
 \subsection{SCRIP Grid File Format}\label{sec:fileformat:scrip}
 
@@ -509,7 +532,10 @@ grid defination.
 Currently, ESMF only supports the Grid creation and regridding from a single tile grid file.  A tile file 
 is a CF compliant NetCDF file for a logically rectangular lat/lon grid based on the
 \htmladdnormallink{CF Metadata Conventions V1.6} {http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.html}.   An example grid file is shown below.  
-The cell center coordinates are defined in the variables whose attribute {\tt standard\_name} or {\tt long\_name} is set to either {\tt latitude} or {\tt longitude}.  The latitude and the longitude variables are one-dimensional arrays if the grid is a regular lat/lon grid, two-dimensional arrays if the grid is curvilinear. The bound coordinate 
+The cell center coordinate variables are determined by the value of its attribute {\tt units}.  The longitude 
+variable has the attribute value set to either {\tt degrees\_east}, {\tt degree\_east}, {\tt degrees\_E}, {\tt degree\_E},
+{\tt degreesE} or {\tt degreeE}.  The latitude variable has the attribute value set to {\tt degrees\_north}, {\tt degree\_north}, {\tt degrees\_N},
+{\tt degree\_N}, {\tt degreesN} or {\tt degreeN}.   The latitude and the longitude variables are one-dimensional arrays if the grid is a regular lat/lon grid, two-dimensional arrays if the grid is curvilinear. The bound coordinate 
 variables define the bound or the corner coordinates of a cell.  The bound variable name is specified in the
 {\tt bounds} attribute of the latitude and longitude variables.  In the following example, the latitude bound 
 variable is {\tt lat\_bnds} and the longitude bound variable is {\tt lon\_bnds}.  The bound variables are 2D
@@ -517,7 +543,10 @@ arrays for a regular lat/lon grid and a 3D array for a curvilinear grid.  The fi
 array is 2 for a regular lat/lon grid and 4 for a curvilinear grid.  The bound coordinates for a curvilinear
 grid is defined in counterclockwise order.  In the example below, the grid is a regular lat/lon
 grid, thus the coordinate variables are 1D and the bound variables are 2D with the first dimension equal to 2.
-The bound coordinates will be read in and stored in a ESMF Grid object as the corner stagger coordinates when doing a conservative regrid.
+The bound coordinates will be read in and stored in a ESMF Grid object as the corner stagger coordinates when doing a conservative regrid.  In case there are multiple sets of coordinate variables defined in a grid file, 
+the offline regrid application will return an error for duplicate latitude or longitude variables unless the user 
+uses "{\tt \verb+--+src_coordinates}" or "{\tt \verb+--+src_coordinates}" to specifiy the coordinate variable names
+to be used in the regrid.  
 
 Since a GRIDSPEC tile file does not have a way to specify the grid mask, the mask is usually derived by the missing values stored in a data variable.  ESMF\_RegridWeightGen provides an option for users to
 derive the grid mask from a data variable's missing values.  The value of the missing value is defined by the
