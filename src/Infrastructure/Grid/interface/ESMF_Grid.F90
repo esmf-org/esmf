@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.273 2012/05/08 17:14:44 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.274 2012/05/30 23:17:50 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -308,7 +308,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.273 2012/05/08 17:14:44 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.274 2012/05/30 23:17:50 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5362,7 +5362,7 @@ end subroutine convert_corner_arrays_to_1D
   ! Private name; call using ESMF_GridCreate()
      function ESMF_GridCreateFrmNCFile(filename, fileFormat, regDecomp, keywordEnforcer, &
        decompflag, isSphere, addCornerStagger, addUserArea, addMask, &
-       varname, rc)
+       varname, coordNames, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmNCFile
@@ -5379,6 +5379,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional  :: addUserArea
     logical,                intent(in),  optional  :: addMask
     character(len=*),       intent(in),  optional  :: varname
+    character(len=*),       intent(in),  optional  :: coordNames(:)
     integer,                intent(out), optional  :: rc
 
 ! !DESCRIPTION:
@@ -5425,6 +5426,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      this variable.  The first two dimensions of the variable has to be the
 !      the longitude and the latitude dimension and the mask is derived from the
 !      first 2D values of this variable even if this data is 3D, or 4D array.
+!\item[{coordNames}]
+!      a 2D array containing the longitude and latitude variable names in a GRIDSPEC
+!      file if there are multiple coordinates defined in the file
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -5465,11 +5469,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	if (present(addMask)) then
   	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecomp, decompflag=localDecompflag, &
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
-		addMask=addMask, varname=varname, rc=localrc)
+		addMask=addMask, varname=varname, coordNames=coordNames, rc=localrc)
         else
   	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecomp, decompflag=localDecompflag, &
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
-		rc=localrc)
+		coordNames = coordNames, rc=localrc)
 	endif
     else
 	call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
@@ -5871,7 +5875,7 @@ end function ESMF_GridCreateFrmScrip
   ! Private function
   function ESMF_GridCreateFrmGridspec(grid_filename, &
                                         regDecomp, keywordEnforcer, decompflag, &
-					addMask, varname, &
+					addMask, varname, coordNames, &
                                         isSphere, addCornerStagger, rc)
 
 ! !RETURN VALUE:
@@ -5884,6 +5888,7 @@ end function ESMF_GridCreateFrmScrip
     type(ESMF_Decomp_Flag), intent(in),   optional:: decompflag(:)
     logical,                intent(in),  optional  :: addMask
     character(len=*),       intent(in),  optional  :: varname
+    character(len=*),       intent(in),  optional  :: coordNames(:)
     logical,               intent(in),  optional   :: isSphere
     logical,               intent(in),  optional   :: addCornerStagger
     integer,               intent(out), optional   :: rc
@@ -5921,6 +5926,9 @@ end function ESMF_GridCreateFrmScrip
 !      this variable.  The first two dimensions of the variable has to be the
 !      the longitude and the latitude dimension and the mask is derived from the
 !      first 2D values of this variable even if this data is 3D, or 4D array.
+!\item[{coordNames}]
+!      a 2D array containing the longitude and latitude variable names in a GRIDSPEC
+!      file if there are multiple coordinates defined in the file
 ! \item[{[isSphere]}]
 !      If .true. is a spherical grid, if .false. is regional. Defaults to .true.
 ! \item[{[addCornerStagger]}]
@@ -6006,8 +6014,9 @@ end function ESMF_GridCreateFrmScrip
     ! Get the grid rank and dimensions from the GridSpec file on PET 0, broadcast the
     ! data to all the PETs
     if (PetNo == 0) then
-        call ESMF_GridspecInq(grid_filename, ndims, dims, dimids=dimids, &
-		coordids = coordids, rc=localrc)
+    !    print *, "In gridcreatefrmgridspec: ", trim(coordNames(1)), " ", trim(coordNames(2))
+        call ESMF_GridspecInq(grid_filename, ndims, dims, coord_names=coordNames, &
+		dimids=dimids, coordids = coordids, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         ! broadcast the values to other PETs (generalized)
