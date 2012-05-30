@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2011/07/01 05:44:41 w6ws Exp $
+# $Id: makefile,v 1.27 2012/05/30 02:06:42 w6ws Exp $
 
 ALL: build_here 
 
@@ -9,7 +9,8 @@ AUTOGEN   = ESMF_StateInternals.F90 ESMF_StateRemRep.F90 ESMF_StateAPI.F90
 SOURCEC	  = 
 SOURCEF	  = ESMF_StateItem.F90 ESMF_StateContainer.F90 ESMF_StateTypes.F90 \
 	    ESMF_StateVa.F90 ESMF_State.F90 \
-	    ESMF_StateReconcile.F90 ESMF_StateWr.F90 $(AUTOGEN)
+	    ESMF_StateReconcile.F90 ESMF_StateReconcile2.F90 \
+	    ESMF_StateWr.F90 $(AUTOGEN)
 SOURCEH	  = 
 STOREH    = ESMCI_StateItem.h ESMC_State.h
 TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
