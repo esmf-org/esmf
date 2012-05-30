@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.44 2012/04/13 20:42:50 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.45 2012/05/30 23:15:52 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -572,7 +572,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 				      srcFrac, dstFrac, largeFileFlag, &
 				      srcmeshname, dstmeshname, & 
 			              srcMissingValue, dstMissingValue, &
-				      srcvarname, dstvarname, rc)
+				      srcvarname, dstvarname, &
+				      srccoordnames, dstcoordnames, rc)
 !
 ! !ARGUMENTS:
       character(len=*), intent(in) :: wgtFile
@@ -590,6 +591,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       character(len=*), optional, intent(in) :: srcmeshname, dstmeshname
       logical, optional, intent(in) :: srcMissingValue, dstMissingValue
       character(len=*), optional, intent(in) :: srcvarname, dstvarname
+      character(len=*), optional, intent(in) :: srccoordnames(:), dstcoordnames(:)
       integer, optional :: rc
 
       integer :: total, localCount(1)
@@ -805,7 +807,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	else if (srcFileTypeLocal == ESMF_FILEFORMAT_GRIDSPEC) then
           allocate(src_grid_dims(2))
           call ESMF_GridspecInq(srcFile, src_ndims, src_grid_dims, &
-		dimids = src_dimids, coordids = src_coordids, rc=status)
+		dimids = src_dimids, coordids = src_coordids, &
+		coord_names = srccoordnames, rc=status)
           if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 	  src_grid_rank = 2
@@ -864,7 +867,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	else if (dstFileTypeLocal == ESMF_FILEFORMAT_GRIDSPEC) then
           allocate(dst_grid_dims(2))
           call ESMF_GridspecInq(dstFile, dst_ndims, dst_grid_dims, &
-		dimids = dst_dimids, coordids = dst_coordids, rc=status)
+		dimids = dst_dimids, coordids = dst_coordids, &
+		coord_names = dstcoordnames, rc=status)
           if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 	  dst_grid_rank = 2
