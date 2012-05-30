@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.13 2012/05/05 03:33:59 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.14 2012/05/30 17:58:41 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -42,6 +42,7 @@ module ESMF_StateReconcile2Mod
 ! !USES:
   use ESMF_BaseMod
   use ESMF_InitMacrosMod
+  use ESMF_IOUtilMod
   use ESMF_LogErrMod
   use ESMF_StateMod
   use ESMF_StateContainerMod
@@ -75,7 +76,7 @@ module ESMF_StateReconcile2Mod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-  '$Id: ESMF_StateReconcile2.F90,v 1.13 2012/05/05 03:33:59 w6ws Exp $'
+  '$Id: ESMF_StateReconcile2.F90,v 1.14 2012/05/30 17:58:41 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
@@ -658,7 +659,7 @@ end if
 	    write (msgstring,'(2a,i0,a,i0,a)') ESMF_METHOD,  &
                 ': pet', j, ': id_info%needed(',i,') ='
             write (6,*) msgstring, id_info(i)%needed
-	    flush (6)
+	    call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
 	  end do
 	end if
 	call ESMF_VMBarrier (vm)
@@ -1349,7 +1350,7 @@ logical, parameter :: debug = .false.
 !     write (6,*) ESMF_METHOD, ': pet', mypet, ': displs_buf_send =', displs_buf_send
 !     write (6,*) ESMF_METHOD, ': pet', mypet, ': counts_buf_recv =', counts_buf_recv
 !     write (6,*) ESMF_METHOD, ': pet', mypet, ': displs_buf_recv =', displs_buf_recv
-!     flush (6)
+!     call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
 !   end if
 !   call ESMF_VMBarrier (vm)
 ! end do
@@ -1384,7 +1385,7 @@ logical, parameter :: debug = .false.
 !   if (j == myPet) then
 !     do, i=0, ubound (id_info, 1)
 !       write (6,*) 'pet', j, ': id_info%id     =', id_info(i)%id
-!       flush (6)
+!       call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
 !     end do
 !   end if
 !   call ESMF_VMBarrier (vm)
@@ -1613,7 +1614,7 @@ logical, parameter :: debug = .false.
         write (msgstring,'(a,i0,a,i0,a)')  &
             '  PET ', mypet, ': needs that PET ', i, ' requested are:'
         write (6,*) trim (msgstring), recv_needs(:,i)
-        flush (6)
+        call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
       end do
     end if
 
@@ -1913,7 +1914,7 @@ logical, parameter :: debug = .false.
         rcToReturn=rc)) return
 
 ! write (6,*) ' PET', mypet, ': nitems_all =', nitems_all
-! flush (6)
+! call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
 ! call ESMF_VMBarrier (vm)
 
   end subroutine ESMF_ReconcileInitialize
@@ -2439,25 +2440,25 @@ end if
     end if
 
     if (present (text)) then
-      flush (ESMF_UtilIOStdout)
+      call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
       call ESMF_VMBarrier (vm)
       if (mypet == 0) then
 	write (ESMF_UtilIOStdout,*) text
-	flush (ESMF_UtilIOStderr)
+	call ESMF_UtilIOUnitflush (ESMF_UtilIOStdout)
       end if
       call ESMF_VMBarrier (vm)
     end if
 
     if (present (multitext)) then
       write (ESMF_UtilIOStdout,*) multitext
-      flush (ESMF_UtilIOStdout)
+      call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
       call ESMF_VMBarrier (vm)
     end if
 
     if (localask) then
       if (mypet == 0) then
 	write (ESMF_UtilIOStdout,'(a)') 'Proceed?'
-	flush (ESMF_UtilIOStdout)
+        call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
 	read (ESMF_UtilIOStdin,'(a)') answer
       end if
       call ESMF_VMBarrier (vm)
