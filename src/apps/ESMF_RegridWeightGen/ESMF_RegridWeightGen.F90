@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.65 2012/04/17 20:58:03 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.66 2012/05/30 23:43:47 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_RegridWeightGen
       character(len=256) :: srcmeshname, dstmeshname
       character(len=40)  :: method, flag
       integer(ESMF_KIND_I4) :: maskvals(1)
-      integer            :: index
+      integer            :: ind
       type(ESMF_PoleMethod_Flag) :: pole
       integer            :: poleptrs
       integer, pointer   :: srcdims(:), dstdims(:)
@@ -61,7 +61,10 @@ program ESMF_RegridWeightGen
       type(ESMF_UnmappedAction_Flag) :: unmappedaction
       logical :: srcMissingValue, dstMissingValue
       character(len=80) :: srcvarname, dstvarname
-
+      character(len=80) :: srcCoordNames(2), dstCoordNames(2)
+      character(len=256) :: argStr
+      integer            :: pos
+      logical            :: useSrcCoordVar, useDstCoordVar
       !real(ESMF_KIND_R8) :: starttime, endtime
       !------------------------------------------------------------------------
       ! Initialize ESMF
@@ -86,59 +89,59 @@ program ESMF_RegridWeightGen
       !   then broadcast the results to the rest of the Pets
       !
       if (PetNo == 0) then
-         call ESMF_UtilGetArgIndex('--help', argindex=index)
-         if (index /= -1) then
+         call ESMF_UtilGetArgIndex('--help', argindex=ind)
+         if (ind /= -1) then
 	   call PrintUsage()
 	   call ESMF_Finalize(endflag=ESMF_END_ABORT)
          endif
-         call ESMF_UtilGetArgIndex('--version', argindex=index)
-         if (index /= -1) then
+         call ESMF_UtilGetArgIndex('--version', argindex=ind)
+         if (ind /= -1) then
 	   call PrintVersionInfo()
 	   call ESMF_Finalize(endflag=ESMF_END_ABORT)
          endif
-         call ESMF_UtilGetArgIndex('-s', argindex=index)
-         if (index == -1) call ESMF_UtilGetArgIndex('--source', argindex=index, rc=rc)
-         if (index == -1) then
+         call ESMF_UtilGetArgIndex('-s', argindex=ind)
+         if (ind == -1) call ESMF_UtilGetArgIndex('--source', argindex=ind, rc=rc)
+         if (ind == -1) then
            write(*,*)
            print *, 'ERROR: The required argument [-s|--source] is missing.'
            call ESMF_Finalize(endflag=ESMF_END_ABORT)
          else
-           call ESMF_UtilGetArg(index+1, argvalue=srcfile)
+           call ESMF_UtilGetArg(ind+1, argvalue=srcfile)
          endif
       
-         call ESMF_UtilGetArgIndex('-d', argindex=index, rc=rc)
-         if (index == -1) call ESMF_UtilGetArgIndex('--destination', argindex=index, rc=rc)
-         if (index == -1) then
+         call ESMF_UtilGetArgIndex('-d', argindex=ind, rc=rc)
+         if (ind == -1) call ESMF_UtilGetArgIndex('--destination', argindex=ind, rc=rc)
+         if (ind == -1) then
            write(*,*)
            print *, 'ERROR: The required argument [-w|--weight] is missing.'
            call ESMF_Finalize(endflag=ESMF_END_ABORT)
          else
-           call ESMF_UtilGetArg(index+1, argvalue=dstfile)
+           call ESMF_UtilGetArg(ind+1, argvalue=dstfile)
          endif
           
-         call ESMF_UtilGetArgIndex('-w', argindex=index, rc=rc)
-         if (index == -1) call ESMF_UtilGetArgIndex('--weight', argindex=index, rc=rc)
-         if (index == -1) then
+         call ESMF_UtilGetArgIndex('-w', argindex=ind, rc=rc)
+         if (ind == -1) call ESMF_UtilGetArgIndex('--weight', argindex=ind, rc=rc)
+         if (ind == -1) then
            write(*,*)
            print *, 'ERROR: The required argument [-w|--weight] is missing.'
            call ESMF_Finalize(endflag=ESMF_END_ABORT)
          else	
-           call ESMF_UtilGetArg(index+1, argvalue=wgtfile)
+           call ESMF_UtilGetArg(ind+1, argvalue=wgtfile)
          endif
 
-         call ESMF_UtilGetArgIndex('-m', argindex=index, rc=rc)
-         if (index == -1) call ESMF_UtilGetArgIndex('--method', argindex=index, rc=rc)
-         if (index == -1) then
+         call ESMF_UtilGetArgIndex('-m', argindex=ind, rc=rc)
+         if (ind == -1) call ESMF_UtilGetArgIndex('--method', argindex=ind, rc=rc)
+         if (ind == -1) then
           !  print *, 'Use default interpolation method: bilinear'
            method = 'bilinear'
          else
-           call ESMF_UtilGetArg(index+1, argvalue=method)
+           call ESMF_UtilGetArg(ind+1, argvalue=method)
          endif
     	
          poleptrs = -1
-         call ESMF_UtilGetArgIndex('-p', argindex=index, rc=rc)
-         if (index == -1) call ESMF_UtilGetArgIndex('--pole', argindex=index, rc=rc)
-         if (index == -1) then
+         call ESMF_UtilGetArgIndex('-p', argindex=ind, rc=rc)
+         if (ind == -1) call ESMF_UtilGetArgIndex('--pole', argindex=ind, rc=rc)
+         if (ind == -1) then
 	   if (method .eq. 'conserve') then
              ! print *, 'Use default pole: None'
               pole = ESMF_POLEMETHOD_NONE
@@ -148,7 +151,7 @@ program ESMF_RegridWeightGen
               pole = ESMF_POLEMETHOD_ALLAVG
            endif
          else
-           call ESMF_UtilGetArg(index+1, argvalue=flag)
+           call ESMF_UtilGetArg(ind+1, argvalue=flag)
            if (trim(flag) .eq. 'none') then
 	     pole = ESMF_POLEMETHOD_NONE
 	     poleptrs = 0
@@ -174,9 +177,9 @@ program ESMF_RegridWeightGen
          dstFileType = ESMF_FILEFORMAT_SCRIP
          srcIsRegional = .false.
          dstIsRegional = .false.
-         call ESMF_UtilGetArgIndex('-t', argindex=index, rc=rc)
-         if (index /= -1) then
-           call ESMF_UtilGetArg(index+1, argvalue=flag)
+         call ESMF_UtilGetArgIndex('-t', argindex=ind, rc=rc)
+         if (ind /= -1) then
+           call ESMF_UtilGetArg(ind+1, argvalue=flag)
 	   if (trim(flag) .eq. 'ESMF') then
 	     srcFileType = ESMF_FILEFORMAT_ESMFMESH
              dstFileType = ESMF_FILEFORMAT_ESMFMESH
@@ -187,7 +190,7 @@ program ESMF_RegridWeightGen
              dstFileType = ESMF_FILEFORMAT_UGRID
              !write(*,*)
              !print *, 'Set src and dst grid file types to UGRID.'
-           else if (trim(flag) .eq. 'GRIPSPEC') then
+           else if (trim(flag) .eq. 'GRIDSPEC') then
 	     srcFileType = ESMF_FILEFORMAT_GRIDSPEC
              dstFileType = ESMF_FILEFORMAT_GRIDSPEC
            else if (trim(flag) .ne. 'SCRIP') then
@@ -198,9 +201,9 @@ program ESMF_RegridWeightGen
            typeSetFlag = .true.
          endif
 
-         call ESMF_UtilGetArgIndex('--src_type', argindex=index, rc=rc)
-         if (index /= -1) then
-           call ESMF_UtilGetArg(index+1, argvalue=flag)
+         call ESMF_UtilGetArgIndex('--src_type', argindex=ind, rc=rc)
+         if (ind /= -1) then
+           call ESMF_UtilGetArg(ind+1, argvalue=flag)
 	   if (typeSetFlag) then
 	     ! check if the type is consistent with -t
              if ((trim(flag) .eq. 'ESMF' .and. srcFileType /= ESMF_FILEFORMAT_ESMFMESH) .or.   &
@@ -225,9 +228,9 @@ program ESMF_RegridWeightGen
            endif
          endif
 
-         call ESMF_UtilGetArgIndex('--dst_type', argindex=index, rc=rc)
-         if (index /= -1) then
-           call ESMF_UtilGetArg(index+1, argvalue=flag)
+         call ESMF_UtilGetArgIndex('--dst_type', argindex=ind, rc=rc)
+         if (ind /= -1) then
+           call ESMF_UtilGetArg(ind+1, argvalue=flag)
 	   if (typeSetFlag) then
 	     ! check if the type is consistent with -t
              if ((trim(flag) .eq. 'ESMF' .and. dstFileType /= ESMF_FILEFORMAT_ESMFMESH) .or.   &
@@ -254,35 +257,35 @@ program ESMF_RegridWeightGen
 
          ! If the src grid type is UGRID, get the dummy variable name in the file
 	 if (srcFileType == ESMF_FILEFORMAT_UGRID) then
-	    call ESMF_UtilGetArgIndex('--src_meshname', argindex=index, rc=rc)
-            if (index == -1) then
+	    call ESMF_UtilGetArgIndex('--src_meshname', argindex=ind, rc=rc)
+            if (ind == -1) then
 	         write(*,*)
                  print *, 'ERROR: The argument --src_meshname is missing.'
                  call ESMF_Finalize(endflag=ESMF_END_ABORT)
             else
-                 call ESMF_UtilGetArg(index+1, argvalue=srcMeshName)	   
+                 call ESMF_UtilGetArg(ind+1, argvalue=srcMeshName)	   
             endif
          endif
 
          ! If the dst grid type is UGRID, get the dummy variable name in the file
 	 if (dstFileType == ESMF_FILEFORMAT_UGRID) then
-	    call ESMF_UtilGetArgIndex('--dst_meshname', argindex=index, rc=rc)
-            if (index == -1) then
+	    call ESMF_UtilGetArgIndex('--dst_meshname', argindex=ind, rc=rc)
+            if (ind == -1) then
 	         write(*,*)
                  print *, 'ERROR: The argument --dst_meshname is missing.'
                  call ESMF_Finalize(endflag=ESMF_END_ABORT)
             else
-                 call ESMF_UtilGetArg(index+1, argvalue=dstMeshName)	   
+                 call ESMF_UtilGetArg(ind+1, argvalue=dstMeshName)	   
             endif
          endif
 
          ! If the src grid type is GRIDSPEC or UGRID, check if --src_missingvalue argument is given
-         call ESMF_UtilGetArgIndex('--src_missingvalue', argindex=index, rc=rc)
-         if (index == -1) then
+         call ESMF_UtilGetArgIndex('--src_missingvalue', argindex=ind, rc=rc)
+         if (ind == -1) then
 	    srcMissingValue = .false.
          else
 	     srcMissingValue = .true.
-             call ESMF_UtilGetArg(index+1, argvalue=srcVarName)	   
+             call ESMF_UtilGetArg(ind+1, argvalue=srcVarName)	   
          endif
 
          ! missing area only supported for GRIDSPEC and UGRID file.  When the grid
@@ -304,12 +307,12 @@ program ESMF_RegridWeightGen
 	 endif
 
          ! If the dst grid type is GRIDSPEC or UGRID, check if --dst_missingvalue argument is given
-	 call ESMF_UtilGetArgIndex('--dst_missingvalue', argindex=index, rc=rc)
-         if (index == -1) then
+	 call ESMF_UtilGetArgIndex('--dst_missingvalue', argindex=ind, rc=rc)
+         if (ind == -1) then
 	    dstMissingValue = .false.
          else
 	     dstMissingValue = .true.
-             call ESMF_UtilGetArg(index+1, argvalue=dstVarName)	   
+             call ESMF_UtilGetArg(ind+1, argvalue=dstVarName)	   
          endif
 
          ! missing area only supported for GRIDSPEC and UGRID file.  When the grid
@@ -331,14 +334,14 @@ program ESMF_RegridWeightGen
 	 endif
 
          ignoreUnmapped=.false.
-         call ESMF_UtilGetArgIndex('-i', argindex=index, rc=rc)
-         if (index == -1) call ESMF_UtilGetArgIndex('--ignore_unmapped', argindex=index, rc=rc)
-         if (index /= -1) then
+         call ESMF_UtilGetArgIndex('-i', argindex=ind, rc=rc)
+         if (ind == -1) call ESMF_UtilGetArgIndex('--ignore_unmapped', argindex=ind, rc=rc)
+         if (ind /= -1) then
             ignoreUnmapped=.true.
          end if
 
-         call ESMF_UtilGetArgIndex('-r', argindex=index, rc=rc)
-         if (index /= -1) then
+         call ESMF_UtilGetArgIndex('-r', argindex=ind, rc=rc)
+         if (ind /= -1) then
            srcIsRegional = .true.
            dstIsRegional = .true.
            pole = ESMF_POLEMETHOD_NONE
@@ -346,30 +349,30 @@ program ESMF_RegridWeightGen
            ! print *, 'Set pole to None for regional grids.'
          end if
 
-         call ESMF_UtilGetArgIndex('--src_regional', argindex=index, rc=rc)
-         if (index /= -1) then
+         call ESMF_UtilGetArgIndex('--src_regional', argindex=ind, rc=rc)
+         if (ind /= -1) then
            srcIsRegional = .true.
            pole = ESMF_POLEMETHOD_NONE
            poleptrs = 0
            ! print *, 'Set pole to None for regional source grid.'
          end if
 
-         call ESMF_UtilGetArgIndex('--dst_regional', argindex=index, rc=rc)
-         if (index /= -1) then
+         call ESMF_UtilGetArgIndex('--dst_regional', argindex=ind, rc=rc)
+         if (ind /= -1) then
            dstIsRegional = .true.
          end if
 
 	! --64bit_offset for large weight file
- 	call ESMF_UtilGetArgIndex('--64bit_offset', argindex=index, rc=rc)
-	if (index /= -1) then
+ 	call ESMF_UtilGetArgIndex('--64bit_offset', argindex=ind, rc=rc)
+	if (ind /= -1) then
 	   largeFileFlag = .true.
 	else
 	   largeFileFlag = .false.
         end if
 
         ! --user_area - to use user-defined area for the cells
- 	call ESMF_UtilGetArgIndex('--user_areas', argindex=index, rc=rc)
-	if (index /= -1) then
+ 	call ESMF_UtilGetArgIndex('--user_areas', argindex=ind, rc=rc)
+	if (ind /= -1) then
 	   userAreaFlag = .true.
 	else
 	   userAreaFlag = .false.
@@ -393,6 +396,59 @@ program ESMF_RegridWeightGen
 	     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 	endif
 
+        ! --src_coordinates, --dst_coordinates for GRIDSPEC file if there are multiple
+        ! coordinate variables
+	useSrcCoordVar = .false.
+        useDstCoordVar = .false.
+	if (srcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+	    call ESMF_UtilGetArgIndex('--src_coordinates', argindex=ind, rc=rc)
+            if (ind /= -1) then
+                 call ESMF_UtilGetArg(ind+1, argvalue=argStr)	   
+                 pos = INDEX(argStr, ',')
+	         if (pos == 0) then
+		    write(*,*)
+		    print *, "ERROR: wrong value for --src_coordinates: should be lon and lat "
+	  	    print *, "       variable names separated by comma" 
+	            call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  	         endif
+	         srcCoordNames(1)=argStr(1:pos-1)
+                 srcCoordNames(2)=argStr(pos+1:)
+                 pos = INDEX(argStr(pos+1:), ",")
+	         if (pos /= 0) then
+		    write(*,*)
+		    print *, "ERROR: wrong value for --src_coordinates: should be lon and lat "
+	  	    print *, "       variable names separated by comma" 
+	            call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  	         endif
+	         useSrcCoordVar = .true.
+            endif
+         endif
+
+	 if (dstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+	    call ESMF_UtilGetArgIndex('--dst_coordinates', argindex=ind, rc=rc)
+            if (ind /= -1) then
+                 call ESMF_UtilGetArg(ind+1, argvalue=argStr)	   
+                 pos = INDEX(argStr, ",")
+	         if (pos == 0) then
+		    write(*,*)
+		    print *, "ERROR: wrong value for --dst_coordinates: should be lon and lat "
+	  	    print *, "       variable names separated by comma" 
+	            call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  	         endif
+	         dstCoordNames(1)=argStr(1:pos-1)
+                 dstCoordNames(2)=argStr(pos+1:)
+                 pos = INDEX(argStr(pos+1:), ",")
+	         if (pos /= 0) then
+		    write(*,*)
+		    print *, "ERROR: wrong value for --dst_coordinates: should be lon and lat "
+	  	    print *, "       variable names separated by comma" 
+	            call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  	         endif
+	         useDstCoordVar = .true.
+            endif
+         endif
+
+
         ! Should I have only PetNO=0 to open the file and find out the size?
          if (srcFileType == ESMF_FILEFORMAT_SCRIP) then
 	   call ESMF_ScripInq(srcfile, grid_rank= srcrank, grid_dims=srcdims, rc=rc)
@@ -409,7 +465,11 @@ program ESMF_RegridWeightGen
            endif
 	 elseif (srcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
            allocate(srcdims(2))
-	   call ESMF_GridspecInq(srcfile, srcrank, srcdims, rc=rc)
+	   if (useSrcCoordVar) then
+   	      call ESMF_GridspecInq(srcfile, srcrank, srcdims, coord_names=srcCoordNames, rc=rc)
+	   else
+	      call ESMF_GridspecInq(srcfile, srcrank, srcdims, rc=rc)
+ 	   endif
 	   if (rc /= ESMF_SUCCESS) then 
              write(*,*)
 	     print *, 'ERROR: Unable to get dimension information from:', srcfile, &
@@ -418,7 +478,6 @@ program ESMF_RegridWeightGen
            endif
 	   srcIsReg = .true.
            srcrank = 2
-           print *, 'srcdims ', srcdims
          else
 	   srcIsReg = .false.
 	 endif
@@ -437,7 +496,11 @@ program ESMF_RegridWeightGen
            endif
 	 elseif (dstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
 	   allocate(dstdims(2))
-	   call ESMF_GridspecInq(dstfile, dstrank, dstdims, rc=rc)
+	   if (useDstCoordVar) then
+	      call ESMF_GridspecInq(dstfile, dstrank, dstdims, coord_names=dstCoordNames, rc=rc)
+	   else
+	      call ESMF_GridspecInq(dstfile, dstrank, dstdims, rc=rc)
+	   endif 
 	   if (rc /= ESMF_SUCCESS) then 
              write(*,*)
 	     print *, 'ERROR: Unable to get dimension information from:', dstfile, &
@@ -465,8 +528,11 @@ program ESMF_RegridWeightGen
 	    endif
 	else 
 	    print *, "  Source File is in GRIDSPEC foramt"
+	    if (useSrcCoordVar) then
+	      print *, "    Use '", trim(srcCoordNames(1)), "' and '", trim(srcCoordNames(2)), "' as the longitude and latitude variables"
+	    endif
 	    if (srcMissingValue) then
-	      print *, "    Use attribute 'missing_value' of variable '", trim(srcVarName),"' as the mask"
+	      print *, "    Use the missing values of variable '", trim(srcVarName),"' as the mask"
             endif
         endif
         if (srcIsRegional) then
@@ -483,16 +549,19 @@ program ESMF_RegridWeightGen
             print *, "  Destination File is in SCRIP format"
         elseif (dstFileType == ESMF_FILEFORMAT_ESMFMESH) then 
             print *, "  Destination File is in ESMF format"
-        elseif (srcFileType == ESMF_FILEFORMAT_UGRID) then
+        elseif (dstFileType == ESMF_FILEFORMAT_UGRID) then
             print *, "  Destination File is in UGRID format, dummy variable: ", & 
 		trim(dstMeshName)
 	    if (dstMissingValue) then
-	      print *, "  Use the missing value of ", trim(dstVarName)," as the mask"
+	      print *, "    Use the missing value of '", trim(dstVarName),"' as the mask"
             endif	
         else
-	    print *, "  Destination File is in GRIDSPEC format"
+	    print *, "  Destination File is in GRIDSPEC format"	
+	    if (useDstCoordVar) then
+	      print *, "    Use '", trim(dstCoordNames(1)), "' and '", trim(dstCoordNames(2)), "' as the longitude and latitude variables"
+	    endif
 	    if (dstMissingValue) then
-	      print *, "  Use the missing value of ", trim(dstVarName)," as the mask"
+	      print *, "    Use the missing value of '", trim(dstVarName),"' as the mask"
             endif	
 	endif
         if (dstIsRegional) then
@@ -747,14 +816,27 @@ program ESMF_RegridWeightGen
      ! ESMF_Grid or ESMF_Mesh
 
      if (srcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-	if (srcMissingValue) then
-	   srcGrid = ESMF_GridCreate(srcfile, srcFileType, (/xpart,ypart/), &
+	if (useSrcCoordVar) then
+ 	  if (srcMissingValue) then
+	     srcGrid = ESMF_GridCreate(srcfile, srcFileType, (/xpart,ypart/), &
+		  addCornerStagger=addCorners, &
+		  addMask=.true., varname=trim(srcVarName), isSphere=srcIsSphere, &
+		  coordNames = srcCoordNames, rc=rc)
+          else
+             srcGrid = ESMF_GridCreate(srcfile, srcFileType, (/xpart,ypart/), & 
+		       addCornerStagger=addCorners, &
+                       isSphere=srcIsSphere, coordNames = srcCoordNames,rc=rc)
+	  endif
+        else 
+ 	  if (srcMissingValue) then
+	     srcGrid = ESMF_GridCreate(srcfile, srcFileType, (/xpart,ypart/), &
 		  addCornerStagger=addCorners, &
 		  addMask=.true., varname=trim(srcVarName), isSphere=srcIsSphere, rc=rc)
-        else
-           srcGrid = ESMF_GridCreate(srcfile, srcFileType, (/xpart,ypart/), & 
+          else
+             srcGrid = ESMF_GridCreate(srcfile, srcFileType, (/xpart,ypart/), & 
 		       addCornerStagger=addCorners, &
                        isSphere=srcIsSphere, rc=rc)
+	  endif
 	endif
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
@@ -829,14 +911,27 @@ program ESMF_RegridWeightGen
         endif
      endif
      if (dstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-	if (dstMissingValue) then
-	   dstGrid = ESMF_GridCreate(dstfile, dstFileType, (/xpart,ypart/), &
+	if (useDstCoordVar) then
+ 	  if (dstMissingValue) then
+	     dstGrid = ESMF_GridCreate(dstfile, dstFileType, (/xpart,ypart/), &
+		  addCornerStagger=addCorners, &
+		  addMask=.true., varname=trim(dstVarName), isSphere=dstIsSphere, &
+		  coordNames = dstCoordNames, rc=rc)
+          else
+             dstGrid = ESMF_GridCreate(dstfile, dstFileType, (/xpart,ypart/), &
+			addCornerStagger=addCorners, &
+                        isSphere=dstIsSphere, coordNames=dstCoordNames, rc=rc)
+	  endif
+        else
+ 	  if (dstMissingValue) then
+	     dstGrid = ESMF_GridCreate(dstfile, dstFileType, (/xpart,ypart/), &
 		  addCornerStagger=addCorners, &
 		  addMask=.true., varname=trim(dstVarName), isSphere=dstIsSphere, rc=rc)
-        else
-           dstGrid = ESMF_GridCreate(dstfile, dstFileType, (/xpart,ypart/), &
+          else
+             dstGrid = ESMF_GridCreate(dstfile, dstFileType, (/xpart,ypart/), &
 			addCornerStagger=addCorners, &
                         isSphere=dstIsSphere, rc=rc)
+	  endif
 	endif
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
         call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=rc)
@@ -1028,7 +1123,38 @@ program ESMF_RegridWeightGen
       !! Write the weight table into a SCRIP format NetCDF file
       if (PetNo == 0) then
          if (isConserve) then
-            call ESMF_OutputScripWeightFile(wgtfile, factorList, factorIndexList,  &
+	   if (useSrcCoordVar .and. useDstCoordVar) then
+              call ESMF_OutputScripWeightFile(wgtfile, factorList, factorIndexList,  &
+	           srcFile=srcfile, dstFile=dstfile, srcFileType=srcFileType,&
+	           dstFileType=dstFileType, method = methodflag, &
+                   srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+		   dstFrac=dstFrac, largeFileFlag=largeFileFlag, &
+		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+	           srcvarname = srcvarname, dstvarname=dstvarname, &
+	 	   srccoordnames = srcCoordNames, dstcoordnames = dstCoordNames, rc=rc)
+    	   else if (useSrcCoordVar) then	
+              call ESMF_OutputScripWeightFile(wgtfile, factorList, factorIndexList,  &
+	           srcFile=srcfile, dstFile=dstfile, srcFileType=srcFileType,&
+	           dstFileType=dstFileType, method = methodflag, &
+                   srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+		   dstFrac=dstFrac, largeFileFlag=largeFileFlag, &
+		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+	           srcvarname = srcvarname, dstvarname=dstvarname, &
+	 	   srccoordnames = srcCoordNames, rc=rc)
+	   elseif (useDstCoordVar) then
+              call ESMF_OutputScripWeightFile(wgtfile, factorList, factorIndexList,  &
+	           srcFile=srcfile, dstFile=dstfile, srcFileType=srcFileType,&
+	           dstFileType=dstFileType, method = methodflag, &
+                   srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+		   dstFrac=dstFrac, largeFileFlag=largeFileFlag, &
+		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+	           srcvarname = srcvarname, dstvarname=dstvarname, &
+	 	   dstcoordnames = dstCoordNames, rc=rc)
+	    else
+              call ESMF_OutputScripWeightFile(wgtfile, factorList, factorIndexList,  &
 	           srcFile=srcfile, dstFile=dstfile, srcFileType=srcFileType,&
 	           dstFileType=dstFileType, method = methodflag, &
                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
@@ -1036,17 +1162,47 @@ program ESMF_RegridWeightGen
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	           srcvarname = srcvarname, dstvarname=dstvarname, rc=rc)
-            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+	   endif
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
          else
-            call ESMF_OutputScripWeightFile(wgtfile, factorList, factorIndexList,  &
+	   if (useSrcCoordVar .and. useDstCoordVar) then
+               call ESMF_OutputScripWeightFile(wgtfile, factorList, factorIndexList,  &
+	           srcFile=srcfile, dstFile=dstfile, srcFileType=srcFileType,&
+	           dstFileType=dstFileType, method = methodflag, dstFrac=dstFrac, &
+		   largeFileFlag=largeFileFlag, &
+		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+	           srcvarname = srcvarname, dstvarname=dstvarname, &
+ 	 	   srccoordnames = srcCoordNames, dstcoordnames = dstCoordNames, rc=rc)
+	   elseif (useSrcCoordVar) then
+               call ESMF_OutputScripWeightFile(wgtfile, factorList, factorIndexList,  &
+	           srcFile=srcfile, dstFile=dstfile, srcFileType=srcFileType,&
+	           dstFileType=dstFileType, method = methodflag, dstFrac=dstFrac, &
+		   largeFileFlag=largeFileFlag, &
+		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+	           srcvarname = srcvarname, dstvarname=dstvarname, &
+ 	 	   srccoordnames = srcCoordNames, rc=rc)
+	   elseif (useDstCoordVar) then
+               call ESMF_OutputScripWeightFile(wgtfile, factorList, factorIndexList,  &
+	           srcFile=srcfile, dstFile=dstfile, srcFileType=srcFileType,&
+	           dstFileType=dstFileType, method = methodflag, dstFrac=dstFrac, &
+		   largeFileFlag=largeFileFlag, &
+		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
+		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
+	           srcvarname = srcvarname, dstvarname=dstvarname, &
+ 	 	   dstcoordnames = dstCoordNames, rc=rc)
+	   else
+               call ESMF_OutputScripWeightFile(wgtfile, factorList, factorIndexList,  &
 	           srcFile=srcfile, dstFile=dstfile, srcFileType=srcFileType,&
 	           dstFileType=dstFileType, method = methodflag, dstFrac=dstFrac, &
 		   largeFileFlag=largeFileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	           srcvarname = srcvarname, dstvarname=dstvarname, rc=rc)
-            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-	  endif
+           endif
+           if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+	 endif
       else 
 	 call ESMF_OutputScripWeightFile(wgtfile, factorList, factorIndexList, rc=rc)
          if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
@@ -1845,15 +2001,22 @@ subroutine PrintUsage()
      print *, "                	     [--destination|-d] dst_grid_filename"
      print *, "                      [--weight|-w] out_weight_file "
      print *, "                      [--method|-m] [bilinear|patch|conservative]"
-     print *, "                      [--pole|-p] [all|none|<N>]"
+     print *, "                      [--pole|-p] [all|none|teeth|<N>]"
      print *, "                      [--ignore_unmapped|-i]"
-     print *, "                      --src_type [SCRIP|ESMF|UGRID]" 
-     print *, "                      --dst_type [SCRIP|ESMF|UGRID]"
-     print *, "                      -t [SCRIP|ESMF|UGRID]"
+     print *, "                      --src_type [SCRIP|ESMF|UGRID|GRIDSPEC]" 
+     print *, "                      --dst_type [SCRIP|ESMF|UGRID|GRIDSPEC]"
+     print *, "                      -t [SCRIP|ESMF|UGRID|GRIDSPEC]"
+     print *, "                      -r"
+     print *, "                      -- src_regional"
+     print *, "                      -- dst_regional"
      print *, "                      --64bit_offset"
      print *, "                      --src_meshname src_mesh_variable"
      print *, "                      --dst_meshname dst_mesh_variable"
-     print *, "                      -r"
+     print *, "                      --src_missingvalue src_var_name"
+     print *, "                      --dst_missingvalue dst_var_name"
+     print *, "                      --src_coordinates lon_var_name,lat_var_name"
+     print *, "                      --dst_coordinates lon_var_name,lat_var_name"
+     print *, "                      --user_areas"
      print *, "                      --help"
      print *, "                      --version"
      print *, "where"
@@ -1910,6 +2073,12 @@ subroutine PrintUsage()
      print *, "             grid.  If the grid is a UGRID, the variable has to be defined on the"
      print *, "             element ('face') because ESMF only support masking on the element"
      print *, "             Without this argument,a GRIDSPEC file or a UGRID file is not masked."
+     print *, "--src_coordinates  - an optional argument used when the source grid type is GRIDSPEC."
+     print *, "             It defines the longitude and latitude variable names separated by comma,"
+     print *, "             in case there are multiple coordinate variables defined in the file"
+     print *, "--dst_coordinates  - an optional argument used when the destination grid type is GRIDSPEC."
+     print *, "             It defines the longitude and latitude variable names separated by comma,"
+     print *, "             in case there are multiple coordinate variables defined in the file"
      print *, "--user_areas  - an optional argument specifying that the conservation is adjusted to"
      print *, "             hold for the user areas provided in the grid files.  If not specified,"
      print *, "             then the conservation will hold for the ESMF calculated (great circle)"
