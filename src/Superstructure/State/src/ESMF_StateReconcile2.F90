@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.14 2012/05/30 17:58:41 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.15 2012/05/31 15:50:28 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -69,14 +69,14 @@ module ESMF_StateReconcile2Mod
   ! These are only public for unit testing.  They are not intended
   ! to be called by ESMF users.
   public :: ESMF_ReconcileDeserialize, ESMF_ReconcileSerialize
-  public :: ESMF_ReconcileSendItems
+  ! public :: ESMF_ReconcileSendItems
 
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-  '$Id: ESMF_StateReconcile2.F90,v 1.14 2012/05/30 17:58:41 w6ws Exp $'
+  '$Id: ESMF_StateReconcile2.F90,v 1.15 2012/05/31 15:50:28 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
@@ -246,16 +246,13 @@ contains
 !EOPI
     integer :: localrc
     integer :: memstat
-    integer :: mypet, npets, send_pet
-    logical :: i_send, i_recv
+    integer :: mypet, npets
 
-    integer :: nitems       ! # of items contained within the local State
     integer, pointer :: nitems_buf(:)
     type (ESMF_StateItemWrap), pointer :: siwrap(:)
 
     integer,         pointer :: ids_send(:), itemtypes_send(:)
     type(ESMF_VMId), pointer :: vmids_send(:)
-    integer,     allocatable :: ids_recv(:), itemtypes_recv(:)
 
     type(ESMF_ReconcileIDInfo), pointer :: id_info(:)
 
@@ -263,8 +260,7 @@ contains
 
     type(ESMF_Itembuffer), pointer :: items_recv(:)
 
-    integer :: i, j
-    character(ESMF_MAXSTR) :: msgstring
+    integer :: i
 
     logical, parameter :: debug = .false.
     logical, parameter :: trace = .true.
@@ -327,7 +323,7 @@ contains
           ': *** Step 2 - Exchange Ids/VMIds')
     end if
     id_info => null ()
-    call ESMF_ReconcileExchangeIDInfo (vm,  &
+    call ESMF_ReconcileExchgIDInfo (vm,  &
         nitems_buf=nitems_buf,  &
 	  id=  ids_send,  &
 	vmid=vmids_send,  &
@@ -374,7 +370,7 @@ contains
     ! offered.
 
     recvd_needs_matrix => null ()
-    call ESMF_ReconcileExchangeNeeds (vm,  &
+    call ESMF_ReconcileExchgNeeds (vm,  &
         id_info=id_info,  &
         recv_needs=recvd_needs_matrix,  &
         rc=localrc)
@@ -495,7 +491,7 @@ contains
 	call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
             ': *** Step 8 - Exchange Base Attributes', ask=.false.)
       end if
-      call ESMF_ReconcileExchangeAttributes (state, vm, rc=localrc)
+      call ESMF_ReconcileExchgAttributes (state, vm, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
@@ -892,7 +888,8 @@ end if
     buffer_offset = ESMF_SIZEOF_DEFINT
 
     if (needs_count /= ubound (vm_ids, 1)) then
-      print *, ESMF_METHOD, ': WARNING - size mismatch between needs_count and vm_ids', needs_count, ubound (vm_ids, 1)
+      print *, ESMF_METHOD,  &
+          ': WARNING - size mismatch between needs_count and vm_ids', needs_count, ubound (vm_ids, 1)
       if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, msg='needs_count /= ubound (vm_ids, 1)', &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
@@ -1056,12 +1053,12 @@ end if
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ReconcileExchangeAttributes"
+#define ESMF_METHOD "ESMF_ReconcileExchgAttributes"
 !BOPI
-! !IROUTINE: ESMF_ReconcileExchangeAttributes
+! !IROUTINE: ESMF_ReconcileExchgAttributes
 !
 ! !INTERFACE:
-  subroutine ESMF_ReconcileExchangeAttributes (state, vm, rc)
+  subroutine ESMF_ReconcileExchgAttributes (state, vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State),  intent(inout):: state
@@ -1209,16 +1206,16 @@ rc = ESMF_RC_NOT_IMPL
 
     rc = ESMF_SUCCESS
 
-  end subroutine ESMF_ReconcileExchangeAttributes
+  end subroutine ESMF_ReconcileExchgAttributes
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ReconcileExchangeIDInfo"
+#define ESMF_METHOD "ESMF_ReconcileExchgIDInfo"
 !BOPI
-! !IROUTINE: ESMF_ReconcileExchangeIDInfo
+! !IROUTINE: ESMF_ReconcileExchgIDInfo
 !
 ! !INTERFACE:
-  subroutine ESMF_ReconcileExchangeIDInfo (vm,  &
+  subroutine ESMF_ReconcileExchgIDInfo (vm,  &
       nitems_buf, id, vmid, id_info, rc)
 !
 ! !ARGUMENTS:
@@ -1464,16 +1461,16 @@ logical, parameter :: debug = .false.
 
     rc = localrc
 
-  end subroutine ESMF_ReconcileExchangeIDInfo
+  end subroutine ESMF_ReconcileExchgIDInfo
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ReconcileExchangeNeeds"
+#define ESMF_METHOD "ESMF_ReconcileExchgNeeds"
 !BOPI
-! !IROUTINE: ESMF_ReconcileExchangeNeeds
+! !IROUTINE: ESMF_ReconcileExchgNeeds
 !
 ! !INTERFACE:
-  subroutine ESMF_ReconcileExchangeNeeds (vm, id_info, recv_needs, rc)
+  subroutine ESMF_ReconcileExchgNeeds (vm, id_info, recv_needs, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)  :: vm
@@ -1620,7 +1617,7 @@ logical, parameter :: debug = .false.
 
     rc = localrc
 
-  end subroutine ESMF_ReconcileExchangeNeeds
+  end subroutine ESMF_ReconcileExchgNeeds
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2466,7 +2463,7 @@ end if
 
   end subroutine ESMF_ReconcileDebugPrint
 
-  elemental function iTos_len (i)
+  pure function iTos_len (i)
     integer, intent(in) :: i
     integer :: iTos_len
 
