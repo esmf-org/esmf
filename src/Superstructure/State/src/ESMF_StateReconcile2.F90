@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.15 2012/05/31 15:50:28 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.16 2012/05/31 16:01:14 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@ module ESMF_StateReconcile2Mod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-  '$Id: ESMF_StateReconcile2.F90,v 1.15 2012/05/31 15:50:28 w6ws Exp $'
+  '$Id: ESMF_StateReconcile2.F90,v 1.16 2012/05/31 16:01:14 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
@@ -713,7 +713,6 @@ end if
       integer,         intent(out):: rc_1
 
       type(NeedsList_t), pointer :: needslist_p
-      logical :: needs
       integer :: memstat_1
 
     ! Called when a Id/VMId is offered by some remote PET, and is needed
@@ -856,9 +855,7 @@ end if
 !EOPI
 
     integer :: localrc
-    integer :: memstat
 
-    type(ESMF_Base) :: base
     type(ESMF_FieldBundle) :: fieldbundle
     type(ESMF_Field) :: field
     type(ESMF_Array) :: array
@@ -867,7 +864,6 @@ end if
 
     integer :: buffer_offset
     integer :: needs_count
-    integer, allocatable :: offsets(:)
 
     integer :: i
     integer :: stateitem_type
@@ -1259,13 +1255,10 @@ rc = ESMF_RC_NOT_IMPL
     integer :: send_pet
     integer, allocatable :: counts_buf_send(:), counts_buf_recv(:)
     integer, allocatable :: displs_buf_send(:), displs_buf_recv(:)
-    integer :: recv_count, recv_offset
-    integer :: i, j, k, ipos
+    integer :: i, ipos
     integer :: memstat
-    logical :: needed
 
     integer,         allocatable ::   id_recv(:)
-    type(ESMF_VMId), allocatable :: vmid_recv(:)
 
 logical, parameter :: debug = .false.
 
@@ -1671,7 +1664,6 @@ logical, parameter :: debug = .false.
     type(ESMF_StateClass),      pointer :: statep
 
     integer :: localrc
-    integer :: array_sizes
     integer :: i
     integer :: memstat
     integer :: nitems
@@ -2136,11 +2128,9 @@ logical, parameter :: debug = .false.
 
     integer :: buffer_offset
     integer :: needs_count
-    integer, allocatable :: offsets(:)
     integer :: lbufsize
 
     integer :: i
-    character(32) :: errstring
 
     logical, parameter :: debug=.false.
 
@@ -2414,9 +2404,7 @@ end if
     integer,      intent(out), optional :: rc
 
     type(ESMF_VM) :: vm
-    integer :: iostat
     integer :: localrc
-    integer :: memstat
     integer :: mypet, npets
     character(16) :: answer
     logical :: localask
