@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridGridRegridCsrvUTest.C,v 1.6 2012/05/14 20:46:01 svasquez Exp $
+// $Id: ESMC_FieldGridGridRegridCsrvUTest.C,v 1.7 2012/05/31 22:26:56 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -636,10 +636,10 @@ int main(void){
 
   double srcmass = 0;
   p = 0;
-  for (int i1=exLBound_dcenter[1]; i1<=exUBound_dcenter[1]; ++i1) {
-    for (int i0=exLBound_dcenter[0]; i0<=exUBound_dcenter[0]; ++i0) {
+  for (int i1=exLBound_center[1]; i1<=exUBound_center[1]; ++i1) {
+    for (int i0=exLBound_center[0]; i0<=exUBound_center[0]; ++i0) {
       srcmass += srcfieldptr[p]*srcAreaFieldPtr[p]*srcFracFieldPtr[p];
-      printf("%f - %f - %f\n", dstfieldptr[p], dstAreaFieldPtr[p], dstFracFieldPtr[p]);
+      //printf("%f - %f - %f\n", dstfieldptr[p], dstAreaFieldPtr[p], dstFracFieldPtr[p]);
       ++p;
     }
   }
@@ -675,7 +675,7 @@ int main(void){
     }
   }
   // check that the mass is conserved
-  //if (ESMC_dabs(srcmass - dstmass) > .0001) correct = false;
+  if (ESMC_dabs(srcmass - dstmass) > .0001) correct = false;
   //printf("srcmass = %f, dstmass = %f, srcmass-dstmass = %f\n", srcmass, dstmass, srcmass-dstmass);
 
   ESMC_Test((correct==true), name, failMsg, &result, __FILE__, __LINE__, 0);
