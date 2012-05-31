@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.71 2012/05/30 23:09:46 peggyli Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.72 2012/05/31 15:03:36 peggyli Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -408,7 +408,7 @@ grid file.
 
 The last example shows how to use the missing values of a data variable to generate the 
 grid mask for a GRIDSPEC file, how to specify the coordinate variable names 
-using "{\tt \verb+--+src_coordinates}"
+using "{\tt \verb+--+src\_coordinates}"
  and use user defined area for the conservative regridding.
 
 \begin{verbatim}
@@ -545,7 +545,7 @@ grid is defined in counterclockwise order.  In the example below, the grid is a 
 grid, thus the coordinate variables are 1D and the bound variables are 2D with the first dimension equal to 2.
 The bound coordinates will be read in and stored in a ESMF Grid object as the corner stagger coordinates when doing a conservative regrid.  In case there are multiple sets of coordinate variables defined in a grid file, 
 the offline regrid application will return an error for duplicate latitude or longitude variables unless the user 
-uses "{\tt \verb+--+src_coordinates}" or "{\tt \verb+--+src_coordinates}" to specifiy the coordinate variable names
+uses "{\tt \verb+--+src\_coordinates}" or "{\tt \verb+--+src\_coordinates}" to specifiy the coordinate variable names
 to be used in the regrid.  
 
 Since a GRIDSPEC tile file does not have a way to specify the grid mask, the mask is usually derived by the missing values stored in a data variable.  ESMF\_RegridWeightGen provides an option for users to
