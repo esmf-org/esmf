@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridRegridParUTest.C,v 1.10 2012/05/14 20:46:01 svasquez Exp $
+// $Id: ESMC_FieldGridRegridParUTest.C,v 1.11 2012/06/01 19:51:05 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -20,7 +20,7 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
-#define corner
+#define center
 
 //==============================================================================
 //BOP
@@ -45,7 +45,7 @@ int main(void){
   // Field variables
   ESMC_ArraySpec arrayspec;
   ESMC_RouteHandle routehandle;
-  ESMC_Field srcfield, dstfield;
+  ESMC_Field srcfield, dstfield, exactfield;
 
   // Grid variables
   ESMC_Grid srcgrid;
@@ -83,8 +83,6 @@ int main(void){
 
 #ifdef ESMF_TESTEXHAUSTIVE
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
-  // Create a Grid
   double ub_x, lb_x, max_x, min_x, cellwidth_x, cellcenter_x;
   double ub_y, lb_y, max_y, min_y, cellwidth_y, cellcenter_y;
   ub_x = 21;
@@ -107,7 +105,7 @@ int main(void){
   i_maxIndex = ESMC_InterfaceIntCreate(maxIndex, dimcount, &rc);
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ESMC_CoordSys coordsys = ESMC_COORDSYS_CART;
@@ -125,7 +123,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "GridAddCoord");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_GridAddCoord(srcgrid, ESMC_STAGGERLOC_CENTER);
@@ -136,7 +134,7 @@ int main(void){
   // CORNERS
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   // get and fill first coord array and computational bounds
   int *exLB_corner = (int *)malloc(dimcount*sizeof(int));
   int *exUB_corner = (int *)malloc(dimcount*sizeof(int));
@@ -162,7 +160,7 @@ int main(void){
   printf("exUB_corner = [%d,%d]\n", exUB_corner[0], exUB_corner[1]);
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   // get and fill second coord array
   strcpy(name, "GridGetCoord - Y");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -184,7 +182,7 @@ int main(void){
   // CENTERS
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   // get and fill first coord array and computational bounds
   int *exLB_center = (int *)malloc(dimcount*sizeof(int));
   int *exUB_center = (int *)malloc(dimcount*sizeof(int));
@@ -210,7 +208,7 @@ int main(void){
   printf("exUB_center = [%d,%d]\n", exUB_center[0], exUB_center[1]);
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   // get and fill second coord array
   strcpy(name, "GridGetCoord - Y");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
@@ -467,7 +465,7 @@ int main(void){
   }
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "MeshCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dstmesh = ESMC_MeshCreate(pdim,sdim,&rc);
@@ -475,7 +473,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "MeshAddNodes");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_MeshAddNodes(dstmesh, num_node, nodeId, nodeCoord, nodeOwner);
@@ -483,15 +481,15 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshAddElements(dstmesh, num_elem, elemId, elemType, elemConn, NULL);
+  rc = ESMC_MeshAddElements(dstmesh, num_elem, elemId, elemType, elemConn, NULL,NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
  
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "MeshGetLocalNodeCount");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int num_node_out;
@@ -502,7 +500,7 @@ int main(void){
   printf("num_node = %d\nnum_node_out=%d\n", num_node, num_node_out);
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "MeshGetLocalElementCount");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int num_elem_out;
@@ -519,7 +517,7 @@ int main(void){
 
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "Create ESMC_Field object from a Grid via TypeKind");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef corner
@@ -534,10 +532,19 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "Create ESMC_Field object from a Mesh via TypeKind");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   dstfield = ESMC_FieldCreateMeshTypeKind(dstmesh, 
+    ESMC_TYPEKIND_R8, ESMC_MESHLOC_NODE, NULL, NULL, NULL, "dstfield", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //EX_UTest_Multi_Proc_Only
+  strcpy(name, "Create ESMC_Field object from a Mesh via TypeKind");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  exactfield = ESMC_FieldCreateMeshTypeKind(dstmesh, 
     ESMC_TYPEKIND_R8, ESMC_MESHLOC_NODE, NULL, NULL, NULL, "dstfield", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -547,7 +554,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "Get a void * C pointer to data from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double * srcfieldptr = (double *)ESMC_FieldGetPtr(srcfield, 0, &rc);
@@ -582,29 +589,59 @@ int main(void){
 #endif
   
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "Get a void * C pointer to data from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double * dstfieldptr = (double *)ESMC_FieldGetPtr(dstfield, 0, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-  // initialize destination field
-  for(int i=0; i<num_node; ++i)
-    dstfieldptr[i] = 0.0;
-
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
-  strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
+  //EX_UTest_Multi_Proc_Only
+  strcpy(name, "Get a void * C pointer to data from ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle, 
-                        ESMC_REGRIDMETHOD_BILINEAR, ESMC_UNMAPPEDACTION_ERROR,
-                        NULL, NULL);
+  double * exactptr = (double *)ESMC_FieldGetPtr(exactfield, 0, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
+  strcpy(name, "Get the ownedNode count from ESMC_Mesh object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  int num_onode;
+  rc = ESMC_MeshGetOwnedNodeCount(dstmesh, &num_onode);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  // initialize destination field
+  for(int i=0; i<num_onode; ++i)
+    dstfieldptr[i] = 0.0;
+
+  // initialize destination field
+  p = 0;
+  for(int i=0; i<num_node; ++i) {
+    if (nodeOwner[i] == localPet) {
+      x = nodeCoord[2*i];
+      y = nodeCoord[2*i+1];
+      exactptr[p] = 20.0 + x + y;
+      p++;
+    }
+  }
+
+  //----------------------------------------------------------------------------
+  //EX_UTest_Multi_Proc_Only
+  strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  ESMC_RegridMethod regridmethod = ESMC_REGRIDMETHOD_BILINEAR;
+  ESMC_UnmappedAction unmappedaction = ESMC_UNMAPPEDACTION_ERROR;
+  rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle, 
+                             &regridmethod, &unmappedaction,
+                             NULL, NULL);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "Execute ESMC_FieldRegrid()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle);
@@ -612,32 +649,27 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "Release an ESMC_RouteHandle via ESMC_FieldRegridRelease()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldRegridRelease(&routehandle);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   
-
   //----------------------------------------------------------------------------
   //-------------------------- REGRID VALIDATION -------------------------------
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "Regridding Validation");
   strcpy(failMsg, "Did not have acceptable accuracy");
 
   bool correct = true;
   // check destination field against analytic field
-  for(int i=0; i<num_node; ++i) {
-    x=nodeCoord[2*i];
-    y=nodeCoord[2*i+1];
-    //exact = 20.0;
-    exact = 20.0+x+y;
+  for(int i=0; i<num_onode; ++i) {
     tol = .0001;
-    if (ESMC_dabs(dstfieldptr[i]-exact) > tol) {
-      printf("dstfieldptr[%d]:\n%f /= %f\n", 
-             i, dstfieldptr[i], exact);
+    if (ESMC_dabs(dstfieldptr[i]-exactptr[i]) > tol) {
+      printf("PET%d: dstfieldptr[%d]:%f /= %f\n", 
+             localPet, i, dstfieldptr[i], exactptr[i]);
       correct=false;
     }
   }
@@ -650,13 +682,9 @@ int main(void){
   free(elemId);
   free(elemType);
   free(elemConn);
-  free(exLB_center);
-  free(exUB_center);
-  free(exLB_corner);
-  free(exUB_corner);
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "Destroy ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldDestroy(&srcfield);
@@ -664,7 +692,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "Destroy ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_FieldDestroy(&dstfield);
@@ -672,7 +700,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "Destroy ESMC_Grid object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_GridDestroy(&srcgrid);
@@ -680,7 +708,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  //EX_disable_UTest_Multi_Proc_Only
+  //EX_UTest_Multi_Proc_Only
   strcpy(name, "Destroy ESMC_Mesh object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_MeshDestroy(&dstmesh);
