@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.67 2012/05/02 22:30:11 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.68 2012/06/04 16:07:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.67 2012/05/02 22:30:11 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.68 2012/06/04 16:07:34 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -287,7 +287,7 @@ program ESMF_FieldRegridEx
 ! of similar Fields that differ in the number of elements in the left most undistributed dimensions.             
 ! You can apply the routehandle between any set of Fields weakly congruent to the original Fields used to create the routehandle without 
 ! incurring an error. However, if you want                                     
-! the routehandle to be the same interpolation between the grid objects upon which the Fields are build as was calculated                                        
+! the routehandle to be the same interpolation between the grid objects upon which the Fields are built as was calculated                                        
 ! with the original {\tt ESMF\_FieldRegridStore()} call, then there                                                                                              
 ! are additional constraints on the grid objects. To be the same interpolation, the grid objects upon which the                                                  
 ! Fields are build must contain the same coordinates at the stagger locations involved in the regridding as                                                      
@@ -298,7 +298,7 @@ program ESMF_FieldRegridEx
 ! {\tt ESMF\_FieldRegridRelease()} should be used to 
 ! free the associated memory. 
 !
-! In the case that the Grid is on a sphere (coordSys=ESMF\_COORDSYS\_SPH\_DEG or ESMF\_COORDSYS\_SPH\_DEG)
+! In the case that the Grid is on a sphere (coordSys=ESMF\_COORDSYS\_SPH\_DEG or ESMF\_COORDSYS\_SPH\_RAD)
 ! then the coordinates given in the Grid are interpretted as latitude and longitude values. The coordinates can either be in degrees or radians as indicated by the 
 ! {\tt coordSys} flag set during Grid creation. As is true with many global models, this application currently assumes the latitude and longitude refer to positions on a 
 ! perfect sphere, as opposed to a more complex and accurate representation of the earth's true shape such as would be used in a GIS system. (ESMF's current user base doesn't 
