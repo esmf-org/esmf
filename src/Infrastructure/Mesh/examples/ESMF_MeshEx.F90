@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.55 2012/05/02 22:31:24 oehmke Exp $
+! $Id: ESMF_MeshEx.F90,v 1.56 2012/06/04 20:06:00 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@ program ESMF_MeshEx
 ! For each element in the Mesh we set three properties: the global id of the element ({\tt elementIds}), the topology type of
 ! the element ({\tt elementTypes}), and which nodes are connected together to form the element ({\tt elementConn}). The element id is
 ! a unique (across all PETs) integer attached to the particular element. The element type describes the topology of the element 
-! (e.g. a triangle vs. a quadralateral). The range of choices for the topology of the elements in a Mesh are restricted by the 
+! (e.g. a triangle vs. a quadrilateral). The range of choices for the topology of the elements in a Mesh are restricted by the 
 ! Mesh's parametric dimension (e.g. a Mesh can't contain a 2D element like a triangle, when its parametric dimension is 3D), but it can contain
 ! any combination of elements appropriate to its dimension. The element connectivity indicates which nodes are to be connected together to
 ! form the element. The number of nodes connected together for each element is implied by the elements topology type ({\tt elementTypes}). 
@@ -177,7 +177,7 @@ program ESMF_MeshEx
 ! case is so that the user can start to familiarize themselves with the concepts of Mesh creation without the added complication of 
 ! multiple processors. Later examples illustrate the multiple processor case. This example creates the small 2D Mesh which can be 
 ! seen in the figure above. Note that this Mesh consists of 9 nodes and 5 elements, where the elements are a mixture of 
-! quadralaterals and triangles.  The coordinates of the nodes in the Mesh range from 0.0 to 2.0 in both dimensions. The node ids are 
+! quadrilaterals and triangles.  The coordinates of the nodes in the Mesh range from 0.0 to 2.0 in both dimensions. The node ids are 
 ! in the corners of the elements whereas the element ids are in the centers. The following section of code illustrates the creation of
 ! this Mesh. 
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.68 2012/06/04 16:07:34 rokuingh Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.69 2012/06/04 20:05:55 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.68 2012/06/04 16:07:34 rokuingh Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.69 2012/06/04 20:05:55 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -330,7 +330,7 @@ program ESMF_FieldRegridEx
 ! In 2D, ESMF supports bilinear regridding between any combination of the following:
 ! \begin{itemize}
 ! \item Structured Grids composed of a single logically rectangular patch
-! \item Unstructured Meshes composed of any combination of triangles and quadralaterals (e.g. rectangles)
+! \item Unstructured Meshes composed of any combination of triangles and quadrilaterals (e.g. rectangles)
 ! \end{itemize}
 !
 !\smallskip
@@ -364,7 +364,7 @@ program ESMF_FieldRegridEx
 ! In 2D, ESMF supports patch regridding between any combination of the following:
 ! \begin{itemize}
 ! \item Structured Grids composed of a single logically rectangular patch
-! \item Unstructured Meshes composed of any combination of triangles and quadralaterals (e.g. rectangles)
+! \item Unstructured Meshes composed of any combination of triangles and quadrilaterals (e.g. rectangles)
 ! \end{itemize}
 !
 !\smallskip
@@ -453,7 +453,7 @@ program ESMF_FieldRegridEx
 ! In 2D, ESMF supports conservative regridding between any combination of the following:
 ! \begin{itemize}
 ! \item Structured Grids composed of a single logically rectangular patch
-! \item Unstructured Meshes composed of any combination of triangles and quadralaterals (e.g. rectangles)
+! \item Unstructured Meshes composed of any combination of triangles and quadrilaterals (e.g. rectangles)
 ! \end{itemize}
 !
 !\smallskip

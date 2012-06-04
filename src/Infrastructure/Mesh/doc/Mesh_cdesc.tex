@@ -1,4 +1,4 @@
-% $Id: Mesh_cdesc.tex,v 1.3 2011/07/01 16:07:24 rokuingh Exp $
+% $Id: Mesh_cdesc.tex,v 1.4 2012/06/04 20:05:58 rokuingh Exp $
 
 Unstructured grids are commonly used in the computational solution of Partial Differential equations.  These are especially useful for problems that involve complex geometry, where using the less flexible structured grids can
 result in grid representation of regions where no computation is needed.  Finite
@@ -25,9 +25,9 @@ ESMF currently only supports Meshes whose number of coordinate dimensions (spati
 either 2D elements in 2D space, 3D elements in 3D space, or a manifold constructed of 2D elements embedded in 3D space. 
 
 ESMF currently supports two types of elements for each Mesh parametric dimension. For a parametric dimension of 2 the 
-supported element types are triangles or quadralaterals. For a parametric dimension of 3 the supported element types are tetrahedrons
+supported element types are triangles or quadrilaterals. For a parametric dimension of 3 the supported element types are tetrahedrons
 and hexahedrons. See Section~\ref{const:meshelemtype} for diagrams of these. The Mesh supports any combination of element types within a particular
-dimension, but types from different dimensions may not be mixed, for example, a Mesh cannot be constructed of both quadralaterals and tetrahedra.
+dimension, but types from different dimensions may not be mixed, for example, a Mesh cannot be constructed of both quadrilaterals and tetrahedra.
 
 ESMF currently only supports distributions where every node on a PET must be a part of an element on that PET. In other words, there 
 must not be nodes without an element on a PET. 

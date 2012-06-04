@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.39 2012/01/06 20:17:06 svasquez Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.40 2012/06/04 20:05:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -130,7 +130,7 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays
                              ESMCI_FortranStrLenArg nlen
 			  ) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshio()" 
+#define ESMC_METHOD "c_esmc_gridio()" 
   ESMCI::Grid &grid = **gridpp;
 
   // Get VM
