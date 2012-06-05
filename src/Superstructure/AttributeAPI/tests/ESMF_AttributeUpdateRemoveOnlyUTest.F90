@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateRemoveOnlyUTest.F90,v 1.4 2012/05/16 21:56:52 svasquez Exp $
+! $Id: ESMF_AttributeUpdateRemoveOnlyUTest.F90,v 1.5 2012/06/05 17:13:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -9,12 +9,20 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-module ESMF_AttributeUpdateUTestMod
+module ESMF_AttributeUpdateRemoveOnlyUTestMod
 
 !  THIS unit test is to show the behavior of a known bug documented for the
 !  510, 520, 520p1, and 520r releases.  When an Attribute 
 !  hierarchy is updated after ONLY removals have been performed, the newly
 !  removed Attributes are not removed on all PETs by the ESMF_AttributeUpdate()
+!
+!  The reason for this bug is that the routine inside of AttributeUpdate which
+!  unpackes the serialized Attribute hierarchy that is sent from the rootPets
+!  is received on the non-root PETs.  If only removals have happened then the
+!  missing Attributes will not be present on the non root PETs where the 
+!  unpacking routine runs.  The routine is recursive, so it depends on an object
+!  hierarchy to guide the program flow.  If there is no Attribute there, it will
+!  not be able to detect that fact.
 
   use ESMF
 
@@ -440,13 +448,13 @@ module ESMF_AttributeUpdateUTestMod
  
 end module
 
-program ESMF_AttributeUpdateUTest
+program ESMF_AttributeUpdateRemoveOnlyUTest
 
 #include "ESMF.h"
 
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_AttributeUpdateUTest - Attribute Update Unit Tests
+! !PROGRAM: ESMF_AttributeUpdateRemoveOnlyUTest - Attribute Update Unit Tests
 !
 ! !DESCRIPTION:
 !
@@ -456,7 +464,8 @@ program ESMF_AttributeUpdateUTest
 ! !USES:
   use ESMF
   use ESMF_TestMod
-  use ESMF_AttributeUpdateUTestMod, only : userm1_setvm, userm1_register, &
+  use ESMF_AttributeUpdateRemoveOnlyUTestMod, &
+    only : userm1_setvm, userm1_register, &
     userm2_setvm, userm2_register, usercpl_setvm, usercpl_register
 
 
@@ -465,7 +474,7 @@ program ESMF_AttributeUpdateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdateRemoveOnlyUTest.F90,v 1.4 2012/05/16 21:56:52 svasquez Exp $'
+    '$Id: ESMF_AttributeUpdateRemoveOnlyUTest.F90,v 1.5 2012/06/05 17:13:11 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -572,7 +581,7 @@ program ESMF_AttributeUpdateUTest
     call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    !EX_disable_UTest_Multi_Proc_Only
+    !EX_UTest_Multi_Proc_Only
     call ESMF_AttributeGet(field, name2, convention=convESMF, &
       purpose=purpGen, isPresent=isPresent, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -606,4 +615,4 @@ program ESMF_AttributeUpdateUTest
     call ESMF_TestEnd(ESMF_SRCLINE)
     !-----------------------------------------------------------------------------
 
-end program ESMF_AttributeUpdateUTest
+end program ESMF_AttributeUpdateRemoveOnlyUTest
