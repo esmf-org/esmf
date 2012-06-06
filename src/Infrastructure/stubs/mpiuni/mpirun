@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: mpirun,v 1.4 2012/01/19 05:03:19 w6ws Exp $
+# $Id: mpirun,v 1.5 2012/06/06 17:51:46 w6ws Exp $
 
 CYCLE=1
 while [ $CYCLE = 1 ]
@@ -7,9 +7,9 @@ do
     case $1 in
     --help)
 	echo "Usage: mpirun [OPTION]... [command [arg ...]]"
-	echo "-np 1       run the command with one processor (default)"
-	echo "--help      display this help and exit"
-	echo "--version   output version information and exit"
+	echo "-np 1           run the command with one processor (default)"
+	echo "--help          display this help and exit"
+	echo "-v, --version   output version information and exit"
 	exit 0
 	;;
 
@@ -21,10 +21,10 @@ do
 	shift; shift
 	;;
 
-    --version)
+    --version|-v)
 	echo "ESMF mpirun:"
-	echo "  revision$Revision: 1.4 $"
-	echo "  revision date$Date: 2012/01/19 05:03:19 $"
+	echo "  revision$Revision: 1.5 $"
+	echo "  revision date$Date: 2012/06/06 17:51:46 $"
 	echo "  tag$Name:  $"
 	exit 0
 	;;
