@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.85 2012/05/17 17:23:49 rokuingh Exp $
+// $Id: ESMCI_Grid.h,v 1.86 2012/06/06 00:07:26 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -248,6 +248,7 @@ template <class TYPE>
   static Grid* create1peridim(ESMC_InterfaceInt maxIndex, 
                               ESMC_CoordSys *coordSys,
                               ESMC_TypeKind *coordTypeKind, 
+                              ESMC_PoleKind_Flag *poleKind, 
                               int *rc);
 
   int write(ESMC_StaggerLoc staggerloc, const char *fname);

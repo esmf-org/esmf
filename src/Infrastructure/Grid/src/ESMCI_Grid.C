@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.136 2012/05/17 17:23:55 rokuingh Exp $
+// $Id: ESMCI_Grid.C,v 1.137 2012/06/06 00:07:29 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -52,7 +52,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.136 2012/05/17 17:23:55 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.137 2012/06/06 00:07:29 rokuingh Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -78,6 +78,7 @@ void FTN_X(f_esmf_gridcreate1peridim)(ESMCI::Grid **grid,
     int *maxIndex, int *len1, 
     ESMC_CoordSys *coordSys, int *cs_present,
     ESMC_TypeKind *coordTypeKind, int *ctk_present,
+    ESMC_PoleKind_Flag *poleKind, int *pk_present, int *pksize,
     int *rc);
 }
 
@@ -238,6 +239,7 @@ int setDefaultsLUA(int dimCount,
     ESMC_InterfaceInt maxIndex, 
     ESMC_CoordSys *coordSys,
     ESMC_TypeKind *coordTypeKind,
+    ESMC_PoleKind_Flag *poleKind,
     int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -251,9 +253,12 @@ int setDefaultsLUA(int dimCount,
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
 
-    int cs_present, ctk_present;
+    int cs_present, ctk_present, pk_present;
     cs_present = 0;
     ctk_present = 0;
+    pk_present = 0;
+
+    int pksize = 2;
 
     ESMCI::InterfaceInt *mi = (ESMCI::InterfaceInt *)(maxIndex.ptr);
   
@@ -268,6 +273,8 @@ int setDefaultsLUA(int dimCount,
       cs_present = 1;
     if (coordTypeKind != NULL)
       ctk_present = 1; 
+    if (poleKind != NULL)
+      pk_present = 1; 
 
     // allocate the grid object
     Grid *grid;
@@ -276,6 +283,7 @@ int setDefaultsLUA(int dimCount,
                                      mi->array, &mi->extent[0], 
                                      coordSys, &cs_present,
                                      coordTypeKind, &ctk_present,
+                                     poleKind, &pk_present, &pksize,
                                      &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
         return grid;

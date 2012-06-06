@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.44 2012/03/30 19:03:35 rokuingh Exp $
+// $Id: ESMC_Util.h,v 1.45 2012/06/06 00:07:32 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -32,59 +32,58 @@ extern "C" {
 } // extern "C"
 #endif
 
-// general logical value - MUST MATCH F90
-enum ESMC_Logical { ESMF_TRUE=1,
-                    ESMF_FALSE };
-
-enum ESMC_TypeKind { ESMC_TYPEKIND_I1=1,
-                     ESMC_TYPEKIND_I2,
-                     ESMC_TYPEKIND_I4,
-                     ESMC_TYPEKIND_I8,
-                     ESMC_TYPEKIND_R4,
-                     ESMC_TYPEKIND_R8,
-                     ESMF_C8,
-                     ESMF_C16,
-                     ESMC_TYPEKIND_LOGICAL,
-                     ESMC_TYPEKIND_CHARACTER,
-                     ESMF_NOKIND=99 };
-
-enum ESMC_MeshLoc_Flag { ESMC_MESHLOC_NODE=1,
-                         ESMC_MESHLOC_ELEMENT };
-
-enum ESMC_RegridMethod { ESMC_REGRIDMETHOD_BILINEAR=0,
-                         ESMC_REGRIDMETHOD_PATCH,
-                         ESMC_REGRIDMETHOD_CONSERVE };
-
-enum ESMC_UnmappedAction { ESMC_UNMAPPEDACTION_ERROR=0,
-                           ESMC_UNMAPPEDACTION_IGNORE };
-
 enum ESMC_CoordSys {ESMC_COORDSYS_INVALID=-2,
                     ESMC_COORDSYS_UNINIT,
                     ESMC_COORDSYS_CART,
                     ESMC_COORDSYS_SPH_DEG,
-                    ESMC_COORDSYS_SPH_RAD
-};
+                    ESMC_COORDSYS_SPH_RAD};
+
+enum ESMC_GridItem_Flag {ESMC_GRIDITEM_INVALID=-2,
+                         ESMC_GRIDITEM_UNINIT,
+                         ESMC_GRIDITEM_MASK,
+                         ESMC_GRIDITEM_AREA};
+
+enum ESMC_GridStatus {ESMC_GRIDSTATUS_INVALID=-1,
+                      ESMC_GRIDSTATUS_UNINIT,
+                      ESMC_GRIDSTATUS_NOT_READY,
+                      ESMC_GRIDSTATUS_SHAPE_READY};
+
+// general logical value - MUST MATCH F90
+enum ESMC_Logical { ESMF_TRUE=1,
+                    ESMF_FALSE };
+
+enum ESMC_MeshLoc_Flag {ESMC_MESHLOC_NODE=1,
+                        ESMC_MESHLOC_ELEMENT};
+
+enum ESMC_PoleKind_Flag {ESMC_POLEKIND_NONE=0,
+                         ESMC_POLEKIND_MONOPOLE=1,
+                         ESMC_POLEKIND_BIPOLE=2};
+
+enum ESMC_RegridMethod {ESMC_REGRIDMETHOD_BILINEAR=0,
+                        ESMC_REGRIDMETHOD_PATCH,
+                        ESMC_REGRIDMETHOD_CONSERVE};
 
 enum ESMC_StaggerLoc {ESMC_STAGGERLOC_INVALID=-2,
                       ESMC_STAGGERLOC_UNINIT,
                       ESMC_STAGGERLOC_CENTER,
                       ESMC_STAGGERLOC_EDGE1,
                       ESMC_STAGGERLOC_EDGE2,
-                      ESMC_STAGGERLOC_CORNER,
-};
+                      ESMC_STAGGERLOC_CORNER};
 
-enum ESMC_GridStatus {ESMC_GRIDSTATUS_INVALID=-1,
-                      ESMC_GRIDSTATUS_UNINIT,
-                      ESMC_GRIDSTATUS_NOT_READY,
-                      ESMC_GRIDSTATUS_SHAPE_READY
-};
+enum ESMC_TypeKind {ESMC_TYPEKIND_I1=1,
+                    ESMC_TYPEKIND_I2,
+                    ESMC_TYPEKIND_I4,
+                    ESMC_TYPEKIND_I8,
+                    ESMC_TYPEKIND_R4,
+                    ESMC_TYPEKIND_R8,
+                    ESMF_C8,
+                    ESMF_C16,
+                    ESMC_TYPEKIND_LOGICAL,
+                    ESMC_TYPEKIND_CHARACTER,
+                    ESMF_NOKIND=99};
 
-enum ESMC_GridItem_Flag {ESMC_GRIDITEM_INVALID=-2,
-                         ESMC_GRIDITEM_UNINIT,
-                         ESMC_GRIDITEM_MASK,
-                         ESMC_GRIDITEM_AREA
-};
-
+enum ESMC_UnmappedAction {ESMC_UNMAPPEDACTION_ERROR=0,
+                          ESMC_UNMAPPEDACTION_IGNORE};
 
 
 // ESMF platform-dependent data types

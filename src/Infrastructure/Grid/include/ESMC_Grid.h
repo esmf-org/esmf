@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.h,v 1.22 2012/05/17 17:23:49 rokuingh Exp $
+// $Id: ESMC_Grid.h,v 1.23 2012/06/06 00:07:26 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -95,6 +95,7 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
   ESMC_InterfaceInt maxIndex,  // in
   enum ESMC_CoordSys *coordSys,      // in
   enum ESMC_TypeKind *coordTypeKind, // in
+  enum ESMC_PoleKind_Flag *poleKind, // in
   int *rc                      // out
 );
 // !RETURN VALUE:
@@ -114,6 +115,12 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
 //  \item[coordTypeKind]
 //  The type/kind of the grid coordinate data.  If not specified then the
 //  type/kind will be 8 byte reals.
+//  \item[poleKind]
+//  Two item array which specifies the type of connection which occurs at the 
+//  pole. polekindflag(1) the connection that occurs at the minimum end of the 
+//  index dimension. polekindflag(2) the connection that occurs at the maximum 
+//  end of the index dimension. If not specified, the default is 
+//  ESMF\_POLETYPE\_MONOPOLE for both.
 //  \item[rc]
 //  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 //  \end{description}

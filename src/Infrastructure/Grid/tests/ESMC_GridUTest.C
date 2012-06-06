@@ -1,4 +1,4 @@
-// $Id: ESMC_GridUTest.C,v 1.9 2012/05/17 17:23:56 rokuingh Exp $
+// $Id: ESMC_GridUTest.C,v 1.10 2012/06/06 00:07:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ int main(void){
   int rc;
   bool correct;
 
-  ESMC_Grid grid_np, grid_1p;
+  ESMC_Grid grid_np, grid_1p, grid_tripole;
   ESMC_VM vm;
 
   int dimcount = 2;
@@ -111,6 +111,92 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
+  //  GridCreate1PeriDim for a tripole grid
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // Create a Grid
+  maxIndex = (int *)malloc(dimcount*sizeof(int));
+  maxIndex[0] = 12;
+  maxIndex[1] = 20;
+  i_maxIndex = ESMC_InterfaceIntCreate(maxIndex, dimcount, &rc);
+
+  strcpy(name, "GridCreate");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  ESMC_PoleKind_Flag polekind[2];
+  polekind[0] = ESMC_POLEKIND_MONOPOLE;
+  polekind[1] = ESMC_POLEKIND_BIPOLE;
+  ESMC_PoleKind_Flag *pkptr = polekind;
+  grid_tripole = ESMC_GridCreate1PeriDim(i_maxIndex, &coordsys, &typekind, 
+                                         pkptr, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  // free memory
+  free(maxIndex);
+  ESMC_InterfaceIntDestroy(&i_maxIndex);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //  GridAddCoord and GetCoord on grid_tripole
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridAddCoord");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridAddCoord(grid_tripole, ESMC_STAGGERLOC_CENTER);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // get and fill first coord array and computational bounds
+  int *exLBound_tripole = (int *)malloc(dimcount*sizeof(int));
+  int *exUBound_tripole = (int *)malloc(dimcount*sizeof(int));
+
+  strcpy(name, "GridGetCoord - X");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  double *gridXCoord_tripole = (double *)ESMC_GridGetCoord(grid_tripole, 1,
+                                                   ESMC_STAGGERLOC_CENTER,
+                                                   exLBound_tripole, 
+                                                   exUBound_tripole, &rc);
+
+  p = 0;
+  for (int i1=exLBound_tripole[1]; i1<=exUBound_tripole[1]; ++i1) {
+    for (int i0=exLBound_tripole[0]; i0<=exUBound_tripole[0]; ++i0) {
+      gridXCoord_tripole[p]=(double)(i0);
+      //printf("PET%d - set gridXCoord_tripole[%d] = %f (%f)\n", localPet, p, 
+      //  (double)(i0), gridXCoord_tripole[p]);
+      ++p;
+    }
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  // get and fill second coord array
+  strcpy(name, "GridGetCoord - Y");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  double *gridYCoord_tripole = (double *)ESMC_GridGetCoord(grid_tripole, 2, 
+                                                   ESMC_STAGGERLOC_CENTER,
+                                                   NULL, NULL, &rc);
+
+  p = 0;
+  for (int i1=exLBound_tripole[1]; i1<=exUBound_tripole[1]; ++i1) {
+    for (int i0=exLBound_tripole[0]; i0<=exUBound_tripole[0]; ++i0) {
+      gridYCoord_tripole[p]=(double)(i1);
+      //printf("PET%d - set gridYCoord_tripole[%d] = %f (%f)\n", localPet, p, 
+      //  (double)(i1), gridYCoord_tripole[p]);
+      ++p;
+    }
+  }
+
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
   //  GridCreate1PeriDim
   //----------------------------------------------------------------------------
 
@@ -124,7 +210,7 @@ int main(void){
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  grid_1p = ESMC_GridCreate1PeriDim(i_maxIndex, &coordsys, &typekind, &rc);
+  grid_1p = ESMC_GridCreate1PeriDim(i_maxIndex, &coordsys, &typekind, NULL, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   // free memory
   free(maxIndex);
