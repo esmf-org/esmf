@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateRemoveOnlyUTest.F90,v 1.5 2012/06/05 17:13:11 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateRemoveOnlyUTest.F90,v 1.6 2012/06/06 20:30:17 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -474,7 +474,7 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdateRemoveOnlyUTest.F90,v 1.5 2012/06/05 17:13:11 rokuingh Exp $'
+    '$Id: ESMF_AttributeUpdateRemoveOnlyUTest.F90,v 1.6 2012/06/06 20:30:17 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -581,7 +581,7 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
     call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    !EX_UTest_Multi_Proc_Only
+    !EX_disabled_UTest_Multi_Proc_Only
     call ESMF_AttributeGet(field, name2, convention=convESMF, &
       purpose=purpGen, isPresent=isPresent, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
