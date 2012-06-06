@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.49 2012/06/06 00:43:15 w6ws Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.50 2012/06/06 14:05:45 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -860,8 +860,8 @@ program ESMF_StateReconcileUTest
     ! Test accessing nested State items after reconcile
     !-------------------------------------------------------------------------
 
-    ! Nested State will be created on PET 0.  After reconciliation, the other
-    ! PETs will have proxies.
+    ! Nested State items will be created on PET 0.  After reconciliation,
+    ! the other PETs will have a proxy nested State.
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
@@ -870,37 +870,45 @@ program ESMF_StateReconcileUTest
     write(name, *) "Calling StateCreate for top-level State tests"
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-    if (localPET == 0) then
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-      state_nested = ESMF_StateCreate (name='state_nested', rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Calling StateCreate for nested State tests"
-      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-      field_nested = ESMF_FieldEmptyCreate (name='nested Field', rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Calling FieldEmptyCreate for nested State test"
-      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-      call ESMF_StateAdd (state_nested, fieldList=(/ field_nested /), rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Calling StateAdd of nested Field test"
-      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !NEX_UTest_Multi_Proc_Only
-      call ESMF_StateAdd (state3, nestedStateList=(/ state_nested /), rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Calling StateAdd of nested State test"
-      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-call ESMF_StatePrint (state3, nestedFlag=.true.)
+    if (localPET /= 0) then
+      rc = ESMF_SUCCESS
     end if
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    if (localPET == 0) then
+      state_nested = ESMF_StateCreate (name='state_nested', rc=rc)
+    end if
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling StateCreate for nested State tests"
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    if (localPET == 0) then
+      field_nested = ESMF_FieldEmptyCreate (name='nested Field', rc=rc)
+    end if
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling FieldEmptyCreate for nested State test"
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    if (localPET == 0) then
+      call ESMF_StateAdd (state_nested, fieldList=(/ field_nested /), rc=rc)
+    end if
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling StateAdd of nested Field test"
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    if (localPET == 0) then
+      call ESMF_StateAdd (state3, nestedStateList=(/ state_nested /), rc=rc)
+      ! call ESMF_StatePrint (state3, nestedFlag=.true.)
+    end if
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Calling StateAdd of nested State test"
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
