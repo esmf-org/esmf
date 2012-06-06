@@ -1,5 +1,5 @@
 !
-!     $Id: mpif.h,v 1.2 2006/09/22 23:55:42 theurich Exp $
+!     $Id: mpif.h,v 1.3 2012/06/06 17:50:10 w6ws Exp $
 !
 
 !===============================================================================
@@ -43,6 +43,7 @@
        INTEGER MPI_SOURCE,MPI_TAG,MPI_ERROR
        PARAMETER(MPI_SOURCE=2,MPI_TAG=3,MPI_ERROR=4)
 
+       integer, parameter :: MPI_ANY_SOURCE=4
      
 !     Data Types. Same Values used in mpi.c
        integer MPI_INTEGER,MPI_REAL,MPI_DOUBLE_PRECISION
@@ -54,4 +55,15 @@
        parameter (MPI_COMPLEX=3)
        parameter (MPI_CHARACTER=4)
 
+       integer, parameter :: MPI_REAL4 = MPI_REAL
+       integer, parameter :: MPI_REAL8 = MPI_DOUBLE_PRECISION
 
+       ! The following is non-portable:
+       integer, parameter :: MPI_OFFSET_KIND = 8
+
+       integer, parameter :: MPI_MAX_ERROR_STRING = 256
+
+!     Null objects
+
+       integer, parameter :: MPI_DATATYPE_NULL = 0
+       integer, parameter :: MPI_INFO_NULL = 0
