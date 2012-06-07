@@ -1,4 +1,4 @@
-! $Id: ESMF_IOGridspec.F90,v 1.4 2012/05/30 23:14:22 peggyli Exp $
+! $Id: ESMF_IOGridspec.F90,v 1.5 2012/06/07 05:09:53 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -140,7 +140,7 @@
 	        ESMF_SRCLINE, &
         	errmsg, &
 	        rc)) return
-        if (attstr(len:len) == "\0") len=len-1
+        if (ichar(attstr(len:len)) == 0) len=len-1
 	if (.not. (attstr(1:len) .eq. 'degrees_east' .or. &
 	        attstr(1:len) .eq. 'degree_east' .or. &
 	        attstr(1:len) .eq. 'degree_E' .or. &
@@ -172,7 +172,7 @@
 	        ESMF_SRCLINE, &
         	errmsg, &
 	        rc)) return
-        if (attstr(len:len) == "\0") len=len-1
+        if (ichar(attstr(len:len)) == 0) len=len-1
 	if (.not. (attstr(1:len) .eq. 'degrees_north' .or. &
 	        attstr(1:len) .eq. 'degree_north' .or. &
 	        attstr(1:len) .eq. 'degree_N' .or. &
@@ -210,8 +210,7 @@
         	errmsg, &
 	        rc)) return
 
-	   if (attstr(len:len) == "\0") len=len-1
-
+	   if (ichar(attstr(len:len)) == 0) len=len-1
            if (len >= 6 .and. (attstr(1:6) .eq. "degree")) then
   	      if (attstr(1:len) .eq. "degrees_east" .or. &
 	          attstr(1:len) .eq. "degree_east" .or. &
