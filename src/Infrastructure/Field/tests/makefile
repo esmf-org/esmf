@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.100 2012/06/01 19:51:05 rokuingh Exp $ 
+# $Id: makefile,v 1.101 2012/06/08 16:50:08 rokuingh Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -17,6 +17,7 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMC_FieldGridRegridParUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldGridGridRegridUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldGridGridRegridCsrvUTest \
+		$(ESMF_TESTDIR)/ESMC_FieldTripoleRegridUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldCreateGetUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridCsrvUTest \
