@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateRemoveOnlyUTest.F90,v 1.6 2012/06/06 20:30:17 rokuingh Exp $
+! $Id: ESMF_AttributeUpdateRemoveOnlyUTest.F90,v 1.7 2012/06/11 19:53:15 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -23,6 +23,8 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 !  unpacking routine runs.  The routine is recursive, so it depends on an object
 !  hierarchy to guide the program flow.  If there is no Attribute there, it will
 !  not be able to detect that fact.
+
+!  One solution would be to use the entire buffer that is passed from the root
 
   use ESMF
 
@@ -474,7 +476,7 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdateRemoveOnlyUTest.F90,v 1.6 2012/06/06 20:30:17 rokuingh Exp $'
+    '$Id: ESMF_AttributeUpdateRemoveOnlyUTest.F90,v 1.7 2012/06/11 19:53:15 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 
