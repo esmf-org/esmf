@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridConcurrentSTest.F90,v 1.14 2012/05/14 19:34:25 feiliu Exp $
+! $Id: ESMF_XGridConcurrentSTest.F90,v 1.15 2012/06/12 22:18:45 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
@@ -50,6 +50,8 @@ program ESMF_XGridConcurrentSTest
   ! Local variables
   integer :: localPet, petCount, localrc, rc=ESMF_SUCCESS, userrc=ESMF_SUCCESS
   character(len=ESMF_MAXSTR) :: cname1, cname2, cname3, cplname
+  integer :: i
+  logical :: atmos_pet, land_pet, ocean_pet
   type(ESMF_VM):: vm
   type(ESMF_State) :: land_export, ocean_export, landocn_export
   type(ESMF_State) :: atmos_import
@@ -105,6 +107,7 @@ program ESMF_XGridConcurrentSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  land_pet = any ( localPet == (/0,1/) )
 
   cname2 = "ocean"
   ! use petList to define ocean on 4 PETs
@@ -113,6 +116,7 @@ program ESMF_XGridConcurrentSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  ocean_pet = any ( localPet == (/ (i, i=2,5) /) )
 
   cname3 = "atmosphere"
   ! use petList to define atmosphere on 4 PETs
@@ -121,6 +125,7 @@ program ESMF_XGridConcurrentSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  atmos_pet = any ( localPet == (/ (i, i=6,9) /) )
 
   cplname = "user one-way coupler"
   ! no petList means that coupler component runs on all PETs
@@ -249,15 +254,19 @@ program ESMF_XGridConcurrentSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  call ESMF_StateAdd(landocn_export, (/land_export/), rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  if (land_pet) then
+    call ESMF_StateAdd(landocn_export, (/land_export/), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  end if
 
-  call ESMF_StateAdd(landocn_export, (/ocean_export/), rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  if (ocean_pet) then
+    call ESMF_StateAdd(landocn_export, (/ocean_export/), rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  end if
 
   ! atmosphere import state
   atmos_import = ESMF_StateCreate(name="atmos_import",  &
@@ -268,9 +277,6 @@ program ESMF_XGridConcurrentSTest
   call ESMF_GridCompInitialize(atmos, importState=atmos_import, userRc=userrc, rc=localrc)
   print *, "Atmosphere Initialize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
