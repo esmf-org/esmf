@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.129 2012/01/06 20:15:50 svasquez Exp $
+// $Id: ESMCI_Attribute.C,v 1.130 2012/06/19 00:58:09 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.129 2012/01/06 20:15:50 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.130 2012/06/19 00:58:09 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -3805,7 +3805,7 @@ if (attrRoot == ESMF_TRUE) {
       else
         tlen = attrLens[index];
       if (attrList.at(i)->items == 0) {
-        sprintf(msgbuf, "%-*\t",tlen);
+        sprintf(msgbuf, "%-*s\t",tlen, " ");
         fprintf(tab,"%s",msgbuf);
       } else if (attrList.at(i)->items == 1) {
         if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
@@ -8395,18 +8395,18 @@ if (attrRoot == ESMF_TRUE) {
     // get localoffset
     loffset=*offset;
     
-    DESERIALIZE_VAR(buffer,loffset,chars,int);
+    DESERIALIZE_VAR(buffer,loffset,chars,string::size_type);
     DESERIALIZE_VARC(buffer,loffset,attrName,temp,chars);
 
     DESERIALIZE_VAR(buffer,loffset,tk,ESMC_TypeKind);
     DESERIALIZE_VAR(buffer,loffset,items,int);
     DESERIALIZE_VAR(buffer,loffset,attrRoot,ESMC_Logical);
     
-    DESERIALIZE_VAR(buffer,loffset,chars,int);
+    DESERIALIZE_VAR(buffer,loffset,chars,string::size_type);
     DESERIALIZE_VARC(buffer,loffset,attrConvention,temp2,chars);
-    DESERIALIZE_VAR(buffer,loffset,chars,int);
+    DESERIALIZE_VAR(buffer,loffset,chars,string::size_type);
     DESERIALIZE_VARC(buffer,loffset,attrPurpose,temp3,chars);
-    DESERIALIZE_VAR(buffer,loffset,chars,int);
+    DESERIALIZE_VAR(buffer,loffset,chars,string::size_type);
     DESERIALIZE_VARC(buffer,loffset,attrObject,temp4,chars);
       
     DESERIALIZE_VAR(buffer,loffset,attrPack,ESMC_Logical);
@@ -8464,7 +8464,7 @@ if (attrRoot == ESMF_TRUE) {
       else if (tk == ESMC_TYPEKIND_CHARACTER) {
           vcpp.reserve(items);
           for (i=0; i<items; i++) {
-            DESERIALIZE_VAR(buffer,loffset,chars,int);
+            DESERIALIZE_VAR(buffer,loffset,chars,string::size_type);
             string vcppTemp((buffer)+(loffset),chars);
             loffset += chars;
             vcpp.push_back(vcppTemp);
@@ -8604,7 +8604,7 @@ if (attrRoot == ESMF_TRUE) {
     // Initialize local return code; assume routine not implemented
     localrc = ESMC_RC_NOT_IMPL;
 
-      SERIALIZE_VAR(cc,buffer,offset,(attrName.size()),int);
+      SERIALIZE_VAR(cc,buffer,offset,(attrName.size()),string::size_type);
       SERIALIZE_VARC(cc,buffer,offset,attrName,(attrName.size()));
 
       SERIALIZE_VAR(cc,buffer,offset,tk,ESMC_TypeKind);
@@ -8612,11 +8612,11 @@ if (attrRoot == ESMF_TRUE) {
       SERIALIZE_VAR(cc,buffer,offset,items,int);
       SERIALIZE_VAR(cc,buffer,offset,attrRoot,ESMC_Logical);
       
-      SERIALIZE_VAR(cc,buffer,offset,(attrConvention.size()),int);
+      SERIALIZE_VAR(cc,buffer,offset,(attrConvention.size()),string::size_type);
       SERIALIZE_VARC(cc,buffer,offset,attrConvention,(attrConvention.size()));
-      SERIALIZE_VAR(cc,buffer,offset,(attrPurpose.size()),int);
+      SERIALIZE_VAR(cc,buffer,offset,(attrPurpose.size()),string::size_type);
       SERIALIZE_VARC(cc,buffer,offset,attrPurpose,(attrPurpose.size()));
-      SERIALIZE_VAR(cc,buffer,offset,(attrObject.size()),int);
+      SERIALIZE_VAR(cc,buffer,offset,(attrObject.size()),string::size_type);
       SERIALIZE_VARC(cc,buffer,offset,attrObject,(attrObject.size()));
       
       SERIALIZE_VAR(cc,buffer,offset,attrPack,ESMC_Logical);
@@ -8649,7 +8649,7 @@ if (attrRoot == ESMF_TRUE) {
           }}
         else if (tk == ESMC_TYPEKIND_CHARACTER) {
           for (i=0; i<items; i++) {
-            SERIALIZE_VAR(cc,buffer,offset,(vcpp[i].size()),int);
+            SERIALIZE_VAR(cc,buffer,offset,(vcpp[i].size()),string::size_type);
             SERIALIZE_VARC(cc,buffer,offset,vcpp[i],(vcpp[i].size())); 
           }
         }
