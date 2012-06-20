@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.104 2012/06/13 17:51:48 peggyli Exp $
+% $Id: ESMF_install.tex,v 1.105 2012/06/20 17:21:11 peggyli Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -145,8 +145,8 @@ is set to {\tt "-lnetcdff -lnetcdf\_c++ -lnetcdf"}.
 
 In the NetCDF 4.2 released in March 2012, the C, C++, and Fortran libraries are released as separate packages.
 To compile ESMF with NetCDF 4.2, it is required to have the NetCDF 4.2 Fortran Library, 
-the NetCDF 4.2 C library, and the NetCDF 4.2 Legacy C++ Library installed in the same directory. 
-The {\tt ESMF\_NETCDF} environement variable has to be set to {\tt "split"}.  Note ESMF does not
+the NetCDF 4.2 C Library, and the NetCDF 4.2 Legacy C++ Library installed in the same directory. 
+The {\tt ESMF\_NETCDF} environement variable has to be set to {\tt "split"}.  Note that currently ESMF does not
 work with the new C++ API introduced in NetCDF 4.2, therefore, the Legacy C++ Library has to be 
 used.
 
