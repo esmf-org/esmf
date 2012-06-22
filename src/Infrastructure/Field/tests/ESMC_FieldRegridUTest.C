@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldRegridUTest.C,v 1.21 2012/05/14 20:46:01 svasquez Exp $
+// $Id: ESMC_FieldRegridUTest.C,v 1.22 2012/06/22 17:34:49 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -328,7 +328,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "Execute ESMC_FieldRegrid()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle);
+  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

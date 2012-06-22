@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.39 2012/04/17 04:16:41 rokuingh Exp $
+!  $Id: ESMF_Field_C.F90,v 1.40 2012/06/22 17:34:45 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.39 2012/04/17 04:16:41 rokuingh Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.40 2012/06/22 17:34:45 rokuingh Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -1168,7 +1168,7 @@
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_regrid"
-  subroutine f_esmf_regrid(srcField, dstField, routehandle, rc)
+  subroutine f_esmf_regrid(srcField, dstField, routehandle, zeroregion, zrpresent, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_BaseMod
@@ -1182,6 +1182,8 @@
     type(ESMF_Field)        :: srcField
     type(ESMF_Field)        :: dstField
     type(ESMF_RouteHandle)  :: routehandle
+    type(ESMF_Region_Flag)  :: zeroregion
+    integer, intent(in)     :: zrpresent
     integer                 :: rc 
 
     integer :: localrc
@@ -1202,10 +1204,14 @@
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! handle the regridmethod and unmappedaction flags
-
-    call ESMF_FieldRegrid(srcField, dstField, routehandle=l_routehandle, &
-      rc=localrc)
+    ! handle the zeroregion flag
+    if (zrpresent == 0) then
+      call ESMF_FieldRegrid(srcField, dstField, routehandle=l_routehandle, &
+        rc=localrc)
+    elseif (zrpresent == 1) then
+      call ESMF_FieldRegrid(srcField, dstField, routehandle=l_routehandle, &
+        zeroregion=zeroregion, rc=localrc)
+    endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
   

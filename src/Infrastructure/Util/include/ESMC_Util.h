@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.45 2012/06/06 00:07:32 rokuingh Exp $
+// $Id: ESMC_Util.h,v 1.46 2012/06/22 17:34:51 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -58,6 +58,10 @@ enum ESMC_MeshLoc_Flag {ESMC_MESHLOC_NODE=1,
 enum ESMC_PoleKind_Flag {ESMC_POLEKIND_NONE=0,
                          ESMC_POLEKIND_MONOPOLE=1,
                          ESMC_POLEKIND_BIPOLE=2};
+
+enum ESMC_RegionFlag { ESMC_REGION_TOTAL=0,
+                       ESMC_REGION_SELECT,
+                       ESMC_REGION_EMPTY};
 
 enum ESMC_RegridMethod {ESMC_REGRIDMETHOD_BILINEAR=0,
                         ESMC_REGRIDMETHOD_PATCH,

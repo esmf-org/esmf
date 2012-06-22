@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.110 2012/05/02 22:30:13 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.111 2012/06/22 17:34:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.110 2012/05/02 22:30:13 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.111 2012/06/22 17:34:47 rokuingh Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -472,7 +472,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         real(ESMF_KIND_R8), pointer :: fracFptr(:)
         integer(ESMF_KIND_I4),       pointer :: tmp_indices(:,:)
         real(ESMF_KIND_R8),          pointer :: tmp_weights(:)
-
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS

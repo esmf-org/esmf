@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.38 2012/04/17 04:16:41 rokuingh Exp $
+// $Id: ESMC_Field.C,v 1.39 2012/06/22 17:34:45 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -343,7 +343,8 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldRegrid()"
   int ESMC_FieldRegrid(ESMC_Field srcField, ESMC_Field dstField, 
-                            ESMC_RouteHandle routehandle){
+                            ESMC_RouteHandle routehandle, 
+                            enum ESMC_RegionFlag *zeroregion){
 
     // Initialize return code. Assume routine not implemented
     int rc = ESMF_RC_NOT_IMPL;
@@ -356,7 +357,8 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
       reinterpret_cast<ESMCI::RouteHandle *>(routehandle.ptr);
 
     // Invoque the C++ interface
-    localrc = ESMCI::Field::regrid(fieldpsrc, fieldpdst, routehandlep);
+    localrc = ESMCI::Field::regrid(fieldpsrc, fieldpdst, routehandlep, 
+                                   zeroregion);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;  // bail out
 

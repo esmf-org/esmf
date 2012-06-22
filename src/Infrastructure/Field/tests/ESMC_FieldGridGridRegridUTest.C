@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridGridRegridUTest.C,v 1.7 2012/05/14 20:46:01 svasquez Exp $
+// $Id: ESMC_FieldGridGridRegridUTest.C,v 1.8 2012/06/22 17:34:49 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -149,11 +149,15 @@ int main(void){
   int *exLBound = (int *)malloc(dimcount*sizeof(int));
   int *exUBound = (int *)malloc(dimcount*sizeof(int));
 
-  strcpy(name, "GridGetCoord - X");
+  strcpy(name, "Grid Get and Set Coords");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridXCoord = (double *)ESMC_GridGetCoord(srcgrid, 1,
                                                    ESMC_STAGGERLOC_CENTER,
                                                    exLBound, exUBound, &rc);
+
+  double *gridYCoord = (double *)ESMC_GridGetCoord(srcgrid, 2,
+                                                   ESMC_STAGGERLOC_CENTER,
+                                                   NULL, NULL, &rc);
 
   printf("exLBounds = [%d,%d]\n", exLBound[0], exLBound[1]);
   printf("exUBounds = [%d,%d]\n", exUBound[0], exUBound[1]);
@@ -161,31 +165,12 @@ int main(void){
   p = 0;
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
     for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-        gridXCoord[p]=((double)(i0-1)*cellwidth_x) + lb_x + (double)(cellwidth_x/2.0);
+      gridXCoord[p]=((double)(i0-1)*cellwidth_x) + lb_x + (double)(cellwidth_x/2.0);
+      gridYCoord[p]=((double)(i1-1)*cellwidth_y) + lb_y + (double)(cellwidth_y/2.0);
 #ifdef masking
       if (i0 == 2) mask[p] = 1;
       else mask[p] = 0;
 #endif
-      ++p;
-    }
-  }
-
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  // get and fill second coord array
-  strcpy(name, "GridGetCoord - Y");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  double *gridYCoord = (double *)ESMC_GridGetCoord(srcgrid, 2,
-                                                   ESMC_STAGGERLOC_CENTER,
-                                                   NULL, NULL, &rc);
-
-  p = 0;
-  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
-    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      gridYCoord[p]=((double)(i1-1)*cellwidth_y) + lb_y + (double)(cellwidth_y/2.0);
       ++p;
     }
   }
@@ -242,15 +227,40 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //EX_UTest
+  strcpy(name, "GridAddItem");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef masking
+  rc = ESMC_GridAddItem(dstgrid, ESMC_GRIDITEM_MASK, ESMC_STAGGERLOC_CENTER);
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridGetItem - mask");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef masking
+  int *dstmask = (int *)ESMC_GridGetItem(dstgrid, ESMC_GRIDITEM_MASK, 
+                                      ESMC_STAGGERLOC_CENTER, &rc);
+#endif
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
   // get and fill first coord array and computational bounds
   int *exLBound_d = (int *)malloc(dimcount*sizeof(int));
   int *exUBound_d = (int *)malloc(dimcount*sizeof(int));
 
-  strcpy(name, "GridGetCoord - X");
+  strcpy(name, "Grid Get and Set Coords - DST");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *gridXCoord_d = (double *)ESMC_GridGetCoord(dstgrid, 1,
                                                      ESMC_STAGGERLOC_CENTER,
                                                      exLBound_d, exUBound_d, &rc);
+
+  double *gridYCoord_d = (double *)ESMC_GridGetCoord(dstgrid, 2,
+                                                     ESMC_STAGGERLOC_CENTER,
+                                                     NULL, NULL, &rc);
 
   printf("exLBounds = [%d,%d]\n", exLBound_d[0], exLBound_d[1]);
   printf("exUBounds = [%d,%d]\n", exUBound_d[0], exUBound_d[1]);
@@ -259,26 +269,11 @@ int main(void){
   for (int i1=exLBound_d[1]; i1<=exUBound_d[1]; ++i1) {
     for (int i0=exLBound_d[0]; i0<=exUBound_d[0]; ++i0) {
       gridXCoord_d[p]=((double)(i0-1)*cellwidth_x) + lb_x + (double)(cellwidth_x/2.0) ;
-      ++p;
-    }
-  }
-
-  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  //----------------------------------------------------------------------------
-
-  //----------------------------------------------------------------------------
-  //EX_UTest
-  // get and fill second coord array
-  strcpy(name, "GridGetCoord - Y");
-  strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  double *gridYCoord_d = (double *)ESMC_GridGetCoord(dstgrid, 2,
-                                                     ESMC_STAGGERLOC_CENTER,
-                                                     NULL, NULL, &rc);
-
-  p = 0;
-  for (int i1=exLBound_d[1]; i1<=exUBound_d[1]; ++i1) {
-    for (int i0=exLBound_d[0]; i0<=exUBound_d[0]; ++i0) {
       gridYCoord_d[p]=((double)(i1-1)*cellwidth_y) + lb_y + (double)(cellwidth_y/2.0);
+#ifdef masking
+      if (i1 == 2) dstmask[p] = 1;
+      else dstmask[p] = 0;
+#endif
       ++p;
     }
   }
@@ -286,6 +281,8 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+#if 0
+  //----------------------------------------------------------------------------
   printf("\nSource Grid coords: \n");
   p = 0;
   for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
@@ -297,7 +294,9 @@ int main(void){
     }
   }
   printf("\n");
+  //----------------------------------------------------------------------------
   
+  //----------------------------------------------------------------------------
   printf("\nDestination Grid coords: \n");
   p = 0;
   for (int i1=exLBound_d[1]; i1<=exUBound_d[1]; ++i1) {
@@ -309,7 +308,8 @@ int main(void){
     }
   }
   printf("\n");
-
+  //----------------------------------------------------------------------------
+#endif
 
   //----------------------------------------------------------------------------
   //---------------------- FIELD CREATION --------------------------------------
@@ -370,7 +370,7 @@ int main(void){
   p = 0;
   for (int i1=exLBound_d[1]; i1<=exUBound_d[1]; ++i1) {
     for (int i0=exLBound_d[0]; i0<=exUBound_d[0]; ++i0) {
-      dstfieldptr[p] = 0.0;
+      dstfieldptr[p] = -1.0;
       ++p;
     }
   }
@@ -390,7 +390,8 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ESMC_UnmappedAction unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
 #ifdef masking
-  rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, NULL, &routehandle, 
+  rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, &i_maskValues, 
+                             &routehandle, 
                              NULL, &unmappedaction,
                              NULL, NULL);
 #else
@@ -405,7 +406,16 @@ int main(void){
   //EX_UTest
   strcpy(name, "Execute ESMC_FieldRegrid()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle);
+#ifdef masking
+  // we are using the ESMC_REGION_SELECT option here because the destination
+  // field was initialized to -1, so the values that are modified by the 
+  // SMM operation will need to be initialized to 0 before having the new
+  // value added to them.
+  ESMC_RegionFlag zeroregion = ESMC_REGION_SELECT;
+  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, &zeroregion);
+#else
+  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL);
+#endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -447,6 +457,14 @@ int main(void){
                x, y, dstfieldptr[p], exact);
         correct=false;
       }
+#ifdef masking
+      if (dstmask[p] == 1) {
+        if (dstfieldptr[p] >= 0) {
+          printf("dstfieldptr [%f,%f] = %f!!\n", x, y, dstfieldptr[p]);
+          correct=false;
+        }
+      }
+#endif
       ++p;
     }
   }

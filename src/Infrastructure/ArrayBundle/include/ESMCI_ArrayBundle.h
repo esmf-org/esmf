@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.34 2012/01/06 20:15:29 svasquez Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.35 2012/06/22 17:34:40 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -139,7 +139,7 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
         std::vector<SparseMatrix> &sparseMatrix);
     static int sparseMatMul(ArrayBundle *srcArraybundle,
       ArrayBundle *dstArraybundle, RouteHandle **routehandle,
-      ESMC_RegionFlag zeroflag=ESMF_REGION_TOTAL,
+      ESMC_RegionFlag zeroflag=ESMC_REGION_TOTAL,
       bool checkflag=false, bool haloFlag=false);  
     static int sparseMatMulRelease(RouteHandle *routehandle);
           

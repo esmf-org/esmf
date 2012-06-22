@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldTripoleRegridUTest.C,v 1.1 2012/06/08 16:49:47 rokuingh Exp $
+// $Id: ESMC_FieldTripoleRegridUTest.C,v 1.2 2012/06/22 17:34:49 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -267,7 +267,7 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
-  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle);
+  rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------

@@ -50,7 +50,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.26 2012/04/17 04:16:41 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.27 2012/06/22 17:34:45 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -123,7 +123,8 @@ void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   ESMCI::Field *dstfracfieldp, int *dff_present, int *rc);
 
 void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
-  ESMCI::RouteHandle **routehandlep, int *rc);
+  ESMCI::RouteHandle **routehandlep, ESMC_RegionFlag *zeroregion, int *zr_present,
+  int *rc);
 
 void FTN_X(f_esmf_regridrelease)(ESMCI::RouteHandle **routehandlep, int *rc);
 
@@ -988,7 +989,8 @@ namespace ESMCI {
 // !ARGUMENTS:
     Field *fieldpsrc, 
     Field *fieldpdst, 
-    RouteHandle *routehandlep) {
+    RouteHandle *routehandlep,
+    ESMC_RegionFlag *zeroRegion) {
 //
 // !DESCRIPTION:
 //
@@ -997,9 +999,15 @@ namespace ESMCI {
     // Initialize return code. Assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-  
+    int zr_present;
+    
+    zr_present = 0;
+    if (zeroRegion != NULL)
+      zr_present = 1;
+
     // TODO: why are fields.ptr and routehandle by reference??  from create.. 
-    FTN_X(f_esmf_regrid)(fieldpsrc, fieldpdst, &routehandlep, &localrc);
+    FTN_X(f_esmf_regrid)(fieldpsrc, fieldpdst, &routehandlep, 
+                         zeroRegion, &zr_present, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
 

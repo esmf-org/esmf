@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.40 2012/01/06 20:15:32 svasquez Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.41 2012/06/22 17:34:42 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.40 2012/01/06 20:15:32 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.41 2012/06/22 17:34:42 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -521,7 +521,7 @@ int ArrayBundle::halo(
   
   // implemented via sparseMatMul
   localrc = sparseMatMul(arraybundle, arraybundle, routehandle,
-    ESMF_REGION_SELECT, checkflag, true);
+    ESMC_REGION_SELECT, checkflag, true);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -793,7 +793,7 @@ int ArrayBundle::redist(
   
   // implemented via sparseMatMul
   localrc = sparseMatMul(srcArraybundle, dstArraybundle, routehandle,
-    ESMF_REGION_SELECT, checkflag);
+    ESMC_REGION_SELECT, checkflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -1048,11 +1048,11 @@ int ArrayBundle::sparseMatMul(
   ArrayBundle *srcArraybundle,          // in    - source ArrayBundle
   ArrayBundle *dstArraybundle,          // inout - destination ArrayBundle
   RouteHandle **routehandle,            // inout - handle to precomputed comm
-  ESMC_RegionFlag zeroflag,             // in    - ESMF_REGION_TOTAL:
+  ESMC_RegionFlag zeroflag,             // in    - ESMC_REGION_TOTAL:
                                         //          -> zero out total region
-                                        //         ESMF_REGION_SELECT:
+                                        //         ESMC_REGION_SELECT:
                                         //          -> zero out target points
-                                        //         ESMF_REGION_EMPTY:
+                                        //         ESMC_REGION_EMPTY:
                                         //          -> don't zero out any points
   bool checkflag,                       // in    - ESMF_FALSE: (def.) bas. chcks
                                         //         ESMF_TRUE: full input check
@@ -1209,9 +1209,9 @@ int ArrayBundle::sparseMatMul(
 //!!!!!!!! This looks like I should set the filterBitField here to take out
 //!!!!!!!! the non-blocking testing stuff -> strange this isn't causing trouble!
 
-      if (zeroflag!=ESMF_REGION_TOTAL)
+      if (zeroflag!=ESMC_REGION_TOTAL)
         filterBitField |= 1;  // filter the region_total zero operations
-      if (zeroflag!=ESMF_REGION_SELECT)
+      if (zeroflag!=ESMC_REGION_SELECT)
         filterBitField |= 2;  // filter the region_select zero operations
       // get a handle on the XXE stored in routehandle
       XXE *xxe = (XXE *)(*routehandle)->getStorage();

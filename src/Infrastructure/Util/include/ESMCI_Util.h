@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.49 2012/03/15 19:24:22 rokuingh Exp $
+// $Id: ESMCI_Util.h,v 1.50 2012/06/22 17:34:51 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -95,11 +95,6 @@ enum ESMC_ProxyFlag { ESMF_PROXYYES=1,
 // halostartregionflag type
 enum ESMC_HaloStartRegionFlag { ESMF_REGION_EXCLUSIVE=0,
                                 ESMF_REGION_COMPUTATIONAL};
-// regionflag type
-enum ESMC_RegionFlag { ESMF_REGION_TOTAL=0,
-                       ESMF_REGION_SELECT,
-                       ESMF_REGION_EMPTY};
-
 // commflag type
 enum ESMC_CommFlag { ESMF_COMM_BLOCKING=0,
                      ESMF_COMM_NBSTART,

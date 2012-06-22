@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.51 2012/04/17 04:16:39 rokuingh Exp $
+// $Id: ESMC_Field.h,v 1.52 2012/06/22 17:34:44 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -573,9 +573,10 @@ int ESMC_FieldRegridStore(
 //
 // !INTERFACE:
   int ESMC_FieldRegrid( 
-    ESMC_Field srcField,            // in
-    ESMC_Field dstField,            // inout
-    ESMC_RouteHandle routehandle);  // in
+    ESMC_Field srcField,                // in
+    ESMC_Field dstField,                // inout
+    ESMC_RouteHandle routehandle,       // in
+    enum ESMC_RegionFlag *zeroregion);  // in
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -596,6 +597,18 @@ int ESMC_FieldRegridStore(
 //    ESMC\_Field with destination data.
 //  \item[routehandle]
 //    Handle to the precomputed Route.
+//  \item [{[zeroregion]}]
+//    \begin{sloppypar}
+//    If set to {\tt ESMC\_REGION\_TOTAL} {\em (default)} the total regions of
+//    all DEs in {\tt dstField} will be initialized to zero before updating the 
+//    elements with the results of the sparse matrix multiplication. If set to
+//    {\tt ESMC\_REGION\_EMPTY} the elements in {\tt dstField} will not be
+//    modified prior to the sparse matrix multiplication and results will be
+//    added to the incoming element values. Setting {\tt zeroregion} to 
+//    {\tt ESMC\_REGION\_SELECT} will only zero out those elements in the 
+//    destination Array that will be updated by the sparse matrix
+//    multiplication.
+//    \end{sloppypar}
 //  \end{description}
 //
 //EOP

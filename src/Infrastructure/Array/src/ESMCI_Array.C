@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.144 2012/03/30 21:06:58 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.145 2012/06/22 17:34:38 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.144 2012/03/30 21:06:58 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.145 2012/06/22 17:34:38 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4212,7 +4212,7 @@ int Array::halo(
 
   // implemented via sparseMatMul
   localrc = sparseMatMul(array, array, routehandle,
-    commflag, finishedflag, cancelledflag, ESMF_REGION_SELECT, checkflag, true);
+    commflag, finishedflag, cancelledflag, ESMC_REGION_SELECT, checkflag, true);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -4804,7 +4804,7 @@ int Array::redist(
 
   // implemented via sparseMatMul
   localrc = sparseMatMul(srcArray, dstArray, routehandle,
-    commflag, finishedflag, cancelledflag, ESMF_REGION_SELECT, checkflag);
+    commflag, finishedflag, cancelledflag, ESMC_REGION_SELECT, checkflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -9383,11 +9383,11 @@ int Array::sparseMatMul(
   ESMC_CommFlag commflag,               // in    - communication options
   bool *finishedflag,                   // out   - TEST ops finished or not
   bool *cancelledflag,                  // out   - any cancelled operations
-  ESMC_RegionFlag zeroflag,             // in    - ESMF_REGION_TOTAL:
+  ESMC_RegionFlag zeroflag,             // in    - ESMC_REGION_TOTAL:
                                         //          -> zero out total region
-                                        //         ESMF_REGION_SELECT:
+                                        //         ESMC_REGION_SELECT:
                                         //          -> zero out target points
-                                        //         ESMF_REGION_EMPTY:
+                                        //         ESMC_REGION_EMPTY:
                                         //          -> don't zero out any points
   bool checkflag,                       // in    - false: (def.) basic chcks
                                         //         true:  full input check
@@ -9520,9 +9520,9 @@ int Array::sparseMatMul(
     filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
   }
   
-  if (zeroflag!=ESMF_REGION_TOTAL)
+  if (zeroflag!=ESMC_REGION_TOTAL)
     filterBitField |= XXE::filterBitRegionTotalZero;  // filter reg. total zero
-  if (zeroflag!=ESMF_REGION_SELECT)
+  if (zeroflag!=ESMC_REGION_SELECT)
     filterBitField |= XXE::filterBitRegionSelectZero; // filter reg. select zero
   
 #ifdef ASMMTIMING
