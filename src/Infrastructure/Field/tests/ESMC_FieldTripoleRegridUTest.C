@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldTripoleRegridUTest.C,v 1.2 2012/06/22 17:34:49 rokuingh Exp $
+// $Id: ESMC_FieldTripoleRegridUTest.C,v 1.3 2012/06/22 22:25:50 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -85,6 +85,7 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
                                                    ESMC_STAGGERLOC_CORNER,
                                                    NULL, NULL, NULL);
 
+  printf("1\n");
   int p = 0;
   for (int i1=exLBound_c[1]; i1<=exUBound_c[1]; ++i1) {
     for (int i0=exLBound_c[0]; i0<=exUBound_c[0]; ++i0) {
@@ -94,6 +95,7 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
     }
   }
 
+  printf("2\n");
   // get and fill first coord array and computational bounds
   int *exLBound = (int *)malloc(dimcount*sizeof(int));
   int *exUBound = (int *)malloc(dimcount*sizeof(int));
@@ -172,7 +174,6 @@ int main(void){
   //----------------------------------------------------------------------------
   //----------------------- Grid CREATION --------------------------------------
   //----------------------------------------------------------------------------
-
   create_grid(srcgrid, 18, 10);
   create_grid(dstgrid, 10, 8);
 
