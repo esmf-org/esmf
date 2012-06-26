@@ -1,4 +1,4 @@
-% $Id: Field_desc.tex,v 1.9 2010/10/14 23:19:01 theurich Exp $
+% $Id: Field_desc.tex,v 1.10 2012/06/26 23:24:57 oehmke Exp $
 
 An ESMF Field represents a physical field, such as temperature.
 The motivation for including Fields in ESMF is that bundles of 
@@ -27,3 +27,33 @@ gather, sparse-matrix multiplication, and halo update.  These are discussed
 in more detail in the documentation for the specific method calls.  
 ESMF does not currently support vector fields, so the components of 
 a vector field must be stored as separate Field objects.  
+
+\subsubsection{Operations}
+
+The Field class allows the user to easily perform a number of operations on 
+the data stored in a Field. This section gives a brief summary of the different types of operations
+and the range of their capabilites. The operations covered here are: redistribution ({\tt ESMF\_FieldRedistStore()}), sparse matrix multiply ({\tt ESMF\_FieldSMMStore()}), and regridding ({\tt ESMF\_FieldRegridStore()}).
+
+The redistribution operation ({\tt ESMF\_FieldRedistStore()}) allows the user to move data between two Fields with the same size, but different 
+distribution. This operation is useful, for example, to move data between two components with different distributions. 
+Please see Section~\ref{sec:field:usage:redist_1dptr} for an example of the redistribution capability.
+
+The sparse matrix multiply operation ({\tt ESMF\_FieldSMMStore()}) allows the user to multiply the data in a Field by a sparse matrix. This operation is useful, for example, if the user has an interpolation matrix and wants to apply it to the data in a Field. Please see Section~\ref{sec:field:usage:smm_1dptr}
+for an example of the sparse matrix multiply capability.
+
+The regridding operation ({\tt ESMF\_FieldRegridStore()}) allows the user to move data from one grid to another while maintaining certain properties
+of the data. Regridding is also called interpolation or remapping. In the Field regridding operation the grids the data is being moved between
+are the grids associated with the Fields storing the data. The regridding operation works on Fields built on 2D or 3D Meshes and 2D or 3D Grids. 
+There are three regridding methods available: bilinear, higher-order patch, and first-order conservative. All three of these methods are 
+supported on 2D Grids or 2D Meshes. In 3D the situation is more complicated. Bilinear 
+is supported on 3D Grid or 3D Meshes composed of hexahedrons. Higher-order patch is not supported in 3D. First-order conservative 
+is supported on 3D Grids or 3D Meshes composed of hexahdrons or tetrahedrons. There are also a range of options for what to do at the poles and what to do 
+if a point does not map. Please see Section~\ref{sec:fieldregrid} for a full description of the regridding capability. Several sections following Section~\ref{sec:fieldregrid} 
+contain examples of using regridding. 
+
+
+
+
+
+
+
