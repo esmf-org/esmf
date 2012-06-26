@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.45.2.3 2012/01/06 20:43:08 svasquez Exp $
+// $Id: ESMCI_DELayout.C,v 1.45.2.4 2012/06/26 20:45:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.45.2.3 2012/01/06 20:43:08 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.45.2.4 2012/06/26 20:45:13 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -864,6 +864,8 @@ int DELayout::destruct(){
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
+//fprintf(stderr, "DELayout::destruct\n");
+
   if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
     if (oldstyle){
       // oldstyle DELayout has several more allocations that need to be deleted
@@ -5539,6 +5541,8 @@ int XXE::growStream(
 //
 // !DESCRIPTION:
 //  Increase the length of the XXE stream.
+//  CAUTION: This method changes the location (in memory) of the entire stream!
+//    Previously written stream elements will be moved to a new location.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -5595,6 +5599,8 @@ int XXE::growStorage(
 //
 // !DESCRIPTION:
 //  Increase the length of the XXE storage.
+//  CAUTION: This method changes the location (in memory) of the entire storage!
+//    Previously written storage elements will be moved to a new location.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -5651,6 +5657,10 @@ int XXE::growCommhandle(
 //
 // !DESCRIPTION:
 //  Increase the length of the XXE commhandle storage.
+//  CAUTION: This method changes the location (in memory) of the entire 
+//           commhandle storage!
+//    Previously written commhandle storage elements will be moved to a new
+//    location.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -5707,6 +5717,10 @@ int XXE::growXxeSub(
 //
 // !DESCRIPTION:
 //  Increase the length of the XXE Sub storage.
+//  CAUTION: This method changes the location (in memory) of the entire 
+//           XXE Sub storage!
+//    Previously written XXE Sub storage elements will be moved to a new
+//    location.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -5763,6 +5777,8 @@ int XXE::incCount(
 //
 // !DESCRIPTION:
 //  Increment the count by one.
+//  CAUTION: The location (in memory) of the entire stream may be changed by
+//           this call!
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -5798,6 +5814,8 @@ int XXE::incStorageCount(
 //
 // !DESCRIPTION:
 //  Increment the storageCount by one.
+//  CAUTION: The location (in memory) of the entire storage may be changed by
+//           this call!
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -5833,6 +5851,8 @@ int XXE::incCommhandleCount(
 //
 // !DESCRIPTION:
 //  Increment the commhandleCount by one.
+//  CAUTION: The location (in memory) of the entire commhandle storage may be
+//           changed by this call!
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -5868,6 +5888,8 @@ int XXE::incXxeSubCount(
 //
 // !DESCRIPTION:
 //  Increment the xxeSubCount by one.
+//  CAUTION: The location (in memory) of the entire SSE Sub storage may be
+//           changed by this call!
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -5903,7 +5925,9 @@ int XXE::storeStorage(
   ){
 //
 // !DESCRIPTION:
-//  Append a storage at the end of the XXE stream.
+//  Append an element at the end of the storage.
+//  CAUTION: The location (in memory) of the entire storage may be changed by
+//           this call!
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -5940,7 +5964,9 @@ int XXE::storeCommhandle(
   ){
 //
 // !DESCRIPTION:
-//  Append a commhandle at the end of the XXE stream.
+//  Append an element at the end of the commhandle storage.
+//  CAUTION: The location (in memory) of the entire commhandle storage may be
+//           changed by this call!
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -5977,7 +6003,9 @@ int XXE::storeXxeSub(
   ){
 //
 // !DESCRIPTION:
-//  Append an xxeSub at the end of the XXE stream.
+//  Append an element at the end of the XXE Sub storage.
+//  CAUTION: The location (in memory) of the entire XXE Sub storage may be
+//           changed by this call!
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -6015,7 +6043,7 @@ int XXE::storeBufferInfo(
   ){
 //
 // !DESCRIPTION:
-//  Append an xxeSub at the end of the XXE stream.
+//  Append an element at the end of the buffer info vector.
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
@@ -6066,6 +6094,8 @@ int XXE::appendXxeSub(
   xxeSubInfo->xxe = xxe;
   xxeSubInfo->rraShift = rraShift;
   xxeSubInfo->vectorLengthShift = vectorLengthShift;
+  
+  // bump up element count, this may move entire stream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
@@ -6117,14 +6147,17 @@ int XXE::appendWtimer(
   xxeWtimerInfo->actualWtimerId = actualId;
   xxeWtimerInfo->relativeWtimerId = relativeId;
   xxeWtimerInfo->relativeWtimerXXE = relativeXXE;
-  localrc = incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // keep track of strings for xxe garbage collection
   localrc = storeStorage(xxeWtimerInfo->timerString);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -6176,14 +6209,17 @@ int XXE::appendRecvnb(
   xxeRecvnbInfo->cancelledFlag = false;
   xxeRecvnbInfo->commhandle = new VMK::commhandle*;
   *(xxeRecvnbInfo->commhandle) = new VMK::commhandle;
-  localrc = incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+  
   // keep track of commhandles for xxe garbage collection
   localrc = storeCommhandle(xxeRecvnbInfo->commhandle);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -6235,14 +6271,17 @@ int XXE::appendSendnb(
   xxeSendnbInfo->cancelledFlag = false;
   xxeSendnbInfo->commhandle = new VMK::commhandle*;
   *(xxeSendnbInfo->commhandle) = new VMK::commhandle;
-  localrc = incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // keep track of commhandles for xxe garbage collection
   localrc = storeCommhandle(xxeSendnbInfo->commhandle);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -6294,14 +6333,17 @@ int XXE::appendSendnbRRA(
   xxeSendnbRRAInfo->cancelledFlag = false;
   xxeSendnbRRAInfo->commhandle = new VMK::commhandle*;
   *(xxeSendnbRRAInfo->commhandle) = new VMK::commhandle;
-  localrc = incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // keep track of commhandles for xxe garbage collection
   localrc = storeCommhandle(xxeSendnbRRAInfo->commhandle);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -6345,10 +6387,12 @@ int XXE::appendMemCpySrcRRA(
   xxeMemCpySrcRRAInfo->size = size;
   xxeMemCpySrcRRAInfo->dstMem = dstMem;
   xxeMemCpySrcRRAInfo->rraIndex = rraIndex;
-  localrc = incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -6401,9 +6445,7 @@ int XXE::appendMemGatherSrcRRA(
   xxeMemGatherSrcRRAInfo->rraOffsetList = (int *)rraOffsetListChar;
   char *countListChar = new char[chunkCount*sizeof(int)];
   xxeMemGatherSrcRRAInfo->countList = (int *)countListChar;
-  localrc = incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // keep track of allocations for xxe garbage collection
   localrc = storeStorage(rraOffsetListChar);  // for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -6412,6 +6454,11 @@ int XXE::appendMemGatherSrcRRA(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -6454,10 +6501,12 @@ int XXE::appendZeroScalarRRA(
   xxeZeroScalarRRAInfo->elementTK = elementTK;
   xxeZeroScalarRRAInfo->rraOffset = rraOffset;
   xxeZeroScalarRRAInfo->rraIndex = rraIndex;
-  localrc = incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -6504,14 +6553,17 @@ int XXE::appendZeroSuperScalarRRA(
   xxeZeroSuperScalarRRAInfo->rraIndex = rraIndex;
   xxeZeroSuperScalarRRAInfo->termCount = termCount;
   xxeZeroSuperScalarRRAInfo->vectorFlag = vectorFlag;
-  localrc = incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // keep track of allocations for xxe garbage collection
   localrc = storeStorage(rraOffsetListChar);  // for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -6556,10 +6608,12 @@ int XXE::appendZeroMemset(
   xxeZeroMemsetInfo->byteCount = byteCount;
   xxeZeroMemsetInfo->vectorFlag = vectorFlag;
   xxeZeroMemsetInfo->indirectionFlag = indirectionFlag;
-  localrc = incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -6602,10 +6656,12 @@ int XXE::appendZeroMemsetRRA(
   xxeZeroMemsetRRAInfo->byteCount = byteCount;
   xxeZeroMemsetRRAInfo->rraIndex = rraIndex;
   xxeZeroMemsetRRAInfo->vectorFlag = vectorFlag;
-  localrc = incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -6656,6 +6712,8 @@ int XXE::appendProductSumScalarRRA(
   xxeProductSumScalarRRAInfo->factor = factor;
   xxeProductSumScalarRRAInfo->value = value;
   xxeProductSumScalarRRAInfo->rraIndex = rraIndex;
+
+  // bump up element count, this may move entire stream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
@@ -6714,9 +6772,7 @@ int XXE::appendSumSuperScalarDstRRA(
   xxeSumSuperScalarDstRRAInfo->rraOffsetList = (int *)rraOffsetListChar;
   char *valueOffsetListChar = new char[termCount*sizeof(int)];
   xxeSumSuperScalarDstRRAInfo->valueOffsetList = (int *)valueOffsetListChar;
-  localrc = incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+  
   // keep track of allocations for xxe garbage collection
   localrc = storeStorage(rraOffsetListChar);// for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -6725,6 +6781,11 @@ int XXE::appendSumSuperScalarDstRRA(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -6784,9 +6845,7 @@ int XXE::appendProductSumSuperScalarDstRRA(
   char *valueOffsetListChar = new char[termCount*sizeof(int)];
   xxeProductSumSuperScalarDstRRAInfo->valueOffsetList =
     (int *)valueOffsetListChar;
-  localrc = incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // keep track of allocations for xxe garbage collection
   localrc = storeStorage(rraOffsetListChar);// for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -6798,6 +6857,11 @@ int XXE::appendProductSumSuperScalarDstRRA(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -6857,9 +6921,7 @@ int XXE::appendProductSumSuperScalarSrcRRA(
   char *elementOffsetListChar = new char[termCount*sizeof(int)];
   xxeProductSumSuperScalarSrcRRAInfo->elementOffsetList =
     (int *)elementOffsetListChar;
-  localrc = incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // keep track of allocations for xxe garbage collection
   localrc = storeStorage(rraOffsetListChar);// for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -6871,6 +6933,11 @@ int XXE::appendProductSumSuperScalarSrcRRA(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -6909,6 +6976,8 @@ int XXE::appendWaitOnIndex(
   WaitOnIndexInfo *xxeWaitOnIndexInfo =
     (WaitOnIndexInfo *)&(stream[count]);
   xxeWaitOnIndexInfo->index = index;
+
+  // bump up element count, this may move entire stream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
@@ -6951,6 +7020,8 @@ int XXE::appendTestOnIndex(
   TestOnIndexInfo *xxeTestOnIndexInfo =
     (TestOnIndexInfo *)&(stream[count]);
   xxeTestOnIndexInfo->index = index;
+  
+  // bump up element count, this may move entire stream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
@@ -6999,9 +7070,7 @@ int XXE::appendWaitOnAnyIndexSub(
   xxeWaitOnAnyIndexSubInfo->index = (int *)indexChar;
   char *completeFlagChar = new char[countArg*sizeof(int)];
   xxeWaitOnAnyIndexSubInfo->completeFlag = (int *)completeFlagChar;
-  localrc = incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // keep track of allocations for xxe garbage collection
   localrc = storeStorage(xxeChar);  // for xxe garb. coll.
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -7013,6 +7082,11 @@ int XXE::appendWaitOnAnyIndexSub(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -7047,6 +7121,8 @@ int XXE::appendWaitOnAllSendnb(
 
   stream[count].opId = waitOnAllSendnb;
   stream[count].predicateBitField = predicateBitField;
+  
+  // bump up element count, this may move entire stream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
@@ -7096,6 +7172,8 @@ int XXE::appendWaitOnIndexSub(
   waitOnIndexSubInfo->rraShift = rraShift;
   waitOnIndexSubInfo->vectorLengthShift = vectorLengthShift;
   waitOnIndexSubInfo->index = index;
+  
+  // bump up element count, this may move entire stream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
@@ -7145,6 +7223,8 @@ int XXE::appendTestOnIndexSub(
   testOnIndexSubInfo->rraShift = rraShift;
   testOnIndexSubInfo->vectorLengthShift = vectorLengthShift;
   testOnIndexSubInfo->index = index;
+  
+  // bump up element count, this may move entire stream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
@@ -7187,6 +7267,8 @@ int XXE::appendCancelIndex(
   CancelIndexInfo *xxeCancelIndexInfo =
     (CancelIndexInfo *)&(stream[count]);
   xxeCancelIndexInfo->index = index;
+  
+  // bump up element count, this may move entire stream to new memory location 
   localrc = incCount();
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
@@ -7231,14 +7313,17 @@ int XXE::appendProfileMessage(
   int stringLen = strlen(messageString);
   xxeProfileMessageInfo->messageString = new char[stringLen+1];
   strcpy(xxeProfileMessageInfo->messageString, messageString);
-  localrc = incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+  
   // keep track of strings for xxe garbage collection
   localrc = storeStorage(xxeProfileMessageInfo->messageString);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -7279,14 +7364,17 @@ int XXE::appendMessage(
   int stringLen = strlen(messageString);
   xxeMessageInfo->messageString = new char[stringLen+1];
   strcpy(xxeMessageInfo->messageString, messageString);
-  localrc = incCount();
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // keep track of strings for xxe garbage collection
   localrc = storeStorage(xxeMessageInfo->messageString);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
