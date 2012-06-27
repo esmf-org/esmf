@@ -1,4 +1,4 @@
-! $Id: ESMF_StateRemRep.cppF90,v 1.10 2012/05/14 18:56:22 w6ws Exp $
+! $Id: ESMF_StateRemRep.cppF90,v 1.11 2012/06/27 22:04:52 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_StateRemRepMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateRemRep.cppF90,v 1.10 2012/05/14 18:56:22 w6ws Exp $'
+      '$Id: ESMF_StateRemRep.cppF90,v 1.11 2012/06/27 22:04:52 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -127,12 +127,13 @@ contains
 ! !IROUTINE: ESMF_StateRemove - Remove an item from a State
 !
 ! !INTERFACE:
-  subroutine ESMF_StateRemove (state, itemName, keywordEnforcer, rc)
+  subroutine ESMF_StateRemove (state, itemName, keywordEnforcer, relaxedFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
     character(*),     intent(in)             :: itemName
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,          intent(in),   optional :: relaxedFlag
     integer,          intent(out),  optional :: rc
 !     
 ! !STATUS:
@@ -161,6 +162,11 @@ contains
 !      Since items could potentially be referenced by multiple containers,
 !      it remains the responsibility of the user to manage their
 !      destruction when they are no longer in use.
+! \item[{[relaxedflag]}]
+!     A setting of {\tt .true.} indicates a relaxed definition of "remove",
+!     where it is {\em not} an error if {\tt itemName} present in the
+!     {\tt state}. For {\tt .false.} this is treated
+!     as an error condition.  The default setting is {\tt .false.}.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -173,6 +179,7 @@ contains
     integer :: localrc
     character(len=ESMF_MAXSTR) :: errmsg
     integer :: ipos, iposnext
+    logical :: localrelaxed
     integer :: memstat
     type(ESMF_Logical) :: linkChange
 
@@ -183,6 +190,11 @@ contains
     ! check input variables
     ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
+    localrelaxed = .false.
+    if (present (relaxedFlag)) then
+      localrelaxed = relaxedFlag
+    end if
+
     localstatep => null ()
     exists = ESMF_StateClassFindData (state%statep,  &
                                        dataname=itemName, expected=.true., &
@@ -190,9 +202,14 @@ contains
                                        dataState=localstatep,  &
                                        rc=localrc)
     if (.not. exists) then
-        errmsg = "can not find " CONCAT/ trim (itemname) CONCAT/ " for removal"
+      if (localrelaxed) then
+        if (present (rc)) rc = ESMF_SUCCESS
+        return
+      else
+        errmsg = "could not find " CONCAT/ trim (itemname) CONCAT/ " for removal"
         if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
     end if
 
     ipos = 1
