@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.109 2012/05/16 22:02:38 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.110 2012/06/27 22:06:09 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.109 2012/05/16 22:02:38 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.110 2012/06/27 22:06:09 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -1012,6 +1012,15 @@
       write (failmsg, *) "Removing an non-existing State item"
       write (name, *) "Remove a non-existing item test"
       call ESMF_Test (rc == ESMF_RC_NOT_FOUND, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Test removing an item which shouldn't exist
+      call ESMF_StateRemove (state10, itemName="temperatures",  &
+          relaxedFlag=.true., rc=rc)
+      write (failmsg, *) "Relaxed removing an non-existing State item"
+      write (name, *) "Relaxed remove a non-existing item test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
         result, ESMF_SRCLINE)
 
       ! StateRemove of FieldBundles
