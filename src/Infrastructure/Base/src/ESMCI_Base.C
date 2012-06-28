@@ -1,4 +1,4 @@
-// $Id: ESMCI_Base.C,v 1.6 2012/04/05 00:29:03 w6ws Exp $
+// $Id: ESMCI_Base.C,v 1.7 2012/06/28 01:10:39 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Base.C,v 1.6 2012/04/05 00:29:03 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_Base.C,v 1.7 2012/06/28 01:10:39 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -663,7 +663,7 @@ static const char *const version = "$Id: ESMCI_Base.C,v 1.6 2012/04/05 00:29:03 
     }
   }
   sprintf(msgbuf, "Root Attributes:\n");
-  printf(msgbuf);
+  printf("%s", msgbuf);
   // ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
   
   // traverse the Attribute hierarchy, printing as we go
