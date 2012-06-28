@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.91 2012/05/17 18:38:39 feiliu Exp $
+! $Id: ESMF_Mesh.F90,v 1.92 2012/06/28 16:45:11 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.91 2012/05/17 18:38:39 feiliu Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.92 2012/06/28 16:45:11 peggyli Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -172,7 +172,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.91 2012/05/17 18:38:39 feiliu Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.92 2012/06/28 16:45:11 peggyli Exp $'
 
 !==============================================================================
 ! 
@@ -1154,26 +1154,30 @@ end function ESMF_MeshCreateFromDG
 !         for a list of valid options. 
 !   \item[{[convert3D]}] 
 !         if TRUE, the node coordinates will be converted into 3D Cartisian, which
-!         is required for a global grid
+!         is required for a global grid. If not specified, defaults is TRUE.
 !   \item[{[convertToDual]}] 
 !         if TRUE, the mesh will be converted to its dual. If not specified,
-!         defaults to true. Converting to dual is not supported with
+!         defaults to TRUE. Converting to dual is not supported with
 !         file type {\tt ESMF\_FILEFORMAT\_ESMFMESH}, so when using that file type
-!         this parameter has no effect.
+!         this parameter has no effect.  
 !   \item[{[addUserArea]}] 
 !         if TRUE, the cell area will be read in from the GRID file.  This feature is
-!         only supported when the grid file is in the SCRIP or ESMF format. 
+!         only supported when the grid file is in the SCRIP or ESMF format. If not specified, 
+!         defaults to FALSE. 
 !   \item[{[meshname]}]
 !         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
-!         is {\tt ESMF\_FILEFORMAT\_UGRID}
+!         is {\tt ESMF\_FILEFORMAT\_UGRID}.  If not specified, defaults to empty string.
 !   \item[{[addMask]}]
-!      If .true., generate the mask using the missing\_value attribute defined in 'varname'
+!         If TRUE, generate the mask using the missing\_value attribute defined in 'varname'
+!         This flag is applied to the UGRID file with the {\tt filetypeflag} set to
+!         {\tt ESMF\_FILEFORMAT\_UGRID}. If not specified, defaults to FALSE.  
 !   \item[{[varname]}]
-!      If addMask is true, provide a variable name stored in the grid file and
-!      the mask will be generated using the missing value of the data value of
-!      this variable.  The first two dimensions of the variable has to be the
-!      the longitude and the latitude dimension and the mask is derived from the
-!      first 2D values of this variable even if this data is 3D, or 4D array.
+!         If addMask is TRUE, provide a variable name stored in the UGRID file and
+!         the mask will be generated using the missing value of the data value of
+!         this variable.  The first two dimensions of the variable has to be the
+!         the longitude and the latitude dimension and the mask is derived from the
+!         first 2D values of this variable even if this data is 3D, or 4D array. If not 
+!         specified, defaults to empty string.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
