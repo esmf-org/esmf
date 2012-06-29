@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.93 2012/06/28 16:52:34 peggyli Exp $
+! $Id: ESMF_Mesh.F90,v 1.94 2012/06/29 16:33:28 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.93 2012/06/28 16:52:34 peggyli Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.94 2012/06/29 16:33:28 peggyli Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -172,7 +172,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.93 2012/06/28 16:52:34 peggyli Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.94 2012/06/29 16:33:28 peggyli Exp $'
 
 !==============================================================================
 ! 
@@ -1153,25 +1153,25 @@ end function ESMF_MeshCreateFromDG
 !         The file type of the grid file to be read, please see Section~\ref{const:mesh:fileformat}
 !         for a list of valid options. 
 !   \item[{[convert3D]}] 
-!         if TRUE, the node coordinates will be converted into 3D Cartisian, which
-!         is required for a global grid. If not specified, defaults is FALSE.
+!         if {\tt .true.}, the node coordinates will be converted into 3D Cartisian, which
+!         is required for a global grid. If not specified, defaults is {\tt .false.}.
 !   \item[{[convertToDual]}] 
-!         if TRUE, the mesh will be converted to its dual. If not specified,
-!         defaults to TRUE. Converting to dual is only supported with
+!         if {\tt .true.}, the mesh will be converted to its dual. If not specified,
+!         defaults to {\tt .true.}. Converting to dual is only supported with
 !         file type {\tt ESMF\_FILEFORMAT\_SCRIP}.
 !   \item[{[addUserArea]}] 
-!         if TRUE, the cell area will be read in from the GRID file.  This feature is
+!         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
 !         only supported when the grid file is in the SCRIP or ESMF format. If not specified, 
-!         defaults to FALSE. 
+!         defaults to {\tt .false.}.
 !   \item[{[meshname]}]
 !         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
 !         is {\tt ESMF\_FILEFORMAT\_UGRID}.  If not specified, defaults to empty string.
 !   \item[{[addMask]}]
-!         If TRUE, generate the mask using the missing\_value attribute defined in 'varname'
+!         If {\tt .true.}, generate the mask using the missing\_value attribute defined in 'varname'
 !         This flag is only supported when the grid file is in the UGRID format.
-!         If not specified, defaults to FALSE.  
+!         If not specified, defaults to {\tt .false.}.  
 !   \item[{[varname]}]
-!         If addMask is TRUE, provide a variable name stored in the UGRID file and
+!         If addMask is {\tt .true.}, provide a variable name stored in the UGRID file and
 !         the mask will be generated using the missing value of the data value of
 !         this variable.  The first two dimensions of the variable has to be the
 !         the longitude and the latitude dimension and the mask is derived from the
@@ -1294,10 +1294,10 @@ end function ESMF_MeshCreateFromFile
 !   \item [filename]
 !         The name of the grid file
 !   \item[convert3D] 
-!         if TRUE, the node coordinates will be converted into 3D Cartisian, which
+!         if {\tt .true.}, the node coordinates will be converted into 3D Cartisian, which
 !         is required for a global grid
 !   \item[{[addUserArea]}] 
-!         if TRUE, the cell area will be read in from the GRID file.  This feature is
+!         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
 !         only supported when the grid file is in the SCRIP or ESMF format. 
 !   \item [{[filetype]}]
 !         The type of grid file
@@ -1305,7 +1305,7 @@ end function ESMF_MeshCreateFromFile
 !         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
 !         is {\tt ESMF\_FILEFORMAT\_UGRID}
 !   \item[{[addMask]}]
-!      If .true., generate the mask using the missing\_value attribute defined in 'varname'
+!      If {\tt .true.}, generate the mask using the missing\_value attribute defined in 'varname'
 !   \item[{[varname]}]
 !      If addMask is true, provide a variable name stored in the grid file and
 !      the mask will be generated using the missing value of the data value of
@@ -1454,7 +1454,7 @@ end function ESMF_MeshCreateFromFile
        haveMask = .false.       
        ! Get information from file
        call ESMF_GetMeshFromUGridFile(filename, meshname, nodeCoords, elementConn, &
-                                   elmtNum, startElmt, convertToDeg=.TRUE., rc=localrc)
+                                   elmtNum, startElmt, convertToDeg=..true.., rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1900,14 +1900,14 @@ end function ESMF_MeshCreateFromUnstruct
 !   \item [filename]
 !         The name of the grid file
 !   \item[convert3D] 
-!         if TRUE, the node coordinates will be converted into 3D Cartisian, which
+!         if {\tt .true.}, the node coordinates will be converted into 3D Cartisian, which
 !         is required for a global grid
 !   \item[convertToDual] 
-!         if TRUE, the mesh will be converted to it's dual. If not specified,
+!         if {\tt .true.}, the mesh will be converted to it's dual. If not specified,
 !         defaults to true. 
 !   \item[addUserArea] 
-!         if TRUE, the grid_area defined in the grid file will be added into the mesh.
-!         If not specified, defaults to false. 
+!         if {\tt .true.}, the grid_area defined in the grid file will be added into the mesh.
+!         If not specified, defaults to .false. 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
