@@ -1,4 +1,4 @@
-! $Id: ESMF_StateRemRep.cppF90,v 1.11 2012/06/27 22:04:52 w6ws Exp $
+! $Id: ESMF_StateRemRep.cppF90,v 1.12 2012/06/29 00:08:45 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_StateRemRepMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateRemRep.cppF90,v 1.11 2012/06/27 22:04:52 w6ws Exp $'
+      '$Id: ESMF_StateRemRep.cppF90,v 1.12 2012/06/29 00:08:45 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -164,7 +164,7 @@ contains
 !      destruction when they are no longer in use.
 ! \item[{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "remove",
-!     where it is {\em not} an error if {\tt itemName} present in the
+!     where it is {\em not} an error if {\tt itemName} is not present in the
 !     {\tt state}. For {\tt .false.} this is treated
 !     as an error condition.  The default setting is {\tt .false.}.
 ! \item[{[rc]}]
