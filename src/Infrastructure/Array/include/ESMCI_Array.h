@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.68 2012/06/22 17:34:36 rokuingh Exp $
+// $Id: ESMCI_Array.h,v 1.69 2012/07/06 18:58:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -146,13 +146,13 @@ namespace ESMCI {
                                       // Multiply with tensorElementCount to get
                                       // total number of elements in total
                                       // Array region.
-    std::vector<std::vector<SeqIndex> > rimSeqIndex;// elements in the rim between
-                                          // exclusive and total region
-                                          // [localDeCount][rimElementCount[]]
-    std::vector<std::vector<int> > rimLinIndex;     // elements in the rim between
-                                          // exclusive and total region
-                                          // [localDeCount][rimElementCount[]]
-    std::vector<int> rimElementCount;      // numb. of elements in rim [localDeCount]
+    std::vector<std::vector<SeqIndex> > rimSeqIndex;  // elements in the rim,
+                                      // between exclusive and total bounds
+                                      // [localDeCount][rimElementCount[]]
+    std::vector<std::vector<int> > rimLinIndex;       // elements in the rim,
+                                      // between exclusive and total bounds
+                                      // [localDeCount][rimElementCount[]]
+    std::vector<int> rimElementCount; // numb. of elements in rim [localDeCount]
     // lower level object references
     DistGrid *distgrid;
     bool distgridCreator;
@@ -297,6 +297,12 @@ namespace ESMCI {
     int setComputationalLWidth(InterfaceInt *computationalLWidthArg);
     int setComputationalUWidth(InterfaceInt *computationalUWidthArg);
     int setRimSeqIndex(int localDe, InterfaceInt *rimSeqIndexArg);
+    std::vector<std::vector<SeqIndex> > const &getRimSeqIndex()const
+      {return rimSeqIndex;}
+    std::vector<std::vector<int> > const &getRimLinIndex()const
+      {return rimLinIndex;}
+    std::vector<int> const &getRimElementCount()const
+      {return rimElementCount;}
     const char *getName()               const {return ESMC_BaseGetName();}
     int setName(const char *name){return ESMC_BaseSetName(name, "Array");}
     // misc.
@@ -349,12 +355,14 @@ namespace ESMCI {
   
   //============================================================================
   class SparseMatrix{
-    ESMC_TypeKind typekind;
-    void const *factorList;
-    int factorListCount;
-    int srcN;
-    int dstN;
-    int const *factorIndexList; // element: (0,..,srcN-1,srcN,..,srcN+dstN-1)
+    ESMC_TypeKind typekind; // typekind of factors
+    void const *factorList; // vector of factors
+    int factorListCount;    // number of factors
+    int srcN;               // src sequence index width (1 or 2)
+    int dstN;               // dst sequence index width (1 or 2)
+    int const *factorIndexList; // vector of sequence index elements, each
+                                // element is a srcN+dstN tuple:
+                                // (0,..,srcN-1,srcN,..,srcN+dstN-1)
    public:
     SparseMatrix(ESMC_TypeKind const typekind_, void const *factorList_,
       int const factorListCount_, int const srcN_, int const dstN_,
