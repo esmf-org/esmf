@@ -1,4 +1,4 @@
-% $Id: Grid_crefdoc.ctex,v 1.14 2012/01/06 20:16:53 svasquez Exp $
+% $Id: Grid_crefdoc.ctex,v 1.15 2012/07/10 22:59:19 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -87,26 +87,25 @@
 %\input{../Infrastructure/Grid/doc/ESMF_GridCreateFromF90ArraysEx_fapi}
 #endif
 
-%\subsection{Restrictions and Future Work}
+\subsection{Restrictions and Future Work}
 #ifdef STANDALONE
-%\input{Grid_rest}
+\input{Grid_rest}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/Grid/doc/Grid_rest}
+\input{../Infrastructure/Grid/doc/Grid_rest}
 #endif
 
-%\subsection{Design and Implementation Notes}
+\subsection{Design and Implementation Notes}
 #ifdef STANDALONE
-%\input{Grid_implnotes}
+\input{Grid_implnotes}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/Grid/doc/Grid_implnotes}
+\input{../Infrastructure/Grid/doc/Grid_implnotes}
 #endif
 
 \subsection{Class API: General Grid Methods}
 #ifdef STANDALONE
-%\input{ESMF_Grid_fapi}
-%\input{ESMC_Grid_chapi}
+\input{ESMC_Grid_chapi}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/Grid/doc/ESMC_Grid_chapi}
+\input{../Infrastructure/Grid/doc/ESMC_Grid_chapi}
 #endif
 
 %\subsection{Class API: GridGen Methods}
