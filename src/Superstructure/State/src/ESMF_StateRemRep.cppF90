@@ -1,4 +1,4 @@
-! $Id: ESMF_StateRemRep.cppF90,v 1.13 2012/07/10 05:59:55 w6ws Exp $
+! $Id: ESMF_StateRemRep.cppF90,v 1.14 2012/07/10 06:09:22 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_StateRemRepMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateRemRep.cppF90,v 1.13 2012/07/10 05:59:55 w6ws Exp $'
+      '$Id: ESMF_StateRemRep.cppF90,v 1.14 2012/07/10 06:09:22 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -297,7 +297,7 @@ contains
 	else
           errmsg = "could not find " CONCAT/ trim (itemNameList(i)) CONCAT/ " for removal"
           if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, msg=errmsg, &
-        	ESMF_CONTEXT, rcToReturn=rc)) exit
+        	ESMF_CONTEXT, rcToReturn=rc)) return
 	end if
       end if
 
