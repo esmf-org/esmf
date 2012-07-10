@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.146 2012/07/06 18:58:18 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.147 2012/07/10 20:30:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -30,6 +30,7 @@
 #include <cstdio>
 #include <cstring>
 #include <vector>
+#include <map>
 #include <algorithm>
 
 // include ESMF headers
@@ -59,7 +60,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.146 2012/07/06 18:58:18 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.147 2012/07/10 20:30:11 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -5674,7 +5675,6 @@ namespace DD{
     int min;
     int max;
     int count;
-    int countEff;
   };
   
   struct FactorElement{
@@ -5697,6 +5697,10 @@ namespace DD{
     vector<int> de;
     int factorCount;
     vector<FactorElement> factorList;
+  public:
+    SeqIndexFactorLookup(){
+      factorCount = 0;
+    }
   };
   
   // the following structs could be moved out of this namespace
@@ -5713,17 +5717,33 @@ namespace DD{
     int localDeCount;
     const int *localDeElementCount;
     const Interval *seqIndexInterval;
-    const SeqIndexFactorLookup *seqIndexFactorLookup;
+    map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookup;
     bool tensorMixFlag;
     bool haloRimFlag;   // true indicates that halo rim instead of excl reg used
+  public:
+    FillLinSeqVectInfo(
+      map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookup_
+    ):
+      // members that need to be set on this level because of reference
+      seqIndexFactorLookup(seqIndexFactorLookup_)
+    {}
   };
   struct FillPartnerDeInfo{
     int localPet;
     const Interval *seqIndexIntervalIn;
     const Interval *seqIndexIntervalOut;
-    const SeqIndexFactorLookup *seqIndexFactorLookupIn;
-    SeqIndexFactorLookup *seqIndexFactorLookupOut;
+    map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookupIn;
+    map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookupOut;
     bool tensorMixFlag;
+  public:
+    FillPartnerDeInfo(
+      map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookupIn_,
+      map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookupOut_
+    ):
+      // members that need to be set on this level because of reference
+      seqIndexFactorLookupIn(seqIndexFactorLookupIn_),
+      seqIndexFactorLookupOut(seqIndexFactorLookupOut_)
+    {}
   };
 
 // -- accessLookup()
@@ -5933,17 +5953,17 @@ int requestSizeFactor(FillLinSeqVectInfo *fillLinSeqVectInfo){
                         // linIndex
 }
 
-void clientRequest(FillLinSeqVectInfo *fillLinSeqVectInfo, int i,
+void clientRequest(FillLinSeqVectInfo *fillLinSeqVectInfo, int dstPet,
   char **requestStreamClient){
   const int localDeCount = fillLinSeqVectInfo->localDeCount;
   const int *localDeElementCount = fillLinSeqVectInfo->localDeElementCount;
   const Interval *seqIndexInterval = fillLinSeqVectInfo->seqIndexInterval;
   const bool tensorMixFlag = fillLinSeqVectInfo->tensorMixFlag;
-  // fill the requestStreamClient[i] element
-  int *requestStreamClientInt = (int *)requestStreamClient[i];
-  int seqIndMin = seqIndexInterval[i].min;
-  int seqIndMax = seqIndexInterval[i].max;
-  int seqIndCount = seqIndexInterval[i].count;
+  // fill the requestStreamClient[dstPet] element
+  int *requestStreamClientInt = (int *)requestStreamClient[dstPet];
+  int seqIndMin = seqIndexInterval[dstPet].min;
+  int seqIndMax = seqIndexInterval[dstPet].max;
+  int seqIndCount = seqIndexInterval[dstPet].count;
   int jj = 0; // reset
   for (int j=0; j<localDeCount; j++){
     if (fillLinSeqVectInfo->haloRimFlag){
@@ -5997,7 +6017,7 @@ void localClientServerExchange(FillLinSeqVectInfo *fillLinSeqVectInfo){
   vector<AssociationElement> *linSeqVect = fillLinSeqVectInfo->linSeqVect;
   const Interval *seqIndexInterval = fillLinSeqVectInfo->seqIndexInterval;
   const bool tensorMixFlag = fillLinSeqVectInfo->tensorMixFlag;
-  const SeqIndexFactorLookup *seqIndexFactorLookup =
+  map<unsigned int, SeqIndexFactorLookup> const &seqIndexFactorLookup =
     fillLinSeqVectInfo->seqIndexFactorLookup;
   // localPet locally acts as server and client
   int seqIndMin = seqIndexInterval[localPet].min;
@@ -6011,14 +6031,15 @@ void localClientServerExchange(FillLinSeqVectInfo *fillLinSeqVectInfo){
         if (seqIndex.valid()){
           int seqInd = seqIndex.decompSeqIndex;
           if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-            int kk = seqInd - seqIndMin;
+            int lookupIndex = seqInd - seqIndMin;
             if (tensorMixFlag)
-              kk += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-            int factorCount = seqIndexFactorLookup[kk].factorCount;
-            if (factorCount){
+              lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
+            map<unsigned int, SeqIndexFactorLookup>::const_iterator i =
+              seqIndexFactorLookup.find(lookupIndex);
+            if (i != seqIndexFactorLookup.end()){
               AssociationElement element;
-              element.factorCount = factorCount;
-              element.factorList = seqIndexFactorLookup[kk].factorList;
+              element.factorCount = (i->second).factorCount;
+              element.factorList = (i->second).factorList;
               element.linIndex =
                 fillLinSeqVectInfo->array->getRimLinIndex()[j][k];
               element.seqIndex = seqIndex;
@@ -6034,14 +6055,15 @@ void localClientServerExchange(FillLinSeqVectInfo *fillLinSeqVectInfo){
         SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
         int seqInd = seqIndex.decompSeqIndex;
         if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-          int kk = seqInd - seqIndMin;
+          int lookupIndex = seqInd - seqIndMin;
           if (tensorMixFlag)
-            kk += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-          int factorCount = seqIndexFactorLookup[kk].factorCount;
-          if (factorCount){
+            lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
+          map<unsigned int, SeqIndexFactorLookup>::const_iterator i =
+            seqIndexFactorLookup.find(lookupIndex);
+          if (i != seqIndexFactorLookup.end()){
             AssociationElement element;
-            element.factorCount = factorCount;
-            element.factorList = seqIndexFactorLookup[kk].factorList;
+            element.factorCount = (i->second).factorCount;
+            element.factorList = (i->second).factorList;
             element.linIndex = arrayElement.getLinearIndexExclusive();
             element.seqIndex = seqIndex;
             linSeqVect[j].push_back(element);
@@ -6054,23 +6076,23 @@ void localClientServerExchange(FillLinSeqVectInfo *fillLinSeqVectInfo){
 }
 
 int serverResponseSize(FillLinSeqVectInfo *fillLinSeqVectInfo, int count,
-  int i, char **requestStreamServer){
-  const SeqIndexFactorLookup *seqIndexFactorLookup =
+  int srcPet, char **requestStreamServer){
+  map<unsigned int, SeqIndexFactorLookup> const &seqIndexFactorLookup =
     fillLinSeqVectInfo->seqIndexFactorLookup;
-  // process requestStreamServer[i] and return response stream size
+  // process requestStreamServer[srcPet] and return response stream size
   int indexCounter = 0; // reset
   int factorElementCounter = 0; // reset
   int partnerDeCounter = 0; // reset
-  int *requestStreamServerInt = (int *)requestStreamServer[i];
+  int *requestStreamServerInt = (int *)requestStreamServer[srcPet];
   for (int j=0; j<count; j++){
     int lookupIndex = requestStreamServerInt[5*j];
-    int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
-    if (factorCount){
+    map<unsigned int, SeqIndexFactorLookup>::const_iterator i =
+      seqIndexFactorLookup.find(lookupIndex);
+    if (i != seqIndexFactorLookup.end()){
       ++indexCounter;
-      factorElementCounter += factorCount;
-      for (int jj=0; jj<factorCount; jj++)
-        partnerDeCounter += seqIndexFactorLookup[lookupIndex].factorList[jj]
-          .partnerDe.size();
+      factorElementCounter += (i->second).factorCount;
+      for (int jj=0; jj<(i->second).factorCount; jj++)
+        partnerDeCounter += (i->second).factorList[jj].partnerDe.size();
     }
   }
   int responseStreamSize = 
@@ -6082,36 +6104,35 @@ int serverResponseSize(FillLinSeqVectInfo *fillLinSeqVectInfo, int count,
 }
       
 void serverResponse(FillLinSeqVectInfo *fillLinSeqVectInfo, int count,
-  int i, char **requestStreamServer, char **responseStreamServer){
-  const SeqIndexFactorLookup *seqIndexFactorLookup =
+  int srcPet, char **requestStreamServer, char **responseStreamServer){
+  map<unsigned int, SeqIndexFactorLookup> const &seqIndexFactorLookup =
     fillLinSeqVectInfo->seqIndexFactorLookup;
   // construct response stream
-  int *responseStreamInt = (int *)responseStreamServer[i];
-  int *requestStreamServerInt = (int *)requestStreamServer[i];
+  int *responseStreamInt = (int *)responseStreamServer[srcPet];
+  int *requestStreamServerInt = (int *)requestStreamServer[srcPet];
   for (int jj=0; jj<count; jj++){
     int lookupIndex = requestStreamServerInt[5*jj];
-    int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
-    if (factorCount){
+    map<unsigned int, SeqIndexFactorLookup>::const_iterator i =
+      seqIndexFactorLookup.find(lookupIndex);
+    if (i != seqIndexFactorLookup.end()){
       *responseStreamInt++ = requestStreamServerInt[5*jj+1];  // j
       *responseStreamInt++ = requestStreamServerInt[5*jj+2];  // decompSeqIndex
       *responseStreamInt++ = requestStreamServerInt[5*jj+3];  // tensorSeqIndex
       *responseStreamInt++ = requestStreamServerInt[5*jj+4];  // linIndex
-      *responseStreamInt++ = factorCount;
-      for (int k=0; k<factorCount; k++){
-        *responseStreamInt++ = seqIndexFactorLookup[lookupIndex].factorList[k]
-          .partnerSeqIndex.decompSeqIndex;
-        *responseStreamInt++ = seqIndexFactorLookup[lookupIndex].factorList[k]
-          .partnerSeqIndex.tensorSeqIndex;
-        int size = seqIndexFactorLookup[lookupIndex].factorList[k]
-          .partnerDe.size();
+      *responseStreamInt++ = (i->second).factorCount;
+      for (int k=0; k<(i->second).factorCount; k++){
+        *responseStreamInt++ = (i->second).factorList[k].partnerSeqIndex
+          .decompSeqIndex;
+        *responseStreamInt++ = (i->second).factorList[k].partnerSeqIndex
+          .tensorSeqIndex;
+        int size = (i->second).factorList[k].partnerDe.size();
         *responseStreamInt++ = size;
         for (int kk=0; kk<size; kk++)
-          *responseStreamInt++ = seqIndexFactorLookup[lookupIndex].factorList[k]
-            .partnerDe[kk];
+          *responseStreamInt++ = (i->second).factorList[k].partnerDe[kk];
         char *responseStreamChar = (char *)responseStreamInt;
         for (int kk=0; kk<8; kk++)
           *responseStreamChar++ =
-            seqIndexFactorLookup[lookupIndex].factorList[k].factor[kk];
+            (i->second).factorList[k].factor[kk];
         responseStreamInt = (int *)responseStreamChar;
       }
     }
@@ -6157,35 +6178,36 @@ void clientProcess(FillLinSeqVectInfo *fillLinSeqVectInfo,
 // FillPartnerDeInfo-specific accessLookup routines:
 
 int requestSizeFactor(FillPartnerDeInfo *fillPartnerDeInfo){
-  return 3*sizeof(int); // lookupIndex, j, k
+  return 3*sizeof(int); // lookupIndex, localLookupIndex, k
 }
 
-void clientRequest(FillPartnerDeInfo *fillPartnerDeInfo, int i,
+void clientRequest(FillPartnerDeInfo *fillPartnerDeInfo, int dstPet,
   char **requestStreamClient){
   const int localPet = fillPartnerDeInfo->localPet;
   const Interval *seqIndexIntervalIn = fillPartnerDeInfo->seqIndexIntervalIn;
   const Interval *seqIndexIntervalOut = fillPartnerDeInfo->seqIndexIntervalOut;
-  const SeqIndexFactorLookup *seqIndexFactorLookupOut =
+  map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookupOut =
     fillPartnerDeInfo->seqIndexFactorLookupOut;
   const bool tensorMixFlag = fillPartnerDeInfo->tensorMixFlag;
-  // fill the requestStreamClient[i] element
-  int seqIndMin = seqIndexIntervalIn[i].min;
-  int seqIndMax = seqIndexIntervalIn[i].max;
-  int seqIndCount = seqIndexIntervalIn[i].count;
+  // fill the requestStreamClient[dstPet] element
+  int seqIndMin = seqIndexIntervalIn[dstPet].min;
+  int seqIndMax = seqIndexIntervalIn[dstPet].max;
+  int seqIndCount = seqIndexIntervalIn[dstPet].count;
   int jj = 0; // reset
-  for (int j=0; j<seqIndexIntervalOut[localPet].countEff; j++){
-    for (int k=0; k<seqIndexFactorLookupOut[j].factorCount; k++){
-      int partnerSeqInd = seqIndexFactorLookupOut[j].factorList[k]
+  for (map<unsigned int, DD::SeqIndexFactorLookup>::const_iterator
+    j=seqIndexFactorLookupOut.begin(); j!=seqIndexFactorLookupOut.end(); ++j){  
+    for (int k=0; k<(j->second).factorCount; k++){
+      int partnerSeqInd = (j->second).factorList[k]
         .partnerSeqIndex.decompSeqIndex;
       if (partnerSeqInd >= seqIndMin && partnerSeqInd <= seqIndMax){
         int lookupIndex = partnerSeqInd - seqIndMin;
         if (tensorMixFlag){
-          lookupIndex += (seqIndexFactorLookupOut[j].factorList[k]
+          lookupIndex += ((j->second).factorList[k]
             .partnerSeqIndex.tensorSeqIndex - 1) * seqIndCount;
         }
-        int *requestStreamClientInt = (int *)requestStreamClient[i];
+        int *requestStreamClientInt = (int *)requestStreamClient[dstPet];
         requestStreamClientInt[3*jj] = lookupIndex;
-        requestStreamClientInt[3*jj+1] = j;
+        requestStreamClientInt[3*jj+1] = (j->first);  // localLookupIndex
         requestStreamClientInt[3*jj+2] = k;
         ++jj; // increment counter
       }
@@ -6197,80 +6219,82 @@ void localClientServerExchange(FillPartnerDeInfo *fillPartnerDeInfo){
   const int localPet = fillPartnerDeInfo->localPet;
   const Interval *seqIndexIntervalIn = fillPartnerDeInfo->seqIndexIntervalIn;
   const Interval *seqIndexIntervalOut = fillPartnerDeInfo->seqIndexIntervalOut;
-  const SeqIndexFactorLookup *seqIndexFactorLookupIn =
+  map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookupIn =
     fillPartnerDeInfo->seqIndexFactorLookupIn;
-  SeqIndexFactorLookup *seqIndexFactorLookupOut =
+  map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookupOut =
     fillPartnerDeInfo->seqIndexFactorLookupOut;
   const bool tensorMixFlag = fillPartnerDeInfo->tensorMixFlag;
   // localPet locally acts as server and client
   int seqIndMin = seqIndexIntervalIn[localPet].min;
   int seqIndMax = seqIndexIntervalIn[localPet].max;
   int seqIndCount = seqIndexIntervalIn[localPet].count;
-  for (int j=0; j<seqIndexIntervalOut[localPet].countEff; j++){
-    for (int k=0; k<seqIndexFactorLookupOut[j].factorCount; k++){
-      int partnerSeqInd = seqIndexFactorLookupOut[j].factorList[k]
+  for (map<unsigned int, DD::SeqIndexFactorLookup>::iterator
+    j=seqIndexFactorLookupOut.begin(); j!=seqIndexFactorLookupOut.end(); ++j){  
+    for (int k=0; k<(j->second).factorCount; k++){
+      int partnerSeqInd = (j->second).factorList[k]
         .partnerSeqIndex.decompSeqIndex;
       if (partnerSeqInd >= seqIndMin && partnerSeqInd <= seqIndMax){
-        int kk = partnerSeqInd - seqIndMin;
+        int lookupIndex = partnerSeqInd - seqIndMin;
         if (tensorMixFlag){
-          kk += (seqIndexFactorLookupOut[j].factorList[k]
+          lookupIndex += ((j->second).factorList[k]
             .partnerSeqIndex.tensorSeqIndex - 1) * seqIndCount;
         }
-        seqIndexFactorLookupOut[j].factorList[k].partnerDe.insert(
-          seqIndexFactorLookupOut[j].factorList[k].partnerDe.end(),
-          seqIndexFactorLookupIn[kk].de.begin(),
-          seqIndexFactorLookupIn[kk].de.end());
+        (j->second).factorList[k].partnerDe.insert(
+          (j->second).factorList[k].partnerDe.end(),
+          seqIndexFactorLookupIn[lookupIndex].de.begin(),
+          seqIndexFactorLookupIn[lookupIndex].de.end());
       }
     }
   }
 }
 
 int serverResponseSize(FillPartnerDeInfo *fillPartnerDeInfo, int count,
-  int i, char **requestStreamServer){
-  const SeqIndexFactorLookup *seqIndexFactorLookupIn =
+  int srcPet, char **requestStreamServer){
+  map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookupIn =
     fillPartnerDeInfo->seqIndexFactorLookupIn;
-  int *requestStreamServerInt = (int *)requestStreamServer[i];
+  int *requestStreamServerInt = (int *)requestStreamServer[srcPet];
   int responseCount = 0;  // reset
-  for (int jj=0; jj<count; jj++){
-    int lookupIndex = requestStreamServerInt[3*jj];
+  for (int i=0; i<count; i++){
+    int lookupIndex = requestStreamServerInt[3*i];
     responseCount += seqIndexFactorLookupIn[lookupIndex].de.size();
-    responseCount += 3;
+    responseCount += 3; // localLookupIndex, k, size
   }
-  int responseStreamSize = responseCount*sizeof(int);
+  int responseStreamSize = responseCount * sizeof(int);
   return responseStreamSize;
 }
       
 void serverResponse(FillPartnerDeInfo *fillPartnerDeInfo, int count,
-  int i, char **requestStreamServer, char **responseStreamServer){
-  const SeqIndexFactorLookup *seqIndexFactorLookupIn =
+  int srcPet, char **requestStreamServer, char **responseStreamServer){
+  map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookupIn =
     fillPartnerDeInfo->seqIndexFactorLookupIn;
   // construct response stream
-  int *responseStreamInt = (int *)responseStreamServer[i];
-  int *requestStreamServerInt = (int *)requestStreamServer[i];
-  for (int jj=0; jj<count; jj++){
-    int lookupIndex = requestStreamServerInt[3*jj];
-    *responseStreamInt++ = requestStreamServerInt[3*jj+1];  // j
-    *responseStreamInt++ = requestStreamServerInt[3*jj+2];  // k
+  int *responseStreamInt = (int *)responseStreamServer[srcPet];
+  int *requestStreamServerInt = (int *)requestStreamServer[srcPet];
+  for (int i=0; i<count; i++){
+    int lookupIndex = requestStreamServerInt[3*i];
+    *responseStreamInt++ = requestStreamServerInt[3*i+1];   // localLookupIndex
+    *responseStreamInt++ = requestStreamServerInt[3*i+2];   // k
     int size = seqIndexFactorLookupIn[lookupIndex].de.size();
-    *responseStreamInt++ = size;
-    for (int jjj=0; jjj<size; jjj++)
-      *responseStreamInt++ = seqIndexFactorLookupIn[lookupIndex].de[jjj]; // de
+    *responseStreamInt++ = size;                            // size
+    for (int j=0; j<size; j++)
+      *responseStreamInt++ = seqIndexFactorLookupIn[lookupIndex].de[j]; // de
   }
 }        
         
 void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
   char *responseStream, int responseStreamSize){
-  SeqIndexFactorLookup *seqIndexFactorLookupOut =
+  map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookupOut =
     fillPartnerDeInfo->seqIndexFactorLookupOut;
   // process responseStream and complete seqIndexFactorLookupOut info
   int *responseStreamInt = (int *)responseStream;
   while ((char *)responseStreamInt != responseStream+responseStreamSize){
-    int j = *responseStreamInt++;
+    int localLookupIndex = *responseStreamInt++;
     int k = *responseStreamInt++;
     int size = *responseStreamInt++;
-    for (int jjj=0; jjj<size; jjj++){
+    for (int j=0; j<size; j++){
       int de = *responseStreamInt++;
-      seqIndexFactorLookupOut[j].factorList[k].partnerDe.push_back(de);
+      seqIndexFactorLookupOut[localLookupIndex].factorList[k].partnerDe
+        .push_back(de);
     }
   }
 }
@@ -6284,7 +6308,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     int const *localDeElementCount;
     int const *localDeToDeMap;
     Interval const *seqIndexInterval;
-    SeqIndexFactorLookup *seqIndexFactorLookup;
+    map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookup;
     bool tensorMixFlag;
     int const *localIntervalPerPetCount;
     int const *localElementsPerIntervalCount;
@@ -6297,19 +6321,21 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       int const *localDeElementCount_,
       int const *localDeToDeMap_,
       Interval const *seqIndexInterval_,
-      SeqIndexFactorLookup *seqIndexFactorLookup_,
+      map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookup_,
       bool tensorMixFlag_,
       int const *localIntervalPerPetCount_,
       int const *localElementsPerIntervalCount_,
       bool haloRimFlag_
-    ){
+    ):
+      // members that need to be set on this level because of reference
+      seqIndexFactorLookup(seqIndexFactorLookup_)
+    {
       array = array_;
       localPet = localPet_;
       localDeCount = localDeCount_;
       localDeElementCount = localDeElementCount_;
       localDeToDeMap = localDeToDeMap_;
       seqIndexInterval = seqIndexInterval_;
-      seqIndexFactorLookup = seqIndexFactorLookup_;
       tensorMixFlag = tensorMixFlag_;
       localIntervalPerPetCount = localIntervalPerPetCount_;
       localElementsPerIntervalCount = localElementsPerIntervalCount_;
@@ -6322,7 +6348,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       else if (localPet == dstPet)
         return localIntervalPerPetCount[srcPet];
       else{
-        return 0; // this should provoke MPI errors
+        return 0; // provoke MPI errors
       }
     }
     virtual int messageSize(int srcPet, int dstPet)const{
@@ -6376,7 +6402,9 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       int *bufferInt = (int *)buffer;    
       for (int jj=0; jj<count; jj++){
         int lookupIndex = bufferInt[2*jj];
-        if (seqIndexFactorLookup[lookupIndex].factorCount){
+        // use find() and not [] notiation,
+        // or else std::map will insert new element!
+        if (seqIndexFactorLookup.find(lookupIndex)!=seqIndexFactorLookup.end()){
           // element with factors -> fill in the DE
           seqIndexFactorLookup[lookupIndex].de.push_back(bufferInt[2*jj+1]);
           // this will lead to duplicate de entries for cases with tensor
@@ -6401,7 +6429,10 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
                 int lookupIndex = seqInd - seqIndMin;
                 if (tensorMixFlag)
                   lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-                if (seqIndexFactorLookup[lookupIndex].factorCount){
+                // use find() and not [] notiation, 
+                // or else std::map will insert new element!
+                if (seqIndexFactorLookup.find(lookupIndex)
+                  !=seqIndexFactorLookup.end()){
                   // element with factors -> fill in the DE
                   seqIndexFactorLookup[lookupIndex].de.push_back(de);
                   // this will lead to duplicate de entries for cases with
@@ -6421,7 +6452,10 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
               int lookupIndex = seqInd - seqIndMin;
               if (tensorMixFlag)
                 lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-              if (seqIndexFactorLookup[lookupIndex].factorCount){
+              // use find() and not [] notiation, 
+              // or else std::map will insert new element!
+              if (seqIndexFactorLookup.find(lookupIndex)
+                !=seqIndexFactorLookup.end()){
                 // element with factors -> fill in the DE
                 seqIndexFactorLookup[lookupIndex].de.push_back(de);
                 // this will lead to duplicate de entries for cases with tensor
@@ -6440,29 +6474,38 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
   // abstract parent class for DE info fill stage1 and stage2
   class SetupSeqIndexFactorLookup:public ComPat{
    protected:
-    SeqIndexFactorLookup *seqIndexFactorLookup;
+    map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookup;
     int localPet;
     int petCount;
     SparseMatrix const *sparseMatrix;
     vector<bool> const &factorPetFlag;
     Interval const *seqIndexInterval;
-    vector<int> const &seqIntervFactorListCount;
-    vector<vector<int> > const &seqIntervFactorListIndex;
+    vector<int> const &seqIntervFactorListCountToPet;
+    vector<vector<int> > const &seqIntervFactorListIndexToPet;
+    vector<vector<int> > const &seqIntervFactorListLookupIndexToPet;
+    vector<int> const &seqIntervFactorListCountFromPet;
     bool tensorMixFlag;
     bool dstSetupFlag;
-    vector<int> totalFactorCount;
     ESMC_TypeKind typekindFactors;
    public:
     SetupSeqIndexFactorLookup(
+      map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookup_,
       SparseMatrix const *sparseMatrix_,
       vector<bool> const &factorPetFlag_,
-      vector<int> const &seqIntervFactorListCount_,
-      vector<vector<int> > const &seqIntervFactorListIndex_):
+      vector<int> const &seqIntervFactorListCountToPet_,
+      vector<vector<int> > const &seqIntervFactorListIndexToPet_,
+      vector<vector<int> > const &seqIntervFactorListLookupIndexToPet_,
+      vector<int> const &seqIntervFactorListCountFromPet_
+    ):
       // members that need to be set on this level because of reference
+      seqIndexFactorLookup(seqIndexFactorLookup_),
       sparseMatrix(sparseMatrix_),
       factorPetFlag(factorPetFlag_),
-      seqIntervFactorListCount(seqIntervFactorListCount_),
-      seqIntervFactorListIndex(seqIntervFactorListIndex_){}
+      seqIntervFactorListCountToPet(seqIntervFactorListCountToPet_),
+      seqIntervFactorListIndexToPet(seqIntervFactorListIndexToPet_),
+      seqIntervFactorListLookupIndexToPet(seqIntervFactorListLookupIndexToPet_),
+      seqIntervFactorListCountFromPet(seqIntervFactorListCountFromPet_)
+    {}
   };
 
   // -------------------------------------------------
@@ -6470,97 +6513,67 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
   class SetupSeqIndexFactorLookupStage1:public SetupSeqIndexFactorLookup{
    public:
     SetupSeqIndexFactorLookupStage1(
-      SeqIndexFactorLookup *seqIndexFactorLookup_,
+      map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookup_,
       int localPet_,
       int petCount_,
       SparseMatrix const *sparseMatrix_,
       vector<bool> const &factorPetFlag_,
       Interval const *seqIndexInterval_,
-      vector<int> const &seqIntervFactorListCount_,
-      vector<vector<int> > const &seqIntervFactorListIndex_,
+      vector<int> const &seqIntervFactorListCountToPet_,
+      vector<vector<int> > const &seqIntervFactorListIndexToPet_,
+      vector<vector<int> > const &seqIntervFactorListLookupIndexToPet_,
+      vector<int> const &seqIntervFactorListCountFromPet_,
       bool tensorMixFlag_,
       bool dstSetupFlag_,
       ESMC_TypeKind typekindFactors_
     ):SetupSeqIndexFactorLookup(
+      seqIndexFactorLookup_,
       sparseMatrix_,
       factorPetFlag_,
-      seqIntervFactorListCount_,
-      seqIntervFactorListIndex_
+      seqIntervFactorListCountToPet_,
+      seqIntervFactorListIndexToPet_,
+      seqIntervFactorListLookupIndexToPet_,
+      seqIntervFactorListCountFromPet_
     ){
-      seqIndexFactorLookup = seqIndexFactorLookup_;
       localPet = localPet_;
       petCount = petCount_;
       seqIndexInterval = seqIndexInterval_;
       tensorMixFlag = tensorMixFlag_;
       dstSetupFlag = dstSetupFlag_;
-      totalFactorCount.resize(petCount);
-      for (int i=0; i<petCount; i++)
-        totalFactorCount[i] = 0;  // reset
       typekindFactors = typekindFactors_;
     }
    private:
     int messageSizeCount(int srcPet, int dstPet)const{
-      if (factorPetFlag[srcPet])
-        return seqIndexInterval[dstPet].countEff+1;
+      if (localPet == srcPet)
+        return seqIntervFactorListCountToPet[dstPet];
+      else if (localPet == dstPet)
+        return seqIntervFactorListCountFromPet[srcPet];
       else
-        return 0;
+        return 0; // provoke MPI errors
     }
     virtual int messageSize(int srcPet, int dstPet)const{
       return sizeof(int) * messageSizeCount(srcPet, dstPet);
     }
     virtual void messagePrepare(int srcPet, int dstPet, char *buffer)const{
-      int *bufferInt = (int *)buffer;
-      for (int i=0; i<seqIndexInterval[dstPet].countEff+1; i++)
-        bufferInt[i] = 0; // reset
-      int totalCountIndex = seqIndexInterval[dstPet].countEff; // last element
-      for (int jj=0; jj<seqIntervFactorListCount[dstPet]; jj++){
-        // loop over factorList entries in dstPet's seqIndex interval
-        int j = seqIntervFactorListIndex[dstPet][jj];
-        SeqInd seqInd;
-        if (dstSetupFlag)
-          seqInd = sparseMatrix->getDstSeqIndex(j);
-        else
-          seqInd = sparseMatrix->getSrcSeqIndex(j);
-        int seqIndex = seqInd.getIndex(0);
-        int k = seqIndex - seqIndexInterval[dstPet].min;
-        if (tensorMixFlag)
-          k += (seqInd.getIndex(1)-1) * seqIndexInterval[dstPet].count;
-        // count this factor
-        ++bufferInt[k];
-        ++bufferInt[totalCountIndex];
-      }
+      memcpy(buffer, &(seqIntervFactorListLookupIndexToPet[dstPet].front()),
+        messageSizeCount(srcPet, dstPet)*sizeof(int));
     }
     virtual void messageProcess(int srcPet, int dstPet, char *buffer){
       int *bufferInt = (int *)buffer;
-      totalFactorCount[srcPet] =
-        bufferInt[seqIndexInterval[localPet].countEff];
-      prepareSeqIndexFactorLookup(bufferInt);
+      for (int i=0; i<messageSizeCount(srcPet, dstPet); i++){
+        // loop over buffer entries
+        int lookupIndex = bufferInt[i];
+        // count this factor -> std::map will insert new element if needed
+        ++(seqIndexFactorLookup[lookupIndex].factorCount);
+      }
     }
     virtual void localPrepareAndProcess(int localPet){
-      int *petFactorCountList = new int[seqIndexInterval[localPet].countEff+1];
-      for (int i=0; i<seqIndexInterval[localPet].countEff+1; i++)
-        petFactorCountList[i] = 0; // reset
-      for (int jj=0; jj<seqIntervFactorListCount[localPet]; jj++){
+      for (int i=0; i<messageSizeCount(localPet, localPet); i++){
         // loop over factorList entries in localPet's seqIndex interval
-        int j = seqIntervFactorListIndex[localPet][jj];
-        SeqInd seqInd;
-        if (dstSetupFlag)
-          seqInd = sparseMatrix->getDstSeqIndex(j);
-        else
-          seqInd = sparseMatrix->getSrcSeqIndex(j);
-        int seqIndex = seqInd.getIndex(0);
-        int k = seqIndex - seqIndexInterval[localPet].min;
-        if (tensorMixFlag)
-          k += (seqInd.getIndex(1)-1) * seqIndexInterval[localPet].count;
-        // count this factor
-        ++petFactorCountList[k];
+        int lookupIndex = seqIntervFactorListLookupIndexToPet[localPet][i];
+        // count this factor -> std::map will insert new element if needed
+        ++(seqIndexFactorLookup[lookupIndex].factorCount);
       }
-      prepareSeqIndexFactorLookup(petFactorCountList);
-      delete [] petFactorCountList;
-    }
-    void prepareSeqIndexFactorLookup(int *petFactorCountList){
-      for (int j=0; j<seqIndexInterval[localPet].countEff; j++)
-        seqIndexFactorLookup[j].factorCount += petFactorCountList[j];
     }
     friend class SetupSeqIndexFactorLookupStage2;
   };
@@ -6571,28 +6584,29 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
    public:
     SetupSeqIndexFactorLookupStage2(SetupSeqIndexFactorLookupStage1 const &s1)
       :SetupSeqIndexFactorLookup(
+      s1.seqIndexFactorLookup,
       s1.sparseMatrix,
       s1.factorPetFlag,
-      s1.seqIntervFactorListCount,
-      s1.seqIntervFactorListIndex
+      s1.seqIntervFactorListCountToPet,
+      s1.seqIntervFactorListIndexToPet,
+      s1.seqIntervFactorListLookupIndexToPet,
+      s1.seqIntervFactorListCountFromPet
     ){
-      seqIndexFactorLookup = s1.seqIndexFactorLookup;
       localPet = s1.localPet;
       petCount = s1.petCount;
       seqIndexInterval = s1.seqIndexInterval;
       tensorMixFlag = s1.tensorMixFlag;
       dstSetupFlag = s1.dstSetupFlag;
-      totalFactorCount = s1.totalFactorCount;
       typekindFactors = s1.typekindFactors;
     }
    private:
     int messageSizeCount(int srcPet, int dstPet)const{
       if (localPet == srcPet)
-        return seqIntervFactorListCount[dstPet];
+        return seqIntervFactorListCountToPet[dstPet];
       else if (localPet == dstPet)
-        return totalFactorCount[srcPet];
+        return seqIntervFactorListCountFromPet[srcPet];
       else{
-        return 0; // this should provoke MPI errors
+        return 0; // provoke MPI errors
       }
     }
     virtual int messageSize(int srcPet, int dstPet)const{
@@ -6602,134 +6616,299 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     }
     virtual void messagePrepare(int srcPet, int dstPet, char *buffer)const{
       if (typekindFactors == ESMC_TYPEKIND_R4)
-        fillStream<ESMC_R4>(dstPet, buffer);
+        fillStream<ESMC_R4>(srcPet, dstPet, buffer);
       else if (typekindFactors == ESMC_TYPEKIND_R8)
-        fillStream<ESMC_R8>(dstPet, buffer);
+        fillStream<ESMC_R8>(srcPet, dstPet, buffer);
       else if (typekindFactors == ESMC_TYPEKIND_I4)
-        fillStream<ESMC_I4>(dstPet, buffer);
+        fillStream<ESMC_I4>(srcPet, dstPet, buffer);
       else if (typekindFactors == ESMC_TYPEKIND_I8)
-        fillStream<ESMC_I8>(dstPet, buffer);
+        fillStream<ESMC_I8>(srcPet, dstPet, buffer);
     }
     virtual void messageProcess(int srcPet, int dstPet, char *buffer){
       if (typekindFactors == ESMC_TYPEKIND_R4)
-        fillSeqIndexFactorLookupFromStream<ESMC_R4>(srcPet, buffer);
+        fillSeqIndexFactorLookupFromStream<ESMC_R4>(srcPet, dstPet, buffer);
       else if (typekindFactors == ESMC_TYPEKIND_R8)
-        fillSeqIndexFactorLookupFromStream<ESMC_R8>(srcPet, buffer);
+        fillSeqIndexFactorLookupFromStream<ESMC_R8>(srcPet, dstPet, buffer);
       else if (typekindFactors == ESMC_TYPEKIND_I4)
-        fillSeqIndexFactorLookupFromStream<ESMC_I4>(srcPet, buffer);
+        fillSeqIndexFactorLookupFromStream<ESMC_I4>(srcPet, dstPet, buffer);
       else if (typekindFactors == ESMC_TYPEKIND_I8)
-        fillSeqIndexFactorLookupFromStream<ESMC_I8>(srcPet, buffer);
+        fillSeqIndexFactorLookupFromStream<ESMC_I8>(srcPet, dstPet, buffer);
     }
     virtual void localPrepareAndProcess(int localPet){
       if (typekindFactors == ESMC_TYPEKIND_R4)
-        fillSeqIndexFactorLookup<ESMC_R4>(localPet);
+        fillSeqIndexFactorLookupLocally<ESMC_R4>(localPet);
       else if (typekindFactors == ESMC_TYPEKIND_R8)
-        fillSeqIndexFactorLookup<ESMC_R8>(localPet);
+        fillSeqIndexFactorLookupLocally<ESMC_R8>(localPet);
       else if (typekindFactors == ESMC_TYPEKIND_I4)
-        fillSeqIndexFactorLookup<ESMC_I4>(localPet);
+        fillSeqIndexFactorLookupLocally<ESMC_I4>(localPet);
       else if (typekindFactors == ESMC_TYPEKIND_I8)
-        fillSeqIndexFactorLookup<ESMC_I8>(localPet);
+        fillSeqIndexFactorLookupLocally<ESMC_I8>(localPet);
     }
-    template<typename T> void fillSeqIndexFactorLookupFromStream(int srcPet, 
-      char *stream){
+    template<typename T> void fillStream(int srcPet, int dstPet,
+      char *stream)const{
       int *intStream;
       T *factorStream = (T *)stream;
-      for (int i=0; i<totalFactorCount[srcPet]; i++){
-        intStream = (int *)factorStream;
-        int j=*intStream++;                 // index into lookup table
-        int k=seqIndexFactorLookup[j].factorList.size();
-        seqIndexFactorLookup[j].factorList.resize(k+1);
-        seqIndexFactorLookup[j].factorList[k]
-          .partnerSeqIndex.decompSeqIndex = *intStream++; // seqIndex
-        seqIndexFactorLookup[j].factorList[k]
-          .partnerSeqIndex.tensorSeqIndex = *intStream++; // tensorSeqIndex
-        intStream++;  // skip padding
-        factorStream = (T *)intStream;
-        *((T *)seqIndexFactorLookup[j].factorList[k].factor) = *factorStream++;
-      }
-    }
-    template<typename T> void fillStream(int dstPet, char *stream)const{
-      int *intStream;
-      T *factorStream = (T *)stream;
-      for (int jj=0; jj<seqIntervFactorListCount[dstPet]; jj++){
+      for (int i=0; i<messageSizeCount(srcPet, dstPet); i++){
         // loop over factorList entries in dstPet's seqIndex interval
         intStream = (int *)factorStream;
-        int j = seqIntervFactorListIndex[dstPet][jj];
+        int lookupIndex = seqIntervFactorListLookupIndexToPet[dstPet][i];
+        int j = seqIntervFactorListIndexToPet[dstPet][i];
         SeqInd seqInd;
         if (dstSetupFlag)
-          seqInd = sparseMatrix->getDstSeqIndex(j);
-        else
           seqInd = sparseMatrix->getSrcSeqIndex(j);
+          // reverse to lookupIndex construction b/c src side picks dst and rev.
+        else
+          seqInd = sparseMatrix->getDstSeqIndex(j);
+          // reverse to lookupIndex construction b/c src side picks dst and rev.
         int seqIndex = seqInd.getIndex(0);
-        int k = seqIndex - seqIndexInterval[dstPet].min;
-        if (tensorMixFlag)
-          k += (seqInd.getIndex(1)-1) * seqIndexInterval[dstPet].count;
-        *intStream++ = k; // index into distr. dir lookup table
-        if (dstSetupFlag)
-          seqInd = sparseMatrix->getSrcSeqIndex(j);
-          // reverse b/c src side picks dst and rev.
-        else
-          seqInd = sparseMatrix->getDstSeqIndex(j);
-          // reverse b/c src side picks dst and rev.
-        seqIndex = seqInd.getIndex(0);
         int tensorSeqIndex = -1;  // dummy tensorSeqIndex
         if (tensorMixFlag)
           tensorSeqIndex = seqInd.getIndex(1);  // set actual tensor seqIndex
-        *intStream++ = seqIndex;          // seqIndex
-        *intStream++ = tensorSeqIndex;    // dummy tensorSeqIndex
-        *intStream++ = 0; // padding for 8-byte alignment
+        *intStream++ = lookupIndex;     // index into distr. dir lookup table
+        *intStream++ = seqIndex;        // seqIndex
+        *intStream++ = tensorSeqIndex;  // dummy tensorSeqIndex
+        *intStream++ = 0;               // padding for 8-byte alignment
         factorStream = (T *)intStream;
-        *factorStream++ = ((T *)sparseMatrix->getFactorList())[j];
+        *factorStream++ = ((T *)sparseMatrix->getFactorList())[j];  // factor
       }
     }
-    template<typename T> void fillSeqIndexFactorLookup(int localPet){
-      for (int jj=0; jj<seqIntervFactorListCount[localPet]; jj++){
+    template<typename T> void fillSeqIndexFactorLookupFromStream(int srcPet,
+      int dstPet, char *stream){
+      int *intStream;
+      T *factorStream = (T *)stream;
+      for (int i=0; i<messageSizeCount(srcPet, dstPet); i++){
+        intStream = (int *)factorStream;
+        int lookupIndex = *intStream++;   // index into lookup table
+        FactorElement factorElement;
+        factorElement.partnerSeqIndex.decompSeqIndex = *intStream++;
+        factorElement.partnerSeqIndex.tensorSeqIndex = *intStream++;
+        intStream++;  // skip padding
+        factorStream = (T *)intStream;
+        *((T *)factorElement.factor) = *factorStream++;
+        seqIndexFactorLookup[lookupIndex].factorList.push_back(factorElement);
+      }
+    }
+    template<typename T> void fillSeqIndexFactorLookupLocally(int localPet){
+      for (int i=0; i<messageSizeCount(localPet, localPet); i++){
         // loop over factorList entries in localPet's seqIndex interval
-        int j = seqIntervFactorListIndex[localPet][jj];
+        int j = seqIntervFactorListIndexToPet[localPet][i];
         SeqInd seqInd;
         if (dstSetupFlag)
-          seqInd = sparseMatrix->getDstSeqIndex(j);
-        else
           seqInd = sparseMatrix->getSrcSeqIndex(j);
+          // reverse b/c src side picks dst and rev.
+        else
+          seqInd = sparseMatrix->getDstSeqIndex(j);
+          // reverse b/c src side picks dst and rev.
         int seqIndex = seqInd.getIndex(0);
-        int k = seqIndex - seqIndexInterval[localPet].min;
-        if (tensorMixFlag)
-          k += (seqInd.getIndex(1)-1) * seqIndexInterval[localPet].count;
-        int kk = seqIndexFactorLookup[k].factorList.size();
-        seqIndexFactorLookup[k].factorList.resize(kk+1);
-        if (dstSetupFlag)
-          seqInd = sparseMatrix->getSrcSeqIndex(j);
-          // reverse b/c src side picks dst and rev.
-        else
-          seqInd = sparseMatrix->getDstSeqIndex(j);
-          // reverse b/c src side picks dst and rev.
-        seqIndex = seqInd.getIndex(0);
         int tensorSeqIndex = -1;  // dummy tensorSeqIndex
         if (tensorMixFlag)
           tensorSeqIndex = seqInd.getIndex(1);  // set actual tensor seqIndex
-        seqIndexFactorLookup[k].factorList[kk]
-          .partnerSeqIndex.decompSeqIndex = seqIndex; // seqIndex
-        seqIndexFactorLookup[k].factorList[kk]
-          .partnerSeqIndex.tensorSeqIndex = tensorSeqIndex; //tensorSeqIndex
-        *((T *)seqIndexFactorLookup[k].factorList[kk].factor) =
-          ((T *)sparseMatrix->getFactorList())[j];        
+        int lookupIndex = seqIntervFactorListLookupIndexToPet[localPet][i];
+        FactorElement factorElement;
+        factorElement.partnerSeqIndex.decompSeqIndex = seqIndex;
+        factorElement.partnerSeqIndex.tensorSeqIndex = tensorSeqIndex;
+        *((T *)factorElement.factor) = ((T *)sparseMatrix->getFactorList())[j];
+        seqIndexFactorLookup[lookupIndex].factorList.push_back(factorElement);
       }
     }
   };
   
+  // -------------------------------------------------
+  void sum(char *a, char *b, ESMC_TypeKind tk){
+    if (tk == ESMC_TYPEKIND_R4)
+      *((ESMC_R4 *)a) += *((ESMC_R4 *)b);
+    else if (tk == ESMC_TYPEKIND_R8)
+      *((ESMC_R8 *)a) += *((ESMC_R8 *)b);
+    else if (tk == ESMC_TYPEKIND_I4)
+      *((ESMC_I4 *)a) += *((ESMC_I4 *)b);
+    else if (tk == ESMC_TYPEKIND_I8)
+      *((ESMC_I8 *)a) += *((ESMC_I8 *)b);
+  }
+
+  // -------------------------------------------------
+  int setupSeqIndexFactorLookup(VM *vm,
+    map<unsigned int, SeqIndexFactorLookup> &seqIndexFactorLookup,
+    const int petCount, const int localPet, const int factorListCount,
+    const bool dstSetupFlag, vector<SparseMatrix> const &sparseMatrix,
+    const bool tensorMixFlag, DD::Interval const *seqIndexInterval,
+    const int tensorElementCountEff, vector<bool> const &factorPetFlag,
+    const ESMC_TypeKind typekindFactors, const bool haloFlag,
+    Array const *array, const int localDeCount, const int *localDeElementCount,
+    int const *localDeToDeMap, int const *localIntervalPerPetCount,
+    int const *localElementsPerIntervalCount
+    ){
+    
+    int localrc = ESMC_RC_NOT_IMPL;         // local return code
+    
+    // set up seqIntervFactorListCountToPet and seqIntervFactorListIndexToPet
+    vector<int> seqIntervFactorListCountToPet(petCount);
+    for (int i=0; i<petCount; i++)
+      seqIntervFactorListCountToPet[i] = 0; // reset
+    vector<vector<int> > seqIntervFactorListIndexToPet(petCount);
+    vector<vector<int> > seqIntervFactorListLookupIndexToPet(petCount);
+    
+    for (int j=0; j<factorListCount; j++){
+      // loop over all factorList entries, find matching interval via bisection
+      // and count factor towards those that need to be sent to that PET.
+      SeqInd seqInd;
+      if (dstSetupFlag)
+        seqInd = sparseMatrix[0].getDstSeqIndex(j);
+      else
+        seqInd = sparseMatrix[0].getSrcSeqIndex(j);
+      int seqIndex = seqInd.getIndex(0);
+      int tensorSeqIndex;
+      if (tensorMixFlag)
+        tensorSeqIndex = seqInd.getIndex(1);
+      else
+        tensorSeqIndex = 1;  // dummy
+      int iMin=0, iMax=petCount-1;
+      int i=petCount/2;
+      bool foundFlag=false;     // reset
+      do{
+        if (seqIndex < seqIndexInterval[i].min){
+          iMax = i;
+          i = iMin + (iMax - iMin) / 2;
+          continue; 
+        }
+        if (seqIndex > seqIndexInterval[i].max){
+          iMin = i;
+          i = iMin + 1 + (iMax - iMin) / 2;
+          continue; 
+        }
+        // found interval -> check if tensorSeqIndex is within bounds
+        if (tensorSeqIndex < 1 || tensorSeqIndex > tensorElementCountEff){
+          // tensorSeqIndex outside Array bounds
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+            "- factorIndexList contains tensorSeqIndex outside Array bounds",
+            &localrc);
+          return localrc;
+        }
+        foundFlag = true;  // set
+        ++seqIntervFactorListCountToPet[i]; // count this factor for this Pet
+        seqIntervFactorListIndexToPet[i].push_back(j); // store factorList ind.
+        // determine lookupIndex and store
+        int lookupIndex = seqIndex - seqIndexInterval[i].min;
+        if (tensorMixFlag)
+          lookupIndex += (tensorSeqIndex - 1) * seqIndexInterval[i].count;
+        seqIntervFactorListLookupIndexToPet[i].push_back(lookupIndex); // store
+        break;
+      }while (iMin != iMax);
+      if (!foundFlag){
+        // seqIndex lies outside Array bounds
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+          "- factorIndexList contains seqIndex outside Array bounds", &localrc);
+        return localrc;
+      }
+    }
+
+    // construct seqIntervFactorListCountFromPet
+    vector<int> seqIntervFactorListCountFromPet(petCount);
+    vm->alltoall(&(seqIntervFactorListCountToPet.front()), sizeof(int),
+      &(seqIntervFactorListCountFromPet.front()), sizeof(int), vmBYTE);
+
+    DD::SetupSeqIndexFactorLookupStage1 setupSeqIndexFactorLookupStage1(
+      seqIndexFactorLookup,
+      localPet,
+      petCount,
+      (sparseMatrix.size()==0) ? NULL : &(sparseMatrix[0]),
+      factorPetFlag,
+      seqIndexInterval,
+      seqIntervFactorListCountToPet,
+      seqIntervFactorListIndexToPet,
+      seqIntervFactorListLookupIndexToPet,
+      seqIntervFactorListCountFromPet,
+      tensorMixFlag,
+      dstSetupFlag,
+      typekindFactors);
+      
+#define WITH_RESERVE
+#ifdef WITH_RESERVE
+    // Determine factorCount in stage1 and use to reserve memory of vector
+    // before using it in stage2. Not sure this is really an improvement over
+    // just dealing with memory allocation hit, b/c it does require extra
+    // communication.
+    
+    setupSeqIndexFactorLookupStage1.totalExchange(vm);
+    
+    for (map<unsigned int, SeqIndexFactorLookup>::iterator
+      i=seqIndexFactorLookup.begin(); i!=seqIndexFactorLookup.end(); ++i){
+      // obtain memory
+      (i->second).factorList.reserve((i->second).factorCount);  
+    }
+#endif
+    
+    DD::SetupSeqIndexFactorLookupStage2
+      setupSeqIndexFactorLookupStage2(setupSeqIndexFactorLookupStage1);
+
+    setupSeqIndexFactorLookupStage2.totalExchange(vm);
+    
+    // deal with duplicate sparse matrix entries in seqIndexFactorLookup
+    for (map<unsigned int, SeqIndexFactorLookup>::iterator
+      i=seqIndexFactorLookup.begin(); i!=seqIndexFactorLookup.end(); ++i){
+#ifdef ASMMSTOREPRINT
+      fprintf(asmmstoreprintfp,
+        "befr duplicate elimination seqIndexFactorLookup[%d].factorCount=%d\n",
+        i->first, (i->second).factorCount);
+#endif
+      sort((i->second).factorList.begin(), (i->second).factorList.end());
+      if (!haloFlag){
+        // not halo: sum duplicate sparse matrix entries into the first occur.
+        for (int j=0; j<(i->second).factorCount; j++){
+          int k;
+          for (k=j+1; k<(i->second).factorCount; k++){
+            if ((i->second).factorList[j] == (i->second).factorList[k]){
+              sum((i->second).factorList[j].factor,
+                (i->second).factorList[k].factor, typekindFactors);
+            }else
+              break;
+          }
+          j=k-1;  // skip over the duplicates
+        }
+      }
+      // eliminate duplicates in factorList, only leaving first occurrences
+      (i->second).factorList.erase(
+        unique((i->second).factorList.begin(),
+        (i->second).factorList.end()),
+        (i->second).factorList.end());
+      (i->second).factorCount = (i->second).factorList.size();
+#ifdef ASMMSTOREPRINT
+      fprintf(asmmstoreprintfp,
+        "aftr duplicate elimination seqIndexFactorLookup[%d].factorCount=%d\n",
+        i->first, (i->second).factorCount);
+#endif
+    }
+    
+    // communicate between Pets to set up "de" member in seqIndexFactorLookup[]
+    {
+      DD::FillSelfDeInfo fillSelfDeInfo(
+        array,
+        localPet,
+        localDeCount,
+        localDeElementCount,
+        localDeToDeMap,
+        seqIndexInterval,
+        seqIndexFactorLookup,
+        tensorMixFlag,
+        localIntervalPerPetCount,
+        localElementsPerIntervalCount,
+        (dstSetupFlag & haloFlag));
+      
+      fillSelfDeInfo.totalExchange(vm);
+    }
+    
+    // eliminate duplicate de entries in seqIndexFactorLookup
+    for (map<unsigned int, SeqIndexFactorLookup>::iterator
+      i=seqIndexFactorLookup.begin(); i!=seqIndexFactorLookup.end(); ++i){
+      sort((i->second).de.begin(), (i->second).de.end());
+      (i->second).de.erase(unique((i->second).de.begin(),(i->second).de.end()),
+        (i->second).de.end());
+    }
+  
+    // return successfully
+    return ESMF_SUCCESS;
+  }
+  
 } // namespace DD
-
-
-void sum(char *a, char *b, ESMC_TypeKind tk){
-  if (tk == ESMC_TYPEKIND_R4)
-    *((ESMC_R4 *)a) += *((ESMC_R4 *)b);
-  else if (tk == ESMC_TYPEKIND_R8)
-    *((ESMC_R8 *)a) += *((ESMC_R8 *)b);
-  else if (tk == ESMC_TYPEKIND_I4)
-    *((ESMC_I4 *)a) += *((ESMC_I4 *)b);
-  else if (tk == ESMC_TYPEKIND_I8)
-    *((ESMC_I8 *)a) += *((ESMC_I8 *)b);
-}
 
 
 #define ASMMSTORETIMING___disable
@@ -6815,8 +6994,7 @@ int Array::sparseMatMulStore(
   double t4a, t4b;  //gjt - profile
   double t4a1, t4a2, t4a3;  //gjt - profile  
   double t4b1, t4b2, t4b3;  //gjt - profile
-  double t5a, t5b, t5c, t5d, t5e, t5f;  //gjt - profile
-  double t5a1, t5b1, t5d1, t5e1;  //gjt - profile  
+  double t5c, t5f;  //gjt - profile
   vm->barrier();      //synchronize start time across all PETs
   VMK::wtime(&t0);    //gjt - profile
 #endif
@@ -7212,16 +7390,12 @@ int Array::sparseMatMulStore(
       ++srcSeqIndexInterval[i].max;   // distribute extra indices homogeneously
     srcSeqIndexInterval[i].count = 
       srcSeqIndexInterval[i].max - srcSeqIndexInterval[i].min + 1;
-    srcSeqIndexInterval[i].countEff =
-      srcSeqIndexInterval[i].count * srcTensorElementCountEff;
     srcSeqIndexInterval[i+1].min = srcSeqIndexInterval[i].max + 1;
   }
   srcSeqIndexInterval[petCount-1].max = srcSeqIndexMaxGlobal;  // finish
   srcSeqIndexInterval[petCount-1].count = 
     srcSeqIndexInterval[petCount-1].max - srcSeqIndexInterval[petCount-1].min
     + 1;
-  srcSeqIndexInterval[petCount-1].countEff =
-    srcSeqIndexInterval[petCount-1].count * srcTensorElementCountEff;
   
 #ifdef ASMMSTOREPRINT
   fprintf(asmmstoreprintfp, "gjt: localPet %d, srcElementCountList[localPet] = "
@@ -7316,16 +7490,12 @@ int Array::sparseMatMulStore(
       ++dstSeqIndexInterval[i].max;   // distribute extra indices homogeneously
     dstSeqIndexInterval[i].count = 
       dstSeqIndexInterval[i].max - dstSeqIndexInterval[i].min + 1;
-    dstSeqIndexInterval[i].countEff =
-      dstSeqIndexInterval[i].count * dstTensorElementCountEff;
     dstSeqIndexInterval[i+1].min = dstSeqIndexInterval[i].max + 1;
   }
   dstSeqIndexInterval[petCount-1].max = dstSeqIndexMaxGlobal;  // finish
   dstSeqIndexInterval[petCount-1].count = 
     dstSeqIndexInterval[petCount-1].max - dstSeqIndexInterval[petCount-1].min
     + 1;
-  dstSeqIndexInterval[petCount-1].countEff =
-    dstSeqIndexInterval[petCount-1].count * dstTensorElementCountEff;
   
 #ifdef ASMMSTOREPRINT
     fprintf(asmmstoreprintfp, "gjt: localPet %d, dstElementCountList[localPet] "
@@ -7406,343 +7576,41 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t4);   //gjt - profile
 #endif
   
-  // set up srcSeqIntervFactorListCount and srcSeqIntervFactorListIndex
-  vector<int> srcSeqIntervFactorListCount(petCount);
-  vector<vector<int> > srcSeqIntervFactorListIndex(petCount);
-  for (int i=0; i<petCount; i++)
-    srcSeqIntervFactorListCount[i] = 0; // reset
-
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t5a1);   //gjt - profile
-#endif
-
-  for (int j=0; j<factorListCount; j++){
-    // loop over all factorList entries, find matching interval via bisection
-    // and count factor towards that PETs factor list count.
-    SeqInd srcSeqInd = sparseMatrix[0].getSrcSeqIndex(j);
-    int srcSeqIndex = srcSeqInd.getIndex(0);
-    int srcTensorSeqIndex;
-    if (tensorMixFlag)
-      srcTensorSeqIndex = srcSeqInd.getIndex(1);
-    else
-      srcTensorSeqIndex = 1;  // dummy
-    int iMin=0, iMax=petCount-1;
-    int i=petCount/2;
-    bool foundFlag=false;     // reset
-    do{
-      if (srcSeqIndex < srcSeqIndexInterval[i].min){
-        iMax = i;
-        i = iMin + (iMax - iMin) / 2;
-        continue; 
-      }
-      if (srcSeqIndex > srcSeqIndexInterval[i].max){
-        iMin = i;
-        i = iMin + 1 + (iMax - iMin) / 2;
-        continue; 
-      }
-      // found interval -> check if srcTensorSeqIndex is within bounds
-      if (srcTensorSeqIndex < 1 || srcTensorSeqIndex >
-        srcTensorElementCountEff){
-        // srcTensorSeqIndex outside srcArray bounds
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-          "- factorIndexList contains srcTensorSeqIndex outside srcArray"
-          " bounds", &rc);
-        return rc;
-      }
-      ++srcSeqIntervFactorListCount[i]; // count this factor for this Pet
-      srcSeqIntervFactorListIndex[i].push_back(j); // store factorList index
-      foundFlag = true;  // set
-      break;
-    }while (iMin != iMax);
-    if (!foundFlag){
-      // srcSeqIndex lies outside srcArray bounds
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-        "- factorIndexList contains srcSeqIndex outside srcArray bounds", &rc);
-      return rc;
-    }
-  }
+  // allocate local look-up map indexed by srcSeqIndex, i.e. distributed dir.
+  map<unsigned int, DD::SeqIndexFactorLookup> srcSeqIndexFactorLookup;
   
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t5a);   //gjt - profile
-#endif
+  localrc = DD::setupSeqIndexFactorLookup(vm, 
+    srcSeqIndexFactorLookup,
+    petCount, localPet, factorListCount, 
+    false,  // dstSetupFlag
+    sparseMatrix, tensorMixFlag,
+    srcSeqIndexInterval, srcTensorElementCountEff, factorPetFlag,
+    typekindFactors, haloFlag, srcArray, srcLocalDeCount,
+    srcLocalDeElementCount, srcLocalDeToDeMap, srcLocalIntervalPerPetCount,
+    srcLocalElementsPerIntervalCount);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;
   
-  // allocate local look-up table indexed by srcSeqIndex
-  DD::SeqIndexFactorLookup *srcSeqIndexFactorLookup = 
-    new DD::SeqIndexFactorLookup[srcSeqIndexInterval[localPet].countEff];
-  for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++)
-    srcSeqIndexFactorLookup[i].factorCount = 0;   // reset count
-  
-  {
-    DD::SetupSeqIndexFactorLookupStage1 setupSeqIndexFactorLookupStage1(
-      srcSeqIndexFactorLookup,
-      localPet,
-      petCount,
-      (sparseMatrix.size()==0) ? NULL : &(sparseMatrix[0]),
-      factorPetFlag,
-      srcSeqIndexInterval,
-      srcSeqIntervFactorListCount,
-      srcSeqIntervFactorListIndex,
-      tensorMixFlag,
-      false,
-      typekindFactors);
-    
-    setupSeqIndexFactorLookupStage1.totalExchange(vm);
-    
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t5b1);   //gjt - profile
-#endif
-
-    for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++)
-      srcSeqIndexFactorLookup[i].factorList.reserve(
-        srcSeqIndexFactorLookup[i].factorCount);  // obtain memory
-  
-    DD::SetupSeqIndexFactorLookupStage2
-      setupSeqIndexFactorLookupStage2(setupSeqIndexFactorLookupStage1);
-
-    setupSeqIndexFactorLookupStage2.totalExchange(vm);
-  }
-  
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t5b);   //gjt - profile
-#endif
-
-  // deal with duplicate sparse matrix entries in srcSeqIndexFactorLookup
-  for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++){
-#ifdef ASMMSTOREPRINT
-    fprintf(asmmstoreprintfp,
-      "befr duplicate elimination srcSeqIndexFactorLookup[%d].factorCount=%d\n",
-      i, srcSeqIndexFactorLookup[i].factorCount);
-#endif
-    sort(srcSeqIndexFactorLookup[i].factorList.begin(),
-      srcSeqIndexFactorLookup[i].factorList.end());
-    if (!haloFlag){
-      // not halo: sum duplicate sparse matrix entries into the first occurrence
-      for (int j=0; j<srcSeqIndexFactorLookup[i].factorCount; j++){
-        int k;
-        for (k=j+1; k<srcSeqIndexFactorLookup[i].factorCount; k++){
-          if (srcSeqIndexFactorLookup[i].factorList[j] ==
-            srcSeqIndexFactorLookup[i].factorList[k]){
-            sum(srcSeqIndexFactorLookup[i].factorList[j].factor,
-              srcSeqIndexFactorLookup[i].factorList[k].factor, typekindFactors);
-          }else
-            break;
-        }
-        j=k-1;  // skip over the duplicates
-      }
-    }
-    // eliminate duplicates in factorList, only leaving first occurrences
-    srcSeqIndexFactorLookup[i].factorList.erase(
-      unique(srcSeqIndexFactorLookup[i].factorList.begin(),
-      srcSeqIndexFactorLookup[i].factorList.end()),
-      srcSeqIndexFactorLookup[i].factorList.end());
-    srcSeqIndexFactorLookup[i].factorCount =
-      srcSeqIndexFactorLookup[i].factorList.size();
-#ifdef ASMMSTOREPRINT
-    fprintf(asmmstoreprintfp,
-      "aftr duplicate elimination srcSeqIndexFactorLookup[%d].factorCount=%d\n",
-      i, srcSeqIndexFactorLookup[i].factorCount);
-#endif
-  }
-    
-  // communicate between Pets to set up "de" member in srcSeqIndexFactorLookup[]
-  {
-    DD::FillSelfDeInfo fillSelfDeInfo(
-      srcArray,
-      localPet,
-      srcLocalDeCount,
-      srcLocalDeElementCount,
-      srcLocalDeToDeMap,
-      srcSeqIndexInterval,
-      srcSeqIndexFactorLookup,
-      tensorMixFlag,
-      srcLocalIntervalPerPetCount,
-      srcLocalElementsPerIntervalCount,
-      false);
-      
-    fillSelfDeInfo.totalExchange(vm);
-  }
-  
-  // eliminate duplicate de entries in srcSeqIndexFactorLookup
-  for (int i=0; i<srcSeqIndexInterval[localPet].countEff; i++){
-    sort(srcSeqIndexFactorLookup[i].de.begin(),
-      srcSeqIndexFactorLookup[i].de.end());
-    srcSeqIndexFactorLookup[i].de.erase(
-      unique(srcSeqIndexFactorLookup[i].de.begin(),
-      srcSeqIndexFactorLookup[i].de.end()),
-      srcSeqIndexFactorLookup[i].de.end());
-  }
-    
 //vm->barrier();  /// only for profiling tests
       
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t5c);   //gjt - profile
 #endif
 
-  // set up dstSeqIntervFactorListCount and dstSeqIntervFactorListIndex
-  vector<int> dstSeqIntervFactorListCount(petCount);
-  vector<vector<int> >dstSeqIntervFactorListIndex(petCount);
-  for (int i=0; i<petCount; i++)
-    dstSeqIntervFactorListCount[i] = 0; // reset
-  
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t5d1);   //gjt - profile
-#endif
+  // allocate local look-up map indexed by dstSeqIndex, i.e. distributed dir.
+  map<unsigned int, DD::SeqIndexFactorLookup> dstSeqIndexFactorLookup;
 
-  for (int j=0; j<factorListCount; j++){
-    // loop over all factorList entries, find matching interval via bisection
-    // and count factor towards that PETs factor list count.
-    SeqInd dstSeqInd = sparseMatrix[0].getDstSeqIndex(j);
-    int dstSeqIndex = dstSeqInd.getIndex(0);
-    int dstTensorSeqIndex;
-    if (tensorMixFlag)
-      dstTensorSeqIndex = dstSeqInd.getIndex(1);
-    else
-      dstTensorSeqIndex = 1;  // dummy
-    int iMin=0, iMax=petCount-1;
-    int i=petCount/2;
-    bool foundFlag=false;     // reset
-    do{
-      if (dstSeqIndex < dstSeqIndexInterval[i].min){
-        iMax = i;
-        i = iMin + (iMax - iMin) / 2;
-        continue; 
-      }
-      if (dstSeqIndex > dstSeqIndexInterval[i].max){
-        iMin = i;
-        i = iMin + 1 + (iMax - iMin) / 2;
-        continue; 
-      }
-      // found interval -> check if dstTensorSeqIndex is within bounds
-      if (dstTensorSeqIndex < 1 || dstTensorSeqIndex >
-        dstTensorElementCountEff){
-        // dstTensorSeqIndex outside dstArray bounds
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-          "- factorIndexList contains dstTensorSeqIndex outside dstArray"
-          " bounds", &rc);
-        return rc;
-      }
-      ++dstSeqIntervFactorListCount[i]; // count this factor for this Pet
-      dstSeqIntervFactorListIndex[i].push_back(j); // store factorList index
-      foundFlag = true;  // set
-      break;
-    }while (iMin != iMax);
-    if (!foundFlag){
-      // dstSeqIndex lies outside dstArray bounds
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-        "- factorIndexList contains dstSeqIndex outside dstArray bounds", &rc);
-      return rc;
-    }
-  }
-  
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t5d);   //gjt - profile
-#endif
-
-  // allocate local look-up table indexed by dstSeqIndex
-  DD::SeqIndexFactorLookup *dstSeqIndexFactorLookup = 
-    new DD::SeqIndexFactorLookup[dstSeqIndexInterval[localPet].countEff];
-  for (int i=0; i<dstSeqIndexInterval[localPet].countEff; i++)
-    dstSeqIndexFactorLookup[i].factorCount = 0;   // reset count
-
-  {
-    DD::SetupSeqIndexFactorLookupStage1 setupSeqIndexFactorLookupStage1(
-      dstSeqIndexFactorLookup,
-      localPet,
-      petCount,
-      (sparseMatrix.size()==0) ? NULL : &(sparseMatrix[0]),
-      factorPetFlag,
-      dstSeqIndexInterval,
-      dstSeqIntervFactorListCount,
-      dstSeqIntervFactorListIndex,
-      tensorMixFlag,
-      true,
-      typekindFactors);
-    
-    setupSeqIndexFactorLookupStage1.totalExchange(vm);
-    
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t5e1);   //gjt - profile
-#endif
-
-    for (int i=0; i<dstSeqIndexInterval[localPet].countEff; i++)
-      dstSeqIndexFactorLookup[i].factorList.reserve(
-        dstSeqIndexFactorLookup[i].factorCount);  // obtain memory
-    
-    DD::SetupSeqIndexFactorLookupStage2
-      setupSeqIndexFactorLookupStage2(setupSeqIndexFactorLookupStage1);
-
-    setupSeqIndexFactorLookupStage2.totalExchange(vm);
-  }
-    
-#ifdef ASMMSTORETIMING
-  VMK::wtime(&t5e);   //gjt - profile
-#endif
-  
-  // deal with duplicate sparse matrix entries in dstSeqIndexFactorLookup
-  for (int i=0; i<dstSeqIndexInterval[localPet].countEff; i++){
-#ifdef ASMMSTOREPRINT
-    fprintf(asmmstoreprintfp,
-      "befr duplicate elimination dstSeqIndexFactorLookup[%d].factorCount=%d\n",
-      i, dstSeqIndexFactorLookup[i].factorCount);
-#endif
-    sort(dstSeqIndexFactorLookup[i].factorList.begin(),
-      dstSeqIndexFactorLookup[i].factorList.end());
-    if (!haloFlag){
-      // not halo: sum duplicate sparse matrix entries into the first occurrence
-      for (int j=0; j<dstSeqIndexFactorLookup[i].factorCount; j++){
-        int k;
-        for (k=j+1; k<dstSeqIndexFactorLookup[i].factorCount; k++){
-          if (dstSeqIndexFactorLookup[i].factorList[j] ==
-            dstSeqIndexFactorLookup[i].factorList[k]){
-            sum(dstSeqIndexFactorLookup[i].factorList[j].factor,
-              dstSeqIndexFactorLookup[i].factorList[k].factor, typekindFactors);
-          }else
-            break;
-        }
-        j=k-1;  // skip over the duplicates
-      }
-    }
-    // eliminate duplicates in factorList, only leaving first occurrences
-    dstSeqIndexFactorLookup[i].factorList.erase(
-      unique(dstSeqIndexFactorLookup[i].factorList.begin(),
-      dstSeqIndexFactorLookup[i].factorList.end()),
-      dstSeqIndexFactorLookup[i].factorList.end());
-    dstSeqIndexFactorLookup[i].factorCount =
-      dstSeqIndexFactorLookup[i].factorList.size();
-#ifdef ASMMSTOREPRINT
-    fprintf(asmmstoreprintfp,
-      "aftr duplicate elimination dstSeqIndexFactorLookup[%d].factorCount=%d\n",
-      i, dstSeqIndexFactorLookup[i].factorCount);
-#endif
-  }
-  
-  // communicate between Pets to set up "de" member in dstSeqIndexFactorLookup[]
-  {
-    DD::FillSelfDeInfo fillSelfDeInfo(
-      dstArray,
-      localPet,
-      dstLocalDeCount,
-      dstLocalDeElementCount,
-      dstLocalDeToDeMap,
-      dstSeqIndexInterval,
-      dstSeqIndexFactorLookup,
-      tensorMixFlag,
-      dstLocalIntervalPerPetCount,
-      dstLocalElementsPerIntervalCount,
-      haloFlag);
-      
-    fillSelfDeInfo.totalExchange(vm);
-  }
-
-  // eliminate duplicate de entries in dstSeqIndexFactorLookup
-  for (int i=0; i<dstSeqIndexInterval[localPet].countEff; i++){
-    sort(dstSeqIndexFactorLookup[i].de.begin(),
-      dstSeqIndexFactorLookup[i].de.end());
-    dstSeqIndexFactorLookup[i].de.erase(
-      unique(dstSeqIndexFactorLookup[i].de.begin(),
-      dstSeqIndexFactorLookup[i].de.end()),
-      dstSeqIndexFactorLookup[i].de.end());
-  }
+  localrc = DD::setupSeqIndexFactorLookup(vm, 
+    dstSeqIndexFactorLookup,
+    petCount, localPet, factorListCount, 
+    true,  // dstSetupFlag
+    sparseMatrix, tensorMixFlag,
+    dstSeqIndexInterval, dstTensorElementCountEff, factorPetFlag,
+    typekindFactors, haloFlag, dstArray, dstLocalDeCount,
+    dstLocalDeElementCount, dstLocalDeToDeMap, dstLocalIntervalPerPetCount,
+    dstLocalElementsPerIntervalCount);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;
   
 //vm->barrier();  /// only for profiling tests
       
@@ -7761,9 +7629,10 @@ int Array::sparseMatMulStore(
     int seqIndexMin = dstSeqIndexInterval[i].min;
     int seqIndexMax = dstSeqIndexInterval[i].max;
     int count = 0; // reset
-    for (int j=0; j<srcSeqIndexInterval[localPet].countEff; j++){
-      for (int k=0; k<srcSeqIndexFactorLookup[j].factorCount; k++){
-        int partnerSeqIndex = srcSeqIndexFactorLookup[j].factorList[k]
+    for (map<unsigned int, DD::SeqIndexFactorLookup>::const_iterator
+      j=srcSeqIndexFactorLookup.begin(); j!=srcSeqIndexFactorLookup.end(); ++j){
+      for (int k=0; k<(j->second).factorCount; k++){
+        int partnerSeqIndex = (j->second).factorList[k]
           .partnerSeqIndex.decompSeqIndex;
         if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax)
           ++count; // increment counter
@@ -7777,12 +7646,13 @@ int Array::sparseMatMulStore(
   
   // fill partnerDe in srcSeqIndexFactorLookup using dstSeqIndexFactorLookup
   {
-    DD::FillPartnerDeInfo *fillPartnerDeInfo = new DD::FillPartnerDeInfo;
+    DD::FillPartnerDeInfo *fillPartnerDeInfo =
+      new DD::FillPartnerDeInfo(dstSeqIndexFactorLookup,
+      srcSeqIndexFactorLookup);
+      
     fillPartnerDeInfo->localPet = localPet;
     fillPartnerDeInfo->seqIndexIntervalIn = dstSeqIndexInterval;
     fillPartnerDeInfo->seqIndexIntervalOut = srcSeqIndexInterval;
-    fillPartnerDeInfo->seqIndexFactorLookupIn = dstSeqIndexFactorLookup;
-    fillPartnerDeInfo->seqIndexFactorLookupOut = srcSeqIndexFactorLookup;
     fillPartnerDeInfo->tensorMixFlag = tensorMixFlag;
       
     DD::accessLookup(vm, petCount, localPet, dstLocalPartnerIntervalPerPetCount,
@@ -7801,9 +7671,10 @@ int Array::sparseMatMulStore(
     int seqIndexMin = srcSeqIndexInterval[i].min;
     int seqIndexMax = srcSeqIndexInterval[i].max;
     int count = 0; // reset
-    for (int j=0; j<dstSeqIndexInterval[localPet].countEff; j++){
-      for (int k=0; k<dstSeqIndexFactorLookup[j].factorCount; k++){
-        int partnerSeqIndex = dstSeqIndexFactorLookup[j].factorList[k]
+    for (map<unsigned int, DD::SeqIndexFactorLookup>::const_iterator
+      j=dstSeqIndexFactorLookup.begin(); j!=dstSeqIndexFactorLookup.end(); ++j){
+      for (int k=0; k<(j->second).factorCount; k++){
+        int partnerSeqIndex = (j->second).factorList[k]
           .partnerSeqIndex.decompSeqIndex;
         if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax)
           ++count; // increment counter
@@ -7817,12 +7688,12 @@ int Array::sparseMatMulStore(
   
   // fill partnerDe in dstSeqIndexFactorLookup using srcSeqIndexFactorLookup
   {
-    DD::FillPartnerDeInfo *fillPartnerDeInfo = new DD::FillPartnerDeInfo;
+    DD::FillPartnerDeInfo *fillPartnerDeInfo =
+      new DD::FillPartnerDeInfo(srcSeqIndexFactorLookup,
+      dstSeqIndexFactorLookup);
     fillPartnerDeInfo->localPet = localPet;
     fillPartnerDeInfo->seqIndexIntervalIn = srcSeqIndexInterval;
     fillPartnerDeInfo->seqIndexIntervalOut = dstSeqIndexInterval;
-    fillPartnerDeInfo->seqIndexFactorLookupIn = srcSeqIndexFactorLookup;
-    fillPartnerDeInfo->seqIndexFactorLookupOut = dstSeqIndexFactorLookup;
     fillPartnerDeInfo->tensorMixFlag = tensorMixFlag;
       
     DD::accessLookup(vm, petCount, localPet, srcLocalPartnerIntervalPerPetCount,
@@ -7840,54 +7711,56 @@ int Array::sparseMatMulStore(
   fprintf(asmmstoreprintfp, "========================================"
     "========================================\n\n");
   // some serious printing for src info
-  for (int i=0; i<srcSeqIndexInterval[localPet].count; i++){
+  for (map<unsigned int, DD::SeqIndexFactorLookup>::const_iterator
+    i=srcSeqIndexFactorLookup.begin(); i!=srcSeqIndexFactorLookup.end(); ++i){
     fprintf(asmmstoreprintfp, "gjt srcDistDir: localPet %d, srcSeqIndex = %d, "
       "srcSeqIndexFactorLookup[%d].factorCount = %d\n -> .de: ",
-      localPet, i+srcSeqIndexInterval[localPet].min, i,
-      srcSeqIndexFactorLookup[i].factorCount);
-    for (int j=0; j<srcSeqIndexFactorLookup[i].de.size(); j++)
-      fprintf(asmmstoreprintfp, "%d, ", srcSeqIndexFactorLookup[i].de[j]);
+      localPet, (i->first)+srcSeqIndexInterval[localPet].min, i->first,
+      (i->second).factorCount);
+    for (int j=0; j<(i->second).de.size(); j++)
+      fprintf(asmmstoreprintfp, "%d, ", (i->second).de[j]);
     fprintf(asmmstoreprintfp, "\n");
-    for (int j=0; j<srcSeqIndexFactorLookup[i].factorCount; j++){
+    for (int j=0; j<(i->second).factorCount; j++){
       fprintf(asmmstoreprintfp, "\tfactorList[%d]\n"
         "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
         "\t\t.partnerDe = ", j,
-        srcSeqIndexFactorLookup[i].factorList[j].partnerSeqIndex
+        (i->second).factorList[j].partnerSeqIndex
         .decompSeqIndex);
       for (int jj=0;
-        jj<srcSeqIndexFactorLookup[i].factorList[j].partnerDe.size(); jj++)
+        jj<(i->second).factorList[j].partnerDe.size(); jj++)
         fprintf(asmmstoreprintfp, "%d, ",
-          srcSeqIndexFactorLookup[i].factorList[j].partnerDe[jj]);
+          (i->second).factorList[j].partnerDe[jj]);
       fprintf(asmmstoreprintfp, "\n");
       fprintf(asmmstoreprintfp, "\t\t.factor = %d\n",
-        *((int *)srcSeqIndexFactorLookup[i].factorList[j].factor));
+        *((int *)(i->second).factorList[j].factor));
     }
   }
 #endif
   
 #ifdef ASMMSTOREPRINT
   // some serious printing for dst info
-  for (int i=0; i<dstSeqIndexInterval[localPet].count; i++){
+  for (map<unsigned int, DD::SeqIndexFactorLookup>::const_iterator
+    i=dstSeqIndexFactorLookup.begin(); i!=dstSeqIndexFactorLookup.end(); ++i){
     fprintf(asmmstoreprintfp, "gjt dstDistDir: localPet %d, dstSeqIndex = %d, "
       "dstSeqIndexFactorLookup[%d].factorCount = %d\n -> .de: ",
-      localPet, i+dstSeqIndexInterval[localPet].min, i,
-      dstSeqIndexFactorLookup[i].factorCount);
-    for (int j=0; j<dstSeqIndexFactorLookup[i].de.size(); j++)
-      fprintf(asmmstoreprintfp, "%d, ", dstSeqIndexFactorLookup[i].de[j]);
+      localPet, (i->first)+dstSeqIndexInterval[localPet].min, i->first,
+      (i->second).factorCount);
+    for (int j=0; j<(i->second).de.size(); j++)
+      fprintf(asmmstoreprintfp, "%d, ", (i->second).de[j]);
     fprintf(asmmstoreprintfp, "\n");
-    for (int j=0; j<dstSeqIndexFactorLookup[i].factorCount; j++){
+    for (int j=0; j<(i->second).factorCount; j++){
       fprintf(asmmstoreprintfp, "\tfactorList[%d]\n"
         "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
         "\t\t.partnerDe = ", j,
-        dstSeqIndexFactorLookup[i].factorList[j].partnerSeqIndex
+        (i->second).factorList[j].partnerSeqIndex
         .decompSeqIndex);
       for (int jj=0;
-        jj<dstSeqIndexFactorLookup[i].factorList[j].partnerDe.size(); jj++)
+        jj<(i->second).factorList[j].partnerDe.size(); jj++)
         fprintf(asmmstoreprintfp, "%d, ",
-          dstSeqIndexFactorLookup[i].factorList[j].partnerDe[jj]);
+          (i->second).factorList[j].partnerDe[jj]);
       fprintf(asmmstoreprintfp, "\n");
       fprintf(asmmstoreprintfp, "\t\t.factor = %d\n",
-        *((int *)dstSeqIndexFactorLookup[i].factorList[j].factor));
+        *((int *)(i->second).factorList[j].factor));
     }
   }
 #endif
@@ -7913,14 +7786,14 @@ int Array::sparseMatMulStore(
 
   // access srcSeqIndexFactorLookup to construct srcLinSeqVect
   {  
-    DD::FillLinSeqVectInfo *fillLinSeqVectInfo = new DD::FillLinSeqVectInfo;
+    DD::FillLinSeqVectInfo *fillLinSeqVectInfo =
+      new DD::FillLinSeqVectInfo(srcSeqIndexFactorLookup);
     fillLinSeqVectInfo->array = srcArray;
     fillLinSeqVectInfo->linSeqVect = srcLinSeqVect;
     fillLinSeqVectInfo->localPet = localPet;
     fillLinSeqVectInfo->localDeCount = srcLocalDeCount;
     fillLinSeqVectInfo->localDeElementCount = srcLocalDeElementCount;
     fillLinSeqVectInfo->seqIndexInterval = srcSeqIndexInterval;
-    fillLinSeqVectInfo->seqIndexFactorLookup = srcSeqIndexFactorLookup;
     fillLinSeqVectInfo->tensorMixFlag = tensorMixFlag;
     fillLinSeqVectInfo->haloRimFlag = false;
 
@@ -7931,14 +7804,14 @@ int Array::sparseMatMulStore(
   
   // access dstSeqIndexFactorLookup to construct dstLinSeqVect
   {
-    DD::FillLinSeqVectInfo *fillLinSeqVectInfo = new DD::FillLinSeqVectInfo;
+    DD::FillLinSeqVectInfo *fillLinSeqVectInfo =
+      new DD::FillLinSeqVectInfo(dstSeqIndexFactorLookup);
     fillLinSeqVectInfo->array = dstArray;
     fillLinSeqVectInfo->linSeqVect = dstLinSeqVect;
     fillLinSeqVectInfo->localPet = localPet;
     fillLinSeqVectInfo->localDeCount = dstLocalDeCount;
     fillLinSeqVectInfo->localDeElementCount = dstLocalDeElementCount;
     fillLinSeqVectInfo->seqIndexInterval = dstSeqIndexInterval;
-    fillLinSeqVectInfo->seqIndexFactorLookup = dstSeqIndexFactorLookup;
     fillLinSeqVectInfo->tensorMixFlag = tensorMixFlag;
     fillLinSeqVectInfo->haloRimFlag = haloFlag; // forward HALO
 
@@ -7952,10 +7825,27 @@ int Array::sparseMatMulStore(
   delete [] srcLocalIntervalPerPetCount;
   delete [] dstLocalElementsPerIntervalCount;
   delete [] dstLocalIntervalPerPetCount;
-  delete [] srcSeqIndexFactorLookup;
   delete [] srcSeqIndexInterval;
-  delete [] dstSeqIndexFactorLookup;
   delete [] dstSeqIndexInterval;
+  
+#ifdef GJT_DEBUG
+/////////////////////////  
+  for (map<unsigned int, DD::SeqIndexFactorLookup>::const_iterator
+    i=srcSeqIndexFactorLookup.begin(); i!=srcSeqIndexFactorLookup.end(); ++i){
+    
+    fprintf(stderr, "src: lookupIndex=%d, factorCount=%d\n", i->first,
+      (i->second).factorCount);
+  }
+/////////////////////////  
+/////////////////////////  
+  for (map<unsigned int, DD::SeqIndexFactorLookup>::const_iterator
+    i=dstSeqIndexFactorLookup.begin(); i!=dstSeqIndexFactorLookup.end(); ++i){
+    
+    fprintf(stderr, "dst: lookupIndex=%d, factorCount=%d\n", i->first,
+      (i->second).factorCount);
+  }
+/////////////////////////  
+#endif
   
 #ifdef ASMMSTOREPRINT
   fprintf(asmmstoreprintfp, "\n========================================"
@@ -8235,11 +8125,11 @@ int Array::sparseMatMulStore(
     localPet, t4a1-t3, t4a2-t3, t4a3-t3, t4a-t3, t4b1-t3, t4b2-t3, t4b3-t3,
     t4b-t3);
   fprintf(asmmstoretimingfp, "gjt - profile for PET %d:\n"
-    " t5a1=%g\n t5a=%g\n t5b1=%g\n t5b=%g\n t5c=%g\n"
-    " t5d1=%g\n t5d=%g\n t5e1=%g\n t5e=%g\n t5f=%g\n",
+    " t5c=%g\n"
+    " t5f=%g\n",
     localPet, 
-    t5a1-t4, t5a-t4, t5b1-t4, t5b-t4, t5c-t4,
-    t5d1-t4, t5d-t4, t5e1-t4, t5e-t4, t5f-t4);
+    t5c-t4,
+    t5f-t4);
   fprintf(asmmstoretimingfp, "gjt - profile for PET %d:\n"
     " t1=%g\n t2=%g\n t3=%g\n t4=%g\n t5=%g\n t6=%g\n"
     " t7=%g\n t8=%g\n t9=%g\n t10=%g\n t11=%g\n t12=%g\n t13=%g\n t14=%g\n"
