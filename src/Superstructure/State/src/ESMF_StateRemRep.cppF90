@@ -1,4 +1,4 @@
-! $Id: ESMF_StateRemRep.cppF90,v 1.15 2012/07/10 15:17:28 w6ws Exp $
+! $Id: ESMF_StateRemRep.cppF90,v 1.16 2012/07/11 21:11:51 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_StateRemRepMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateRemRep.cppF90,v 1.15 2012/07/10 15:17:28 w6ws Exp $'
+      '$Id: ESMF_StateRemRep.cppF90,v 1.16 2012/07/11 21:11:51 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -140,72 +140,13 @@ contains
 
 
 !-------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateRemove - Remove items from a State
-!
-! !INTERFACE:
-!  subroutine ESMF_StateRemove (state, itemName, keywordEnforcer, relaxedFlag, rc)
-! or
-!  subroutine ESMF_StateRemove (state, itemNameList, keywordEnforcer, relaxedFlag, rc)
-!
-! !ARGUMENTS:
-!    type(ESMF_State), intent(inout)          :: state
-!
-!    character(*),     intent(in)             :: itemName
-! or
-!    character(*),     intent(in)             :: itemNameList(:)
-!
-!    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    logical,          intent(in),   optional :: relaxedFlag
-!    integer,          intent(out),  optional :: rc
-!     
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! The itemNameList version, which accepts an array of names, was added at
-! ESMF 5.3.0r.
-! \end{itemize}
-!
-! !DESCRIPTION:
-!      Remove existing references to items from a {\tt State}.
-!
-! The arguments are:
-! \begin{description}
-! \item[state]
-!      The {\tt ESMF\_State} within which {\tt itemName} will be replaced.
-! \item[itemName]
-!      Scalar version of {\tt itemNameList}.
-! \item[itemNameList]
-!      The name of the items to be removed.  This is a reference only.
-!      The items themselves are unchanged.
-!
-!      If the {\tt state} contains nested {\tt ESMF\_State}s,
-!      the {\tt itemName} arguments may specify fully qualified names
-!      to remove the desired items with a single call.  This is performed
-!      using the ``/'' character to separate the names of the intermediate
-!      State names leading to the desired items.  (E.g.,
-!      {\tt itemName=``state1/state12/item''}.
-!
-!      Since items could potentially be referenced by multiple containers,
-!      it remains the responsibility of the user to manage their
-!      destruction when they are no longer in use.
-! \item[{[relaxedflag]}]
-!     A setting of {\tt .true.} indicates a relaxed definition of "remove",
-!     where it is {\em not} an error if a specified item is not present in the
-!     {\tt state}. For {\tt .false.} this is treated
-!     as an error condition.  The default setting is {\tt .false.}.
-! \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!EOP
-!------------------------------------------------------------------------------
-!-------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_StateRemove"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_StateRemove - Remove an item from a State
 !
 ! !INTERFACE:
+! ! Private name; call using ESMF_StateRemove ()
   subroutine ESMF_StateRemoveOneItem (state, itemName, keywordEnforcer,  &
       relaxedFlag, rc)
 !
@@ -219,6 +160,7 @@ contains
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! Deprecated as of ESMF 5.3.1, in favor of the list version.
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -227,11 +169,11 @@ contains
 ! The arguments are:
 ! \begin{description}
 ! \item[state]
-!      The {\tt ESMF\_State} within which {\tt itemName} will be replaced.
+!      The {\tt ESMF\_State} within which {\tt itemName} will be removed.
 ! \item[itemName]
 !      The name of the item to be removed.  This is a reference only.
 !      The item itself is unchanged.
-!
+! 
 !      If the {\tt state} contains nested {\tt ESMF\_State}s,
 !      the {\tt itemName} argument may specify a fully qualified name
 !      to remove the desired item with a single call.  This is performed
@@ -239,9 +181,9 @@ contains
 !      State names leading to the desired item.  (E.g.,
 !      {\tt itemName=``state1/state12/item''}.
 !
-!      Since items could potentially be referenced by multiple containers,
-!      it remains the responsibility of the user to manage their
-!      destruction when they are no longer in use.
+!      Since an item could potentially be referenced by multiple containers,
+!      it remains the responsibility of the user to manage its
+!      destruction when it is no longer in use.
 ! \item[{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "remove",
 !     where it is {\em not} an error if {\tt itemName} is not present in the
@@ -250,7 +192,7 @@ contains
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: localrc
 
@@ -268,11 +210,12 @@ contains
 
 !-------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateRemoveList"
-!BOPI
+^define ESMF_METHOD "ESMF_StateRemove"
+!BOP
 ! !IROUTINE: ESMF_StateRemoveList - Remove a list of items from a State
 !
 ! !INTERFACE:
+! ! Private name; call using ESMF_StateRemove ()
   subroutine ESMF_StateRemoveList (state, itemNameList, keywordEnforcer, relaxedFlag, rc)
 !
 ! !ARGUMENTS:
@@ -284,16 +227,16 @@ contains
 !     
 ! !STATUS:
 ! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item Added at ESMF 5.3.1.
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!      Remove an existing reference to an item from a {\tt State}.
+!      Remove existing references to items from a {\tt State}.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[state]
-!      The {\tt ESMF\_State} within which {\tt itemName} will be replaced.
+!      The {\tt ESMF\_State} within which {\tt itemName} will be removed.
 ! \item[itemNameList]
 !      The name of the items to be removed.  This is a reference only.
 !      The items themselves are unchanged.
@@ -310,13 +253,13 @@ contains
 !      destruction when they are no longer in use.
 ! \item[{[relaxedflag]}]
 !     A setting of {\tt .true.} indicates a relaxed definition of "remove",
-!     where it is {\em not} an error if a {\tt itemName} is not present in the
-!     {\tt state}. For {\tt .false.} this is treated
+!     where it is {\em not} an error if an item in the {\tt itemNameList}
+!     is not present in the {\tt state}. For {\tt .false.} this is treated
 !     as an error condition.  The default setting is {\tt .false.}.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
 
     type(ESMF_StateItem),  pointer :: dataitem
