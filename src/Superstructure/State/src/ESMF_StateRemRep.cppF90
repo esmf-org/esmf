@@ -1,4 +1,4 @@
-! $Id: ESMF_StateRemRep.cppF90,v 1.16 2012/07/11 21:11:51 w6ws Exp $
+! $Id: ESMF_StateRemRep.cppF90,v 1.17 2012/07/11 23:56:54 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_StateRemRepMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateRemRep.cppF90,v 1.16 2012/07/11 21:11:51 w6ws Exp $'
+      '$Id: ESMF_StateRemRep.cppF90,v 1.17 2012/07/11 23:56:54 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -152,7 +152,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
-    character(*),     intent(in)             :: itemName
+    character(*),     intent(in)             :: itemName ! DEPRECATED ARG
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,          intent(in),   optional :: relaxedFlag
     integer,          intent(out),  optional :: rc
@@ -160,7 +160,8 @@ contains
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
-! Deprecated as of ESMF 5.3.1, in favor of the list version.
+! \item Deprecated as of ESMF 5.3.1, in favor of the list version, for
+! consistency with other ESMF container operations which use lists.
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -171,6 +172,8 @@ contains
 ! \item[state]
 !      The {\tt ESMF\_State} within which {\tt itemName} will be removed.
 ! \item[itemName]
+!      \apiDeprecatedArgWithReplacement{itemNameList}
+!
 !      The name of the item to be removed.  This is a reference only.
 !      The item itself is unchanged.
 ! 
@@ -210,9 +213,9 @@ contains
 
 !-------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateRemove"
+^define ESMF_METHOD "ESMF_StateRemoveList"
 !BOP
-! !IROUTINE: ESMF_StateRemoveList - Remove a list of items from a State
+! !IROUTINE: ESMF_StateRemove - Remove a list of items from a State
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_StateRemove ()
@@ -227,7 +230,7 @@ contains
 !     
 ! !STATUS:
 ! \begin{itemize}
-! \item Added at ESMF 5.3.1.
+! \item\apiStatusCompatibleVersion{5.3.1}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
