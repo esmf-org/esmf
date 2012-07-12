@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.43 2012/01/06 20:16:28 svasquez Exp $
+// $Id: ESMCI_DistGrid.h,v 1.44 2012/07/12 23:43:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -82,6 +82,8 @@ namespace ESMCI {
     int **elementCountPCollPLocalDe; // number of elements 
                                   // [diffCollocationCount][localDeCount]
     int *regDecomp;               // regular decomposition descriptor [dimCount]
+    Decomp_Flag *decompflag;      // decomposition scheme [dimCount]
+    ESMC_IndexFlag *indexflag;    // index scheme
     // lower level object references
     DELayout *delayout;
     bool delayoutCreator;
@@ -104,6 +106,7 @@ namespace ESMCI {
       int *minIndex, int *maxIndex, int *minIndexPDimPDe, int *maxIndexPDimPDe,
       int *contigFlagPDimPDe, int *indexCountPDimPDe, int **indexList,
       int *regDecompArg, InterfaceInt *connectionList,
+      Decomp_Flag const *decompflagArg, ESMC_IndexFlag *indexflagArg,
       DELayout *delayout, bool delayoutCreator, VM *vm);
     int destruct(bool followCreator=true);
    public:

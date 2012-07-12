@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.69 2012/01/06 20:16:31 svasquez Exp $
+// $Id: ESMCI_DistGrid.C,v 1.70 2012/07/12 23:43:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.69 2012/01/06 20:16:31 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.70 2012/07/12 23:43:52 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -289,8 +289,13 @@ DistGrid *DistGrid::create(
         sizeof(int)*totalCountInterfaceInt);
     InterfaceInt *maxIndex = new InterfaceInt(maxIndexAlloc,
       dimInterfaceInt, dimCountInterfaceInt);
-    //TODO: decompflag needs to be kept in DistGrid so it can be used here!
-    //TODO: indexflag needs to be kept in DistGrid so it can be used as default!
+    
+    // use indexflag inside dg as the default if not supplied by caller
+    ESMC_IndexFlag *indexflagOpt = dg->indexflag; // default
+    if (indexflag)
+      indexflagOpt = indexflag; // provided by caller
+    
+    //TODO: maybe also need to hold on to delabellist to preserver DE labeling?
     
     // create DistGrid according to collected information
     if (dg->regDecomp!=NULL){
@@ -298,18 +303,31 @@ DistGrid *DistGrid::create(
       // prepare regDecomp
       InterfaceInt *regDecomp = new InterfaceInt(dg->regDecomp,
         dimInterfaceInt, dimCountInterfaceInt);
+    
+      // use decompflag inside dg in order to ensure identical decomposition
+      Decomp_Flag *decompflag = dg->decompflag;
+      
       if (dg->tileCount==1){
         // single tile
-        distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, NULL, 0,
-          firstExtra, lastExtra, NULL, indexflag,
-          connectionList, dg->delayout, dg->vm, &localrc);
+        int decompflagCount = 0;  // default
+        if (decompflag)
+          decompflagCount = dg->dimCount;
+        distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, decompflag,
+          decompflagCount, firstExtra, lastExtra, NULL,
+          indexflagOpt, connectionList, dg->delayout, dg->vm, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return ESMC_NULL_POINTER;
       }else{
         // multi tile
-        distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, NULL, 0, 0,
-          firstExtra, lastExtra, NULL, indexflag,
-          connectionList, dg->delayout, dg->vm, &localrc);
+        int decompflagCount1 = 0;  // default
+        int decompflagCount2 = 0;  // default
+        if (decompflag){
+          decompflagCount1 = dg->dimCount;
+          decompflagCount2 = dg->tileCount;
+        }
+        distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, decompflag,
+          decompflagCount1, decompflagCount2, firstExtra, lastExtra, NULL,
+          indexflagOpt, connectionList, dg->delayout, dg->vm, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return ESMC_NULL_POINTER;
       }
@@ -356,7 +374,7 @@ DistGrid *DistGrid::create(
         }
         // create DistGrid
         distgrid = DistGrid::create(minIndex, maxIndex, deBlockList,
-          NULL, indexflag, connectionList, dg->delayout, dg->vm, &localrc);
+          NULL, indexflagOpt, connectionList, dg->delayout, dg->vm, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return ESMC_NULL_POINTER;
         delete deBlockList;
@@ -915,7 +933,8 @@ DistGrid *DistGrid::create(
   localrc = distgrid->construct(dimCount, 1, tileListPDe,
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe,
-    regDecomp->array, connectionList, delayout, delayoutCreator, vm);
+    regDecomp->array, connectionList, decompflag, indexflag,
+    delayout, delayoutCreator, vm);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
@@ -1186,7 +1205,8 @@ DistGrid *DistGrid::create(
   localrc = distgrid->construct(dimCount, 1, tileListPDe, 
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe, NULL,
-    connectionList, delayout, delayoutCreator, vm);
+    connectionList, NULL, indexflag,
+    delayout, delayoutCreator, vm);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
@@ -1756,7 +1776,8 @@ DistGrid *DistGrid::create(
   localrc = distgrid->construct(dimCount, tileCount, tileListPDe,
     minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
     contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe,
-    regDecomp->array, connectionList, delayout, delayoutCreator, vm);
+    regDecomp->array, connectionList, decompflag, indexflag,
+    delayout, delayoutCreator, vm);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
@@ -1877,6 +1898,8 @@ int DistGrid::construct(
   int **indexListPDimPLocalDeArg,       // (in)
   int *regDecompArg,                    // (in)
   InterfaceInt *connectionListArg,      // (in)
+  Decomp_Flag const *decompflagArg,     // (in)
+  ESMC_IndexFlag *indexflagArg,         // (in)
   DELayout *delayoutArg,                // (in) DELayout
   bool delayoutCreatorArg,              // (in)
   VM *vmArg                             // (in) VM context
@@ -1890,6 +1913,14 @@ int DistGrid::construct(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // simple variables only kept if possible needed in DistGridCreate() from DG
+  if (decompflagArg){
+    decompflag = new Decomp_Flag[dimCountArg];
+    memcpy(decompflag, decompflagArg, sizeof(Decomp_Flag)*dimCountArg);
+  }else
+    decompflag = NULL;
+  indexflag = indexflagArg;
 
   // fill in the DistGrid object
   dimCount = dimCountArg;
