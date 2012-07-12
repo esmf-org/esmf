@@ -21,12 +21,12 @@ Descriptor: <xsl:value-of select="PDS"/> \\ \\
 \tablehead {}
 \tabletail {\hline}
 \tablelasttail {}
-\begin{supertabular}{|p{0.375in}|p{0.375in}|p{0.375in}|
+\begin{longtable}{|p{0.375in}|p{0.375in}|p{0.375in}|
   p{0.375in}|p{0.375in}|p{0.375in}|
   p{0.375in}|p{0.375in}|p{0.375in}|
   p{0.375in}|p{0.375in}|p{0.375in}|}
 <xsl:apply-templates/>
-\end{supertabular}
+\end{longtable}
 \\ \\
   </xsl:template>
 

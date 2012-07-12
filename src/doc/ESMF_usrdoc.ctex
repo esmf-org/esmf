@@ -1,8 +1,7 @@
-% $Id: ESMF_usrdoc.ctex,v 1.47 2012/04/30 17:56:35 svasquez Exp $
+% $Id: ESMF_usrdoc.ctex,v 1.48 2012/07/12 20:20:36 rokuingh Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
-\usepackage{supertabular}
 \usepackage{html}
 \usepackage{times}
 \usepackage{graphicx}

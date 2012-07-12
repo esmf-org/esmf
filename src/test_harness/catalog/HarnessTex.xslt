@@ -23,7 +23,7 @@ Descriptor: <xsl:value-of select="PDS"/> \\
   </xsl:template>
 
   <xsl:template match="DistGridFile/Row">
-\begin{supertabular}{|p{0.75in}|p{1.25in}|p{1.25in}|p{1.25in}|
+\begin{longtable}{|p{0.75in}|p{1.25in}|p{1.25in}|p{1.25in}|
     p{1.25in}|p{1.25in}|p{1.25in}|}
 Dist Dim &amp; 
 <xsl:value-of select="SourceDistSize1"/> &amp; 
@@ -67,7 +67,7 @@ UOM &amp;
 <xsl:value-of select="DestGridUnits1"/> &amp; 
 <xsl:value-of select="DestGridUnits2"/> &amp; 
 <xsl:value-of select="DestGridUnits3"/> \\ \hline
-\end{supertabular}
+\end{longtable}
 \vspace{0.25in}
   </xsl:template>
 

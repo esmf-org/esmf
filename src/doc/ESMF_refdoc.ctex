@@ -1,8 +1,7 @@
-% $Id: ESMF_refdoc.ctex,v 1.115 2012/07/12 19:38:58 rokuingh Exp $
+% $Id: ESMF_refdoc.ctex,v 1.116 2012/07/12 20:20:36 rokuingh Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
-\usepackage{supertabular}
 \usepackage{longtable}
 \usepackage{html}
 \usepackage{times}

@@ -1,8 +1,7 @@
-% $Id: ESMC_crefdoc.ctex,v 1.24 2012/07/12 19:38:58 rokuingh Exp $
+% $Id: ESMC_crefdoc.ctex,v 1.25 2012/07/12 20:20:36 rokuingh Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
-\usepackage{supertabular}
 \usepackage{html}
 \usepackage{times}
 %\usepackage{subsections}
