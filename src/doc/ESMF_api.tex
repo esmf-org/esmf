@@ -1,4 +1,4 @@
-% $Id: ESMF_api.tex,v 1.57 2012/01/06 20:19:34 svasquez Exp $
+% $Id: ESMF_api.tex,v 1.58 2012/07/12 19:38:58 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -380,6 +380,29 @@ names must be unique within a single object.    Attributes are set
 by name, and can be retrieved either directly by name or by querying
 for a count of attributes and retrieving names and values
 by index number.
+
+\subsection{Constants}
+
+Named constants are used throughout ESMF to specify the values of many 
+arguments with multiple well defined values in a consistent way.  These 
+constants are defined by a derived type that follows this pattern:
+
+\begin{verbatim}
+ESMF_<CONSTANT_NAME>_Flag
+\end{verbatim}
+
+The values of the constant are then specified by this pattern:
+
+\begin{verbatim}
+ESMF_<CONSTANT_NAME>_<VALUE1>
+ESMF_<CONSTANT_NAME>_<VALUE2>
+ESMF_<CONSTANT_NAME>_<VALUE3>
+...
+\end{verbatim}
+
+A master list of all available constants can be found in section 
+\ref{const:master}.
+
 
 \section{Integrating ESMF into Applications}
 

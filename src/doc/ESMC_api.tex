@@ -1,4 +1,4 @@
-% $Id: ESMC_api.tex,v 1.17 2012/01/06 20:19:33 svasquez Exp $
+% $Id: ESMC_api.tex,v 1.18 2012/07/12 19:38:58 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -450,6 +450,28 @@ methods.
 
 \end{enumerate} 
 
+
+\subsection{Constants}
+
+Named constants are used throughout ESMF to specify the values of many 
+arguments with multiple well defined values in a consistent way.  These 
+constants are defined by a derived type that follows this pattern:
+
+\begin{verbatim}
+ESMF_<CONSTANT_NAME>_Flag
+\end{verbatim}
+
+The values of the constant are then specified by this pattern:
+
+\begin{verbatim}
+ESMF_<CONSTANT_NAME>_<VALUE1>
+ESMF_<CONSTANT_NAME>_<VALUE2>
+ESMF_<CONSTANT_NAME>_<VALUE3>
+...
+\end{verbatim}
+
+A master list of all available constants can be found in section 
+\ref{const:cmaster}.
 
 
 

@@ -1,0 +1,96 @@
+% $Id: ESMC_options.tex,v 1.1 2012/07/12 19:38:58 rokuingh Exp $
+
+\section{Appendix A: Master List of Constants}
+\label{const:cmaster}
+
+\subsection{ESMC\_COORDSYS}
+This flag is documented in section \ref{const:ccoordsys}.
+
+\subsection{ESMC\_GRIDITEM}
+This flag is documented in section \ref{const:cgriditem}.
+
+\subsection{ESMC\_GRIDSTATUS}
+This flag is documented in section \ref{const:cgridstatus}.
+
+\subsection{ESMC\_MESHELEMTYPE}
+This flag is documented in section \ref{const:cmeshelemtype}.
+
+\subsection{ESMC\_POLEKIND}
+This flag is documented in section \ref{const:cpolekind}.
+
+\subsection{ESMC\_REGION}
+\label{const:cregion}
+{\sf DESCRIPTION:\\}
+Specifies various regions in the data layout of an Array or Field object.
+
+The type of this flag is:
+
+{\tt type(ESMC\_RegionFlag)}
+
+The valid values are:
+\begin{description}
+\item [ESMC\_REGION\_TOTAL]
+      Total allocated memory.
+\item [ESMC\_REGION\_SELECT]
+      Region of operation-specific elements.
+\item [ESMC\_REGION\_EMPTY]
+      The empty region contains no elements.
+\end{description}
+
+\subsection{ESMC\_REGRIDMETHOD}
+This flag is documented in section \ref{opt:cregridmethod}.
+
+\subsection{ESMC\_STAGGERLOC}
+This flag is documented in section \ref{const:cstaggerloc}.
+
+\subsection{ESMC\_TYPEKIND}
+\label{const:ctypekind}
+
+{\sf DESCRIPTION:\\}
+Named constants used to indicate type and kind combinations supported by the
+overloaded ESMC interfaces. The corresponding Fortran kind-parameter constants
+are described in section \ref{const:kind}.
+
+The type of these named constants is:
+
+{\tt type(ESMC\_TypeKind)}
+
+The named constants are:
+\begin{description}
+\item [ESMC\_TYPEKIND\_I1]
+      Indicates 1 byte integer.
+\item [ESMC\_TYPEKIND\_I2]
+      Indicates 2 byte integer.
+\item [ESMC\_TYPEKIND\_I4]
+      Indicates 4 byte integer.
+\item [ESMC\_TYPEKIND\_I8]
+      Indicates 8 byte integer.
+\item [ESMC\_TYPEKIND\_R4]
+      Indicates 4 byte real.
+\item [ESMC\_TYPEKIND\_R8]
+      Indicates 8 byte real.
+\end{description}
+
+\subsection{ESMC\_UNMAPPEDACTION}
+\label{const:unmappedaction}
+{\sf DESCRIPTION:\\}
+Indicates what action to take with respect to unmapped destination points
+and the entries of the sparse matrix that correspond to these points.
+
+The type of this flag is:
+
+{\tt type(ESMC\_UnmappedAction)}
+
+The valid values are:
+\begin{description}
+	\item[ESMC\_UNMAPPEDACTION\_ERROR]
+	An error is issued when there exist destination points in a regridding
+	operation that are not mapped by corresponding source points.
+	\item[ESMC\_UNMAPPEDACTION\_IGNORE]
+	Destination points which do not have corresponding source points are 
+	ignored and zeros are used for the entries of the sparse matrix
+	that is generated.
+\end{description}
+
+\subsection{ESMC\_XGRIDSIDE}
+This flag is documented in section \ref{const:xgridside}.
