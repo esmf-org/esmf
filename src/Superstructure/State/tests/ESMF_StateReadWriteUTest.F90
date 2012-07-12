@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReadWriteUTest.F90,v 1.17 2012/05/16 22:02:38 svasquez Exp $
+! $Id: ESMF_StateReadWriteUTest.F90,v 1.18 2012/07/12 19:06:53 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateReadWriteUTest.F90,v 1.17 2012/05/16 22:02:38 svasquez Exp $'
+      '$Id: ESMF_StateReadWriteUTest.F90,v 1.18 2012/07/12 19:06:53 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -45,6 +45,8 @@
     type(ESMF_VM) :: vm
     integer :: rc
     logical :: have_netcdf
+
+    character(*), parameter :: netcdf_file = 'io_netcdf_testdata.nc'
 
     ! individual test failure messages
     character(ESMF_MAXSTR) :: failMsg
@@ -80,8 +82,8 @@
       !------------------------------------------------------------------------
       !EX_UTest 
       ! Test reading a netCDF file into Arrays in a State
-      call ESMF_StateRead(state, "io_netcdf_testdata.nc", rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_StateRead(state, netcdf_file, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS when reading: ", netcdf_file
       write(name, *) "Reading a netCDF file into Arrays in a State"
       call ESMF_Test((rc.eq.ESMF_SUCCESS.or.rc.eq.ESMF_RC_LIB_NOT_PRESENT), &
                       name, failMsg, result, ESMF_SRCLINE)
