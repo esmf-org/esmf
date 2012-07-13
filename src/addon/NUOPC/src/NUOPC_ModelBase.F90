@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelBase.F90,v 1.1 2012/04/17 22:03:06 theurich Exp $
+! $Id: NUOPC_ModelBase.F90,v 1.2 2012/07/13 20:40:50 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelBase.F90"
 
@@ -291,7 +291,7 @@ module NUOPC_ModelBase
       file=FILENAME)) &
       return  ! bail out
       
-    call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
+    call NUOPC_ClockPrintCurrTime(internalClock, "<<<"// &
       trim(modelName)//" leaving Run with current time: ", msgString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out

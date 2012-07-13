@@ -1,4 +1,4 @@
-! $Id: NUOPC_Driver.F90,v 1.2 2012/04/10 17:35:16 theurich Exp $
+! $Id: NUOPC_Driver.F90,v 1.3 2012/07/13 20:40:50 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Driver.F90"
 
@@ -615,7 +615,7 @@ call NUOPC_ClockPrintCurrTime(runElement%runSeq%clock, "NUOPC_Driver.Run() "// &
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
-    call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
+    call NUOPC_ClockPrintCurrTime(internalClock, "<<<"// &
       trim(modelName)//" leaving Run with current time: ", msgString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
