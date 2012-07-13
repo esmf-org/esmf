@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.44 2012/07/12 23:43:51 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.45 2012/07/13 16:36:24 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -96,8 +96,14 @@ namespace ESMCI {
         
    public:
     // native constructor and destructor
-    DistGrid(){}
-    DistGrid(int baseID):ESMC_Base(baseID){}// prevent baseID counter increment
+    DistGrid(){
+      decompflag = NULL;
+      indexflag = NULL;
+    }
+    DistGrid(int baseID):ESMC_Base(baseID){ // prevent baseID counter increment
+      decompflag = NULL;
+      indexflag = NULL;
+    }
     ~DistGrid(){destruct(false);}
     
    private:

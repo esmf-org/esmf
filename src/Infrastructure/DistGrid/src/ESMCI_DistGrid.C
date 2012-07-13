@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.70 2012/07/12 23:43:52 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.71 2012/07/13 16:36:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.70 2012/07/12 23:43:52 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.71 2012/07/13 16:36:26 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1920,7 +1920,11 @@ int DistGrid::construct(
     memcpy(decompflag, decompflagArg, sizeof(Decomp_Flag)*dimCountArg);
   }else
     decompflag = NULL;
-  indexflag = indexflagArg;
+  if (indexflagArg){
+    indexflag = new ESMC_IndexFlag; // must store in local storage
+    *indexflag = *indexflagArg;     // copy the value
+  }else
+    indexflag = NULL;
 
   // fill in the DistGrid object
   dimCount = dimCountArg;
@@ -2087,6 +2091,11 @@ int DistGrid::destruct(bool followCreator){
     delete [] tileListPDe;
     delete [] elementCountPDe;
     delete [] contigFlagPDimPDe;
+    
+    if (decompflag)
+      delete [] decompflag;
+    if (indexflag)
+      delete indexflag;
     
 //    int localDeCount = delayout->getLocalDeCount();
     int localDeCount = localDeCountAux; // TODO: delayout may be gone already!
