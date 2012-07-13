@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.17 2012/07/13 00:11:26 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.18 2012/07/13 16:05:35 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@ module ESMF_StateReconcile2Mod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-  '$Id: ESMF_StateReconcile2.F90,v 1.17 2012/07/13 00:11:26 w6ws Exp $'
+  '$Id: ESMF_StateReconcile2.F90,v 1.18 2012/07/13 16:05:35 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
@@ -2227,7 +2227,6 @@ end if
 	if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
-obj_buffer = repeat (achar (x'ff'), buffer_offset)
         inqflag = ESMF_NOINQUIRE
 
         ! serialize needs_count
