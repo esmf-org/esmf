@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.71 2012/07/13 16:36:26 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.72 2012/07/13 19:09:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.71 2012/07/13 16:36:26 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.72 2012/07/13 19:09:56 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -485,6 +485,17 @@ DistGrid *DistGrid::create(
       memcpy(distgrid->regDecomp, dg->regDecomp, sizeof(int)*dimCount);
     }else
       distgrid->regDecomp = NULL;
+    if (dg->decompflag){
+      distgrid->decompflag = new Decomp_Flag[dimCount];
+      memcpy(distgrid->decompflag, dg->decompflag,
+        sizeof(Decomp_Flag)*dimCount);
+    }else
+      distgrid->regDecomp = NULL;
+    if (dg->indexflag){
+      distgrid->indexflag = new ESMC_IndexFlag;
+      memcpy(distgrid->indexflag, dg->indexflag, sizeof(ESMC_IndexFlag));
+    }else
+      distgrid->indexflag = NULL;
     distgrid->delayout = dg->delayout;
     distgrid->delayoutCreator = false;
     distgrid->vm = dg->vm;
