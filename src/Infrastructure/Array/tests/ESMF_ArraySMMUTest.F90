@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySMMUTest.F90,v 1.10 2012/05/16 22:09:31 svasquez Exp $
+! $Id: ESMF_ArraySMMUTest.F90,v 1.11 2012/07/16 20:08:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -121,9 +121,12 @@ module ESMF_ArraySMMUTest_comp_mod
 
   end subroutine !--------------------------------------------------------------
 
-  recursive subroutine test_smm(srcRegDecomp, dstPetList, rc)
+  recursive subroutine test_smm(srcRegDecomp, dstPetList, &
+    srcTermProcessing, pipelineDepth, rc)
     integer           :: srcRegDecomp(:)
     integer, optional :: dstPetList(:)
+    integer, optional :: srcTermProcessing
+    integer, optional :: pipelineDepth
     integer           :: rc
 
     ! Local variables
@@ -294,13 +297,15 @@ module ESMF_ArraySMMUTest_comp_mod
     
     if (localPet == 0) then
       call ESMF_ArraySMMStore(srcArray, dstArray, factorList=factorList, &
-        factorIndexList=factorIndexList, routehandle=rh, rc=rc)
+        factorIndexList=factorIndexList, routehandle=rh, &
+        srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     else
-      call ESMF_ArraySMMStore(srcArray, dstArray, routehandle=rh, rc=rc)
+      call ESMF_ArraySMMStore(srcArray, dstArray, routehandle=rh, &
+        srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -470,7 +475,7 @@ program ESMF_ArraySMMUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArraySMMUTest.F90,v 1.10 2012/05/16 22:09:31 svasquez Exp $'
+    '$Id: ESMF_ArraySMMUTest.F90,v 1.11 2012/07/16 20:08:51 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -512,6 +517,17 @@ program ESMF_ArraySMMUTest
   write(name, *) "src 1 DE/PET -> dst default 4DEs ASMM Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call test_smm(srcRegDecomp=(/1,petCount/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "src 1 DE/PET -> dst default 4DEs ASMM Test w/ tuning parameters"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/1,petCount/), srcTermProcessing=10, &
+    pipelineDepth=4, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   ! must abort to prevent possible hanging due to communications
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -587,6 +603,17 @@ program ESMF_ArraySMMUTest
   write(name, *) "src some PETs with 0 DEs -> dst skipping PETs ASMM Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call test_smm(srcRegDecomp=(/2,2/), dstPetList=petList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  ! must abort to prevent possible hanging due to communications
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "src some PETs with 0 DEs -> dst skipping PETs w/ tuning parameters ASMM Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call test_smm(srcRegDecomp=(/2,2/), dstPetList=petList, srcTermProcessing=10,&
+    pipelineDepth=4, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   ! must abort to prevent possible hanging due to communications
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

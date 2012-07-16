@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.148 2012/07/16 17:41:51 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.149 2012/07/16 20:08:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.148 2012/07/16 17:41:51 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.149 2012/07/16 20:08:49 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -6915,11 +6915,13 @@ int sparseMatMulStoreEncodeXXE(VM *vm, DELayout *srcDelayout,
   vector<DD::AssociationElement> *srcLinSeqVect,
   vector<DD::AssociationElement> *dstLinSeqVect,
   const int *dstLocalDeTotalElementCount,
-  char **rraList, int rraCount, RouteHandle **routehandle
+  char **rraList, int rraCount, RouteHandle **routehandle,
 #ifdef ASMMSTORETIMING
-  , double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
-  double *t14
+  double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
+  double *t14,
 #endif
+  int *srcTermProcessingArg = NULL,       // in (optional)
+  int *pipelineDepthArg = NULL            // in (optional)
   );
 
 //-----------------------------------------------------------------------------
@@ -6940,7 +6942,9 @@ int Array::sparseMatMulStore(
   Array *dstArray,                          // in    - destination Array
   RouteHandle **routehandle,                // inout - handle to precomp. comm
   vector<SparseMatrix> const &sparseMatrix, // in    - sparse matrix vector
-  bool haloFlag                             // in    - support halo conditions
+  bool haloFlag,                            // in    - support halo conditions
+  int *srcTermProcessingArg,                // in (optional)
+  int *pipelineDepthArg                     // in (optional)
   ){    
 //
 // !DESCRIPTION:
@@ -8091,10 +8095,12 @@ int Array::sparseMatMulStore(
     srcLocalDeElementCount, dstLocalDeElementCount,
     srcLinSeqVect, dstLinSeqVect,
     dstLocalDeTotalElementCount,
-    rraList, rraCount, routehandle
+    rraList, rraCount, routehandle,
 #ifdef ASMMSTORETIMING
-    , &t8, &t9, &t10, &t11, &t12, &t13, &t14
+    &t8, &t9, &t10, &t11, &t12, &t13, &t14,
 #endif
+    srcTermProcessingArg,
+    pipelineDepthArg
   );
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
@@ -8201,11 +8207,13 @@ int sparseMatMulStoreEncodeXXE(
   const int *dstLocalDeTotalElementCount, // in
   char **rraList,                         // in
   int rraCount,                           // in
-  RouteHandle **routehandle               // inout - handle to precomputed comm
+  RouteHandle **routehandle,              // inout - handle to precomputed comm
 #ifdef ASMMSTORETIMING
-  , double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
-  double *t14
+  double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
+  double *t14,
 #endif
+  int *srcTermProcessingArg,              // in (optional)
+  int *pipelineDepthArg                   // in (optional)
   ){    
 //
 // !DESCRIPTION:
@@ -8848,10 +8856,15 @@ fflush(asmmstoreprintfp);
   // define the vectorLength.
   if (vectorFlag)
     vectorLength = srcTensorContigLength; // consistent vectorLength
+  
+  int srcTermProcessingOpt; // optimium src term processing ... to be determined
+
+  if (srcTermProcessingArg)
+    srcTermProcessingOpt = *srcTermProcessingArg;
+  else{
 
   // optimize srcTermProcessing
   int pipelineDepth = 4;  // safe value during srcTermProcessing optimization
-  int srcTermProcessingOpt;
   const int srcTermProcMax = 8;
   const int srcTermProcList[] = {0, 1, 2, 3, 4, 6, 8, 20};  // trial settings
   for (int srcTermProc=0; srcTermProc<srcTermProcMax; srcTermProc++){
@@ -8911,7 +8924,7 @@ fflush(asmmstoreprintfp);
       }
     }
   } // srcTermProcessing
-
+  
 #ifdef ASMMSTOREOPTPRINT
   fprintf(asmmstoreoptprintfp, "localPet: %d, srcTermProcessingOpt=%d -> "
     "dtMin=%gs (local)\n", localPet, srcTermProcessingOpt, dtMin);
@@ -8944,6 +8957,8 @@ fflush(asmmstoreprintfp);
     srcTermProcessingOpt = srcTermProcessingOptList[petCount-1];
   }
   
+  } // whether srcTermProcessingArg was provided as argument
+
 #ifdef ASMMSTOREOPTPRINT
   fprintf(asmmstoreoptprintfp, "localPet: %d, srcTermProcessingOpt=%d "
     "(majority vote)\n", localPet, srcTermProcessingOpt);
@@ -8953,9 +8968,14 @@ fflush(asmmstoreprintfp);
   VMK::wtime(t12);   //gjt - profile
 #endif
 
+  int pipelineDepthOpt;     // optimium pipeline depth ... to be determined
+
+  if (pipelineDepthArg)
+    pipelineDepthOpt = *pipelineDepthArg;
+  else{
+
   // optimize pipeline depth
-  int pipelineDepthOpt;   // optimium pipeline depth
-  for (pipelineDepth=1; pipelineDepth<=petCount; pipelineDepth*=2){
+  for (int pipelineDepth=1; pipelineDepth<=petCount; pipelineDepth*=2){
     // start writing a fresh XXE stream
     xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
       startXxeSubCount, startBufferInfoListSize);
@@ -9021,8 +9041,8 @@ fflush(asmmstoreprintfp);
   vector<int> pipelineDepthOptList(petCount);
   vm->allgather(&pipelineDepthOpt, &pipelineDepthOptList[0], sizeof(int));
   sort(pipelineDepthOptList.begin(), pipelineDepthOptList.end());
-  votes = 1; // initialize
-  votesMax = 0; // initialize
+  int votes = 1; // initialize
+  int votesMax = 0; // initialize
   for (int i=1; i<petCount; i++){
     if (pipelineDepthOptList[i-1] == pipelineDepthOptList[i]){
       // same vote
@@ -9042,6 +9062,8 @@ fflush(asmmstoreprintfp);
     // new high vote found
     pipelineDepthOpt = pipelineDepthOptList[petCount-1];
   }
+
+  } // whether pipelineDepthArg was provided as argument
 
 #ifdef ASMMSTOREOPTPRINT
   fprintf(asmmstoreoptprintfp, "localPet: %d, pipelineDepthOpt=%d "

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.69 2012/07/06 18:58:16 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.70 2012/07/16 20:08:46 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -341,7 +341,8 @@ namespace ESMCI {
     static int redistRelease(RouteHandle *routehandle);
     static int sparseMatMulStore(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, std::vector<SparseMatrix> const &sparseMatrix,
-      bool haloFlag=false);
+      bool haloFlag=false, int *srcTermProcessingArg = NULL,
+      int *pipelineDepthArg = NULL);
     static int sparseMatMul(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
       bool *finishedflag=NULL, bool *cancelledflag=NULL,

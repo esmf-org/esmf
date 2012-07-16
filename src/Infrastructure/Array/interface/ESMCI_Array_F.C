@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.54 2012/03/15 18:47:44 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.55 2012/07/16 20:08:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -756,7 +756,8 @@ extern "C" {
   void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
     ESMC_TypeKind *typekindFactors, void *factorList, int *factorListCount,
-    ESMCI::InterfaceInt **factorIndexList, int *rc){
+    ESMCI::InterfaceInt **factorIndexList, 
+    int *srcTermProcessing, int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysmmstore()"
     // Initialize return code; assume routine not implemented
@@ -799,7 +800,9 @@ extern "C" {
       *factorListCount, srcN, dstN, (*factorIndexList)->array));
     // Call into the actual C++ method wrapped inside LogErr handling
     if (ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
-      *srcArray, *dstArray, routehandle, sparseMatrix),
+      *srcArray, *dstArray, routehandle, sparseMatrix, false,
+      ESMC_NOT_PRESENT_FILTER(srcTermProcessing),
+      ESMC_NOT_PRESENT_FILTER(pipelineDepth)),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     
@@ -821,7 +824,8 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_arraysmmstorenf)(ESMCI::Array **srcArray,
-    ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, int *rc){
+    ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
+    int *srcTermProcessing, int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysmmstorenf()"
     // Initialize return code; assume routine not implemented
@@ -830,7 +834,9 @@ extern "C" {
     vector<ESMCI::SparseMatrix> sparseMatrix;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
-      *srcArray, *dstArray, routehandle, sparseMatrix),
+      *srcArray, *dstArray, routehandle, sparseMatrix, false,
+      ESMC_NOT_PRESENT_FILTER(srcTermProcessing),
+      ESMC_NOT_PRESENT_FILTER(pipelineDepth)),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.165 2012/03/15 18:47:44 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.166 2012/07/16 20:08:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -116,7 +116,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.165 2012/03/15 18:47:44 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.166 2012/07/16 20:08:47 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -884,7 +884,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
   subroutine ESMF_ArraySMMStoreI4(srcArray, dstArray, routehandle, factorList, &
-    factorIndexList, keywordEnforcer, rc)
+    factorIndexList, keywordEnforcer, srcTermProcessing, pipelineDepth, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: srcArray
@@ -893,6 +893,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I4), target, intent(in)            :: factorList(:)
     integer,                       intent(in)            :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                       intent(in),  optional :: srcTermProcessing
+    integer,                       intent(in),  optional :: pipelineDepth
     integer,                       intent(out), optional :: rc
 !
 !EOPI
@@ -921,7 +923,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_I4, opt_factorList, len_factorList, factorIndexListArg, &
-      localrc)
+      srcTermProcessing, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -951,7 +953,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
   subroutine ESMF_ArraySMMStoreI8(srcArray, dstArray, routehandle, factorList, &
-    factorIndexList, keywordEnforcer, rc)
+    factorIndexList, keywordEnforcer, srcTermProcessing, pipelineDepth, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),              intent(in)            :: srcArray
@@ -960,6 +962,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer(ESMF_KIND_I8), target, intent(in)            :: factorList(:)
     integer,                       intent(in)            :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                       intent(in),  optional :: srcTermProcessing
+    integer,                       intent(in),  optional :: pipelineDepth
     integer,                       intent(out), optional :: rc
 !
 !EOPI
@@ -988,7 +992,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_I8, opt_factorList, len_factorList, factorIndexListArg, &
-      localrc)
+      srcTermProcessing, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1018,7 +1022,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
   subroutine ESMF_ArraySMMStoreR4(srcArray, dstArray, routehandle, factorList, &
-    factorIndexList, keywordEnforcer, rc)
+    factorIndexList, keywordEnforcer, srcTermProcessing, pipelineDepth, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)            :: srcArray
@@ -1027,6 +1031,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R4), target, intent(in)            :: factorList(:)
     integer,                    intent(in)            :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                    intent(in),  optional :: srcTermProcessing
+    integer,                    intent(in),  optional :: pipelineDepth
     integer,                    intent(out), optional :: rc
 !
 !EOPI
@@ -1055,7 +1061,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_R4, opt_factorList, len_factorList, factorIndexListArg, &
-      localrc)
+      srcTermProcessing, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1085,7 +1091,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
   subroutine ESMF_ArraySMMStoreR8(srcArray, dstArray, routehandle, factorList, &
-    factorIndexList, keywordEnforcer, rc)
+    factorIndexList, keywordEnforcer, srcTermProcessing, pipelineDepth, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),           intent(in)            :: srcArray
@@ -1094,6 +1100,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8), target, intent(in)            :: factorList(:)
     integer,                    intent(in)            :: factorIndexList(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                    intent(in),  optional :: srcTermProcessing
+    integer,                    intent(in),  optional :: pipelineDepth
     integer,                    intent(out), optional :: rc
 !
 !EOPI
@@ -1122,7 +1130,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMMStore(srcArray, dstArray, routehandle, &
       ESMF_TYPEKIND_R8, opt_factorList, len_factorList, factorIndexListArg, &
-      localrc)
+      srcTermProcessing, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1151,13 +1159,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_ArraySMMStore()
-  subroutine ESMF_ArraySMMStoreNF(srcArray, dstArray, routehandle, keywordEnforcer, rc)
+  subroutine ESMF_ArraySMMStoreNF(srcArray, dstArray, routehandle, &
+    keywordEnforcer, srcTermProcessing, pipelineDepth, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),       intent(in)            :: srcArray
     type(ESMF_Array),       intent(inout)         :: dstArray
     type(ESMF_RouteHandle), intent(inout)         :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                intent(in),  optional :: srcTermProcessing
+    integer,                intent(in),  optional :: pipelineDepth
     integer,                intent(out), optional :: rc
 !
 ! !STATUS:
@@ -1241,7 +1252,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMMStoreNF(srcArray, dstArray, routehandle, &
-      localrc)
+      srcTermProcessing, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
