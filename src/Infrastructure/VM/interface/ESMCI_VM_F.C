@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM_F.C,v 1.27 2012/04/05 04:30:57 w6ws Exp $
+// $Id: ESMCI_VM_F.C,v 1.28 2012/07/17 22:46:19 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ extern "C" {
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
   void FTN_X(c_esmc_vmallfullreduce)(ESMCI::VM **vm, void *input, void *output, 
-    int *count, ESMC_TypeKind *dtk, ESMC_Operation *op, int *rc){
+    int *count, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *dtk, ESMC_Operation *op, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmallfullreduce()"
     // Initialize return code; assume routine not implemented
@@ -123,7 +123,7 @@ extern "C" {
   void FTN_X(c_esmc_vmallgatherv)(ESMCI::VM **vm,
     void *sendData, int *sendCount,
     void *recvData, int *recvCounts, int *recvOffsets,
-    ESMC_TypeKind *dtk, int *rc,
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *dtk, int *rc,
     ESMCI_FortranStrLenArg sendData_len, ESMCI_FortranStrLenArg recvData_len){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmallgatherv()"
@@ -168,7 +168,7 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_vmallreduce)(ESMCI::VM **vm, void *input, void *output, 
-    int *count, ESMC_TypeKind *dtk, ESMC_Operation *op, int *rc){
+    int *count, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *dtk, ESMC_Operation *op, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmallreduce()"
     // Initialize return code; assume routine not implemented
@@ -207,7 +207,7 @@ extern "C" {
   void FTN_X(c_esmc_vmalltoall)(ESMCI::VM **vm,
     void *sendData, int *sendCount,
     void *recvData, int *recvCount, 
-    ESMC_TypeKind *dtk, int *rc){
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *dtk, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmalltoall()"
     // Initialize return code; assume routine not implemented
@@ -247,7 +247,7 @@ extern "C" {
   void FTN_X(c_esmc_vmalltoallv)(ESMCI::VM **vm,
     void *sendData, int *sendCounts, int *sendOffsets,
     void *recvData, int *recvCounts, int *recvOffsets, 
-    ESMC_TypeKind *dtk, int *rc,
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *dtk, int *rc,
     ESMCI_FortranStrLenArg sendData_len, ESMCI_FortranStrLenArg recvData_len){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmalltoallv()"
@@ -390,7 +390,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_vmgatherv)(ESMCI::VM **vm, void *sendData, int *sendCount,
-    void *recvData, int *recvCounts, int *recvOffsets, ESMC_TypeKind *dtk, 
+    void *recvData, int *recvCounts, int *recvOffsets, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *dtk, 
     int *root, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmgatherv()"
@@ -581,7 +581,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_vmreduce)(ESMCI::VM **vm, void *input, void *output, 
-    int *count, ESMC_TypeKind *dtk, ESMC_Operation *op, int *root, int *rc){
+    int *count, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *dtk, ESMC_Operation *op, int *root, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmreduce()"
     // Initialize return code; assume routine not implemented
@@ -658,7 +658,7 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_vmscatterv)(ESMCI::VM **vm, void *sendData, int *sendCounts,
-    int *sendOffsets, void *recvData, int *recvCount, ESMC_TypeKind *dtk, 
+    int *sendOffsets, void *recvData, int *recvCount, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *dtk, 
     int *root, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmscatterv()"

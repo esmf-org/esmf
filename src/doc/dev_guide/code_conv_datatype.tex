@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_datatype.tex,v 1.9 2011/12/23 21:05:58 theurich Exp $
+% CVS $Id: code_conv_datatype.tex,v 1.10 2012/07/17 22:46:22 rokuingh Exp $
 
 \subsection{Code: Data Type Consistency Guidelines}
 
@@ -227,9 +227,9 @@ Fortran {\tt ESMF\_TypeKind\_Flag} parameters mostly appear in calls to C routin
          ...
          ...
 \end{verbatim}
-Likewise in C the enumerated type's name is {\tt ESMC\_TypeKind}.
+Likewise in C the enumerated type's name is {\tt ESMC\_TypeKind\_Flag\_Flag\_Flag\_Flag\_Flag}.
 
-The {\tt ESMC\_TypeKind} parameter names declared are:
+The {\tt ESMC\_TypeKind\_Flag\_Flag\_Flag\_Flag\_Flag} parameter names declared are:
 \begin{verbatim}
                ESMC_TYPEKIND_I4   (4 byte integer)
                ESMC_TYPEKIND_I8   (8 byte integer)
@@ -237,9 +237,9 @@ The {\tt ESMC\_TypeKind} parameter names declared are:
                ESMC_TYPEKIND_R8   (8 byte floating point)
 \end{verbatim}
 
-In C, {\tt ESMC\_TypeKind} parameters are used to tailor computation to the type and kind of user data arguments being processed. e.g
+In C, {\tt ESMC\_TypeKind\_Flag\_Flag\_Flag\_Flag\_Flag} parameters are used to tailor computation to the type and kind of user data arguments being processed. e.g
 \begin{verbatim}
-  void FTN_X(c_esmc_vmallfullreduce)(.., ESMC_TypeKind *dtk, ..,int *rc){
+  void FTN_X(c_esmc_vmallfullreduce)(.., ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *dtk, ..,int *rc){
     .....      
     switch (*dtk){
     case ESMC_TYPEKIND_I4:
@@ -269,7 +269,7 @@ There must be a one to one correspondence of Fortran and C arguments as illustra
      type(ESMF_Logical)     <-->  ESMC_Logical
      etc.
 \end{verbatim}
-Also, {\tt ESMF\_TypeKind\_Flag} and {\tt ESMC\_TypeKind} values are set to have matching values. That is:
+Also, {\tt ESMF\_TypeKind\_Flag} and {\tt ESMC\_TypeKind\_Flag\_Flag\_Flag\_Flag\_Flag} values are set to have matching values. That is:
 \begin{verbatim}
              ESMF_TYPEKIND_I<n> = ESMC_TYPEKIND_I<n>
              ESMF_TYPEKIND_R<n> = ESMC_TYPEKIND_R<n>

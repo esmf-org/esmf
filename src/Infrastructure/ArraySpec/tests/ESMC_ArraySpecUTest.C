@@ -1,4 +1,4 @@
-// $Id: ESMC_ArraySpecUTest.C,v 1.10 2012/05/14 20:45:51 svasquez Exp $
+// $Id: ESMC_ArraySpecUTest.C,v 1.11 2012/07/17 22:45:39 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,8 +41,8 @@ int main(void){
   int localrc;
   int rank = 2;
   int rank_out=0;
-  ESMC_TypeKind typekind; 
-  ESMC_TypeKind typekind_out; 
+  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind; 
+  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind_out; 
   typekind= ESMC_TYPEKIND_I4;
 
   //----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.50 2012/06/26 20:25:46 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.51 2012/07/17 22:45:51 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.50 2012/06/26 20:25:46 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.51 2012/07/17 22:45:51 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1910,7 +1910,7 @@ int DELayout::ESMC_DELayoutCopy(
   void *srcdata,    // input array
   void *destdata,   // output array
   int len,          // size in elements that need to be copied from src to dest
-  ESMC_TypeKind dtk,// data type kind
+  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk,// data type kind
   int srcDE,        // input DE
   int destDE        // output DE
   ){
@@ -1923,7 +1923,7 @@ int DELayout::ESMC_DELayoutCopy(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  int blen = len * ESMC_TypeKindSize(dtk);
+  int blen = len * ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(dtk);
   localrc = ESMC_DELayoutCopy(srcdata, destdata, blen, srcDE, destDE);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
@@ -2001,8 +2001,8 @@ int DELayout::ESMC_DELayoutExchange(
   void *dstData2,     // output array
   int len1,           // size in elements to copy from srcData1 to dstData2
   int len2,           // size in elements to copy from srcData2 to dstData1
-  ESMC_TypeKind dtk1, // data type kind
-  ESMC_TypeKind dtk2, // data type kind
+  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk1, // data type kind
+  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk2, // data type kind
   int de1,            // de for data1
   int de2             // de for data2
   ){
@@ -2016,8 +2016,8 @@ int DELayout::ESMC_DELayoutExchange(
   // Initialize return code; assume routine not initialized
   localrc = ESMC_RC_NOT_IMPL;
 
-  int blen1 = len1 * ESMC_TypeKindSize(dtk1);
-  int blen2 = len2 * ESMC_TypeKindSize(dtk2);
+  int blen1 = len1 * ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(dtk1);
+  int blen2 = len2 * ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(dtk2);
   return ESMC_DELayoutExchange(srcData1, srcData2, dstData1, dstData2,
     blen1, blen2, de1, de2);
 }
@@ -2077,7 +2077,7 @@ int DELayout::ESMC_DELayoutBcast(
 //
   void *data,    // data 
   int len,       // message size in elements
-  ESMC_TypeKind dtk,// data type kind
+  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk,// data type kind
   int rootDE      // root DE
   ){
 //
@@ -2090,7 +2090,7 @@ int DELayout::ESMC_DELayoutBcast(
   // Initialize return code; assume routine not initialized
   localrc = ESMC_RC_NOT_IMPL;
 
-  int blen = len * ESMC_TypeKindSize(dtk);
+  int blen = len * ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(dtk);
   // very crude implementation of a layout wide bcast
   for (int i=0; i<deCount; i++)
     ESMC_DELayoutCopy(data, data, blen, rootDE, i);
@@ -2165,7 +2165,7 @@ int DELayout::ESMC_DELayoutScatter(
   void *srcdata,    // input array
   void *destdata,   // output array
   int len,          // message size in elements
-  ESMC_TypeKind dtk,// data type kind
+  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk,// data type kind
   int rootDE        // root DE
   ){
 //
@@ -2178,7 +2178,7 @@ int DELayout::ESMC_DELayoutScatter(
   // Initialize return code; assume routine not initialized
   localrc = ESMC_RC_NOT_IMPL;
 
-  int blen = len * ESMC_TypeKindSize(dtk);
+  int blen = len * ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(dtk);
   return ESMC_DELayoutScatter(srcdata, destdata, blen, rootDE);
 }
 //-----------------------------------------------------------------------------
@@ -2249,7 +2249,7 @@ int DELayout::ESMC_DELayoutGather(
   void *srcdata,    // input array
   void *destdata,   // output array
   int len,          // message size in bytes
-  ESMC_TypeKind dtk,// data type kind
+  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk,// data type kind
   int rootDE        // root DE
   ){
 //
@@ -2262,7 +2262,7 @@ int DELayout::ESMC_DELayoutGather(
   // Initialize return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
-  int blen = len * ESMC_TypeKindSize(dtk);
+  int blen = len * ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(dtk);
   localrc = ESMC_DELayoutGather(srcdata, destdata, blen, rootDE);
   return localrc;
 }
@@ -2340,7 +2340,7 @@ int DELayout::ESMC_DELayoutGatherV(
                   // - the PET that holds rootDE must provide all blen elementes
                   // - all other PETs only need to fill elements for their DEs
   int *destdispl, // displacement vector for destdata for each DE mes. in elem.
-  ESMC_TypeKind dtk,// data type kind
+  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk,// data type kind
   int rootDE      // root DE
   ){
 //
@@ -2352,7 +2352,7 @@ int DELayout::ESMC_DELayoutGatherV(
   rc = ESMC_RC_NOT_IMPL;
   int *blen = new int[deCount];
   int *bdestdispl = new int[deCount];
-  int dtk_size = ESMC_TypeKindSize(dtk);
+  int dtk_size = ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(dtk);
 
   // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;

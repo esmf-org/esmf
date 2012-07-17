@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.h,v 1.19 2012/01/06 20:17:27 svasquez Exp $
+// $Id: ESMCI_LocalArray.h,v 1.20 2012/07/17 22:46:09 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ namespace ESMCI {
   class LocalArray{
 
    protected:
-    ESMC_TypeKind typekind;         // I1, I2, I4, I8, R4, R8
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind;         // I1, I2, I4, I8, R4, R8
     int rank;                       // 1, 2, ..., ESMF_MAXDIM
     LocalArrayOrigin origin;        // create called from Fortran or C++?
     bool dealloc;                   // responsible for deallocation?
@@ -102,18 +102,18 @@ namespace ESMCI {
    private:
     // construct() and destruct()
     int construct(bool aflag, CopyFlag docopy,
-      ESMC_TypeKind tk, int irank, LocalArrayOrigin oflag, bool dflag,
+      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag tk, int irank, LocalArrayOrigin oflag, bool dflag,
       const int *offsets, const int *lbounds, const int *ubounds,
       const int *icounts, void *ibase_addr, struct c_F90ptr *f90ptr);
     int destruct();
 
    public:
     // create() and destroy()
-    static LocalArray *create(ESMC_TypeKind tk, int rank,
+    static LocalArray *create(ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag tk, int rank,
       LocalArrayOrigin oflag, int *rc = NULL);
-    static LocalArray *create(ESMC_TypeKind tk, int rank, const int *counts,
+    static LocalArray *create(ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag tk, int rank, const int *counts,
       void *base_addr = NULL, CopyFlag docopy = DATA_REF, int *rc = NULL);
-    static LocalArray *create(ESMC_TypeKind dk, int rank, const int *counts,
+    static LocalArray *create(ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dk, int rank, const int *counts,
       const int *lbounds, const int *ubounds, void *base_addr = NULL, 
       CopyFlag docopy = DATA_REF, int *rc = NULL);
     static LocalArray *create(const LocalArray *larrayIn,
@@ -130,8 +130,8 @@ namespace ESMCI {
     // simple set/get methods
     void setRank(int rank){ this->rank = rank; }
     int getRank()const{ return rank; }
-    void setTypeKind(ESMC_TypeKind typekind){ this->typekind = typekind; }
-    ESMC_TypeKind getTypeKind()const{ return typekind; }
+    void setTypeKind(ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind){ this->typekind = typekind; }
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag getTypeKind()const{ return typekind; }
     void setBaseAddr(void *base_addr){ this->base_addr = base_addr; }
     void *getBaseAddr()const{ return base_addr; } 
     void setOrigin(LocalArrayOrigin origin){ this->origin = origin; } 
@@ -194,7 +194,7 @@ namespace ESMCI {
     template <class TYPE> void setDataInternal(int *index, TYPE data);
 
     // portably copy Fortran dope vector
-    static int tkrPtrCopy(void *dst, void *src, ESMC_TypeKind typekind,
+    static int tkrPtrCopy(void *dst, void *src, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind,
       int rank);
   
   };  // class LocalArray

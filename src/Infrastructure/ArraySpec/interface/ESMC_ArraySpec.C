@@ -1,4 +1,4 @@
-// $Id: ESMC_ArraySpec.C,v 1.17 2012/01/06 20:15:40 svasquez Exp $
+// $Id: ESMC_ArraySpec.C,v 1.18 2012/07/17 22:45:38 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -36,13 +36,13 @@
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version =
-  "$Id: ESMC_ArraySpec.C,v 1.17 2012/01/06 20:15:40 svasquez Exp $";
+  "$Id: ESMC_ArraySpec.C,v 1.18 2012/07/17 22:45:38 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
 
 int ESMC_ArraySpecSet(ESMC_ArraySpec *arrayspec,int rank,
-  ESMC_TypeKind typekind){
+  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ArraySpecSet()"
     
@@ -61,7 +61,7 @@ int ESMC_ArraySpecSet(ESMC_ArraySpec *arrayspec,int rank,
 }
 
 int ESMC_ArraySpecGet(ESMC_ArraySpec arrayspec, int *rank,
-  ESMC_TypeKind *typekind){
+  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_ArraySpecGet()"
 

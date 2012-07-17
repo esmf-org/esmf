@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArraySpec.h,v 1.10 2012/01/06 20:15:38 svasquez Exp $
+// $Id: ESMCI_ArraySpec.h,v 1.11 2012/07/17 22:45:36 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,9 +47,9 @@ class ArraySpec {   // NOT inherited from Base class
     char shallowMem[192];
 
   public:
-    int set(int rank, ESMC_TypeKind typekind);
+    int set(int rank, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind);
     int getRank(int *rc=NULL);
-    ESMC_TypeKind getTypeKind(int *rc=NULL);
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag getTypeKind(int *rc=NULL);
 
 };
 

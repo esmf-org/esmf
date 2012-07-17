@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray_F.C,v 1.21 2012/01/06 20:17:28 svasquez Exp $
+// $Id: ESMCI_LocalArray_F.C,v 1.22 2012/07/17 22:46:11 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ using namespace std;
 extern "C" {
 
   void FTN_X(c_esmc_localarraycreatenodata)(ESMCI::LocalArray **ptr, int *rank,
-    ESMC_TypeKind *tk, ESMCI::LocalArrayOrigin *oflag, int *rc){
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk, ESMCI::LocalArrayOrigin *oflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraycreatenodata()"
     // Initialize return code; assume routine not implemented
@@ -199,7 +199,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_localarraygettypekind)(ESMCI::LocalArray **ptr,
-    ESMC_TypeKind *typekind, int *rc){
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_localarraygettypekind()"
     // Initialize return code; assume routine not implemented

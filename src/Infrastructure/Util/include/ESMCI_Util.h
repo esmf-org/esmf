@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.50 2012/06/22 17:34:51 rokuingh Exp $
+// $Id: ESMCI_Util.h,v 1.51 2012/07/17 22:46:16 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -175,10 +175,10 @@ void  FTN_X(esmf_ctof90string)(const char *src, char *dst, int *rc,
 }
 
 // return byte counts for TypeKinds
-int ESMC_TypeKindSize(ESMC_TypeKind dk);
+int ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dk);
 // return a static string name for various enums
 const char *ESMC_StatusString(ESMC_Status stat);
-const char *ESMC_TypeKindString(ESMC_TypeKind dk);
+const char *ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagString(ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dk);
 const char *ESMC_LogicalString(ESMC_Logical tf);
 
 extern "C" {

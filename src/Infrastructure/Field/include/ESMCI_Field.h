@@ -1,5 +1,5 @@
 
-// $Id: ESMCI_Field.h,v 1.18 2012/06/22 17:34:44 rokuingh Exp $
+// $Id: ESMCI_Field.h,v 1.19 2012/07/17 22:45:54 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -70,14 +70,14 @@ namespace ESMCI{
       ESMC_StaggerLoc staggerloc, ESMC_InterfaceInt *gridToFieldMap, 
       ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
       const char *name, int *rc); 
-    static Field* create(ESMC_Grid *grid, ESMC_TypeKind typekind,
+    static Field* create(ESMC_Grid *grid, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind,
       ESMC_StaggerLoc staggerloc, ESMC_InterfaceInt *gridToFieldMap, 
       ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
       const char *name, int *rc); 
     static Field* create(ESMC_Mesh mesh, ESMC_ArraySpec arrayspec,
       ESMC_InterfaceInt *gridToFieldMap, ESMC_InterfaceInt *ungriddedLBound,
       ESMC_InterfaceInt *ungriddedUBound, const char *name, int *rc); 
-    static Field* create(ESMC_Mesh mesh, ESMC_TypeKind typekind,
+    static Field* create(ESMC_Mesh mesh, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind,
       ESMC_MeshLoc_Flag meshloc, ESMC_InterfaceInt *gridToFieldMap, 
       ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
       const char *name, int *rc); 
@@ -91,11 +91,11 @@ namespace ESMCI{
                            ESMC_InterfaceInt *srcMaskValues, 
                            ESMC_InterfaceInt *dstMaskValues,
                            RouteHandle **routehandle,
-		                       ESMC_RegridMethod *regridMethod, 
-                           ESMC_UnmappedAction *unmappedAction,
+		                       ESMC_RegridMethod_Flag_Flag_Flag_Flag *regridMethod, 
+                           ESMC_UnmappedAction_Flag_Flag_Flag_Flag_Flag_Flag *unmappedAction,
                            Field *srcFracField, Field *dstFracField);
     static int regrid(Field *fieldsrc, Field *fielddst, 
-                      RouteHandle *routehandle, ESMC_RegionFlag *zeroRegion);
+                      RouteHandle *routehandle, ESMC_Region_Flag *zeroRegion);
     static int regridrelease(RouteHandle *routehandle);
   }; 
 }

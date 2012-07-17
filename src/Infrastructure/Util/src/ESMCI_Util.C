@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.C,v 1.12 2012/01/06 20:18:20 svasquez Exp $
+// $Id: ESMCI_Util.C,v 1.13 2012/07/17 22:46:18 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Util.C,v 1.12 2012/01/06 20:18:20 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Util.C,v 1.13 2012/07/17 22:46:18 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // Note:  any changes made to this C++ list must also be made to
@@ -98,18 +98,18 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_TypeKindSize"
+#define ESMC_METHOD "ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize"
 //BOPI
-// !IROUTINE:  ESMC_TypeKindSize - Return number of bytes in a TypeKind
+// !IROUTINE:  ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize - Return number of bytes in a TypeKind
 //
 // !INTERFACE:
-    int ESMC_TypeKindSize(
+    int ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(
 //
 // !RETURN VALUE:
 //  int number of bytes (negative for error)
 // 
 // !ARGUMENTS:
-    ESMC_TypeKind dk) {       // in - a data kind 
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dk) {       // in - a data kind 
 //EOPI
 
     switch (dk) {
@@ -164,18 +164,18 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMC_TypeKindString"
+#define ESMC_METHOD "ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagString"
 //BOPI
-// !IROUTINE:  ESMC_TypeKindString - Return fixed char string for printing
+// !IROUTINE:  ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagString - Return fixed char string for printing
 //
 // !INTERFACE:
-    const char *ESMC_TypeKindString(
+    const char *ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagString(
 //
 // !RETURN VALUE:
 //  const char * to string name of value
 // 
 // !ARGUMENTS:
-    ESMC_TypeKind dk) {       // in - a datakind value
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dk) {       // in - a datakind value
 //EOPI
 
     switch (dk) {

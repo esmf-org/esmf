@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.55 2012/07/16 20:08:47 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.56 2012/07/17 22:45:29 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -161,7 +161,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN_X(c_esmc_arrayget)(ESMCI::Array **ptr, ESMC_TypeKind *typekind, 
+  void FTN_X(c_esmc_arrayget)(ESMCI::Array **ptr, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind, 
     int *rank, ESMCI::LocalArray **opt_localArrayList,
     int *len_localArrayList, ESMCI::DistGrid **distgrid,
     ESMCI::DELayout **delayout,
@@ -689,7 +689,7 @@ extern "C" {
   
   void FTN_X(c_esmc_arrayrediststore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
-    ESMCI::InterfaceInt **srcToDstTransposeMap, ESMC_TypeKind *typekind,
+    ESMCI::InterfaceInt **srcToDstTransposeMap, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind,
     void *factor, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayrediststore()"
@@ -755,7 +755,7 @@ extern "C" {
   
   void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
-    ESMC_TypeKind *typekindFactors, void *factorList, int *factorListCount,
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekindFactors, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt **factorIndexList, 
     int *srcTermProcessing, int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
@@ -844,7 +844,7 @@ extern "C" {
   void FTN_X(c_esmc_arraysmm)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
     ESMC_CommFlag *commflag, ESMC_Logical *finishedflag,
-    ESMC_Logical *cancelledflag, ESMC_RegionFlag *zeroflag,
+    ESMC_Logical *cancelledflag, ESMC_Region_Flag *zeroflag,
     ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysmm()"
@@ -879,7 +879,7 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_arraygather)(ESMCI::Array **array, void *farray,
-    ESMC_TypeKind *typekind, int *rank, int *counts,
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind, int *rank, int *counts,
     int *tile, int *rootPet, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraygather()"
@@ -916,7 +916,7 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_arrayscatter)(ESMCI::Array **array, void *farray,
-    ESMC_TypeKind *typekind, int *rank, int *counts,
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind, int *rank, int *counts,
     int *tile, int *rootPet, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayscatter()"
@@ -1201,7 +1201,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_newarrayreducescalarb)(ESMC_newArray **ptr, void *result,
-    ESMC_TypeKind *dtk, ESMC_Operation *op, int *rootPET, ESMCI::VM **vm, 
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *dtk, ESMC_Operation *op, int *rootPET, ESMCI::VM **vm, 
     int *rc){
     // PET-based blocking scalar reduce
     int localrc;
@@ -1219,7 +1219,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_newarrayreducescalarnbroot)(ESMC_newArray **ptr, void *result,
-    ESMC_TypeKind *dtk, ESMC_Operation *op, int *rootPET,
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *dtk, ESMC_Operation *op, int *rootPET,
     ESMC_newArrayCommHandle **commh, ESMCI::VM **vm, int *rc){
     // DE-based non-blocking reduce (root call)
     int localrc;
@@ -1255,7 +1255,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_newarrayreducescalarnb)(ESMC_newArray **ptr, void *result,
-    ESMC_TypeKind *dtk, ESMC_Operation *op, int *rootPET, int *de,
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *dtk, ESMC_Operation *op, int *rootPET, int *de,
     ESMCI::VM **vm, int *rc){
     // PET-based blocking scalar reduce
     int localrc;

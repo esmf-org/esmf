@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.C,v 1.25 2012/01/06 20:16:05 svasquez Exp $
+// $Id: ESMC_Config.C,v 1.26 2012/07/17 22:45:47 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char* const version = "$Id: ESMC_Config.C,v 1.25 2012/01/06 20:16:05 svasquez Exp $";
+static const char* const version = "$Id: ESMC_Config.C,v 1.26 2012/07/17 22:45:47 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 // class declaration type -> this should be moved into ESMCI namespace
@@ -1110,7 +1110,7 @@ int ESMC_ConfigValidate(
 // !ARGUMENTS: 
 // ESMC_Config config,        // in  - ESMC_Config object
 // void* value,               // out - value
-// ESMC_TypeKind tk,          // in  - tk
+// ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag tk,          // in  - tk
 // ...                        // optional argument list: (count, label, dvalue)
 // ) {
 //
@@ -1477,7 +1477,7 @@ int ESMC_ConfigValidate(
 // !ARGUMENTS: 
 // ESMC_Config config,        // in  - ESMC_Config object
 // void* value,               // in  - value
-// ESMC_TypeKind tk,          // in  - tk
+// ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag tk,          // in  - tk
 // ...                        // optional argument list: (count, label)
 // ) {
 //

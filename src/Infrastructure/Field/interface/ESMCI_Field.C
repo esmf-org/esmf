@@ -50,7 +50,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.27 2012/06/22 17:34:45 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Field.C,v 1.28 2012/07/17 22:45:55 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -72,7 +72,7 @@ void FTN_X(f_esmf_fieldcreategridas)(ESMCI::Field *fieldp, ESMCI::Grid **grid,
     ESMCI_FortranStrLenArg nlen);
 
 void FTN_X(f_esmf_fieldcreategridtk)(ESMCI::Field *fieldp, ESMCI::Grid **grid, 
-    ESMC_TypeKind *typekind, ESMC_StaggerLoc *staggerloc,
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind, ESMC_StaggerLoc *staggerloc,
     int *gridToFieldMap, int *len1, int *gtfm_present, 
     int *ungriddedLBound, int *len2, int *uglb_present,
     int *ungriddedUBound, int *len3, int *ugub_present,
@@ -88,7 +88,7 @@ void FTN_X(f_esmf_fieldcreatemeshas)(ESMCI::Field *fieldp, void *mesh_pointer,
     ESMCI_FortranStrLenArg nlen);
 
 void FTN_X(f_esmf_fieldcreatemeshtk)(ESMCI::Field *fieldp, void *mesh_pointer, 
-    ESMC_TypeKind *typekind, ESMC_MeshLoc_Flag *meshloc,
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind, ESMC_MeshLoc_Flag *meshloc,
     int *gridToFieldMap, int *len1, int *gtfm_present, 
     int *ungriddedLBound, int *len2, int *uglb_present,
     int *ungriddedUBound, int *len3, int *ugub_present,
@@ -117,13 +117,13 @@ void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   int *srcMaskValues, int *len1, int *smv_present,
   int *dstMaskValues, int *len2, int *dmv_present,
   ESMCI::RouteHandle **routehandlep, 
-  ESMC_RegridMethod *regridmethod, int *rm_present,
-  ESMC_UnmappedAction *unmappedaction, int *ua_present,
+  ESMC_RegridMethod_Flag_Flag_Flag_Flag *regridmethod, int *rm_present,
+  ESMC_UnmappedAction_Flag_Flag_Flag_Flag_Flag_Flag *unmappedaction, int *ua_present,
   ESMCI::Field *srcfracfieldp, int *sff_present, 
   ESMCI::Field *dstfracfieldp, int *dff_present, int *rc);
 
 void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
-  ESMCI::RouteHandle **routehandlep, ESMC_RegionFlag *zeroregion, int *zr_present,
+  ESMCI::RouteHandle **routehandlep, ESMC_Region_Flag *zeroregion, int *zr_present,
   int *rc);
 
 void FTN_X(f_esmf_regridrelease)(ESMCI::RouteHandle **routehandlep, int *rc);
@@ -282,7 +282,7 @@ namespace ESMCI {
 //
 // !ARGUMENTS:
     ESMC_Grid *grid, 
-    ESMC_TypeKind typekind, 
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind, 
     ESMC_StaggerLoc staggerloc,
     ESMC_InterfaceInt *gridToFieldMap, 
     ESMC_InterfaceInt *ungriddedLBound, 
@@ -534,7 +534,7 @@ namespace ESMCI {
 //
 // !ARGUMENTS:
     ESMC_Mesh mesh, 
-    ESMC_TypeKind typekind, 
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind, 
     ESMC_MeshLoc_Flag meshloc,
     ESMC_InterfaceInt *gridToFieldMap, 
     ESMC_InterfaceInt *ungriddedLBound, 
@@ -870,8 +870,8 @@ namespace ESMCI {
     ESMC_InterfaceInt *srcMaskValues, 
     ESMC_InterfaceInt *dstMaskValues, 
     RouteHandle **routehandlep, 
-    ESMC_RegridMethod *regridMethod, 
-    ESMC_UnmappedAction *unmappedAction,
+    ESMC_RegridMethod_Flag_Flag_Flag_Flag *regridMethod, 
+    ESMC_UnmappedAction_Flag_Flag_Flag_Flag_Flag_Flag *unmappedAction,
     Field *srcFracField, 
     Field *dstFracField) {
 //
@@ -990,7 +990,7 @@ namespace ESMCI {
     Field *fieldpsrc, 
     Field *fieldpdst, 
     RouteHandle *routehandlep,
-    ESMC_RegionFlag *zeroRegion) {
+    ESMC_Region_Flag *zeroRegion) {
 //
 // !DESCRIPTION:
 //

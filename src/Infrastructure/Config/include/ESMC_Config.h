@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.31 2012/01/06 20:16:03 svasquez Exp $
+// $Id: ESMC_Config.h,v 1.32 2012/07/17 22:45:46 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -320,14 +320,14 @@ int ESMC_ConfigValidate(
 int ESMC_ConfigGetAttribute(
   ESMC_Config config,        // in
   void* value,               // out
-  enum ESMC_TypeKind tk,
+  enum ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag tk,
   ...
 );
 
 int ESMC_ConfigSetAttribute(
   ESMC_Config config,        // in
   void* value,               // in
-  enum ESMC_TypeKind tk,
+  enum ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag tk,
   ...
 );
 

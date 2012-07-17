@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldTripoleRegridUTest.C,v 1.3 2012/06/22 22:25:50 rokuingh Exp $
+// $Id: ESMC_FieldTripoleRegridUTest.C,v 1.4 2012/07/17 22:45:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -50,8 +50,8 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
   maxIndex[1] = int(max_y);
   i_maxIndex = ESMC_InterfaceIntCreate(maxIndex, dimcount, NULL);
 
-  ESMC_CoordSys coordsys = ESMC_COORDSYS_CART;
-  ESMC_TypeKind typekind = ESMC_TYPEKIND_R8;
+  ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
+  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind = ESMC_TYPEKIND_R8;
   ESMC_PoleKind_Flag polekind[2];
   polekind[0] = ESMC_POLEKIND_MONOPOLE;
   polekind[1] = ESMC_POLEKIND_BIPOLE;
@@ -252,8 +252,8 @@ int main(void){
   ESMC_InterfaceInt i_maskValues = ESMC_InterfaceIntCreate(maskValues, 1, &rc);
 
   //----------------------------------------------------------------------------
-  ESMC_UnmappedAction unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
-  ESMC_RegridMethod regridmethod = ESMC_REGRIDMETHOD_CONSERVE;
+  ESMC_UnmappedAction_Flag_Flag_Flag_Flag_Flag_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
+  ESMC_RegridMethod_Flag_Flag_Flag_Flag regridmethod = ESMC_REGRIDMETHOD_CONSERVE;
 #ifdef masking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, NULL, &routehandle, 
                         NULL, &unmappedaction,

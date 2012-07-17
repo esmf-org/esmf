@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.130 2012/06/19 00:58:09 w6ws Exp $
+// $Id: ESMCI_Attribute.C,v 1.131 2012/07/17 22:45:44 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.130 2012/06/19 00:58:09 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.131 2012/07/17 22:45:44 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1521,7 +1521,7 @@ int Attribute::count = 0;
 // 
 // !ARGUMENTS:
       const string &name,             // in - Attribute name
-      const ESMC_TypeKind &tk,       // in - typekind
+      const ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag &tk,       // in - typekind
       int count,              // in - item count
       void *value,            // in - Attribute value
       const string &convention,       // in - attpack convention
@@ -2551,7 +2551,7 @@ if (attrRoot == ESMF_TRUE) {
 // 
 // !ARGUMENTS:
       const string &name,           // in - name of Attribute to retrieve
-      ESMC_TypeKind *tk,            // out - typekind
+      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,            // out - typekind
       int *itemCount) const {       // out - number of values in list
 // 
 // !DESCRIPTION:
@@ -2600,7 +2600,7 @@ if (attrRoot == ESMF_TRUE) {
 // !ARGUMENTS:
       int num,                        // in - number of Attribute to retrieve
       string *name,                   // out - Attribute name
-      ESMC_TypeKind *tk,              // out - typekind
+      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,              // out - typekind
       int *itemCount) const {         // out - number of values in list
 // 
 // !DESCRIPTION:
@@ -3489,7 +3489,7 @@ if (attrRoot == ESMF_TRUE) {
 // !ARGUMENTS:
       const string &name,                    // in - name
       const string &object,                  // in - object
-      const ESMC_TypeKind &tk,              // in - typekind
+      const ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag &tk,              // in - typekind
       const int &count,                     // in - count
       void *value) {                 // in - value
 // 
@@ -8123,7 +8123,7 @@ if (attrRoot == ESMF_TRUE) {
 //
 // !ARGUMENTS:
         const string &name,                // Attribute name
-        const ESMC_TypeKind &typekind,    // typekind
+        const ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag &typekind,    // typekind
         int numitems,              // single or list
         void *datap) {             // generic pointer to values
 //
@@ -8214,7 +8214,7 @@ if (attrRoot == ESMF_TRUE) {
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
-        const ESMC_TypeKind &typekind,    // typekind
+        const ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag &typekind,    // typekind
         int numitems,              // single or list
         void *datap) {             // generic pointer to values
 //
@@ -8398,7 +8398,7 @@ if (attrRoot == ESMF_TRUE) {
     DESERIALIZE_VAR(buffer,loffset,chars,string::size_type);
     DESERIALIZE_VARC(buffer,loffset,attrName,temp,chars);
 
-    DESERIALIZE_VAR(buffer,loffset,tk,ESMC_TypeKind);
+    DESERIALIZE_VAR(buffer,loffset,tk,ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag);
     DESERIALIZE_VAR(buffer,loffset,items,int);
     DESERIALIZE_VAR(buffer,loffset,attrRoot,ESMC_Logical);
     
@@ -8607,7 +8607,7 @@ if (attrRoot == ESMF_TRUE) {
       SERIALIZE_VAR(cc,buffer,offset,(attrName.size()),string::size_type);
       SERIALIZE_VARC(cc,buffer,offset,attrName,(attrName.size()));
 
-      SERIALIZE_VAR(cc,buffer,offset,tk,ESMC_TypeKind);
+      SERIALIZE_VAR(cc,buffer,offset,tk,ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag);
       
       SERIALIZE_VAR(cc,buffer,offset,items,int);
       SERIALIZE_VAR(cc,buffer,offset,attrRoot,ESMC_Logical);

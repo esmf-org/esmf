@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.40 2012/06/04 20:05:57 rokuingh Exp $
+// $Id: ESMCI_GridUtil_F.C,v 1.41 2012/07/17 22:46:05 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -158,7 +158,7 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays
   bool prevIsSphere=grid.isSphere();
   if (*spherical != 0) grid.setSphere();
 
-  ESMC_CoordSys prevCoordSys=grid.getCoordSys();
+  ESMC_CoordSys_Flag prevCoordSys=grid.getCoordSys();
   if (*islatlondeg != 0) grid.setCoordSys(ESMC_COORDSYS_SPH_DEG);
 
 
@@ -214,7 +214,7 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays
   if (*isSphere != 0) grid.setSphere();
 
   // Map coords to surface of a sphere if reqeusted
-  ESMC_CoordSys prevCoordSys=grid.getCoordSys();
+  ESMC_CoordSys_Flag prevCoordSys=grid.getCoordSys();
   if (*islatlondeg != 0) grid.setCoordSys(ESMC_COORDSYS_SPH_DEG);
 
 

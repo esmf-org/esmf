@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridGridRegridUTest.C,v 1.8 2012/06/22 17:34:49 rokuingh Exp $
+// $Id: ESMC_FieldGridGridRegridUTest.C,v 1.9 2012/07/17 22:45:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -100,8 +100,8 @@ int main(void){
 
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_CoordSys coordsys = ESMC_COORDSYS_CART;
-  ESMC_TypeKind typekind = ESMC_TYPEKIND_R8;
+  ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
+  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind = ESMC_TYPEKIND_R8;
   srcgrid = ESMC_GridCreateNoPeriDim(i_maxIndex, &coordsys, &typekind, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
@@ -388,7 +388,7 @@ int main(void){
   //EX_UTest
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_UnmappedAction unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
+  ESMC_UnmappedAction_Flag_Flag_Flag_Flag_Flag_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
 #ifdef masking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, &i_maskValues, 
                              &routehandle, 
@@ -411,7 +411,7 @@ int main(void){
   // field was initialized to -1, so the values that are modified by the 
   // SMM operation will need to be initialized to 0 before having the new
   // value added to them.
-  ESMC_RegionFlag zeroregion = ESMC_REGION_SELECT;
+  ESMC_Region_Flag zeroregion = ESMC_REGION_SELECT;
   rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, &zeroregion);
 #else
   rc = ESMC_FieldRegrid(srcfield, dstfield, routehandle, NULL);

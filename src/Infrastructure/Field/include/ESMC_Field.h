@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.h,v 1.52 2012/06/22 17:34:44 rokuingh Exp $
+// $Id: ESMC_Field.h,v 1.53 2012/07/17 22:45:54 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -130,7 +130,7 @@ ESMC_Field ESMC_FieldCreateGridArraySpec(
 // !INTERFACE:
 ESMC_Field ESMC_FieldCreateGridTypeKind(
   ESMC_Grid grid,                           // in
-  enum ESMC_TypeKind typekind,              // in
+  enum ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind,              // in
   enum ESMC_StaggerLoc staggerloc,          // in
   ESMC_InterfaceInt *gridToFieldMap,         // in
   ESMC_InterfaceInt *ungriddedLBound,        // in
@@ -151,7 +151,7 @@ ESMC_Field ESMC_FieldCreateGridTypeKind(
 //  \item[grid]
 //    A {\tt ESMC\_Grid} object.
 //  \item[typekind]
-//    The ESMC\_TypeKind that describes this Field data.
+//    The ESMC\_TypeKind\_Flag\_Flag\_Flag\_Flag\_Flag that describes this Field data.
 //  \item[staggerloc]
 //    Stagger location of data in grid cells. The default value is 
 //    ESMF\_STAGGERLOC\_CENTER.
@@ -274,7 +274,7 @@ ESMC_Field ESMC_FieldCreateMeshArraySpec(
 // !INTERFACE:
 ESMC_Field ESMC_FieldCreateMeshTypeKind(
   ESMC_Mesh mesh,                           // in
-  enum ESMC_TypeKind typekind,              // in
+  enum ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind,              // in
   enum ESMC_MeshLoc_Flag meshloc,           // in
   ESMC_InterfaceInt *gridToFieldMap,         // in
   ESMC_InterfaceInt *ungriddedLBound,        // in
@@ -295,7 +295,7 @@ ESMC_Field ESMC_FieldCreateMeshTypeKind(
 //  \item[mesh]
 //    A {\tt ESMC\_Mesh} object.
 //  \item[typekind]
-//    The ESMC\_TypeKind that describes this Field data.
+//    The ESMC\_TypeKind\_Flag\_Flag\_Flag\_Flag\_Flag that describes this Field data.
 //  \item[meshloc]
 //    The ESMC\_MeshLoc\_Flag that describes this Field data.
 //  \item[gridToFieldMap]
@@ -517,8 +517,8 @@ int ESMC_FieldRegridStore(
     ESMC_InterfaceInt *srcMaskValues,          // in
     ESMC_InterfaceInt *dstMaskValues,          // in
     ESMC_RouteHandle *routehandle,             // inout
-    enum ESMC_RegridMethod *regridmethod,       // in
-    enum ESMC_UnmappedAction *unmappedaction,   // in
+    enum ESMC_RegridMethod_Flag_Flag_Flag_Flag *regridmethod,       // in
+    enum ESMC_UnmappedAction_Flag_Flag_Flag_Flag_Flag_Flag *unmappedaction,   // in
     ESMC_Field *srcFracField,                  // out
     ESMC_Field *dstFracField);                 // out
 
@@ -576,7 +576,7 @@ int ESMC_FieldRegridStore(
     ESMC_Field srcField,                // in
     ESMC_Field dstField,                // inout
     ESMC_RouteHandle routehandle,       // in
-    enum ESMC_RegionFlag *zeroregion);  // in
+    enum ESMC_Region_Flag *zeroregion);  // in
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.

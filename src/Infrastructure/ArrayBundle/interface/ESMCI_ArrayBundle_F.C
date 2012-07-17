@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.38 2012/01/06 20:15:30 svasquez Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.39 2012/07/17 22:45:33 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -381,7 +381,7 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundlerediststore)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle, 
-    ESMCI::InterfaceInt **srcToDstTransposeMap, ESMC_TypeKind *typekind,
+    ESMCI::InterfaceInt **srcToDstTransposeMap, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind,
     void *factor, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlerediststore()"
@@ -523,7 +523,7 @@ extern "C" {
  
   void FTN_X(c_esmc_arraybundlesmmstore)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle, 
-    ESMC_TypeKind *typekindFactors, void *factorList, int *factorListCount,
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekindFactors, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt **factorIndexList, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmmstore()"
@@ -607,7 +607,7 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundlesmm)(ESMCI::ArrayBundle **srcArraybundle,
     ESMCI::ArrayBundle **dstArraybundle, ESMCI::RouteHandle **routehandle,
-    ESMC_RegionFlag *zeroflag, ESMC_Logical *checkflag, int *rc){
+    ESMC_Region_Flag *zeroflag, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlesmm()"
     // Initialize return code; assume routine not implemented

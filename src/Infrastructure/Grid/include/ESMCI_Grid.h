@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.86 2012/06/06 00:07:26 rokuingh Exp $
+// $Id: ESMCI_Grid.h,v 1.87 2012/07/17 22:45:58 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -65,7 +65,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   private:
 
   // prototype for indicating coordGeom
-  ESMC_CoordSys coordSys;
+  ESMC_CoordSys_Flag coordSys;
 
   // forceConn
   bool forceConn; // connections being forced by Store()
@@ -74,12 +74,12 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   ProtoGrid *proto;
 
   // Grid Status
-  ESMC_GridStatus status;
+  ESMC_GridStatus_Flag_Flag status;
 
   ESMC_GridDecompType decompType;
 
   // type information
-  ESMC_TypeKind typekind;
+  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind;
 
   int distDimCount;
 
@@ -197,7 +197,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
   // make grid usable
   int constructInternal(
        char *name,                            // (in)
-       ESMC_TypeKind typekindArg,              // (in)
+       ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindArg,              // (in)
        DistGrid *distgridArg,                  // (in)
        int distDimCountArg,                        // (in)
        int *distgridToGridMapArg,                         // (in)
@@ -208,7 +208,7 @@ class Grid : public ESMC_Base {    // inherits from ESMC_Base class
        int *gridEdgeLWidth,
        int *gridEdgeUWidth,
        int *gridAlign,
-       ESMC_CoordSys coordSys, 
+       ESMC_CoordSys_Flag coordSys, 
        int *coordDimCountArg,                     // (in)
        int **coordDimMapArg,                   // (in)
        int *gridMemLBoundArg,                      // (in)
@@ -242,12 +242,12 @@ template <class TYPE>
 
   // ESMC interface:
   static Grid* createnoperidim(ESMC_InterfaceInt maxIndex, 
-                               ESMC_CoordSys *coordSys,
-                               ESMC_TypeKind *coordTypeKind, 
+                               ESMC_CoordSys_Flag *coordSys,
+                               ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *coordTypeKind, 
                                int *rc);
   static Grid* create1peridim(ESMC_InterfaceInt maxIndex, 
-                              ESMC_CoordSys *coordSys,
-                              ESMC_TypeKind *coordTypeKind, 
+                              ESMC_CoordSys_Flag *coordSys,
+                              ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *coordTypeKind, 
                               ESMC_PoleKind_Flag *poleKind, 
                               int *rc);
 
@@ -258,7 +258,7 @@ template <class TYPE>
   //       so be sure to error check the grid or any input before using.  
   ESMC_GridDecompType getDecompType(void) const {return decompType;}
   void setDecompType(ESMC_GridDecompType type) {decompType=type;}
-  ESMC_GridStatus getStatus(void) const {return status;}
+  ESMC_GridStatus_Flag_Flag getStatus(void) const {return status;}
   const ESMC_GridConn *getConnL(void) const {return connL;}
   const ESMC_GridConn *getConnU(void) const {return connU;} 
   int getDimCount(void) const {return dimCount;}
@@ -267,7 +267,7 @@ template <class TYPE>
   int getTileCount(void) const {return distgrid->getTileCount();}
   int getStaggerLocCount(void) const {return staggerLocCount;}
   ESMC_IndexFlag getIndexFlag(void) const {return indexflag;}
-  ESMC_TypeKind getTypeKind(void) const {return typekind;}
+  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag getTypeKind(void) const {return typekind;}
   const DistGrid *getDistGrid(void) const {return distgrid;}
   const int *getDistgridToGridMap(void) const {return distgridToGridMap;}
   const int *getUndistLBound(void) const {return undistLBound;}
@@ -304,8 +304,8 @@ template <class TYPE>
   // bool isUBnd(int localDE, int dim) {return (isDEUBnd[localDE] & (0x1 << dim))?true:false;}
 
   // Prototype coordGeom call
-  ESMC_CoordSys getCoordSys() {return coordSys;}  
-  void setCoordSys(ESMC_CoordSys _coordSys) {coordSys=_coordSys;}  
+  ESMC_CoordSys_Flag getCoordSys() {return coordSys;}  
+  void setCoordSys(ESMC_CoordSys_Flag _coordSys) {coordSys=_coordSys;}  
 
   int getCartCoordDimCount();
 
@@ -345,7 +345,7 @@ template <class TYPE>
   int set(
 	  int _nameLen,                                // (in)
 	  char *_name,                                 // (in)
-	  ESMC_TypeKind *_typekind,                    // (in)
+	  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *_typekind,                    // (in)
 	  DistGrid *_distgrid,                    // (in)
 	  InterfaceInt *gridEdgeLWidth,          // (in)
 	  InterfaceInt *gridEdgeUWidth,          // (in)
@@ -356,7 +356,7 @@ template <class TYPE>
           InterfaceInt *_maxIndex,          // (in)
           InterfaceInt *_localArbIndex,          // (in)
           int *localArbIndexCount,          // (in)
-          ESMC_CoordSys *coordSys,
+          ESMC_CoordSys_Flag *coordSys,
 	  InterfaceInt *_coordDimCount,              // (in)
 	  InterfaceInt *_coordDimMap,             // (in)
 	  InterfaceInt *gridMemLBound,          // (in)
@@ -381,13 +381,13 @@ template <class TYPE>
   // create fully formed grid
  static Grid *create(int nameLen,                                // (in)
 	       char *name,                                 // (in)
-	       ESMC_TypeKind *typekind,                    // (in)
+	       ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind,                    // (in)
 	       DistGrid *distgrid,                  // (in)
 	       InterfaceInt *gridEdgeLWidth,          // (in)
 	       InterfaceInt *gridEdgeUWidth,          // (in)
 	       InterfaceInt *gridAlign,          // (in)
 	       InterfaceInt *distgridToGridMap,                  // (in)
-                     ESMC_CoordSys *coordSys, 
+                     ESMC_CoordSys_Flag *coordSys, 
 	       InterfaceInt *coordDimCount,              // (in)
 	       InterfaceInt *coordDimMap,             // (in)
 	       InterfaceInt *gridMemLBound,          // (in)
@@ -400,7 +400,7 @@ template <class TYPE>
  // create an arbitrarily distributed grid
  static Grid *create(int nameLen,                                // (in)
 	       char *name,                                 // (in)
-	       ESMC_TypeKind *typekind,                    // (in)
+	       ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind,                    // (in)
 	       DistGrid *distgrid,                  // (in)
 	       InterfaceInt *minIndex,              // (in)
 	       InterfaceInt *maxIndex,              // (in)
@@ -408,7 +408,7 @@ template <class TYPE>
                int localArbIndexCount,				  // (in)
 	       InterfaceInt *distDimMap,                  // (in)
 	       int arbDim,
-               ESMC_CoordSys *coordSys,
+               ESMC_CoordSys_Flag *coordSys,
   	       InterfaceInt *coordDimCount,       // (in) optional
                InterfaceInt *coordDimMap,         // (in) optional
     	       bool *destroyDistgrid,
@@ -524,7 +524,7 @@ int getComputationalUBound(
  int addItemArray(
                      int *_staggerloc,
 		     int *item,
-		     ESMC_TypeKind *typekind,          
+		     ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind,          
                      InterfaceInt *_staggerEdgeLWidthArg,
                      InterfaceInt *_staggerEdgeUWidthArg,
                      InterfaceInt *_staggerAlign,
@@ -535,7 +535,7 @@ int getComputationalUBound(
  int addItemArrayArb(
                      int *_staggerloc,
 		     int *item,
-		     ESMC_TypeKind *typekind          
+		     ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind          
                      );
 
 
@@ -631,7 +631,7 @@ int getComputationalUBound(
 		      Grid *_grid, 
 		      int _nameLen,
 		      char *_name, 
-		      ESMC_TypeKind *_typekind,
+		      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *_typekind,
 		      DistGrid *_distgrid,     
                       InterfaceInt *gridEdgeLWidthArg,
                       InterfaceInt *gridEdgeUWidthArg,
@@ -639,7 +639,7 @@ int getComputationalUBound(
 		      InterfaceInt *_distgridToGridMap,   
 		      InterfaceInt *_undistLBound,  
 		      InterfaceInt *_undistUBound,
-                      ESMC_CoordSys *coordSys, 
+                      ESMC_CoordSys_Flag *coordSys, 
 		      InterfaceInt *_coordDimCount,
 		      InterfaceInt *_coordDimMap,
                       InterfaceInt *gridMemLBound,
@@ -652,7 +652,7 @@ int getComputationalUBound(
 		      Grid *_grid, 
 		      int _nameLen,
 		      char *_name, 
-		      ESMC_TypeKind *_typekind,
+		      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *_typekind,
 		      DistGrid *_distgrid,     
 		      InterfaceInt *minIndex,   
 		      InterfaceInt *maxIndex,   
@@ -662,7 +662,7 @@ int getComputationalUBound(
 		      int arbDim,
 		      InterfaceInt *_undistLBound,  
 		      InterfaceInt *_undistUBound,
-                      ESMC_CoordSys *coordSys, 
+                      ESMC_CoordSys_Flag *coordSys, 
 		      InterfaceInt *_coordDimCount,
 		      InterfaceInt *_coordDimMap,
 		      bool *destroyDistgrid,
@@ -810,7 +810,7 @@ class ProtoGrid {
  public:
   int nameLen; 
   char *name;  
-  ESMC_TypeKind *typekind;
+  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind;
   DistGrid *distgrid;     
   InterfaceInt *gridEdgeLWidth;
   InterfaceInt *gridEdgeUWidth;
@@ -820,7 +820,7 @@ class ProtoGrid {
   InterfaceInt *distDim;   
   InterfaceInt *undistLBound;  
   InterfaceInt *undistUBound;  
-  ESMC_CoordSys *coordSys;
+  ESMC_CoordSys_Flag *coordSys;
   InterfaceInt *coordDimCount;  
   InterfaceInt *coordDimMap; 
   ESMC_IndexFlag *indexflag; 

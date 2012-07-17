@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.75 2012/07/16 20:36:05 theurich Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.76 2012/07/17 22:46:14 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
 // external C functions
 extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
-    ESMC_TypeKind *typekind, void *factorList, int *factorListCount,
+    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind, void *factorList, int *factorListCount,
     ESMCI::InterfaceInt **factorIndexList,
     int *srcTermProcessing, int *pipelineDepth, int *rc);
 
@@ -238,7 +238,7 @@ wts.Print(Par::Out());
     // Build the ArraySMM
     if (*has_rh != 0) {
       int localrc;
-      enum ESMC_TypeKind tk = ESMC_TYPEKIND_R8;
+      enum ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag tk = ESMC_TYPEKIND_R8;
       FTN_X(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
                  &num_entries, &iiptr, NULL, NULL, &localrc);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
