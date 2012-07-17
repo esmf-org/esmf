@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.50 2012/06/06 14:05:45 w6ws Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.51 2012/07/17 18:34:57 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -159,20 +159,25 @@ program ESMF_StateReconcileUTest
     ! Local variables
     integer :: rc
     type(ESMF_State) :: state1, state2, state3, state_nested
+    type(ESMF_State) :: state_attr
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array)     :: array1, array1_alternate, array2
     type(ESMF_DistGrid)  :: distgrid
     type(ESMF_Field)     :: field_nested, field_dummy
+    type(ESMF_Field)     :: field_attr(4), field_attr_new(size (field_attr))
     type(ESMF_VM) :: vm
-    character(len=ESMF_MAXSTR) :: comp1name, comp2name, statename
+    character(len=ESMF_MAXSTR) :: comp1name, comp2name, statename, fieldname
     character(len=ESMF_MAXSTR) :: array1name
+    character(4) :: localpet_str, temppet_str
+    integer :: attr_val(1)
+    integer :: i
     logical :: reconcile_needed, recneeded_expected
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
-    integer :: result = 0, localPet
+    integer :: result = 0, localPet, petCount
 
     !-------------------------------------------------------------------------
 
@@ -185,7 +190,9 @@ program ESMF_StateReconcileUTest
     ! Get the global VM for this job.
     call ESMF_VMGetGlobal(vm=vm, rc=rc)
     
-    call ESMF_VMGet(vm, localPet=localPet, rc=rc)
+    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+    write (localpet_str, '(i4)') localPet
+    localpet_str = adjustl (localpet_str)
 
     !-------------------------------------------------------------------------
     ! exclusive component test section
@@ -938,6 +945,125 @@ program ESMF_StateReconcileUTest
     write(failMsg, *) "Incorrectly returned ESMF_SUCCESS"
     write(name, *) "Calling StateGet of nested Field with wrong name test"
     call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    ! Test with attribute reconcile turned on
+    !-------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    statename = 'state w/attributes'
+    state_attr = ESMF_StateCreate (name=statename, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a State for attributes"
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Reconciling state with Attribute reconciling turned on"
+    call ESMF_StateReconcile (state_attr, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Adding an Attribute to the Base test"
+    write (localpet_str, '(i4)') localPet
+    call ESMF_AttributeSet (state_attr,  &
+        name='Base PET ' // trim (adjustl (localpet_str)),  &
+        valueList=(/ localPet /),  &
+        rc=rc)
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Reconciling state with Base attribute test"
+    call ESMF_StateReconcile (state_attr, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Verifying reconciled Base attributes test"
+    do, i=0, petCount-1
+      write (temppet_str, '(i4)') i
+      call ESMF_AttributeGet (state_attr,  &
+        name='Base PET ' // trim (adjustl (temppet_str)),  &
+        valueList=attr_val,  &
+        rc=rc)
+      if (rc /= ESMF_SUCCESS) exit
+      if (attr_val(1) /= i) then
+        rc = ESMF_FAILURE
+        exit
+      end if
+    end do
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+
+    rc = ESMF_SUCCESS
+    if (localPet == 0) then
+      do, i=1, size (field_attr)
+	write (fieldname, '(a,i4)') 'PET 0 Field', i
+	field_attr(i) = ESMF_FieldEmptyCreate (name=fieldname, rc=rc)
+	if (rc /= ESMF_SUCCESS) go to 5
+
+	call ESMF_AttributeSet (field_attr(i),  &
+            name=trim (fieldname) // ' attribute',  &
+            valueList=(/ i /),  &
+            rc=rc)
+	if (rc /= ESMF_SUCCESS) go to 5
+      end do
+      
+      call ESMF_StateAdd (state_attr, field_attr, rc=rc)
+      if (rc /= ESMF_SUCCESS) go to 5
+    end if
+
+5 continue
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Adding Field to State on PET 0"
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Reconciling state with Field and Attribute"
+    call ESMF_StateReconcile (state_attr, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Accessing reconciled Fields"
+    do, i=1, size (field_attr_new)
+	write (fieldname, '(a,i4)') 'PET 0 Field', i
+      call ESMF_StateGet (state_attr,  &
+          itemName=fieldname, field=field_attr_new(i),  &
+          rc=rc)
+      if (rc /= ESMF_SUCCESS) exit
+    end do
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Accessing reconciled Field Attributes"
+    do, i=1, size (field_attr_new)
+	write (fieldname, '(a,i4)') 'PET 0 Field', i
+      call ESMF_AttributeGet (field_attr_new(i),  &
+          name=trim (fieldname) // ' attribute',  &
+          value=attr_val(1),  &
+          rc=rc)
+      if (rc /= ESMF_SUCCESS) exit
+      if (attr_val(1) /= i) then
+        rc = ESMF_FAILURE
+        exit
+      end if
+    end do
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 10  continue
