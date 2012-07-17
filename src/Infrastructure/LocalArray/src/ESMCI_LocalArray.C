@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.C,v 1.24 2012/07/17 22:46:13 rokuingh Exp $
+// $Id: ESMCI_LocalArray.C,v 1.25 2012/07/17 23:22:55 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.24 2012/07/17 22:46:13 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.25 2012/07/17 23:22:55 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
   
@@ -1047,14 +1047,14 @@ int LocalArray::print(
   }
 
   sprintf(msgbuf,"LocalArrayPrint: Array at address %p:\n", this);
-  printf(msgbuf);
+  printf("%s", msgbuf);
   sprintf(msgbuf,"            rank = %d, typekind = %d, ", 
                            this->rank, this->typekind);
-  printf(msgbuf);
+  printf("%s", msgbuf);
   sprintf(msgbuf,"base_addr = %p\n", this->base_addr);
-  printf(msgbuf);
+  printf("%s", msgbuf);
   sprintf(msgbuf,"            ");
-  printf(msgbuf);
+  printf("%s", msgbuf);
   
   if (opt_dopev){ 
     printf("f90dopev: \n");
@@ -1070,17 +1070,17 @@ int LocalArray::print(
   // some error checking against garbage pointers:
   if (rank > 7) {
     sprintf(msgbuf, "invalid rank, %d\n", this->rank);
-    printf(msgbuf);
+    printf("%s", msgbuf);
     ESMC_LogDefault.Write(msgbuf, ESMC_LOG_ERROR, ESMC_CONTEXT);
     return ESMC_RC_OBJ_BAD;
   }
 
   for (i=0; i<this->rank; i++) {
     sprintf(msgbuf,"dim[%d] = %d  ", i, this->counts[i]);
-    printf(msgbuf);
+    printf("%s", msgbuf);
   }
   sprintf(msgbuf,"\n");
-  printf(msgbuf);
+  printf("%s", msgbuf);
   
   // TODO: make this look at one of the option letters to see if user
   //   wants data printed.
@@ -1090,7 +1090,7 @@ int LocalArray::print(
       switch (this->rank) {
         case 1:
           sprintf(msgbuf,"  Real, *4, Dim 1, Data values:\n");
-          printf(msgbuf);
+          printf("%s", msgbuf);
           imax = this->counts[0];
           tcount = imax;
           for (i=0; i<tcount; i++) {
@@ -1099,21 +1099,21 @@ int LocalArray::print(
                     *((ESMC_R4 *)(this->base_addr) + i));
               else
                   sprintf(msgbuf,"%lg ", *((ESMC_R4 *)(this->base_addr) + i));
-              printf(msgbuf);
+              printf("%s", msgbuf);
               if (!opt_all && (tcount > 22) && ((i+1)==10)) {
                  sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
-                 printf(msgbuf);
+                 printf("%s", msgbuf);
                  i = tcount - 11;
               }
           }
           if (opt_byline) {
               sprintf(msgbuf,"\n");
-              printf(msgbuf);
+              printf("%s", msgbuf);
           }
           break;
         case 2:
           sprintf(msgbuf,"  Real, *4, Dim 2, Data values:\n");
-          printf(msgbuf);
+          printf("%s", msgbuf);
           imax = this->counts[0];
           jmax = this->counts[1];
           tcount = imax * jmax;
@@ -1121,7 +1121,7 @@ int LocalArray::print(
           for (j=0; j<jmax; j++) {
               if (opt_byline) {
                   sprintf(msgbuf,"(*,%2d) = ", lbound[1]+j);
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
               }
               for (i=0; i<imax; i++) {
                   if (!opt_byline) 
@@ -1131,24 +1131,24 @@ int LocalArray::print(
                   else 
                       sprintf(msgbuf,"%lg ",  
                              *((ESMC_R4 *)(this->base_addr) + i + j*imax) );
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
                   rcount++;
                   if (!opt_all && (tcount > 22) && (rcount==10)) {
                      sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
-                     printf(msgbuf);
+                     printf("%s", msgbuf);
                      j = (tcount-11) / imax;
                      i = (tcount-11) % imax;
                   }
               }
               if (opt_byline) {
                   sprintf(msgbuf,"\n");
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
               }
           }
           break;
         case 3:
           sprintf(msgbuf,"  Real, *4, Dim 3, Data values:\n");
-          printf(msgbuf);
+          printf("%s", msgbuf);
           imax = this->counts[0];
           jmax = this->counts[1];
           kmax = this->counts[2];
@@ -1159,7 +1159,7 @@ int LocalArray::print(
               if (opt_byline) {
                   sprintf(msgbuf,"(*,%2d,%2d) = ", 
                   lbound[1]+j, lbound[2]+k);
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
               }
               for (i=0; i<imax; i++) {
                   if (!opt_byline)
@@ -1170,12 +1170,12 @@ int LocalArray::print(
                   else
                        sprintf(msgbuf,"%g ", *((ESMC_R4 *)(this->base_addr) + 
                              i + j*imax + k*jmax*imax));
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
                   rcount++;
                   if (!opt_all && (tcount > 22) && (rcount==10)) {
                      int krem;
                      sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
-                     printf(msgbuf);
+                     printf("%s", msgbuf);
                      k = (tcount-11) / (imax*jmax);
                      krem = (tcount-11) % (imax*jmax);
                      j = krem / imax;
@@ -1184,14 +1184,14 @@ int LocalArray::print(
               }
               if (opt_byline) {
                   sprintf(msgbuf,"\n");
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
               }
             }
           }
           break;
         default:
           sprintf(msgbuf,"no code to handle real rank %d yet\n", this->rank);
-          printf(msgbuf);
+          printf("%s", msgbuf);
           break;    
       }
       break;
@@ -1199,7 +1199,7 @@ int LocalArray::print(
       switch (this->rank) {
         case 1:
           sprintf(msgbuf,"  Real, *8, Dim 1, Data values:\n");
-          printf(msgbuf);
+          printf("%s", msgbuf);
           imax = this->counts[0];
           tcount = imax;
           for (i=0; i<tcount; i++) {
@@ -1208,21 +1208,21 @@ int LocalArray::print(
                     *((ESMC_R8 *)(this->base_addr) + i));
               else
                   sprintf(msgbuf,"%lg ", *((ESMC_R8 *)(this->base_addr) + i));
-              printf(msgbuf);
+              printf("%s", msgbuf);
               if (!opt_all && (tcount > 22) && ((i+1)==10)) {
                  sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
-                 printf(msgbuf);
+                 printf("%s", msgbuf);
                  i = tcount - 11;
               }
           }
           if (opt_byline) {
               sprintf(msgbuf,"\n");
-              printf(msgbuf);
+              printf("%s", msgbuf);
           }
           break;
         case 2:
           sprintf(msgbuf,"  Real, *8, Dim 2, Data values:\n");
-          printf(msgbuf);
+          printf("%s", msgbuf);
           imax = this->counts[0];
           jmax = this->counts[1];
           tcount = imax * jmax;
@@ -1230,7 +1230,7 @@ int LocalArray::print(
           for (j=0; j<jmax; j++) {
               if (opt_byline) {
                   sprintf(msgbuf,"(*,%2d) = ", lbound[1]+j);
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
               } 
               for (i=0; i<imax; i++) {
                   if (!opt_byline)
@@ -1240,24 +1240,24 @@ int LocalArray::print(
                   else
                       sprintf(msgbuf,"%lg ",  
                              *((ESMC_R8 *)(this->base_addr) + i + j*imax) );
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
                   rcount++;
                   if (!opt_all && (tcount > 22) && (rcount==10)) {
                      sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
-                     printf(msgbuf);
+                     printf("%s", msgbuf);
                      j = (tcount-11) / imax;
                      i = (tcount-11) % imax;
                   }
               }
               if (opt_byline) {
                   sprintf(msgbuf,"\n");
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
               }
           }
           break;
         case 3:
           sprintf(msgbuf,"  Real, *8, Dim 3, Data values:\n");
-          printf(msgbuf);
+          printf("%s", msgbuf);
           imax = this->counts[0];
           jmax = this->counts[1];
           kmax = this->counts[2];
@@ -1268,7 +1268,7 @@ int LocalArray::print(
               if (opt_byline) {
                   sprintf(msgbuf,"(*,%2d,%2d) = ",
                     lbound[1]+j, lbound[2]+k);
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
               }
               for (i=0; i<imax; i++) {
                   if (!opt_byline)
@@ -1279,12 +1279,12 @@ int LocalArray::print(
                   else
                        sprintf(msgbuf,"%g ", *((ESMC_R8 *)(this->base_addr) + 
                              i + j*imax + k*jmax*imax));
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
                   rcount++;
                   if (!opt_all && (tcount > 22) && (rcount==10)) {
                      int krem;
                      sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
-                     printf(msgbuf);
+                     printf("%s", msgbuf);
                      k = (tcount-11) / (imax*jmax);
                      krem = (tcount-11) % (imax*jmax);
                      j = krem / imax;
@@ -1293,14 +1293,14 @@ int LocalArray::print(
               }
               if (opt_byline) {
                   sprintf(msgbuf,"\n");
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
               }
             }
           }
           break;
         default:
           sprintf(msgbuf,"no code to handle real rank %d yet\n", this->rank);
-          printf(msgbuf);
+          printf("%s", msgbuf);
           break;    
       }
       break;
@@ -1310,7 +1310,7 @@ int LocalArray::print(
           imax = this->counts[0];
           tcount = imax;
           sprintf(msgbuf,"  Integer, *4, Dim 1, Data values:\n");
-          printf(msgbuf);
+          printf("%s", msgbuf);
           for (i=0; i<imax; i++) {
               if (!opt_byline)
                   sprintf(msgbuf,"(%2d) =  %d\n", lbound[0]+i, 
@@ -1318,21 +1318,21 @@ int LocalArray::print(
               else
                   sprintf(msgbuf,"%d ",
                          *((int *)(this->base_addr) + i));
-              printf(msgbuf);
+              printf("%s", msgbuf);
               if (!opt_all && (tcount > 22) && ((i+1)==10)) {
                  sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
-                 printf(msgbuf);
+                 printf("%s", msgbuf);
                  i = tcount - 11;
               }
           }
           if (opt_byline) {
               sprintf(msgbuf,"\n");
-              printf(msgbuf);
+              printf("%s", msgbuf);
           }
           break;
         case 2:
           sprintf(msgbuf,"  Integer, *4, Dim 2, Data values:\n");
-          printf(msgbuf);
+          printf("%s", msgbuf);
           imax = this->counts[0];
           jmax = this->counts[1];
           tcount = imax * jmax;
@@ -1340,7 +1340,7 @@ int LocalArray::print(
           for (j=0; j<jmax; j++) {
               if (opt_byline) {
                   sprintf(msgbuf,"(*,%2d) = ", lbound[1]+j);
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
               }
               for (i=0; i<imax; i++) {
                   if (!opt_byline)
@@ -1350,24 +1350,24 @@ int LocalArray::print(
                   else
                       sprintf(msgbuf,"%d ", 
                            *((int *)(this->base_addr) + i + j*imax) );
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
                   rcount++;
                   if (!opt_all && (tcount > 22) && (rcount==10)) {
                      sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
-                     printf(msgbuf);
+                     printf("%s", msgbuf);
                      j = (tcount-11) / imax;
                      i = (tcount-11) % imax;
                   }
               }
               if (opt_byline) {
                   sprintf(msgbuf,"\n");
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
               } 
           }
           break;
         case 3:
           sprintf(msgbuf,"  Integer, *4, Dim 3, Data values:\n");
-          printf(msgbuf);
+          printf("%s", msgbuf);
           imax = this->counts[0];
           jmax = this->counts[1];
           kmax = this->counts[2];
@@ -1378,7 +1378,7 @@ int LocalArray::print(
               if (opt_byline) {
                   sprintf(msgbuf,"(*,%2d,%2d) = ", 
                     lbound[1]+j, lbound[1]+k);
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
               }
               for (i=0; i<imax; i++) {
                   if (!opt_byline)
@@ -1390,12 +1390,12 @@ int LocalArray::print(
                       sprintf(msgbuf,"%d ", 
                              *((int *)(this->base_addr) + 
                              i + j*imax + k*jmax*imax));
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
                   rcount++;
                   if (!opt_all && (tcount > 22) && (rcount==10)) {
                      int krem;
                      sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
-                     printf(msgbuf);
+                     printf("%s", msgbuf);
                      k = (tcount-11) / (imax*jmax);
                      krem = (tcount-11) % (imax*jmax);
                      j = krem / imax;
@@ -1404,14 +1404,14 @@ int LocalArray::print(
               }
               if (opt_byline) {
                   sprintf(msgbuf,"\n");
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
               } 
             }
           }
           break;
         default:
           sprintf(msgbuf,"no code to handle integer rank %d yet\n", this->rank);
-          printf(msgbuf);
+          printf("%s", msgbuf);
           break;    
       }
       break;
@@ -1421,7 +1421,7 @@ int LocalArray::print(
           imax = this->counts[0];
           tcount = imax;
           sprintf(msgbuf,"  Integer, *8, Dim 1, Data values:\n");
-          printf(msgbuf);
+          printf("%s", msgbuf);
           for (i=0; i<imax; i++) {
               if (!opt_byline)
                   sprintf(msgbuf,"(%2d) =  %lld\n", lbound[0]+i, 
@@ -1429,21 +1429,21 @@ int LocalArray::print(
               else
                   sprintf(msgbuf,"%lld ",
                          *((ESMC_I8 *)(this->base_addr) + i));
-              printf(msgbuf);
+              printf("%s", msgbuf);
               if (!opt_all && (tcount > 22) && ((i+1)==10)) {
                  sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
-                 printf(msgbuf);
+                 printf("%s", msgbuf);
                  i = tcount - 11;
               }
           }
           if (opt_byline) {
               sprintf(msgbuf,"\n");
-              printf(msgbuf);
+              printf("%s", msgbuf);
           } 
           break;
         case 2:
           sprintf(msgbuf,"  Integer, *8, Dim 2, Data values:\n");
-          printf(msgbuf);
+          printf("%s", msgbuf);
           imax = this->counts[0];
           jmax = this->counts[1];
           tcount = imax * jmax;
@@ -1451,7 +1451,7 @@ int LocalArray::print(
           for (j=0; j<jmax; j++) {
               if (opt_byline) {
                   sprintf(msgbuf,"(*,%2d) = ", lbound[1]+j);
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
               }
               for (i=0; i<imax; i++) {
                   if (!opt_byline)
@@ -1461,24 +1461,24 @@ int LocalArray::print(
                   else
                       sprintf(msgbuf,"%lld ", 
                            *((ESMC_I8 *)(this->base_addr) + i + j*imax) );
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
                   rcount++;
                   if (!opt_all && (tcount > 22) && (rcount==10)) {
                      sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
-                     printf(msgbuf);
+                     printf("%s", msgbuf);
                      j = (tcount-11) / imax;
                      i = (tcount-11) % imax;
                   }
               }
               if (opt_byline) {
                   sprintf(msgbuf,"\n");
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
               } 
           }
           break;
         case 3:
           sprintf(msgbuf,"  Integer, *8, Dim 3, Data values:\n");
-          printf(msgbuf);
+          printf("%s", msgbuf);
           imax = this->counts[0];
           jmax = this->counts[1];
           kmax = this->counts[2];
@@ -1489,7 +1489,7 @@ int LocalArray::print(
               if (opt_byline) {
                   sprintf(msgbuf,"(*,%2d,%2d) = ", 
                     lbound[1]+j, lbound[2]+k);
-                    printf(msgbuf);
+                    printf("%s", msgbuf);
               }
               for (i=0; i<imax; i++) {
                   if (!opt_byline)
@@ -1501,12 +1501,12 @@ int LocalArray::print(
                       sprintf(msgbuf,"%lld ", 
                              *((ESMC_I8 *)(this->base_addr) + 
                              i + j*imax + k*jmax*imax));
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
                   rcount++;
                   if (!opt_all && (tcount > 22) && (rcount==10)) {
                      int krem;
                      sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
-                     printf(msgbuf);
+                     printf("%s", msgbuf);
                      k = (tcount-11) / (imax*jmax);
                      krem = (tcount-11) % (imax*jmax);
                      j = krem / imax;
@@ -1515,14 +1515,14 @@ int LocalArray::print(
               }
               if (opt_byline) {
                   sprintf(msgbuf,"\n");
-                  printf(msgbuf);
+                  printf("%s", msgbuf);
               } 
             }
           }
           break;
         default:
           sprintf(msgbuf,"no code to handle integer rank %d yet\n", this->rank);
-          printf(msgbuf);
+          printf("%s", msgbuf);
           break;    
       }
       break;
