@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreate.cppF90,v 1.91 2012/05/24 00:02:20 w6ws Exp $
+! $Id: ESMF_ArrayCreate.cppF90,v 1.92 2012/07/18 21:17:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -103,7 +103,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayCreate.cppF90,v 1.91 2012/05/24 00:02:20 w6ws Exp $'
+    '$Id: ESMF_ArrayCreate.cppF90,v 1.92 2012/07/18 21:17:50 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -496,10 +496,10 @@ contains
 ! \item[{[datacopyflag]}] @\
 !      Specifies whether the Array object will reference the memory allocation @\
 !      provided by {\tt farrayPtr} directly or will copy the data from @\
-!      {\tt farrayPtr} into a new memory allocation. Valid options are @\
-!      {\tt ESMF\_DATACOPY\_REFERENCE} (default) or {\tt ESMF\_DATACOPY\_VALUE}. @\
-!      Depending on the specific situation the {\tt ESMF\_DATACOPY\_REFERENCE} option @\
-!      may be unsafe when specifying an array slice for {\tt farrayPtr}. @\
+!      {\tt farrayPtr} into a new memory allocation. For valid values see @\
+!      \ref{const:datacopyflag}. The default is {\tt ESMF\_DATACOPY\_REFERENCE}. @\
+!      Note that the {\tt ESMF\_DATACOPY\_REFERENCE} option may not be safe @\
+!      when providing an array slice in {\tt farrayPtr}. @\
 ! \item[{[distgridToArrayMap]}] @\
 !      List that contains as many elements as is indicated by @\
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
@@ -725,10 +725,10 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 ! \item[{[datacopyflag]}] @\
 !      Specifies whether the Array object will reference the memory allocation @\
 !      provided by {\tt farrayPtr} directly or will copy the data from @\
-!      {\tt farrayPtr} into a new memory allocation. Valid options are @\
-!      {\tt ESMF\_DATACOPY\_REFERENCE} (default) or {\tt ESMF\_DATACOPY\_VALUE}. @\
-!      Depending on the specific situation the {\tt ESMF\_DATACOPY\_REFERENCE} option @\
-!      may be unsafe when specifying an array slice for {\tt farrayPtr}. @\
+!      {\tt farrayPtr} into a new memory allocation. For valid values see @\
+!      \ref{const:datacopyflag}. The default is {\tt ESMF\_DATACOPY\_REFERENCE}. @\
+!      Note that the {\tt ESMF\_DATACOPY\_REFERENCE} option may not be safe @\
+!      when providing an array slice in {\tt farrayPtr}. @\
 ! \item[{[distgridToArrayMap]}] @\
 !      List that contains as many elements as is indicated by @\
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
@@ -919,10 +919,10 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
 ! \item[{[datacopyflag]}] @\
 !      Specifies whether the Array object will reference the memory allocation @\
 !      provided by {\tt farray} directly or will copy the data from @\
-!      {\tt farray} into a new memory allocation. Valid options are @\
-!      {\tt ESMF\_DATACOPY\_REFERENCE} (default) or {\tt ESMF\_DATACOPY\_VALUE}. @\
-!      Depending on the specific situation the {\tt ESMF\_DATACOPY\_REFERENCE} option @\
-!      may be unsafe when specifying an array slice for {\tt farray}. @\
+!      {\tt farray} into a new memory allocation. For valid values see @\
+!      \ref{const:datacopyflag}. The default is {\tt ESMF\_DATACOPY\_REFERENCE}. @\
+!      Note that the {\tt ESMF\_DATACOPY\_REFERENCE} option may not be safe @\
+!      when providing an array slice in {\tt farray}. @\
 ! \item[{[distgridToArrayMap]}] @\
 !      List that contains as many elements as is indicated by @\
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of @\
@@ -1182,11 +1182,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      for a list of valid indexflag options.
 ! \item[{[datacopyflag]}]
 !      Specifies whether the Array object will reference the memory allocation
-!      provided by {\tt farray} directly or will copy the data from
-!      {\tt farray} into a new memory allocation. Valid options are
-!      {\tt ESMF\_DATACOPY\_REFERENCE} (default) or {\tt ESMF\_DATACOPY\_VALUE}.
-!      Depending on the specific situation the {\tt ESMF\_DATACOPY\_REFERENCE} option
-!      may be unsafe when specifying an array slice for {\tt farray}.
+!      of the arrays provided in {\tt localarrayList} directly, or will copy
+!      the actual data into new memory allocations. For valid values see
+!      \ref{const:datacopyflag}. The default is {\tt ESMF\_DATACOPY\_REFERENCE}.
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of
@@ -1475,11 +1473,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      be different on each PET.
 ! \item[{[datacopyflag]}]
 !      Specifies whether the Array object will reference the memory allocation
-!      provided by {\tt farray} directly or will copy the data from
-!      {\tt farray} into a new memory allocation. Valid options are
-!      {\tt ESMF\_DATACOPY\_REFERENCE} (default) or {\tt ESMF\_DATACOPY\_VALUE}.
-!      Depending on the specific situation the {\tt ESMF\_DATACOPY\_REFERENCE} option
-!      may be unsafe when specifying an array slice for {\tt farray}.
+!      of the arrays provided in {\tt localarrayList} directly, or will copy
+!      the actual data into new memory allocations. For valid values see
+!      \ref{const:datacopyflag}. The default is {\tt ESMF\_DATACOPY\_REFERENCE}.
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of
