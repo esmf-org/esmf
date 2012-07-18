@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.139 2012/05/02 22:30:49 oehmke Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.140 2012/07/18 20:09:46 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.139 2012/05/02 22:30:49 oehmke Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.140 2012/07/18 20:09:46 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -4981,8 +4981,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       
-      call c_ESMC_BaseSerialize(bp%base, buffer, length, offset, &
-                                 lattreconflag, linquireflag, localrc)
+      call ESMF_BaseSerialize (bp%base, buffer, offset,  &
+          lattreconflag, linquireflag,  &
+          rc=localrc)
       if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5096,7 +5097,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Deserialize Base
-      call c_ESMC_BaseDeserialize(bp%base, buffer(1), offset, lattreconflag, localrc)
+      bp%base = ESMF_BaseDeserialize (buffer, offset=offset,  &
+          attreconflag=lattreconflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5109,7 +5111,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
       ! Deserialize other FieldBundle members
       
       call c_ESMC_FieldBundleDeserialize(bp%status, fieldCount, &
-                                 buffer(1), offset, localrc)
+                                 buffer, offset, localrc)
       if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
