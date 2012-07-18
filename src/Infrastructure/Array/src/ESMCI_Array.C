@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.151 2012/07/18 22:20:54 rokuingh Exp $
+// $Id: ESMCI_Array.C,v 1.152 2012/07/18 22:52:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.151 2012/07/18 22:20:54 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.152 2012/07/18 22:52:32 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -91,7 +91,7 @@ Array::Array(
 //
 // !ARGUMENTS:
 //
-  ESMC_TypeKind_Flag typekindArg,              // (in)
+  ESMC_TypeKind_Flag typekindArg,         // (in)
   int rankArg,                            // (in)
   LocalArray **larrayListArg,             // (in)
   DistGrid *distgridArg,                  // (in)
@@ -179,8 +179,6 @@ Array::Array(
     dimCount * sizeof(int));
   // indexflag
   indexflag = indexflagArg;
-  // contiguous flag
-  contiguousFlag = new int[localDeCount];
   // exclusiveElementCountPDe
   int deCount = delayout->getDeCount();
   exclusiveElementCountPDe = new int[deCount];
@@ -206,40 +204,13 @@ Array::Array(
     }
   }
   
-  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
-  for (int i=0; i<localDeCount; i++){
-    int de = localDeToDeMap[i];
-    contiguousFlag[i] = 1;  // initialize as contiguous
-    int pI = 0; // initialize packed index
-    for (int jj=0; jj<rank; jj++){
-      int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor d
-      if (j){
-        // decomposed dimension 
-        if (totalLBound[i*redDimCount+pI] != exclusiveLBound[i*redDimCount+pI]
-          || totalUBound[i*redDimCount+pI] !=exclusiveUBound[i*redDimCount+pI]){
-          contiguousFlag[i] = 0; // reset
-          break;
-        }
-        // obtain indexList for this DE and dim
-        --j;  // shift to basis 0
-        const int *indexList =
-          distgrid->getIndexListPDimPLocalDe(i, j+1, &localrc);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          rc)) return;
-        // check if this dim has a contiguous index list
-        for (int k=1; k<indexCountPDimPDe[de*dimCount+j]; k++){
-          if (indexList[k] != indexList[k-1]+1){
-            contiguousFlag[i] = 0; // reset
-            break;
-          }
-        }
-        ++pI;
-      }
-    } // jj
-  }
+  // contiguous flag
+  contiguousFlag = new int[localDeCount];
+  for (int i=0; i<localDeCount; i++)
+    contiguousFlag[i] = -1;  // initialize as "not yet constructed"
   
   // Set up rim members and fill with canonical seqIndex values
-  //TODO: rim setup has potentially large memory and performance impact!!!
+  //TODO: rim setup has potentially sizable memory and performance impact???
   rimElementCount.resize(localDeCount);
   rimSeqIndex.resize(localDeCount);
   rimLinIndex.resize(localDeCount);
@@ -352,6 +323,62 @@ void Array::destruct(bool followCreator){
     }
     
     
+  }
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::constructContiguousFlag()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::constructContiguousFlag
+//
+// !INTERFACE:
+int Array::constructContiguousFlag(int redDimCount){
+//
+// !DESCRIPTION:
+//    Fill the contiguousFlag member in an ESMCI::Array object.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  
+  int const localDeCount = delayout->getLocalDeCount();
+  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
+  const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
+  int dimCount = distgrid->getDimCount();
+
+  for (int i=0; i<localDeCount; i++){
+    int de = localDeToDeMap[i];
+    contiguousFlag[i] = 1;  // initialize as contiguous
+    int pI = 0; // initialize packed index
+    for (int jj=0; jj<rank; jj++){
+      int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor d
+      if (j){
+        // decomposed dimension 
+        if (totalLBound[i*redDimCount+pI] != exclusiveLBound[i*redDimCount+pI]
+          || totalUBound[i*redDimCount+pI] !=exclusiveUBound[i*redDimCount+pI]){
+          contiguousFlag[i] = 0; // reset
+          break;
+        }
+        // obtain indexList for this DE and dim
+        --j;  // shift to basis 0
+        const int *indexList =
+          distgrid->getIndexListPDimPLocalDe(i, j+1, &localrc);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          NULL)) return localrc;
+        // check if this dim has a contiguous index list
+        for (int k=1; k<indexCountPDimPDe[de*dimCount+j]; k++){
+          if (indexList[k] != indexList[k-1]+1){
+            contiguousFlag[i] = 0; // reset
+            break;
+          }
+        }
+        ++pI;
+      }
+    } // jj
   }
 }
 //-----------------------------------------------------------------------------
@@ -1012,8 +1039,8 @@ Array *Array::create(
       // either be referenced, or a copy of the data will have been made.
       larrayList[i] = LocalArray::create(larrayListArg[i], copyflag,
         temp_larrayLBound, temp_larrayUBound, &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-        return ESMC_NULL_POINTER;
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        rc)) return ESMC_NULL_POINTER;
     }        
   }
   delete [] temp_larrayLBound;
@@ -3065,10 +3092,10 @@ int Array::gather(
 // !ARGUMENTS:
 //
   void *arrayArg,                       // out -
-  ESMC_TypeKind_Flag typekindArg,            // in -
+  ESMC_TypeKind_Flag typekindArg,       // in -
   int rankArg,                          // in -
   int *counts,                          // in -
-  int *tileArg,                        // in -
+  int *tileArg,                         // in -
   int rootPet,                          // in -
   VM *vm                                // in -
   ){    
@@ -3187,6 +3214,14 @@ int Array::gather(
   VMK::commhandle **commh = new VMK::commhandle*; // used by all comm calls
   VMK::commhandle **commhList = 
     new VMK::commhandle*[dimCount]; // used for indexList comm
+  
+  // the following code depends on the "contiguousFlag" -> may need to construct
+  if (localDeCount && (contiguousFlag[0]==-1)){
+    // has local DEs and contiguousFlag has no yet been constructed
+    localrc = constructContiguousFlag(redDimCount);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+      return rc;
+  }
   
   // all PETs may be senders of data, each PET issues a maximum of one
   // non-blocking send, so no problem with too many outstanding comms here
@@ -3465,10 +3500,10 @@ int Array::scatter(
 // !ARGUMENTS:
 //
   void *arrayArg,                       // in -
-  ESMC_TypeKind_Flag typekindArg,            // in -
+  ESMC_TypeKind_Flag typekindArg,       // in -
   int rankArg,                          // in -
   int *counts,                          // in -
-  int *tileArg,                        // in -
+  int *tileArg,                         // in -
   int rootPet,                          // in -
   VM *vm                                // in -
   ){    
@@ -3586,6 +3621,14 @@ int Array::scatter(
   VMK::commhandle **commh = new VMK::commhandle*; // used by all comm calls
   VMK::commhandle **commhList = 
     new VMK::commhandle*[dimCount]; // used for indexList comm
+  
+  // the following code depends on the "contiguousFlag" -> may need to construct
+  if (localDeCount && (contiguousFlag[0]==-1)){
+    // has local DEs and contiguousFlag has no yet been constructed
+    localrc = constructContiguousFlag(redDimCount);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+      return rc;
+  }
   
   // all PETs may be receivers of data, each PET issues a maximum of one
   // non-blocking receive, so no problem with too many outstanding comms here
@@ -4281,7 +4324,7 @@ int Array::redistStore(
   Array *dstArray,                      // in    - destination Array
   RouteHandle **routehandle,            // inout - handle to precomputed comm
   InterfaceInt *srcToDstTransposeMap,   // in    - mapping src -> dst dims
-  ESMC_TypeKind_Flag typekindFactor,         // in    - typekind of factor
+  ESMC_TypeKind_Flag typekindFactor,    // in    - typekind of factor
   void *factor                          // in    - redist factor
   ){    
 //
@@ -7057,7 +7100,8 @@ int Array::sparseMatMulStore(
 
   // communicate typekindFactors across all Pets
   vector<ESMC_TypeKind_Flag> typekindList(petCount);
-  vm->allgather(&typekindFactors, &(typekindList[0]), sizeof(ESMC_TypeKind_Flag));
+  vm->allgather(&typekindFactors, &(typekindList[0]), 
+    sizeof(ESMC_TypeKind_Flag));
   // communicate tensorMixFlag across all Pets
   bool *tensorMixFlagList = new bool[petCount]; // cannot use vector<bool> here
   vm->allgather(&tensorMixFlag, tensorMixFlagList, sizeof(bool));
@@ -8065,8 +8109,7 @@ int Array::sparseMatMulStore(
   
   // prepare tensorContigLength arguments
   int srcTensorContigLength = 1;  // init
-  int srcRank = srcArray->rank;
-  for (int jj=0; jj<srcRank; jj++){
+  for (int jj=0; jj<srcArray->rank; jj++){
     if (srcArray->arrayToDistGridMap[jj])
       // decomposed dimension
       break;
@@ -8076,8 +8119,7 @@ int Array::sparseMatMulStore(
         - srcArray->undistLBound[jj] + 1;
   }
   int dstTensorContigLength = 1;  // init
-  int dstRank = dstArray->rank;
-  for (int jj=0; jj<dstRank; jj++){
+  for (int jj=0; jj<dstArray->rank; jj++){
     if (dstArray->arrayToDistGridMap[jj])
       // decomposed dimension
       break;
@@ -8197,9 +8239,9 @@ int sparseMatMulStoreEncodeXXE(
   bool tensorMixFlag,                     // in
   int srcTensorContigLength,              // in
   int dstTensorContigLength,              // in
-  ESMC_TypeKind_Flag typekindFactors,          // in
-  ESMC_TypeKind_Flag typekindSrc,              // in
-  ESMC_TypeKind_Flag typekindDst,              // in
+  ESMC_TypeKind_Flag typekindFactors,     // in
+  ESMC_TypeKind_Flag typekindSrc,         // in
+  ESMC_TypeKind_Flag typekindDst,         // in
   const int *srcLocalDeElementCount,      // in
   const int *dstLocalDeElementCount,      // in
   vector<DD::AssociationElement> *srcLinSeqVect, // in - sparse mat "run dist."
@@ -9450,7 +9492,7 @@ int Array::sparseMatMul(
   ESMC_CommFlag commflag,               // in    - communication options
   bool *finishedflag,                   // out   - TEST ops finished or not
   bool *cancelledflag,                  // out   - any cancelled operations
-  ESMC_Region_Flag zeroflag,             // in    - ESMC_REGION_TOTAL:
+  ESMC_Region_Flag zeroflag,            // in    - ESMC_REGION_TOTAL:
                                         //          -> zero out total region
                                         //         ESMC_REGION_SELECT:
                                         //          -> zero out target points
@@ -11091,10 +11133,10 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 // !ARGUMENTS:
 //
   void *result,             // result value (scalar)
-  ESMC_TypeKind_Flag dtk,        // data type kind
+  ESMC_TypeKind_Flag dtk,   // data type kind
   ESMC_Operation op,        // reduce operation
   int rootPET,              // root
-  ESMCI::VM *vm){             // optional VM argument to speed up things
+  ESMCI::VM *vm){           // optional VM argument to speed up things
 //
 // !DESCRIPTION:
 //    Reduce the data of an {\tt ESMC\_newArray} into a single scalar value.
@@ -11344,11 +11386,11 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 // !ARGUMENTS:
 //
   void *result,             // result value (scalar)
-  ESMC_TypeKind_Flag dtk,        // data type kind
+  ESMC_TypeKind_Flag dtk,   // data type kind
   ESMC_Operation op,        // reduce operation
   int rootPET,              // root
   ESMC_newArrayCommHandle *commh, // commu handle for non-blocking mode
-  ESMCI::VM *vm){             // optional VM argument to speed up things
+  ESMCI::VM *vm){           // optional VM argument to speed up things
 //
 // !DESCRIPTION:
 //    Reduce the data of an {\tt ESMC\_newArray} into a single scalar value.
@@ -11411,11 +11453,11 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 // !ARGUMENTS:
 //
   void *result,             // result value (scalar)
-  ESMC_TypeKind_Flag dtk,        // data type kind
+  ESMC_TypeKind_Flag dtk,   // data type kind
   ESMC_Operation op,        // reduce operation
   int rootPET,              // root
   int de,                   // DE for DE-based non-blocking reduce
-  ESMCI::VM *vm){             // optional VM argument to speed up things
+  ESMCI::VM *vm){           // optional VM argument to speed up things
 //
 // !DESCRIPTION:
 //    Reduce the data of an {\tt ESMC\_newArray} into a single scalar value.

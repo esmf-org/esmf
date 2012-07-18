@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.72 2012/07/18 22:20:51 rokuingh Exp $
+// $Id: ESMCI_Array.h,v 1.73 2012/07/18 22:52:26 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -236,6 +236,8 @@ namespace ESMCI {
    private:
     void destruct(bool followCreator=true);
    public:
+    // helper
+    int constructContiguousFlag(int redDimCount);
     // create() and destroy()
     static Array *create(LocalArray **larrayList, int larrayCount,
       DistGrid *distgrid, CopyFlag copyflag,
@@ -261,7 +263,7 @@ namespace ESMCI {
     // data copy()
     int copy(Array const *arrayIn);
     // get() and set()
-    ESMC_TypeKind_Flag getTypekind()             const {return typekind;}
+    ESMC_TypeKind_Flag getTypekind()        const {return typekind;}
     int getRank()                           const {return rank;}
     ESMC_IndexFlag getIndexflag()           const {return indexflag;}
     LocalArray **getLocalarrayList()        const {return larrayList;}
@@ -356,14 +358,14 @@ namespace ESMCI {
   
   //============================================================================
   class SparseMatrix{
-    ESMC_TypeKind_Flag typekind; // typekind of factors
-    void const *factorList; // vector of factors
-    int factorListCount;    // number of factors
-    int srcN;               // src sequence index width (1 or 2)
-    int dstN;               // dst sequence index width (1 or 2)
-    int const *factorIndexList; // vector of sequence index elements, each
-                                // element is a srcN+dstN tuple:
-                                // (0,..,srcN-1,srcN,..,srcN+dstN-1)
+    ESMC_TypeKind_Flag typekind;  // typekind of factors
+    void const *factorList;       // vector of factors
+    int factorListCount;          // number of factors
+    int srcN;                     // src sequence index width (1 or 2)
+    int dstN;                     // dst sequence index width (1 or 2)
+    int const *factorIndexList;   // vector of sequence index elements, each
+                                  // element is a srcN+dstN tuple:
+                                  // (0,..,srcN-1,srcN,..,srcN+dstN-1)
    public:
     SparseMatrix(ESMC_TypeKind_Flag const typekind_, void const *factorList_,
       int const factorListCount_, int const srcN_, int const dstN_,
@@ -434,11 +436,11 @@ typedef struct{
 
 typedef struct{
   ESMC_newArray *array;     // pointer to calling ESMC_newArray object
-  ESMCI::VM *vm;              // pointer to current VM
+  ESMCI::VM *vm;            // pointer to current VM
   int de;                   // DE for DE-based non-blocking operation
   int rootPET;              // root
   void *result;             // result memory location
-  ESMC_TypeKind_Flag dtk;        // data type kind
+  ESMC_TypeKind_Flag dtk;   // data type kind
   ESMC_Operation op;        // operation flag
 }ESMC_newArrayThreadArg;
 
@@ -447,7 +449,7 @@ typedef struct{
 class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
   private:
     int rank;                 // rank of newArray
-    ESMC_TypeKind_Flag kind;       // kind of newArray (for F90)
+    ESMC_TypeKind_Flag kind;  // kind of newArray (for F90)
     int **globalDataLBound;   // dataBox for this DE [de][dim]
     int **globalDataUBound;   // dataBox for this DE [de][dim]
     int **localFullLBound;    // fullBox (data + halo) for this DE [de][dim]
@@ -510,39 +512,39 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
       LocalArray *larray,  // pointer to LocalArray object
       int rootPET,              // root
       int de,                   // DE for DE-based non-blocking scatter
-      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
+      ESMCI::VM *vm=NULL);      // optional VM argument to speed up things
 
     int ESMC_newArrayScalarReduce(
       void *result,             // result value (scalar)
-      ESMC_TypeKind_Flag dtk,        // data type kind
+      ESMC_TypeKind_Flag dtk,   // data type kind
       ESMC_Operation op,        // reduce operation
       int rootPET,              // root
-      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
+      ESMCI::VM *vm=NULL);      // optional VM argument to speed up things
 
     int ESMC_newArrayScalarReduce(
       void *result,             // result value (scalar)
-      ESMC_TypeKind_Flag dtk,        // data type kind
+      ESMC_TypeKind_Flag dtk,   // data type kind
       ESMC_Operation op,        // reduce operation
       int rootPET,              // root
       ESMC_newArrayCommHandle *commh, // commu handle for non-blocking mode
-      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
+      ESMCI::VM *vm=NULL);      // optional VM argument to speed up things
 
     int ESMC_newArrayScalarReduce(
       void *result,             // result value (scalar)
-      ESMC_TypeKind_Flag dtk,        // data type kind
+      ESMC_TypeKind_Flag dtk,   // data type kind
       ESMC_Operation op,        // reduce operation
       int rootPET,              // root
       int de,                   // DE for DE-based non-blocking reduce
-      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
+      ESMCI::VM *vm=NULL);      // optional VM argument to speed up things
 
     int ESMC_newArrayWait(
       int rootPET,              // root
       ESMC_newArrayCommHandle *commh, // commu handle specifying non-block op.
-      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
+      ESMCI::VM *vm=NULL);      // optional VM argument to speed up things
 
     int ESMC_newArrayWait(
       int de,                   // DE for which to wait
-      ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
+      ESMCI::VM *vm=NULL);      // optional VM argument to speed up things
     
     // friend functions that provide thread support for non-blocking comms
     friend void *ESMC_newArrayScatterThread(void *);

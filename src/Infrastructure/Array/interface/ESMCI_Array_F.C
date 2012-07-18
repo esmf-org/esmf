@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.57 2012/07/18 22:20:52 rokuingh Exp $
+// $Id: ESMCI_Array_F.C,v 1.58 2012/07/18 22:52:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -161,7 +161,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN_X(c_esmc_arrayget)(ESMCI::Array **ptr, ESMC_TypeKind_Flag *typekind, 
+  void FTN_X(c_esmc_arrayget)(ESMCI::Array **ptr, ESMC_TypeKind_Flag *typekind,
     int *rank, ESMCI::LocalArray **opt_localArrayList,
     int *len_localArrayList, ESMCI::DistGrid **distgrid,
     ESMCI::DELayout **delayout,
@@ -1201,7 +1201,7 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_newarrayreducescalarb)(ESMC_newArray **ptr, void *result,
-    ESMC_TypeKind_Flag *dtk, ESMC_Operation *op, int *rootPET, ESMCI::VM **vm, 
+    ESMC_TypeKind_Flag *dtk, ESMC_Operation *op, int *rootPET, ESMCI::VM **vm,
     int *rc){
     // PET-based blocking scalar reduce
     int localrc;
@@ -1218,8 +1218,8 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
-  void FTN_X(c_esmc_newarrayreducescalarnbroot)(ESMC_newArray **ptr, void *result,
-    ESMC_TypeKind_Flag *dtk, ESMC_Operation *op, int *rootPET,
+  void FTN_X(c_esmc_newarrayreducescalarnbroot)(ESMC_newArray **ptr,
+    void *result, ESMC_TypeKind_Flag *dtk, ESMC_Operation *op, int *rootPET,
     ESMC_newArrayCommHandle **commh, ESMCI::VM **vm, int *rc){
     // DE-based non-blocking reduce (root call)
     int localrc;
