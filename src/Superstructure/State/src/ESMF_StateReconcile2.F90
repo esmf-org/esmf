@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.18 2012/07/13 16:05:35 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.19 2012/07/18 20:25:17 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@ module ESMF_StateReconcile2Mod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-  '$Id: ESMF_StateReconcile2.F90,v 1.18 2012/07/13 16:05:35 w6ws Exp $'
+  '$Id: ESMF_StateReconcile2.F90,v 1.19 2012/07/18 20:25:17 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
@@ -263,7 +263,7 @@ contains
     integer :: i
 
     logical, parameter :: debug = .false.
-    logical, parameter :: trace = .true.
+    logical, parameter :: trace = .false.
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -271,15 +271,6 @@ contains
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-
-    if (.false.) then
-      do, i=0, npets-1
-	if (i == mypet) then
-	  call ESMF_StatePrint (state)
-	end if
-	call ESMF_VMBarrier (vm)
-      end do
-    end if
 
     ! 0.) Interchange item counts between PETs.  Set up counts/displacements
     if (trace) then
@@ -877,6 +868,8 @@ end if
 
     integer :: mypet
 
+    logical, parameter :: debug = .false.
+
     ! Sanity checks
     call ESMF_VMGet (vm, localPet=mypet, rc=localrc)
     if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU, &
@@ -902,8 +895,6 @@ end if
     ! Deserialize
     do, i=1, needs_count
 
-buffer_offset = ((buffer_offset+7)/8) * 8
-
       ! Item type
       stateitem_type = transfer (  &
           source=obj_buffer(buffer_offset:buffer_offset+ESMF_SIZEOF_DEFINT-1), &
@@ -914,7 +905,7 @@ buffer_offset = ((buffer_offset+7)/8) * 8
       select case (stateitem_type)
         case (ESMF_STATEITEM_FIELDBUNDLE%ot)
 	  if (debug) then
-	    print *, "deserializing FieldBundle, offset =", buffer_offset
+	    print *, "deserializing FieldBundle, offset =", buffer_offset, stateitem_type
 	  end if
           fieldbundle = ESMF_FieldBundleDeserialize(obj_buffer, buffer_offset, &
               attreconflag=attreconflag, rc=localrc)
@@ -1129,7 +1120,7 @@ buffer_offset = ((buffer_offset+7)/8) * 8
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
 
-	allocate (buffer(0:offset), stat=memstat)
+	allocate (buffer(0:offset-1), stat=memstat)
 	if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
@@ -1183,7 +1174,7 @@ if (debug) then
 end if
 
     call ESMF_VMAllGatherV (vm,  &
-        sendData=buffer(:buffer_size(1)), sendCount=buffer_size(1),  &
+        sendData=buffer(:buffer_size(1)-1), sendCount=buffer_size(1),  &
         recvData=buffer_recv, recvCounts=recv_sizes, recvOffsets=recv_offsets,  &
         rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1971,7 +1962,7 @@ logical, parameter :: debug = .false.
     integer,   allocatable :: offsets_recv(:), offsets_send(:)
     character, allocatable :: buffer_recv(:),  buffer_send(:)
 
-logical, parameter :: debug=.true.
+logical, parameter :: debug = .false.
 
     localrc = ESMF_RC_NOT_IMPL
 
@@ -2065,14 +2056,15 @@ logical, parameter :: debug=.true.
     end do
 
     ! AlltoAllV
-if (debug) then
-  open (42, file='pet'//iToS (myPet)//'send',  &
-      status='unknown', action='write', form='unformatted')
+
+! if (debug) then
+!   open (42, file='pet'//iToS (myPet)//'send',  &
+!       status='unknown', action='write', form='unformatted', access='stream')
 !  write (42) 'counts_send:', counts_send
 !  write (42) 'offsets_send:', offsets_send
-  write (42) buffer_send
-  close (42)
-end if
+!   write (42) buffer_send
+!   close (42)
+! end if
 
     call ESMF_VMAllToAllV (vm,  &
         sendData=buffer_send, sendCounts=counts_send, sendOffsets=offsets_send,  &
@@ -2081,14 +2073,15 @@ end if
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-if (debug) then
-  open (42, file='pet'//iToS (myPet)//'recv',  &
-      status='unknown', action='write', form='unformatted')
-  write (42) counts_recv
-  write (42) offsets_recv
-  write (42) buffer_recv
-  close (42)
-end if
+
+! if (debug) then
+!   open (42, file='pet'//iToS (myPet)//'recv',  &
+!       status='unknown', action='write', form='unformatted', access='stream')
+!  write (42) counts_recv
+!  write (42) offsets_recv
+!   write (42) buffer_recv
+!   close (42)
+! end if
 
     ! Copy recv buffers into recv_items
 
@@ -2242,8 +2235,6 @@ end if
       do, i=1, size (needs_list)
 
         if (.not. needs_list(i)) cycle
-
-buffer_offset = ((buffer_offset+7)/8) * 8
 
         stateitem => siwrap(i)%si
 
