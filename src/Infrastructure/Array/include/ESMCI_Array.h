@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.71 2012/07/17 22:45:27 rokuingh Exp $
+// $Id: ESMCI_Array.h,v 1.72 2012/07/18 22:20:51 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@ namespace ESMCI {
   
    private:
     // global information
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind;
+    ESMC_TypeKind_Flag typekind;
     int rank;
     ESMC_IndexFlag indexflag;
     //todo: the LocalArray pointers should be shared between PETs in the same
@@ -224,7 +224,7 @@ namespace ESMCI {
       localDeCountAux = 0;  // auxiliary variable for garbage collection
     }
    private:
-    Array(ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind, int rank, LocalArray **larrayList,
+    Array(ESMC_TypeKind_Flag typekind, int rank, LocalArray **larrayList,
       DistGrid *distgrid, bool distgridCreator, int *exclusiveLBound,
       int *exclusiveUBound, int *computationalLBound, int *computationalUBound,
       int *totalLBound, int *totalUBound, int tensorCount,
@@ -261,7 +261,7 @@ namespace ESMCI {
     // data copy()
     int copy(Array const *arrayIn);
     // get() and set()
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag getTypekind()             const {return typekind;}
+    ESMC_TypeKind_Flag getTypekind()             const {return typekind;}
     int getRank()                           const {return rank;}
     ESMC_IndexFlag getIndexflag()           const {return indexflag;}
     LocalArray **getLocalarrayList()        const {return larrayList;}
@@ -321,9 +321,9 @@ namespace ESMCI {
     int deserialize(char *buffer, int *offset,
       const ESMC_AttReconcileFlag &attreconflag);
     // comms
-    int gather(void *array, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind, int rank,
+    int gather(void *array, ESMC_TypeKind_Flag typekind, int rank,
       int *counts, int *tile, int rootPet, VM *vm);
-    int scatter(void *array, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind, int rank,
+    int scatter(void *array, ESMC_TypeKind_Flag typekind, int rank,
       int *counts, int *tile, int rootPet, VM *vm);
     static int haloStore(Array *array, RouteHandle **routehandle,
       ESMC_HaloStartRegionFlag halostartregionflag=ESMF_REGION_EXCLUSIVE,
@@ -334,7 +334,7 @@ namespace ESMCI {
     static int haloRelease(RouteHandle *routehandle);
     static int redistStore(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, InterfaceInt *srcToDstTransposeMap,
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindFactor = ESMF_NOKIND, void *factor = NULL);
+      ESMC_TypeKind_Flag typekindFactor = ESMF_NOKIND, void *factor = NULL);
     static int redist(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
       bool *finishedflag=NULL, bool *cancelledflag=NULL, bool checkflag=false);
@@ -356,7 +356,7 @@ namespace ESMCI {
   
   //============================================================================
   class SparseMatrix{
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind; // typekind of factors
+    ESMC_TypeKind_Flag typekind; // typekind of factors
     void const *factorList; // vector of factors
     int factorListCount;    // number of factors
     int srcN;               // src sequence index width (1 or 2)
@@ -365,10 +365,10 @@ namespace ESMCI {
                                 // element is a srcN+dstN tuple:
                                 // (0,..,srcN-1,srcN,..,srcN+dstN-1)
    public:
-    SparseMatrix(ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag const typekind_, void const *factorList_,
+    SparseMatrix(ESMC_TypeKind_Flag const typekind_, void const *factorList_,
       int const factorListCount_, int const srcN_, int const dstN_,
       int const *factorIndexList_);
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag getTypekind()const{return typekind;}
+    ESMC_TypeKind_Flag getTypekind()const{return typekind;}
     void const *getFactorList()const{return factorList;}
     int getFactorListCount()const{return factorListCount;}
     SeqInd getSrcSeqIndex(int i)const{
@@ -438,7 +438,7 @@ typedef struct{
   int de;                   // DE for DE-based non-blocking operation
   int rootPET;              // root
   void *result;             // result memory location
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk;        // data type kind
+  ESMC_TypeKind_Flag dtk;        // data type kind
   ESMC_Operation op;        // operation flag
 }ESMC_newArrayThreadArg;
 
@@ -447,7 +447,7 @@ typedef struct{
 class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
   private:
     int rank;                 // rank of newArray
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag kind;       // kind of newArray (for F90)
+    ESMC_TypeKind_Flag kind;       // kind of newArray (for F90)
     int **globalDataLBound;   // dataBox for this DE [de][dim]
     int **globalDataUBound;   // dataBox for this DE [de][dim]
     int **localFullLBound;    // fullBox (data + halo) for this DE [de][dim]
@@ -514,14 +514,14 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
 
     int ESMC_newArrayScalarReduce(
       void *result,             // result value (scalar)
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk,        // data type kind
+      ESMC_TypeKind_Flag dtk,        // data type kind
       ESMC_Operation op,        // reduce operation
       int rootPET,              // root
       ESMCI::VM *vm=NULL);        // optional VM argument to speed up things
 
     int ESMC_newArrayScalarReduce(
       void *result,             // result value (scalar)
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk,        // data type kind
+      ESMC_TypeKind_Flag dtk,        // data type kind
       ESMC_Operation op,        // reduce operation
       int rootPET,              // root
       ESMC_newArrayCommHandle *commh, // commu handle for non-blocking mode
@@ -529,7 +529,7 @@ class ESMC_newArray : public ESMC_Base {    // inherits from ESMC_Base class
 
     int ESMC_newArrayScalarReduce(
       void *result,             // result value (scalar)
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk,        // data type kind
+      ESMC_TypeKind_Flag dtk,        // data type kind
       ESMC_Operation op,        // reduce operation
       int rootPET,              // root
       int de,                   // DE for DE-based non-blocking reduce

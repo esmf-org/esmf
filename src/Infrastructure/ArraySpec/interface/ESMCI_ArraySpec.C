@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArraySpec.C,v 1.13 2012/07/17 22:45:38 rokuingh Exp $
+// $Id: ESMCI_ArraySpec.C,v 1.14 2012/07/18 22:21:03 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -31,25 +31,25 @@ extern "C" {
   
 // Prototypes of the Fortran interface functions.
 void FTN_X(f_esmf_arrayspecset)(ESMCI::ArraySpec *arrayspec, int *rank,
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind, int *rc);
+  ESMC_TypeKind_Flag *typekind, int *rc);
 
 void FTN_X(f_esmf_arrayspecgetrank)(ESMCI::ArraySpec *arrayspec, int *rank,
   int *rc);
 
 void FTN_X(f_esmf_arrayspecgettypekind)(ESMCI::ArraySpec *arrayspec,
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind, int *rc);
+  ESMC_TypeKind_Flag *typekind, int *rc);
 
 }; // extern "C"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArraySpec.C,v 1.13 2012/07/17 22:45:38 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_ArraySpec.C,v 1.14 2012/07/18 22:21:03 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
 
-int ArraySpec::set(int rank, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind){
+int ArraySpec::set(int rank, ESMC_TypeKind_Flag typekind){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::ArraySpec::set()"
   // initialize return code; assume routine not implemented
@@ -78,13 +78,13 @@ int ArraySpec::getRank(int *rc){
   return rank;
 }
 
-ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag ArraySpec::getTypeKind(int *rc){
+ESMC_TypeKind_Flag ArraySpec::getTypeKind(int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::ArraySpec::getTypeKind()"
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind;
+  ESMC_TypeKind_Flag typekind;
   FTN_X(f_esmf_arrayspecgettypekind)(this, &typekind, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return ESMF_NOKIND;  // bail out with invalid typekind

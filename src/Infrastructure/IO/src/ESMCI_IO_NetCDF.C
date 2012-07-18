@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.C,v 1.22 2012/07/17 22:46:08 rokuingh Exp $
+// $Id: ESMCI_IO_NetCDF.C,v 1.23 2012/07/18 22:21:37 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.22 2012/07/17 22:46:08 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.23 2012/07/18 22:21:37 rokuingh Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -568,9 +568,9 @@ void IO_NetCDF::destruct(void) {
 //-------------------------------------------------------------------------
 
 #ifdef ESMF_NETCDF
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag  IO_NetCDF::ncToEsmcType(NcType  ncTypeVal) 
+  ESMC_TypeKind_Flag  IO_NetCDF::ncToEsmcType(NcType  ncTypeVal) 
   {
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag  esmcTypeVal = ESMF_NOKIND;
+    ESMC_TypeKind_Flag  esmcTypeVal = ESMF_NOKIND;
 
     switch (ncTypeVal)
     {
@@ -605,7 +605,7 @@ void IO_NetCDF::destruct(void) {
 
 //-------------------------------------------------------------------------
 
-  NcType  IO_NetCDF::esmcToNcType(ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag  esmcTypeVal) 
+  NcType  IO_NetCDF::esmcToNcType(ESMC_TypeKind_Flag  esmcTypeVal) 
   {
     NcType  ncTypeVal = ncNoType;
 
@@ -682,7 +682,7 @@ void IO_NetCDF::destruct(void) {
       maxIndices[j] = thisDim->size() - 1;
     }
 
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag	arrayType = ncToEsmcType(thisVar->type());
+    ESMC_TypeKind_Flag	arrayType = ncToEsmcType(thisVar->type());
 
     int		numValues = thisVar->num_vals();
     NcValues*	values = thisVar->values();
@@ -803,9 +803,9 @@ void IO_NetCDF::destruct(void) {
         break;
       }
 
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag	attType = ncToEsmcType(thisAtt->type());
+      ESMC_TypeKind_Flag	attType = ncToEsmcType(thisAtt->type());
       //printf("   ESMC type[%d]: %d (%s)\n", j, attType, 
-      //                                      ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagString(attType));
+      //                                      ESMC_TypeKind_FlagString(attType));
 
       Attribute* esmfAtt = new Attribute(thisAtt->name(),
                                          attType, 1,
@@ -827,7 +827,7 @@ void IO_NetCDF::destruct(void) {
   {
     int  rc = ESMF_SUCCESS;
 
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag  esmcType = thisArray->getTypekind();
+    ESMC_TypeKind_Flag  esmcType = thisArray->getTypekind();
 //printf("ESMC Type: %d\n", esmcType);
     NcType	       ncType = esmcToNcType(esmcType);
 
@@ -883,7 +883,7 @@ void IO_NetCDF::destruct(void) {
     for (int i = 0; i < numAttributes; ++i)
     {
       string         attName;
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag  attEsmfType;
+      ESMC_TypeKind_Flag  attEsmfType;
       int            numAttValues = 0;
       Attribute*     thisAtt = thisArray->root.AttributeGet(i);
       thisArray->root.AttributeGet(i, &attName, &attEsmfType, &numAttValues);

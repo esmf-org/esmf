@@ -1,4 +1,4 @@
-// $Id: ESMC_GridUTest.C,v 1.11 2012/07/17 22:46:03 rokuingh Exp $
+// $Id: ESMC_GridUTest.C,v 1.12 2012/07/18 22:21:34 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -77,7 +77,7 @@ int main(void){
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind = ESMC_TYPEKIND_R8;
+  ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
   grid_np = ESMC_GridCreateNoPeriDim(i_maxIndex, &coordsys, &typekind, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.42 2012/07/17 22:45:35 rokuingh Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.43 2012/07/18 22:20:59 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.42 2012/07/17 22:45:35 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.43 2012/07/18 22:20:59 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -588,7 +588,7 @@ int ArrayBundle::redistStore(
   ArrayBundle *dstArraybundle,          // in    - destination ArrayBundle
   RouteHandle **routehandle,            // inout - handle to precomputed comm
   InterfaceInt *srcToDstTransposeMap,   // in    - mapping src -> dst dims
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindFactor,         // in    - typekind of factor
+  ESMC_TypeKind_Flag typekindFactor,         // in    - typekind of factor
   void *factor                          // in    - redist factor
   ){    
 //

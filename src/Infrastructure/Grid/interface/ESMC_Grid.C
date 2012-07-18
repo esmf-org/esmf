@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.C,v 1.11 2012/07/17 22:46:00 rokuingh Exp $
+// $Id: ESMC_Grid.C,v 1.12 2012/07/18 22:21:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Grid.C,v 1.11 2012/07/17 22:46:00 rokuingh Exp $";
+ static const char *const version = "$Id: ESMC_Grid.C,v 1.12 2012/07/18 22:21:31 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -67,7 +67,7 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays
 #define ESMC_METHOD "ESMC_GridCreateNoPeriDim()"
 ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt maxIndex,
                                    enum ESMC_CoordSys_Flag *coordSys,
-                                   enum ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *coordTypeKind, 
+                                   enum ESMC_TypeKind_Flag *coordTypeKind, 
                                    int *rc){
   // Initialize return code. Assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
@@ -93,7 +93,7 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt maxIndex,
 #define ESMC_METHOD "ESMC_GridCreate1PeriDim()"
 ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt maxIndex,
                                    enum ESMC_CoordSys_Flag *coordSys,
-                                   enum ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *coordTypeKind, 
+                                   enum ESMC_TypeKind_Flag *coordTypeKind, 
                                    enum ESMC_PoleKind_Flag *poleKind, 
                                    int *rc){
   int localrc = ESMC_RC_NOT_IMPL;
@@ -320,4 +320,4 @@ int ESMC_GridWrite(ESMC_Grid grid,
 //-----------------------------------------------------------------------------
 
 } // extern "C"
-// $Id: ESMC_Grid.C,v 1.11 2012/07/17 22:46:00 rokuingh Exp $
+// $Id: ESMC_Grid.C,v 1.12 2012/07/18 22:21:31 rokuingh Exp $

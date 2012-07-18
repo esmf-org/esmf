@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.59 2012/07/17 22:45:41 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.60 2012/07/18 22:21:07 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@ class Attribute
 {
  private:
     std::string attrName; // inline to reduce memory thrashing
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag tk;           // typekind indicator
+    ESMC_TypeKind_Flag tk;           // typekind indicator
     int items;                  // number of items (NOT byte count) for lists
 
     ESMC_Logical attrRoot;
@@ -204,8 +204,8 @@ class Attribute
 
     // get attribute info
     int AttributeGet(const std::string &name, int *lens, int count) const;
-    int AttributeGet(const std::string &name, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk, int *itemCount) const;
-    int AttributeGet(int num, std::string *name, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk, int *itemCount) const;
+    int AttributeGet(const std::string &name, ESMC_TypeKind_Flag *tk, int *itemCount) const;
+    int AttributeGet(int num, std::string *name, ESMC_TypeKind_Flag *tk, int *itemCount) const;
     int AttributeGetCount(void) const;
     int AttributeGetCountPack(void) const;
     int AttributeGetCountLink(void) const;
@@ -244,12 +244,12 @@ class Attribute
     int AttributeSet(const std::string &name, int count, std::vector<ESMC_Logical> *value);
 //    int AttributeSet(const std::string &name, std::string *value);
     int AttributeSet(const std::string &name, int count, std::vector<std::string> *value);
-//    int AttributeSet(const std::string &name, const ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag &tk, 
+//    int AttributeSet(const std::string &name, const ESMC_TypeKind_Flag &tk, 
 //      int count, void *value);
     
     // recursive call to set all attributes with attrObject = object
     int AttributeSetObjsInTree(const std::string &name, const std::string &object, 
-      const ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag &tk, const int &count, void *value);
+      const ESMC_TypeKind_Flag &tk, const int &count, void *value);
 
     // attribute update
     int AttributeUpdate(VM *vm, const std::vector<ESMC_I4> &rootList);
@@ -319,11 +319,11 @@ class Attribute
       const std::string &obj);
     Attribute(void);
     Attribute(const ESMC_Logical &attributeRoot);
-/*    Attribute(const std::string &name, const ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag &typekind, 
+/*    Attribute(const std::string &name, const ESMC_TypeKind_Flag &typekind, 
       void *datap);*/
-    Attribute(const std::string &name, const ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag &typekind, 
+    Attribute(const std::string &name, const ESMC_TypeKind_Flag &typekind, 
       int numitems, void *datap);
-    int AttrModifyValue(const ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag &typekind, int numitems, 
+    int AttrModifyValue(const ESMC_TypeKind_Flag &typekind, int numitems, 
       void *datap);
     Attribute& operator=(const Attribute& source);
     ~Attribute(void);
@@ -407,7 +407,7 @@ extern "C" {
                                   ESMCI_FortranStrLenArg olen,
                                   ESMCI_FortranStrLenArg alen);
   void FTN_X(c_esmc_attpackgetcharlist)(ESMC_Base **base, char *name,
-                                  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk, int *count,
+                                  ESMC_TypeKind_Flag *tk, int *count,
                                   int *lens, char *valueList,
                                   char *convention, char *purpose, 
                                   char *object, char *attPackInstanceName,
@@ -419,7 +419,7 @@ extern "C" {
                                   ESMCI_FortranStrLenArg olen,
                                   ESMCI_FortranStrLenArg alen);
   void FTN_X(c_esmc_attpackgetvalue)(ESMC_Base **base, char *name,
-                                  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk, int *count,
+                                  ESMC_TypeKind_Flag *tk, int *count,
                                   void *value, char *convention, char *purpose,
                                   char *object, char *attPackInstanceName,
                                   int *rc, 
@@ -450,7 +450,7 @@ extern "C" {
                                   ESMCI_FortranStrLenArg olen,
                                   ESMCI_FortranStrLenArg alen);
   void FTN_X(c_esmc_attpacksetcharlist)(ESMC_Base **base, char *name,
-                                  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk, int *count,
+                                  ESMC_TypeKind_Flag *tk, int *count,
                                   char *valueList, int *lens,
                                   char *convention, char *purpose, 
                                   char *object, char *attPackInstanceName,
@@ -462,7 +462,7 @@ extern "C" {
                                   ESMCI_FortranStrLenArg olen,
                                   ESMCI_FortranStrLenArg alen);
   void FTN_X(c_esmc_attpacksetvalue)(ESMC_Base **base, char *name,
-                                  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk, int *count,
+                                  ESMC_TypeKind_Flag *tk, int *count,
                                   void *value, char *convention, char *purpose,
                                   char *object, char *attPackInstanceName,
                                   int *rc,
@@ -494,16 +494,16 @@ extern "C" {
                                   ESMC_AttCopyFlag *attcopyflag,
                                   ESMC_AttTreeFlag *atttreeflag, int *rc);
   void FTN_X(c_esmc_attributegetcharlist)(ESMC_Base **base, char *name, 
-                                  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk, int *count, int *lens, 
+                                  ESMC_TypeKind_Flag *tk, int *count, int *lens, 
                                   char *valueList, int *rc, 
                                   ESMCI_FortranStrLenArg nlen, 
                                   ESMCI_FortranStrLenArg vlen);
   void FTN_X(c_esmc_attributegetvalue)(ESMC_Base **base, char *name, 
-                                  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,
+                                  ESMC_TypeKind_Flag *tk,
                                   int *count, void *value, int *rc, 
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attpackgetinfoname)(ESMC_Base **base, char *name, 
-                                  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk, int *count,
+                                  ESMC_TypeKind_Flag *tk, int *count,
                                   char *convention, char *purpose, 
                                   char *object, char *attPackInstanceName,
                                   int *rc,
@@ -513,12 +513,12 @@ extern "C" {
                                   ESMCI_FortranStrLenArg olen,
                                   ESMCI_FortranStrLenArg alen);
   void FTN_X(c_esmc_attributegetinfoname)(ESMC_Base **base, char *name, 
-                                  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,
+                                  ESMC_TypeKind_Flag *tk,
                                   int *count, int *rc,
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attributegetinfonum)(ESMC_Base **base, int *num, 
                                   char *name,
-                                  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk, int *count, int *rc, 
+                                  ESMC_TypeKind_Flag *tk, int *count, int *rc, 
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attributegetcount)(ESMC_Base **base, int *count,
                                   ESMC_AttGetCountFlag *flag, int *rc);
@@ -534,18 +534,18 @@ extern "C" {
   void FTN_X(c_esmc_attributeremove)(ESMC_Base **base, char *name, int *rc,                   // in - return code     
 	                              ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attributesetcharlist)(ESMC_Base **base, char *name,
-                                  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,
+                                  ESMC_TypeKind_Flag *tk,
                                   int *count, char *valueList, int *lens,
                                   int *rc, 
                                   ESMCI_FortranStrLenArg nlen,
                                   ESMCI_FortranStrLenArg vllen);
   void FTN_X(c_esmc_attributesetvalue)(ESMC_Base **base, char *name,
-                                  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,
+                                  ESMC_TypeKind_Flag *tk,
                                   int *count, void *value, int *rc, 
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attributesetobjsintree)(ESMC_Base **base, char *object,
                                   char *name, 
-                                  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk, int *count, void *value, 
+                                  ESMC_TypeKind_Flag *tk, int *count, void *value, 
                                   int *rc, 
                                   ESMCI_FortranStrLenArg olen, 
                                   ESMCI_FortranStrLenArg nlen);

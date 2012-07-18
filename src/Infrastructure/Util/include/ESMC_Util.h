@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.47 2012/07/17 22:46:16 rokuingh Exp $
+// $Id: ESMC_Util.h,v 1.48 2012/07/18 22:21:47 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@ enum ESMC_GridItem_Flag {ESMC_GRIDITEM_INVALID=-2,
                          ESMC_GRIDITEM_MASK,
                          ESMC_GRIDITEM_AREA};
 
-enum ESMC_GridStatus_Flag_Flag {ESMC_GRIDSTATUS_INVALID=-1,
+enum ESMC_GridStatus_Flag {ESMC_GRIDSTATUS_INVALID=-1,
                       ESMC_GRIDSTATUS_UNINIT,
                       ESMC_GRIDSTATUS_NOT_READY,
                       ESMC_GRIDSTATUS_SHAPE_READY};
@@ -63,7 +63,7 @@ enum ESMC_Region_Flag { ESMC_REGION_TOTAL=0,
                        ESMC_REGION_SELECT,
                        ESMC_REGION_EMPTY};
 
-enum ESMC_RegridMethod_Flag_Flag_Flag_Flag {ESMC_REGRIDMETHOD_BILINEAR=0,
+enum ESMC_RegridMethod_Flag {ESMC_REGRIDMETHOD_BILINEAR=0,
                         ESMC_REGRIDMETHOD_PATCH,
                         ESMC_REGRIDMETHOD_CONSERVE};
 
@@ -74,7 +74,7 @@ enum ESMC_StaggerLoc {ESMC_STAGGERLOC_INVALID=-2,
                       ESMC_STAGGERLOC_EDGE2,
                       ESMC_STAGGERLOC_CORNER};
 
-enum ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag {ESMC_TYPEKIND_I1=1,
+enum ESMC_TypeKind_Flag {ESMC_TYPEKIND_I1=1,
                     ESMC_TYPEKIND_I2,
                     ESMC_TYPEKIND_I4,
                     ESMC_TYPEKIND_I8,
@@ -86,7 +86,7 @@ enum ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag {ESMC_TYPEKIND_I1=1,
                     ESMC_TYPEKIND_CHARACTER,
                     ESMF_NOKIND=99};
 
-enum ESMC_UnmappedAction_Flag_Flag_Flag_Flag_Flag_Flag {ESMC_UNMAPPEDACTION_ERROR=0,
+enum ESMC_UnmappedAction_Flag {ESMC_UNMAPPEDACTION_ERROR=0,
                           ESMC_UNMAPPEDACTION_IGNORE};
 
 

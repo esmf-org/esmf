@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldGridGridRegridUTest.C,v 1.9 2012/07/17 22:45:57 rokuingh Exp $
+// $Id: ESMC_FieldGridGridRegridUTest.C,v 1.10 2012/07/18 22:21:27 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ int main(void){
   strcpy(name, "GridCreate");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ESMC_CoordSys_Flag coordsys = ESMC_COORDSYS_CART;
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind = ESMC_TYPEKIND_R8;
+  ESMC_TypeKind_Flag typekind = ESMC_TYPEKIND_R8;
   srcgrid = ESMC_GridCreateNoPeriDim(i_maxIndex, &coordsys, &typekind, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
@@ -388,7 +388,7 @@ int main(void){
   //EX_UTest
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  ESMC_UnmappedAction_Flag_Flag_Flag_Flag_Flag_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
+  ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
 #ifdef masking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, &i_maskValues, 
                              &routehandle, 

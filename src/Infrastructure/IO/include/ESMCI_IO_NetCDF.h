@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.h,v 1.11 2012/07/17 22:46:06 rokuingh Exp $
+// $Id: ESMCI_IO_NetCDF.h,v 1.12 2012/07/18 22:21:36 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -102,8 +102,8 @@ namespace ESMCI
  // < declare private interface methods here >
 
 #ifdef ESMF_NETCDF
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag  ncToEsmcType(NcType  ncTypeVal);
-    NcType         esmcToNcType(ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag  esmcTypeVal);
+    ESMC_TypeKind_Flag  ncToEsmcType(NcType  ncTypeVal);
+    NcType         esmcToNcType(ESMC_TypeKind_Flag  esmcTypeVal);
 
     Array*  readArray(NcFile*  netCdfFile,
                       int      varIndex);

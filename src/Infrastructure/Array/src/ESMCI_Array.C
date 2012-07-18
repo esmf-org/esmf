@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.150 2012/07/17 22:45:30 rokuingh Exp $
+// $Id: ESMCI_Array.C,v 1.151 2012/07/18 22:20:54 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.150 2012/07/17 22:45:30 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.151 2012/07/18 22:20:54 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -91,7 +91,7 @@ Array::Array(
 //
 // !ARGUMENTS:
 //
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindArg,              // (in)
+  ESMC_TypeKind_Flag typekindArg,              // (in)
   int rankArg,                            // (in)
   LocalArray **larrayListArg,             // (in)
   DistGrid *distgridArg,                  // (in)
@@ -418,7 +418,7 @@ Array *Array::create(
       rc);
     return ESMC_NULL_POINTER;
   }
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind = larrayListArg[0]->getTypeKind();
+  ESMC_TypeKind_Flag typekind = larrayListArg[0]->getTypeKind();
   int rank = larrayListArg[0]->getRank();
   for (int i=1; i<larrayCount; i++){
     if (larrayListArg[0]->getTypeKind() != typekind){
@@ -1122,7 +1122,7 @@ Array *Array::create(
       "- Not a valid pointer to arrayspec", rc);
     return ESMC_NULL_POINTER;
   }
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind = arrayspec->getTypeKind(&localrc);
+  ESMC_TypeKind_Flag typekind = arrayspec->getTypeKind(&localrc);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,rc))
     return ESMC_NULL_POINTER;
   int rank = arrayspec->getRank(&localrc);
@@ -1890,7 +1890,7 @@ int Array::copy(
     }
     
     // do the actual data copy
-    int const dataSize = ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(typekind);
+    int const dataSize = ESMC_TypeKind_FlagSize(typekind);
     int const localDeCount = delayout->getLocalDeCount();
     for (int i=0; i<localDeCount; i++){
       int size =
@@ -2667,7 +2667,7 @@ int Array::print()const{
   // print info about the ESMCI::Array object
   printf("--- ESMCI::Array::print start ---\n");
   ESMC_Print(); // print the Base class info
-  printf("Array typekind/rank: %s / %d \n", ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagString(typekind),
+  printf("Array typekind/rank: %s / %d \n", ESMC_TypeKind_FlagString(typekind),
     rank);
   printf("~ lower class' values ~\n");
   int dimCount = distgrid->getDimCount();
@@ -2877,7 +2877,7 @@ int Array::serialize(
   // Prepare pointer variables of different types
   char *cp;
   int *ip;
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *dkp;
+  ESMC_TypeKind_Flag *dkp;
   ESMC_IndexFlag *ifp;
   int r;
 
@@ -2902,7 +2902,7 @@ int Array::serialize(
   // Serialize Array meta data
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  dkp = (ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *)(buffer + *offset);
+  dkp = (ESMC_TypeKind_Flag *)(buffer + *offset);
   if (inquireflag != ESMF_INQUIREONLY)
     *dkp++ = typekind;
   else
@@ -2980,7 +2980,7 @@ int Array::deserialize(
   // Prepare pointer variables of different types
   char *cp;
   int *ip;
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *dkp;
+  ESMC_TypeKind_Flag *dkp;
   ESMC_IndexFlag *ifp;
   int r;
 
@@ -2998,7 +2998,7 @@ int Array::deserialize(
   // Deserialize Array meta data
   r=*offset%8;
   if (r!=0) *offset += 8-r;  // alignment
-  dkp = (ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *)(buffer + *offset);
+  dkp = (ESMC_TypeKind_Flag *)(buffer + *offset);
   typekind = *dkp++;
   ip = (int *)dkp;
   rank = *ip++;
@@ -3065,7 +3065,7 @@ int Array::gather(
 // !ARGUMENTS:
 //
   void *arrayArg,                       // out -
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindArg,            // in -
+  ESMC_TypeKind_Flag typekindArg,            // in -
   int rankArg,                          // in -
   int *counts,                          // in -
   int *tileArg,                        // in -
@@ -3170,7 +3170,7 @@ int Array::gather(
   }
 
   // size in bytes of each piece of data
-  int dataSize = ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(typekind);
+  int dataSize = ESMC_TypeKind_FlagSize(typekind);
   
   // distgrid and delayout values
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
@@ -3465,7 +3465,7 @@ int Array::scatter(
 // !ARGUMENTS:
 //
   void *arrayArg,                       // in -
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindArg,            // in -
+  ESMC_TypeKind_Flag typekindArg,            // in -
   int rankArg,                          // in -
   int *counts,                          // in -
   int *tileArg,                        // in -
@@ -3569,7 +3569,7 @@ int Array::scatter(
   }
 
   // size in bytes of each piece of data
-  int dataSize = ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(typekind);
+  int dataSize = ESMC_TypeKind_FlagSize(typekind);
 
   // distgrid and delayout values
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
@@ -4095,7 +4095,7 @@ int Array::haloStore(
     }    
     
     // load type specific factorList with "1" for the identity matrix
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindFactor = array->getTypekind();
+    ESMC_TypeKind_Flag typekindFactor = array->getTypekind();
     void *factorList;
     if (typekindFactor == ESMC_TYPEKIND_R4){
       ESMC_R4 *factorListT = new ESMC_R4[factorListCount];
@@ -4281,7 +4281,7 @@ int Array::redistStore(
   Array *dstArray,                      // in    - destination Array
   RouteHandle **routehandle,            // inout - handle to precomputed comm
   InterfaceInt *srcToDstTransposeMap,   // in    - mapping src -> dst dims
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindFactor,         // in    - typekind of factor
+  ESMC_TypeKind_Flag typekindFactor,         // in    - typekind of factor
   void *factor                          // in    - redist factor
   ){    
 //
@@ -4345,8 +4345,8 @@ int Array::redistStore(
   }
   
   // communicate typekindFactor across all Pets
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekindList = new ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag[petCount];
-  vm->allgather(&typekindFactor, typekindList, sizeof(ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag));
+  ESMC_TypeKind_Flag *typekindList = new ESMC_TypeKind_Flag[petCount];
+  vm->allgather(&typekindFactor, typekindList, sizeof(ESMC_TypeKind_Flag));
   // Check that all non-ESMF_NOKIND typekindList elements match,
   // set local typekindFactor accordingly and keep track of Pets that have
   // factors.
@@ -4408,7 +4408,7 @@ int Array::redistStore(
   
   if (factorPetCount > 0){
     // communicate factorLocal variables and check for consistency
-    int factorSize = ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(typekindFactor);
+    int factorSize = ESMC_TypeKind_FlagSize(typekindFactor);
     char *factorLocalList = new char[petCount*factorSize];
     vm->allgather(factorLocal, factorLocalList, factorSize);
     // prime factorLocal with value from first Pet with factor
@@ -6480,7 +6480,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     vector<int> const &seqIntervFactorListCountFromPet;
     bool tensorMixFlag;
     bool dstSetupFlag;
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindFactors;
+    ESMC_TypeKind_Flag typekindFactors;
    public:
     SetupSeqIndexFactorLookup(
       vector<SeqIndexFactorLookup> &seqIndexFactorLookup_,
@@ -6519,7 +6519,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       vector<int> const &seqIntervFactorListCountFromPet_,
       bool tensorMixFlag_,
       bool dstSetupFlag_,
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindFactors_
+      ESMC_TypeKind_Flag typekindFactors_
     ):SetupSeqIndexFactorLookup(
       seqIndexFactorLookup_,
       sparseMatrix_,
@@ -6604,7 +6604,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       }
     }
     virtual int messageSize(int srcPet, int dstPet)const{
-      int dataSizeFactors = ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(typekindFactors);
+      int dataSizeFactors = ESMC_TypeKind_FlagSize(typekindFactors);
       //todo: reduce waste of bandwidth in case there are _not_ 4-comp ind.
       return (4*sizeof(int)+dataSizeFactors) * messageSizeCount(srcPet, dstPet);
     }
@@ -6708,7 +6708,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
   };
   
   // -------------------------------------------------
-  void sum(char *a, char *b, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag tk){
+  void sum(char *a, char *b, ESMC_TypeKind_Flag tk){
     if (tk == ESMC_TYPEKIND_R4)
       *((ESMC_R4 *)a) += *((ESMC_R4 *)b);
     else if (tk == ESMC_TYPEKIND_R8)
@@ -6726,7 +6726,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     const bool dstSetupFlag, vector<SparseMatrix> const &sparseMatrix,
     const bool tensorMixFlag, DD::Interval const *seqIndexInterval,
     const int tensorElementCountEff, vector<bool> const &factorPetFlag,
-    const ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindFactors, const bool haloFlag,
+    const ESMC_TypeKind_Flag typekindFactors, const bool haloFlag,
     Array const *array, const int localDeCount, const int *localDeElementCount,
     int const *localDeToDeMap, int const *localIntervalPerPetCount,
     int const *localElementsPerIntervalCount
@@ -6909,8 +6909,8 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
 int sparseMatMulStoreEncodeXXE(VM *vm, DELayout *srcDelayout,
   DELayout *dstDelayout, bool tensorMixFlag, 
   int srcTensorContigLength, int dstTensorContigLength,
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindFactors, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindSrc,
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindDst,
+  ESMC_TypeKind_Flag typekindFactors, ESMC_TypeKind_Flag typekindSrc,
+  ESMC_TypeKind_Flag typekindDst,
   const int *srcLocalDeElementCount, const int *dstLocalDeElementCount,
   vector<DD::AssociationElement> *srcLinSeqVect,
   vector<DD::AssociationElement> *dstLinSeqVect,
@@ -7046,7 +7046,7 @@ int Array::sparseMatMulStore(
   
   // determine local tensorMixFlag and typekindFactors settings
   bool tensorMixFlag = false;                   // default
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindFactors = ESMF_NOKIND;  // default
+  ESMC_TypeKind_Flag typekindFactors = ESMF_NOKIND;  // default
   if (factorListCount > 0){
     // set typekindFactors
     typekindFactors = sparseMatrix[0].getTypekind();
@@ -7056,8 +7056,8 @@ int Array::sparseMatMulStore(
   }
 
   // communicate typekindFactors across all Pets
-  vector<ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag> typekindList(petCount);
-  vm->allgather(&typekindFactors, &(typekindList[0]), sizeof(ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag));
+  vector<ESMC_TypeKind_Flag> typekindList(petCount);
+  vm->allgather(&typekindFactors, &(typekindList[0]), sizeof(ESMC_TypeKind_Flag));
   // communicate tensorMixFlag across all Pets
   bool *tensorMixFlagList = new bool[petCount]; // cannot use vector<bool> here
   vm->allgather(&tensorMixFlag, tensorMixFlagList, sizeof(bool));
@@ -7125,7 +7125,7 @@ int Array::sparseMatMulStore(
   }
   
   // set dataSize for factors
-  int dataSizeFactors = ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(typekindFactors);
+  int dataSizeFactors = ESMC_TypeKind_FlagSize(typekindFactors);
   
   // check that if tensorMixFlag is not set that the tensorElementCount matches
   if (!tensorMixFlag){
@@ -8053,9 +8053,9 @@ int Array::sparseMatMulStore(
     dstArray->larrayBaseAddrList,
     dstArray->delayout->getLocalDeCount() * sizeof(char *));
   // obtain typekindSrc
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindSrc = srcArray->getTypekind();
+  ESMC_TypeKind_Flag typekindSrc = srcArray->getTypekind();
   // obtain typekindDst
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindDst = dstArray->getTypekind();
+  ESMC_TypeKind_Flag typekindDst = dstArray->getTypekind();
   
   // prepare dstLocalDeTotalElementCount
   int *dstLocalDeTotalElementCount = new int[dstLocalDeCount];
@@ -8197,9 +8197,9 @@ int sparseMatMulStoreEncodeXXE(
   bool tensorMixFlag,                     // in
   int srcTensorContigLength,              // in
   int dstTensorContigLength,              // in
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindFactors,          // in
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindSrc,              // in
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindDst,              // in
+  ESMC_TypeKind_Flag typekindFactors,          // in
+  ESMC_TypeKind_Flag typekindSrc,              // in
+  ESMC_TypeKind_Flag typekindDst,              // in
   const int *srcLocalDeElementCount,      // in
   const int *dstLocalDeElementCount,      // in
   vector<DD::AssociationElement> *srcLinSeqVect, // in - sparse mat "run dist."
@@ -8326,13 +8326,13 @@ int sparseMatMulStoreEncodeXXE(
     break;
   }
   // prepare other local variables
-  int dataSizeFactors = ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(typekindFactors);
+  int dataSizeFactors = ESMC_TypeKind_FlagSize(typekindFactors);
   
-  int dataSizeSrc = ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(typekindSrc);
+  int dataSizeSrc = ESMC_TypeKind_FlagSize(typekindSrc);
   int srcLocalDeCount = srcDelayout->getLocalDeCount();
   const int *srcLocalDeToDeMap = srcDelayout->getLocalDeToDeMap();
   
-  int dataSizeDst = ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(typekindDst);
+  int dataSizeDst = ESMC_TypeKind_FlagSize(typekindDst);
   int dstLocalDeCount = dstDelayout->getLocalDeCount();
   const int *dstLocalDeToDeMap = dstDelayout->getLocalDeToDeMap();
   
@@ -10190,7 +10190,7 @@ SparseMatrix::SparseMatrix(
 //
 // !ARGUMENTS:
 //
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag const typekind_,
+  ESMC_TypeKind_Flag const typekind_,
   void const *factorList_,
   int const factorListCount_,
   int const srcN_,
@@ -10451,9 +10451,9 @@ int ESMC_newArray::ESMC_newArrayConstruct(
   // now the LocalArrays for all the DEs on this PET must be created
   if (localPet == rootPET){
     kind = larray->ESMC_LocalArrayGetTypeKind();
-    vm->broadcast(&kind, sizeof(ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag), rootPET);
+    vm->broadcast(&kind, sizeof(ESMC_TypeKind_Flag), rootPET);
   }else{
-    vm->broadcast(&kind, sizeof(ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag), rootPET);
+    vm->broadcast(&kind, sizeof(ESMC_TypeKind_Flag), rootPET);
   }
   if (localTid == 0){
     // this is the master thread of an ESMF-thread group
@@ -10595,7 +10595,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
         "- ranks don't match", &localrc);
       return localrc;
     }
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
+    ESMC_TypeKind_Flag laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
     if (laTypeKind != kind){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
         "- kinds don't match", &localrc);
@@ -10877,7 +10877,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
       "- ranks don't match", &localrc);
     return localrc;
   }
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
+  ESMC_TypeKind_Flag laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
   if (laTypeKind != kind){
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
       "- kinds don't match", &localrc);
@@ -11047,7 +11047,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
         "- ranks don't match", &localrc);
       return localrc;
     }
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
+    ESMC_TypeKind_Flag laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
     if (laTypeKind != kind){
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP, 
         "- kinds don't match", &localrc);
@@ -11091,7 +11091,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 // !ARGUMENTS:
 //
   void *result,             // result value (scalar)
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk,        // data type kind
+  ESMC_TypeKind_Flag dtk,        // data type kind
   ESMC_Operation op,        // reduce operation
   int rootPET,              // root
   ESMCI::VM *vm){             // optional VM argument to speed up things
@@ -11344,7 +11344,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 // !ARGUMENTS:
 //
   void *result,             // result value (scalar)
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk,        // data type kind
+  ESMC_TypeKind_Flag dtk,        // data type kind
   ESMC_Operation op,        // reduce operation
   int rootPET,              // root
   ESMC_newArrayCommHandle *commh, // commu handle for non-blocking mode
@@ -11411,7 +11411,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 // !ARGUMENTS:
 //
   void *result,             // result value (scalar)
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk,        // data type kind
+  ESMC_TypeKind_Flag dtk,        // data type kind
   ESMC_Operation op,        // reduce operation
   int rootPET,              // root
   int de,                   // DE for DE-based non-blocking reduce
@@ -12444,7 +12444,7 @@ void *ESMC_newArrayScalarReduceThread(
   ESMCI::VM *vm = tharg->vm;
   int rootPET = tharg->rootPET;
   void *result = tharg->result;
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk = tharg->dtk;
+  ESMC_TypeKind_Flag dtk = tharg->dtk;
   ESMC_Operation op = tharg->op;
   // prepeare PET-local temporary result variable
   int deCount = array->deCount;

@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.40 2012/07/17 22:45:55 rokuingh Exp $
+// $Id: ESMC_Field.C,v 1.41 2012/07/18 22:21:25 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -69,7 +69,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldCreateGridTypeKind()"
   ESMC_Field ESMC_FieldCreateGridTypeKind(ESMC_Grid grid, 
-    enum ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind, enum ESMC_StaggerLoc staggerloc,
+    enum ESMC_TypeKind_Flag typekind, enum ESMC_StaggerLoc staggerloc,
     ESMC_InterfaceInt *gridToFieldMap, 
     ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
     const char *name, int *rc){
@@ -126,7 +126,7 @@ extern "C" {
 //--------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldCreateMeshTypeKind()"
-  ESMC_Field ESMC_FieldCreateMeshTypeKind(ESMC_Mesh mesh, enum ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind,
+  ESMC_Field ESMC_FieldCreateMeshTypeKind(ESMC_Mesh mesh, enum ESMC_TypeKind_Flag typekind,
     enum ESMC_MeshLoc_Flag meshloc, ESMC_InterfaceInt *gridToFieldMap, 
     ESMC_InterfaceInt *ungriddedLBound, ESMC_InterfaceInt *ungriddedUBound, 
     const char *name, int *rc){
@@ -300,8 +300,8 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
                             ESMC_InterfaceInt *srcMaskValues, 
                             ESMC_InterfaceInt *dstMaskValues,
                             ESMC_RouteHandle *routehandle, 
-                            enum ESMC_RegridMethod_Flag_Flag_Flag_Flag *regridmethod, 
-                            enum ESMC_UnmappedAction_Flag_Flag_Flag_Flag_Flag_Flag *unmappedaction,
+                            enum ESMC_RegridMethod_Flag *regridmethod, 
+                            enum ESMC_UnmappedAction_Flag *unmappedaction,
                             ESMC_Field *srcFracField,
                             ESMC_Field *dstFracField){
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.138 2012/07/17 22:46:01 rokuingh Exp $
+// $Id: ESMCI_Grid.C,v 1.139 2012/07/18 22:21:32 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -52,7 +52,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.138 2012/07/17 22:46:01 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.139 2012/07/18 22:21:32 rokuingh Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -71,13 +71,13 @@ extern "C" {
 void FTN_X(f_esmf_gridcreatenoperidim)(ESMCI::Grid **grid,
     int *maxIndex, int *len1, 
     ESMC_CoordSys_Flag *coordSys, int *cs_present,
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *coordTypeKind, int *ctk_present,
+    ESMC_TypeKind_Flag *coordTypeKind, int *ctk_present,
     int *rc);
 
 void FTN_X(f_esmf_gridcreate1peridim)(ESMCI::Grid **grid,
     int *maxIndex, int *len1, 
     ESMC_CoordSys_Flag *coordSys, int *cs_present,
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *coordTypeKind, int *ctk_present,
+    ESMC_TypeKind_Flag *coordTypeKind, int *ctk_present,
     ESMC_PoleKind_Flag *poleKind, int *pk_present, int *pksize,
     int *rc);
 }
@@ -123,7 +123,7 @@ static void _freeInterfaceInt(InterfaceInt **in);
 static int _createIsDEBnd(char **_isDELBnd, char **_isDEUBnd, 
                           DistGrid *distgrid,int *distgridToGridMap);
 
-int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *_typekind,
+int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind_Flag *_typekind,
               DistGrid *_distgrid, InterfaceInt *_gridEdgeLWidth, 
               InterfaceInt *_gridEdgeUWidth, InterfaceInt *_gridAlign,
                InterfaceInt *_distgridToGridMap,
@@ -134,7 +134,7 @@ int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind_Flag_Flag_Fl
               ESMC_IndexFlag *_indexflag, bool destroyDistgrid,
               bool destroyDELayout);
 
-int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *_typekind,
+int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind_Flag *_typekind,
               DistGrid *_distgrid, 
               InterfaceInt *_minIndex, InterfaceInt *_maxIndex,
 	      InterfaceInt *_localArbIndex, int localArbIndexCount,
@@ -173,7 +173,7 @@ int setDefaultsLUA(int dimCount,
 // !ARGUMENTS:
     ESMC_InterfaceInt maxIndex, 
     ESMC_CoordSys_Flag *coordSys,
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *coordTypeKind,
+    ESMC_TypeKind_Flag *coordTypeKind,
     int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -238,7 +238,7 @@ int setDefaultsLUA(int dimCount,
 // !ARGUMENTS:
     ESMC_InterfaceInt maxIndex, 
     ESMC_CoordSys_Flag *coordSys,
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *coordTypeKind,
+    ESMC_TypeKind_Flag *coordTypeKind,
     ESMC_PoleKind_Flag *poleKind,
     int *rc) {           // out - return code
 //
@@ -771,7 +771,7 @@ int Grid::addItemArray(
 //
                           int *staggerlocArg,             // (in) optional
                           int *itemArg,
-			  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekindArg,          
+			  ESMC_TypeKind_Flag *typekindArg,          
                           InterfaceInt *staggerEdgeLWidthArg, // (in) optional
                           InterfaceInt *staggerEdgeUWidthArg, // (in) optional
                           InterfaceInt *staggerAlignArg,   // (in) optional 
@@ -790,7 +790,7 @@ int Grid::addItemArray(
   Array *array;
   DistGrid *staggerDistgrid;
   int extent[1];
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind;
+  ESMC_TypeKind_Flag typekind;
 
 
   // initialize return code; assume routine not implemented
@@ -988,7 +988,7 @@ int Grid::addItemArrayArb(
 //
                           int *staggerlocArg,             // (in) optional
 			  int *itemArg,                   // (in) required
-			  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekindArg     // (in) optional          
+			  ESMC_TypeKind_Flag *typekindArg     // (in) optional          
   ) {
 //
 // !DESCRIPTION:
@@ -1003,7 +1003,7 @@ int Grid::addItemArrayArb(
   const int *distgridToArrayMap;
   Array *array;
   int extent[1];
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind;
+  ESMC_TypeKind_Flag typekind;
 
   // initialize return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
@@ -1226,7 +1226,7 @@ Grid *Grid::create(
 //
   int nameLenArg,                           // (in) 
   char *nameArg,                            // (in) optional
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekindArg,               // (in) optional
+  ESMC_TypeKind_Flag *typekindArg,               // (in) optional
   DistGrid *distgridArg,                    // (in) optional
   InterfaceInt *gridEdgeLWidthArg,           // (in) optional
   InterfaceInt *gridEdgeUWidthArg,           // (in) optional
@@ -1301,7 +1301,7 @@ Grid *Grid::create(
 //
   int nameLenArg,                           // (in) 
   char *nameArg,                            // (in) optional
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekindArg,               // (in) optional
+  ESMC_TypeKind_Flag *typekindArg,               // (in) optional
   DistGrid *distgridArg,                    // (in) optional
   InterfaceInt *minIndexArg,                // (in) optional
   InterfaceInt *maxIndexArg,                // (in)
@@ -2709,7 +2709,7 @@ int Grid::set(
 //
   int nameLenArg,                // (in) optional
   char *nameArg,                 // (in) optional
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekindArg,    // (in) optional
+  ESMC_TypeKind_Flag *typekindArg,    // (in) optional
   DistGrid *distgridArg,         // (in) optional
   InterfaceInt *gridEdgeLWidthArg,  // (in) optional
   InterfaceInt *gridEdgeUWidthArg,  // (in) optional
@@ -2775,7 +2775,7 @@ int Grid::set(
 
   //  if passed in, set typekind
   if (typekindArg != ESMC_NULL_POINTER) {
-    if (proto->typekind == ESMC_NULL_POINTER) proto->typekind= new ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag;
+    if (proto->typekind == ESMC_NULL_POINTER) proto->typekind= new ESMC_TypeKind_Flag;
     *(proto->typekind)=*typekindArg;
   }
 
@@ -3345,7 +3345,7 @@ int Grid::constructInternal(
 // !ARGUMENTS:
 //
   char *nameArg,                          // (in)
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindArg,              // (in)
+  ESMC_TypeKind_Flag typekindArg,              // (in)
   DistGrid *distgridArg,                  // (in)
   int distDimCountArg,                    // (in)
   int *distgridToGridMapArg,              // (in)
@@ -4863,7 +4863,7 @@ int Grid::serialize(
 
     SERIALIZE_VAR(cp, buffer,loffset, decompType, ESMC_GridDecompType);
 
-    SERIALIZE_VAR(cp, buffer,loffset,typekind,ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag);
+    SERIALIZE_VAR(cp, buffer,loffset,typekind,ESMC_TypeKind_Flag);
 
     SERIALIZE_VAR(cp, buffer,loffset,indexflag,ESMC_IndexFlag);
     
@@ -5108,7 +5108,7 @@ int Grid::deserialize(
 
   DESERIALIZE_VAR( buffer,loffset, decompType, ESMC_GridDecompType);
 
-  DESERIALIZE_VAR( buffer,loffset,typekind,ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag);
+  DESERIALIZE_VAR( buffer,loffset,typekind,ESMC_TypeKind_Flag);
 
   DESERIALIZE_VAR( buffer,loffset,indexflag,ESMC_IndexFlag);
 
@@ -5607,7 +5607,7 @@ int construct(
   Grid *gridArg, 
   int nameLenArg,                           // (in)
   char *nameArg,                            // (in) optional
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekindArg,               // (in) optional
+  ESMC_TypeKind_Flag *typekindArg,               // (in) optional
   DistGrid *distgridArg,                    // (in) 
   InterfaceInt *gridEdgeLWidthArg,             // (in) optional
   InterfaceInt *gridEdgeUWidthArg,             // (in) optional
@@ -5640,7 +5640,7 @@ int construct(
   int distDimCount;
   int undistDimCount;
   int *distgridToGridMap;
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind;
+  ESMC_TypeKind_Flag typekind;
   int *undistUBound;
   int *undistLBound;
   int *coordDimCount;
@@ -6114,7 +6114,7 @@ int construct(
   Grid *gridArg, 
   int nameLenArg,                           // (in)
   char *nameArg,                            // (in) optional
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekindArg,               // (in) optional
+  ESMC_TypeKind_Flag *typekindArg,               // (in) optional
   DistGrid *distgridArg,                    // (in) 
   InterfaceInt *minIndexArg,               // (in) optional
   InterfaceInt *maxIndexArg,                // (in)  
@@ -6144,7 +6144,7 @@ int construct(
   int distDimCount;
   int undistDimCount;
   int *distgridToGridMap;
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind;
+  ESMC_TypeKind_Flag typekind;
   int *gridEdgeLWidth;
   int *gridEdgeUWidth;
   int *gridAlign;

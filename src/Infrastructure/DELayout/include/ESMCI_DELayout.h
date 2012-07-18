@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.39 2012/07/17 22:45:49 rokuingh Exp $
+// $Id: ESMCI_DELayout.h,v 1.40 2012/07/18 22:21:19 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -176,26 +176,26 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     int ESMC_DELayoutCopy(void *srcdata, void *destdata, 
       int blen, int srcDE, int destDE);
     int ESMC_DELayoutCopy(void *srcdata, void *destdata, 
-      int len, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk, int srcDE, int destDE);
+      int len, ESMC_TypeKind_Flag dtk, int srcDE, int destDE);
     int ESMC_DELayoutExchange(void *srcData1, void *srcData2, 
       void *dstData1, void *dstData2, int blen1, int blen2, int de1, int de2);
     int ESMC_DELayoutExchange(void *srcData1, void *srcData2, 
-      void *dstData1, void *dstData2, int len1, int len2, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk1,
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk2, int de1, int de2);
+      void *dstData1, void *dstData2, int len1, int len2, ESMC_TypeKind_Flag dtk1,
+      ESMC_TypeKind_Flag dtk2, int de1, int de2);
     int ESMC_DELayoutBcast(void *data, int blen, int rootDE);
-    int ESMC_DELayoutBcast(void *data, int len, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk, int rootDE);
+    int ESMC_DELayoutBcast(void *data, int len, ESMC_TypeKind_Flag dtk, int rootDE);
     int ESMC_DELayoutScatter(void *srcdata, void *destdata, 
       int blen, int rootDE);
     int ESMC_DELayoutScatter(void *srcdata, void *destdata, 
-      int len, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk, int rootDE);
+      int len, ESMC_TypeKind_Flag dtk, int rootDE);
     int ESMC_DELayoutGather(void *srcdata, void *destdata, 
       int blen, int rootDE);
     int ESMC_DELayoutGather(void *srcdata, void *destdata, 
-      int len, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk, int rootDE);
+      int len, ESMC_TypeKind_Flag dtk, int rootDE);
     int ESMC_DELayoutGatherV(void *srcdata, void *destdata, 
       int *blen, int *bdestdispl, int rootDE);
     int ESMC_DELayoutGatherV(void *srcdata, void *destdata, 
-      int *blen, int *bdestdispl, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag dtk, int rootDE);
+      int *blen, int *bdestdispl, ESMC_TypeKind_Flag dtk, int rootDE);
     int ESMC_DELayoutFindDEtoPET(int npets);
     int ESMC_DELayoutFillLocal(int mypet);        
     
@@ -298,7 +298,7 @@ class XXE{
     XXE **xxeSubList;               // list of (XXE *) entries for which this
                                     // XXE object is responsible
     int xxeSubCount;                // number of elements in xxeSubList
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind[10];     // place the XXE can store TypeKind info
+    ESMC_TypeKind_Flag typekind[10];     // place the XXE can store TypeKind info
     std::vector<BufferInfo *>bufferInfoList; // vector of (BufferInfo *) entries
       // The bufferInfoList provides an extra level of indirection to XXE
       // managed communication buffers, and associated size information.

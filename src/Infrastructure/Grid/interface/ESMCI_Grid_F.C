@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid_F.C,v 1.97 2012/07/17 22:46:00 rokuingh Exp $
+// $Id: ESMCI_Grid_F.C,v 1.98 2012/07/18 22:21:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ extern "C" {
   ///////////////////////////////////////////////////////////////////////////////////
 
   void FTN_X(c_esmc_gridcreatefromdistgrid)(ESMCI::Grid **ptr, 
-    int *nameLen, char *name, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *coordTypeKind, 
+    int *nameLen, char *name, ESMC_TypeKind_Flag *coordTypeKind, 
 					  ESMCI::DistGrid **distgrid,
 					  ESMCI::InterfaceInt **distgridToGridMapArg, 
                                           ESMC_CoordSys_Flag *coordSys, 
@@ -138,7 +138,7 @@ extern "C" {
   ///////////////////////////////////////////////////////////////////////////////////
 
   void FTN_X(c_esmc_gridcreatedistgridarb)(ESMCI::Grid **ptr, 
-                                         int *nameLen, char *name, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *coordTypeKind, 
+                                         int *nameLen, char *name, ESMC_TypeKind_Flag *coordTypeKind, 
                                          ESMCI::DistGrid **distgrid,
                                          ESMCI::InterfaceInt **distDimArg, 
                                          int *arbDim,   
@@ -191,7 +191,7 @@ extern "C" {
   ///////////////////////////////////////////////////////////////////////////////////
 
   void FTN_X(c_esmc_gridget)(ESMCI::Grid **_grid, 
-                           ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *_coordTypeKind,
+                           ESMC_TypeKind_Flag *_coordTypeKind,
                            int *_dimCount, 
 			   int *_tileCount,
 			   ESMCI::DistGrid **_distgrid,
@@ -542,7 +542,7 @@ extern "C" {
   ///////////////////////////////////////////////////////////////////////////////////
 
   void FTN_X(c_esmc_gridgetstatus)(ESMCI::Grid **_grid, 
-                           ESMC_GridStatus_Flag_Flag *_status){
+                           ESMC_GridStatus_Flag *_status){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridgetstatus()"
 
@@ -679,7 +679,7 @@ extern "C" {
   void FTN_X(c_esmc_gridadditem)(ESMCI::Grid **grid, 
                                          int *staggerloc, 
                                          int *item,
-			                 ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *itemTypeKind,   
+			                 ESMC_TypeKind_Flag *itemTypeKind,   
                                          ESMCI::InterfaceInt **staggerEdgeLWidthArg, 
                                          ESMCI::InterfaceInt **staggerEdgeUWidthArg, 
                                          ESMCI::InterfaceInt **staggerAlignArg, 
@@ -706,7 +706,7 @@ extern "C" {
   void FTN_X(c_esmc_gridadditemarb)(ESMCI::Grid **grid, 
                                          int *staggerloc, 
                                          int *item,
-			                 ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *itemTypeKind,   
+			                 ESMC_TypeKind_Flag *itemTypeKind,   
                                          int *rc) {
     int localrc;
 #undef  ESMC_METHOD
@@ -749,7 +749,7 @@ extern "C" {
 
   // - ESMF-public methods:        
   void FTN_X(c_esmc_gridsetfromdistgrid)(ESMCI::Grid **grid, 
-    int *nameLen, char *name, ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *coordTypeKind, 
+    int *nameLen, char *name, ESMC_TypeKind_Flag *coordTypeKind, 
                                        ESMCI::DistGrid **distgrid,
                                        ESMCI::InterfaceInt **distgridToGridMapArg, 
                                        ESMCI::InterfaceInt **distDimArg, 

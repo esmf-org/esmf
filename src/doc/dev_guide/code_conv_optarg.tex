@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_optarg.tex,v 1.3 2012/07/17 22:46:22 rokuingh Exp $
+% CVS $Id: code_conv_optarg.tex,v 1.4 2012/07/18 22:21:54 rokuingh Exp $
 
 \subsection{Code: Optional Argument Conventions for the C/C++ API}
 
@@ -307,7 +307,7 @@ parsing block shown above. The difference is that in this case the
 The following example shows how an optional argument list check block can be
 structured to handle an optional argument whose type is call dependent. In this
 case the type of the \texttt{dValue} optional argument depends on the value of the
-\texttt{ESMC\_TypeKind\_Flag\_Flag\_Flag\_Flag\_Flag} argument \texttt{tk} (which is the last fixed argument).
+\texttt{ESMC\_TypeKind\_Flag} argument \texttt{tk} (which is the last fixed argument).
 \begin{verbatim}
   // check the optional argument list:
   ESMCI_ArgStart(argPtr,tk);

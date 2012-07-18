@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.36 2012/07/17 22:45:32 rokuingh Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.37 2012/07/18 22:20:56 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     static int redistStore(ArrayBundle *srcArraybundle,
       ArrayBundle *dstArraybundle, RouteHandle **routehandle,
       InterfaceInt *srcToDstTransposeMap,
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekindFactor = ESMF_NOKIND, void *factor = NULL);
+      ESMC_TypeKind_Flag typekindFactor = ESMF_NOKIND, void *factor = NULL);
     static int redist(ArrayBundle *srcArraybundle,
       ArrayBundle *dstArraybundle, RouteHandle **routehandle,
       bool checkflag=false);

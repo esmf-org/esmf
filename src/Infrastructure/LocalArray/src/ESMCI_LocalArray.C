@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray.C,v 1.25 2012/07/17 23:22:55 w6ws Exp $
+// $Id: ESMCI_LocalArray.C,v 1.26 2012/07/18 22:21:43 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.25 2012/07/17 23:22:55 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.26 2012/07/18 22:21:43 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
   
@@ -53,13 +53,13 @@ static const char *const version = "$Id: ESMCI_LocalArray.C,v 1.25 2012/07/17 23
 extern "C" {
 
   void FTN_X(f_esmf_localarrayf90allocate)(ESMCI::LocalArray**, int *, 
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag*, int *, int *, int *, int *);
+    ESMC_TypeKind_Flag*, int *, int *, int *, int *);
  
   void FTN_X(f_esmf_localarrayf90deallocate)(ESMCI::LocalArray**, int*, 
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *, int *);
+    ESMC_TypeKind_Flag *, int *);
  
   void FTN_X(f_esmf_localarrayadjust)(ESMCI::LocalArray**, int *,
-    ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag*, const int *, const int *, const int *, int *);
+    ESMC_TypeKind_Flag*, const int *, const int *, const int *, int *);
 
   void FTN_X(f_esmf_localarraycopyf90ptr)(const ESMCI::LocalArray** laIn, 
     ESMCI::LocalArray** laOut, int *rc);
@@ -143,7 +143,7 @@ int LocalArray::construct(
 // !ARGUMENTS:
   bool aflag,                 // allocate space for data?
   CopyFlag docopy,            // make a data copy from ibase_addr?
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag tk,           // I1, I2, I4, I8, R4, R8
+  ESMC_TypeKind_Flag tk,           // I1, I2, I4, I8, R4, R8
   int irank,                  // 1, 2, ..., ESMF_MAXDIM
   LocalArrayOrigin oflag,     // create called from Fortran or C++?
   bool dflag,                 // responsible for deallocation?
@@ -190,7 +190,7 @@ int LocalArray::construct(
   }
   origin = oflag;
   dealloc = dflag;
-  byte_count = ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(typekind) * totalcount; 
+  byte_count = ESMC_TypeKind_FlagSize(typekind) * totalcount; 
 
   // set Fortran dope vector if provided for existing allocation
   if (f90ptr != NULL)
@@ -293,7 +293,7 @@ LocalArray *LocalArray::create(
 //    pointer to newly allocated LocalArray object
 //
 // !ARGUMENTS:
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag tk,           // I1, I2, I4, I8, R4, R8
+  ESMC_TypeKind_Flag tk,           // I1, I2, I4, I8, R4, R8
   int rank,                   // 1, 2, ..., ESMF_MAXDIM
   LocalArrayOrigin oflag,     // caller is fortran or C++?
   int *rc){                   // return code
@@ -345,7 +345,7 @@ LocalArray *LocalArray::create(
 //    pointer to newly allocated ESMCI::LocalArray object
 //
 // !ARGUMENTS:
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag tk,           // I1, I2, I4, I8, R4, R8
+  ESMC_TypeKind_Flag tk,           // I1, I2, I4, I8, R4, R8
   int rank,                   // 1, 2, ..., ESMF_MAXDIM
   const int *counts,          // number of items in each dim
   void *base_addr,            // if non-null, this is already allocated memory
@@ -403,7 +403,7 @@ LocalArray *LocalArray::create(
 //    pointer to newly allocated ESMCI::LocalArray object
 //
 // !ARGUMENTS:
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag tk,           // I1, I2, I4, I8, R4, R8
+  ESMC_TypeKind_Flag tk,           // I1, I2, I4, I8, R4, R8
   int rank,                   // 1, 2, ..., ESMF_MAXDIM
   const int *counts,          // number of items in each dim
   const int *lbounds,         // lower index number per dim
@@ -546,7 +546,7 @@ LocalArray *LocalArray::create(
 
   // set some variables according to larrayIn
   int rank = larrayIn->getRank();
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind = larrayIn->getTypeKind();
+  ESMC_TypeKind_Flag typekind = larrayIn->getTypeKind();
   const int *counts = larrayIn->getCounts();
   
   // check that lbounds and ubounds arguments match counts
@@ -714,7 +714,7 @@ int LocalArray::setInfo(
   if (dflag)
     dealloc = *dflag;
 
-  byte_count = ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(typekind) * totalcount;
+  byte_count = ESMC_TypeKind_FlagSize(typekind) * totalcount;
 
   // Setup info for calculating index tuple location quickly
   // Needs to be done after lbounds and counts are set
@@ -832,7 +832,7 @@ void LocalArray::getDataInternal(
     off +=dimOff[i]*index[i];
   
   // Get Data 
-  *data=*((TYPE *)((char *)base_addr+ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(typekind)*off)); 
+  *data=*((TYPE *)((char *)base_addr+ESMC_TypeKind_FlagSize(typekind)*off)); 
 }
 //-----------------------------------------------------------------------------
 // Add more types here if necessary
@@ -930,7 +930,7 @@ void LocalArray::setDataInternal(
     off +=dimOff[i]*index[i];
   
   // Set Data 
-  *((TYPE *)((char *)base_addr+ESMC_TypeKind_Flag_Flag_Flag_Flag_FlagSize(typekind)*off))=data; 
+  *((TYPE *)((char *)base_addr+ESMC_TypeKind_FlagSize(typekind)*off))=data; 
 }
 //-----------------------------------------------------------------------------
 // Add more types here if necessary
@@ -1816,7 +1816,7 @@ int LocalArray::tkrPtrCopy(
 // !ARGUMENTS:
   void *dst, 
   void *src, 
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind,
+  ESMC_TypeKind_Flag typekind,
   int rank){
 //
 // !DESCRIPTION:

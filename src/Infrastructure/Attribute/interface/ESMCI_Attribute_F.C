@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.55 2012/07/17 22:45:42 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.56 2012/07/18 22:21:10 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.55 2012/07/17 22:45:42 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.56 2012/07/18 22:21:10 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1087,7 +1087,7 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,        // in - typekind
+      ESMC_TypeKind_Flag *tk,        // in - typekind
       int *count,               // in - must match actual length
       int *lens,                // in/out - length of strings
       char *valueList,          // out - character values
@@ -1110,7 +1110,7 @@ extern "C" {
 
   int status, j;
   unsigned int i,k;
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag attrTypeKind;
+  ESMC_TypeKind_Flag attrTypeKind;
   int* llens;
   int lcount;
   ESMCI::Attribute *attpack, *attr; 
@@ -1326,7 +1326,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,        // in - typekind
+      ESMC_TypeKind_Flag *tk,        // in - typekind
       int *count,               // in - must match actual length
       void *value,              // out - value
       char *convention,         // in - convention
@@ -1346,7 +1346,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 //EOP
 
   int status, attrCount;
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag attrTk;
+  ESMC_TypeKind_Flag attrTk;
   ESMCI::Attribute *attpack, *attr;
 
   // Initialize return code; assume routine not implemented
@@ -1911,7 +1911,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !ARGUMENTS:
       ESMC_Base **base,          // in/out - base object
       char *name,                // in - F90, non-null terminated string
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,         // in - typekind
+      ESMC_TypeKind_Flag *tk,         // in - typekind
       int *count,                 // in - number of items
       char *valueList,               // in - F90, non-null terminated string
       int *lens,                 // in - length of the char*s
@@ -2090,7 +2090,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !ARGUMENTS:
       ESMC_Base **base,          // in/out - base object
       char *name,                // in - F90, non-null terminated string
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,         // in - typekind
+      ESMC_TypeKind_Flag *tk,         // in - typekind
       int *count,                // in - item count
       void *value,               // in - F90, non-null terminated string
       char *convention,          // in - convention
@@ -2655,7 +2655,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,        // in - typekind
+      ESMC_TypeKind_Flag *tk,        // in - typekind
       int *count,               // in - must match actual length
       int *lens,                // in/out - length of strings
       char *valueList,          // out - character values
@@ -2670,7 +2670,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 
   int status, j;
   unsigned int i,k;
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag attrTypeKind;
+  ESMC_TypeKind_Flag attrTypeKind;
   int *llens;
   int lcount;
 
@@ -2804,7 +2804,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,        // in - typekind
+      ESMC_TypeKind_Flag *tk,        // in - typekind
       int *items,               // in - must match actual length
       void *value,              // out - value
       int *rc,                  // in - return code
@@ -2816,7 +2816,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 //EOP
 
   int status, attrItems;
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag attrTk;
+  ESMC_TypeKind_Flag attrTk;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -2939,7 +2939,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,        // out - typekind
+      ESMC_TypeKind_Flag *tk,        // out - typekind
       int *count,               // out - item count
       char *convention,          // in - convention
       char *purpose,             // in - purpose
@@ -3111,7 +3111,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,        // out - typekind
+      ESMC_TypeKind_Flag *tk,        // out - typekind
       int *count,               // out - item count
       int *rc,                  // in - return code
       ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for name
@@ -3189,7 +3189,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
       ESMC_Base **base,         // in/out - base object
       int *num,                 // in - attr number
       char *name,               // out - F90, non-null terminated string
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,        // out - typekind
+      ESMC_TypeKind_Flag *tk,        // out - typekind
       int *count,               // out - item count
       int *rc,                  // in - return code
       ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for name
@@ -3583,7 +3583,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,        // in - typekind
+      ESMC_TypeKind_Flag *tk,        // in - typekind
       int *count,               // in - number of value(s)
       char *valueList,          // in - char string
       int *lens,                // in - lengths
@@ -3679,7 +3679,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       char *name,               // in - F90, non-null terminated string
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,        // in - typekind
+      ESMC_TypeKind_Flag *tk,        // in - typekind
       int *count,               // in - number of value(s)
       void *value,              // in - any value or list of values
       int *rc,                  // in - return code
@@ -3798,7 +3798,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
       ESMC_Base **base,         // in/out - base object
       char *object,             // in - F90, object of the Attribute
       char *name,               // in - F90, non-null terminated string
-      ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *tk,        // in - typekind of the Attribute
+      ESMC_TypeKind_Flag *tk,        // in - typekind of the Attribute
       int *count,               // in - items
       void *value,              // in - value
       int *rc,                  // in - return code
@@ -3892,7 +3892,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 //
 //EOP
 
-  ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag tk;
+  ESMC_TypeKind_Flag tk;
   int count, status;
 
   // Initialize return code; assume routine not implemented

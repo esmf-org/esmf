@@ -1,4 +1,4 @@
-// $Id: ESMC_ArraySpec.h,v 1.23 2012/07/17 22:45:36 rokuingh Exp $
+// $Id: ESMC_ArraySpec.h,v 1.24 2012/07/18 22:21:01 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -54,7 +54,7 @@ typedef struct{
 int ESMC_ArraySpecGet(
   ESMC_ArraySpec arrayspec,         // inout
   int *rank,                        // in
-  enum ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag *typekind      // in
+  enum ESMC_TypeKind_Flag *typekind      // in
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -84,7 +84,7 @@ int ESMC_ArraySpecGet(
 int ESMC_ArraySpecSet(
   ESMC_ArraySpec *arrayspec,         // inout 
   int rank,                          // in
-  enum ESMC_TypeKind_Flag_Flag_Flag_Flag_Flag typekind        // in
+  enum ESMC_TypeKind_Flag typekind        // in
 );
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
