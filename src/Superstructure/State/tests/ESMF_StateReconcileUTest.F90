@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileUTest.F90,v 1.51 2012/07/17 18:34:57 w6ws Exp $
+! $Id: ESMF_StateReconcileUTest.F90,v 1.52 2012/07/18 19:11:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -165,10 +165,13 @@ program ESMF_StateReconcileUTest
     type(ESMF_Array)     :: array1, array1_alternate, array2
     type(ESMF_DistGrid)  :: distgrid
     type(ESMF_Field)     :: field_nested, field_dummy
-    type(ESMF_Field)     :: field_attr(4), field_attr_new(size (field_attr))
+    type(ESMF_Field)     :: field_attr(5)
+    type(ESMF_Field)     :: field_attr_new(size (field_attr))
+    type(ESMF_FieldBundle) :: fb_attr, fb_attr_new
     type(ESMF_VM) :: vm
     character(len=ESMF_MAXSTR) :: comp1name, comp2name, statename, fieldname
     character(len=ESMF_MAXSTR) :: array1name
+    character(len=ESMF_MAXSTR) :: fb_name
     character(4) :: localpet_str, temppet_str
     integer :: attr_val(1)
     integer :: i
@@ -1003,41 +1006,40 @@ program ESMF_StateReconcileUTest
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
-
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Adding Field to State on PET 0 test"
     rc = ESMF_SUCCESS
     if (localPet == 0) then
       do, i=1, size (field_attr)
 	write (fieldname, '(a,i4)') 'PET 0 Field', i
 	field_attr(i) = ESMF_FieldEmptyCreate (name=fieldname, rc=rc)
-	if (rc /= ESMF_SUCCESS) go to 5
+	if (rc /= ESMF_SUCCESS) go to 50
 
 	call ESMF_AttributeSet (field_attr(i),  &
             name=trim (fieldname) // ' attribute',  &
             valueList=(/ i /),  &
             rc=rc)
-	if (rc /= ESMF_SUCCESS) go to 5
+	if (rc /= ESMF_SUCCESS) go to 50
       end do
-      
+
       call ESMF_StateAdd (state_attr, field_attr, rc=rc)
-      if (rc /= ESMF_SUCCESS) go to 5
+      if (rc /= ESMF_SUCCESS) go to 50
     end if
 
-5 continue
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Adding Field to State on PET 0"
+50 continue
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Reconciling state with Field and Attribute"
+    write(name, *) "Reconciling state with Field and Attribute test"
     call ESMF_StateReconcile (state_attr, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Accessing reconciled Fields"
+    write(name, *) "Accessing reconciled Fields test"
     do, i=1, size (field_attr_new)
 	write (fieldname, '(a,i4)') 'PET 0 Field', i
       call ESMF_StateGet (state_attr,  &
@@ -1050,7 +1052,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Accessing reconciled Field Attributes"
+    write(name, *) "Accessing reconciled Field Attributes test"
     do, i=1, size (field_attr_new)
 	write (fieldname, '(a,i4)') 'PET 0 Field', i
       call ESMF_AttributeGet (field_attr_new(i),  &
@@ -1063,6 +1065,44 @@ program ESMF_StateReconcileUTest
         exit
       end if
     end do
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Create a FieldBundle with Attributes on PET 0 test"
+    fb_name = 'my fields'
+    if (localPet == 0) then
+      fb_attr = ESMF_FieldBundleCreate (  &
+          fieldList=(/field_attr/),  &
+          name=fb_name,  &
+          rc=rc)
+      if (rc /= ESMF_SUCCESS) go to 55
+
+      call ESMF_StateAdd (state_attr, (/ fb_attr /), rc=rc)
+      if (rc /= ESMF_SUCCESS) go to 55
+    else
+      rc = ESMF_SUCCESS
+    end if
+
+ 55 continue
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Reconciling state with FieldBundle and Attributes test"
+    call ESMF_StateReconcile (state_attr, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
+    call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Access reconciled FieldBundle test"
+    call ESMF_StateGet (state_attr,  &
+        itemName=fb_name,  &
+        fieldBundle=fb_attr_new,  &
+        rc=rc)
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
