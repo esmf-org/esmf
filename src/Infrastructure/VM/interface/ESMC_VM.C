@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.14 2012/07/17 21:25:51 svasquez Exp $
+// $Id: ESMC_VM.C,v 1.15 2012/07/18 18:04:57 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.14 2012/07/17 21:25:51 svasquez Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.15 2012/07/18 18:04:57 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -68,7 +68,7 @@ ESMC_VM ESMC_VMGetGlobal(int *rc){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  *rc = ESMC_RC_NOT_IMPL;                 // final return code
+  if (rc) *rc = ESMC_RC_NOT_IMPL;         // final return code
 
   ESMC_VM vm;
   vm.ptr = (void *)NULL; // initialize
@@ -91,7 +91,7 @@ ESMC_VM ESMC_VMGetCurrent(int *rc){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  *rc = ESMC_RC_NOT_IMPL;                 // final return code
+  if (rc) *rc = ESMC_RC_NOT_IMPL;         // final return code
 
   ESMC_VM vm;
   vm.ptr = (void *)NULL; // initialize
