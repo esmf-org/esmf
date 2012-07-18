@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.369 2012/01/06 20:16:40 svasquez Exp $
+! $Id: ESMF_Field.F90,v 1.370 2012/07/18 20:07:56 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -141,7 +141,7 @@ module ESMF_FieldMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Field.F90,v 1.369 2012/01/06 20:16:40 svasquez Exp $'
+    '$Id: ESMF_Field.F90,v 1.370 2012/07/18 20:07:56 w6ws Exp $'
 
 !==============================================================================
 !
@@ -453,8 +453,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! shortcut to internals
       fp => field%ftypep
 
-      call c_ESMC_BaseSerialize(fp%base, buffer(1), length, offset, &
-                                 lattreconflag, linquireflag, localrc)
+      call ESMF_BaseSerialize(fp%base, buffer, offset, &
+                                 lattreconflag, linquireflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -464,7 +464,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  fp%dimCount, fp%gridToFieldMap, &
                                  fp%ungriddedLBound, fp%ungriddedUBound, &
                                  fp%totalLWidth, fp%totalUWidth, &
-                                 buffer(1), length, offset, linquireflag, localrc)
+                                 buffer, length, offset, linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -480,7 +480,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       if (fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
-          call c_ESMC_ArraySerialize(fp%array, buffer(1), length, offset, &
+          call c_ESMC_ArraySerialize(fp%array, buffer, length, offset, &
                                      lattreconflag, linquireflag, localrc)
           if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
@@ -561,7 +561,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Deserialize Base
-      call c_ESMC_BaseDeserialize(fp%base, buffer(1), offset, lattreconflag, localrc)
+      fp%base = ESMF_BaseDeserialize(buffer, offset, lattreconflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -578,7 +578,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                    fp%dimCount, fp%gridToFieldMap, &
                                    fp%ungriddedLBound, fp%ungriddedUBound, &
                                    fp%totalLWidth, fp%totalUWidth, &
-                                   buffer(1), offset, localrc)
+                                   buffer, offset, localrc)
       if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -605,7 +605,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       if (fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
-          call c_ESMC_ArrayDeserialize(fp%array, buffer(1), offset, &
+          call c_ESMC_ArrayDeserialize(fp%array, buffer, offset, &
                                       lattreconflag, localrc)
           if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
