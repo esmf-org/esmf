@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.36 2012/03/26 15:49:08 feiliu Exp $
+! $Id: ESMF_XGrid.F90,v 1.37 2012/07/18 21:57:05 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -149,7 +149,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.36 2012/03/26 15:49:08 feiliu Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.37 2012/07/18 21:57:05 w6ws Exp $'
 
 !==============================================================================
 !
@@ -817,8 +817,8 @@ contains
       ! shortcut to internals
       fp => xgrid%xgtypep
 
-      call c_ESMC_BaseSerialize(fp%base, buffer(1), length, offset, &
-                                 lattreconflag, linquireflag, localrc)
+      call ESMF_BaseSerialize(fp%base, buffer, offset, &
+                                 lattreconflag, linquireflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -843,13 +843,13 @@ contains
       flag = 0
       if(fp%storeOverlay) flag = 1
       call c_ESMC_XGridSerialize(s, ngridA, ngridB, fp%online, flag, &
-                                 buffer(1), length, offset, linquireflag, localrc)
+                                 buffer, length, offset, linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! serialize the balanced distgrid
-      call C_ESMC_DistGridSerialize(fp%distgridM, buffer(1), length, offset, &
+      call c_ESMC_DistGridSerialize(fp%distgridM, buffer, length, offset, &
                                    linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                ESMF_ERR_PASSTHRU, &
@@ -859,7 +859,7 @@ contains
       if(associated(fp%distgridA)) then
           ngridA = size(fp%distgridA,1)
           do i = 1, ngridA
-            call C_ESMC_DistGridSerialize(fp%distgridA(i), buffer(1), length, offset, &
+            call c_ESMC_DistGridSerialize(fp%distgridA(i), buffer, length, offset, &
                                          linquireflag, localrc)
             if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
@@ -870,7 +870,7 @@ contains
       if(associated(fp%distgridB)) then
           ngridB = size(fp%distgridB,1)
           do i = 1, ngridB
-            call C_ESMC_DistGridSerialize(fp%distgridB(i), buffer(1), length, offset, &
+            call c_ESMC_DistGridSerialize(fp%distgridB(i), buffer, length, offset, &
                                          linquireflag, localrc)
             if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
@@ -1073,7 +1073,7 @@ contains
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Deserialize Base
-      call c_ESMC_BaseDeserialize(fp%base, buffer(1), offset, lattreconflag, localrc)
+      fp%base = ESMF_BaseDeserialize(buffer, offset, lattreconflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1086,13 +1086,13 @@ contains
       ! call into the C api to deserialize this status array and other meta-data
       flag = 0
       call c_ESMC_XGridDeserialize(s, ngridA, ngridB, fp%online, flag, &
-                                 buffer(1), offset, localrc)
+                                 buffer, offset, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Deserialize the balanced distgrid
-      call C_ESMC_DistGridDeserialize(fp%distgridM, buffer(1), offset, &
+      call C_ESMC_DistGridDeserialize(fp%distgridM, buffer, offset, &
                                    localrc)
       if (ESMF_LogFoundError(localrc, &
                                ESMF_ERR_PASSTHRU, &
@@ -1115,7 +1115,7 @@ contains
       ! Deserialize the rest of the XGrid members
       if(associated(fp%distgridA)) then
           do i = 1, ngridA
-            call C_ESMC_DistGridDeserialize(fp%distgridA(i), buffer(1), offset, &
+            call C_ESMC_DistGridDeserialize(fp%distgridA(i), buffer, offset, &
                                      localrc)
             if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
@@ -1125,7 +1125,7 @@ contains
 
       if(associated(fp%distgridB)) then
           do i = 1, ngridB
-            call C_ESMC_DistGridDeserialize(fp%distgridB(i), buffer(1), offset, &
+            call C_ESMC_DistGridDeserialize(fp%distgridB(i), buffer, offset, &
                                      localrc)
             if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
