@@ -1,4 +1,4 @@
-! $Id: ESMF_StateRemRep.cppF90,v 1.17 2012/07/11 23:56:54 w6ws Exp $
+! $Id: ESMF_StateRemRep.cppF90,v 1.18 2012/07/19 20:09:07 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_StateRemRepMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateRemRep.cppF90,v 1.17 2012/07/11 23:56:54 w6ws Exp $'
+      '$Id: ESMF_StateRemRep.cppF90,v 1.18 2012/07/19 20:09:07 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -143,7 +143,7 @@ contains
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_StateRemove"
 !BOP
-! !IROUTINE: ESMF_StateRemove - Remove an item from a State
+! !IROUTINE: ESMF_StateRemove - Remove an item from a State - (DEPRECATED METHOD)
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_StateRemove ()
@@ -152,7 +152,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)          :: state
-    character(*),     intent(in)             :: itemName ! DEPRECATED ARG
+    character(*),     intent(in)             :: itemName
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,          intent(in),   optional :: relaxedFlag
     integer,          intent(out),  optional :: rc
@@ -160,8 +160,9 @@ contains
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
-! \item Deprecated as of ESMF 5.3.1, in favor of the list version, for
-! consistency with other ESMF container operations which use lists.
+! \item\apiDeprecatedMethodWithReplacement{5.3.1}{ESMF\_StateRemoveList}{esmfstateremovelist}
+! Rationale:  The list version is consistent with other ESMF container
+! operations which use lists.
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -172,8 +173,6 @@ contains
 ! \item[state]
 !      The {\tt ESMF\_State} within which {\tt itemName} will be removed.
 ! \item[itemName]
-!      \apiDeprecatedArgWithReplacement{itemNameList}
-!
 !      The name of the item to be removed.  This is a reference only.
 !      The item itself is unchanged.
 ! 
@@ -203,6 +202,11 @@ contains
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
+    call ESMF_LogWrite (  &
+        "Scalar itemName argument is deprecated.  Use itemNameList instead.",  &
+        logmsgFlag=ESMF_LOGMSG_WARNING, method=ESMF_METHOD,  &
+        rc=localrc)
+
     call ESMF_StateRemoveList (state, (/ itemName /),  &
         relaxedflag=relaxedflag,  rc=localrc)
 
@@ -216,6 +220,7 @@ contains
 ^define ESMF_METHOD "ESMF_StateRemoveList"
 !BOP
 ! !IROUTINE: ESMF_StateRemove - Remove a list of items from a State
+! \label{esmfstateremovelist}
 !
 ! !INTERFACE:
 ! ! Private name; call using ESMF_StateRemove ()
@@ -317,6 +322,9 @@ contains
 
       call ESMF_ContainerRemove (localstatep%stateContainer,  &
           itemNameList=(/ itemNameList(i)(ipos:namelen) /), rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Handle the attribute heirarchy
       linkChange = ESMF_TRUE
