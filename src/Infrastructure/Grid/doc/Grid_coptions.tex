@@ -1,0 +1,156 @@
+% $Id: Grid_coptions.tex,v 1.1 2012/07/19 17:52:32 rokuingh Exp $
+
+\subsubsection{ESMC\_COORDSYS}
+\label{const:ccoordsys}
+
+{\sf DESCRIPTION:\\}
+ A set of values which indicates in which system the coordinates in the Grid are. This value is useful both to indicate to 
+other users the type of the coordinates, but also to control how the coordinates are interpreted in regridding methods 
+(e.g. {\tt ESMC\_FieldRegridStore()}).
+
+The type of this flag is:
+
+{\tt type(ESMC\_CoordSys\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMC\_COORDSYS\_CART] Cartesian coordinate system. In this system, the cartesian coordinates are mapped to the Grid coordinate dimensions in the following order: x,y,z. (E.g. using {\tt coordDim=2} in ESMC\_GridGetCoord() references the y dimension) 
+
+\item [ESMC\_COORDSYS\_SPH\_DEG] Spherical coordinates in degrees. In this system, the spherical coordinates are mapped to the Grid coordinate dimensions in the following order: longitude, latitude, radius. (E.g. using {\tt coordDim=2} in ESMC\_GridGetCoord() references the latitude dimension) Note, however, that ESMC\_FieldRegridStore() currently just supports longitude and latitude (i.e. with this system, only Grids of dimension 2 are supported in the regridding).
+
+\item [ESMC\_COORDSYS\_SPH\_RAD] Spherical coordinates in radians. In this system, the spherical coordinates are mapped to the Grid coordinate dimensions in the following order: longitude, latitude, radius. (E.g. using {\tt coordDim=2} in ESMC\_GridGetCoord() references the latitude dimension) Note, however, that ESMC\_FieldRegridStore() currently just supports longitude and latitude (i.e. with this system, only Grids of dimension 2 are supported in the regridding).
+
+\end{description}
+
+
+\subsubsection{ESMC\_GRIDITEM}
+\label{const:cgriditem}
+
+{\sf DESCRIPTION:\\}
+The ESMC Grid can contain other kinds of data besides coordinates. 
+This data is referred to as Grid ``items''. Some items may be used
+by ESMC for calculations involving the Grid. The following
+are the valid values of ESMC\_GridItem\_Flag.
+
+The type of this flag is:
+
+{\tt type(ESMC\_GridItem\_Flag)}
+
+The valid values are:
+\newline
+\begin{tabular}{|l|c|c|c|c||}
+\hline
+\hline
+Item Label & {\bf Type Restriction}  & {\bf Type Default} & {\bf ESMC Uses} & {\bf Controls} \\
+\hline
+{\bf ESMC\_GRIDITEM\_MASK}  & ESMC\_TYPEKIND\_I4 & ESMC\_TYPEKIND\_I4 & YES & Masking in Regrid \\
+{\bf ESMC\_GRIDITEM\_AREA} & NONE & ESMC\_TYPEKIND\_R8 & YES & Conservation in Regrid \\
+\hline
+\hline
+\end{tabular}
+
+
+\subsubsection{ESMC\_GRIDSTATUS}
+\label{const:cgridstatus}
+
+{\sf DESCRIPTION:\\}
+The ESMC Grid class can exist in two states. These states are
+present so that the library code can detect if a Grid has been
+appropriately setup for the task at hand. The following
+are the valid values of ESMC\_GRIDSTATUS.
+
+The type of this flag is:
+
+{\tt type(ESMC\_GridStatus\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMC\_GRIDSTATUS\_EMPTY:] Status after a Grid has been created with 
+      {\tt ESMC\_GridEmptyCreate}.  A Grid object container is allocated but
+      space for internal objects is not.  Topology information and coordinate
+      information is incomplete.  This object can be used in {\tt ESMC\_GridEmptyComplete()}
+      methods in which additional information is added to the Grid.
+\item [ESMC\_GRIDSTATUS\_COMPLETE:] The Grid has a specific topology and
+      distribution, but incomplete coordinate arrays.  The Grid can be used
+      as the basis for allocating a Field, and coordinates can be added
+      via {\tt ESMC\_GridCoordAdd()} to allow other functionality. 
+\end{description}
+
+
+\subsubsection{ESMC\_POLEKIND}
+\label{const:cpolekind}
+
+{\sf DESCRIPTION:\\}
+This type describes the type of connection that occurs at the pole when a Grid is 
+created with {\tt ESMC\_GridCreate1PeriodicDim()}.
+
+The type of this flag is:
+
+{\tt type(ESMC\_PoleKind\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMC\_POLEKIND\_NONE] No connection at pole.
+
+\item [ESMC\_POLEKIND\_MONOPOLE] This edge is connected to itself. Given
+that the edge is n elements long, then element i is connected to
+element i+n/2.
+
+\item [ESMC\_POLEKIND\_BIPOLE] This edge is connected to itself. Given
+that the edge is n elements long, element i is connected to element n-i-1.
+\end{description}
+
+
+\subsubsection{ESMC\_STAGGERLOC}
+\label{const:cstaggerloc}
+
+ {\sf DESCRIPTION:\\}
+ In the ESMC Grid class, data can be located at different positions in a
+ Grid cell.  When setting or retrieving coordinate data the stagger location is
+ specified to tell the Grid method  from where in the cell to get the data. 
+ Although the user may define their own custom stagger locations, 
+ ESMC provides a set of predefined locations for ease of use. The
+following are the valid predefined stagger locations. 
+
+\medskip
+
+\begin{center}
+\begin{figure}
+\center
+\scalebox{0.75}{\includegraphics{GridStaggerLoc2D}}
+\caption{2D Predefined Stagger Locations}
+\label{fig:gridstaggerloc2d}
+\end{figure}
+\end{center}
+
+The 2D predefined stagger locations (illustrated in figure~\ref{fig:gridstaggerloc2d}) are:\\
+\begin{description}
+\item [ESMC\_STAGGERLOC\_CENTER:] The center of the cell.
+\item [ESMC\_STAGGERLOC\_CORNER:] The corners of the cell.
+\item [ESMC\_STAGGERLOC\_EDGE1:] The edges offset from the center in the 1st dimension.
+\item [ESMC\_STAGGERLOC\_EDGE2:] The edges offset from the center in the 2nd dimension.
+\end{description}
+
+\medskip
+
+\begin{center}
+\begin{figure}
+\center
+\scalebox{1.0}{\includegraphics{GridStaggerLoc3D}}
+\caption{3D Predefined Stagger Locations}
+\label{fig:gridstaggerloc3d}
+\end{figure}
+\end{center}
+
+The 3D predefined stagger locations (illustrated in figure~\ref{fig:gridstaggerloc3d}) are:\\
+\begin{description}
+\item [ESMC\_STAGGERLOC\_CENTER\_VCENTER:] The center of the 3D cell.
+\item [ESMC\_STAGGERLOC\_CORNER\_VCENTER:] Half way up the vertical edges of the cell.
+\item [ESMC\_STAGGERLOC\_EDGE1\_VCENTER:] The center of the face bounded by edge 1 and the vertical dimension.
+\item [ESMC\_STAGGERLOC\_EDGE2\_VCENTER:] The center of the face bounded by edge 2 and the vertical dimension. 
+\item [ESMC\_STAGGERLOC\_CORNER\_VFACE:] The corners of the 3D cell.
+\item [ESMC\_STAGGERLOC\_EDGE1\_VFACE:] The center of the edges of the 3D cell parallel offset from the center in the 1st dimension.
+\item [ESMC\_STAGGERLOC\_EDGE2\_VFACE:] The center of the edges of the 3D cell parallel offset from the center in the 2nd dimension.
+\item [ESMC\_STAGGERLOC\_CENTER\_VFACE:] The center of the top and bottom face. The face bounded by the 1st and 2nd dimensions. 
+\end{description}
+
