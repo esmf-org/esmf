@@ -1,4 +1,4 @@
-! $Id: ESMF_StateRemRep.cppF90,v 1.18 2012/07/19 20:09:07 w6ws Exp $
+! $Id: ESMF_StateRemRep.cppF90,v 1.19 2012/07/19 22:16:01 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@ module ESMF_StateRemRepMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateRemRep.cppF90,v 1.18 2012/07/19 20:09:07 w6ws Exp $'
+      '$Id: ESMF_StateRemRep.cppF90,v 1.19 2012/07/19 22:16:01 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -160,7 +160,7 @@ contains
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
-! \item\apiDeprecatedMethodWithReplacement{5.3.1}{ESMF\_StateRemoveList}{esmfstateremovelist}
+! \item\apiDeprecatedMethodWithReplacement{5.3.1}{ESMF\_StateRemove}{esmfstateremovelist}
 ! Rationale:  The list version is consistent with other ESMF container
 ! operations which use lists.
 ! \end{itemize}
@@ -179,9 +179,9 @@ contains
 !      If the {\tt state} contains nested {\tt ESMF\_State}s,
 !      the {\tt itemName} argument may specify a fully qualified name
 !      to remove the desired item with a single call.  This is performed
-!      using the ``/'' character to separate the names of the intermediate
+!      using the "/" character to separate the names of the intermediate
 !      State names leading to the desired item.  (E.g.,
-!      {\tt itemName=``state1/state12/item''}.
+!      {\tt itemName="state1/state12/item"}.
 !
 !      Since an item could potentially be referenced by multiple containers,
 !      it remains the responsibility of the user to manage its
@@ -252,9 +252,9 @@ contains
 !      If the {\tt state} contains nested {\tt ESMF\_State}s,
 !      the {\tt itemName} arguments may specify fully qualified names
 !      to remove the desired items with a single call.  This is performed
-!      using the ``/'' character to separate the names of the intermediate
+!      using the "/" character to separate the names of the intermediate
 !      State names leading to the desired items.  (E.g.,
-!      {\tt itemName=``state1/state12/item''}.
+!      {\tt itemName="state1/state12/item"}.
 !
 !      Since items could potentially be referenced by multiple containers,
 !      it remains the responsibility of the user to manage their
