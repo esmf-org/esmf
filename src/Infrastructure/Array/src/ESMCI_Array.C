@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.152 2012/07/18 22:52:32 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.153 2012/07/19 17:05:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.152 2012/07/18 22:52:32 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.153 2012/07/19 17:05:08 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -380,6 +380,9 @@ int Array::constructContiguousFlag(int redDimCount){
       }
     } // jj
   }
+  
+  // return successfully
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
