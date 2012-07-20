@@ -1,4 +1,4 @@
-! $Id: ocean_comp.F90,v 1.9 2012/05/14 19:34:25 feiliu Exp $
+! $Id: ocean_comp.F90,v 1.10 2012/07/20 22:57:31 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -100,6 +100,7 @@ module ocean_comp
     type(ESMF_Grid)       :: grid
     type(ESMF_Field)      :: field
     type(ESMF_VM)         :: vm
+    type(ESMF_State)      :: ocean_export
     integer               :: petCount, localPet
     
     ! Initialize return code
@@ -111,6 +112,10 @@ module ocean_comp
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     print *, "Ocean Init starting, localPet =", localPet
+
+    ocean_export = ESMF_StateCreate(name="ocean_export",  &
+                                    stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
     
     ! Create the source Field and add it to the export State
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
@@ -123,7 +128,9 @@ module ocean_comp
     field = ESMF_FieldCreate(arrayspec=arrayspec, grid=grid, &
       indexflag=ESMF_INDEX_GLOBAL, name="F_ocn", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(exportState, (/field/), rc=rc)
+    call ESMF_StateAdd(ocean_export, (/field/), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateAdd(exportState, (/ocean_export/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, "ocean Init returning"

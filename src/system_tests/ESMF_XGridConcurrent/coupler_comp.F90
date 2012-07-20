@@ -1,4 +1,4 @@
-! $Id: coupler_comp.F90,v 1.9 2012/05/14 19:34:25 feiliu Exp $
+! $Id: coupler_comp.F90,v 1.10 2012/07/20 22:57:31 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -202,10 +202,10 @@ module coupler_comp
     print *, "User Coupler Run starting"
 
     ! Get source Fields out of import state
-    call ESMF_StateGet(importState, itemName="landocn export/ocean export/F_ocn", field=F_ocn, &
+    call ESMF_StateGet(importState, itemName="ocean_export/F_ocn", field=F_ocn, &
         rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGet(importState, itemName="landocn export/land export/F_lnd", field=F_lnd, &
+    call ESMF_StateGet(importState, itemName="land_export/F_lnd", field=F_lnd, &
         rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
