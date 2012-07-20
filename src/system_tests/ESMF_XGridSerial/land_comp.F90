@@ -1,4 +1,4 @@
-! $Id: land_comp.F90,v 1.7 2011/06/30 06:01:36 theurich Exp $
+! $Id: land_comp.F90,v 1.8 2012/07/20 22:43:22 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -16,6 +16,7 @@ module land_comp
 
   ! ESMF Framework module
   use ESMF
+  use util_mod
 
   implicit none
     
@@ -99,33 +100,33 @@ module land_comp
     type(ESMF_Grid)       :: grid
     type(ESMF_Field)      :: field
     type(ESMF_VM)         :: vm
-    integer               :: petCount
+    integer               :: petCount, localPet
     
     ! Initialize return code
     rc = ESMF_SUCCESS
 
-    print *, "Land Init starting"
-
     ! Determine petCount
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+    call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+    print *, "Land Init starting, localPet =", localPet
     
     ! Create the source Field and add it to the export State
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/1,2/), &
-      rc=rc)
+    !
+    grid = make_grid_sph(45,120,8.,1.5,0.,-90., msx=200., mex=360., msy=-90., mey=90., &
+          maskvalue=4, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    grid = ESMF_GridCreate(distgrid=distgrid, destroyDistGrid=.true., &
-        indexflag=ESMF_INDEX_GLOBAL, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
+    !
     field = ESMF_FieldCreate(arrayspec=arrayspec, grid=grid, &
       indexflag=ESMF_INDEX_GLOBAL, name="F_lnd", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateAdd(exportState, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_StatePrint(exportState, rc=rc)
    
     print *, "land Init returning"
 

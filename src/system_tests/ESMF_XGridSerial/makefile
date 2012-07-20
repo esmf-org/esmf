@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2010/10/11 21:16:04 w6ws Exp $ 
+# $Id: makefile,v 1.4 2012/07/20 22:43:22 feiliu Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -14,7 +14,7 @@ SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_XGridSerialSTest
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
-SYSTEM_TESTS_OBJ      = atmos_comp.o land_comp.o ocean_comp.o coupler_comp.o
+SYSTEM_TESTS_OBJ      = util_mod.o atmos_comp.o land_comp.o ocean_comp.o coupler_comp.o
 
 SYSTEM_TESTS_RUN      = RUN_XGridSerial
 
@@ -32,7 +32,7 @@ CLOBBERDIRS =
 
 
 RUN_XGridSerial:
-	$(MAKE) TNAME=XGridSerial NP=6 stest
+	$(MAKE) TNAME=XGridSerial NP=4 stest
 
 RUN_XGridSerialUNI:
 	$(MAKE) TNAME=XGridSerial NP=1 stest
