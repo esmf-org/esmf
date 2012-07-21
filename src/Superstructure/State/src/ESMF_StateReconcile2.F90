@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.19 2012/07/18 20:25:17 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.20 2012/07/21 02:53:16 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@ module ESMF_StateReconcile2Mod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-  '$Id: ESMF_StateReconcile2.F90,v 1.19 2012/07/18 20:25:17 w6ws Exp $'
+  '$Id: ESMF_StateReconcile2.F90,v 1.20 2012/07/21 02:53:16 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
@@ -864,7 +864,7 @@ end if
 
     integer :: i
     integer :: stateitem_type
-    character(32) :: errstring
+    character(ESMF_MAXSTR) :: errstring
 
     integer :: mypet
 
@@ -2453,6 +2453,7 @@ end if
     integer :: localrc
     integer :: mypet, npets
     character(16) :: answer
+    character(10) :: time
     logical :: localask
 
     call ESMF_VMGetCurrent(vm=vm, rc=localrc)
@@ -2474,7 +2475,9 @@ end if
       call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
       call ESMF_VMBarrier (vm)
       if (mypet == 0) then
-	write (ESMF_UtilIOStdout,*) text
+        call date_and_time (time=time)
+	write (ESMF_UtilIOStdout,*)  &
+          time(1:2), ':', time(3:4), ':', time(5:), ': ', text
 	call ESMF_UtilIOUnitflush (ESMF_UtilIOStdout)
       end if
       call ESMF_VMBarrier (vm)
