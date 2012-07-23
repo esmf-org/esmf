@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.31 2012/04/25 05:08:24 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.32 2012/07/23 20:24:35 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,6 +41,7 @@
 #include <string>
 #include <cstdlib>
 #include "ESMF_Pthread.h"
+#include "ESMCI_IO_Handler.h"
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
@@ -59,7 +60,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.31 2012/04/25 05:08:24 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.32 2012/07/23 20:24:35 gold2718 Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -1837,6 +1838,13 @@ void VM::finalize(
           return;
       }
       matchTable_FObjects[0].pop_back();
+    }
+    // We need to make sure any open files and streams are closed.
+    // Also, resources such as cached I/O communication patterns are deleted.
+    IO_Handler::finalize(&localrc);
+    std::cout << "IO_Handler::finalize returned " << localrc << std::endl;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+      return;
     }
     // The following loop deletes deep C++ ESMF objects derived from
     // Base class. For deep Fortran classes it deletes the Base member.
