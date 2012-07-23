@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.153 2012/07/19 17:05:08 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.154 2012/07/23 20:19:33 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.153 2012/07/19 17:05:08 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.154 2012/07/23 20:19:33 gold2718 Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2609,9 +2609,24 @@ int Array::read(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+  ESMC_IOFmtFlag localiofmt;
 
-  // call into Fortran interface
-  IO::read(array, file, variableName, timeslice, iofmt);
+  IO *newIO = IO::create(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    return rc;
+  }
+  localrc = newIO->addArray(array, variableName);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    return rc;
+  }
+  // Set optional parameters which are not optional at next layer
+  if ((ESMC_IOFmtFlag *)NULL != iofmt) {
+    localiofmt = *iofmt;
+  } else {
+    localiofmt = ESMF_IOFMT_NETCDF;
+  }
+  // Call the IO read function
+  localrc = newIO->read(file, &localiofmt, timeslice);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     return rc;
   }
@@ -2653,9 +2668,30 @@ int Array::write(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+  bool localappend;
+  ESMC_IOFmtFlag localiofmt;
 
-  // call into Fortran interface
-  IO::write(array, file, variableName, append, timeslice, iofmt);
+  IO *newIO = IO::create(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    return rc;
+  }
+  localrc = newIO->addArray(array, variableName);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    return rc;
+  }
+  // Set optional parameters which are not optional at next layer
+  if ((bool *)NULL != append) {
+    localappend = *append;
+  } else {
+    localappend = false;
+  }
+  if ((ESMC_IOFmtFlag *)NULL != iofmt) {
+    localiofmt = *iofmt;
+  } else {
+    localiofmt = ESMF_IOFMT_NETCDF;
+  }
+  // Call the IO read function
+  localrc = newIO->write(file, &localiofmt, &localappend, timeslice);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     return rc;
   }
@@ -2783,24 +2819,29 @@ int Array::validate()const{
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Array::constructPioDof()"
+#define ESMC_METHOD "ESMCI::Array::constructFileMap()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::constructPioDof
+// !IROUTINE:  ESMCI::Array::constructFileMap
 //
 // !INTERFACE:
 //
-int Array::constructPioDof(
+int Array::constructFileMap(
 // !RETURN VALUE:
 //    int return code
 //
 // !ARGUMENTS:
 //
-  InterfaceInt *pioDofList,     // in
-  int localDe                   // in  - local DE = {0, ..., localDeCount-1}
+  int64_t *fileMapList,         // (in)  - Array of map elements to fill
+  int mapListSize,              // (in)  - Number of elements in fileMapList
+  int localDe,                  // (in)  - local DE = {0, ..., localDeCount-1}
+  int64_t unmap_val             // (in)  - value to give to unmapped elements
   )const{
 //
 // !DESCRIPTION:
-//    Construct the DOF list for PIO for the total Array region on localDe.
+//    Construct the map between each local array element and its location
+//    in a disk file for the total Array region on localDe.
+//    Unmapped elements (those outside of exclusive region) are given a value
+//    of of unmap_val (defaults to zero which is the PIO convention).
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -2812,37 +2853,32 @@ int Array::constructPioDof(
   
     if (tensorElementCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-        "- pioDofList is only defined for tensorElementCount == 1", &rc);
+        "- fileMapList is only defined for tensorElementCount == 1", &rc);
       return rc;
     }
     ArrayElement arrayElement(this, localDe, false);  // also checks localDe
     int elementCount = totalElementCountPLocalDe[localDe];
   
-    if (pioDofList != NULL){
-      // pioDofList provided -> error checking
-      if ((pioDofList)->dimCount != 1){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- pioDofList array must be of rank 1", &rc);
-        return rc;
-      }
-      if ((pioDofList)->extent[0] < elementCount){
+    if (fileMapList != NULL){
+      // fileMapList provided -> error checking
+      if (mapListSize < elementCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of pioDofList array insufficiently sized", &rc);
+          "- fileMapList array insufficiently sized", &rc);
         return rc;
       }
-      // fill pioDofList
+      // fill fileMapList
       //TODO: Make the following more efficient by obtaining the seqIndex list
       //TODO: from DistGrid for all the exclusive elements once, and then copy
-      //TODO: from that list into pioDofList for each exclusive element.
+      //TODO: from that list into fileMapList for each exclusive element.
       int element = 0;
       while(arrayElement.isWithin()){
         if (arrayElement.isWithinWatch()){
           // within exclusive Array region -> obtain seqIndex value
           SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive(0);
-          pioDofList->array[element] = seqIndex.decompSeqIndex;
+          fileMapList[element] = seqIndex.decompSeqIndex;
         }else{
           // outside exclusive Array region -> mark this as unmapped element
-          pioDofList->array[element] = 0; // PIO convention for unmapped element
+          fileMapList[element] = unmap_val;
         }
         arrayElement.next();
         ++element;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.58 2012/07/18 22:52:29 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.59 2012/07/23 20:19:32 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -602,12 +602,40 @@ extern "C" {
     char *file, char *variableName, bool *append,
     int *timeslice, ESMC_IOFmtFlag *iofmt, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraywritec()"
+#define ESMC_METHOD "c_esmc_arraywrite()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::write(
       *array, file, variableName, append, timeslice, iofmt),
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN_X(c_esmc_arraywrite)(ESMCI::Array **array,
+    char *file, char *variableName, bool *append,
+    int *timeslice, ESMC_IOFmtFlag *iofmt, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraywrite()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.MsgFoundError(ESMCI::Array::write(
+      *array, file, variableName, append, timeslice, iofmt),
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN_X(c_esmc_arrayread)(ESMCI::Array **array,
+    char *file, char *variableName,
+    int *timeslice, ESMC_IOFmtFlag *iofmt, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayread()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.MsgFoundError(ESMCI::Array::read(
+      *array, file, variableName, timeslice, iofmt),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -984,6 +1012,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
+#if 0
   void FTN_X(c_esmc_arrayconstructpiodof)(ESMCI::Array **ptr,
     int *localDeArg, ESMCI::InterfaceInt **pioDofList, int *pioDofCount,
     int *rc){
@@ -1014,6 +1043,7 @@ extern "C" {
     // return successfully
     if (ESMC_NOT_PRESENT_FILTER(rc)) *rc = ESMF_SUCCESS;   
   }
+#endif
   
   void FTN_X(c_esmc_arrayserialize)(ESMCI::Array **array, char *buf, int *length,
     int *offset, ESMC_AttReconcileFlag *attreconflag,

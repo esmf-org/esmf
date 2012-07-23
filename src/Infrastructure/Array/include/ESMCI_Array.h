@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.73 2012/07/18 22:52:26 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.74 2012/07/23 20:19:30 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -315,7 +315,9 @@ namespace ESMCI {
          int *timeslice, ESMC_IOFmtFlag *iofmt);
     int print() const;
     int validate() const;
-    int constructPioDof(InterfaceInt *pioDofList, int localDe) const;
+//    int constructPioDof(InterfaceInt *pioDofList, int localDe) const;
+    int constructFileMap(int64_t *fileMapList, int mapListSize,
+                         int localDe, int64_t unmap_val = 0) const;
     // serialize() and deserialize()
     int serialize(char *buffer, int *length, int *offset,
       const ESMC_AttReconcileFlag &attreconflag,

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cppF90,v 1.82 2012/01/06 20:15:20 svasquez Exp $
+! $Id: ESMF_ArrayGet.cppF90,v 1.83 2012/07/23 20:19:32 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -70,8 +70,10 @@ module ESMF_ArrayGetMod
 ! - ESMF-public methods:
   public ESMF_ArrayGet
 
+#if 0
 ! - ESMF-internal methods:
   public ESMF_ArrayConstructPioDof
+#endif
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -79,7 +81,7 @@ module ESMF_ArrayGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayGet.cppF90,v 1.82 2012/01/06 20:15:20 svasquez Exp $'
+    '$Id: ESMF_ArrayGet.cppF90,v 1.83 2012/07/23 20:19:32 gold2718 Exp $'
 
 !==============================================================================
 ! 
@@ -1120,6 +1122,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 
+#if 0
 ! -------------------------- ESMF-internal method -----------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArrayConstructPioDof()"
@@ -1210,7 +1213,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   end subroutine ESMF_ArrayConstructPioDof
 !------------------------------------------------------------------------------
-
+#endif
 
 !------------------------------------------------------------------------------
 end module ESMF_ArrayGetMod

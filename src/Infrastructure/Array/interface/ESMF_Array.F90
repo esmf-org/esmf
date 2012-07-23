@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.166 2012/07/16 20:08:47 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.167 2012/07/23 20:19:32 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -51,7 +51,6 @@ module ESMF_ArrayMod
   use ESMF_ArrayGatherMod
   use ESMF_ArrayGetMod
   use ESMF_ArrayHaMod
-  use ESMF_ArrayIOMod
   use ESMF_ArrayScatterMod
   
   implicit none
@@ -107,7 +106,9 @@ module ESMF_ArrayMod
   public ESMF_ArraySetThis          ! implemented in ESMF_ArrayCreateMod
   public ESMF_ArraySetThisNull      ! implemented in ESMF_ArrayCreateMod
   public ESMF_ArrayCopyThis         ! implemented in ESMF_ArrayCreateMod
+#if 0
   public ESMF_ArrayConstructPioDof  ! implemented in ESMF_ArrayGetMod
+#endif
 
 
 !EOPI
@@ -116,7 +117,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.166 2012/07/16 20:08:47 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.167 2012/07/23 20:19:32 gold2718 Exp $'
 
 !==============================================================================
 ! 
@@ -1332,6 +1333,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_ArrayWrite(array, file, keywordEnforcer, &
      variableName, append, timeslice, iofmt, rc)
+!   ! We need to terminate the strings on the way to C++
+    use, intrinsic :: iso_c_binding, only: C_NULL_CHAR
 !
 ! !ARGUMENTS:
     type(ESMF_Array),     intent(in)            :: array
@@ -1408,199 +1411,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
 
-    ! Handle IO format
-    iofmt_internal = ESMF_IOFMT_NETCDF   ! default format
-    if (present(iofmt)) iofmt_internal = iofmt
-
-    if (iofmt_internal .eq. ESMF_IOFMT_NETCDF) then
-      ! NETCDF format selected
-#ifdef ESMF_PNETCDF
-      piofmt = "pnc"  ! PNETCDF first choice to write NETCDF format
-#elif ESMF_NETCDF
-      piofmt = "snc"  ! serial NETCDF second choice to write NETCDF format
-#else
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-      msg="ESMF must be compiled with NETCDF or PNETCDF support for this format choice", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-#endif
-
-    else if (iofmt_internal == ESMF_IOFMT_NETCDF4P) then
-      ! NETCDF format selected
-#ifdef ESMF_NETCDF
-      piofmt = "nc4p"  ! parallel read/write of NETCDF4 (HDF5) files 
-#else
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-      msg= "ESMF must be compiled with NETCDF support for this format choice", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-#endif
-
-    else if (iofmt_internal == ESMF_IOFMT_NETCDF4C) then
-      ! NETCDF format selected
-#ifdef ESMF_NETCDF
-      piofmt = "nc4c"  ! parallel read/serial write of NetCDF4 (HDF5) 
-                       ! files with data compression
-#else
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-      msg="ESMF must be compiled with NETCDF support for this format choice", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-#endif
-
-    else if (iofmt_internal == ESMF_IOFMT_BIN) then
- 
-#ifdef ESMF_MPIIO
-      ! binary format selected
-      piofmt = "bin"
-      if (present(variableName)) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
-        msg="The input argument variableName cannot be sepcified in ESMF_IOFMT_BIN mode", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-      if (present(timeslice)) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
-        msg="The input argument timeslice cannot be sepcified in ESMF_IOFMT_BIN mode",  &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-      endif
-#else
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-      msg="ESMF must be compiled with an MPI that implements MPI-IO to support this format choice", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-#endif
-
-    else
-
-      ! format option that is not supported
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-      msg="this format is not currently supported by the ESMF IO layer", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-
-    endif
-
-    ! Handle time dimension
-    time = -1   ! default, no time dimension
-    if (present(timeslice)) time = timeslice
-
-    !
-    ! Obtain typekind and rank
-    call ESMF_ArrayGet( array, typekind=typekind, rank=rank, name=varname, rc=localrc)
+    ! Call into the C++ interface, which will call IO object
+    call c_esmc_arraywritec(array, trim(file)//C_NULL_CHAR,    &
+        trim(variableName)//C_NULL_CHAR, append,               &
+        timeslice, iofmt, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    if(present(variableName)) varname = variableName
- 
-    appd_internal = .false.
-    if(present(append)) appd_internal = append
-
-
-    ! Call a T/K/R specific interface in order to create the proper
-    !  type of F90 pointer, allocate the space, set the values in the
-    !  Array object, and return.  (The routine this code is calling is
-    !  generated by macro.)
-
-    localtk = typekind%dkind
-
-    !! calling routines generated from macros by the preprocessor
-
-    select case (localtk)
-      !
-      case (ESMF_TYPEKIND_I4%dkind)
-        ! The PIO data type is PIO_int
-        select case(rank)
-          case (1)
-            call ESMF_ArrayWriteIntl1DI4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          case (2)
-            call ESMF_ArrayWriteIntl2DI4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          case (3)
-            call ESMF_ArrayWriteIntl3DI4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          case (4)
-            call ESMF_ArrayWriteIntl4DI4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          case (5)
-            call ESMF_ArrayWriteIntl5DI4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          case default
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, msg="Unsupported rank", &
-              ESMF_CONTEXT, rcToReturn=rc)
-            return
-        end select
-
-      case (ESMF_TYPEKIND_R4%dkind)
-        ! The PIO data type is PIO_real
-        select case(rank)
-          case (1)
-            call ESMF_ArrayWriteIntl1DR4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          case (2)
-            call ESMF_ArrayWriteIntl2DR4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          case (3)
-            call ESMF_ArrayWriteIntl3DR4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          case (4)
-            call ESMF_ArrayWriteIntl4DR4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          case (5)
-            call ESMF_ArrayWriteIntl5DR4(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          case default
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, msg="Unsupported rank", &
-              ESMF_CONTEXT, rcToReturn=rc)
-            return
-        end select
-
-      case (ESMF_TYPEKIND_R8%dkind)
-        ! The PIO data type is PIO_double
-        select case(rank)
-          case (1)
-            call ESMF_ArrayWriteIntl1DR8(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          case (2)
-            call ESMF_ArrayWriteIntl2DR8(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          case (3)
-            call ESMF_ArrayWriteIntl3DR8(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          case (4)
-            call ESMF_ArrayWriteIntl4DR8(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          case (5)
-            call ESMF_ArrayWriteIntl5DR8(array, file, varname, appd_internal, time, piofmt, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-          case default
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, msg="Unsupported rank", &
-              ESMF_CONTEXT, rcToReturn=rc)
-            return
-        end select
-
-      case default
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, msg="Unsupported typekind", &
-          ESMF_CONTEXT, rcToReturn=rc)
-        return
-
-    end select
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1626,6 +1442,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_ArrayWriteC(array, file, &
      variableName, append, timeslice, iofmt, rc)
+!   ! We need to terminate the strings on the way to C++
+    use, intrinsic :: iso_c_binding, only: C_NULL_CHAR
 !
 ! !ARGUMENTS:
     type(ESMF_Array),     intent(inout)          :: array
@@ -1698,7 +1516,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #ifdef ESMF_PIO
 
     ! Call into the C++ interface, which will call IO object
-    call c_esmc_arraywritec(array, file, variableName, append, &
+    call c_esmc_arraywritec(array, trim(file)//C_NULL_CHAR,   &
+        trim(variableName)//C_NULL_CHAR, append,              &
         timeslice, iofmt, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
