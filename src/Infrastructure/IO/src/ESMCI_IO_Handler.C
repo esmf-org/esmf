@@ -1,0 +1,576 @@
+// $Id: ESMCI_IO_Handler.C,v 1.1 2012/07/23 20:21:04 gold2718 Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2012, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+// NASA Goddard Space Flight Center.
+// Licensed under the University of Illinois-NCSA License.
+//
+// ESMC IO method code (body) file
+//
+//-------------------------------------------------------------------------
+//
+// !DESCRIPTION:
+//
+// The code in this file implements the C++ {\tt ESMC\_IO_Handler} methods
+// declared in the companion file {\tt ESMCI\_IO_Handler.h}
+//
+//-------------------------------------------------------------------------
+//
+#define ESMC_FILENAME "ESMCI_IO_Handler.C"
+
+// include associated header file
+#include "ESMCI_IO_Handler.h"
+
+// higher level, 3rd party or system includes here
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <vector>
+#include <iostream>
+#include <fstream>
+
+// other ESMF include files here.
+#include "ESMCI_Macros.h"
+#include "ESMCI_Container.h"
+#include <ESMCI_LogErr.h>
+#include <ESMF_LogMacros.inc>
+#include <ESMCI_ArrayBundle.h>
+#include "ESMCI_PIO_Handler.h"
+
+//-------------------------------------------------------------------------
+ // leave the following line as-is; it will insert the cvs ident string
+ // into the object file for tracking purposes.
+ static const char *const version = "$Id: ESMCI_IO_Handler.C,v 1.1 2012/07/23 20:21:04 gold2718 Exp $";
+//-------------------------------------------------------------------------
+
+namespace ESMCI
+{
+//
+//-------------------------------------------------------------------------
+//
+// constructors and destruct()
+//
+//-------------------------------------------------------------------------
+//
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::IO_Handler()"
+//BOPI
+// !IROUTINE:  ESMCI::IO_Handler::IO_Handler    - constructor
+//
+// !INTERFACE:
+IO_Handler::IO_Handler (
+//
+// !RETURN VALUE:
+//    
+//
+// !ARGUMENTS:
+  ESMC_IOFmtFlag *fmtArg               // (in)  - the desired I/O format
+//
+  ) {
+//
+// !DESCRIPTION:
+//    Fill the internal information of an ESMCI::IO_Handler object.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  localPet = 0;
+  indexflag = ESMF_INDEX_DELOCAL;
+  if (fmtArg != (ESMC_IOFmtFlag *)NULL) {
+    iofmtFlag = *fmtArg;
+  } else {
+#ifdef ESMF_PNETCDF
+    iofmtFlag = ESMF_IOFMT_NETCDF4P;
+#elif ESMF_NETCDF
+    iofmtFlag = ESMF_IOFMT_NETCDF;
+#else
+    iofmtFlag = ESMF_IOFMT_BIN;
+#endif
+  }
+  filename[0] = '\0';
+
+  // invalidate the name for this PIO_Handler object in the Base class
+  ESMC_BaseSetName(NULL, "IO_Handler");
+}
+//-----------------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::IO_Handler()"
+//BOPI
+// !IROUTINE:  ESMCI::IO_Handler::IO_Handler    - constructor
+//
+// !INTERFACE:
+IO_Handler::IO_Handler (
+//
+// !RETURN VALUE:
+//    
+//
+// !ARGUMENTS:
+  ESMC_IOFmtFlag *fmtArg,              // (in)  - the desired I/O format
+  int baseID                           // (in)  - prevent baseID counter inc
+//
+  ) : ESMC_Base(baseID)  { // prevent baseID counter increment
+//
+// !DESCRIPTION:
+//    Fill the internal information of an ESMCI::IO_Handler object.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  localPet = 0;
+  indexflag = ESMF_INDEX_DELOCAL;
+  if (fmtArg != (ESMC_IOFmtFlag *)NULL) {
+    iofmtFlag = *fmtArg;
+  } else {
+#ifdef ESMF_PNETCDF
+    iofmtFlag = ESMF_IOFMT_NETCDF4P;
+#elif ESMF_NETCDF
+    iofmtFlag = ESMF_IOFMT_NETCDF;
+#else
+    iofmtFlag = ESMF_IOFMT_BIN;
+#endif
+  }
+  filename[0] = '\0';
+
+  // invalidate the name for this PIO_Handler object in the Base class
+  ESMC_BaseSetName(NULL, "IO_Handler");
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
+// create() and destroy()
+//
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::create()"
+//BOPI
+// !IROUTINE:  ESMCI::IO_Handler::create
+//
+// !INTERFACE:
+IO_Handler *IO_Handler::create (
+//
+// !RETURN VALUE:
+//    IO_Handler * to newly allocated IO_Handler
+//
+// !ARGUMENTS:
+      ESMC_IOFmtFlag *iofmt,              // (in) the desired I/O format
+//
+  int *rc                                  // (out) return code
+  ) {
+//
+// !DESCRIPTION:
+//    Create an initialized {\tt IO_Handler} object of the correct type for
+//    the specified I/O format (iofmt).
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMF_RC_NOT_IMPL;         // local return code
+  if (rc != NULL) {
+    *rc = ESMF_RC_NOT_IMPL;               // final return code
+  }
+
+  IO_Handler *iohandler;
+
+  // call class constructor
+  try {
+    if ((ESMC_IOFmtFlag *)NULL == iofmt) {
+      localrc = ESMF_RC_PTR_NULL;
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "- NULL IOFmtFlag", rc);
+      return ESMC_NULL_POINTER;
+    }
+    if (ESMF_IOFMT_BIN == *iofmt) {
+#ifdef ESMF_PIO
+      iohandler = new PIO_Handler(iofmt, &localrc);
+#else // ESMF_PIO
+      localrc = ESMF_RC_LIB_NOT_PRESENT;
+#endif // ESMF_PIO
+    } else if (ESMF_IOFMT_NETCDF == *iofmt) {
+#if defined(ESMF_NETCDF) && defined(ESMF_PIO)
+      iohandler = new PIO_Handler(iofmt, &localrc);
+#else // ESMF_NETCDF && ESMF_PIO
+      localrc = ESMF_RC_LIB_NOT_PRESENT;
+#endif // ESMF_NETCDF && ESMF_PIO
+    }  else if (ESMF_IOFMT_NETCDF4P == *iofmt) {
+#if defined(ESMF_PNETCDF) && defined(ESMF_PIO)
+      iohandler = new PIO_Handler(iofmt, &localrc);
+#else // ESMF_PNETCDF && ESMF_PIO
+      localrc = ESMF_RC_LIB_NOT_PRESENT;
+#endif // ESMF_PNETCDF && ESMF_PIO
+    } else if (ESMF_IOFMT_NETCDF4C == *iofmt) {
+#if defined(ESMF_PNETCDF) && defined(ESMF_PIO)
+      iohandler = new PIO_Handler(iofmt, &localrc);
+#else // ESMF_PNETCDF && ESMF_PIO
+      localrc = ESMF_RC_LIB_NOT_PRESENT;
+#endif // ESMF_PNETCDF && ESMF_PIO
+    } else {
+      localrc = ESMF_RC_ARG_BAD;
+    }
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+      return ESMC_NULL_POINTER;
+  } catch(...) {
+    // allocation error
+    ESMC_LogDefault.AllocError(ESMC_CONTEXT, rc);
+    return ESMC_NULL_POINTER;
+  }
+
+  // return successfully
+  if (rc != NULL) {
+    *rc = ESMF_SUCCESS;
+  }
+  return iohandler;
+} // end IO_Handler::create
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::create()"
+//BOPI
+// !IROUTINE:  ESMCI::IO_Handler::create
+//
+// !INTERFACE:
+IO_Handler *IO_Handler::create (
+//
+// !RETURN VALUE:
+//    IO_Handler * to newly allocated IO_Handler
+//
+// !ARGUMENTS:
+      char const * const file,             // (in) A file for Handler
+      ESMC_IOFmtFlag *iofmt,              // (in) the desired I/O format
+//
+  int *rc                                  // (out) return code
+  ) {
+//
+// !DESCRIPTION:
+//    Create an initialized {\tt IO_Handler} object of the correct type for
+//    the specified I/O format (iofmt).
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMF_RC_NOT_IMPL;         // local return code
+  if (rc != NULL) {
+    *rc = ESMF_RC_NOT_IMPL;   // final return code
+  }
+
+  IO_Handler *iohandler = IO_Handler::create(iofmt, &localrc);
+
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+    return ESMC_NULL_POINTER;;
+  } else {
+    strncpy(iohandler->filename, file, ESMF_MAXSTR);
+    // Ensure termination
+    iohandler->filename[ESMF_MAXSTR - 1] = '\0';
+  }
+
+  // return successfully
+  if (rc != NULL) {
+    *rc = ESMF_SUCCESS;
+  }
+  return iohandler;;
+} // end IO_Handler::create
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::destroy()"
+//BOPI
+// !IROUTINE:  IO_Handler::destroy - free an IO created with Create
+//
+// !INTERFACE:
+int IO_Handler::destroy (
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+  IO_Handler **ioclass) {  // in - IO_Handler to destroy
+//
+// !DESCRIPTION:
+//      ESMF routine which destroys an IO object previously allocated
+//      via an {\tt ESMCI\_IOCreate} routine.  Define for deep classes only.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMF_RC_NOT_IMPL;              // final return code
+  int localrc = ESMF_RC_NOT_IMPL;         // local return code
+
+  // return with errors for NULL pointer
+  if (ioclass == ESMC_NULL_POINTER || *ioclass == ESMC_NULL_POINTER){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_PTR_NULL,
+                                          "- Not a valid pointer to ioclass",
+                                          &rc);
+    return rc;
+  }
+
+  try {
+    // destruct IO object
+    (*ioclass)->destruct();
+    (*ioclass)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
+    localrc = ESMF_SUCCESS;
+  } catch(int localrc) {
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    return rc;
+  } catch(...) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+                                          "- Caught exception", &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+} // end IO_Handler::destroy
+//-------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::finalize()"
+//BOPI
+// !IROUTINE:  IO_Handler::finalize - Close connections and free resources
+//
+// !INTERFACE:
+void IO_Handler::finalize (
+//
+// !RETURN VALUE:
+//
+// !ARGUMENTS:
+  int *rc) {                          // (out) - Status code
+//
+// !DESCRIPTION:
+//      Static function to ensure that all open files and streams are closed.
+//      Also, any resources used to store filesystem or I/O information is
+//      deleted.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // Because this routine may not do anything (depends on compilation options),
+  // we initialize the return code as success
+  int localrc = ESMF_SUCCESS;             // local return code
+  if ((int *)NULL != rc) {
+    *rc = ESMF_RC_NOT_IMPL;               // final return code
+  }
+
+  try {
+    // We don't have any open files or resources, however, classes descended
+    // from us might.
+    // This is not very OO-like but we have to have some place to store
+    // knowledge about other classes which might have static information
+    // that needs cleaning up.
+
+#ifdef ESMF_PIO
+    // PIO
+    PIO_Handler::finalize(&localrc);
+    if (ESMF_SUCCESS != localrc) {
+      char errmsg[256];
+      sprintf(errmsg, "PIO_Handler::finalize error = %d", localrc);
+      ESMC_LogDefault.Write(errmsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+    }
+#endif // ESMF_PIO
+    // If we need to call other finalize routines, we need to decide what
+    // to do about the final return code since we should call all
+    // finalize routines even if one fails.
+  } catch(int localrc) {
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    return;
+  } catch(...) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+                                          "- Caught exception", rc);
+    return;
+  }
+
+  // return successfully
+  if ((int *)NULL != rc) {
+    *rc = localrc;
+  }
+} // end IO_Handler::finalize
+//-------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::setFilename()"
+//BOPI
+// !IROUTINE:  IO_Handler::setFilename - Set a filename for this handler
+//
+// !INTERFACE:
+int IO_Handler::setFilename(
+//
+// !RETURN VALUE:
+//    int error or success return code
+//
+// !ARGUMENTS:
+  const char * const name             // (in) - The new filename
+) {
+//
+// !DESCRIPTION:
+//      Set a new filename for this IO Handler.
+//      Return ESMF_SUCCESS if successful
+//      It is an error if a file is presently open (ESMF_RC_FILE_ACTIVE)
+//      It is an error if the new name is too long (ESMF_RC_LONG_NAME)
+//      If name is NULL, clear the current filename
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMF_RC_NOT_IMPL;              // final return code
+  int localrc = ESMF_RC_NOT_IMPL;         // local return code
+
+  // It is an error if we already have an open file
+  if (isOpen() != ESMF_FALSE) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_FILE_ACTIVE,
+                                          "- Cannot change name, file open",
+                                          &rc);
+    return rc;
+  }
+
+  // clear name for NULL pointer
+  if (name == ESMC_NULL_POINTER){
+    strcpy(filename, "");
+  } else if (strlen(name) > ESMF_MAXSTR) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_LONG_NAME,
+                                          "- Cannot change name, file open",
+                                          &rc);
+    return rc;
+  } else {
+    // Just set the name
+    strcpy(filename, name);
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+} // end IO_Handler::setFilename
+//-------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::fileExists()"
+//BOPI
+// !IROUTINE:  IO_Handler::fileExists - See if file exists for read/write
+//
+// !INTERFACE:
+bool IO_Handler::fileExists(
+//
+// !RETURN VALUE:
+//    bool true if file exists and meets the input requirements
+//
+// !ARGUMENTS:
+  bool needRead,                      // (in) - true if file read is required
+  bool needWrite                      // (in) - true if file write is required
+) {
+//
+// !DESCRIPTION:
+//      Determine if the file exists with the required permissions.
+//      If needRead is true, file must exist with read permission
+//      If needWrite is true, file must exist with write permission
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code
+  bool fileOK = false;
+  std::ios_base::openmode iomode = std::ios_base::binary;
+
+  // BOGUS: On some systems (I'm looking at you IBM), opening a file with
+  //        write on but in off automatically truncates the file.
+  //        Solution is to always use in.
+  needRead = true;
+  if (needRead) {
+    iomode |= std::ios_base::in;
+  }
+  if (needWrite) {
+    iomode |= std::ios_base::out;
+  }
+
+  std::fstream filestr (getFilename(), iomode);
+  fileOK = (filestr.good());
+  // filestr will automatically close when function exits
+
+  return fileOK;
+} // end IO_Handler::fileExists
+//-------------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_Handler::open()"
+//BOP
+// !IROUTINE:  IO::open - Open a file or stream for I/O
+//
+// !INTERFACE:
+void IO_Handler::open (
+//
+// !RETURN VALUE:
+//     int error return code
+//
+// !ARGUMENTS:
+
+  char const * const file,               // (in)  - name of file being read
+  IOReadFlag *ioreadflag,                // (in)  - open file for reading?
+  IOWriteFlag *iowriteflag,              // (in)  - open file for write/append?
+//
+  int *rc                                // (out) - return code
+  ) {
+// !DESCRIPTION:
+//      Open a file or stream for I/O. Create a new IO_Handler if necessary
+//      It is an error if a handler exists with a different I/O format (iofmt)
+//      It is an error if the IO_Handler is already connected to an open stream
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMF_SUCCESS;         // local return code
+  if (rc != NULL) {
+    *rc = ESMF_RC_NOT_IMPL;   // final return code
+  }
+
+  // Make sure pointer inputs have something in them
+  if ((char *)NULL == file) {
+    localrc = ESMF_RC_PTR_NULL;
+    ESMC_LogDefault.MsgFoundError(localrc,
+                                  "- NULL filename argument pointer", rc);
+  } else if ((enum IOReadFlag *)NULL == ioreadflag) {
+    localrc = ESMF_RC_PTR_NULL;
+    ESMC_LogDefault.MsgFoundError(localrc, "- NULL IOReadFlag", rc);
+  } else if ((enum IOWriteFlag *)NULL == iowriteflag) {
+    localrc = ESMF_RC_PTR_NULL;
+    ESMC_LogDefault.MsgFoundError(localrc, "- NULL IOWriteFlag", rc);
+  } else if (isOpen() == ESMF_TRUE) {
+    // Check to make sure that a file is not already open
+    localrc = ESMF_RC_FILE_OPEN;
+    ESMC_LogDefault.MsgFoundError(localrc, "- File already open", rc);
+  }
+
+  if (ESMF_SUCCESS == localrc) {
+    // Set the filename
+    localrc = setFilename(file);
+  }
+
+  if (ESMF_SUCCESS == localrc) {
+    // Open the file
+    open(ioreadflag, iowriteflag, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, "- Error opening file", rc);
+  }
+
+  // return
+  if (rc != (int *)NULL) {
+    *rc = localrc;
+  }
+}  // end IO::open
+//-------------------------------------------------------------------------
+
+}  // end namespace ESMCI

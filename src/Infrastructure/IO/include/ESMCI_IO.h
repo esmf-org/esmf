@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.h,v 1.9 2012/01/06 20:17:11 svasquez Exp $
+// $Id: ESMCI_IO.h,v 1.10 2012/07/23 20:20:54 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -15,77 +15,220 @@
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
 
-#ifndef ESMCI_IO_H
-#define ESMCI_IO_H
+#ifndef __ESMCI_IO_H
+#define __ESMCI_IO_H
 
 //-------------------------------------------------------------------------
 //BOPI
-// !CLASS: ESMCI::IOClass - IOClass
+// !CLASS: ESMCI::IO - IO
 //
 // !DESCRIPTION:
 //
-// The code in this file defines the C++ {\tt IOClass} members and method
-// signatures (prototypes).  The companion file {\tt ESMCI\_IOClass.C}
-// contains the full code (bodies) for the {\tt IOClass} methods.
+// The code in this file defines the C++ {\tt IO} members and method
+// signatures (prototypes).  The companion file {\tt ESMCI\_IO.C}
+// contains the full code (bodies) for the {\tt IO} methods.
 //
 //EOPI
 //-------------------------------------------------------------------------
 
-#include <ESMC_Util.h>
-
-#include "ESMCI_Base.h"       // Base is superclass to ArrayBundle
+#include "ESMCI_Base.h"       // Base is superclass to IO
 #include "ESMCI_VM.h"
-#include "ESMCI_ArrayBundle.h"
-#include "ESMCI_Container.h"
+#include "ESMCI_Array.h"
+#include "ESMC_Util.h"
+#include "ESMCI_IO_Handler.h"
 
+#include <cstdio>
 #include <vector>
 
 //-------------------------------------------------------------------------
 
 namespace ESMCI {
 
-// classes and structs
+  enum IOListObjectType { IO_NULL = 1,
+                          IO_ARRAY,
+                          IO_ATTRIBUTE,
+                          IO_GRID,
+                          IO_MESH };
+
+  typedef union {
+    Array *arr;
+    Attribute *attr;
+  } IO_ObjectType;
+
+  struct IO_ObjectContainer {
+    enum IOListObjectType type;
+    IO_ObjectType object;           // e.g., Array, Attribute
+    char name[ESMF_MAXSTR];
+    ESMC_I8 number;
+
+    IO_ObjectContainer () {
+      type = IO_NULL;
+      object.arr = (Array *)NULL;
+      name[0] = '\0';
+      number = 0;
+    }
+    IO_ObjectContainer (Array *arr_p, const char * const arrName) {
+      type = IO_ARRAY;
+      object.arr = arr_p;
+      if ((const char * const)NULL != arrName) {
+        strncpy(name, arrName, ESMF_MAXSTR);
+      }
+      number = 0;
+    }
+    Array *getArray(void) {
+      return object.arr;
+    }
+    Attribute *getAttribute(void) {
+      return object.attr;
+    }
+    const char *getName(void) {
+      return name;
+    }
+
+  };
 
 
-class IO;
+  // classes and structs
 
-// class definition
-class IO : public ESMC_Base {    // inherits from ESMC_Base class
+  class IO;
+
+  // class definitions
+  
+  //===========================================================================
+  
+  //===========================================================================
+  
+  //===========================================================================
+  class IO : public ESMC_Base {    // inherits from ESMC_Base class
   
   private:
-    ESMCI::ArrayBundle *dataContainer;
-    bool dataCreator;
-  
+  // global information
+    IO_Handler    *ioHandler;
+    std::vector<IO_ObjectContainer *> objects;
+    
   public:
-    // constructor and destructor
-    IO(){
-      dataContainer;
-      dataCreator = false;
+    // native constructor and destructor
+    IO(int *rc = NULL) {
+      ioHandler = (IO_Handler *)NULL;
+      // No constructor call for objects -- use default Allocator
+      // return successfully
+      if (rc != NULL) {
+        *rc = ESMF_SUCCESS;
+      }
     }
-    IO(int baseID):ESMC_Base(baseID){// prevent baseID counter incr.
-      dataContainer;
-      dataCreator = false;
+    IO(int baseID) : ESMC_Base(baseID) {  // prevent baseID counter increment
+      ioHandler = (IO_Handler *)NULL;
+      // No constructor call for objects -- use default Allocator
     }
-
-  private:
-    IO(ArrayBundle **dataList, int dataCount, int *rc);
   public:
-    ~IO(){destruct(false);}
-  private:
-    int destruct(bool followCreator=true);
-  public:
+    ~IO() { destruct(); }
     // create() and destroy()
-    static IO *create(ArrayBundle **dataList, int dataCount, int *rc);
-    static int destroy(IO **ioclass);
+    static IO *create(int *rc = NULL);
+    static int destroy(IO **io);
+  private:
+    void destruct(void);
+  public:
+    // read()
+    // An atomic read function which transparently handles open and close
+    int read(const char * const file, ESMC_IOFmtFlag *iofmt,
+             int *timeslice = NULL);
 
-    // 
-    static int read(Array *array, char *file, char *variableName,
-             int *timeslice, ESMC_IOFmtFlag *iofmt);
-    static int write(Array *array, char *file, char *variableName,
-               bool *append, int *timeslice, ESMC_IOFmtFlag *iofmt);
+    // A non-atomic read which is only successful on an open IO stream
+    int read(int *timeslice = NULL);
 
-};  // class IO
+    // write()
+    // An atomic write function which transparently handles open and close
+    // This version more closely matches the functionality in the ESMF
+    // interface
+    int write(const char * const file,
+              ESMC_IOFmtFlag *iofmt, bool *append,
+              int *timeslice = NULL);
 
+    // An atomic write function which transparently handles open and close
+    int write(const char * const file,
+              ESMC_IOFmtFlag *iofmt, IOWriteFlag *iowriteflag,
+              int *timeslice = NULL);
+
+    // A non-atomic write which is only successful on an open IO stream
+    int write(int *timeslice = NULL);
+
+    // get() and set()
+    const char *getName() const { return ESMC_BaseGetName(); }
+    int setName(const char *name) { return ESMC_BaseSetName(name, "IO"); }
+
+    // match()
+    static bool match(IO const * const io1, IO const * const io2,
+                      int *rc = NULL) {
+      if (rc != (int *)NULL) {
+        *rc = ESMF_SUCCESS;
+      }
+      return (io1 == io2);
+    }
+
+    // open() and close()
+    int open(const char * const file,
+             IOReadFlag *ioreadflag,
+             IOWriteFlag *iowriteflag,
+             ESMC_IOFmtFlag *iofmt);
+    int flush(void);
+    int close(void);
+
+    // add and remove objects
+    int addArray(ESMC_Base *arr_p,
+                 const char * const variableName);
+// TBI
+#if 0
+    void addAttributes(ESMC_Base *obj_p,
+                       const char *schemaFileName,
+                       const char *convention,
+                       const char *purpose,
+                       int *rc=NULL);
+    void addGrid(ESMC_Base *grid_p, char *gridName,
+                 int *rc=NULL);
+#endif // TBI
+    void clear();
+
+// TBI
+#if 0
+    int print() const;
+    int validate() const;
+
+    // serialize() and deserialize()
+    int serialize(char *buffer, int *length, int *offset,
+                  const ESMC_AttReconcileFlag &attreconflag,
+                  const ESMC_InquireFlag &inquireflag) const;
+    int deserialize(char *buffer, int *offset,
+                    const ESMC_AttReconcileFlag &attreconflag);
+#endif // TBI
+
+// Don't know yet if we will need these
+#if 0
+  private:
+    // Attribute writing
+    int writeStartElement(const std::string& name,
+                          const std::string& value,
+                          const int     indentLevel,
+                          const int     nPairs, ...); // nPairs of
+                 // (char *attrName, char *attrValue)
+
+    int writeElement(const std::string& name,
+                     const std::string& value,
+                     const int     indentLevel,
+                     const int     nPairs, ...); // nPairs of
+                 // (char *attrName, char *attrValue)
+
+    int writeEndElement(const std::string& name,
+                        const int     indentLevel);
+
+    // write an XML comment
+    int writeComment(const std::string& comment, const int indentLevel=0);
+
+    int write(int fileNameLen, const char* fileName,
+              const char* outChars, int flag);
+#endif
+  };  // class IO
+  //===========================================================================
+  
 } // namespace ESMCI
 
-#endif  // ESMCI_IOClass_H
+#endif // __ESMCI_IO_H
