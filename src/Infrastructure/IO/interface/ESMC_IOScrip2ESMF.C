@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.16 2012/01/06 20:17:12 svasquez Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.17 2012/07/23 05:21:10 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -33,6 +33,8 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+#define TOL 0.000000000001
+
 typedef struct field {
   double lon, lat;
   struct field *prev, *next;
@@ -55,7 +57,7 @@ int init_bucket(int num_cells) {
     factor *=2;
     len = num_cells/total;
   }
-  //  printf("total number of buckets: %d\n", total);
+  //printf("total number of buckets: %d\n", total);
   // need one more bucket for latitude = 90
   totalbuckets = total+1;
   interval = factor;
@@ -69,7 +71,7 @@ int init_bucket(int num_cells) {
 FIELD* insert_bucket(double lon, double lat) {
   int bid;
   FIELD *me, *curr;
-  bid = (int)((lat + 90.0)*interval);
+  bid = (int)((lat + 90.0)*interval+TOL);
   if (!bucket[bid]) {
     me = bucket[bid] = (FIELD*)malloc(sizeof(FIELD));
     me->prev = me->next = NULL;
@@ -80,23 +82,23 @@ FIELD* insert_bucket(double lon, double lat) {
     return me;
   } else {
     curr = bucket[bid];
-    while (curr->lon < lon) {
+    while ((curr->lon+TOL) < lon) {
       if (!curr->next) break;
       curr=curr->next;
     }
-    if (lon == curr->lon) {
+    if (abs(lon - curr->lon) < TOL) {
     // Advance to the item which is still has curr->lon==lon, but which is just >= lat if possible
     //      while (curr->lon == lon && (curr->lat < lat)) {
     while (true) {
 	if (!curr->next) break;
-        if (curr->next->lon != lon) break;      
-        if (curr->lat >= lat) break;
+        if (abs(curr->next->lon - lon) > TOL) break;      
+        if ((curr->lat - lat) >= -1*TOL) break;
 	curr=curr->next;
       }
       // At this point curr->lon still == lon
 
       // Point is in list
-      if (curr->lat == lat) {
+      if (abs(curr->lat-lat)<TOL) {
 	curr->count++;
 	return curr;
       } else if (lat < curr->lat) {  // Put point just before this one
@@ -503,7 +505,7 @@ void FTN_X(c_convertscrip)(
   }
   totalnodes = nextrank-1;
 
-  // fprintf(stdout, "Total number of nodes: %d\n", totalnodes);
+  //fprintf(stdout, "Total number of nodes: %d\n", totalnodes);
   free(cornerlats);
   free(cornerlons);
 
@@ -820,7 +822,7 @@ void FTN_X(c_convertscrip)(
     // numedges = find_cells(i+1, totalneighbors[i], cells, gcdim, gsdim, celltbl);
     numedges = dualcellcounts[i];
     if (numedges < 3) {
-      //      printf("degenarate cells index %d, edges %d\n", i, numedges);
+      //printf("degenarate cells index %d, edges %d\n", i, numedges);
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,"A cell with less than 3 edges were found", rc);
       return;
     }
