@@ -1,4 +1,3 @@
-#include "ESMFPIO.h"
 !|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
  module pio_kinds
@@ -11,17 +10,20 @@
 !  types like integer, character, logical, real4 and real8.
 !
 ! !REVISION HISTORY:
-!  CVS:$Id: pio_kinds.F90,v 1.4 2011/08/30 19:06:53 w6ws Exp $
+!  CVS:$Id: pio_kinds.F90,v 1.5 2012/07/23 19:28:31 gold2718 Exp $
 !  CVS:$Name:  $
 
 ! !USES:
-!  uses no other modules
+!  uses mpi if available
+#ifndef NO_MPIMOD
+   use mpi, only : MPI_OFFSET_KIND ! _EXTERNAL
+#endif
 
    implicit none
    private
+#ifdef NO_MPIMOD
    include 'mpif.h'   ! _EXTERNAL
-
-
+#endif
 ! !DEFINED PARAMETERS:
 
    integer, parameter, public ::          &
@@ -35,7 +37,7 @@
 
 
    integer, parameter, public ::          &
-      PIO_OFFSET = MPI_OFFSET_KIND 
+      PIO_OFFSET = MPI_OFFSET_KIND
 
 !EOP
 !BOC

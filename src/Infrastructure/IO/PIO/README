@@ -1,6 +1,11 @@
 PIO directory README
 ====================
 
+Pending Notes:
+--------------
+Starting to bring in new version of PIO with builtin CPP bindings
+Currently using branch pio1_4_1_piocpp which is close to the 1.4.1 release.
+
 Current Notes:
 -------------
 Jim Edwards fixed the bug for Halo array written by 1PE.

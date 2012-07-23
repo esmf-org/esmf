@@ -1,4 +1,3 @@
-#include "ESMFPIO.h"
 #define __PIO_FILE__ "piolib_mod.f90"
 #define debug_rearr 0
 #ifdef BGP
@@ -14,8 +13,8 @@ module piolib_mod
   !--------------
   use pio_types, only : file_desc_t, iosystem_desc_t, var_desc_t, io_desc_t, &
 	pio_iotype_pbinary, pio_iotype_binary, pio_iotype_direct_pbinary, &
-	pio_iotype_netcdf, pio_iotype_pnetcdf, pio_iotype_netcdf4p, &
-        pio_iotype_netcdf4c, pio_noerr
+	pio_iotype_netcdf, pio_iotype_pnetcdf, pio_iotype_netcdf4p, pio_iotype_netcdf4c, &
+        pio_noerr, pio_num_ost
   !--------------
   use alloc_mod
   !--------------
@@ -32,12 +31,14 @@ module piolib_mod
   use perf_mod, only : t_startf, t_stopf     ! _EXTERNAL
 #endif
   use pio_msg_mod
-
+#ifndef NO_MPIMOD
+  use mpi    ! _EXTERNAL
+#endif
   implicit none
   private
+#ifdef NO_MPIMOD
   include 'mpif.h'    ! _EXTERNAL
-
-
+#endif
   ! !public member functions:
 
   public :: PIO_init,     &
@@ -59,6 +60,8 @@ module piolib_mod
        PIO_dupiodesc,     &
        PIO_getnumiotasks, &
        PIO_set_hint,      &
+       PIO_getnum_OST,    &
+       PIO_setnum_OST,    &
        PIO_FILE_IS_OPEN
 
 #ifdef MEMCHK
@@ -152,13 +155,19 @@ module piolib_mod
 !! @brief PIO_initdecomp is an overload interface the models decomposition to pio.
 !<
   interface PIO_initdecomp
-     module procedure PIO_initdecomp_dof  ! previous name: initdecomop_1dof_nf_box
+     module procedure PIO_initdecomp_dof_i4  ! previous name: initdecomop_1dof_nf_box
+     module procedure PIO_initdecomp_dof_i8  ! previous name: initdecomop_1dof_nf_box
+     module procedure initdecomp_1dof_nf_i4
+     module procedure initdecomp_1dof_nf_i8
+     module procedure initdecomp_1dof_bin_i4
+     module procedure initdecomp_1dof_bin_i8
+     module procedure initdecomp_2dof_nf_i4
+     module procedure initdecomp_2dof_nf_i8
+     module procedure initdecomp_2dof_bin_i4
+     module procedure initdecomp_2dof_bin_i8
+
      module procedure PIO_initdecomp_bc
-!cheung     module procedure PIO_initdecomp_dof_dof
-     module procedure initdecomp_1dof_nf
-     module procedure initdecomp_1dof_bin
-     module procedure initdecomp_2dof_nf
-     module procedure initdecomp_2dof_bin
+     module procedure PIO_initdecomp_dof_dof
   end interface
 
 !> 
@@ -236,7 +245,6 @@ module piolib_mod
   !eoc
   !***********************************************************************
 
-  private :: nextlarger
 
 contains
 
@@ -426,20 +434,19 @@ contains
 !! @param iodesc @copydoc iodesc_generate
 !! @param iodof Mapping of the storage order for the IO decomposition its memory order
 !<
-!cheung
-!  subroutine PIO_initdecomp_dof_dof(iosystem,basepiotype,dims,compdof,iodesc,iodof)
-!    type (iosystem_desc_t), intent(inout)          :: iosystem
-!    integer(i4), intent(in)                        :: basepiotype
-!    integer(i4), intent(in)                        :: dims(:)
-!    integer(i4), intent(in)                        :: compdof(:)
-!    type (IO_desc_t), intent(out)                   :: iodesc
-!    integer(i4), intent(in)                        :: iodof(:)
-!
-!!    character(len=*), parameter :: subName=modName//'::PIO_initdecomp_dof_dof'
-!
-!!    call piodie(subname,__LINE__,'subroutine not yet implemented')
-!
-!  end subroutine PIO_initdecomp_dof_dof
+  subroutine PIO_initdecomp_dof_dof(iosystem,basepiotype,dims,compdof,iodesc,iodof)
+    type (iosystem_desc_t), intent(inout)          :: iosystem
+    integer(i4), intent(in)                        :: basepiotype
+    integer(i4), intent(in)                        :: dims(:)
+    integer(i4), intent(in)                        :: compdof(:)
+    type (IO_desc_t), intent(out)                   :: iodesc
+    integer(i4), intent(in)                        :: iodof(:)
+
+!    character(len=*), parameter :: subName=modName//'::PIO_initdecomp_dof_dof'
+
+!    call piodie(subname,__LINE__,'subroutine not yet implemented')
+
+  end subroutine PIO_initdecomp_dof_dof
 
 !> 
 !! @public 
@@ -457,7 +464,8 @@ contains
 !! @param iodofw :
 !! @param iodesc @copydoc iodesc_generate
 !<
-  subroutine initdecomp_2dof_bin(iosystem,basepiotype,dims,lenblocks,compdof,iodofr,iodofw,iodesc)
+  subroutine initdecomp_2dof_bin_i4(iosystem,basepiotype,dims,lenblocks,compdof,iodofr,iodofw,iodesc)
+    use calcdisplace_mod, only : calcdisplace
     type (iosystem_desc_t), intent(in) :: iosystem
     integer(i4), intent(in)           :: basepiotype
     integer(i4)                       :: basetype
@@ -468,13 +476,36 @@ contains
     integer (i4), intent(in)          :: iodofw(:)     !> global degrees of freedom for io decomposition 
     type (io_desc_t), intent(out)     :: iodesc
 
+ 
+   call initdecomp_2dof_bin_i8(iosystem,basepiotype,dims,lenblocks,int(compdof,kind=pio_offset),int(iodofr,kind=pio_offset), &
+         int(iodofw,kind=pio_offset),iodesc)
+
+
+  end subroutine initdecomp_2dof_bin_i4
+  subroutine initdecomp_2dof_bin_i8(iosystem,basepiotype,dims,lenblocks,compdof,iodofr,iodofw,iodesc)
+    use calcdisplace_mod, only : calcdisplace
+    type (iosystem_desc_t), intent(in) :: iosystem
+    integer(i4), intent(in)           :: basepiotype
+    integer(i4)                       :: basetype
+    integer(i4), intent(in)           :: dims(:)
+    integer (i4), intent(in)          :: lenblocks
+    integer (kind=pio_offset), intent(in)          :: compdof(:)   !> global degrees of freedom for computational decomposition
+    integer (kind=pio_offset), intent(in)          :: iodofr(:)     !> global degrees of freedom for io decomposition 
+    integer (kind=pio_offset), intent(in)          :: iodofw(:)     !> global degrees of freedom for io decomposition 
+    type (io_desc_t), intent(out)     :: iodesc
+
     integer(kind=PIO_offset) :: start(1), count(1)
 
-    integer (i4) :: i,ndims,glength,n_iotasks
+    integer (i4) :: i,ndims,n_iotasks
+    integer(kind=PIO_OFFSET) glength
     logical :: userearranger
-    integer (i4) ::  ndispr,ndispw
-    integer (i4) :: lengthr, lengthw
-    integer (i4), pointer :: displacer(:),displacew(:)
+    integer (kind=pio_offset) ::  ndispr,ndispw
+    integer (kind=pio_offset) :: lengthr, lengthw
+    integer (kind=pio_offset), pointer :: displacer(:),displacew(:)
+
+
+    nullify(iodesc%start)
+    nullify(iodesc%count)
 
     basetype=PIO_type_to_mpi_type(basepiotype)
 
@@ -492,10 +523,14 @@ contains
     !---------------------
     ! total global size
     !---------------------
-    glength=1
-    do i=1,ndims
-       glength = glength*dims(i)
-    enddo
+    glength= product(int(dims,kind=PIO_OFFSET))
+    if(glength > int(huge(i),kind=pio_offset)) then
+       call piodie( __PIO_FILE__,__LINE__, &
+            'requested array size too large for this interface ')       
+    endif
+
+
+
     lengthr = size(iodofr);
     lengthw = size(iodofw)
     if(lenblocks>0) then
@@ -505,8 +540,8 @@ contains
        ndispw=0
        ndispr=0
     end if
-    call alloc_check(displacer,ndispr)
-    call alloc_check(displacew,ndispw)
+    call alloc_check(displacer,int(ndispr))
+    call alloc_check(displacew,int(ndispw))
 
     !--------------------------------------------
     ! calculate mpi data structure displacements
@@ -531,7 +566,7 @@ contains
        !-----------------------------------------------
        iodesc%read%n_elemtype = ndispr
        iodesc%read%n_words    = iodesc%read%n_elemtype*lenblocks
-       call genindexedblock(lenblocks,basetype,iodesc%read%elemtype,iodesc%read%filetype,displacer)
+       call genindexedblock(lenblocks,basetype,iodesc%read%elemtype,iodesc%read%filetype,int(displacer))
 
        !-------------------------------------------------
        ! setup the data structure for the write operation
@@ -539,7 +574,7 @@ contains
        iodesc%write%n_elemtype = ndispw
        iodesc%write%n_words    = iodesc%write%n_elemtype*lenblocks
 
-       call genindexedblock(lenblocks,basetype,iodesc%write%elemtype,iodesc%write%filetype,displacew)
+       call genindexedblock(lenblocks,basetype,iodesc%write%elemtype,iodesc%write%filetype,int(displacew))
 
        if(debug) print *,'initdecomp: at the end of subroutine'
        !       if(iodesc%read%n_elemtype == 0 .and. iodesc%write%n_elemtype == 0) iosystem%ioproc = .false.
@@ -548,7 +583,7 @@ contains
     deallocate(displacer,displacew)
 
 
-  end subroutine initdecomp_2dof_bin
+  end subroutine initdecomp_2dof_bin_i8
 
 
 !> 
@@ -566,7 +601,24 @@ contains
 !! @param iodofr : 
 !! @param iodesc @copydoc iodesc_generate
 !<
-  subroutine initdecomp_1dof_bin(iosystem,basepiotype,dims,lenblocks,compdof,iodofr,iodesc)
+  subroutine initdecomp_1dof_bin_i8(iosystem,basepiotype,dims,lenblocks,compdof,iodofr,iodesc)
+    type (iosystem_desc_t), intent(in) :: iosystem
+    integer(i4), intent(in)           :: basepiotype
+    integer(i4), intent(in)           :: dims(:)
+    integer(i4), intent(in)          :: lenblocks
+    integer(kind=pio_offset), intent(in)          :: compdof(:)   ! global degrees of freedom for computational decomposition
+    integer(kind=pio_offset), intent(in)          :: iodofr(:)     ! global degrees of freedom for io decomposition 
+    type (io_desc_t), intent(out)     :: iodesc
+
+    integer(kind=PIO_offset) :: start(1), count(1)
+    ! these are not used in the binary interface
+
+    start(1)=-1
+    count(1)=-1
+    call initdecomp_1dof_nf_i8(iosystem,basepiotype,dims,lenblocks,compdof,iodofr,start, count, iodesc)
+  end subroutine initdecomp_1dof_bin_i8
+
+  subroutine initdecomp_1dof_bin_i4(iosystem,basepiotype,dims,lenblocks,compdof,iodofr,iodesc)
     type (iosystem_desc_t), intent(in) :: iosystem
     integer(i4), intent(in)           :: basepiotype
     integer(i4), intent(in)           :: dims(:)
@@ -580,8 +632,9 @@ contains
 
     start(1)=-1
     count(1)=-1
-    call initdecomp_1dof_nf(iosystem,basepiotype,dims,lenblocks,compdof,iodofr,start, count, iodesc)
-  end subroutine initdecomp_1dof_bin
+    call initdecomp_1dof_nf_i8(iosystem,basepiotype,dims,lenblocks, &
+         int(compdof,kind=PIO_OFFSET),int(iodofr,kind=PIO_OFFSET),start, count, iodesc)
+  end subroutine initdecomp_1dof_bin_i4
 
 !> 
 !! @public 
@@ -601,7 +654,7 @@ contains
 !! @param count : 
 !! @param iodesc @copydoc iodesc_generate
 !<
-  subroutine initdecomp_2dof_nf(iosystem,basepiotype,dims,lenblocks,compdof,iodofr,iodofw,start, count, iodesc)
+  subroutine initdecomp_2dof_nf_i4(iosystem,basepiotype,dims,lenblocks,compdof,iodofr,iodofw,start, count, iodesc)
     type (iosystem_desc_t), intent(in) :: iosystem
     integer(i4), intent(in)           :: basepiotype
     integer(i4), intent(in)           :: dims(:)
@@ -616,9 +669,29 @@ contains
     type (io_desc_t) :: tmp
 
 
-    call initdecomp_1dof_nf(iosystem, basepiotype, dims, lenblocks, compdof, iodofr, start, count, iodesc)
+    call pio_initdecomp(iosystem, basepiotype,dims,lenblocks,int(compdof,kind=PIO_OFFSET),int(iodofr,kind=PIO_OFFSET), &
+         int(iodofw,kind=PIO_OFFSET),start,count,iodesc)
 
-    call initdecomp_1dof_nf(iosystem, basepiotype, dims, lenblocks, compdof, iodofw, start, count, tmp)
+  end subroutine initdecomp_2dof_nf_i4
+
+  subroutine initdecomp_2dof_nf_i8(iosystem,basepiotype,dims,lenblocks,compdof,iodofr,iodofw,start, count, iodesc)
+    type (iosystem_desc_t), intent(in) :: iosystem
+    integer(i4), intent(in)           :: basepiotype
+    integer(i4), intent(in)           :: dims(:)
+    integer (i4), intent(in)          :: lenblocks
+    integer (kind=pio_offset), intent(in)          :: compdof(:)   ! global degrees of freedom for computational decomposition
+    integer (kind=pio_offset), intent(in)          :: iodofr(:)     ! global degrees of freedom for io decomposition 
+    integer (kind=pio_offset), intent(in)          :: iodofw(:)     ! global degrees of freedom for io decomposition 
+
+    type (io_desc_t), intent(out)     :: iodesc
+
+    integer(kind=PIO_offset), intent(in) :: start(:), count(:)
+    type (io_desc_t) :: tmp
+
+
+    call initdecomp_1dof_nf_i8(iosystem, basepiotype, dims, lenblocks, compdof, iodofr, start, count, iodesc)
+
+    call initdecomp_1dof_nf_i8(iosystem, basepiotype, dims, lenblocks, compdof, iodofw, start, count, tmp)
 
     call dupiodesc2(iodesc%write,tmp%write)
 
@@ -629,7 +702,7 @@ contains
             iodesc%write%n_elemtype,iodesc%write%n_words
     end if
 
-  end subroutine initdecomp_2dof_nf
+  end subroutine initdecomp_2dof_nf_i8
 
 !> 
 !! @public 
@@ -648,7 +721,8 @@ contains
 !! @param count :
 !! @param iodesc @copydoc iodesc_generate
 !<
-  subroutine initdecomp_1dof_nf(iosystem,basepiotype,dims,lenblocks,compdof,iodof,start, count, iodesc)
+  subroutine initdecomp_1dof_nf_i4(iosystem,basepiotype,dims,lenblocks,compdof,iodof,start, count, iodesc)
+    use calcdisplace_mod, only : calcdisplace
     type (iosystem_desc_t), intent(in) :: iosystem
     integer(i4), intent(in)           :: basepiotype
     integer(i4), intent(in)           :: dims(:)
@@ -659,21 +733,41 @@ contains
     integer :: piotype
     integer(kind=PIO_offset), intent(in) :: start(:), count(:)
 
+
+    call initdecomp_1dof_nf_i8(iosystem, basepiotype,dims,lenblocks,int(compdof,kind=pio_offset),int(iodof,kind=pio_offset),&
+         start,count,iodesc)
+
+  end subroutine initdecomp_1dof_nf_i4
+  subroutine initdecomp_1dof_nf_i8(iosystem,basepiotype,dims,lenblocks,compdof,iodof,start, count, iodesc)
+    use calcdisplace_mod, only : calcdisplace
+    type (iosystem_desc_t), intent(in) :: iosystem
+    integer(i4), intent(in)           :: basepiotype
+    integer(i4), intent(in)           :: dims(:)
+    integer (i4), intent(in) :: lenblocks
+    integer (kind=pio_offset), intent(in)          :: compdof(:)   ! global degrees of freedom for computational decomposition
+    integer (kind=pio_offset), intent(in)          :: iodof(:)     ! global degrees of freedom for io decomposition 
+    type (io_desc_t), intent(out)     :: iodesc
+    integer :: piotype
+    integer(kind=PIO_offset), intent(in) :: start(:), count(:)
+
     integer(i4) :: length,n_iotasks
     integer(i4) :: ndims
 
-    integer (i4), pointer :: displace(:)  ! the displacements for the mpi data structure (read)
+    integer (kind=pio_offset), pointer :: displace(:)  ! the displacements for the mpi data structure (read)
 
     integer(i4) :: prev
-    integer(i4) :: glength    ! global length in words
+    integer(kind=PIO_OFFSET) :: glength    ! global length in words
     integer(i4) :: ii,i,dis,ierr
     integer(i4),pointer, dimension(:) :: blocklen,disp
     logical(log_kind) ::  userearranger
     logical, parameter :: check = .true.
-    integer(i4) :: ndisp
+    integer(kind=pio_offset) :: ndisp
 #ifdef MEMCHK
     integer :: msize, rss, mshare, mtext, mstack
 #endif
+
+    nullify(iodesc%start)
+    nullify(iodesc%count)
 
     piotype=PIO_type_to_mpi_type(basepiotype)
 
@@ -700,16 +794,18 @@ contains
     !---------------------
     ! total global size
     !---------------------
-    glength=1
-    do i=1,ndims
-       glength = glength*dims(i)
-    enddo
+    glength= product(int(dims,kind=PIO_OFFSET))
+    if(glength > int(huge(i),kind=pio_offset)) then
+       call piodie( __PIO_FILE__,__LINE__, &
+            'requested array size too large for this interface ')       
+    endif
+
     if(lenblocks>0) then
        ndisp=size(iodof)/lenblocks
     else
        ndisp=0
     end if
-    call alloc_check(displace,ndisp)
+    call alloc_check(displace,int(ndisp))
 
 #ifdef MEMCHK	
     call get_memusage(msize, rss, mshare, mtext, mstack)
@@ -749,7 +845,9 @@ contains
 
     if(debug) print *,'iam: ',iosystem%io_rank,'initdecomp: userearranger: ',userearranger, glength
     if(userearranger) then 
-       call rearrange_create(iosystem,compdof,iodof,iodesc)
+             call piodie( __PIO_FILE__,__LINE__, &
+                  'this interface does not use rearranger')
+       
     endif
 #ifdef MEMCHK	
     call get_memusage(msize, rss, mshare, mtext, mstack)
@@ -770,7 +868,7 @@ contains
        iodesc%write%n_elemtype = ndisp
        iodesc%write%n_words    = iodesc%write%n_elemtype*lenblocks
 
-       call genindexedblock(lenblocks,piotype,iodesc%write%elemtype,iodesc%write%filetype,displace)
+       call genindexedblock(lenblocks,piotype,iodesc%write%elemtype,iodesc%write%filetype,int(displace))
 
        if(debug) print *,'initdecomp: at the end of subroutine',iodesc%write%n_elemtype,iodesc%write%n_words
     endif
@@ -800,7 +898,7 @@ contains
 #ifdef TIMING
     call t_stopf("PIO_initdecomp")
 #endif
-  end subroutine initdecomp_1dof_nf
+  end subroutine initdecomp_1dof_nf_i8
 
 !>
 !! @public
@@ -823,11 +921,37 @@ contains
 !! @param iostart   The start index for the block-cyclic io decomposition
 !! @param iocount   The count for the block-cyclic io decomposition
 !<
-  subroutine PIO_initdecomp_dof(iosystem,basepiotype,dims,compdof, iodesc, iostart, iocount)
+  subroutine PIO_initdecomp_dof_i4(iosystem,basepiotype,dims,compdof, iodesc, iostart, iocount)
+    use calcdisplace_mod, only : calcdisplace_box
+    use calcdecomp, only : calcstartandcount
     type (iosystem_desc_t), intent(inout) :: iosystem
     integer(i4), intent(in)           :: basepiotype
     integer(i4), intent(in)           :: dims(:)
-    integer (i4), intent(in)          :: compdof(:)   ! global degrees of freedom for computational decomposition
+    integer(i4), intent(in)          :: compdof(:)   ! global degrees of freedom for computational decomposition
+    integer (kind=PIO_offset), optional :: iostart(:), iocount(:)
+    type (io_desc_t), intent(out)     :: iodesc
+    integer(kind=PIO_OFFSET), pointer :: internal_compdof(:)
+
+    allocate(internal_compdof(size(compdof)))
+    internal_compdof = int(compdof,kind=pio_offset)
+    
+    if(present(iostart) .and. present(iocount) ) then
+       call pio_initdecomp(iosystem, basepiotype, dims, internal_compdof, iodesc, iostart, iocount)
+    else
+       call pio_initdecomp(iosystem, basepiotype, dims, internal_compdof, iodesc)
+    endif
+    deallocate(internal_compdof)
+
+  end subroutine PIO_initdecomp_dof_i4
+
+
+  subroutine PIO_initdecomp_dof_i8(iosystem,basepiotype,dims,compdof, iodesc, iostart, iocount)
+    use calcdisplace_mod, only : calcdisplace_box
+    use calcdecomp, only : calcstartandcount
+    type (iosystem_desc_t), intent(inout) :: iosystem
+    integer(i4), intent(in)           :: basepiotype
+    integer(i4), intent(in)           :: dims(:)
+    integer (kind=pio_offset), intent(in)          :: compdof(:)   ! global degrees of freedom for computational decomposition
     integer (kind=PIO_offset), optional :: iostart(:), iocount(:)
     type (io_desc_t), intent(out)     :: iodesc
 
@@ -836,15 +960,15 @@ contains
     integer (i4)                       :: lenblocks
     integer(i4)                       ::  piotype
 
-    integer (i4), pointer :: displace(:)  ! the displacements for the mpi data structure (read)
+    integer (kind=pio_offset), pointer :: displace(:)  ! the displacements for the mpi data structure (read)
 
     integer(i4) :: prev
-    integer(i4) :: glength    ! global length in words
+    integer(kind=PIO_OFFSET) :: glength    ! global length in words
     integer(i4) :: ii,i,dis,ierr
     integer(i4),pointer, dimension(:) :: blocklen,disp
     logical(log_kind) ::  userearranger
     logical, parameter :: check = .true.
-    integer(i4) :: ndisp
+    integer(kind=pio_offset) :: ndisp
     integer(i4) :: iosize               ! rml
     integer(i4) :: msg
     logical :: is_async=.false.
@@ -853,6 +977,9 @@ contains
 #endif
 
     integer ierror
+
+    nullify(iodesc%start)
+    nullify(iodesc%count)
 
 
 #ifdef TIMING
@@ -909,11 +1036,12 @@ contains
     !---------------------
     ! total global size
     !---------------------
-    
-    glength=1
-    do i=1,ndims
-       glength = glength*dims(i)
-    enddo
+    glength= product(int(dims,kind=PIO_OFFSET))
+    if(glength > int(huge(i),kind=pio_offset)) then
+       call piodie( __PIO_FILE__,__LINE__, &
+            'requested array size too large for this interface ')       
+    endif
+
        
 
     ! remember iocount() is only defined on io procs
@@ -925,8 +1053,7 @@ contains
        
     iodesc%start=0
     iodesc%count=0
-    if(DebugAsync) print*,__PIO_FILE__,__LINE__, iosystem%num_tasks, &
-    iosystem%num_iotasks, iosystem%io_rank, iosystem%io_comm, iosystem%ioranks
+    if(Debug) print*,__PIO_FILE__,__LINE__, iosystem%num_tasks, iosystem%num_iotasks, iosystem%io_rank, iosystem%io_comm, iosystem%ioranks
 
     if (iosystem%ioproc) then
        if(present(iostart) .and. present(iocount)) then
@@ -936,9 +1063,8 @@ contains
           call piodie( __PIO_FILE__,__LINE__, &
                'both optional parameters start and count must be provided')
        else
-          call getiostartandcount(iosystem%num_tasks, ndims, dims, &
-               iosystem%num_iotasks, iosystem%io_rank, iosystem%io_comm, &
-               iodesc%start, iodesc%count)
+          call calcstartandcount(basepiotype, ndims, dims, iosystem%num_iotasks, iosystem%io_rank,&
+                 iodesc%start, iodesc%count,iosystem%num_aiotasks)
        end if
        iosize=1
        do i=1,ndims
@@ -947,8 +1073,7 @@ contains
        call mpi_allreduce(iosize, iodesc%maxiobuflen, 1, mpi_integer, mpi_max, iosystem%io_comm, ierr)
        call checkmpireturn('mpi_allreduce in initdecomp',ierr)
 
-       if(debug) print *,'IAM: ',iosystem%comp_rank, &
-           ' after getiostartandcount: count is: ',iodesc%count
+       if(debug) print *,'IAM: ',iosystem%comp_rank,' after getiostartandcount: count is: ',iodesc%count
 
 
        lenblocks=iodesc%count(1)
@@ -959,7 +1084,7 @@ contains
        else
           ndisp=0
        end if
-       call alloc_check(displace,ndisp)
+       call alloc_check(displace,int(ndisp))
        
        !--------------------------------------------
        ! calculate mpi data structure displacements 
@@ -1014,13 +1139,10 @@ contains
        !-----------------------------------------------
        iodesc%write%n_elemtype = ndisp
        iodesc%write%n_words    = iodesc%write%n_elemtype*lenblocks
-       call genindexedblock(lenblocks,piotype,iodesc%write%elemtype,iodesc%write%filetype,displace)
+       call genindexedblock(lenblocks,piotype,iodesc%write%elemtype,iodesc%write%filetype,int(displace))
        
-       if(debug) then
-          print *,__PIO_FILE__,__LINE__, &
-          iodesc%write%n_elemtype,iodesc%write%n_words, &
-          iodesc%write%elemtype,iodesc%write%filetype
-       endif
+       if(debug) print *,__PIO_FILE__,__LINE__,iodesc%write%n_elemtype, &
+        iodesc%write%n_words,iodesc%write%elemtype,iodesc%write%filetype
     else
        iodesc%write%n_elemtype=0
        iodesc%write%n_words=0
@@ -1060,173 +1182,9 @@ contains
     call t_stopf("PIO_initdecomp_dof")
 #endif
 
-  end subroutine PIO_initdecomp_dof
-
-  subroutine getiostartandcount(ntasks, ndims, gdims, num_io_procs, iorank, iocomm, start, count)
-
-    implicit none
-
-    integer, intent(in) :: ntasks
-    integer, intent(in) :: ndims, gdims(ndims), num_io_procs
-
-    integer, intent(in) :: iocomm
-    integer(kind=PIO_offset), intent(out) :: start(ndims), count(ndims)   ! start and count arrays 
-
-    integer :: ierr
-    integer :: n,m
-    integer :: use_io_procs,iorank, sdims, cnt
-    logical :: done
-    integer :: xiam, xpes, ps, pe, ds, de, ns, pe1, ps1
-    integer :: size,tsize
-    integer :: it
-    real(r8) :: fanfactor, fanlimit
-    real(r8) :: rtmp
-    integer :: testvalue
-    integer, parameter :: minblocksize=16        ! minimum block size on a task
-    integer, parameter :: maxit=1               ! maximum number of times to iterate on the fanin/out limiter  (Probably want a better solution)
-    integer,allocatable :: pes_per_dim(:), step(:)
-    integer,allocatable :: bsize(:),nblocks(:),fblocks(:)
+  end subroutine PIO_initdecomp_dof_i8
 
 
-    tsize=1
-    do n=1,ndims
-       tsize=tsize*gdims(n)
-    end do
-    allocate(pes_per_dim(ndims))
-    allocate(step(ndims))
-    allocate(bsize(ndims))
-    allocate(nblocks(ndims))
-    allocate(fblocks(ndims))
-
-    use_io_procs=num_io_procs
-    do while(tsize/minblocksize < use_io_procs .and. use_io_procs>1)
-       use_io_procs=use_io_procs-1
-    end do
-    if(Debug) print *,'iorank: ',iorank,' getiostartandcount: use_io_procs: ',use_io_procs
-
-    start = 1
-    count = 0
-
-
-!!    if(iorank>=use_io_procs) return 
-
-    !-----------------
-
-    cnt = 1
-    sdims = ndims
-    do while (cnt < use_io_procs .and. sdims > 0)
-       !       cnt = cnt * ceiling(dble(gdims(sdims))/dble(minblocksize))
-       cnt = cnt * gdims(sdims)
-       sdims = sdims - 1
-    enddo
-    if (sdims < 0) then
-       call piodie( __PIO_FILE__,__LINE__, &
-            'error in sdims',sdims)
-    endif
-
-    do m = 1,sdims
-       start(m) = 1
-       count(m) = gdims(m)
-       bsize(m) = gdims(m)
-       nblocks(m) = 1
-       fblocks(m) = 1
-    enddo
-    if(Debug) print *,'iorank: ',iorank, ' getiostartandcount: sdims: ',sdims
-    if(Debug) print *,'iorank: ',iorank, ' getiostartandcount: count: ',count
-
-    fanlimit  = 50.00
-    fanfactor = fanlimit + 1.0  !we want at least one trip through the do while loop  
-
-    it = 0
-    step(:) = 1
-    do while (fanfactor > fanlimit .and. it < maxit ) 
-       xpes = use_io_procs
-       xiam = iorank   ! goes from 0 to xpes-1
-       do m = ndims, sdims+1, -1
-!          if(xpes >= gdims(m)) then
-          if(xpes > gdims(m)) then
-             ps = -1
-             ns = 1
-             do while (ps < 0 .and. ns <= gdims(m) )
-                ps1 = int((dble(xpes)*dble((ns-1)*step(m)))/dble(gdims(m)))
-                pe1 = int((dble(xpes)*dble(ns*step(m)  ))/dble(gdims(m))) - 1
-                if (xiam >= ps1 .and. xiam <= pe1) then
-                   ps = ps1
-                   pe = pe1
-                   start(m) = (ns-1)*step(m) + 1
-                   count(m) = step(m)
-                end if
-                ns = ns+1
-             end do
-             xpes = pe - ps + 1
-             xiam = xiam - ps
-             !          write(6,*) 'tcx1 ',iorank,m,start(m),count(m)
-             step(m)=nextlarger(step(m),gdims(m))
-             if(step(m) == gdims(m)) fanlimit = fanlimit + 10.0
-          else
-             if (m /= sdims+1) then
-                call piodie( __PIO_FILE__,__LINE__, &
-                     'm /= sdims+1',ival1=m,ival2=sdims)
-             endif
-             ds = int((dble(gdims(m))*dble(xiam  ))/dble(xpes)) + 1
-             de = int((dble(gdims(m))*dble(xiam+1))/dble(xpes))
-             start(m) = ds
-             count(m) = de-ds+1
-          end if
-
-          if (start(m) < 1 .or. count(m) < 1) then
-             print *, 'start =',start, ' count=',count
-             call piodie( __PIO_FILE__,__LINE__, &
-                  'start or count failed to converge')
-          endif
-
-       enddo
-       do m=1,ndims
-          pes_per_dim(m) = gdims(m)/count(m)
-       enddo
-       ! -----------------------------------------------
-       ! note this caculation assumes that the the first 
-       ! two horizontal dimensions are decomposed,
-       ! -----------------------------------------------
-       if(ndims==1) then
-          fanfactor = ntasks/pes_per_dim(1)
-       else
-          fanfactor = ntasks/(pes_per_dim(1)*pes_per_dim(2))
-       end if
-       call mpi_allreduce(fanfactor,rtmp,1,MPI_REAL8,MPI_MAX,iocomm,ierr)
-       fanfactor=rtmp
-       if(Debug) print *,'iorank: ',iorank,'getiostartandcount: pes_per_dim is: ',pes_per_dim
-       if(Debug) print *,'iorank: ',iorank,' getiostartandcount: fan factor is: ',fanfactor
-       it=it+1
-    enddo
-    deallocate(step)
-    deallocate(pes_per_dim)
-    deallocate(bsize,nblocks,fblocks)
-    !   stop 'end of getiostartandcount'
-
-    if(iorank>=use_io_procs) then 
-	start = 1
-        count = 0 
-    endif
-
-  end subroutine getiostartandcount
-
-  integer function nextlarger(current,value) result(res)
-
-  integer :: current,value,rem
-  !-----------------------------------------
-  ! This function finds a value res that is
-  !  larger than current that divides value evenly
-  !-----------------------------------------
-  res=current
-  rem = 1
-  do while ((rem .ne. 0) .and. (res .lt. value))
-     res = res + 1
-     rem = MOD(value,res)
-!     print *,'res,rem: ',res,rem
-  enddo
-
-  end function nextlarger
 
   !************************************
   ! dupiodesc2
@@ -1267,7 +1225,8 @@ contains
     integer(i4), intent(inout) :: filetype   ! file mpi type 
     integer(i4), intent(in) :: displace(:)   ! mpi displacement in the array
 
-    integer(i4) :: numblocks,i,ierr,prev
+    integer(i4) :: numblocks,i,ierr, prev
+
     logical, parameter :: check = .true.
 
     integer:: nints, nadds, ndtypes, comb, lbasetype
@@ -1339,8 +1298,7 @@ contains
 !! @param iosystem a derived type which can be used in subsequent pio operations (defined in PIO_types).
 !! @param base @em optional argument can be used to offset the first io task - default base is task 1.
 !<
-  subroutine init_intracom(comp_rank, comp_comm, num_iotasks, &
-             num_aggregator, stride,  rearr, iosystem,base)
+  subroutine init_intracom(comp_rank, comp_comm, num_iotasks, num_aggregator, stride,  rearr, iosystem,base)
     use pio_types, only : pio_internal_error, pio_rearr_none
     integer(i4), intent(in) :: comp_rank
     integer(i4), intent(in) :: comp_comm
@@ -1373,7 +1331,6 @@ contains
 #ifdef TIMING
     call t_startf("PIO_init")
 #endif
-
     iosystem%error_handling = PIO_internal_error
     iosystem%union_comm = comp_comm
     iosystem%comp_comm = comp_comm
@@ -1384,6 +1341,10 @@ contains
 #ifndef _MPISERIAL
     iosystem%info = mpi_info_null
 #endif
+    if(comp_comm == MPI_COMM_NULL) then
+       call piodie(__PIO_FILE__,__LINE__,'invalid comp_comm in pio_init')
+    end if
+
     call mpi_comm_size(comp_comm,iosystem%num_tasks,ierr)
 
     iosystem%num_comptasks = iosystem%num_tasks
@@ -1415,8 +1376,7 @@ contains
        if(base>=0 .and. base<iosystem%num_tasks) lbase = base
     endif
 
-    if(debug) print *,'init: iosystem%num_tasks,n_iotasks,num_aggregator: ', &
-              iosystem%num_tasks,n_iotasks,num_aggregator
+    if(debug) print *,'init: iosystem%num_tasks,n_iotasks,num_aggregator: ',iosystem%num_tasks,n_iotasks,num_aggregator
 
     ! --------------------------
     ! select which nodes are io
@@ -1505,8 +1465,6 @@ contains
 
     iosystem%iomaster = iosystem%ioranks(1)
     iosystem%ioroot = iosystem%ioranks(1)
-    if(debug) print *,'init: iam: ',comp_rank,'io processor: ',iosystem%ioproc, 'io rank ',&
-         iosystem%io_rank, iosystem%iomaster		  
 
 
     if(debug) print *,'init: iam: ',comp_rank,' before allocate(status): n_iotasks: ',n_iotasks
@@ -1520,8 +1478,6 @@ contains
 #ifndef _MPISERIAL
     call mpi_info_create(iosystem%info,ierr)
 #endif
-
-    if(debug) print *,'iam: ',iosystem%io_rank,__LINE__,'init: userearranger: ',iosystem%userearranger
 
     !---------------------------------
     ! initialize the rearranger system 
@@ -1538,7 +1494,8 @@ contains
     call mpi_group_incl(mpi_group_world,n_iotasks,iosystem%ioranks,mpi_group_io,ierr)
     if(check) call checkmpireturn('init: after call to group_range_incl: ',ierr)
 
-    if(DebugAsync) print *,__PIO_FILE__,__LINE__,'n: ',n_iotasks, ' r: ',iosystem%ioranks, ' g: ',mpi_group_io
+    if(DebugAsync) print *,__PIO_FILE__,__LINE__,'n: ',n_iotasks, ' r: ', &
+     iosystem%ioranks, ' g: ',mpi_group_io
 
     !-----------------------
     ! setup io_comm and io_rank
@@ -1553,6 +1510,10 @@ contains
     !DBG    print *,'PIO_init: before call to setnumagg'
     itmp = num_aggregator
     call mpi_bcast(itmp, 1, mpi_integer, 0, iosystem%comp_comm, ierr)
+
+    if(debug) print *,__LINE__,'init: iam: ',comp_rank,'io processor: ',iosystem%ioproc, 'io rank ',&
+         iosystem%io_rank, iosystem%iomaster, iosystem%comp_comm, iosystem%io_comm
+
 
     if(itmp .gt. 0) then 
        write(cb_nodes,('(i5)')) itmp
@@ -1570,6 +1531,10 @@ contains
     call PIO_set_hint(iosystem, 'romio_ds_read','disable') 
     call PIO_set_hint(iosystem,'romio_ds_write','disable') 
 #endif
+    iosystem%num_aiotasks = iosystem%num_iotasks
+    iosystem%numost = PIO_NUM_OST
+    if(debug) print *,__LINE__,'init: iam: ',comp_rank,'io processor: ',iosystem%ioproc, 'io rank ',&
+         iosystem%io_rank, iosystem%iomaster, iosystem%comp_comm, iosystem%io_comm
 
 #ifdef TIMING
     call t_stopf("PIO_init")
@@ -1614,7 +1579,7 @@ contains
 #endif
 #if defined(NO_MPI2) || defined(_MPISERIAL)
     call piodie( __PIO_FILE__,__LINE__, &
-      'The PIO async interface requires an MPI2 complient MPI library')
+     'The PIO async interface requires an MPI2 complient MPI library')
 #else 
     do i=1,component_count
        iosystem(i)%error_handling = PIO_internal_error
@@ -1628,6 +1593,7 @@ contains
        iosystem(i)%ioroot = MPI_PROC_NULL
        iosystem(i)%compmaster= MPI_PROC_NULL
        iosystem(i)%iomaster = MPI_PROC_NULL 
+       iosystem(i)%numOST = PIO_num_OST
 
 
        if(io_comm/=MPI_COMM_NULL) then
@@ -1783,6 +1749,8 @@ contains
     if(DebugAsync) print*,__PIO_FILE__,__LINE__, iosystem(1)%ioranks
 
 
+    iosystem%num_aiotasks = iosystem%num_iotasks
+    iosystem%numost = PIO_NUM_OST
 
     ! This routine does not return
     if(io_comm /= MPI_COMM_NULL) call pio_msg_handler(component_count,iosystem) 
@@ -1864,13 +1832,13 @@ contains
 !! @retval ierr @copydoc  error_return
 !<
   subroutine PIO_set_hint(iosystem, hint, hintval)
-    type (iosystem_desc_t), intent(out)  :: iosystem  ! io descriptor to initalize
+    type (iosystem_desc_t), intent(inout)  :: iosystem  ! io descriptor to initalize
     character(len=*), intent(in) :: hint, hintval
     
     integer :: ierr
 #if defined(USEMPIIO) || defined(_PNETCDF) || defined(_NETCDF4)
 #ifndef _MPISERIAL
-    if(iosystem%ioproc) then
+    if(iosystem%ioproc .and. (iosystem%info /= MPI_INFO_NULL)) then
        if(iosystem%io_rank==0 .or. Debug) print *,'Setting mpi info: ',hint,'=',hintval
        call mpi_info_set(iosystem%info,hint,hintval,ierr)
        call checkmpireturn('PIO_set_hint',ierr)
@@ -2116,16 +2084,14 @@ contains
     integer :: msg
     logical, parameter :: check = .true.
     character(len=9) :: rd_buffer
+    character(len=4) :: stripestr
+    character(len=9) :: stripestr2
     character(len=char_len)  :: myfname
 #ifdef TIMING
     call t_startf("PIO_createfile")
 #endif
 
-    if(debug.or.debugasync) then
-      print *,'createfile: {comp,io}_rank:', &
-      iosystem%comp_rank,iosystem%io_rank,'io proc: ', &
-      iosystem%ioproc, iosystem%async_interface, iotype
-    endif
+    if(debug.or.debugasync) print *,'createfile: {comp,io}_rank:',iosystem%comp_rank,iosystem%io_rank,'io proc: ',iosystem%ioproc, iosystem%async_interface, iotype
     ierr=PIO_noerr
     
 
@@ -2163,6 +2129,12 @@ contains
        call PIO_set_hint(iosystem, "cb_buffer_size",trim(adjustl(rd_buffer)))
     endif
 #endif
+#ifdef PIO_LUSTRE_HINTS
+    write(stripestr,('(i3)')) min(iosystem%num_iotasks,iosystem%numOST)
+    call PIO_set_hint(iosystem,"striping_factor",trim(adjustl(stripestr)))
+    write(stripestr2,('(i9)')) 1024*1024
+    call PIO_set_hint(iosystem,"striping_unit",trim(adjustl(stripestr2)))
+#endif
 
 #ifndef _NETCDF4
     if(file%iotype==pio_iotype_netcdf4p .or. file%iotype==pio_iotype_netcdf4c) then
@@ -2188,8 +2160,9 @@ contains
        end if
        ierr = create_mpiio(file,myfname)
     case( pio_iotype_pnetcdf, pio_iotype_netcdf, pio_iotype_netcdf4p, pio_iotype_netcdf4c)
-       ierr = create_nf(file,myfname, amode)	
-       if(debug .and. iosystem%io_rank==0)print *,__PIO_FILE__,__LINE__,' open: ', myfname, file%fh
+       if(debug) print *,__PIO_FILE__,__LINE__,' open: ', trim(myfname), amode
+       ierr = create_nf(file,trim(myfname), amode)	
+       if(debug .and. iosystem%io_rank==0)print *,__PIO_FILE__,__LINE__,' open: ', myfname, file%fh, ierr
     case(pio_iotype_binary)
        print *,'createfile: io type not supported'
     end select
@@ -2201,7 +2174,35 @@ contains
     call t_stopf("PIO_createfile")
 #endif
   end function createfile
-
+!>
+!! @public
+!! @defgroup PIO_setnum_OST PIO_setnum_OST
+!! @brief Sets the default number of Lustre Object Storage Targets (OST)
+!! @details  When PIO is used on a Lustre filesystem, this subroutine sets the
+!!           default number Object Storage targets (OST) to use. PIO
+!!           will use min(num_aiotasks,numOST) where num_aiotasks the the
+!!           actual number of active iotasks
+!! @param iosystem : a defined pio system descriptor created by a call to @ref PIO_init (see PIO_types)
+!! @param numOST : The number of OST to use by default
+!<
+  subroutine PIO_setnum_OST(iosystem,numOST)
+     type (iosystem_desc_t), intent(inout), target :: iosystem
+     integer(i4) :: numOST
+     iosystem%numOST = numOST
+  end subroutine PIO_setnum_OST
+!>
+!! @public
+!! @defgroup PIO_getnum_OST PIO_getnum_OST
+!! @brief Sets the default number of Lustre Object Storage Targets (OST)
+!! @details  When PIO is used on a Lustre filesystem, this subroutine gets the
+!!           default number Object Storage targets (OST) to use.
+!! @param iosystem : a defined pio system descriptor created by a call to @ref PIO_init (see PIO_types)
+!! @retval numOST : The number of OST to use.
+!<
+  integer function PIO_getnum_OST(iosystem) result(numOST)
+     type (iosystem_desc_t), intent(inout), target :: iosystem
+     numOST = iosystem%numOST
+  end function PIO_getnum_OST
 !> 
 !! @public
 !! @ingroup PIO_openfile 
@@ -2241,9 +2242,7 @@ contains
 
 
 
-    if(Debug .or. Debugasync) &
-      print *,'PIO_openfile: {comp,io}_rank:',iosystem%comp_rank, &
-      iosystem%io_rank,'io proc: ',iosystem%ioproc
+    if(Debug .or. Debugasync) print *,'PIO_openfile: {comp,io}_rank:',iosystem%comp_rank,iosystem%io_rank,'io proc: ',iosystem%ioproc
     ierr=PIO_noerr
 
     file%iosystem => iosystem
@@ -2368,9 +2367,16 @@ contains
     implicit none
     type (iosystem_desc_t) :: ios
     type (io_desc_t) :: iodesc
-    integer :: ierr
+    integer :: ierr, msg
 
-
+    if(ios%async_interface .and. .not. ios%ioproc) then
+       msg = PIO_MSG_FREEDECOMP
+       if(ios%comp_rank==0) then
+          call mpi_send(msg, 1, mpi_integer, ios%ioroot, 1, ios%union_comm, ierr)
+       end if
+       call mpi_bcast(iodesc%async_id,1, mpi_integer, ios%compmaster,ios%intercomm, ierr)
+    end if
+    iodesc%async_id=-1
     call rearrange_free(ios,iodesc)
 
 #ifndef _MPISERIAL
@@ -2434,7 +2440,7 @@ contains
 !! @param file @copydoc file_desc_t
 !< 
   subroutine closefile(file)
-
+    use piodarray, only : darray_write_complete
     type (file_desc_t),intent(inout)   :: file
 
     integer :: ierr, msg
@@ -2452,12 +2458,14 @@ contains
        call mpi_bcast(file%fh, 1, mpi_integer, file%iosystem%compmaster, file%iosystem%intercomm, ierr)
     end if
 
-    if(debug .and. file%iosystem%io_rank==0) print *,__PIO_FILE__,__LINE__,'close: ',file%fh
+    if(debug .and. file%iosystem%io_rank==0) &
+      print *,__PIO_FILE__,__LINE__,'close: ',file%fh
     iotype = file%iotype 
     select case(iotype)
     case(pio_iotype_pbinary, pio_iotype_direct_pbinary)
        ierr = close_mpiio(file)
     case( pio_iotype_pnetcdf, pio_iotype_netcdf, pio_iotype_netcdf4p, pio_iotype_netcdf4c)
+       call darray_write_complete(file)
        ierr = close_nf(file)
     case(pio_iotype_binary)
        print *,'closefile: io type not supported'
@@ -2500,9 +2508,7 @@ contains
        read(unit=lun,fmt=*,iostat=ios) iobuf(i)
        if (ios /= 0) then
           write (6,*) rank,': error reading item ',i,' of ',size
-          ! Thus us not Fortran standard, besides, this routine is not used. 
-          ! call abort
-          return
+          call abort
        endif
 
     end do
@@ -2512,144 +2518,6 @@ contains
   end subroutine read_ascii
 
 
-
-  !*****************************
-  ! calcdisplace
-  !
-
-  subroutine calcdisplace(bsize,dof,displace)
-
-    integer(i4), intent(in) :: bsize    ! length of contigious blocks of numbers
-    integer(i4), intent(in) :: dof(:)   ! degree of freedom on which to setup the displacement array
-    integer(i4), intent(inout) :: displace(:)  ! array of mpi displacments
-
-    integer :: numblocks,lenblocks,i,ii,dis
-
-    numblocks = size(displace)
-    lenblocks = bsize
-    do i=1,numblocks
-       ii = (i-1)*lenblocks+1
-       dis = dof(ii)-1
-       dis = dis/lenblocks   
-       displace(i) = dis
-    enddo
-    do i=1,numblocks-1	
-       if(displace(i+1) .lt. displace(i)) then
-          print *,'calcdisplace: error with displacement arrays',i,displace(i:i+1),numblocks,size(dof),dof(numblocks)
-          call piodie( __PIO_FILE__,__LINE__)
-       endif
-    enddo
-
-  end subroutine calcdisplace
-
-
-  subroutine calcdisplace_box(gsize,start,count,ndim,displace)
-
-    integer(i4),intent(in) :: gsize(:)   ! global size of output domain
-    integer(kind=PIO_offset),intent(in) :: start(:), count(:)
-    integer(i4), intent(in) :: ndim
-    integer(i4),intent(inout) :: displace(:)  ! mpi displacments
-
-    !!
-
-    integer ndisp
-    integer(i4) :: gstride(ndim)
-    integer i,j
-    integer iosize
-    integer(i4) :: myloc(ndim)
-    integer(i4) :: ub(ndim)
-    integer idim
-    logical done
-    integer gindex
-
-    gstride(1)=gsize(1)
-    do i=2,ndim
-       gstride(i)=gsize(i)*gstride(i-1)
-    end do
-
-    iosize=min(int(count(1)),1)
-    do i=2,ndim
-       iosize=iosize*count(i)
-    end do
-
-    ndisp=size(displace)
-
-
-    if (iosize<1 .or. ndisp<1) return
-
-    if (ndisp/=iosize) then
-       call piodie(__PIO_FILE__,__LINE__,'ndisp=',ndisp,' /= iosize=',iosize)
-    endif
-
-    do i=1,ndim
-       ub(i)=start(i)+count(i)-1
-    end do
-
-    ! skip x dimension (start of each block)
-    ! generate displacement for every 1,y,z
-    !  i.e. loop over y,z,...
-    !       compute corresponding global index
-    !       divide by lenblocks
-
-    displace(1)=1
-    myloc=start
-
-    do i=1,iosize
-       ! go from myloc() to 1-based global index
-       gindex=myloc(1)
-       do j=2,ndim
-          gindex=gindex+(myloc(j)-1)*gstride(j-1)
-       end do
-
-       ! rml
-       ! following original but is that right???
-       ! seems like the 'if' is erroneous
-
-       gindex=gindex-1
-
-       gindex=gindex/count(1)    ! gindex/lenblock
-
-       displace(i)=gindex
-
-       ! increment myloc to next position
-
-
-       idim=2                    ! dimension to increment
-       done=.false.
-
-       if (i<iosize) then
-          do while (.not. done)
-             if (myloc(idim)<ub(idim)) then
-                myloc(idim)=myloc(idim)+1
-                done=.true.
-             else
-                myloc(idim)=start(idim)
-                idim=idim+1
-                if (idim>ndim) call piodie(__PIO_FILE__,__LINE__,'dim overflow')
-             endif
-          end do
-       endif
-
-    end do
-
-    do i=2,ndim
-       if (myloc(i) /= ub(i)) then
-          print *,'myloc=',myloc
-          print *,'ub=',ub
-          call piodie( __PIO_FILE__,__LINE__,'myloc/=ub')
-       endif
-    end do
-
-
-    ! check for strictly increasing
-
-    do i=1,ndisp-1	
-       if(displace(i) .gt. displace(i+1)) then
-          call piodie(__PIO_FILE__,__LINE__,'displace is not increasing')
-       endif
-    enddo
-
-  end subroutine calcdisplace_box
 
 
 end module piolib_mod

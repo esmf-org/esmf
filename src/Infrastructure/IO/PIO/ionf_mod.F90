@@ -1,4 +1,3 @@
-#include "ESMFPIO.h"
 #define __PIO_FILE__ "ionf_mod.F90"
 module ionf_mod
 #ifdef TIMING
@@ -37,8 +36,11 @@ contains
   !
 
   integer function create_nf(File,fname, amode) result(ierr)
+#ifndef NO_MPIMOD
+    use mpi ! _EXTERNAL
+#else
     include 'mpif.h'      ! _EXTERNAL
-
+#endif
     type (File_desc_t), intent(inout) :: File
     character(len=*), intent(in)      :: fname
     integer(i4),  intent(in) :: amode
@@ -104,7 +106,7 @@ contains
           if (File%iosystem%io_rank == 0) then
              ! Stores the ncid in File%fh
              ierr = nf90_create(fname, nmode , File%fh)
-             if(Debug .or. Debugasync) print *,__PIO_FILE__,__LINE__,file%fh, ierr
+             if(Debug .or. Debugasync) print *,__PIO_FILE__,__LINE__,file%fh, ierr, nmode
 ! Set default to NOFILL for performance.  
              if(ierr==NF90_NOERR) &
                   ierr = nf90_set_fill(File%fh, NF90_NOFILL, nmode)
@@ -124,10 +126,7 @@ contains
     
     if(.not. file%iosystem%ioproc) file%fh=-tmpfh
 
-    if(Debug.or.DebugAsync) &
-    print *,__PIO_FILE__, &
-            __LINE__, &
-            file%fh,ierr
+    if(Debug.or.DebugAsync) print *,__PIO_FILE__,__LINE__,file%fh,ierr
     
     call check_netcdf(File, ierr,__PIO_FILE__,__LINE__)
 
@@ -140,8 +139,11 @@ contains
   ! 
 
   integer function open_nf(File,fname, mode) result(ierr)
+#ifndef NO_MPIMOD
+    use mpi ! _EXTERNAL
+#else
     include 'mpif.h'      ! _EXTERNAL
-
+#endif
     type (File_desc_t), intent(inout) :: File
     character(len=*), intent(in)      :: fname
     integer(i4), optional, intent(in) :: mode
@@ -298,8 +300,11 @@ contains
   end function sync_nf
 
   subroutine check_file_type(File, filename) 
+#ifndef NO_MPIMOD
+    use mpi !_EXTERNAL
+#else
     include 'mpif.h'      ! _EXTERNAL
-
+#endif
 
     type (File_desc_t), intent(inout) :: File
     character(len=*), intent(in) :: filename
@@ -338,11 +343,8 @@ contains
                 File%iotype=pio_iotype_netcdf4c
              end if
 #else
-             call piodie( &
-             __PIO_FILE__, &
-             __LINE__, &
-             'You must link with the netcdf4 ',0,  &
-             'library built with hdf5 support to read this file',0,filename)
+             call piodie(__PIO_FILE__,__LINE__,'You must link with the netcdf4 ',0,&
+                  'library built with hdf5 support to read this file',0,filename)
 #endif       
           else 
              ! The HDF identifier could be offset further into the file.
@@ -363,9 +365,7 @@ contains
                 i=i*2
              end do
              close(fh)
-             if(eof<0) call piodie(  &
-                __PIO_FILE__,  &
-                __LINE__,'Unrecognized file format ',0,filename)             
+             if(eof<0) call piodie(__PIO_FILE__,__LINE__,'Unrecognized file format ',0,filename)             
           end if
 
        end if
@@ -374,12 +374,8 @@ contains
        call CheckMPIReturn('nf_mod',mpierr)
     end if
     return
-100 call piodie(__PIO_FILE__,  &
-                __LINE__,  &
-                'File open error ',0,filename)
-101 call piodie(__PIO_FILE__,  &
-                __LINE__,  &
-                'File read error ',0,filename)
+100 call piodie(__PIO_FILE__,__LINE__,'File open error ',0,filename)
+101 call piodie(__PIO_FILE__,__LINE__,'File read error ',0,filename)
 
 
 

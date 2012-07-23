@@ -1,4 +1,3 @@
-#include "ESMFPIO.h"
 module pio_utils
   use pio_types, only : file_desc_t, var_desc_t
   use pio_types, only : pio_int, pio_real, pio_double, pio_char
@@ -6,16 +5,19 @@ module pio_utils
   use pio_types, only : PIO_iotype_netcdf4p, pio_iotype_netcdf4c
   use pio_types, only : PIO_bcast_error 
   use pio_kinds, only : i4, r4, r8
-  use pio_support, only : checkmpireturn, piodie
+  use pio_support, only : checkmpireturn, piodie, Debug
 
 #ifdef _NETCDF
   use netcdf            ! _EXTERNAL
 #endif
-
+#ifndef NO_MPIMOD
+  use mpi !_EXTERNAL
+#endif
   implicit none
   private
-
+#ifdef NO_MPIMOD
   include 'mpif.h'      ! _EXTERNAL
+#endif
 #ifdef _PNETCDF
 #include <pnetcdf.inc>   /* _EXTERNAL */
 #endif
@@ -44,7 +46,7 @@ contains
 !
     iotype = file%iotype
     
-    call mpi_barrier(file%iosystem%union_comm, mpierr)
+    if(Debug) call mpi_barrier(file%iosystem%union_comm, mpierr)
 
     select case(iotype)
     case(iotype_pnetcdf)

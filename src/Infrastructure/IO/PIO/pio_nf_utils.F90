@@ -1,4 +1,3 @@
-#include "ESMFPIO.h"
 module pio_nf_utils
   use pio_types, only : file_desc_t, var_desc_t
   use nf_mod, only : pio_inq_vartype
