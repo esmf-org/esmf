@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.50 2012/01/06 20:16:40 svasquez Exp $
+! $Id: ESMF_FieldPr.F90,v 1.51 2012/07/23 20:23:58 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,6 @@ module ESMF_FieldPrMod
 
   use ESMF_FieldMod
   use ESMF_FieldGetMod
-  use ESMF_ArrayIOMod
 
   implicit none
 
