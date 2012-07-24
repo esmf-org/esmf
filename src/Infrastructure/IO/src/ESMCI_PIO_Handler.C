@@ -1,4 +1,4 @@
-// $Id: ESMCI_PIO_Handler.C,v 1.1 2012/07/23 20:21:04 gold2718 Exp $
+// $Id: ESMCI_PIO_Handler.C,v 1.2 2012/07/24 05:57:11 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -78,7 +78,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.1 2012/07/23 20:21:04 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.2 2012/07/24 05:57:11 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -290,7 +290,7 @@ int PIO_Handler::initializeVM (void
       // Figure out the inputs for the initialize call
       my_rank = localPet;
       num_iotasks = petCount;
-//      num_iotasks = 1;
+      num_iotasks = 1;
       num_aggregators = 1;
       stride = 1;
       rearr = PIO_rearr_box;
@@ -701,6 +701,8 @@ void PIO_Handler::arrayRead(
                                localrc);
       // Check to see if time is the unlimited dimension
       if (dimid_time != unlim) {
+        std::cout << "Time dimension = " << dimid_time << ", unlimited dim = "
+                  << unlim << std::endl;
         ESMC_LogDefault.Write(" Time is not the file's unlimited dimension",
                               ESMC_LOG_ERROR, ESMC_CONTEXT);
         statusOK = false;
@@ -810,7 +812,11 @@ void PIO_Handler::arrayWrite(
     *rc = ESMF_RC_NOT_IMPL;               // final return code
   }
 
-  PRINTPOS;
+//  PRINTPOS;
+  PRINTMSG(" (" << my_rank << "): file = \"" << getFilename() <<
+           "\",  varname = \"" << name << "\", time_frame = " <<
+           ((((int *)NULL != timeslice) && (*timeslice > 0)) ?
+            *timeslice : -1));
   // File open?
   statusOK = (isOpen() == ESMF_TRUE);
   if (statusOK) {
@@ -844,9 +850,10 @@ void PIO_Handler::arrayWrite(
     } else {
       varname = arr_p->getName();
     }
-    PRINTMSG(" (" << my_rank << "): varname = " << varname);
-    if (isNewFile()) {
+    PRINTMSG(" (" << my_rank << "): varname = \"" << varname << "\"");
+    if (ESMF_TRUE == isNewFile()) {
       var_exists = false;
+      PRINTMSG(" (" << my_rank << "): New file, setting var_exists to false");
     } else {
       int nVar;                           // Number of variables in file
       int nAtt;                           // Number of attributes in file
@@ -869,6 +876,10 @@ void PIO_Handler::arrayWrite(
       if (statusOK) {
         // We have a NetCDF file, see if the variable is in there
         localrc = pio_cpp_inq_varid_vdesc(pioFileDesc, varname, vardesc);
+        PRINTMSG(" (" << my_rank << "): After pio_cpp_inq_varid_vdesc, " <<
+                 "localrc = " << localrc << ", time_frame = " <<
+                 ((((int *)NULL != timeslice) && (*timeslice > 0)) ?
+                   *timeslice : -1));
         // This should succeed if the variable exists
         var_exists = (PIO_noerr == localrc);
       }
@@ -895,6 +906,10 @@ void PIO_Handler::arrayWrite(
         if (statusOK) {
           // Check to make sure that time is the unlimited dimension
           if (dimid_time != unlim) {
+            PRINTMSG(" (" << my_rank << "): " <<
+                     "Time is not the file's unlimited dimension, file = " <<
+                     getFilename() << ", dimid_time = " << dimid_time <<
+                     ", unlim = " << unlim);
             ESMC_LogDefault.Write("Time is not the file's unlimited dimension",
                                   ESMC_LOG_ERROR, ESMC_CONTEXT);
             statusOK = false;
@@ -902,13 +917,17 @@ void PIO_Handler::arrayWrite(
         }
         if (statusOK) {
           // Check to make sure timeslice has the "right??" value
-          if (*timeslice != time_len) {
-            ESMC_LogDefault.Write("Timeframe is greater than that in file",
+          if (*timeslice != (time_len + 1)) {
+            PRINTMSG(" (" << my_rank << "): " <<
+                     "Timeframe is incompatible with file" <<
+                     getFilename() << ", file time = " << time_len <<
+                     ", time to write = " << *timeslice);
+            ESMC_LogDefault.Write("Timeframe is incompatible with file",
                                   ESMC_LOG_ERROR, ESMC_CONTEXT);
             statusOK = false;
+          } else {
+            time_frame = *timeslice;
           }
-        } else {
-          time_frame = *timeslice;
         }
       } else {
         time_frame = *timeslice;
@@ -961,10 +980,23 @@ void PIO_Handler::arrayWrite(
       statusOK = false;
     }
   }
-  if (statusOK && (time_frame >= 0)) {
+#ifdef __DEBUG
+    pio_cpp_setdebuglevel(3);
+#endif // __DEBUG
+  if (statusOK && (getFormat() != ESMF_IOFMT_BIN) && (time_frame >= 0)) {
+#ifdef __DEBUG
+    int nvdims;
+    int lrc;
+    lrc = pio_cpp_inq_varndims_vdesc(pioFileDesc, vardesc, &nvdims);
+    PRINTMSG(" (" << my_rank << "): calling setframe, ndims = " << nvdims);
+#endif // __DEBUG
     pio_cpp_setframe(vardesc, time_frame);
   }
 #ifdef __DEBUG
+  else if (getFormat() != ESMF_IOFMT_BIN) {
+    PRINTMSG(" (" << my_rank << "): NOT calling setframe, status = " <<
+             statusOK << ", time_frame = " << time_frame);
+  }
   if (getFormat() != ESMF_IOFMT_BIN) {
     localrc = pio_cpp_inq_varid_vid(pioFileDesc, varname, &varid);
     PRINTMSG(" (" << my_rank << "): calling enddef, status = " << statusOK << ", varid = " << varid);
@@ -1005,6 +1037,7 @@ void PIO_Handler::arrayWrite(
       ESMC_LogDefault.Write("Bad PIO IO type", ESMC_LOG_WARN, ESMC_CONTEXT);
     }
   }
+  pio_cpp_setdebuglevel(0);
   PRINTMSG(" (" << my_rank << "): calling cleanup, status = " << statusOK);
 
   // Cleanup
@@ -1169,7 +1202,9 @@ void PIO_Handler::open(
              ((IO_NEW == *iowriteflag) || (IO_TRUNCATE == *iowriteflag))) {
     PRINTMSG(" calling pio_cpp_createfile");
     // Looks like we are ready to go
+#ifdef __DEBUG
     pio_cpp_setdebuglevel(3);
+#endif // __DEBUG
     localrc = pio_cpp_createfile(&pioSystemDesc, pioFileDesc,
                                  iotype, getFilename(), PIO_CLOBBER);
     if (!CHECKPIOERROR(localrc, "Unable to create file", (*rc))) {
@@ -1446,6 +1481,9 @@ bool PIO_Handler::CheckPIOError(
     } else {
       ESMC_LogDefault.Write(errmsg, ESMC_LOG_ERROR, line, file, method);
     }
+#ifdef __DEBUG
+    PRINTMSG(" ERROR: " << errmsg);
+#endif // __DEBUG
     // Attempt to find a corresponding ESMC error code
     switch(pioRetCode) {
     default:
