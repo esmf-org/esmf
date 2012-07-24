@@ -20,23 +20,23 @@ extern "C" {
 //                                  num_aggregator, stride, rearr, iosystem,
 //                                  base) bind(c)
 
-void pio_cpp_init_intracom_int(int comp_rank,
-                               int comp_comm,
-                               int num_tasks,
-                               int num_aggregator,
-                               int stride,
-                               int rearr,
-                               pio_iosystem_desc_t *iosystem,
-                               int base);
+void FTN_X(pio_cpp_init_intracom_int)(int comp_rank,
+                                      int comp_comm,
+                                      int num_tasks,
+                                      int num_aggregator,
+                                      int stride,
+                                      int rearr,
+                                      pio_iosystem_desc_t *iosystem,
+                                      int base);
 
 // subroutine pio_cpp_init_intercom(component_count, peer_comm, comp_comms,
 //                                  io_comm, iosystem) bind(c)
 
-void pio_cpp_init_intercom_int(int component_count,
-                               int peer_comm,
-                               int *comp_comms,
-                               int io_comm,
-                               pio_iosystem_desc_t **iosystem);
+void FTN_X(pio_cpp_init_intercom_int)(int component_count,
+                                      int peer_comm,
+                                      int *comp_comms,
+                                      int io_comm,
+                                      pio_iosystem_desc_t **iosystem);
 
 /////////////////////////////////
 //
@@ -52,14 +52,14 @@ void pio_cpp_init_intracom(int comp_rank,
                            int rearr,
                            pio_iosystem_desc_t *iosystem,
                            int base) {
-  pio_cpp_init_intracom_int(comp_rank,
-                            MPI_Comm_c2f(comp_comm),
-                            num_tasks,
-                            num_aggregator,
-                            stride,
-                            rearr,
-                            iosystem,
-                            base);
+  FTN_X(pio_cpp_init_intracom_int)(comp_rank,
+                                   MPI_Comm_c2f(comp_comm),
+                                   num_tasks,
+                                   num_aggregator,
+                                   stride,
+                                   rearr,
+                                   iosystem,
+                                   base);
 }
 
 void pio_cpp_init_intercom(int component_count,
@@ -74,11 +74,11 @@ void pio_cpp_init_intercom(int component_count,
     for (int i = 0; i < component_count; i++) {
       int_comp_comms[i] = MPI_Comm_c2f(comp_comms[i]);
     }
-    pio_cpp_init_intercom_int(component_count,
-                              MPI_Comm_c2f(peer_comm),
-                              int_comp_comms,
-                              MPI_Comm_c2f(io_comm),
-                              iosystems);
+    FTN_X(pio_cpp_init_intercom_int)(component_count,
+                                     MPI_Comm_c2f(peer_comm),
+                                     int_comp_comms,
+                                     MPI_Comm_c2f(io_comm),
+                                     iosystems);
   }
 }
 
@@ -92,9 +92,9 @@ void pio_cpp_init_intercom(int component_count,
 //                      unlimitedDimID) result(ierr)
 
 // The real pio_cpp_inquire fortran prototype
-int pio_cpp_inquire_int(pio_file_desc_t file, int *nDimensions,
-                        int *nVariables, int *nAttributes,
-                        int *unlimitedDimID);
+int FTN_X(pio_cpp_inquire_int)(pio_file_desc_t file, int *nDimensions,
+                               int *nVariables, int *nAttributes,
+                               int *unlimitedDimID);
 
 int pio_cpp_inquire(pio_file_desc_t file, int *nDimensions, int *nVariables,
                     int *nAttributes, int *unlimitedDimID) {
@@ -107,8 +107,8 @@ int pio_cpp_inquire(pio_file_desc_t file, int *nDimensions, int *nVariables,
   int nattr_local;
   int unlimdim_local;
 
-  iret = pio_cpp_inquire_int(file, &ndim_local, &nvar_local,
-                             &nattr_local, &unlimdim_local);
+  iret = FTN_X(pio_cpp_inquire_int)(file, &ndim_local, &nvar_local,
+                                    &nattr_local, &unlimdim_local);
   if ((int *)NULL != nDimensions) {
     *nDimensions = ndim_local;
   }
@@ -138,23 +138,23 @@ int pio_cpp_inquire_variable_vid(pio_file_desc_t ncid, int varid,
   // function called. We do that unless an earlier function had an error
   // in which case we return that.
   if ((char *)NULL != name) {
-    localrc = pio_cpp_inq_varname_vid(ncid, varid, name);
+    localrc = FTN_X(pio_cpp_inq_varname_vid)(ncid, varid, name);
     iret = (localrc == PIO_noerr) ? iret : localrc;
   }
   if ((int *)NULL != ndims) {
-    localrc = pio_cpp_inq_varndims_vid(ncid, varid, ndims);
+    localrc = FTN_X(pio_cpp_inq_varndims_vid)(ncid, varid, ndims);
     iret = (localrc == PIO_noerr) ? iret : localrc;
     if ((PIO_noerr == localrc) && ((int *)NULL != dimids)) {
-      localrc = pio_cpp_inq_vardimid_vid(ncid, varid, dimids, *ndims);
+      localrc = FTN_X(pio_cpp_inq_vardimid_vid)(ncid, varid, dimids, *ndims);
       iret = (localrc == PIO_noerr) ? iret : localrc;
     }
   }
   if ((int *)NULL != natts) {
-    localrc = pio_cpp_inq_varnatts_vid(ncid, varid, natts);
+    localrc = FTN_X(pio_cpp_inq_varnatts_vid)(ncid, varid, natts);
     iret = (localrc == PIO_noerr) ? iret : localrc;
   }
   if ((int *)NULL != xtype) {
-    localrc = pio_cpp_inq_vartype_vid(ncid, varid, xtype);
+    localrc = FTN_X(pio_cpp_inq_vartype_vid)(ncid, varid, xtype);
     iret = (localrc == PIO_noerr) ? iret : localrc;
   }
 
@@ -175,23 +175,24 @@ int pio_cpp_inquire_variable_vdesc(pio_file_desc_t ncid,
   // function called. We do that unless an earlier function had an error
   // in which case we return that.
   if ((char *)NULL != name) {
-    localrc = pio_cpp_inq_varname_vdesc(ncid, vardesc, name);
+    localrc = FTN_X(pio_cpp_inq_varname_vdesc)(ncid, vardesc, name);
     iret = (localrc == PIO_noerr) ? iret : localrc;
   }
   if ((int *)NULL != ndims) {
-    localrc = pio_cpp_inq_varndims_vdesc(ncid, vardesc, ndims);
+    localrc = FTN_X(pio_cpp_inq_varndims_vdesc)(ncid, vardesc, ndims);
     iret = (localrc == PIO_noerr) ? iret : localrc;
     if ((PIO_noerr == localrc) && ((int *)NULL != dimids)) {
-      localrc = pio_cpp_inq_vardimid_vdesc(ncid, vardesc, dimids, *ndims);
+      localrc = FTN_X(pio_cpp_inq_vardimid_vdesc)(ncid, vardesc,
+                                                  dimids, *ndims);
       iret = (localrc == PIO_noerr) ? iret : localrc;
     }
   }
   if ((int *)NULL != natts) {
-    localrc = pio_cpp_inq_varnatts_vdesc(ncid, vardesc, natts);
+    localrc = FTN_X(pio_cpp_inq_varnatts_vdesc)(ncid, vardesc, natts);
     iret = (localrc == PIO_noerr) ? iret : localrc;
   }
   if ((int *)NULL != xtype) {
-    localrc = pio_cpp_inq_vartype_vdesc(ncid, vardesc, xtype);
+    localrc = FTN_X(pio_cpp_inq_vartype_vdesc)(ncid, vardesc, xtype);
     iret = (localrc == PIO_noerr) ? iret : localrc;
   }
 
@@ -210,11 +211,11 @@ int pio_cpp_inquire_dimension(pio_file_desc_t ncid, int dimid,
   // function called. We do that unless an earlier function had an error
   // in which case we return that.
   if ((int *)NULL != len) {
-    localrc = pio_cpp_inq_dimlen(ncid, dimid, len);
+    localrc = FTN_X(pio_cpp_inq_dimlen)(ncid, dimid, len);
     iret = (localrc == PIO_noerr) ? iret : localrc;
   }
   if ((char *)NULL != name) {
-    localrc = pio_cpp_inq_dimname(ncid, dimid, name);
+    localrc = FTN_X(pio_cpp_inq_dimname)(ncid, dimid, name);
     iret = (localrc == PIO_noerr) ? iret : localrc;
   }
 
