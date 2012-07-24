@@ -93,8 +93,8 @@ function pio_cpp_inquire_int(File, nDimensions, nVariables, nAttributes,      &
   !  convert the arguments back to C
   nDimensions = int(nDimLocal, c_int)
   nVariables = int(nVarLocal, c_int)
-  nAttributes = int(unlDimIdLocal, c_int)
-  unlimitedDimID = int(ierror, c_int)
+  nAttributes = int(nAttrLocal, c_int)
+  unlimitedDimID = int(unlDimIdLocal, c_int)
   ierr = int(ierror, c_int)
 
   !  return to the cpp caller
