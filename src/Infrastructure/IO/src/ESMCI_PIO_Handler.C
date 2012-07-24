@@ -1,4 +1,4 @@
-// $Id: ESMCI_PIO_Handler.C,v 1.2 2012/07/24 05:57:11 gold2718 Exp $
+// $Id: ESMCI_PIO_Handler.C,v 1.3 2012/07/24 22:22:52 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -78,7 +78,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.2 2012/07/24 05:57:11 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.3 2012/07/24 22:22:52 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -199,19 +199,20 @@ void PIO_Handler::initialize (
   try {  
 
     if (!instanceFound) {
-      pio_cpp_init_intracom(comp_rank, comp_comm, num_iotasks, num_aggregator,
+      pio_cpp_init_intracom(comp_rank, comp_comm,
+                            num_iotasks, num_aggregator,
                             stride, rearr, &instance, base);
       // If we get here, hopefully everything is OK.
       if (instance != PIO_IOSYSTEM_DESC_NULL) {
         // Set the error handling to return PIO errors
         // Just return error (error code may be different on different PEs).
-//        pio_cpp_seterrorhandlingi(&instance, PIO_RETURN_ERROR);
+//        FTN_X(pio_cpp_seterrorhandlingi)(&instance, PIO_RETURN_ERROR);
         // Broadcast the error to all PEs (consistant error handling)
-        pio_cpp_seterrorhandlingi(&instance, PIO_BCAST_ERROR);
+        FTN_X(pio_cpp_seterrorhandlingi)(&instance, PIO_BCAST_ERROR);
 #ifdef __DEBUG
-        pio_cpp_setdebuglevel(3);
+        FTN_X(pio_cpp_setdebuglevel)(3);
 #else // __DEBUG
-        pio_cpp_setdebuglevel(0);
+        FTN_X(pio_cpp_setdebuglevel)(0);
 #endif // __DEBUG
         // Add the instance to the global list
         PIO_Handler::activePioInstances.push_back(instance);
@@ -290,7 +291,7 @@ int PIO_Handler::initializeVM (void
       // Figure out the inputs for the initialize call
       my_rank = localPet;
       num_iotasks = petCount;
-      num_iotasks = 1;
+//      num_iotasks = 1;
       num_aggregators = 1;
       stride = 1;
       rearr = PIO_rearr_box;
@@ -352,7 +353,7 @@ void PIO_Handler::finalize (
   // Now, close any open PIO instances
   while(!PIO_Handler::activePioInstances.empty()) {
     pio_iosystem_desc_t instance = PIO_Handler::activePioInstances.back();
-    pio_cpp_finalize(&instance, &error);
+    FTN_X(pio_cpp_finalize)(&instance, &error);
 #ifdef __DEBUG
     static int ionum = 1;
     if (error != PIO_noerr) {
@@ -680,13 +681,14 @@ void PIO_Handler::arrayRead(
     }
     PRINTMSG(" (" << my_rank << "): varname = " << varname);
     // Make sure the variable is in the file
-    localrc = pio_cpp_inquire(pioFileDesc, &nDims, &nVar, &nAtt, &unlim);
+    localrc = pio_cpp_inquire(pioFileDesc, &nDims,
+                              &nVar, &nAtt, &unlim);
       // This should work if it is a NetCDF file.
     statusOK = CHECKPIOERROR(localrc, "File is not in NetCDF format",
                              localrc);
   }
   if (statusOK && (getFormat() != ESMF_IOFMT_BIN)) {
-    localrc = pio_cpp_inq_varid_vdesc(pioFileDesc, varname, vardesc);
+    localrc = FTN_X(pio_cpp_inq_varid_vdesc)(pioFileDesc, varname, vardesc);
     // An error here means the variable is not in the file
     statusOK = CHECKPIOERROR(localrc, "variable not found in file",
                              localrc);
@@ -696,18 +698,16 @@ void PIO_Handler::arrayRead(
     if (((int *)NULL != timeslice) && (*timeslice > 0)) {
       int dimid_time;
       int time_len;
-      localrc = pio_cpp_inq_dimid(pioFileDesc, "time", &dimid_time);
+      localrc = FTN_X(pio_cpp_inq_dimid)(pioFileDesc, "time", &dimid_time);
       statusOK = CHECKPIOERROR(localrc, "No time dimension found in file",
                                localrc);
       // Check to see if time is the unlimited dimension
       if (dimid_time != unlim) {
-        std::cout << "Time dimension = " << dimid_time << ", unlimited dim = "
-                  << unlim << std::endl;
         ESMC_LogDefault.Write(" Time is not the file's unlimited dimension",
                               ESMC_LOG_ERROR, ESMC_CONTEXT);
         statusOK = false;
       }
-      localrc = pio_cpp_inq_dimlen(pioFileDesc, dimid_time, &time_len);
+      localrc = FTN_X(pio_cpp_inq_dimlen)(pioFileDesc, dimid_time, &time_len);
       if (statusOK) {
         statusOK = CHECKPIOERROR(localrc,
                                  "Timeframe is greater than that in file",
@@ -718,10 +718,10 @@ void PIO_Handler::arrayRead(
     } else {
       frame = 1;
     }
-    pio_cpp_setframe(vardesc, frame);
+    FTN_X(pio_cpp_setframe)(vardesc, frame);
   }
 #endif // ESMF_NETCDF || ESMF_PNETCDF
-  pio_cpp_setdebuglevel(0);
+  FTN_X(pio_cpp_setdebuglevel)(0);
   PRINTMSG(" (" << my_rank << "): calling read_darray, status = " <<
            statusOK << ", pio type = " << basepiotype << ", address = " <<
            baseAddress);
@@ -729,19 +729,19 @@ void PIO_Handler::arrayRead(
     // Read in the array
     switch(basepiotype) {
     case PIO_int:
-      pio_cpp_read_darray_int(pioFileDesc, vardesc, iodesc,
-                              (int *)baseAddress,
-                              arrDims, narrDims, &localrc);
+      FTN_X(pio_cpp_read_darray_int)(pioFileDesc, vardesc, iodesc,
+                                     (int *)baseAddress,
+                                     arrDims, narrDims, &localrc);
       break;
     case PIO_real:
-      pio_cpp_read_darray_real(pioFileDesc, vardesc, iodesc,
-                               (float *)baseAddress,
-                               arrDims, narrDims, &localrc);
+      FTN_X(pio_cpp_read_darray_real)(pioFileDesc, vardesc, iodesc,
+                                      (float *)baseAddress,
+                                      arrDims, narrDims, &localrc);
       break;
     case PIO_double:
-      pio_cpp_read_darray_double(pioFileDesc, vardesc, iodesc,
-                                 (double *)baseAddress,
-                                 arrDims, narrDims, &localrc);
+      FTN_X(pio_cpp_read_darray_double)(pioFileDesc, vardesc, iodesc,
+                                        (double *)baseAddress,
+                                        arrDims, narrDims, &localrc);
       break;
     default:
       localrc = ESMF_RC_INTNRL_BAD;
@@ -812,11 +812,7 @@ void PIO_Handler::arrayWrite(
     *rc = ESMF_RC_NOT_IMPL;               // final return code
   }
 
-//  PRINTPOS;
-  PRINTMSG(" (" << my_rank << "): file = \"" << getFilename() <<
-           "\",  varname = \"" << name << "\", time_frame = " <<
-           ((((int *)NULL != timeslice) && (*timeslice > 0)) ?
-            *timeslice : -1));
+  PRINTPOS;
   // File open?
   statusOK = (isOpen() == ESMF_TRUE);
   if (statusOK) {
@@ -850,15 +846,14 @@ void PIO_Handler::arrayWrite(
     } else {
       varname = arr_p->getName();
     }
-    PRINTMSG(" (" << my_rank << "): varname = \"" << varname << "\"");
-    if (ESMF_TRUE == isNewFile()) {
+    PRINTMSG(" (" << my_rank << "): varname = " << varname);
+    if (isNewFile()) {
       var_exists = false;
-      PRINTMSG(" (" << my_rank << "): New file, setting var_exists to false");
     } else {
       int nVar;                           // Number of variables in file
       int nAtt;                           // Number of attributes in file
       int nfDims;                         // Number of dimensions in file
-      localrc = pio_cpp_redef(pioFileDesc);
+      localrc = FTN_X(pio_cpp_redef)(pioFileDesc);
       // Not all NetCDF errors are really errors here so we need to check
       if ((PIO_noerr != localrc) && (NC_EINDEFINE != localrc)) {
         statusOK = CHECKPIOERROR(localrc,
@@ -869,17 +864,15 @@ void PIO_Handler::arrayWrite(
       }
       if (statusOK) {
         // This should work if it is a NetCDF file.
-        localrc = pio_cpp_inquire(pioFileDesc, &nfDims, &nVar, &nAtt, &unlim);
+        localrc = pio_cpp_inquire(pioFileDesc, &nfDims,
+                                  &nVar, &nAtt, &unlim);
         statusOK = CHECKPIOERROR(localrc, "File is not in NetCDF format",
                                  localrc);
       }
       if (statusOK) {
         // We have a NetCDF file, see if the variable is in there
-        localrc = pio_cpp_inq_varid_vdesc(pioFileDesc, varname, vardesc);
-        PRINTMSG(" (" << my_rank << "): After pio_cpp_inq_varid_vdesc, " <<
-                 "localrc = " << localrc << ", time_frame = " <<
-                 ((((int *)NULL != timeslice) && (*timeslice > 0)) ?
-                   *timeslice : -1));
+        localrc = FTN_X(pio_cpp_inq_varid_vdesc)(pioFileDesc,
+                                                 varname, vardesc);
         // This should succeed if the variable exists
         var_exists = (PIO_noerr == localrc);
       }
@@ -890,7 +883,7 @@ void PIO_Handler::arrayWrite(
       int dimid_time;
       int time_len;
       if (var_exists) {
-        localrc = pio_cpp_inq_dimid(pioFileDesc, "time", &dimid_time);
+        localrc = FTN_X(pio_cpp_inq_dimid)(pioFileDesc, "time", &dimid_time);
         // NetCDF does not specify which error code goes with with
         // condition so will print for now and guess that there
         // is no time dimension (which is an error in this context)
@@ -898,7 +891,8 @@ void PIO_Handler::arrayWrite(
                                  localrc);
         if (statusOK) {
           // Retrieve the max time field
-          localrc = pio_cpp_inq_dimlen(pioFileDesc, dimid_time, &time_len);
+          localrc = FTN_X(pio_cpp_inq_dimlen)(pioFileDesc,
+                                              dimid_time, &time_len);
           statusOK = CHECKPIOERROR(localrc,
                                    "Error retrieving information about time",
                                    localrc);
@@ -906,10 +900,6 @@ void PIO_Handler::arrayWrite(
         if (statusOK) {
           // Check to make sure that time is the unlimited dimension
           if (dimid_time != unlim) {
-            PRINTMSG(" (" << my_rank << "): " <<
-                     "Time is not the file's unlimited dimension, file = " <<
-                     getFilename() << ", dimid_time = " << dimid_time <<
-                     ", unlim = " << unlim);
             ESMC_LogDefault.Write("Time is not the file's unlimited dimension",
                                   ESMC_LOG_ERROR, ESMC_CONTEXT);
             statusOK = false;
@@ -917,17 +907,13 @@ void PIO_Handler::arrayWrite(
         }
         if (statusOK) {
           // Check to make sure timeslice has the "right??" value
-          if (*timeslice != (time_len + 1)) {
-            PRINTMSG(" (" << my_rank << "): " <<
-                     "Timeframe is incompatible with file" <<
-                     getFilename() << ", file time = " << time_len <<
-                     ", time to write = " << *timeslice);
-            ESMC_LogDefault.Write("Timeframe is incompatible with file",
+          if (*timeslice != time_len) {
+            ESMC_LogDefault.Write("Timeframe is greater than that in file",
                                   ESMC_LOG_ERROR, ESMC_CONTEXT);
             statusOK = false;
-          } else {
-            time_frame = *timeslice;
           }
+        } else {
+          time_frame = *timeslice;
         }
       } else {
         time_frame = *timeslice;
@@ -937,7 +923,7 @@ void PIO_Handler::arrayWrite(
 
   if (statusOK && (getFormat() != ESMF_IOFMT_BIN) && !var_exists) {
     // Ensure we are in define mode
-    localrc = pio_cpp_redef(pioFileDesc);
+    localrc = FTN_X(pio_cpp_redef)(pioFileDesc);
     // Not all NetCDF errors are really errors here so we need to check
     if ((PIO_noerr != localrc) && (NC_EINDEFINE != localrc)) {
       statusOK = CHECKPIOERROR(localrc,
@@ -952,7 +938,8 @@ void PIO_Handler::arrayWrite(
     for (int i = 0; i < nioDims; i++) {
       char axis[128];
       sprintf(axis, "%s_dim%03d", varname, (i + 1));
-      localrc = pio_cpp_def_dim(pioFileDesc, axis, ioDims[i], &ncDims[i]);
+      localrc = FTN_X(pio_cpp_def_dim)(pioFileDesc, axis,
+                                       ioDims[i], &ncDims[i]);
       if (PIO_noerr != localrc) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
         statusOK = false;
@@ -962,8 +949,8 @@ void PIO_Handler::arrayWrite(
     PRINTMSG(" (" << my_rank << "): finished defining dims, status = " <<
              statusOK << ", time_frame = " << time_frame);
     if (statusOK && (time_frame > -1)) {
-      localrc = pio_cpp_def_dim(pioFileDesc, "time",
-                                PIO_unlimited, &ncDims[nioDims]);
+      localrc = FTN_X(pio_cpp_def_dim)(pioFileDesc, "time",
+                                       PIO_unlimited, &ncDims[nioDims]);
       if (PIO_noerr != localrc) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
         statusOK = false;
@@ -973,37 +960,24 @@ void PIO_Handler::arrayWrite(
   }
   PRINTMSG(" (" << my_rank << "): var_exists = " << var_exists);
   if (statusOK && (getFormat() != ESMF_IOFMT_BIN) && !var_exists) {
-    localrc = pio_cpp_def_var_md(pioFileDesc, varname, basepiotype,
-                                 ncDims, nioDims, vardesc);
+    localrc = FTN_X(pio_cpp_def_var_md)(pioFileDesc, varname, basepiotype,
+                                        ncDims, nioDims, vardesc);
     if (PIO_noerr != localrc) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
       statusOK = false;
     }
   }
-#ifdef __DEBUG
-    pio_cpp_setdebuglevel(3);
-#endif // __DEBUG
-  if (statusOK && (getFormat() != ESMF_IOFMT_BIN) && (time_frame >= 0)) {
-#ifdef __DEBUG
-    int nvdims;
-    int lrc;
-    lrc = pio_cpp_inq_varndims_vdesc(pioFileDesc, vardesc, &nvdims);
-    PRINTMSG(" (" << my_rank << "): calling setframe, ndims = " << nvdims);
-#endif // __DEBUG
-    pio_cpp_setframe(vardesc, time_frame);
+  if (statusOK && (time_frame >= 0)) {
+    FTN_X(pio_cpp_setframe)(vardesc, time_frame);
   }
 #ifdef __DEBUG
-  else if (getFormat() != ESMF_IOFMT_BIN) {
-    PRINTMSG(" (" << my_rank << "): NOT calling setframe, status = " <<
-             statusOK << ", time_frame = " << time_frame);
-  }
   if (getFormat() != ESMF_IOFMT_BIN) {
-    localrc = pio_cpp_inq_varid_vid(pioFileDesc, varname, &varid);
+    localrc = FTN_X(pio_cpp_inq_varid_vid)(pioFileDesc, varname, &varid);
     PRINTMSG(" (" << my_rank << "): calling enddef, status = " << statusOK << ", varid = " << varid);
   }
 #endif // __DEBUG
   if (statusOK && (getFormat() != ESMF_IOFMT_BIN)) {
-    localrc = pio_cpp_enddef(pioFileDesc);
+    localrc = FTN_X(pio_cpp_enddef)(pioFileDesc);
     if (PIO_noerr != localrc) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
       statusOK = false;
@@ -1017,19 +991,19 @@ void PIO_Handler::arrayWrite(
     // Write the array
     switch(basepiotype) {
     case PIO_int:
-      pio_cpp_write_darray_int(pioFileDesc, vardesc, iodesc,
-                               (int *)baseAddress,
-                               arrDims, narrDims, &localrc);
+      FTN_X(pio_cpp_write_darray_int)(pioFileDesc, vardesc, iodesc,
+                                      (int *)baseAddress,
+                                      arrDims, narrDims, &localrc);
       break;
     case PIO_real:
-      pio_cpp_write_darray_real(pioFileDesc, vardesc, iodesc,
-                                (float *)baseAddress,
-                                arrDims, narrDims, &localrc);
+      FTN_X(pio_cpp_write_darray_real)(pioFileDesc, vardesc, iodesc,
+                                       (float *)baseAddress,
+                                       arrDims, narrDims, &localrc);
       break;
     case PIO_double:
-      pio_cpp_write_darray_double(pioFileDesc, vardesc, iodesc,
-                                  (double *)baseAddress,
-                                  arrDims, narrDims, &localrc);
+      FTN_X(pio_cpp_write_darray_double)(pioFileDesc, vardesc, iodesc,
+                                         (double *)baseAddress,
+                                         arrDims, narrDims, &localrc);
       break;
     default:
       localrc = ESMF_RC_INTNRL_BAD;
@@ -1037,7 +1011,6 @@ void PIO_Handler::arrayWrite(
       ESMC_LogDefault.Write("Bad PIO IO type", ESMC_LOG_WARN, ESMC_CONTEXT);
     }
   }
-  pio_cpp_setdebuglevel(0);
   PRINTMSG(" (" << my_rank << "): calling cleanup, status = " << statusOK);
 
   // Cleanup
@@ -1191,8 +1164,8 @@ void PIO_Handler::open(
     } else {
       PRINTMSG(" calling pio_cpp_openfile with mode = " << mode);
       // Looks like we are ready to go
-      localrc = pio_cpp_openfile(&pioSystemDesc, pioFileDesc,
-                                 iotype, getFilename(), mode);
+      localrc = FTN_X(pio_cpp_openfile)(&pioSystemDesc, pioFileDesc,
+                                        iotype, getFilename(), mode);
       PRINTMSG(", called pio_cpp_openfile on " << getFilename());
       if (!CHECKPIOERROR(localrc, "Unable to open file", (*rc))) {
         return;
@@ -1202,15 +1175,13 @@ void PIO_Handler::open(
              ((IO_NEW == *iowriteflag) || (IO_TRUNCATE == *iowriteflag))) {
     PRINTMSG(" calling pio_cpp_createfile");
     // Looks like we are ready to go
-#ifdef __DEBUG
-    pio_cpp_setdebuglevel(3);
-#endif // __DEBUG
-    localrc = pio_cpp_createfile(&pioSystemDesc, pioFileDesc,
-                                 iotype, getFilename(), PIO_CLOBBER);
+    FTN_X(pio_cpp_setdebuglevel)(3);
+    localrc = FTN_X(pio_cpp_createfile)(&pioSystemDesc, pioFileDesc,
+                                        iotype, getFilename(), PIO_CLOBBER);
     if (!CHECKPIOERROR(localrc, "Unable to create file", (*rc))) {
       return;
     }
-    pio_cpp_setdebuglevel(0);
+    FTN_X(pio_cpp_setdebuglevel)(0);
     new_file = true;
   } else {
     localrc = ESMF_RC_FILE_OPEN;
@@ -1250,7 +1221,7 @@ ESMC_Logical PIO_Handler::isOpen(
 //-----------------------------------------------------------------------------
   if ((pio_file_desc_t)NULL == pioFileDesc) {
     return ESMF_FALSE;
-  } else if (pio_cpp_file_is_open(pioFileDesc) != 0) {
+  } else if (FTN_X(pio_cpp_file_is_open)(pioFileDesc) != 0) {
     return ESMF_TRUE;
   } else {
     // This really should not happen, warn and clean up just in case
@@ -1296,7 +1267,7 @@ void PIO_Handler::flush(
   PRINTPOS;
   // Not open? No problem, just skip
   if (isOpen() == ESMF_TRUE) {
-    pio_cpp_syncfile(pioFileDesc);
+    FTN_X(pio_cpp_syncfile)(pioFileDesc);
   }
   // return successfully
   if (rc != NULL) {
@@ -1339,7 +1310,7 @@ void PIO_Handler::close(
   PRINTPOS;
   // Not open? No problem, just skip
   if (isOpen() == ESMF_TRUE) {
-    pio_cpp_closefile(pioFileDesc);
+    FTN_X(pio_cpp_closefile)(pioFileDesc);
     free(pioFileDesc);
     pioFileDesc = (pio_file_desc_t)NULL;
     new_file = false;
@@ -1481,9 +1452,6 @@ bool PIO_Handler::CheckPIOError(
     } else {
       ESMC_LogDefault.Write(errmsg, ESMC_LOG_ERROR, line, file, method);
     }
-#ifdef __DEBUG
-    PRINTMSG(" ERROR: " << errmsg);
-#endif // __DEBUG
     // Attempt to find a corresponding ESMC error code
     switch(pioRetCode) {
     default:
@@ -1521,7 +1489,7 @@ PIO_IODescHandler::~PIO_IODescHandler (
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  pio_cpp_freedecomp_ios(&ios, io_descriptor);
+  FTN_X(pio_cpp_freedecomp_ios)(&ios, io_descriptor);
   io_descriptor = (pio_io_desc_t)NULL;
   if (dims != (int *)NULL) {
     delete dims;
@@ -1759,9 +1727,9 @@ int PIO_IODescHandler::constructPioDecomp(
 #endif // __DEBUG
 
     // Create the decomposition
-    pio_cpp_initdecomp_dof(&iosys, handle->basepiotype, handle->dims,
-                           handle->nDims, pioDofList, pioDofCount,
-                           handle->io_descriptor);
+    FTN_X(pio_cpp_initdecomp_dof)(&iosys, handle->basepiotype, handle->dims,
+                                  handle->nDims, pioDofList, pioDofCount,
+                                  handle->io_descriptor);
 
     // Add the handle into the master list
     PIO_IODescHandler::activePioIoDescriptors.push_back(handle);
