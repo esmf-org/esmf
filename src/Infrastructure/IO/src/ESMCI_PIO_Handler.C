@@ -1,4 +1,4 @@
-// $Id: ESMCI_PIO_Handler.C,v 1.5 2012/07/25 05:02:19 gold2718 Exp $
+// $Id: ESMCI_PIO_Handler.C,v 1.6 2012/07/25 05:14:36 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -78,7 +78,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.5 2012/07/25 05:02:19 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.6 2012/07/25 05:14:36 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -291,7 +291,7 @@ int PIO_Handler::initializeVM (void
       // Figure out the inputs for the initialize call
       my_rank = localPet;
       num_iotasks = petCount;
-      num_iotasks = 1;
+//      num_iotasks = 1;
       num_aggregators = 1;
       stride = 1;
       rearr = PIO_rearr_box;
