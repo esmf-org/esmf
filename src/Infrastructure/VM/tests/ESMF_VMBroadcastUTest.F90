@@ -1,4 +1,4 @@
-! $Id: ESMF_VMBroadcastUTest.F90,v 1.24 2012/05/16 23:01:02 svasquez Exp $
+! $Id: ESMF_VMBroadcastUTest.F90,v 1.25 2012/07/25 20:31:30 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMBroadcastUTest.F90,v 1.24 2012/05/16 23:01:02 svasquez Exp $'
+      '$Id: ESMF_VMBroadcastUTest.F90,v 1.25 2012/07/25 20:31:30 theurich Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -48,16 +48,18 @@
       character(len=8) :: strvalue
 
       ! local variables
-      integer:: i, j
+      integer:: i, j, k
       integer:: localrc, rc
       type(ESMF_VM):: vm
       integer:: localPet, petCount
-      integer:: count,root  
-      integer, allocatable:: localData(:),soln(:)
-      real(ESMF_KIND_R8), allocatable:: r8_localData(:),r8_soln(:)
-      real(ESMF_KIND_R4), allocatable:: r4_localData(:),r4_soln(:)
+      integer:: count1, count2, count3, count, root  
+      integer, allocatable            :: localData(:),soln(:)
+      real(ESMF_KIND_R8), allocatable :: r8_localData(:),r8_soln(:)
+      real(ESMF_KIND_R4), allocatable :: r4_localData(:),r4_soln(:)
 
-      type(ESMF_logical), allocatable:: local_logical(:),logical_soln(:)
+      integer, allocatable            :: localData2d(:,:), localData3d(:,:,:)
+
+      type(ESMF_logical), allocatable :: local_logical(:),logical_soln(:)
 
       type(ESMF_VMId), allocatable :: local_vmids(:), vmids_soln(:)
       integer   :: idData
@@ -87,21 +89,26 @@
       call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
 
       ! Allocate localData
-      count = 2
+      count1  = 5
+      count2  = 4
+      count3  = 2
+      count   = count1 * count2 * count3
       allocate(localData(count))
+      allocate(localData2d(count1, count2*count3))
+      allocate(localData3d(count1, count2, count3))
       allocate(r8_localData(count))
       allocate(r4_localData(count))
       allocate(local_logical(count))
 
       ! Allocate the solution arrays
-      Allocate(soln(count))
-      Allocate(r8_soln(count))
-      Allocate(r4_soln(count))
+      allocate(soln(count))
+      allocate(r8_soln(count))
+      allocate(r4_soln(count))
       allocate(logical_soln(count))
 
       !Assign values
       do i=1,count
-        localData(i)    = localPet*100+i 
+        localData(i)    = localPet*100+i
         r4_localData(i) = real( localData(i) , ESMF_KIND_R4 )
         r8_localData(i) = real( localData(i) , ESMF_KIND_R8 )
         if (mod(localData(i)+localPet,2).eq.0) then
@@ -109,12 +116,26 @@
         else
           local_logical(i)= ESMF_FALSE
         endif
-      end do 
+      enddo
+      
+      do j=1,count2*count3
+        do i=1,count1
+          localData2d(i,j) = localPet*100+(i+(j-1)*count1)
+        enddo
+      enddo
+      
+      do k=1, count3
+        do j=1, count2
+          do i=1, count1
+            localData3d(i,j,k) = localPet*100+(i+(j-1)*count1+(k-1)*count1*count2)
+          enddo
+        enddo
+      enddo
 
-       root=0
+      root=0
 
       !The solution to test against is..
-      do  i=1,count
+      do i=1,count
         soln(i)    = root*100+i
         r8_soln(i) = real( soln(i) , ESMF_KIND_R8 ) 
         r4_soln(i) = r8_soln(i)
@@ -123,123 +144,155 @@
         else
           logical_soln(i)= ESMF_FALSE
         endif
-      end do 
+      enddo 
 
-     !Test with integer arguments
-     !===========================     
+    !Test with 1D integer argument
+    !===========================
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Broadcast data from the root processor
+      write(name, *) "Broadcasting 1D integer data Test"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Broadcasting  data Test"
       call ESMF_VMBroadcast(vm, bcstData=localData, count=count, rootPet=root, &
-                            rc=rc)
+        rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      print *, localPet," After Broadcast  LocalData is ", &
-               localData(1),localData(2),"( Should be ",   &
-               soln(1), soln(2)," )"
+      !NEX_UTest
+      ! Verify localData after VM Broadcast
+      all_verify = .true.
+      write(name, *) "Verify local data after broadcast Test"
+      write(failMsg, *) "Wrong Local Data"
+      do i=1, count
+        if (localData(i) /= soln(i)) all_verify = .false.
+      enddo
+      call ESMF_Test(all_verify, name, failMsg, result, ESMF_SRCLINE)
+
+    !Test with 2D integer argument
+    !===========================
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Broadcast data from the root processor
+      write(name, *) "Broadcasting 2D integer data Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMBroadcast(vm, bcstData=localData2D(:,1), count=count, &
+        rootPet=root, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Verify localData after VM Broadcast
-      isum=0
-      write(failMsg, *) "Wrong Local Data"
+      all_verify = .true.
       write(name, *) "Verify local data after broadcast Test"
-      isum=isum+ (localData(1) - soln(1)) + (localData(2) - soln(2))
-      CALL ESMF_Test((isum.eq.0), name, failMsg, result, ESMF_SRCLINE)
+      write(failMsg, *) "Wrong Local Data"
+      do j=1, count2*count3
+        do i=1, count1
+          if (localData2D(i,j) /= soln(i+(j-1)*count1)) all_verify = .false.
+        enddo
+      enddo
+      call ESMF_Test(all_verify, name, failMsg, result, ESMF_SRCLINE)
 
-     !Test with REAL_KIND_R4 arguments
-     !================================
+    !Test with 3D integer argument
+    !===========================
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Broadcast data from the root processor
+      write(name, *) "Broadcasting 3D integer data Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMBroadcast(vm, bcstData=localData3D(:,1,1), count=count, &
+        rootPet=root, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify localData after VM Broadcast
+      all_verify = .true.
+      write(name, *) "Verify local data after broadcast Test"
+      write(failMsg, *) "Wrong Local Data"
+      do k=1, count3
+        do j=1, count2
+          do i=1, count1
+            if (localData3D(i,j,k) /= soln(i+(j-1)*count1+(k-1)*count1*count2))&
+              all_verify = .false.
+          enddo
+        enddo
+      enddo
+      call ESMF_Test(all_verify, name, failMsg, result, ESMF_SRCLINE)
+
+    !Test with 1D REAL_KIND_R4 argument
+    !===========================
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Broadcast local data from root processor
+      write(name, *) "Broadcasting 1D real R4 data Test"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Broadcasting local data Test"
       call ESMF_VMBroadcast(vm, bcstData=r4_localData, count=count, rootPet=root, &
-                            rc=rc)
+        rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      print *, localPet,"After Broadcast: R4_LocalData is ", &
-               r4_localData(1),r4_localData(2),"( Should be ",&
-               r4_soln(1), r4_soln(2)," )"
-      !------------------------------------------------------------------------
       !NEX_UTest
       ! Verify localData after VM Broadcast
-      R4Sum=0.
+      all_verify = .true.
+      write(name, *) "Verify local data after broadcast Test"
       write(failMsg, *) "Wrong Local Data"
-      write(name, *) "Verify local data after Broadcast Test"
-      print *,localPet, "After Broadcast r4_LocalData is ", &
-              r4_localData(1),r4_localData(2)
-      R4Sum=(r4_localData(1) - r4_soln(1)) +  &
-            (r4_localData(2) - r4_soln(2))
-      call ESMF_Test( (R4Sum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
+      do i=1, count
+        if (r4_localData(i) /= r4_soln(i)) all_verify = .false.
+      enddo
+      call ESMF_Test(all_verify, name, failMsg, result, ESMF_SRCLINE)
 
-     !Test with ESMF_KIND_R8 arguments
-     !================================
+    !Test with 1D ESMF_KIND_R8 argument
+    !===========================
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Broadcast  data from root
+      write(name, *) "Broadcasting 1D real R8 data Test"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Broadcasting local data Test"
       call ESMF_VMBroadcast(vm, bcstData=r8_localData, count=count, rootPet=root, &
-                            rc=rc)
+        rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      print *, localPet,"After Broadcast: R8_LocalData is ", &
-               r8_localData(1),r8_localData(2)," (Should be", &
-               r8_soln(1), r8_soln(2)," )"
-      !------------------------------------------------------------------------
       !NEX_UTest
       ! Verify localData after VM Broadcast
-      R8Sum=0.
+      all_verify = .true.
+      write(name, *) "Verify local data after broadcast Test"
       write(failMsg, *) "Wrong Local Data"
-      write(name, *) "Verify local data after Broadcast Test"
-      R8Sum=(r8_localData(1) - r8_soln(1)) +  &
-            (r8_localData(2) - r8_soln(2))
-      call ESMF_Test( (R8Sum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
+      do i=1, count
+        if (r8_localData(i) /= r8_soln(i)) all_verify = .false.
+      enddo
+      call ESMF_Test(all_verify, name, failMsg, result, ESMF_SRCLINE)
 
-     !Test with logical arguments
-     !===========================
+    !Test with 1D logical argument
+    !===========================
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Broadcast local data from root
+      write(name, *) "Broadcasting 1D logical data Test"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
-      write(name, *) "Broadcasting local data Test"
       call ESMF_VMBroadcast(vm, bcstData=local_logical, count=count, &
         rootPet=root, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      call ESMF_LogicalString(local_logical(1), strvalue, rc)
-      print *, localPet, "after broadcast: Local_Logical(1) is ", trim(strvalue)
-      call ESMF_LogicalString(local_logical(2), strvalue, rc)
-      print *, localPet, "after broadcast: Local_Logical(2) is ", trim(strvalue)
-      call ESMF_LogicalString(logical_soln(1), strvalue, rc)
-      print *, localPet, "After broadcast: logical_soln(1) is ", trim(strvalue)
-      call ESMF_LogicalString(logical_soln(2), strvalue, rc)
-      print *, localPet, "After broadcast: logical_soln(2) is ", trim(strvalue)
-      !------------------------------------------------------------------------
       !NEX_UTest
-      ! Verify localData after VM Receive
-      ISum=0.
-      write(failMsg, *) "Wrong Local Data"
+      ! Verify localData after VM Broadcast
+      all_verify = .true.
       write(name, *) "Verify local data after broadcast Test"
-      do i=1,count
-        if (local_logical(i).ne. logical_soln(i)) ISum= ISum + 1
-      end do
-      call ESMF_Test( (ISum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
+      write(failMsg, *) "Wrong Local Data"
+      do i=1, count
+        if (local_logical(i) /= logical_soln(i)) all_verify = .false.
+      enddo
+      call ESMF_Test(all_verify, name, failMsg, result, ESMF_SRCLINE)
+      
 
-      !Test with VMId arguments
-      !===========================
-
+    !Test with VMId arguments
+    !===========================
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Create VMid arrays on both root and destinations
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Creating VMId array Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       allocate (local_vmids(n_elements))
       call ESMF_VMIdCreate (local_vmids, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -248,8 +301,8 @@
       !NEX_UTest
       ! Insert dummy data for the purposes of the test.  Only
       ! the first character of the key is set.
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Inserting dummy data into VMId array Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       rc = ESMF_SUCCESS
       do, i=1, n_elements
 	if (localPet == root) then
@@ -264,8 +317,8 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Create VMid solutions array
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Creating VMId solutions array Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       allocate (vmids_soln(n_elements))
       call ESMF_VMIdCreate (vmids_soln, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -274,8 +327,8 @@
       !NEX_UTest
       ! Insert dummy data for the purposes of the test.  Only
       ! the first character of the key is set.
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Inserting dummy data into VMId solution array Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       rc = ESMF_SUCCESS
       do, i=1, n_elements
         call c_ESMCI_VMIdSet (vmids_soln(i), i, achar (i+10), localrc)
@@ -286,8 +339,8 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Broadcast data from the root processor
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Broadcasting VMId data Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       call ESMF_VMBcastVMId(vm,  &
           bcstData=local_vmids, count=size (local_vmids),  &
           rootPet=root, rc=rc)
@@ -297,8 +350,8 @@
       !NEX_UTest
       ! Verify localData after VM Broadcast.  Only
       ! the first character of the key is tested.
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "ID/Key extraction VMId data after broadcast Test"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       all_verify = .true.
       rc = ESMF_SUCCESS
       do, i=1, n_elements
@@ -316,15 +369,15 @@
       !NEX_UTest
       ! Verify localData after VM Broadcast.  Only
       ! the first character of the key is tested.
-      write(failMsg, *) "Wrong Local Data"
       write(name, *) "Verify VMId data after broadcast Test"
+      write(failMsg, *) "Wrong Local Data"
       call ESMF_Test(all_verify, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Verify localData after VM Broadcast with VMIdCompare.
-      write(failMsg, *) "Wrong Local Data"
       write(name, *) "Verify VMId data after broadcast Test"
+      write(failMsg, *) "Wrong Local Data"
       all_verify = .true.
       do, i=1, n_elements
         if (ESMF_VMIdCompare (local_vmids(i), vmids_soln(i))) cycle
@@ -336,8 +389,8 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Release VMId resources
-      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Releasing VMId array Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       call ESMF_VMIdDestroy (local_vmids, rc=rc)
       call ESMF_Test(all_verify, name, failMsg, result, ESMF_SRCLINE)
 
