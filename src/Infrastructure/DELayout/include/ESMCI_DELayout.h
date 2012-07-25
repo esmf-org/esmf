@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.40 2012/07/18 22:21:19 rokuingh Exp $
+// $Id: ESMCI_DELayout.h,v 1.41 2012/07/25 22:35:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -213,8 +213,9 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
 class XXE{
   public:
     enum OpId{
-      // --- send and recv
-      send, recv,
+      // --- send, recv, sendrecv
+      send, recv, sendRRA, recvRRA, sendrecv, sendRRArecv,
+      // --- non-blocking send, recv
       sendnb, recvnb, sendnbRRA, recvnbRRA,
       // --- wait
       waitOnIndex, waitOnAnyIndexSub, waitOnIndexRange, waitOnIndexSub,
@@ -427,6 +428,19 @@ class XXE{
       int vectorLengthShift);
     int appendWtimer(int predicateBitField, char *string, int id, int actualId,
       int relativeId=0, XXE *relativeXXE=NULL);
+    int appendRecv(int predicateBitField, void *buffer, int size, int srcPet,
+      int tag=-1, bool vectorFlag=false, bool indirectionFlag=false);
+    int appendSend(int predicateBitField, void *buffer, int size, int dstPet,
+      int tag=-1, bool vectorFlag=false, bool indirectionFlag=false);
+    int appendSendRRA(int predicateBitField, int rraOffset, int size,
+      int dstPet, int rraIndex, int tag=-1, bool vectorFlag=false);
+    int appendSendRecv(int predicateBitField, void *srcBuffer, void *dstBuffer,
+      int srcSize, int dstSize, int srcPet, int dstPet, int srcTag, int dstTag, 
+      bool vectorFlag=false, bool srcIndirectionFlag=false,
+      bool dstIndirectionFlag=false);
+    int appendSendRRARecv(int predicateBitField, int rraOffset, void *dstBuffer,       int srcSize, int dstSize, int srcPet, int dstPet, int rraIndex,
+      int srcTag, int dstTag, bool vectorFlag=false,
+      bool dstIndirectionFlag=false);
     int appendRecvnb(int predicateBitField, void *buffer, int size, int srcPet,
       int tag=-1, bool vectorFlag=false, bool indirectionFlag=false);
     int appendSendnb(int predicateBitField, void *buffer, int size, int dstPet,
@@ -506,6 +520,94 @@ class XXE{
     //  indirectionFlag     - true:  interpret buffer as " *(char **)buffer"
     //                        false: interpret buffer as " (char *)buffer"
       
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      bool activeFlag;
+      bool cancelledFlag;
+      void *buffer;
+      int size;
+      int dstPet;
+      int tag;
+      bool vectorFlag;
+      bool indirectionFlag;
+    }SendInfo;
+
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      bool activeFlag;
+      bool cancelledFlag;
+      void *buffer;
+      int size;
+      int srcPet;
+      int tag;
+      bool vectorFlag;
+      bool indirectionFlag;
+    }RecvInfo;
+
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      bool activeFlag;
+      bool cancelledFlag;
+      int rraOffset;
+      int size;
+      int dstPet;
+      int rraIndex;
+      int tag;
+      bool vectorFlag;
+    }SendRRAInfo;
+
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      bool activeFlag;
+      bool cancelledFlag;
+      int rraOffset;
+      int size;
+      int srcPet;
+      int rraIndex;
+      int tag;
+      bool vectorFlag;
+    }RecvRRAInfo;
+
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      bool activeFlag;
+      bool cancelledFlag;
+      void *srcBuffer;
+      void *dstBuffer;
+      int srcSize;
+      int dstSize;
+      int srcPet;
+      int dstPet;
+      int srcTag;
+      int dstTag;
+      bool vectorFlag;
+      bool srcIndirectionFlag;
+      bool dstIndirectionFlag;
+    }SendRecvInfo;
+
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      bool activeFlag;
+      bool cancelledFlag;
+      int rraOffset;
+      void *dstBuffer;
+      int srcSize;
+      int dstSize;
+      int srcPet;
+      int dstPet;
+      int rraIndex;
+      int srcTag;
+      int dstTag;
+      bool vectorFlag;
+      bool dstIndirectionFlag;
+    }SendRRARecvInfo;
+
     typedef struct{
       OpId opId;
       int predicateBitField;

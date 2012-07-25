@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.52 2012/07/18 22:21:21 rokuingh Exp $
+// $Id: ESMCI_DELayout.C,v 1.53 2012/07/25 22:35:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.52 2012/07/18 22:21:21 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.53 2012/07/25 22:35:08 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2505,6 +2505,12 @@ int XXE::exec(
   if (cancelled) *cancelled = false; // assume no ops cancelled unless find ow.  
   // XXE element variables used below
   StreamElement *xxeElement, *xxeIndexElement;
+  SendInfo *xxeSendInfo;
+  RecvInfo *xxeRecvInfo;
+  SendRRAInfo *xxeSendRRAInfo;
+  RecvRRAInfo *xxeRecvRRAInfo;
+  SendRecvInfo *xxeSendRecvInfo;
+  SendRRARecvInfo *xxeSendRRARecvInfo;
   SendnbInfo *xxeSendnbInfo;
   RecvnbInfo *xxeRecvnbInfo;
   SendnbRRAInfo *xxeSendnbRRAInfo;
@@ -2567,6 +2573,8 @@ int XXE::exec(
     }
   }
   
+#define EXECWITHPRINT____disable
+
   for (int i=indexRangeStart; i<=indexRangeStop; i++){
     xxeElement = &(stream[i]);
     
@@ -2576,8 +2584,136 @@ int XXE::exec(
 //    printf("gjt: %d, opId=%d\n", i, stream[i].opId);
     switch(stream[i].opId){
     case send:
+      {
+        xxeSendInfo = (SendInfo *)xxeElement;
+        char *buffer = (char *)xxeSendInfo->buffer;
+        if (xxeSendInfo->indirectionFlag)
+          buffer = *(char **)xxeSendInfo->buffer;
+        int size = xxeSendInfo->size;
+        if (xxeSendInfo->vectorFlag)
+          size *= *vectorLength;
+#ifdef EXECWITHPRINT
+        fprintf(stderr, "XXE::send: <localPet=%d> buffer=%p, size=%d, dst=%d, "
+          "tag=%d, vectorFlag=%d, indirectionFlag=%d\n",
+          vm->getLocalPet(),
+          xxeSendInfo->buffer, xxeSendInfo->size, xxeSendInfo->dstPet,
+          xxeSendInfo->tag, xxeSendInfo->vectorFlag,
+          xxeSendInfo->indirectionFlag);
+#endif
+        vm->send(buffer, size, xxeSendInfo->dstPet, xxeSendInfo->tag);
+        xxeSendInfo->activeFlag = true;     // set
+        xxeSendInfo->cancelledFlag = false; // set
+      }
       break;
     case recv:
+      {
+        xxeRecvInfo = (RecvInfo *)xxeElement;
+        char *buffer = (char *)xxeRecvInfo->buffer;
+        if (xxeRecvInfo->indirectionFlag)
+          buffer = *(char **)xxeRecvInfo->buffer;
+        int size = xxeRecvInfo->size;
+        if (xxeRecvInfo->vectorFlag)
+          size *= *vectorLength;
+#ifdef EXECWITHPRINT
+        fprintf(stderr, "XXE::recv: <localPet=%d> buffer=%p, size=%d, src=%d, "
+          "tag=%d, vectorFlag=%d, indirectionFlag=%d\n",
+          vm->getLocalPet(),
+          xxeRecvInfo->buffer, xxeRecvInfo->size, xxeRecvInfo->srcPet,
+          xxeRecvInfo->tag, xxeRecvInfo->vectorFlag,
+          xxeRecvInfo->indirectionFlag);
+#endif
+        vm->recv(buffer, size, xxeRecvInfo->srcPet, xxeRecvInfo->tag);
+        xxeRecvInfo->activeFlag = true;     // set
+        xxeRecvInfo->cancelledFlag = false; // set
+      }
+      break;
+    case sendRRA:
+      {
+        xxeSendRRAInfo = (SendRRAInfo *)xxeElement;
+        int size = xxeSendRRAInfo->size;
+        int rraOffset = xxeSendRRAInfo->rraOffset;
+        if (xxeSendRRAInfo->vectorFlag){
+          size *= *vectorLength;
+          rraOffset *= *vectorLength;
+        }
+#ifdef EXECWITHPRINT
+        fprintf(stderr, "XXE::sendRRA: <localPet=%d> \n", vm->getLocalPet());
+#endif
+        vm->send(rraList[xxeSendRRAInfo->rraIndex]
+          + rraOffset, size, xxeSendRRAInfo->dstPet, xxeSendRRAInfo->tag);
+        xxeSendRRAInfo->activeFlag = true;      // set
+        xxeSendRRAInfo->cancelledFlag = false;  // set
+      }
+      break;
+    case recvRRA:
+      {
+        xxeRecvRRAInfo = (RecvRRAInfo *)xxeElement;
+        int size = xxeRecvRRAInfo->size;
+        int rraOffset = xxeRecvRRAInfo->rraOffset;
+        if (xxeRecvRRAInfo->vectorFlag){
+          size *= *vectorLength;
+          rraOffset *= *vectorLength;
+        }
+#ifdef EXECWITHPRINT
+        fprintf(stderr, "XXE::recvRRA: <localPet=%d> \n", vm->getLocalPet());
+#endif
+        vm->recv(rraList[xxeRecvRRAInfo->rraIndex]
+          + rraOffset, size, xxeRecvRRAInfo->srcPet, xxeRecvRRAInfo->tag);
+        xxeRecvRRAInfo->activeFlag = true;      // set
+        xxeRecvRRAInfo->cancelledFlag = false;  // set
+      }
+      break;
+    case sendrecv:
+      {
+        xxeSendRecvInfo = (SendRecvInfo *)xxeElement;
+        char *srcBuffer = (char *)xxeSendRecvInfo->srcBuffer;
+        char *dstBuffer = (char *)xxeSendRecvInfo->dstBuffer;
+        if (xxeSendRecvInfo->srcIndirectionFlag)
+          srcBuffer = *(char **)xxeSendRecvInfo->srcBuffer;
+        if (xxeSendRecvInfo->dstIndirectionFlag)
+          dstBuffer = *(char **)xxeSendRecvInfo->dstBuffer;
+        int srcSize = xxeSendRecvInfo->srcSize;
+        int dstSize = xxeSendRecvInfo->dstSize;
+        if (xxeSendRecvInfo->vectorFlag){
+          srcSize *= *vectorLength;
+          dstSize *= *vectorLength;
+        }
+#ifdef EXECWITHPRINT
+        fprintf(stderr, "XXE::sendrecv: <localPet=%d> dst=%d, sendSize=%d, "
+          " src=%d, recvSize=%d\n", vm->getLocalPet(), xxeSendRecvInfo->dstPet,
+          srcSize, xxeSendRecvInfo->srcPet, dstSize);
+#endif
+        vm->sendrecv(srcBuffer, srcSize, xxeSendRecvInfo->dstPet,
+          dstBuffer, dstSize, xxeSendRecvInfo->srcPet, xxeSendRecvInfo->dstTag,
+          xxeSendRecvInfo->srcTag);
+        xxeSendRecvInfo->activeFlag = true;     // set
+        xxeSendRecvInfo->cancelledFlag = false; // set
+      }
+      break;
+    case sendRRArecv:
+      {
+        xxeSendRRARecvInfo = (SendRRARecvInfo *)xxeElement;
+        int srcSize = xxeSendRRARecvInfo->srcSize;
+        int dstSize = xxeSendRRARecvInfo->dstSize;
+        char *dstBuffer = (char *)xxeSendRRARecvInfo->dstBuffer;
+        if (xxeSendRRARecvInfo->dstIndirectionFlag)
+          dstBuffer = *(char **)xxeSendRRARecvInfo->dstBuffer;
+        int rraOffset = xxeSendRRARecvInfo->rraOffset;
+        if (xxeSendRRARecvInfo->vectorFlag){
+          srcSize *= *vectorLength;
+          dstSize *= *vectorLength;
+          rraOffset *= *vectorLength;
+        }
+#ifdef EXECWITHPRINT
+        fprintf(stderr, "XXE::sendRRArecv: <localPet=%d> \n", vm->getLocalPet());
+#endif
+        vm->sendrecv(rraList[xxeSendRRARecvInfo->rraIndex] + rraOffset,
+          srcSize, xxeSendRRARecvInfo->dstPet, dstBuffer, dstSize,
+          xxeSendRRARecvInfo->srcPet, xxeSendRRARecvInfo->dstTag,
+          xxeSendRRARecvInfo->srcTag);
+        xxeSendRRARecvInfo->activeFlag = true;      // set
+        xxeSendRRARecvInfo->cancelledFlag = false;  // set
+      }
       break;
     case sendnb:
       {
@@ -4188,6 +4324,10 @@ int XXE::print(
   }
   
   StreamElement *xxeElement, *xxeIndexElement;
+  SendInfo *xxeSendInfo;
+  RecvInfo *xxeRecvInfo;
+  SendRRAInfo *xxeSendRRAInfo;
+  RecvRRAInfo *xxeRecvRRAInfo;
   SendnbInfo *xxeSendnbInfo;
   RecvnbInfo *xxeRecvnbInfo;
   SendnbRRAInfo *xxeSendnbRRAInfo;
@@ -4233,12 +4373,46 @@ int XXE::print(
     switch(stream[i].opId){
     case send:
       {
-        fprintf(fp, "  XXE::send <localPet=%d>\n", vm->getLocalPet());
+        xxeSendInfo = (SendInfo *)xxeElement;
+        fprintf(fp, "  XXE::send: <localPet=%d> buffer=%p, size=%d, dst=%d, "
+          "tag=%d, vectorFlag=%d, indirectionFlag=%d\n",
+          vm->getLocalPet(),
+          xxeSendInfo->buffer, xxeSendInfo->size, xxeSendInfo->dstPet,
+          xxeSendInfo->tag, xxeSendInfo->vectorFlag,
+          xxeSendInfo->indirectionFlag);
       }
       break;
     case recv:
       {
-        fprintf(fp, "  XXE::recv <localPet=%d>\n", vm->getLocalPet());
+        xxeRecvInfo = (RecvInfo *)xxeElement;
+        fprintf(fp, "  XXE::recv: <localPet=%d> buffer=%p, size=%d, src=%d, "
+          "tag=%d, vectorFlag=%d, indirectionFlag=%d\n",
+          vm->getLocalPet(),
+          xxeRecvInfo->buffer, xxeRecvInfo->size, xxeRecvInfo->srcPet,
+          xxeRecvInfo->tag, xxeRecvInfo->vectorFlag,
+          xxeRecvInfo->indirectionFlag);
+      }
+      break;
+    case sendRRA:
+      {
+        xxeSendRRAInfo = (SendRRAInfo *)xxeElement;
+        fprintf(fp, "  XXE::sendRRA: <localPet=%d> rraOffset=%d, size=%d, "
+          "dst=%d, rraIndex=%d, tag=%d, vectorFlag=%d\n",
+          vm->getLocalPet(),
+          xxeSendRRAInfo->rraOffset, xxeSendRRAInfo->size,
+          xxeSendRRAInfo->dstPet, xxeSendRRAInfo->rraIndex,
+          xxeSendRRAInfo->tag, xxeSendRRAInfo->vectorFlag);
+      }
+      break;
+    case recvRRA:
+      {
+        xxeRecvRRAInfo = (RecvRRAInfo *)xxeElement;
+        fprintf(fp, "  XXE::recvRRA: <localPet=%d> rraOffset=%d, size=%d, "
+          "src=%d, rraIndex=%d, tag=%d, vectorFlag=%d\n",
+          vm->getLocalPet(),
+          xxeRecvRRAInfo->rraOffset, xxeRecvRRAInfo->size,
+          xxeRecvRRAInfo->srcPet, xxeRecvRRAInfo->rraIndex,
+          xxeRecvRRAInfo->tag, xxeRecvRRAInfo->vectorFlag);
       }
       break;
     case sendnb:
@@ -4266,8 +4440,8 @@ int XXE::print(
     case sendnbRRA:
       {
         xxeSendnbRRAInfo = (SendnbRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::sendnbRRA: <localPet=%d> rraOffset=%d, size=%d, dst=%d, "
-          "rraIndex=%d, tag=%d, vectorFlag=%d, commhandle=%p\n",
+        fprintf(fp, "  XXE::sendnbRRA: <localPet=%d> rraOffset=%d, size=%d, "
+          "dst=%d, rraIndex=%d, tag=%d, vectorFlag=%d, commhandle=%p\n",
           vm->getLocalPet(),
           xxeSendnbRRAInfo->rraOffset, xxeSendnbRRAInfo->size,
           xxeSendnbRRAInfo->dstPet, xxeSendnbRRAInfo->rraIndex,
@@ -6152,6 +6326,301 @@ int XXE::appendWtimer(
   localrc = storeStorage(xxeWtimerInfo->timerString);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, &rc)) return rc;
+  
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendRecv()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendRecv
+//
+// !INTERFACE:
+int XXE::appendRecv(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  void *buffer,
+  int size,
+  int srcPet,
+  int tag,
+  bool vectorFlag,
+  bool indirectionFlag
+  ){
+//
+// !DESCRIPTION:
+//  Append a recv element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = recv;
+  stream[count].predicateBitField = predicateBitField;
+  RecvInfo *xxeRecvInfo = (RecvInfo *)&(stream[count]);
+  xxeRecvInfo->buffer = buffer;
+  xxeRecvInfo->size = size;
+  xxeRecvInfo->srcPet = srcPet;
+  xxeRecvInfo->tag = tag;
+  xxeRecvInfo->vectorFlag = vectorFlag;
+  xxeRecvInfo->indirectionFlag = indirectionFlag;
+  xxeRecvInfo->activeFlag = false;
+  xxeRecvInfo->cancelledFlag = false;
+  
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendSend()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendSend
+//
+// !INTERFACE:
+int XXE::appendSend(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  void *buffer,
+  int size,
+  int dstPet,
+  int tag,
+  bool vectorFlag,
+  bool indirectionFlag
+  ){
+//
+// !DESCRIPTION:
+//  Append a send element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = send;
+  stream[count].predicateBitField = predicateBitField;
+  SendInfo *xxeSendInfo = (SendInfo *)&(stream[count]);
+  xxeSendInfo->buffer = buffer;
+  xxeSendInfo->size = size;
+  xxeSendInfo->dstPet = dstPet;
+  xxeSendInfo->tag = tag;
+  xxeSendInfo->vectorFlag = vectorFlag;
+  xxeSendInfo->indirectionFlag = indirectionFlag;
+  xxeSendInfo->activeFlag = false;
+  xxeSendInfo->cancelledFlag = false;
+  
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendSendRRA()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendSendRRA
+//
+// !INTERFACE:
+int XXE::appendSendRRA(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  int rraOffset,
+  int size,
+  int dstPet,
+  int rraIndex,
+  int tag,
+  bool vectorFlag
+  ){
+//
+// !DESCRIPTION:
+//  Append a sendRRA element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = sendRRA;
+  stream[count].predicateBitField = predicateBitField;
+  SendRRAInfo *xxeSendRRAInfo = (SendRRAInfo *)&(stream[count]);
+  xxeSendRRAInfo->rraOffset = rraOffset;
+  xxeSendRRAInfo->size = size;
+  xxeSendRRAInfo->dstPet = dstPet;
+  xxeSendRRAInfo->rraIndex = rraIndex;
+  xxeSendRRAInfo->tag = tag;
+  xxeSendRRAInfo->vectorFlag = vectorFlag;
+  xxeSendRRAInfo->activeFlag = false;
+  xxeSendRRAInfo->cancelledFlag = false;
+  
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendSendRecv()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendSendRecv
+//
+// !INTERFACE:
+int XXE::appendSendRecv(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  void *srcBuffer,
+  void *dstBuffer,
+  int srcSize,
+  int dstSize,
+  int srcPet,
+  int dstPet,
+  int srcTag,
+  int dstTag,
+  bool vectorFlag,
+  bool srcIndirectionFlag,
+  bool dstIndirectionFlag
+  ){
+//
+// !DESCRIPTION:
+//  Append a sendrecv element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  stream[count].opId = sendrecv;
+  stream[count].predicateBitField = predicateBitField;
+  SendRecvInfo *xxeSendRecvInfo = (SendRecvInfo *)&(stream[count]);
+  xxeSendRecvInfo->srcBuffer = srcBuffer;
+  xxeSendRecvInfo->dstBuffer = dstBuffer;
+  xxeSendRecvInfo->srcSize = srcSize;
+  xxeSendRecvInfo->dstSize = dstSize;
+  xxeSendRecvInfo->srcPet = srcPet;
+  xxeSendRecvInfo->dstPet = dstPet;
+  xxeSendRecvInfo->srcTag = srcTag;
+  xxeSendRecvInfo->dstTag = dstTag;
+  xxeSendRecvInfo->vectorFlag = vectorFlag;
+  xxeSendRecvInfo->srcIndirectionFlag = srcIndirectionFlag;
+  xxeSendRecvInfo->dstIndirectionFlag = dstIndirectionFlag;
+  xxeSendRecvInfo->activeFlag = false;
+  xxeSendRecvInfo->cancelledFlag = false;
+  
+  // bump up element count, this may move entire stream to new memory location
+  localrc = incCount();
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    ESMCI_ERR_PASSTHRU, &rc)) return rc;
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::XXE::appendSendRRARecv()"
+//BOPI
+// !IROUTINE:  ESMCI::XXE::appendSendRRARecv
+//
+// !INTERFACE:
+int XXE::appendSendRRARecv(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  int predicateBitField,
+  int rraOffset,
+  void *dstBuffer,
+  int srcSize,
+  int dstSize,
+  int srcPet,
+  int dstPet,
+  int rraIndex,
+  int srcTag,
+  int dstTag,
+  bool vectorFlag,
+  bool dstIndirectionFlag
+  ){
+//
+// !DESCRIPTION:
+//  Append a sendRRArecv element at the end of the XXE stream.
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  stream[count].opId = sendRRArecv;
+  stream[count].predicateBitField = predicateBitField;
+  SendRRARecvInfo *xxeSendRRARecvInfo = (SendRRARecvInfo *)&(stream[count]);
+  xxeSendRRARecvInfo->rraOffset = rraOffset;
+  xxeSendRRARecvInfo->dstBuffer = dstBuffer;
+  xxeSendRRARecvInfo->srcSize = srcSize;
+  xxeSendRRARecvInfo->dstSize = dstSize;
+  xxeSendRRARecvInfo->srcPet = srcPet;
+  xxeSendRRARecvInfo->dstPet = dstPet;
+  xxeSendRRARecvInfo->rraIndex = rraIndex;
+  xxeSendRRARecvInfo->srcTag = srcTag;
+  xxeSendRRARecvInfo->dstTag = dstTag;
+  xxeSendRRARecvInfo->vectorFlag = vectorFlag;
+  xxeSendRRARecvInfo->dstIndirectionFlag = dstIndirectionFlag;
+  xxeSendRRARecvInfo->activeFlag = false;
+  xxeSendRRARecvInfo->cancelledFlag = false;
   
   // bump up element count, this may move entire stream to new memory location
   localrc = incCount();
