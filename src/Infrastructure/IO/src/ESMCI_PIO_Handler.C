@@ -1,4 +1,4 @@
-// $Id: ESMCI_PIO_Handler.C,v 1.4 2012/07/25 04:08:57 gold2718 Exp $
+// $Id: ESMCI_PIO_Handler.C,v 1.5 2012/07/25 05:02:19 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -78,7 +78,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.4 2012/07/25 04:08:57 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.5 2012/07/25 05:02:19 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -702,25 +702,36 @@ void PIO_Handler::arrayRead(
       statusOK = CHECKPIOERROR(localrc, "No time dimension found in file",
                                localrc);
       // Check to see if time is the unlimited dimension
-      if (dimid_time != unlim) {
+      if (statusOK && (dimid_time != unlim)) {
         std::cout << "Time dimension = " << dimid_time << ", unlimited dim = "
                   << unlim << std::endl;
          ESMC_LogDefault.Write(" Time is not the file's unlimited dimension",
                               ESMC_LOG_ERROR, ESMC_CONTEXT);
         statusOK = false;
       }
-      localrc = FTN_X(pio_cpp_inq_dimlen)(pioFileDesc, dimid_time, &time_len);
       if (statusOK) {
+        // Check to make sure the requested record is in the file
+        localrc = FTN_X(pio_cpp_inq_dimlen)(pioFileDesc,
+                                            dimid_time, &time_len);
         statusOK = CHECKPIOERROR(localrc,
-                                 "Timeframe is greater than that in file",
-                                 localrc);
+                                 "Error finding time length", localrc);
+      }
+      if (statusOK && (*timeslice > time_len)) {
+        PRINTMSG(" (" << my_rank << "): " <<
+                 "Timeframe is greater than that in file" <<
+                 getFilename() << ", file time = " << time_len <<
+                 ", requested record = " << *timeslice);
+        ESMC_LogDefault.Write("Timeframe is greater than max in file",
+                              ESMC_LOG_ERROR, ESMC_CONTEXT);
         statusOK = false;
       }
       frame = *timeslice;
     } else {
       frame = 1;
     }
-    FTN_X(pio_cpp_setframe)(vardesc, frame);
+    if (statusOK && (unlim >= 0)) {
+      FTN_X(pio_cpp_setframe)(vardesc, frame);
+    }
   }
 #endif // ESMF_NETCDF || ESMF_PNETCDF
   FTN_X(pio_cpp_setdebuglevel)(0);
