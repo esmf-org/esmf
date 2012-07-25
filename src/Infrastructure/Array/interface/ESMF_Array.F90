@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.167 2012/07/23 20:19:32 gold2718 Exp $
+! $Id: ESMF_Array.F90,v 1.168 2012/07/25 17:05:57 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -117,7 +117,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.167 2012/07/23 20:19:32 gold2718 Exp $'
+    '$Id: ESMF_Array.F90,v 1.168 2012/07/25 17:05:57 gold2718 Exp $'
 
 !==============================================================================
 ! 
@@ -1334,7 +1334,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArrayWrite(array, file, keywordEnforcer, &
      variableName, append, timeslice, iofmt, rc)
 !   ! We need to terminate the strings on the way to C++
+#ifdef ESMF_PIO
     use, intrinsic :: iso_c_binding, only: C_NULL_CHAR
+#endif // ESMF_PIO
 !
 ! !ARGUMENTS:
     type(ESMF_Array),     intent(in)            :: array
@@ -1443,7 +1445,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArrayWriteC(array, file, &
      variableName, append, timeslice, iofmt, rc)
 !   ! We need to terminate the strings on the way to C++
+#ifdef ESMF_PIO
     use, intrinsic :: iso_c_binding, only: C_NULL_CHAR
+#endif // ESMF_PIO
 !
 ! !ARGUMENTS:
     type(ESMF_Array),     intent(inout)          :: array
