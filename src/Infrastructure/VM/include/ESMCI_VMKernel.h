@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.h,v 1.16 2012/03/13 02:44:07 theurich Exp $
+// $Id: ESMCI_VMKernel.h,v 1.17 2012/07/25 22:31:01 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -317,7 +317,7 @@ class VMK{
       int tag=-1);
     
     int sendrecv(void *sendData, int sendSize, int dst, void *recvData,
-      int recvSize, int src);
+      int recvSize, int src, int dstTag=-1, int srcTag=-1);
     int sendrecv(void *sendData, int sendSize, int dst, void *recvData,
       int recvSize, int src, commhandle **commh);
 

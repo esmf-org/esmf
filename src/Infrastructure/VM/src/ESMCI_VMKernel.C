@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.43 2012/05/02 00:23:12 w6ws Exp $
+// $Id: ESMCI_VMKernel.C,v 1.44 2012/07/25 22:31:04 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -3534,13 +3534,33 @@ int VMK::barrier(){
 
 
 int VMK::sendrecv(void *sendData, int sendSize, int dst, void *recvData,
-  int recvSize, int src){
+  int recvSize, int src, int dstTag, int srcTag){
   // p2p sendrecv
   int localrc=0;
   if (mpionly){
     MPI_Status mpi_s;
-    localrc = MPI_Sendrecv(sendData, sendSize, MPI_BYTE, dst, 1000*mypet+dst, 
-      recvData, recvSize, MPI_BYTE, src, 1000*src+mypet, mpi_c, &mpi_s);
+    if (dstTag == -1){
+      dstTag = 1000*mypet+dst;  // default tag to simplify debugging
+      // make sure to stay below max tag
+      int maxTag = getMaxTag();
+      if (maxTag > 0)
+        dstTag = dstTag%maxTag;
+      else
+        dstTag = 0;
+    }else if (dstTag == VM_ANY_TAG)
+      dstTag = MPI_ANY_TAG;
+    if (srcTag == -1){
+      srcTag = 1000*src+mypet;  // default tag to simplify debugging
+      // make sure to stay below max tag
+      int maxTag = getMaxTag();
+      if (maxTag > 0)
+        srcTag = srcTag%maxTag;
+      else
+        srcTag = 0;
+    }else if (srcTag == VM_ANY_TAG)
+      srcTag = MPI_ANY_TAG;
+    localrc = MPI_Sendrecv(sendData, sendSize, MPI_BYTE, dst, dstTag, 
+      recvData, recvSize, MPI_BYTE, src, srcTag, mpi_c, &mpi_s);
   }else{
     // A unique order of the send and receive is given by the PET index.
     // This very simplistic implementation establishes a unique order by
