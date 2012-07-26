@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.32 2012/07/23 20:24:35 gold2718 Exp $
+// $Id: ESMCI_VM.C,v 1.33 2012/07/26 18:01:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.32 2012/07/23 20:24:35 gold2718 Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.33 2012/07/26 18:01:42 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -1842,7 +1842,8 @@ void VM::finalize(
     // We need to make sure any open files and streams are closed.
     // Also, resources such as cached I/O communication patterns are deleted.
     IO_Handler::finalize(&localrc);
-    std::cout << "IO_Handler::finalize returned " << localrc << std::endl;
+    if (localrc != ESMF_SUCCESS)
+      std::cout << "IO_Handler::finalize returned " << localrc << std::endl;
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
       return;
     }
