@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2009/03/03 17:23:24 theurich Exp $
+# $Id: makefile,v 1.24 2012/07/26 22:23:13 theurich Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -11,28 +11,31 @@ EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx \
                     $(ESMF_EXDIR)/ESMF_VMGetMPICommunicatorEx \
                     $(ESMF_EXDIR)/ESMF_VMUserMpiEx \
                     $(ESMF_EXDIR)/ESMF_VMUserMpiCommEx \
+                    $(ESMF_EXDIR)/ESMF_VMComponentEx \
                     $(ESMF_EXDIR)/ESMF_VMSendVMRecvEx \
                     $(ESMF_EXDIR)/ESMF_VMScatterVMGatherEx \
                     $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx \
-                    $(ESMF_EXDIR)/ESMF_VMComponentEx
+                    $(ESMF_EXDIR)/ESMF_VMHigherRankDataEx
 
 EXAMPLES_RUN      = run_ESMF_VMDefaultBasicsEx \
                     run_ESMF_VMGetMPICommunicatorEx \
                     run_ESMF_VMUserMpiEx \
                     run_ESMF_VMUserMpiCommEx \
+                    run_ESMF_VMComponentEx \
                     run_ESMF_VMSendVMRecvEx \
                     run_ESMF_VMScatterVMGatherEx \
                     run_ESMF_VMAllFullReduceEx \
-                    run_ESMF_VMComponentEx
+                    run_ESMF_VMHigherRankDataEx
 
 EXAMPLES_RUN_UNI  = run_ESMF_VMDefaultBasicsEx_uni \
                     run_ESMF_VMGetMPICommunicatorEx_uni \
                     run_ESMF_VMUserMpiEx_uni \
                     run_ESMF_VMUserMpiCommEx_uni \
+                    run_ESMF_VMComponentEx_uni \
                     run_ESMF_VMSendVMRecvEx_uni \
                     run_ESMF_VMScatterVMGatherEx_uni \
                     run_ESMF_VMAllFullReduceEx_uni \
-                    run_ESMF_VMComponentEx_uni
+                    run_ESMF_VMHigherRankDataEx_uni
 
 
 include $(ESMF_DIR)/makefile
@@ -70,6 +73,12 @@ run_ESMF_VMUserMpiCommEx:
 run_ESMF_VMUserMpiCommEx_uni:
 	$(MAKE) EXNAME=VMUserMpiComm NP=1 exfrun
 
+run_ESMF_VMComponentEx:
+	$(MAKE) EXNAME=VMComponent NP=4 exfrun
+
+run_ESMF_VMComponentEx_uni:
+	$(MAKE) EXNAME=VMComponent NP=1 exfrun
+
 run_ESMF_VMSendVMRecvEx:
 	$(MAKE) EXNAME=VMSendVMRecv NP=4 exfrun
 
@@ -88,10 +97,10 @@ run_ESMF_VMAllFullReduceEx:
 run_ESMF_VMAllFullReduceEx_uni:
 	$(MAKE) EXNAME=VMAllFullReduce NP=1 exfrun
 
-run_ESMF_VMComponentEx:
-	$(MAKE) EXNAME=VMComponent NP=4 exfrun
+run_ESMF_VMHigherRankDataEx:
+	$(MAKE) EXNAME=VMHigherRankData NP=4 exfrun
 
-run_ESMF_VMComponentEx_uni:
-	$(MAKE) EXNAME=VMComponent NP=1 exfrun
+run_ESMF_VMHigherRankDataEx_uni:
+	$(MAKE) EXNAME=VMHigherRankData NP=1 exfrun
 
 

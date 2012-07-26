@@ -1,14 +1,10 @@
-% $Id: VM_rest.tex,v 1.10 2011/01/20 20:19:13 theurich Exp $
+% $Id: VM_rest.tex,v 1.11 2012/07/26 22:23:12 theurich Exp $
 
 %\subsubsection{Restrictions and Future Work}
 
 \begin{enumerate}
 
-\item {\bf Fortran array section syntax is not supported} for source and
-destination arguments in VM communication calls. Just as for MPI, the VM
-communication calls require contiguous data arrays. Fortran array sections are
-not guaranteed to be contiguous. This fundamental restriction is not likely to
-change in future releases.
+\item {\bf Only array section syntax that leads to contiguous sub sections is supported}. The source and destination arguments in VM communication calls must reference contiguos data arrays. Fortran array sections are not guaranteed to be contiguous in all cases.
 
 \item {\bf Non-blocking {\tt Reduce()} operations {\em not} implemented.} None of the reduce communication calls have an implementation for the non-blocking feature. This affects:
 \begin{itemize}
@@ -21,7 +17,7 @@ change in future releases.
 
 \item {\bf Alternative communication paths not accessible.} All user accessible VM communication calls are currently implemented using MPI-1.2. VM's implementation of alternative communication techniques, such as shared memory between threaded PETs and POSIX IPC between PETs located on the same single system image, are currently inaccessible to the user. (One exception to this is the {\tt mpiuni} case for which the VM automatically utilizes a shared memory path.)
 
-\item {\bf Data arrays in VM comm calls are {\em assumed shape} with rank=1.} Currently all dummy arrays in VM comm calls are defined as {\em assumed shape} arrays of rank=1. The motivation for this choice is that the use of assumed shape dummy arrays guards against the Fortran copy in/out problem. However it may not be as flexible as desired from the user perspective. Alternatively all dummy arrays could be defined as {\em assumed size} arrays, as it is done in most MPI implementations, allowing arrays of various rank to be passed into the comm methods.
+\item {\bf Data arrays in VM comm calls are {\em assumed shape} with rank=1.} Currently all dummy arrays in VM comm calls are defined as {\em assumed shape} arrays of rank=1. The motivation for this choice is that the use of assumed shape dummy arrays guards against the Fortran copy in/out problem. However it may not be as flexible as desired from the user perspective. Alternatively all dummy arrays could be defined as {\em assumed size} arrays, as it is done in most MPI implementations, allowing arrays of various rank to be passed into the comm methods. Arrays of higher rank can be passed into the current interfaces using Fortran array syntax. This approach is explained in section \ref{vm_higherrank}.
 
 \end{enumerate}
 

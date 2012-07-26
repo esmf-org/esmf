@@ -1,4 +1,4 @@
-! $Id: ESMF_VMScatterVMGatherEx.F90,v 1.22 2012/02/16 21:20:39 svasquez Exp $
+! $Id: ESMF_VMScatterVMGatherEx.F90,v 1.23 2012/07/26 22:23:13 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -17,7 +17,7 @@
 !------------------------------------------------------------------------------
 !BOE
 !
-! \subsubsection{Scatter and Gather}
+! \subsubsection{Communication - Scatter and Gather}
 !
 ! The VM layer provides MPI-like collective communication. {\tt ESMF\_VMScatter()}
 ! scatters data located on {\tt root} PET across all the PETs of the VM. 
@@ -39,7 +39,9 @@ program ESMF_VMScatterVMGatherEx
   integer:: rc
   type(ESMF_VM):: vm
   integer:: localPet, petCount
+!BOC
   integer, allocatable:: array1(:), array2(:)
+!EOC
   integer:: nlen, nsize, i, scatterRoot, gatherRoot
   ! result code
   integer :: finalrc, result
@@ -69,6 +71,7 @@ program ESMF_VMScatterVMGatherEx
   scatterRoot = 0
   gatherRoot = petCount-1
 
+!BOC
   ! allocate data arrays
   nsize = 2
   nlen = nsize * petCount
@@ -79,6 +82,7 @@ program ESMF_VMScatterVMGatherEx
   do i=1, nlen
     array1(i) = localPet * 100 + i
   enddo
+!EOC
   
   ! verify contents of data array1
   print *, 'contents before scatter/gather:'
@@ -90,13 +94,11 @@ program ESMF_VMScatterVMGatherEx
 !BOC
   call ESMF_VMScatter(vm, sendData=array1, recvData=array2, count=nsize, &
     rootPet=scatterRoot, rc=rc)
-  ! Both sendData and recvData must be 1-d arrays.
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   call ESMF_VMGather(vm, sendData=array2, recvData=array1, count=nsize, &
     rootPet=gatherRoot, rc=rc)
-  ! Both sendData and recvData must be 1-d arrays.
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
