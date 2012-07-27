@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.119 2012/02/09 18:40:07 theurich Exp $ 
+# $Id: makefile,v 1.120 2012/07/27 18:28:33 theurich Exp $ 
 
 ALL: build_here
 
@@ -6,15 +6,10 @@ LOCDIR   = src/Infrastructure
 
 include $(ESMF_DIR)/makefile
 
-#TODO: remove the IO/PIO entry below once ESMCI::IO satisfies Array IO needs
-DIRS        = stubs Util Base LogErr VM 
-ifeq ($(ESMF_PIO),internal)
-DIRS       += IO/PIO
-endif
-DIRS       += TimeMgr DELayout \
+DIRS        = stubs Util Base LogErr VM IO TimeMgr DELayout \
               Config ArraySpec LocalArray Route DistGrid Array ArrayBundle \
-              IO Grid Mesh GridUtil LocStream XGrid GeomBase Regrid Field \
-              Container FieldBundle Attribute 
+              Grid Mesh GridUtil LocStream XGrid GeomBase Regrid Field \
+              Container FieldBundle Attribute
 
 CLEANDIRS   =
 CLEANFILES  =
