@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.74 2012/07/23 20:19:30 gold2718 Exp $
+// $Id: ESMCI_Array.h,v 1.75 2012/07/27 02:28:39 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -315,7 +315,10 @@ namespace ESMCI {
          int *timeslice, ESMC_IOFmtFlag *iofmt);
     int print() const;
     int validate() const;
-//    int constructPioDof(InterfaceInt *pioDofList, int localDe) const;
+    // fileMapList is an int64_t to be compatible with PIO and MPI.
+    // Internally, PIO uses a type which is tied to the Fortran type, 
+    // MPI_OFFSET. Instead of int64_t, an alternative is to use MPI_offset,
+    // however, this may run into issues with MPIUNI.
     int constructFileMap(int64_t *fileMapList, int mapListSize,
                          int localDe, int64_t unmap_val = 0) const;
     // serialize() and deserialize()

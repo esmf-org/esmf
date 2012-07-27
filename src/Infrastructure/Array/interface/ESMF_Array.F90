@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.168 2012/07/25 17:05:57 gold2718 Exp $
+! $Id: ESMF_Array.F90,v 1.169 2012/07/27 02:28:37 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -93,7 +93,6 @@ module ESMF_ArrayMod
   public ESMF_ArraySMMStore
   public ESMF_ArrayValidate
   public ESMF_ArrayWrite
-  public ESMF_ArrayWriteC
 
 #ifdef FIRSTNEWARRAYPROTOTYPE
   public ESMF_ArrayWait
@@ -106,9 +105,6 @@ module ESMF_ArrayMod
   public ESMF_ArraySetThis          ! implemented in ESMF_ArrayCreateMod
   public ESMF_ArraySetThisNull      ! implemented in ESMF_ArrayCreateMod
   public ESMF_ArrayCopyThis         ! implemented in ESMF_ArrayCreateMod
-#if 0
-  public ESMF_ArrayConstructPioDof  ! implemented in ESMF_ArrayGetMod
-#endif
 
 
 !EOPI
@@ -117,7 +113,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.168 2012/07/25 17:05:57 gold2718 Exp $'
+    '$Id: ESMF_Array.F90,v 1.169 2012/07/27 02:28:37 gold2718 Exp $'
 
 !==============================================================================
 ! 
@@ -1395,14 +1391,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     ! Local vars
     integer :: localrc                   ! local return code
-    integer :: localtk
-    integer :: rank, time
-    logical :: appd_internal
-    character(len=80) :: varname
-    type(ESMF_IOFmtFlag) :: iofmt_internal
-    character(len=10) :: piofmt
-
-    type(ESMF_TypeKind_Flag)             :: typekind
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1414,7 +1402,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
 
     ! Call into the C++ interface, which will call IO object
-    call c_esmc_arraywritec(array, trim(file)//C_NULL_CHAR,    &
+    call c_esmc_arraywrite(array, trim(file)//C_NULL_CHAR,     &
         trim(variableName)//C_NULL_CHAR, append,               &
         timeslice, iofmt, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1433,111 +1421,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_ArrayWrite
 !------------------------------------------------------------------------------
 
-
-! -------------------------- ESMF-public method -------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayWriteC"
-!BOPI
-! !IROUTINE: ESMF_ArrayWriteC - Write Array data into a file
-! \label{api:ArrayWrite}
-!
-! !INTERFACE:
-  subroutine ESMF_ArrayWriteC(array, file, &
-     variableName, append, timeslice, iofmt, rc)
-!   ! We need to terminate the strings on the way to C++
-#ifdef ESMF_PIO
-    use, intrinsic :: iso_c_binding, only: C_NULL_CHAR
-#endif // ESMF_PIO
-!
-! !ARGUMENTS:
-    type(ESMF_Array),     intent(inout)          :: array
-    character(*),         intent(in)             :: file
-    character(*),         intent(in),  optional  :: variableName
-    logical,              intent(in),  optional  :: append
-    integer,              intent(in),  optional  :: timeslice
-    type(ESMF_IOFmtFlag), intent(in),  optional  :: iofmt
-    integer,              intent(out), optional  :: rc
-!
-!
-! !DESCRIPTION:
-!   Write Array data into a file. For this API to be functional, the 
-!   environment variable {\tt ESMF\_PIO} should be set to "internal" when 
-!   the ESMF library is built.  Please see the section on 
-!   Data I/O,~\ref{io:dataio}. 
-!
-!   Limitations:
-!   \begin{itemize}
-!     \item Only 1 DE per PET supported.
-!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
-!   \end{itemize}
-!
-!  The arguments are:
-!  \begin{description}
-!   \item[array]
-!    The {\tt ESMF\_Array} object that contains data to be written.
-!   \item[file]
-!    The name of the output file to which Array data is written.
-!   \item[{[variableName]}]
-!    Variable name in the output file; default is the "name" of Array.
-!    Use this argument only in the IO format (such as NetCDF) that
-!    supports variable name. If the IO format does not support this 
-!    (such as binary format), ESMF will return an error code.
-!   \item[{[append]}]
-!    Logical: if .true., data (with attributes) is appended to an
-!    existing file; default is .false.
-!   \item[{[timeslice]}]
-!    Some IO formats (e.g. NetCDF) support the output of data in form of
-!    time slices. The {\tt timeslice} argument provides access to this
-!    capability. Usage of this feature requires that the first slice is
-!    written with a positive {\tt timeslice} value, and that subsequent slices
-!    are written with a {\tt timeslice} argument that increments by one each
-!    time. By default, i.e. by omitting the {\tt timeslice} argument, no
-!    provisions for time slicing are made in the output file.
-!   \item[{[iofmt]}]
-!    \begin{sloppypar}
-!    The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
-!    of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
-!    \end{sloppypar}
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!  \end{description}
-!
-!EOPI
-!------------------------------------------------------------------------------
-    ! Local vars
-    integer :: localrc                   ! local return code
-    integer :: localtk
-    integer :: rank, time
-    logical :: appd_internal
-    character(len=80) :: varname
-    type(ESMF_IOFmtFlag) :: iofmt_internal
-    character(len=10) :: piofmt
-
-    ! Initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-#ifdef ESMF_PIO
-
-    ! Call into the C++ interface, which will call IO object
-    call c_esmc_arraywritec(array, trim(file)//C_NULL_CHAR,   &
-        trim(variableName)//C_NULL_CHAR, append,              &
-        timeslice, iofmt, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-#else
-    ! Return indicating PIO not present
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-      msg="ESMF must be compiled with PIO support to support I/O methods", &
-      ESMF_CONTEXT, rcToReturn=rc)
-#endif
-
-  end subroutine ESMF_ArrayWriteC
-!------------------------------------------------------------------------------
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

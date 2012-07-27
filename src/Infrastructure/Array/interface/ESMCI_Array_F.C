@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.59 2012/07/23 20:19:32 gold2718 Exp $
+// $Id: ESMCI_Array_F.C,v 1.60 2012/07/27 02:28:38 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -598,20 +598,6 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_arraywritec)(ESMCI::Array **array,
-    char *file, char *variableName, bool *append,
-    int *timeslice, ESMC_IOFmtFlag *iofmt, int *rc){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraywrite()"
-    // Initialize return code; assume routine not implemented
-    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.MsgFoundError(ESMCI::Array::write(
-      *array, file, variableName, append, timeslice, iofmt),
-      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
-  }
-
   void FTN_X(c_esmc_arraywrite)(ESMCI::Array **array,
     char *file, char *variableName, bool *append,
     int *timeslice, ESMC_IOFmtFlag *iofmt, int *rc){
@@ -1011,39 +997,6 @@ extern "C" {
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
-  
-#if 0
-  void FTN_X(c_esmc_arrayconstructpiodof)(ESMCI::Array **ptr,
-    int *localDeArg, ESMCI::InterfaceInt **pioDofList, int *pioDofCount,
-    int *rc){
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arrayconstructpiodof()"
-    // Initialize return code; assume routine not implemented
-    if (ESMC_NOT_PRESENT_FILTER(rc)) *rc = ESMC_RC_NOT_IMPL;
-    int localrc = ESMC_RC_NOT_IMPL;
-    // shift input indices
-    int localDe = *localDeArg;  // already base 0
-    // check input values
-    int localDeCount = (*ptr)->getDELayout()->getLocalDeCount();
-    if (localDe < 0 || localDe > localDeCount-1){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "- Specified local DE out of bounds", ESMC_NOT_PRESENT_FILTER(rc));
-      return;
-    }
-    // determine pioDofCount
-    if (ESMC_NOT_PRESENT_FILTER(pioDofCount)){
-      *pioDofCount = (*ptr)->getTotalElementCountPLocalDe()[localDe];
-    }
-    // fill seqIndexList
-    if (*pioDofList){
-      localrc = (*ptr)->constructPioDof(*pioDofList, localDe);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-        ESMC_NOT_PRESENT_FILTER(rc))) return;
-    }
-    // return successfully
-    if (ESMC_NOT_PRESENT_FILTER(rc)) *rc = ESMF_SUCCESS;   
-  }
-#endif
   
   void FTN_X(c_esmc_arrayserialize)(ESMCI::Array **array, char *buf, int *length,
     int *offset, ESMC_AttReconcileFlag *attreconflag,

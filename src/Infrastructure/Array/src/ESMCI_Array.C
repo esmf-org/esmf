@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.155 2012/07/25 22:42:16 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.156 2012/07/27 02:28:41 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -42,25 +42,12 @@
 #include "ESMCI_IO.h"
 
 
-extern "C" {
-
-// Prototypes of the Fortran interface functions.
-void FTN_X(f_esmf_arrayread)(ESMCI::Array *array, char *file,
-  char *variableName, int *timeslice, ESMC_IOFmtFlag *iofmt,  int *rc);
-
-void FTN_X(f_esmf_arraywrite)(ESMCI::Array *array, char *file,
-  char *variableName, bool *append, int *timeslice, ESMC_IOFmtFlag *iofmt,
-  int *rc);
-
-}; // extern "C"
-
-
 using namespace std;
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.155 2012/07/25 22:42:16 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.156 2012/07/27 02:28:41 gold2718 Exp $";
 //-----------------------------------------------------------------------------
 
 
