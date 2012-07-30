@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.66 2012/05/30 23:43:47 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.67 2012/07/30 23:17:42 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -136,6 +136,13 @@ program ESMF_RegridWeightGen
            method = 'bilinear'
          else
            call ESMF_UtilGetArg(ind+1, argvalue=method)
+	   if ((trim(method) .ne. 'bilinear') .and. (trim(method) .ne. 'conserve') &
+	      .and. (trim(method) .ne. 'patch')) then
+              write(*,*)
+              print *, 'ERROR: The interpolation method "', trim(method), '" is not supported'
+              print *, '  The supported methods are "bilinear", "patch", and "conserve"'
+              call ESMF_Finalize(endflag=ESMF_END_ABORT)
+           endif    
          endif
     	
          poleptrs = -1
@@ -223,7 +230,7 @@ program ESMF_RegridWeightGen
 	     srcFileType = ESMF_FILEFORMAT_GRIDSPEC
            else if (trim(flag) .ne. 'SCRIP') then
              write(*,*)
-	     print *, 'ERROR: Unknown --src_type: must be either ESMF or SCRIP.'
+	     print *, 'ERROR: Unknown --src_type: must be one of ESMF,SCRIP,UGRID, or GRIDSPEC.'
              call ESMF_Finalize(endflag=ESMF_END_ABORT)
            endif
          endif
@@ -250,7 +257,7 @@ program ESMF_RegridWeightGen
 	     dstFileType = ESMF_FILEFORMAT_GRIDSPEC
            else if (trim(flag) .ne. 'SCRIP') then
              write(*,*)
-	     print *, 'ERROR: Unknown --dst_type: must be either ESMF or SCRIP.'
+	     print *, 'ERROR: Unknown --dst_type: must be one of ESMF,SCRIP,UGRID or GRIDSPEC.'
              call ESMF_Finalize(endflag=ESMF_END_ABORT)
            end if
          endif
@@ -2000,7 +2007,7 @@ subroutine PrintUsage()
      print *, "Usage: ESMF_RegridWeightGen [--source|-s] src_grid_filename" 
      print *, "                	     [--destination|-d] dst_grid_filename"
      print *, "                      [--weight|-w] out_weight_file "
-     print *, "                      [--method|-m] [bilinear|patch|conservative]"
+     print *, "                      [--method|-m] [bilinear|patch|conserve]"
      print *, "                      [--pole|-p] [all|none|teeth|<N>]"
      print *, "                      [--ignore_unmapped|-i]"
      print *, "                      --src_type [SCRIP|ESMF|UGRID|GRIDSPEC]" 
