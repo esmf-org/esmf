@@ -7,30 +7,30 @@
 #define BGx
 #endif
 
-module piolib_mod
+module esmfpiolib_mod
   !--------------
-  use pio_kinds
+  use esmfpio_kinds
   !--------------
-  use pio_types, only : file_desc_t, iosystem_desc_t, var_desc_t, io_desc_t, &
+  use esmfpio_types, only : file_desc_t, iosystem_desc_t, var_desc_t, io_desc_t, &
 	pio_iotype_pbinary, pio_iotype_binary, pio_iotype_direct_pbinary, &
 	pio_iotype_netcdf, pio_iotype_pnetcdf, pio_iotype_netcdf4p, pio_iotype_netcdf4c, &
         pio_noerr, pio_num_ost
   !--------------
-  use alloc_mod
+  use esmfpio_alloc_mod
   !--------------
-  use pio_support, only : piodie, debug, debugio, debugasync, checkmpireturn
+  use esmfpio_support, only : piodie, debug, debugio, debugasync, checkmpireturn
   !
-  use ionf_mod, only : create_nf, open_nf,close_nf, sync_nf
-  use pionfread_mod, only : read_nf
-  use pionfwrite_mod, only : write_nf
+  use ESMFPIO_ionf_mod, only : create_nf, open_nf,close_nf, sync_nf
+  use esmfpionfread_mod, only : read_nf
+  use esmfpionfwrite_mod, only : write_nf
 
-  use pio_mpi_utils, only : PIO_type_to_mpi_type 
-  use iompi_mod
-  use rearrange
+  use esmfpio_mpi_utils, only : PIO_type_to_mpi_type 
+  use ESMFPIO_iompi_mod
+  use ESMFPIO_rearrange
 #ifdef TIMING
   use perf_mod, only : t_startf, t_stopf     ! _EXTERNAL
 #endif
-  use pio_msg_mod
+  use esmfpio_msg_mod
 #ifndef NO_MPIMOD
   use mpi    ! _EXTERNAL
 #endif
@@ -360,8 +360,8 @@ contains
 !! @copydoc PIO_error_method
 !<
   subroutine seterrorhandlingi(ios, method)
-    use pio_types, only : pio_internal_error, pio_return_error
-    use pio_msg_mod, only : pio_msg_seterrorhandling
+    use esmfpio_types, only : pio_internal_error, pio_return_error
+    use esmfpio_msg_mod, only : pio_msg_seterrorhandling
     type(iosystem_desc_t), intent(inout) :: ios
     integer, intent(in) :: method
     integer :: msg, ierr
@@ -465,7 +465,7 @@ contains
 !! @param iodesc @copydoc iodesc_generate
 !<
   subroutine initdecomp_2dof_bin_i4(iosystem,basepiotype,dims,lenblocks,compdof,iodofr,iodofw,iodesc)
-    use calcdisplace_mod, only : calcdisplace
+    use ESMFPIO_calcdisplace_mod, only : calcdisplace
     type (iosystem_desc_t), intent(in) :: iosystem
     integer(i4), intent(in)           :: basepiotype
     integer(i4)                       :: basetype
@@ -483,7 +483,7 @@ contains
 
   end subroutine initdecomp_2dof_bin_i4
   subroutine initdecomp_2dof_bin_i8(iosystem,basepiotype,dims,lenblocks,compdof,iodofr,iodofw,iodesc)
-    use calcdisplace_mod, only : calcdisplace
+    use ESMFPIO_calcdisplace_mod, only : calcdisplace
     type (iosystem_desc_t), intent(in) :: iosystem
     integer(i4), intent(in)           :: basepiotype
     integer(i4)                       :: basetype
@@ -722,7 +722,7 @@ contains
 !! @param iodesc @copydoc iodesc_generate
 !<
   subroutine initdecomp_1dof_nf_i4(iosystem,basepiotype,dims,lenblocks,compdof,iodof,start, count, iodesc)
-    use calcdisplace_mod, only : calcdisplace
+    use ESMFPIO_calcdisplace_mod, only : calcdisplace
     type (iosystem_desc_t), intent(in) :: iosystem
     integer(i4), intent(in)           :: basepiotype
     integer(i4), intent(in)           :: dims(:)
@@ -739,7 +739,7 @@ contains
 
   end subroutine initdecomp_1dof_nf_i4
   subroutine initdecomp_1dof_nf_i8(iosystem,basepiotype,dims,lenblocks,compdof,iodof,start, count, iodesc)
-    use calcdisplace_mod, only : calcdisplace
+    use ESMFPIO_calcdisplace_mod, only : calcdisplace
     type (iosystem_desc_t), intent(in) :: iosystem
     integer(i4), intent(in)           :: basepiotype
     integer(i4), intent(in)           :: dims(:)
@@ -922,8 +922,8 @@ contains
 !! @param iocount   The count for the block-cyclic io decomposition
 !<
   subroutine PIO_initdecomp_dof_i4(iosystem,basepiotype,dims,compdof, iodesc, iostart, iocount)
-    use calcdisplace_mod, only : calcdisplace_box
-    use calcdecomp, only : calcstartandcount
+    use ESMFPIO_calcdisplace_mod, only : calcdisplace_box
+    use ESMFPIO_calcdecomp, only : calcstartandcount
     type (iosystem_desc_t), intent(inout) :: iosystem
     integer(i4), intent(in)           :: basepiotype
     integer(i4), intent(in)           :: dims(:)
@@ -946,8 +946,8 @@ contains
 
 
   subroutine PIO_initdecomp_dof_i8(iosystem,basepiotype,dims,compdof, iodesc, iostart, iocount)
-    use calcdisplace_mod, only : calcdisplace_box
-    use calcdecomp, only : calcstartandcount
+    use ESMFPIO_calcdisplace_mod, only : calcdisplace_box
+    use ESMFPIO_calcdecomp, only : calcstartandcount
     type (iosystem_desc_t), intent(inout) :: iosystem
     integer(i4), intent(in)           :: basepiotype
     integer(i4), intent(in)           :: dims(:)
@@ -1191,7 +1191,7 @@ contains
   !
 
   subroutine dupiodesc2(src, dest)
-    use pio_types, only : io_desc2_t
+    use esmfpio_types, only : io_desc2_t
     type(io_desc2_t), intent(in) :: src
     type(io_desc2_t), intent(out) :: dest
 
@@ -1215,9 +1215,9 @@ contains
 
 
   subroutine genindexedblock(lenblocks,basetype,elemtype,filetype,displace)
-    use pio_types, only : pio_double, pio_int, pio_real, pio_char
+    use esmfpio_types, only : pio_double, pio_int, pio_real, pio_char
 #ifdef NO_MPI2
-    use pio_support, only : mpi_type_create_indexed_block
+    use esmfpio_support, only : mpi_type_create_indexed_block
 #endif
     integer(i4), intent(in) :: lenblocks     ! length of blocks
     integer(i4), intent(in) :: basetype      ! base mpi type 
@@ -1299,7 +1299,7 @@ contains
 !! @param base @em optional argument can be used to offset the first io task - default base is task 1.
 !<
   subroutine init_intracom(comp_rank, comp_comm, num_iotasks, num_aggregator, stride,  rearr, iosystem,base)
-    use pio_types, only : pio_internal_error, pio_rearr_none
+    use esmfpio_types, only : pio_internal_error, pio_rearr_none
     integer(i4), intent(in) :: comp_rank
     integer(i4), intent(in) :: comp_comm
     integer(i4), intent(in) :: num_iotasks 
@@ -1557,7 +1557,7 @@ contains
 !! @param iosystem a derived type which can be used in subsequent pio operations (defined in PIO_types).
 !<
   subroutine init_intercom(component_count, peer_comm, comp_comms, io_comm, iosystem)
-    use pio_types, only : pio_internal_error, pio_rearr_box
+    use esmfpio_types, only : pio_internal_error, pio_rearr_box
     integer, intent(in) :: component_count
     integer, intent(in) :: peer_comm
     integer, intent(in) :: comp_comms(component_count)   !  The compute communicator
@@ -1579,7 +1579,7 @@ contains
 #endif
 #if defined(NO_MPI2) || defined(_MPISERIAL)
     call piodie( __PIO_FILE__,__LINE__, &
-     'The PIO async interface requires an MPI2 complient MPI library')
+     'The esmfpio async interface requires an MPI2 complient MPI library')
 #else 
     do i=1,component_count
        iosystem(i)%error_handling = PIO_internal_error
@@ -1996,7 +1996,7 @@ contains
   !=============================================
 
   subroutine copy_decompmap(src,dest)
-    use pio_types, only : decompmap_t
+    use esmfpio_types, only : decompmap_t
     type (decompmap_t), intent(in) :: src
     type (decompmap_t), intent(inout) :: dest
 
@@ -2109,7 +2109,7 @@ contains
        call mpi_bcast(file%iotype, 1, MPI_INTEGER, 0, iosystem%comp_comm, ierr)
 
        if(len(fname) > char_len) then
-          print *,'Length of filename exceeds compile time max, increase char_len in pio_kinds and recompile', len(fname), char_len
+          print *,'Length of filename exceeds compile time max, increase char_len in esmfpio_kinds and recompile', len(fname), char_len
           call piodie( __PIO_FILE__,__LINE__)
        end if
 
@@ -2138,7 +2138,7 @@ contains
 
 #ifndef _NETCDF4
     if(file%iotype==pio_iotype_netcdf4p .or. file%iotype==pio_iotype_netcdf4c) then
-       print *, 'WARNING: PIO was not built with NETCDF 4 support changing iotype to netcdf'
+       print *, 'WARNING: esmfpio was not built with NETCDF 4 support changing iotype to netcdf'
        file%iotype = pio_iotype_netcdf
     end if
 #endif
@@ -2278,7 +2278,7 @@ contains
 #endif
 #ifndef _NETCDF4
     if(file%iotype==pio_iotype_netcdf4p .or. file%iotype==pio_iotype_netcdf4c) then
-       print *, 'WARNING: PIO was not built with NETCDF 4 support changing iotype to netcdf'
+       print *, 'WARNING: esmfpio was not built with NETCDF 4 support changing iotype to netcdf'
        file%iotype = pio_iotype_netcdf
     end if
 #endif
@@ -2286,7 +2286,7 @@ contains
        call mpi_bcast(amode, 1, MPI_INTEGER, 0, iosystem%comp_comm, ierr)
        call mpi_bcast(file%iotype, 1, MPI_INTEGER, 0, iosystem%comp_comm, ierr)
        if(len(fname) > char_len) then
-          print *,'Length of filename exceeds compile time max, increase char_len in pio_kinds and recompile'
+          print *,'Length of filename exceeds compile time max, increase char_len in esmfpio_kinds and recompile'
           call piodie( __PIO_FILE__,__LINE__)
        end if
 
@@ -2440,7 +2440,7 @@ contains
 !! @param file @copydoc file_desc_t
 !< 
   subroutine closefile(file)
-    use piodarray, only : darray_write_complete
+    use esmfpiodarray, only : darray_write_complete
     type (file_desc_t),intent(inout)   :: file
 
     integer :: ierr, msg
@@ -2520,6 +2520,6 @@ contains
 
 
 
-end module piolib_mod
+end module esmfpiolib_mod
 
   !|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||

@@ -19,6 +19,26 @@ perr() {
   help 1
 }
 
+##
+## fileInList is a helper function test that returns true iff
+## the test file (arg $1) is in a colon-separated list of files (arg $2)
+## The function "returns" (i.e., echos) "yes" or "no" as the result
+##
+fileInList() {
+  ans="no"
+  if [ $# -ne 2 ]; then
+    echo "INTERNAL ERROR: fileInList requires two arguments"
+    exit 3
+  fi
+  for file in ${2}; do
+    if [ "${file}" == "${1}" ]; then
+      ans="yes"
+      break
+    fi
+  done
+  echo ${ans}
+}
+
 ## Force us to work in the correct directory
 cd `dirname $0`
 
@@ -78,16 +98,18 @@ changealert="\n${stars}\nFiles have been"
 changealert="${changealert} added to PIO, add these to makefile"
 changealert="${changealert}\n${stars}\n"
 
-piofiles="`(cd pio; ls *.F90 *.cc *.c)`"
+piofiles="`(cd pio; ls *.F90 *.cc *.c 2> /dev/null)`"
 for file in $piofiles; do
   sfile=`echo ${file} | sed -e 's/cc$/C/'`
   lfile="`ls $sfile 2> /dev/null`"
   if [ -z "${lfile}" ]; then
-    if [ -n "${changealert}" ]; then
-      echo -e $changealert
-      changealert=""
+    if [ "${file}" != "pio_cpp_sizes.F90" ]; then
+      if [ -n "${changealert}" ]; then
+        echo -e $changealert
+        changealert=""
+      fi
+      echo $file
     fi
-    echo $file
   fi
 done
 
@@ -95,56 +117,101 @@ changealert="\n${stars}\nFiles have been"
 changealert="${changealert} removed from PIO, remove these from makefile"
 changealert="${changealert}\n${stars}\n"
 
-currfiles="`(ls *.F90 *.C *.c)`"
+currfiles="`(ls *.F90 *.C *.c 2> /dev/null)`"
 for file in $currfiles; do
   sfile=`echo ${file} | sed -e 's/C$/cc/'`
   lfile="`(cd pio; ls $sfile 2> /dev/null)`"
   if [ -z "${lfile}" ]; then
-    if [ -n "${changealert}" ]; then
-      echo -e $changealert
-      changealert=""
+    if [ "${file}" != "pnetcdfversion.c" ]; then
+      if [ -n "${changealert}" ]; then
+        echo -e $changealert
+        changealert=""
+      fi
+      echo $file
     fi
-    echo $file
   fi
 done
 
 ## Remove all current F90, C, and C++ files as well as header files
-rm -f *.F90 *.h *.c *.cc *.C
-res=$?
-if [ $res -ne 0 ]; then
-  echo "ERROR: unable to remove old PIO installation"
-  rm -rf pio
-  exit $res
-fi
+## Exception, keep pnetcdfversion.c
+keepfiles="pnetcdfversion.c"
+remlist=`ls *.F90 *.h *.cc *.C *.c 2> /dev/null`
+for file in ${remlist}; do
+  if [ "`fileInList ${file} \"${keepfiles}\"`" != "yes" ]; then
+    rm -f ${file}
+    res=$?
+    if [ $res -ne 0 ]; then
+      echo "ERROR: unable to remove old PIO file, \"${file}\""
+      rm -rf pio
+      exit $res
+    fi
+  fi
+done
 
 ## Create ESMF redefinition files
-esmfincname="ESMFPIO.h"
-esmcincname="ESMCPIO.h"
-esmfinchead="! WARNING: Auto-generated file, do not edit"
-esmcinchead="// WARNING: Auto-generated file, do not edit"
+esmcincname="ESMFPIO.h"
+esmcincfile="${esmcincname}"
+esmfpioinc="#include \"${esmcincname}\""
+esmcpioinc="#include \"../PIO/${esmcincname}\""
 
-if [ -f "../include/${esmfincname}" ]; then
-  rm "../include/${esmfincname}"
+# ESMCPIO.h needs to be in the PIO directory so Fortran files can find it
+if [ -f "${esmcincfile}" ]; then
+  rm -f "${esmcincfile}"
 fi
-echo -e ${esmfinchead} > "../include/${esmfincname}"
-
-if [ -f "../include/${esmcincname}" ]; then
-  rm "../include/${esmcincname}"
-fi
-echo -e ${esmcinchead} > "../include/${esmcincname}"
+touch "${esmcincfile}"
 
 ## Move the files we need into the current directory
-## Add include of ESMFPIO.H along the way
-esmfpioinc="#include \"${esmfincname}\""
-esmcpioinc="#include \"${esmcincname}\""
-awkinsert="BEGIN { print LINE1 } { print }"
-#mv pio/*.F90 .
+
+# Some files need special handling (or should be ignored)
+cppintfiles="pio_cpp_binding.F90"
+cppintfiles="${cppintfiles} darray_cpp_binding.F90"
+cppintfiles="${cppintfiles} nf_cpp_binding.F90"
+ignorefiles="pio_cpp_sizes.F90"
+nosymfiles="${cppintfiles} ${ignorefiles}"
+
+# Gather up the public symbols for later substitution
+pubsyms=""
 for file in pio/*.F90; do
-  # Add public symbols to header file
-  cat ${file} | awk -f f90symbols.awk >> "../include/${esmfincname}"
-  # Rewrite the file by adding the include line at the top
   fname="`basename ${file}`"
-  cat ${file} | awk -v LINE1="${esmfpioinc}" "${awkinsert}" > ${fname}
+  if [ "`fileInList ${fname} \"${nosymfiles}\"`" != "yes" ]; then
+    # Add public symbols to list
+    newsyms="`cat ${file} | awk -f f90symbols.awk`"
+    if [ -n "${newsyms}" ]; then
+      if [ -n "${pubsyms}" ]; then
+        pubsyms="${pubsyms}:${newsyms}"
+      else
+        pubsyms="${newsyms}"
+      fi
+    fi
+  fi
+done
+
+# Now, bring in the F90 files, translating as necessary along the way
+awkinsert="BEGIN { print LINE1 } { print }"
+
+for file in pio/*.F90; do
+  fname="`basename ${file}`"
+  ifile=${file}
+  if [ "`fileInList ${fname} \"${ignorefiles}\"`" == "yes" ]; then
+    continue
+  fi
+  if [ "`fileInList ${fname} \"${cppintfiles}\"`" == "yes" ]; then
+    # For the C++ interface files, we have to insert the #include line
+    ftemp="`basename ${file} F90`tmp"
+    cat ${ifile} | awk -v LINE1="${esmfpioinc}" "${awkinsert}" > ${ftemp}
+  # Don't need the original file anymore
+    rm ${ifile}
+    ifile=${ftemp}
+    res=$?
+    if [ $res -ne 0 ]; then
+      echo "ERROR: unable to create ${fname}"
+      rm -rf pio
+      exit $res
+    fi
+  fi
+  # Since this takes a while, amuse the spectator with a blow by blow
+  echo "Translating \"${fname}\""
+  cat ${ifile} | awk -v PUBSYMS="${pubsyms}" -f f90files.awk > ${fname}
   res=$?
   if [ $res -ne 0 ]; then
     echo "ERROR: unable to create ${fname}"
@@ -152,24 +219,30 @@ for file in pio/*.F90; do
     exit $res
   fi
   # Don't need the original file anymore
-  rm ${file}
+  rm ${ifile}
 done
-
-#mv pio/*.F90.in .
 
 # Now, take care of pio.h
 file="pio/pio.h"
 if [ -f "${file}" ]; then
   # Add public symbols to header file
-  cat ${file} | awk -f cppsymbols.awk >> "../include/${esmcincname}"
+  cat ${file} | awk -f cppsymbols.awk >> "${esmcincfile}"
   if [ $res -ne 0 ]; then
-      echo "ERROR: unable to create ../include/${esmcincname}"
+      echo "ERROR: unable to create ${esmcincfile}"
       rm -rf pio
       exit $res
   fi
   # Rewrite the file by adding the include line at the top
   fname="../include/pio.h"
-  cat ${file} | awk -v LINE1="${esmfpioinc}" "${awkinsert}" > ${fname}
+  # Make sure it is writable
+  chmod 644 $fname
+  awkinsert="BEGIN { DIDINSERT = 0 }
+            ((DIDINSERT == 0) && (NF == 0)) {
+              printf \"%s\\n\\n\", LINE3
+              DIDINSERT = 1
+            }
+            { print }"
+  cat ${file} | awk -v LINE3="${esmcpioinc}" "${awkinsert}" > ${fname}
   res=$?
   if [ $res -ne 0 ]; then
       echo "ERROR: unable to create ${fname}"
@@ -177,14 +250,16 @@ if [ -f "${file}" ]; then
       exit $res
   fi
   # Don't need the original file anymore
-  rm ${file}
+  rm -f ${file}
 else
   echo "ERROR: pio.h not found in repository"
   rm -rf pio
   exit 1
 fi
 
-# Move the rest of the .h files
+# Move the pio_* include files
+# First, make sure we can overwrite them (CVS permissions and all that)
+rm -f `ls pio/pio_*.h 2> /dev/null | sed -e 's/pio/..\/include/'`
 mv pio/pio*.h ../include
 res=$?
 if [ $res -ne 0 ]; then
@@ -193,6 +268,7 @@ if [ $res -ne 0 ]; then
   exit $res
 fi
 
+# Move remaining include files to PIO. This should work since we cleaned up
 mv pio/*.h .
 res=$?
 if [ $res -ne 0 ]; then

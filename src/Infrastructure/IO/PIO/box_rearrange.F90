@@ -71,19 +71,19 @@
 #define TAG1  101
 #define TAG2  102
 
-module box_rearrange
+module ESMFPIO_box_rearrange
 
-  use pio_kinds, only : pio_offset, r4, r8, i4, i8
-  use pio_types, only : io_desc_t, iosystem_desc_t
+  use esmfpio_kinds, only : pio_offset, r4, r8, i4, i8
+  use esmfpio_types, only : io_desc_t, iosystem_desc_t
 #ifdef NO_MPI2
-  use pio_support, only : MPI_TYPE_CREATE_INDEXED_BLOCK, piodie, &
+  use esmfpio_support, only : MPI_TYPE_CREATE_INDEXED_BLOCK, piodie, &
                           Debug, DebugIO, CheckMPIReturn, pio_fc_gather_int
 #else
-  use pio_support, only : piodie, Debug, DebugIO, CheckMPIReturn, &
+  use esmfpio_support, only : piodie, Debug, DebugIO, CheckMPIReturn, &
                           pio_fc_gather_int
 #endif
-  use alloc_mod,      only : alloc_check, dealloc_check
-  use pio_spmd_utils, only : pio_swapm
+  use esmfpio_alloc_mod,      only : alloc_check, dealloc_check
+  use esmfpio_spmd_utils, only : pio_swapm
 #ifndef NO_MPIMOD
   use mpi ! _EXTERNAL
 #endif
@@ -119,7 +119,7 @@ module box_rearrange
      module procedure box_rearrange_io2comp_double
   end interface
 
-  character(len=*), parameter :: modName='box_rearrange'
+  character(len=*), parameter :: modName='ESMFPIO_box_rearrange'
 
 #ifdef MEMCHK
 integer :: msize, rss, mshare, mtext, mstack, lastrss=0
@@ -527,7 +527,7 @@ subroutine box_rearrange_comp2io_real (IOsystem, ioDesc, s1, src, s2, &
       call MPI_ALLTOALLW(src,  a2a_sendcounts, a2a_displs, a2a_sendtypes, &
                          dest, a2a_recvcounts, a2a_displs, a2a_recvtypes, &
                          IOsystem%union_comm, ierror                       )
-      call CheckMPIReturn('box_rearrange', ierror)
+      call CheckMPIReturn('ESMFPIO_box_rearrange', ierror)
     else
 #endif
       call pio_swapm( nprocs, myrank,                            &
@@ -567,7 +567,7 @@ subroutine box_rearrange_comp2io_real (IOsystem, ioDesc, s1, src, s2, &
         call MPI_ISEND( src, 1, stype(i),    &                 ! buf, count, type
                         io_comprank,TAG2,    &                 ! destination,tag
                         IOsystem%union_comm,sreq(i),ierror )
-        call CheckMPIReturn('box_rearrange',ierror)
+        call CheckMPIReturn('ESMFPIO_box_rearrange',ierror)
       endif
 
     end do
@@ -581,7 +581,7 @@ subroutine box_rearrange_comp2io_real (IOsystem, ioDesc, s1, src, s2, &
         call MPI_IRECV( dest,1, rtype(i), &             ! buf, count, type
                         rfrom(i), TAG2, &               ! source, tag
                         IOsystem%union_comm,rreq(i),ierror )        
-        call CheckMPIReturn('box_rearrange',ierror)
+        call CheckMPIReturn('ESMFPIO_box_rearrange',ierror)
       end do
 
     endif
@@ -593,7 +593,7 @@ subroutine box_rearrange_comp2io_real (IOsystem, ioDesc, s1, src, s2, &
     if (IOsystem%IOproc) then
       do i=1,nrecvs
         call MPI_WAIT( rreq(i), status, ierror )
-        call CheckMPIReturn('box_rearrange',ierror)
+        call CheckMPIReturn('ESMFPIO_box_rearrange',ierror)
       end do
       call dealloc_check(rreq, 'receive requests')
     endif
@@ -601,7 +601,7 @@ subroutine box_rearrange_comp2io_real (IOsystem, ioDesc, s1, src, s2, &
     do i=1,num_iotasks
       if (scount(i) /= 0) then
         call MPI_WAIT( sreq(i), status, ierror )
-        call CheckMPIReturn('box_rearrange',ierror)
+        call CheckMPIReturn('ESMFPIO_box_rearrange',ierror)
       endif
     end do
 
@@ -755,7 +755,7 @@ subroutine box_rearrange_comp2io_double (IOsystem, ioDesc, s1, src, s2, &
       call MPI_ALLTOALLW(src,  a2a_sendcounts, a2a_displs, a2a_sendtypes, &
                          dest, a2a_recvcounts, a2a_displs, a2a_recvtypes, &
                          IOsystem%union_comm, ierror                       )
-      call CheckMPIReturn('box_rearrange', ierror)
+      call CheckMPIReturn('ESMFPIO_box_rearrange', ierror)
     else
 #endif
       call pio_swapm( nprocs, myrank,                            &
@@ -795,7 +795,7 @@ subroutine box_rearrange_comp2io_double (IOsystem, ioDesc, s1, src, s2, &
         call MPI_ISEND( src, 1, stype(i),    &                 ! buf, count, type
                         io_comprank,TAG2,    &                 ! destination,tag
                         IOsystem%union_comm,sreq(i),ierror )
-        call CheckMPIReturn('box_rearrange',ierror)
+        call CheckMPIReturn('ESMFPIO_box_rearrange',ierror)
       endif
 
     end do
@@ -809,7 +809,7 @@ subroutine box_rearrange_comp2io_double (IOsystem, ioDesc, s1, src, s2, &
         call MPI_IRECV( dest,1, rtype(i), &             ! buf, count, type
                         rfrom(i), TAG2, &               ! source, tag
                         IOsystem%union_comm,rreq(i),ierror )        
-        call CheckMPIReturn('box_rearrange',ierror)
+        call CheckMPIReturn('ESMFPIO_box_rearrange',ierror)
       end do
 
     endif
@@ -821,7 +821,7 @@ subroutine box_rearrange_comp2io_double (IOsystem, ioDesc, s1, src, s2, &
     if (IOsystem%IOproc) then
       do i=1,nrecvs
         call MPI_WAIT( rreq(i), status, ierror )
-        call CheckMPIReturn('box_rearrange',ierror)
+        call CheckMPIReturn('ESMFPIO_box_rearrange',ierror)
       end do
       call dealloc_check(rreq, 'receive requests')
     endif
@@ -829,7 +829,7 @@ subroutine box_rearrange_comp2io_double (IOsystem, ioDesc, s1, src, s2, &
     do i=1,num_iotasks
       if (scount(i) /= 0) then
         call MPI_WAIT( sreq(i), status, ierror )
-        call CheckMPIReturn('box_rearrange',ierror)
+        call CheckMPIReturn('ESMFPIO_box_rearrange',ierror)
       endif
     end do
 
@@ -983,7 +983,7 @@ subroutine box_rearrange_comp2io_int (IOsystem, ioDesc, s1, src, s2, &
       call MPI_ALLTOALLW(src,  a2a_sendcounts, a2a_displs, a2a_sendtypes, &
                          dest, a2a_recvcounts, a2a_displs, a2a_recvtypes, &
                          IOsystem%union_comm, ierror                       )
-      call CheckMPIReturn('box_rearrange', ierror)
+      call CheckMPIReturn('ESMFPIO_box_rearrange', ierror)
     else
 #endif
       call pio_swapm( nprocs, myrank,                            &
@@ -1023,7 +1023,7 @@ subroutine box_rearrange_comp2io_int (IOsystem, ioDesc, s1, src, s2, &
         call MPI_ISEND( src, 1, stype(i),    &                 ! buf, count, type
                         io_comprank,TAG2,    &                 ! destination,tag
                         IOsystem%union_comm,sreq(i),ierror )
-        call CheckMPIReturn('box_rearrange',ierror)
+        call CheckMPIReturn('ESMFPIO_box_rearrange',ierror)
       endif
 
     end do
@@ -1037,7 +1037,7 @@ subroutine box_rearrange_comp2io_int (IOsystem, ioDesc, s1, src, s2, &
         call MPI_IRECV( dest,1, rtype(i), &             ! buf, count, type
                         rfrom(i), TAG2, &               ! source, tag
                         IOsystem%union_comm,rreq(i),ierror )        
-        call CheckMPIReturn('box_rearrange',ierror)
+        call CheckMPIReturn('ESMFPIO_box_rearrange',ierror)
       end do
 
     endif
@@ -1049,7 +1049,7 @@ subroutine box_rearrange_comp2io_int (IOsystem, ioDesc, s1, src, s2, &
     if (IOsystem%IOproc) then
       do i=1,nrecvs
         call MPI_WAIT( rreq(i), status, ierror )
-        call CheckMPIReturn('box_rearrange',ierror)
+        call CheckMPIReturn('ESMFPIO_box_rearrange',ierror)
       end do
       call dealloc_check(rreq, 'receive requests')
     endif
@@ -1057,7 +1057,7 @@ subroutine box_rearrange_comp2io_int (IOsystem, ioDesc, s1, src, s2, &
     do i=1,num_iotasks
       if (scount(i) /= 0) then
         call MPI_WAIT( sreq(i), status, ierror )
-        call CheckMPIReturn('box_rearrange',ierror)
+        call CheckMPIReturn('ESMFPIO_box_rearrange',ierror)
       endif
     end do
 
@@ -2297,7 +2297,7 @@ end subroutine box_rearrange_io2comp_int
 
     if (Iosystem%num_tasks /= 1 .or. Iosystem%num_iotasks /= 1) then
       call piodie( __PIO_FILE__,__LINE__, &
-                   'pio was built with -D_MPISERIAL but tasks=', &
+                   'esmfpio was built with -D_MPISERIAL but tasks=', &
                    Iosystem%num_tasks, &
                    'iotasks=', Iosystem%num_iotasks)
     endif
@@ -2345,7 +2345,7 @@ end subroutine box_rearrange_io2comp_int
 # 1113 "box_rearrange.F90.in"
   subroutine compute_counts(Iosystem, ioDesc, niodof)
     
-    use calcdisplace_mod, only : calcdisplace,GCDblocksize,gcd
+    use ESMFPIO_calcdisplace_mod, only : calcdisplace,GCDblocksize,gcd
 
 
     type (Iosystem_desc_t), intent(in) :: Iosystem
@@ -2917,7 +2917,7 @@ end subroutine box_rearrange_io2comp_int
 
     if (Iosystem%num_tasks /= 1 .or. Iosystem%num_iotasks /= 1) then
       call piodie( __PIO_FILE__,__LINE__, &
-                   'pio was built with -D_MPISERIAL but tasks=', &
+                   'esmfpio was built with -D_MPISERIAL but tasks=', &
                    Iosystem%num_tasks, &
                    'iotasks=', Iosystem%num_iotasks)
     endif
@@ -3018,7 +3018,7 @@ end subroutine box_rearrange_io2comp_int
 # 1784 "box_rearrange.F90.in"
   subroutine compute_counts( Iosystem,ioDesc,niodof )
 
-    use calcdisplace_mod, only : calcdisplace, GCDblocksize, gcd
+    use ESMFPIO_calcdisplace_mod, only : calcdisplace, GCDblocksize, gcd
 
     type (Iosystem_desc_t), intent(in) :: Iosystem
     type (IO_desc_t),intent(in) :: ioDesc
@@ -3559,4 +3559,4 @@ end subroutine box_rearrange_io2comp_int
 
   end subroutine box_rearrange_free
 
-end module box_rearrange
+end module ESMFPIO_box_rearrange

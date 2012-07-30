@@ -10,9 +10,9 @@
 #define TYPEINT 103
 
 # 8 "pio_msg_getput_callbacks.F90.in"
-subroutine string_handler_for_var1(file, varid, index, ndims, strlen, msg)
-  use pio, only : file_desc_t, pio_get_var, pio_put_var
-  use pio_msg_mod, only : pio_msg_getvar1
+subroutine ESMFPIO_string_handler_for_var1(file, varid, index, ndims, strlen, msg)
+  use esmfpio, only : file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_msg_mod, only : pio_msg_getvar1
   implicit none
   type(file_desc_t) :: file
   integer, intent(in) :: varid, strlen, msg, ndims
@@ -25,14 +25,14 @@ subroutine string_handler_for_var1(file, varid, index, ndims, strlen, msg)
   else
      ierr = pio_put_var(file, varid, index, str )  
   end if
-end subroutine string_handler_for_var1
+end subroutine ESMFPIO_string_handler_for_var1
 
 # 25 "pio_msg_getput_callbacks.F90.in"
-subroutine var1_handler(ios, msg)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
-  use pio_kinds, only : i4, r4, r8, pio_offset
-  use pio_msg_mod, only : lookupfile, pio_msg_getvar1
-  use pio_support, only : debugAsync
+subroutine ESMFPIO_var1_handler(ios, msg)
+  use esmfpio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_kinds, only : i4, r4, r8, pio_offset
+  use esmfpio_msg_mod, only : lookupfile, pio_msg_getvar1
+  use esmfpio_support, only : debugAsync
 #ifndef NO_MPIMOD
   use mpi ! _EXTERNAL
 #endif
@@ -63,7 +63,7 @@ subroutine var1_handler(ios, msg)
   if(itype == TYPETEXT) then
      call mpi_bcast(strlen, 1, mpi_integer, ios%compmaster, ios%intercomm, ierr)
      
-     call string_handler_for_var1(file, varid, index, size_index, strlen, msg)
+     call ESMFPIO_string_handler_for_var1(file, varid, index, size_index, strlen, msg)
   else
      if(msg==pio_msg_getvar1) then
         select case(itype)
@@ -86,15 +86,15 @@ subroutine var1_handler(ios, msg)
      end if
   end if
   deallocate(index)
-end subroutine var1_handler
+end subroutine ESMFPIO_var1_handler
 
 ! DIMS 1,2,3,4,5
 # 86 "pio_msg_getput_callbacks.F90.in"
-subroutine vara_1d_handler(ios, msg)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
-  use pio_kinds, only : i4, r4, r8, pio_offset
-  use pio_msg_mod, only : lookupfile, pio_msg_getvara_1d
-  use pio_support, only : debugAsync
+subroutine ESMFPIO_vara_1d_handler(ios, msg)
+  use esmfpio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_kinds, only : i4, r4, r8, pio_offset
+  use esmfpio_msg_mod, only : lookupfile, pio_msg_getvara_1d
+  use esmfpio_support, only : debugAsync
 #ifndef NO_MPIMOD
   use mpi ! _EXTERNAL
 #endif
@@ -130,7 +130,7 @@ subroutine vara_1d_handler(ios, msg)
   select case(itype)
   case (TYPETEXT)
      call mpi_bcast(strlen, 1, mpi_integer, ios%compmaster, ios%intercomm, ierr)
-     call string_handler_for_vara_1d(file, varid, start, count, strlen, dims, msg)
+     call ESMFPIO_string_handler_for_vara_1d(file, varid, start, count, strlen, dims, msg)
   case (TYPEREAL)
 #if(1 == 1)
      allocate(rvar(dims(1)))
@@ -187,15 +187,15 @@ subroutine vara_1d_handler(ios, msg)
      deallocate(ivar)
   end select
   deallocate(start,count)
-end subroutine vara_1d_handler
+end subroutine ESMFPIO_vara_1d_handler
 
 ! DIMS 1,2,3,4,5
 # 86 "pio_msg_getput_callbacks.F90.in"
-subroutine vara_2d_handler(ios, msg)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
-  use pio_kinds, only : i4, r4, r8, pio_offset
-  use pio_msg_mod, only : lookupfile, pio_msg_getvara_2d
-  use pio_support, only : debugAsync
+subroutine ESMFPIO_vara_2d_handler(ios, msg)
+  use esmfpio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_kinds, only : i4, r4, r8, pio_offset
+  use esmfpio_msg_mod, only : lookupfile, pio_msg_getvara_2d
+  use esmfpio_support, only : debugAsync
 #ifndef NO_MPIMOD
   use mpi ! _EXTERNAL
 #endif
@@ -231,7 +231,7 @@ subroutine vara_2d_handler(ios, msg)
   select case(itype)
   case (TYPETEXT)
      call mpi_bcast(strlen, 1, mpi_integer, ios%compmaster, ios%intercomm, ierr)
-     call string_handler_for_vara_2d(file, varid, start, count, strlen, dims, msg)
+     call ESMFPIO_string_handler_for_vara_2d(file, varid, start, count, strlen, dims, msg)
   case (TYPEREAL)
 #if(2 == 1)
      allocate(rvar(dims(1)))
@@ -288,15 +288,15 @@ subroutine vara_2d_handler(ios, msg)
      deallocate(ivar)
   end select
   deallocate(start,count)
-end subroutine vara_2d_handler
+end subroutine ESMFPIO_vara_2d_handler
 
 ! DIMS 1,2,3,4,5
 # 86 "pio_msg_getput_callbacks.F90.in"
-subroutine vara_3d_handler(ios, msg)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
-  use pio_kinds, only : i4, r4, r8, pio_offset
-  use pio_msg_mod, only : lookupfile, pio_msg_getvara_3d
-  use pio_support, only : debugAsync
+subroutine ESMFPIO_vara_3d_handler(ios, msg)
+  use esmfpio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_kinds, only : i4, r4, r8, pio_offset
+  use esmfpio_msg_mod, only : lookupfile, pio_msg_getvara_3d
+  use esmfpio_support, only : debugAsync
 #ifndef NO_MPIMOD
   use mpi ! _EXTERNAL
 #endif
@@ -332,7 +332,7 @@ subroutine vara_3d_handler(ios, msg)
   select case(itype)
   case (TYPETEXT)
      call mpi_bcast(strlen, 1, mpi_integer, ios%compmaster, ios%intercomm, ierr)
-     call string_handler_for_vara_3d(file, varid, start, count, strlen, dims, msg)
+     call ESMFPIO_string_handler_for_vara_3d(file, varid, start, count, strlen, dims, msg)
   case (TYPEREAL)
 #if(3 == 1)
      allocate(rvar(dims(1)))
@@ -389,15 +389,15 @@ subroutine vara_3d_handler(ios, msg)
      deallocate(ivar)
   end select
   deallocate(start,count)
-end subroutine vara_3d_handler
+end subroutine ESMFPIO_vara_3d_handler
 
 ! DIMS 1,2,3,4,5
 # 86 "pio_msg_getput_callbacks.F90.in"
-subroutine vara_4d_handler(ios, msg)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
-  use pio_kinds, only : i4, r4, r8, pio_offset
-  use pio_msg_mod, only : lookupfile, pio_msg_getvara_4d
-  use pio_support, only : debugAsync
+subroutine ESMFPIO_vara_4d_handler(ios, msg)
+  use esmfpio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_kinds, only : i4, r4, r8, pio_offset
+  use esmfpio_msg_mod, only : lookupfile, pio_msg_getvara_4d
+  use esmfpio_support, only : debugAsync
 #ifndef NO_MPIMOD
   use mpi ! _EXTERNAL
 #endif
@@ -433,7 +433,7 @@ subroutine vara_4d_handler(ios, msg)
   select case(itype)
   case (TYPETEXT)
      call mpi_bcast(strlen, 1, mpi_integer, ios%compmaster, ios%intercomm, ierr)
-     call string_handler_for_vara_4d(file, varid, start, count, strlen, dims, msg)
+     call ESMFPIO_string_handler_for_vara_4d(file, varid, start, count, strlen, dims, msg)
   case (TYPEREAL)
 #if(4 == 1)
      allocate(rvar(dims(1)))
@@ -490,15 +490,15 @@ subroutine vara_4d_handler(ios, msg)
      deallocate(ivar)
   end select
   deallocate(start,count)
-end subroutine vara_4d_handler
+end subroutine ESMFPIO_vara_4d_handler
 
 ! DIMS 1,2,3,4,5
 # 86 "pio_msg_getput_callbacks.F90.in"
-subroutine vara_5d_handler(ios, msg)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
-  use pio_kinds, only : i4, r4, r8, pio_offset
-  use pio_msg_mod, only : lookupfile, pio_msg_getvara_5d
-  use pio_support, only : debugAsync
+subroutine ESMFPIO_vara_5d_handler(ios, msg)
+  use esmfpio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_kinds, only : i4, r4, r8, pio_offset
+  use esmfpio_msg_mod, only : lookupfile, pio_msg_getvara_5d
+  use esmfpio_support, only : debugAsync
 #ifndef NO_MPIMOD
   use mpi ! _EXTERNAL
 #endif
@@ -534,7 +534,7 @@ subroutine vara_5d_handler(ios, msg)
   select case(itype)
   case (TYPETEXT)
      call mpi_bcast(strlen, 1, mpi_integer, ios%compmaster, ios%intercomm, ierr)
-     call string_handler_for_vara_5d(file, varid, start, count, strlen, dims, msg)
+     call ESMFPIO_string_handler_for_vara_5d(file, varid, start, count, strlen, dims, msg)
   case (TYPEREAL)
 #if(5 == 1)
      allocate(rvar(dims(1)))
@@ -591,12 +591,12 @@ subroutine vara_5d_handler(ios, msg)
      deallocate(ivar)
   end select
   deallocate(start,count)
-end subroutine vara_5d_handler
+end subroutine ESMFPIO_vara_5d_handler
 
 # 185 "pio_msg_getput_callbacks.F90.in"
-subroutine string_handler_for_var_0d(file, varid, strlen, msg)
-  use pio, only : file_desc_t, pio_get_var, pio_put_var
-  use pio_msg_mod, only : PIO_MSG_GETVAR_0D
+subroutine ESMFPIO_string_handler_for_var_0d(file, varid, strlen, msg)
+  use esmfpio, only : file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_msg_mod, only : PIO_MSG_GETVAR_0D
   implicit none
   type(file_desc_t) :: file
   integer, intent(in) :: varid, strlen, msg
@@ -608,14 +608,14 @@ subroutine string_handler_for_var_0d(file, varid, strlen, msg)
   else
      ierr = pio_put_var(file, varid, str )  
   end if
-end subroutine string_handler_for_var_0d
+end subroutine ESMFPIO_string_handler_for_var_0d
   
 # 201 "pio_msg_getput_callbacks.F90.in"
-subroutine var_0d_handler (ios, msg)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
-  use pio_kinds, only : i4, r4, r8, pio_offset
-  use pio_msg_mod, only : lookupfile, pio_msg_getvar_0d 
-  use pio_support, only : debugAsync, piodie
+subroutine ESMFPIO_var_0d_handler (ios, msg)
+  use esmfpio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_kinds, only : i4, r4, r8, pio_offset
+  use esmfpio_msg_mod, only : lookupfile, pio_msg_getvar_0d 
+  use esmfpio_support, only : debugAsync, piodie
 #ifndef NO_MPIMOD
   use mpi ! _EXTERNAL
 #endif
@@ -642,7 +642,7 @@ subroutine var_0d_handler (ios, msg)
   select case(itype)
   case (TYPETEXT)
      call mpi_bcast(strlen, 1, mpi_integer, ios%compmaster, ios%intercomm, ierr)
-     call string_handler_for_var_0d (file, varid, strlen, msg)
+     call ESMFPIO_string_handler_for_var_0d (file, varid, strlen, msg)
   case (TYPEREAL)
      if(msg == pio_msg_getvar_0D) then
         ierr = pio_get_var(file, varid, rvar)
@@ -663,13 +663,13 @@ subroutine var_0d_handler (ios, msg)
      end if
   end select
   
-end subroutine var_0d_handler
+end subroutine ESMFPIO_var_0d_handler
 
 ! DIMS 1,2,3,4,5
 # 256 "pio_msg_getput_callbacks.F90.in"
-subroutine string_handler_for_var_1d (file, varid, strlen, dims, msg)
-  use pio, only : file_desc_t, pio_get_var, pio_put_var
-  use pio_msg_mod, only : pio_msg_getvar_1D
+subroutine ESMFPIO_string_handler_for_var_1d (file, varid, strlen, dims, msg)
+  use esmfpio, only : file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_msg_mod, only : pio_msg_getvar_1D
   implicit none
   type(file_desc_t) :: file
   integer, intent(in) :: varid, strlen, dims(1), msg
@@ -695,13 +695,13 @@ subroutine string_handler_for_var_1d (file, varid, strlen, dims, msg)
   end if
   deallocate(str)
 
-end subroutine string_handler_for_var_1d
+end subroutine ESMFPIO_string_handler_for_var_1d
 
 ! DIMS 1,2,3,4,5
 # 256 "pio_msg_getput_callbacks.F90.in"
-subroutine string_handler_for_var_2d (file, varid, strlen, dims, msg)
-  use pio, only : file_desc_t, pio_get_var, pio_put_var
-  use pio_msg_mod, only : pio_msg_getvar_2D
+subroutine ESMFPIO_string_handler_for_var_2d (file, varid, strlen, dims, msg)
+  use esmfpio, only : file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_msg_mod, only : pio_msg_getvar_2D
   implicit none
   type(file_desc_t) :: file
   integer, intent(in) :: varid, strlen, dims(2), msg
@@ -727,13 +727,13 @@ subroutine string_handler_for_var_2d (file, varid, strlen, dims, msg)
   end if
   deallocate(str)
 
-end subroutine string_handler_for_var_2d
+end subroutine ESMFPIO_string_handler_for_var_2d
 
 ! DIMS 1,2,3,4,5
 # 256 "pio_msg_getput_callbacks.F90.in"
-subroutine string_handler_for_var_3d (file, varid, strlen, dims, msg)
-  use pio, only : file_desc_t, pio_get_var, pio_put_var
-  use pio_msg_mod, only : pio_msg_getvar_3D
+subroutine ESMFPIO_string_handler_for_var_3d (file, varid, strlen, dims, msg)
+  use esmfpio, only : file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_msg_mod, only : pio_msg_getvar_3D
   implicit none
   type(file_desc_t) :: file
   integer, intent(in) :: varid, strlen, dims(3), msg
@@ -759,13 +759,13 @@ subroutine string_handler_for_var_3d (file, varid, strlen, dims, msg)
   end if
   deallocate(str)
 
-end subroutine string_handler_for_var_3d
+end subroutine ESMFPIO_string_handler_for_var_3d
 
 ! DIMS 1,2,3,4,5
 # 256 "pio_msg_getput_callbacks.F90.in"
-subroutine string_handler_for_var_4d (file, varid, strlen, dims, msg)
-  use pio, only : file_desc_t, pio_get_var, pio_put_var
-  use pio_msg_mod, only : pio_msg_getvar_4D
+subroutine ESMFPIO_string_handler_for_var_4d (file, varid, strlen, dims, msg)
+  use esmfpio, only : file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_msg_mod, only : pio_msg_getvar_4D
   implicit none
   type(file_desc_t) :: file
   integer, intent(in) :: varid, strlen, dims(4), msg
@@ -791,13 +791,13 @@ subroutine string_handler_for_var_4d (file, varid, strlen, dims, msg)
   end if
   deallocate(str)
 
-end subroutine string_handler_for_var_4d
+end subroutine ESMFPIO_string_handler_for_var_4d
 
 ! DIMS 1,2,3,4,5
 # 256 "pio_msg_getput_callbacks.F90.in"
-subroutine string_handler_for_var_5d (file, varid, strlen, dims, msg)
-  use pio, only : file_desc_t, pio_get_var, pio_put_var
-  use pio_msg_mod, only : pio_msg_getvar_5D
+subroutine ESMFPIO_string_handler_for_var_5d (file, varid, strlen, dims, msg)
+  use esmfpio, only : file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_msg_mod, only : pio_msg_getvar_5D
   implicit none
   type(file_desc_t) :: file
   integer, intent(in) :: varid, strlen, dims(5), msg
@@ -823,13 +823,13 @@ subroutine string_handler_for_var_5d (file, varid, strlen, dims, msg)
   end if
   deallocate(str)
 
-end subroutine string_handler_for_var_5d
+end subroutine ESMFPIO_string_handler_for_var_5d
   
 ! DIMS 1,2,3,4,5
 # 287 "pio_msg_getput_callbacks.F90.in"
-subroutine string_handler_for_vara_1d (file, varid, start, count, strlen, dims, msg)
-  use pio_msg_mod, only : pio_msg_getvara_1d
-  use pio, only : file_desc_t, pio_get_var, pio_put_var
+subroutine ESMFPIO_string_handler_for_vara_1d (file, varid, start, count, strlen, dims, msg)
+  use esmfpio_msg_mod, only : pio_msg_getvara_1d
+  use esmfpio, only : file_desc_t, pio_get_var, pio_put_var
   implicit none
   type(file_desc_t) :: file
   integer, intent(in) :: varid, strlen, start(1), count(1), dims(1), msg
@@ -856,13 +856,13 @@ subroutine string_handler_for_vara_1d (file, varid, start, count, strlen, dims, 
   end if
   deallocate(str)
 
-end subroutine string_handler_for_vara_1d
+end subroutine ESMFPIO_string_handler_for_vara_1d
   
 ! DIMS 1,2,3,4,5
 # 287 "pio_msg_getput_callbacks.F90.in"
-subroutine string_handler_for_vara_2d (file, varid, start, count, strlen, dims, msg)
-  use pio_msg_mod, only : pio_msg_getvara_2d
-  use pio, only : file_desc_t, pio_get_var, pio_put_var
+subroutine ESMFPIO_string_handler_for_vara_2d (file, varid, start, count, strlen, dims, msg)
+  use esmfpio_msg_mod, only : pio_msg_getvara_2d
+  use esmfpio, only : file_desc_t, pio_get_var, pio_put_var
   implicit none
   type(file_desc_t) :: file
   integer, intent(in) :: varid, strlen, start(2), count(2), dims(2), msg
@@ -889,13 +889,13 @@ subroutine string_handler_for_vara_2d (file, varid, start, count, strlen, dims, 
   end if
   deallocate(str)
 
-end subroutine string_handler_for_vara_2d
+end subroutine ESMFPIO_string_handler_for_vara_2d
   
 ! DIMS 1,2,3,4,5
 # 287 "pio_msg_getput_callbacks.F90.in"
-subroutine string_handler_for_vara_3d (file, varid, start, count, strlen, dims, msg)
-  use pio_msg_mod, only : pio_msg_getvara_3d
-  use pio, only : file_desc_t, pio_get_var, pio_put_var
+subroutine ESMFPIO_string_handler_for_vara_3d (file, varid, start, count, strlen, dims, msg)
+  use esmfpio_msg_mod, only : pio_msg_getvara_3d
+  use esmfpio, only : file_desc_t, pio_get_var, pio_put_var
   implicit none
   type(file_desc_t) :: file
   integer, intent(in) :: varid, strlen, start(3), count(3), dims(3), msg
@@ -922,13 +922,13 @@ subroutine string_handler_for_vara_3d (file, varid, start, count, strlen, dims, 
   end if
   deallocate(str)
 
-end subroutine string_handler_for_vara_3d
+end subroutine ESMFPIO_string_handler_for_vara_3d
   
 ! DIMS 1,2,3,4,5
 # 287 "pio_msg_getput_callbacks.F90.in"
-subroutine string_handler_for_vara_4d (file, varid, start, count, strlen, dims, msg)
-  use pio_msg_mod, only : pio_msg_getvara_4d
-  use pio, only : file_desc_t, pio_get_var, pio_put_var
+subroutine ESMFPIO_string_handler_for_vara_4d (file, varid, start, count, strlen, dims, msg)
+  use esmfpio_msg_mod, only : pio_msg_getvara_4d
+  use esmfpio, only : file_desc_t, pio_get_var, pio_put_var
   implicit none
   type(file_desc_t) :: file
   integer, intent(in) :: varid, strlen, start(4), count(4), dims(4), msg
@@ -955,13 +955,13 @@ subroutine string_handler_for_vara_4d (file, varid, start, count, strlen, dims, 
   end if
   deallocate(str)
 
-end subroutine string_handler_for_vara_4d
+end subroutine ESMFPIO_string_handler_for_vara_4d
   
 ! DIMS 1,2,3,4,5
 # 287 "pio_msg_getput_callbacks.F90.in"
-subroutine string_handler_for_vara_5d (file, varid, start, count, strlen, dims, msg)
-  use pio_msg_mod, only : pio_msg_getvara_5d
-  use pio, only : file_desc_t, pio_get_var, pio_put_var
+subroutine ESMFPIO_string_handler_for_vara_5d (file, varid, start, count, strlen, dims, msg)
+  use esmfpio_msg_mod, only : pio_msg_getvara_5d
+  use esmfpio, only : file_desc_t, pio_get_var, pio_put_var
   implicit none
   type(file_desc_t) :: file
   integer, intent(in) :: varid, strlen, start(5), count(5), dims(5), msg
@@ -988,16 +988,16 @@ subroutine string_handler_for_vara_5d (file, varid, start, count, strlen, dims, 
   end if
   deallocate(str)
 
-end subroutine string_handler_for_vara_5d
+end subroutine ESMFPIO_string_handler_for_vara_5d
   
 
 ! DIMS 1,2,3,4,5
 # 320 "pio_msg_getput_callbacks.F90.in"
-subroutine var_1d_handler (ios, msg)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
-  use pio_kinds, only : i4, r4, r8, pio_offset
-  use pio_msg_mod, only : lookupfile, pio_msg_getvar_1d
-  use pio_support, only : debugAsync
+subroutine ESMFPIO_var_1d_handler (ios, msg)
+  use esmfpio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_kinds, only : i4, r4, r8, pio_offset
+  use esmfpio_msg_mod, only : lookupfile, pio_msg_getvar_1d
+  use esmfpio_support, only : debugAsync
 #ifndef NO_MPIMOD
   use mpi ! _EXTERNAL
 #endif
@@ -1030,7 +1030,7 @@ subroutine var_1d_handler (ios, msg)
   select case(itype)
   case (TYPETEXT)
      call mpi_bcast(strlen, 1, mpi_integer, ios%compmaster, ios%intercomm, ierr)
-     call string_handler_for_var_1d (file, varid, strlen, dims, msg)
+     call ESMFPIO_string_handler_for_var_1d (file, varid, strlen, dims, msg)
   case (TYPEREAL)
 #if(1 == 1)
      allocate(rvar(dims(1)))
@@ -1087,16 +1087,16 @@ subroutine var_1d_handler (ios, msg)
      deallocate(ivar)
   end select
   
-end subroutine var_1d_handler
+end subroutine ESMFPIO_var_1d_handler
   
 
 ! DIMS 1,2,3,4,5
 # 320 "pio_msg_getput_callbacks.F90.in"
-subroutine var_2d_handler (ios, msg)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
-  use pio_kinds, only : i4, r4, r8, pio_offset
-  use pio_msg_mod, only : lookupfile, pio_msg_getvar_2d
-  use pio_support, only : debugAsync
+subroutine ESMFPIO_var_2d_handler (ios, msg)
+  use esmfpio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_kinds, only : i4, r4, r8, pio_offset
+  use esmfpio_msg_mod, only : lookupfile, pio_msg_getvar_2d
+  use esmfpio_support, only : debugAsync
 #ifndef NO_MPIMOD
   use mpi ! _EXTERNAL
 #endif
@@ -1129,7 +1129,7 @@ subroutine var_2d_handler (ios, msg)
   select case(itype)
   case (TYPETEXT)
      call mpi_bcast(strlen, 1, mpi_integer, ios%compmaster, ios%intercomm, ierr)
-     call string_handler_for_var_2d (file, varid, strlen, dims, msg)
+     call ESMFPIO_string_handler_for_var_2d (file, varid, strlen, dims, msg)
   case (TYPEREAL)
 #if(2 == 1)
      allocate(rvar(dims(1)))
@@ -1186,16 +1186,16 @@ subroutine var_2d_handler (ios, msg)
      deallocate(ivar)
   end select
   
-end subroutine var_2d_handler
+end subroutine ESMFPIO_var_2d_handler
   
 
 ! DIMS 1,2,3,4,5
 # 320 "pio_msg_getput_callbacks.F90.in"
-subroutine var_3d_handler (ios, msg)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
-  use pio_kinds, only : i4, r4, r8, pio_offset
-  use pio_msg_mod, only : lookupfile, pio_msg_getvar_3d
-  use pio_support, only : debugAsync
+subroutine ESMFPIO_var_3d_handler (ios, msg)
+  use esmfpio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_kinds, only : i4, r4, r8, pio_offset
+  use esmfpio_msg_mod, only : lookupfile, pio_msg_getvar_3d
+  use esmfpio_support, only : debugAsync
 #ifndef NO_MPIMOD
   use mpi ! _EXTERNAL
 #endif
@@ -1228,7 +1228,7 @@ subroutine var_3d_handler (ios, msg)
   select case(itype)
   case (TYPETEXT)
      call mpi_bcast(strlen, 1, mpi_integer, ios%compmaster, ios%intercomm, ierr)
-     call string_handler_for_var_3d (file, varid, strlen, dims, msg)
+     call ESMFPIO_string_handler_for_var_3d (file, varid, strlen, dims, msg)
   case (TYPEREAL)
 #if(3 == 1)
      allocate(rvar(dims(1)))
@@ -1285,16 +1285,16 @@ subroutine var_3d_handler (ios, msg)
      deallocate(ivar)
   end select
   
-end subroutine var_3d_handler
+end subroutine ESMFPIO_var_3d_handler
   
 
 ! DIMS 1,2,3,4,5
 # 320 "pio_msg_getput_callbacks.F90.in"
-subroutine var_4d_handler (ios, msg)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
-  use pio_kinds, only : i4, r4, r8, pio_offset
-  use pio_msg_mod, only : lookupfile, pio_msg_getvar_4d
-  use pio_support, only : debugAsync
+subroutine ESMFPIO_var_4d_handler (ios, msg)
+  use esmfpio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_kinds, only : i4, r4, r8, pio_offset
+  use esmfpio_msg_mod, only : lookupfile, pio_msg_getvar_4d
+  use esmfpio_support, only : debugAsync
 #ifndef NO_MPIMOD
   use mpi ! _EXTERNAL
 #endif
@@ -1327,7 +1327,7 @@ subroutine var_4d_handler (ios, msg)
   select case(itype)
   case (TYPETEXT)
      call mpi_bcast(strlen, 1, mpi_integer, ios%compmaster, ios%intercomm, ierr)
-     call string_handler_for_var_4d (file, varid, strlen, dims, msg)
+     call ESMFPIO_string_handler_for_var_4d (file, varid, strlen, dims, msg)
   case (TYPEREAL)
 #if(4 == 1)
      allocate(rvar(dims(1)))
@@ -1384,16 +1384,16 @@ subroutine var_4d_handler (ios, msg)
      deallocate(ivar)
   end select
   
-end subroutine var_4d_handler
+end subroutine ESMFPIO_var_4d_handler
   
 
 ! DIMS 1,2,3,4,5
 # 320 "pio_msg_getput_callbacks.F90.in"
-subroutine var_5d_handler (ios, msg)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
-  use pio_kinds, only : i4, r4, r8, pio_offset
-  use pio_msg_mod, only : lookupfile, pio_msg_getvar_5d
-  use pio_support, only : debugAsync
+subroutine ESMFPIO_var_5d_handler (ios, msg)
+  use esmfpio, only : iosystem_desc_t, file_desc_t, pio_get_var, pio_put_var
+  use esmfpio_kinds, only : i4, r4, r8, pio_offset
+  use esmfpio_msg_mod, only : lookupfile, pio_msg_getvar_5d
+  use esmfpio_support, only : debugAsync
 #ifndef NO_MPIMOD
   use mpi ! _EXTERNAL
 #endif
@@ -1426,7 +1426,7 @@ subroutine var_5d_handler (ios, msg)
   select case(itype)
   case (TYPETEXT)
      call mpi_bcast(strlen, 1, mpi_integer, ios%compmaster, ios%intercomm, ierr)
-     call string_handler_for_var_5d (file, varid, strlen, dims, msg)
+     call ESMFPIO_string_handler_for_var_5d (file, varid, strlen, dims, msg)
   case (TYPEREAL)
 #if(5 == 1)
      allocate(rvar(dims(1)))
@@ -1483,5 +1483,5 @@ subroutine var_5d_handler (ios, msg)
      deallocate(ivar)
   end select
   
-end subroutine var_5d_handler
+end subroutine ESMFPIO_var_5d_handler
 

@@ -1,11 +1,11 @@
-module pio_utils
-  use pio_types, only : file_desc_t, var_desc_t
-  use pio_types, only : pio_int, pio_real, pio_double, pio_char
-  use pio_types, only : iotype_netcdf, iotype_pnetcdf, PIO_internal_error
-  use pio_types, only : PIO_iotype_netcdf4p, pio_iotype_netcdf4c
-  use pio_types, only : PIO_bcast_error 
-  use pio_kinds, only : i4, r4, r8
-  use pio_support, only : checkmpireturn, piodie, Debug
+module esmfpio_utils
+  use esmfpio_types, only : file_desc_t, var_desc_t
+  use esmfpio_types, only : pio_int, pio_real, pio_double, pio_char
+  use esmfpio_types, only : iotype_netcdf, iotype_pnetcdf, PIO_internal_error
+  use esmfpio_types, only : PIO_iotype_netcdf4p, pio_iotype_netcdf4c
+  use esmfpio_types, only : PIO_bcast_error 
+  use esmfpio_kinds, only : i4, r4, r8
+  use esmfpio_support, only : checkmpireturn, piodie, Debug
 
 #ifdef _NETCDF
   use netcdf            ! _EXTERNAL
@@ -57,7 +57,7 @@ contains
           end if
        else if(file%iosystem%error_handling==PIO_BCAST_ERROR) then
           call MPI_BCAST(status,1,MPI_INTEGER,file%iosystem%iomaster,File%iosystem%my_comm, mpierr)
-          call CheckMPIReturn('nf_mod',mpierr)
+          call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
        end if
 
 #endif
@@ -69,7 +69,7 @@ contains
           end if
        else if(file%iosystem%error_handling==PIO_BCAST_ERROR) then
           call MPI_BCAST(status,1,MPI_INTEGER,file%iosystem%iomaster,File%iosystem%my_comm, mpierr)
-          call CheckMPIReturn('nf_mod',mpierr)
+          call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
        end if
 #endif
     end select
@@ -148,4 +148,4 @@ contains
 #endif
 
 
-end module pio_utils
+end module esmfpio_utils

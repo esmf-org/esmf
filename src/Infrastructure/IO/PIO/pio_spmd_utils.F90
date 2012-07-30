@@ -24,10 +24,10 @@
 #define mpi_irsend mpi_isend
 #endif
 
-module pio_spmd_utils
+module esmfpio_spmd_utils
 
-  use pio_kinds
-  use pio_support, only: CheckMPIReturn
+  use esmfpio_kinds
+  use esmfpio_support, only: CheckMPIReturn
 #ifndef NO_MPIMOD
   use mpi ! _EXTERNAL
 #endif
@@ -52,7 +52,7 @@ module pio_spmd_utils
      module procedure pio_swapm_long
   end interface
 
-  character(len=*), parameter :: modName='pio_spmd_utils'
+  character(len=*), parameter :: modName='esmfpio_spmd_utils'
 
 # 46 "pio_spmd_utils.F90.in"
 contains
@@ -2204,4 +2204,4 @@ contains
 !========================================================================
 !
 
-end module pio_spmd_utils
+end module esmfpio_spmd_utils

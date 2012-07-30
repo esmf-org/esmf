@@ -9,10 +9,12 @@
 #
 
 BEGIN { IGNORECASE = 0
-        PRLINE     = "#define %s ESMCPIO_%s\n"
+        PRLINE     = "#define %s esmc%s\n"
         CPPFUNCID  = /[A-Za-z][A-Za-z0-9_]*\(?/
         CPPID      = /[*]?[A-Za-z][A-Za-z0-9_]*,?/
         INFUNCARGS = 0
+        # We ignore the first #ifndef in a C include file
+        PREPROCPOS = -2
 }
 
 
@@ -37,13 +39,41 @@ INFUNCARGS {
   next
 }
 
+# We need to copy #ifdef/#endif statements to make sure that some definitions
+# only happen at the correct times
+# To avoid file clutter, we keep track of the current state and just wrap
+# each definition with the current state
+/^#[ \t]*if/ {
+  PREPROCPOS = PREPROCPOS + 1
+  ifdef[PREPROCPOS] = $0
+  next
+}
+
+/^#[ \t]*endif/ {
+  PREPROCPOS = PREPROCPOS - 1
+  next
+}
+
 # NB: The C++ interface functions are either void or return an int
 /^[ \t]*void[ \t]+/ || /^[ \t]*int[ \t]+/ {
 
   if (! INFUNCARGS && ($2 ~ /[A-Za-z][A-Za-z0-9_]*\(?/)) {
     INFUNCARGS = 1
-    sub(/\([A-Za-z][A-Za-z0-9_]*$/,"",$2)
-    printf PRLINE, $2, $2
+    # Truncate the string at the open paren (if present)
+    pos = match($2, /\(/)
+    if (pos > 0) {
+      fname = substr($2, 1, (pos - 1))
+    } else {
+      fname = $2
+    }
+    # Finally, print the definition in context
+    for (i = 0; i <= PREPROCPOS; i++) {
+      print ifdef[i]
+    }
+    printf PRLINE, fname, fname
+    for (i = 0; i <= PREPROCPOS; i++) {
+      print "#endif"
+    }
   }
   # See if this is a one line function declaration
   for (i = 3; i <= NF; i++) {
@@ -57,11 +87,3 @@ INFUNCARGS {
     }
   }
 }
-
-# /^[ \t]*int[ \t]+/ {
-
-#   if ($2 ~ /[A-Za-z][A-Za-z0-9_]*\(?/) {
-#     sub(/\([A-Za-z][A-Za-z0-9_]*$/,"",$2)
-#     printf PRLINE, $2, $2
-#   }
-# }

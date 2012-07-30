@@ -4,14 +4,14 @@
 ! Any changes you make to this file may be lost
 !===================================================
 #define __PIO_FILE__ "pionfatt_mod.F90"
-module pionfatt_mod
-  use pio_kinds, only : r4, r8, i4
-  use pio_types, only : iotype_netcdf, iotype_pnetcdf, pio_noerr
-  use pio_types, only : pio_iotype_netcdf4p, pio_iotype_netcdf4c
-  use pio_types, only : file_desc_t, var_desc_t, iosystem_desc_t
-  use pio_kinds, only : pio_offset
-  use pio_support, only : piodie, checkmpireturn, debug, debugasync
-  use pio_utils, only : check_netcdf, bad_iotype
+module esmfpionfatt_mod
+  use esmfpio_kinds, only : r4, r8, i4
+  use esmfpio_types, only : iotype_netcdf, iotype_pnetcdf, pio_noerr
+  use esmfpio_types, only : pio_iotype_netcdf4p, pio_iotype_netcdf4c
+  use esmfpio_types, only : file_desc_t, var_desc_t, iosystem_desc_t
+  use esmfpio_kinds, only : pio_offset
+  use esmfpio_support, only : piodie, checkmpireturn, debug, debugasync
+  use esmfpio_utils, only : check_netcdf, bad_iotype
 
 #ifdef _NETCDF
     use netcdf      ! _EXTERNAL
@@ -73,7 +73,7 @@ module pionfatt_mod
 !<
 
   private :: modName
-  character(len=*), parameter :: modName='pionfatt_mod'
+  character(len=*), parameter :: modName='esmfpionfatt_mod'
 
 # 57 "pionfatt_mod.F90.in"
 contains
@@ -91,7 +91,7 @@ contains
 !<
 # 70 "pionfatt_mod.F90.in"
   integer function put_att_text (File, varid, name, value) result(ierr)
-    use pio_msg_mod, only : pio_msg_putatt
+    use esmfpio_msg_mod, only : pio_msg_putatt
     type (File_desc_t), intent(inout) , target :: File
     integer, intent(in) :: varid
     character(len=*), intent(in) :: name
@@ -189,7 +189,7 @@ contains
 !<
 # 70 "pionfatt_mod.F90.in"
   integer function put_att_real (File, varid, name, value) result(ierr)
-    use pio_msg_mod, only : pio_msg_putatt
+    use esmfpio_msg_mod, only : pio_msg_putatt
     type (File_desc_t), intent(inout) , target :: File
     integer, intent(in) :: varid
     character(len=*), intent(in) :: name
@@ -287,7 +287,7 @@ contains
 !<
 # 70 "pionfatt_mod.F90.in"
   integer function put_att_double (File, varid, name, value) result(ierr)
-    use pio_msg_mod, only : pio_msg_putatt
+    use esmfpio_msg_mod, only : pio_msg_putatt
     type (File_desc_t), intent(inout) , target :: File
     integer, intent(in) :: varid
     character(len=*), intent(in) :: name
@@ -385,7 +385,7 @@ contains
 !<
 # 70 "pionfatt_mod.F90.in"
   integer function put_att_int (File, varid, name, value) result(ierr)
-    use pio_msg_mod, only : pio_msg_putatt
+    use esmfpio_msg_mod, only : pio_msg_putatt
     type (File_desc_t), intent(inout) , target :: File
     integer, intent(in) :: varid
     character(len=*), intent(in) :: name
@@ -484,7 +484,7 @@ contains
 !<
 # 169 "pionfatt_mod.F90.in"
   integer function put_att_1d_real (File, varid, name, value) result(ierr)
-    use pio_msg_mod, only : pio_msg_putatt_1D
+    use esmfpio_msg_mod, only : pio_msg_putatt_1D
     type (File_desc_t), intent(inout) , target :: File
     integer, intent(in) :: varid
     character(len=*), intent(in) :: name
@@ -574,7 +574,7 @@ contains
 !<
 # 169 "pionfatt_mod.F90.in"
   integer function put_att_1d_double (File, varid, name, value) result(ierr)
-    use pio_msg_mod, only : pio_msg_putatt_1D
+    use esmfpio_msg_mod, only : pio_msg_putatt_1D
     type (File_desc_t), intent(inout) , target :: File
     integer, intent(in) :: varid
     character(len=*), intent(in) :: name
@@ -664,7 +664,7 @@ contains
 !<
 # 169 "pionfatt_mod.F90.in"
   integer function put_att_1d_int (File, varid, name, value) result(ierr)
-    use pio_msg_mod, only : pio_msg_putatt_1D
+    use esmfpio_msg_mod, only : pio_msg_putatt_1D
     type (File_desc_t), intent(inout) , target :: File
     integer, intent(in) :: varid
     character(len=*), intent(in) :: name
@@ -1105,7 +1105,7 @@ contains
 !<
 # 354 "pionfatt_mod.F90.in"
   integer function get_att_text (File,varid,name,value) result(ierr)
-    use pio_msg_mod, only : pio_msg_getatt	
+    use esmfpio_msg_mod, only : pio_msg_getatt	
     type (File_desc_t), intent(in) , target :: File
     integer(i4), intent(in)        :: varid
     character(len=*), intent(in)   :: name
@@ -1184,7 +1184,7 @@ contains
 !<
 # 354 "pionfatt_mod.F90.in"
   integer function get_att_real (File,varid,name,value) result(ierr)
-    use pio_msg_mod, only : pio_msg_getatt	
+    use esmfpio_msg_mod, only : pio_msg_getatt	
     type (File_desc_t), intent(in) , target :: File
     integer(i4), intent(in)        :: varid
     character(len=*), intent(in)   :: name
@@ -1263,7 +1263,7 @@ contains
 !<
 # 354 "pionfatt_mod.F90.in"
   integer function get_att_double (File,varid,name,value) result(ierr)
-    use pio_msg_mod, only : pio_msg_getatt	
+    use esmfpio_msg_mod, only : pio_msg_getatt	
     type (File_desc_t), intent(in) , target :: File
     integer(i4), intent(in)        :: varid
     character(len=*), intent(in)   :: name
@@ -1342,7 +1342,7 @@ contains
 !<
 # 354 "pionfatt_mod.F90.in"
   integer function get_att_int (File,varid,name,value) result(ierr)
-    use pio_msg_mod, only : pio_msg_getatt	
+    use esmfpio_msg_mod, only : pio_msg_getatt	
     type (File_desc_t), intent(in) , target :: File
     integer(i4), intent(in)        :: varid
     character(len=*), intent(in)   :: name
@@ -1422,7 +1422,7 @@ contains
 !<
 # 433 "pionfatt_mod.F90.in"
   integer function get_att_1d_real (File,varid,name,value) result(ierr)
-    use pio_msg_mod, only : pio_msg_getatt_1d
+    use esmfpio_msg_mod, only : pio_msg_getatt_1d
 
     type (File_desc_t), intent(in) , target :: File
     integer(i4), intent(in)        :: varid
@@ -1501,7 +1501,7 @@ contains
 !<
 # 433 "pionfatt_mod.F90.in"
   integer function get_att_1d_int (File,varid,name,value) result(ierr)
-    use pio_msg_mod, only : pio_msg_getatt_1d
+    use esmfpio_msg_mod, only : pio_msg_getatt_1d
 
     type (File_desc_t), intent(in) , target :: File
     integer(i4), intent(in)        :: varid
@@ -1580,7 +1580,7 @@ contains
 !<
 # 433 "pionfatt_mod.F90.in"
   integer function get_att_1d_double (File,varid,name,value) result(ierr)
-    use pio_msg_mod, only : pio_msg_getatt_1d
+    use esmfpio_msg_mod, only : pio_msg_getatt_1d
 
     type (File_desc_t), intent(in) , target :: File
     integer(i4), intent(in)        :: varid
@@ -1646,4 +1646,4 @@ contains
   end function get_att_1d_double
 
 
-end module pionfatt_mod
+end module esmfpionfatt_mod

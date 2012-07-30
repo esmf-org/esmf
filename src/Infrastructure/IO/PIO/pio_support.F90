@@ -17,8 +17,8 @@
 #define mpi_irsend mpi_isend
 #endif
 
-module pio_support
-  use pio_kinds
+module esmfpio_support
+  use esmfpio_kinds
 #ifndef NO_MPIMOD
   use mpi !_EXTERNAL
 #endif
@@ -52,7 +52,7 @@ module pio_support
   logical, public :: DebugAsync=.FALSE.
   integer,private,parameter :: versno = 1001
 
-  character(len=*), parameter :: modName='pio_support'
+  character(len=*), parameter :: modName='esmfpio_support'
 
 # 48 "pio_support.F90.in"
 contains
@@ -69,7 +69,7 @@ contains
     ! Change History
     ! 20070608 R. Loy  added optional args
     !-----------------------------------------------------------------------
-    ! $Id: pio_support.F90,v 1.7 2012/07/23 19:28:31 gold2718 Exp $
+    ! $Id: pio_support.F90,v 1.8 2012/07/30 05:33:31 gold2718 Exp $
     !-----------------------------------------------------------------------
     !-----------------------------------------------------------------------
     implicit none
@@ -165,7 +165,7 @@ contains
     ! Change History
     ! 
     !-----------------------------------------------------------------------
-    ! $Id: pio_support.F90,v 1.7 2012/07/23 19:28:31 gold2718 Exp $
+    ! $Id: pio_support.F90,v 1.8 2012/07/30 05:33:31 gold2718 Exp $
     !-----------------------------------------------------------------------
     !-----------------------------------------------------------------------
     implicit none
@@ -271,7 +271,7 @@ contains
     ! Change History
     ! 
     !-----------------------------------------------------------------------
-    ! $Id: pio_support.F90,v 1.7 2012/07/23 19:28:31 gold2718 Exp $
+    ! $Id: pio_support.F90,v 1.8 2012/07/30 05:33:31 gold2718 Exp $
     !-----------------------------------------------------------------------
     !-----------------------------------------------------------------------
     implicit none
@@ -600,4 +600,4 @@ contains
 
    end subroutine pio_fc_gather_int
 
-end module pio_support
+end module esmfpio_support

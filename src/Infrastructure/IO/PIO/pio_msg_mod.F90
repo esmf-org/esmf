@@ -1,8 +1,8 @@
 #define __PIO_FILE__ "pio_msg_mod.F90"
-module pio_msg_mod
-  use pio_kinds
-  use pio_types
-  use pio_support, only : piodie, DebugAsync
+module esmfpio_msg_mod
+  use esmfpio_kinds
+  use esmfpio_types
+  use esmfpio_support, only : piodie, DebugAsync
 
   implicit none
   private
@@ -127,7 +127,7 @@ contains
     integer :: index
 
 #ifdef TIMING    
-    call t_startf('pio_msg_mod')
+    call t_startf('esmfpio_msg_mod')
 #endif
     if(iorank==0) then
        do index=1,numcomps
@@ -154,82 +154,82 @@ contains
 
        select case(msg) 
        case (PIO_MSG_CREATE_FILE)
-          call create_file_handler(ios)
+          call ESMFPIO_create_file_handler(ios)
        case (PIO_MSG_OPEN_FILE)
-          call open_file_handler(ios)
+          call ESMFPIO_open_file_handler(ios)
        case (PIO_MSG_INITDECOMP_DOF)
-          call initdecomp_dof_handler(ios)
+          call ESMFPIO_initdecomp_dof_handler(ios)
        case (PIO_MSG_WRITEDARRAY)
-          call writedarray_handler(ios)
+          call ESMFPIO_writedarray_handler(ios)
        case (PIO_MSG_READDARRAY)
-          call readdarray_handler(ios)
+          call ESMFPIO_readdarray_handler(ios)
        case (PIO_MSG_SETERRORHANDLING)
-          call seterrorhandling_handler(ios)
+          call ESMFPIO_seterrorhandling_handler(ios)
        case (PIO_MSG_GETVAR1)
-          call var1_handler(ios, msg)
+          call ESMFPIO_var1_handler(ios, msg)
        case (PIO_MSG_GETVAR_0d)
-          call var_0d_handler(ios, msg)
+          call ESMFPIO_var_0d_handler(ios, msg)
        case (PIO_MSG_GETVAR_1d)
-          call var_1d_handler(ios, msg)
+          call ESMFPIO_var_1d_handler(ios, msg)
        case (PIO_MSG_GETVAR_2d)
-          call var_2d_handler(ios, msg)
+          call ESMFPIO_var_2d_handler(ios, msg)
        case (PIO_MSG_GETVAR_3d)
-          call var_3d_handler(ios, msg)
+          call ESMFPIO_var_3d_handler(ios, msg)
        case (PIO_MSG_GETVAR_4d)
-          call var_4d_handler(ios, msg)
+          call ESMFPIO_var_4d_handler(ios, msg)
        case (PIO_MSG_GETVAR_5d)
-          call var_5d_handler(ios, msg)
+          call ESMFPIO_var_5d_handler(ios, msg)
        case (PIO_MSG_GETVARA_1d)
-          call vara_1d_handler(ios, msg)
+          call ESMFPIO_vara_1d_handler(ios, msg)
        case (PIO_MSG_GETVARA_2d)
-          call vara_2d_handler(ios, msg)
+          call ESMFPIO_vara_2d_handler(ios, msg)
        case (PIO_MSG_GETVARA_3d)
-          call vara_3d_handler(ios, msg)
+          call ESMFPIO_vara_3d_handler(ios, msg)
        case (PIO_MSG_GETVARA_4d)
-          call vara_4d_handler(ios, msg)
+          call ESMFPIO_vara_4d_handler(ios, msg)
        case (PIO_MSG_GETVARA_5d)
-          call vara_5d_handler(ios, msg)
+          call ESMFPIO_vara_5d_handler(ios, msg)
 
        case (PIO_MSG_PUTVAR1)
-          call var1_handler(ios, msg)
+          call ESMFPIO_var1_handler(ios, msg)
        case (PIO_MSG_PUTVAR_0d)
-          call var_0d_handler(ios, msg)
+          call ESMFPIO_var_0d_handler(ios, msg)
        case (PIO_MSG_PUTVAR_1d)
-          call var_1d_handler(ios, msg)
+          call ESMFPIO_var_1d_handler(ios, msg)
        case (PIO_MSG_PUTVAR_2d)
-          call var_2d_handler(ios, msg)
+          call ESMFPIO_var_2d_handler(ios, msg)
        case (PIO_MSG_PUTVAR_3d)
-          call var_3d_handler(ios, msg)
+          call ESMFPIO_var_3d_handler(ios, msg)
        case (PIO_MSG_PUTVAR_4d)
-          call var_4d_handler(ios, msg)
+          call ESMFPIO_var_4d_handler(ios, msg)
        case (PIO_MSG_PUTVAR_5d)
-          call var_5d_handler(ios, msg)
+          call ESMFPIO_var_5d_handler(ios, msg)
 
        case (PIO_MSG_PUTVARA_1d)
-          call vara_1d_handler(ios, msg)
+          call ESMFPIO_vara_1d_handler(ios, msg)
        case (PIO_MSG_PUTVARA_2d)
-          call vara_2d_handler(ios, msg)
+          call ESMFPIO_vara_2d_handler(ios, msg)
        case (PIO_MSG_PUTVARA_3d)
-          call vara_3d_handler(ios, msg)
+          call ESMFPIO_vara_3d_handler(ios, msg)
        case (PIO_MSG_PUTVARA_4d)
-          call vara_4d_handler(ios, msg)
+          call ESMFPIO_vara_4d_handler(ios, msg)
        case (PIO_MSG_PUTVARA_5d)
-          call vara_5d_handler(ios, msg)
+          call ESMFPIO_vara_5d_handler(ios, msg)
        case (PIO_MSG_GETATT)
-          call att_handler(ios, msg)
+          call esmfpio_att_handler(ios, msg)
        case (PIO_MSG_GETATT_1D)
-          call att_1d_handler(ios, msg)
+          call esmfpio_att_1d_handler(ios, msg)
        case (PIO_MSG_PUTATT)
-          call att_handler(ios, msg)
+          call esmfpio_att_handler(ios, msg)
        case (PIO_MSG_PUTATT_1D)
-          call att_1d_handler(ios, msg)          
+          call esmfpio_att_1d_handler(ios, msg)          
        case (PIO_MSG_FREEDECOMP)
-          call freedecomp_handler(ios, msg)
+          call ESMFPIO_freedecomp_handler(ios, msg)
        case (PIO_MSG_EXIT)
-          call finalize_handler(ios)
-          print *,'PIO Exiting'
+          call ESMFPIO_finalize_handler(ios)
+          print *,'esmfpio Exiting'
        case default
-          call pio_callback_handler(ios,msg)
+          call esmfpio_callback_handler(ios,msg)
        end select   
        if(iorank==0) then
           call mpi_irecv(msg, 1, mpi_integer, ios%comproot, 1, ios%union_comm, req(index), ierr)
@@ -238,7 +238,7 @@ contains
     end do
 
 #ifdef TIMING
-    call t_stopf('pio_msg_mod')
+    call t_stopf('esmfpio_msg_mod')
     call t_finalizef()
 #endif
 
@@ -414,5 +414,5 @@ contains
 
   end function lookupiodesc
 
-end module pio_msg_mod
+end module esmfpio_msg_mod
 

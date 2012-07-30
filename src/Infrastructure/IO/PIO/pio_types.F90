@@ -1,6 +1,6 @@
 #define __PIO_FILE__ "pio_types.F90"
-module pio_types
-    use pio_kinds
+module esmfpio_types
+    use esmfpio_kinds
 
 #ifdef _NETCDF
      use netcdf                                  ! _EXTERNAL
@@ -69,7 +69,7 @@ module pio_types
         logical(log_kind)        :: async_interface    ! .true. if using the async interface model
         integer(i4)              :: rearr         ! type of rearranger
                                                   ! e.g. rearr_{none,box}
-	integer(i4)              :: error_handling ! how pio handles errors
+	integer(i4)              :: error_handling ! how esmfpio handles errors
         integer(i4),pointer      :: ioranks(:)         ! the computational ranks for the IO tasks
 
 	! This holds the IODESC
@@ -333,4 +333,4 @@ module pio_types
 #endif
 #endif
 
-end module pio_types
+end module esmfpio_types

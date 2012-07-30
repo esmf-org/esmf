@@ -1,6 +1,6 @@
 !|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
- module pio_kinds
+ module esmfpio_kinds
 
 !BOP
 ! !MODULE: pio_kinds
@@ -10,7 +10,7 @@
 !  types like integer, character, logical, real4 and real8.
 !
 ! !REVISION HISTORY:
-!  CVS:$Id: pio_kinds.F90,v 1.5 2012/07/23 19:28:31 gold2718 Exp $
+!  CVS:$Id: pio_kinds.F90,v 1.6 2012/07/30 05:33:31 gold2718 Exp $
 !  CVS:$Name:  $
 
 ! !USES:
@@ -44,6 +44,6 @@
 !EOC
 !***********************************************************************
 
- end module pio_kinds
+ end module esmfpio_kinds
 
 !|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||

@@ -9,9 +9,7 @@
 #
 
 BEGIN { IGNORECASE  = 1
-        PRLINE      = "#define %s ESMFPIO_%s\n"
-        FOUNDMODULE = 0
-        INPUBLIC    = 0
+        FIRSTSYMBOL = 1
 }
 
 
@@ -24,35 +22,22 @@ BEGIN { IGNORECASE  = 1
 /^[ \t]*module[ \t]+/ {
 
   # We only want the first module line to make things easier
-  if ( FOUNDMODULE ) next
-
   # Assume the second field is the F90 module name
 
-#  sub(/,$/,"",$2)
-  printf PRLINE, $2, $2
-  FOUNDMODULE=1
+  printf "%s", $2
+  # We are done with this file
+#  next
+  exit
 }
 
-
-# This will match public lines
-
-/^[ \t]*public[ \t]/ {
-
-  INPUBLIC=1
-}
-
-INPUBLIC {
-  INPUBLIC=0
-  for (i = 1; i <= NF; i++) {
-    if ( $i ~ /^!/ ) break
-    if ( $i ~ /[A-Za-z][A-Za-z0-9_]*,?/ ) {
-      if ( $i !~ /public/ ) {
-        sub(/,$/,"",$i)
-        printf PRLINE, $i, $i
-      }
-    }
-    if ( $i ~ /&/ ) {
-      INPUBLIC=1
-    }
+# If we get here (and find any matches), we are not in a module file
+# Look for subroutine statements
+/^[ \t]*subroutine[ \t]/ {
+  sub(/[(].*$/,"",$2)
+  if (FIRSTSYMBOL) {
+    printf "%s", $2
+    FIRSTSYMBOL = 0
+  } else {
+    printf ":%s", $2
   }
 }

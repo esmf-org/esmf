@@ -3,7 +3,7 @@
 ! Any changes you make to this file may be lost
 !===================================================
 #define __PIO_FILE__ "pionfread_mod.F90.in"
-module pionfread_mod
+module esmfpionfread_mod
 
   implicit none
 
@@ -22,7 +22,7 @@ module pionfread_mod
      module procedure read_nfdarray_int
   end interface
 
-  character(len=*), parameter :: modName='pionfread_mod'
+  character(len=*), parameter :: modName='esmfpionfread_mod'
 
 # 18 "pionfread_mod.F90.in"
 contains
@@ -33,13 +33,13 @@ contains
 !<
 # 24 "pionfread_mod.F90.in"
   integer function read_nfdarray_real (File,IOBUF,varDesc,IODesc, start,count) result(ierr)
-    use pio_types, only : file_desc_t, var_desc_t, io_desc_t, pio_real, pio_double, pio_int, &
+    use esmfpio_types, only : file_desc_t, var_desc_t, io_desc_t, pio_real, pio_double, pio_int, &
 	pio_noerr, pio_iotype_netcdf4p, pio_iotype_netcdf4c, pio_iotype_pnetcdf, pio_iotype_netcdf, &
 	pio_max_var_dims
-    use pio_kinds, only : pio_offset, i4, r4, r8
-    use pio_utils, only : check_netcdf, bad_iotype 
-    use pio_support, only : Debug, DebugIO, piodie, checkmpireturn
-    use alloc_mod, only: alloc_check
+    use esmfpio_kinds, only : pio_offset, i4, r4, r8
+    use esmfpio_utils, only : check_netcdf, bad_iotype 
+    use esmfpio_support, only : Debug, DebugIO, piodie, checkmpireturn
+    use esmfpio_alloc_mod, only: alloc_check
 #ifdef _NETCDF
     use netcdf, only : nf90_get_var  !_EXTERNAL
 #endif
@@ -211,13 +211,13 @@ contains
 !<
 # 24 "pionfread_mod.F90.in"
   integer function read_nfdarray_double (File,IOBUF,varDesc,IODesc, start,count) result(ierr)
-    use pio_types, only : file_desc_t, var_desc_t, io_desc_t, pio_real, pio_double, pio_int, &
+    use esmfpio_types, only : file_desc_t, var_desc_t, io_desc_t, pio_real, pio_double, pio_int, &
 	pio_noerr, pio_iotype_netcdf4p, pio_iotype_netcdf4c, pio_iotype_pnetcdf, pio_iotype_netcdf, &
 	pio_max_var_dims
-    use pio_kinds, only : pio_offset, i4, r4, r8
-    use pio_utils, only : check_netcdf, bad_iotype 
-    use pio_support, only : Debug, DebugIO, piodie, checkmpireturn
-    use alloc_mod, only: alloc_check
+    use esmfpio_kinds, only : pio_offset, i4, r4, r8
+    use esmfpio_utils, only : check_netcdf, bad_iotype 
+    use esmfpio_support, only : Debug, DebugIO, piodie, checkmpireturn
+    use esmfpio_alloc_mod, only: alloc_check
 #ifdef _NETCDF
     use netcdf, only : nf90_get_var  !_EXTERNAL
 #endif
@@ -389,13 +389,13 @@ contains
 !<
 # 24 "pionfread_mod.F90.in"
   integer function read_nfdarray_int (File,IOBUF,varDesc,IODesc, start,count) result(ierr)
-    use pio_types, only : file_desc_t, var_desc_t, io_desc_t, pio_real, pio_double, pio_int, &
+    use esmfpio_types, only : file_desc_t, var_desc_t, io_desc_t, pio_real, pio_double, pio_int, &
 	pio_noerr, pio_iotype_netcdf4p, pio_iotype_netcdf4c, pio_iotype_pnetcdf, pio_iotype_netcdf, &
 	pio_max_var_dims
-    use pio_kinds, only : pio_offset, i4, r4, r8
-    use pio_utils, only : check_netcdf, bad_iotype 
-    use pio_support, only : Debug, DebugIO, piodie, checkmpireturn
-    use alloc_mod, only: alloc_check
+    use esmfpio_kinds, only : pio_offset, i4, r4, r8
+    use esmfpio_utils, only : check_netcdf, bad_iotype 
+    use esmfpio_support, only : Debug, DebugIO, piodie, checkmpireturn
+    use esmfpio_alloc_mod, only: alloc_check
 #ifdef _NETCDF
     use netcdf, only : nf90_get_var  !_EXTERNAL
 #endif
@@ -560,4 +560,4 @@ contains
 #endif
 
   end function read_nfdarray_int
-end module pionfread_mod
+end module esmfpionfread_mod

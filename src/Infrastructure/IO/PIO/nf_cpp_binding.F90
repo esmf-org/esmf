@@ -1,51 +1,8 @@
+#include "ESMFPIO.h"
 #define __PIO_FILE__ "nf_cpp_binding.F90"
 ! ---------------------------------------------------------------------
 
 !  procedures for a cpp binding to PIO's NetCDF interface functions
-module nf_cpp_binding
-
-  use pio_kinds, only: i4, r4, r8, pio_offset
-
-  implicit none
-
-   !  explicit export
-
-  private
-
-   ! public interface
-
-  public :: pio_cpp_def_dim
-  public :: pio_cpp_enddef
-  public :: pio_cpp_redef
-  public :: pio_cpp_inquire_int
-  public :: pio_cpp_inq_dimid
-  public :: pio_cpp_inq_dimname
-  public :: pio_cpp_inq_dimlen
-  public :: pio_cpp_copy_att
-  public :: pio_cpp_def_var_0d
-  public :: pio_cpp_def_var_md
-  public :: pio_cpp_inq_attname_vid
-  public :: pio_cpp_inq_attname_vdesc
-  public :: pio_cpp_inq_att_vid
-  public :: pio_cpp_inq_att_vdesc
-  public :: pio_cpp_inq_attlen_vid
-  public :: pio_cpp_inq_attlen_vdesc
-  public :: pio_cpp_inq_varid_vid
-  public :: pio_cpp_inq_varid_vdesc
-  public :: pio_cpp_inq_varname_vid
-  public :: pio_cpp_inq_varname_vdesc
-  public :: pio_cpp_inq_vartype_vid
-  public :: pio_cpp_inq_vartype_vdesc
-  public :: pio_cpp_inq_varndims_vid
-  public :: pio_cpp_inq_varndims_vdesc
-  public :: pio_cpp_inq_vardimid_vid
-  public :: pio_cpp_inq_vardimid_vdesc
-  public :: pio_cpp_inq_varnatts_vid
-  public :: pio_cpp_inq_varnatts_vdesc
-
-  !  constants
-
- contains
 
 !  the extern "C" functions()
 
@@ -61,9 +18,9 @@ function pio_cpp_inquire_int(File, nDimensions, nVariables, nAttributes,      &
   use, intrinsic :: iso_c_binding, only: c_char, c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
   !  import nf procedure signatures
-  use nf_mod, only: pio_inquire
+  use ESMFPIO_nf_mod, only: pio_inquire
 
   !  function result
   integer(c_int)              :: ierr
@@ -115,11 +72,11 @@ function pio_cpp_inq_att_vid(file, varid, name, xtype, len)                   &
   use, intrinsic :: iso_c_binding, only: c_char, c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_att
-  use pio_cpp_utils, only: f_chars, c_len, max_path_len
+  use ESMFPIO_nf_mod, only: pio_inq_att
+  use esmfpio_cpp_utils, only: f_chars, c_len, max_path_len
 
   !  function result
   integer(c_int)              :: ierr
@@ -188,11 +145,11 @@ function pio_cpp_inq_att_vdesc(file, vardesc, name, xtype, len)               &
   use, intrinsic :: iso_c_binding, only: c_char, c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t, var_desc_t
+  use esmfpio_types, only: file_desc_t, var_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_att
-  use pio_cpp_utils, only: f_chars, c_len, max_path_len
+  use ESMFPIO_nf_mod, only: pio_inq_att
+  use esmfpio_cpp_utils, only: f_chars, c_len, max_path_len
 
   !  function result
   integer(c_int)              :: ierr
@@ -263,11 +220,11 @@ function pio_cpp_inq_attlen_vid(file, varid, name, len) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_char, c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_attlen
-  use pio_cpp_utils, only: f_chars, c_len, max_path_len
+  use ESMFPIO_nf_mod, only: pio_inq_attlen
+  use esmfpio_cpp_utils, only: f_chars, c_len, max_path_len
 
   !  function result
   integer(c_int)              :: ierr
@@ -333,11 +290,11 @@ function pio_cpp_inq_attlen_vdesc(file, vardesc, name, len)                   &
   use, intrinsic :: iso_c_binding, only: c_char, c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t, var_desc_t
+  use esmfpio_types, only: file_desc_t, var_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_attlen
-  use pio_cpp_utils, only: f_chars, c_len, max_path_len
+  use ESMFPIO_nf_mod, only: pio_inq_attlen
+  use esmfpio_cpp_utils, only: f_chars, c_len, max_path_len
 
   !  function result
   integer(c_int)              :: ierr
@@ -406,11 +363,11 @@ function pio_cpp_inq_attname_vid(file, varid, attnum, name)                   &
   use, intrinsic :: iso_c_binding, only: c_int, c_char, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_attname
-  use pio_cpp_utils, only: c_chars, c_len, max_path_len
+  use ESMFPIO_nf_mod, only: pio_inq_attname
+  use esmfpio_cpp_utils, only: c_chars, c_len, max_path_len
 
   !  function result
   integer(c_int)              :: ierr
@@ -461,11 +418,11 @@ function pio_cpp_inq_attname_vdesc(file, vardesc, attnum, name)               &
   use, intrinsic :: iso_c_binding, only: c_int, c_char, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t, var_desc_t
+  use esmfpio_types, only: file_desc_t, var_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_attname
-  use pio_cpp_utils, only: c_chars, c_len, max_path_len
+  use ESMFPIO_nf_mod, only: pio_inq_attname
+  use esmfpio_cpp_utils, only: c_chars, c_len, max_path_len
 
   !  function result
   integer(c_int)              :: ierr
@@ -516,11 +473,11 @@ function pio_cpp_inq_varid_vid(file, name, varid) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_int, c_char, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_varid
-  use pio_cpp_utils, only: f_chars, c_len, max_path_len
+  use ESMFPIO_nf_mod, only: pio_inq_varid
+  use esmfpio_cpp_utils, only: f_chars, c_len, max_path_len
 
   !  function result
   integer(c_int)              :: ierr
@@ -585,11 +542,11 @@ function pio_cpp_inq_varid_vdesc(file, name, vardesc) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_int, c_char, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t, var_desc_t
+  use esmfpio_types, only: file_desc_t, var_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_varid
-  use pio_cpp_utils, only: f_chars, c_len, max_path_len
+  use ESMFPIO_nf_mod, only: pio_inq_varid
+  use esmfpio_cpp_utils, only: f_chars, c_len, max_path_len
 
   !  function result
   integer(c_int)              :: ierr
@@ -654,11 +611,11 @@ function pio_cpp_inq_varname_vdesc(file, vardesc, name) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_int, c_char, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t, var_desc_t
+  use esmfpio_types, only: file_desc_t, var_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_varname
-  use pio_cpp_utils, only: c_chars, c_len, max_path_len
+  use ESMFPIO_nf_mod, only: pio_inq_varname
+  use esmfpio_cpp_utils, only: c_chars, c_len, max_path_len
 
   !  function result
   integer(c_int)              :: ierr
@@ -708,11 +665,11 @@ function pio_cpp_inq_varname_vid(file, varid, name) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_int, c_char, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_varname
-  use pio_cpp_utils, only: c_chars, c_len, max_path_len
+  use ESMFPIO_nf_mod, only: pio_inq_varname
+  use esmfpio_cpp_utils, only: c_chars, c_len, max_path_len
 
   !  function result
   integer(c_int)              :: ierr
@@ -760,10 +717,10 @@ function pio_cpp_inq_varndims_vid(file, varid, ndims) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_varndims
+  use ESMFPIO_nf_mod, only: pio_inq_varndims
 
   !  function result
   integer(c_int)              :: ierr
@@ -810,10 +767,10 @@ function pio_cpp_inq_varndims_vdesc(file, vardesc, ndims) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t, var_desc_t
+  use esmfpio_types, only: file_desc_t, var_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_varndims
+  use ESMFPIO_nf_mod, only: pio_inq_varndims
 
   !  function result
   integer(c_int)              :: ierr
@@ -861,10 +818,10 @@ function pio_cpp_inq_vartype_vid(file, varid, type) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_vartype
+  use ESMFPIO_nf_mod, only: pio_inq_vartype
 
   !  function result
   integer(c_int)              :: ierr
@@ -911,10 +868,10 @@ function pio_cpp_inq_vardimid_vid(file, varid, dimids, ndims)                 &
   use, intrinsic :: iso_c_binding, only: c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_vardimid
+  use ESMFPIO_nf_mod, only: pio_inq_vardimid
 
   !  function result
   integer(c_int)              :: ierr
@@ -962,10 +919,10 @@ function pio_cpp_inq_vardimid_vdesc(file, vardesc, dimids, ndims)             &
   use, intrinsic :: iso_c_binding, only: c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t, var_desc_t
+  use esmfpio_types, only: file_desc_t, var_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_vardimid
+  use ESMFPIO_nf_mod, only: pio_inq_vardimid
 
   !  function result
   integer(c_int)              :: ierr
@@ -1014,10 +971,10 @@ function pio_cpp_inq_vartype_vdesc(file, vardesc, type) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t, var_desc_t
+  use esmfpio_types, only: file_desc_t, var_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_vartype
+  use ESMFPIO_nf_mod, only: pio_inq_vartype
 
   !  function result
   integer(c_int)              :: ierr
@@ -1065,10 +1022,10 @@ function pio_cpp_inq_varnatts_vid(file, varid, natts) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_varnatts
+  use ESMFPIO_nf_mod, only: pio_inq_varnatts
 
   !  function result
   integer(c_int)              :: ierr
@@ -1115,10 +1072,10 @@ function pio_cpp_inq_varnatts_vdesc(file, vardesc, natts) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t, var_desc_t
+  use esmfpio_types, only: file_desc_t, var_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_varnatts
+  use ESMFPIO_nf_mod, only: pio_inq_varnatts
 
   !  function result
   integer(c_int)              :: ierr
@@ -1166,11 +1123,11 @@ function pio_cpp_inq_dimid(file, name, dimid) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_int, c_char, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_dimid
-  use pio_cpp_utils, only: f_chars, c_len, max_path_len
+  use ESMFPIO_nf_mod, only: pio_inq_dimid
+  use esmfpio_cpp_utils, only: f_chars, c_len, max_path_len
 
   !  function result
   integer(c_int)              :: ierr
@@ -1234,11 +1191,11 @@ function pio_cpp_inq_dimname(file, dimid, name) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_int, c_char, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_dimname
-  use pio_cpp_utils, only: c_chars, c_len, max_path_len
+  use ESMFPIO_nf_mod, only: pio_inq_dimname
+  use esmfpio_cpp_utils, only: c_chars, c_len, max_path_len
 
   !  function result
   integer(c_int)              :: ierr
@@ -1286,10 +1243,10 @@ function pio_cpp_inq_dimlen(file, dimid, dimlen) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_inq_dimlen
+  use ESMFPIO_nf_mod, only: pio_inq_dimlen
 
   !  function result
   integer(c_int)              :: ierr
@@ -1333,11 +1290,11 @@ function pio_cpp_def_dim(file, name, len, dimid) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_char, c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_def_dim
-  use pio_cpp_utils, only: f_chars, c_len, max_path_len
+  use ESMFPIO_nf_mod, only: pio_def_dim
+  use esmfpio_cpp_utils, only: f_chars, c_len, max_path_len
 
   !  function result
   integer(c_int) :: ierr
@@ -1400,10 +1357,10 @@ function pio_cpp_enddef(file) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_enddef
+  use ESMFPIO_nf_mod, only: pio_enddef
 
   !  function result
   integer(c_int) :: ierr
@@ -1442,10 +1399,10 @@ function pio_cpp_redef(file) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_redef
+  use ESMFPIO_nf_mod, only: pio_redef
 
   !  function result
   integer(c_int) :: ierr
@@ -1483,11 +1440,11 @@ function pio_cpp_def_var_0d(file, name, type, vardesc) result(ierr) bind(c)
   use, intrinsic :: iso_c_binding, only: c_char, c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: var_desc_t, file_desc_t
+  use esmfpio_types, only: var_desc_t, file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_def_var
-  use pio_cpp_utils, only: f_chars, c_len, max_path_len
+  use ESMFPIO_nf_mod, only: pio_def_var
+  use esmfpio_cpp_utils, only: f_chars, c_len, max_path_len
 
   !  function result
   integer(c_int) :: ierr
@@ -1552,11 +1509,11 @@ function pio_cpp_def_var_md(file, name, type, dimds, ndimds, vardesc)         &
   use, intrinsic :: iso_c_binding, only: c_char, c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: var_desc_t, file_desc_t
+  use esmfpio_types, only: var_desc_t, file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_def_var
-  use pio_cpp_utils, only: f_chars, c_len, max_path_len
+  use ESMFPIO_nf_mod, only: pio_def_var
+  use esmfpio_cpp_utils, only: f_chars, c_len, max_path_len
 
   !  function result
   integer(c_int) :: ierr
@@ -1626,11 +1583,11 @@ function pio_cpp_copy_att(infile, invarid, name, outfile, outvarid)           &
   use, intrinsic :: iso_c_binding, only: c_char, c_int, c_ptr, c_f_pointer
 
   !  import pio types
-  use pio_types, only: file_desc_t
+  use esmfpio_types, only: file_desc_t
 
   !  import nf procedure signatures
-  use nf_mod, only: pio_copy_att
-  use pio_cpp_utils, only: f_chars, c_len, max_path_len
+  use ESMFPIO_nf_mod, only: pio_copy_att
+  use esmfpio_cpp_utils, only: f_chars, c_len, max_path_len
 
   !  function result
   integer(c_int) :: ierr
@@ -1687,4 +1644,3 @@ function pio_cpp_copy_att(infile, invarid, name, outfile, outvarid)           &
 end function pio_cpp_copy_att
 
 ! ---------------------------------------------------------------------
-end module nf_cpp_binding

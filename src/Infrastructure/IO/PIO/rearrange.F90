@@ -12,12 +12,12 @@
 !
 !  20070919  Initial version  - R. Loy
 !
-module rearrange
+module ESMFPIO_rearrange
 
-  use pio_kinds
-  use pio_types
-  use pio_support
-  use box_rearrange
+  use esmfpio_kinds
+  use esmfpio_types
+  use esmfpio_support
+  use ESMFPIO_box_rearrange
 
 
 #ifdef TIMING
@@ -344,4 +344,4 @@ contains
   end subroutine rearrange_free_
 
 
-end module rearrange
+end module ESMFPIO_rearrange

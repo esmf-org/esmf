@@ -1,11 +1,11 @@
 #define __PIO_FILE__ "calcdisplace_mod.F90"
-MODULE calcdisplace_mod
+MODULE ESMFPIO_calcdisplace_mod
 
-  use pio_kinds, only: i4, PIO_OFFSET, i8
-  use pio_support, only : piodie
+  use esmfpio_kinds, only: i4, PIO_OFFSET, i8
+  use esmfpio_support, only : piodie
 
   private
-  public :: GCDblocksize,gcd
+  public :: GCDblocksize, gcd
   public :: calcdisplace, calcdisplace_box
 
   interface gcd_pair
@@ -166,7 +166,7 @@ CONTAINS
   SUBROUTINE GCDblocksize(arr_in,bsize)
     implicit none
 
-    integer(kind=pio_offset),intent(in) ,dimension(:)  :: arr_in  !arr_in = rindex array from box_rearrange
+    integer(kind=pio_offset),intent(in) ,dimension(:)  :: arr_in  !arr_in = rindex array from ESMFPIO_box_rearrange
     integer(kind=pio_offset),intent(out)               :: bsize   ! the gcd of the block length array
 
     ! Locals
@@ -368,4 +368,4 @@ CONTAINS
 
   end FUNCTION gcd_pair_i4
 
-END MODULE calcdisplace_mod
+END MODULE ESMFPIO_calcdisplace_mod

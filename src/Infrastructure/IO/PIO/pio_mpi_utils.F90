@@ -1,5 +1,5 @@
 #define __PIO_FILE__ "pio_mpi_utils.F90"
-module pio_mpi_utils
+module esmfpio_mpi_utils
   
   implicit none
   private
@@ -10,8 +10,8 @@ contains
 
   integer function pio_type_to_mpi_type(ptype) result(mtype)
 
-    use pio_support, only : piodie
-    use pio_types, only : PIO_char, PIO_int, PIO_double, PIO_real
+    use esmfpio_support, only : piodie
+    use esmfpio_types, only : PIO_char, PIO_int, PIO_double, PIO_real
 #ifndef NO_MPIMOD
     use mpi, only : MPI_REAL8, MPI_REAL4, MPI_INTEGER, MPI_CHARACTER  ! _EXTERNAL
 #endif
@@ -33,9 +33,9 @@ contains
          mtype=MPI_CHARACTER
       case default
          call piodie( __PIO_FILE__,__LINE__, &
-                      'Could not convert pio type=',ptype,' to an mpi type')
+                      'Could not convert esmfpio type=',ptype,' to an mpi type')
     end select
 
   end function pio_type_to_mpi_type
 
-end module pio_mpi_utils
+end module esmfpio_mpi_utils

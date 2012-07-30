@@ -4,19 +4,19 @@
 ! Any changes you make to this file may be lost
 !===================================================
 #define __PIO_FILE__ "pionfput_mod.F90"
-module pionfput_mod
+module esmfpionfput_mod
 #ifdef TIMING
   use perf_mod, only : t_startf, t_stopf      ! _EXTERNAL
 #endif
-  use pio_kinds, only: i4,r4,r8,pio_offset
-  use pio_types, only : file_desc_t, iosystem_desc_t, var_desc_t, &
+  use esmfpio_kinds, only: i4,r4,r8,pio_offset
+  use esmfpio_types, only : file_desc_t, iosystem_desc_t, var_desc_t, &
 	pio_iotype_pbinary, pio_iotype_binary, pio_iotype_direct_pbinary, &
 	pio_iotype_netcdf, pio_iotype_pnetcdf, pio_iotype_netcdf4p, pio_iotype_netcdf4c, &
 	pio_noerr
 
-  use pio_utils, only : check_netcdf
-  use pio_msg_mod
-  use pio_support, only : Debug, DebugIO, piodie   
+  use esmfpio_utils, only : check_netcdf
+  use esmfpio_msg_mod
+  use esmfpio_support, only : Debug, DebugIO, piodie   
 #ifdef _NETCDF
   use netcdf            ! _EXTERNAL
 #endif
@@ -4698,7 +4698,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_1d_text (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -4805,7 +4805,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_2d_text (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -4912,7 +4912,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_3d_text (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -5019,7 +5019,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_4d_text (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -5126,7 +5126,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_5d_text (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -5233,7 +5233,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_1d_real (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -5340,7 +5340,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_2d_real (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -5447,7 +5447,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_3d_real (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -5554,7 +5554,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_4d_real (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -5661,7 +5661,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_5d_real (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -5768,7 +5768,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_1d_double (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -5875,7 +5875,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_2d_double (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -5982,7 +5982,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_3d_double (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -6089,7 +6089,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_4d_double (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -6196,7 +6196,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_5d_double (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -6303,7 +6303,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_1d_int (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -6410,7 +6410,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_2d_int (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -6517,7 +6517,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_3d_int (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -6624,7 +6624,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_4d_int (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -6731,7 +6731,7 @@ contains
 !<
 # 342 "pionfput_mod.F90.in"
   integer function put_vara_5d_int (File,varid, start, count, ival) result(ierr)
-    use nf_mod, only : pio_inq_varndims
+    use ESMFPIO_nf_mod, only : pio_inq_varndims
     type (File_desc_t), intent(inout) :: File
     integer, intent(in) :: varid, start(:), count(:)
 
@@ -7322,4 +7322,4 @@ contains
 
 
   end function put_vara_vdesc_5d_int
-end module pionfput_mod
+end module esmfpionfput_mod

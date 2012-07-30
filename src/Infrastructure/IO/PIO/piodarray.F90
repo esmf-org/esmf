@@ -4,18 +4,18 @@
 !===================================================
 #define __PIO_FILE__ 'piodarray'
 
-module piodarray
-  use pio_types, only : file_desc_t, io_desc_t, var_desc_t, pio_noerr, iosystem_desc_t, &
+module esmfpiodarray
+  use esmfpio_types, only : file_desc_t, io_desc_t, var_desc_t, pio_noerr, iosystem_desc_t, &
 	pio_iotype_pbinary, pio_iotype_binary, pio_iotype_direct_pbinary, &
 	pio_iotype_netcdf, pio_iotype_pnetcdf, pio_iotype_netcdf4p, pio_iotype_netcdf4c, &
         PIO_MAX_VAR_DIMS
-  use pio_kinds
-  use pio_support
-  use pionfwrite_mod, only : write_nf
-  use pionfread_mod, only : read_nf
-  use iompi_mod
-  use alloc_mod
-  use rearrange
+  use esmfpio_kinds
+  use esmfpio_support
+  use esmfpionfwrite_mod, only : write_nf
+  use esmfpionfread_mod, only : read_nf
+  use ESMFPIO_iompi_mod
+  use esmfpio_alloc_mod
+  use ESMFPIO_rearrange
 #ifdef TIMING
   use perf_mod, only : t_startf, t_stopf   !_EXTERNAL
 #endif
@@ -187,7 +187,7 @@ module piodarray
   end interface
 
 
-  character(len=*), parameter, private  :: modName='piodarray'
+  character(len=*), parameter, private  :: modName='esmfpiodarray'
   integer :: total_buffsize=0
   integer :: pio_buffer_size_limit= 100000000   ! 100MB default
 
@@ -224,7 +224,7 @@ contains
 !<  
 # 91 "piodarray.F90.in"
   subroutine write_darray_1d_real (File,varDesc,ioDesc, array, iostat, fillval)
-    use pio_msg_mod, only : pio_msg_writedarray
+    use esmfpio_msg_mod, only : pio_msg_writedarray
     ! !DESCRIPTION:
     !  Writes a 2-d slab of TYPE to a netcdf file.
     !
@@ -245,7 +245,7 @@ contains
     real(r4), dimension(:), target, intent(in) ::  &
          array                 ! array to be written
 
-    real(r4), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    real(r4), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
     type(iosystem_desc_t), pointer :: ios
 
     integer(i4), intent(out) :: iostat
@@ -313,7 +313,7 @@ contains
 !<  
 # 91 "piodarray.F90.in"
   subroutine write_darray_1d_int (File,varDesc,ioDesc, array, iostat, fillval)
-    use pio_msg_mod, only : pio_msg_writedarray
+    use esmfpio_msg_mod, only : pio_msg_writedarray
     ! !DESCRIPTION:
     !  Writes a 2-d slab of TYPE to a netcdf file.
     !
@@ -334,7 +334,7 @@ contains
     integer(i4), dimension(:), target, intent(in) ::  &
          array                 ! array to be written
 
-    integer(i4), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    integer(i4), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
     type(iosystem_desc_t), pointer :: ios
 
     integer(i4), intent(out) :: iostat
@@ -402,7 +402,7 @@ contains
 !<  
 # 91 "piodarray.F90.in"
   subroutine write_darray_1d_double (File,varDesc,ioDesc, array, iostat, fillval)
-    use pio_msg_mod, only : pio_msg_writedarray
+    use esmfpio_msg_mod, only : pio_msg_writedarray
     ! !DESCRIPTION:
     !  Writes a 2-d slab of TYPE to a netcdf file.
     !
@@ -423,7 +423,7 @@ contains
     real(r8), dimension(:), target, intent(in) ::  &
          array                 ! array to be written
 
-    real(r8), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    real(r8), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
     type(iosystem_desc_t), pointer :: ios
 
     integer(i4), intent(out) :: iostat
@@ -503,7 +503,7 @@ contains
     real(r4), intent(in) ::  &
          array(:,:)                 ! array to be written
 
-    real(r4), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    real(r4), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     real(r4) :: transvar(1), dumbvar(0)
@@ -550,7 +550,7 @@ contains
     real(r4), intent(in) ::  &
          array(:,:,:)                 ! array to be written
 
-    real(r4), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    real(r4), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     real(r4) :: transvar(1), dumbvar(0)
@@ -597,7 +597,7 @@ contains
     real(r4), intent(in) ::  &
          array(:,:,:,:)                 ! array to be written
 
-    real(r4), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    real(r4), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     real(r4) :: transvar(1), dumbvar(0)
@@ -644,7 +644,7 @@ contains
     real(r4), intent(in) ::  &
          array(:,:,:,:,:)                 ! array to be written
 
-    real(r4), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    real(r4), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     real(r4) :: transvar(1), dumbvar(0)
@@ -691,7 +691,7 @@ contains
     real(r4), intent(in) ::  &
          array(:,:,:,:,:,:)                 ! array to be written
 
-    real(r4), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    real(r4), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     real(r4) :: transvar(1), dumbvar(0)
@@ -738,7 +738,7 @@ contains
     real(r4), intent(in) ::  &
          array(:,:,:,:,:,:,:)                 ! array to be written
 
-    real(r4), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    real(r4), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     real(r4) :: transvar(1), dumbvar(0)
@@ -785,7 +785,7 @@ contains
     integer(i4), intent(in) ::  &
          array(:,:)                 ! array to be written
 
-    integer(i4), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    integer(i4), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     integer(i4) :: transvar(1), dumbvar(0)
@@ -832,7 +832,7 @@ contains
     integer(i4), intent(in) ::  &
          array(:,:,:)                 ! array to be written
 
-    integer(i4), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    integer(i4), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     integer(i4) :: transvar(1), dumbvar(0)
@@ -879,7 +879,7 @@ contains
     integer(i4), intent(in) ::  &
          array(:,:,:,:)                 ! array to be written
 
-    integer(i4), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    integer(i4), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     integer(i4) :: transvar(1), dumbvar(0)
@@ -926,7 +926,7 @@ contains
     integer(i4), intent(in) ::  &
          array(:,:,:,:,:)                 ! array to be written
 
-    integer(i4), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    integer(i4), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     integer(i4) :: transvar(1), dumbvar(0)
@@ -973,7 +973,7 @@ contains
     integer(i4), intent(in) ::  &
          array(:,:,:,:,:,:)                 ! array to be written
 
-    integer(i4), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    integer(i4), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     integer(i4) :: transvar(1), dumbvar(0)
@@ -1020,7 +1020,7 @@ contains
     integer(i4), intent(in) ::  &
          array(:,:,:,:,:,:,:)                 ! array to be written
 
-    integer(i4), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    integer(i4), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     integer(i4) :: transvar(1), dumbvar(0)
@@ -1067,7 +1067,7 @@ contains
     real(r8), intent(in) ::  &
          array(:,:)                 ! array to be written
 
-    real(r8), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    real(r8), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     real(r8) :: transvar(1), dumbvar(0)
@@ -1114,7 +1114,7 @@ contains
     real(r8), intent(in) ::  &
          array(:,:,:)                 ! array to be written
 
-    real(r8), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    real(r8), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     real(r8) :: transvar(1), dumbvar(0)
@@ -1161,7 +1161,7 @@ contains
     real(r8), intent(in) ::  &
          array(:,:,:,:)                 ! array to be written
 
-    real(r8), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    real(r8), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     real(r8) :: transvar(1), dumbvar(0)
@@ -1208,7 +1208,7 @@ contains
     real(r8), intent(in) ::  &
          array(:,:,:,:,:)                 ! array to be written
 
-    real(r8), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    real(r8), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     real(r8) :: transvar(1), dumbvar(0)
@@ -1255,7 +1255,7 @@ contains
     real(r8), intent(in) ::  &
          array(:,:,:,:,:,:)                 ! array to be written
 
-    real(r8), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    real(r8), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     real(r8) :: transvar(1), dumbvar(0)
@@ -1302,7 +1302,7 @@ contains
     real(r8), intent(in) ::  &
          array(:,:,:,:,:,:,:)                 ! array to be written
 
-    real(r8), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    real(r8), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(i4), intent(out) :: iostat
     real(r8) :: transvar(1), dumbvar(0)
@@ -1333,7 +1333,7 @@ contains
 !<
 # 220 "piodarray.F90.in"
   subroutine read_darray_1d_real (File,varDesc, ioDesc, array, iostat)
-    use pio_msg_mod, only : pio_msg_readdarray
+    use esmfpio_msg_mod, only : pio_msg_readdarray
     ! !DESCRIPTION:
     !  Reads a 2-d slab of TYPE to a netcdf file.
     !
@@ -1403,7 +1403,7 @@ contains
 !<
 # 220 "piodarray.F90.in"
   subroutine read_darray_1d_int (File,varDesc, ioDesc, array, iostat)
-    use pio_msg_mod, only : pio_msg_readdarray
+    use esmfpio_msg_mod, only : pio_msg_readdarray
     ! !DESCRIPTION:
     !  Reads a 2-d slab of TYPE to a netcdf file.
     !
@@ -1473,7 +1473,7 @@ contains
 !<
 # 220 "piodarray.F90.in"
   subroutine read_darray_1d_double (File,varDesc, ioDesc, array, iostat)
-    use pio_msg_mod, only : pio_msg_readdarray
+    use esmfpio_msg_mod, only : pio_msg_readdarray
     ! !DESCRIPTION:
     !  Reads a 2-d slab of TYPE to a netcdf file.
     !
@@ -2265,7 +2265,7 @@ contains
     real(r4), target, intent(in) ::  &
          array(:)                 ! array to be written
 
-    real(r4), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    real(r4), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(pio_offset), pointer :: start(:), count(:)
 
@@ -2505,7 +2505,7 @@ contains
     integer(i4), target, intent(in) ::  &
          array(:)                 ! array to be written
 
-    integer(i4), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    integer(i4), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(pio_offset), pointer :: start(:), count(:)
 
@@ -2745,7 +2745,7 @@ contains
     real(r8), target, intent(in) ::  &
          array(:)                 ! array to be written
 
-    real(r8), optional, intent(in) :: fillval    ! rearrange receiver fill value
+    real(r8), optional, intent(in) :: fillval    ! ESMFPIO_rearrange receiver fill value
 
     integer(pio_offset), pointer :: start(:), count(:)
 
@@ -4592,7 +4592,7 @@ contains
   ! TYPE real,int,double  
 # 1098 "piodarray.F90.in"
   subroutine add_data_to_buffer_real (File, IOBUF, request)
-    use pio_types, only : io_data_list
+    use esmfpio_types, only : io_data_list
     type(file_desc_t) :: File
     real(r4), pointer :: IOBUF(:)
     integer, intent(in) :: request
@@ -4634,7 +4634,7 @@ contains
   ! TYPE real,int,double  
 # 1098 "piodarray.F90.in"
   subroutine add_data_to_buffer_int (File, IOBUF, request)
-    use pio_types, only : io_data_list
+    use esmfpio_types, only : io_data_list
     type(file_desc_t) :: File
     integer(i4), pointer :: IOBUF(:)
     integer, intent(in) :: request
@@ -4676,7 +4676,7 @@ contains
   ! TYPE real,int,double  
 # 1098 "piodarray.F90.in"
   subroutine add_data_to_buffer_double (File, IOBUF, request)
-    use pio_types, only : io_data_list
+    use esmfpio_types, only : io_data_list
     type(file_desc_t) :: File
     real(r8), pointer :: IOBUF(:)
     integer, intent(in) :: request
@@ -4718,7 +4718,7 @@ contains
 
 # 1139 "piodarray.F90.in"
   subroutine darray_write_complete(File)
-    use pio_types, only : io_data_list
+    use esmfpio_types, only : io_data_list
 #ifdef _PNETCDF
 #   include <pnetcdf.inc>   /* _EXTERNAL */    
 #endif
@@ -4774,4 +4774,4 @@ contains
 
 
 
-end module piodarray
+end module esmfpiodarray

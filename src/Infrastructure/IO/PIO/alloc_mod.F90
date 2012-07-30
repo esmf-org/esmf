@@ -3,11 +3,11 @@
 ! Any changes you make to this file may be lost
 !===================================================
 #define __PIO_FILE__ "alloc_mod.F90.in"
-module alloc_mod
+module esmfpio_alloc_mod
 
-  use pio_kinds
-  use pio_types
-  use pio_support, only : piodie, CheckMPIreturn, debug
+  use esmfpio_kinds
+  use esmfpio_types
+  use esmfpio_support, only : piodie, CheckMPIreturn, debug
   implicit none
   private
 
@@ -98,7 +98,7 @@ module alloc_mod
 !<
   public :: alloc_trace_off
 
-  character(len=*), parameter :: modName='pio::alloc_mod'
+  character(len=*), parameter :: modName='esmfpio::esmfpio_alloc_mod'
 
 # 57 "alloc_mod.F90.in"
 contains
@@ -984,4 +984,4 @@ end subroutine dealloc_check_0d_double
   end subroutine alloc_trace_off
 
 
-end module alloc_mod
+end module esmfpio_alloc_mod

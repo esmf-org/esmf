@@ -3,20 +3,20 @@
 ! Any changes you make to this file may be lost
 !===================================================
 #define __PIO_FILE__ "iompi_mod.F90"
-module iompi_mod
+module ESMFPIO_iompi_mod
 
 
 
-    use pio_kinds, only : i4,r4,r8,log_kind,pio_offset
-    use pio_types, only : io_desc_t,file_desc_t,var_desc_t, &
+    use esmfpio_kinds, only : i4,r4,r8,log_kind,pio_offset
+    use esmfpio_types, only : io_desc_t,file_desc_t,var_desc_t, &
 		  iotype_pbinary, &
 		  iotype_direct_pbinary,pio_noerr
 #ifdef TIMING
     use perf_mod, only : t_startf, t_stopf  !_EXTERNAL
 #endif
 
-    use pio_support
-    use alloc_mod, only : alloc_check
+    use esmfpio_support
+    use esmfpio_alloc_mod, only : alloc_check
 #ifndef NO_MPIMOD
     use mpi ! _EXTERNAL
 #endif
@@ -28,7 +28,7 @@ module iompi_mod
 #ifdef NO_MPIMOD  
     include 'mpif.h'        ! _EXTERNAL
 #endif
-    public :: open_mpiio, create_mpiio, close_mpiio, write_mpiio,read_mpiio
+    public :: open_mpiio, create_mpiio, close_mpiio, write_mpiio, read_mpiio
 
 !>
 !! @private
@@ -53,7 +53,7 @@ module iompi_mod
        module procedure read_mpiio_double
     end interface
 
-character(len=*), parameter :: modName='iompi_mod'
+character(len=*), parameter :: modName='ESMFPIO_iompi_mod'
 
 # 44 "iompi_mod.F90.in"
 contains 
@@ -86,7 +86,7 @@ contains
            File%offset = 0
         end select
 #else
-        call piodie(__PIO_FILE__,__LINE__,'PIO was not built with -DUSEMPIIO')
+        call piodie(__PIO_FILE__,__LINE__,'esmfpio was not built with -DUSEMPIIO')
 #endif
      end if
  end function close_mpiio
@@ -129,7 +129,7 @@ contains
         if(Check) call CheckMPIreturn('create_mpiio: after call to MPI_BCAST: ',ierrl)
      end if
 #else
-     call piodie(__PIO_FILE__,__LINE__,'PIO was not built with -DUSEMPIIO')
+     call piodie(__PIO_FILE__,__LINE__,'esmfpio was not built with -DUSEMPIIO')
      ierr=0
 #endif
  end function create_mpiio
@@ -172,7 +172,7 @@ contains
      end if
 
 #else
-     call piodie(__PIO_FILE__,__LINE__,'PIO was not built with -DUSEMPIIO')
+     call piodie(__PIO_FILE__,__LINE__,'esmfpio was not built with -DUSEMPIIO')
      ierr=0
 #endif
  end function open_mpiio
@@ -241,7 +241,7 @@ contains
      !-----------------------------------
      File%Offset = File%Offset + reclen
 #else
-     call piodie(__PIO_FILE__,__LINE__,'PIO was not built with -DUSEMPIIO')
+     call piodie(__PIO_FILE__,__LINE__,'esmfpio was not built with -DUSEMPIIO')
      ierr=0
 #endif
 #ifdef TIMING
@@ -314,7 +314,7 @@ contains
      !-----------------------------------
      File%Offset = File%Offset + reclen
 #else
-     call piodie(__PIO_FILE__,__LINE__,'PIO was not built with -DUSEMPIIO')
+     call piodie(__PIO_FILE__,__LINE__,'esmfpio was not built with -DUSEMPIIO')
      ierr=0
 #endif
 #ifdef TIMING
@@ -387,7 +387,7 @@ contains
      !-----------------------------------
      File%Offset = File%Offset + reclen
 #else
-     call piodie(__PIO_FILE__,__LINE__,'PIO was not built with -DUSEMPIIO')
+     call piodie(__PIO_FILE__,__LINE__,'esmfpio was not built with -DUSEMPIIO')
      ierr=0
 #endif
 #ifdef TIMING
@@ -455,7 +455,7 @@ contains
      !-----------------------------------
      File%Offset = File%Offset + reclen
 #else
-     call piodie(__PIO_FILE__,__LINE__,'PIO was not built with -DUSEMPIIO')
+     call piodie(__PIO_FILE__,__LINE__,'esmfpio was not built with -DUSEMPIIO')
      ierr=0
 #endif
 #ifdef TIMING
@@ -521,7 +521,7 @@ contains
      !-----------------------------------
      File%Offset = File%Offset + reclen
 #else
-     call piodie(__PIO_FILE__,__LINE__,'PIO was not built with -DUSEMPIIO')
+     call piodie(__PIO_FILE__,__LINE__,'esmfpio was not built with -DUSEMPIIO')
      ierr=0
 #endif
 #ifdef TIMING
@@ -587,7 +587,7 @@ contains
      !-----------------------------------
      File%Offset = File%Offset + reclen
 #else
-     call piodie(__PIO_FILE__,__LINE__,'PIO was not built with -DUSEMPIIO')
+     call piodie(__PIO_FILE__,__LINE__,'esmfpio was not built with -DUSEMPIIO')
      ierr=0
 #endif
 #ifdef TIMING
@@ -653,7 +653,7 @@ contains
      !-----------------------------------
      File%Offset = File%Offset + reclen
 #else
-     call piodie(__PIO_FILE__,__LINE__,'PIO was not built with -DUSEMPIIO')
+     call piodie(__PIO_FILE__,__LINE__,'esmfpio was not built with -DUSEMPIIO')
      ierr=0
 #endif
 #ifdef TIMING
@@ -697,7 +697,7 @@ contains
      endif
      File%offset = File%offset+i4
 #else
-     call piodie(__PIO_FILE__,__LINE__,'PIO was not built with -DUSEMPIIO')
+     call piodie(__PIO_FILE__,__LINE__,'esmfpio was not built with -DUSEMPIIO')
 #endif
 
  end subroutine Write_FORTRAN_CntrlWord
@@ -734,8 +734,8 @@ contains
 
      if(Debug) print *, subName,':: reclen ',reclen
 #else
-     call piodie(__PIO_FILE__,__LINE__,'PIO was not built with -DUSEMPIIO')
+     call piodie(__PIO_FILE__,__LINE__,'esmfpio was not built with -DUSEMPIIO')
 #endif
  end subroutine Read_FORTRAN_CntrlWord
 
-end module iompi_mod
+end module ESMFPIO_iompi_mod

@@ -1,5 +1,5 @@
 #define __PIO_FILE__ "calcdecomp.F90"
-module calcdecomp
+module ESMFPIO_calcdecomp
 #ifdef TESTCALCDECOMP
   implicit none 
   integer, parameter :: i4=selected_int_kind(6), &
@@ -7,9 +7,9 @@ module calcdecomp
   logical, parameter :: debug=.false.
   integer, parameter :: pio_real=1,pio_int=2, pio_double=3
 #else
-  use pio_kinds, only: i4, r4,r8,i4,i8, PIO_offset
-  use pio_types, only: PIO_int, PIO_real, PIO_double
-  use pio_support, only : debug, piodie
+  use esmfpio_kinds, only: i4, r4,r8,i4,i8, PIO_offset
+  use esmfpio_types, only: PIO_int, PIO_real, PIO_double
+  use esmfpio_support, only : debug, piodie
   implicit none 
 #endif
 
@@ -175,11 +175,11 @@ contains
   end subroutine computestartandcount
 
 
-end module calcdecomp
+end module ESMFPIO_calcdecomp
 
 #ifdef TESTCALCDECOMP
 program sandctest
-  use calcdecomp  !_EXTERNAL
+  use ESMFPIO_calcdecomp  !_EXTERNAL
   implicit none
   
 

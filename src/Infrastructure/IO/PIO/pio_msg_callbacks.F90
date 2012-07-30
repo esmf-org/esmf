@@ -1,9 +1,9 @@
 #include "dtypes.h"
 #define __PIO_FILE__ "pio_msg_callbacks.F90"
-subroutine pio_callback_handler(iosystem, msg)
-  use pio
-  use pio_msg_mod
-  use pio_support, only : debugAsync, piodie
+subroutine esmfpio_callback_handler(iosystem, msg)
+  use esmfpio
+  use esmfpio_msg_mod
+  use esmfpio_support, only : debugAsync, piodie
 #ifndef NO_MPIMOD
   use mpi !_EXTERNAL
 #endif
@@ -69,18 +69,18 @@ subroutine pio_callback_handler(iosystem, msg)
   case(PIO_MSG_SYNC_FILE)
      call pio_syncfile(file)
   case default
-     print *, 'PIO Got unrecognized message ', msg, ierr
+     print *, 'esmfpio Got unrecognized message ', msg, ierr
      call piodie(__PIO_FILE__,__LINE__)  
   end select
 
-end subroutine pio_callback_handler
+end subroutine esmfpio_callback_handler
 
-subroutine freedecomp_handler(iosystem)
-  use pio, only : iosystem_desc_t, io_desc_t, pio_freedecomp
+subroutine ESMFPIO_freedecomp_handler(iosystem)
+  use esmfpio, only : iosystem_desc_t, io_desc_t, pio_freedecomp
 #ifndef NO_MPIMOD
   use mpi !_EXTERNAL
 #endif
-  use pio_msg_mod, only : delete_from_iodesc_list
+  use esmfpio_msg_mod, only : delete_from_iodesc_list
   implicit none
 #ifdef NO_MPIMOD
   include 'mpif.h' !_EXTERNAL
@@ -95,14 +95,14 @@ subroutine freedecomp_handler(iosystem)
   call pio_freedecomp(iosystem, iodesc)
 
 
-end subroutine freedecomp_handler
+end subroutine ESMFPIO_freedecomp_handler
 
 
-subroutine create_file_handler(iosystem)
-  use pio, only : iosystem_desc_t, file_desc_t, pio_createfile
-  use pio_kinds, only : char_len
-  use pio_msg_mod, only : add_to_file_list
-  use pio_support, only : debugAsync
+subroutine ESMFPIO_create_file_handler(iosystem)
+  use esmfpio, only : iosystem_desc_t, file_desc_t, pio_createfile
+  use esmfpio_kinds, only : char_len
+  use esmfpio_msg_mod, only : add_to_file_list
+  use esmfpio_support, only : debugAsync
 #ifndef NO_MPIMOD
   use mpi !_EXTERNAL
 #endif
@@ -130,14 +130,14 @@ subroutine create_file_handler(iosystem)
   call add_to_file_list(file)
   if(Debugasync) print *,__PIO_FILE__,__LINE__,file%fh
 
-end subroutine create_file_handler
+end subroutine ESMFPIO_create_file_handler
 
-subroutine open_file_handler(iosystem)
-  use pio
-  use piolib_mod
-  use pio_kinds
-  use pio_msg_mod
-  use pio_support, only : debugAsync
+subroutine ESMFPIO_open_file_handler(iosystem)
+  use esmfpio
+  use esmfpiolib_mod
+  use esmfpio_kinds
+  use esmfpio_msg_mod
+  use esmfpio_support, only : debugAsync
 #ifndef NO_MPIMOD
   use mpi !_EXTERNAL
 #endif
@@ -166,14 +166,14 @@ subroutine open_file_handler(iosystem)
   call add_to_file_list(file)
   if(Debugasync) print *,__PIO_FILE__,__LINE__,file%fh
 
-end subroutine open_file_handler
+end subroutine ESMFPIO_open_file_handler
 
-subroutine initdecomp_dof_handler(iosystem)
+subroutine ESMFPIO_initdecomp_dof_handler(iosystem)
 
-  use pio
-  use pio_kinds
-  use pio_msg_mod
-  use pio_support, only : debugAsync
+  use esmfpio
+  use esmfpio_kinds
+  use esmfpio_msg_mod
+  use esmfpio_support, only : debugAsync
 #ifndef NO_MPIMOD
   use mpi !_EXTERNAL
 #endif
@@ -204,13 +204,13 @@ subroutine initdecomp_dof_handler(iosystem)
   call pio_initdecomp(iosystem, basepiotype, dims(1:dims_size), compdof, iodesc)
 
 
-end subroutine initdecomp_dof_handler
+end subroutine ESMFPIO_initdecomp_dof_handler
 
-subroutine writedarray_handler(iosystem)
-  use pio
-  use pio_kinds
-  use pio_msg_mod
-  use pio_support, only : debugAsync
+subroutine ESMFPIO_writedarray_handler(iosystem)
+  use esmfpio
+  use esmfpio_kinds
+  use esmfpio_msg_mod
+  use esmfpio_support, only : debugAsync
 #ifndef NO_MPIMOD
   use mpi !_EXTERNAL
 #endif
@@ -266,14 +266,14 @@ subroutine writedarray_handler(iosystem)
   end select
 #endif
 
-end subroutine writedarray_handler
+end subroutine ESMFPIO_writedarray_handler
 
 
-subroutine readdarray_handler(iosystem)
-  use pio
-  use pio_kinds
-  use pio_msg_mod
-  use pio_support, only : debugAsync
+subroutine ESMFPIO_readdarray_handler(iosystem)
+  use esmfpio
+  use esmfpio_kinds
+  use esmfpio_msg_mod
+  use esmfpio_support, only : debugAsync
 #ifndef NO_MPIMOD
   use mpi !_EXTERNAL
 #endif
@@ -316,10 +316,10 @@ subroutine readdarray_handler(iosystem)
   end select
 #endif
 
-end subroutine readdarray_handler
+end subroutine ESMFPIO_readdarray_handler
 
-subroutine seterrorhandling_handler(ios)
-  use pio, only : iosystem_desc_t, pio_seterrorhandling
+subroutine ESMFPIO_seterrorhandling_handler(ios)
+  use esmfpio, only : iosystem_desc_t, pio_seterrorhandling
 #ifndef NO_MPIMOD
   use mpi !_EXTERNAL
 #endif
@@ -334,12 +334,12 @@ subroutine seterrorhandling_handler(ios)
   
   call pio_seterrorhandling(ios, method)
 
-end subroutine seterrorhandling_handler
+end subroutine ESMFPIO_seterrorhandling_handler
 
-subroutine string_handler_for_att(file, varid, name, strlen, msg)
-  use pio_msg_mod, only : pio_msg_getatt
-  use pio, only : file_desc_t, pio_get_att, pio_put_att
-  use pio_support, only : debugasync
+subroutine ESMFPIO_string_handler_for_att(file, varid, name, strlen, msg)
+  use esmfpio_msg_mod, only : pio_msg_getatt
+  use esmfpio, only : file_desc_t, pio_get_att, pio_put_att
+  use esmfpio_support, only : debugasync
   implicit none
 
   type(file_desc_t) :: file
@@ -355,14 +355,14 @@ subroutine string_handler_for_att(file, varid, name, strlen, msg)
   else
      ierr = pio_put_att(file, varid, name, str )  
   end if
-end subroutine string_handler_for_att
+end subroutine ESMFPIO_string_handler_for_att
 
-subroutine att_handler(ios, msg)
+subroutine esmfpio_att_handler(ios, msg)
   
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_att, pio_max_name, pio_put_att
-  use pio_kinds, only : i4, r4, r8
-  use pio_msg_mod, only : lookupfile, pio_msg_putatt, pio_msg_getatt
-  use pio_support, only : debugAsync, piodie
+  use esmfpio, only : iosystem_desc_t, file_desc_t, pio_get_att, pio_max_name, pio_put_att
+  use esmfpio_kinds, only : i4, r4, r8
+  use esmfpio_msg_mod, only : lookupfile, pio_msg_putatt, pio_msg_getatt
+  use esmfpio_support, only : debugAsync, piodie
 #ifndef NO_MPIMOD
   use mpi !_EXTERNAL
 #endif
@@ -395,7 +395,7 @@ subroutine att_handler(ios, msg)
   case (TYPETEXT)
      call mpi_bcast(strlen, 1, mpi_integer, ios%compmaster, ios%intercomm, ierr)
        if(Debugasync) print *,__PIO_FILE__,__LINE__, strlen,nlen
-     call string_handler_for_att (file, varid, name(1:nlen), strlen, msg)
+     call ESMFPIO_string_handler_for_att (file, varid, name(1:nlen), strlen, msg)
   case (TYPEREAL)
      if(msg==PIO_MSG_GETATT) then
         ierr = pio_get_att(file, varid, name(1:nlen), rvar)
@@ -416,16 +416,16 @@ subroutine att_handler(ios, msg)
      end if
   end select
   
-end subroutine att_handler
+end subroutine esmfpio_att_handler
 
 
 
-subroutine att_1d_handler(ios, msg)
+subroutine esmfpio_att_1d_handler(ios, msg)
   
-  use pio, only : iosystem_desc_t, file_desc_t, pio_get_att, pio_max_name, pio_put_att
-  use pio_kinds, only : i4, r4, r8
-  use pio_msg_mod, only : lookupfile, pio_msg_getatt_1d, pio_msg_putatt_1d
-  use pio_support, only : debugAsync, piodie
+  use esmfpio, only : iosystem_desc_t, file_desc_t, pio_get_att, pio_max_name, pio_put_att
+  use esmfpio_kinds, only : i4, r4, r8
+  use esmfpio_msg_mod, only : lookupfile, pio_msg_getatt_1d, pio_msg_putatt_1d
+  use esmfpio_support, only : debugAsync, piodie
 #ifndef NO_MPIMOD
   use mpi !_EXTERNAL
 #endif
@@ -480,16 +480,16 @@ subroutine att_1d_handler(ios, msg)
      deallocate(ivar)
   end select
   
-end subroutine att_1d_handler
+end subroutine esmfpio_att_1d_handler
 
 
-subroutine finalize_handler(iosystem)
-  use pio, only : iosystem_desc_t, pio_finalize
-  use pio_support, only : debugAsync
+subroutine ESMFPIO_finalize_handler(iosystem)
+  use esmfpio, only : iosystem_desc_t, pio_finalize
+  use esmfpio_support, only : debugAsync
   implicit none
   type(iosystem_desc_t) :: iosystem
   integer :: ierr
 
   call pio_finalize(iosystem, ierr)
 
-end subroutine finalize_handler
+end subroutine ESMFPIO_finalize_handler

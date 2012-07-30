@@ -1,19 +1,19 @@
 #define __PIO_FILE__ "ionf_mod.F90"
-module ionf_mod
+module ESMFPIO_ionf_mod
 #ifdef TIMING
   use perf_mod, only : t_startf, t_stopf      ! _EXTERNAL
 #endif
-  use alloc_mod
+  use esmfpio_alloc_mod
 
-  use pio_kinds, only: i4,r4,r8,pio_offset
-  use pio_types
-  use pio_utils, only: bad_iotype, check_netcdf
+  use esmfpio_kinds, only: i4,r4,r8,pio_offset
+  use esmfpio_types
+  use esmfpio_utils, only: bad_iotype, check_netcdf
 
-  use pio_support, only : Debug, DebugIO, piodie, DebugAsync   
+  use esmfpio_support, only : Debug, DebugIO, piodie, DebugAsync   
 #ifdef _NETCDF
   use netcdf            ! _EXTERNAL
 #endif
-  use pio_support, only : CheckMPIReturn
+  use esmfpio_support, only : CheckMPIReturn
 
   implicit none
   private
@@ -371,7 +371,7 @@ contains
        end if
        
        call mpi_bcast(file%iotype,1,mpi_integer, 0, file%iosystem%io_comm, mpierr)
-       call CheckMPIReturn('nf_mod',mpierr)
+       call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
     end if
     return
 100 call piodie(__PIO_FILE__,__LINE__,'File open error ',0,filename)
@@ -384,4 +384,4 @@ contains
 
 
 
-end module ionf_mod
+end module ESMFPIO_ionf_mod

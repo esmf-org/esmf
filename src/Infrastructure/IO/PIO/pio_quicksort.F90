@@ -5,7 +5,7 @@
 !   html_code/utils/quicksort.F90.html
 
 
-module pio_quicksort
+module esmfpio_quicksort
 
 
 ! sort routine to arrange array elements from smallest to largest
@@ -31,7 +31,7 @@ contains
 
 
 RECURSIVE SUBROUTINE quick_sort(list, order)
-  use pio_kinds, only : i4
+  use esmfpio_kinds, only : i4
 implicit none
 
 integer(i4), DIMENSION (:), INTENT(INOUT)  :: list
@@ -125,4 +125,4 @@ END SUBROUTINE interchange_sort
 
 END SUBROUTINE quick_sort
 
-end module pio_quicksort
+end module esmfpio_quicksort

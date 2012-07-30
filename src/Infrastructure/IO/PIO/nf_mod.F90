@@ -1,23 +1,23 @@
 #define __PIO_FILE__ "nf_mod.F90"
-module nf_mod
+module ESMFPIO_nf_mod
 
 #ifdef TIMING
   use perf_mod, only : t_startf, t_stopf      ! _EXTERNAL
 #endif
-  use alloc_mod
+  use esmfpio_alloc_mod
 
-  use pio_kinds, only: i4,r4,r8,pio_offset
-  use pio_types, only: file_desc_t, iosystem_desc_t, var_desc_t, pio_noerr, pio_iotype_netcdf, &
+  use esmfpio_kinds, only: i4,r4,r8,pio_offset
+  use esmfpio_types, only: file_desc_t, iosystem_desc_t, var_desc_t, pio_noerr, pio_iotype_netcdf, &
 	pio_iotype_pnetcdf, pio_iotype_netcdf4p, pio_iotype_netcdf4c, pio_max_name
 
-  use pio_support, only : Debug, DebugIO, DebugAsync, piodie   
-  use pio_utils, only : bad_iotype, check_netcdf
+  use esmfpio_support, only : Debug, DebugIO, DebugAsync, piodie   
+  use esmfpio_utils, only : bad_iotype, check_netcdf
 
 #ifdef _NETCDF
   use netcdf            ! _EXTERNAL
 #endif
-  use pio_support, only : CheckMPIReturn
-  use pio_msg_mod
+  use esmfpio_support, only : CheckMPIReturn
+  use esmfpio_msg_mod
 #ifndef NO_MPIMOD
   use mpi ! _EXTERNAL
 #endif
@@ -237,7 +237,7 @@ contains
           
           if(ios%num_iotasks>1) then
              call MPI_BCAST(vals,4,MPI_INTEGER,0,ios%IO_comm, mpierr)
-             call CheckMPIReturn('nf_mod',mpierr)
+             call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
           end if
 
 #endif
@@ -252,7 +252,7 @@ contains
 
     if(file%iosystem%async_interface .or. ios%num_tasks>ios%num_iotasks) then
        call MPI_BCAST(vals,4,MPI_INTEGER,ios%IOMaster, ios%my_comm, mpierr)
-       call CheckMPIReturn('nf_mod',mpierr)
+       call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
     end if
 
     if(present(nDimensions)) then	
@@ -339,9 +339,9 @@ contains
 
           if(.not.ios%async_interface .and. ios%num_tasks==ios%num_iotasks) then
              call MPI_BCAST(xtype,1,MPI_INTEGER,0,ios%IO_comm, mpierr)
-             call CheckMPIReturn('nf_mod',mpierr)
+             call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
              call MPI_BCAST(len,1,MPI_INTEGER,0,ios%IO_comm, mpierr)
-             call CheckMPIReturn('nf_mod',mpierr)
+             call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
           end if
 #endif
 
@@ -353,9 +353,9 @@ contains
     call check_netcdf(File, ierr,__PIO_FILE__,__LINE__)
     if(ios%async_interface .or. ios%num_tasks>ios%num_iotasks) then
        call MPI_BCAST(xtype,1,MPI_INTEGER,ios%IOMaster, ios%my_comm , mpierr)
-       call CheckMPIReturn('nf_mod',mpierr)
+       call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
        call MPI_BCAST(len,1,MPI_INTEGER,ios%IOMaster, ios%my_comm  , mpierr)
-       call CheckMPIReturn('nf_mod',mpierr)
+       call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
     end if
   end function inq_att_vid
 
@@ -449,7 +449,7 @@ contains
 
           if(.not.ios%async_interface .and. ios%num_tasks==ios%num_iotasks) then
              call MPI_BCAST(len,1,MPI_INTEGER,0,ios%IO_comm, mpierr)
-             call CheckMPIReturn('nf_mod',mpierr)
+             call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
           end if
 
 #endif
@@ -462,7 +462,7 @@ contains
     call check_netcdf(File, ierr,__PIO_FILE__,__LINE__)
     if(ios%async_interface.or.ios%num_tasks>ios%num_iotasks) then
        call MPI_BCAST(len,1,MPI_INTEGER,ios%IOMaster,ios%my_comm, mpierr)
-       call CheckMPIReturn('nf_mod',mpierr)
+       call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
     end if
 
   end function inq_attlen_vid
@@ -548,7 +548,7 @@ contains
           endif
           if(.not.ios%async_interface .and. ios%num_tasks==ios%num_iotasks) then
              call MPI_BCAST(tmpname,PIO_MAX_NAME,MPI_CHARACTER,0,ios%IO_comm, mpierr)
-             call CheckMPIReturn('nf_mod',mpierr)
+             call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
           end if
 
 #endif
@@ -561,7 +561,7 @@ contains
     call check_netcdf(File, ierr,__PIO_FILE__,__LINE__)
     if(ios%async_interface .or. ios%num_tasks>ios%num_iotasks) then
        call MPI_BCAST(tmpname,PIO_MAX_NAME,MPI_CHARACTER,ios%IOMaster,ios%my_comm, mpierr)
-       call CheckMPIReturn('nf_mod',mpierr)
+       call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
     end if
     name = tmpname(1:len_trim(tmpname))
   end function inq_attname_vid
@@ -757,7 +757,7 @@ contains
           endif
           if(.not.ios%async_interface .and. ios%num_tasks==ios%num_iotasks) then
              call MPI_BCAST(name,nlen,MPI_CHARACTER,0,ios%IO_comm, mpierr)
-             call CheckMPIReturn('nf_mod',mpierr)
+             call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
           end if
 
 #endif
@@ -770,7 +770,7 @@ contains
     call check_netcdf(File, ierr,__PIO_FILE__,__LINE__)
     if(ios%async_interface.or.ios%num_tasks>=ios%num_iotasks) then
        call MPI_BCAST(name,nlen,MPI_CHARACTER,ios%IOMaster,ios%my_comm, mpierr)
-       call CheckMPIReturn('nf_mod',mpierr)
+       call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
     end if
 
   end function inq_varname_vid
@@ -829,7 +829,7 @@ contains
           endif
           if(.not.ios%async_interface .and. ios%num_tasks==ios%num_iotasks) then
              call MPI_BCAST(ndims,1,MPI_INTEGER,0,ios%IO_comm, mpierr)
-             call CheckMPIReturn('nf_mod',mpierr)
+             call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
           end if
 #endif
 
@@ -844,7 +844,7 @@ contains
 
     if(ios%async_interface .or. ios%num_tasks>ios%num_iotasks) then
        call MPI_BCAST(ndims,1,MPI_INTEGER,ios%IOMaster,ios%my_comm, mpierr)
-       call CheckMPIReturn('nf_mod',mpierr)
+       call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
     end if
   end function inq_varndims_vid
 
@@ -922,7 +922,7 @@ contains
 
           if(.not.ios%async_interface .and. ios%num_tasks==ios%num_iotasks) then
              call MPI_BCAST(type,1,MPI_INTEGER,0,ios%IO_comm, mpierr)
-             call CheckMPIReturn('nf_mod',mpierr)
+             call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
           end if
 #endif
 
@@ -934,7 +934,7 @@ contains
     call check_netcdf(File,ierr,__PIO_FILE__,__LINE__)
     if(file%iosystem%async_interface .or. ios%num_tasks>ios%num_iotasks) then
        call MPI_BCAST(type,1,MPI_INTEGER,ios%IOMaster,ios%my_comm, mpierr)
-       call CheckMPIReturn('nf_mod',mpierr)
+       call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
     end if
   end function inq_vartype_vid
 
@@ -1016,7 +1016,7 @@ contains
 
           if(.not.ios%async_interface .and. ios%num_tasks==ios%num_iotasks) then
              call MPI_BCAST(dimids,size(dimids),MPI_INTEGER,0,ios%IO_comm, mpierr)
-             call CheckMPIReturn('nf_mod',mpierr)
+             call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
           end if
 #endif
 
@@ -1028,7 +1028,7 @@ contains
     call check_netcdf(File,ierr,__PIO_FILE__,__LINE__)
     if(ios%num_tasks>ios%num_iotasks) then
        call MPI_BCAST(dimids,size_dimids,MPI_INTEGER,ios%IOMaster,ios%My_comm, mpierr)
-       call CheckMPIReturn('nf_mod',mpierr)
+       call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
     end if
   end function inq_vardimid_vid
 
@@ -1106,7 +1106,7 @@ contains
           endif
 
           call MPI_BCAST(natts,1,MPI_INTEGER,0,ios%IO_comm, mpierr)
-          call CheckMPIReturn('nf_mod',mpierr)
+          call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
 #endif
 
        case default
@@ -1117,7 +1117,7 @@ contains
     call check_netcdf(File, ierr,__PIO_FILE__,__LINE__)
     if(ios%async_interface .or. ios%num_tasks>ios%num_iotasks) then
        call MPI_BCAST(natts,1,MPI_INTEGER,ios%IOMaster,ios%My_comm, mpierr)
-       call CheckMPIReturn('nf_mod',mpierr)
+       call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
     end if
   end function inq_varnatts_vid
 
@@ -1198,7 +1198,7 @@ contains
           endif
           if(.not. ios%async_interface .and. ios%num_tasks==ios%num_iotasks) then
              call MPI_BCAST(dimid,1,MPI_INTEGER,0,ios%IO_comm, mpierr)
-             call CheckMPIReturn('nf_mod',mpierr)
+             call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
           end if
 #endif
 
@@ -1216,7 +1216,7 @@ contains
     if(ios%async_interface .or. ios%num_tasks>ios%num_iotasks) then
        call MPI_BCAST(dimid,1,MPI_INTEGER,ios%IOMaster,ios%My_comm, mpierr)
        if(Debugasync) print *,__PIO_FILE__,__LINE__,dimid,ierr,mpierr
-       call CheckMPIReturn('nf_mod',mpierr)
+       call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
     end if
  
   end function pio_inq_dimid
@@ -1278,7 +1278,7 @@ contains
           endif
           if(.not.ios%async_interface .and. ios%num_tasks==ios%num_iotasks) then
              call MPI_BCAST(dimname,ldn,MPI_CHARACTER,0,ios%IO_comm, mpierr)
-             call CheckMPIReturn('nf_mod',mpierr)
+             call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
           end if
 #endif
 
@@ -1290,7 +1290,7 @@ contains
     call check_netcdf(File, ierr,__PIO_FILE__,__LINE__)
     if(ios%async_interface .or. ios%num_tasks>ios%num_iotasks) then
        call MPI_BCAST(dimname,ldn,MPI_CHARACTER,ios%IOMaster,ios%My_comm, mpierr)
-       call CheckMPIReturn('nf_mod',mpierr)
+       call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
     end if
 
   end function pio_inq_dimname
@@ -1351,7 +1351,7 @@ contains
           endif
           if(.not.ios%async_interface .and. ios%num_tasks==ios%num_iotasks) then
              call MPI_BCAST(dimlen,1,MPI_INTEGER,0,ios%IO_comm, mpierr)
-             call CheckMPIReturn('nf_mod',mpierr)
+             call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
           end if
 #endif
 
@@ -1363,7 +1363,7 @@ contains
     call check_netcdf(File, ierr,__PIO_FILE__,__LINE__)
     if(file%iosystem%async_interface .or. ios%num_tasks>ios%num_iotasks) then
        call MPI_BCAST(dimlen,1,MPI_INTEGER,ios%IOMaster,ios%My_comm, mpierr)
-       call CheckMPIReturn('nf_mod',mpierr)
+       call CheckMPIReturn('ESMFPIO_nf_mod',mpierr)
     end if
 
 
@@ -1822,4 +1822,4 @@ contains
 
   end function PIO_inquire_dimension
 
-end module nf_mod
+end module ESMFPIO_nf_mod
