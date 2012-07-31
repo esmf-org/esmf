@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.67 2012/07/30 23:17:42 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.68 2012/07/31 23:37:43 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -65,6 +65,7 @@ program ESMF_RegridWeightGen
       character(len=256) :: argStr
       integer            :: pos
       logical            :: useSrcCoordVar, useDstCoordVar
+      logical            :: useSrcMask, useDstMask
       !real(ESMF_KIND_R8) :: starttime, endtime
       !------------------------------------------------------------------------
       ! Initialize ESMF
@@ -83,6 +84,10 @@ program ESMF_RegridWeightGen
       ! set up local pet info
       call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
       if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+
+      ! Default values
+      useSrcMask = .TRUE.
+      useDstMask = .TRUE.
 
       !------------------------------------------------------------------------
       ! Parse keyword based arguments at Pet 0
@@ -290,6 +295,7 @@ program ESMF_RegridWeightGen
          call ESMF_UtilGetArgIndex('--src_missingvalue', argindex=ind, rc=rc)
          if (ind == -1) then
 	    srcMissingValue = .false.
+            useSrcMask = .false.
          else
 	     srcMissingValue = .true.
              call ESMF_UtilGetArg(ind+1, argvalue=srcVarName)	   
@@ -317,6 +323,7 @@ program ESMF_RegridWeightGen
 	 call ESMF_UtilGetArgIndex('--dst_missingvalue', argindex=ind, rc=rc)
          if (ind == -1) then
 	    dstMissingValue = .false.
+            useDstMask = .false.
          else
 	     dstMissingValue = .true.
              call ESMF_UtilGetArg(ind+1, argvalue=dstVarName)	   
@@ -651,7 +658,7 @@ program ESMF_RegridWeightGen
 	if (userAreaFlag)   commandbuf2(16) = 1
         if (srcMissingValue) commandbuf2(17) = 1
         if (dstMissingValue) commandbuf2(18) = 1
-
+        
         call ESMF_VMBroadcast(vm, commandbuf2, 18, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
      else
@@ -734,12 +741,14 @@ program ESMF_RegridWeightGen
            srcMissingValue=.true.
         else
            srcMissingValue=.false.
+           useSrcMask = .false.
         endif
 
         if (commandbuf2(18) == 1) then
            dstMissingValue=.true.
         else
            dstMissingValue=.false.
+           useDstMask=.false.
         endif
      endif
 
@@ -1014,37 +1023,12 @@ program ESMF_RegridWeightGen
       if (poleptrs <= 0) poleptrs = 1
 
       if (trim(method) .eq. 'bilinear') then
-          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
-	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedaction=unmappedaction, &
-	    factorIndexList=factorIndexList, factorList=factorList, &
-            regridmethod = ESMF_REGRIDMETHOD_BILINEAR, &
-            polemethod = pole, regridPoleNPnts = poleptrs, &
-	    rc=rc)
-            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             methodStr = "Bilinear remapping"
 	    methodflag = ESMF_REGRIDMETHOD_BILINEAR
       else if (trim(method) .eq. 'patch') then
-          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
-	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedaction=unmappedaction, &
-	    factorIndexList=factorIndexList, factorList=factorList, &
-            regridmethod = ESMF_REGRIDMETHOD_PATCH, &
-            polemethod = pole, regridPoleNPnts = poleptrs, &
-	    rc=rc)
-            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Patch
 	    methodflag = ESMF_REGRIDMETHOD_PATCH
       else if (trim(method) .eq. 'conserve') then
-          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
-	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedaction=unmappedaction, &
-	    factorIndexList=factorIndexList, factorList=factorList, &
-            srcFracField=srcFracField, dstFracField=dstFracField, &
-            regridmethod = ESMF_REGRIDMETHOD_CONSERVE, &
-            polemethod = pole, regridPoleNPnts = poleptrs, &
-	    rc=rc)
-            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
             methodStr = "Conservative remapping"
 	    methodflag = ESMF_REGRIDMETHOD_CONSERVE
       else ! nothing recognizable so report error
@@ -1052,6 +1036,45 @@ program ESMF_RegridWeightGen
              call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
 
+      if (useSrcMask .and. useDstMask) then
+          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
+	    unmappedaction=unmappedaction, &
+	    factorIndexList=factorIndexList, factorList=factorList, &
+            regridmethod = methodflag, &
+            polemethod = pole, regridPoleNPnts = poleptrs, &
+	    rc=rc)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+      else if (useSrcMask) then
+          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	    srcMaskValues = maskvals, &
+	    unmappedaction=unmappedaction, &
+	    factorIndexList=factorIndexList, factorList=factorList, &
+            regridmethod = methodflag, &
+            polemethod = pole, regridPoleNPnts = poleptrs, &
+	    rc=rc)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+      else if (useDstMask) then
+          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	    dstMaskValues = maskvals, &
+	    unmappedaction=unmappedaction, &
+	    factorIndexList=factorIndexList, factorList=factorList, &
+            srcFracField=srcFracField, dstFracField=dstFracField, &
+            regridmethod = methodflag, &
+            polemethod = pole, regridPoleNPnts = poleptrs, &
+	    rc=rc)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+      else	
+          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	    unmappedaction=unmappedaction, &
+	    factorIndexList=factorIndexList, factorList=factorList, &
+            srcFracField=srcFracField, dstFracField=dstFracField, &
+            regridmethod = methodflag, &
+            polemethod = pole, regridPoleNPnts = poleptrs, &
+	    rc=rc)
+            if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+      end if
+      ! print *, PetNo, size(factorList), factorIndexList(1,1), factorIndexList(2,1)
       ! Compute areas if conservative
       ! Area only valid on PET 0 right now, when parallel Array
       ! write works, then make area io parallel
