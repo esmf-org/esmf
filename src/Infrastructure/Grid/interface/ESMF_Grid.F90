@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.275 2012/07/31 22:28:24 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.276 2012/07/31 23:39:08 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -308,7 +308,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.275 2012/07/31 22:28:24 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.276 2012/07/31 23:39:08 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -6146,23 +6146,23 @@ end function ESMF_GridCreateFrmScrip
       endif
     endif
 
-    ! Add mask
-    call ESMF_GridAddItem(grid, staggerloc=localStaggerLoc, &
-                        itemflag = ESMF_GRIDITEM_MASK, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                        ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_GridGetItem(grid, staggerloc=localStaggerLoc,  &
-                        itemflag=ESMF_GRIDITEM_MASK, array=array, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                        ESMF_CONTEXT, rcToReturn=rc)) return
-    if (PetNo == 0) then
-	allocate(mask2D(dims(1),dims(2)))
-	mask2D(:,:)=1
-    endif
- 
-    ! Check if we want to extract mask from a data variable
+    ! Only add mask if localAddMask = .TRUE.
     if (localAddMask) then
-        if (PetNo == 0) then        ! Assume GridSpec masking is array of same
+       call ESMF_GridAddItem(grid, staggerloc=localStaggerLoc, &
+                        itemflag = ESMF_GRIDITEM_MASK, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                        ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_GridGetItem(grid, staggerloc=localStaggerLoc,  &
+                        itemflag=ESMF_GRIDITEM_MASK, array=array, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                        ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! TODO --- Read in mask in parallel ----
+       if (PetNo == 0) then
+	  allocate(mask2D(dims(1),dims(2)),stat=localrc)
+          if (ESMF_LogFoundAllocError(localrc, msg="Allocating mask2D", &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return 
+	  mask2D(:,:)=1
           allocate(varBuffer(dims(1),dims(2)))
           call ESMF_GridspecGetVarByName(grid_filename, varname, dimids, &
 			        varBuffer, missing_value = missing_value, &
@@ -6177,16 +6177,16 @@ end function ESMF_GridCreateFrmScrip
               endif
             enddo
           enddo
-	deallocate(varBuffer)
+	  deallocate(varBuffer)
         endif
-    endif
-    call ESMF_ArrayScatter(array, mask2D, rootPet=0, rc=localrc)
 
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        call ESMF_ArrayScatter(array, mask2D, rootPet=0, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if (PetNo == 0) then
+        if (PetNo == 0) then
            deallocate(mask2D)
+        end if
     end if
 
     ! Add coordinates at the corner stagger location
