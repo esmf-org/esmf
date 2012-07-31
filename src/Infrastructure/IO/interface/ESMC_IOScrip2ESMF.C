@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.17 2012/07/23 05:21:10 peggyli Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.18 2012/07/31 09:24:57 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#define TOL 0.000000000001
+#define TOL 0.0000000001
 
 typedef struct field {
   double lon, lat;
@@ -68,10 +68,27 @@ int init_bucket(int num_cells) {
   return 1;
 }
 
+void print_bucket(int bid) {
+  FIELD *curr;
+  if (bucket[bid]) {
+    curr = bucket[bid];
+    printf("Bucket %d:\n", bid);
+    while (curr) {
+      printf("%f %f %d %d\n", curr->lon, curr->lat, curr->rank, curr->count);
+      curr=curr->next;
+    }
+  }
+}
+
 FIELD* insert_bucket(double lon, double lat) {
   int bid;
   FIELD *me, *curr;
   bid = (int)((lat + 90.0)*interval+TOL);
+  if (bid < 0) {
+    printf("Wrong coordinates, (%f, %f)", lon, lat);
+    return 0;
+  }
+  if (bid > totalbuckets-1) bid=bid-1;
   if (!bucket[bid]) {
     me = bucket[bid] = (FIELD*)malloc(sizeof(FIELD));
     me->prev = me->next = NULL;
@@ -83,22 +100,23 @@ FIELD* insert_bucket(double lon, double lat) {
   } else {
     curr = bucket[bid];
     while ((curr->lon+TOL) < lon) {
+      //while (curr->lon < lon) { 
       if (!curr->next) break;
       curr=curr->next;
     }
-    if (abs(lon - curr->lon) < TOL) {
+    if (fabs(lon - curr->lon) < TOL) {
     // Advance to the item which is still has curr->lon==lon, but which is just >= lat if possible
     //      while (curr->lon == lon && (curr->lat < lat)) {
-    while (true) {
+      while (true) {
 	if (!curr->next) break;
-        if (abs(curr->next->lon - lon) > TOL) break;      
+        if (fabs(curr->next->lon - lon) > TOL) break;      
         if ((curr->lat - lat) >= -1*TOL) break;
 	curr=curr->next;
       }
       // At this point curr->lon still == lon
 
       // Point is in list
-      if (abs(curr->lat-lat)<TOL) {
+      if (fabs(curr->lat-lat)<TOL) {
 	curr->count++;
 	return curr;
       } else if (lat < curr->lat) {  // Put point just before this one
@@ -129,7 +147,7 @@ FIELD* insert_bucket(double lon, double lat) {
 	  me->rank=nextrank++;
 	  me->count = 1;
 	  return me;
-      }	
+      }	 
     }
     // insert before curr
     if (lon < curr->lon) {
@@ -159,6 +177,7 @@ FIELD* insert_bucket(double lon, double lat) {
 	return me;
     }
   }
+  printf("insert_bucket() failed, (%f, %f)\n", lon, lat);
   return 0;
 }
 
@@ -213,7 +232,7 @@ void orderit(int index, double lon, double lat, int numedges, double *latlonbuf,
     j=*(next+i)-1;
     clon = latlonbuf[j*2];
     clat = latlonbuf[j*2+1];
-    if (abs(clon-lon) > 180) {
+    if (fabs(clon-lon) > 180) {
       if (lon >= 180) {
 	clon = clon+360;
       } else { 
@@ -501,7 +520,14 @@ void FTN_X(c_convertscrip)(
   // each bucket is a sorted linked list by longitude
   init_bucket(gsdim);
   for (i=0; i<gcdim*gsdim; i++) {
-    cells[i]=(insert_bucket(cornerlons[i],cornerlats[i]))->rank;
+    tmppt=insert_bucket(cornerlons[i],cornerlats[i]);
+    if (tmppt) {
+      cells[i]=tmppt->rank;
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,"insert_bucket() failed", rc);
+      //printf("insert_buket() failed at index %d\n", i);
+      return;
+    }
   }
   totalnodes = nextrank-1;
 
@@ -577,7 +603,7 @@ void FTN_X(c_convertscrip)(
       maxconnection=totalneighbors[i];
   }
 
-  //printf("Maximal connection per vertex is %d\n", maxconnection);
+  // printf("Maximal connection per vertex is %d\n", maxconnection);
 
   if (*dualflag == 0) {
     // create the output netcdf file
@@ -832,7 +858,7 @@ void FTN_X(c_convertscrip)(
     // in the cell id in counter clockwise order
     
     next = &dualcells[i*maxconnection];
-    if (abs(nodelatlon[i*2+1]) > 88.0) {
+    if (fabs(nodelatlon[i*2+1]) > 88.0) {
       orderit2(i+1, nodelatlon[i*2], nodelatlon[i*2+1], numedges, inbuf1,next);      
     } else {
       orderit(i+1, nodelatlon[i*2], nodelatlon[i*2+1], numedges, inbuf1,next);      
