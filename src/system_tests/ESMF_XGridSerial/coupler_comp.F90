@@ -1,4 +1,4 @@
-! $Id: coupler_comp.F90,v 1.9 2012/07/20 22:43:22 feiliu Exp $
+! $Id: coupler_comp.F90,v 1.10 2012/07/31 20:45:49 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -18,15 +18,9 @@ module coupler_comp
   use ESMF
     
   implicit none
-   
-  public usercpl_setvm, usercpl_register
-        
-  ! global data
-  type(ESMF_RouteHandle), save :: routehandle
-
   private
-  type(ESMF_XGrid), save  :: xgrid
-  type(ESMF_Field), save  :: field
+  public usercpl_setvm, usercpl_register
+
   contains
 
 !-------------------------------------------------------------------------
@@ -103,6 +97,9 @@ module coupler_comp
     type(ESMF_State) :: lnd_state, ocn_state
     type(ESMF_VM) :: vm
     type(ESMF_Grid)  :: lnd_grid, ocn_grid, atm_grid
+    type(ESMF_XGrid) :: xgrid
+    type(ESMF_Field) :: flux
+    type(ESMF_RouteHandle) :: rh1, rh2, rh3
     real(ESMF_KIND_R8), pointer         :: xfptr(:)
     integer :: localPet
     character(len=64)    :: focn(1)
@@ -148,26 +145,39 @@ module coupler_comp
 
     ! Finally ready to do an flux exchange from A side to B side
     xgrid = ESMF_XGridCreate((/ocn_grid, lnd_grid/), (/atm_grid/), &
+        sideAMaskValues=(/2,3,4/), &
         rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    field = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, rc=rc)
+    flux = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, name='xgrid_flux', rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_FieldGet(field, farrayPtr=xfptr, rc=rc)
+    call ESMF_FieldGet(flux, farrayPtr=xfptr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     xfptr = 0.0
 
     ! Precompute and store an FieldRegrid operation
-    !call ESMF_FieldRegridStore(F_lnd, flux, xgrid, &
-    !  routehandle=routehandle, rc=rc)
-    !if (rc/=ESMF_SUCCESS) return ! bail out
-    !call ESMF_FieldRegridStore(F_ocn, flux, xgrid, &
-    !  routehandle=routehandle, rc=rc)
-    !if (rc/=ESMF_SUCCESS) return ! bail out
-    !call ESMF_FieldRegridStore(flux, F_atm, xgrid, &
-    !  routehandle=routehandle, rc=rc)
-    !if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_FieldRegridStore(xgrid, F_lnd, flux, &
+      routehandle=rh1, rc=rc)
+    call ESMF_RoutehandleSet(rh1, name='lnd2xgrid', rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_FieldRegridStore(xgrid, F_ocn, flux, &
+      routehandle=rh2, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_RoutehandleSet(rh2, name='ocn2xgrid', rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_FieldRegridStore(xgrid, flux, F_atm, &
+      routehandle=rh3, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_RoutehandleSet(rh3, name='xgrid2atm', rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_StateAdd(exportState, (/rh1,rh2,rh3/), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateAdd(exportState, (/flux/), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     
     print *, "User Coupler Init returning"
    
@@ -185,8 +195,9 @@ module coupler_comp
     integer, intent(out) :: rc
 
     ! Local variables
-    type(ESMF_Field) :: F_lnd, F_ocn, F_atm
+    type(ESMF_Field) :: F_lnd, F_ocn, F_atm, flux
     type(ESMF_Grid)  :: lnd_grid, ocn_grid, atm_grid
+    type(ESMF_RouteHandle) :: rh1, rh2, rh3
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -204,17 +215,23 @@ module coupler_comp
     ! Get destination Field out of export state
     call ESMF_StateGet(exportState, "F_atm", F_atm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateGet(exportState, "xgrid_flux", flux, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_StateGet(exportState, "lnd2xgrid", routehandle=rh1, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateGet(exportState, "ocn2xgrid", routehandle=rh2, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateGet(exportState, "xgrid2atm", routehandle=rh3, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! compute regridding
-    !call ESMF_FieldRegrid(F_lnd, flux, xgrid, &
-    !  routehandle=routehandle, rc=rc)
-    !if (rc/=ESMF_SUCCESS) return ! bail out
-    !call ESMF_FieldRegrid(F_ocn, flux, xgrid, &
-    !  routehandle=routehandle, rc=rc)
-    !if (rc/=ESMF_SUCCESS) return ! bail out
-    !call ESMF_FieldRegrid(flux, F_atm, xgrid, &
-    !  routehandle=routehandle, rc=rc)
-    !if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_FieldRegrid(F_lnd, flux, routehandle=rh1, zeroregion=ESMF_REGION_EMPTY, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_FieldRegrid(F_ocn, flux, routehandle=rh2, zeroregion=ESMF_REGION_EMPTY, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_FieldRegrid(flux, F_atm, routehandle=rh3, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
   
     print *, "User Coupler Run returning"
 
@@ -231,20 +248,40 @@ module coupler_comp
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
+    type(ESMF_Field) :: flux
+    type(ESMF_XGrid) :: xgrid
+    type(ESMF_RouteHandle) :: rh1, rh2, rh3
+
     ! Initialize return code
     rc = ESMF_SUCCESS
 
     print *, "User Coupler Final starting"
 
+    call ESMF_StateGet(exportState, "xgrid_flux", flux, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateGet(exportState, "lnd2xgrid", rh1, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateGet(exportState, "ocn2xgrid", rh2, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateGet(exportState, "xgrid2atm", rh3, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    call ESMF_FieldGet(flux, xgrid=xgrid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     call ESMF_XGridDestroy(xgrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    call ESMF_FieldDestroy(field, rc=rc)
+    call ESMF_FieldDestroy(flux, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
   
     ! Release resources stored for the ArrayRedist.
-    !call ESMF_FieldRegridRelease(routehandle=routehandle, rc=rc)
-    !if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_FieldRegridRelease(routehandle=rh1, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_FieldRegridRelease(routehandle=rh2, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_FieldRegridRelease(routehandle=rh3, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, "User Coupler Final returning"
   

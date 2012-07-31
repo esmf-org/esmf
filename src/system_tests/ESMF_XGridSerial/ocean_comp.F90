@@ -1,4 +1,4 @@
-! $Id: ocean_comp.F90,v 1.8 2012/07/20 22:43:22 feiliu Exp $
+! $Id: ocean_comp.F90,v 1.9 2012/07/31 20:45:49 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -142,10 +142,10 @@ module ocean_comp
     integer, intent(out) :: rc
 
     ! Local variables
-    real(ESMF_KIND_R8)    :: pi
+    real(ESMF_KIND_R8)    :: pi, kx, ky
     type(ESMF_Field)      :: field
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
-    integer               :: i, j
+    integer               :: i, j, elb(2), eub(2)
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -161,7 +161,13 @@ module ocean_comp
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Fill source Field with data
-    farrayPtr = 0.0
+    kx = 2.*pi/(eub(1)-elb(1))
+    ky = 2.*pi/(eub(2)-elb(2))
+    do i = elb(1), eub(1)
+      do j = elb(2), eub(2)
+        farrayPtr = sin(kx*i)*sin(ky*j)
+      enddo
+    enddo
  
     print *, "Ocean Run returning"
 
