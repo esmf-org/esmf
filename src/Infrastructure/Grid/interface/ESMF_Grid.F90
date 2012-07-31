@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.274 2012/05/30 23:17:50 peggyli Exp $
+! $Id: ESMF_Grid.F90,v 1.275 2012/07/31 22:28:24 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -308,7 +308,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.274 2012/05/30 23:17:50 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.275 2012/07/31 22:28:24 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -12959,31 +12959,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridGetCoord - Get a DE-local Fortran array pointer to Grid coord data and coord bounds
 !
 ! !INTERFACE:
-!      subroutine ESMF_GridGetCoord(grid, coordDim, keywordEnforcer,    &
-!        staggerloc, localDE, <pointer argument>,                       &
+!      subroutine ESMF_GridGetCoord<rank><type><kind>(grid, coordDim, keywordEnforcer,    &
+!        staggerloc, localDE, farrayPtr, datacopyflag,                  &
 !        exclusiveLBound, exclusiveUBound, exclusiveCount,              &
 !        computationalLBound, computationalUBound, computationalCount,  &
-!        totalLBound, totalUBound, totalCount,                          &
-!        datacopyflag, rc)
+!        totalLBound, totalUBound, totalCount, rc)
 ! 
 ! !ARGUMENTS:
-!     type(ESMF_Grid),       intent(in)            :: grid
-!     integer,               intent(in)            :: coordDim
+!     type(ESMF_Grid),       intent(in)                :: grid
+!     integer,               intent(in)                :: coordDim
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     type (ESMF_StaggerLoc) intent(in),  optional :: staggerloc
-!     integer,               intent(in),  optional :: localDE
-!     <pointer argument>, see below for supported values
-!     integer,               intent(out), optional :: exclusiveLBound(:)
-!     integer,               intent(out), optional :: exclusiveUBound(:)
-!     integer,               intent(out), optional :: exclusiveCount(:)
-!     integer,               intent(out), optional :: computationalLBound(:)
-!     integer,               intent(out), optional :: computationalUBound(:)
-!     integer,               intent(out), optional :: computationalCount(:)
-!     integer,               intent(out), optional :: totalLBound(:)
-!     integer,               intent(out), optional :: totalUBound(:)
-!     integer,               intent(out), optional :: totalCount(:)
-!     type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag
-!     integer,               intent(out), optional :: rc
+!     type (ESMF_StaggerLoc) intent(in),    optional   :: staggerloc
+!     integer,               intent(in),    optional   :: localDE
+!     <type> (ESMF_KIND_<kind>), pointer               :: farrayPtr(<rank>)
+!     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag
+!     integer,               intent(out),   optional   :: exclusiveLBound(:)
+!     integer,               intent(out),   optional   :: exclusiveUBound(:)
+!     integer,               intent(out),   optional   :: exclusiveCount(:)
+!     integer,               intent(out),   optional   :: computationalLBound(:)
+!     integer,               intent(out),   optional   :: computationalUBound(:)
+!     integer,               intent(out),   optional   :: computationalCount(:)
+!     integer,               intent(out),   optional   :: totalLBound(:)
+!     integer,               intent(out),   optional   :: totalUBound(:)
+!     integer,               intent(out),   optional   :: totalCount(:)
+!     integer,               intent(out),   optional   :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -13002,7 +13001,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     values in an {\tt ESMF\_Array} instead.  That interface supports the retrieval of
 !     coordinates up to 7D. 
 !
-!     Supported values for the <pointer argument> are: 
+!     Supported values for the farrayPtr argument are: 
 !     \begin{description}
 !     \item real(ESMF\_KIND\_R4), pointer :: farrayPtr(:)
 !     \item real(ESMF\_KIND\_R4), pointer :: farrayPtr(:,:)     
@@ -13026,6 +13025,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
@@ -13073,11 +13077,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !          \end{sloppypar}
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -13092,11 +13091,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
       subroutine ESMF_GridGetCoord1DR4(grid, coordDim, keywordEnforcer, &
-          staggerloc, localDE, farrayPtr, &
+          staggerloc, localDE, farrayPtr, datacopyflag, &
           exclusiveLBound, exclusiveUBound, &
           exclusiveCount, computationalLBound, computationalUBound, &
           computationalCount, totalLBound, totalUBound, totalCount, &
-          datacopyflag, rc)
+          rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
@@ -13105,6 +13104,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       integer,                intent(in), optional  :: localDE
       real(ESMF_KIND_R4), pointer                   :: farrayPtr(:)
+      type(ESMF_DataCopy_Flag),intent(in), optional :: datacopyflag
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -13114,7 +13114,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_DataCopy_Flag),    intent(in), optional :: datacopyflag
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -13138,6 +13137,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
@@ -13187,16 +13191,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOPI
+
 
     ! Local variables 
     type(ESMF_Array) :: array 
@@ -13382,11 +13382,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
       subroutine ESMF_GridGetCoord2DR4(grid, coordDim, keywordEnforcer,     &
-          staggerloc, localDE, farrayPtr,                                   &
+          staggerloc, localDE, farrayPtr, datacopyflag,                     &
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
-          totalLBound, totalUBound, totalCount,                             &
-          datacopyflag, rc)
+          totalLBound, totalUBound, totalCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -13395,6 +13394,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
       integer, intent(in),optional :: localDE
       real(ESMF_KIND_R4), pointer :: farrayPtr(:,:)
+      type(ESMF_DataCopy_Flag), intent(in),optional :: datacopyflag
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -13404,7 +13404,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -13429,6 +13428,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
@@ -13477,11 +13481,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -13671,11 +13670,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
       subroutine ESMF_GridGetCoord3DR4(grid, coordDim, keywordEnforcer,     &
-          staggerloc, localDE, farrayPtr,                                   & 
+          staggerloc, localDE, farrayPtr, datacopyflag,                     & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
-          totalLBound, totalUBound, totalCount,                             &      
-          datacopyflag, rc)
+          totalLBound, totalUBound, totalCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -13684,6 +13682,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer, intent(in),optional :: localDE
       real(ESMF_KIND_R4), pointer :: farrayPtr(:,:,:)
+      type(ESMF_DataCopy_Flag), intent(in),optional :: datacopyflag
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -13693,7 +13692,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -13718,6 +13716,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
@@ -13766,11 +13769,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -13968,19 +13966,19 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
       subroutine ESMF_GridGetCoord1DR8(grid, coordDim, keywordEnforcer,     &
-          staggerloc, localDE, farrayPtr,                                   & 
+          staggerloc, localDE, farrayPtr, datacopyflag,                     & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
-          totalLBound, totalUBound, totalCount,                             &
-          datacopyflag, rc)
+          totalLBound, totalUBound, totalCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       integer, intent(in) :: coordDim
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
-      integer, intent(in),optional         :: localDE
-      real(ESMF_KIND_R8), pointer :: farrayPtr(:)
+      type (ESMF_StaggerLoc), intent(in),optional   :: staggerloc
+      integer, intent(in),optional                  :: localDE
+      real(ESMF_KIND_R8), pointer                   :: farrayPtr(:)
+      type(ESMF_DataCopy_Flag), intent(in),optional :: datacopyflag
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -13990,7 +13988,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -14015,6 +14012,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
@@ -14063,11 +14065,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -14259,11 +14256,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
       subroutine ESMF_GridGetCoord2DR8(grid, coordDim, keywordEnforcer,     &
-          staggerloc, localDE, farrayPtr,                                   &
+          staggerloc, localDE, farrayPtr, datacopyflag,                     &
           exclusiveLBound, exclusiveUBound, exclusiveCount,                 &
           computationalLBound, computationalUBound, computationalCount,     &
-          totalLBound, totalUBound, totalCount,                             &
-          datacopyflag, rc)
+          totalLBound, totalUBound, totalCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -14272,6 +14268,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
       integer, intent(in),optional :: localDE
       real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)
+      type(ESMF_DataCopy_Flag), intent(in),optional :: datacopyflag
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -14281,7 +14278,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -14306,6 +14302,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
@@ -14354,11 +14355,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -14548,11 +14544,10 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetCoord()
       subroutine ESMF_GridGetCoord3DR8(grid, coordDim, keywordEnforcer, &
-          staggerloc, localDE, farrayPtr,                               & 
+          staggerloc, localDE, farrayPtr, datacopyflag,                 & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
-          totalLBound, totalUBound, totalCount,                         &
-          datacopyflag, rc)
+          totalLBound, totalUBound, totalCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -14561,6 +14556,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),optional :: staggerloc
       integer, intent(in),optional :: localDE
       real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:)
+      type(ESMF_DataCopy_Flag), intent(in),optional :: datacopyflag
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -14570,7 +14566,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -14595,6 +14590,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{farrayPtr}]
 !          The pointer to the coordinate data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the coord dimCount.
@@ -14643,11 +14643,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the coord dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid coordinate arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -15322,31 +15317,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !\label{API:GridGetItem}
 ! !IROUTINE: ESMF_GridGetItem - Get a DE-local Fortran array pointer to Grid item data and item bounds
 ! !INTERFACE:
-!      subroutine ESMF_GridGetItem(grid, itemflag,  keywordEnforcer, &
-!        staggerloc, localDE, <pointer argument>, 
-!        exclusiveLBound, exclusiveUBound, exclusiveCount, &
+!      subroutine ESMF_GridGetItem<rank><type><kind>(grid, itemflag,  keywordEnforcer, &
+!        staggerloc, localDE, farrayPtr, datacopyflag,                  &
+!        exclusiveLBound, exclusiveUBound, exclusiveCount,              &
 !        computationalLBound, computationalUBound, computationalCount,  &
-!        totalLBound, totalUBound, totalCount,                          &
-!        datacopyflag, rc)
+!        totalLBound, totalUBound, totalCount, rc)
 ! 
 ! !ARGUMENTS:
-!     type(ESMF_Grid),      intent(in)             :: grid
-!     type (ESMF_GridItem_Flag),intent(in)         :: itemflag
+!     type(ESMF_Grid),      intent(in)               :: grid
+!     type (ESMF_GridItem_Flag),intent(in)           :: itemflag
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     type (ESMF_StaggerLoc), intent(in),optional  :: staggerloc
-!     integer,              intent(in),  optional  :: localDE
-!     <pointer argument>, see below for supported values
-!     integer,              intent(out), optional  :: exclusiveLBound(:)
-!     integer,              intent(out), optional  :: exclusiveUBound(:)
-!     integer,              intent(out), optional  :: exclusiveCount(:)
-!     integer,              intent(out), optional  :: computationalLBound(:)
-!     integer,              intent(out), optional  :: computationalUBound(:)
-!     integer,              intent(out), optional  :: computationalCount(:)
-!     integer,              intent(out), optional  :: totalLBound(:)
-!     integer,              intent(out), optional  :: totalUBound(:)
-!     integer,              intent(out), optional  :: totalCount(:)
-!     type(ESMF_DataCopy_Flag),intent(in),optional :: datacopyflag
-!     integer,              intent(out), optional  :: rc
+!     type (ESMF_StaggerLoc), intent(in),  optional  :: staggerloc
+!     integer,              intent(in),    optional  :: localDE
+!     <type> (ESMF_KIND_<kind>), pointer             :: farrayPtr(<rank>)
+!     type(ESMF_DataCopy_Flag),intent(in), optional  :: datacopyflag
+!     integer,              intent(out),   optional  :: exclusiveLBound(:)
+!     integer,              intent(out),   optional  :: exclusiveUBound(:)
+!     integer,              intent(out),   optional  :: exclusiveCount(:)
+!     integer,              intent(out),   optional  :: computationalLBound(:)
+!     integer,              intent(out),   optional  :: computationalUBound(:)
+!     integer,              intent(out),   optional  :: computationalCount(:)
+!     integer,              intent(out),   optional  :: totalLBound(:)
+!     integer,              intent(out),   optional  :: totalUBound(:)
+!     integer,              intent(out),   optional  :: totalCount(:)
+!     integer,              intent(out),   optional  :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -15364,17 +15358,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     values in an {\tt ESMF\_Array} instead.  That interface supports the retrieval of
 !     coordinates up to 7D. 
 !
-!     Supported values for the <pointer argument> are: 
+!     Supported values for the farrayPtr argument are: 
 !     \begin{description}
 !     \item integer(ESMF\_KIND\_I4), pointer :: farrayPtr(:)
 !     \item integer(ESMF\_KIND\_I4), pointer :: farrayPtr(:,:)     
 !     \item integer(ESMF\_KIND\_I4), pointer :: farrayPtr(:,:,:)
-!     \item real(ESMF\_KIND\_R4), pointer :: farrayPtr(:)
-!     \item real(ESMF\_KIND\_R4), pointer :: farrayPtr(:,:)     
-!     \item real(ESMF\_KIND\_R4), pointer :: farrayPtr(:,:,:)
-!     \item real(ESMF\_KIND\_R8), pointer :: farrayPtr(:)
-!     \item real(ESMF\_KIND\_R8), pointer :: farrayPtr(:,:)     
-!     \item real(ESMF\_KIND\_R8), pointer :: farrayPtr(:,:,:)
+!     \item real(ESMF\_KIND\_R4),    pointer :: farrayPtr(:)
+!     \item real(ESMF\_KIND\_R4),    pointer :: farrayPtr(:,:)     
+!     \item real(ESMF\_KIND\_R4),    pointer :: farrayPtr(:,:,:)
+!     \item real(ESMF\_KIND\_R8),    pointer :: farrayPtr(:)
+!     \item real(ESMF\_KIND\_R8),    pointer :: farrayPtr(:,:)     
+!     \item real(ESMF\_KIND\_R8),    pointer :: farrayPtr(:,:,:)
 !     \end{description}
 !
 !     The arguments are:
@@ -15392,6 +15386,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[farrayPtr]
 !          The pointer to the item data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the grid dimCount.
@@ -15440,11 +15439,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
 !          \end{sloppypar}
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -15459,11 +15453,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
       subroutine ESMF_GridGetItem1DI4(grid, itemflag,  keywordEnforcer,      &
-          staggerloc, localDE, farrayPtr,                               & 
+          staggerloc, localDE, farrayPtr, datacopyflag,                 & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
-          totalLBound, totalUBound, totalCount,                         &
-          datacopyflag, rc)
+          totalLBound, totalUBound, totalCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in)            :: grid
@@ -15472,6 +15465,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer,                intent(in),  optional :: localDE
       integer(ESMF_KIND_I4), pointer                :: farrayPtr(:)
+      type(ESMF_DataCopy_Flag),    intent(in), optional  :: datacopyflag
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -15481,7 +15475,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_DataCopy_Flag),    intent(in), optional  :: datacopyflag
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -15505,6 +15498,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -15553,11 +15551,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -15717,11 +15710,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
       subroutine ESMF_GridGetItem2DI4(grid, itemflag,  keywordEnforcer,      &
-          staggerloc, localDE, farrayPtr,                               &
+          staggerloc, localDE, farrayPtr, datacopyflag,                 &
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
-          totalLBound, totalUBound, totalCount,                         &
-          datacopyflag, rc)
+          totalLBound, totalUBound, totalCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -15730,6 +15722,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       integer, intent(in), optional                 :: localDE
       integer(ESMF_KIND_I4), pointer :: farrayPtr(:,:)
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -15739,7 +15732,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -15764,6 +15756,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -15812,11 +15809,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -15977,11 +15969,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
       subroutine ESMF_GridGetItem3DI4(grid, itemflag,  keywordEnforcer,      &
-          staggerloc, localDE, farrayPtr,                               &
+          staggerloc, localDE, farrayPtr, datacopyflag,                 &
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
-          totalLBound, totalUBound, totalCount,                         &      
-          datacopyflag, rc)
+          totalLBound, totalUBound, totalCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -15990,6 +15981,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer, intent(in), optional :: localDE
       integer(ESMF_KIND_I4), pointer :: farrayPtr(:,:,:)
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -15999,7 +15991,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -16024,6 +16015,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -16072,11 +16068,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -16236,11 +16227,10 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
       subroutine ESMF_GridGetItem1DR4(grid, itemflag,  keywordEnforcer,      &
-          staggerloc, localDE, farrayPtr,                               & 
+          staggerloc, localDE, farrayPtr, datacopyflag,                 & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
-          totalLBound, totalUBound, totalCount,                         &
-          datacopyflag, rc)
+          totalLBound, totalUBound, totalCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in) :: grid
@@ -16249,6 +16239,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer,                intent(in), optional :: localDE
       real(ESMF_KIND_R4), pointer                   :: farrayPtr(:)
+      type(ESMF_DataCopy_Flag),    intent(in), optional :: datacopyflag
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -16258,7 +16249,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_DataCopy_Flag),    intent(in), optional :: datacopyflag
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -16282,6 +16272,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -16330,11 +16325,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -16493,11 +16483,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
       subroutine ESMF_GridGetItem2DR4(grid, itemflag,  keywordEnforcer,      &
-          staggerloc, localDE, farrayPtr,                               & 
+          staggerloc, localDE, farrayPtr, datacopyflag,                 & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
-          totalLBound, totalUBound, totalCount,                         &
-          datacopyflag, rc)
+          totalLBound, totalUBound, totalCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -16506,6 +16495,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       integer, intent(in), optional :: localDE
       real(ESMF_KIND_R4), pointer :: farrayPtr(:,:)
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -16515,7 +16505,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -16540,6 +16529,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -16588,11 +16582,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -16753,11 +16742,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
       subroutine ESMF_GridGetItem3DR4(grid, itemflag,  keywordEnforcer,      &
-          staggerloc, localDE, farrayPtr,                               &
+          staggerloc, localDE, farrayPtr, datacopyflag,                 &
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
-          totalLBound, totalUBound, totalCount,                         &      
-          datacopyflag, rc)
+          totalLBound, totalUBound, totalCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -16766,6 +16754,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer, intent(in),optional :: localDE
       real(ESMF_KIND_R4), pointer :: farrayPtr(:,:,:)
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -16775,7 +16764,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -16800,6 +16788,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -16848,11 +16841,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -17013,11 +17001,10 @@ endif
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
       subroutine ESMF_GridGetItem1DR8(grid, itemflag,  keywordEnforcer,       &
-          staggerloc, localDE, farrayPtr,                                & 
+          staggerloc, localDE, farrayPtr, datacopyflag,                  & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,              &
           computationalLBound, computationalUBound, computationalCount,  &
-          totalLBound, totalUBound, totalCount,                          &
-          datacopyflag, rc)
+          totalLBound, totalUBound, totalCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid),        intent(in) :: grid
@@ -17026,6 +17013,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer,                intent(in),optional :: localDE
       real(ESMF_KIND_R8), pointer                   :: farrayPtr(:)
+      type(ESMF_DataCopy_Flag),    intent(in), optional :: datacopyflag
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -17035,7 +17023,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_DataCopy_Flag),    intent(in), optional :: datacopyflag
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -17057,6 +17044,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          of predefined stagger locations. If not present, defaults to ESMF\_STAGGERLOC\_CENTER.
 !     \item[{localDE}]
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
+!     \item[{farrayPtr}]
+!          The pointer to the item data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -17105,13 +17099,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{farrayPtr}]
-!          The pointer to the item data.
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -17270,11 +17257,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
       subroutine ESMF_GridGetItem2DR8(grid, itemflag,  keywordEnforcer,      &
-          staggerloc, localDE, farrayPtr,                               & 
+          staggerloc, localDE, farrayPtr, datacopyflag,                 & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
-          totalLBound, totalUBound, totalCount,                         &
-          datacopyflag, rc)
+          totalLBound, totalUBound, totalCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -17283,6 +17269,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in), optional  :: staggerloc
       integer, intent(in),optional :: localDE
       real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -17292,7 +17279,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -17317,6 +17303,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -17365,11 +17356,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -17532,11 +17518,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_GridGetItem()
       subroutine ESMF_GridGetItem3DR8(grid, itemflag,  keywordEnforcer,      &
-          staggerloc, localDE, farrayPtr,                               & 
+          staggerloc, localDE, farrayPtr, datacopyflag,                 & 
           exclusiveLBound, exclusiveUBound, exclusiveCount,             &
           computationalLBound, computationalUBound, computationalCount, &
-          totalLBound, totalUBound, totalCount,                         &      
-          datacopyflag, rc)
+          totalLBound, totalUBound, totalCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -17545,6 +17530,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type (ESMF_StaggerLoc), intent(in),  optional :: staggerloc
       integer, intent(in),optional :: localDE
       real(ESMF_KIND_R8), pointer :: farrayPtr(:,:,:)
+      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer,        target, intent(out), optional :: exclusiveLBound(:)
       integer,        target, intent(out), optional :: exclusiveUBound(:)
       integer,        target, intent(out), optional :: exclusiveCount(:)
@@ -17554,7 +17540,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        target, intent(out), optional :: totalLBound(:)
       integer,        target, intent(out), optional :: totalUBound(:)
       integer,        target, intent(out), optional :: totalCount(:)
-      type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -17579,6 +17564,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The local DE to get the information for. {\tt [0,..,localDeCount-1]}
 !     \item[{farrayPtr}]
 !          The pointer to the item data.
+!     \item[{[datacopyflag]}]
+!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
+!          farrayPtr is a reference to the data in the Grid item arrays. 
+!          Please see Section~\ref{const:datacopyflag} for further description and a
+!          list of valid values. 
 !     \item[{[exclusiveLBound]}]
 !          Upon return this holds the lower bounds of the exclusive region.
 !          {\tt exclusiveLBound} must be allocated to be of size equal to the item dimCount.
@@ -17627,11 +17617,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          be allocated to be of size equal to the item dimCount.
 !          Please see Section~\ref{sec:grid:usage:bounds} for a description
 !          of the regions and their associated bounds and counts. 
-!     \item[{[datacopyflag]}]
-!          If not specified, default to {\tt ESMF\_DATACOPY\_REFERENCE}, in this case
-!          farrayPtr is a reference to the data in the Grid item arrays. 
-!          Please see Section~\ref{const:datacopyflag} for further description and a
-!          list of valid values. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
