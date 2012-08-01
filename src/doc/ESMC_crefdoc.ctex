@@ -1,4 +1,4 @@
-% $Id: ESMC_crefdoc.ctex,v 1.25 2012/07/12 20:20:36 rokuingh Exp $
+% $Id: ESMC_crefdoc.ctex,v 1.26 2012/08/01 23:34:03 rokuingh Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -98,16 +98,8 @@
 \addcontentsline{toc}{part}{Applications}
 \end{htmlonly}
 \part{Applications}
-
-\label{part:Applications}
-
-\input{Applications}
-
-%\input{ESMF_InfoC}
-
-\input{ESMF_Info}
-
-\input{ESMF_RegridWeightGen}
+\label{part:CApplications}
+\input{CApplications}
 
 \newpage
 \begin{htmlonly}
