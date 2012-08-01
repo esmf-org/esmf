@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.68 2012/07/31 23:37:43 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.69 2012/08/01 19:26:27 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@ program ESMF_RegridWeightGen
       real(ESMF_KIND_R8), pointer :: dstArea(:)
       real(ESMF_KIND_R8), pointer :: dstFrac(:), srcFrac(:)
       character(len=256) :: commandbuf1(7)
-      integer            :: commandbuf2(18)
+      integer            :: commandbuf2(20)
       integer            :: regridScheme
       integer            :: i, bigFac, xpets, ypets, xpart, ypart, xdim, ydim
       logical            :: wasCompacted, largeFileFlag
@@ -658,6 +658,8 @@ program ESMF_RegridWeightGen
 	if (userAreaFlag)   commandbuf2(16) = 1
         if (srcMissingValue) commandbuf2(17) = 1
         if (dstMissingValue) commandbuf2(18) = 1
+	if (useSrcMask) commandbuf2(19) = 1
+        if (useDstMask) commandbuf2(20) = 1
         
         call ESMF_VMBroadcast(vm, commandbuf2, 18, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
@@ -750,6 +752,15 @@ program ESMF_RegridWeightGen
            dstMissingValue=.false.
            useDstMask=.false.
         endif
+
+        if (commandbuf2(19) == 0) then
+           useSrcMask = .false.
+        endif
+
+        if (commandbuf2(20) == 0) then
+           useDstMask=.false.
+        endif
+
      endif
 
      ! Set flag to say if we're conservative
