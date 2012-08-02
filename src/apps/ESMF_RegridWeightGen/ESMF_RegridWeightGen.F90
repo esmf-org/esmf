@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.69 2012/08/01 19:26:27 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.70 2012/08/02 22:12:32 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -295,7 +295,6 @@ program ESMF_RegridWeightGen
          call ESMF_UtilGetArgIndex('--src_missingvalue', argindex=ind, rc=rc)
          if (ind == -1) then
 	    srcMissingValue = .false.
-            useSrcMask = .false.
          else
 	     srcMissingValue = .true.
              call ESMF_UtilGetArg(ind+1, argvalue=srcVarName)	   
@@ -323,7 +322,6 @@ program ESMF_RegridWeightGen
 	 call ESMF_UtilGetArgIndex('--dst_missingvalue', argindex=ind, rc=rc)
          if (ind == -1) then
 	    dstMissingValue = .false.
-            useDstMask = .false.
          else
 	     dstMissingValue = .true.
              call ESMF_UtilGetArg(ind+1, argvalue=dstVarName)	   
@@ -462,7 +460,14 @@ program ESMF_RegridWeightGen
             endif
          endif
 
+        ! Only set useSrcMask to false if srcMissingvalue is not given and the file type is
+        ! either GRIDSPEC or UGRID, same for useDstMask
+	if ((.not. srcMissingvalue) .and. (srcFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
+	    srcFileType == ESMF_FILEFORMAT_UGRID)) useSrcMask = .false.
 
+	if ((.not. dstMissingvalue) .and. (dstFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
+	    dstFileType == ESMF_FILEFORMAT_UGRID)) useDstMask = .false.
+ 
         ! Should I have only PetNO=0 to open the file and find out the size?
          if (srcFileType == ESMF_FILEFORMAT_SCRIP) then
 	   call ESMF_ScripInq(srcfile, grid_rank= srcrank, grid_dims=srcdims, rc=rc)
@@ -661,7 +666,7 @@ program ESMF_RegridWeightGen
 	if (useSrcMask) commandbuf2(19) = 1
         if (useDstMask) commandbuf2(20) = 1
         
-        call ESMF_VMBroadcast(vm, commandbuf2, 18, 0, rc=rc)
+        call ESMF_VMBroadcast(vm, commandbuf2, 20, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
      else
         call ESMF_VMBroadcast(vm, commandbuf1, 256*7, 0, rc=rc)
@@ -674,7 +679,7 @@ program ESMF_RegridWeightGen
         srcVarName = commandbuf1(6)
 	dstVarName = commandbuf1(7)
 
-        call ESMF_VMBroadcast(vm, commandbuf2, 18, 0, rc=rc)
+        call ESMF_VMBroadcast(vm, commandbuf2, 20, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 	srcFileType%fileformat = commandbuf2(1)
         if (commandbuf2(2)==1) then
@@ -743,14 +748,12 @@ program ESMF_RegridWeightGen
            srcMissingValue=.true.
         else
            srcMissingValue=.false.
-           useSrcMask = .false.
         endif
 
         if (commandbuf2(18) == 1) then
            dstMissingValue=.true.
         else
            dstMissingValue=.false.
-           useDstMask=.false.
         endif
 
         if (commandbuf2(19) == 0) then
@@ -1052,6 +1055,7 @@ program ESMF_RegridWeightGen
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
 	    unmappedaction=unmappedaction, &
 	    factorIndexList=factorIndexList, factorList=factorList, &
+            srcFracField=srcFracField, dstFracField=dstFracField, &
             regridmethod = methodflag, &
             polemethod = pole, regridPoleNPnts = poleptrs, &
 	    rc=rc)
@@ -1061,6 +1065,7 @@ program ESMF_RegridWeightGen
 	    srcMaskValues = maskvals, &
 	    unmappedaction=unmappedaction, &
 	    factorIndexList=factorIndexList, factorList=factorList, &
+            srcFracField=srcFracField, dstFracField=dstFracField, &
             regridmethod = methodflag, &
             polemethod = pole, regridPoleNPnts = poleptrs, &
 	    rc=rc)
