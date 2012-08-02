@@ -1,8 +1,10 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.41 2011/11/03 05:45:32 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.42 2012/08/02 20:21:36 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
+
+#define FILENAME "ESMF_ComplianceIC.F90"
 
 !-------------------------------------------------------------------------
 ! !DESCRIPTION:
@@ -77,14 +79,14 @@ module ESMF_ComplianceICMod
     call prefixString(comp, prefix=prefix, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     call ESMF_LogWrite(trim(prefix)//">START register compliance check.", &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     !---------------------------------------------------------------------------
@@ -95,20 +97,20 @@ module ESMF_ComplianceICMod
       phaseZeroFlag, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     if (phaseZeroFlag) then
       call ESMF_LogWrite(trim(prefix)//" phase Zero for Initialize registered.",&
         ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZEIC, &
         userRoutine=ic_init, phase=0, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     endif
     if (phaseCount == 0) then
@@ -116,21 +118,21 @@ module ESMF_ComplianceICMod
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     else
       write(output,*) " ",phaseCount," phase(s) of Initialize registered."
       call ESMF_LogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       do phase=1, phaseCount
         call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZEIC, &
           userRoutine=ic_init, phase=phase, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
       enddo
     endif
@@ -140,20 +142,20 @@ module ESMF_ComplianceICMod
       phaseZeroFlag, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     if (phaseZeroFlag) then
       call ESMF_LogWrite(trim(prefix)//" phase Zero for Run registered.",&
         ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUNIC, &
         userRoutine=ic_run, phase=0, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     endif
     if (phaseCount == 0) then
@@ -161,21 +163,21 @@ module ESMF_ComplianceICMod
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     else
       write(output,*) " ",phaseCount," phase(s) of Run registered."
       call ESMF_LogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       do phase=1, phaseCount
         call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUNIC, &
           userRoutine=ic_run, phase=phase, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
       enddo
     endif
@@ -185,20 +187,20 @@ module ESMF_ComplianceICMod
       phaseZeroFlag, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     if (phaseZeroFlag) then
       call ESMF_LogWrite(trim(prefix)//" phase Zero for Finalize registered.",&
         ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZEIC, &
         userRoutine=ic_final, phase=0, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     endif
     if (phaseCount == 0) then
@@ -206,21 +208,21 @@ module ESMF_ComplianceICMod
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     else
       write(output,*) " ",phaseCount," phase(s) of Finalize registered."
       call ESMF_LogWrite(trim(prefix)//trim(output), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       do phase=1, phaseCount
         call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZEIC, &
           userRoutine=ic_final, phase=phase, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
       enddo
     endif
@@ -232,7 +234,7 @@ module ESMF_ComplianceICMod
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
   end subroutine
@@ -260,13 +262,13 @@ module ESMF_ComplianceICMod
     call prefixString(comp, prefix=prefix, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     call ESMF_GridCompGet(comp, currentPhase=phase, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     !---------------------------------------------------------------------------
@@ -277,7 +279,7 @@ module ESMF_ComplianceICMod
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! compliance check importState
@@ -285,7 +287,7 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! compliance check exportState
@@ -293,14 +295,14 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! compliance check clock usage
     call clockUsageIncoming(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     write(output,*) ">STOP InitializePrologue for phase=", phase
@@ -308,7 +310,7 @@ module ESMF_ComplianceICMod
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! Stop Compliance Checking: InitializePrologue
@@ -319,7 +321,7 @@ module ESMF_ComplianceICMod
       phase=phase, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
    
     ccfDepth = ccfDepth - 1
@@ -331,14 +333,14 @@ module ESMF_ComplianceICMod
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! compliance check Component metadata
     call checkComponentMetadata(prefix, comp=comp, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! compliance check importState
@@ -346,7 +348,7 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! compliance check exportState
@@ -354,14 +356,14 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! compliance check clock usage
     call clockUsageOutgoing(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! compliance check internal Clock
@@ -369,7 +371,7 @@ module ESMF_ComplianceICMod
       mustMatchCurr=.false., mustReachStop=.false., rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! Component Attributes should be set up -> ready to output
@@ -378,7 +380,7 @@ module ESMF_ComplianceICMod
 !      attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
 !    if (ESMF_LogFoundError(rc, &
 !      line=__LINE__, &
-!      file=__FILE__)) &
+!      file=FILENAME)) &
 !      return  ! bail out
     
     
@@ -387,7 +389,7 @@ module ESMF_ComplianceICMod
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! Stop Compliance Checking: InitializeEpilogue
@@ -422,13 +424,13 @@ module ESMF_ComplianceICMod
     call prefixString(comp, prefix=prefix, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     call ESMF_GridCompGet(comp, currentPhase=phase, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     !---------------------------------------------------------------------------
@@ -439,7 +441,7 @@ module ESMF_ComplianceICMod
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! compliance check importState
@@ -447,7 +449,7 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! compliance check exportState
@@ -455,14 +457,14 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! compliance check clock usage
     call clockUsageIncoming(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! compliance check internal Clock
@@ -470,7 +472,7 @@ module ESMF_ComplianceICMod
       mustMatchCurr=.true., mustReachStop=.false., rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     write(output,*) ">STOP RunPrologue for phase=", phase
@@ -478,7 +480,7 @@ module ESMF_ComplianceICMod
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! Stop Compliance Checking: RunPrologue
@@ -489,7 +491,7 @@ module ESMF_ComplianceICMod
       phase=phase, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ccfDepth = ccfDepth - 1
@@ -501,7 +503,7 @@ module ESMF_ComplianceICMod
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! compliance check importState
@@ -509,7 +511,7 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! compliance check exportState
@@ -517,14 +519,14 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! compliance check clock usage
     call clockUsageOutgoing(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! compliance check internal Clock
@@ -532,7 +534,7 @@ module ESMF_ComplianceICMod
       mustMatchCurr=.false., mustReachStop=.true., rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     write(output,*) ">STOP RunEpilogue for phase=", phase
@@ -540,7 +542,7 @@ module ESMF_ComplianceICMod
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! Stop Compliance Checking: RunEpilogue
@@ -575,13 +577,13 @@ module ESMF_ComplianceICMod
     call prefixString(comp, prefix=prefix, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     call ESMF_GridCompGet(comp, currentPhase=phase, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     !---------------------------------------------------------------------------
@@ -592,7 +594,7 @@ module ESMF_ComplianceICMod
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! compliance check importState
@@ -600,7 +602,7 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! compliance check exportState
@@ -608,14 +610,14 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! compliance check clock usage
     call clockUsageIncoming(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     write(output,*) ">STOP FinalizePrologue for phase=", phase
@@ -623,7 +625,7 @@ module ESMF_ComplianceICMod
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! Stop Compliance Checking: FinalizePrologue
@@ -634,7 +636,7 @@ module ESMF_ComplianceICMod
       phase=phase, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ccfDepth = ccfDepth - 1
@@ -646,7 +648,7 @@ module ESMF_ComplianceICMod
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! compliance check importState
@@ -654,7 +656,7 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     ! compliance check exportState
@@ -662,14 +664,14 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     ! compliance check clock usage
     call clockUsageOutgoing(prefix, clock=clock, clockCopy=clockCopy, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     write(output,*) ">STOP FinalizeEpilogue for phase=", phase
@@ -677,7 +679,7 @@ module ESMF_ComplianceICMod
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     ! Stop Compliance Checking: FinalizeEpilogue
@@ -706,7 +708,7 @@ module ESMF_ComplianceICMod
     call ESMF_GridCompGet(comp, name=compName, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     prefix = "COMPLIANCECHECKER:"//repeat("|->", ccfDepth)//":"//trim(compName)//":"
@@ -742,7 +744,7 @@ module ESMF_ComplianceICMod
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       stateValid = .false.
     endif
@@ -753,13 +755,13 @@ module ESMF_ComplianceICMod
         itemCount=itemCount, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       call ESMF_LogWrite(trim(prefix)//" "//trim(referenceName)//" name: "// &
         trim(name), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       if (stateintent==ESMF_STATEINTENT_IMPORT) then
         tempString = "ESMF_STATEINTENT_IMPORT"
@@ -774,14 +776,14 @@ module ESMF_ComplianceICMod
         trim(tempString), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       write (tempString, *) itemCount
       call ESMF_LogWrite(trim(prefix)//" "//trim(referenceName)//" itemCount: "// &
         trim(tempString), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
 
       if (itemCount > 0) then
@@ -791,7 +793,7 @@ module ESMF_ComplianceICMod
           itemtypeList=stateitemtypeList, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
           
         do item=1, itemCount
@@ -804,7 +806,7 @@ module ESMF_ComplianceICMod
               " contains an ESMF_Array object!", ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
-              file=__FILE__)) &
+              file=FILENAME)) &
               return  ! bail out
             write (tempString, *) item, " [ARRAY] name: "
           else if (stateitemtypeList(item) == ESMF_STATEITEM_ARRAYBUNDLE) then
@@ -812,7 +814,7 @@ module ESMF_ComplianceICMod
               " contains an ESMF_ArrayBundle object!", ESMF_LOGMSG_WARNING, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
-              file=__FILE__)) &
+              file=FILENAME)) &
               return  ! bail out
             write (tempString, *) item, " [ARRAYBUNDLE] name: "
           else if (stateitemtypeList(item) == ESMF_STATEITEM_ROUTEHANDLE) then
@@ -830,7 +832,7 @@ module ESMF_ComplianceICMod
             ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
-            file=__FILE__)) &
+            file=FILENAME)) &
             return  ! bail out
           
           ! check metadata compliance            
@@ -840,47 +842,47 @@ module ESMF_ComplianceICMod
               field=field, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
-              file=__FILE__)) &
+              file=FILENAME)) &
               return  ! bail out
             call checkFieldMetadata(prefix, field=field, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
-              file=__FILE__)) &
+              file=FILENAME)) &
               return  ! bail out
           else if (stateitemtypeList(item) == ESMF_STATEITEM_FIELDBUNDLE) then
             call ESMF_StateGet(state, itemName=itemNameList(item), &
               fieldbundle=fieldbundle, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
-              file=__FILE__)) &
+              file=FILENAME)) &
               return  ! bail out
             call ESMF_FieldBundleGet(fieldbundle, fieldCount=fieldCount, rc=rc)
             if (ESMF_LogFoundError(rc, &
               line=__LINE__, &
-              file=__FILE__)) &
+              file=FILENAME)) &
               return  ! bail out
             do fitem=1, fieldCount
               call ESMF_FieldBundleGet(fieldbundle, fieldIndex=fitem, &
                 field=field, rc=rc)
               if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
-                file=__FILE__)) &
+                file=FILENAME)) &
                 return  ! bail out
               call ESMF_FieldGet(field, name=name, rc=rc)
               if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
-                file=__FILE__)) &
+                file=FILENAME)) &
                 return  ! bail out
               call ESMF_LogWrite(trim(prefix)//" in FieldBundle, Field name: "//&
                 trim(name), ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
-                file=__FILE__)) &
+                file=FILENAME)) &
                 return  ! bail out
               call checkFieldMetadata(prefix, field=field, rc=rc)
               if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
-                file=__FILE__)) &
+                file=FILENAME)) &
                 return  ! bail out
             enddo
           endif
@@ -911,7 +913,7 @@ module ESMF_ComplianceICMod
     call ESMF_GridCompGet(comp, comptype=comptype, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     if (comptype == ESMF_COMPTYPE_GRID) then
@@ -925,7 +927,7 @@ module ESMF_ComplianceICMod
         ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
 
       attributeName = "ShortName"
@@ -934,7 +936,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
       attributeName = "LongName"
@@ -943,7 +945,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
       attributeName = "Description"
@@ -952,7 +954,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
       return  ! bail out
       
       attributeName = "ModelType"
@@ -961,7 +963,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
       attributeName = "ReleaseDate"
@@ -970,7 +972,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
       attributeName = "PreviousVersion"
@@ -979,7 +981,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       
 #if 0
@@ -990,7 +992,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
       attributeName = "LongTitle"
@@ -999,7 +1001,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       
       attributeName = "Date"
@@ -1008,7 +1010,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       
       attributeName = "PresentationForm"
@@ -1017,7 +1019,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       
       attributeName = "DOI"
@@ -1026,7 +1028,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
 #endif
 
@@ -1036,7 +1038,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
       attributeName = "Name"
@@ -1045,7 +1047,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
       attributeName = "EmailAddress"
@@ -1054,7 +1056,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
       attributeName = "PhysicalAddress"
@@ -1063,7 +1065,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
       attributeName = "URL"
@@ -1072,7 +1074,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
     elseif (comptype == ESMF_COMPTYPE_CPL) then
@@ -1086,7 +1088,7 @@ module ESMF_ComplianceICMod
         ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
 
       attributeName = "LongName"
@@ -1095,7 +1097,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
       attributeName = "CplList"
@@ -1104,7 +1106,7 @@ module ESMF_ComplianceICMod
         rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
     else
@@ -1131,7 +1133,7 @@ module ESMF_ComplianceICMod
       isPresent=isPresent, convention=convention, purpose=purpose, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     if (.not.isPresent) then      
       ! attribute not present
@@ -1140,7 +1142,7 @@ module ESMF_ComplianceICMod
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     else if (itemCount == 0) then
       ! attribute present but not set
@@ -1149,7 +1151,7 @@ module ESMF_ComplianceICMod
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     else
       ! attribute present and set
@@ -1164,7 +1166,7 @@ module ESMF_ComplianceICMod
           ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
       else
         ! multi valued -> requires loop
@@ -1176,7 +1178,7 @@ module ESMF_ComplianceICMod
             ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
-            file=__FILE__)) &
+            file=FILENAME)) &
             return  ! bail out
         enddo
       endif
@@ -1207,7 +1209,7 @@ module ESMF_ComplianceICMod
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
 
     attributeName = "ShortName"
@@ -1216,7 +1218,7 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     attributeName = "LongName"
@@ -1225,7 +1227,7 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     attributeName = "StandardName"
@@ -1234,7 +1236,7 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     attributeName = "Units"
@@ -1243,7 +1245,7 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     attributeName = "Intent"
@@ -1252,7 +1254,7 @@ module ESMF_ComplianceICMod
       rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
   end subroutine
@@ -1275,7 +1277,7 @@ module ESMF_ComplianceICMod
       isPresent=isPresent, convention=convention, purpose=purpose, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     if (.not.isPresent) then      
       ! attribute not present
@@ -1284,7 +1286,7 @@ module ESMF_ComplianceICMod
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     else if (itemCount == 0) then
       ! attribute present but not set
@@ -1293,7 +1295,7 @@ module ESMF_ComplianceICMod
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     else
       ! attribute present and set
@@ -1308,7 +1310,7 @@ module ESMF_ComplianceICMod
           ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
       else
         ! multi valued -> requires loop
@@ -1320,7 +1322,7 @@ module ESMF_ComplianceICMod
             ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
-            file=__FILE__)) &
+            file=FILENAME)) &
             return  ! bail out
         enddo
       endif
@@ -1348,7 +1350,7 @@ module ESMF_ComplianceICMod
     call ESMF_ClockGetThis(clock, clockThis, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     if ((ESMF_ClockGetInit(clock) /= ESMF_INIT_CREATED) .or. &
       (clockThis == ESMF_NULL_POINTER)) then
@@ -1356,7 +1358,7 @@ module ESMF_ComplianceICMod
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       clockValid = .false.
     endif
@@ -1365,7 +1367,7 @@ module ESMF_ComplianceICMod
       clockCopy = ESMF_ClockCreate(clock, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     endif
     
@@ -1402,7 +1404,7 @@ module ESMF_ComplianceICMod
     call ESMF_ClockGetThis(clock, clockThis, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     if ((ESMF_ClockGetInit(clock) /= ESMF_INIT_CREATED) .or. &
       (clockThis == ESMF_NULL_POINTER)) clockValid = .false.
@@ -1416,7 +1418,7 @@ module ESMF_ComplianceICMod
         advanceCount=advanceCount, direction=direction, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     
       call ESMF_ClockGet(clockCopy, name=nameCopy, timeStep=timeStepCopy, &
@@ -1425,7 +1427,7 @@ module ESMF_ComplianceICMod
         advanceCount=advanceCountCopy, direction=directionCopy, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
       if (name /= nameCopy) clockModified = .true.
@@ -1444,21 +1446,21 @@ module ESMF_ComplianceICMod
           ESMF_LOGMSG_WARNING, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
       else
         call ESMF_LogWrite(trim(prefix)//" The incoming Clock was not modified.", &
           ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
       endif
       
       call ESMF_ClockDestroy(clockCopy, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
         
     endif
@@ -1498,7 +1500,7 @@ module ESMF_ComplianceICMod
     call ESMF_GridCompGet(comp, clockIsPresent=clockIsPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     if (.not.clockIsPresent) then
@@ -1508,7 +1510,7 @@ module ESMF_ComplianceICMod
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       return
       
@@ -1517,7 +1519,7 @@ module ESMF_ComplianceICMod
       call ESMF_GridCompGet(comp, clock=clockInternal, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     
       clockInternalValid = .true.
@@ -1530,7 +1532,7 @@ module ESMF_ComplianceICMod
           ESMF_LOGMSG_WARNING, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
         return
       endif
@@ -1550,7 +1552,7 @@ module ESMF_ComplianceICMod
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       return
     endif
@@ -1561,7 +1563,7 @@ module ESMF_ComplianceICMod
       advanceCount=advanceCount, direction=direction, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
     
     call ESMF_ClockGet(clockInternal, name=nameInt, timeStep=timeStepInt, &
@@ -1570,7 +1572,7 @@ module ESMF_ComplianceICMod
       advanceCount=advanceCountInt, direction=directionInt, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
-      file=__FILE__)) &
+      file=FILENAME)) &
       return  ! bail out
       
     clockMatch = .true. ! initialize
@@ -1580,7 +1582,7 @@ module ESMF_ComplianceICMod
         ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
       clockMatch = .false.
     endif
@@ -1591,7 +1593,7 @@ module ESMF_ComplianceICMod
           ESMF_LOGMSG_WARNING, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
         clockMatch = .false.
       endif
@@ -1602,7 +1604,7 @@ module ESMF_ComplianceICMod
         ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
-        file=__FILE__)) &
+        file=FILENAME)) &
         return  ! bail out
     endif
 
@@ -1612,14 +1614,14 @@ module ESMF_ComplianceICMod
           ESMF_LOGMSG_WARNING, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
       else
         call ESMF_LogWrite(trim(prefix)//" The internal Clock has run to its stopTime.", &
           ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rc, &
           line=__LINE__, &
-          file=__FILE__)) &
+          file=FILENAME)) &
           return  ! bail out
       endif
     endif
@@ -1661,7 +1663,7 @@ recursive subroutine ESMF_ComplianceICRegister(comp, rc)
   call registerIC(comp, rc)   ! simply call the internal IC module's register
   if (ESMF_LogFoundError(rc, &
     line=__LINE__, &
-    file=__FILE__)) &
+    file=FILENAME)) &
     return  ! bail out
   
 end subroutine
