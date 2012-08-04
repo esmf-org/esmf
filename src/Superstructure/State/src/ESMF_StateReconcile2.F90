@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.20 2012/07/21 02:53:16 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.21 2012/08/04 03:45:23 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@ module ESMF_StateReconcile2Mod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-  '$Id: ESMF_StateReconcile2.F90,v 1.20 2012/07/21 02:53:16 w6ws Exp $'
+  '$Id: ESMF_StateReconcile2.F90,v 1.21 2012/08/04 03:45:23 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
@@ -397,7 +397,7 @@ contains
     end if
 
     items_recv => null ()
-    call ESMF_ReconcileSendItems (vm,  &
+    call ESMF_ReconcileExchgItems (vm,  &
         id_info=id_info,  &
         recv_items=items_recv,  &
         rc=localrc)
@@ -413,7 +413,6 @@ contains
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 7 - Deserialize needs', ask=.false.)
     end if
-    call ESMF_VMBarrier (vm)
 
     do, i=0, npets-1
       if (debug) then
@@ -422,6 +421,10 @@ contains
             ', associated (items_recv(i)%item_buffer) =', associated (items_recv(i)%item_buffer)
       end if
       if (associated (items_recv(i)%item_buffer)) then
+        if (debug) then
+          print *, '    item_buffer(', lbound (items_recv(i)%item_buffer),  &
+              ',', ubound (items_recv(i)%item_buffer), ')'
+        end if
 	call ESMF_ReconcileDeserialize (state, vm,  &
             obj_buffer=items_recv(i)%item_buffer,  &
             vm_ids=id_info(i)%vmid,  &
@@ -876,6 +879,11 @@ end if
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
+    if (debug) then
+        print '(2a,(1x,4z2.2))', ESMF_METHOD,  &
+          ': first few ints =', iachar (obj_buffer(0: min (31, size (obj_buffer))))
+    end if
+
     needs_count = transfer (  &
         source=obj_buffer(0:ESMF_SIZEOF_DEFINT-1),  &
         mold  =needs_count)
@@ -896,10 +904,23 @@ end if
     do, i=1, needs_count
 
       ! Item type
+#if !defined (__G95__)
       stateitem_type = transfer (  &
           source=obj_buffer(buffer_offset:buffer_offset+ESMF_SIZEOF_DEFINT-1), &
           mold  = stateitem_type)
+#else
+      ! g95 snapshots prior to April 4, 2010 have a bug in TRANSFER.  The following works
+      ! around it.
+      stateitem_type = ESMF_Reconcile_g95_getint (  &
+          obj_buffer(buffer_offset:buffer_offset+ESMF_SIZEOF_DEFINT-1))
+#endif
+
       buffer_offset = buffer_offset+ESMF_SIZEOF_DEFINT
+
+      if (debug) then
+        print *, ESMF_METHOD,  &
+            ': stateitem_type =', stateitem_type, ', offset =', buffer_offset
+      end if
 
       ! Item itself
       select case (stateitem_type)
@@ -1465,6 +1486,202 @@ logical, parameter :: debug = .false.
     rc = localrc
 
   end subroutine ESMF_ReconcileExchgIDInfo
+    
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ReconcileExchgItems"
+!BOPI
+! !IROUTINE: ESMF_ReconcileExchgItems
+!
+! !INTERFACE:
+  subroutine ESMF_ReconcileExchgItems (vm, id_info, recv_items, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),              intent(in)  :: vm
+    type(ESMF_ReconcileIDInfo), intent(in)  :: id_info(0:)
+    type(ESMF_ItemBuffer),      pointer     :: recv_items(:) ! intent(out)
+    integer,                    intent(out) :: rc
+!
+! !DESCRIPTION:
+!
+!  Performs alltoallv communications of serialized data from offering PETs
+!  to PETs requesting items.
+!
+!   The arguments are:  						   
+!   \begin{description} 						   
+!   \item[vm]
+!     The current {\tt ESMF\_VM} (virtual machine).
+!   \item[id_info]
+!     Array of arrays of global VMId info.
+!   \item[recv_items]
+!     Array of arrays of serialized item data.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!EOPI
+
+    integer :: localrc
+    integer :: memstat
+    integer :: mypet, npets
+    integer :: i
+    integer :: itemcount, itemcount_global, itemcount_local
+    integer :: offset_pos
+
+    integer,   allocatable :: counts_recv(:),  counts_send(:)
+    integer,   allocatable :: offsets_recv(:), offsets_send(:)
+    character, allocatable :: buffer_recv(:),  buffer_send(:)
+
+    logical, parameter :: debug = .false.
+
+    localrc = ESMF_RC_NOT_IMPL
+
+    call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    if (size (id_info) /= npets) then
+      if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, &
+          msg="size (id_info) /= npets", &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+    end if
+
+!   Set up send counts, offsets, and buffer.
+
+    allocate (  &
+        counts_send (0:npets-1),  &
+        offsets_send(0:npets-1),  &
+        stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    do, i=0, npets-1
+      if (associated (id_info(i)%item_buffer)) then
+        counts_send(i) = size (id_info(i)%item_buffer)
+      else
+        counts_send(i) = 0
+      end if
+    end do
+
+    itemcount_local = counts_send(mypet)
+    itemcount_global = sum (counts_send)
+
+    allocate (  &
+        buffer_send(0:itemcount_global-1),  &
+        stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    offset_pos = 0
+    do, i=0, npets-1
+      itemcount = counts_send(i)
+      offsets_send(i) = offset_pos
+      if (associated (id_info(i)%item_buffer)) then
+        buffer_send(offset_pos:offset_pos+itemcount-1) = id_info(i)%item_buffer
+      end if
+      offset_pos = offset_pos + itemcount
+    end do
+
+!   Set up recv counts, offsets, and buffer.  Since there will be a different
+!   buffer size from each remote PET, an AllToAll communication is necessary
+!   for PETs to exchange the buffer sizes they are sending to each other.
+
+    allocate (  &
+        counts_recv(0:npets-1),  &
+        stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    call ESMF_VMAllToAll (vm,  &
+        sendData=counts_send, sendCount=1,  &
+        recvData=counts_recv, recvCount=1,  &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+    if (debug) then
+      print *, ESMF_METHOD, ': PET', mypet, ': serialized buffer sizes',  &
+          ': counts_send =', counts_send,  &
+          ', counts_recv =', counts_recv
+    end if
+
+    allocate (  &
+        offsets_recv(0:npets-1),  &
+        buffer_recv(0:sum (counts_recv)-1),  &
+        stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    offset_pos = 0
+    do, i=0, npets-1
+      itemcount = counts_recv(i)
+      offsets_recv(i) = offset_pos
+      offset_pos = offset_pos + itemcount
+    end do
+
+    ! AlltoAllV
+
+! if (debug) then
+!   open (42, file='pet'//iToS (myPet)//'send',  &
+!       status='unknown', action='write', form='unformatted', access='stream')
+!  write (42) 'counts_send:', counts_send
+!  write (42) 'offsets_send:', offsets_send
+!   write (42) buffer_send
+!   close (42)
+! end if
+
+    call ESMF_VMAllToAllV (vm,  &
+        sendData=buffer_send, sendCounts=counts_send, sendOffsets=offsets_send,  &
+        recvData=buffer_recv, recvCounts=counts_recv, recvOffsets=offsets_recv,  &
+        rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+! if (debug) then
+!   open (42, file='pet'//iToS (myPet)//'recv',  &
+!       status='unknown', action='write', form='unformatted', access='stream')
+!  write (42) counts_recv
+!  write (42) offsets_recv
+!   write (42) buffer_recv
+!   close (42)
+! end if
+
+    ! Copy recv buffers into recv_items
+
+    allocate (recv_items(0:npets-1), stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
+
+    do, i=0, npets-1
+      itemcount = counts_recv(i)
+      if (itemcount > 0) then
+        if (debug) then
+          print *, ESMF_METHOD, '(', myPet, '): ',  &
+              'allocating item_buffer(0:', itemcount-1, ')'
+        end if
+	allocate (  &
+            recv_items(i)%item_buffer(0:itemcount-1),  &
+            stat=memstat)
+	if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) return
+	offset_pos = offsets_recv(i)
+	recv_items(i)%item_buffer = buffer_recv(offset_pos:offset_pos+itemcount-1)
+      else
+        recv_items(i)%item_buffer => null ()
+      end if
+    end do
+
+    rc = localrc
+
+  end subroutine ESMF_ReconcileExchgItems
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1917,198 +2134,6 @@ logical, parameter :: debug = .false.
 ! call ESMF_VMBarrier (vm)
 
   end subroutine ESMF_ReconcileInitialize
-    
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ReconcileSendItems"
-!BOPI
-! !IROUTINE: ESMF_ReconcileSendItems
-!
-! !INTERFACE:
-  subroutine ESMF_ReconcileSendItems (vm, id_info, recv_items, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_VM),              intent(in)  :: vm
-    type(ESMF_ReconcileIDInfo), intent(in)  :: id_info(0:)
-    type(ESMF_ItemBuffer),      pointer     :: recv_items(:) ! intent(out)
-    integer,                    intent(out) :: rc
-!
-! !DESCRIPTION:
-!
-!  Performs alltoallv communications of serialized data from offering PETs
-!  to PETs requesting items.
-!
-!   The arguments are:  						   
-!   \begin{description} 						   
-!   \item[vm]
-!     The current {\tt ESMF\_VM} (virtual machine).
-!   \item[id_info]
-!     Array of arrays of global VMId info.
-!   \item[recv_items]
-!     Array of arrays of serialized item data.
-!   \item[rc]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!EOPI
-
-    integer :: localrc
-    integer :: memstat
-    integer :: mypet, npets
-    integer :: i
-    integer :: itemcount, itemcount_global, itemcount_local
-    integer :: offset_pos
-
-    integer,   allocatable :: counts_recv(:),  counts_send(:)
-    integer,   allocatable :: offsets_recv(:), offsets_send(:)
-    character, allocatable :: buffer_recv(:),  buffer_send(:)
-
-logical, parameter :: debug = .false.
-
-    localrc = ESMF_RC_NOT_IMPL
-
-    call ESMF_VMGet(vm, localPet=mypet, petCount=npets, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-
-    if (size (id_info) /= npets) then
-      if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, &
-          msg="size (id_info) /= npets", &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
-    end if
-
-!   Set up send counts, offsets, and buffer.
-
-    allocate (  &
-        counts_send (0:npets-1),  &
-        offsets_send(0:npets-1),  &
-        stat=memstat)
-    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-
-    do, i=0, npets-1
-      if (associated (id_info(i)%item_buffer)) then
-        counts_send(i) = size (id_info(i)%item_buffer)
-      else
-        counts_send(i) = 0
-      end if
-    end do
-
-    itemcount_local = counts_send(mypet)
-    itemcount_global = sum (counts_send)
-
-    allocate (  &
-        buffer_send(0:itemcount_global-1),  &
-        stat=memstat)
-    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-
-    offset_pos = 0
-    do, i=0, npets-1
-      itemcount = counts_send(i)
-      offsets_send(i) = offset_pos
-      if (associated (id_info(i)%item_buffer)) then
-        buffer_send(offset_pos:offset_pos+itemcount-1) = id_info(i)%item_buffer
-      end if
-      offset_pos = offset_pos + itemcount
-    end do
-
-!   Set up recv counts, offsets, and buffer.  Since there will be a different
-!   buffer size from each remote PET, an AllToAll communication is necessary
-!   for PETs to exchange the buffer sizes they are sending to each other.
-
-    allocate (  &
-        counts_recv(0:npets-1),  &
-        stat=memstat)
-    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-
-    call ESMF_VMAllToAll (vm,  &
-        sendData=counts_send, sendCount=1,  &
-        recvData=counts_recv, recvCount=1,  &
-        rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-    if (debug) then
-      print *, ESMF_METHOD, ': PET', mypet, ': serialized buffer sizes',  &
-          ': counts_send =', counts_send,  &
-          ', counts_recv =', counts_recv
-    end if
-
-    allocate (  &
-        offsets_recv(0:npets-1),  &
-        buffer_recv(0:sum (counts_recv)-1),  &
-        stat=memstat)
-    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-
-    offset_pos = 0
-    do, i=0, npets-1
-      itemcount = counts_recv(i)
-      offsets_recv(i) = offset_pos
-      offset_pos = offset_pos + itemcount
-    end do
-
-    ! AlltoAllV
-
-! if (debug) then
-!   open (42, file='pet'//iToS (myPet)//'send',  &
-!       status='unknown', action='write', form='unformatted', access='stream')
-!  write (42) 'counts_send:', counts_send
-!  write (42) 'offsets_send:', offsets_send
-!   write (42) buffer_send
-!   close (42)
-! end if
-
-    call ESMF_VMAllToAllV (vm,  &
-        sendData=buffer_send, sendCounts=counts_send, sendOffsets=offsets_send,  &
-        recvData=buffer_recv, recvCounts=counts_recv, recvOffsets=offsets_recv,  &
-        rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-
-! if (debug) then
-!   open (42, file='pet'//iToS (myPet)//'recv',  &
-!       status='unknown', action='write', form='unformatted', access='stream')
-!  write (42) counts_recv
-!  write (42) offsets_recv
-!   write (42) buffer_recv
-!   close (42)
-! end if
-
-    ! Copy recv buffers into recv_items
-
-    allocate (recv_items(0:npets-1), stat=memstat)
-    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
-
-    do, i=0, npets-1
-      itemcount = counts_recv(i)
-      if (itemcount > 0) then
-	allocate (  &
-            recv_items(i)%item_buffer(0:itemcount-1),  &
-            stat=memstat)
-	if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT,  &
-            rcToReturn=rc)) return
-	offset_pos = offsets_recv(i)
-	recv_items(i)%item_buffer = buffer_recv(offset_pos:offset_pos+itemcount-1)
-      else
-        recv_items(i)%item_buffer => null ()
-      end if
-    end do
-
-    rc = localrc
-
-  end subroutine ESMF_ReconcileSendItems
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2242,7 +2267,7 @@ logical, parameter :: debug = .false.
         if (inqflag == ESMF_NOINQUIRE) then
 	  obj_buffer(buffer_offset:buffer_offset+ESMF_SIZEOF_DEFINT-1) = transfer ( &
 	      source=stateitem%otype%ot,  &
-              mold  =obj_buffer(1:ESMF_SIZEOF_DEFINT))
+              mold  =obj_buffer)
         end if
         buffer_offset = buffer_offset + ESMF_SIZEOF_DEFINT
 
@@ -2366,6 +2391,13 @@ end if
 
     end do pass_loop
 
+    if (debug) then
+        print '(2a,i0,a,i0,a)', ESMF_METHOD,  &
+          ': obj_buffer(', lbound (obj_buffer), ',', ubound (obj_buffer), ')'
+        print '(2a,(1x,4z2.2))', ESMF_METHOD,  &
+          ': first few ints =', iachar (obj_buffer(0: min (31, size (obj_buffer))))
+    end if
+
     rc = ESMF_SUCCESS
 
   end subroutine ESMF_ReconcileSerialize
@@ -2436,6 +2468,19 @@ end if
       if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_ReconcileZapProxies
 
+#if defined (__G95__)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_Reconcileg95_getint"
+    function ESMF_Reconcile_g95_getint (bytes) result (int)
+      character, intent(in) :: bytes(:)
+      integer :: int
+
+      ! Workaround routine for g95 TRANSFER bug.
+
+      int = transfer (bytes, int)
+
+    end function ESMF_Reconcile_g95_getint
+#endif
 
 !------------------------------------------------------------------------------
 ! Debugging and support procedures
