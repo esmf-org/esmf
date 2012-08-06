@@ -10,7 +10,7 @@
 !  types like integer, character, logical, real4 and real8.
 !
 ! !REVISION HISTORY:
-!  CVS:$Id: pio_kinds.F90,v 1.6 2012/07/30 05:33:31 gold2718 Exp $
+!  CVS:$Id: pio_kinds.F90,v 1.7 2012/08/06 04:42:39 gold2718 Exp $
 !  CVS:$Name:  $
 
 ! !USES:

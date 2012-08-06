@@ -1,8 +1,9 @@
 #
-# File f90symbols.awk
+# File f90symbols.awk -- Gather a list of PIO public symbols
+# $\Id$
 #
-# Take an .F90 file and generate a list of CPP #define statements to allow
-# hiding of PIO public interfaces with the ESMFPIO_ prefix.
+# Take an .F90 file and generate a list of PIO public symbols (e.g., module
+# names and non-module subroutines).
 #
 # Example:
 # #define piolib_mod ESMFPIO_piolib_mod

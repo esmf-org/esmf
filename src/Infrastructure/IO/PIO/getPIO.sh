@@ -1,5 +1,8 @@
 #! /bin/bash
 
+# getPio.sh -- Bring in a new version of PIO, warning about possible changes.
+# $\Id$
+
 ##
 ## General syntax help function
 ## Usage: help <exit status>
@@ -215,7 +218,7 @@ for file in pio/*.F90; do
   res=$?
   if [ $res -ne 0 ]; then
     echo "ERROR: unable to create ${fname}"
-    rm -rf pio
+#    rm -rf pio
     exit $res
   fi
   # Don't need the original file anymore

@@ -144,7 +144,7 @@ subroutine new_pio_iosys_handles(iosystem_handles, iosystem)
   type(iosystem_desc_t), pointer :: iosystem(:)
 
   ! local
-  type(PIO_C_HANDLE_NODE), pointer :: new_pio_c_handle_node(:)
+  type(PIO_C_HANDLE_NODE), pointer :: new_pio_c_handle_node
   type(PIO_C_HANDLE_NODE), pointer :: pio_handle_node
   integer :: stat
   integer :: num_handles
@@ -153,36 +153,36 @@ subroutine new_pio_iosys_handles(iosystem_handles, iosystem)
   num_handles = size(iosystem_handles, 1)
 
   ! First, create a new iosystem handle node
-  allocate(new_pio_c_handle_node(1), stat=stat)
+  allocate(new_pio_c_handle_node, stat=stat)
   if (stat .ne. 0) then
     call piodie(__PIO_FILE__,__LINE__,       &
          'unable to allocate PIO_C_HANDLE_NODE')
   endif
-  nullify(new_pio_c_handle_node(1)%next)
+  nullify(new_pio_c_handle_node%next)
   ! Now, create the new iosystem_desc_t array
-  allocate(new_pio_c_handle_node(1)%PIO_descriptors(num_handles), stat=stat)
+  allocate(new_pio_c_handle_node%PIO_descriptors(num_handles), stat=stat)
   if (stat .ne. 0) then
     deallocate(new_pio_c_handle_node)
     call piodie(__PIO_FILE__,__LINE__,'unable to allocate iosystem_desc_t')
   endif
   ! Fill in C starting handle number and increment
-  new_pio_c_handle_node(1)%c_handle_start = PIO_c_handle_num
+  new_pio_c_handle_node%c_handle_start = PIO_c_handle_num
   PIO_c_handle_num = PIO_c_handle_num + num_handles
   ! Find the end of the chain and insert new node
   if (.not. associated(PIO_Intracom_handles)) then
-    PIO_Intracom_handles => new_pio_c_handle_node(1)
+    PIO_Intracom_handles => new_pio_c_handle_node
   else
     pio_handle_node => PIO_Intracom_handles
     do while (associated(pio_handle_node%next))
       pio_handle_node => pio_handle_node%next
     end do
-    pio_handle_node%next => new_pio_c_handle_node(1)
+    pio_handle_node%next => new_pio_c_handle_node
   end if
   ! Set the PIO iosystem_desc_t output
-  iosystem => new_pio_c_handle_node(1)%PIO_descriptors
+  iosystem => new_pio_c_handle_node%PIO_descriptors
   ! Fill in the c handle numbers
   do i = 1, num_handles
-    iosystem_handles(i) = new_pio_c_handle_node(1)%c_handle_start + i
+    iosystem_handles(i) = new_pio_c_handle_node%c_handle_start + i
   end do
 
 end subroutine new_pio_iosys_handles

@@ -1,5 +1,6 @@
 #
-# File cppsymbols.awk
+# File cppsymbols.awk -- Create a header file for PIO public C++ interfaces
+# $\Id$
 #
 # Take a C++ header file and generate a list of CPP #define statements to allow
 # hiding of PIO public interfaces with the ESMFPIO_ prefix.
