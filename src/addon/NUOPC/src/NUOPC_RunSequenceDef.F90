@@ -1,4 +1,4 @@
-! $Id: NUOPC_RunSequenceDef.F90,v 1.5 2012/05/02 00:27:38 w6ws Exp $
+! $Id: NUOPC_RunSequenceDef.F90,v 1.6 2012/08/06 22:05:59 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_RunSequenceDef.F90"
 
@@ -512,7 +512,7 @@ print *, "silly time loop"
     
     if (.not.associated(runElement%next)) then
       ! "ENDDO" element
-print *, "found ENDDO element"
+!print *, "found ENDDO element"
       ! advance the clock and check for stop time
       call ESMF_ClockAdvance(clock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

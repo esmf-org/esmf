@@ -1,4 +1,4 @@
-! $Id: NUOPC_Driver.F90,v 1.4 2012/08/06 21:52:13 theurich Exp $
+! $Id: NUOPC_Driver.F90,v 1.5 2012/08/06 22:05:59 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Driver.F90"
 
@@ -493,7 +493,7 @@ module NUOPC_Driver
       endif
     enddo
         
-#define DEBUGPRINT
+#define DEBUGPRINT____disable
 #ifdef DEBUGPRINT
     ! print the entire runSeq structure
     call NUOPC_RunSequencePrint(is%wrap%runSeq, rc=rc)
@@ -563,7 +563,6 @@ module NUOPC_Driver
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
       ! now interpret and act on the current runElement
-#define DEBUGPRINT
 #ifdef DEBUGPRINT
       print *, runElement%i, runElement%j, runElement%phase
       call NUOPC_ClockPrintCurrTime(runElement%runSeq%clock, &
