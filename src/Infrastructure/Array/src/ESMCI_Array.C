@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.156 2012/07/27 02:28:41 gold2718 Exp $
+// $Id: ESMCI_Array.C,v 1.157 2012/08/06 01:23:59 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.156 2012/07/27 02:28:41 gold2718 Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.157 2012/08/06 01:23:59 gold2718 Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2583,13 +2583,15 @@ int Array::read(
 //
   Array *array,                   // in    - Array
   char  *file,                    // in    - name of file being read
-  char  *variableName,            // in    - start of halo region
+  char  *variableName,            // in    - optional variable name
   int   *timeslice,               // in    - timeslice option
   ESMC_IOFmtFlag *iofmt           // in    - IO format flag
   ){
 //
 // !DESCRIPTION:
-//    Print details of Array object
+//   Read Array data from file and put it into an ESMF_Array object.
+//   For this API to be functional, the environmentvariable ESMF_PIO
+//   should be set to "internal" when the ESMF library is built.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -2602,9 +2604,10 @@ int Array::read(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     return rc;
   }
-  localrc = newIO->addArray(array, variableName);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    return rc;
+  // For here on, we have to be sure to clean up before returning
+  if (ESMF_SUCCESS == localrc) {
+    localrc = newIO->addArray(array, variableName);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
   }
   // Set optional parameters which are not optional at next layer
   if ((ESMC_IOFmtFlag *)NULL != iofmt) {
@@ -2612,14 +2615,24 @@ int Array::read(
   } else {
     localiofmt = ESMF_IOFMT_NETCDF;
   }
-  // Call the IO read function
-  localrc = newIO->read(file, &localiofmt, timeslice);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    return rc;
+  // It is an error to supply a variable name if not in NetCDF mode
+  if ((ESMF_IOFMT_NETCDF != localiofmt) &&
+      ((char *)NULL != variableName) && (strlen(variableName) > 0)) {
+    ESMC_LogDefault.Write("Array variable name not allowed in binary mode",
+                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+    return ESMF_RC_ARG_BAD;
+  }
+  if (ESMF_SUCCESS == localrc) {
+    // Call the IO read function
+    localrc = newIO->read(file, &localiofmt, timeslice);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
   }
 
-  // return successfully
-  rc = ESMF_SUCCESS;
+  // cleanup
+  IO::destroy(&newIO);
+  newIO == (IO *)NULL;
+
+  // return
   return rc;
 }
 //-----------------------------------------------------------------------------
@@ -2640,51 +2653,60 @@ int Array::write(
 // !ARGUMENTS:
 //
   Array *array,                   // in    - Array
-  char  *file,                    // in    - name of file being read
-  char  *variableName,            // in    - start of halo region
-  bool  *append,                  // in    - append as group
+  char  *file,                    // in    - name of file being written
+  char  *variableName,            // in    - optional variable name
+  bool  append,                   // in    - append array to file
   int   *timeslice,               // in    - timeslice option
   ESMC_IOFmtFlag *iofmt           // in    - IO format flag
   ){
 //
 // !DESCRIPTION:
-//    Print details of Array object
+//   Write Array data into a file. For this API to be functional, the 
+//   environment variable {\tt ESMF\_PIO} should be set to "internal" when 
+//   the ESMF library is built.
 //
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  bool localappend;
   ESMC_IOFmtFlag localiofmt;
 
   IO *newIO = IO::create(&localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     return rc;
   }
-  localrc = newIO->addArray(array, variableName);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    return rc;
+  // From now on, we have to be sure to clean up before returning
+  if (ESMF_SUCCESS == localrc) {
+    localrc = newIO->addArray(array, variableName);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
   }
   // Set optional parameters which are not optional at next layer
-  if ((bool *)NULL != append) {
-    localappend = *append;
-  } else {
-    localappend = false;
-  }
   if ((ESMC_IOFmtFlag *)NULL != iofmt) {
     localiofmt = *iofmt;
   } else {
     localiofmt = ESMF_IOFMT_NETCDF;
   }
-  // Call the IO read function
-  localrc = newIO->write(file, &localiofmt, &localappend, timeslice);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    return rc;
+  if (ESMF_SUCCESS == localrc) {
+    // It is an error to supply a variable name if not in NetCDF mode
+    if ((ESMF_IOFMT_NETCDF != localiofmt) &&
+        ((char *)NULL != variableName) && (strlen(variableName) > 0)) {
+      ESMC_LogDefault.Write("Array variable name not allowed in binary mode",
+                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+      rc = ESMF_RC_ARG_BAD;
+    }
+  }
+  if (ESMF_SUCCESS == localrc) {
+    // Call the IO read function
+    localrc = newIO->write(file, &localiofmt, append, timeslice);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
   }
 
-  // return successfully
-  rc = ESMF_SUCCESS;
+  // cleanup
+  IO::destroy(&newIO);
+  newIO == (IO *)NULL;
+
+  // return 
   return rc;
 }
 //-----------------------------------------------------------------------------
