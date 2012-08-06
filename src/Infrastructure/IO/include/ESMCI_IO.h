@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.h,v 1.10 2012/07/23 20:20:54 gold2718 Exp $
+// $Id: ESMCI_IO.h,v 1.11 2012/08/06 01:25:41 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -141,7 +141,7 @@ namespace ESMCI {
     // This version more closely matches the functionality in the ESMF
     // interface
     int write(const char * const file,
-              ESMC_IOFmtFlag *iofmt, bool *append,
+              ESMC_IOFmtFlag *iofmt, bool append,
               int *timeslice = NULL);
 
     // An atomic write function which transparently handles open and close

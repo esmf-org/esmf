@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.75 2012/07/27 02:28:39 gold2718 Exp $
+// $Id: ESMCI_Array.h,v 1.76 2012/08/06 01:22:37 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -311,7 +311,7 @@ namespace ESMCI {
     static bool match(Array const *array1, Array const *array2, int *rc=NULL);
     static int read(Array *array, char *file, char *variableName,
          int *timeslice, ESMC_IOFmtFlag *iofmt);
-    static int write(Array *array, char *file, char *variableName, bool *append,
+    static int write(Array *array, char *file, char *variableName, bool append,
          int *timeslice, ESMC_IOFmtFlag *iofmt);
     int print() const;
     int validate() const;
