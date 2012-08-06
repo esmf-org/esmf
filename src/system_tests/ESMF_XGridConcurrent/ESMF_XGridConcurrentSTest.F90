@@ -1,7 +1,7 @@
-! $Id: ESMF_XGridConcurrentSTest.F90,v 1.17 2012/08/06 18:27:35 feiliu Exp $
+! $Id: ESMF_XGridConcurrentSTest.F90,v 1.18 2012/08/06 18:28:48 feiliu Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
