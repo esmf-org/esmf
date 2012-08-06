@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.C,v 1.15 2012/07/23 20:21:04 gold2718 Exp $
+// $Id: ESMCI_IO.C,v 1.16 2012/08/06 01:26:54 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -54,7 +54,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO.C,v 1.15 2012/07/23 20:21:04 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_IO.C,v 1.16 2012/08/06 01:26:54 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -333,7 +333,7 @@ int IO::write(
 // !ARGUMENTS:
   char const * const file,        // (in)    - name of file being read
   ESMC_IOFmtFlag *iofmt,          // (in)    - IO format flag
-  bool *append,                   // (in)    - IO append flag
+  bool append,                    // (in)    - IO append flag
   int   *timeslice                // (in)    - timeslice option
   ) {
 // !DESCRIPTION:
@@ -348,7 +348,7 @@ int IO::write(
   PRINTPOS;
   // Open the file
   IOReadFlag readflag = IO_NO_READ;
-  if (((bool *)NULL != append) && (*append)) {
+  if (append) {
     iowriteflag = IO_APPEND;
   } else {
     iowriteflag = IO_TRUNCATE;
@@ -679,6 +679,12 @@ int IO::close(void
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
       return rc;
     }
+    if (ESMF_SUCCESS == localrc) {
+      ioHandler->close();
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+        return rc;
+      }
+    }
   } else {
     localrc = ESMC_RC_FILE_CLOSE;
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
@@ -754,6 +760,34 @@ int IO::addArray(
   rc = localrc;
   return (rc);
 }  // end IO::addArray
+//-------------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO::clear()"
+//BOP
+// !IROUTINE:  IO::clear - Clear all objects from this IO's I/O queue
+//
+// !INTERFACE:
+void IO::clear(void) {
+// !DESCRIPTION:
+//      Clear all objects from this IO's I/O queue (e.g., arrays's, attributes)
+//      The IO_Handler object belonging to this is not affected
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+  IO_ObjectContainer *obj;
+
+  PRINTPOS;
+  // Clear out the objects list.
+  while (!objects.empty()) {
+    obj = objects.back();
+    objects.pop_back();
+    delete obj;
+  }
+}  // end IO::close
 //-------------------------------------------------------------------------
 
 }  // end namespace ESMCI
