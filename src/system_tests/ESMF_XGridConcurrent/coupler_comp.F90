@@ -1,4 +1,4 @@
-! $Id: coupler_comp.F90,v 1.11 2012/08/06 17:23:44 feiliu Exp $
+! $Id: coupler_comp.F90,v 1.12 2012/08/06 18:27:35 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -93,15 +93,14 @@ module coupler_comp
 
     ! Local variables
     integer :: itemcount
-    type(ESMF_Field) :: F_lnd, F_ocn, F_atm
+    type(ESMF_Field) :: F_lnd, F_atm
     type(ESMF_VM) :: vm
-    type(ESMF_Grid)  :: lnd_grid, ocn_grid, atm_grid
+    type(ESMF_Grid)  :: lnd_grid, atm_grid
     type(ESMF_XGrid) :: xgrid
     type(ESMF_Field) :: flux
     type(ESMF_RouteHandle) :: rh1, rh2, rh3
     real(ESMF_KIND_R8), pointer         :: xfptr(:)
     integer :: localPet
-    character(len=64)    :: focn(1)
     integer              :: cnt
 
     ! Initialize return code
@@ -129,14 +128,8 @@ module coupler_comp
     call ESMF_StateGet(exportState, "F_atm", F_atm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    call ESMF_StateGet(importState, itemSearch='F_ocn', nestedFlag=.true., itemCount=cnt, itemNameList=focn, rc=rc)
-    if(cnt .ge. 1 ) print *, '*******************', localPet, focn
-
     ! Get source Fields out of import state
-    call ESMF_StateGet(importState, itemName="ocean_export/F_ocn", field=F_ocn, &
-        rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGet(importState, itemName="land_export/F_lnd", field=F_lnd, &
+    call ESMF_StateGet(importState, itemName="F_lnd", field=F_lnd, &
         rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -144,13 +137,11 @@ module coupler_comp
     ! - grab grids
     call ESMF_FieldGet(F_lnd, grid=lnd_grid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_FieldGet(F_ocn, grid=ocn_grid, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_FieldGet(F_atm, grid=atm_grid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Finally ready to do an flux exchange from A side to B side
-    xgrid = ESMF_XGridCreate((/ocn_grid, lnd_grid/), (/atm_grid/), &
+    xgrid = ESMF_XGridCreate((/lnd_grid/), (/atm_grid/), &
         sideAMaskValues=(/2,3,4/), &
         rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -168,19 +159,13 @@ module coupler_comp
     call ESMF_RoutehandleSet(rh1, name='lnd2xgrid', rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    call ESMF_FieldRegridStore(xgrid, F_ocn, flux, &
-      routehandle=rh2, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_RoutehandleSet(rh2, name='ocn2xgrid', rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
     call ESMF_FieldRegridStore(xgrid, flux, F_atm, &
       routehandle=rh3, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_RoutehandleSet(rh3, name='xgrid2atm', rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    call ESMF_StateAdd(exportState, (/rh1,rh2,rh3/), rc=rc)
+    call ESMF_StateAdd(exportState, (/rh1,rh3/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateAdd(exportState, (/flux/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -201,8 +186,8 @@ module coupler_comp
     integer, intent(out) :: rc
 
     ! Local variables
-    type(ESMF_Field) :: F_lnd, F_ocn, F_atm, flux
-    type(ESMF_Grid)  :: lnd_grid, ocn_grid, atm_grid
+    type(ESMF_Field) :: F_lnd, F_atm, flux
+    type(ESMF_Grid)  :: lnd_grid, atm_grid
     type(ESMF_RouteHandle) :: rh1, rh2, rh3
 
     ! Initialize return code
@@ -211,10 +196,7 @@ module coupler_comp
     print *, "User Coupler Run starting"
 
     ! Get source Fields out of import state
-    call ESMF_StateGet(importState, itemName="ocean_export/F_ocn", field=F_ocn, &
-        rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGet(importState, itemName="land_export/F_lnd", field=F_lnd, &
+    call ESMF_StateGet(importState, itemName="F_lnd", field=F_lnd, &
         rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -226,15 +208,11 @@ module coupler_comp
 
     call ESMF_StateGet(exportState, "lnd2xgrid", routehandle=rh1, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGet(exportState, "ocn2xgrid", routehandle=rh2, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateGet(exportState, "xgrid2atm", routehandle=rh3, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! compute regridding
     call ESMF_FieldRegrid(F_lnd, flux, routehandle=rh1, zeroregion=ESMF_REGION_EMPTY, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_FieldRegrid(F_ocn, flux, routehandle=rh2, zeroregion=ESMF_REGION_EMPTY, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_FieldRegrid(flux, F_atm, routehandle=rh3, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -267,8 +245,6 @@ module coupler_comp
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateGet(exportState, "lnd2xgrid", rh1, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateGet(exportState, "ocn2xgrid", rh2, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateGet(exportState, "xgrid2atm", rh3, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -283,8 +259,6 @@ module coupler_comp
   
     ! Release resources stored for the ArrayRedist.
     call ESMF_FieldRegridRelease(routehandle=rh1, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_FieldRegridRelease(routehandle=rh2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_FieldRegridRelease(routehandle=rh3, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

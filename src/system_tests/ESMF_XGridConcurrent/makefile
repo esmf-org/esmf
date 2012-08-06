@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2012/05/14 19:34:25 feiliu Exp $ 
+# $Id: makefile,v 1.3 2012/08/06 18:27:35 feiliu Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -13,7 +13,7 @@ SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_XGridConcurrentSTest
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.
-SYSTEM_TESTS_OBJ      = util_mod.o atmos_comp.o land_comp.o ocean_comp.o coupler_comp.o
+SYSTEM_TESTS_OBJ      = util_mod.o atmos_comp.o land_comp.o coupler_comp.o
 
 SYSTEM_TESTS_RUN      = RUN_XGridConcurrent
 

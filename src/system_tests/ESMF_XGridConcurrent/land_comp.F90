@@ -1,4 +1,4 @@
-! $Id: land_comp.F90,v 1.11 2012/08/06 17:23:44 feiliu Exp $
+! $Id: land_comp.F90,v 1.12 2012/08/06 18:27:35 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -113,10 +113,6 @@ module land_comp
     if (rc/=ESMF_SUCCESS) return ! bail out
     print *, "Land Init starting, localPet =", localPet
 
-    land_export = ESMF_StateCreate(name="land_export",  &
-                                   stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
-    if (rc /= ESMF_SUCCESS) return
-    
     ! Create the source Field and add it to the export State
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -128,9 +124,7 @@ module land_comp
     field = ESMF_FieldCreate(arrayspec=arrayspec, grid=grid, &
       indexflag=ESMF_INDEX_GLOBAL, name="F_lnd", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(land_export, (/field/), rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_StateAdd(exportState, (/land_export/), rc=rc)
+    call ESMF_StateAdd(exportState, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
     print *, "land Init returning"
@@ -162,7 +156,6 @@ module land_comp
     pi = 3.14159d0
 
     ! Get the source Field from the export State
-    call ESMF_StatePrint(exportState,rc=rc)
     call ESMF_StateGet(exportState, "F_lnd", field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -198,6 +191,7 @@ module land_comp
     ! Local variables
     type(ESMF_Grid) :: grid
     type(ESMF_Field) :: field
+    type(ESMF_State) :: state
     
     ! Initialize return code
     rc = ESMF_SUCCESS

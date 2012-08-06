@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridConcurrentSTest.F90,v 1.16 2012/07/20 22:57:31 feiliu Exp $
+! $Id: ESMF_XGridConcurrentSTest.F90,v 1.17 2012/08/06 18:27:35 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.
@@ -8,25 +8,18 @@
 !
 ! !DESCRIPTION:
 ! System test XGridConcurrent.
-!    Three gridded components and one coupler component, one-way coupling,
-!    all gridded components are executed concurrently. The three gridded components
-!    are idealized atmosphere, land, and ocean component with ocean and land on
-!    one side of the exchange grid, while atmosphere component on the other side.
+!    Two gridded components and one coupler component, one-way coupling,
+!    all gridded components are executed concurrently. The two gridded components
+!    are idealized atmosphere and land.
 !    Exchange grid is created inside the coupler component.
 !
-!    Atmosphere component runs on 4 PETs and defines a 2D souserrce Field
-!    2x2. Land gridded component defines another 2D souserrce Field
-!    1x2 but runs on 2 PETs. Ocean component again runs on 4 PETs and defines
-!    a 2D souserrce Field 2x2.
+!    Atmosphere component runs on 4 PETs and defines a 2D source Field.
+!    Land gridded component defines another 2D souserrce Field but runs on 6 PETs. 
 !
-!    Both ocean and land initialize source Fields to a constant function:
-!    1.0. The coupler runs on all PETs and has access to atmosphere, land,
-!    and ocean temperature Fields. The coupler uses the exchange grid to do a
-!    SMM from source Fields to destination Field.
-!
-!    Finally the atmosphere gridded component compares the data stored in the
-!    destination Field to the exact solution of the above function as a measure
-!    of the accuracy of the XGrid methods.
+!    Land initialize source Fields to cosine hill functions.
+!    The coupler runs on all PETs and has access to atmosphere and land
+!    temperature Fields. The coupler uses the exchange grid to do a
+!    sparse matrix matmul from source Field to destination Field.
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}
@@ -42,7 +35,6 @@ program ESMF_XGridConcurrentSTest
 
   use atmos_comp, only : atmos_setvm, atmos_register
   use land_comp,  only : land_setvm,  land_register
-  use ocean_comp, only : ocean_setvm, ocean_register
   use coupler_comp, only : usercpl_setvm, usercpl_register
 
   implicit none
@@ -52,9 +44,9 @@ program ESMF_XGridConcurrentSTest
   character(len=ESMF_MAXSTR) :: cname1, cname2, cname3, cplname
   integer :: i
   type(ESMF_VM):: vm
-  type(ESMF_State) :: land_export, ocean_export, landocn_export
+  type(ESMF_State) :: land_export
   type(ESMF_State) :: atmos_import
-  type(ESMF_GridComp) :: atmos, land, ocean
+  type(ESMF_GridComp) :: atmos, land
   type(ESMF_CplComp) :: cpl
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -101,16 +93,8 @@ program ESMF_XGridConcurrentSTest
   ! Create the 3 model components and coupler
   cname1 = "land"
   ! use petList to define land on 2 PETs
-  land = ESMF_GridCompCreate(name=cname1, petlist=(/0,1/), rc=localrc)
+  land = ESMF_GridCompCreate(name=cname1, petlist=(/0,1,2,3,4,5/), rc=localrc)
   print *, "Created component ", trim(cname1), "rc =", localrc
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-
-  cname2 = "ocean"
-  ! use petList to define ocean on 4 PETs
-  ocean = ESMF_GridCompCreate(name=cname2, petlist=(/2,3,4,5/), rc=localrc)
-  print *, "Created component ", trim(cname2), "rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -173,23 +157,6 @@ program ESMF_XGridConcurrentSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  call ESMF_GridCompSetVM(ocean, userRoutine=ocean_setvm, userRc=userrc, rc=localrc)
-  print *, "ocean SetVM finished, rc= ", localrc
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  call ESMF_GridCompSetServices(ocean, userRoutine=ocean_register, userRc=userrc, rc=localrc)
-  print *, "ocean SetServices finished, rc= ", localrc
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-
   call ESMF_CplCompSetVM(cpl, userRoutine=usercpl_setvm, userRc=userrc, rc=localrc)
   print *, "Cpl SetVM finished, rc= ", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -213,26 +180,16 @@ program ESMF_XGridConcurrentSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  ! nestted state with land and ocean attached inside
-  landocn_export = ESMF_StateCreate(name="landocn_export",  &
+  ! land export state
+  land_export = ESMF_StateCreate(name="land_export",  &
                                     stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! land export state
-  call ESMF_GridCompInitialize(land, exportState=landocn_export, userRc=userrc, rc=localrc)
+  call ESMF_GridCompInitialize(land, exportState=land_export, userRc=userrc, rc=localrc)
   print *, "Land Initialize finished, rc =", localrc
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-
-  ! ocean export state
-  call ESMF_GridCompInitialize(ocean, exportState=landocn_export, userRc=userrc, rc=localrc)
-  print *, "Ocean Initialize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -254,7 +211,7 @@ program ESMF_XGridConcurrentSTest
 
   ! note that the coupler's import is atmos's export state
   ! and coupler's export is land's import state
-  call ESMF_CplCompInitialize(cpl, importState=landocn_export, exportState=atmos_import, userRc=userrc, rc=localrc)
+  call ESMF_CplCompInitialize(cpl, importState=land_export, exportState=atmos_import, userRc=userrc, rc=localrc)
   print *, "Coupler Initialize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -279,18 +236,8 @@ program ESMF_XGridConcurrentSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  ! ocean run
-  call ESMF_GridCompRun(ocean, exportState=ocean_export, userRc=userrc, rc=localrc)
-  print *, "Ocean Run returned, rc =", localrc
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-
   ! coupler run
-  call ESMF_CplCompRun(cpl, importState=landocn_export, exportState=atmos_import, userRc=userrc, rc=localrc)
+  call ESMF_CplCompRun(cpl, importState=land_export, exportState=atmos_import, userRc=userrc, rc=localrc)
   print *, "Coupler Run returned, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -315,7 +262,7 @@ program ESMF_XGridConcurrentSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_CplCompFinalize(cpl, importState=landocn_export, exportState=atmos_import, userRc=userrc, rc=localrc)
+  call ESMF_CplCompFinalize(cpl, importState=land_export, exportState=atmos_import, userRc=userrc, rc=localrc)
   print *, "Coupler Finalize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -326,15 +273,6 @@ program ESMF_XGridConcurrentSTest
 
   call ESMF_GridCompFinalize(land, exportState=land_export, userRc=userrc, rc=localrc)
   print *, "Land Finalize finished, rc =", localrc
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-
-  call ESMF_GridCompFinalize(ocean, exportState=ocean_export, userRc=userrc, rc=localrc)
-  print *, "Ocean Finalize finished, rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -365,24 +303,12 @@ program ESMF_XGridConcurrentSTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  call ESMF_GridCompDestroy(ocean, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   call ESMF_CplCompDestroy(cpl, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   call ESMF_StateDestroy(land_export, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  call ESMF_StateDestroy(ocean_export, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  call ESMF_StateDestroy(landocn_export, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
