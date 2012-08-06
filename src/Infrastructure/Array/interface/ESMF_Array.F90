@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.169 2012/07/27 02:28:37 gold2718 Exp $
+! $Id: ESMF_Array.F90,v 1.170 2012/08/06 01:25:14 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.169 2012/07/27 02:28:37 gold2718 Exp $'
+    '$Id: ESMF_Array.F90,v 1.170 2012/08/06 01:25:14 gold2718 Exp $'
 
 !==============================================================================
 ! 
@@ -1390,7 +1390,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     ! Local vars
-    integer :: localrc                   ! local return code
+    integer             :: localrc              ! local return code
+    type(ESMF_Logical)  :: opt_appendflag       ! helper variable
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1401,11 +1402,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
 
+    ! Set default flags
+    opt_appendflag = ESMF_FALSE
+    if (present(append)) opt_appendflag = append
+
     ! Call into the C++ interface, which will call IO object
     call c_esmc_arraywrite(array, trim(file)//C_NULL_CHAR,     &
-        trim(variableName)//C_NULL_CHAR, append,               &
+        trim(variableName)//C_NULL_CHAR, opt_appendflag,       &
         timeslice, iofmt, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully

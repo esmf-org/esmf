@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.60 2012/07/27 02:28:38 gold2718 Exp $
+// $Id: ESMCI_Array_F.C,v 1.61 2012/08/06 01:25:14 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -599,15 +599,20 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_arraywrite)(ESMCI::Array **array,
-    char *file, char *variableName, bool *append,
+    char *file, char *variableName, ESMC_Logical *appendflag,
     int *timeslice, ESMC_IOFmtFlag *iofmt, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraywrite()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    bool appendflagOpt = false;  // default
+    if ((ESMC_NOT_PRESENT_FILTER(appendflag) != ESMC_NULL_POINTER) &&
+        (*appendflag == ESMF_TRUE)) {
+      appendflagOpt = true;
+    }
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::write(
-      *array, file, variableName, append, timeslice, iofmt),
+      *array, file, variableName, appendflagOpt, timeslice, iofmt),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
