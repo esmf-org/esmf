@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.40 2012/07/18 22:20:57 rokuingh Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.41 2012/08/06 01:29:07 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -377,6 +377,52 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
     // Flush before crossing language interface to ensure correct output order
     fflush(stdout);
+  }
+
+  void FTN_X(c_esmc_arraybundlewrite)(ESMCI::ArrayBundle **bundle,
+    char *file, ESMC_Logical *singleFile,
+    ESMC_Logical *appendflag, int *timeslice, ESMC_IOFmtFlag *iofmt, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraybundlewrite()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    bool singleFileOpt = true;  // default
+    if ((ESMC_NOT_PRESENT_FILTER(singleFile) != ESMC_NULL_POINTER) &&
+        (*singleFile != ESMF_TRUE)) {
+      singleFileOpt = false;
+    }
+    bool appendflagOpt = false;  // default
+    if ((ESMC_NOT_PRESENT_FILTER(appendflag) != ESMC_NULL_POINTER) &&
+        (*appendflag == ESMF_TRUE)) {
+      appendflagOpt = true;
+    }
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::write(
+      *bundle, file, singleFileOpt, appendflagOpt, timeslice, iofmt),
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
+  void FTN_X(c_esmc_arraybundleread)(ESMCI::ArrayBundle **bundle,
+    char *file, ESMC_Logical *singleFile,
+    int *timeslice, ESMC_IOFmtFlag *iofmt, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraybundleread()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    bool singleFileOpt = true;  // default
+    if ((ESMC_NOT_PRESENT_FILTER(singleFile) != ESMC_NULL_POINTER) &&
+        (*singleFile != ESMF_TRUE)) {
+      singleFileOpt = false;
+    }
+    // Call into the actual C++ method wrapped inside LogErr handling
+    std::cout << "Calling ArrayBundle read on file = \"" << file
+              << "\", " << (singleFileOpt ? "single file" : "multiple files")
+              << std::endl;
+    ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::read(
+      *bundle, file, singleFileOpt, timeslice, iofmt),
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN_X(c_esmc_arraybundlerediststore)(ESMCI::ArrayBundle **srcArraybundle,

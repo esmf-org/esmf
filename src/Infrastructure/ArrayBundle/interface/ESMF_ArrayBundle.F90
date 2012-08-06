@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.83 2012/03/09 21:08:26 w6ws Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.84 2012/08/06 01:29:07 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.83 2012/03/09 21:08:26 w6ws Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.84 2012/08/06 01:29:07 gold2718 Exp $'
 
 !==============================================================================
 ! 
@@ -1446,6 +1446,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleRead(arraybundle, file, keywordEnforcer, &
     singleFile, iofmt, rc)
+!   ! We need to terminate the strings on the way to C++
+#ifdef ESMF_PIO
+    use, intrinsic :: iso_c_binding, only: C_NULL_CHAR
+#endif // ESMF_PIO
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(inout)          :: arraybundle
@@ -1490,14 +1494,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    character(len=80), allocatable :: Aname(:)
-    integer :: arrayCount,i
-    type(ESMF_Array), allocatable :: arrayList(:)
-    logical                       :: singlef
-    character(len=80)             :: filename
-    character(len=3)              :: cnum
-    type(ESMF_IOFmtFlag)          :: iofmtd
+    integer                 :: localrc              ! local return code
+    type(ESMF_Logical)      :: opt_singlefileflag   ! helper variable
+    integer                 :: timeslice            ! because not in input FSR
 
 #ifdef ESMF_PIO
     ! initialize return code; assume routine not implemented
@@ -1507,53 +1506,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
 
-    ! Check options
-    singlef = .true.
-    if (present(singleFile)) singlef = singleFile
-    iofmtd = ESMF_IOFMT_NETCDF   ! default format
-    if(present(iofmt)) iofmtd = iofmt
+    ! Set default flags
+    opt_singlefileflag = ESMF_TRUE
+    if (present(singleFile)) opt_singlefileflag = singleFile
+    ! Since timeslice is not (yet?) an input, set it to -1
+    timeslice = -1
 
-    call ESMF_ArrayBundleGet(arraybundle, arrayCount=arrayCount, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    allocate (Aname(arrayCount))
-    allocate (arrayList(arrayCount))
-    call ESMF_ArrayBundleGet(arraybundle, arrayList=arrayList, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (singlef) then
-      ! Get and read the arrays in the Bundle
-      do i=1,arrayCount
-       call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_ArrayRead(arrayList(i), file=file, variableName=Aname(i), &
-          iofmt=iofmtd, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      enddo
-    else
-      do i=1,arrayCount
-        write(cnum,"(i3.3)") i
-        filename = file // cnum
-        call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayRead(arrayList(i), file=filename,  &
-               variableName=Aname(i), iofmt=iofmtd, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-      enddo
-    endif
+    ! Call into the C++ interface, which will call IO object
+    call c_esmc_arraybundleread(arraybundle, trim(file)//C_NULL_CHAR,     &
+        opt_singlefileflag, timeslice, iofmt, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                    &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
 #else
     ! Return indicating PIO not present
-    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT,                 &
+        msg="ESMF must be compiled with PIO support to support I/O methods", &
+        ESMF_CONTEXT, rcToReturn=rc)
 #endif
 
   end subroutine ESMF_ArrayBundleRead
@@ -3090,6 +3062,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_ArrayBundleWrite(arraybundle, file, keywordEnforcer, &
     singleFile, timeslice, iofmt, rc)
+!   ! We need to terminate the strings on the way to C++
+#ifdef ESMF_PIO
+    use, intrinsic :: iso_c_binding, only: C_NULL_CHAR
+#endif // ESMF_PIO
 !
 ! !ARGUMENTS:
     type(ESMF_ArrayBundle), intent(in)              :: arraybundle
@@ -3143,14 +3119,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    character(len=80), allocatable :: Aname(:)
-    integer :: arrayCount,i,time
-    type(ESMF_Array), allocatable :: arrayList(:)
-    logical :: singlef
-    character(len=80) :: filename
-    character(len=3) :: cnum
-    type(ESMF_IOFmtFlag)        :: iofmtd
+    integer             :: localrc              ! local return code
+    type(ESMF_Logical)  :: opt_singlefileflag   ! helper variable
+    type(ESMF_Logical)  :: opt_appendflag       ! helper variable
 
 #ifdef ESMF_PIO
     ! initialize return code; assume routine not implemented
@@ -3160,64 +3131,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
 
-    ! Check options
-    singlef = .true.
-    if (present(singleFile)) singlef = singleFile
-    iofmtd = ESMF_IOFMT_NETCDF   ! default format
-    if(present(iofmt)) iofmtd = iofmt
-    time = -1   ! default, no time dimension
-    if (present(timeslice)) time = timeslice
-    
-    call ESMF_ArrayBundleGet(arraybundle, arrayCount=arrayCount, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    allocate (Aname(arrayCount))
-    allocate (arrayList(arrayCount))
-    call ESMF_ArrayBundleGet(arraybundle, arrayList=arrayList, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Set default flags
+    opt_singlefileflag = ESMF_TRUE
+    if (present(singleFile)) opt_singlefileflag = singleFile
+    ! For some reason, append is not an option but supported by implementation
+    opt_appendflag = ESMF_FALSE
 
-    if (singlef) then
-      ! Get and write the first array in the Bundle
-      call ESMF_ArrayGet(arrayList(1), name=Aname(1), rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_ArrayWrite(arrayList(1), file=file, timeslice=time, iofmt=iofmtd, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Get and write the rest of the arrays in the Bundle
-      do i=2,arrayCount
-       call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_ArrayWrite(arrayList(i), file=file, timeslice=time, &
-         append=.true., iofmt=iofmtd, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-      enddo
-    else
-      do i=1,arrayCount
-        write(cnum,"(i3.3)") i
-        filename = file // cnum
-        ! Get and write the first array in the Bundle
-        call ESMF_ArrayGet(arrayList(i), name=Aname(i), rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayWrite(arrayList(i), file=trim(filename),  &
-           timeslice=time, iofmt=iofmtd, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-      enddo
-    endif
+    ! Call into the C++ interface, which will call IO object
+    call c_esmc_arraybundlewrite(arraybundle, trim(file)//C_NULL_CHAR,    &
+        opt_singlefileflag, opt_appendflag, timeslice, iofmt, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                    &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
 #else
     ! Return indicating PIO not present
-    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT,                 &
+        msg="ESMF must be compiled with PIO support to support I/O methods", &
+        ESMF_CONTEXT, rcToReturn=rc)
 #endif
  
   end subroutine ESMF_ArrayBundleWrite

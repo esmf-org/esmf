@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.43 2012/07/18 22:20:59 rokuingh Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.44 2012/08/06 01:28:43 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -40,13 +40,14 @@
 // LogErr headers
 #include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMCI_IO.h"
 
 using namespace std;
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.43 2012/07/18 22:20:59 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.44 2012/08/06 01:28:43 gold2718 Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -261,6 +262,240 @@ int ArrayBundle::destroy(
   
   // return successfully
   rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
+// read and write
+//
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayBundle::read()"
+//BOPI
+// !IROUTINE:  ESMCI::ArrayBundle::read
+//
+// !INTERFACE:
+int ArrayBundle::read(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  ArrayBundle *bundle,          // in    - ArrayBundle
+  char  *file,                  // in    - name of file being read
+  bool singleFile,              // in    - All arrays from single file if true
+  int   *timeslice,             // in    - timeslice option
+  ESMC_IOFmtFlag *iofmt         // in    - IO format flag
+  ){
+//
+// !DESCRIPTION:
+//   Read Array data to an ArrayBundle object from file(s).
+//   For this API to be functional, the environment variable {\tt ESMF\_PIO} 
+//   should be set to "internal" when the ESMF library is built.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  ESMC_IOFmtFlag localiofmt;
+
+  // Check the required parameters
+  if ((ArrayBundle *)NULL == bundle) {
+    ESMC_LogDefault.Write("ArrayBundle argument required",
+                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+    return ESMF_RC_ARG_BAD;
+  }
+  if ((char *)NULL == file) {
+    ESMC_LogDefault.Write("filename argument required",
+                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+    return ESMF_RC_ARG_BAD;
+  }
+  // Set optional parameters which are not optional at next layer
+  if ((ESMC_IOFmtFlag *)NULL != iofmt) {
+    localiofmt = *iofmt;
+  } else {
+    localiofmt = ESMF_IOFMT_NETCDF;
+  }
+
+  IO *newIO = IO::create(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    return rc;
+  }
+
+  // From here out, we need to be sure to clean up before returning
+  if (singleFile) {
+    Container<std::string, Array *>::iterator it;
+    for (it = bundle->arrayContainer.begin();
+         it != bundle->arrayContainer.end(); ++it) {
+      if (ESMF_SUCCESS == localrc) {
+        localrc = newIO->addArray(it->second, (char *)NULL);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+      }
+    }
+    if (ESMF_SUCCESS == localrc) {
+      // Call the IO read function
+      localrc = newIO->read(file, &localiofmt, timeslice);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    }
+  } else {
+    Container<std::string, Array *>::iterator it;
+    char filename[ESMF_MAXSTR];
+    int i = 0;
+    int spret;
+    if (strlen(file) >= (ESMF_MAXSTR - 3)) {
+      localrc = ESMF_RC_LONG_NAME;
+      ESMC_LogDefault.Write("file argument is too long",
+                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+      rc = localrc;
+    }
+    for (it = bundle->arrayContainer.begin();
+         it != bundle->arrayContainer.end(); ++it) {
+      if (ESMF_SUCCESS == localrc) {
+        localrc = newIO->addArray(it->second, (char *)NULL);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+      }
+      if (ESMF_SUCCESS == localrc) {
+        spret = sprintf(filename, "%s%03d", file, i);
+        if (spret <= 0) {
+          localrc = ESMF_RC_SYS;
+        } else {
+          // Call the IO read function
+          localrc = newIO->read(filename, &localiofmt, timeslice);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+        }
+        newIO->clear();
+      }
+      i++;
+    }
+  }
+
+  // cleanup
+  IO::destroy(&newIO);
+  newIO == (IO *)NULL;
+
+  // return
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayBundle::write()"
+//BOPI
+// !IROUTINE:  ESMCI::ArrayBundle::write
+//
+// !INTERFACE:
+int ArrayBundle::write(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  ArrayBundle *bundle,            // in    - ArrayBundle
+  char  *file,                    // in    - name of file being read
+  bool singleFile,                // in    - All arrays to single file if true
+  bool append,                    // in    - Truncate file if false
+  int   *timeslice,               // in    - timeslice option
+  ESMC_IOFmtFlag *iofmt           // in    - IO format flag
+  ){
+//
+// !DESCRIPTION:
+//   Write the Arrays into a file. For this API to be functional,
+//   the environment variable {\tt ESMF\_PIO} should be set to "internal"
+//   when the ESMF library is built.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  ESMC_IOFmtFlag localiofmt;
+
+  // Check the required parameters
+  if ((ArrayBundle *)NULL == bundle) {
+    ESMC_LogDefault.Write("ArrayBundle argument required",
+                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+    return ESMF_RC_ARG_BAD;
+  }
+  if ((char *)NULL == file) {
+    ESMC_LogDefault.Write("filename argument required",
+                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+    return ESMF_RC_ARG_BAD;
+  }
+  // Set optional parameters which are not optional at next layer
+  if ((ESMC_IOFmtFlag *)NULL != iofmt) {
+    localiofmt = *iofmt;
+  } else {
+    localiofmt = ESMF_IOFMT_NETCDF;
+  }
+
+  IO *newIO = IO::create(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    return rc;
+  }
+
+  // From here out, we need to be sure to clean up before returning
+  if (singleFile) {
+    Container<std::string, Array *>::iterator it;
+    for (it = bundle->arrayContainer.begin();
+         it != bundle->arrayContainer.end(); ++it) {
+      if (ESMF_SUCCESS == localrc) {
+        localrc = newIO->addArray(it->second, (char *)NULL);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+      }
+    }
+    if (ESMF_SUCCESS == localrc) {
+      // Call the IO read function
+      localrc = newIO->write(file, &localiofmt, append, timeslice);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    }
+  } else {
+    Container<std::string, Array *>::iterator it;
+    char filename[ESMF_MAXSTR];
+    int i = 0;
+    int spret;
+    if (strlen(file) >= (ESMF_MAXSTR - 3)) {
+      localrc = ESMF_RC_LONG_NAME;
+      ESMC_LogDefault.Write("file argument is too long",
+                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+      rc = localrc;
+    }
+    for (it = bundle->arrayContainer.begin();
+         it != bundle->arrayContainer.end(); ++it) {
+      if (ESMF_SUCCESS == localrc) {
+        localrc = newIO->addArray(it->second, (char *)NULL);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+      }
+      if (ESMF_SUCCESS == localrc) {
+        spret = sprintf(filename, "%s%03d", file, i);
+        if (spret <= 0) {
+          localrc = ESMF_RC_SYS;
+        } else {
+          // Call the IO read function
+          localrc = newIO->write(filename, &localiofmt, append, timeslice);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+        }
+        newIO->clear();
+      }
+      i++;
+    }
+  }
+
+  // cleanup
+  IO::destroy(&newIO);
+  newIO == (IO *)NULL;
+
+  // return
   return rc;
 }
 //-----------------------------------------------------------------------------
