@@ -1,4 +1,4 @@
-! $Id: NUOPC_Driver.F90,v 1.3 2012/07/13 20:40:50 theurich Exp $
+! $Id: NUOPC_Driver.F90,v 1.4 2012/08/06 21:52:13 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Driver.F90"
 
@@ -563,10 +563,14 @@ module NUOPC_Driver
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
       ! now interpret and act on the current runElement
-      
-print *, runElement%i, runElement%j, runElement%phase
-call NUOPC_ClockPrintCurrTime(runElement%runSeq%clock, "NUOPC_Driver.Run() "// &
-  "RunSequence iterator loop at current time: ", rc=rc)
+#define DEBUGPRINT
+#ifdef DEBUGPRINT
+      print *, runElement%i, runElement%j, runElement%phase
+      call NUOPC_ClockPrintCurrTime(runElement%runSeq%clock, &
+        "NUOPC_Driver.Run() RunSequence iterator loop at current time: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+#endif
       
       i = runElement%i
       phase = runElement%phase
