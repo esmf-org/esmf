@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2012/08/06 18:27:35 feiliu Exp $ 
+# $Id: makefile,v 1.4 2012/08/07 19:36:51 feiliu Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -31,5 +31,5 @@ CLOBBERDIRS =
 
 
 RUN_XGridConcurrent:
-	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=XGridConcurrent NP=10 stest
+	env MPI_REQUEST_MAX=8192 MPI_MSG_RETRIES=8192 MPI_MSGS_PER_PROC=8192 $(MAKE) TNAME=XGridConcurrent NP=8 stest
 

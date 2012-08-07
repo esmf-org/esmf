@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridConcurrentSTest.F90,v 1.18 2012/08/06 18:28:48 feiliu Exp $
+! $Id: ESMF_XGridConcurrentSTest.F90,v 1.19 2012/08/07 19:36:51 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -13,8 +13,8 @@
 !    are idealized atmosphere and land.
 !    Exchange grid is created inside the coupler component.
 !
-!    Atmosphere component runs on 4 PETs and defines a 2D source Field.
-!    Land gridded component defines another 2D souserrce Field but runs on 6 PETs. 
+!    Atmosphere component runs on 6 PETs and defines a 2D source Field.
+!    Land gridded component defines another 2D source Field on 2 PETs. 
 !
 !    Land initialize source Fields to cosine hill functions.
 !    The coupler runs on all PETs and has access to atmosphere and land
@@ -93,7 +93,7 @@ program ESMF_XGridConcurrentSTest
   ! Create the 3 model components and coupler
   cname1 = "land"
   ! use petList to define land on 2 PETs
-  land = ESMF_GridCompCreate(name=cname1, petlist=(/0,1,2,3,4,5/), rc=localrc)
+  land = ESMF_GridCompCreate(name=cname1, petlist=(/0,1/), rc=localrc)
   print *, "Created component ", trim(cname1), "rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -101,7 +101,7 @@ program ESMF_XGridConcurrentSTest
 
   cname3 = "atmosphere"
   ! use petList to define atmosphere on 4 PETs
-  atmos = ESMF_GridCompCreate(name=cname3, petlist=(/6,7,8,9/), rc=localrc)
+  atmos = ESMF_GridCompCreate(name=cname3, petlist=(/2,3,4,5,6,7/), rc=localrc)
   print *, "Created component ", trim(cname1), "rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
