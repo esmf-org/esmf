@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.18 2012/07/31 09:24:57 peggyli Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.19 2012/08/07 19:25:40 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -185,20 +185,24 @@ FIELD* insert_bucket(double lon, double lat) {
 FIELD* search_bucket(double lon, double lat) {
   int bid;
   FIELD *curr;
-  bid = (int)((lat + 90.0)*interval);
+  bid = (int)((lat + 90.0)*interval+TOL);
+  if (bid < 0) {
+    return NULL;
+  }
+  if (bid > totalbuckets-1) bid=bid-1;
   curr = bucket[bid];
-  while (!curr && curr->lon < lon) {
+  while (!curr && (curr->lon+TOL) < lon) {
     curr=curr->next;
   }
-  if (!curr || (curr->lon != lon)) return NULL;
-  while ((curr->lon == lon) && (curr->lat < lat)) {
+  if (!curr || fabs(curr->lon-lon) > TOL) return NULL;
+  while (fabs(curr->lon-lon)<TOL && (curr->lat < lat)) {
     curr = curr->next;
   }
   if (!curr) return NULL;
-  if ((curr->lon == lon) && (curr->lat == lat)) return curr;
+  if (fabs(curr->lon-lon)<TOL && fabs(curr->lat-lat)<TOL) return curr;
   return NULL;
 }
-  
+
 #undef ESMC_METHOD
 #define ESMC_METHOD "handle_error"
 bool handle_error(int status) {
@@ -403,7 +407,8 @@ void FTN_X(c_convertscrip)(
   int *cells, temp[16];
   int numedges, *next;
   unsigned char *edges, *totalneighbors;
-  int i,i1, j, k, totalnodes, count, fillvalue;
+  int i,i1, i2, j, k, totalnodes, count, fillvalue;
+  int goodnodes;
   FIELD *curr, *tmppt;
   int noarea, nocenter, nomask;
   const char *strbuf;
@@ -821,15 +826,17 @@ void FTN_X(c_convertscrip)(
     }
   }
   free(inbuf);
-  dualcells = (int*)malloc(sizeof(int)*maxconnection*totalnodes);
+
   dualcellcounts = (int*)malloc(sizeof(int)*totalnodes);
-  for (i=0; i<totalnodes; i++)
+  dualcells = (int*)malloc(sizeof(int)*maxconnection*totalnodes);
+  for (i=0; i<totalnodes; i++) 
     dualcellcounts[i]=0;
+
   // initialize the values to -1
   for (i=0; i<maxconnection*totalnodes; i++)
     dualcells[i]=-1;
-  
-  // go through the cells table and put the cell id into the dualcell table
+
+  // go through the cells table and count the edges for each dual cell
   for (i=0,k=0; i<gsdim; i++) {
     for (j=0; j<gcdim; j++,k++) {
       if (cells[k] < 0) continue;
@@ -844,25 +851,37 @@ void FTN_X(c_convertscrip)(
     }
   }
     
-  for (i=0; i<totalnodes; i++) {
-    // numedges = find_cells(i+1, totalneighbors[i], cells, gcdim, gsdim, celltbl);
-    numedges = dualcellcounts[i];
-    if (numedges < 3) {
-      //printf("degenarate cells index %d, edges %d\n", i, numedges);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,"A cell with less than 3 edges were found", rc);
-      return;
+  // remove the cells with less than 3 edges in dualcells table
+  // also remove them from the node coordinates table and the totalneighbors table 
+  for (i=0, i1=0; i<totalnodes; i++) {
+    if (dualcellcounts[i] >= 3) {
+      if (i1 != i) {
+	for (k=0; k<maxconnection; k++) {
+	  dualcells[i1*maxconnection+k]=dualcells[i*maxconnection+k];
+	  totalneighbors[i1]=totalneighbors[i];
+	  nodelatlon[i1*2]=nodelatlon[i*2];
+	  nodelatlon[i1*2+1]=nodelatlon[i*2+1];
+	}
+      }
+      i1++;
     }
-    // order the cell center coordinates in counter-clockwise order
-    // lonbuf and latbuf contains the center vertex coordinates
-    // next points to the cell_vertex location where we will fill
-    // in the cell id in counter clockwise order
-    
-    next = &dualcells[i*maxconnection];
-    if (fabs(nodelatlon[i*2+1]) > 88.0) {
-      orderit2(i+1, nodelatlon[i*2], nodelatlon[i*2+1], numedges, inbuf1,next);      
-    } else {
-      orderit(i+1, nodelatlon[i*2], nodelatlon[i*2+1], numedges, inbuf1,next);      
-    }
+  }
+
+  goodnodes = i1;
+  // printf("Total nodes: %d, total non-degenerated nodes: %d\n", totalnodes, goodnodes);
+
+  // order the cell center coordinates in counter-clockwise order
+  // lonbuf and latbuf contains the center vertex coordinates
+  // next points to the cell_vertex location where we will fill
+  // in the cell id in counter clockwise order
+  for (i = 0; i < goodnodes; i++) {  
+      next = &dualcells[i*maxconnection];
+      numedges = totalneighbors[i];
+      if (fabs(nodelatlon[i*2+1]) > 88.0) {
+	orderit2(i+1, nodelatlon[i*2], nodelatlon[i*2+1], numedges, inbuf1,next);      
+      } else {
+	orderit(i+1, nodelatlon[i*2], nodelatlon[i*2+1], numedges, inbuf1,next);      
+      }
   }
 
   free(dualcellcounts);
@@ -875,7 +894,7 @@ void FTN_X(c_convertscrip)(
   // define the dimensions
   status = nc_def_dim(ncid2, "nodeCount", gsdim, &vertdimid);
   if (handle_error(status)) return; // bail out;
-  status = nc_def_dim(ncid2, "elementCount", totalnodes, &celldimid);
+  status = nc_def_dim(ncid2, "elementCount", goodnodes, &celldimid);
   if (handle_error(status)) return; // bail out;
   status = nc_def_dim(ncid2, "maxNodePElement", maxconnection, & vpcdimid);
   if (handle_error(status)) return; // bail out;
