@@ -1,4 +1,4 @@
-! $Id: component.F90,v 1.16 2011/06/30 06:01:27 theurich Exp $
+! $Id: component.F90,v 1.17 2012/08/07 23:09:07 w6ws Exp $
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -106,13 +106,13 @@ module componentMod
       component1 = ESMF_GridCompCreate(name="component012", petList=(/0,1,2/), &
         rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
-      call ESMF_GridCompSetServices(component1, componentReg, &
+      call ESMF_GridCompSetServices(component1, userRoutine=componentReg, &
         userRc=userrc, rc=rc)
       if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS))  return ! bail out
       component2 = ESMF_GridCompCreate(name="component345", petList=(/3,4,5/), &
         rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
-      call ESMF_GridCompSetServices(component2, componentReg, &
+      call ESMF_GridCompSetServices(component2, userRoutine=componentReg, &
         userRc=userrc, rc=rc)
       if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS))  return ! bail out
       ! Initialize component concurrently
@@ -137,13 +137,13 @@ module componentMod
       component1 = ESMF_GridCompCreate(name="component0", petList=(/0/), &
         rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
-      call ESMF_GridCompSetServices(component1, componentReg, &
+      call ESMF_GridCompSetServices(component1, userRoutine=componentReg, &
         userRc=userrc, rc=rc)
       if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
       component2 = ESMF_GridCompCreate(name="component12", petList=(/1,2/), &
         rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
-      call ESMF_GridCompSetServices(component2, componentReg, &
+      call ESMF_GridCompSetServices(component2, userRoutine=componentReg, &
         userRc=userrc, rc=rc)
       if ((rc/=ESMF_SUCCESS) .or. (userrc/=ESMF_SUCCESS)) return ! bail out
       ! Initialize component concurrently
