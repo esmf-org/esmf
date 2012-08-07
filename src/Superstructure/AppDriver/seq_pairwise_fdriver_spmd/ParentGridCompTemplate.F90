@@ -1,4 +1,4 @@
-! $Id: ParentGridCompTemplate.F90,v 1.19 2011/06/30 05:59:39 theurich Exp $
+! $Id: ParentGridCompTemplate.F90,v 1.20 2012/08/07 00:56:12 w6ws Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -86,9 +86,12 @@
 
       ! Now call the SetServices routine for each so they can register their
       ! subroutines for Init, Run, and Finalize
-      call ESMF_GridCompSetServices(comp1Grid, UserGrid1_SetServices, rc=rc)
-      call ESMF_GridCompSetServices(comp2Grid, UserGrid2_SetServices, rc=rc)
-      call ESMF_CplCompSetServices(compCoupler, UserCpl_SetServices, rc=rc)
+      call ESMF_GridCompSetServices(comp1Grid,  &
+          userRoutine=UserGrid1_SetServices, rc=rc)
+      call ESMF_GridCompSetServices(comp2Grid,  &
+          userRoutine=UserGrid2_SetServices, rc=rc)
+      call ESMF_CplCompSetServices(compCoupler, &
+          userRoutine=UserCpl_SetServices, rc=rc)
 
 
       ! Now create Import and Export State objects in order to pass data
