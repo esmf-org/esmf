@@ -1,4 +1,4 @@
-! $Id: ESMF_VMComponentEx.F90,v 1.30 2012/02/16 21:06:47 svasquez Exp $
+! $Id: ESMF_VMComponentEx.F90,v 1.31 2012/08/07 00:48:30 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -170,7 +170,7 @@ program ESMF_VMComponentEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC  
-  call ESMF_GridCompSetServices(gcomp, mygcomp_register, rc=rc)
+  call ESMF_GridCompSetServices(gcomp, userRoutine=mygcomp_register, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
