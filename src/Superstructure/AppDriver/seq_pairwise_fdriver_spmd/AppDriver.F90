@@ -133,7 +133,7 @@
 !  Register the set services method for the top Gridded Component.
 !----------------------------------------------------------------------------
 
-    call ESMF_GridCompSetServices(compGridded, SetServices, rc=rc)
+    call ESMF_GridCompSetServices(compGridded, userRoutine=SetServices, rc=rc)
     if (ESMF_LogFoundError(rc, msg="Registration failed", rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
