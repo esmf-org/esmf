@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateUTest.F90,v 1.25 2012/05/16 21:56:52 svasquez Exp $
+! $Id: ESMF_AttributeUpdateUTest.F90,v 1.26 2012/08/07 00:51:45 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -531,7 +531,7 @@ program ESMF_AttributeUpdateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.25 2012/05/16 21:56:52 svasquez Exp $'
+    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.26 2012/08/07 00:51:45 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -607,11 +607,11 @@ program ESMF_AttributeUpdateUTest
     call ESMF_CplCompSetVM(cplcomp, usercpl_setvm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    call ESMF_GridCompSetServices(gridcomp1, userm1_register, rc=rc)
+    call ESMF_GridCompSetServices(gridcomp1, userRoutine=userm1_register, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    call ESMF_GridCompSetServices(gridcomp2, userm2_register, rc=rc)
+    call ESMF_GridCompSetServices(gridcomp2, userRoutine=userm2_register, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    call ESMF_CplCompSetServices(cplcomp, usercpl_register, rc=rc)
+    call ESMF_CplCompSetServices(cplcomp, userRoutine=usercpl_register, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_GridCompInitialize(gridcomp1, exportState=c1exp, rc=rc)
