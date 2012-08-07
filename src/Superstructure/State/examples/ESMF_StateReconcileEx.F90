@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.47 2012/02/17 22:59:13 svasquez Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.48 2012/08/07 22:32:28 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -204,12 +204,12 @@ end module ESMF_StateReconcileEx_Mod
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
 
-    call ESMF_GridCompSetServices(comp1, comp_dummy, rc=rc)
+    call ESMF_GridCompSetServices(comp1, userRoutine=comp_dummy, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
 
-    call ESMF_GridCompSetServices(comp2, comp_dummy, rc=rc)
+    call ESMF_GridCompSetServices(comp2, userRoutine=comp_dummy, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC

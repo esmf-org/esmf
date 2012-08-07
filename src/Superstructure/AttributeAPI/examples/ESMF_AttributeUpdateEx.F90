@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateEx.F90,v 1.40 2012/02/16 23:48:53 svasquez Exp $
+! $Id: ESMF_AttributeUpdateEx.F90,v 1.41 2012/08/07 22:41:45 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -160,11 +160,14 @@ implicit none
       call ESMF_CplCompSetVM(cplcomp, usercpl_setvm, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-      call ESMF_GridCompSetServices(gridcomp1, userm1_register, rc=rc)
+      call ESMF_GridCompSetServices(gridcomp1,  &
+          userRoutine=userm1_register, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_GridCompSetServices(gridcomp2, userm2_register, rc=rc)
+      call ESMF_GridCompSetServices(gridcomp2,  &
+          userRoutine=userm2_register, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      call ESMF_CplCompSetServices(cplcomp, usercpl_register, rc=rc)
+      call ESMF_CplCompSetServices(cplcomp,  &
+          userRoutine=usercpl_register, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
