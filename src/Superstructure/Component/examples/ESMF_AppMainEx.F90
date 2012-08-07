@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.58 2012/02/17 22:26:01 svasquez Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.59 2012/08/07 22:46:45 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -299,7 +299,7 @@
     ! This single user-supplied subroutine must be a public entry point 
     !  and can renamed with the 'use localname => modulename' syntax if
     !  the name is not unique.
-    call ESMF_GridCompSetServices(gcomp1, PHYS_SetServices, rc=rc)
+    call ESMF_GridCompSetServices(gcomp1, userRoutine=PHYS_SetServices, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -314,7 +314,7 @@
 !BOC
 
     ! This single user-supplied subroutine must be a public entry point.
-    call ESMF_GridCompSetServices(gcomp2, DYNM_SetServices, rc=rc)
+    call ESMF_GridCompSetServices(gcomp2, userRoutine=DYNM_SetServices, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
@@ -328,7 +328,7 @@
 !BOC
 
     ! This single user-supplied subroutine must be a public entry point.
-    call ESMF_CplCompSetServices(cpl, CPLR_SetServices, rc=rc)
+    call ESMF_CplCompSetServices(cpl, userRoutine=CPLR_SetServices, rc=rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC

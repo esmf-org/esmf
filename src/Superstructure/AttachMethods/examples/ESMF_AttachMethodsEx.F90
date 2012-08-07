@@ -1,4 +1,4 @@
-! $Id: ESMF_AttachMethodsEx.F90,v 1.8 2012/02/16 22:12:19 svasquez Exp $
+! $Id: ESMF_AttachMethodsEx.F90,v 1.9 2012/08/07 22:50:18 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -175,10 +175,10 @@ program ESMF_AttachMethodsEx
   consumer = ESMF_GridCompCreate(name="consumer", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_GridCompSetServices(producer, producerReg, rc=rc)
+  call ESMF_GridCompSetServices(producer, userRoutine=producerReg, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_GridCompSetServices(consumer, consumerReg, rc=rc)
+  call ESMF_GridCompSetServices(consumer, userRoutine=consumerReg, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   state = ESMF_StateCreate(rc=rc)

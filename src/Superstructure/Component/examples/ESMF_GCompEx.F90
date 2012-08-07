@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.66 2012/02/17 22:38:09 svasquez Exp $
+! $Id: ESMF_GCompEx.F90,v 1.67 2012/08/07 22:46:45 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -321,7 +321,7 @@
      end if
      
     ! This single user-supplied subroutine must be a public entry point.
-    call ESMF_GridCompSetServices(gcomp, GComp_SetServices, rc=rc)
+    call ESMF_GridCompSetServices(gcomp, userRoutine=GComp_SetServices, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
        finalrc = ESMF_FAILURE
