@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.33 2011/06/30 06:01:20 theurich Exp $
+! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.34 2012/08/07 23:42:12 w6ws Exp $
 !
 ! System test code FieldRegridOrder
 !  Description on Sourceforge under System Test #xxxxxx
@@ -116,15 +116,15 @@
 !  Register section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-    call ESMF_GridCompSetServices(comp1, userm1_register, rc)
+    call ESMF_GridCompSetServices(comp1, userRoutine=userm1_register, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Comp SetServices finished, rc= ", rc
 
-    call ESMF_GridCompSetServices(comp2, userm2_register, rc)
+    call ESMF_GridCompSetServices(comp2, userRoutine=userm2_register, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Comp SetServices finished, rc= ", rc
 
-    call ESMF_CplCompSetServices(cpl, usercpl_register, rc)
+    call ESMF_CplCompSetServices(cpl, userRoutine=usercpl_register, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Comp SetServices finished, rc= ", rc
 

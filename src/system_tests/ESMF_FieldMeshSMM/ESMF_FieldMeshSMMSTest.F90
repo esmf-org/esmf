@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.23 2011/06/30 06:01:02 theurich Exp $
+! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.24 2012/08/07 23:42:02 w6ws Exp $
 !
 ! System test code FieldMeshSMM
 !  Description on Sourceforge under System Test #79497
@@ -127,7 +127,7 @@
 !  Register section
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-    call ESMF_GridCompSetServices(comp1, userm1_register, &
+    call ESMF_GridCompSetServices(comp1, userRoutine=userm1_register, &
       userRc=userrc, rc=localrc)
     print *, "Comp SetServices finished, rc= ", localrc
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -137,7 +137,7 @@
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    call ESMF_GridCompSetServices(comp2, userm2_register, &
+    call ESMF_GridCompSetServices(comp2, userRoutine=userm2_register, &
       userRc=userrc, rc=localrc)
     print *, "Comp SetServices finished, rc= ", localrc
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -147,7 +147,7 @@
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    call ESMF_CplCompSetServices(cpl, usercpl_register, &
+    call ESMF_CplCompSetServices(cpl, userRoutine=usercpl_register, &
       userRc=userrc, rc=localrc)
     print *, "Comp SetServices finished, rc= ", localrc
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
