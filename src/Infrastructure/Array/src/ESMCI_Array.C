@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.157 2012/08/06 01:23:59 gold2718 Exp $
+// $Id: ESMCI_Array.C,v 1.158 2012/08/08 17:35:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.157 2012/08/06 01:23:59 gold2718 Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.158 2012/08/08 17:35:19 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -9708,7 +9708,6 @@ ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOG_INFO);
   int pipelineDepthOpt;     // optimium pipeline depth ... to be determined
 
 #define FORCE_PIPELINEDEPTH___disable
-#define FORCE_PIPELINEDEPTH
 #ifdef FORCE_PIPELINEDEPTH
   int dummyVar2 = petCount;
   pipelineDepthArg = &dummyVar2; // ignore optionally incoming value
