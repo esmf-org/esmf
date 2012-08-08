@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.60 2012/02/17 22:33:51 svasquez Exp $
+! $Id: ESMF_CplEx.F90,v 1.61 2012/08/08 18:17:26 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -313,7 +313,7 @@
     end if    
 
     ! This single user-supplied subroutine must be a public entry point.
-    call ESMF_CplCompSetServices(cpl, CPL_SetServices, rc=rc)
+    call ESMF_CplCompSetServices(cpl, userRoutine=CPL_SetServices, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
