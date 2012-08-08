@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.h,v 1.45 2012/07/13 16:36:24 theurich Exp $
+// $Id: ESMCI_DistGrid.h,v 1.46 2012/08/08 22:28:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -228,7 +228,8 @@ namespace ESMCI {
    public:
     MultiDimIndexLoop();
     MultiDimIndexLoop(std::vector<int> const &sizes);
-    MultiDimIndexLoop(std::vector<int> const &offsets, std::vector<int> const &sizes);
+    MultiDimIndexLoop(std::vector<int> const &offsets,
+      std::vector<int> const &sizes);
     void setSkipDim(int dim);
     void setBlockStart(std::vector<int> const &blockStart);
     void setBlockEnd(std::vector<int> const &blockEnd);

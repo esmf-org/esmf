@@ -1,4 +1,4 @@
-// $Id: ESMCI_DistGrid.C,v 1.72 2012/07/13 19:09:56 theurich Exp $
+// $Id: ESMCI_DistGrid.C,v 1.73 2012/08/08 22:28:55 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.72 2012/07/13 19:09:56 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DistGrid.C,v 1.73 2012/08/08 22:28:55 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -4232,41 +4232,84 @@ int DistGrid::setArbSeqIndex(
     adjust();
   }
   void MultiDimIndexLoop::first(){
-    for (int i=0; i<indexTuple.size(); i++)
-      indexTuple[i] = indexTupleStart[i];  // reset
+    // set indexTuple to the first valid index, considering blocked out region
+    int i;
+    for (i=0; i<indexTuple.size(); i++)
+      indexTuple[i] = indexTupleStart[i];  // reset, to cover not fully blocked
+    for (i=0; i<indexTuple.size(); i++){
+      if ((indexTupleStart[i] < indexTupleBlockStart[i]) ||
+        (indexTupleBlockEnd[i] < indexTupleEnd[i])){
+        // found a dimension that does NOT have a fully blocked range
+        break;
+      }
+    }
+    if (i<indexTuple.size()){
+      // dimension i is the first one that does NOT have fully blocked range
+      if (indexTupleStart[i] < indexTupleBlockStart[i]){
+        // there are unblocked elements before the blocked ranged
+        indexTuple[i] = indexTupleStart[i];
+      }else{
+        // there must be unblocked elements after the blocked ranged
+        indexTuple[i] = indexTupleBlockEnd[i];
+      }
+    }else{
+      // all dimensions are fully blocked out -> set indexTuple to the End
+      for (i=0; i<indexTuple.size(); i++)
+        indexTuple[i] = indexTupleEnd[i];
+    }
   }
   void MultiDimIndexLoop::last(){
+    // set indexTuple to the last index, not considering whether it is blocked
     for (int i=0; i<indexTuple.size(); i++)
       indexTuple[i] = indexTupleEnd[i]-1;  // reset
   }
   void MultiDimIndexLoop::adjust(){
-    bool skipBlockedRegionFlag;
-    do{
-      // adjust all tuples, if necessary skip blocked region
-      skipBlockedRegionFlag = true;  // init
-      int i;
-      for (i=0; i<indexTuple.size()-1; i++){
-        if (indexTuple[i] == indexTupleEnd[i]){
-          indexTuple[i] = indexTupleStart[i];  // reset
-          if (skipDim[i+1])
-            indexTuple[i+1] = indexTupleEnd[i+1]; // skip
-          else
-            ++indexTuple[i+1];                    // increment
+    // adjust the indexTuple after an increment to point to the next valid tuple
+    // -> consider the blocked out region
+    // to improve performance for the fully blocked case check for it first
+    bool skipBlockedRegionFlag = true;
+    for (int i=0; i<indexTuple.size(); i++){
+      if ((indexTupleBlockStart[i] > indexTupleStart[i]) ||
+        (indexTupleBlockEnd[i] < indexTupleEnd[i])){
+        // found a dimension that does not have a fully blocked range
+        skipBlockedRegionFlag = false;
+        break;
+      }
+    }
+    if (skipBlockedRegionFlag){
+      // fully blocked range in all dimensions -> shift indexTuple to end
+      for (int i=0; i<indexTuple.size(); i++)
+        indexTuple[i] = indexTupleEnd[i];
+    }else{
+      // there are dimensions that do NOT have fully blocked ranges
+      // -> must carefully adjust
+      do{
+        // adjust all tuples, if necessary skip blocked region
+        skipBlockedRegionFlag = true;  // init
+        int i;
+        for (i=0; i<indexTuple.size()-1; i++){
+          if (indexTuple[i] == indexTupleEnd[i]){
+            indexTuple[i] = indexTupleStart[i];  // reset
+            if (skipDim[i+1])
+              indexTuple[i+1] = indexTupleEnd[i+1]; // skip
+            else
+              ++indexTuple[i+1];                    // increment
+          }
+          if ((indexTuple[i] < indexTupleBlockStart[i]) ||
+            (indexTuple[i] >= indexTupleBlockEnd[i])){
+            skipBlockedRegionFlag = false;  // not within blocked region
+          }
         }
         if ((indexTuple[i] < indexTupleBlockStart[i]) ||
           (indexTuple[i] >= indexTupleBlockEnd[i])){
           skipBlockedRegionFlag = false;  // not within blocked region
         }
-      }
-      if ((indexTuple[i] < indexTupleBlockStart[i]) ||
-        (indexTuple[i] >= indexTupleBlockEnd[i])){
-        skipBlockedRegionFlag = false;  // not within blocked region
-      }
-      if (skipBlockedRegionFlag){
-        indexTuple[0] = indexTupleBlockEnd[0];
-//        printf("gjt skip the blocked region\n");     
-      }
-    }while(skipBlockedRegionFlag && (indexTuple[0] >= indexTupleEnd[0]));
+        if (skipBlockedRegionFlag){
+          indexTuple[0] = indexTupleBlockEnd[0];
+//          printf("gjt skip the blocked region\n");     
+        }
+      }while(skipBlockedRegionFlag && (indexTuple[0] >= indexTupleEnd[0]));
+    }
   }
   void MultiDimIndexLoop::next(){
     if (skipDim[0])
