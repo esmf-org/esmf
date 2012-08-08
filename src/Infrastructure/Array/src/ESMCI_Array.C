@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.158 2012/08/08 17:35:19 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.159 2012/08/08 22:31:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.158 2012/08/08 17:35:19 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.159 2012/08/08 22:31:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -219,7 +219,7 @@ Array::Array(
       ++element;
     } // multi dim index loop
     rimElementCount[i] = element; // store element count
-  }    
+  }
   
   localDeCountAux = localDeCount; // TODO: auxilary for garb until ref. counting
   
@@ -10839,7 +10839,8 @@ ArrayElement::ArrayElement(
     if (blockExclusiveFlag)
       indexTupleBlockEnd[i] =  indexTupleWatchEnd[i];
   }
-  adjust(); // adjust indexTuple to point to first element not blocked
+  first();  // point indexTuple to the first element that is not blocked
+  
 }
 //-----------------------------------------------------------------------------
 
