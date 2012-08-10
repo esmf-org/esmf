@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.22 2012/08/10 01:35:16 w6ws Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.23 2012/08/10 14:01:26 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@ module ESMF_StateReconcile2Mod
 
   ! These are only public for unit testing.  They are not intended
   ! to be called by ESMF users.
-  public :: ESMF_ReconcileDeserialize, ESMF_ReconcileSerialize
+!  public :: ESMF_ReconcileDeserialize, ESMF_ReconcileSerialize
   ! public :: ESMF_ReconcileSendItems
 
 !EOPI
@@ -76,7 +76,7 @@ module ESMF_StateReconcile2Mod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-  '$Id: ESMF_StateReconcile2.F90,v 1.22 2012/08/10 01:35:16 w6ws Exp $'
+  '$Id: ESMF_StateReconcile2.F90,v 1.23 2012/08/10 14:01:26 w6ws Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
