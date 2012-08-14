@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.52 2010/03/30 22:48:49 svasquez Exp $ 
+# $Id: makefile,v 1.53 2012/08/14 21:08:31 rokuingh Exp $ 
 
 ALL: doc
 
@@ -38,7 +38,7 @@ DIRS =
 
 CLEANDIRS   = ESMF_refdoc $(HTMLFILES) \
 	      ESMC_crefdoc $(HTMLFILES)
-CLEANFILES  = $(CLEAN_TEXFILES) ESMF.bib ESMC_bib\
+CLEANFILES  = $(CLEAN_TEXFILES) ESMF.bib ESMC.bib\
 	      ESMF_refdoc.tex ESMC_crefdoc.tex ESMF_usrdoc.tex \
 	      ESMF_refdoc.pdf ESMC_crefdoc.pdf ESMF_usrdoc.pdf \
 	      ESMF_refdoc.bib ESMC_crefdoc.bib ESMF_usrdoc.bib \
