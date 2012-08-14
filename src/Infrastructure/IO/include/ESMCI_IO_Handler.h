@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_Handler.h,v 1.1 2012/07/23 20:20:54 gold2718 Exp $
+// $Id: ESMCI_IO_Handler.h,v 1.2 2012/08/14 22:52:56 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@ namespace ESMCI {
   //===========================================================================
   
   //===========================================================================
-  class IO_Handler : public ESMC_Base {    // inherits from ESMC_Base class
+  class IO_Handler {
   
   private:
     // global information
@@ -80,8 +80,6 @@ namespace ESMCI {
   protected:
     // native constructor and destructor
     IO_Handler(ESMC_IOFmtFlag *fmtArg);
-    // prevent baseID counter increment
-    IO_Handler(ESMC_IOFmtFlag *fmtArg, int baseID);
   private:
 //    IO(ESMC_IOFmtFlag fmtArg, int rank, int *rc);
   protected:
@@ -109,7 +107,7 @@ namespace ESMCI {
 
     // get() and set()
   public:
-    const char *getName(void) const { return ESMC_BaseGetName(); }
+    const char *getName(void) const { return "ESMCI::IO_Handler"; }
     ESMC_IOFmtFlag getFormat(void) { return iofmtFlag; }
     virtual bool formatOk(ESMC_IOFmtFlag *newIofmt) {
       return (((ESMC_IOFmtFlag *)NULL != newIofmt) &&
@@ -125,9 +123,6 @@ namespace ESMCI {
     int setFilename(const char * const name);
     bool fileExists(bool needRead, bool needWrite);
   public:
-    virtual int setName(const char *name) {
-            return ESMC_BaseSetName(name, "IO_Handler");
-    }
 
     // match()
     static bool match(IO_Handler const * const ioh1,

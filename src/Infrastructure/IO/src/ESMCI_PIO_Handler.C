@@ -1,4 +1,4 @@
-// $Id: ESMCI_PIO_Handler.C,v 1.7 2012/07/30 05:33:41 gold2718 Exp $
+// $Id: ESMCI_PIO_Handler.C,v 1.8 2012/08/14 22:53:23 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -52,17 +52,39 @@
 #include "pio.h"
 #include "pio_types.h"
 
-#define __DEBUG
-#ifdef __DEBUG
+#ifdef ESMFIO_DEBUG
+#include "ESMC_VM.h"
+#include "ESMCI_VM.h"
 // Debug version
-#define PRINTPOS                                                             \
-                 VM *vm = VM::getCurrent(&localrc);                          \
-                 vm->barrier();                                              \
-                 std::cout << "(" << my_rank << "): " << ESMC_METHOD         \
-                           << " called at " << ESMC_FILENAME                 \
-                           << ":" << __LINE__ << std::endl
-#define PRINTMSG(_msg)  std::cout << ESMC_METHOD << " at " << ESMC_FILENAME   \
-                                  << ":" << __LINE__ << _msg << std::endl
+static int dbgio_getrank(void) {
+  static int my_rank = -1;
+  if (-1 == my_rank) {
+    int rc;
+    ESMC_VM evm;
+    ESMCI::VM *vm;
+    int localPet;
+    int petCount;
+    int peCount;
+    MPI_Comm communicator;
+    evm = ESMC_VMGetCurrent(&rc);
+    if (ESMF_SUCCESS == rc) {
+      vm = ESMCI::VM::getCurrent(&rc);
+      if (ESMF_SUCCESS == rc) {
+        rc = ESMC_VMGet(evm, &localPet, &petCount, &peCount,
+                        &communicator, (int *)NULL, (int *)NULL);
+        vm->barrier();
+        if (ESMF_SUCCESS == rc) {
+          my_rank = localPet;
+        }
+      }
+    }
+  }
+  return my_rank;
+}
+#define PRANKM "(" << dbgio_getrank() << "): " << ESMC_METHOD << " "
+#define PPOS " " << ESMC_FILENAME << ":" << __LINE__ << "; "
+#define PRINTPOS  std::cout << PRANKM << "called at" << PPOS << std::endl
+#define PRINTMSG(_msg)  std::cout << PRANKM "at" << PPOS << _msg << std::endl
 #else
 // Non-debug version
 #define PRINTPOS
@@ -78,7 +100,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.7 2012/07/30 05:33:41 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.8 2012/08/14 22:53:23 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -183,13 +205,14 @@ void PIO_Handler::initialize (
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  int localrc = ESMF_SUCCESS;          // local return code
+  int localrc = ESMF_RC_NOT_IMPL;      // local return code
   int base;
   bool instanceFound = false;          // try to find a PIO sys to reuse
   pio_iosystem_desc_t instance = PIO_IOSYSTEM_DESC_NULL;
   if (rc != NULL) {
     *rc = ESMF_RC_NOT_IMPL;            // final return code
   }
+  PRINTPOS;
   if (base_p != (int *)NULL) {
     base = *base_p;
   } else {
@@ -198,10 +221,17 @@ void PIO_Handler::initialize (
 
   try {  
 
+#ifdef ESMFIO_DEBUG
+    pio_cpp_setdebuglevel(3);
+#else // ESMFIO_DEBUG
+    pio_cpp_setdebuglevel(0);
+#endif // ESMFIO_DEBUG
     if (!instanceFound) {
+      PRINTMSG("Before pio_cpp_init_intracom, num_iotasks = " << num_iotasks);
       pio_cpp_init_intracom(comp_rank, comp_comm,
                             num_iotasks, num_aggregator,
                             stride, rearr, &instance, base);
+      PRINTMSG("After pio_cpp_init_intracom");
       // If we get here, hopefully everything is OK.
       if (instance != PIO_IOSYSTEM_DESC_NULL) {
         // Set the error handling to return PIO errors
@@ -209,13 +239,11 @@ void PIO_Handler::initialize (
 //        pio_cpp_seterrorhandlingi(&instance, PIO_RETURN_ERROR);
         // Broadcast the error to all PEs (consistant error handling)
         pio_cpp_seterrorhandlingi(&instance, PIO_BCAST_ERROR);
-#ifdef __DEBUG
-        pio_cpp_setdebuglevel(3);
-#else // __DEBUG
-        pio_cpp_setdebuglevel(0);
-#endif // __DEBUG
+        PRINTMSG("After pio_cpp_seterrorhandlingi");
         // Add the instance to the global list
         PIO_Handler::activePioInstances.push_back(instance);
+        PRINTMSG("push_back");
+        localrc = ESMF_SUCCESS;
       } else {
         // Something went wrong (this really shouldn't happen)
         localrc = ESMF_RC_INTNRL_BAD;
@@ -225,11 +253,13 @@ void PIO_Handler::initialize (
     }
   } catch (int catchrc) {
     // catch standard ESMF return code
+    PRINTMSG("Exception: " << catchrc);
     ESMC_LogDefault.ESMC_LogMsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, rc);
     return;
   } catch (...) {
+    PRINTMSG("Unknown exception");
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
-      "- Caught exception", rc);
+                                          "- Caught exception", rc);
     return;
   }
 
@@ -289,25 +319,37 @@ int PIO_Handler::initializeVM (void
       }
       // Figure out the inputs for the initialize call
       my_rank = localPet;
+#if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
       num_iotasks = petCount;
-//      num_iotasks = 1;
       num_aggregators = 1;
       stride = 1;
       rearr = PIO_rearr_box;
       base = 0;
+#else // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
+      num_iotasks = 1;
+      num_aggregators = 1;
+      stride = 1;
+      rearr = PIO_rearr_box;
+      base = 0;
+#endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
 
       // Call the static function
       PIO_Handler::initialize(my_rank, communicator, num_iotasks,
                               num_aggregators, stride, rearr, &base, &rc);
+      PRINTMSG("After initialize, rc = " << rc);
       if (ESMF_SUCCESS == rc) {
+        PRINTMSG("Looking for active instance, size = " << activePioInstances.size());
         pioSystemDesc = PIO_Handler::activePioInstances.back();
+        PRINTMSG("Fetched PIO system descriptor, " << (void *)pioSystemDesc);
       }
     }
-  } catch (int localrc) {
+  } catch (int catchrc) {
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
+    PRINTMSG("Exception: " << catchrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, &rc);
     return rc;
   } catch (...) {
+    PRINTMSG("Unknown exception");
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
                                           "- Caught exception", &rc);
     return rc;
@@ -346,34 +388,54 @@ void PIO_Handler::finalize (
     *rc = ESMF_RC_NOT_IMPL;               // final return code
   }
 
-  // Close any open IO descriptors before turning off the instances
-  PIO_IODescHandler::finalize();
-  // Now, close any open PIO instances
-  while(!PIO_Handler::activePioInstances.empty()) {
-    pio_iosystem_desc_t instance = PIO_Handler::activePioInstances.back();
-    pio_cpp_finalize(&instance, &error);
-#ifdef __DEBUG
-    static int ionum = 1;
-    if (error != PIO_noerr) {
-      int lrc;
-      ESMC_VM currentVM;
-      int localPet;
-      int petCount;
-      int peCount;
-      MPI_Comm foo;
-      currentVM = ESMC_VMGetCurrent(&lrc);
-      lrc = ESMC_VMGet(currentVM, &localPet, &petCount, &peCount,
-                       &foo, (int *)NULL, (int *)NULL);
-      PRINTMSG(" (" << localPet << "): ionum = " << ionum << ", localrc = " << localrc);
-    }
-    ionum++;
-#endif // __DEBUG
-    PIO_Handler::activePioInstances.pop_back();
-    // Even if we have an error but log and keep going to try and shut
-    // down other PIO instances
-    CHECKPIOWARN(error, "Error shutting down PIO instance", localrc);
+  PRINTMSG("");
+  try {
+    // Close any open IO descriptors before turning off the instances
+    PIO_IODescHandler::finalize();
+  } catch(int lrc) {
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(lrc, ESMCI_ERR_PASSTHRU, rc);
+    return;
+  } catch(...) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+                                          "- Caught exception", rc);
+    return;
   }
-
+  try {
+    // Now, close any open PIO instances
+    while(!PIO_Handler::activePioInstances.empty()) {
+      pio_iosystem_desc_t instance = PIO_Handler::activePioInstances.back();
+      pio_cpp_finalize(&instance, &error);
+      // Even if we have an error but log and keep going to try and shut
+      // down other PIO instances
+      CHECKPIOWARN(error, "Error shutting down PIO instance", localrc);
+#ifdef ESMFIO_DEBUG
+      static int ionum = 1;
+      if (error != PIO_noerr) {
+        int lrc;
+        ESMC_VM currentVM;
+        int localPet;
+        int petCount;
+        int peCount;
+        MPI_Comm foo;
+        currentVM = ESMC_VMGetCurrent(&lrc);
+        lrc = ESMC_VMGet(currentVM, &localPet, &petCount, &peCount,
+                         &foo, (int *)NULL, (int *)NULL);
+        PRINTMSG(" (" << localPet << "): ionum = " << ionum << ", localrc = " << localrc);
+      }
+      ionum++;
+#endif // ESMFIO_DEBUG
+      PIO_Handler::activePioInstances.pop_back();
+    }
+  } catch(int lrc) {
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(lrc, ESMCI_ERR_PASSTHRU, rc);
+    return;
+  } catch(...) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+                                          "- Caught exception", rc);
+    return;
+  }
 
   // return successfully
   if (rc != NULL) {
@@ -489,70 +551,6 @@ PIO_Handler::PIO_Handler (
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::PIO_Handler::PIO_Handler()"
-//BOPI
-// !IROUTINE:  ESMCI::PIO_Handler::PIO_Handler    - constructor
-//
-// !INTERFACE:
-PIO_Handler::PIO_Handler (
-//
-// !RETURN VALUE:
-//    
-//
-// !ARGUMENTS:
-//
-  ESMC_IOFmtFlag *fmtArg,                // (in)  - File format for PIO to use
-  int baseID,                            // (in)  - prevent baseID counter inc.
-  int *rc                                // (out) - Error return code
-  ) : IO_Handler(fmtArg, baseID) {
-//
-// !DESCRIPTION:
-//    Construct the internal information structure of an ESMCI::PIO_Handler
-//    object.
-//    No error checking wrt consistency of input arguments is needed because
-//    the PIO_Handler constructor is only to be called by IO_Handler::create()
-//    interfaces which are responsible for providing consistent arguments
-//    to this layer.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMF_RC_NOT_IMPL;         // local return code
-  if (rc != NULL) {
-    *rc = ESMF_RC_NOT_IMPL;               // final return code
-  }
-
-  try {  
-
-    // fill in the PIO_Handler object
-    pioSystemDesc =  PIO_IOSYSTEM_DESC_NULL;
-    pioFileDesc = (pio_file_desc_t)NULL;
-    pioIODesc = (pio_io_desc_t)NULL;
-    user_count = 0;
-    new_file = false;
-    // Get the rest from initialize
-    localrc = initializeVM();
-  
-  } catch (int catchrc) {
-    // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, rc);
-    return;
-  } catch (...) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
-                                          "- Caught exception", rc);
-    return;
-  }
-  
-  // return successfully
-  if (rc != NULL) {
-    *rc = localrc;
-  }
-} // PIO_Handler::PIO_Handler()
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::PIO_Handler::destruct()"
 //BOPI
 // !IROUTINE:  ESMCI::PIO_Handler::destruct    - tear down PIO handler
@@ -572,12 +570,16 @@ void PIO_Handler::destruct (void
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  int localrc; // Only for debug!
+  PRINTPOS;
   // Make sure the file is closed
   if (isOpen() == ESMF_TRUE) {
+    PRINTMSG(" (" << my_rank << "): closing file");
     close((int *)NULL);     // Don't care about an error, continue with cleanup
   }
   // Kill the file descriptor
   if ((pio_file_desc_t)NULL != pioFileDesc) {
+    PRINTMSG(" (" << my_rank << "): killing PIO file descriptor");
     free(pioFileDesc);
     pioFileDesc = (pio_file_desc_t)NULL;
   }
@@ -666,7 +668,7 @@ void PIO_Handler::arrayRead(
     localDE = 0;
     baseAddress = arr_p->getLocalarrayList()[localDE]->getBaseAddr();
   }
-#if ESMF_NETCDF || ESMF_PNETCDF
+#if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
   if (statusOK && (getFormat() != ESMF_IOFMT_BIN)) {
     int nDims;
     if (((char *)NULL != name) && (strlen(name) > 0)) {
@@ -698,8 +700,8 @@ void PIO_Handler::arrayRead(
                                localrc);
       // Check to see if time is the unlimited dimension
       if (statusOK && (dimid_time != unlim)) {
-        std::cout << "Time dimension = " << dimid_time << ", unlimited dim = "
-                  << unlim << std::endl;
+        PRINTMSG(" Time dimension = " << dimid_time <<
+                 ", unlimited dim = " << unlim);
          ESMC_LogDefault.Write(" Time is not the file's unlimited dimension",
                               ESMC_LOG_ERROR, ESMC_CONTEXT);
         statusOK = false;
@@ -728,7 +730,7 @@ void PIO_Handler::arrayRead(
       pio_cpp_setframe(vardesc, frame);
     }
   }
-#endif // ESMF_NETCDF || ESMF_PNETCDF
+#endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
   pio_cpp_setdebuglevel(0);
   PRINTMSG(" (" << my_rank << "): calling read_darray, status = " <<
            statusOK << ", pio type = " << basepiotype << ", address = " <<
@@ -812,7 +814,6 @@ void PIO_Handler::arrayWrite(
   int localDE;                            // DE to use for IO
   int ncDims[8];                          // To hold NetCDF dimensions
   int unlim;                              // Unlimited dimension ID
-  int varid;                              // NetCDF ID of desired variable
   int time_frame = -1;                    // ID of time dimension (>0 if used)
   bool var_exists = false;                // true if varname is defined in file
   const char *varname;                    // Variable name
@@ -846,7 +847,7 @@ void PIO_Handler::arrayWrite(
     localDE = 0;
     baseAddress = arr_p->getLocalarrayList()[localDE]->getBaseAddr();
   }
-#if ESMF_NETCDF || ESMF_PNETCDF
+#if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
   if (statusOK && (getFormat() != ESMF_IOFMT_BIN)) {
     // Define the variable name and check the file
     if (((char *)NULL != name) && (strlen(name) > 0)) {
@@ -879,8 +880,7 @@ void PIO_Handler::arrayWrite(
       }
       if (statusOK) {
         // We have a NetCDF file, see if the variable is in there
-        localrc = pio_cpp_inq_varid_vdesc(pioFileDesc,
-                                                 varname, vardesc);
+        localrc = pio_cpp_inq_varid_vdesc(pioFileDesc, varname, vardesc);
         // This should succeed if the variable exists
         var_exists = (PIO_noerr == localrc);
       }
@@ -979,23 +979,28 @@ void PIO_Handler::arrayWrite(
     }
   }
   if (statusOK && (getFormat() != ESMF_IOFMT_BIN) && (time_frame >= 0)) {
-#ifdef __DEBUG
+#ifdef ESMFIO_DEBUG
     int nvdims;
     pio_cpp_inq_varndims_vdesc(pioFileDesc, vardesc, &nvdims);
     PRINTMSG(" (" << my_rank << "): calling setframe, ndims = " << nvdims);
-#endif // __DEBUG
+#endif // ESMFIO_DEBUG
     pio_cpp_setframe(vardesc, time_frame);
   }
-#ifdef __DEBUG
+#ifdef ESMFIO_DEBUG
   else if (getFormat() != ESMF_IOFMT_BIN) {
     PRINTMSG(" (" << my_rank << "): NOT calling setframe, status = " <<
              statusOK << ", time_frame = " << time_frame);
   }
   if (getFormat() != ESMF_IOFMT_BIN) {
-    localrc = pio_cpp_inq_varid_vid(pioFileDesc, varname, &varid);
-    PRINTMSG(" (" << my_rank << "): calling enddef, status = " << statusOK << ", varid = " << varid);
+    PRINTMSG(" (" << my_rank << "): calling enddef, status = " << statusOK);
+    if (var_exists) {
+      int varid;
+      int lrc;
+      lrc = pio_cpp_inq_varid_vid(pioFileDesc, varname, &varid);
+      PRINTMSG(" (" << my_rank << "): varid = " << varid);
+    }
   }
-#endif // __DEBUG
+#endif // ESMFIO_DEBUG
   if (statusOK && (getFormat() != ESMF_IOFMT_BIN)) {
     localrc = pio_cpp_enddef(pioFileDesc);
     if (PIO_noerr != localrc) {
@@ -1003,7 +1008,7 @@ void PIO_Handler::arrayWrite(
       statusOK = false;
     }
   }
-#endif // ESMF_NETCDF || ESMF_PNETCDF
+#endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
   PRINTMSG(" (" << my_rank << "): calling write_darray, status = " <<
            statusOK << ", pio type = " << basepiotype << ", address = " <<
            baseAddress);
@@ -1028,7 +1033,7 @@ void PIO_Handler::arrayWrite(
       break;
     default:
       localrc = ESMF_RC_INTNRL_BAD;
-      std::cout << "Attempt to write basepiotype = " << basepiotype << std::endl;
+      PRINTMSG(" Attempt to write basepiotype = " << basepiotype);
       ESMC_LogDefault.Write("Bad PIO IO type", ESMC_LOG_WARN, ESMC_CONTEXT);
     }
   }
@@ -1120,23 +1125,25 @@ void PIO_Handler::open(
   if (getFormat() == ESMF_IOFMT_BIN) {
     iotype = PIO_iotype_pbinary;
   } else if (getFormat() == ESMF_IOFMT_NETCDF) {
-#ifdef ESMF_NETCDF
+#ifdef ESMF_PNETCDF
+    iotype = PIO_iotype_pnetcdf;
+#elif ESMF_NETCDF
     iotype = PIO_iotype_netcdf;
 #else  // ESMF_NETCDF
     localrc = ESMF_RC_LIB_NOT_PRESENT;
 #endif // ESMF_NETCDF
   } else if (getFormat() == ESMF_IOFMT_NETCDF4P) {
-#ifdef ESMF_PNETCDF
+#ifdef ESMF_NETCDF
     iotype = PIO_iotype_netcdf4c;
-#else  // ESMF_PNETCDF
+#else  // ESMF_NETCDF
     localrc = ESMF_RC_LIB_NOT_PRESENT;
-#endif // ESMF_PNETCDF
+#endif // ESMF_NETCDF
   } else if (getFormat() == ESMF_IOFMT_NETCDF4C) {
-#ifdef ESMF_PNETCDF
+#ifdef ESMF_NETCDF
     iotype = PIO_iotype_netcdf4p;
-#else  // ESMF_PNETCDF
+#else  // ESMF_NETCDF
     localrc = ESMF_RC_LIB_NOT_PRESENT;
-#endif // ESMF_PNETCDF
+#endif // ESMF_NETCDF
   } else {
     localrc = ESMF_RC_ARG_BAD;
   }
@@ -1194,11 +1201,11 @@ void PIO_Handler::open(
     }
   } else if (((IOWriteFlag *)NULL != iowriteflag) &&
              ((IO_NEW == *iowriteflag) || (IO_TRUNCATE == *iowriteflag))) {
-    PRINTMSG(" calling pio_cpp_createfile");
     // Looks like we are ready to go
-#ifdef __DEBUG
+#ifdef ESMFIO_DEBUG
     pio_cpp_setdebuglevel(3);
-#endif // __DEBUG
+#endif // ESMFIO_DEBUG
+    PRINTMSG(" calling pio_cpp_createfile: fname len = " << strlen(getFilename()));
     localrc = pio_cpp_createfile(&pioSystemDesc, pioFileDesc,
                                  iotype, getFilename(), PIO_CLOBBER);
     if (!CHECKPIOERROR(localrc, "Unable to create file", (*rc))) {
@@ -1390,7 +1397,8 @@ void PIO_Handler::close(
     PRINTMSG("(" << my_rank << "): calling pio_cpp_initdecomp_dof");
     localrc = PIO_IODescHandler::constructPioDecomp(iosys,
                                                     arr_p, &new_io_desc);
-    PRINTMSG("(" << my_rank << "): pio_cpp_initdecomp_dof call complete");
+    PRINTMSG("(" << my_rank << "): pio_cpp_initdecomp_dof call complete" <<
+             ", localrc = " << localrc);
   }
   if ((ioDims != (int **)NULL) || (nioDims != (int *)NULL) ||
       (arrDims != (int **)NULL) || (narrDims != (int *)NULL)) {
@@ -1475,19 +1483,19 @@ bool PIO_Handler::CheckPIOError(
     } else {
       ESMC_LogDefault.Write(errmsg, ESMC_LOG_ERROR, line, file, method);
     }
-#ifdef __DEBUG
+#ifdef ESMFIO_DEBUG
     PRINTMSG(" ERROR: " << errmsg);
-#endif // __DEBUG
+#endif // ESMFIO_DEBUG
     // Attempt to find a corresponding ESMC error code
     switch(pioRetCode) {
     default:
       localrc = ESMF_RC_LIB;
       break;
     }
-    // Place the error
-    if (rc != NULL) {
-      *rc = localrc;
-    }
+  }
+  // Set the return code
+  if (rc != NULL) {
+    *rc = localrc;
   }
   return (pioRetCode == PIO_noerr);
 } // PIO_Handler::CheckPIOError()
@@ -1741,7 +1749,7 @@ int PIO_IODescHandler::constructPioDecomp(
                                1);
     }
 
-#ifdef __DEBUG
+#ifdef ESMFIO_DEBUG
     {
       char dimstr[64];
       for (int i = 0; i < handle->arrayRank; i++) {
@@ -1750,7 +1758,7 @@ int PIO_IODescHandler::constructPioDecomp(
       }
       PRINTMSG(", IODesc shape = [" << dimstr << "]");
     }
-#endif // __DEBUG
+#endif // ESMFIO_DEBUG
 
     // Create the decomposition
     pio_cpp_initdecomp_dof(&iosys, handle->basepiotype, handle->dims,

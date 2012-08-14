@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_Handler.C,v 1.1 2012/07/23 20:21:04 gold2718 Exp $
+// $Id: ESMCI_IO_Handler.C,v 1.2 2012/08/14 22:53:23 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -40,10 +40,49 @@
 #include <ESMCI_ArrayBundle.h>
 #include "ESMCI_PIO_Handler.h"
 
+#ifdef ESMFIO_DEBUG
+#include "ESMC_VM.h"
+#include "ESMCI_VM.h"
+// Debug version
+static int dbgio_getrank(void) {
+  static int my_rank = -1;
+  if (-1 == my_rank) {
+    int rc;
+    ESMC_VM evm;
+    ESMCI::VM *vm;
+    int localPet;
+    int petCount;
+    int peCount;
+    MPI_Comm communicator;
+    evm = ESMC_VMGetCurrent(&rc);
+    if (ESMF_SUCCESS == rc) {
+      vm = ESMCI::VM::getCurrent(&rc);
+      if (ESMF_SUCCESS == rc) {
+        rc = ESMC_VMGet(evm, &localPet, &petCount, &peCount,
+                        &communicator, (int *)NULL, (int *)NULL);
+        vm->barrier();
+        if (ESMF_SUCCESS == rc) {
+          my_rank = localPet;
+        }
+      }
+    }
+  }
+  return my_rank;
+}
+#define PRANKM "(" << dbgio_getrank() << "): " << ESMC_METHOD << " "
+#define PPOS " " << ESMC_FILENAME << ":" << __LINE__ << "; "
+#define PRINTPOS  std::cout << PRANKM << "called at" << PPOS << std::endl
+#define PRINTMSG(_msg)  std::cout << PRANKM "at" << PPOS << _msg << std::endl
+#else
+// Non-debug version
+#define PRINTPOS
+#define PRINTMSG(_msg)
+#endif
+
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_Handler.C,v 1.1 2012/07/23 20:21:04 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_IO_Handler.C,v 1.2 2012/08/14 22:53:23 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -83,9 +122,7 @@ IO_Handler::IO_Handler (
   if (fmtArg != (ESMC_IOFmtFlag *)NULL) {
     iofmtFlag = *fmtArg;
   } else {
-#ifdef ESMF_PNETCDF
-    iofmtFlag = ESMF_IOFMT_NETCDF4P;
-#elif ESMF_NETCDF
+#if defined(ESMF_PNETCDF) || defined(ESMF_NETCDF)
     iofmtFlag = ESMF_IOFMT_NETCDF;
 #else
     iofmtFlag = ESMF_IOFMT_BIN;
@@ -94,51 +131,7 @@ IO_Handler::IO_Handler (
   filename[0] = '\0';
 
   // invalidate the name for this PIO_Handler object in the Base class
-  ESMC_BaseSetName(NULL, "IO_Handler");
-}
-//-----------------------------------------------------------------------------
-
-
-//-------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::IO_Handler::IO_Handler()"
-//BOPI
-// !IROUTINE:  ESMCI::IO_Handler::IO_Handler    - constructor
-//
-// !INTERFACE:
-IO_Handler::IO_Handler (
-//
-// !RETURN VALUE:
-//    
-//
-// !ARGUMENTS:
-  ESMC_IOFmtFlag *fmtArg,              // (in)  - the desired I/O format
-  int baseID                           // (in)  - prevent baseID counter inc
-//
-  ) : ESMC_Base(baseID)  { // prevent baseID counter increment
-//
-// !DESCRIPTION:
-//    Fill the internal information of an ESMCI::IO_Handler object.
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  localPet = 0;
-  indexflag = ESMF_INDEX_DELOCAL;
-  if (fmtArg != (ESMC_IOFmtFlag *)NULL) {
-    iofmtFlag = *fmtArg;
-  } else {
-#ifdef ESMF_PNETCDF
-    iofmtFlag = ESMF_IOFMT_NETCDF4P;
-#elif ESMF_NETCDF
-    iofmtFlag = ESMF_IOFMT_NETCDF;
-#else
-    iofmtFlag = ESMF_IOFMT_BIN;
-#endif
-  }
-  filename[0] = '\0';
-
-  // invalidate the name for this PIO_Handler object in the Base class
-  ESMC_BaseSetName(NULL, "IO_Handler");
+//  ESMC_BaseSetName(NULL, "IO_Handler");
 }
 //-----------------------------------------------------------------------------
 
@@ -173,58 +166,73 @@ IO_Handler *IO_Handler::create (
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  int localrc = ESMF_RC_NOT_IMPL;         // local return code
+  int localrc = ESMF_RC_NOT_IMPL;            // local return code
+  char errmsg[256];                          // Specific error message
+  IO_Handler *iohandler = ESMC_NULL_POINTER; // New handler to return
   if (rc != NULL) {
     *rc = ESMF_RC_NOT_IMPL;               // final return code
   }
 
-  IO_Handler *iohandler;
 
   // call class constructor
   try {
+    // We really should never get here because IO layer is supposed to check
     if ((ESMC_IOFmtFlag *)NULL == iofmt) {
       localrc = ESMF_RC_PTR_NULL;
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "- NULL IOFmtFlag", rc);
       return ESMC_NULL_POINTER;
     }
-    if (ESMF_IOFMT_BIN == *iofmt) {
+    // Determine if we have the support for the requested I/O format
+    switch (*iofmt) {
+    case ESMF_IOFMT_BIN:
 #ifdef ESMF_PIO
       iohandler = new PIO_Handler(iofmt, &localrc);
 #else // ESMF_PIO
       localrc = ESMF_RC_LIB_NOT_PRESENT;
+      ESMC_LogDefault.Write("PIO library required for I/O operation",
+                            ESMC_LOG_WARN, ESMC_CONTEXT);
 #endif // ESMF_PIO
-    } else if (ESMF_IOFMT_NETCDF == *iofmt) {
-#if defined(ESMF_NETCDF) && defined(ESMF_PIO)
+      break;
+    case ESMF_IOFMT_NETCDF:
+      // No break
+    case ESMF_IOFMT_NETCDF4P:
+      // No break
+    case ESMF_IOFMT_NETCDF4C:
+#if  defined(ESMF_PIO) && (defined(ESMF_NETCDF) || defined(ESMF_PNETCDF))
       iohandler = new PIO_Handler(iofmt, &localrc);
-#else // ESMF_NETCDF && ESMF_PIO
+#else // defined(ESMF_PIO) && (defined(ESMF_NETCDF) || defined(ESMF_PNETCDF))
+      sprintf(errmsg, "PIO & (P)NetCDF libraries required for I/O operation");
       localrc = ESMF_RC_LIB_NOT_PRESENT;
-#endif // ESMF_NETCDF && ESMF_PIO
-    }  else if (ESMF_IOFMT_NETCDF4P == *iofmt) {
-#if defined(ESMF_PNETCDF) && defined(ESMF_PIO)
-      iohandler = new PIO_Handler(iofmt, &localrc);
-#else // ESMF_PNETCDF && ESMF_PIO
-      localrc = ESMF_RC_LIB_NOT_PRESENT;
-#endif // ESMF_PNETCDF && ESMF_PIO
-    } else if (ESMF_IOFMT_NETCDF4C == *iofmt) {
-#if defined(ESMF_PNETCDF) && defined(ESMF_PIO)
-      iohandler = new PIO_Handler(iofmt, &localrc);
-#else // ESMF_PNETCDF && ESMF_PIO
-      localrc = ESMF_RC_LIB_NOT_PRESENT;
-#endif // ESMF_PNETCDF && ESMF_PIO
-    } else {
+#endif // defined(ESMF_PIO) && (defined(ESMF_NETCDF) || defined(ESMF_PNETCDF))
+      break;
+    default:
       localrc = ESMF_RC_ARG_BAD;
+      break;
     }
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-      return ESMC_NULL_POINTER;
+    // Process the result
+    switch (localrc) {
+    case ESMF_SUCCESS:
+      // No action needed, should have a good PIO Handler.
+      break;
+    case ESMF_RC_LIB_NOT_PRESENT:
+      ESMC_LogDefault.Write(errmsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+      break;
+    case ESMF_RC_ARG_BAD:
+      ESMC_LogDefault.Write("Unknown I/O Format",
+                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+      break;
+    default:
+      ESMC_LogDefault.Write("Unknown I/O Error",
+                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+    }
   } catch(...) {
     // allocation error
     ESMC_LogDefault.AllocError(ESMC_CONTEXT, rc);
-    return ESMC_NULL_POINTER;
   }
 
-  // return successfully
+  // return
   if (rc != NULL) {
-    *rc = ESMF_SUCCESS;
+    *rc = localrc;
   }
   return iohandler;
 } // end IO_Handler::create
@@ -263,9 +271,7 @@ IO_Handler *IO_Handler::create (
 
   IO_Handler *iohandler = IO_Handler::create(iofmt, &localrc);
 
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
-    return ESMC_NULL_POINTER;;
-  } else {
+  if (ESMC_NULL_POINTER != iohandler) {
     strncpy(iohandler->filename, file, ESMF_MAXSTR);
     // Ensure termination
     iohandler->filename[ESMF_MAXSTR - 1] = '\0';
@@ -273,7 +279,7 @@ IO_Handler *IO_Handler::create (
 
   // return successfully
   if (rc != NULL) {
-    *rc = ESMF_SUCCESS;
+    *rc = localrc;
   }
   return iohandler;;
 } // end IO_Handler::create
@@ -314,9 +320,9 @@ int IO_Handler::destroy (
   }
 
   try {
-    // destruct IO object
-    (*ioclass)->destruct();
-    (*ioclass)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
+    // delete the IO object (this will call destruct)
+    delete (*ioclass);
+    *ioclass = ESMC_NULL_POINTER;
     localrc = ESMF_SUCCESS;
   } catch(int localrc) {
     // catch standard ESMF return code
@@ -372,7 +378,9 @@ void IO_Handler::finalize (
 
 #ifdef ESMF_PIO
     // PIO
+    PRINTPOS;
     PIO_Handler::finalize(&localrc);
+    PRINTMSG(", after finalize, localrc = " << localrc);
     if (ESMF_SUCCESS != localrc) {
       char errmsg[256];
       sprintf(errmsg, "PIO_Handler::finalize error = %d", localrc);
@@ -384,14 +392,17 @@ void IO_Handler::finalize (
     // finalize routines even if one fails.
   } catch(int localrc) {
     // catch standard ESMF return code
+    PRINTMSG(", caught passthru, localrc = " << localrc);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
     return;
   } catch(...) {
+    PRINTMSG(", caught unknown error");
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
                                           "- Caught exception", rc);
     return;
   }
 
+  PRINTMSG(", before return, localrc = " << localrc);
   // return successfully
   if ((int *)NULL != rc) {
     *rc = localrc;

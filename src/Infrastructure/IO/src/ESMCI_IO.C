@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.C,v 1.16 2012/08/06 01:26:54 gold2718 Exp $
+// $Id: ESMCI_IO.C,v 1.17 2012/08/14 22:53:23 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -38,13 +38,39 @@
 #include <ESMF_LogMacros.inc>
 #include <ESMCI_ArrayBundle.h>
 
-//#define __DEBUG
-#ifdef __DEBUG
+#ifdef ESMFIO_DEBUG
+#include "ESMC_VM.h"
+#include "ESMCI_VM.h"
 // Debug version
-#define PRINTPOS  std::cout << ESMC_METHOD << " called at " << ESMC_FILENAME  \
-                            << ":" << __LINE__ << std::endl
-#define PRINTMSG(_msg)  std::cout << ESMC_METHOD << " at " << ESMC_FILENAME   \
-                                  << ":" << __LINE__ << _msg << std::endl
+static int dbgio_getrank(void) {
+  static int my_rank = -1;
+  if (-1 == my_rank) {
+    int rc;
+    ESMC_VM evm;
+    ESMCI::VM *vm;
+    int localPet;
+    int petCount;
+    int peCount;
+    MPI_Comm communicator;
+    evm = ESMC_VMGetCurrent(&rc);
+    if (ESMF_SUCCESS == rc) {
+      vm = ESMCI::VM::getCurrent(&rc);
+      if (ESMF_SUCCESS == rc) {
+        rc = ESMC_VMGet(evm, &localPet, &petCount, &peCount,
+                        &communicator, (int *)NULL, (int *)NULL);
+        vm->barrier();
+        if (ESMF_SUCCESS == rc) {
+          my_rank = localPet;
+        }
+      }
+    }
+  }
+  return my_rank;
+}
+#define PRANKM "(" << dbgio_getrank() << "): " << ESMC_METHOD << " "
+#define PPOS " " << ESMC_FILENAME << ":" << __LINE__ << "; "
+#define PRINTPOS  std::cout << PRANKM << "called at" << PPOS << std::endl
+#define PRINTMSG(_msg)  std::cout << PRANKM "at" << PPOS << _msg << std::endl
 #else
 // Non-debug version
 #define PRINTPOS
@@ -54,7 +80,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO.C,v 1.16 2012/08/06 01:26:54 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_IO.C,v 1.17 2012/08/14 22:53:23 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -86,13 +112,38 @@ void IO::destruct(void) {
   PRINTPOS;
   if (ioHandler != (IO_Handler *)NULL) {
     // Allow ioHandler to close and clean up as necessary.
-    IO_Handler::destroy(&ioHandler);
+    try {
+      IO_Handler::destroy(&ioHandler);
+      ioHandler = (IO_Handler *)NULL;
+    } catch(int localrc) {
+      int rc;
+      // catch standard ESMF return code
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+      // Don't return, try to finish anyway
+    } catch(...) {
+      int rc;
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+                                            "- Caught exception", &rc);
+      // Don't return, try to finish anyway
+    }
   }
   // Delete all object nodes
-  while(!objects.empty()) {
-    IO_ObjectContainer *obj = objects.back();
-    objects.pop_back();
-    delete(obj);
+  try {
+    while(!objects.empty()) {
+      IO_ObjectContainer *obj = objects.back();
+      objects.pop_back();
+      delete(obj);
+    }
+  } catch(int localrc) {
+    int rc;
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    return;
+  } catch(...) {
+    int rc;
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+                                          "- Caught exception", &rc);
+    return;
   }
 } // end IO:destruct
 //-----------------------------------------------------------------------------
@@ -127,7 +178,9 @@ IO *IO::create(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  if (rc != NULL) {
+    *rc = ESMC_RC_NOT_IMPL;               // final return code
+  }
 
   IO *ioclass;
 
@@ -135,10 +188,14 @@ IO *IO::create(
   // call class constructor
   try{
     ioclass = new IO(&localrc);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+                                              ESMCI_ERR_PASSTHRU, rc)) {
+      ioclass = ESMC_NULL_POINTER;
       return ESMC_NULL_POINTER;
+    }
   } catch(...) {
     // allocation error
+    ioclass = ESMC_NULL_POINTER;
     ESMC_LogDefault.AllocError(ESMC_CONTEXT, rc);
     return ESMC_NULL_POINTER;
   }
@@ -187,9 +244,9 @@ int IO::destroy(
   }
 
   try {
-    // destruct IO object
-    (*ioclass)->destruct();
-    (*ioclass)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
+    // delete the IO object (this will call destruct)
+    delete (*ioclass);
+    *ioclass = ESMC_NULL_POINTER;
     localrc = ESMF_SUCCESS;
   } catch(int localrc) {
     // catch standard ESMF return code
@@ -354,17 +411,17 @@ int IO::write(
     iowriteflag = IO_TRUNCATE;
   }
   localrc = open(file, &readflag, &iowriteflag, iofmt);
-  std::cout << ESMC_METHOD << ": open returned " << localrc << std::endl;
+  PRINTMSG("open returned " << localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     return rc;
   }
 
   localrc = write(timeslice);
-  std::cout << ESMC_METHOD << ": write returned " << localrc << std::endl;
+  PRINTMSG("write returned " << localrc);
 
   // Close the file
   localrc = close();
-  std::cout << ESMC_METHOD << ": close returned " << localrc << std::endl;
+  PRINTMSG("close returned " << localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     return rc;
   }
@@ -406,17 +463,17 @@ int IO::write(
   // Open the file
   IOReadFlag readflag = IO_NO_READ;
   localrc = open(file, &readflag, iowriteflag, iofmt);
-  std::cout << ESMC_METHOD << ": open returned " << localrc << std::endl;
+  PRINTMSG("open returned " << localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     return rc;
   }
 
   localrc = write(timeslice);
-  std::cout << ESMC_METHOD << ": write returned " << localrc << std::endl;
+  PRINTMSG("write returned " << localrc);
 
   // Close the file
   localrc = close();
-  std::cout << ESMC_METHOD << ": close returned " << localrc << std::endl;
+  PRINTMSG("close returned " << localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     return rc;
   }
@@ -517,6 +574,7 @@ int IO::open(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  PRINTPOS;
   // Make sure pointer inputs have something in them
   if ((char const * const)NULL == file) {
     localrc = ESMC_RC_PTR_NULL;
@@ -524,7 +582,6 @@ int IO::open(
                           ESMC_LOG_ERROR, ESMC_CONTEXT);
     return localrc;
   }
-  PRINTPOS;
   if ((IOReadFlag *)NULL == ioreadflag) {
     localrc = ESMC_RC_PTR_NULL;
     ESMC_LogDefault.Write("IO Read Flag cannot be NULL",
@@ -547,18 +604,15 @@ int IO::open(
   // Ensure that we have an IO_Handler (create if necessary)
   if ((IO_Handler *)NULL == ioHandler) {
     ioHandler = IO_Handler::create(file, iofmt, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-      std::cout << ESMC_METHOD << " at " << ESMC_FILENAME << ":"
-                << __LINE__ << ", IO_Handler::create returned "
-                << localrc << std::endl;
+    if (ESMF_SUCCESS != localrc) {
+      PRINTMSG("IO_Handler::create returned " << localrc);
       ioHandler = (IO_Handler *)NULL;
       return localrc;
     }
   } else if (ioHandler->getFormat() != *iofmt) {
-    std::cout << ESMC_METHOD << " at " << ESMC_FILENAME << ":"
-              << __LINE__ << ", IO_Handler::create is wrong format, "
-              << ioHandler->getFormat() << " instead of, "
-              << *iofmt << std::endl;
+    PRINTMSG("IO_Handler::create is wrong format, " <<
+             ioHandler->getFormat() << " instead of, " <<
+             *iofmt);
     localrc = ESMC_RC_FILE_OPEN;
     ESMC_LogDefault.Write("Internal error, ioHandler has wrong format",
                           ESMC_LOG_ERROR, ESMC_CONTEXT);
@@ -568,8 +622,7 @@ int IO::open(
 
   // Check to make sure that a file is not already open
   if (ioHandler->isOpen() != ESMF_FALSE) {
-    std::cout << ESMC_METHOD << " called at " << ESMC_FILENAME << ":"
-              << __LINE__ << ", IO_Handler is already open " << std::endl;
+    PRINTMSG("IO_Handler is already open ");
     localrc = ESMC_RC_FILE_OPEN;
     ESMC_LogDefault.Write("Internal error, ioHandler is already open",
                           ESMC_LOG_ERROR, ESMC_CONTEXT);
@@ -579,17 +632,12 @@ int IO::open(
   // Open the file
   ioHandler->open(file, ioreadflag, iowriteflag, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    std::cout << ESMC_METHOD << " called at " << ESMC_FILENAME << ":"
-              << __LINE__ << ", IO_Handler::open returned "
-              << localrc << std::endl;
+    PRINTMSG("IO_Handler::open returned " << localrc);
     return localrc;
   }
-  std::cout << ESMC_METHOD << " at " << ESMC_FILENAME << ":"
-            << __LINE__ << ", ioHandler->open returned "
-            << localrc << std::endl;
     
   // return successfully
-  rc = ESMF_SUCCESS;
+  rc = localrc;
   return (rc);
 }  // end IO::open
 //-------------------------------------------------------------------------
@@ -752,12 +800,15 @@ int IO::addArray(
         objects.push_back(newObj);
       }
     } catch(...) {
+      PRINTMSG("CATCH: Alloc error!!");
       ESMC_LogDefault.AllocError(ESMC_CONTEXT, &rc);
     }
   }
     
-  // return successfully
-  rc = localrc;
+  // return
+  if (ESMC_RC_NOT_IMPL == rc) {
+    rc = localrc;
+  }
   return (rc);
 }  // end IO::addArray
 //-------------------------------------------------------------------------

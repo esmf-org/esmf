@@ -1,4 +1,4 @@
-// $Id: ESMCI_PIO_Handler.h,v 1.1 2012/07/23 20:20:54 gold2718 Exp $
+// $Id: ESMCI_PIO_Handler.h,v 1.2 2012/08/14 22:52:56 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -84,8 +84,6 @@ namespace ESMCI {
   public:
     // native constructor and destructor
     PIO_Handler(ESMC_IOFmtFlag *fmtArg, int *rc);
-    // prevent baseID counter increment
-    PIO_Handler(ESMC_IOFmtFlag *fmtArg, int baseID, int *rc);
     // Static initialize and finalize routines for PIO
     static void initialize(int comp_rank, MPI_Comm comp_comm,
                            int num_iotasks, int num_aggregator,
@@ -117,9 +115,6 @@ namespace ESMCI {
 
     // get() and set()
   public:
-    virtual int setName(const char *name) {
-            return ESMC_BaseSetName(name, "PIO_Handler");
-    }
 
     // match()
     static bool match(PIO_Handler const * const ioh1,

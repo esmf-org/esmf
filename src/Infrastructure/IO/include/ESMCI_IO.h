@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.h,v 1.11 2012/08/06 01:25:41 gold2718 Exp $
+// $Id: ESMCI_IO.h,v 1.12 2012/08/14 22:52:56 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -71,9 +71,21 @@ namespace ESMCI {
       type = IO_ARRAY;
       object.arr = arr_p;
       if ((const char * const)NULL != arrName) {
-        strncpy(name, arrName, ESMF_MAXSTR);
+        int len = strlen(arrName);
+        if (len >= ESMF_MAXSTR) {
+          strncpy(name, arrName, (ESMF_MAXSTR - 1));
+          name[ESMF_MAXSTR - 1] = '\0';
+        } else {
+          strcpy(name, arrName);
+        }
       }
       number = 0;
+    }
+    ~IO_ObjectContainer() {
+      name[0] = '\0';
+      object.arr = (Array *)NULL;
+      number = 0;
+      type = IO_NULL;
     }
     Array *getArray(void) {
       return object.arr;
@@ -99,7 +111,7 @@ namespace ESMCI {
   //===========================================================================
   
   //===========================================================================
-  class IO : public ESMC_Base {    // inherits from ESMC_Base class
+  class IO {
   
   private:
   // global information
@@ -115,10 +127,6 @@ namespace ESMCI {
       if (rc != NULL) {
         *rc = ESMF_SUCCESS;
       }
-    }
-    IO(int baseID) : ESMC_Base(baseID) {  // prevent baseID counter increment
-      ioHandler = (IO_Handler *)NULL;
-      // No constructor call for objects -- use default Allocator
     }
   public:
     ~IO() { destruct(); }
@@ -153,8 +161,7 @@ namespace ESMCI {
     int write(int *timeslice = NULL);
 
     // get() and set()
-    const char *getName() const { return ESMC_BaseGetName(); }
-    int setName(const char *name) { return ESMC_BaseSetName(name, "IO"); }
+    const char *getName() const { return "ESMCI::IO"; }
 
     // match()
     static bool match(IO const * const io1, IO const * const io2,
