@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.149 2012/05/05 00:28:25 w6ws Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.150 2012/08/15 17:59:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -140,6 +140,15 @@
 
       type(ESMF_Pointer), parameter :: ESMF_NULL_POINTER = ESMF_Pointer(0), &
                                        ESMF_BAD_POINTER = ESMF_Pointer(-1)
+ 
+!------------------------------------------------------------------------------
+!
+!    ! Character array pointer.  For use when arrays of character pointers
+!    ! are needed, but can not be directly coded due to Fortran semantics.
+
+     type ESMF_CharPtr
+       character(1), pointer :: cptr(:) => null ()
+     end type
 
 
 !------------------------------------------------------------------------------
@@ -789,7 +798,7 @@
 
       public ESMF_KeywordEnforcer
 
-      public ESMF_Status, ESMF_Pointer, ESMF_TypeKind_Flag
+      public ESMF_Status, ESMF_Pointer, ESMF_CharPtr, ESMF_TypeKind_Flag
       public ESMF_DataValue
 
       public ESMF_MapPtr
