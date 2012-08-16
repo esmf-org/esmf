@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.44 2012/07/25 22:31:04 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.45 2012/08/16 17:31:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -914,12 +914,17 @@ static void *vmk_spawn(void *arg){
 // TODO: Windows equivalent, perhaps using TerminateProcess
 #endif
       // which ever thread of the other process woke up will try to receive tid
-//      MPI_Send(&(sarg->contributors[sarg->mypet][i].blocker_tid),
-//      sizeof(pthread_t), MPI_BYTE, sarg->contributors[sarg->mypet][i].mpi_pid,
-//      VM_TID_MPI_TAG, vm.default_mpi_c);
+#ifndef ESMF_NO_PTHREADS
+      if (vm->mpi_thread_level<MPI_THREAD_MULTIPLE)
+        pthread_mutex_lock(&(vmkt->mut0));
+#endif
       MPI_Send(&(sarg->contributors[sarg->mypet][i].blocker_vmkt),
         sizeof(vmkt_t *), MPI_BYTE, sarg->contributors[sarg->mypet][i].mpi_pid,
         VM_TID_MPI_TAG, vm->default_mpi_c);
+#ifndef ESMF_NO_PTHREADS
+      if (vm->mpi_thread_level<MPI_THREAD_MULTIPLE)
+        pthread_mutex_unlock(&(vmkt->mut0));
+#endif
     }
     // now signal to parent thread that child is done with its work
 #ifndef ESMF_NO_PTHREADS
@@ -1025,14 +1030,10 @@ static void *vmk_sigcatcher(void *arg){
 #endif
   // this signal was received from a thread running under another process
   // receive the thread id of the blocker thread that needs to be woken up
-//  MPI_Recv(&thread_wake, sizeof(pthread_t), MPI_BYTE, MPI_ANY_SOURCE, 
-//    VM_TID_MPI_TAG, vm.default_mpi_c, &mpi_s);
   MPI_Recv(&blocker_vmkt, sizeof(vmkt_t *), MPI_BYTE, MPI_ANY_SOURCE, 
     VM_TID_MPI_TAG, vm.default_mpi_c, &mpi_s);
   // now wake up the correct blocker thread within this pid
 #if (VERBOSITY > 5)
-//  printf("It's the sigcatcher for pid %d again. I received the blocker tid\n"
-//    " and I'll wake up blocker thread with tid: %d\n", getpid(), thread_wake);
   fprintf(stderr, "It's the sigcatcher for pid %d again. I received the blocker"
     " &vmkt\n"
     " and I'll wake up blocker thread with &vmkt: %p\n", getpid(),
