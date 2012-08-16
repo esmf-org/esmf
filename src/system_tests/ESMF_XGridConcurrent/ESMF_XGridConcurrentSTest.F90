@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridConcurrentSTest.F90,v 1.19 2012/08/07 19:36:51 feiliu Exp $
+! $Id: ESMF_XGridConcurrentSTest.F90,v 1.20 2012/08/16 17:00:26 feiliu Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -13,7 +13,7 @@
 !    are idealized atmosphere and land.
 !    Exchange grid is created inside the coupler component.
 !
-!    Atmosphere component runs on 6 PETs and defines a 2D source Field.
+!    Atmosphere component runs on 6 PETs and defines a 2D destination Field.
 !    Land gridded component defines another 2D source Field on 2 PETs. 
 !
 !    Land initialize source Fields to cosine hill functions.
