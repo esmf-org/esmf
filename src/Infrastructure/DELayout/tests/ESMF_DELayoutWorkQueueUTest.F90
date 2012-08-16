@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.32 2012/05/14 20:45:58 svasquez Exp $
+! $Id: ESMF_DELayoutWorkQueueUTest.F90,v 1.33 2012/08/16 17:45:04 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -9,7 +9,6 @@
 ! Licensed under the University of Illinois-NCSA License.
 !
 !==============================================================================
-!
 
 module ESMF_DELayoutWQUTest_mod
 
@@ -60,9 +59,10 @@ module ESMF_DELayoutWQUTest_mod
     type(ESMF_VM):: vm
     type(ESMF_DELayout):: delayout
     integer:: petCount, localPet, localDeCount, i, workDe, k, deCount
-    integer, allocatable:: localDeToDeMap(:)
+    integer, allocatable:: localDeToDeMap(:), petMap(:)
     type(ESMF_ServiceReply_Flag):: reply
-    real:: x
+    
+    integer, parameter  :: workLoad = 10
     
     rc = ESMF_SUCCESS
 
@@ -74,9 +74,13 @@ module ESMF_DELayoutWQUTest_mod
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    deCount = 10*petCount
-    delayout = ESMF_DELayoutCreate(deCount=deCount, &
-      pinflag=ESMF_PIN_DE_TO_VAS, rc=rc)
+    deCount = workLoad * petCount
+    allocate(petMap(deCount))
+    do i=0, petCount-1
+      petMap(i*workLoad+1:(i+1)*workLoad) = i
+    enddo
+    delayout = ESMF_DELayoutCreate(petMap=petMap, pinflag=ESMF_PIN_DE_TO_VAS, &
+      rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
 !    call ESMF_DELayoutPrint(delayout, rc=rc)
@@ -88,59 +92,43 @@ module ESMF_DELayoutWQUTest_mod
     call ESMF_DELayoutGet(delayout, vasLocalDeToDeMap=localDeToDeMap, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    do k=1, 4
-      do i=1, localDeCount
-        workDe = localDeToDeMap(i)
-!        print *, "I am PET", localPET, " and I am offering service for DE ", workDe
-        reply = ESMF_DELayoutServiceOffer(delayout, de=workDe, rc=rc)
+    do i=1, localDeCount
+      workDe = localDeToDeMap(i)
+!      print *, "I am PET", localPET, " and I am offering service for DE ", workDe
+      reply = ESMF_DELayoutServiceOffer(delayout, de=workDe, rc=rc)
+      if (rc/=ESMF_SUCCESS) return ! bail out
+      if (reply == ESMF_SERVICEREPLY_ACCEPT) then
+!        print *, "I am PET", localPET, ", service offer for DE ", workDe, &
+!          " was accepted."
+        call work(workDe, deCount)  ! work for workDe
+        call ESMF_DELayoutServiceComplete(delayout, de=workDe, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
-        if (reply == ESMF_SERVICEREPLY_ACCEPT) then
-!          print *, "I am PET", localPET, ", service offer for DE ", workDe, &
-!            " was accepted."
-          call work(x, workDe, petCount)  ! work for workDe
-!          print *, "x = ", x
-          call ESMF_DELayoutServiceComplete(delayout, de=workDe, rc=rc)
-          if (rc/=ESMF_SUCCESS) return ! bail out
-!          print *, "I am PET", localPET, ", service for DE ", workDe, &
-!            " completed."
-        endif
-      enddo
-    enddo    
+!        print *, "I am PET", localPET, ", service for DE ", workDe, &
+!          " completed."
+      endif
+    enddo
     
-    deallocate(localDeToDeMap)
+    deallocate(localDeToDeMap, petMap)
     
     call ESMF_DELayoutDestroy(delayout, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
   end subroutine !--------------------------------------------------------------
 
+  recursive subroutine work(de, deCount)
+    integer             :: de, deCount
+    real(ESMF_KIND_R8)  :: dt
+    
+    dt = 5.d0 * exp(-((de-deCount/2)**2)/8.)
 
-  recursive subroutine work(x, de, petCount)
-    real:: x, zend
-    integer:: de, petCount, i, iend
+!print *, "de=", de, "dt=", dt
     
-    real:: z, de_ratio, random
-    
-    zend = 10000.
-    de_ratio = 2.* 3.1415 * de/petCount
-    
-    call random_number(random)
-    zend = zend * (1. + 10. * sin(de_ratio) * random)
-    
-    x=0.
-    z=0.
-    iend = zend/0.01
-    do i=0, iend
-      x = x + sin(z) * de
-      z = z + 0.01
-    enddo
-    
+    call ESMF_VMWtimeDelay(dt)    
   end subroutine
-
 
 end module
 
-
+!==============================================================================
 
 program ESMF_DELayoutWQUTest
 
@@ -214,11 +202,10 @@ program ESMF_DELayoutWQUTest
   print *, "<round 1> PET ", localPet, " time: ", timeEnd-timeStart
   
   !NEX_UTest
-  write(name, *) "Run work queue - round 1"
+  write(name, *) "GridCompDestroy() - round 1"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_GridCompDestroy(gcomp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
 
   !----------------- test with threads -------------------------------
 
@@ -229,14 +216,21 @@ program ESMF_DELayoutWQUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !NEX_UTest
-  write(name, *) "GridCompSetServices() - round 2"
+  write(name, *) "GridCompSetVM() - round 2"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   if (pthreadsEnabled) then
     call ESMF_GridCompSetVM(gcomp, userRoutine=mygcomp_setvm_withthreads, rc=rc)
+  else
+    rc=ESMF_SUCCESS
   endif
-  call ESMF_GridCompSetServices(gcomp, userRoutine=mygcomp_register, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
+  !NEX_UTest
+  write(name, *) "GridCompSetServices() - round 2"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_GridCompSetServices(gcomp, userRoutine=mygcomp_register, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
   !NEX_UTest
   write(name, *) "Run work queue - round 2"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -248,11 +242,10 @@ program ESMF_DELayoutWQUTest
   print *, "<round 2> PET ", localPet, " time: ", timeEnd-timeStart
 
   !NEX_UTest
-  write(name, *) "Run work queue - round 2"
+  write(name, *) "GridCompDestroy() - round 2"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_GridCompDestroy(gcomp, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
  
   !---------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)
