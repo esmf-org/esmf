@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.h,v 1.17 2012/07/25 22:31:01 theurich Exp $
+// $Id: ESMCI_VMKernel.h,v 1.18 2012/08/16 18:50:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -290,8 +290,20 @@ class VMK{
     esmf_pthread_t getLocalPthreadId() const {return mypthid;}
     bool isPthreadsEnabled() const{
 #ifdef ESMF_NO_PTHREADS
+      // did not compile with threads
       return false;
 #else
+      //TODO: Actually need to check that MPI at least provides
+      //TODO: MPI_THREAD_SERIALIZED thread support. However, turns out that
+      //TODO: at least OpenMPI by default is configured to return 
+      //TODO: MPI_THREAD_SINGLE, although it is actually safe on the
+      //TODO: MPI_THREAD_SERIALIZED level. The totally correct thing to do here
+      //TODO: is to go with what the MPI call returned in mpi_thread_level,
+      //TODO: and to rebuild e.g. OpenMPI with its threading options, but for
+      //TODO: now this would mean that we loose thread testing even where it
+      //TODO: is actually working... so I comment out this check below for now!!
+   //   if (mpi_thread_level < MPI_THREAD_SERIALIZED)
+   //     return false;
       return true;
 #endif
     }

@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.45 2012/08/16 17:31:50 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.46 2012/08/16 18:50:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -2276,9 +2276,7 @@ int VMKPlan::vmkplan_maxthreads(VMK &vm, int max, int *plist,
   if (pref_inter_ssi >= 0)
     this->pref_inter_ssi = pref_inter_ssi;
   vmkplan_maxthreads(vm, max, plist, nplist);
-#ifdef ESMF_NO_PTHREADS
-  if (!nothreadflag) return 1; // indicate error
-#endif
+  if ((vm.isPthreadsEnabled()==false) && !nothreadflag) return 1; // error
   return 0;
 }
 
@@ -2390,9 +2388,7 @@ int VMKPlan::vmkplan_minthreads(VMK &vm, int max, int *plist,
   if (pref_inter_ssi >= 0)
     this->pref_inter_ssi = pref_inter_ssi;
   vmkplan_minthreads(vm, max, plist, nplist);
-#ifdef ESMF_NO_PTHREADS
-  if (!nothreadflag) return 1; // indicate error
-#endif
+  if ((vm.isPthreadsEnabled()==false) && !nothreadflag) return 1; // error
   return 0;
 }
 
@@ -2509,9 +2505,7 @@ int VMKPlan::vmkplan_maxcores(VMK &vm, int max, int *plist,
   if (pref_inter_ssi >= 0)
     this->pref_inter_ssi = pref_inter_ssi;
   vmkplan_maxcores(vm, max, plist, nplist);
-#ifdef ESMF_NO_PTHREADS
-  if (!nothreadflag) return 1; // indicate error
-#endif
+  if ((vm.isPthreadsEnabled()==false) && !nothreadflag) return 1; // error
   return 0;
 }
 
