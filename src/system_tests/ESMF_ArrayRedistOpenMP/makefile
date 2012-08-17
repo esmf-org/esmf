@@ -1,12 +1,4 @@
-# $Id: makefile,v 1.5 2009/06/03 23:00:28 theurich Exp $ 
-
-ifeq ($(ESMF_TESTFORCEOPENMP),ON)
-ifeq ($(ESMF_OPENMP),OFF)
-ESMF_F90COMPILEOPTS = $(ESMF_OPENMP_F90COMPILEOPTS)
-ESMF_F90LINKOPTS = $(ESMF_OPENMP_F90LINKOPTS)
-endif
-endif
-
+# $Id: makefile,v 1.6 2012/08/17 22:30:54 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -27,6 +19,13 @@ SYSTEM_TESTS_RUN      = RUN_ArrayRedistOpenMP
 ESMF_ArrayRedistOpenMPSTest.o : $(SYSTEM_TESTS_OBJ)
 
 include $(ESMF_DIR)/makefile
+
+ifeq ($(ESMF_TESTFORCEOPENMP),ON)
+ifeq ($(ESMF_OPENMP),OFF)
+ESMF_F90COMPILEOPTS += $(ESMF_OPENMP_F90COMPILEOPTS)
+ESMF_F90LINKOPTS    += $(ESMF_OPENMP_F90LINKOPTS)
+endif
+endif
 
 DIRS = 
 

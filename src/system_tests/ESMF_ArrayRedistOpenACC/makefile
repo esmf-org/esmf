@@ -1,12 +1,4 @@
-# $Id: makefile,v 1.1 2012/08/17 21:05:15 theurich Exp $ 
-
-ifeq ($(ESMF_TESTFORCEOPENACC),ON)
-ifeq ($(ESMF_OPENACC),OFF)
-ESMF_F90COMPILEOPTS = $(ESMF_OPENACC_F90COMPILEOPTS)
-ESMF_F90LINKOPTS = $(ESMF_OPENACC_F90LINKOPTS)
-endif
-endif
-
+# $Id: makefile,v 1.2 2012/08/17 22:31:42 theurich Exp $ 
 
 ALL: tree_build_system_tests
 
@@ -27,6 +19,13 @@ SYSTEM_TESTS_RUN      = RUN_ArrayRedistOpenACC
 ESMF_ArrayRedistOpenACCSTest.o : $(SYSTEM_TESTS_OBJ)
 
 include $(ESMF_DIR)/makefile
+
+ifeq ($(ESMF_TESTFORCEOPENACC),ON)
+ifeq ($(ESMF_OPENACC),OFF)
+ESMF_F90COMPILEOPTS += $(ESMF_OPENACC_F90COMPILEOPTS)
+ESMF_F90LINKOPTS    += $(ESMF_OPENACC_F90LINKOPTS)
+endif
+endif
 
 DIRS = 
 
