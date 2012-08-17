@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.63 2012/04/05 04:35:56 theurich Exp $
+# $Id: build_rules.mk,v 1.64 2012/08/17 21:43:32 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -153,6 +153,16 @@ ESMF_CXXCOMPILEOPTS       += -mcmodel=medium
 ESMF_CXXLINKOPTS          += -mcmodel=medium
 ESMF_F90COMPILEOPTS       += -mcmodel=medium
 ESMF_F90LINKOPTS          += -mcmodel=medium
+endif
+
+############################################################
+# Conditionally add pthread compiler and linker flags
+#
+ifeq ($(ESMF_PTHREADS),ON)
+ESMF_F90COMPILEOPTS += -lpthread
+ESMF_CXXCOMPILEOPTS += -lpthread
+ESMF_F90LINKOPTS    += -lpthread
+ESMF_CXXLINKOPTS    += -lpthread
 endif
 
 ############################################################
