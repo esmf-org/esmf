@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.127 2012/04/05 04:27:22 theurich Exp $
+# $Id: makefile,v 1.128 2012/08/17 21:56:27 theurich Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -90,6 +90,7 @@ script_info:
 	-@echo "ESMF_SITE:              $(ESMF_SITE)"
 	-@echo "ESMF_PTHREADS:          $(ESMF_PTHREADS)"
 	-@echo "ESMF_OPENMP:            $(ESMF_OPENMP)"
+	-@echo "ESMF_OPENACC:           $(ESMF_OPENACC)"
 	-@echo "ESMF_ARRAY_LITE:        $(ESMF_ARRAY_LITE)"
 	-@echo "ESMF_NO_INTEGER_1_BYTE: $(ESMF_NO_INTEGER_1_BYTE)"
 	-@echo "ESMF_NO_INTEGER_2_BYTE: $(ESMF_NO_INTEGER_2_BYTE)"
@@ -100,6 +101,7 @@ script_info:
 	-@echo "ESMF_TESTMPMD:          $(ESMF_TESTMPMD)"
 	-@echo "ESMF_TESTSHAREDOBJ:     $(ESMF_TESTSHAREDOBJ)"
 	-@echo "ESMF_TESTFORCEOPENMP:   $(ESMF_TESTFORCEOPENMP)"
+	-@echo "ESMF_TESTFORCEOPENACC:  $(ESMF_TESTFORCEOPENACC)"
 	-@echo "ESMF_TESTHARNESS_ARRAY: $(ESMF_TESTHARNESS_ARRAY)"
 	-@echo "ESMF_TESTHARNESS_FIELD: $(ESMF_TESTHARNESS_FIELD)"
 	-@echo "ESMF_MPIRUN:            $(ESMF_MPIRUN)"
@@ -305,6 +307,11 @@ info_mk: chkdir_lib
 	-@echo "ESMF_OPENMP_CXXCOMPILEOPTS=$(ESMF_OPENMP_CXXCOMPILEOPTS)" >> $(MKINFO)
 	-@echo "ESMF_OPENMP_CXXLINKOPTS=$(ESMF_OPENMP_CXXLINKOPTS)" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
+	-@echo "ESMF_OPENACC_F90COMPILEOPTS=$(ESMF_OPENACC_F90COMPILEOPTS)" >> $(MKINFO)
+	-@echo "ESMF_OPENACC_F90LINKOPTS=$(ESMF_OPENACC_F90LINKOPTS)" >> $(MKINFO)
+	-@echo "ESMF_OPENACC_CXXCOMPILEOPTS=$(ESMF_OPENACC_CXXCOMPILEOPTS)" >> $(MKINFO)
+	-@echo "ESMF_OPENACC_CXXLINKOPTS=$(ESMF_OPENACC_CXXLINKOPTS)" >> $(MKINFO)
+	-@echo "" >> $(MKINFO)
 	-@echo "# Internal ESMF variables, do NOT depend on these!" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "ESMF_INTERNAL_DIR=$(ESMF_DIR)" >> $(MKINFO)
@@ -326,6 +333,7 @@ info_mk: chkdir_lib
 	-@echo "# ESMF_SITE: $(ESMF_SITE)" >> $(MKINFO)
 	-@echo "# ESMF_PTHREADS: $(ESMF_PTHREADS)" >> $(MKINFO)
 	-@echo "# ESMF_OPENMP: $(ESMF_OPENMP)" >> $(MKINFO)
+	-@echo "# ESMF_OPENACC: $(ESMF_OPENACC)" >> $(MKINFO)
 	-@echo "# ESMF_ARRAY_LITE: $(ESMF_ARRAY_LITE)" >> $(MKINFO)
 	-@echo "# ESMF_NO_INTEGER_1_BYTE: $(ESMF_NO_INTEGER_1_BYTE)" >> $(MKINFO)
 	-@echo "# ESMF_NO_INTEGER_2_BYTE: $(ESMF_NO_INTEGER_2_BYTE)" >> $(MKINFO)

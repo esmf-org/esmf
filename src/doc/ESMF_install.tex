@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.105 2012/06/20 17:21:11 peggyli Exp $
+% $Id: ESMF_install.tex,v 1.106 2012/08/17 21:56:31 theurich Exp $
 
 %\section{Building and Installing the ESMF}
 \subsection{ESMF Download Options}
@@ -630,6 +630,11 @@ Possible value: {\tt TRUE} (default), {\tt FALSE}
 Not normally set by user. Setting this variable to {\tt FALSE} instructs
 ESMF to generating data array interfaces for data types of 2-byte integers.
 
+\item[ESMF\_OPENACC] 
+Possible value: {\tt ON}, {\tt OFF} (default)
+
+Compiles and links the ESMF library with OpenACC compiler flags.
+
 \item[ESMF\_OPENMP] 
 Possible value: {\tt ON}, {\tt OFF} (default is system dependent)
 
@@ -705,6 +710,11 @@ then all unit tests will be compiled and will be executed when the test is
 run.  If unset or set to any other value, only a subset of the unit tests
 will be included to verify basic functions. Note that this is a compile-time
 selection, not a run-time option.
+
+\item[ESMF\_TESTFORCEOPENACC] 
+Possible value: {\tt ON}, {\tt OFF} (default)
+
+The {\tt ON} setting enforces usage of OpenACC compiler flags when building ESMF test applications. This allows testing of user-level OpenACC usage even with {\tt ESMF\_OPENACC} set to {\tt OFF}.
 
 \item[ESMF\_TESTFORCEOPENMP] 
 Possible value: {\tt ON}, {\tt OFF} (default)

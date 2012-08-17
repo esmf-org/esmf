@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.357 2012/02/07 22:12:32 theurich Exp $
+#  $Id: common.mk,v 1.358 2012/08/17 21:56:28 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -168,6 +168,10 @@ ifndef ESMF_OPENMP
 export ESMF_OPENMP = $(ESMF_OPENMPDEFAULT)
 endif
 
+ifndef ESMF_OPENACC
+export ESMF_OPENACC = $(ESMF_OPENACCDEFAULT)
+endif
+
 ifndef ESMF_ARRAY_LITE
 export ESMF_ARRAY_LITE = default
 endif
@@ -206,6 +210,10 @@ endif
 
 ifndef ESMF_TESTFORCEOPENMP
 export ESMF_TESTFORCEOPENMP = default
+endif
+
+ifndef ESMF_TESTFORCEOPENACC
+export ESMF_TESTFORCEOPENACC = default
 endif
 
 ifndef ESMF_TESTHARNESS_ARRAY
@@ -382,6 +390,10 @@ endif
 
 ifneq ($(ESMF_TESTFORCEOPENMP),ON)
 export ESMF_TESTFORCEOPENMP = OFF
+endif
+
+ifneq ($(ESMF_TESTFORCEOPENACC),ON)
+export ESMF_TESTFORCEOPENACC = OFF
 endif
 
 ifeq ($(ESMF_ETCDIR),default)
@@ -602,6 +614,7 @@ endif
 #-------------------------------------------------------------------------------
 ESMF_PTHREADSDEFAULT        = ON
 ESMF_OPENMPDEFAULT          = ON
+ESMF_OPENACCDEFAULT         = OFF
 
 ESMF_ARDEFAULT              = ar
 ESMF_ARCREATEFLAGSDEFAULT   = cr
@@ -899,6 +912,12 @@ ESMF_OPENMP_F90COMPILEOPTS  +=
 ESMF_OPENMP_F90LINKOPTS     +=
 ESMF_OPENMP_CXXCOMPILEOPTS  +=
 ESMF_OPENMP_CXXLINKOPTS     +=
+
+# - OpenACC compiler and linker flags
+ESMF_OPENACC_F90COMPILEOPTS  +=
+ESMF_OPENACC_F90LINKOPTS     +=
+ESMF_OPENACC_CXXCOMPILEOPTS  +=
+ESMF_OPENACC_CXXLINKOPTS     +=
 
 # - MPIRUN
 ifneq ($(origin ESMF_MPIRUN), environment)
@@ -1210,6 +1229,21 @@ ESMF_F90COMPILEOPTS += $(ESMF_OPENMP_F90COMPILEOPTS)
 ESMF_F90LINKOPTS    += $(ESMF_OPENMP_F90LINKOPTS)
 ESMF_CXXCOMPILEOPTS += $(ESMF_OPENMP_CXXCOMPILEOPTS)
 ESMF_CXXLINKOPTS    += $(ESMF_OPENMP_CXXLINKOPTS)
+endif
+
+#-------------------------------------------------------------------------------
+# ESMF_OPENACC is passed (by CPP) into the library compilation to control the
+# dependency of the ESMF library on OpenACC.
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_OPENACC),OFF)
+CPPFLAGS       += -DESMF_NO_OPENACC
+endif
+
+ifeq ($(ESMF_OPENACC),ON)
+ESMF_F90COMPILEOPTS += $(ESMF_OPENACC_F90COMPILEOPTS)
+ESMF_F90LINKOPTS    += $(ESMF_OPENACC_F90LINKOPTS)
+ESMF_CXXCOMPILEOPTS += $(ESMF_OPENACC_CXXCOMPILEOPTS)
+ESMF_CXXLINKOPTS    += $(ESMF_OPENACC_CXXLINKOPTS)
 endif
 
 #-------------------------------------------------------------------------------

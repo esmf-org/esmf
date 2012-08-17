@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.64 2012/08/17 21:43:32 theurich Exp $
+# $Id: build_rules.mk,v 1.65 2012/08/17 21:56:30 theurich Exp $
 #
 # Linux.pgi.default
 #
@@ -174,6 +174,14 @@ ESMF_OPENMP_F90LINKOPTS    += -mp
 ESMF_OPENMP_CXXLINKOPTS    += -mp --exceptions
 # Newer vers of PGI (>6) have trouble with OpenMP symbols under cross lang. link
 ESMF_OPENMP := OFF
+
+############################################################
+# OpenACC compiler and linker flags (the -Minfo just there for debugging)
+#
+ESMF_OPENACC_F90COMPILEOPTS += -acc -Minfo
+ESMF_OPENACC_CXXCOMPILEOPTS += -acc -Minfo
+ESMF_OPENACC_F90LINKOPTS    += -acc -Minfo
+ESMF_OPENACC_CXXLINKOPTS    += -acc -Minfo
 
 ############################################################
 # Need this until the file convention is fixed (then remove these two lines)
