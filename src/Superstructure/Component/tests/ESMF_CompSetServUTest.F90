@@ -1,4 +1,4 @@
-! $Id: ESMF_CompSetServUTest.F90,v 1.39 2012/05/16 21:55:58 svasquez Exp $
+! $Id: ESMF_CompSetServUTest.F90,v 1.40 2012/08/20 16:15:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -39,6 +39,7 @@ program ESMF_CompSetServUTest
     type(ESMF_VM) :: vm
     integer:: localPet, petCount, i
     integer, allocatable:: petList(:)
+    logical :: pthreadsEnabledFlag
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -77,7 +78,8 @@ program ESMF_CompSetServUTest
     call ESMF_VMGetGlobal(vm, rc=rc)
     if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
-    call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
+    call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, &
+      pthreadsEnabledFlag=pthreadsEnabledFlag, rc=rc)
     if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
     allocate(petList((petCount+1)/2))
@@ -220,9 +222,16 @@ program ESMF_CompSetServUTest
 #if (defined ESMF_TESTWITHTHREADS && ! defined ESMF_NO_PTHREADS)
     ! The user SetVM() routine will not return ESMF_SUCCESS because it cannot
     ! make the Component threaded due to the fact that it was created with
-    ! ESMF_CONTEXT_PARENT_VM. The following logic tests this.
-    write(failMsg, *) "userRc ESMF_SUCCESS"
-    call ESMF_Test((userRc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    ! ESMF_CONTEXT_PARENT_VM.
+    if (pthreadsEnabledFlag) then
+      ! ESMF Component Threading is enabled -> this test will work as expected
+      write(failMsg, *) "userRc ESMF_SUCCESS"
+      call ESMF_Test((userRc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    else
+      ! ESMF Component Threading is NOT enabled -> SetVM will not even try to thread
+      write(failMsg, *) "userRc not ESMF_SUCCESS"
+      call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    endif
 #else    
     write(failMsg, *) "userRc not ESMF_SUCCESS"
     call ESMF_Test((userRc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
