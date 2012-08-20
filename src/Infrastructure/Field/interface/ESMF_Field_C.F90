@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.40 2012/06/22 17:34:45 rokuingh Exp $
+!  $Id: ESMF_Field_C.F90,v 1.41 2012/08/20 22:46:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.40 2012/06/22 17:34:45 rokuingh Exp $'
+!      '$Id: ESMF_Field_C.F90,v 1.41 2012/08/20 22:46:53 theurich Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -545,6 +545,7 @@
 
     ! deallocate actual FieldType allocation      
     if (associated(field%ftypep)) then
+      !print *, "deallocate(field%ftypep)"
       deallocate(field%ftypep, stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, msg="Deallocating Field", &
         ESMF_CONTEXT, rcToReturn=rc)) return
