@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.33 2012/07/26 18:01:42 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.34 2012/08/20 22:50:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.33 2012/07/26 18:01:42 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.34 2012/08/20 22:50:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -642,37 +642,37 @@ void VM::shutdown(
             if (matchTable_FObjects[i][k].objectID == ESMC_ID_FIELD.objectID){
               FTN_X(f_esmf_fieldcollectgarbage)
                 (&(matchTable_FObjects[i][k].fobject),&localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,rc))
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_FIELDBUNDLE.objectID){
               FTN_X(f_esmf_fbundlecollectgarbage)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,rc))
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_GEOMBASE.objectID){
               FTN_X(f_esmf_geombasecollectgarbage)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,rc))
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_LOCSTREAM.objectID){
               FTN_X(f_esmf_locstreamcollectgarbage)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,rc))
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_STATE.objectID){
               FTN_X(f_esmf_statecollectgarbage)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,rc))
                 return;
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_COMPONENT.objectID){
               FTN_X(f_esmf_compcollectgarbage1)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,rc))
                 return;
             }
           }
@@ -686,17 +686,27 @@ void VM::shutdown(
               ESMC_ID_COMPONENT.objectID){
               FTN_X(f_esmf_compcollectgarbage2)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
-              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,rc))
                 return;
             }
             matchTable_FObjects[i].pop_back();
           }
+          if (matchTable_FObjects[i].size() > 0)
+            std::cout << "Failure in ESMF Automatic Garbage Collection line: "
+              << __LINE__ << std::endl;
+          // swap() trick with a temporary to free vector's memory
+          std::vector<FortranObject>().swap(matchTable_FObjects[i]);
           // The following loop deletes deep C++ ESMF objects derived from
           // Base class. For deep Fortran classes it deletes the Base member.
           for (int k=matchTable_Objects[i].size()-1; k>=0; k--){
             delete matchTable_Objects[i][k];  // delete ESMF object, incl. Base
             matchTable_Objects[i].pop_back();
           }
+          if (matchTable_Objects[i].size() > 0)
+            std::cout << "Failure in ESMF Automatic Garbage Collection line: "
+              << __LINE__ << std::endl;
+          // swap() trick with a temporary to free vector's memory
+            std::vector<ESMC_Base *>().swap(matchTable_Objects[i]);
         }catch(int localrc){
           // catch standard ESMF return code
           ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
@@ -1785,6 +1795,14 @@ void VM::finalize(
     return;
   // automatic garbage collection of ESMF objects
   try{
+    // We need to make sure any open files and streams are closed.
+    // Also, resources such as cached I/O communication patterns are deleted.
+    IO_Handler::finalize(&localrc);
+    if (localrc != ESMF_SUCCESS)
+      std::cout << "IO_Handler::finalize returned " << localrc << std::endl;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+      return;
+    }
     // The following loop deallocates deep Fortran ESMF objects
     for (int k=matchTable_FObjects[0].size()-1; k>=0; k--){
       if (matchTable_FObjects[0][k].objectID == ESMC_ID_FIELD.objectID){
@@ -1800,8 +1818,8 @@ void VM::finalize(
           return;
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_GEOMBASE.objectID){
-        FTN_X(f_esmf_geombasecollectgarbage)(&(matchTable_FObjects[0][k].fobject),
-          &localrc);
+        FTN_X(f_esmf_geombasecollectgarbage)(
+          &(matchTable_FObjects[0][k].fobject), &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return;
       }else if (matchTable_FObjects[0][k].objectID ==
@@ -1839,20 +1857,22 @@ void VM::finalize(
       }
       matchTable_FObjects[0].pop_back();
     }
-    // We need to make sure any open files and streams are closed.
-    // Also, resources such as cached I/O communication patterns are deleted.
-    IO_Handler::finalize(&localrc);
-    if (localrc != ESMF_SUCCESS)
-      std::cout << "IO_Handler::finalize returned " << localrc << std::endl;
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
-      return;
-    }
+    if (matchTable_FObjects[0].size() > 0)
+      std::cout << "Failure in ESMF Automatic Garbage Collection line: "
+        << __LINE__ << std::endl;
+    // swap() trick with a temporary to free vector's memory
+    std::vector<FortranObject>().swap(matchTable_FObjects[0]);
     // The following loop deletes deep C++ ESMF objects derived from
     // Base class. For deep Fortran classes it deletes the Base member.
     for (int k=matchTable_Objects[0].size()-1; k>=0; k--){
       delete matchTable_Objects[0][k];  // delete ESMF object, incl. Base
       matchTable_Objects[0].pop_back();
     }
+    if (matchTable_Objects[0].size() > 0)
+      std::cout << "Failure in ESMF Automatic Garbage Collection line: "
+        << __LINE__ << std::endl;
+    // swap() trick with a temporary to free vector's memory
+    std::vector<ESMC_Base *>().swap(matchTable_Objects[0]);
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
