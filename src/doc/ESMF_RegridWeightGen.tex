@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.74 2012/08/08 23:44:53 rokuingh Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.75 2012/08/20 21:19:10 oehmke Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -64,7 +64,7 @@ Internally {\tt ESMF\_FieldRegridStore()} is used to generate the weight table a
 The regridding occurs in 3D to avoid
 problems with periodicity and with the pole singularity. This application
 supports four options for handling the pole region (i.e. the empty area above the top row of the source grid or below
-the bottom row of the source grid).  The first option is to leave the pole region empty ("-p none"), in this 
+the bottom row of the source grid).  Note that all of these pole options currently only work for logically rectangular grids (i.e. SCRIP format grids with grid\_rank=2 or GRIDSPEC format grids). The first option is to leave the pole region empty ("-p none"), in this 
 case if a destination point lies above or below the 
 top row of the source grid, it will fail to map, yielding an error (unless "-i" is specified).  
 With the next two options, the pole region is handled by constructing 
