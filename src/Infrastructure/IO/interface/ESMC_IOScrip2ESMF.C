@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.19 2012/08/07 19:25:40 peggyli Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.20 2012/08/21 19:14:25 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -460,11 +460,13 @@ void FTN_X(c_convertscrip)(
   status = nc_inq_dimlen(ncid1, grdimid, &grdim);
   if (handle_error(status)) return; // bail out;
 
+#if 0
   if (grdim > 1) {
     fprintf(stderr, "%s: grid_rank is greater than 1.  This program only convert grids with grid_rank=1.\n",c_infile);
     ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,"The grid_rank is not equal 1.", rc);
     return;
   }
+#endif
 
   noarea = 0;
   nocenter = 0;
@@ -519,6 +521,13 @@ void FTN_X(c_convertscrip)(
     }
   }
 
+  // convert longitude to (0, 360) degrees
+  for (i = 0; i < gcdim*gsdim; i++) {
+    if (cornerlons[i] <= 0) {
+      cornerlons[i] += 360.0;
+    }
+  }
+  
   cells = (int*)malloc(sizeof(int)*gcdim*gsdim);
   
   // doing a bucket sort, create totalbuckets buckets,one for each latitude degree
@@ -826,6 +835,13 @@ void FTN_X(c_convertscrip)(
     }
   }
   free(inbuf);
+
+  // convert longitude to (0, 360) degrees
+  for (i = 0; i < gsdim; i++) {
+    if (cornerlons[i*2] <= 0) {
+      cornerlons[i*2] += 360.0;
+    }
+  }
 
   dualcellcounts = (int*)malloc(sizeof(int)*totalnodes);
   dualcells = (int*)malloc(sizeof(int)*maxconnection*totalnodes);
