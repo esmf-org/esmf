@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.24 2012/08/23 19:29:47 gold2718 Exp $
+! $Id: ESMF_IO.F90,v 1.25 2012/08/23 20:18:00 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -109,6 +109,23 @@ module ESMF_IOMod
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
+<<<<<<< ESMF_IO.F90
+      public ESMF_IOAddArray
+      public ESMF_IOAddField
+      !public ESMF_IOClose
+      public ESMF_IOCreate
+      public ESMF_IODestroy
+      !public ESMF_IOFlush 
+      !public ESMF_IOGet     
+      !public ESMF_IOOpen
+      !public ESMF_IOPrint
+      public ESMF_IORead
+      !public ESMF_IOReadRestart
+      !public ESMF_IOSet
+      !public ESMF_IOValidate
+      public ESMF_IOWrite
+      !public ESMF_IOWriteRestart
+=======
   !public ESMF_IOAddArray
   public ESMF_IOAddField
   !public ESMF_IOClose
@@ -124,12 +141,13 @@ module ESMF_IOMod
   !public ESMF_IOValidate
 !  public ESMF_IOWrite
   !public ESMF_IOWriteRestart
+>>>>>>> 1.24
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-       '$Id: ESMF_IO.F90,v 1.24 2012/08/23 19:29:47 gold2718 Exp $'
+       '$Id: ESMF_IO.F90,v 1.25 2012/08/23 20:18:00 gold2718 Exp $'
 
 !==============================================================================
 !
@@ -148,7 +166,12 @@ contains
 ! !IROUTINE: ESMF_IOCreate - Create a new ESMF IO object
 !
 ! !INTERFACE:
+<<<<<<< ESMF_IO.F90
+      function ESMF_IOCreate(name, <object>, fileFormat, fileName, &
+                             readWritetype, convention, purpose, rc)
+=======
   function ESMF_IOCreate(keywordEnforcer, rc)
+>>>>>>> 1.24
 !
 ! !RETURN VALUE:
     type(ESMF_IO) :: ESMF_IOCreate
