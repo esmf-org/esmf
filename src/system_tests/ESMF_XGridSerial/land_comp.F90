@@ -1,4 +1,4 @@
-! $Id: land_comp.F90,v 1.9 2012/07/31 20:45:49 feiliu Exp $
+! $Id: land_comp.F90,v 1.10 2012/08/24 14:28:01 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -170,7 +170,7 @@ module land_comp
     ky = 2.*pi/(eub(2)-elb(2))
     do i = elb(1), eub(1)
       do j = elb(2), eub(2)
-        farrayPtr = cos(kx*i)*sin(ky*j)
+        farrayPtr(i,j) = cos(kx*i)*sin(ky*j)
       enddo
     enddo
  

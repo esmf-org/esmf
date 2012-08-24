@@ -1,4 +1,4 @@
-! $Id: ocean_comp.F90,v 1.9 2012/07/31 20:45:49 feiliu Exp $
+! $Id: ocean_comp.F90,v 1.10 2012/08/24 14:28:01 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -157,7 +157,8 @@ module ocean_comp
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer
-    call ESMF_FieldGet(field, localDe=0, farrayPtr=farrayPtr, rc=rc)
+    call ESMF_FieldGet(field, localDe=0, farrayPtr=farrayPtr, &
+      exclusiveLBound=elb, exclusiveUBound=eub, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Fill source Field with data
@@ -165,7 +166,7 @@ module ocean_comp
     ky = 2.*pi/(eub(2)-elb(2))
     do i = elb(1), eub(1)
       do j = elb(2), eub(2)
-        farrayPtr = sin(kx*i)*sin(ky*j)
+        farrayPtr(i,j) = sin(kx*i)*sin(ky*j)
       enddo
     enddo
  
