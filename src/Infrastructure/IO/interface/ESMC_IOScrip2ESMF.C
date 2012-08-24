@@ -1,4 +1,4 @@
-// $Id: ESMC_IOScrip2ESMF.C,v 1.20 2012/08/21 19:14:25 peggyli Exp $
+// $Id: ESMC_IOScrip2ESMF.C,v 1.21 2012/08/24 19:56:43 peggyli Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -838,8 +838,8 @@ void FTN_X(c_convertscrip)(
 
   // convert longitude to (0, 360) degrees
   for (i = 0; i < gsdim; i++) {
-    if (cornerlons[i*2] <= 0) {
-      cornerlons[i*2] += 360.0;
+    if (inbuf1[i*2] <= 0) {
+      inbuf1[i*2] += 360.0;
     }
   }
 
