@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.108 2012/04/18 22:00:44 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.109 2012/08/24 00:32:12 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -70,6 +70,7 @@ module ESMF_AttributeMod
   use ESMF_StateTypesMod
   use ESMF_StateVaMod
   use ESMF_StateMod
+  use ESMF_UtilMod
   use ESMF_VMMod
 	use ESMF_AttributeInternalsMod
 
@@ -120,7 +121,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.108 2012/04/18 22:00:44 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.109 2012/08/24 00:32:12 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -2839,8 +2840,10 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
       end subroutine mclass##AttGet##mtypekind @\
- @\
-!------------------------------------------------------------------------------ @\
+!------------------------------------------------------------------------------
+
+#define AttGet1DBMacro(mtype, mtypekind, mclass, mthis, mthisfield) \
+@\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttGet1D" @\
  @\
@@ -3004,6 +3007,8 @@ contains
       else @\
  @\
         if(present(itemCount)) then @\
+          call c_ESMC_AttributeGetInfoName(mthisfield, name, localTk, & @\
+            litemCount, localrc) @\
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rcToReturn=rc)) return @\
           itemCount = litemCount @\
@@ -3766,8 +3771,10 @@ contains
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
       end subroutine mclass##AttGet##mtypekind @\
- @\
-!------------------------------------------------------------------------------ @\
+!------------------------------------------------------------------------------
+
+#define AttGet1DMacro(mtype, mtypekind, mclass, mthis, mthisfield) \
+@\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttGet1D" @\
  @\
@@ -5999,9 +6006,305 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                               ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
-      	litemCount = itemCount @\
+        litemCount = itemCount @\
       else @\
-	      litemCount = size(valueList) @\
+        litemCount = size(valueList) @\
+      end if @\
+ @\
+      if (litemCount .le. 0) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
+                              msg="valueList is too small", & @\
+                              ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+ @\
+      j = 1 @\
+      do  i=1,litemCount @\
+        lens(i) = len_trim(valueList(i)) @\
+        valueString(j:(j+lens(i)-1)) = valueList(i) @\
+        j = j + lens(i) @\
+      enddo @\
+ @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
+          return @\
+        endif @\
+        attpack = ESMF_TRUE @\
+      endif @\
+ @\
+      if (attpack == ESMF_TRUE) then @\
+        call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+          litemCount, valueString, lens, convention, purpose, fobject, & @\
+          attPackInstanceName, localrc) @\
+      else @\
+        call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+          litemCount, valueString, lens, localrc) @\
+      endif @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass##AttSetCharList @\
+
+#define AttSetCharacterBMacro(mclass, mthis, mthisfield) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttSetChar" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeSet() @\
+      subroutine mclass##AttSetChar(mthis, name, value, inputList, & @\
+        convention, purpose, attPackInstanceName, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass), intent(inout) :: mthis @\
+      character (len = *), intent(in) :: name @\
+      character (len = *), intent(in) :: value @\
+      character (len = *), intent(in), optional :: inputList(:) @\
+      character (len = *), intent(in), optional :: convention @\
+      character (len = *), intent(in), optional :: purpose @\
+      character (len = *), intent(in), optional :: attPackInstanceName @\
+      integer, intent(out), optional :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Attach a character Attribute to the object. @\
+!     The Attribute has a {\tt name} and a {\tt value}. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis] @\
+!           An ESMF object. @\
+!     \item [name] @\
+!           The name of the Attribute to add. @\
+!     \item [value] @\
+!           The character value of the Attribute to add. @\
+!     \item [{[convention]}] @\
+!           The convention of the Attribute package. @\
+!     \item [{[purpose]}] @\
+!           The purpose of the Attribute package. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance. @\
+!     \item [{[rc]}]  @\
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc, memstat @\
+      character(len=*), parameter :: fobject=#mthis @\
+      integer, allocatable :: lens(:) @\
+      type(ESMF_Logical) :: attpack @\
+      integer :: litemCount, i, j @\
+      character (len=ESMF_MAXSTR) :: modName @\
+      character, allocatable :: valueString(:) @\
+      integer :: lens_size, valuestring_size @\
+ @\
+      ! Initialize @\
+      localrc = ESMF_RC_NOT_IMPL @\
+      attpack = ESMF_FALSE @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check variables @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      !!!! TODO: this can go away once modName is dynamically sized !!! @\
+      if (len(name) > ESMF_MAXSTR) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+          msg="len(name) cannot be larger than ESMF_MAXSTR for now", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+      ! If internal info is implied, bail out, cannot set Attribute starting with 'ESMF:'@\
+      if (AttributeInternalInfo(name, modName)) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+          msg="Attribute names starting with 'ESMF:' are not allowed!", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+@\
+      ! allocate arrays @\
+      if (present (inputList)) then @\
+        lens_size = size (inputList) + 1 @\
+        !                  inputList size  * string len + "Input:" + len(value) @\
+        valuestring_size = size(inputList) * ((len(inputList) + 6)) + len(value) @\
+        ! set the size of the new valueList @\
+        litemCount = lens_size @\
+      else @\
+        lens_size = 1 @\
+        valuestring_size = len(value) @\
+        ! set the size of the new valueList @\
+        litemCount = 1 @\
+      end if @\
+ @\
+      allocate (lens (lens_size), stat = memstat) @\
+      lens = 0 @\
+      if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT,  rcToReturn=rc)) return @\
+      allocate (valueString (valuestring_size), stat = memstat) @\
+      valueString = "" @\
+      if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT,  rcToReturn=rc)) then @\
+        deallocate(lens) @\
+        return @\
+      endif @\
+ @\
+      ! also for internal Attributes, must append inputList to the Attribute value @\
+      lens(1) = len_trim(value) @\
+      valueString(1:lens(1)) = ESMF_String2Array(value) @\
+      if (present(inputList)) then @\
+        j = lens(1) + 1 @\
+        do i=2,litemCount @\
+          ! put inputList values into valueString @\
+          lens(i) = len_trim(inputList(i-1))+7 @\
+          valueString(j:(j+7-1)) = ESMF_String2Array(":Input:") @\
+          j = j + 7 @\
+          valueString(j:(j+lens(i)-7-1)) = ESMF_String2Array(trim(inputList(i-1))) @\
+          j = j + lens(i) @\
+        enddo @\
+      endif @\
+      print *, "VALUESTRING = ", valueString @\
+ @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
+          deallocate(lens) @\
+          deallocate(valueString) @\
+          return @\
+        endif @\
+        attpack = ESMF_TRUE @\
+      endif @\
+ @\
+      if (attpack == ESMF_TRUE) then @\
+!        call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
+!          ESMF_TYPEKIND_CHARACTER, convention, purpose, fobject, & @\
+!          attPackInstanceName, localrc) @\
+ @\
+        call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+          litemCount, valueString, lens, convention, purpose, fobject, & @\
+          attPackInstanceName, localrc) @\
+      else @\
+!        call c_ESMC_AttributeSetChar(mthisfield, name, value, localrc) @\
+        call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
+          litemCount, valueString, lens, localrc) @\
+      endif @\
+ @\
+      ! deallocate @\
+      deallocate(lens) @\
+      deallocate(valueString) @\
+ @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass##AttSetChar @\
+ @\
+!------------------------------------------------------------------------------ @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttSetCharList" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute list @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeSet() @\
+      subroutine mclass##AttSetCharList(mthis, name, valueList, & @\
+        convention, purpose, attPackInstanceName, itemCount, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass), intent(inout) :: mthis @\
+      character(len=*), intent(in) :: name @\
+      character (len = *), dimension(:), intent(in) :: valueList @\
+      character (len = *), intent(in), optional :: convention @\
+      character (len = *), intent(in), optional :: purpose @\
+      character (len = *), intent(in), optional :: attPackInstanceName @\
+      integer, intent(in), optional :: itemCount @\
+      integer, intent(out), optional :: rc @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Attach a character Attribute to the object. @\
+!     The Attribute has a {\tt name} and a {\tt value}. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis] @\
+!           An ESMF object. @\
+!     \item [name] @\
+!           The name of the Attribute to add. @\
+!     \item [value] @\
+!           The character value of the Attribute to add. @\
+!     \item [{[convention]}] @\
+!           The convention of the Attribute package. @\
+!     \item [{[purpose]}] @\
+!           The purpose of the Attribute package. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance. (Not implemented yet) @\
+!     \item [{[rc]}]  @\
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc, i, j, litemCount @\
+      character(len=*), parameter :: fobject=#mthis @\
+      integer, dimension(size(valueList)) :: lens @\
+      character(len=(size(valueList)*len(valueList))) :: valueString @\
+      type(ESMF_Logical) :: attpack @\
+      character (len=ESMF_MAXSTR) :: modName @\
+@\
+      ! Initialize @\
+      localrc = ESMF_RC_NOT_IMPL @\
+      attpack = ESMF_FALSE @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check variables @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      !!!! TODO: this can go away once modName is dynamically sized !!! @\
+      if (len(name) > ESMF_MAXSTR) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+          msg="len(name) cannot be larger than ESMF_MAXSTR for now", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+      ! If internal info is implied, bail out, cannot set Attribute starting with 'ESMF:'@\
+      if (AttributeInternalInfo(name, modName)) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
+          msg="Attribute names starting with 'ESMF:' are not allowed!", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+@\
+      if (present(itemCount)) then @\
+        if (itemCount > size(valueList)) then @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
+                              msg="itemCount cannot be larger than size(valueList)", & @\
+                              ESMF_CONTEXT, rcToReturn=rc) @\
+          return @\
+        endif @\
+        litemCount = itemCount @\
+      else @\
+        litemCount = size(valueList) @\
       end if @\
  @\
       if (litemCount .le. 0) then @\
@@ -6201,6 +6504,7 @@ AttAddPackCustomN1Macro(ESMF_CplComp, comp, comp%compp%base)
 AttCopyMacro(ESMF_CplComp, ESMF_CplComp, comp1, comp2, comp1%compp%base, comp2%compp%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_CplComp, comp, comp%compp%base)
+TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_CplComp, comp, comp%compp%base)
 AttGetLogicalMacro(ESMF_CplComp, comp, comp%compp%base)
 AttGetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 
@@ -6244,6 +6548,7 @@ AttCopyMacro(ESMF_GridComp, ESMF_GridComp, comp1, comp2, comp1%compp%base, comp2
 AttRemoveMacro(ESMF_GridComp, comp, comp%compp%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_GridComp, comp, comp%compp%base)
+TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_GridComp, comp, comp%compp%base)
 AttGetLogicalMacro(ESMF_GridComp, comp, comp%compp%base)
 AttGetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 
@@ -6283,6 +6588,7 @@ AttAddPackCustomN1Macro(ESMF_State, state, state%statep%base)
 AttCopyMacro(ESMF_State, ESMF_State, state1, state2, state1%statep%base, state2%statep%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_State, state, state%statep%base)
+TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_State, state, state%statep%base)
 AttGetLogicalMacro(ESMF_State, state, state%statep%base)
 AttGetCharacterMacro(ESMF_State, state, state%statep%base)
 
@@ -6329,6 +6635,7 @@ AttAddPackCustomNMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttAddPackCustomN1Macro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
+TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttGetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttGetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 
@@ -6364,6 +6671,7 @@ AttAddPackCustomNMacro(ESMF_Field, field, field%ftypep%base)
 AttAddPackCustomN1Macro(ESMF_Field, field, field%ftypep%base)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_Field, field, field%ftypep%base)
+TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_Field, field, field%ftypep%base)
 AttGetLogicalMacro(ESMF_Field, field, field%ftypep%base)
 AttGetCharacterMacro(ESMF_Field, field, field%ftypep%base)
 
@@ -6396,6 +6704,7 @@ AttAddPackStandardMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttRemoveMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_ArrayBundle, arraybundle, arraybundle)
+TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_ArrayBundle, arraybundle, arraybundle)
 AttGetLogicalMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttGetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 
@@ -6424,6 +6733,7 @@ AttAddPackStandardMacro(ESMF_Array, array, array)
 AttRemoveMacro(ESMF_Array, array, array)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_Array, array, array)
+TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_Array, array, array)
 AttGetLogicalMacro(ESMF_Array, array, array)
 AttGetCharacterMacro(ESMF_Array, array, array)
 
@@ -6445,8 +6755,20 @@ AttAddPackCustomMacro(ESMF_Grid, grid, grid)
 AttAddPackCustomNMacro(ESMF_Grid, grid, grid)
 AttAddPackCustomN1Macro(ESMF_Grid, grid, grid)
 
-TypeKind3ADeclarationMacro(AttGet, ESMF_Grid, grid, grid)
-TypeKind3BDeclarationMacro(AttGet, ESMF_Grid, grid, grid)
+^ifndef ESMF_NO_INTEGER_1_BYTE
+funcname##Macro(integer, I1, ESMF_Grid, grid, grid)
+^endif
+^ifndef ESMF_NO_INTEGER_2_BYTE
+funcname##Macro(integer, I2, ESMF_Grid, grid, grid)
+^endif
+AttGetBMacro(integer, I4, ESMF_Grid, grid, grid)
+AttGet1DBMacro(integer, I4, ESMF_Grid, grid, grid)
+AttGetMacro(integer, I8, ESMF_Grid, grid, grid)
+AttGet1DMacro(integer, I8, ESMF_Grid, grid, grid)
+AttGetMacro(real, R4, ESMF_Grid, grid, grid)
+AttGet1DMacro(real, R4, ESMF_Grid, grid, grid)
+AttGetMacro(real, R8, ESMF_Grid, grid, grid)
+AttGet1DBMacro(real, R8, ESMF_Grid, grid, grid)
 AttGetLogicalBMacro(ESMF_Grid, grid, grid)
 AttGetCharacterBMacro(ESMF_Grid, grid, grid)
 
@@ -6458,7 +6780,7 @@ AttRemoveMacro(ESMF_Grid, grid, grid)
 
 TypeKind3DeclarationMacro(AttSet, ESMF_Grid, grid, grid)
 AttSetLogicalMacro(ESMF_Grid, grid, grid)
-AttSetCharacterMacro(ESMF_Grid, grid, grid)
+AttSetCharacterBMacro(ESMF_Grid, grid, grid)
 
 AttWriteMacro(ESMF_Grid, grid, grid, grid, grid)
 
@@ -6471,6 +6793,7 @@ AttAddPackCustomNMacro(ESMF_DistGrid, distgrid, distgrid)
 AttAddPackCustomN1Macro(ESMF_DistGrid, distgrid, distgrid)
 
 TypeKind3DeclarationMacro(AttGet, ESMF_DistGrid, distgrid, distgrid)
+TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_DistGrid, distgrid, distgrid)
 AttGetLogicalMacro(ESMF_DistGrid, distgrid, distgrid)
 AttGetCharacterMacro(ESMF_DistGrid, distgrid, distgrid)
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeInternals.F90,v 1.4 2012/04/02 15:59:43 rokuingh Exp $
+! $Id: ESMF_AttributeInternals.F90,v 1.5 2012/08/24 00:32:13 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -68,9 +68,10 @@ module ESMF_AttributeInternalsMod
   public extractInfoInt, extractInfoValueString
     
   interface ESMF_AttributeGetInfo
-    module procedure ESMF_GridAttGetInfoInt
-    module procedure ESMF_GridAttGetInfoIntList
+    module procedure ESMF_GridAttGetInfoI4
     module procedure ESMF_GridAttGetInfoChar
+    module procedure ESMF_GridAttGetInfoI4List
+    module procedure ESMF_GridAttGetInfoR8List
     module procedure ESMF_GridAttGetInfoLogicalList
   end interface
 
@@ -85,7 +86,7 @@ module ESMF_AttributeInternalsMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_AttributeInternals.F90,v 1.4 2012/04/02 15:59:43 rokuingh Exp $'
+               '$Id: ESMF_AttributeInternals.F90,v 1.5 2012/08/24 00:32:13 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -105,7 +106,197 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGetInfo()
-      subroutine ESMF_GridAttGetInfoIntList(grid, name, valueList, &
+      subroutine ESMF_GridAttGetInfoI4(grid, name, value, inputList, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(inout) :: grid
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I4), intent(out) :: value
+      character(len=*), intent(in), optional :: inputList(:)
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Returns internal info from the object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An ESMF object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [value]
+!           The value of the internal info.
+!     \item [inputList]
+!           A list containing input information needed to retrieve info.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      integer :: localrc
+      integer :: localDel, i
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      localDel = 0
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+      ! retrieve input values
+      if (present(inputList)) then
+        do i=1,size(inputList)
+          if (index(inputList(i), "localDe") /= 0) then
+            localDel = extractInfoInt(inputList(i))
+          endif
+        enddo
+      endif
+
+      ! retrieve list type info that does not require additional inputs
+      select case (name)
+        case ("dimCount")
+          call ESMF_GridGet(grid, dimCount=value, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        case ("tileCount")
+          call ESMF_GridGet(grid, tileCount=value, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        case ("staggerlocCount")
+          call ESMF_GridGet(grid, staggerlocCount=value, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        case ("localDECount")
+          call ESMF_GridGet(grid, localDECount=value, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        case ("arbDim")
+          call ESMF_GridGet(grid, arbDim=value, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        case ("rank")
+          call ESMF_GridGet(grid, rank=value, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        case ("arbDimCount")
+          call ESMF_GridGet(grid, arbDimCount=value, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        case("arbIndexCount") ! requires localDe
+          call ESMF_GridGet(grid, localDe=localDel, arbIndexCount=value, &
+                            rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        case DEFAULT
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
+            msg="The provided 'name' does not correspond to internal info", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return
+      end select
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridAttGetInfoI4
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttGetInfo"
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_AttributeGetInfo - Get internal Attribute info
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeGetInfo()
+      subroutine ESMF_GridAttGetInfoChar(grid, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(inout) :: grid
+      character (len = *), intent(in) :: name
+      character (len = *), intent(out) :: value
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Returns internal info from the object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           An ESMF object.
+!     \item [name]
+!           The name of the Attribute to retrieve.
+!     \item [value]
+!           The value of the internal info.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOPI
+
+      type(ESMF_TypeKind_Flag)   :: lcoordTypeKind
+      type(ESMF_Index_Flag)      :: lindexflag
+      type(ESMF_GridStatus_Flag) :: lstatus
+
+      integer :: localrc
+
+      ! Initialize
+      localrc = ESMF_RC_NOT_IMPL
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+      ! check variables
+      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
+
+      select case (name)
+        case ("coordTypeKind")
+          call ESMF_GridGet(grid, coordTypeKind=lcoordTypeKind, rc=localrc)
+print *, "HERE!!!!!!!!!!!"
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          ! assign the string value of this named constant
+          value = lcoordTypeKind
+print *, "value = ", value
+print *, "coordTypeKind = ", lcoordTypeKind
+        case ("indexflag")
+          call ESMF_GridGet(grid, indexflag=lindexflag, rc=localrc)
+          ! assign the string value of this named constant
+          value = lindexflag
+        case ("status")
+          call ESMF_GridGet(grid, status=lstatus, rc=localrc)
+          ! assign the string value of this named constant
+          value = lstatus
+        case ("name")
+          call ESMF_GridGet(grid, name=value, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        case DEFAULT
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
+            msg="The provided 'name' does not correspond to internal info", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return
+      end select
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridAttGetInfoChar
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttGetInfo"
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_AttributeGetInfo - Get internal Attribute info
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_AttributeGetInfo()
+      subroutine ESMF_GridAttGetInfoI4List(grid, name, valueList, &
                                             inputList, rc)
 !
 ! !ARGUMENTS:
@@ -178,7 +369,7 @@ contains
             staggerlocl = extractInfoValueString(inputList(i))
           elseif (index(inputList(i), "tile") /= 0) then
             tilel = extractInfoInt(inputList(i))
-          elseif (index(inputList(i), "coorddim") /= 0) then
+          elseif (index(inputList(i), "coordDim") /= 0) then
             coordDiml = extractInfoInt(inputList(i))
             getCoord = .true.
           elseif (index(inputList(i), "itemflag") /= 0) then
@@ -251,7 +442,7 @@ contains
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         case ("gridAlign")
-	call ESMF_GridGet(grid, gridAlign=valueList, rc=localrc)
+  call ESMF_GridGet(grid, gridAlign=valueList, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
       ! retrieve list type info that DOES require additional inputs
@@ -400,7 +591,7 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridAttGetInfoIntList
+      end subroutine ESMF_GridAttGetInfoI4List
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -412,12 +603,13 @@ contains
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_AttributeGetInfo()
-      subroutine ESMF_GridAttGetInfoInt(grid, name, value, inputList, rc)
+      subroutine ESMF_GridAttGetInfoR8List(grid, name, valueList, &
+                                            inputList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(inout) :: grid
-      character (len = *), intent(in) :: name
-      integer(ESMF_KIND_I4), intent(out) :: value
+      character(len=*), intent(in) :: name
+      real(ESMF_KIND_R8), intent(out) :: valueList(:)
       character(len=*), intent(in), optional :: inputList(:)
       integer, intent(out), optional :: rc
 
@@ -431,8 +623,8 @@ contains
 !           An ESMF object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
-!     \item [value]
-!           The value of the internal info.
+!     \item [valueList]
+!           The valueList of the internal info.
 !     \item [inputList]
 !           A list containing input information needed to retrieve info.
 !     \item [{[rc]}]
@@ -442,62 +634,119 @@ contains
 !
 !EOPI
 
-      integer :: localrc
-      integer :: localDel, i
+      integer :: localrc, i
+      
+      integer :: localDel
+      type(ESMF_StaggerLoc) :: staggerlocl
+      integer :: coordDiml
+      integer :: min_size, dimCount
+
+
+      ! have to allocate pointers for all three possiblities of Grid size, R8 will be handled by templates
+      real(ESMF_KIND_R8), pointer :: coords1D(:)
+      real(ESMF_KIND_R8), pointer :: coords2D(:,:)
+      real(ESMF_KIND_R8), pointer :: coords3D(:,:,:)
+      integer :: totalCount(3)
+
+      logical :: getLDe, getStagger, getCoord
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+      ! setting default values
       localDel = 0
+      staggerlocl = ESMF_STAGGERLOC_CENTER
+      ! coorddim cannot default
+      getCoord = .false.
 
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
 
-      ! retrieve input values
+      ! looking for required input parameters
       if (present(inputList)) then
         do i=1,size(inputList)
+          !!!! TODO: this can go away once modName is dynamically sized !!!
+          if (len(inputList(i)) > ESMF_MAXSTR) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
+              msg="len(inputList(i)) cannot be larger than ESMF_MAXSTR for now", &
+              ESMF_CONTEXT, rcToReturn=rc)
+            return
+          endif
+          ! set the parameters based on the inputList
           if (index(inputList(i), "localDe") /= 0) then
             localDel = extractInfoInt(inputList(i))
+          elseif (index(inputList(i), "staggerloc") /= 0) then
+            staggerlocl = extractInfoValueString(inputList(i))
+          elseif (index(inputList(i), "coordDim") /= 0) then
+            coordDiml = extractInfoInt(inputList(i))
+            getCoord = .true.
           endif
         enddo
       endif
 
-      ! retrieve list type info that does not require additional inputs
+      ! retrieve list type info that DOES NOT require additional inputs
       select case (name)
-        case ("dimCount")
-          call ESMF_GridGet(grid, dimCount=value, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        case ("tileCount")
-          call ESMF_GridGet(grid, tileCount=value, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        case ("staggerlocCount")
-          call ESMF_GridGet(grid, staggerlocCount=value, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        case ("localDECount")
-          call ESMF_GridGet(grid, localDECount=value, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        case ("arbDim")
-          call ESMF_GridGet(grid, arbDim=value, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        case ("rank")
-          call ESMF_GridGet(grid, rank=value, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        case ("arbDimCount")
-          call ESMF_GridGet(grid, arbDimCount=value, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        case("arbIndexCount") ! requires localDe
-          call ESMF_GridGet(grid, localDe=localDel, arbIndexCount=value, &
-                            rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+         case("farrayPtr")
+          if (getCoord) then
+            ! get the dimcount
+            call ESMF_GridGet(grid, dimCount=dimCount, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            if (dimCount == 1) then
+              ! get the coordinates
+              call ESMF_GridGetCoord(grid, coordDiml, farrayPtr=coords1D, &
+                                     totalCount=totalCount, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+                ! check that valueList is large enough
+                min_size = totalCount(1)
+                if (size(valueList) < min_size) then 
+                  call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
+                    msg="The valueList size is not large enough!", &
+                    ESMF_CONTEXT, rcToReturn=rc)
+                endif
+                ! fill the valueList with coordinates
+                valueList(1:totalCount(1)) = coords1D
+            else if (dimCount == 2) then
+              ! get the coordinates
+              call ESMF_GridGetCoord(grid, coordDiml, farrayPtr=coords2D, &
+                                     totalCount=totalCount, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+                ! check that valueList is large enough
+                min_size = totalCount(1)*totalCount(2)
+                if (size(valueList) < min_size) then 
+                  call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
+                    msg="The valueList size is not large enough!", &
+                    ESMF_CONTEXT, rcToReturn=rc)
+                endif
+                ! fill the valueList with coordinates
+                valueList(1:totalCount(1)) = coords2D(1,:)
+                valueList(totalCount(1)+1:totalCount(2)) = coords2D(2,:)
+            else if (dimCount == 3) then
+              ! get the coordinates
+              call ESMF_GridGetCoord(grid, coordDiml, farrayPtr=coords3D, &
+                                     totalCount=totalCount, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+                ! check that valueList is large enough
+                min_size = totalCount(1)*totalCount(2)*totalCount(3)
+                if (size(valueList) < min_size) then 
+                  call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
+                    msg="The valueList size is not large enough!", &
+                    ESMF_CONTEXT, rcToReturn=rc)
+                endif
+                ! fill the valueList with coordinates
+                !valueList(1:totalCount(1)) = coords3D(1,:)
+                !valueList(totalCount(1)+1:totalCount(2)) = coords3D(2,:)
+                !valueList(totalCount(2)+1:totalCount(3)) = coords3D(3,:)
+            endif
+          else
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
+              msg="The required argument 'coordDim' was not specified!", &
+              ESMF_CONTEXT, rcToReturn=rc)
+          endif
         case DEFAULT
           call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
             msg="The provided 'name' does not correspond to internal info", &
@@ -507,87 +756,7 @@ contains
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridAttGetInfoInt
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_AttGetInfo"
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_AttributeGetInfo - Get internal Attribute info
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_AttributeGetInfo()
-      subroutine ESMF_GridAttGetInfoChar(grid, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(inout) :: grid
-      character (len = *), intent(in) :: name
-      character (len = *), intent(out) :: value
-      integer, intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!     Returns internal info from the object.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [grid]
-!           An ESMF object.
-!     \item [name]
-!           The name of the Attribute to retrieve.
-!     \item [value]
-!           The value of the internal info.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOPI
-
-      type(ESMF_TypeKind_Flag)   :: lcoordTypeKind
-      type(ESMF_Index_Flag)      :: lindexflag
-      type(ESMF_GridStatus_Flag) :: lstatus
-
-      integer :: localrc
-
-      ! Initialize
-      localrc = ESMF_RC_NOT_IMPL
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      ! check variables
-      ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
-
-      select case (name)
-        case ("coordTypeKind")
-          call ESMF_GridGet(grid, coordTypeKind=lcoordTypeKind, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-          ! assign the string value of this named constant
-          value = lcoordTypeKind
-        case ("indexflag")
-          call ESMF_GridGet(grid, indexflag=lindexflag, rc=localrc)
-          ! assign the string value of this named constant
-          value = lindexflag
-        case ("status")
-          call ESMF_GridGet(grid, status=lstatus, rc=localrc)
-          ! assign the string value of this named constant
-          value = lstatus
-        case ("name")
-          call ESMF_GridGet(grid, name=value, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        case DEFAULT
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
-            msg="The provided 'name' does not correspond to internal info", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-      end select
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_GridAttGetInfoChar
+      end subroutine ESMF_GridAttGetInfoR8List
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------

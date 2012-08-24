@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_TypeKindMacros.hcppF90,v 1.15 2012/04/06 00:20:03 theurich Exp $
+! $Id: ESMF_TypeKindMacros.hcppF90,v 1.16 2012/08/24 00:32:09 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -178,40 +178,23 @@ funcname##Macro(real, R8, userp1, userp2, userp3) @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
 
-#define TypeKind3ADeclarationMacro(funcname, userp1, userp2, userp3) \
+#define TypeKind3NoDocDeclarationMacro(funcname, userp1, userp2, userp3) \
 !------------------------------------------------------------------------------ @\
 ! <This section created by macro - do not edit directly> @\
  @\
 !! < start of macros which become actual subroutine bodies after expansion > @\
  @\
-funcname##Doc() @\
 ^ifndef ESMF_NO_INTEGER_1_BYTE @\
 funcname##Macro(integer, I1, userp1, userp2, userp3) @\
 ^endif @\
 ^ifndef ESMF_NO_INTEGER_2_BYTE @\
 funcname##Macro(integer, I2, userp1, userp2, userp3) @\
 ^endif @\
+funcname##Macro(integer, I4, userp1, userp2, userp3) @\
 funcname##Macro(integer, I8, userp1, userp2, userp3) @\
 funcname##Macro(real, R4, userp1, userp2, userp3) @\
 funcname##Macro(real, R8, userp1, userp2, userp3) @\
  @\
 ! < end macro - do not edit directly >  @\
-!------------------------------------------------------------------------------ @\
-
-#if 0
-! these were removed from the macro above and added the macro below
-
-!funcname##Macro(integer, I4, userp1, userp2, userp3)
-#endif
-
-#define TypeKind3BDeclarationMacro(funcname, userp1, userp2, userp3) \
-!------------------------------------------------------------------------------ @\
-! <This section created by macro - do not edit directly> @\
- @\
-!! < start of macros which become actual subroutine bodies after expansion > @\
- @\
-funcname##BMacro(integer, I4, userp1, userp2, userp3) @\
- @\
-! < end macro - do not edit directly > @\
 !------------------------------------------------------------------------------ @\
 

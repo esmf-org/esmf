@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.132 2012/07/18 22:21:12 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.133 2012/08/24 00:32:07 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -34,6 +34,7 @@
 #include "ESMCI_Time.h"
 #include "ESMF_LogMacros.inc"
 //#include "ESMCI_VM.h"
+#include "ESMCI_Grid.h"
 
 #include <sstream>
 #include <cstring>
@@ -49,8 +50,38 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.132 2012/07/18 22:21:12 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.133 2012/08/24 00:32:07 rokuingh Exp $";
 //-----------------------------------------------------------------------------
+
+extern "C" {
+  // Prototypes of the Fortran interface functions.
+
+  void FTN_X(f_esmf_gridattgetinfoint)(ESMCI::Grid **grid, char *name,
+                                       int *value, //int *il_present,
+                                       //char *inputList, int *len1, int *rc,
+                                       int *rc,
+                                       ESMCI_FortranStrLenArg nlen);
+  void FTN_X(f_esmf_gridattgetinfochar)(ESMCI::Grid **grid, char *name,
+                                        char *value, int *rc,
+                                        ESMCI_FortranStrLenArg nlen,
+                                        ESMCI_FortranStrLenArg vlen);
+  void FTN_X(f_esmf_gridattgetinfointlist)(ESMCI::Grid **grid, char *name,
+                                           int *valueList, int *len1, 
+                                           int *il_present, char *inputList, 
+                                           int *len2, int *rc, 
+                                           ESMCI_FortranStrLenArg nlen);
+  void FTN_X(f_esmf_gridattgetinfor8list)(ESMCI::Grid **grid, char *name,
+                                          double *valueList, int *len1, 
+                                          int *il_present, char *inputList, 
+                                          int *len2, int *rc, 
+                                          ESMCI_FortranStrLenArg nlen);
+  void FTN_X(f_esmf_gridattgetinfologicallist)(ESMCI::Grid **grid, char *name,
+                                               bool *valueList, int *len1, 
+                                               int *il_present, char *inputList, 
+                                               int *len2, int *rc,
+                                               ESMCI_FortranStrLenArg nlen);
+}
+
 
 namespace ESMCI {
 
@@ -4318,8 +4349,12 @@ if (attrRoot == ESMF_TRUE) {
     attpack = AttPackGet(convention, purpose, "grid", attPackInstanceName);
     if (attpack) {
       // write the grid header
+// RLO: this was removed when prototyping the GridSpec CIM definition
+#if 0 
       localrc = io_xml->writeStartElement("GridSpec", "", 0, 1, "name", attpack->attrBase->ESMC_BaseGetName());
       localrc = io_xml->writeStartElement("Mosaic", "", 1, 1, "name", attpack->attrBase->ESMC_BaseGetName());
+#endif
+      localrc = io_xml->writeStartElement("grid", "", 1, 1, "name", attpack->attrBase->ESMC_BaseGetName());
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
       localrc = attpack->AttributeWriteXMLbuffergrid(io_xml);
@@ -4330,8 +4365,12 @@ if (attrRoot == ESMF_TRUE) {
         return ESMF_FAILURE;
       }
       // write the grid footer
+// RLO: this was removed when prototyping the GridSpec CIM definition
+#if 0 
       localrc = io_xml->writeEndElement("Mosaic", 1);
       localrc = io_xml->writeEndElement("GridSpec", 0);
+#endif
+      localrc = io_xml->writeEndElement("grid", 1);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       griddone = true;
       return ESMF_SUCCESS;
@@ -4377,10 +4416,14 @@ if (attrRoot == ESMF_TRUE) {
   // Initialize local return code; assume routine not implemented
   localrc = ESMC_RC_NOT_IMPL;
 
+  printf("ESMCI::Attribute::AttributeWriteXMLbuffergrid\n");
+
     for (i=0;  i<attrList.size(); ++i) { 
       if (attrList.at(i)->items == 1) {
         string name = attrList.at(i)->attrName; 
+        string value = attrList.at(i)->vcpp.at(0); 
         ostringstream outstring;
+
         switch (attrList.at(i)->tk)
         {
           case ESMC_TYPEKIND_I4:
@@ -4418,6 +4461,7 @@ if (attrRoot == ESMF_TRUE) {
             break;
 
           case ESMC_TYPEKIND_CHARACTER:
+            if (strncmp(value.c_str(), "ESMF:", 5) == 0) break;
             localrc = io_xml->writeElement(name, attrList.at(i)->vcpp.at(0), 2, 0);
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
@@ -4427,6 +4471,111 @@ if (attrRoot == ESMF_TRUE) {
             ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
             break;
         }
+        // if this is internal info, retrieve the correct Attribute
+        if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER && 
+            strncmp(value.c_str(), "ESMF:", 5) == 0) {
+          printf("!!! ESMCI::Attribute::AttributeWriteXMLbuffergrid !!!\n");
+
+          // initialize
+          // strip the 'ESMF:' off of the value and set as name of Attribute to be retrieved
+          string mod_name = value.substr(5,value.length());
+          int nlen = strlen(mod_name.c_str());
+
+          // cast the base back to a Grid ;)
+          ESMCI::Grid *grid = dynamic_cast<ESMCI::Grid *> (attrList.at(i)->attrBase);
+          if (grid) {
+            ESMC_GridStatus_Flag gridstatus = grid->getStatus();
+            printf("Attribute: %s\ngrid status = %d\n", mod_name.c_str(), gridstatus);
+          }
+          
+          // TODO: hardcoded case statement for now, will have to use a config file in future
+          // integer valued info
+          if (mod_name == "dimCount" || 
+              mod_name == "tileCount" || 
+              mod_name == "staggerlocCount" || 
+              mod_name == "localDECount" || 
+              mod_name == "arbDim" || 
+              mod_name == "rank" || 
+              mod_name == "arbDimCount" || 
+              mod_name == "arbIndexCount") {
+            
+            // initialize int return parameters
+            int int_value = 0;
+            // TODO: input parameters are unimplemented until there is a definite way to specify them
+            
+            // call into the glue layer to Fortran Attribute layer
+            FTN_X(f_esmf_gridattgetinfoint)(&grid, 
+                       const_cast<char *> (mod_name.c_str()), &int_value, 
+                       &localrc, nlen);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+
+            // write the output value to the output stream and write to XML file
+            outstring << int_value;
+            localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
+          }
+          // character string valued info
+          else if (mod_name == "coordTypeKind" || 
+                   mod_name == "indexflag" || 
+                   mod_name == "status" || 
+                   mod_name == "name") {
+            
+            // TODO: get rid of the fixed size buffer!
+            // initialize char return parameters
+            char char_value[ESMF_MAXSTR];
+            int vlen = ESMF_MAXSTR;
+            
+            // call into the glue layer to Fortran Attribute layer
+            FTN_X(f_esmf_gridattgetinfochar)(&grid, 
+                       const_cast<char *> (mod_name.c_str()), 
+                       char_value, 
+                       &localrc, nlen, vlen);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            
+            // TODO: related to fixed buffer, convert to string and resize to remove cruft
+            string char_string_value(char_value, vlen);
+            char_string_value.resize(char_string_value.find_last_not_of(" ")+1);
+
+            // write the output string to the output stream and write to XML file
+            outstring << char_string_value;
+            localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
+          }
+          // list valued info
+          else if (mod_name == "farrayPtr") {
+            
+            // initialize
+            int len1 = 10;
+            double *valueList;
+            valueList = new double[len1];
+            int il_present = 1;
+            // TODO: remove another fixed length buffer
+            char *inputList;
+            inputList = "coordDim:1";
+            int len2 = 10;
+            printf("farrayPtr!!!  - inputList = %s\n", inputList);
+
+            // call into the glue layer to Fortran Attribute layer
+
+            FTN_X(f_esmf_gridattgetinfor8list)(&grid, 
+                       const_cast<char *> (mod_name.c_str()), 
+                       valueList, &len1,
+                       &il_present, inputList, &len2,
+                       &localrc, nlen);
+
+            ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            
+            // write the output values to the output stream and write to XML file
+            for (int i=0; i<len1-1; ++i) {
+              if (i == len1-1)
+                outstring << valueList[i];
+              else
+                outstring << valueList[i] << ", ";
+            }
+            localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
+            delete [] valueList;
+          }
+
+          printf("!!! ESMCI::Attribute::AttributeWriteXMLbuffergrid !!! - end\n");
+        }      
       } else if (attrList.at(i)->items >1) { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
         ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);

@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.150 2012/08/15 17:59:24 w6ws Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.151 2012/08/24 00:32:11 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -1060,8 +1060,8 @@ subroutine ESMF_dkas_string(string, dkval)
    write(string,'(a)') 'ESMF_TYPEKIND_I8'
  elseif (dkval == ESMF_TYPEKIND_R4) then
    write(string,'(a)') 'ESMF_TYPEKIND_R4'
- elseif (dkval == ESMF_TYPEKIND_I8) then
-   write(string,'(a)') 'ESMF_TYPEKIND_I8'
+ elseif (dkval == ESMF_TYPEKIND_R8) then
+   write(string,'(a)') 'ESMF_TYPEKIND_R8'
  elseif (dkval == ESMF_TYPEKIND_C8) then
    write(string,'(a)') 'ESMF_TYPEKIND_C8'
  elseif (dkval == ESMF_TYPEKIND_C16) then
