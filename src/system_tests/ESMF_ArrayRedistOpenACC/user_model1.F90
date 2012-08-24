@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1 2012/08/17 21:05:15 theurich Exp $
+! $Id: user_model1.F90,v 1.2 2012/08/24 18:22:34 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -47,6 +47,7 @@ module user_model1
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     if (pthreadsEnabled) then
+      ! try to get all 8PEs under a single PET
       call ESMF_GridCompSetVMMaxPEs(comp, maxPeCountPerPet=8, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
     endif
@@ -146,7 +147,7 @@ module user_model1
     type(ESMF_Array)      :: array
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
     type(ESMF_VM)         :: vm
-    integer               :: i, j
+    integer               :: i, j, il, iu, jl, ju
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -164,9 +165,15 @@ module user_model1
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Fill source Array with data
+    ! For OpenACC to work correctly the loop bounds need to be obtained
+    ! outside of the OpenACC region!
+    jl = lbound(farrayPtr, 2)
+    ju = ubound(farrayPtr, 2)
+    il = lbound(farrayPtr, 1)
+    iu = ubound(farrayPtr, 1)
 !$acc kernels
-    do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
-      do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+    do j = jl, ju
+      do i = il, iu
         farrayPtr(i,j) = 10.0d0 &
           + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
           + 2.0d0 * sin(real(j,ESMF_KIND_R8)/1500.d0*pi)
