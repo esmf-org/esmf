@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTestA.F90,v 1.27 2011/06/30 06:00:26 theurich Exp $
+! $Id: ESMF_ArrayRedistSTestA.F90,v 1.28 2012/08/24 23:46:35 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MPMD_SYSTEM_TEST   String used by test script to count system tests.
@@ -14,33 +14,35 @@
 !
 ! !DESCRIPTION:
 ! System test ArrayRedistMPMD.
-!    Two gridded components and one coupler component, one-way coupling.
 !
-!    The two gridded components are compiled and linked into two separate
-!    executables. The coupler component which must run on the union of
-!    PETs is linked into both executables. The first executable is started
-!    on the first 4 PETs and the second executable is started on the last
-!    2 PETs.
+!   Two Gridded Components and one Coupler Component, one-way coupling.
 !
-!    First gridded component runs on 4 PETs and defines a 2D source Array
-!    100x150. Second gridded component defines a destination Array also
-!    100x150 but runs on only 2 PETs. Both gridded components use DELayouts
-!    with 1 DE per PET. The decomposition of the source Array is defined as
-!    (petCount x 1) = (4 x 1) while the destination Array is decomposed as
-!    (1 x petCount) = (1 x 2).
+!   The two Gridded Components are compiled and linked into two separate
+!   executables. The Coupler Component, which must run on the union of
+!   PETs, is compiled once, but linked into both executables. The first
+!   executable is started on the first 4 PETs and the second executable is
+!   started on the last 2 PETs.
 !
-!    The first component initializes the source Array to a geometric function:
+!   The first Gridded Component runs on 4 PETs and defines a 2D source Array
+!   of 100x150. The second Gridded Component defines a destination Array also
+!   of 100x150, but runs on only 2 PETs. Both Gridded Components use DELayouts
+!   with 1 DE per PET. The decomposition of the source Array is defined as
+!   (petCount x 1), i.e. (4 x 1) while the destination Array is decomposed as
+!   (1 x petCount), i.e. (1 x 2).
 !
-!       10.0 + 5.0*sin((I/Imax)*pi) + 2.0*sin((J/Jmax)*pi)
+!   The first Gridded Component initializes the source Array to a geometric
+!   function:
 !
-!    The coupler component runs on all 6 PETs and reconciles import and export
-!    states which contain source and destination Array, respectively. The
-!    coupler component then calls ArrayRedist() to redistribute the source
-!    Array data onto the destination Array.
+!     10.0 + 5.0*sin((I/Imax)*pi) + 2.0*sin((J/Jmax)*pi)
 !
-!    Finally the second gridded component compares the data stored in the
-!    destination Array to the exact solution of the above function as a measure
-!    of the accuracy of the ArrayRedist() method.
+!   The Coupler Component runs on all 6 PETs and reconciles import and export
+!   States, which contain the source and destination Arrays, respectively. The
+!   Coupler Component then calls ArrayRedist() to redistribute the source
+!   Array data onto the destination Array.
+!
+!   Finally the second Gridded Component compares the data stored in the
+!   destination Array to the analytic solution of the above function as a
+!   measure of the accuracy of the ArrayRedist() method.
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}
@@ -106,8 +108,9 @@ program ESMF_ArrayRedistSTest
 !-------------------------------------------------------------------------
 !
   ! Initialize framework and get back default global VM
-  call ESMF_Initialize(vm=vm, defaultlogfilename="ArrayRedistSTestA.Log", &
-                        logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
+  call ESMF_Initialize(vm=vm, &
+    defaultlogfilename="ArrayRedistSTestA.Log", &
+    logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -409,10 +412,9 @@ program ESMF_ArrayRedistSTest
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
 
-  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
-  ! file that the scripts grep for.
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors 
+  ! in the log file that the scripts grep for.
   call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-
 
   call ESMF_Finalize()
 

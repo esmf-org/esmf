@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.18 2011/06/30 06:00:28 theurich Exp $
+! $Id: ESMF_ArrayRedistOpenMPSTest.F90,v 1.19 2012/08/24 23:46:38 theurich Exp $
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST   String used by test script to count system tests.
@@ -8,33 +8,36 @@
 !
 ! !DESCRIPTION:
 ! System test ArrayRedistOpenMP.
-!    Two gridded components and one coupler component, one-way coupling.
 !
-!    First gridded component receives 8 PETs from the driver. However, using
-!    GridCompSetVM calls in its SetVM routine it requests 2PEs to be provided
-!    to each of its PETs. If this request can be accommodated the component will
-!    execute on 4 PETs with 2PEs each. If the request cannot be accommodated the
-!    component will execute with 8PETs. In either case it defines a 2D source
-!    Array 100x1500. Second gridded component defines a destination Array also
-!    100x1500 but runs on only 2 PETs. Both gridded components use DELayouts
-!    with 1 DE per PET. The decomposition of the source Array is defined as
-!    (petCount x 1) = (4 x 1) or (8 x 1), depending on whether each PET received
-!    2PEs or not. The destination Array is decomposed as (1 x petCount) =
-!    (1 x 2).
+!   Two Gridded Components and one Coupler Component, one-way coupling.
 !
-!    Using OpenMP directives for loop-parallelization the first component
-!    initializes the source Array to a geometric function:
+!   The first Gridded Component receives 8 PETs from the driver. However, using
+!   GridCompSetVM calls in its SetVM routine the Component requests 2 PEs to be
+!   associated with a each PET. If this request can be accommodated (i.e. of the
+!   8 PEs received from the driver, 2 were always on the same single system
+!   image), then the Component will execute on 4 PETs with 2 PEs each. If
+!   the request cannot be accommodated, the Component will execute with 8 PETs,
+!   holding 1 PE each. In either case the first Gridded Component defines a 2D
+!   source Array of 100x1500. The decomposition of the source Array is defined
+!   as (petCount x 1), i.e. either (4 x 1) or (8 x 1).
 !
-!       10.0 + 5.0*sin((I/Imax)*pi) + 2.0*sin((J/Jmax)*pi)
+!   The second Gridded Component defines a destination Array also of 100x1500,
+!   but runs on only 2 PETs. The destination Array is decomposed as
+!   (1 x petCount), i.e. (1 x 2).
 !
-!    The coupler component runs on all 8 PETs and reconciles import and export
-!    states which contain source and destination Array, respectively. The
-!    coupler component then calls ArrayRedist() to redistribute the source
-!    Array data onto the destination Array.
+!   Using OpenMP directives for loop-parallelization the first Component
+!   initializes the source Array to a geometric function:
 !
-!    Finally the second gridded component compares the data stored in the
-!    destination Array to the exact solution of the above function as a measure
-!    of the accuracy of the ArrayRedist() method.
+!     10.0 + 5.0*sin((I/Imax)*pi) + 2.0*sin((J/Jmax)*pi)
+!
+!   The Coupler Component runs on all 8 PETs and reconciles import and export
+!   States, which contain the source and destination Arrays, respectively. The
+!   Coupler Component then calls ArrayRedist() to redistribute the source
+!   Array data onto the destination Array.
+!
+!   Finally the second Gridded Component compares the data stored in the
+!   destination Array to the analytic solution of the above function as a
+!   measure of the accuracy of the ArrayRedist() method.
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}
@@ -91,7 +94,8 @@ program ESMF_ArrayRedistOpenMPSTest
 !-------------------------------------------------------------------------
 !
   ! Initialize framework and get back default global VM
-  call ESMF_Initialize(vm=vm, defaultlogfilename="ArrayRedistOpenMPSTest.Log", &
+  call ESMF_Initialize(vm=vm, &
+    defaultlogfilename="ArrayRedistOpenMPSTest.Log", &
     logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -380,7 +384,8 @@ program ESMF_ArrayRedistOpenMPSTest
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
 
-  ! Print final PASS/FAIL and add # of procs message to log file.
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors 
+  ! in the log file that the scripts grep for.
   call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
   call ESMF_Finalize()

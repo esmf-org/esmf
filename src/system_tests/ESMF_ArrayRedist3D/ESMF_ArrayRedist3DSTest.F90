@@ -1,34 +1,36 @@
-! $Id: ESMF_ArrayRedist3DSTest.F90,v 1.25 2011/06/30 06:00:24 theurich Exp $
+! $Id: ESMF_ArrayRedist3DSTest.F90,v 1.26 2012/08/24 23:46:28 theurich Exp $
 !
 !-------------------------------------------------------------------------
-!ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
+!ESMF_MULTI_PROC_SYSTEM_TEST   String used by test script to count system tests.
 !=========================================================================
 
 !-------------------------------------------------------------------------
 !
 ! !DESCRIPTION:
 ! System test ArrayRedist3D.
-!    Two gridded components and one coupler component, one-way coupling.
 !
-!    First gridded component runs on 8 PETs and defines a 3D source Array
-!    100x150x4. Second gridded component defines a destination Array also
-!    100x150x4 but runs on only 2 PETs. Both gridded components use DELayouts
-!    with 1 DE per PET. The decomposition of the source Array is defined as
-!    (2 x 2 x 2) while the destination Array is decomposed as
-!    (1 x 1 x petCount) = (1 x 1 x 2).
+!   Two Gridded Components and one Coupler Component, one-way coupling.
 !
-!    The first component initializes the source Array to a geometric function:
+!   The first Gridded Component runs on 8 PETs and defines a 3D source Array
+!   of 100x150x4. The second Gridded Component defines a destination Array also
+!   of 100x150x4, but runs on only 2 PETs. Both Gridded Components use DELayouts
+!   with 1 DE per PET. The decomposition of the source Array is defined as
+!   (2 x 2 x 2), while the destination Array is decomposed as
+!   (1 x 1 x petCount), i.e. (1 x 1 x 2).
 !
-!       10.0 + 5.0*sin((I/Imax)*pi) + 2.0*sin((J/Jmax)*pi) + 3.0*sin((K/Kmax)*pi)
+!   The first Gridded Component initializes the source Array to a geometric
+!   function:
 !
-!    The coupler component runs on all 8 PETs and reconciles import and export
-!    states which contain source and destination Array, respectively. The
-!    coupler component then calls ArrayRedist() to redistribute the source
-!    Array data onto the destination Array.
+!     10.0 + 5.0*sin((I/Imax)*pi) + 2.0*sin((J/Jmax)*pi) + 3.0*sin((K/Kmax)*pi)
 !
-!    Finally the second gridded component compares the data stored in the
-!    destination Array to the exact solution of the above function as a measure
-!    of the accuracy of the ArrayRedist() method.
+!   The Coupler Component runs on all 8 PETs and reconciles import and export
+!   States, which contain the source and destination Arrays, respectively. The
+!   Coupler Component then calls ArrayRedist() to redistribute the source
+!   Array data onto the destination Array.
+!
+!   Finally the second Gridded Component compares the data stored in the
+!   destination Array to the analytic solution of the above function as a
+!   measure of the accuracy of the ArrayRedist() method.
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}
@@ -85,8 +87,9 @@ program ESMF_ArrayRedist3DSTest
 !-------------------------------------------------------------------------
 !
   ! Initialize framework and get back default global VM
-  call ESMF_Initialize(vm=vm, defaultlogfilename="ESMF_ArrayRedist3DSTest.Log", &
-                        logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
+  call ESMF_Initialize(vm=vm, &
+    defaultlogfilename="ESMF_ArrayRedist3DSTest.Log", &
+    logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -109,7 +112,8 @@ program ESMF_ArrayRedist3DSTest
   ! Create the 2 model components and coupler
   cname1 = "user model 1"
   ! use petList to define comp1 on PET 0,1,2,3,4,5,6,7
-  comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0,1,2,3,4,5,6,7/), rc=localrc)
+  comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0,1,2,3,4,5,6,7/), &
+    rc=localrc)
   print *, "Created component ", trim(cname1), "rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -373,10 +377,9 @@ program ESMF_ArrayRedist3DSTest
   print *, "------------------------------------------------------------"
   print *, "------------------------------------------------------------"
 
-  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
-  ! file that the scripts grep for.
+  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors 
+  ! in the log file that the scripts grep for.
   call ESMF_STest((rc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-
 
   call ESMF_Finalize()
 
