@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.97 2012/08/20 19:36:52 feiliu Exp $ 
+# $Id: makefile,v 1.98 2012/08/24 14:29:00 feiliu Exp $ 
 
 ALL: build_system_tests
 
@@ -44,8 +44,8 @@ DIRS      = ESMF_CompCreate \
 	    ESMF_ArrayRedistOpenMP \
 	    ESMF_ArrayRedistOpenACC \
             ESMF_DirectCoupling \
-            ESMF_XGridConcurrent 
-#            ESMF_XGridSerial
+            ESMF_XGridConcurrent \
+            ESMF_XGridSerial
 # Disabled STests
 #           ESMF_FieldRegridConserv \ cover by Regrid
 #           ESMF_FieldRegridMulti \   cover by Regrid
