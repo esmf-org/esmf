@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.42 2012/08/02 20:21:36 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.43 2012/08/28 22:58:41 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -918,9 +918,9 @@ module ESMF_ComplianceICMod
       
     if (comptype == ESMF_COMPTYPE_GRID) then
     
-      ! set CIM convention and purpose specifiers
-      convention = "CIM"
-      purpose = "Model Component Simulation Description"
+      ! set NUOPC convention and purpose specifiers
+      convention = "NUOPC"
+      purpose = "General"
     
       call ESMF_LogWrite(trim(prefix)//" GridComp level attribute check: "// &
         "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
@@ -1077,9 +1077,18 @@ module ESMF_ComplianceICMod
         file=FILENAME)) &
         return  ! bail out
         
+      attributeName = "NestingGeneration"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
     elseif (comptype == ESMF_COMPTYPE_CPL) then
 
-      ! set CIM convention and purpose specifiers
+      ! set NUOPC convention and purpose specifiers
       convention = "NUOPC"
       purpose = "General"
     
@@ -1091,7 +1100,7 @@ module ESMF_ComplianceICMod
         file=FILENAME)) &
         return  ! bail out
 
-      attributeName = "LongName"
+      attributeName = "ComponentLongName"
       call checkComponentAttribute(prefix, comp=comp, &
         attributeName=attributeName, convention=convention, purpose=purpose, &
         rc=rc)
@@ -1124,13 +1133,16 @@ module ESMF_ComplianceICMod
     character(*), intent(in)              :: purpose
     integer,      intent(out), optional   :: rc
     
+    type(ESMF_TypeKind_Flag)              :: typekind
     integer                               :: itemCount, i
     logical                               :: isPresent
-    character(10*ESMF_MAXSTR), pointer    :: valueList(:)
-    character(ESMF_MAXSTR)                :: iStr
+    character(10*ESMF_MAXSTR), pointer    :: valueStringList(:)
+    character(ESMF_MAXSTR)                :: iStr, vStr
+    integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
 
-    call ESMF_AttributeGet(comp, name=attributeName, itemCount=itemCount, &
-      isPresent=isPresent, convention=convention, purpose=purpose, rc=rc)
+    call ESMF_AttributeGet(comp, name=attributeName, &
+      convention=convention, purpose=purpose, &
+      typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -1155,34 +1167,78 @@ module ESMF_ComplianceICMod
         return  ! bail out
     else
       ! attribute present and set
-      allocate(valueList(itemCount))
-      call ESMF_AttributeGet(comp, name=attributeName, valueList=valueList, &
-        convention=convention, purpose=purpose, rc=rc)
-      if (itemCount == 1) then
-        ! single valued
-        call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
-          trim(attributeName)//"> "// &
-          "present and set: "// trim(valueList(1)), &
-          ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
-      else
-        ! multi valued -> requires loop
-        do i=1, itemCount
-          write(iStr,*) i
+      if (typekind == ESMF_TYPEKIND_CHARACTER) then
+        allocate(valueStringList(itemCount))
+        call ESMF_AttributeGet(comp, name=attributeName, &
+          valueList=valueStringList, &
+          convention=convention, purpose=purpose, rc=rc)
+        if (itemCount == 1) then
+          ! single valued
           call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
-            trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
-            "present and set: "// trim(valueList(i)), &
+            trim(attributeName)//"> "// &
+            "present and set: "// trim(valueStringList(1)), &
             ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
-        enddo
+        else
+          ! multi valued -> requires loop
+          do i=1, itemCount
+            write(iStr,*) i
+            call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+              trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+              "present and set: "// trim(valueStringList(i)), &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+          enddo
+        endif
+        deallocate(valueStringList)
+      else if (typekind == ESMF_TYPEKIND_I4) then
+        allocate(valueI4List(itemCount))
+        call ESMF_AttributeGet(comp, name=attributeName, &
+          valueList=valueI4List, &
+          convention=convention, purpose=purpose, rc=rc)
+        if (itemCount == 1) then
+          ! single valued
+          write(vStr,*) valueI4List(1)
+          call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+            trim(attributeName)//"> "// &
+            "present and set: "// vStr, &
+            ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rc, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        else
+          ! multi valued -> requires loop
+          do i=1, itemCount
+            write(iStr,*) i
+            write(vStr,*) valueI4List(i)
+            call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+              trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
+              "present and set: "// vStr, &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+          enddo
+        endif
+        deallocate(valueI4List)
+      else
+        call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
+          trim(attributeName)//"> "// &
+          "present and set: <unsupported data type>", &
+          ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rc, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
       endif
-      deallocate(valueList)
     endif
     
   end subroutine
@@ -1200,8 +1256,8 @@ module ESMF_ComplianceICMod
       
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ! set CIM convention and purpose specifiers
-    convention = "ESG"
+    ! set NUOPC convention and purpose specifiers
+    convention = "NUOPC"
     purpose = "General"
     
     call ESMF_LogWrite(trim(prefix)//" Field level attribute check: "// &
@@ -1212,7 +1268,16 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
 
-    attributeName = "ShortName"
+    attributeName = "StandardName"
+    call checkFieldAttribute(prefix, field=field, &
+      attributeName=attributeName, convention=convention, purpose=purpose, &
+      rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
+    attributeName = "Units"
     call checkFieldAttribute(prefix, field=field, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
@@ -1230,16 +1295,7 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
       
-    attributeName = "StandardName"
-    call checkFieldAttribute(prefix, field=field, &
-      attributeName=attributeName, convention=convention, purpose=purpose, &
-      rc=rc)
-    if (ESMF_LogFoundError(rc, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-      
-    attributeName = "Units"
+    attributeName = "ShortName"
     call checkFieldAttribute(prefix, field=field, &
       attributeName=attributeName, convention=convention, purpose=purpose, &
       rc=rc)
