@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.109 2012/08/24 00:32:12 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.110 2012/08/28 19:18:49 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -121,7 +121,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.109 2012/08/24 00:32:12 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.110 2012/08/28 19:18:49 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -967,12 +967,12 @@ contains
 !     \end{description}
 !     Supported values for <defaultvalue argument> are:
 !     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out), optional :: defaultvalue
-!     \item integer(ESMF\_KIND\_I8), intent(out), optional :: defaultvalue
-!     \item real (ESMF\_KIND\_R4), intent(out), optional :: defaultvalue
-!     \item real (ESMF\_KIND\_R8), intent(out), optional :: defaultvalue
-!     \item logical, intent(out), optional :: defaultvalue
-!     \item character (len = *), intent(out), optional :: defaultvalue
+!     \item integer(ESMF\_KIND\_I4), intent(in), optional :: defaultvalue
+!     \item integer(ESMF\_KIND\_I8), intent(in), optional :: defaultvalue
+!     \item real (ESMF\_KIND\_R4), intent(in), optional :: defaultvalue
+!     \item real (ESMF\_KIND\_R8), intent(in), optional :: defaultvalue
+!     \item logical, intent(in), optional :: defaultvalue
+!     \item character (len = *), intent(in), optional :: defaultvalue
 !     \end{description}
 !
 !     The arguments are:
@@ -1048,7 +1048,7 @@ contains
 !     \item type(ESMF\_Grid), intent(inout) :: grid
 !     \item type(ESMF\_State), intent(inout) :: state
 !     \end{description}
-!     Supported values for <value argument> are:
+!     Supported values for <valueList argument> are:
 !     \begin{description}
 !     \item integer(ESMF\_KIND\_I4), intent(out) :: valueList(:)
 !     \item integer(ESMF\_KIND\_I8), intent(out) :: valueList(:)
@@ -1057,14 +1057,14 @@ contains
 !     \item logical, intent(out) :: valueList(:)
 !     \item character (len = *), intent(out) :: valueList(:)
 !     \end{description}
-!     Supported values for <defaultvalue argument> are:
+!     Supported values for <defaultvalueList argument> are:
 !     \begin{description}
-!     \item integer(ESMF\_KIND\_I4), intent(out), optional :: defaultvalueList(:)
-!     \item integer(ESMF\_KIND\_I8), intent(out), optional :: defaultvalueList(:)
-!     \item real (ESMF\_KIND\_R4), intent(out), optional :: defaultvalueList(:)
-!     \item real (ESMF\_KIND\_R8), intent(out), optional :: defaultvalueList(:)
-!     \item logical,  intent(out), optional :: defaultvalueList(:)
-!     \item character (len = *), intent(out), optional :: defaultvalueList(:)
+!     \item integer(ESMF\_KIND\_I4), intent(in), optional :: defaultvalueList(:)
+!     \item integer(ESMF\_KIND\_I8), intent(in), optional :: defaultvalueList(:)
+!     \item real (ESMF\_KIND\_R4), intent(in), optional :: defaultvalueList(:)
+!     \item real (ESMF\_KIND\_R8), intent(in), optional :: defaultvalueList(:)
+!     \item logical,  intent(in), optional :: defaultvalueList(:)
+!     \item character (len = *), intent(in), optional :: defaultvalueList(:)
 !     \end{description}
 !
 !     The arguments are:
@@ -2708,7 +2708,7 @@ contains
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), intent(out) :: value @\
-      mtype(ESMF_KIND_##mtypekind), intent(inout), optional :: defaultvalue @\
+      mtype(ESMF_KIND_##mtypekind), intent(in), optional :: defaultvalue @\
       character (len=*), intent(in), optional :: inputList(:) @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
@@ -2859,7 +2859,7 @@ contains
       type(mclass), intent(inout) :: mthis   @\
       character (len=*), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(out) :: valueList @\
-      mtype(ESMF_KIND_##mtypekind), dimension(:), intent(inout), optional :: defaultvalueList @\
+      mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in), optional :: defaultvalueList @\
       character (len=*), intent(in), optional :: inputList(:) @\
       character (len=*), intent(in), optional :: convention @\
       character (len=*), intent(in), optional :: purpose @\
@@ -2878,10 +2878,10 @@ contains
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to retrieve. @\
-!     \item [value] @\
-!           The real value of the named Attribute. @\
-!     \item [{[defaultvalue]}] @\
-!           The real default value of the named Attribute. @\
+!     \item [valueList] @\
+!           The list of real values of the named Attribute. @\
+!     \item [{[defaultvalueList]}] @\
+!           The list of real default values of the named Attribute. @\
 !     \item [{[inputList]}] @\
 !           A list of the input parameters required to retrieve internal info. @\
 !     \item [{[convention]}] @\
@@ -3038,7 +3038,7 @@ contains
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       logical, intent(out) :: value @\
-      logical, intent(inout), optional :: defaultvalue @\
+      logical, intent(in), optional :: defaultvalue @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
@@ -3167,7 +3167,7 @@ contains
       type(mclass), intent(inout) :: mthis   @\
       character (len=*), intent(in) :: name @\
       logical, dimension(:), intent(out) :: valueList @\
-      logical, dimension(:), intent(inout), optional :: defaultvalueList @\
+      logical, dimension(:), intent(in), optional :: defaultvalueList @\
       character (len=*), intent(in), optional :: inputList(:) @\
       character (len=*), intent(in), optional :: convention @\
       character (len=*), intent(in), optional :: purpose @\
@@ -3347,7 +3347,7 @@ contains
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       character (len = *), intent(out) :: value @\
-      character (len = *), intent(inout), optional :: defaultvalue @\
+      character (len = *), intent(in), optional :: defaultvalue @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
@@ -3663,7 +3663,7 @@ contains
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), intent(out) :: value @\
-      mtype(ESMF_KIND_##mtypekind), intent(inout), optional :: defaultvalue @\
+      mtype(ESMF_KIND_##mtypekind), intent(in), optional :: defaultvalue @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
@@ -3790,7 +3790,7 @@ contains
       type(mclass), intent(inout) :: mthis   @\
       character (len=*), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(out) :: valueList @\
-      mtype(ESMF_KIND_##mtypekind), dimension(:), intent(inout), optional :: defaultvalueList @\
+      mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in), optional :: defaultvalueList @\
       character (len=*), intent(in), optional :: convention @\
       character (len=*), intent(in), optional :: purpose @\
       character (len=*), intent(in), optional :: attPackInstanceName @\
@@ -3808,10 +3808,10 @@ contains
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to retrieve. @\
-!     \item [value] @\
-!           The real value of the named Attribute. @\
-!     \item [{[defaultvalue]}] @\
-!           The real default value of the named Attribute. @\
+!     \item [valueList] @\
+!           The list of real values of the named Attribute. @\
+!     \item [{[defaultvalueList]}] @\
+!           The list of real default values of the named Attribute. @\
 !     \item [{[convention]}] @\
 !           The convention of the Attribute package. @\
 !     \item [{[purpose]}] @\
@@ -3946,7 +3946,7 @@ contains
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       logical, intent(out) :: value @\
-      logical, intent(inout), optional :: defaultvalue @\
+      logical, intent(in), optional :: defaultvalue @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
@@ -4075,7 +4075,7 @@ contains
       type(mclass), intent(inout) :: mthis   @\
       character (len=*), intent(in) :: name @\
       logical, dimension(:), intent(out) :: valueList @\
-      logical, dimension(:), intent(inout), optional :: defaultvalueList @\
+      logical, dimension(:), intent(in), optional :: defaultvalueList @\
       character (len=*), intent(in), optional :: convention @\
       character (len=*), intent(in), optional :: purpose @\
       character (len=*), intent(in), optional :: attPackInstanceName @\
@@ -4232,7 +4232,7 @@ contains
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       character (len = *), intent(out) :: value @\
-      character (len = *), intent(inout), optional :: defaultvalue @\
+      character (len = *), intent(in), optional :: defaultvalue @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
