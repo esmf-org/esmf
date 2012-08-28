@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.4 2012/04/17 18:36:42 theurich Exp $
+! $Id: NUOPC_Base.F90,v 1.5 2012/08/28 23:04:37 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -28,11 +28,13 @@ module NUOPC_Base
   ! public module interfaces
   public NUOPC_FieldDictionarySetup
   public NUOPC_FieldDictionaryAddEntry  
-  public NUOPC_FieldAttributeGet
   public NUOPC_FieldAttributeAdd
+  public NUOPC_FieldAttributeGet
   public NUOPC_CplCompAreServicesSet
-  public NUOPC_CplCompAttributeGet
   public NUOPC_CplCompAttributeAdd
+  public NUOPC_CplCompAttributeGet
+  public NUOPC_CplCompAttributeSet
+  public NUOPC_GridCompAttributeAdd
   public NUOPC_TimePrint
   public NUOPC_ClockCheckSetClock
   public NUOPC_ClockPrintCurrTime
@@ -155,56 +157,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_FieldAttributeGet - Get a NUOPC Field Attribute
-! !INTERFACE:
-  subroutine NUOPC_FieldAttributeGet(field, name, value, rc)
-! !ARGUMENTS:
-    type(ESMF_Field)                      :: field
-    character(*), intent(in)              :: name
-    character(*), intent(out)             :: value
-    integer,      intent(out), optional   :: rc
-! !DESCRIPTION:
-!   Access the Attribute {\tt name} inside of {\tt field} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
-!   the Attribute is not present or not set.
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    character(ESMF_MAXSTR)  :: defaultvalue
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-
-    defaultvalue = "CheckThisDefaultValue"
-
-    call ESMF_AttributeGet(field, name=name, value=value, &
-      defaultvalue=defaultvalue, convention="NUOPC", purpose="General", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    if (trim(value) == trim(defaultvalue)) then
-      ! attribute not present
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not present",&
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
-    else if (len_trim(value) == 0) then
-      ! attribute present but not set
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not set",&
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
-    endif
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_FieldAttributeAdd - Add a NUOPC Field Attribute
+! !IROUTINE: NUOPC_FieldAttributeAdd - Add the NUOPC Field Attributes
 ! !INTERFACE:
   subroutine NUOPC_FieldAttributeAdd(field, StandardName, Units, LongName, &
     ShortName, Connected, rc)
@@ -220,6 +173,10 @@ module NUOPC_Base
 !   Add standard NUOPC Attributes to a Field object. Check the provided
 !   arguments against the NUOPC Field Dictionary. Omitted optional
 !   information is filled in using defaults out of the NUOPC Field Dictionary.
+!
+!   This adds the standard NUOPC Field Attribute package: convention="NUOPC", 
+!   purpose="General" to the Field. The NUOPC Field Attribute package extends
+!   the ESG Field Attribute package: convention="ESG", purpose="General". 
 !
 !   The arguments are:
 !   \begin{description}
@@ -301,7 +258,7 @@ module NUOPC_Base
     ! set StandardName
     call ESMF_AttributeSet(field, &
       name="StandardName", value=trim(StandardName), &
-      convention="ESG", purpose="General", &
+      convention="NUOPC", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -327,7 +284,7 @@ module NUOPC_Base
     endif
     call ESMF_AttributeSet(field, &
       name="Units", value=trim(tempString), &
-      convention="ESG", purpose="General", &
+      convention="NUOPC", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -340,7 +297,7 @@ module NUOPC_Base
     endif
     call ESMF_AttributeSet(field, &
       name="LongName", value=trim(tempString), &
-      convention="ESG", purpose="General", &
+      convention="NUOPC", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -353,7 +310,7 @@ module NUOPC_Base
     endif
     call ESMF_AttributeSet(field, &
       name="ShortName", value=trim(tempString), &
-      convention="ESG", purpose="General", &
+      convention="NUOPC", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -397,6 +354,55 @@ module NUOPC_Base
   
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_FieldAttributeGet - Get a NUOPC Field Attribute
+! !INTERFACE:
+  subroutine NUOPC_FieldAttributeGet(field, name, value, rc)
+! !ARGUMENTS:
+    type(ESMF_Field)                      :: field
+    character(*), intent(in)              :: name
+    character(*), intent(out)             :: value
+    integer,      intent(out), optional   :: rc
+! !DESCRIPTION:
+!   Access the Attribute {\tt name} inside of {\tt field} using the
+!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
+!   the Attribute is not present or not set.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)  :: defaultvalue
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    defaultvalue = "CheckThisDefaultValue"
+
+    call ESMF_AttributeGet(field, name=name, value=value, &
+      defaultvalue=defaultvalue, convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (trim(value) == trim(defaultvalue)) then
+      ! attribute not present
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not present",&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    else if (len_trim(value) == 0) then
+      ! attribute present but not set
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not set",&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_CplCompAreServicesSet - Check if SetServices was called
 ! !INTERFACE:
   function NUOPC_CplCompAreServicesSet(comp, rc)
@@ -431,6 +437,53 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_CplCompAttributeAdd - Add the NUOPC CplComp Attributes
+! !INTERFACE:
+  subroutine NUOPC_CplCompAttributeAdd(comp, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp), intent(inout)         :: comp
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Add standard NUOPC Attributes to a Coupler Component. Check the provided
+!   importState and exportState arguments for matching Fields and add the list
+!   as "CplList" Attribute.
+!
+!   This adds the standard NUOPC Coupler Attribute package: convention="NUOPC", 
+!   purpose="General" to the Field. The NUOPC Coupler Attribute package extends
+!   the ESG Component Attribute package: convention="ESG", purpose="General".
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[comp]
+!     The {\tt ESMF\_CplComp} object to which the Attributes are added.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)  :: attrList(1)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! Set up a customized list of Attributes to be added to the CplComp
+    attrList(1) = "CplList"
+    
+    ! add Attribute packages
+    call ESMF_AttributeAdd(comp, convention="ESG", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
+      attrList=attrList, nestConvention="ESG", nestPurpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+          
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_CplCompAttributeGet - Get a NUOPC CplComp Attribute
 ! !INTERFACE:
   subroutine NUOPC_CplCompAttributeGet(comp, cplList, cplListSize, rc)
@@ -440,6 +493,9 @@ module NUOPC_Base
     integer,      intent(out),   optional :: cplListSize
     integer,      intent(out),   optional :: rc
 ! !DESCRIPTION:
+!   Access the "CplList" Attribute inside of {\tt comp} using the
+!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
+!   the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
@@ -465,68 +521,112 @@ module NUOPC_Base
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CplCompAttributeAdd - Add a NUOPC CplComp Attribute
+! !IROUTINE: NUOPC_CplCompAttributeSet - Set the NUOPC CplComp Attributes
 ! !INTERFACE:
-  subroutine NUOPC_CplCompAttributeAdd(comp, importState, exportState, rc)
+  subroutine NUOPC_CplCompAttributeSet(comp, importState, exportState, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp), intent(inout)         :: comp
     type(ESMF_State),   intent(in)            :: importState
     type(ESMF_State),   intent(in)            :: exportState
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
+!   Check the provided importState and exportState arguments for matching Fields
+!   and set the coupling list as "CplList" Attribute.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[comp]
+!     The {\tt ESMF\_CplComp} object to which the Attributes are set.
+!   \item[importState]
+!     Import State.
+!   \item[exportState]
+!     Export State.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)  :: attrList(2)
     integer, parameter      :: maxCount=10
     character(ESMF_MAXSTR)  :: cplListValues(maxCount)
     integer                 :: count
 
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ! Set up a customized list of Attributes to be added to the CplComp
-    attrList(1) = "LongName"
-    attrList(2) = "CplList"
-    
-    ! add Attribute packages
-    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
-      attrList=attrList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-      
     ! find cplListValues
     call NUOPC_FillCplList(importState, exportState, cplList=cplListValues, &
       count=count, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
     
     ! set Attributes
     call ESMF_AttributeSet(comp, &
-      name="LongName", value="NUOPC Generic Connector Component", &
+      name="ComponentLongName", value="NUOPC Generic Connector Component", &
       convention="NUOPC", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
     if (count>0) then
       call ESMF_AttributeSet(comp, &
         name="CplList", valueList=cplListValues(1:count), &
         convention="NUOPC", purpose="General", &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+        line=__LINE__, file=FILENAME)) return  ! bail out
     endif
       
   end subroutine
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_GridCompAttributeAdd - Add the NUOPC GridComp Attributes
+! !INTERFACE:
+  subroutine NUOPC_GridCompAttributeAdd(comp, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                   :: comp
+    integer,      intent(out), optional   :: rc
+! !DESCRIPTION:
+!   Add standard NUOPC Attributes to a Gridded Component.
+!
+!   This adds the standard NUOPC GridComp Attribute package: convention="NUOPC",
+!   purpose="General" to the Gridded Component. The NUOPC GridComp Attribute
+!   package extends the CIM Component Attribute package: convention="CIM",
+!   purpose="Model Component Simulation Description".
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)            :: attrList(1)
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! Set up a customized list of Attributes to be added to the Fields
+    attrList(1) = "NestingGeneration"  ! values: integer starting 0 for parent
+    
+    ! add Attribute packages
+    call ESMF_AttributeAdd(comp, convention="CIM", &
+      purpose="Model Component Simulation Description", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
+      attrList=attrList, nestConvention="CIM", &
+      nestPurpose="Model Component Simulation Description", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    ! set Attributes
+    call ESMF_AttributeSet(comp, &
+      name="NestingGeneration", value=0, &        ! default to parent level
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_FillCplList - Fill the cplList according to matching Fields

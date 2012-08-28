@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.28 2012/04/12 16:38:32 theurich Exp $
+! $Id: NUOPC.F90,v 1.29 2012/08/28 23:04:37 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -25,11 +25,13 @@ module NUOPC
   ! public module interfaces
   public NUOPC_FieldDictionarySetup
   public NUOPC_FieldDictionaryAddEntry  
-  public NUOPC_FieldAttributeGet
   public NUOPC_FieldAttributeAdd
+  public NUOPC_FieldAttributeGet
   public NUOPC_CplCompAreServicesSet
-  public NUOPC_CplCompAttributeGet
   public NUOPC_CplCompAttributeAdd
+  public NUOPC_CplCompAttributeGet
+  public NUOPC_CplCompAttributeSet
+  public NUOPC_GridCompAttributeAdd
   public NUOPC_TimePrint
   public NUOPC_ClockCheckSetClock
   public NUOPC_ClockPrintCurrTime

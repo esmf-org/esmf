@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.18 2012/04/10 17:35:16 theurich Exp $
+! $Id: NUOPC_Connector.F90,v 1.19 2012/08/28 23:04:37 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -126,8 +126,8 @@ module NUOPC_Connector
       ! not ES -> IS ==> should indicate problem???
     endif
     
-    ! look for matching Fields and add them to the CPL component metadata
-    call NUOPC_CplCompAttributeAdd(cplcomp, importState, exportState, rc=rc)
+    ! look for matching Fields and set as "CplList" metadata
+    call NUOPC_CplCompAttributeSet(cplcomp, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &

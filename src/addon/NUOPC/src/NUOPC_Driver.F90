@@ -1,4 +1,4 @@
-! $Id: NUOPC_Driver.F90,v 1.5 2012/08/06 22:05:59 theurich Exp $
+! $Id: NUOPC_Driver.F90,v 1.6 2012/08/28 23:04:37 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Driver.F90"
 
@@ -228,6 +228,11 @@ module NUOPC_Driver
         value=rootVas, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        
+      ! add standard NUOPC GridComp Attribute Package to the modelComp
+      call NUOPC_GridCompAttributeAdd(is%wrap%modelComp(i), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
       ! create connectorComps
       do j=1, is%wrap%modelCount
@@ -312,6 +317,12 @@ module NUOPC_Driver
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME)) return  ! bail out
         endif
+        
+        ! add standard NUOPC CplComp Attribute Package to the connectorComp
+        call NUOPC_CplCompAttributeAdd(is%wrap%connectorComp(i,j), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        
       enddo
     enddo
 
