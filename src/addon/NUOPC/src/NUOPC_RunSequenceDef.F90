@@ -1,4 +1,4 @@
-! $Id: NUOPC_RunSequenceDef.F90,v 1.6 2012/08/06 22:05:59 theurich Exp $
+! $Id: NUOPC_RunSequenceDef.F90,v 1.7 2012/08/29 15:16:17 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_RunSequenceDef.F90"
 
@@ -536,7 +536,7 @@ print *, "silly time loop"
       endif
     else
       ! "LINK" element
-print *, "found LINK element"
+!print *, "found LINK element"
       if (associated(runSeq(i)%stack)) then
         ! detected recursive link
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="recursive link detected",&

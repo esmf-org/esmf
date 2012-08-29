@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.5 2012/08/28 23:04:37 theurich Exp $
+! $Id: NUOPC_Base.F90,v 1.6 2012/08/29 15:16:17 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -598,12 +598,13 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(1)
+    character(ESMF_MAXSTR)            :: attrList(2)
     
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! Set up a customized list of Attributes to be added to the Fields
-    attrList(1) = "NestingGeneration"  ! values: integer starting 0 for parent
+    attrList(1) = "NestingGeneration" ! values: integer starting 0 for parent
+    attrList(2) = "Nestling"  ! values: integer starting 0 for first nestling
     
     ! add Attribute packages
     call ESMF_AttributeAdd(comp, convention="CIM", &
@@ -619,6 +620,12 @@ module NUOPC_Base
     ! set Attributes
     call ESMF_AttributeSet(comp, &
       name="NestingGeneration", value=0, &        ! default to parent level
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeSet(comp, &
+      name="Nestling", value=0, &                 ! default to first nestling
       convention="NUOPC", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
