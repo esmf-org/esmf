@@ -1,4 +1,4 @@
-// $Id: ESMCI_Init.C,v 1.11 2012/01/06 20:19:05 svasquez Exp $
+// $Id: ESMCI_Init.C,v 1.12 2012/08/30 21:46:05 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -55,16 +55,28 @@ char **globalargv;
 //EOP
 
     int rc;
+    ESMCI_FortranStrLenArg defaultConfigFilename_len;
+    ESMCI_FortranStrLenArg defaultLogFilename_len;
     ESMCI_MainLanguage l = ESMF_MAIN_C;
 
     globalargc = 0;
     globalargv = NULL;
 
+    if (defaultConfigFilename != NULL)
+      defaultConfigFilename_len = strlen (defaultConfigFilename);
+    else
+      defaultConfigFilename_len = 0;
+
+    if (defaultLogFilename != NULL)
+      defaultLogFilename_len = strlen (defaultLogFilename);
+    else
+      defaultLogFilename_len = 0;
+
     FTN_X(f_esmf_frameworkinitialize)((int*)&l, defaultConfigFilename, 
                                     &defaultCalendar, defaultLogFilename, 
                                     &defaultLogType, &rc,
-                                    strlen (defaultConfigFilename),
-                                    strlen (defaultLogFilename));
+                                    defaultConfigFilename_len,
+                                    defaultLogFilename_len);
 
     return rc;
 
