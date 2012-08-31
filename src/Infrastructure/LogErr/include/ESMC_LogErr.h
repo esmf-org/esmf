@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.87 2012/01/06 20:17:37 svasquez Exp $
+// $Id: ESMC_LogErr.h,v 1.88 2012/08/31 20:29:48 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,8 +41,13 @@
 extern "C"{
 #endif
 
+// These should be kept in sync with the equivalent Fortran named constants
 enum ESMC_MsgType{ESMC_LOG_INFO=1,  ESMC_LOG_WARN=2,  ESMC_LOG_ERROR=3};
-enum ESMC_LogType{ESMC_LOG_SINGLE=1,ESMC_LOG_MULTI=2, ESMC_LOG_NONE=3};
+enum ESMC_LogType{
+    ESMC_LOGKIND_SINGLE=1,
+    ESMC_LOGKIND_MULTI=2,
+    ESMC_LOGKIND_NONE=3
+};
 
 // Class declaration type
 typedef struct{

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Test.C,v 1.20 2012/05/14 20:46:34 svasquez Exp $
+// $Id: ESMCI_Test.C,v 1.21 2012/08/31 20:34:14 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,    
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Test.C,v 1.20 2012/05/14 20:46:34 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Test.C,v 1.21 2012/08/31 20:34:14 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -437,7 +437,7 @@ int TestStart(
   strcpy(logFileName+numChars, "Log\0");
 
   rc = ESMCI_Initialize((char *)"", ESMC_CALKIND_NOCALENDAR, logFileName,
-    ESMC_LOG_MULTI);
+    ESMC_LOGKIND_MULTI);
   if (rc != ESMF_SUCCESS) {
     sprintf(msgbuf, "FAIL  rc=%d, %s, line %d, Unable to initialize ESMF\n", rc,
       file, line);
