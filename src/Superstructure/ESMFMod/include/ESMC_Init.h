@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.23 2012/01/06 20:19:04 svasquez Exp $
+// $Id: ESMC_Init.h,v 1.24 2012/08/31 00:17:53 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -32,7 +32,8 @@
 
 // identifier list for optional ESMC arguments
 enum {
-  ESMCI_InitArgDefaultConfigFilenameID   = ESMCI_ArgBaseID
+  ESMCI_InitArgDefaultConfigFilenameID   = ESMCI_ArgBaseID,
+  ESMCI_InitArgLogKindFlagID             = ESMCI_ArgBaseID + 1
 };
 
 // prototypes for C routines
@@ -50,6 +51,8 @@ extern "C" {
     ...);           // optional arguments
 #define ESMC_InitArgDefaultConfigFilename(ARG)  \
 ESMCI_Arg(ESMCI_InitArgDefaultConfigFilenameID,ARG)
+#define ESMC_InitArgLogKindFlag(ARG)  \
+ESMCI_Arg(ESMCI_InitArgLogKindFlagID,ARG)
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -69,6 +72,13 @@ ESMCI_Arg(ESMCI_InitArgDefaultConfigFilenameID,ARG)
 //  such as MPICH, to do IO before the MPI environment is initialized. Please
 //  consult the documentation of your MPI implementation for details.
 //
+//  Optional arguments are recognised.  For example to turn off logging,
+//  the {\tt ESMC\_Initialize()} call would be coded as:
+//
+//    ESMC\_Initialize (\&rc,
+//      ESMC\_InitArgLogKindFlag(ESMC\_LOG\_MULTI),
+//      ESMC\_ArgLast);
+//
 //  Before exiting the application
 //  the user must call {\tt ESMC\_Finalize()} to release resources 
 //  and clean up the ESMF gracefully.
@@ -79,6 +89,11 @@ ESMCI_Arg(ESMCI_InitArgDefaultConfigFilenameID,ARG)
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \item [{[defaultConfigFilename]}]
 //    Name of the default configuration file for the entire application.
+//  \item [{[LogKindFlag]}]
+//    Sets the default Log Type to be used by ESMF Log Manager.
+//    Valid options are {\tt ESMC\_LOG\_SINGLE}, {\tt ESMC\_LOG\_MULTI},
+//    and {\tt ESMC\_LOG\_NONE}.
+//    If not specified, defaults to {\tt ESMC\_LOG\_MULTI}.
 //  \end{description}
 //EOP
 //-----------------------------------------------------------------------------

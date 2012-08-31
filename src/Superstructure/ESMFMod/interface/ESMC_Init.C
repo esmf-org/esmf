@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.C,v 1.16 2012/01/06 20:19:05 svasquez Exp $
+// $Id: ESMC_Init.C,v 1.17 2012/08/31 00:17:58 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -58,7 +58,8 @@ extern "C" {
     int localrc;
     ESMCI_ArgList   argPtr;
     ESMCI_ArgID     argID;
-    char *defaultConfigFilename;
+    char           *defaultConfigFilename = NULL;
+    ESMC_LogType    logtype = ESMC_LOG_MULTI;
 
     // check the optional argument list
     ESMCI_ArgStart(argPtr, rc);
@@ -66,6 +67,9 @@ extern "C" {
       switch ( argID ) {
         case ESMCI_InitArgDefaultConfigFilenameID:
           ESMCI_ArgGetString(argPtr);
+          break;
+        case ESMCI_InitArgLogKindFlagID:
+          ESMCI_ArgGetInt(argPtr);
           break;
         default:
           printf("ESMC_Initialize: Improperly specified optional argument list\n");
@@ -80,6 +84,9 @@ extern "C" {
         case ESMCI_InitArgDefaultConfigFilenameID:
           defaultConfigFilename = ESMCI_ArgGetString(argPtr);
           break;
+        case ESMCI_InitArgLogKindFlagID:
+          logtype = (ESMC_LogType)ESMCI_ArgGetInt(argPtr);
+          break;
         default:
           printf("ESMC_Initialize: Improperly specified optional argument list\n");
           return ESMC_RC_OPTARG_BAD;
@@ -88,7 +95,11 @@ extern "C" {
     
     // todo: it may be better to go directly into F90 instead of using C++
     // todo: if this was implemented right it were to use the defaultConfigFile.
-    localrc = ESMCI_Initialize();
+    localrc = ESMCI_Initialize(
+        defaultConfigFilename,
+        ESMC_CALKIND_NOCALENDAR,
+        NULL,
+        logtype);
     
     // todo: use LogErr to do error handling for localrc
 
