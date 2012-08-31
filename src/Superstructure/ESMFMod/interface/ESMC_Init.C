@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.C,v 1.17 2012/08/31 00:17:58 w6ws Exp $
+// $Id: ESMC_Init.C,v 1.18 2012/08/31 20:32:58 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ extern "C" {
     ESMCI_ArgList   argPtr;
     ESMCI_ArgID     argID;
     char           *defaultConfigFilename = NULL;
-    ESMC_LogType    logtype = ESMC_LOG_MULTI;
+    ESMC_LogType    logtype = ESMC_LOGKIND_MULTI;
 
     // check the optional argument list
     ESMCI_ArgStart(argPtr, rc);

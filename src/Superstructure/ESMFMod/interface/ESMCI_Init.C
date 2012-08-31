@@ -1,4 +1,4 @@
-// $Id: ESMCI_Init.C,v 1.12 2012/08/30 21:46:05 w6ws Exp $
+// $Id: ESMCI_Init.C,v 1.13 2012/08/31 20:32:58 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ char **globalargv;
 
     int rc;
     ESMCI_MainLanguage l = ESMF_MAIN_C;
-    ESMC_LogType lt = ESMC_LOG_MULTI;
+    ESMC_LogType lt = ESMC_LOGKIND_MULTI;
 
     globalargc = 0;
     globalargv = NULL;
@@ -135,7 +135,7 @@ char **globalargv;
 
     int rc;
     ESMCI_MainLanguage l = ESMF_MAIN_C;
-    ESMC_LogType lt = ESMC_LOG_MULTI;
+    ESMC_LogType lt = ESMC_LOGKIND_MULTI;
 
     // make this public so the mpi init code in Machine can grab them.
     globalargc = argc;
