@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.h,v 1.12 2012/08/14 22:52:56 gold2718 Exp $
+// $Id: ESMCI_IO.h,v 1.13 2012/09/04 16:11:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -78,7 +78,8 @@ namespace ESMCI {
         } else {
           strcpy(name, arrName);
         }
-      }
+      }else
+        name[0] = '\0';
       number = 0;
     }
     ~IO_ObjectContainer() {
