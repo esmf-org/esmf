@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.151 2012/08/24 00:32:11 rokuingh Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.152 2012/09/05 19:33:50 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -840,6 +840,7 @@ interface operator (==)
   module procedure ESMF_ioeq
   module procedure ESMF_RegridPoleEq
   module procedure ESMF_FileFormatEq
+  module procedure ESMF_RegridMethodEq
 end interface
 
 interface operator (/=)
@@ -854,6 +855,7 @@ interface operator (/=)
   module procedure ESMF_unmappedactionne
   module procedure ESMF_RegridPoleNe
   module procedure ESMF_FileFormatNe
+  module procedure ESMF_RegridMethodNe
 end interface
 
 interface assignment (=)
@@ -1371,8 +1373,22 @@ end function ESMF_FileFormatEq
 end function ESMF_FileFormatNe
 
 
-
 !------------------------------------------------------------------------------
+! function to compare two ESMF_RegridMethod types
+
+function ESMF_RegridMethodEq(rp1, rp2)
+ logical ESMF_RegridMethodEq
+ type(ESMF_RegridMethod_Flag), intent(in) :: rp1, rp2
+
+ ESMF_RegridMethodEq = (rp1%regridmethod == rp2%regridmethod)
+end function
+
+function ESMF_RegridMethodNe(rp1, rp2)
+ logical ESMF_RegridMethodNe
+ type(ESMF_RegridMethod_Flag), intent(in) :: rp1, rp2
+
+ ESMF_RegridMethodNe = (rp1%regridmethod /= rp2%regridmethod)
+end function
 
 
 
