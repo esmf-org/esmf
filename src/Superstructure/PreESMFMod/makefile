@@ -1,0 +1,16 @@
+# $Id: makefile,v 1.1 2012/09/05 16:56:19 theurich Exp $
+
+ALL: build_here
+
+# this needs to be the path of this directory relative to the
+# top level esmf directory.
+LOCDIR	  = src/Superstructure/PreESMFMod/
+
+# leave this line alone.
+include ${ESMF_DIR}/makefile
+
+
+# the DIRS line needs to contain all subdirectories which exist 
+#  directly below this directory, and have either library,
+#  example/test code, or documents which need to be generated.
+DIRS	  = src
