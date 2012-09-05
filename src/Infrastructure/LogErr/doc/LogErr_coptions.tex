@@ -1,0 +1,46 @@
+% $Id: LogErr_coptions.tex,v 1.1 2012/09/05 17:47:16 w6ws Exp $
+
+% Earth System Modeling Framework
+% Copyright 2002-2012, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+\subsubsection{ESMC\_LOGKIND}
+\label{const:clogkindflag}
+
+{\sf DESCRIPTION:\\}
+Specifies a single log file, multiple log files (one per PET), or no log files.
+
+The valid values are:
+\begin{description}
+   \item [ESMC\_LOGKIND\_SINGLE] 
+         Use a single log file, combining messages from all of the PETs.  Not supported on some platforms.
+   \item [ESMC\_LOGKIND\_MULTI]
+         Use multiple log files --- one per PET.  (Default.)
+   \item [ESMC\_LOGKIND\_NONE]
+         Do not issue messages to a log file.
+\end{description}
+
+
+\subsubsection{ESMC\_LOGMSG}
+\label{const:clogmsgflag}
+
+{\sf DESCRIPTION:\\}
+\begin{sloppypar}
+Specifies a message level.
+\end{sloppypar}
+
+The valid values are:
+\begin{description}
+   \item [ESMC\_LOG\_INFO] 
+         Informational messages
+   \item [ESMC\_LOG\_WARNING]
+         Warning messages
+   \item [ESMC\_LOG\_ERROR]
+         Error messages
+   \item [ESMC\_LOG\_TRACE]
+         Trace messages
+\end{description}
