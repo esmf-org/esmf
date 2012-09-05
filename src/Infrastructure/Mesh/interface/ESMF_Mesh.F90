@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.97 2012/09/05 14:37:31 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.98 2012/09/05 15:07:28 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.97 2012/09/05 14:37:31 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.98 2012/09/05 15:07:28 rokuingh Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -172,7 +172,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.97 2012/09/05 14:37:31 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.98 2012/09/05 15:07:28 rokuingh Exp $'
 
 !==============================================================================
 ! 
@@ -1936,6 +1936,17 @@ end function ESMF_MeshCreateFromUnstruct
        endif
     else
       dualflag=1
+    endif
+
+    ! If convertToDual is TRUE (as default), cannot use UserArea because the area defined
+    ! in the grid file is not for the dual mesh
+    if (present(addUserArea)) then
+      if (addUserArea .and. dualflag==1) then
+         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+              msg="- Cannot use user area when convertToDual flag is set to TRUE", &
+              ESMF_CONTEXT, rcToReturn=rc)
+         return
+      endif
     endif
 
     ! get global vm information
