@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.110 2012/08/28 19:18:49 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.111 2012/09/05 14:37:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -121,7 +121,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.110 2012/08/28 19:18:49 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.111 2012/09/05 14:37:38 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -6109,12 +6109,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: litemCount, i, j @\
       character (len=ESMF_MAXSTR) :: modName @\
       character, allocatable :: valueString(:) @\
-      integer :: lens_size, valuestring_size @\
+      integer :: lens_size, valuestring_size, tag_size @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
-      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+      attpack = ESMF_FALSE @\
+      tag_size = 6 ! ':Input:' is 7 characters long @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
@@ -6136,14 +6137,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
       ! allocate arrays @\
       if (present (inputList)) then @\
-        lens_size = size (inputList) + 1 @\
-        !                  inputList size  * string len + "Input:" + len(value) @\
-        valuestring_size = size(inputList) * ((len(inputList) + 6)) + len(value) @\
-        ! set the size of the new valueList @\
-        litemCount = lens_size @\
-      else @\
-        lens_size = 1 @\
         valuestring_size = len(value) @\
+        lens_size = 1 @\
+        do i=1,size(inputList) @\
+          if (len_trim(inputList(i)) > 0) then @\
+            valuestring_size = valuestring_size + len_trim(inputList(i)) + tag_size @\
+            lens_size = lens_size + 1 @\
+          endif @\
+        enddo @\
+        ! set the size of the new valueList @\
+        litemCount =  lens_size @\
+      else @\
+        valuestring_size = len(value) @\
+        lens_size = 1 @\
         ! set the size of the new valueList @\
         litemCount = 1 @\
       end if @\
@@ -6166,15 +6172,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(inputList)) then @\
         j = lens(1) + 1 @\
         do i=2,litemCount @\
-          ! put inputList values into valueString @\
-          lens(i) = len_trim(inputList(i-1))+7 @\
-          valueString(j:(j+7-1)) = ESMF_String2Array(":Input:") @\
-          j = j + 7 @\
-          valueString(j:(j+lens(i)-7-1)) = ESMF_String2Array(trim(inputList(i-1))) @\
-          j = j + lens(i) @\
+          if (len_trim(inputList(i-1)) > 0) then @\
+            ! put inputList values into valueString @\
+            lens(i) = len_trim(inputList(i-1))+tag_size @\
+            valueString(j:(j+tag_size-1)) = ESMF_String2Array("Input:") @\
+            j = j + tag_size @\
+            valueString(j:(j+lens(i)-tag_size-1)) = ESMF_String2Array(trim(inputList(i-1))) @\
+            j = j + lens(i) @\
+          endif @\
         enddo @\
       endif @\
-      print *, "VALUESTRING = ", valueString @\
  @\
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\

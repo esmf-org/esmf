@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.C,v 1.22 2012/08/31 20:29:50 w6ws Exp $
+// $Id: ESMCI_LogErr.C,v 1.23 2012/09/05 14:37:29 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_LogErr.C,v 1.22 2012/08/31 20:29:50 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_LogErr.C,v 1.23 2012/09/05 14:37:29 rokuingh Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -452,7 +452,7 @@ int LogErr::Write(
     // Initialize return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
-    if (ESMC_LogDefault.logtype == ESMC_LOGKIND_NONE) return true;
+    if (ESMC_LogDefault.logtype == ESMC_LOG_NONE) return true;
     FTN_X(f_esmf_logwrite0)(msg, &msgtype, &rc, strlen(msg));
 
     return rc;
@@ -486,7 +486,7 @@ int LogErr::Write(
     // Initialize return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
-    if (ESMC_LogDefault.logtype == ESMC_LOGKIND_NONE) return true;
+    if (ESMC_LogDefault.logtype == ESMC_LOG_NONE) return true;
     FTN_X(f_esmf_logwrite1)(msg, &msgtype, &LINE, FILE, method, &rc,
                           strlen(msg), strlen(FILE), strlen(method));
 
@@ -521,7 +521,7 @@ int LogErr::Set(
     
     lflush = static_cast<bool> (flush);
 
-    if (ESMC_LogDefault.logtype == ESMC_LOGKIND_NONE) return ESMF_SUCCESS;
+    if (ESMC_LogDefault.logtype == ESMC_LOG_NONE) return ESMF_SUCCESS;
     FTN_X(f_esmf_logset)(&lflush, &rc);
 
     return rc;

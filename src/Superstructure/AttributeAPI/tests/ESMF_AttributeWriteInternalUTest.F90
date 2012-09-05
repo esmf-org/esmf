@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.1 2012/08/24 00:32:14 rokuingh Exp $
+! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.2 2012/09/05 14:37:44 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_AttributeWriteInternalUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.1 2012/08/24 00:32:14 rokuingh Exp $'
+  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.2 2012/09/05 14:37:44 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -67,6 +67,10 @@ program ESMF_AttributeWriteInternalUTest
   character(ESMF_MAXSTR),dimension(9)   :: attrList         
   character(ESMF_MAXSTR),dimension(3)   :: inputList 
   character(ESMF_MAXSTR),dimension(4)   :: outValList
+
+  integer(ESMF_KIND_I4), dimension(2) :: exclusiveCount
+  real(ESMF_KIND_R8), pointer :: farrayPtr(:)
+  integer :: coorddim = 1
 
 #if 0
   ! for code to prove that internal info can be retrieved from a Grid
@@ -138,6 +142,12 @@ program ESMF_AttributeWriteInternalUTest
   !   <modelComponent>, <simulationRun>, including <input>s (fields) and
   !   <platform>. Uses built-in, standard CIM packages.
   !-------------------------------------------------------------------------
+
+call ESMF_GridGetCoord(grid, coorddim, farrayPtr=farrayPtr, &
+                       exclusiveCount=exclusiveCount, rc=rc)
+print *, "exclusiveCount = ", exclusiveCount
+print *, "xcoords = ", farrayPtr
+
 
     !-------------------------------------------------------------------------
     !EX_UTest
@@ -227,12 +237,12 @@ program ESMF_AttributeWriteInternalUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Create standard CIM attribute package on the grid
-    attrList(1) = 'gridTile'
-    attrList(2) = 'id'
-    attrList(3) = 'geometryType'
-    attrList(4) = 'discretizationType'
-    attrList(5) = 'shortName'
-    attrList(6) = 'longName'
+    attrList(1) = 'shortName'
+    attrList(2) = 'longName'
+    attrList(3) = 'gridTile'
+    attrList(4) = 'id'
+    attrList(5) = 'discretizationType'
+    attrList(6) = 'geometryType'
     attrList(7) = 'numDims'
     attrList(8) = 'xcoords'
     attrList(9) = 'ycoords'
@@ -240,58 +250,10 @@ program ESMF_AttributeWriteInternalUTest
                            convention='CIM', &
                            purpose='Inputs Description', &
                            attrList=attrList, &  ! create a custom package
-                           count = 8, &
+                           count = 9, &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating custom Grid CIM Inputs attribute package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !EX_UTest
-    ! Set an attribute value within the CIM Grid package
-    call ESMF_AttributeSet(grid, 'gridTile', &
-                           "ESMF:tileCount", &
-                           convention='CIM', &
-                           purpose='Inputs Description', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set an attribute value in CIM Grid package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !EX_UTest
-    ! Set an attribute value within the CIM Grid package
-    call ESMF_AttributeSet(grid, 'id', &
-                           'ESMF:name', &
-                           convention='CIM', &
-                           purpose='Inputs Description', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set an attribute value in CIM Grid package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !EX_UTest
-    ! Set an attribute value within the CIM Grid package
-    call ESMF_AttributeSet(grid, 'geometryType', &
-                           'sphere', &
-                           convention='CIM', &
-                           purpose='Inputs Description', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set an attribute value in CIM Grid package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !EX_UTest
-    ! Set an attribute value within the CIM Grid package
-    call ESMF_AttributeSet(grid, 'discretizationType', &
-                           'logically_rectangular', &
-                           convention='CIM', &
-                           purpose='Inputs Description', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set an attribute value in CIM Grid package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
@@ -321,6 +283,54 @@ program ESMF_AttributeWriteInternalUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set an attribute value within the CIM Grid package
+    call ESMF_AttributeSet(grid, 'gridTile', &
+                           "ESMF:tileCount", &
+                           convention='CIM', &
+                           purpose='Inputs Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set an attribute value in CIM Grid package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set an attribute value within the CIM Grid package
+    call ESMF_AttributeSet(grid, 'id', &
+                           'ESMF:name', &
+                           convention='CIM', &
+                           purpose='Inputs Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set an attribute value in CIM Grid package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set an attribute value within the CIM Grid package
+    call ESMF_AttributeSet(grid, 'discretizationType', &
+                           'logically_rectangular', &
+                           convention='CIM', &
+                           purpose='Inputs Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set an attribute value in CIM Grid package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set an attribute value within the CIM Grid package
+    call ESMF_AttributeSet(grid, 'geometryType', &
+                           'sphere', &
+                           convention='CIM', &
+                           purpose='Inputs Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set an attribute value in CIM Grid package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set an attribute value within the CIM Grid package
     call ESMF_AttributeSet(grid, 'numDims', &
                            'ESMF:dimCount', &
                            convention='CIM', &
@@ -337,7 +347,7 @@ program ESMF_AttributeWriteInternalUTest
     inputList(1) = 'coordDim:1'
     call ESMF_AttributeSet(grid, 'xcoords', &
                            'ESMF:farrayPtr', &
-                           inputList=inputList(1:), &
+                           inputList=inputList, &
                            convention='CIM', &
                            purpose='Inputs Description', &
                            rc=rc)
@@ -345,10 +355,34 @@ program ESMF_AttributeWriteInternalUTest
     write(name, *) "Set an attribute value in CIM Grid package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#if 0
     outValList = ""
     call ESMF_AttributeGet(grid, 'xcoords', outValList, &
                            convention="CIM", purpose="Inputs Description", rc=rc)
     print *, "OUTVALLIST = ", outValList
+#endif
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set an attribute value within the CIM Grid package
+    inputList(:) = ''
+    inputList(1) = 'coordDim:2'
+    call ESMF_AttributeSet(grid, 'ycoords', &
+                           'ESMF:farrayPtr', &
+                           inputList=inputList, &
+                           convention='CIM', &
+                           purpose='Inputs Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set an attribute value in CIM Grid package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+#if 0
+    outValList = ""
+    call ESMF_AttributeGet(grid, 'xcoords', outValList, &
+                           convention="CIM", purpose="Inputs Description", rc=rc)
+    print *, "OUTVALLIST = ", outValList
+#endif
 
     !-------------------------------------------------------------------------
     !EX_UTest

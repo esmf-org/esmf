@@ -1,4 +1,4 @@
-// $Id: ESMCI_Init.C,v 1.13 2012/08/31 20:32:58 w6ws Exp $
+// $Id: ESMCI_Init.C,v 1.14 2012/09/05 14:37:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -55,28 +55,16 @@ char **globalargv;
 //EOP
 
     int rc;
-    ESMCI_FortranStrLenArg defaultConfigFilename_len;
-    ESMCI_FortranStrLenArg defaultLogFilename_len;
     ESMCI_MainLanguage l = ESMF_MAIN_C;
 
     globalargc = 0;
     globalargv = NULL;
 
-    if (defaultConfigFilename != NULL)
-      defaultConfigFilename_len = strlen (defaultConfigFilename);
-    else
-      defaultConfigFilename_len = 0;
-
-    if (defaultLogFilename != NULL)
-      defaultLogFilename_len = strlen (defaultLogFilename);
-    else
-      defaultLogFilename_len = 0;
-
     FTN_X(f_esmf_frameworkinitialize)((int*)&l, defaultConfigFilename, 
                                     &defaultCalendar, defaultLogFilename, 
                                     &defaultLogType, &rc,
-                                    defaultConfigFilename_len,
-                                    defaultLogFilename_len);
+                                    strlen (defaultConfigFilename),
+                                    strlen (defaultLogFilename));
 
     return rc;
 
@@ -102,7 +90,7 @@ char **globalargv;
 
     int rc;
     ESMCI_MainLanguage l = ESMF_MAIN_C;
-    ESMC_LogType lt = ESMC_LOGKIND_MULTI;
+    ESMC_LogType lt = ESMC_LOG_MULTI;
 
     globalargc = 0;
     globalargv = NULL;
@@ -135,7 +123,7 @@ char **globalargv;
 
     int rc;
     ESMCI_MainLanguage l = ESMF_MAIN_C;
-    ESMC_LogType lt = ESMC_LOGKIND_MULTI;
+    ESMC_LogType lt = ESMC_LOG_MULTI;
 
     // make this public so the mpi init code in Machine can grab them.
     globalargc = argc;

@@ -1,4 +1,4 @@
-!  $Id: ESMF_Attribute_C.F90,v 1.1 2012/08/24 00:45:27 rokuingh Exp $
+!  $Id: ESMF_Attribute_C.F90,v 1.2 2012/09/05 14:37:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Attribute_C.F90,v 1.1 2012/08/24 00:45:27 rokuingh Exp $'
+!      '$Id: ESMF_Attribute_C.F90,v 1.2 2012/09/05 14:37:38 rokuingh Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -59,15 +59,15 @@
     localrc = ESMF_RC_NOT_IMPL
     rc = ESMF_RC_NOT_IMPL
 
-    print *, "f_esmf_gridattgetinfoint"
-
     ! initialize the grid
     grid%this = gridp
     ESMF_INIT_SET_CREATED(grid)
 
+#if 0
     call ESMF_GridGet(grid, status=gridstatus)
     print *, "Attribute_C.F90: GRIDSTATUS = ", gridstatus
-    
+#endif
+
     ! Call into the Attribute public Fortran layer
 #if 0
     if (il_present == 1) then
@@ -76,9 +76,13 @@
       call ESMF_AttributeGetInfo(grid, name, value, rc=localrc)
     endif
 #endif
+
     call ESMF_AttributeGetInfo(grid, name, value, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    rc = localrc
+    return
 
   end subroutine f_esmf_gridattgetinfoint
 !------------------------------------------------------------------------------
@@ -114,13 +118,18 @@
     grid%this = gridp
     ESMF_INIT_SET_CREATED(grid)
 
+#if 0
     call ESMF_GridGet(grid, status=gridstatus)
     print *, "Attribute_C.F90: GRIDSTATUS = ", gridstatus
+#endif
 
     ! Call into the Attribute public Fortran layer
     call ESMF_AttributeGetInfo(grid, name, value, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    rc = localrc
+    return
 
   end subroutine f_esmf_gridattgetinfochar
 !------------------------------------------------------------------------------
@@ -128,7 +137,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_gridattgetinfointlist"
   subroutine f_esmf_gridattgetinfointlist(gridp, name, valueList, len1, &
-                                      il_present, inputList, len2, rc)
+                                      il_present, inputString, lens, len2, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_LogErrMod
@@ -142,14 +151,18 @@
     type(ESMF_Pointer) :: gridp
     character(len=*)   :: name
     integer            :: len1, len2
-    integer            :: valueList(1:len1)
+    integer            :: valueList(len1)
     integer            :: il_present
-    character(len=*)   :: inputList(1:len2)
+    character(len=*)   :: inputString
+    integer            :: lens(len2)
     integer            :: rc
 
     ! Local vars
     integer :: localrc                   ! local return code
     type(ESMF_Grid) :: grid
+    integer :: i, j
+    ! TODO: get rid of the fixed length buffer
+    character(len=ESMF_MAXSTR) :: inputList(len2)
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -158,6 +171,13 @@
     ! initialize the grid
     grid%this = gridp
     ESMF_INIT_SET_CREATED(grid)
+
+    ! unpack the inputList
+    j = 1
+    do  i=1,len2
+      inputList(i) = inputString(j:(j+lens(i)-1))
+      j = j + lens(i)
+    enddo
 
     ! Call into the Attribute public Fortran layer
     if (il_present == 1) then
@@ -168,13 +188,16 @@
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    rc = localrc
+    return
+
   end subroutine f_esmf_gridattgetinfointlist
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_gridattgetinfor8list"
   subroutine f_esmf_gridattgetinfor8list(gridp, name, valueList, len1, &
-                                         il_present, inputList, len2, rc)
+                                         il_present, inputString, lens, len2, rc)
 
     use ESMF_UtilTypesMod
     use ESMF_LogErrMod
@@ -188,14 +211,18 @@
     type(ESMF_Pointer)     :: gridp
     character(len=*)       :: name
     integer                :: len1, len2
-    real(ESMF_KIND_R8)     :: valueList(1:len1)
+    real(ESMF_KIND_R8)     :: valueList(len1)
     integer                :: il_present
-    character(len=*)       :: inputList(1:len2)
+    character(len=*)       :: inputString
+    integer                :: lens(len2)
     integer                :: rc
 
     ! Local vars
     integer :: localrc                   ! local return code
     type(ESMF_Grid) :: grid
+    integer :: i, j
+    ! TODO: get rid of the fixed length buffer
+    character(len=ESMF_MAXSTR) :: inputList(len2)
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -204,7 +231,14 @@
     ! initialize the grid
     grid%this = gridp
     ESMF_INIT_SET_CREATED(grid)
-print *, "f_esmf_gridattgetinfor8list - inputList = ", inputList
+
+    ! unpack the inputList
+    j = 1
+    do  i=1,len2
+      inputList(i) = inputString(j:(j+lens(i)-1))
+      j = j + lens(i)
+    enddo
+
     ! Call into the Attribute public Fortran layer
     if (il_present == 1) then
       call ESMF_AttributeGetInfo(grid, name, valueList, inputList=inputList, rc=localrc)
@@ -213,6 +247,9 @@ print *, "f_esmf_gridattgetinfor8list - inputList = ", inputList
     endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    rc = localrc
+    return
 
   end subroutine f_esmf_gridattgetinfor8list
 !------------------------------------------------------------------------------
@@ -246,6 +283,9 @@ print *, "f_esmf_gridattgetinfor8list - inputList = ", inputList
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     rc = ESMF_RC_NOT_IMPL
+
+    ! initialize the grid
+    grid%this = gridp
     ESMF_INIT_SET_CREATED(grid)
 
     ! Call into the Attribute public Fortran layer
@@ -256,6 +296,9 @@ print *, "f_esmf_gridattgetinfor8list - inputList = ", inputList
     endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    rc = localrc
+    return
 
   end subroutine f_esmf_gridattgetinfologicallist
 !------------------------------------------------------------------------------

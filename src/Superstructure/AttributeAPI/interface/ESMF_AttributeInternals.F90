@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeInternals.F90,v 1.5 2012/08/24 00:32:13 rokuingh Exp $
+! $Id: ESMF_AttributeInternals.F90,v 1.6 2012/09/05 14:37:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -86,7 +86,7 @@ module ESMF_AttributeInternalsMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_AttributeInternals.F90,v 1.5 2012/08/24 00:32:13 rokuingh Exp $'
+               '$Id: ESMF_AttributeInternals.F90,v 1.6 2012/09/05 14:37:38 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -138,6 +138,7 @@ contains
 
       integer :: localrc
       integer :: localDel, i
+      character(len=ESMF_MAXSTR) :: msgbuf
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -193,8 +194,9 @@ contains
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         case DEFAULT
+          write (msgbuf, *) "The provided 'name' (", trim(name), ") does not correspond to internal info"
           call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
-            msg="The provided 'name' does not correspond to internal info", &
+            msg=msgbuf, &
             ESMF_CONTEXT, rcToReturn=rc)
           return
       end select
@@ -256,13 +258,10 @@ contains
       select case (name)
         case ("coordTypeKind")
           call ESMF_GridGet(grid, coordTypeKind=lcoordTypeKind, rc=localrc)
-print *, "HERE!!!!!!!!!!!"
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
           ! assign the string value of this named constant
           value = lcoordTypeKind
-print *, "value = ", value
-print *, "coordTypeKind = ", lcoordTypeKind
         case ("indexflag")
           call ESMF_GridGet(grid, indexflag=lindexflag, rc=localrc)
           ! assign the string value of this named constant
@@ -646,7 +645,7 @@ print *, "coordTypeKind = ", lcoordTypeKind
       real(ESMF_KIND_R8), pointer :: coords1D(:)
       real(ESMF_KIND_R8), pointer :: coords2D(:,:)
       real(ESMF_KIND_R8), pointer :: coords3D(:,:,:)
-      integer :: totalCount(3)
+      integer(ESMF_KIND_I4), dimension(3) :: exclusiveCount
 
       logical :: getLDe, getStagger, getCoord
 
@@ -696,51 +695,51 @@ print *, "coordTypeKind = ", lcoordTypeKind
             if (dimCount == 1) then
               ! get the coordinates
               call ESMF_GridGetCoord(grid, coordDiml, farrayPtr=coords1D, &
-                                     totalCount=totalCount, rc=localrc)
+                                     exclusiveCount=exclusiveCount, rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
                 ! check that valueList is large enough
-                min_size = totalCount(1)
+                min_size = exclusiveCount(1)
                 if (size(valueList) < min_size) then 
                   call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
                     msg="The valueList size is not large enough!", &
                     ESMF_CONTEXT, rcToReturn=rc)
                 endif
                 ! fill the valueList with coordinates
-                valueList(1:totalCount(1)) = coords1D
+                valueList(1:exclusiveCount(1)) = coords1D
             else if (dimCount == 2) then
               ! get the coordinates
               call ESMF_GridGetCoord(grid, coordDiml, farrayPtr=coords2D, &
-                                     totalCount=totalCount, rc=localrc)
+                                     exclusiveCount=exclusiveCount, rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
                 ! check that valueList is large enough
-                min_size = totalCount(1)*totalCount(2)
+                min_size = exclusiveCount(1)*exclusiveCount(2)
                 if (size(valueList) < min_size) then 
                   call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
                     msg="The valueList size is not large enough!", &
                     ESMF_CONTEXT, rcToReturn=rc)
                 endif
                 ! fill the valueList with coordinates
-                valueList(1:totalCount(1)) = coords2D(1,:)
-                valueList(totalCount(1)+1:totalCount(2)) = coords2D(2,:)
+                valueList(1:exclusiveCount(1)) = coords2D(1,:)
+                valueList(exclusiveCount(1)+1:exclusiveCount(2)) = coords2D(2,:)
             else if (dimCount == 3) then
               ! get the coordinates
               call ESMF_GridGetCoord(grid, coordDiml, farrayPtr=coords3D, &
-                                     totalCount=totalCount, rc=localrc)
+                                     exclusiveCount=exclusiveCount, rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
                 ! check that valueList is large enough
-                min_size = totalCount(1)*totalCount(2)*totalCount(3)
+                min_size = exclusiveCount(1)*exclusiveCount(2)*exclusiveCount(3)
                 if (size(valueList) < min_size) then 
                   call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
                     msg="The valueList size is not large enough!", &
                     ESMF_CONTEXT, rcToReturn=rc)
                 endif
                 ! fill the valueList with coordinates
-                !valueList(1:totalCount(1)) = coords3D(1,:)
-                !valueList(totalCount(1)+1:totalCount(2)) = coords3D(2,:)
-                !valueList(totalCount(2)+1:totalCount(3)) = coords3D(3,:)
+                !valueList(1:exclusiveCount(1)) = coords3D(1,:,:)
+                !valueList(exclusiveCount(1)+1:exclusiveCount(2)) = coords3D(2,:,:)
+                !valueList(exclusiveCount(2)+1:exclusiveCount(3)) = coords3D(3,:,:)
             endif
           else
             call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
