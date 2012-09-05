@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.90 2012/09/05 15:08:54 rokuingh Exp $
+// $Id: ESMC_LogErr.h,v 1.91 2012/09/05 18:08:40 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -42,7 +42,11 @@ extern "C"{
 #endif
 
 // These should be kept in sync with the equivalent Fortran named constants
-enum ESMC_MsgType{ESMC_LOG_INFO=1,  ESMC_LOG_WARN=2,  ESMC_LOG_ERROR=3};
+enum ESMC_MsgType{
+    ESMC_LOG_INFO=1,
+    ESMC_LOG_WARN=2,
+    ESMC_LOG_ERROR=3,
+    ESMC_LOG_TRACE=4};
 enum ESMC_LogType{
     ESMC_LOGKIND_SINGLE=1,
     ESMC_LOGKIND_MULTI=2,
@@ -77,8 +81,7 @@ int ESMC_LogWrite(
 //  \item[msg]
 //    The message to be written.
 //  \item[msgtype]
-//    The message type.  Can be one of ESMC\_LOG\_INFO, ESMC\_LOG\_WARNING,
-//    or ESMF\_LOG\_ERROR.
+//    The message type.  This flag is documented in section \ref{const:clogmsgflag}
 //  \end{description}
 //
 //EOP
