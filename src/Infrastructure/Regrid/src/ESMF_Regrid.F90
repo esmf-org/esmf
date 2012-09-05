@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.168 2012/01/06 20:17:59 svasquez Exp $
+! $Id: ESMF_Regrid.F90,v 1.169 2012/09/05 20:50:37 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -80,7 +80,6 @@
     public ESMF_RegridGetIwts
     public ESMF_RegridGetArea
     public ESMF_RegridGetFrac
-    public operator (==)
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -92,46 +91,13 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.168 2012/01/06 20:17:59 svasquez Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.169 2012/09/05 20:50:37 peggyli Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!==============================================================================
-!BOPI
-! !INTERFACE:
-      interface operator (==)
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_RegridMethodEqual
-
-! !DESCRIPTION:
-!     This interface overloads the equality operator for the specific
-!     ESMF RegridMethod.  It is provided for easy comparisons of 
-!     these types with defined values.
-!
-!EOPI
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !INTERFACE:
-      interface operator (.ne.)
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_RegridMethodNotEqual
-
-! !DESCRIPTION:
-!     This interface overloads the inequality operator for the specific
-!     ESMF RegridMethod.  It is provided for easy comparisons of 
-!     these types with defined values.
-!
-!EOPI
-      end interface
-!
-!------------------------------------------------------------------------------
 
 
 !==============================================================================
@@ -163,76 +129,6 @@ end function my_xor
 ! This section includes the Regrid Create, Run, and Destroy methods.
 ! 
 !------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RegridMethodEqual"
-!BOPI
-! !IROUTINE: ESMF_RegridMethodEqual - Equality of RegridMethods
-!
-! !INTERFACE:
-      function ESMF_RegridMethodEqual(RegridMethod1, RegridMethod2)
-
-! !RETURN VALUE:
-      logical :: ESMF_RegridMethodEqual
-
-! !ARGUMENTS:
-
-      type (ESMF_RegridMethod_Flag), intent(in) :: &
-         RegridMethod1,      &! Two igrid statuses to compare for
-         RegridMethod2        ! equality
-
-! !DESCRIPTION:
-!     This routine compares two ESMF RegridMethod statuses to see if
-!     they are equivalent.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[RegridMethod1, RegridMethod2]
-!          Two igrid statuses to compare for equality
-!     \end{description}
-!
-!EOPI
-
-      ESMF_RegridMethodEqual = (RegridMethod1%regridmethod == &
-                              RegridMethod2%regridmethod)
-
-      end function ESMF_RegridMethodEqual
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RegridMethodNotEqual"
-!BOPI
-! !IROUTINE: ESMF_RegridMethodNotEqual - Non-equality of RegridMethods
-!
-! !INTERFACE:
-      function ESMF_RegridMethodNotEqual(RegridMethod1, RegridMethod2)
-
-! !RETURN VALUE:
-      logical :: ESMF_RegridMethodNotEqual
-
-! !ARGUMENTS:
-
-      type (ESMF_RegridMethod_Flag), intent(in) :: &
-         RegridMethod1,      &! Two RegridMethod Statuses to compare for
-         RegridMethod2        ! inequality
-
-! !DESCRIPTION:
-!     This routine compares two ESMF RegridMethod statuses to see if
-!     they are unequal.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[RegridMethod1, RegridMethod2]
-!          Two statuses of RegridMethods to compare for inequality
-!     \end{description}
-!
-!EOPI
-
-      ESMF_RegridMethodNotEqual = (RegridMethod1%regridmethod /= &
-                                 RegridMethod2%regridmethod)
-
-      end function ESMF_RegridMethodNotEqual
-
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
