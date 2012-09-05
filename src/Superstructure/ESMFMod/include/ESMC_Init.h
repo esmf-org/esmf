@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.27 2012/09/05 15:30:11 rokuingh Exp $
+// $Id: ESMC_Init.h,v 1.28 2012/09/05 18:28:41 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -91,8 +91,7 @@ ESMCI_Arg(ESMCI_InitArgLogKindFlagID,ARG)
 //    Name of the default configuration file for the entire application.
 //  \item [{[LogKindFlag]}]
 //    Sets the default Log Type to be used by ESMF Log Manager.
-//    Valid options are {\tt ESMC\_LOGKIND\_SINGLE}, {\tt ESMC\_LOGKIND\_MULTI},
-//    and {\tt ESMC\_LOGKIND\_NONE}.
+//    This flag is documented in section \ref{const:clogkindflag}.
 //    If not specified, defaults to {\tt ESMC\_LOGKIND\_MULTI}.
 //  \end{description}
 //EOP
