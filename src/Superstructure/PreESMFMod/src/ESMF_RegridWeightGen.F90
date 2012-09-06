@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.2 2012/09/06 15:21:39 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.3 2012/09/06 15:41:42 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -511,7 +511,8 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 	  else 
 	     print *, "  Source File is in GRIDSPEC foramt"
 	     if (useSrcCoordVar) then
-	        print *, "    Use '", trim(srcCoordinateVars(1)), "' and '", trim(srcCoordinateVars(2)), "' as the longitude and latitude variables"
+	        print *, "    Use '", trim(srcCoordinateVars(1)), "' and '", trim(srcCoordinateVars(2)), &
+		         "' as the longitude and latitude variables"
 	     endif
 	     if (srcMissingValue) then
 	        print *, "    Use the missing values of variable '", trim(srcMissingvalueVar),"' as the mask"
@@ -540,7 +541,8 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
           else
 	      print *, "  Destination File is in GRIDSPEC format"	
 	      if (useDstCoordVar) then
-	        print *, "    Use '", trim(dstCoordinateVars(1)), "' and '", trim(dstCoordinateVars(2)), "' as the longitude and latitude variables"
+	        print *, "    Use '", trim(dstCoordinateVars(1)), "' and '", trim(dstCoordinateVars(2)), &
+		         "' as the longitude and latitude variables"
 	      endif
 	      if (dstMissingValue) then
 	        print *, "    Use the missing value of '", trim(dstMissingvalueVar),"' as the mask"
