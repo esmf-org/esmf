@@ -1,6 +1,6 @@
 ================================================================================
 
-                        README - ESMF v5.3.1 beta snapshot
+                        README - ESMF v6.1.0 beta snapshot
 
                     Earth System Modeling Framework (ESMF)
 
@@ -497,4 +497,4 @@ Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
 
 
 ================================================================================
- $Id: README,v 1.123 2012/05/11 19:18:26 svasquez Exp $
+ $Id: README,v 1.124 2012/09/06 17:58:47 theurich Exp $
