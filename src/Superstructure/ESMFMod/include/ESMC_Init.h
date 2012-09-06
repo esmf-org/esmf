@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.29 2012/09/05 18:31:23 w6ws Exp $
+// $Id: ESMC_Init.h,v 1.30 2012/09/06 17:21:11 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -72,8 +72,9 @@ ESMCI_Arg(ESMCI_InitArgLogKindFlagID,ARG)
 //  such as MPICH, to do IO before the MPI environment is initialized. Please
 //  consult the documentation of your MPI implementation for details.
 //
-//  Optional arguments are recognised.  For example to turn off logging,
-//  the {\tt ESMC\_Initialize()} call would be coded as:
+//  Optional arguments are recognised.  For example to turn off logging
+//  so that no log files would be created, the {\tt ESMC\_Initialize()} call
+//  would be coded as:
 //
 //    ESMC\_Initialize (\&rc,
 //      ESMC\_InitArgLogKindFlag(ESMC\_LOGKIND\_NONE),
@@ -87,12 +88,17 @@ ESMCI_Arg(ESMCI_InitArgLogKindFlagID,ARG)
 //  \begin{description}
 //  \item [{[rc]}]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//    {\tt NULL} may be passed when the return code is not desired.
 //  \item [{[defaultConfigFilename]}]
 //    Name of the default configuration file for the entire application.
 //  \item [{[LogKindFlag]}]
 //    Sets the default Log Type to be used by ESMF Log Manager.
 //    This flag is documented in section \ref{const:clogkindflag}.
 //    If not specified, defaults to {\tt ESMC\_LOGKIND\_MULTI}.
+//  \item [ESMC\_ArgLast]
+//    The {\tt ESMC\_ArgLast} macro is always required as a final argument
+//    to indicate the end of the optional argument list.  This must be provided
+//    even when there are no optional arguments.
 //  \end{description}
 //EOP
 //-----------------------------------------------------------------------------
