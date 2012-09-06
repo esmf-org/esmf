@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridMaskingUTest.F90,v 1.8 2012/05/16 23:03:32 svasquez Exp $
+! $Id: ESMF_XGridMaskingUTest.F90,v 1.9 2012/09/06 20:08:29 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -1084,7 +1084,7 @@ contains
     allocate(srcGrid(nsrc), srcField(nsrc), srcFrac(nsrc), srcFrac2(nsrc), srcArea(nsrc))
     allocate(dstGrid(ndst), dstField(ndst), dstFrac(ndst), dstFrac2(ndst), dstArea(ndst))
 
-    call ESMF_XGridGet(xgrid, sideA=srcGrid, sideB=dstGrid, rc=localrc)
+    call ESMF_XGridGet(xgrid, sideAGrids=srcGrid, sideBGrids=dstGrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

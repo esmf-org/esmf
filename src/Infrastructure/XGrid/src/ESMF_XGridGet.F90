@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.30 2012/04/19 19:53:36 feiliu Exp $
+! $Id: ESMF_XGridGet.F90,v 1.31 2012/09/06 20:08:28 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -43,6 +43,8 @@ module ESMF_XGridGetMod
   use ESMF_StaggerLocMod
   use ESMF_ArrayMod
   use ESMF_GridMod
+  use ESMF_MeshMod
+  use ESMF_XGridGeomBaseMod
   use ESMF_XGridMod
   use ESMF_InitMacrosMod
 
@@ -65,7 +67,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.30 2012/04/19 19:53:36 feiliu Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.31 2012/09/06 20:08:28 feiliu Exp $'
 
 !==============================================================================
 !
@@ -80,9 +82,10 @@ module ESMF_XGridGetMod
     interface ESMF_XGridGet
    
 ! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_XGridGetEle
         module procedure ESMF_XGridGetDefault
         module procedure ESMF_XGridGetDG
-        module procedure ESMF_XGridGetEle
+        module procedure ESMF_XGridGetGB
         module procedure ESMF_XGridGetSMMSpecFrac
 
 
@@ -113,7 +116,9 @@ contains
 ! ! Private name; call using ESMF_XGridGet()
 
 subroutine ESMF_XGridGetDefault(xgrid, keywordEnforcer, &
-    sideA, sideB, ngridA, ngridB, area, centroid, &
+    sideAGeomtype, sideBGeomtype, &
+    sideAGrids, sideBGrids, sideAMeshes, sideBMeshes, &
+    ngridA, ngridB, area, centroid, &
     distgridA, distgridB, distgridM, &
     dimCount, localDECount, &
     sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, &
@@ -124,7 +129,10 @@ subroutine ESMF_XGridGetDefault(xgrid, keywordEnforcer, &
 ! !ARGUMENTS:
 type(ESMF_XGrid), intent(in)                :: xgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-type(ESMF_Grid), intent(out), optional      :: sideA(:), sideB(:)
+type(ESMF_XGridGeomType_Flag), intent(out), optional :: sideAGeomtype
+type(ESMF_XGridGeomType_Flag), intent(out), optional :: sideBGeomtype
+type(ESMF_Grid), intent(out), optional      :: sideAGrids(:), sideBGrids(:)
+type(ESMF_Mesh), intent(out), optional      :: sideAMeshes(:), sideBMeshes(:)
 integer, intent(out), optional              :: ngridA, ngridB
 real*8, intent(out), optional               :: area(:)
 real*8, intent(out), optional               :: centroid(:,:)
@@ -147,18 +155,26 @@ integer, intent(out), optional              :: rc
 !     \begin{description}
 !     \item [xgrid]
 !       The xgrid object used to retrieve information from.
-!     \item [{[sideA]}]
-!           2D Grids on side A
-!     \item [{[sideB]}]
-!           2D Grids on side B
+!     \item [{[sideAGeomtype]}]
+!           XGrid Geom type of objects on sideA
+!     \item [{[sideBGeomtype]}]
+!           XGrid Geom type of objects on sideB
+!     \item [{[sideAGrids]}]
+!           List of 2D Grids on side A
+!     \item [{[sideBGrids]}]
+!           List of 2D Grids on side B
+!     \item [{[sideAMeshes]}]
+!           List of 2D Meshes on side A
+!     \item [{[sideBMeshes]}]
+!           List of 2D Meshes on side B
 !     \item [{[ngridA]}]
-!           Number of grids on the A side
+!           Number of Grids or Meshes on the A side
 !     \item [{[ngridB]}]
-!           Number of grids on the B side
+!           Number of Grids or Meshes on the B side
 !     \item [{[area]}]
-!           area of the xgrid cells
+!           Area of the xgrid cells
 !     \item [{[centroid]}]
-!           coordinates at the area weighted center of the xgrid cells
+!           Coordinates at the area weighted center of the xgrid cells
 !     \item [{[distgridA]}]
 !           list of distgrids whose sequence index list is an overlap between a Grid
 !           on sideA and the xgrid object.
@@ -216,8 +232,27 @@ integer, intent(out), optional              :: rc
         ngridB = size(xgtypep%sideB, 1)
     endif
 
-    if(present(sideA)) then
-        ngrid_a = size(sideA, 1)
+    if(present(sideAGeomtype)) then
+      if(size(xgtypep%sideA, 1) .lt. 1) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+           msg="- Empty XGrid sideA, cannot determine side A XGridGeom_Type", &
+           ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif
+      sideAGeomtype = xgtypep%sideA(1)%gbcp%type
+    endif
+    if(present(sideBGeomtype)) then
+      if(size(xgtypep%sideB, 1) .lt. 1) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+           msg="- Empty XGrid sideB, cannot determine side B XGridGeom_Type", &
+           ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif
+      sideBGeomtype = xgtypep%sideB(1)%gbcp%type
+    endif
+
+    if(present(sideAGrids)) then
+        ngrid_a = size(sideAGrids, 1)
         if(ngrid_a /= size(xgtypep%sideA, 1)) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                msg="- size of sideA doesn't match the size of sideA in the XGrid", &
@@ -225,11 +260,11 @@ integer, intent(out), optional              :: rc
             return
         endif
         do i = 1, ngrid_a
-            sideA(i) = xgtypep%sideA(i)
+            sideAGrids(i) = xgtypep%sideA(i)%gbcp%grid
         enddo 
     endif
-    if(present(sideB)) then
-        ngrid_b = size(sideB, 1)
+    if(present(sideBGrids)) then
+        ngrid_b = size(sideBGrids, 1)
         if(ngrid_b /= size(xgtypep%sideB, 1)) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
                msg="- size of sideB doesn't match the size of sideB in the XGrid", &
@@ -237,7 +272,32 @@ integer, intent(out), optional              :: rc
             return
         endif
         do i = 1, ngrid_b
-            sideB(i) = xgtypep%sideB(i)
+            sideBGrids(i) = xgtypep%sideB(i)%gbcp%grid
+        enddo 
+    endif
+
+    if(present(sideAMeshes)) then
+        ngrid_a = size(sideAMeshes, 1)
+        if(ngrid_a /= size(xgtypep%sideA, 1)) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- size of sideA doesn't match the size of sideA in the XGrid", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+        endif
+        do i = 1, ngrid_a
+            sideAMeshes(i) = xgtypep%sideA(i)%gbcp%mesh
+        enddo 
+    endif
+    if(present(sideBMeshes)) then
+        ngrid_b = size(sideBMeshes, 1)
+        if(ngrid_b /= size(xgtypep%sideB, 1)) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- size of sideB doesn't match the size of sideB in the XGrid", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+        endif
+        do i = 1, ngrid_b
+            sideBMeshes(i) = xgtypep%sideB(i)%gbcp%mesh
         enddo 
     endif
 
@@ -411,6 +471,82 @@ end subroutine ESMF_XGridGetDefault
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridGetGB()"
+!BOPI
+! !IROUTINE:  ESMF_XGridGet - Get geombase object lists
+
+! !INTERFACE: ESMF_XGridGet
+! ! Private name; call using ESMF_XGridGet()
+
+subroutine ESMF_XGridGetGB(xgrid, sideA, sideB, rc) 
+
+!
+! !ARGUMENTS:
+type(ESMF_XGrid), intent(in)                :: xgrid
+type(ESMF_XGridGeomBase), intent(out)       :: sideA(:), sideB(:)
+integer, intent(out), optional              :: rc 
+!
+! !DESCRIPTION:
+!      Get information about XGrid
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [xgrid]
+!       The xgrid object used to retrieve information from.
+!     \item [{[sideA]}]
+!           2D GeomBase objects on side A
+!     \item [{[sideB]}]
+!           2D GeomBase objects on side B
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
+!           is created.
+!     \end{description}
+!
+!EOPI
+
+    integer :: localrc, ngrid_a, ngrid_b, i
+    type(ESMF_XGridType), pointer :: xgtypep
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Initialize return code   
+    if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! check init status of input XGrid
+    ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
+
+    xgtypep => xgrid%xgtypep
+
+    ngrid_a = size(sideA, 1)
+    if(ngrid_a /= size(xgtypep%sideA, 1)) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+           msg="- size of sideA doesn't match the size of sideA in the XGrid", &
+           ESMF_CONTEXT, rcToReturn=rc) 
+        return
+    endif
+    do i = 1, ngrid_a
+        sideA(i) = xgtypep%sideA(i)
+    enddo 
+
+    ngrid_b = size(sideB, 1)
+    if(ngrid_b /= size(xgtypep%sideB, 1)) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+           msg="- size of sideB doesn't match the size of sideB in the XGrid", &
+           ESMF_CONTEXT, rcToReturn=rc) 
+        return
+    endif
+    do i = 1, ngrid_b
+        sideB(i) = xgtypep%sideB(i)
+    enddo 
+
+    ! success
+    if(present(rc)) rc = ESMF_SUCCESS
+
+end subroutine ESMF_XGridGetGB
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridGetSMMSpecFrac()"
 !BOPI
 ! !IROUTINE:  ESMF_XGridGet - Get an individual SparseMatSpec
@@ -495,7 +631,7 @@ integer,                   intent(out),   optional  :: rc
                ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
-          call CpArray2DR8(xgtypep%fracA2X(srcGridIndex), srcFracArray, rc=localrc)
+          call ESMF_ArrayCopy(srcFracArray, xgtypep%fracA2X(srcGridIndex), rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -507,7 +643,7 @@ integer,                   intent(out),   optional  :: rc
                ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
-          call CpArray1DR8(xgtypep%fracX, dstFracArray, rc=localrc)
+          call ESMF_ArrayCopy(dstFracArray, xgtypep%fracX, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -520,7 +656,7 @@ integer,                   intent(out),   optional  :: rc
                ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
-          call CpArray2DR8(xgtypep%frac2A(srcGridIndex), srcFrac2Array, rc=localrc)
+          call ESMF_ArrayCopy(srcFrac2Array, xgtypep%frac2A(srcGridIndex), rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -532,7 +668,7 @@ integer,                   intent(out),   optional  :: rc
                ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
-          call CpArray1DR8(xgtypep%fracX, dstFrac2Array, rc=localrc)
+          call ESMF_ArrayCopy(dstFrac2Array, xgtypep%fracX, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -548,7 +684,7 @@ integer,                   intent(out),   optional  :: rc
                ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
-          call CpArray2DR8(xgtypep%fracB2X(srcGridIndex), srcFracArray, rc=localrc)
+          call ESMF_ArrayCopy(srcFracArray, xgtypep%fracB2X(srcGridIndex), rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -560,7 +696,7 @@ integer,                   intent(out),   optional  :: rc
                ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
-          call CpArray1DR8(xgtypep%fracX, dstFracArray, rc=localrc)
+          call ESMF_ArrayCopy(dstFracArray, xgtypep%fracX, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -573,7 +709,7 @@ integer,                   intent(out),   optional  :: rc
                ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
-          call CpArray2DR8(xgtypep%frac2B(srcGridIndex), srcFrac2Array, rc=localrc)
+          call ESMF_ArrayCopy(srcFrac2Array, xgtypep%frac2B(srcGridIndex), rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -585,7 +721,7 @@ integer,                   intent(out),   optional  :: rc
                ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
-          call CpArray1DR8(xgtypep%fracX, dstFrac2Array, rc=localrc)
+          call ESMF_ArrayCopy(dstFrac2Array, xgtypep%fracX, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -601,7 +737,7 @@ integer,                   intent(out),   optional  :: rc
                ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
-          call CpArray1DR8(xgtypep%fracX, srcFracArray, rc=localrc)
+          call ESMF_ArrayCopy(srcFracArray, xgtypep%fracX, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -613,7 +749,7 @@ integer,                   intent(out),   optional  :: rc
                ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
-          call CpArray2DR8(xgtypep%fracX2A(dstGridIndex), dstFracArray, rc=localrc)
+          call ESMF_ArrayCopy(dstFracArray, xgtypep%fracX2A(dstGridIndex), rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -626,7 +762,7 @@ integer,                   intent(out),   optional  :: rc
                ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
-          call CpArray1DR8(xgtypep%fracX, srcFrac2Array, rc=localrc)
+          call ESMF_ArrayCopy(srcFrac2Array, xgtypep%fracX, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -638,7 +774,7 @@ integer,                   intent(out),   optional  :: rc
                ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
-          call CpArray2DR8(xgtypep%frac2A(dstGridIndex), dstFrac2Array, rc=localrc)
+          call ESMF_ArrayCopy(dstFrac2Array, xgtypep%frac2A(dstGridIndex), rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -654,7 +790,7 @@ integer,                   intent(out),   optional  :: rc
                ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
-          call CpArray1DR8(xgtypep%fracX, srcFracArray, rc=localrc)
+          call ESMF_ArrayCopy(srcFracArray, xgtypep%fracX, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -666,7 +802,7 @@ integer,                   intent(out),   optional  :: rc
                ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
-          call CpArray2DR8(xgtypep%fracX2B(dstGridIndex), dstFracArray, rc=localrc)
+          call ESMF_ArrayCopy(dstFracArray, xgtypep%fracX2B(dstGridIndex), rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -679,7 +815,7 @@ integer,                   intent(out),   optional  :: rc
                ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
-          call CpArray1DR8(xgtypep%fracX, srcFrac2Array, rc=localrc)
+          call ESMF_ArrayCopy(srcFrac2Array, xgtypep%fracX, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -691,7 +827,7 @@ integer,                   intent(out),   optional  :: rc
                ESMF_CONTEXT, rcToReturn=rc) 
             return
           endif
-          call CpArray2DR8(xgtypep%frac2B(dstGridIndex), dstFrac2Array, rc=localrc)
+          call ESMF_ArrayCopy(dstFrac2Array, xgtypep%frac2B(dstGridIndex), rc=localrc)
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return

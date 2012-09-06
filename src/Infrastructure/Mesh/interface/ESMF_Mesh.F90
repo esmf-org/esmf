@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.98 2012/09/05 15:07:28 rokuingh Exp $
+! $Id: ESMF_Mesh.F90,v 1.99 2012/09/06 20:08:13 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.98 2012/09/05 15:07:28 rokuingh Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.99 2012/09/06 20:08:13 feiliu Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -159,6 +159,7 @@ module ESMF_MeshMod
   public ESMF_MeshGetElemArea
   public ESMF_MeshGetOrigElemArea
   public ESMF_MeshGetElemFrac
+  public ESMF_MeshGetElemFrac2
   public ESMF_MeshGetOrigElemFrac
   public ESMF_MeshGetElemSplit
   public ESMF_MeshMergeSplitSrcInd
@@ -172,7 +173,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.98 2012/09/05 15:07:28 rokuingh Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.99 2012/09/06 20:08:13 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -2206,7 +2207,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !RETURN VALUE:
 !
 ! !ARGUMENTS:
-    type(ESMF_Mesh),     intent(inout)         :: mesh
+    type(ESMF_Mesh),     intent(in)            :: mesh
     integer,             intent(out), optional :: parametricDim
     integer,             intent(out), optional :: spatialDim
     type(ESMF_DistGrid), intent(out), optional :: nodalDistgrid
@@ -2349,8 +2350,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                       :: localrc      ! local return code
+    integer                       :: i, localrc      ! local return code
     type(ESMF_DistGridMatch_Flag) :: matchResultNode, matchResultElem
+
+    real(ESMF_KIND_R8), pointer   :: area1(:), area2(:)
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2395,7 +2398,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_MeshMatch = .true.
     else
       ESMF_MeshMatch = .false.
+      return
     endif
+
+    ! check area
+    allocate(area1(mesh1%numOwnedElements), area2(mesh2%numOwnedElements), stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, &
+        msg="- MeshMatch: Allocating area1 and area2 failed ", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_MeshGetOrigElemArea(mesh1, area1, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_MeshGetOrigElemArea(mesh2, area2, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    do i = 1, mesh1%numOwnedElements
+      if(area1(i) /= area2(i)) then
+        ESMF_MeshMatch = .false.
+        deallocate(area1, area2)
+        return
+      endif
+    enddo
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -3020,6 +3044,71 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_MeshGetElemFrac
 !------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshGetElemFrac2()"
+!BOPI
+! !IROUTINE: ESMF_MeshGetElemFrac2 - Get frac of elements in mesh
+!
+! !INTERFACE:
+    subroutine ESMF_MeshGetElemFrac2(mesh, fracList, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                     :: mesh
+    real(ESMF_KIND_R8), pointer                     :: fracList(:)
+    integer, intent(out), optional                  :: rc
+!
+! !DESCRIPTION:
+!   Write a mesh to VTK file.
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh.
+!   \item [fracList]
+!         Fractions for the mesh elements will be put here
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has been freed then exit
+    if (mesh%isCMeshFreed) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+                 msg="- the mesh internals have been freed", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+       return 
+    endif    
+
+    ! If mesh has been freed then exit
+    if (.not. mesh%isFullyCreated) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+                 msg="- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+       return 
+    endif    
+
+   ! Call into mesh get areas
+    call C_ESMC_MeshGetFrac2(mesh%this, size(fracList), fracList, localrc);
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! return success
+     if  (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine ESMF_MeshGetElemFrac2
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------

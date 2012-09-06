@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.64 2012/05/11 15:36:59 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.65 2012/09/06 20:08:28 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -44,6 +44,7 @@ module ESMF_XGridCreateMod
   use ESMF_GridUtilMod
   use ESMF_MeshMod
   use ESMF_StaggerLocMod
+  use ESMF_XGridGeomBaseMod
   use ESMF_XGridMod
   use ESMF_InitMacrosMod
   use ESMF_VMMod
@@ -76,13 +77,40 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.64 2012/05/11 15:36:59 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.65 2012/09/06 20:08:28 feiliu Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_XGridCreate - Create an XGrid
+!
+! !INTERFACE:
+    interface ESMF_XGridCreate
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_XGridCreateGrid
+        module procedure ESMF_XGridCreateMesh
+
+! !DESCRIPTION:
+!    Create an XGrid
+ 
+!EOPI
+      end interface
+!
+!
+  interface ESMF_XGridGetFracInt
+    module procedure ESMF_XGridGetFracIntGrid
+    module procedure ESMF_XGridGetFracIntMesh
+  end interface
+  interface ESMF_XGridGetFrac2Int
+    module procedure ESMF_XGridGetFrac2IntGrid
+    module procedure ESMF_XGridGetFrac2IntMesh
+  end interface
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -207,23 +235,24 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_XGridCreate()"
+#define ESMF_METHOD "ESMF_XGridCreateGrid()"
 !BOP
 ! !IROUTINE:  ESMF_XGridCreate - Create an XGrid from Grids on either side of the XGrid
 
 ! !INTERFACE:
+! ! Private name; call using ESMF_XGridCreate()
 
-function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
+function ESMF_XGridCreateGrid(sideA, sideB, keywordEnforcer, &
     sideAPriority,      sideBPriority, &
     sideAMaskValues,    sideBMaskValues, &
     storeOverlay, &
     name, rc)
 !
 ! !RETURN VALUE:
-  type(ESMF_XGrid)                           :: ESMF_XGridCreate
+  type(ESMF_XGrid)                           :: ESMF_XGridCreateGrid
 !
 ! !ARGUMENTS:
-  type(ESMF_Grid), intent(in)                :: sideA(:), sideB(:)
+  type(ESMF_Grid),      intent(in)           :: sideA(:), sideB(:)
   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer,              intent(in), optional :: sideAPriority(:)
   integer,              intent(in), optional :: sideBPriority(:)
@@ -274,11 +303,17 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
 !           Flux contributions at the overlapping region are computed in the order from the Grid of the
 !           highest priority to the lowest priority.
 !     \item [{[sideAMaskValues]}]
-!           List of values that indicate a side A point should be masked out.
-!           If not specified, no masking will occur.
+!           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask}) 
+!           upon which the {\tt Field} is built. The {\tt sideAMaskValues} argument specifies the values in that 
+!           mask information which indicate a point should be masked out. In other words, a location is masked if and only if the
+!           value for that location in the mask information matches one of the values listed in {\tt sideAMaskValues}.  
+!           If {\tt sideAMaskValues} is not specified, no masking on side A will occur. 
 !     \item [{[sideBMaskValues]}]
-!           List of values that indicate a side B point should be masked out.
-!           If not specified, no masking will occur. 
+!           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask}) 
+!           upon which the {\tt Field} is built. The {\tt sideBMaskValues} argument specifies the values in that 
+!           mask information which indicate a point should be masked out. In other words, a location is masked if and only if the
+!           value for that location in the mask information matches one of the values listed in {\tt sideBMaskValues}.  
+!           If {\tt sideBMaskValues} is not specified, no masking on side B will occur. 
 !     \item [{[storeOverlay]}]
 !           Setting the {\tt storeOverlay} optional argument to .false. (default) 
 !           allows a user to bypass storage of the {\tt ESMF\_Mesh} used to represent the XGrid.
@@ -296,7 +331,7 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
 
   integer                    :: localrc
 
-  ESMF_XGridCreate = ESMF_XGridCreateDefault(sideA, sideB, & 
+  ESMF_XGridCreateGrid = ESMF_XGridCreateDefaultGrid(sideA, sideB, & 
     sideAPriority=sideAPriority, sideBPriority=sideBPriority, &
     sideAMaskValues=sideAMaskValues, sideBMaskValues=sideBMaskValues, &
     storeOverlay=storeOverlay, name=name, rc=localrc)
@@ -305,24 +340,133 @@ function ESMF_XGridCreate(sideA, sideB, keywordEnforcer, &
 
   if(present(rc)) rc = ESMF_SUCCESS
 
-end function ESMF_XGridCreate
+end function ESMF_XGridCreateGrid
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_XGridCreateDefault()"
+#define ESMF_METHOD "ESMF_XGridCreateMesh()"
+!BOP
+! !IROUTINE:  ESMF_XGridCreate - Create an XGrid from Meshes on either side of the XGrid
+
+! !INTERFACE:
+! ! Private name; call using ESMF_XGridCreate()
+
+function ESMF_XGridCreateMesh(sideA, sideB, keywordEnforcer, &
+    sideAPriority,      sideBPriority, &
+    sideAMaskValues,    sideBMaskValues, &
+    storeOverlay, &
+    name, rc)
+!
+! !RETURN VALUE:
+  type(ESMF_XGrid)                           :: ESMF_XGridCreateMesh
+!
+! !ARGUMENTS:
+  type(ESMF_Mesh),      intent(in)           :: sideA(:), sideB(:)
+  type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  integer,              intent(in), optional :: sideAPriority(:)
+  integer,              intent(in), optional :: sideBPriority(:)
+  integer(ESMF_KIND_I4),intent(in), optional :: sideAMaskValues(:)
+  integer(ESMF_KIND_I4),intent(in), optional :: sideBMaskValues(:)
+  logical,              intent(in), optional :: storeOverlay
+  character(len=*),     intent(in), optional :: name
+  integer,              intent(out),optional :: rc
+
+!
+! !DESCRIPTION:
+!      Create an XGrid from user supplied input: the list of Meshes on side A and side B, 
+!  and other optional arguments. Sparse matrix multiply coefficients are internally computed and
+!  uniquely determined by the Meshes provided in {\tt sideA} and {\tt sideB}. User can supply
+!  a single {\tt ESMF\_Mesh} or an array of {\tt ESMF\_Mesh} on either side of the 
+!  {\tt ESMF\_XGrid}. For an array of {\tt ESMF\_Mesh} in {\tt sideA} or {\tt sideB},
+!  a merging process concatenates all the {\tt ESMF\_Mesh}s into a super mesh represented
+!  by {\tt ESMF\_Mesh}. The super mesh is then used to compute the XGrid. 
+!  Mesh objects in {\tt sideA} and {\tt sideB} arguments must have coordinates defined for
+!  the corners of a Mesh cell. XGrid created this way can be potentially memory expensive, 
+!  memory can be released by destroying XGrid after communication routehandles are computed using
+!  {\tt ESMF\_FieldRegridStore()} method.
+! 
+!  It is erroneous to specify identical Mesh object in {\tt sideA} and
+!  {\tt sideB} arguments. If {\tt sideA} and {\tt sideB} have a single Mesh object, then it's erroneous
+!  if the two Meshes do not overlap. It is also erroneous to specify Mesh object in {\tt sideA} or {\tt sideB} 
+!  that is spatially disjoint from the {\tt ESMF\_XGrid}.  
+!
+!  This call is {\em collective} across the current VM. For more details please refer to the description 
+!  \ref{sec:xgrid:desc} of the XGrid class. For an example and associated documentation using this method see section 
+!  \ref{sec:xgrid:usage:xgrid_create}
+
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [sideA]
+!           Parametric 2D Meshes on side A, for example, these Meshes can be either Cartesian 2D or Spherical.
+!     \item [sideB]
+!           Parametric 2D Meshes on side B, for example, these Meshes can be either Cartesian 2D or Spherical.
+!     \item [{[sideAPriority]}]
+!           Priority array of Meshes on {\tt sideA} during overlay generation.
+!           The priority arrays describe the priorities of Meshes at the overlapping region.
+!           Flux contributions at the overlapping region are computed in the order from the Meshes of the
+!           highest priority to the lowest priority.
+!     \item [{[sideBPriority]}]
+!           Priority of Meshes on {\tt sideB} during overlay generation
+!           The priority arrays describe the priorities of Meshes at the overlapping region.
+!           Flux contributions at the overlapping region are computed in the order from the Mesh of the
+!           highest priority to the lowest priority.
+!     \item [{[sideAMaskValues]}]
+!           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask}) 
+!           upon which the {\tt Field} is built. The {\tt sideAMaskValues} argument specifies the values in that 
+!           mask information which indicate a point should be masked out. In other words, a location is masked if and only if the
+!           value for that location in the mask information matches one of the values listed in {\tt sideAMaskValues}.  
+!           If {\tt sideAMaskValues} is not specified, no masking on side A will occur. 
+!     \item [{[sideBMaskValues]}]
+!           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask}) 
+!           upon which the {\tt Field} is built. The {\tt sideBMaskValues} argument specifies the values in that 
+!           mask information which indicate a point should be masked out. In other words, a location is masked if and only if the
+!           value for that location in the mask information matches one of the values listed in {\tt sideBMaskValues}.  
+!           If {\tt sideBMaskValues} is not specified, no masking on side B will occur. 
+!     \item [{[storeOverlay]}]
+!           Setting the {\tt storeOverlay} optional argument to .false. (default) 
+!           allows a user to bypass storage of the {\tt ESMF\_Mesh} used to represent the XGrid.
+!           Only a {\tt ESMF\_DistGrid} is stored to allow Field to be built on the XGrid.
+!           If the temporary mesh object is of interest, {\tt storeOverlay} can be set to .true.
+!           so a user can retrieve it for future use.
+!     \item [{[name]}]
+!           name of the xgrid object.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
+!           is created.
+!     \end{description}
+!
+!EOP
+
+  integer                    :: localrc
+
+  ESMF_XGridCreateMesh = ESMF_XGridCreateDefaultMesh(sideA, sideB, & 
+    sideAPriority=sideAPriority, sideBPriority=sideBPriority, &
+    sideAMaskValues=sideAMaskValues, sideBMaskValues=sideBMaskValues, &
+    storeOverlay=storeOverlay, name=name, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if(present(rc)) rc = ESMF_SUCCESS
+
+end function ESMF_XGridCreateMesh
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridCreateDefaultGrid()"
 !BOPI
 ! !IROUTINE:  ESMF_XGridCreateDefault - Create an XGrid online from user input
 
 ! !INTERFACE:
 ! ! Private name; call using ESMF_XGridCreate()
 
-function ESMF_XGridCreateDefault(sideA, sideB, &
+function ESMF_XGridCreateDefaultGrid(sideA, sideB, &
     sideAPriority, sideBPriority, &
     sideAMaskValues, sideBMaskValues, &
     storeOverlay, name, rc)
 !
 ! !RETURN VALUE:
-  type(ESMF_XGrid)              :: ESMF_XGridCreateDefault
+  type(ESMF_XGrid)              :: ESMF_XGridCreateDefaultGrid
 !
 ! !ARGUMENTS:
   type(ESMF_Grid),       intent(in)           :: sideA(:), sideB(:)
@@ -353,6 +497,18 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
 !           The priority arrays describe the priorities of Grids at the overlapping region.
 !           Flux contributions at the overlapping region are computed from the Grid of the
 !           highest priority.
+!     \item [{[sideAMaskValues]}]
+!           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask}) 
+!           upon which the {\tt Field} is built. The {\tt sideAMaskValues} argument specifies the values in that 
+!           mask information which indicate a point should be masked out. In other words, a location is masked if and only if the
+!           value for that location in the mask information matches one of the values listed in {\tt sideAMaskValues}.  
+!           If {\tt sideAMaskValues} is not specified, no masking on side A will occur. 
+!     \item [{[sideBMaskValues]}]
+!           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask}) 
+!           upon which the {\tt Field} is built. The {\tt sideBMaskValues} argument specifies the values in that 
+!           mask information which indicate a point should be masked out. In other words, a location is masked if and only if the
+!           value for that location in the mask information matches one of the values listed in {\tt sideBMaskValues}.  
+!           If {\tt sideBMaskValues} is not specified, no masking on side B will occur. 
 !     \item [{[storeOverlay]}]
 !           Setting the storeOverlay optional argument to .false. (default) 
 !           allows a user to bypass internal calculation of the fully 
@@ -383,6 +539,7 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
     type(ESMF_INDEX_FLAG)         :: indexflag
     type(ESMF_DistGrid)           :: distgridTmp
     !real(ESMF_KIND_R8), pointer   :: fracFptr(:,:)
+    type(ESMF_XGridGeomBase), allocatable :: sideAxggb(:), sideBxggb(:)
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -412,7 +569,7 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
 
     ! initialize XGridType object and its base object
     nullify(xgtype)
-    nullify(ESMF_XGridCreateDefault%xgtypep)
+    nullify(ESMF_XGridCreateDefaultGrid%xgtypep)
     call ESMF_XGridConstructBaseObj(xgtype, name, localrc)
     if (ESMF_LogFoundAllocError(localrc, &
                                 msg="Constructing xgtype base object ", &
@@ -755,7 +912,24 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
     endif
     
     ! call into offline xgrid create with the xgrid specs
-    call ESMF_XGridConstruct(xgtype, sideA, sideB, area=mesharea, &
+    allocate(xgtype%sideA(ngrid_a), xgtype%sideB(ngrid_b), stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, &
+        msg="- Allocating xgtype%grids ", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    do i = 1, ngrid_a
+      xgtype%sideA(i) = ESMF_XGridGeomBaseCreate(sideA(i), ESMF_STAGGERLOC_CENTER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+    do i = 1, ngrid_b
+      xgtype%sideB(i) = ESMF_XGridGeomBaseCreate(sideB(i), ESMF_STAGGERLOC_CENTER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+      
+    call ESMF_XGridConstruct(xgtype, xgtype%sideA, xgtype%sideB, area=mesharea, &
       sparseMatA2X=xgtype%sparseMatA2X, sparseMatX2A=xgtype%sparseMatX2A, &
       sparseMatB2X=xgtype%sparseMatB2X, sparseMatX2B=xgtype%sparseMatX2B, &
       offline=.false., &
@@ -798,8 +972,8 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
     ! Finalize XGrid Creation
     xgtype%online = 1
     xgtype%status = ESMF_STATUS_READY
-    ESMF_XGridCreateDefault%xgtypep => xgtype 
-    ESMF_INIT_SET_CREATED(ESMF_XGridCreateDefault)
+    ESMF_XGridCreateDefaultGrid%xgtypep => xgtype 
+    ESMF_INIT_SET_CREATED(ESMF_XGridCreateDefaultGrid)
 
     !call ESMF_XGridValidate(ESMF_XGridCreateDefault, rc=localrc)
     !if (ESMF_LogFoundError(localrc, &
@@ -808,8 +982,514 @@ function ESMF_XGridCreateDefault(sideA, sideB, &
 
     if(present(rc)) rc = ESMF_SUCCESS
 
-end function ESMF_XGridCreateDefault
+end function ESMF_XGridCreateDefaultGrid
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridCreateDefaultMesh()"
+!BOPI
+! !IROUTINE:  ESMF_XGridCreateDefault - Create an XGrid online from user input
+
+! !INTERFACE:
+! ! Private name; call using ESMF_XGridCreate()
+
+function ESMF_XGridCreateDefaultMesh(sideA, sideB, &
+    sideAPriority, sideBPriority, &
+    sideAMaskValues, sideBMaskValues, &
+    storeOverlay, name, rc)
+!
+! !RETURN VALUE:
+  type(ESMF_XGrid)              :: ESMF_XGridCreateDefaultMesh
+!
+! !ARGUMENTS:
+  type(ESMF_Mesh),       intent(in)           :: sideA(:), sideB(:)
+  integer,               intent(in), optional :: sideAPriority(:), sideBPriority(:)
+  integer(ESMF_KIND_I4), intent(in), optional :: sideAMaskValues(:), sideBMaskValues(:)
+  logical,               intent(in), optional :: storeOverlay
+  character(len=*),      intent(in), optional :: name
+  integer,               intent(out),optional :: rc
+
+
+!
+! !DESCRIPTION:
+!      Create an XGrid onine from user input
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [sideA]
+!           2D Meshs on side A
+!     \item [sideB]
+!           2D Meshs on side B
+!     \item [{[sideAPriority]}]
+!           Priority array of Meshs on sideA during overlay generation.
+!           The priority arrays describe the priorities of Meshs at the overlapping region.
+!           Flux contributions at the overlapping region are computed from the Mesh of the
+!           highest priority.
+!     \item [{[sideBPriority]}]
+!           priority of Meshs on sideB during overlay generation
+!           The priority arrays describe the priorities of Meshs at the overlapping region.
+!           Flux contributions at the overlapping region are computed from the Mesh of the
+!           highest priority.
+!     \item [{[sideAMaskValues]}]
+!           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask}) 
+!           upon which the {\tt Field} is built. The {\tt sideAMaskValues} argument specifies the values in that 
+!           mask information which indicate a point should be masked out. In other words, a location is masked if and only if the
+!           value for that location in the mask information matches one of the values listed in {\tt sideAMaskValues}.  
+!           If {\tt sideAMaskValues} is not specified, no masking on side A will occur. 
+!     \item [{[sideBMaskValues]}]
+!           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask}) 
+!           upon which the {\tt Field} is built. The {\tt sideBMaskValues} argument specifies the values in that 
+!           mask information which indicate a point should be masked out. In other words, a location is masked if and only if the
+!           value for that location in the mask information matches one of the values listed in {\tt sideBMaskValues}.  
+!           If {\tt sideBMaskValues} is not specified, no masking on side B will occur. 
+!     \item [{[storeOverlay]}]
+!           Setting the storeOverlay optional argument to .false. (default) 
+!           allows a user to bypass internal calculation of the fully 
+!           unstructured grid and its storage.
+!     \item [{[name]}]
+!           name of the xgrid object.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
+!           is created.
+!     \end{description}
+!
+!EOPI
+    integer                       :: localrc, ngrid_a, ngrid_b, i, j
+    real(ESMF_KIND_R8), pointer   :: area(:), centroid(:,:)
+    type(ESMF_XGridType), pointer :: xgtype
+    type(ESMF_Mesh)               :: meshA, meshB, mesh, tmpmesh
+    type(ESMF_Mesh), allocatable  :: meshAt(:), meshBt(:)
+    type(ESMF_Pointer)            :: meshp
+    type(ESMF_VM)                 :: vm
+    integer(ESMF_KIND_I4), pointer:: indicies(:,:)
+    real(ESMF_KIND_R8), pointer   :: weights(:), sidemesharea(:), mesharea(:)
+    integer                       :: nentries
+    type(ESMF_TempWeights)        :: tweights
+    integer, allocatable          :: l_sideAPriority(:), l_sideBPriority(:)
+    integer                       :: compute_midmesh
+    real(ESMF_KIND_R8)            :: fraction = 1.0 ! all newly created Mesh has 1.0 frac2
+    type(ESMF_INDEX_FLAG)         :: indexflag
+    type(ESMF_DistGrid)           :: distgridTmp
+    !real(ESMF_KIND_R8), pointer   :: fracFptr(:,:)
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+
+    ! Initialize return code   
+    if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! check init status of input Meshs
+    ngrid_a = size(sideA, 1)
+    ngrid_b = size(sideB, 1)
+    if(ngrid_a .le. 0 .or. ngrid_b .le. 0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+           msg="- number of Meshes are invalid on one side of the XGrid", &
+           ESMF_CONTEXT, rcToReturn=rc) 
+        return
+    endif
+    do i = 1, ngrid_a
+        ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,sideA(i),rc)
+    enddo
+    do i = 1, ngrid_b
+        ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,sideB(i),rc)
+    enddo
+
+    ! initialize XGridType object and its base object
+    nullify(xgtype)
+    nullify(ESMF_XGridCreateDefaultMesh%xgtypep)
+    call ESMF_XGridConstructBaseObj(xgtype, name, localrc)
+    if (ESMF_LogFoundAllocError(localrc, &
+                                msg="Constructing xgtype base object ", &
+                                ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Can only do conservative on 2D right now
+    ! Make sure all Meshs are 2 dimensional and 
+    ! has enough data points in each dimension for every de-element on a PET to clip
+    !do i = 1, ngrid_a
+    !  call checkMesh(sideA(i), ESMF_STAGGERLOC_CORNER, rc=localrc)
+    !  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    !      ESMF_CONTEXT, rcToReturn=rc)) return
+    !enddo
+
+    !do i = 1, ngrid_b
+    !  call checkMesh(sideB(i), ESMF_STAGGERLOC_CORNER, rc=localrc)
+    !  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    !      ESMF_CONTEXT, rcToReturn=rc)) return
+    !enddo
+
+    ! compute the necessary mesh merge order accounting for the grid priorities
+    allocate(l_sideAPriority(ngrid_a), l_sideBPriority(ngrid_b))
+    if(present(sideAPriority)) then
+      if(size(sideAPriority) /= ngrid_a) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+         msg="- Number of sideA Meshs doesn't agree with size of sideAPriority", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif
+      do i = 1, ngrid_a
+        l_sideAPriority(i) = sideAPriority(i)
+      enddo
+    else
+      do i = 1, ngrid_a
+        l_sideAPriority(i) = i
+      enddo
+    endif
+    if(present(sideBPriority)) then
+      if(size(sideBPriority) /= ngrid_b) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+         msg="- Number of sideB Meshs doesn't agree with size of sideBPriority", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif
+      do i = 1, ngrid_b
+        l_sideBPriority(i) = sideBPriority(i)
+      enddo
+    else
+      do i = 1, ngrid_b
+        l_sideBPriority(i) = i
+      enddo
+    endif
+
+    ! allocate the temporary meshes
+    allocate(meshAt(ngrid_a), meshBt(ngrid_b), stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, &
+      msg="- Allocating temporary meshes for Xgrid creation", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    meshAt(1) = sideA(l_sideAPriority(1))
+    if (present(sideAMaskValues)) then
+      call ESMF_MeshTurnOnCellMask(meshAt(1), maskValues=sideAMaskValues, rc=localrc);
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    call c_esmc_meshsetfraction(meshAt(1), fraction, localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    meshA = meshAt(1)
+
+    do i = 2, ngrid_a
+      meshAt(i) = sideA(l_sideAPriority(i))
+      if (present(sideAMaskValues)) then
+        call ESMF_MeshTurnOnCellMask(meshAt(i), maskValues=sideAMaskValues, rc=localrc);
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      call c_esmc_meshsetfraction(meshAt(i), fraction, localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      ! call into mesh merge with priority taken into account
+      ! meshAt is truncated(if necessary) and concatenated onto meshA
+      ! and result stored in tmpmesh
+      call c_esmc_meshmerge(meshA, meshAt(i), tmpmesh, localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      if(i .gt. 2) then
+        !call ESMF_MeshDestroy(meshA, rc=localrc)
+        ! meshA is only a pointer type of mesh at this point, call the C api to destroy it
+        call C_ESMC_MeshDestroy(meshA%this, localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      meshA = tmpmesh
+    enddo
+
+    meshBt(1) = sideB(l_sideBPriority(1))
+    if (present(sideBMaskValues)) then
+      call ESMF_MeshTurnOnCellMask(meshBt(1), maskValues=sideBMaskValues, rc=localrc);
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    ! uniformly set the merge fraction values to 1.0
+    call c_esmc_meshsetfraction(meshBt(1), fraction, localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    meshB = meshBt(1)
+
+    do i = 2, ngrid_b
+      meshBt(i) = sideB(l_sideBPriority(i))
+      if (present(sideBMaskValues)) then
+        call ESMF_MeshTurnOnCellMask(meshBt(i), maskValues=sideBMaskValues, rc=localrc);
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      call c_esmc_meshsetfraction(meshBt(i), fraction, localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      ! call into mesh merge with priority taken into account
+      ! meshBt is truncated(if necessary) and concatenated onto meshB 
+      ! and result stored in tmpmesh
+      call c_esmc_meshmerge(meshB, meshBt(i), tmpmesh, localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      if(i .gt. 2) then
+        !call ESMF_MeshDestroy(meshB, rc=localrc)
+        call C_ESMC_MeshDestroy(meshB%this, localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      meshB = tmpmesh
+    enddo
+
+    allocate(xgtype%sparseMatA2X(ngrid_a), &
+      xgtype%sparseMatX2A(ngrid_a), &
+      xgtype%sparseMatB2X(ngrid_b), &
+      xgtype%sparseMatX2B(ngrid_b), stat=localrc)
+    if(localrc /= 0) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="- Failed to allocate SMM parameters", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+
+    ! use current VM for communication
+    call ESMF_VMGetCurrent(vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into streamlined Regrid
+    compute_midmesh = 1
+    call c_esmc_xgridregrid_create(vm, meshA, meshB, &
+      meshp, compute_midmesh, &
+      ESMF_REGRIDMETHOD_CONSERVE, &
+      ESMF_UNMAPPEDACTION_IGNORE, &
+      nentries, tweights, &
+      localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    mesh = ESMF_MeshCreate(meshp, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call compute_mesharea(mesh, mesharea, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Create and Retrieve fraction Arrays for store use, only for online
+    allocate(xgtype%fracA2X(ngrid_a), xgtype%fracB2X(ngrid_b))
+    allocate(xgtype%fracX2A(ngrid_a), xgtype%fracX2B(ngrid_b))
+    allocate(xgtype%frac2A(ngrid_a), xgtype%frac2B(ngrid_b))
+    do i = 1, ngrid_A
+      call ESMF_MeshGet(sideA(i), elementDistgrid=distgridTmp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      xgtype%fracA2X(i) = ESMF_ArrayCreate(distgridTmp, typekind=ESMF_TYPEKIND_R8, &
+        indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      xgtype%fracX2A(i) = ESMF_ArrayCreate(distgridTmp, typekind=ESMF_TYPEKIND_R8, &
+       indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      xgtype%frac2A(i) = ESMF_ArrayCreate(distgridTmp, typekind=ESMF_TYPEKIND_R8, &
+       indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      ! retrieve frac2 Field
+      call ESMF_XGridGetFrac2Int(mesh=meshAt(i), array=xgtype%frac2A(i), &
+           meshloc=ESMF_MESHLOC_ELEMENT, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+           ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+    do i = 1, ngrid_B
+      call ESMF_MeshGet(sideB(i), elementDistgrid=distgridTmp, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      xgtype%fracB2X(i) = ESMF_ArrayCreate(distgridTmp, typekind=ESMF_TYPEKIND_R8, &
+        indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      xgtype%fracX2B(i) = ESMF_ArrayCreate(distgridTmp, typekind=ESMF_TYPEKIND_R8, &
+        indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      xgtype%frac2B(i) = ESMF_ArrayCreate(distgridTmp, typekind=ESMF_TYPEKIND_R8, &
+       indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      ! retrieve frac2 Field
+      call ESMF_XGridGetFrac2Int(mesh=meshBt(i), array=xgtype%frac2B(i), &
+           meshloc=ESMF_MESHLOC_ELEMENT, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+           ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
+    ! TODO: investigate the possibility of optimization for the general case of multiple Meshs.
+    ! When there is only 1 grid per side, optimization can be done but it's not clear for multiple Meshs.
+    compute_midmesh = 0
+    do i = 1, ngrid_a
+      call c_esmc_xgridregrid_create(vm, meshAt(i), mesh, &
+        tmpmesh, compute_midmesh, &
+        ESMF_REGRIDMETHOD_CONSERVE, &
+        ESMF_UNMAPPEDACTION_IGNORE, &
+        nentries, tweights, &
+        localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      allocate(xgtype%sparseMatA2X(i)%factorIndexList(2,nentries))
+      allocate(xgtype%sparseMatA2X(i)%factorList(nentries))
+      if(nentries .ge. 1) then
+        call c_ESMC_Copy_TempWeights_xgrid(tweights, &
+        xgtype%sparseMatA2X(i)%factorIndexList(1,1), &
+        xgtype%sparseMatA2X(i)%factorList(1))
+      endif
+      call ESMF_XGridGetFracInt(mesh=meshAt(i), array=xgtype%fracA2X(i), &
+           staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+           ESMF_CONTEXT, rcToReturn=rc)) return
+      
+      ! Now the reverse direction
+      call c_esmc_xgridregrid_create(vm, mesh, meshAt(i), &
+        tmpmesh, compute_midmesh, &
+        ESMF_REGRIDMETHOD_CONSERVE, &
+        ESMF_UNMAPPEDACTION_IGNORE, &
+        nentries, tweights, &
+        localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      allocate(xgtype%sparseMatX2A(i)%factorIndexList(2,nentries))
+      allocate(xgtype%sparseMatX2A(i)%factorList(nentries))
+      if(nentries .ge. 1) then
+        call c_ESMC_Copy_TempWeights_xgrid(tweights, &
+        xgtype%sparseMatX2A(i)%factorIndexList(1,1), &
+        xgtype%sparseMatX2A(i)%factorList(1))
+      endif
+      call ESMF_XGridGetFracInt(mesh=meshAt(i), array=xgtype%fracX2A(i), &
+           staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+           ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
+    ! now do the B side
+    do i = 1, ngrid_b
+      call c_esmc_xgridregrid_create(vm, meshBt(i), mesh, &
+        tmpmesh, compute_midmesh, &
+        ESMF_REGRIDMETHOD_CONSERVE, &
+        ESMF_UNMAPPEDACTION_IGNORE, &
+        nentries, tweights, &
+        localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      allocate(xgtype%sparseMatB2X(i)%factorIndexList(2,nentries))
+      allocate(xgtype%sparseMatB2X(i)%factorList(nentries))
+      if(nentries .ge. 1) then
+        call c_ESMC_Copy_TempWeights_xgrid(tweights, &
+        xgtype%sparseMatB2X(i)%factorIndexList(1,1), &
+        xgtype%sparseMatB2X(i)%factorList(1))
+      endif
+      call ESMF_XGridGetFracInt(mesh=meshBt(i), array=xgtype%fracB2X(i), &
+           staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+           ESMF_CONTEXT, rcToReturn=rc)) return
+    
+      ! Now the reverse direction
+      call c_esmc_xgridregrid_create(vm, mesh, meshBt(i), &
+        tmpmesh, compute_midmesh, &
+        ESMF_REGRIDMETHOD_CONSERVE, &
+        ESMF_UNMAPPEDACTION_IGNORE, &
+        nentries, tweights, &
+        localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      allocate(xgtype%sparseMatX2B(i)%factorIndexList(2,nentries))
+      allocate(xgtype%sparseMatX2B(i)%factorList(nentries))
+      if(nentries .ge. 1) then
+        call c_ESMC_Copy_TempWeights_xgrid(tweights, &
+        xgtype%sparseMatX2B(i)%factorIndexList(1,1), &
+        xgtype%sparseMatX2B(i)%factorList(1))
+      endif
+      call ESMF_XGridGetFracInt(mesh=meshBt(i), array=xgtype%fracX2B(i), &
+           staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+           ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
+    xgtype%storeOverlay = .false.
+    if(present(storeOverlay)) then
+      if(storeOverlay) xgtype%storeOverlay = .true.
+    endif
+    
+    ! call into offline xgrid create with the xgrid specs
+    allocate(xgtype%sideA(ngrid_a), xgtype%sideB(ngrid_b), stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, &
+        msg="- Allocating xgtype%meshes ", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    do i = 1, ngrid_a
+      xgtype%sideA(i) = ESMF_XGridGeomBaseCreate(sideA(i), loc=ESMF_MESHLOC_ELEMENT, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+    do i = 1, ngrid_b
+      xgtype%sideB(i) = ESMF_XGridGeomBaseCreate(sideB(i), loc=ESMF_MESHLOC_ELEMENT, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+    call ESMF_XGridConstruct(xgtype, xgtype%sideA, xgtype%sideB, area=mesharea, &
+      sparseMatA2X=xgtype%sparseMatA2X, sparseMatX2A=xgtype%sparseMatX2A, &
+      sparseMatB2X=xgtype%sparseMatB2X, sparseMatX2B=xgtype%sparseMatX2B, &
+      offline=.false., &
+      mesh=mesh, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! store the middle mesh if needed
+    ! and clean up temporary memory used
+    if(xgtype%storeOverlay) then
+      xgtype%mesh = mesh
+    else
+      call ESMF_MeshDestroy(mesh, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    deallocate(l_sideAPriority, l_sideBPriority)
+    deallocate(meshAt, meshBt)
+    deallocate(mesharea)
+
+    ! Finalize XGrid Creation
+    xgtype%online = 1
+    xgtype%status = ESMF_STATUS_READY
+    ESMF_XGridCreateDefaultMesh%xgtypep => xgtype 
+    ESMF_INIT_SET_CREATED(ESMF_XGridCreateDefaultMesh)
+
+    !call ESMF_XGridValidate(ESMF_XGridCreateDefaultMesh, rc=localrc)
+    !if (ESMF_LogFoundError(localrc, &
+    !    ESMF_ERR_PASSTHRU, &
+    !    ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if(present(rc)) rc = ESMF_SUCCESS
+
+end function ESMF_XGridCreateDefaultMesh
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -927,7 +1607,23 @@ integer, intent(out), optional             :: rc
       msg="Constructing xgtype base object ", &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_XGridConstruct(xgtype, sideA, sideB, area=area, centroid=centroid, &
+    allocate(xgtype%sideA(ngrid_a), xgtype%sideB(ngrid_b), stat=localrc)
+    if (ESMF_LogFoundAllocError(localrc, &
+        msg="- Allocating xgtype%grids ", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    do i = 1, ngrid_a
+      xgtype%sideA(i) = ESMF_XGridGeomBaseCreate(sideA(i), ESMF_STAGGERLOC_CENTER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+    do i = 1, ngrid_b
+      xgtype%sideB(i) = ESMF_XGridGeomBaseCreate(sideB(i), ESMF_STAGGERLOC_CENTER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+    call ESMF_XGridConstruct(xgtype, xgtype%sideA, xgtype%sideB, area=area, centroid=centroid, &
       sparseMatA2X=sparseMatA2X, sparseMatX2A=sparseMatX2A, &
       sparseMatB2X=sparseMatB2X, sparseMatX2B=sparseMatX2B, offline=.true., rc=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
@@ -963,7 +1659,7 @@ subroutine ESMF_XGridConstruct(xgtype, sideA, sideB, area, centroid, &
 !
 ! !ARGUMENTS:
 type(ESMF_XGridType), intent(inout)        :: xgtype
-type(ESMF_Grid), intent(in)                :: sideA(:), sideB(:)
+type(ESMF_XGridGeomBase), intent(in)       :: sideA(:), sideB(:)
 real(ESMF_KIND_R8), intent(in), optional   :: area(:)
 real(ESMF_KIND_R8), intent(in), optional   :: centroid(:,:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatA2X(:)
@@ -1026,13 +1722,6 @@ integer, intent(out), optional             :: rc
 
   ngrid_a = size(sideA, 1)
   ngrid_b = size(sideB, 1)
-  ! copy the Grids
-  allocate(xgtype%sideA(ngrid_a), xgtype%sideB(ngrid_b), stat=localrc)
-  if (ESMF_LogFoundAllocError(localrc, &
-      msg="- Allocating xgtype%grids ", &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-  xgtype%sideA = sideA
-  xgtype%sideB = sideB
 
   ! copy area and centroid
   if(present(area)) then
@@ -1193,13 +1882,13 @@ subroutine ESMF_XGridDistGridsOnline(xgtype, mesh, rc)
   allocate(xgtype%distgridA(size(xgtype%sideA)))
   allocate(xgtype%distgridB(size(xgtype%sideB)))
   do i = 1, size(xgtype%sideA)
-    call ESMF_GridGet(xgtype%sideA(i), distgrid=xgtype%distgridA(i), rc=localrc)
+    call ESMF_XGridGeomBaseGet(xgtype%sideA(i), distgrid=xgtype%distgridA(i), rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
   enddo
   do i = 1, size(xgtype%sideB)
-    call ESMF_GridGet(xgtype%sideB(i), distgrid=xgtype%distgridB(i), rc=localrc)
+    call ESMF_XGridGeomBaseGet(xgtype%sideB(i), distgrid=xgtype%distgridB(i), rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1207,7 +1896,7 @@ subroutine ESMF_XGridDistGridsOnline(xgtype, mesh, rc)
 
   if(present(rc)) rc = ESMF_SUCCESS
 
-end subroutine
+end subroutine ESMF_XGridDistGridsOnline
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1519,7 +2208,7 @@ end function ESMF_XGridDGOverlay
 ! !IROUTINE:  ESMF_XGridDG - compute distgrid on the XGrid locally matching the grid
 
 ! !INTERFACE:
-subroutine ESMF_XGridDG(grid, distgrid, factorIndexList, dim, rc)
+subroutine ESMF_XGridDG(xgridgeombase, distgrid, factorIndexList, dim, rc)
 !
 ! !DESCRIPTION:
 !      Compute distgrid on the XGrid locally matching the grid on the same set of PETs;
@@ -1527,8 +2216,8 @@ subroutine ESMF_XGridDG(grid, distgrid, factorIndexList, dim, rc)
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [grid]
-!           grid object spanning a set of PETs.
+!     \item [xgridgeombase]
+!           xgridgeombase object spanning a set of PETs.
 !     \item [distgrid]
 !           distgrid object spanning the same set of PETs.
 !     \item [factorIndexList]
@@ -1541,7 +2230,7 @@ subroutine ESMF_XGridDG(grid, distgrid, factorIndexList, dim, rc)
 !
 !EOPI
 
-    type(ESMF_Grid), intent(in)                 :: grid
+    type(ESMF_XGridGeomBase), intent(in)        :: xgridgeombase
     type(ESMF_DistGrid), intent(inout)          :: distgrid
     integer,             pointer                :: factorIndexList(:,:)
     integer, intent(in)                         :: dim
@@ -1818,16 +2507,16 @@ end subroutine compute_mesharea
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_XGridGetFracInt"
+#define ESMF_METHOD "ESMF_XGridGetFracIntGrid"
 !BOPI
 ! !IROUTINE: ESMF_XGridGetFracInt - Gets the frac of grid cells after a regrid from a Mesh
 
 ! !INTERFACE:
-      subroutine ESMF_XGridGetFracInt(Grid, Mesh, Array, staggerLoc, &
+      subroutine ESMF_XGridGetFracIntGrid(Grid, Mesh, Array, staggerLoc, &
                  rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in)         :: Grid
+      type(ESMF_Grid), intent(in)            :: Grid
       type(ESMF_Mesh), intent(inout)         :: Mesh
       type(ESMF_Array), intent(inout)        :: Array
       type(ESMF_StaggerLoc), intent(in)      :: staggerLoc
@@ -1874,16 +2563,16 @@ end subroutine compute_mesharea
 
       rc = ESMF_SUCCESS
 
-      end subroutine ESMF_XGridGetFracInt
+      end subroutine ESMF_XGridGetFracIntGrid
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_XGridGetFrac2Int"
+#define ESMF_METHOD "ESMF_XGridGetFrac2IntGrid"
 !BOPI
 ! !IROUTINE: ESMF_XGridGetFrac2Int - Gets the frac2 of grid cells after a regrid from a Mesh
 
 ! !INTERFACE:
-      subroutine ESMF_XGridGetFrac2Int(Grid, Mesh, Array, staggerLoc, &
+      subroutine ESMF_XGridGetFrac2IntGrid(Grid, Mesh, Array, staggerLoc, &
                  rc)
 !
 ! !ARGUMENTS:
@@ -1934,7 +2623,132 @@ end subroutine compute_mesharea
 
       rc = ESMF_SUCCESS
 
-      end subroutine ESMF_XGridGetFrac2Int
+      end subroutine ESMF_XGridGetFrac2IntGrid
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridGetFracIntMesh"
+!BOPI
+! !IROUTINE: ESMF_XGridGetFracInt - Gets the frac of grid cells after a regrid from a Mesh
+
+! !INTERFACE:
+      subroutine ESMF_XGridGetFracIntMesh(Mesh, Array, staggerLoc, &
+                 rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Mesh), intent(inout)         :: Mesh
+      type(ESMF_Array), intent(inout)        :: Array
+      type(ESMF_StaggerLoc), intent(in)      :: staggerLoc
+      integer, intent(out), optional         :: rc
+!
+! !DESCRIPTION:
+!     The arguments are:
+!     \begin{description}
+!     \item[Mesh]
+!          The mesh.
+!     \item[Array]
+!          The grid array.
+!     \item[{rc}]
+!          Return code.
+!     \end{description}
+!EOPI
+       integer :: localrc
+       real(ESMF_KIND_R8), pointer :: frac(:)
+       type(ESMF_VM)        :: vm
+       logical :: isMemFreed
+
+       ! Logic to determine if valid optional args are passed.  
+
+       ! Initialize return code; assume failure until success is certain
+       localrc = ESMF_RC_NOT_IMPL
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+       ! Make sure the srcMesh has its internal bits in place
+       call ESMF_MeshGet(Mesh, isMemFreed=isMemFreed, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       if (isMemFreed)  then
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+                 msg="- Mesh has had its coordinate and connectivity info freed", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+          return 
+       endif
+
+       call ESMF_ArrayGet(Array, localDe=0, farrayPtr=frac, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Call through to the C++ object that does the work
+       call ESMF_MeshGetElemFrac(Mesh, frac, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+      rc = ESMF_SUCCESS
+
+      end subroutine ESMF_XGridGetFracIntMesh
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridGetFrac2IntMesh"
+!BOPI
+! !IROUTINE: ESMF_XGridGetFrac2Int - Gets the frac2 of grid cells after a regrid from a Mesh
+
+! !INTERFACE:
+      subroutine ESMF_XGridGetFrac2IntMesh(Mesh, Array, meshloc, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Mesh), intent(inout)         :: Mesh
+      type(ESMF_Array), intent(inout)        :: Array
+      type(ESMF_MeshLoc), intent(in)         :: meshloc
+      integer, intent(out), optional         :: rc
+!
+! !DESCRIPTION:
+!     The arguments are:
+!     \begin{description}
+!     \item[Mesh]
+!          The mesh.
+!     \item[Array]
+!          The grid array.
+!     \item[{rc}]
+!          Return code.
+!     \end{description}
+!EOPI
+       integer :: localrc
+       type(ESMF_VM)        :: vm
+       logical :: isMemFreed
+       real(ESMF_KIND_R8), pointer :: frac(:)
+
+       ! Logic to determine if valid optional args are passed.  
+
+       ! Initialize return code; assume failure until success is certain
+       localrc = ESMF_RC_NOT_IMPL
+       if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+       ! Make sure the srcMesh has its internal bits in place
+       call ESMF_MeshGet(Mesh, isMemFreed=isMemFreed, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       if (isMemFreed)  then
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+                 msg="- Mesh has had its coordinate and connectivity info freed", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+          return 
+       endif
+
+       call ESMF_ArrayGet(Array, localDe=0, farrayPtr=frac, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Call through to the C++ object that does the work
+       call ESMF_MeshGetElemFrac2(Mesh, frac, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+      rc = ESMF_SUCCESS
+
+      end subroutine ESMF_XGridGetFrac2IntMesh
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2067,7 +2881,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         if(associated(xgrid%xgtypep%sideA)) then
           do i = 1, size(xgrid%xgtypep%sideA,1)
-            call ESMF_GridDestroy(xgrid%xgtypep%sideA(i), rc=localrc)
+            call ESMF_XGridGeomBaseDestroy(xgrid%xgtypep%sideA(i), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2075,7 +2889,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
         if(associated(xgrid%xgtypep%sideB)) then
           do i = 1, size(xgrid%xgtypep%sideB,1)
-            call ESMF_GridDestroy(xgrid%xgtypep%sideB(i), rc=localrc)
+            call ESMF_XGridGeomBaseDestroy(xgrid%xgtypep%sideB(i), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return

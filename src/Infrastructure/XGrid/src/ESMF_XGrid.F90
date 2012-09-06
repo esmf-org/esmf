@@ -1,4 +1,4 @@
-! $Id: ESMF_XGrid.F90,v 1.37 2012/07/18 21:57:05 w6ws Exp $
+! $Id: ESMF_XGrid.F90,v 1.38 2012/09/06 20:08:28 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -52,6 +52,7 @@ module ESMF_XGridMod
   use ESMF_ArrayMod
   use ESMF_GridMod
   use ESMF_MeshMod
+  use ESMF_XGridGeomBaseMod
   use ESMF_InitMacrosMod
 
   implicit none
@@ -85,21 +86,28 @@ module ESMF_XGridMod
   ! the XGridType definition
   type ESMF_XGridType
     sequence
-    type (ESMF_Base)                       :: base                    ! base class object
-    type (ESMF_DistGrid)                   :: distgridM               ! load balanced distgrid in the middle
-    type (ESMF_DistGrid), pointer          :: distgridA(:)            ! A side distgrid
-    type (ESMF_DistGrid), pointer          :: distgridB(:)            ! B side distgrid
-    type (ESMF_Grid), pointer              :: sideA(:), sideB(:)      ! geometric types
-    type (ESMF_Mesh)                       :: mesh                    ! overlay mesh, not always stored
-    real(ESMF_KIND_R8), pointer            :: area(:), centroid(:,:)  ! area and centroids of xgrid
-    type(ESMF_XGridSpec), pointer          :: sparseMatA2X(:), sparseMatX2A(:) ! descriptors of mapping sparsemat
-    type(ESMF_XGridSpec), pointer          :: sparseMatB2X(:), sparseMatX2B(:)
-    type(ESMF_Array), pointer              :: fracA2X(:), fracB2X(:)       ! src fraction 
-    type(ESMF_Array), pointer              :: fracX2A(:), fracX2B(:)       ! dst fraction 
-    type(ESMF_Array)                       :: fracX
-    type(ESMF_Array), pointer              :: frac2A(:), frac2B(:)
+    type(ESMF_Base)                        :: base                      ! base class object
+    type(ESMF_DistGrid)                    :: distgridM                 ! load balanced distgrid in the middle
+    type(ESMF_DistGrid), pointer           :: distgridA(:) => null()    ! A side distgrid
+    type(ESMF_DistGrid), pointer           :: distgridB(:) => null()    ! B side distgrid
+    type(ESMF_XGridGeomBase), pointer      :: sideA(:) => null()        ! geometric types
+    type(ESMF_XGridGeomBase), pointer      :: sideB(:) => null()        ! geometric types
+    type(ESMF_Mesh)                        :: mesh                      ! overlay mesh, not always stored
+    real(ESMF_KIND_R8), pointer            :: area(:)         => null() ! area of xgrid
+    real(ESMF_KIND_R8), pointer            :: centroid(:,:)   => null() ! centroids of xgrid
+    type(ESMF_XGridSpec), pointer          :: sparseMatA2X(:) => null() ! descriptors of mapping sparsemat
+    type(ESMF_XGridSpec), pointer          :: sparseMatX2A(:) => null() 
+    type(ESMF_XGridSpec), pointer          :: sparseMatB2X(:) => null()
+    type(ESMF_XGridSpec), pointer          :: sparseMatX2B(:) => null()
+    type(ESMF_Array), pointer              :: fracA2X(:) => null()      ! side A regridding fraction 
+    type(ESMF_Array), pointer              :: fracX2A(:) => null()      ! side A regridding fraction 
+    type(ESMF_Array), pointer              :: fracB2X(:) => null()      ! side B regridding fraction 
+    type(ESMF_Array), pointer              :: fracX2B(:) => null()      ! side B regridding fraction 
+    type(ESMF_Array)                       :: fracX                     ! middle mesh fraction always 1.0
+    type(ESMF_Array), pointer              :: frac2A(:)  => null()      ! side A merge fraction
+    type(ESMF_Array), pointer              :: frac2B(:)  => null()      ! side B merge fraction
     logical                                :: is_proxy         ! .true. for a proxy xgrid
-    logical                                :: storeOverlay    
+    logical                                :: storeOverlay     ! .false. do not save mesh in the middle
     integer                                :: online           ! 1 if Xgrid is computed based on user input, 0 offline
     type (ESMF_Status)                     :: status
     ESMF_INIT_DECLARE
@@ -149,7 +157,7 @@ module ESMF_XGridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGrid.F90,v 1.37 2012/07/18 21:57:05 w6ws Exp $'
+    '$Id: ESMF_XGrid.F90,v 1.38 2012/09/06 20:08:28 feiliu Exp $'
 
 !==============================================================================
 !
@@ -478,7 +486,7 @@ contains
       endif
       if(.not. associated(fp1%sideA, fp2%sideA)) then
         do i = 1, ngridA1
-          if(ESMF_GridMatch(fp1%sideA(i), fp2%sideA(i))/=ESMF_GRIDMATCH_EXACT) then
+          if(.not. ESMF_XGridGeomBaseMatch(fp1%sideA(i), fp2%sideA(i))) then
             if(present(rc)) rc = ESMF_SUCCESS
             return
           endif
@@ -493,7 +501,7 @@ contains
       endif
       if(.not. associated(fp1%sideB, fp2%sideB)) then
         do i = 1, ngridB1
-          if(ESMF_GridMatch(fp1%sideB(i), fp2%sideB(i))/=ESMF_GRIDMATCH_EXACT) then
+          if(.not. ESMF_XGridGeomBaseMatch(fp1%sideB(i), fp2%sideB(i))) then
             if(present(rc)) rc = ESMF_SUCCESS
             return
           endif
@@ -882,7 +890,7 @@ contains
       if(associated(fp%sideA)) then
           ngridA = size(fp%sideA,1)
           do i = 1, ngridA
-            call ESMF_GridSerialize(grid=fp%sideA(i), buffer=buffer, &
+            call ESMF_XGridGeomBaseSerialize(fp%sideA(i), buffer=buffer, &
                          length=length, offset=offset, &
                          attreconflag=lattreconflag, inquireflag=linquireflag, &
                          rc=localrc)
@@ -895,7 +903,7 @@ contains
       if(associated(fp%sideB)) then
           ngridB = size(fp%sideB,1)
           do i = 1, ngridB
-            call ESMF_GridSerialize(grid=fp%sideB(i), buffer=buffer, &
+            call ESMF_XGridGeomBaseSerialize(fp%sideB(i), buffer=buffer, &
                          length=length, offset=offset, &
                          attreconflag=lattreconflag, inquireflag=linquireflag, &
                          rc=localrc)
@@ -1136,7 +1144,7 @@ contains
       ! Deserialize the Grids
       if(associated(fp%sideA)) then
           do i = 1, ngridA
-            fp%sideA(i) = ESMF_GridDeserialize(buffer=buffer, offset=offset, &
+            fp%sideA(i) = ESMF_XGridGeomBaseDeserialize(buffer=buffer, offset=offset, &
                                      rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
@@ -1146,7 +1154,7 @@ contains
 
       if(associated(fp%sideB)) then
           do i = 1, ngridB
-            fp%sideB(i) = ESMF_GridDeserialize(buffer=buffer, offset=offset, &
+            fp%sideB(i) = ESMF_XGridGeomBaseDeserialize(buffer=buffer, offset=offset, &
                                      rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &

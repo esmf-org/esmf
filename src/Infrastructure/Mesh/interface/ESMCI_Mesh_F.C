@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.61 2012/04/13 23:07:25 peggyli Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.62 2012/09/06 20:08:13 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.61 2012/04/13 23:07:25 peggyli Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.62 2012/09/06 20:08:13 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1601,7 +1601,6 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *
 }
 
 
-
 extern "C" void FTN_X(c_esmc_meshgetfrac)(Mesh **meshpp, int *num_elem, double *elem_fracs, int *rc) {
   
   try {
@@ -1639,6 +1638,95 @@ extern "C" void FTN_X(c_esmc_meshgetfrac)(Mesh **meshpp, int *num_elem, double *
 
     // Get frac field
     MEField<> *elem_frac = mesh.GetField("elem_frac");
+    if (!elem_frac) Throw() << "Getting elem_frac when it doesn't exist";
+
+    // Loop through elements and put areas into array
+    for (int i=0; i<egids.size(); i++) {
+      // Get element gid
+      int elem_gid=egids[i];
+      
+      //  Find the corresponding Mesh element
+      Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, elem_gid);
+      if (mi == mesh.map_end(MeshObj::ELEMENT)) {
+	Throw() << "Element not in mesh";
+      }
+      
+      // Get the element
+      const MeshObj &elem = *mi; 
+
+      // Get frac data
+      double *f=elem_frac->data(elem);
+      
+      // Only put it in if it's locally owned
+      if (!GetAttr(elem).is_locally_owned()) continue;
+
+      // Put frac into frac array
+      elem_fracs[i]=*f;
+    }
+        
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), rc);
+    } else {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+extern "C" void FTN_X(c_esmc_meshgetfrac2)(Mesh **meshpp, int *num_elem, double *elem_fracs, int *rc) {
+  
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+	throw localrc;  // bail out with exception
+    }
+    
+    // Get Mesh pointer
+    Mesh *meshp = *meshpp;
+    
+    // Get Mesh reference
+    Mesh &mesh = *meshp;
+    
+    // Declare id vector
+    std::vector<int> egids; 
+    
+    // get elem ids
+    getElemGIDS(*meshp, egids);
+    
+    // If there are no elements then leave
+    if (egids.empty()) {
+      if (rc!=NULL) *rc = ESMF_SUCCESS;
+      return;
+    }
+
+    // Check size
+    if (*num_elem != egids.size()) {
+      Throw() << "Number of elements doesn't match size of input array for areas";
+    }
+
+    // Get frac field
+    MEField<> *elem_frac = mesh.GetField("elem_frac2");
     if (!elem_frac) Throw() << "Getting elem_frac when it doesn't exist";
 
     // Loop through elements and put areas into array

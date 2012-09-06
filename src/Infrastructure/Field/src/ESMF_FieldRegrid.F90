@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.111 2012/06/22 17:34:47 rokuingh Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.112 2012/09/06 20:12:29 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -36,6 +36,7 @@ module ESMF_FieldRegridMod
   use ESMF_MeshMod
   use ESMF_RHandleMod
   use ESMF_GeomBaseMod
+  use ESMF_XGridGeomBaseMod
   use ESMF_RegridMod
   use ESMF_FieldMod
   use ESMF_FieldGetMod
@@ -83,7 +84,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.111 2012/06/22 17:34:47 rokuingh Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.112 2012/09/06 20:12:29 feiliu Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1059,19 +1060,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
         integer :: localrc, i
 
-        type(ESMF_GeomType_Flag)  :: geomtype
+        type(ESMF_GeomType_Flag)  :: geomtype, srcgeomtype, dstgeomtype
         type(ESMF_XGrid)     :: srcXGrid, dstXGrid        
+        type(ESMF_Mesh)      :: srcMesh, dstMesh
 
         integer :: srcIdx, dstIdx, ngrid_a, ngrid_b
         type(ESMF_XGridSide_Flag) :: srcSide, dstSide
-        type(ESMF_Grid), allocatable :: gridA(:), gridB(:)
+        type(ESMF_XGridGeomBase), allocatable :: gridA(:), gridB(:)
         type(ESMF_Grid)      :: srcGrid
         type(ESMF_Grid)      :: dstGrid
         type(ESMF_XGridSpec) :: sparseMat
         logical :: found, match
         type(ESMF_Array)     :: srcFracArray
         type(ESMF_Array)     :: dstFracArray
-        type(ESMF_STAGGERLOC)         :: interpFieldStaggerloc, fracFieldStaggerloc
+        type(ESMF_STAGGERLOC):: interpFieldStaggerloc, fracFieldStaggerloc
+        type(ESMF_MESHLOC)   :: interpFieldMeshloc, fracFieldMeshloc
     
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -1085,7 +1088,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return
         allocate(gridA(ngrid_a), gridB(ngrid_b))
 
-        call ESMF_XGridGet(xgrid, sideA=gridA, sideB=gridB, rc=localrc)
+        call ESMF_XGridGet(xgrid, gridA, gridB, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1093,6 +1096,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+        srcgeomtype = geomtype
 
         ! locate the Grid or XGrid contained in srcField
         if(geomtype == ESMF_GEOMTYPE_GRID) then
@@ -1103,7 +1107,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
             found = .false.
             do i = 1, ngrid_a
-                if(ESMF_GridMatch(srcGrid, gridA(i))>=ESMF_GRIDMATCH_EXACT) then
+                if(ESMF_GridMatch(srcGrid, gridA(i)%gbcp%grid)>=ESMF_GRIDMATCH_EXACT) then
                     srcIdx = i
                     srcSide = ESMF_XGRIDSIDE_A
                     found = .true.
@@ -1111,7 +1115,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 endif
             enddo 
             do i = 1, ngrid_b
-                if(ESMF_GridMatch(srcGrid, gridB(i))>=ESMF_GRIDMATCH_EXACT) then
+                if(ESMF_GridMatch(srcGrid, gridB(i)%gbcp%grid)>=ESMF_GRIDMATCH_EXACT) then
                     if(found) then
                         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                            msg="- duplication of Grid found in XGrid", &
@@ -1132,32 +1136,67 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 return
             endif
 
-        else
-            if(geomtype == ESMF_GEOMTYPE_XGRID) then
-                call ESMF_FieldGet(srcField, xgrid=srcXGrid, &
-                       rc=localrc)
-                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-                
-                match = ESMF_XGridMatch(xgrid, srcXGrid, rc=localrc)
-                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
+        else if(geomtype == ESMF_GEOMTYPE_MESH) then
+            call ESMF_FieldGet(srcField, mesh=srcMesh, &
+                   rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
-                if(match) then
-                    srcSide = ESMF_XGRIDSIDE_BALANCED
-                    srcIdx = 1
-                else
-                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                           msg="- XGrid in srcField doesn't match the input XGrid", &
-                           ESMF_CONTEXT, rcToReturn=rc) 
-                    return
+            found = .false.
+            do i = 1, ngrid_a
+                if(ESMF_MeshMatch(srcMesh, gridA(i)%gbcp%mesh)) then
+                    srcIdx = i
+                    srcSide = ESMF_XGRIDSIDE_A
+                    found = .true.
+                    exit
                 endif
+            enddo 
+            do i = 1, ngrid_b
+                if(ESMF_MeshMatch(srcMesh, gridB(i)%gbcp%mesh)) then
+                    if(found) then
+                        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                           msg="- duplication of Mesh found in XGrid", &
+                           ESMF_CONTEXT, rcToReturn=rc) 
+                        return
+                    endif
+                    srcIdx = i
+                    srcSide = ESMF_XGRIDSIDE_B
+                    found = .true.
+                    exit
+                endif
+            enddo 
+
+            if(.not. found) then
+                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                   msg="- cannot Locate src Field Mesh in XGrid", &
+                   ESMF_CONTEXT, rcToReturn=rc) 
+                return
+            endif
+                
+        else if(geomtype == ESMF_GEOMTYPE_XGRID) then
+            call ESMF_FieldGet(srcField, xgrid=srcXGrid, &
+                   rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+            
+            match = ESMF_XGridMatch(xgrid, srcXGrid, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+            if(match) then
+                srcSide = ESMF_XGRIDSIDE_BALANCED
+                srcIdx = 1
             else
                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                       msg="- src Field is not built on Grid or XGrid", &
+                       msg="- XGrid in srcField doesn't match the input XGrid", &
                        ESMF_CONTEXT, rcToReturn=rc) 
                 return
             endif
+        else
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                   msg="- src Field is not built on Grid, Mesh, or XGrid", &
+                   ESMF_CONTEXT, rcToReturn=rc) 
+            return
         endif
 
         ! locate the Grid or XGrid contained in dstField
@@ -1165,6 +1204,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+        dstgeomtype = geomtype
 
         if(geomtype == ESMF_GEOMTYPE_GRID) then
             call ESMF_FieldGet(dstField, grid=dstGrid, &
@@ -1174,7 +1214,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
             found = .false.
             do i = 1, ngrid_a
-                if(ESMF_GridMatch(dstGrid, gridA(i))>=ESMF_GRIDMATCH_EXACT) then
+                if(ESMF_GridMatch(dstGrid, gridA(i)%gbcp%grid)>=ESMF_GRIDMATCH_EXACT) then
                     dstIdx = i
                     dstSide = ESMF_XGRIDSIDE_A
                     found = .true.
@@ -1182,7 +1222,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 endif
             enddo 
             do i = 1, ngrid_b
-                if(ESMF_GridMatch(dstGrid, gridB(i))>=ESMF_GRIDMATCH_EXACT) then
+                if(ESMF_GridMatch(dstGrid, gridB(i)%gbcp%grid)>=ESMF_GRIDMATCH_EXACT) then
                     if(found) then
                         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                            msg="- duplication of Grid found in XGrid", &
@@ -1203,32 +1243,67 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 return
             endif
 
-        else
-            if(geomtype == ESMF_GEOMTYPE_XGRID) then
-                call ESMF_FieldGet(dstField, xgrid=dstXGrid, &
-                       rc=localrc)
-                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
+        else if(geomtype == ESMF_GEOMTYPE_MESH) then
+            call ESMF_FieldGet(dstField, mesh=dstMesh, &
+                   rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
-                match = ESMF_XGridMatch(xgrid, dstXGrid, rc=localrc)
-                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-
-                if(match) then
-                    dstSide = ESMF_XGRIDSIDE_BALANCED
-                    dstIdx = 1
-                else
-                    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                           msg="- XGrid in dstField doesn't match the input XGrid", &
-                           ESMF_CONTEXT, rcToReturn=rc) 
-                    return
+            found = .false.
+            do i = 1, ngrid_a
+                if(ESMF_MeshMatch(dstMesh, gridA(i)%gbcp%mesh)) then
+                    dstIdx = i
+                    dstSide = ESMF_XGRIDSIDE_A
+                    found = .true.
+                    exit
                 endif
+            enddo 
+            do i = 1, ngrid_b
+                if(ESMF_MeshMatch(dstMesh, gridB(i)%gbcp%mesh)) then
+                    if(found) then
+                        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                           msg="- duplication of Mesh found in XGrid", &
+                           ESMF_CONTEXT, rcToReturn=rc) 
+                        return
+                    endif
+                    dstIdx = i
+                    dstSide = ESMF_XGRIDSIDE_B
+                    found = .true.
+                    exit
+                endif
+            enddo 
+
+            if(.not. found) then
+                call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                   msg="- cannot Locate dst Field Mesh in XGrid", &
+                   ESMF_CONTEXT, rcToReturn=rc) 
+                return
+            endif
+
+        else if(geomtype == ESMF_GEOMTYPE_XGRID) then
+            call ESMF_FieldGet(dstField, xgrid=dstXGrid, &
+                   rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+            match = ESMF_XGridMatch(xgrid, dstXGrid, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+            if(match) then
+                dstSide = ESMF_XGRIDSIDE_BALANCED
+                dstIdx = 1
             else
                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                       msg="- src Field is not built on Grid or XGrid", &
+                       msg="- XGrid in dstField doesn't match the input XGrid", &
                        ESMF_CONTEXT, rcToReturn=rc) 
                 return
             endif
+        else
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                   msg="- src Field is not built on Grid or XGrid", &
+                   ESMF_CONTEXT, rcToReturn=rc) 
+            return
         endif
 
         ! src and dst Fields should not be on the same side
@@ -1241,22 +1316,47 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! retrieve regridding fraction Fields on demand
         if(present(srcFracField)) then
-          call ESMF_FieldGet(srcFracField, staggerloc=fracFieldStaggerloc, &
-               array=srcFracArray, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-               ESMF_CONTEXT, rcToReturn=rc)) return
+          if(srcgeomtype == ESMF_GEOMTYPE_GRID) then
+            call ESMF_FieldGet(srcFracField, staggerloc=fracFieldStaggerloc, &
+                 array=srcFracArray, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-          call ESMF_FieldGet(srcField, staggerloc=interpFieldStaggerloc, &
-               rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-               ESMF_CONTEXT, rcToReturn=rc)) return
-    
-          ! Make sure the staggerlocs match
-          if (interpFieldStaggerloc .ne. fracFieldStaggerloc) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                  msg="- fracField Field staggerloc must match interpField staggerloc", &
-                  ESMF_CONTEXT, rcToReturn=rc)
-             return
+            call ESMF_FieldGet(srcField, staggerloc=interpFieldStaggerloc, &
+                 rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+      
+            ! Make sure the staggerlocs match
+            if (interpFieldStaggerloc .ne. fracFieldStaggerloc) then
+               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                    msg="- fracField Field staggerloc must match interpField staggerloc", &
+                    ESMF_CONTEXT, rcToReturn=rc)
+               return
+            endif
+          else if(srcgeomtype == ESMF_GEOMTYPE_MESH) then
+            call ESMF_FieldGet(srcFracField, meshloc=fracFieldMeshloc, &
+                 array=srcFracArray, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+            call ESMF_FieldGet(srcField, meshloc=interpFieldMeshloc, &
+                 rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+      
+            ! Make sure the staggerlocs match
+            if (interpFieldMeshloc .ne. fracFieldMeshloc) then
+               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                    msg="- fracField Field Meshloc must match interpField Meshloc", &
+                    ESMF_CONTEXT, rcToReturn=rc)
+               return
+            endif
+          else
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                 msg="- src Field has unrecognized geom type", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+            return
           endif
 
           call ESMF_XGridGet(xgrid, srcSide, srcIdx, &
@@ -1264,23 +1364,49 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        if(present(dstFracField)) then
-          call ESMF_FieldGet(dstFracField, staggerloc=fracFieldStaggerloc, &
-               array=dstFracArray, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-               ESMF_CONTEXT, rcToReturn=rc)) return
 
-          call ESMF_FieldGet(dstField, staggerloc=interpFieldStaggerloc, &
-               rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-               ESMF_CONTEXT, rcToReturn=rc)) return
-    
-          ! Make sure the staggerlocs match
-          if (interpFieldStaggerloc .ne. fracFieldStaggerloc) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                  msg="- fracField Field staggerloc must match interpField staggerloc", &
-                  ESMF_CONTEXT, rcToReturn=rc)
-             return
+        if(present(dstFracField)) then
+          if(dstgeomtype == ESMF_GEOMTYPE_GRID) then
+            call ESMF_FieldGet(dstFracField, staggerloc=fracFieldStaggerloc, &
+                 array=dstFracArray, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+            call ESMF_FieldGet(dstField, staggerloc=interpFieldStaggerloc, &
+                 rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+      
+            ! Make sure the staggerlocs match
+            if (interpFieldStaggerloc .ne. fracFieldStaggerloc) then
+               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                    msg="- fracField Field staggerloc must match interpField staggerloc", &
+                    ESMF_CONTEXT, rcToReturn=rc)
+               return
+            endif
+          else if(dstgeomtype == ESMF_GEOMTYPE_MESH) then
+            call ESMF_FieldGet(dstFracField, meshloc=fracFieldMeshloc, &
+                 array=dstFracArray, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+            call ESMF_FieldGet(dstField, meshloc=interpFieldMeshloc, &
+                 rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+      
+            ! Make sure the staggerlocs match
+            if (interpFieldMeshloc .ne. fracFieldMeshloc) then
+               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                    msg="- fracField Field Meshloc must match interpField Meshloc", &
+                    ESMF_CONTEXT, rcToReturn=rc)
+               return
+            endif
+          else
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                 msg="- dst Field has unrecognized geom type", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+            return
           endif
 
           call ESMF_XGridGet(xgrid, srcSide, srcIdx, &
@@ -1291,22 +1417,47 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! retrieve regridding fraction2 Fields on demand
         if(present(srcMergeFracField)) then
-          call ESMF_FieldGet(srcMergeFracField, staggerloc=fracFieldStaggerloc, &
-               array=srcFracArray, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-               ESMF_CONTEXT, rcToReturn=rc)) return
+          if(srcgeomtype == ESMF_GEOMTYPE_GRID) then
+            call ESMF_FieldGet(srcMergeFracField, staggerloc=fracFieldStaggerloc, &
+                 array=srcFracArray, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-          call ESMF_FieldGet(srcField, staggerloc=interpFieldStaggerloc, &
-               rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-               ESMF_CONTEXT, rcToReturn=rc)) return
-    
-          ! Make sure the staggerlocs match
-          if (interpFieldStaggerloc .ne. fracFieldStaggerloc) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                  msg="- fracField Field staggerloc must match interpField staggerloc", &
-                  ESMF_CONTEXT, rcToReturn=rc)
-             return
+            call ESMF_FieldGet(srcField, staggerloc=interpFieldStaggerloc, &
+                 rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+      
+            ! Make sure the staggerlocs match
+            if (interpFieldStaggerloc .ne. fracFieldStaggerloc) then
+               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                    msg="- fracField Field staggerloc must match interpField staggerloc", &
+                    ESMF_CONTEXT, rcToReturn=rc)
+               return
+            endif
+          else if(srcgeomtype == ESMF_GEOMTYPE_MESH) then
+            call ESMF_FieldGet(srcFracField, meshloc=fracFieldMeshloc, &
+                 array=srcFracArray, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+            call ESMF_FieldGet(srcField, meshloc=interpFieldMeshloc, &
+                 rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+      
+            ! Make sure the staggerlocs match
+            if (interpFieldMeshloc .ne. fracFieldMeshloc) then
+               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                    msg="- fracField Field Meshloc must match interpField Meshloc", &
+                    ESMF_CONTEXT, rcToReturn=rc)
+               return
+            endif
+          else
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                 msg="- src Field has unrecognized geom type", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+            return
           endif
 
           call ESMF_XGridGet(xgrid, srcSide, srcIdx, &
@@ -1314,23 +1465,49 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-        if(present(dstMergeFracField)) then
-          call ESMF_FieldGet(dstMergeFracField, staggerloc=fracFieldStaggerloc, &
-               array=dstFracArray, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-               ESMF_CONTEXT, rcToReturn=rc)) return
 
-          call ESMF_FieldGet(dstField, staggerloc=interpFieldStaggerloc, &
-               rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
-               ESMF_CONTEXT, rcToReturn=rc)) return
-    
-          ! Make sure the staggerlocs match
-          if (interpFieldStaggerloc .ne. fracFieldStaggerloc) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-                  msg="- fracField Field staggerloc must match interpField staggerloc", &
-                  ESMF_CONTEXT, rcToReturn=rc)
-             return
+        if(present(dstMergeFracField)) then
+          if(dstgeomtype == ESMF_GEOMTYPE_GRID) then
+            call ESMF_FieldGet(dstMergeFracField, staggerloc=fracFieldStaggerloc, &
+                 array=dstFracArray, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+            call ESMF_FieldGet(dstField, staggerloc=interpFieldStaggerloc, &
+                 rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+      
+            ! Make sure the staggerlocs match
+            if (interpFieldStaggerloc .ne. fracFieldStaggerloc) then
+               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                    msg="- fracField Field staggerloc must match interpField staggerloc", &
+                    ESMF_CONTEXT, rcToReturn=rc)
+               return
+            endif
+          else if(dstgeomtype == ESMF_GEOMTYPE_MESH) then
+            call ESMF_FieldGet(dstFracField, meshloc=fracFieldMeshloc, &
+                 array=dstFracArray, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+            call ESMF_FieldGet(dstField, meshloc=interpFieldMeshloc, &
+                 rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+      
+            ! Make sure the staggerlocs match
+            if (interpFieldMeshloc .ne. fracFieldMeshloc) then
+               call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                    msg="- fracField Field Meshloc must match interpField Meshloc", &
+                    ESMF_CONTEXT, rcToReturn=rc)
+               return
+            endif
+          else
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+                 msg="- dst Field has unrecognized geom type", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+            return
           endif
 
           call ESMF_XGridGet(xgrid, srcSide, srcIdx, &
