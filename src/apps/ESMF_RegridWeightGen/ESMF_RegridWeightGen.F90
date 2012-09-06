@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.71 2012/09/05 19:35:13 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.72 2012/09/06 18:02:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -16,7 +16,7 @@ program ESMF_RegridWeightGenApp
       use ESMF
       use ESMF_IOScripMod
       use ESMF_IOGridspecMod
-      use ESMF_RegridWeightGenMod
+!      use ESMF_RegridWeightGenMod
 
       implicit none
 
