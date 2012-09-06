@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.1 2012/09/05 19:29:27 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.2 2012/09/06 15:21:39 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -48,13 +48,18 @@ module ESMF_RegridWeightGenMod
 
   
   implicit none
-  private
+
+!
+! !PUBLIC MEMBER FUNCTIONS:
+!
+! - ESMF-public methods:
+  public ESMF_RegridWeightGen
 
 contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+! -------------------------- ESMF-public method -------------------------------
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RegridWeightGen"
@@ -66,31 +71,39 @@ contains
 subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
      	         poleMethod, poleNPnts, ignoreUnmappedFlag, srcFileType, dstFileType, &
                  srcRegionalFlag, dstRegionalFlag, srcMeshname, dstMeshname,  &
-		 srcMissingvalueVar, dstMissingvalueVar, srcCoordinateVars, &
-                 dstCoordinateVars,  useUserAreaFlag,  largefileFlag, rc)
+		 srcMissingvalueFlag, srcMissingvalueVar, &
+		 dstMissingvalueFlag, dstMissingvalueVar, &
+		 useSrcCoordFlag, srcCoordinateVars, &
+                 useDstCoordFlag, dstCoordinateVars, &
+		 useUserAreaFlag,  largefileFlag, verboseFlag, rc)
 
 ! !ARGUMENTS:
 
-	character(len=*),  intent(in) :: srcFile
-	character(len=*),  intent(in) :: dstFile
-	character(len=*),  intent(out) :: weightFile
+	character(len=*),  intent(in)         :: srcFile
+	character(len=*),  intent(in)         :: dstFile
+	character(len=*),  intent(out)        :: weightFile
 	type(ESMF_RegridMethod_Flag),  intent(in), optional :: regridMethod
 	type(ESMF_PoleMethod_Flag),  intent(in), optional :: poleMethod
-	integer,   intent(in), optional :: poleNPnts
-	logical,     intent(in), optional :: ignoreUnmappedFlag
+	integer,   intent(in), optional       :: poleNPnts
+	logical,     intent(in), optional     :: ignoreUnmappedFlag
 	type(ESMF_FileFormat_Flag), intent(in), optional :: srcFileType
 	type(ESMF_FileFormat_Flag), intent(in), optional :: dstFileType
-	logical,     intent(in), optional :: srcRegionalFlag
-	logical,     intent(in), optional :: dstRegionalFlag
+	logical,     intent(in), optional     :: srcRegionalFlag
+	logical,     intent(in), optional     :: dstRegionalFlag
 	character(len=*), intent(in), optional :: srcMeshname 
 	character(len=*), intent(in), optional :: dstMeshname 
+	logical,     intent(in), optional      :: srcMissingValueFlag
 	character(len=*), intent(in), optional :: srcMissingvalueVar
+	logical,     intent(in), optional      :: dstMissingValueFlag
 	character(len=*), intent(in), optional :: dstMissingvalueVar
-	character(len=*), intent(in), optional :: srcCoordinateVars
-	character(len=*), intent(in), optional :: dstCoordinateVars
-	logical, intent(in), optional :: useUserAreaFlag
-	logical, intent(in), optional :: largefileFlag
-	integer, intent(out), optional :: rc
+	logical,     intent(in), optional      :: useSrcCoordFlag
+	character(len=*), intent(in), optional :: srcCoordinateVars(:)
+	logical, intent(in), optional          :: useDstCoordFlag
+	character(len=*), intent(in), optional :: dstCoordinateVars(:)
+	logical, intent(in), optional          :: useUserAreaFlag
+	logical, intent(in), optional          :: largefileFlag
+	logical, intent(in), optional          :: verboseFlag
+	integer, intent(out), optional         :: rc
 
 ! !DESCRIPTION:
 !   \begin{description}
@@ -111,6 +124,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
       integer            :: localPoleNPnts
       logical            :: localUserAreaFlag
       logical            :: localLargefileFlag
+      logical            :: localVerboseFlag
       integer            :: localrc
       type(ESMF_VM)      :: vm
       integer            :: PetNo, PetCnt
@@ -121,7 +135,6 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
       type(ESMF_ArraySpec) :: arrayspec
       integer(ESMF_KIND_I4), pointer:: factorIndexList(:,:)
       real(ESMF_KIND_R8), pointer :: factorList(:)
-      character(len=40)  :: method, flag
       integer(ESMF_KIND_I4) :: maskvals(1)
       integer            :: ind
       integer, pointer   :: srcdims(:), dstdims(:)
@@ -133,7 +146,6 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
       logical            :: srcIsReg, dstIsReg
       logical            :: srcIsRegional, dstIsRegional, typeSetFlag
       character(len=256) :: methodStr
-      type(ESMF_RegridMethod_Flag) :: methodflag
       real(ESMF_KIND_R8), pointer :: srcArea(:)
       real(ESMF_KIND_R8), pointer :: dstArea(:)
       real(ESMF_KIND_R8), pointer :: dstFrac(:), srcFrac(:)
@@ -145,10 +157,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
       logical 		 :: ignoreUnmapped
       type(ESMF_UnmappedAction_Flag) :: unmappedaction
       logical            :: srcMissingValue, dstMissingValue
-      character(len=80) :: srcvarname, dstvarname
-      character(len=80) :: srcCoordNames(2), dstCoordNames(2)
       character(len=256) :: argStr
-      integer            :: pos
       logical            :: useSrcCoordVar, useDstCoordVar
       logical            :: useSrcMask, useDstMask
       !real(ESMF_KIND_R8) :: starttime, endtime
@@ -173,13 +182,17 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
       localRegridMethod = ESMF_REGRIDMETHOD_BILINEAR
       localSrcFileType = ESMF_FILEFORMAT_SCRIP
       localDstFileType = ESMF_FILEFORMAT_SCRIP
+      localVerboseFlag = .false.
       srcIsRegional = .false.
       dstIsRegional = .false.
+      srcMissingValue = .false.
+      dstMissingValue = .false.
       ignoreUnmapped= .false.
       localLargeFileFlag = .false.
       localUserAreaflag = .false.
       useSrcCoordVar = .false.
       useDstCoordVar = .false.
+      localPoleNPnts = 0
 
       if (present(regridMethod)) then
         localRegridMethod = regridMethod
@@ -189,10 +202,8 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
       	 localPoleMethod = poleMethod
       else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
          localPoleMethod = ESMF_POLEMETHOD_NONE
-         localPoleNPnts = 0
       else
          localPoleMethod = ESMF_POLEMETHOD_ALLAVG
-         localPoleNPnts = -1
       endif
 
       if (localPoleMethod == ESMF_POLEMETHOD_NPNTAVG) then
@@ -204,15 +215,6 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
             ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
-      else if (present(poleNPnts)) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	    msg ="no need to set PoleNPnts, ignore", &
-            ESMF_CONTEXT, rcToReturn=rc)
-	  return
-      endif
-
-      if (localPoleMethod == ESMF_POLEMETHOD_TEETH) then
-        localPoleNPnts = -2
       endif
 
       if ((localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) .and. &
@@ -251,27 +253,43 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
         endif
       endif
 
-      ! If the src grid type is UGRID or GRIDSPEC, check if the srcMissingvalueVar is given 
+      ! If the src grid type is UGRID or GRIDSPEC, check if the srcMissingvalueFlag is given 
       if (localSrcFileType == ESMF_FILEFORMAT_UGRID .or. &
       	  localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-        if (present(srcMissingvalueVar)) then
-	   srcMissingValue = .true.
+        if (present(srcMissingvalueFlag)) then
+	   srcMissingValue = srcMissingvalueFlag
 	else
 	   srcMissingValue = .false.
+        endif
+	if (srcMissingValue) then
+	   if (.not. present(srcMissingvalueVar)) then
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+   	        msg ="srcMissingvalueVar argument is not given", &
+                ESMF_CONTEXT, rcToReturn=rc)
+             return
+ 	   endif  
         endif
       endif
 
       ! If the dst grid type is UGRID or GRIDSPEC, check if the dstMissingvalueVar is given 
       if (localDstFileType == ESMF_FILEFORMAT_UGRID .or. &
       	  localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
-        if (present(dstMissingvalueVar)) then
-	   dstMissingValue = .true.
+        if (present(dstMissingvalueFlag)) then
+	   dstMissingValue = dstMissingvalueFlag
 	else
 	   dstMissingValue = .false.
         endif
+	if (dstMissingValue) then
+	   if (.not. present(dstMissingvalueVar)) then
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+   	        msg ="dstMissingvalueVar argument is not given", &
+                ESMF_CONTEXT, rcToReturn=rc)
+             return
+           endif
+        endif
       endif
 
-      if (present(srcMissingvalueVar) .and. (localSrcFileType == ESMF_FILEFORMAT_SCRIP .or. &
+      if (srcMissingValue .and. (localSrcFileType == ESMF_FILEFORMAT_SCRIP .or. &
           localSrcFileType == ESMF_FILEFORMAT_ESMFMESH)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
 	    msg =" missingvalue is only supported for UGRID and GRIDSPEC", &
@@ -287,7 +305,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
           return
       endif
 
-      if (present(dstMissingvalueVar) .and. (localDstFileType == ESMF_FILEFORMAT_SCRIP .or. &
+      if (dstMissingValue .and. (localDstFileType == ESMF_FILEFORMAT_SCRIP .or. &
           localDstFileType == ESMF_FILEFORMAT_ESMFMESH)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
 	    msg = " missingvalue is only supported for UGRID and GRIDSPEC", &
@@ -321,11 +339,15 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
       endif
 
       if (present(largefileFlag)) then
-	   localLargeFileFlag = .true.
-      end if
+	   localLargeFileFlag = largefileFlag
+      endif
 
       if (present(useUserAreaFlag)) then
-	   localUserAreaFlag = .true.
+	   localUserAreaFlag = useUserAreaFlag
+      endif
+
+      if (present(verboseFlag)) then
+           localVerboseFlag = verboseFlag
       endif
 
       ! user area only needed for conservative regridding
@@ -348,45 +370,38 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 
       ! --src_coordinates, --dst_coordinates for GRIDSPEC file if there are multiple
       ! coordinate variables
-      if (present(srcCoordinateVars)) then
-	  if (srcFileType /= ESMF_FILEFORMAT_GRIDSPEC) then
-              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-  	         msg = "srcCoordinateVars is only used when the srcFileType is ESMF_FILEFORMAT_SCRIP", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-              return
-          else 
-              pos = INDEX(srcCoordinateVars, ',')
-              if (pos == 0) then
+      if (srcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+         if (present(useSrcCoordFlag)) then
+	    useSrcCoordVar = useSrcCoordFlag
+         else
+            useSrcCoordVar = .false.
+         endif
+         if (useSrcCoordVar) then
+	    if (.not. present(srcCoordinateVars)) then
                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-                  msg = "srcCoordinateVars should be comma separated lon/lat variable names", &
-                  ESMF_CONTEXT, rcToReturn=rc)
-                return
-              endif
-              srcCoordNames(1)=srcCoordinateVars(1:pos-1)
-              srcCoordNames(2)=srcCoordinateVars(pos+1:)
-              useSrcCoordVar = .true.
-          endif
+       	           msg = "srcCoordinateVars argument is not given.", &
+                   ESMF_CONTEXT, rcToReturn=rc)
+              return
+	    endif  
+         endif
       endif
 
-      if (present(dstCoordinateVars)) then
-	  if (dstFileType /= ESMF_FILEFORMAT_GRIDSPEC) then
-              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-    	        msg = "dstCoordinateVars is only used when the dstFileType is ESMF_FILEFORMAT_SCRIP", &
-                ESMF_CONTEXT, rcToReturn=rc)
-              return
-          else 
-              pos = INDEX(dstCoordinateVars, ',')
-              if (pos == 0) then
+      if (dstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+         if (present(useDstCoordFlag)) then
+	    useDstCoordVar = useDstCoordFlag
+         else
+            useDstCoordVar = .false.
+         endif
+         if (useDstCoordVar) then
+	    if (.not. present(dstCoordinateVars)) then
                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-                  msg = "dstCoordinateVars should be comma separated lon/lat variable names", &
-                  ESMF_CONTEXT, rcToReturn=rc)
-                return
-              endif
-              dstCoordNames(1)=dstCoordinateVars(1:pos-1)
-              dstCoordNames(2)=dstCoordinateVars(pos+1:)
-              useDstCoordVar = .true.
-          endif
+       	           msg = "dstCoordinateVars argument is not given.", &
+                   ESMF_CONTEXT, rcToReturn=rc)
+              return
+	    endif  
+         endif
       endif
+
 
       ! Only set useSrcMask to false if srcMissingvalue is not given and the file type is
       ! either GRIDSPEC or UGRID, same for useDstMask
@@ -418,7 +433,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
       elseif (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
            allocate(srcdims(2))
 	   if (useSrcCoordVar) then
-   	      call ESMF_GridspecInq(srcfile, srcrank, srcdims, coord_names=srcCoordNames, rc=localrc)
+   	      call ESMF_GridspecInq(srcfile, srcrank, srcdims, coord_names=srcCoordinateVars, rc=localrc)
 	   else
 	      call ESMF_GridspecInq(srcfile, srcrank, srcdims, rc=localrc)
  	   endif
@@ -457,7 +472,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
        elseif (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
 	   allocate(dstdims(2))
 	   if (useDstCoordVar) then
-	      call ESMF_GridspecInq(dstfile, dstrank, dstdims, coord_names=dstCoordNames, rc=localrc)
+	      call ESMF_GridspecInq(dstfile, dstrank, dstdims, coord_names=dstCoordinateVars, rc=localrc)
 	   else
 	      call ESMF_GridspecInq(dstfile, dstrank, dstdims, rc=localrc)
 	   endif 
@@ -478,7 +493,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
       endif
         
       ! Print the regrid options
-      if (PetNo == 0) then
+      if (localVerboseFlag .and. PetNo == 0) then
   	  print *, "Starting weight generation with these inputs: "
 	  print *, "  Source File: ", trim(srcfile)
 	  print *, "  Destination File: ", trim(dstfile)
@@ -491,15 +506,15 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
              print *, "  Source File is in UGRID format, dummy variable: ", &
 		trim(srcMeshName)
 	     if (srcMissingValue) then
-	        print *, "    Use attribute 'missing_value' of variable '", trim(srcVarName),"' as the mask"
+	        print *, "    Use attribute 'missing_value' of variable '", trim(srcMissingvalueVar),"' as the mask"
 	     endif
 	  else 
 	     print *, "  Source File is in GRIDSPEC foramt"
 	     if (useSrcCoordVar) then
-	        print *, "    Use '", trim(srcCoordNames(1)), "' and '", trim(srcCoordNames(2)), "' as the longitude and latitude variables"
+	        print *, "    Use '", trim(srcCoordinateVars(1)), "' and '", trim(srcCoordinateVars(2)), "' as the longitude and latitude variables"
 	     endif
 	     if (srcMissingValue) then
-	        print *, "    Use the missing values of variable '", trim(srcVarName),"' as the mask"
+	        print *, "    Use the missing values of variable '", trim(srcMissingvalueVar),"' as the mask"
              endif
           endif
           if (srcIsRegional) then
@@ -520,15 +535,15 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
               print *, "  Destination File is in UGRID format, dummy variable: ", & 
 	  	trim(dstMeshName)
 	      if (dstMissingValue) then
-	        print *, "    Use the missing value of '", trim(dstVarName),"' as the mask"
+	        print *, "    Use the missing value of '", trim(dstMissingvalueVar),"' as the mask"
               endif	
           else
 	      print *, "  Destination File is in GRIDSPEC format"	
 	      if (useDstCoordVar) then
-	        print *, "    Use '", trim(dstCoordNames(1)), "' and '", trim(dstCoordNames(2)), "' as the longitude and latitude variables"
+	        print *, "    Use '", trim(dstCoordinateVars(1)), "' and '", trim(dstCoordinateVars(2)), "' as the longitude and latitude variables"
 	      endif
 	      if (dstMissingValue) then
-	        print *, "    Use the missing value of '", trim(dstVarName),"' as the mask"
+	        print *, "    Use the missing value of '", trim(dstMissingvalueVar),"' as the mask"
               endif	
 	  endif
           if (dstIsRegional) then
@@ -541,7 +556,13 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
           else
 	     print *, "  Destination Grid is an unstructured grid"
           endif
-          print *, "  Regrid Method: ", method
+          if (localRegridMethod == ESMF_REGRIDMETHOD_BILINEAR) then
+             print *, "  Regrid Method: bilinear"
+          elseif (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+             print *, "  Regrid Method: conserve"
+          elseif (localRegridMethod == ESMF_REGRIDMETHOD_PATCH) then
+             print *, "  Regrid Method: patch"
+	  endif
           if (localPoleMethod .eq. ESMF_POLEMETHOD_NONE) then
 	     print *, "  Pole option: NONE"
 	  elseif (localPoleMethod .eq. ESMF_POLEMETHOD_ALLAVG) then
@@ -645,18 +666,18 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
  	  if (srcMissingValue) then
 	     srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
 		  addCornerStagger=addCorners, &
-		  addMask=.true., varname=trim(srcVarName), isSphere=srcIsSphere, &
-		  coordNames = srcCoordNames, rc=localrc)
+		  addMask=.true., varname=trim(srcMissingvalueVar), isSphere=srcIsSphere, &
+		  coordNames = srcCoordinateVars, rc=localrc)
           else
              srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), & 
 		       addCornerStagger=addCorners, &
-                       isSphere=srcIsSphere, coordNames = srcCoordNames,rc=localrc)
+                       isSphere=srcIsSphere, coordNames = srcCoordinateVars,rc=localrc)
 	  endif
         else 
  	  if (srcMissingValue) then
 	     srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
 		  addCornerStagger=addCorners, &
-		  addMask=.true., varname=trim(srcVarName), isSphere=srcIsSphere, rc=localrc)
+		  addMask=.true., varname=trim(srcMissingvalueVar), isSphere=srcIsSphere, rc=localrc)
           else
              srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), & 
 		       addCornerStagger=addCorners, &
@@ -713,7 +734,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 	if (srcMissingValue) then
 	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, convert3D=.true., &
                     meshname = trim(srcMeshName), addMask=.true., &
-		    varname=trim(srcVarName), rc=localrc)
+		    varname=trim(srcMissingvalueVar), rc=localrc)
 	else
 	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, convert3D=.true., &
                     meshname = trim(srcMeshName), rc=localrc)
@@ -760,18 +781,18 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
  	  if (dstMissingValue) then
 	     dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
 		  addCornerStagger=addCorners, &
-		  addMask=.true., varname=trim(dstVarName), isSphere=dstIsSphere, &
-		  coordNames = dstCoordNames, rc=localrc)
+		  addMask=.true., varname=trim(dstMissingvalueVar), isSphere=dstIsSphere, &
+		  coordNames = dstCoordinateVars, rc=localrc)
           else
              dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
 			addCornerStagger=addCorners, &
-                        isSphere=dstIsSphere, coordNames=dstCoordNames, rc=localrc)
+                        isSphere=dstIsSphere, coordNames=dstCoordinateVars, rc=localrc)
 	  endif
         else
  	  if (dstMissingValue) then
 	     dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
 		  addCornerStagger=addCorners, &
-		  addMask=.true., varname=trim(dstVarName), isSphere=dstIsSphere, rc=localrc)
+		  addMask=.true., varname=trim(dstMissingvalueVar), isSphere=dstIsSphere, rc=localrc)
           else
              dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
 			addCornerStagger=addCorners, &
@@ -825,7 +846,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 	if (dstMissingValue) then
  	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, convert3D=.true., &
                     meshname = trim(dstMeshName), addMask=.true., &
-		    varname=trim(dstVarName), rc=localrc)
+		    varname=trim(dstMissingvalueVar), rc=localrc)
 	else
 	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, convert3D=.true., &
                     meshname = trim(dstMeshName), rc=localrc)
@@ -895,11 +916,9 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
             methodStr = "Bilinear remapping"
       else if (localRegridMethod == ESMF_REGRIDMETHOD_PATCH) then
             methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Patch
-	    methodflag = ESMF_REGRIDMETHOD_PATCH
       else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
             methodStr = "Conservative remapping"
-	    methodflag = ESMF_REGRIDMETHOD_CONSERVE
-      else ! nothing recognizable so report error
+     else ! nothing recognizable so report error
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
             msg="unrecognized RegridMethod", &
             ESMF_CONTEXT, rcToReturn=rc)
@@ -911,7 +930,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 	    unmappedaction=unmappedaction, &
 	    factorIndexList=factorIndexList, factorList=factorList, &
             srcFracField=srcFracField, dstFracField=dstFracField, &
-            regridmethod = methodflag, &
+            regridmethod = localRegridMethod, &
             polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
 	    rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -923,7 +942,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 	    unmappedaction=unmappedaction, &
 	    factorIndexList=factorIndexList, factorList=factorList, &
             srcFracField=srcFracField, dstFracField=dstFracField, &
-            regridmethod = methodflag, &
+            regridmethod = localRegridMethod, &
             polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
 	    rc=localrc)
            if (ESMF_LogFoundError(localrc, &
@@ -935,7 +954,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 	    unmappedaction=unmappedaction, &
 	    factorIndexList=factorIndexList, factorList=factorList, &
             srcFracField=srcFracField, dstFracField=dstFracField, &
-            regridmethod = methodflag, &
+            regridmethod = localRegridMethod, &
             polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
 	    rc=localrc)
            if (ESMF_LogFoundError(localrc, &
@@ -946,7 +965,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 	    unmappedaction=unmappedaction, &
 	    factorIndexList=factorIndexList, factorList=factorList, &
             srcFracField=srcFracField, dstFracField=dstFracField, &
-            regridmethod = methodflag, &
+            regridmethod = localRegridMethod, &
             polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
 	    rc=localrc)
            if (ESMF_LogFoundError(localrc, &
@@ -1015,7 +1034,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
       ! Computer fraction if bilinear
       ! src fraction is always 0
       ! destination fraction depends on the src mask, dst mask, and the weight
-      if (method .eq. 'bilinear' .or. method .eq. 'patch') then
+      if (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
 	if (dstIsReg) then
 	   call computeFracGrid(dstGrid, vm, factorIndexList, dstFrac, localrc)
            if (ESMF_LogFoundError(localrc, &
@@ -1027,7 +1046,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-      else if (method .eq. 'conserve') then
+      else 
          if (srcIsReg) then
             call gatherFracFieldGrid(srcGrid, srcFracField, petNo, srcFrac, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
@@ -1061,42 +1080,42 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 	   if (useSrcCoordVar .and. useDstCoordVar) then
               call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	           dstFileType=localDstFileType, method = methodflag, &
+	           dstFileType=localDstFileType, method = localRegridMethod, &
                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
 		   dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-	           srcvarname = srcvarname, dstvarname=dstvarname, &
-	 	   srccoordnames = srcCoordNames, dstcoordnames = dstCoordNames, rc=localrc)
+	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+	 	   srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
     	   else if (useSrcCoordVar) then	
               call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	           dstFileType=localDstFileType, method = methodflag, &
+	           dstFileType=localDstFileType, method = localRegridMethod, &
                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
 		   dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-	           srcvarname = srcvarname, dstvarname=dstvarname, &
-	 	   srccoordnames = srcCoordNames, rc=localrc)
+	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+	 	   srccoordnames = srcCoordinateVars, rc=localrc)
 	   elseif (useDstCoordVar) then
               call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	           dstFileType=localDstFileType, method = methodflag, &
+	           dstFileType=localDstFileType, method = localRegridMethod, &
                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
 		   dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-	           srcvarname = srcvarname, dstvarname=dstvarname, &
-	 	   dstcoordnames = dstCoordNames, rc=localrc)
+	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+	 	   dstcoordnames = dstCoordinateVars, rc=localrc)
 	    else
               call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	           dstFileType=localDstFileType, method = methodflag, &
+	           dstFileType=localDstFileType, method = localRegridMethod, &
                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
 		   dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-	           srcvarname = srcvarname, dstvarname=dstvarname, rc=localrc)
+	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)
 	   endif
            if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1105,38 +1124,38 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 	   if (useSrcCoordVar .and. useDstCoordVar) then
                call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	           dstFileType=localDstFileType, method = methodflag, dstFrac=dstFrac, &
+	           dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
 		   largeFileFlag=localLargeFileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-	           srcvarname = srcvarname, dstvarname=dstvarname, &
- 	 	   srccoordnames = srcCoordNames, dstcoordnames = dstCoordNames, rc=localrc)
+	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+ 	 	   srccoordnames = srcCoordinateVars, dstcoordnames = dstCoordinateVars, rc=localrc)
 	   elseif (useSrcCoordVar) then
                call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	           dstFileType=localDstFileType, method = methodflag, dstFrac=dstFrac, &
+	           dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
 		   largeFileFlag=localLargeFileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-	           srcvarname = srcvarname, dstvarname=dstvarname, &
- 	 	   srccoordnames = srcCoordNames, rc=localrc)
+	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+ 	 	   srccoordnames = srcCoordinateVars, rc=localrc)
 	   elseif (useDstCoordVar) then
                call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	           dstFileType=localDstFileType, method = methodflag, dstFrac=dstFrac, &
+	           dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
 		   largeFileFlag=localLargeFileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-	           srcvarname = srcvarname, dstvarname=dstvarname, &
- 	 	   dstcoordnames = dstCoordNames, rc=localrc)
+	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
+ 	 	   dstcoordnames = dstCoordinateVars, rc=localrc)
 	   else
                call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
 	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
-	           dstFileType=localDstFileType, method = methodflag, dstFrac=dstFrac, &
+	           dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
 		   largeFileFlag=localLargeFileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
-	           srcvarname = srcvarname, dstvarname=dstvarname, rc=localrc)
+	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)
            endif
            if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
