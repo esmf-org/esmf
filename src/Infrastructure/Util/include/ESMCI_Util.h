@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.52 2012/07/18 22:21:47 rokuingh Exp $
+// $Id: ESMCI_Util.h,v 1.53 2012/09/07 20:21:01 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -237,6 +237,7 @@ extern ESMC_ObjectID ESMC_ID_GRIDCOMPONENT;
 extern ESMC_ObjectID ESMC_ID_CPLCOMPONENT;
 extern ESMC_ObjectID ESMC_ID_COMPONENT;
 extern ESMC_ObjectID ESMC_ID_XGRID;
+extern ESMC_ObjectID ESMC_ID_XGRIDGEOMBASE;
 extern ESMC_ObjectID ESMC_ID_NONE;
 
 #endif  // ESMCI_UTIL_H

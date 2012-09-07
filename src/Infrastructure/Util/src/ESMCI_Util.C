@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.C,v 1.14 2012/07/18 22:21:49 rokuingh Exp $
+// $Id: ESMCI_Util.C,v 1.15 2012/09/07 20:21:02 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Util.C,v 1.14 2012/07/18 22:21:49 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Util.C,v 1.15 2012/09/07 20:21:02 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 // Note:  any changes made to this C++ list must also be made to
@@ -82,6 +82,7 @@ ESMC_ObjectID ESMC_ID_GRIDCOMPONENT  = {30, "ESMF_GridComponent"};
 ESMC_ObjectID ESMC_ID_CPLCOMPONENT   = {31, "ESMF_CplComponent"};
 ESMC_ObjectID ESMC_ID_COMPONENT      = {32, "ESMF_Component"};
 ESMC_ObjectID ESMC_ID_XGRID          = {33, "ESMF_XGrid"};
+ESMC_ObjectID ESMC_ID_XGRIDGEOMBASE  = {34, "ESMF_XGridGeomBase"};
 ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 
 //

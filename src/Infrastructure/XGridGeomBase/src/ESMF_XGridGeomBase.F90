@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGeomBase.F90,v 1.3 2012/09/07 17:16:10 feiliu Exp $
+! $Id: ESMF_XGridGeomBase.F90,v 1.4 2012/09/07 20:20:27 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@ public ESMF_XGridGeomType_Flag,  ESMF_XGRIDGEOMTYPE_INVALID, ESMF_XGRIDGEOMTYPE_
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_XGridGeomBase.F90,v 1.3 2012/09/07 17:16:10 feiliu Exp $'
+      '$Id: ESMF_XGridGeomBase.F90,v 1.4 2012/09/07 20:20:27 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -286,58 +286,58 @@ end interface
 
     ! Get info depending on type
     select case(gbcp%type%type)
-       case (ESMF_XGRIDGEOMTYPE_GRID%type) ! Grid 
-         call ESMF_GridGetArrayInfo(gbcp%grid, gbcp%staggerloc, &
-                           gridToFieldMap, ungriddedLBound, ungriddedUBound,  &
-                           distgrid, distgridToArrayMap, undistLBound, undistUBound,       &
-                           rc=localrc)
-         if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+     case (ESMF_XGRIDGEOMTYPE_GRID%type) ! Grid 
+       call ESMF_GridGetArrayInfo(gbcp%grid, gbcp%staggerloc, &
+         gridToFieldMap, ungriddedLBound, ungriddedUBound,  &
+         distgrid, distgridToArrayMap, undistLBound, undistUBound,       &
+         rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
-       case (ESMF_XGRIDGEOMTYPE_MESH%type) ! Mesh
-          if (present(gridToFieldMap)) then
-            distgridToArrayMap = gridToFieldMap
-          else
-            distgridToArrayMap = 1
-          endif
+     case (ESMF_XGRIDGEOMTYPE_MESH%type) ! Mesh
+        if (present(gridToFieldMap)) then
+          distgridToArrayMap = gridToFieldMap
+        else
+          distgridToArrayMap = 1
+        endif
 
-          if (present(ungriddedLBound)) then
-              if (size(ungriddedLBound) .gt. 0) undistLBound = ungriddedLBound
-          endif
-          if (present(ungriddedUBound)) then
-              if (size(ungriddedUBound) .gt. 0) undistUBound = ungriddedUBound
-          endif
+        if (present(ungriddedLBound)) then
+            if (size(ungriddedLBound) .gt. 0) undistLBound = ungriddedLBound
+        endif
+        if (present(ungriddedUBound)) then
+            if (size(ungriddedUBound) .gt. 0) undistUBound = ungriddedUBound
+        endif
 
-           ! Distgrid
-	   if (present(distgrid)) then
-	    if (gbcp%meshloc == ESMF_MESHLOC_NODE) then
-               call ESMF_MeshGet(mesh=gbcp%mesh, &
-                                 nodalDistgrid=distgrid, &
-                                  rc=localrc)
-               if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-	    else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
-               call ESMF_MeshGet(mesh=gbcp%mesh, &
-                                 elementDistgrid=distgrid, &
-                                  rc=localrc)
-               if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-            else
-              if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Bad Mesh Location value", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-            endif
-           endif
+         ! Distgrid
+   if (present(distgrid)) then
+    if (gbcp%meshloc == ESMF_MESHLOC_NODE) then
+     call ESMF_MeshGet(mesh=gbcp%mesh, &
+                       nodalDistgrid=distgrid, &
+                        rc=localrc)
+     if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
+       call ESMF_MeshGet(mesh=gbcp%mesh, &
+         elementDistgrid=distgrid, &
+          rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
+         msg=" Bad Mesh Location value", &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+   endif
 
 
 
-       case default
-         if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Bad type value", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
+     case default
+       if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
+         msg=" Bad type value", &
+         ESMF_CONTEXT, rcToReturn=rc)) return
     end select
 
 
@@ -396,7 +396,7 @@ end interface
     ! allocate GeomBase type
     allocate(gbcp, stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating GeomBase type object", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+     ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set values in GeomBase
     gbcp%type = ESMF_XGRIDGEOMTYPE_GRID
@@ -466,7 +466,7 @@ end interface
     ! allocate GeomBase type
     allocate(gbcp, stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating GeomBase type object", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+     ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set default
     if (present(loc)) then
@@ -626,8 +626,8 @@ end interface
           grid=gbcp%grid
        else
           if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Grid not geometry type", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
+           msg=" Grid not geometry type", &
+           ESMF_CONTEXT, rcToReturn=rc)) return
        endif
     endif
 
@@ -636,9 +636,9 @@ end interface
        if (gbcp%type==ESMF_XGRIDGEOMTYPE_Mesh) then
           mesh=gbcp%mesh
        else
-          if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Mesh not geometry type", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
+        if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
+         msg=" Mesh not geometry type", &
+         ESMF_CONTEXT, rcToReturn=rc)) return
        endif
     endif
 
@@ -648,8 +648,8 @@ end interface
           staggerloc=gbcp%staggerloc
        else
           if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Grid not geometry type", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
+           msg=" Grid not geometry type", &
+           ESMF_CONTEXT, rcToReturn=rc)) return
        endif
     endif
 
@@ -659,8 +659,8 @@ end interface
           meshloc=gbcp%meshloc
        else
           if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Grid not geometry type", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
+           msg=" Grid not geometry type", &
+           ESMF_CONTEXT, rcToReturn=rc)) return
        endif
     endif
 
@@ -670,18 +670,18 @@ end interface
     ! Get info depending on type
     select case(gbcp%type%type)
        case (ESMF_XGRIDGEOMTYPE_GRID%type) ! Grid 
-            call ESMF_GridGet(grid=gbcp%grid,  &
-                      dimCount=dimCount,  localDECount=localDECount, &
-                      distgridToGridMap=distgridToGridMap, &
-                      indexflag=indexFlag, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_GridGet(grid=gbcp%grid, staggerloc=gbcp%staggerloc, &
-                      distgrid=distgrid, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_GridGet(grid=gbcp%grid,  &
+                  dimCount=dimCount,  localDECount=localDECount, &
+                  distgridToGridMap=distgridToGridMap, &
+                  indexflag=indexFlag, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_GridGet(grid=gbcp%grid, staggerloc=gbcp%staggerloc, &
+                  distgrid=distgrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
        case (ESMF_XGRIDGEOMTYPE_MESH%type) ! Mesh
             if (present(dimCount)) dimCount = 1
@@ -689,32 +689,32 @@ end interface
             if (present(distgridToGridMap)) distgridToGridMap = 1
             ! Distgrid
  	    if (present(distgrid)) then
-	       if (gbcp%meshloc == ESMF_MESHLOC_NODE) then
-                  call ESMF_MeshGet(mesh=gbcp%mesh, &
-                                    nodalDistgrid=distgrid, &
-                                    rc=localrc)
-                  if (ESMF_LogFoundError(localrc, &
-                                   ESMF_ERR_PASSTHRU, &
-                                   ESMF_CONTEXT, rcToReturn=rc)) return
-	       else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
-                  call ESMF_MeshGet(mesh=gbcp%mesh, &
-                                 elementDistgrid=distgrid, &
-                                  rc=localrc)
-                  if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-               else
-                  if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Bad Mesh Location value", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-               endif
-            endif
-            if (present(indexFlag)) indexFlag = ESMF_INDEX_DELOCAL
+       if (gbcp%meshloc == ESMF_MESHLOC_NODE) then
+        call ESMF_MeshGet(mesh=gbcp%mesh, &
+                          nodalDistgrid=distgrid, &
+                          rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+       else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
+            call ESMF_MeshGet(mesh=gbcp%mesh, &
+                           elementDistgrid=distgrid, &
+                            rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+             ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+         else
+            if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
+             msg=" Bad Mesh Location value", &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+         endif
+      endif
+      if (present(indexFlag)) indexFlag = ESMF_INDEX_DELOCAL
 
        case default
          if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Bad type value", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
+           msg=" Bad type value", &
+           ESMF_CONTEXT, rcToReturn=rc)) return
     end select
 
 
@@ -795,8 +795,8 @@ end subroutine ESMF_XGridGeomBaseGet
           exclusiveLBound=exclusiveLBound, exclusiveUBound=exclusiveUBound, &
           exclusiveCount=exclusiveCount, rc=localrc) 
           if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+     ESMF_ERR_PASSTHRU, &
+     ESMF_CONTEXT, rcToReturn=rc)) return
 
        case  (ESMF_XGRIDGEOMTYPE_MESH%type) ! Mesh
           if (present(exclusiveLBound)) exclusiveLBound(1) = 1
@@ -806,19 +806,19 @@ end subroutine ESMF_XGridGeomBaseGet
                                     numOwnedNodes=exclusiveUBound(1), &
                                     rc=localrc)
                   if (ESMF_LogFoundError(localrc, &
-                                   ESMF_ERR_PASSTHRU, &
-                                   ESMF_CONTEXT, rcToReturn=rc)) return
+   ESMF_ERR_PASSTHRU, &
+   ESMF_CONTEXT, rcToReturn=rc)) return
 	       else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
                   call ESMF_MeshGet(mesh=gbcp%mesh, &
                                     numOwnedElements=exclusiveUBound(1), &
                                     rc=localrc)
                   if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+   ESMF_ERR_PASSTHRU, &
+   ESMF_CONTEXT, rcToReturn=rc)) return
                else
                   if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Bad Mesh Location value", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
+   msg=" Bad Mesh Location value", &
+   ESMF_CONTEXT, rcToReturn=rc)) return
                endif
             endif
           if (present(exclusiveCount)) then
@@ -827,27 +827,27 @@ end subroutine ESMF_XGridGeomBaseGet
                                     numOwnedNodes=exclusiveCount(1), &
                                     rc=localrc)
                   if (ESMF_LogFoundError(localrc, &
-                                   ESMF_ERR_PASSTHRU, &
-                                   ESMF_CONTEXT, rcToReturn=rc)) return
+   ESMF_ERR_PASSTHRU, &
+   ESMF_CONTEXT, rcToReturn=rc)) return
 	       else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
                   call ESMF_MeshGet(mesh=gbcp%mesh, &
                                     numOwnedElements=exclusiveCount(1), &
                                     rc=localrc)
                   if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+   ESMF_ERR_PASSTHRU, &
+   ESMF_CONTEXT, rcToReturn=rc)) return
                else
                   if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Bad Mesh Location value", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
+   msg=" Bad Mesh Location value", &
+   ESMF_CONTEXT, rcToReturn=rc)) return
                endif
             endif
 
        case default
          if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Bad type value", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-    end select
+    msg=" Bad type value", &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+      end select
 
     ! Set return value
     if (present(rc)) rc = ESMF_SUCCESS
@@ -915,19 +915,19 @@ end subroutine ESMF_XGridGeomBaseGet
          if(ESMF_GridMatch(gbcp1%grid, gbcp2%grid, rc=localrc) >= ESMF_GRIDMATCH_EXACT) &
           ESMF_XGridGeomBaseMatch = .true.
          if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Bad type value", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
+     msg=" Bad type value", &
+     ESMF_CONTEXT, rcToReturn=rc)) return
 
        case (ESMF_XGRIDGEOMTYPE_MESH%type) ! Mesh
          ESMF_XGridGeomBaseMatch = ESMF_MeshMatch(gbcp1%mesh, gbcp2%mesh, rc=localrc)
          if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Bad type value", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
+     msg=" Bad type value", &
+     ESMF_CONTEXT, rcToReturn=rc)) return
 
        case default
          if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Bad type value", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
+     msg=" Bad type value", &
+     ESMF_CONTEXT, rcToReturn=rc)) return
     end select
 
 
@@ -1019,8 +1019,8 @@ end function ESMF_XGridGeomBaseMatch
                                   buffer, length, offset, linquireflag, &
                                   localrc)
     if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+     ESMF_ERR_PASSTHRU, &
+     ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Get info depending on type
     select case(gbcp%type%type)
@@ -1031,8 +1031,8 @@ end function ESMF_XGridGeomBaseMatch
                      attreconflag=lattreconflag, inquireflag=linquireflag, &
                      rc=localrc) 
           if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+   ESMF_ERR_PASSTHRU, &
+   ESMF_CONTEXT, rcToReturn=rc)) return
 
        case  (ESMF_XGRIDGEOMTYPE_MESH%type)
           call ESMF_MeshSerialize(mesh=gbcp%mesh, buffer=buffer, &
@@ -1040,13 +1040,13 @@ end function ESMF_XGridGeomBaseMatch
                      inquireflag=linquireflag, &
                      rc=localrc) 
           if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+   ESMF_ERR_PASSTHRU, &
+   ESMF_CONTEXT, rcToReturn=rc)) return
 
        case default
          if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Bad type value", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
+   msg=" Bad type value", &
+   ESMF_CONTEXT, rcToReturn=rc)) return
     end select
 
 
@@ -1120,8 +1120,8 @@ end function ESMF_XGridGeomBaseMatch
                                     gbcp%meshloc%meshloc, &
                                     buffer, offset, localrc)
     if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+   ESMF_ERR_PASSTHRU, &
+   ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Get info depending on type
     select case(gbcp%type%type)
@@ -1209,8 +1209,8 @@ end function ESMF_XGridGeomBaseMatch
        case (ESMF_XGRIDGEOMTYPE_GRID%type) ! Grid 
          call ESMF_GridValidate(grid=gbcp%grid, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+     ESMF_ERR_PASSTHRU, &
+     ESMF_CONTEXT, rcToReturn=rc)) return
 
        case (ESMF_XGRIDGEOMTYPE_MESH%type) ! Mesh
          !call ESMF_MeshValidate(mesh=gbcp%mesh, rc=localrc)
@@ -1220,8 +1220,8 @@ end function ESMF_XGridGeomBaseMatch
 
        case default
          if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Bad type value", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
+     msg=" Bad type value", &
+     ESMF_CONTEXT, rcToReturn=rc)) return
     end select
 
 
@@ -1343,9 +1343,9 @@ end function ESMF_XGridGeomBaseMatch
 end module ESMF_XGridGeomBaseMod
 
 
-  subroutine f_esmf_xgridgeombasecollectgarbage(gb, rc)
+  subroutine f_esmf_xgridgeombasecolgarbage(gb, rc)
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_geombasecollectgarbage()"
+#define ESMF_METHOD "f_esmf_geombasecolgarbage()"
     use ESMF_UtilTypesMod
     use ESMF_LogErrMod
     use ESMF_XGridGeomBaseMod
@@ -1374,4 +1374,4 @@ end module ESMF_XGridGeomBaseMod
     ! return successfully  
     rc = ESMF_SUCCESS
 
-  end subroutine f_esmf_xgridgeombasecollectgarbage
+  end subroutine f_esmf_xgridgeombasecolgarbage

@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.34 2012/08/20 22:50:14 theurich Exp $
+// $Id: ESMCI_VM.C,v 1.35 2012/09/07 20:20:25 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.34 2012/08/20 22:50:14 theurich Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.35 2012/09/07 20:20:25 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -70,6 +70,7 @@ extern "C" {
   void FTN_X(f_esmf_fieldcollectgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_fbundlecollectgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_geombasecollectgarbage)(void *fobject, int *localrc);
+  void FTN_X(f_esmf_xgridgeombasecolgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_locstreamcollectgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_statecollectgarbage)(void *fobject, int *localrc);
   void FTN_X(f_esmf_compcollectgarbage1)(void *fobject, int *localrc);
@@ -653,6 +654,12 @@ void VM::shutdown(
             }else if (matchTable_FObjects[i][k].objectID ==
               ESMC_ID_GEOMBASE.objectID){
               FTN_X(f_esmf_geombasecollectgarbage)(
+                &(matchTable_FObjects[i][k].fobject), &localrc);
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,rc))
+                return;
+            }else if (matchTable_FObjects[i][k].objectID ==
+              ESMC_ID_XGRIDGEOMBASE.objectID){
+              FTN_X(f_esmf_xgridgeombasecolgarbage)(
                 &(matchTable_FObjects[i][k].fobject), &localrc);
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,rc))
                 return;
@@ -1819,6 +1826,12 @@ void VM::finalize(
       }else if (matchTable_FObjects[0][k].objectID ==
         ESMC_ID_GEOMBASE.objectID){
         FTN_X(f_esmf_geombasecollectgarbage)(
+          &(matchTable_FObjects[0][k].fobject), &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+          return;
+      }else if (matchTable_FObjects[0][k].objectID ==
+        ESMC_ID_XGRIDGEOMBASE.objectID){
+        FTN_X(f_esmf_xgridgeombasecolgarbage)(
           &(matchTable_FObjects[0][k].fobject), &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
           return;
