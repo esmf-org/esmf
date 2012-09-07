@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.C,v 1.20 2012/09/05 15:32:22 rokuingh Exp $
+// $Id: ESMC_Init.C,v 1.21 2012/09/07 19:11:42 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@ extern "C" {
     ESMCI_ArgList   argPtr;
     ESMCI_ArgID     argID;
     char           *defaultConfigFilename = NULL;
-    ESMC_LogType    logtype = ESMC_LOGKIND_MULTI;
+    ESMC_LogKind_Flag logtype = ESMC_LOGKIND_MULTI;
 
     // check the optional argument list
     ESMCI_ArgStart(argPtr, rc);
@@ -85,7 +85,7 @@ extern "C" {
           defaultConfigFilename = ESMCI_ArgGetString(argPtr);
           break;
         case ESMCI_InitArgLogKindFlagID:
-          logtype = (ESMC_LogType)ESMCI_ArgGetInt(argPtr);
+          logtype = (ESMC_LogKind_Flag)ESMCI_ArgGetInt(argPtr);
           break;
         default:
           printf("ESMC_Initialize: Improperly specified optional argument list\n");

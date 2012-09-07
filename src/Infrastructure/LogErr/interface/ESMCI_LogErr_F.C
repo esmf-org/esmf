@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr_F.C,v 1.6 2012/03/07 01:46:07 w6ws Exp $
+// $Id: ESMCI_LogErr_F.C,v 1.7 2012/09/07 19:11:32 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_LogErr_F.C,v 1.6 2012/03/07 01:46:07 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_LogErr_F.C,v 1.7 2012/09/07 19:11:32 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -134,7 +134,7 @@ extern "C" {
 // !ARGUMENTS:
       const char *filename,           // in - F90 filename, non-null terminated string
       int *petnum,
-      ESMC_LogType *logtype,
+      ESMC_LogKind_Flag *logtype,
       int *rc,                        // out - return code
       ESMCI_FortranStrLenArg nlen){   // hidden/in - strlen count for filename
 // 

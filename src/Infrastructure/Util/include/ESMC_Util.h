@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.48 2012/07/18 22:21:47 rokuingh Exp $
+// $Id: ESMC_Util.h,v 1.49 2012/09/07 19:11:33 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -51,6 +51,19 @@ enum ESMC_GridStatus_Flag {ESMC_GRIDSTATUS_INVALID=-1,
 // general logical value - MUST MATCH F90
 enum ESMC_Logical { ESMF_TRUE=1,
                     ESMF_FALSE };
+
+// Values must match F90
+enum ESMC_LogKind_Flag{
+                ESMC_LOGKIND_SINGLE=1,
+                ESMC_LOGKIND_MULTI =2,
+                ESMC_LOGKIND_NONE  =3 };
+
+// Values must match F90
+enum ESMC_LogMsgType_Flag{
+		ESMC_LOG_INFO =1,
+		ESMC_LOG_WARN =2,
+		ESMC_LOG_ERROR=3,
+		ESMC_LOG_TRACE=4 };
 
 enum ESMC_MeshLoc_Flag {ESMC_MESHLOC_NODE=1,
                         ESMC_MESHLOC_ELEMENT};

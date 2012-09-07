@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.h,v 1.17 2012/01/06 20:17:37 svasquez Exp $
+// $Id: ESMCI_LogErr.h,v 1.18 2012/09/07 19:11:30 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ private:
     std::FILE *ESMC_LogFile;
     char nameLogErrFile[ESMC_MAXPATHLEN];
     int *pet_num;
-    ESMC_LogType logtype;
+    ESMC_LogKind_Flag logtype;
     int *errorMask;
     int errorMaskCount;
 

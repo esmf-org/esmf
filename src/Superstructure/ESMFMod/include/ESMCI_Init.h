@@ -1,4 +1,4 @@
-// $Id: ESMCI_Init.h,v 1.17 2012/09/05 15:27:18 rokuingh Exp $
+// $Id: ESMCI_Init.h,v 1.18 2012/09/07 19:11:36 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ enum ESMCI_MainLanguage { ESMF_MAIN_C=1, ESMF_MAIN_F90 };
 int ESMCI_Initialize(char *defaultConfigFilename,
   ESMC_CalKind_Flag defaultCalendar=ESMC_CALKIND_NOCALENDAR,
   char *defaultLogFilename=NULL,
-  ESMC_LogType defaultLogType=ESMC_LOGKIND_MULTI);
+  ESMC_LogKind_Flag defaultLogType=ESMC_LOGKIND_MULTI);
 
 int ESMCI_Initialize(ESMC_CalKind_Flag defaultCalendar=ESMC_CALKIND_NOCALENDAR);
 
@@ -60,7 +60,7 @@ extern "C" {
                                         char *defaultConfigFileName,
                                         ESMC_CalKind_Flag *defaultCalendar,
                                         char *defaultLogFileName,
-                                        ESMC_LogType *defaultLogType,
+                                        ESMC_LogKind_Flag *defaultLogType,
                                         int *rc, ESMCI_FortranStrLenArg count1,
 					ESMCI_FortranStrLenArg count2);
    void FTN_X(f_esmf_frameworkfinalize)(int *rc);
