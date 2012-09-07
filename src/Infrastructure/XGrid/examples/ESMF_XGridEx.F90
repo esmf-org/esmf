@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.46 2012/05/14 16:10:52 feiliu Exp $
+! $Id: ESMF_XGridEx.F90,v 1.47 2012/09/07 13:56:17 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -448,8 +448,8 @@
     call ESMF_XGridGet(xgrid, &
       ngridA=ngridA, &    ! number of Grids on side A
       ngridB=ngridB, &    ! number of Grids on side B
-      sideA=l_sideA, &    ! list of Grids on side A
-      sideB=l_sideB, &    ! list of Grids on side B
+      sideAGrids=l_sideA, &    ! list of Grids on side A
+      sideBGrids=l_sideB, &    ! list of Grids on side B
       distgridA=l_sideAdg, &  ! list of Distgrids on side A
       distgridM = distgrid, & ! balanced distgrid
       sparseMatA2X=l_sparseMatA2X, & !sparse matrix matmul parameters A to X
