@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGeomBase.F90,v 1.2 2012/09/07 15:06:22 feiliu Exp $
+! $Id: ESMF_XGridGeomBase.F90,v 1.3 2012/09/07 17:16:10 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@ public ESMF_XGridGeomType_Flag,  ESMF_XGRIDGEOMTYPE_INVALID, ESMF_XGRIDGEOMTYPE_
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_XGridGeomBase.F90,v 1.2 2012/09/07 15:06:22 feiliu Exp $'
+      '$Id: ESMF_XGridGeomBase.F90,v 1.3 2012/09/07 17:16:10 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1126,25 +1126,25 @@ end function ESMF_XGridGeomBaseMatch
     ! Get info depending on type
     select case(gbcp%type%type)
 
-       case (ESMF_XGRIDGEOMTYPE_GRID%type) ! Grid
-          gbcp%grid=ESMF_GridDeserialize(buffer=buffer, &
-              offset=offset, attreconflag=lattreconflag, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return  
+     case (ESMF_XGRIDGEOMTYPE_GRID%type) ! Grid
+        gbcp%grid=ESMF_GridDeserialize(buffer=buffer, &
+            offset=offset, attreconflag=lattreconflag, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return  
 
-       case (ESMF_XGRIDGEOMTYPE_MESH%type)
-          gbcp%mesh=ESMF_MeshDeserialize(buffer=buffer, &
-              offset=offset, rc=localrc)
-          if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return  
+     case (ESMF_XGRIDGEOMTYPE_MESH%type)
+        gbcp%mesh=ESMF_MeshDeserialize(buffer=buffer, &
+            offset=offset, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return  
 
 
-       case default
-         if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Bad type value", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
+     case default
+       if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
+           msg=" Bad type value", &
+           ESMF_CONTEXT, rcToReturn=rc)) return
     end select
 
 
