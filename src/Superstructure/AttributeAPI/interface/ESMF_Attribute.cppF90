@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.111 2012/09/05 14:37:38 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.112 2012/09/07 18:41:02 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -63,6 +63,7 @@ module ESMF_AttributeMod
   use ESMF_CompMod
   use ESMF_CplCompMod
   use ESMF_GridCompMod
+  use ESMF_SciCompMod
   use ESMF_DistGridMod
   use ESMF_FieldMod
   use ESMF_FieldBundleMod
@@ -121,7 +122,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.111 2012/09/05 14:37:38 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.112 2012/09/07 18:41:02 ksaint Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -155,6 +156,11 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttAddPackCst
         module procedure ESMF_GridCompAttAddPackCstN
         module procedure ESMF_GridCompAttAddPackCstN1
+        module procedure ESMF_SciCompAttAddPackStd
+        module procedure ESMF_SciCompAttAddPackStdN
+        module procedure ESMF_SciCompAttAddPackCst
+        module procedure ESMF_SciCompAttAddPackCstN
+        module procedure ESMF_SciCompAttAddPackCstN1
         module procedure ESMF_DistGridAttAddPackCst
         module procedure ESMF_DistGridAttAddPackCstN
         module procedure ESMF_DistGridAttAddPackCstN1
@@ -192,6 +198,7 @@ module ESMF_AttributeMod
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_CplCompAttCopy
         module procedure ESMF_GridCompAttCopy
+        module procedure ESMF_SciCompAttCopy
         module procedure ESMF_StateAttCopy
         
 ! !DESCRIPTION:
@@ -214,6 +221,7 @@ module ESMF_AttributeMod
         module procedure ESMF_ArrayBundleAttRemove
         module procedure ESMF_CplCompAttRemove
         module procedure ESMF_GridCompAttRemove
+        module procedure ESMF_SciCompAttRemove
         module procedure ESMF_DistGridAttRemove
         module procedure ESMF_FieldAttRemove
         module procedure ESMF_FieldBundleAttRemove
@@ -278,6 +286,17 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttGetInfoByNum
         module procedure ESMF_GridCompAttGetCount
         module procedure ESMF_GridCompAttGetAPinstNames
+
+        TypeKindInterfaceMacro(ESMF_SciCompAttGet)
+        TypeKindInterfaceMacro(ESMF_SciCompAttGet1D)
+        module procedure ESMF_SciCompAttGetLgcl
+        module procedure ESMF_SciCompAttGetLgclList
+        module procedure ESMF_SciCompAttGetChar
+        module procedure ESMF_SciCompAttGetCharList
+        module procedure ESMF_SciCompAttGetInfoByNam
+        module procedure ESMF_SciCompAttGetInfoByNum
+        module procedure ESMF_SciCompAttGetCount
+        module procedure ESMF_SciCompAttGetAPinstNames
 
         TypeKindInterfaceMacro(ESMF_DistGridAttGet)
 	TypeKindInterfaceMacro(ESMF_DistGridAttGet1D)
@@ -349,13 +368,19 @@ module ESMF_AttributeMod
         module procedure ESMF_ArrayBundleAttLinkArray
         module procedure ESMF_CplCompAttLinkCplComp
         module procedure ESMF_CplCompAttLinkGridComp
+        module procedure ESMF_CplCompAttLinkSciComp
         module procedure ESMF_CplCompAttLinkState
         module procedure ESMF_FieldBundleAttLinkField
         module procedure ESMF_FieldBundleAttLinkGrid
         module procedure ESMF_FieldAttLinkGrid
         module procedure ESMF_GridCompAttLinkCplComp
         module procedure ESMF_GridCompAttLinkGridComp
+        module procedure ESMF_GridCompAttLinkSciComp
         module procedure ESMF_GridCompAttLinkState
+        module procedure ESMF_SciCompAttLinkCplComp
+        module procedure ESMF_SciCompAttLinkGridComp
+        module procedure ESMF_SciCompAttLinkSciComp
+        module procedure ESMF_SciCompAttLinkState
         module procedure ESMF_StateAttLinkArrayBundle
         module procedure ESMF_StateAttLinkArray
         module procedure ESMF_StateAttLinkFieldBundle
@@ -381,13 +406,19 @@ module ESMF_AttributeMod
         module procedure ESMF_ArrayBundleAttLinkRmArray
         module procedure ESMF_CplCompAttLinkRmCplComp
         module procedure ESMF_CplCompAttLinkRmGridComp
+        module procedure ESMF_CplCompAttLinkRmSciComp
         module procedure ESMF_CplCompAttLinkRmState
         module procedure ESMF_FieldBundleAttLinkRmField
         module procedure ESMF_FieldBundleAttLinkRmGrid
         module procedure ESMF_FieldAttLinkRmGrid
         module procedure ESMF_GridCompAttLinkRmCplComp
         module procedure ESMF_GridCompAttLinkRmGridComp
+        module procedure ESMF_GridCompAttLinkRmSciComp
         module procedure ESMF_GridCompAttLinkRmState
+        module procedure ESMF_SciCompAttLinkRmCplComp
+        module procedure ESMF_SciCompAttLinkRmGridComp
+        module procedure ESMF_SciCompAttLinkRmSciComp
+        module procedure ESMF_SciCompAttLinkRmState
         module procedure ESMF_StateAttLinkRmArrayBundle
         module procedure ESMF_StateAttLinkRmArray
         module procedure ESMF_StateAttLinkRmFieldBundle
@@ -414,6 +445,7 @@ module ESMF_AttributeMod
 !        module procedure ESMF_ArrayBundleAttRead
         module procedure ESMF_CplCompAttRead
         module procedure ESMF_GridCompAttRead
+        module procedure ESMF_SciCompAttRead
 !        module procedure ESMF_DistGridAttRead
         module procedure ESMF_FieldAttRead
         module procedure ESMF_FieldBundleAttRead
@@ -462,6 +494,13 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttSetLgclList
         module procedure ESMF_GridCompAttSetChar
         module procedure ESMF_GridCompAttSetCharList
+
+	TypeKindInterfaceMacro(ESMF_SciCompAttSet)
+	TypeKindInterfaceMacro(ESMF_SciCompAttSet1D)
+        module procedure ESMF_SciCompAttSetLgcl
+        module procedure ESMF_SciCompAttSetLgclList
+        module procedure ESMF_SciCompAttSetChar
+        module procedure ESMF_SciCompAttSetCharList
 
 	TypeKindInterfaceMacro(ESMF_DistGridAttSet)
 	TypeKindInterfaceMacro(ESMF_DistGridAttSet1D)
@@ -517,6 +556,7 @@ module ESMF_AttributeMod
         module procedure ESMF_ArrayBundleAttWrite
         module procedure ESMF_CplCompAttWrite
         module procedure ESMF_GridCompAttWrite
+        module procedure ESMF_SciCompAttWrite
         !module procedure ESMF_DistGridAttWrite
         module procedure ESMF_FieldAttWrite
         module procedure ESMF_FieldBundleAttWrite
@@ -541,6 +581,7 @@ module ESMF_AttributeMod
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_CplCompAttUpdate
         module procedure ESMF_GridCompAttUpdate
+        module procedure ESMF_SciCompAttUpdate
         module procedure ESMF_FieldAttUpdate
         module procedure ESMF_FieldBundleAttUpdate
         module procedure ESMF_StateAttUpdate
@@ -6522,11 +6563,15 @@ AttLinkCompMacro(ESMF_CplComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkCompMacro(ESMF_CplComp, ESMF_GridComp, GridComp, comp1, comp2,  & @\
                 comp1%compp%base, comp2%compp%base)
+AttLinkCompMacro(ESMF_CplComp, ESMF_SciComp, SciComp, comp1, comp2,  & @\
+                comp1%compp%base, comp2%compp%base)
 AttLinkCompMacro(ESMF_CplComp, ESMF_State, State, comp, state,  & @\
                 comp%compp%base, state%statep%base)
 AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_GridComp, GridComp, comp1, comp2,  & @\
+                comp1%compp%base, comp2%compp%base)
+AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_SciComp, SciComp, comp1, comp2,  & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkRemoveCompMacro(ESMF_CplComp, ESMF_State, State, comp, state,  & @\
                 comp%compp%base, state%statep%base)
@@ -6566,11 +6611,15 @@ AttLinkCompMacro(ESMF_GridComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkCompMacro(ESMF_GridComp, ESMF_GridComp, GridComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
+AttLinkCompMacro(ESMF_GridComp, ESMF_SciComp, SciComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
 AttLinkCompMacro(ESMF_GridComp, ESMF_State, State, comp, state, & @\
                 comp%compp%base, state%statep%base)
 AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_GridComp, GridComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
+AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_SciComp, SciComp, comp1, comp2, & @\
                 comp1%compp%base, comp2%compp%base)
 AttLinkRemoveCompMacro(ESMF_GridComp, ESMF_State, State, comp, state, & @\
                 comp%compp%base, state%statep%base)
@@ -6583,6 +6632,52 @@ AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 
 AttUpdateMacro(ESMF_GridComp, comp, comp%compp%base)
 AttWriteMacro(ESMF_GridComp, comp, comp%compp%base, comp, field)
+
+!-------------------------------------------------------------------------
+!  SciComp
+!-------------------------------------------------------------------------
+
+AttAddPackStandardMacro(ESMF_SciComp, comp, comp%compp%base)
+AttAddPackStandardNMacro(ESMF_SciComp, comp, comp%compp%base)
+AttAddPackCustomMacro(ESMF_SciComp, comp, comp%compp%base)
+AttAddPackCustomNMacro(ESMF_SciComp, comp, comp%compp%base)
+AttAddPackCustomN1Macro(ESMF_SciComp, comp, comp%compp%base)
+AttCopyMacro(ESMF_SciComp, ESMF_SciComp, comp1, comp2, comp1%compp%base, comp2%compp%base)
+AttRemoveMacro(ESMF_SciComp, comp, comp%compp%base)
+
+TypeKind3DeclarationMacro(AttGet, ESMF_SciComp, comp, comp%compp%base)
+TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_SciComp, comp, comp%compp%base)
+AttGetLogicalMacro(ESMF_SciComp, comp, comp%compp%base)
+AttGetCharacterMacro(ESMF_SciComp, comp, comp%compp%base)
+
+GetCountNameNumberMacro(ESMF_SciComp, comp, comp%compp%base)
+AttGetAPinstNamesMacro(ESMF_SciComp, comp, comp%compp%base)
+
+AttLinkCompMacro(ESMF_SciComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
+AttLinkCompMacro(ESMF_SciComp, ESMF_GridComp, GridComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
+AttLinkCompMacro(ESMF_SciComp, ESMF_SciComp, SciComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
+AttLinkCompMacro(ESMF_SciComp, ESMF_State, State, comp, state, & @\
+                comp%compp%base, state%statep%base)
+AttLinkRemoveCompMacro(ESMF_SciComp, ESMF_CplComp, CplComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
+AttLinkRemoveCompMacro(ESMF_SciComp, ESMF_GridComp, GridComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
+AttLinkRemoveCompMacro(ESMF_SciComp, ESMF_SciComp, SciComp, comp1, comp2, & @\
+                comp1%compp%base, comp2%compp%base)
+AttLinkRemoveCompMacro(ESMF_SciComp, ESMF_State, State, comp, state, & @\
+                comp%compp%base, state%statep%base)
+
+AttReadMacro(ESMF_SciComp, comp, comp%compp%base)
+
+TypeKind3DeclarationMacro(AttSet, ESMF_SciComp, comp, comp%compp%base)
+AttSetLogicalMacro(ESMF_SciComp, comp, comp%compp%base)
+AttSetCharacterMacro(ESMF_SciComp, comp, comp%compp%base)
+
+AttUpdateMacro(ESMF_SciComp, comp, comp%compp%base)
+AttWriteMacro(ESMF_SciComp, comp, comp%compp%base, comp, field)
 
 !-------------------------------------------------------------------------
 !  STATE
