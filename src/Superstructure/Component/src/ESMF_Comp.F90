@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.238 2012/05/17 23:21:11 w6ws Exp $
+! $Id: ESMF_Comp.F90,v 1.239 2012/09/07 18:38:47 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -69,7 +69,8 @@ module ESMF_CompMod
 
   type(ESMF_CompType_Flag), parameter :: &
     ESMF_COMPTYPE_GRID = ESMF_CompType_Flag(1), &
-    ESMF_COMPTYPE_CPL  = ESMF_CompType_Flag(2)
+    ESMF_COMPTYPE_CPL  = ESMF_CompType_Flag(2), &
+    ESMF_COMPTYPE_SCI  = ESMF_CompType_Flag(3)
 
 !------------------------------------------------------------------------------
 ! ! ESMF Method Type
@@ -235,8 +236,22 @@ module ESMF_CompMod
   end type
 
 !------------------------------------------------------------------------------
+! ! ESMF_SciComp
+!
+! ! SciComp wrapper
+
+  type ESMF_SciComp
+#ifndef ESMF_SEQUENCE_BUG
+    sequence
+#endif
+    !private
+    type(ESMF_CompClass), pointer :: compp
+    ESMF_INIT_DECLARE
+  end type
+
+!------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-  public ESMF_GridComp, ESMF_CplComp
+  public ESMF_GridComp, ESMF_CplComp, ESMF_SciComp
 
   public ESMF_Method_Flag, ESMF_METHOD_NONE
   public ESMF_METHOD_INITIALIZE, ESMF_METHOD_RUN, ESMF_METHOD_FINALIZE
@@ -251,7 +266,7 @@ module ESMF_CompMod
   ! are not intended to be used outside the Framework code.
   public ESMF_CompClass, ESMF_CWrap
   public ESMF_CompType_Flag
-  public ESMF_COMPTYPE_GRID, ESMF_COMPTYPE_CPL 
+  public ESMF_COMPTYPE_GRID, ESMF_COMPTYPE_CPL, ESMF_COMPTYPE_SCI
   public ESMF_CompStatus
   public ESMF_COMPSTATUS_ALL_PRESENT, ESMF_COMPSTATUS_ALL_NOTPRESENT
 
@@ -291,7 +306,7 @@ module ESMF_CompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Comp.F90,v 1.238 2012/05/17 23:21:11 w6ws Exp $'
+    '$Id: ESMF_Comp.F90,v 1.239 2012/09/07 18:38:47 ksaint Exp $'
 !------------------------------------------------------------------------------
 
 !==============================================================================

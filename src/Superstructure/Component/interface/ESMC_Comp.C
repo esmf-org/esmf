@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.55 2012/01/06 20:18:58 svasquez Exp $
+// $Id: ESMC_Comp.C,v 1.56 2012/09/07 18:38:45 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -19,13 +19,14 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the common code for the public, pure C
-// ESMC_GridComp and ESMC_CplComp structures.
+// ESMC_GridComp, ESMC_CplComp and ESMC_SciComp structures.
 //
 //-----------------------------------------------------------------------------
 
 // include associated header files
 #include "ESMC_GridComp.h"
 #include "ESMC_CplComp.h"
+#include "ESMC_SciComp.h"
 
 // include ESMF headers
 #include "ESMCI_Arg.h"
@@ -39,7 +40,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_Comp.C,v 1.55 2012/01/06 20:18:58 svasquez Exp $";
+static const char *const version = "$Id: ESMC_Comp.C,v 1.56 2012/09/07 18:38:45 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -564,6 +565,152 @@ int ESMC_CplCompPrint(ESMC_CplComp comp){
   localrc = compp->print();
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;  // bail out
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_SciCompCreate()"
+ESMC_SciComp ESMC_SciCompCreate(const char *name, int *rc)
+{
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;           // local return code
+  if (rc != NULL) 
+  {
+    *rc = ESMC_RC_NOT_IMPL;   // final return code
+  }
+
+  ESMC_SciComp comp;
+  
+  comp.ptr = (void *) ESMCI::SciComp::create(name, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+  {
+    comp.ptr = NULL;  // invalidate
+    return comp;  // bail out
+  }
+  
+  // return successfully
+  if (rc != NULL) 
+  {
+    *rc = ESMF_SUCCESS;
+  }
+
+  return comp;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_SciCompDestroy()"
+int ESMC_SciCompDestroy(ESMC_SciComp *comp)
+{
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // call into ESMCI method  
+  localrc = ESMCI::SciComp::destroy((ESMCI::SciComp *)(comp->ptr));
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+  {
+    return rc;  // bail out
+  }
+  
+  // invalidate pointer
+  comp->ptr = NULL;
+    
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_SciCompGetInternalState()"
+void *ESMC_SciCompGetInternalState(ESMC_SciComp comp, int *rc)
+{
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) 
+  {
+    *rc = ESMC_RC_NOT_IMPL;   // final return code
+  }
+  
+  // typecast into ESMCI type
+  ESMCI::SciComp *compp = (ESMCI::SciComp *)(comp.ptr);
+
+  // call into ESMCI method  
+  void *data = compp->getInternalState(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+  {
+    return NULL;  // bail out
+  }
+  
+  // return successfully
+  if (rc!=NULL) 
+  {
+    *rc = ESMF_SUCCESS;
+  }
+
+  return data;
+}  
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_SciCompSetInternalState()"
+int ESMC_SciCompSetInternalState(ESMC_SciComp comp, void *data)
+{
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::SciComp *compp = (ESMCI::SciComp *)(comp.ptr);
+
+  // call into ESMCI method  
+  localrc = compp->setInternalState(data);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+  {
+    return rc;  // bail out
+  }
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_SciCompPrint()"
+int ESMC_SciCompPrint(ESMC_SciComp comp)
+{
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::SciComp *compp = (ESMCI::SciComp *)(comp.ptr);
+
+  // call into ESMCI method  
+  localrc = compp->print();
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+  {
+    return rc;  // bail out
+  }
     
   // return successfully
   rc = ESMF_SUCCESS;

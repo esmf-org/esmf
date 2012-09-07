@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.78 2012/04/25 05:08:21 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.79 2012/09/07 18:38:45 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.78 2012/04/25 05:08:21 theurich Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.79 2012/09/07 18:38:45 ksaint Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -1052,3 +1052,138 @@ subroutine f_esmf_cplcompprint(comp, rc)
 
   call ESMF_CplCompPrint(comp, rc=rc)
 end subroutine f_esmf_cplcompprint
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_scicompcreate"
+subroutine f_esmf_scicompcreate(gcomp, name, rc)
+  use ESMF_UtilTypesMod      ! ESMF utility types
+  use ESMF_BaseMod           ! ESMF base class
+  use ESMF_CompMod
+  use ESMF_SciCompMod
+  use ESMF_InitMacrosMod
+  
+  implicit none
+
+  type(ESMF_SciComp)       :: gcomp
+  character(len=*)          :: name
+  integer                   :: rc
+
+  type(ESMF_Pointer) :: this
+
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  gcomp = ESMF_SciCompCreate(name=name, rc=rc)
+
+end subroutine f_esmf_scicompcreate
+
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_scicompdestroy"
+subroutine f_esmf_scicompdestroy(comp, rc)
+  use ESMF_UtilTypesMod      ! ESMF utility types
+  use ESMF_BaseMod           ! ESMF base class
+  use ESMF_CompMod
+  use ESMF_SciCompMod
+  use ESMF_InitMacrosMod
+  
+  implicit none
+
+  type(ESMF_SciComp) :: comp
+  integer             :: rc              
+
+  call ESMF_SciCompDestroy(comp, rc=rc)
+
+end subroutine f_esmf_scicompdestroy
+
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_scicompset"
+subroutine f_esmf_scicompset(comp, rc)
+  use ESMF_UtilTypesMod      ! ESMF utility types
+  use ESMF_BaseMod           ! ESMF base class
+  use ESMF_CompMod
+  use ESMF_SciCompMod
+  use ESMF_InitMacrosMod
+  
+  implicit none
+
+  type(ESMF_SciComp) :: comp
+  integer             :: rc     
+
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  call ESMF_SciCompSet(comp)
+
+  rc = ESMF_SUCCESS
+
+end subroutine f_esmf_scicompset
+
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_scicompget"
+subroutine f_esmf_scicompget(comp, rc)
+  use ESMF_UtilTypesMod      ! ESMF utility types
+  use ESMF_BaseMod           ! ESMF base class
+  use ESMF_CompMod
+  use ESMF_SciCompMod
+  use ESMF_InitMacrosMod
+  
+  implicit none
+
+  type(ESMF_SciComp) :: comp
+  integer             :: rc     
+
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  call ESMF_SciCompGet(comp)
+
+end subroutine f_esmf_scicompget
+
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_scicompvalidate"
+subroutine f_esmf_scicompvalidate(comp, rc)
+  use ESMF_UtilTypesMod      ! ESMF utility types
+  use ESMF_BaseMod           ! ESMF base class
+  use ESMF_CompMod
+  use ESMF_SciCompMod
+  use ESMF_InitMacrosMod
+  
+  implicit none
+
+  type(ESMF_SciComp) :: comp
+  integer             :: rc     
+
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  call ESMF_SciCompValidate(comp, rc=rc)
+
+end subroutine f_esmf_scicompvalidate
+
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_scicompprint"
+subroutine f_esmf_scicompprint(comp, rc)
+  use ESMF_UtilTypesMod      ! ESMF utility types
+  use ESMF_BaseMod           ! ESMF base class
+  use ESMF_CompMod
+  use ESMF_SciCompMod
+  use ESMF_InitMacrosMod
+  
+  implicit none
+
+  type(ESMF_SciComp) :: comp
+  integer             :: rc     
+
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  call ESMF_SciCompPrint(comp, rc=rc)
+
+end subroutine f_esmf_scicompprint

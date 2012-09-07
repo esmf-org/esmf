@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.29 2012/03/29 23:41:07 theurich Exp $
+// $Id: ESMCI_Comp.h,v 1.30 2012/09/07 18:38:44 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -107,6 +107,13 @@ class CplComp:public Comp{
       ESMCI::Clock *clock, int phase, int *userRc) const;
     int finalize(ESMCI::State *importState, ESMCI::State *exportState,
       ESMCI::Clock *clock, int phase, int *userRc) const;
+};
+
+class SciComp:public Comp{
+  public:
+    static SciComp *create(char const *name, int *rc=NULL);
+    static int destroy(SciComp *comp);
+    int print() const;
 };
 
 } // namespace ESMCI

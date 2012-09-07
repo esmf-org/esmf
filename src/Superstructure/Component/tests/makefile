@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.49 2011/11/03 04:31:24 theurich Exp $ 
+# $Id: makefile,v 1.50 2012/09/07 18:38:48 ksaint Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -9,6 +9,7 @@ LOCDIR	  = src/Superstructure/Component/tests
 TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_ComponentUTest \
 		$(ESMF_TESTDIR)/ESMF_GridCompCreateUTest \
 		$(ESMF_TESTDIR)/ESMF_CplCompCreateUTest \
+		$(ESMF_TESTDIR)/ESMF_SciCompCreateUTest \
 		$(ESMF_TESTDIR)/ESMF_CompSetServUTest \
 		$(ESMF_TESTDIR)/ESMF_StdCompMethodsUTest \
                 $(ESMF_TESTDIR)/ESMF_CompTunnelUTest \
@@ -17,6 +18,7 @@ TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMF_ComponentUTest \
 TESTS_RUN     =	RUN_ESMF_ComponentUTest \
 		RUN_ESMF_GridCompCreateUTest \
 		RUN_ESMF_CplCompCreateUTest \
+		RUN_ESMF_SciCompCreateUTest \
 		RUN_ESMF_CompSetServUTest \
 		RUN_ESMF_StdCompMethodsUTest \
 		RUN_ESMF_CompTunnelUTest \
@@ -25,6 +27,7 @@ TESTS_RUN     =	RUN_ESMF_ComponentUTest \
 TESTS_RUN_UNI =	RUN_ESMF_ComponentUTestUNI \
 		RUN_ESMF_GridCompCreateUTestUNI \
 		RUN_ESMF_CplCompCreateUTestUNI \
+		RUN_ESMF_SciCompCreateUTestUNI \
 		RUN_ESMF_CompSetServUTestUNI \
 		RUN_ESMF_StdCompMethodsUTestUNI \
                 RUN_ESMC_ComponentUTestUNI
@@ -69,6 +72,16 @@ RUN_ESMF_CplCompCreateUTest:
 RUN_ESMF_CplCompCreateUTestUNI:
 	cp -f grid.rc $(ESMF_TESTDIR)
 	$(MAKE) TNAME=CplCompCreate NP=1 ftest
+
+# ---
+
+RUN_ESMF_SciCompCreateUTest:
+	cp -f grid.rc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=SciCompCreate NP=4 ftest
+
+RUN_ESMF_SciCompCreateUTestUNI:
+	cp -f grid.rc $(ESMF_TESTDIR)
+	$(MAKE) TNAME=SciCompCreate NP=1 ftest
 
 # ---
 
