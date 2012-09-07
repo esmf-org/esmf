@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.139 2012/07/18 22:21:32 rokuingh Exp $
+// $Id: ESMCI_Grid.C,v 1.140 2012/09/07 23:16:07 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -52,7 +52,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.139 2012/07/18 22:21:32 rokuingh Exp $";
+static const char *const version = "$Id: ESMCI_Grid.C,v 1.140 2012/09/07 23:16:07 oehmke Exp $";
 
 //-----------------------------------------------------------------------------
 
@@ -131,7 +131,8 @@ int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind_Flag *_typek
               ESMC_CoordSys_Flag *coordSys, 
               InterfaceInt *_coordDimCount, InterfaceInt *_coordDimMap,
 	      InterfaceInt *_gridMemLBound,
-              ESMC_IndexFlag *_indexflag, bool destroyDistgrid,
+              ESMC_IndexFlag *_indexflag,
+              bool destroyDistgrid,
               bool destroyDELayout);
 
 int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind_Flag *_typekind,
@@ -142,6 +143,8 @@ int construct(Grid *_grid, int _nameLen, char *_name, ESMC_TypeKind_Flag *_typek
               InterfaceInt *_undistLBound, InterfaceInt *_undistUBound, 
               ESMC_CoordSys_Flag *coordSys, 
               InterfaceInt *_coordDimCount, InterfaceInt *_coordDimMap,
+	      InterfaceInt *_gridMemLBound,
+              ESMC_IndexFlag *_indexflag,
               bool destroyDistgrid, bool destroyDELayout);
 
 int setDefaultsLUA(int dimCount,
@@ -1183,6 +1186,8 @@ int Grid::commit(
 			proto->undistLBound,
 			proto->undistUBound, proto->coordSys, 
 			proto->coordDimCount, proto->coordDimMap,
+                        proto->gridMemLBound,
+                        proto->indexflag,
                         proto->destroyDistgrid, proto->destroyDELayout);
   } else {
     localrc=construct(this, proto->nameLen, proto->name, proto->typekind, 
@@ -1351,7 +1356,9 @@ Grid *Grid::create(
                     (InterfaceInt *)ESMC_NULL_POINTER,
 		    coordSys, 
                     coordDimCountArg,
-		    coordDimMapArg,  
+		    coordDimMapArg,
+                    (InterfaceInt *)ESMC_NULL_POINTER,
+                    (ESMC_IndexFlag *)NULL,  
                     destroyDistgridArg, destroyDELayoutArg);
    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, rcArg)) return ESMC_NULL_POINTER;        
@@ -6127,6 +6134,8 @@ int construct(
   ESMC_CoordSys_Flag *coordSysArg, 
   InterfaceInt *coordDimCountArg,               // (in) optional
   InterfaceInt *coordDimMapArg,             // (in) optional
+  InterfaceInt *gridMemLBoundArg,             // (in) optional
+  ESMC_IndexFlag *indexflagArg,             // (in) optional
   bool *destroyDistgridArg,
   bool *destroyDELayoutArg
   ){
@@ -6148,6 +6157,7 @@ int construct(
   int *gridEdgeLWidth;
   int *gridEdgeUWidth;
   int *gridAlign;
+  int *gridMemLBound;
   int *coordDimCount;
   int **coordDimMap;
   int *undistUBound;
@@ -6206,6 +6216,15 @@ int construct(
     coordSys=ESMC_COORDSYS_CART;
   } else {
     coordSys=*coordSysArg;
+  }
+
+
+  // If indexflag wasn't passed in then use default, otherwise 
+  // copy passed in value
+  if (indexflagArg==NULL) {
+    indexflag=ESMF_INDEX_DELOCAL;  // default
+  } else {
+    indexflag=*indexflagArg;
   }
 
 
@@ -6278,6 +6297,40 @@ int construct(
     gridEdgeUWidth[i] = 0;
     gridAlign[i] = 0;
   }
+
+
+  // Error check gridMemLBound and fill in value
+  gridMemLBound=new int[dimCount];
+  if (gridMemLBoundArg != NULL) {
+    if (indexflag != ESMF_INDEX_USER){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        "- if gridMemLBound is set then indexflag must be ESMF_INDEX_USER", &rc);
+      return rc;
+    }
+    if (gridMemLBoundArg->dimCount != 1){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
+        "- gridMemLBound array must be of dimCount 1", &rc);
+      return rc;
+    }
+    if (gridMemLBoundArg->extent[0] != dimCount){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+        "- gridMemLBound must be the same size as the dimCount of the Grid", &rc);
+      return rc;
+    }
+    for (int i=0; i<dimCount; i++) {
+      gridMemLBound[i]=gridMemLBoundArg->array[i];
+    }
+  } else {
+    if (indexflag == ESMF_INDEX_USER){
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+        "- if indexflag=ESMF_INDEX_USER then gridMemLBound must be set", &rc);
+      return rc;
+    }
+    for (int i=0; i<dimCount; i++) {
+      gridMemLBound[i]=1;
+    }
+  }
+
 
   // If the distDimArg parameter has been passed in then error check 
   // and copy it, otherwise set a default.
@@ -6409,8 +6462,7 @@ int construct(
     memcpy(distDim, distDimArg->array, distDimCount*sizeof(int));
   }
 
-// indexflag is always ESMF_INDEX_DELOCAL
-  indexflag=ESMF_INDEX_DELOCAL;  // default
+
 
   // If destroyDistgrid wasn't passed in then use default, otherwise 
   // copy passed in value
@@ -6428,10 +6480,6 @@ int construct(
     destroyDELayout=*destroyDELayoutArg;
   }
 
-  int *gridMemLBound = new int[dimCount];
-  for (int i=0; i<dimCount; i++) {
-    gridMemLBound[i]=1;
-  }
 
   // construct the Grid object using the massaged parameter values
   localrc=gridArg->constructInternal(name, typekind, distgridArg, 

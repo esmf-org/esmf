@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.88 2012/07/18 22:21:29 rokuingh Exp $
+// $Id: ESMCI_Grid.h,v 1.89 2012/09/07 23:16:03 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -665,6 +665,8 @@ int getComputationalUBound(
                       ESMC_CoordSys_Flag *coordSys, 
 		      InterfaceInt *_coordDimCount,
 		      InterfaceInt *_coordDimMap,
+                      InterfaceInt *gridMemLBound,
+		      ESMC_IndexFlag *_indexflag, 
 		      bool *destroyDistgrid,
 		      bool *destroyDELayout
 		      );
