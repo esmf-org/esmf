@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGeomBase.F90,v 1.1 2012/09/06 20:11:14 feiliu Exp $
+! $Id: ESMF_XGridGeomBase.F90,v 1.2 2012/09/07 15:06:22 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@ public ESMF_XGridGeomType_Flag,  ESMF_XGRIDGEOMTYPE_INVALID, ESMF_XGRIDGEOMTYPE_
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_XGridGeomBase.F90,v 1.1 2012/09/06 20:11:14 feiliu Exp $'
+      '$Id: ESMF_XGridGeomBase.F90,v 1.2 2012/09/07 15:06:22 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1133,7 +1133,7 @@ end function ESMF_XGridGeomBaseMatch
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return  
 
-       case  (ESMF_XGRIDGEOMTYPE_MESH%type)
+       case (ESMF_XGRIDGEOMTYPE_MESH%type)
           gbcp%mesh=ESMF_MeshDeserialize(buffer=buffer, &
               offset=offset, rc=localrc)
           if (ESMF_LogFoundError(localrc, &
@@ -1148,18 +1148,18 @@ end function ESMF_XGridGeomBaseMatch
     end select
 
 
-      ! Set pointer 
-      ESMF_XGridGeomBaseDeserialize%gbcp=>gbcp
+    ! Set pointer 
+    ESMF_XGridGeomBaseDeserialize%gbcp=>gbcp
 
-      ! Add reference to this object into ESMF garbage collection table
-      call c_ESMC_VMAddFObject(ESMF_XGridGeomBaseDeserialize, ESMF_ID_GEOMBASE%objectID)
-    
-     ! Set init status
-      ESMF_INIT_SET_CREATED(ESMF_XGridGeomBaseDeserialize)
+    ! Add reference to this object into ESMF garbage collection table
+    call c_ESMC_VMAddFObject(ESMF_XGridGeomBaseDeserialize, ESMF_ID_GEOMBASE%objectID)
+  
+   ! Set init status
+    ESMF_INIT_SET_CREATED(ESMF_XGridGeomBaseDeserialize)
 
-      if  (present(rc)) rc = ESMF_SUCCESS
+    if  (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_XGridGeomBaseDeserialize
+    end function ESMF_XGridGeomBaseDeserialize
 
 
 
