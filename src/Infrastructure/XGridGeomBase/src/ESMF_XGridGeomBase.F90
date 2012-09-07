@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGeomBase.F90,v 1.4 2012/09/07 20:20:27 feiliu Exp $
+! $Id: ESMF_XGridGeomBase.F90,v 1.5 2012/09/07 21:38:19 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@ public ESMF_XGridGeomType_Flag,  ESMF_XGRIDGEOMTYPE_INVALID, ESMF_XGRIDGEOMTYPE_
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_XGridGeomBase.F90,v 1.4 2012/09/07 20:20:27 feiliu Exp $'
+      '$Id: ESMF_XGridGeomBase.F90,v 1.5 2012/09/07 21:38:19 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1112,7 +1112,8 @@ end function ESMF_XGridGeomBaseMatch
     ! allocate GeomBase type
     allocate(gbcp, stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating GeomBase type object", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+                                     ESMF_CONTEXT,  &
+                                     rcToReturn=rc)) return
 
     ! serialize GeomBase info
     call c_ESMC_XGridGeomBaseDeserialize(gbcp%type%type,	&
