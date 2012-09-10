@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.93 2012/05/16 22:33:56 svasquez Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.94 2012/09/10 20:43:55 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -1937,6 +1937,21 @@
             "data copy, corner stagger"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
+        !------------------------------------------------------------------------
+        !NEX_UTest_Multi_Proc_Only
+        !    create a 3d array.
+        !    add it to a field with the ESMF_DATACOPY_VALUE flag set (not REF).
+        !    delete the original array� (i should have made a copy inside the
+        !    field)
+
+        !    get the array from the field
+        !    get a data pointer from the array
+        !    it crashes for him here.
+        call test_atnas_gridindex(rc)
+        write(failMsg, *) ""
+        write(name, *) "Testing Atnas's case #3556962"
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
         !------------------------------------------------------------------------
         !NEX_UTest_Multi_Proc_Only
         !    create a 3d array.
@@ -7004,6 +7019,185 @@ contains
 
     end subroutine test7d4_generic
 
+!----------------------------------------------------------------------------------
+
+    subroutine test_atnas_gridindex(rc)
+
+
+    
+    ! Arguments
+    integer, intent(OUT) :: RC
+
+    ! Local variables
+
+    type(ESMF_VM)                   :: vm
+    type(ESMF_Grid)                 :: grid
+    type(ESMF_DistGrid)             :: distgrid
+    type(ESMF_Field)                :: field, f
+    type (ESMF_Array)               :: array
+    integer                         :: counts(7)
+    integer                         :: npets
+    integer                         :: myid
+    integer                         :: i, j, ntiles, extra
+    integer                         :: fieldRank, gridRank
+    integer, allocatable            :: tileIndex(:)
+    integer, allocatable            :: gridToFieldMap(:)
+    real(kind=ESMF_KIND_R4), pointer:: VAR_1D(:)
+    integer                         :: arbIndexCount
+    integer, allocatable            :: arbIndex(:,:)
+    integer, parameter              :: ntilesGlobal = 100
+
+    type(ESMF_INDEX_FLAG)           :: idx
+
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_VmGet(VM, petCount=npets, localPet=myid, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    
+  ! set up abritrary index 
+  ! for this example it won't be arbitrary
+  ! but it does not matter. The real usage is for MAPL_LocStream
+
+    J = 0
+
+    extra = 1
+    if(mod(ntilesGlobal,npets) <= myid) extra=0
+    ntiles = ntilesGlobal / npets + extra
+
+    allocate(tileIndex(ntiles), stat=rc)
+    do I = 1, ntilesGlobal
+       if (mod(I-1,npets) == myid) then
+          J = J + 1
+          tileIndex(J) = I
+       end if
+    end do
+    if(ntiles /= J) then
+      rc = ESMF_FAILURE
+      return
+    endif
+
+  ! the actual preproducer
+
+  ! create distGrid for arbSeqIndexList
+    distgrid=ESMF_DistGridCreate(arbSeqIndexList=tileIndex, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! create grid for the distgrid
+  ! IMPORTANT the indexFlag has to be ESMF_INDEX_USER
+
+    GRID = ESMF_GridEmptyCreate(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+           
+    arbIndexCount = ntiles
+    allocate(arbIndex(arbIndexCount,1), stat=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    arbIndex(:,1) = tileIndex
+    deallocate(tileIndex)
+
+    call ESMF_GridSet(grid,  &
+         name="tile_grid",    &
+         distgrid=distgrid, & 
+         gridMemLBound=(/1/), &
+         indexFlag=ESMF_INDEX_USER, &
+         distDim = (/1/), &
+         localArbIndexCount=arbIndexCount, &
+         localArbIndex=arbIndex, &
+         minIndex=(/1/), &
+         maxIndex=(/ntilesGlobal/), &
+         rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    deallocate(arbIndex)
+    call ESMF_GridCommit(grid, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridGet(GRID, dimCount=gridRank, indexflag=idx, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    print *, '1. index flag: ', idx.i_type
+    idx = ESMF_INDEX_USER
+    print *, '1a. index flag: ', idx.i_type
+
+
+    call ESMF_GridGet(GRID, localDE=0, &
+         staggerloc=ESMF_STAGGERLOC_CENTER, &
+         computationalCount=COUNTS, RC=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    allocate(VAR_1D(counts(1)), stat=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! create a field
+    FIELD = ESMF_FieldCreate(GRID, farrayPtr=VAR_1D,    &
+         name = "tilevar1D",                         &
+         datacopyFlag = ESMF_DATACOPY_REFERENCE,     &
+         rc = rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+  !    print *,'PE ',myid,' returned from FieldCreateF90',rc
+
+  ! Now we query the field and get the grid and the esmf array
+  ! then we want to create a new field (possibly different name)
+  ! and use the same grid and esmf array
+    call ESMF_FieldGet(FIELD, grid=GRID, dimCount=fieldRank, RC=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_GridGet(GRID, dimCount=gridRank, indexflag=idx, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    print *, '2. index flag: ', idx.i_type
+    
+    if(fieldRank /= gridRank) then
+      rc = ESMF_FAILURE
+      return
+    endif
+    allocate(gridToFieldMap(gridRank), stat=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_FieldGet(FIELD, Array=Array, gridToFieldMap=gridToFieldMap, RC=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! this call fails
+  ! the reason is that ESMF "thinks" gridIndex is different from arrayIndex
+  !
+    F = ESMF_FieldCreate(GRID, ARRAY = Array, &
+         name="newName", gridToFieldMap=gridToFieldMap, RC=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    deallocate(gridToFieldMap)
+    
+    end subroutine
+  
 !----------------------------------------------------------------------------------
     subroutine test_eric_klusek(rc)
 
