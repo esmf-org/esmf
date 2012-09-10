@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeSciEx.F90,v 1.1 2012/09/07 18:40:50 ksaint Exp $
+! $Id: ESMF_AttributeSciEx.F90,v 1.2 2012/09/10 18:22:22 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -67,7 +67,7 @@ program ESMF_AttributeSciEx
 !-------------------------------------------------------------------------
 
       write(failMsg, *) "Example failure"
-      write(testname, *) "Example ESMF_AttributeCIMEx"
+      write(testname, *) "Example ESMF_AttributeSciEx"
 
 
 !-------------------------------------------------------------------------
@@ -80,7 +80,7 @@ program ESMF_AttributeSciEx
       
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
-      call ESMF_Initialize(vm=vm, defaultlogfilename="AttributeCIMEx.Log", &
+      call ESMF_Initialize(vm=vm, defaultlogfilename="AttributeSciEx.Log", &
         logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       
