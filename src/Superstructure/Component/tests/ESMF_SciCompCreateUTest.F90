@@ -1,4 +1,4 @@
-! $Id: ESMF_SciCompCreateUTest.F90,v 1.1 2012/09/07 18:38:48 ksaint Exp $
+! $Id: ESMF_SciCompCreateUTest.F90,v 1.2 2012/09/10 17:27:03 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -213,7 +213,7 @@
 !-------------------------------------------------------------------------
 !   !
 !   !  Set Internal State
-    !EX_UTest
+    !NEX_disable_UTest
 !!    allocate(wrap1%p)
 !!    wrap1%p%testnumber=4567
 
@@ -225,7 +225,7 @@
 !-------------------------------------------------------------------------
 !   !
 !   !  Get Internal State
-    !EX_UTest
+    !NEX_disable_UTest
 !!    write(failMsg, *) "Did not return ESMF_SUCCESS"
 !!    write(name, *) "Get Internal State Test"
 !!    call ESMF_SciCompGetInternalState(comp1, wrap2, rc)
@@ -234,7 +234,7 @@
 !-------------------------------------------------------------------------
 !   !
 !   !  Verify Internal State
-    !EX_UTest
+    !NEX_disable_UTest
 !!    write(failMsg, *) "Did not return correct data"
 !!    write(name, *) "Verify Internal State Test"
 !!    call ESMF_Test((wrap2%p%testnumber.eq.4567), name, failMsg, result, ESMF_SRCLINE)
@@ -243,7 +243,7 @@
 !-------------------------------------------------------------------------
 !   !
 !   !  Set Internal State
-    !EX_UTest
+    !NEX_disable_UTest
 !!    allocate(wrap3%p)
 !!    wrap3%p%testnumber=1234
 
@@ -255,7 +255,7 @@
 !-------------------------------------------------------------------------
 !   !
 !   !  Get Internal State
-    !EX_UTest
+    !NEX_disable_UTest
 !!    write(failMsg, *) "Did not return ESMF_SUCCESS"
 !!    write(name, *) "Get Internal State 2nd time Test"
 !!    call ESMF_SciCompGetInternalState(comp1, wrap4, rc)
@@ -264,7 +264,7 @@
 !-------------------------------------------------------------------------
 !   !
 !   !  Verify Internal State
-    !EX_UTest
+    !NEX_disable_UTest
 !!    write(failMsg, *) "Did not return correct data"
 !!    write(name, *) "Verify Internal State 2nd time Test"
 !!    call ESMF_Test((wrap4%p%testnumber.eq.1234), name, failMsg, result, ESMF_SRCLINE)
@@ -272,7 +272,7 @@
     
 !-------------------------------------------------------------------------
 !   !  Set Internal State
-    !EX_UTest
+    !NEX_disable_UTest
 !!    allocate(wrap5%p)
 !!    wrap3%p%testnumber=9182
 
@@ -284,7 +284,7 @@
 !-------------------------------------------------------------------------
 !   !
 !   !  Get Internal State
-    !EX_UTest
+    !NEX_disable_UTest
 !!    write(failMsg, *) "Did not return ESMF_SUCCESS"
 !!    write(name, *) "Get Internal State 3rd time Test"
 !!    call ESMF_SciCompGetInternalState(comp1, wrap6, rc)
@@ -293,7 +293,7 @@
 !-------------------------------------------------------------------------
 !   !
 !   !  Verify Internal State
-    !EX_UTest
+    !EX_disable_UTest
 !!    write(failMsg, *) "Did not return correct data"
 !!    write(name, *) "Verify Internal State 3rd time Test"
 !!    call ESMF_Test((wrap4%p%testnumber.eq.9182), name, failMsg, result, ESMF_SRCLINE)
