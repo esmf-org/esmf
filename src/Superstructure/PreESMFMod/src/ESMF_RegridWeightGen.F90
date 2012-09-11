@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.4 2012/09/11 00:20:37 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.5 2012/09/11 18:22:06 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -81,7 +81,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 
 	character(len=*),  intent(in)         :: srcFile
 	character(len=*),  intent(in)         :: dstFile
-	character(len=*),  intent(out)        :: weightFile
+	character(len=*),  intent(in)         :: weightFile
 	type(ESMF_RegridMethod_Flag),  intent(in), optional :: regridMethod
 	type(ESMF_PoleMethod_Flag),  intent(in), optional :: poleMethod
 	integer,   intent(in), optional       :: poleNPnts
@@ -107,10 +107,95 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 
 ! !DESCRIPTION:
 !   \begin{description}
-!   \item [{[srcField]}]
-!     {\tt ESMF\_Field} with source data.
-!   \item [{[dstField]}]
-!     {\tt ESMF\_Field} with destination data.
+!   \item [srcFile]
+!     The source grid file name.
+!   \item [dstFile]
+!     The destination grid file name.
+!   \item [weightFile]
+!     The interpolation weight file name.
+!   \item [{[regridMethod]}]
+!     The value is one of {\tt ESMF\_REGRIDMETHOD\_BILINEAR}, {\tt ESMF\_REGRIDMETHOD\_PATCH}, or
+!     {\tt ESMF\_REGRIDMETHOD\_CONSERVE}.  The default value is {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
+!   \item [{[poleMethod]}]
+!     A flag to indicate what to do with the pole.  The value is one of {\tt ESMF\_POLEMETHOD\_ALLAVG},
+!     {\tt ESMF\_POLEMETHOD\_NONE}, {\tt ESMF\_POLEMETHOD\_NPNTAVG} or {\tt ESMF\_POLEMETHOD\_TEETH}.
+!     The default value varies depending on the regridding method and the grid type and foramt.  
+!   \item [{[poleNPnts]}]
+!     If {\tt poleMethod} is set to {\tt ESMF_POLEMETHOD\_NPNTAVG}, this argument is required to 
+!     specify how many points are used to represent the pole.
+!   \item [{[ignoreUnmappedFlag]}]
+!     If .TRUE., the unmapped destination points will be ignored.  If not 
+!     specified, the default is to stop the regrid with an error.
+!   \item [{[srcFileType]}]
+!     The file format of the source grid.  The value is one of
+!     {\tt ESMF\_FILEFORMAT\_SCRIP}, {\tt ESMF\_FILEFORMAT\_ESMFMESH}, {\tt ESMF\_FILEFORMAT\_UGRID},
+!     or {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
+!   \item [{[dstFileType]}]
+!     The file format of the destination grid.  The value is one of
+!     {\tt ESMF\_FILEFORMAT\_SCRIP}, {\tt ESMF\_FILEFORMAT\_ESMFMESH}, {\tt ESMF\_FILEFORMAT\_UGRID},
+!     or {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
+!   \item [{[srcRegionalFlag]}]
+!     If .TRUE., the source grid is a regional grid, otherwise,
+!     it is a global grid.  The default value is .FALSE.
+!   \item [{[dstRegionalFlag]}]
+!     If .TRUE., the destination grid is a regional grid, otherwise,
+!     it is a global grid.  The default value is .FALSE.
+!   \item [{[srcMeshname]}]
+!     If the source file is in UGRID format, this argument is required
+!     to define the dummy variable name in the grid file that contains the
+!     mesh topology info.
+!   \item [{[dstMeshname]}]
+!     If the destination file is in UGRID format, this argument is required
+!     to define the dummy variable name in the grid file that contains the
+!     mesh topology info.
+!   \item [{[srcMissingValueFlag]}]
+!     If .TRUE., the source grid mask will be constructed using the missing
+!     values of the variable defined in {\tt srcMissingValueVar}. This flag is
+!     only used for the grid defined in  the GRIDSPEC or the UGRID file formats.
+!     The default value is .FALSE..
+!   \item [{[srcMissingvalueVar]}]
+!     If {\tt srcMissingValueFlag} is .TRUE., the argument is required to define
+!     the variable name whose missing values will be used to construct the grid 
+!     mask.  It is only used for the grid defined in  the GRIDSPEC or the UGRID 
+!     file formats.
+!   \item [{[dstMissingValueFlag]}]
+!     If .TRUE., the destination grid mask will be constructed using the missing
+!     values of the variable defined in {\tt dstMissingValueVar}. This flag is
+!     only used for the grid defined in  the GRIDSPEC or the UGRID file formats.
+!     The default value is .FALSE..
+!   \item [{[dstMissingvalueVar]}]
+!     If {\tt dstMissingValueFlag} is .TRUE., the argument is required to define
+!     the variable name whose missing values will be used to construct the grid 
+!     mask.  It is only used for the grid defined in  the GRIDSPEC or the UGRID 
+!     file formats.
+!   \item [{[useSrcCoordFlag]}]
+!     If .TRUE., the coordinate variables defined in {\tt srcCoordinateVars} will
+!     be used as the longitude and latitude variables for the source grid.
+!     This flag is only used for the GRIDSPEC file format.  The default is .FALSE.
+!   \item [{[srcCoordinateVars]}]
+!     If {\tt useSrcCoordFlag} is .TRUE., this argument defines the longitude and
+!     latitude variables in the source grid file to be used for the regrid.
+!     This argument is only used when the grid file is in GRIDSPEC format.
+!     {\tt srcCoordinateVars} should be a array of 2 elements.
+!   \item [{[useDstCoordFlag]}]
+!     If .TRUE., the coordinate variables defined in {\tt dstCoordinateVars} will
+!     be used as the longitude and latitude variables for the destination grid.
+!     This flag is only used for the GRIDSPEC file format.  The default is .FALSE.
+!   \item [{[dstCoordinateVars]}]
+!     If {\tt useDstCoordFlag} is .TRUE., this argument defines the longitude and
+!     latitude variables in the destination grid file to be used for the regrid.
+!     This argument is only used when the grid file is in GRIDSPEC format.
+!     {\tt dstCoordinateVars} should be a array of 2 elements.
+!   \item [{[useUserAreaFlag]}]
+!     If .TRUE., the element area values defined in the grid files are used.
+!     Only the SCRIP and ESMF format grid files have user specified areas. This flag
+!     is only used for conservative regridding. The default is .FALSE. 
+!   \item [{[largefileFlag]}]
+!     If .TRUE., the output weight file is in NetCDF 64bit offset format. 
+!     The default is .FALSE.
+!   \item [{[verboseFlag]}]
+!     If .TRUE., it will print summary information about the regrid parameters,
+!     default to .FALSE.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
