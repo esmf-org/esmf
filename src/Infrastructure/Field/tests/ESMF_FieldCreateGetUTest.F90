@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateGetUTest.F90,v 1.94 2012/09/10 20:43:55 feiliu Exp $
+! $Id: ESMF_FieldCreateGetUTest.F90,v 1.95 2012/09/11 12:54:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -7131,9 +7131,7 @@ contains
     if (ESMF_LogFoundError(rcToCheck=rc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    print *, '1. index flag: ', idx.i_type
     idx = ESMF_INDEX_USER
-    print *, '1a. index flag: ', idx.i_type
 
 
     call ESMF_GridGet(GRID, localDE=0, &
@@ -7170,7 +7168,6 @@ contains
     if (ESMF_LogFoundError(rcToCheck=rc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    print *, '2. index flag: ', idx.i_type
     
     if(fieldRank /= gridRank) then
       rc = ESMF_FAILURE
