@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.3 2012/09/06 15:41:42 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.4 2012/09/11 00:20:37 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -333,7 +333,8 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
          dstIsRegional = dstRegionalFlag
       endif
 
-      if (srcIsRegional .or. dstIsRegional) then
+!      if (srcIsRegional .or. dstIsRegional) then
+      if (srcIsRegional) then
          localPoleMethod = ESMF_POLEMETHOD_NONE
          localPoleNPnts = 0
       endif
