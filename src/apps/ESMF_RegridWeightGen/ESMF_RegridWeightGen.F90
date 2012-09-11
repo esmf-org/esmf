@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.73 2012/09/11 00:22:02 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.74 2012/09/11 20:13:22 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -90,7 +90,7 @@ program ESMF_RegridWeightGenApp
          if (ind == -1) call ESMF_UtilGetArgIndex('--destination', argindex=ind, rc=rc)
          if (ind == -1) then
            write(*,*)
-           print *, 'ERROR: The required argument [-w|--weight] is missing.'
+           print *, 'ERROR: The required argument [-d|-destination] is missing.'
            call ESMF_Finalize(endflag=ESMF_END_ABORT)
          else
            call ESMF_UtilGetArg(ind+1, argvalue=dstfile)
