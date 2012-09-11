@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.5 2012/09/11 18:22:06 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.6 2012/09/11 20:14:13 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -245,6 +245,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
       character(len=256) :: argStr
       logical            :: useSrcCoordVar, useDstCoordVar
       logical            :: useSrcMask, useDstMask
+      integer            :: commandbuf(6)
       !real(ESMF_KIND_R8) :: starttime, endtime
      
       !------------------------------------------------------------------------
@@ -498,16 +499,13 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 	    dstFileType == ESMF_FILEFORMAT_UGRID)) useDstMask = .false.
  
       ! Should I have only PetNO=0 to open the file and find out the size?
-!      if (PetNo == 0) then
-      if (localSrcFileType == ESMF_FILEFORMAT_SCRIP) then
-	   call ESMF_ScripInq(srcfile, grid_rank= srcrank, grid_dims=srcdims, rc=localrc)
-#if 1
-	   if (localrc /= ESMF_SUCCESS) then 
+      if (PetNo == 0) then
+        if (localSrcFileType == ESMF_FILEFORMAT_SCRIP) then
+	    call ESMF_ScripInq(srcfile, grid_rank= srcrank, grid_dims=srcdims, rc=localrc)
+	   if (localVerboseFlag .and. rc /= ESMF_SUCCESS) then 
              write(*,*)
-	     print *, 'ERROR: Unable to get dimension information from:', srcfile, &
-                      'Please check the PET*.RegridWeightGen.Log files for the NetCDF error message.' 
+	     print *, 'ERROR: Unable to get dimension information from:', srcfile
            endif
-#endif
            if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
@@ -516,37 +514,31 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
            else
              srcIsReg = .false.
            endif
-      elseif (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+        elseif (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
            allocate(srcdims(2))
 	   if (useSrcCoordVar) then
    	      call ESMF_GridspecInq(srcfile, srcrank, srcdims, coord_names=srcCoordinateVars, rc=localrc)
 	   else
 	      call ESMF_GridspecInq(srcfile, srcrank, srcdims, rc=localrc)
  	   endif
-#if 1
-	   if (localrc /= ESMF_SUCCESS) then 
+	   if (localVerboseFlag .and. rc /= ESMF_SUCCESS) then 
              write(*,*)
-	     print *, 'ERROR: Unable to get dimension information from:', srcfile, &
-                      'Please check the PET*.RegridWeightGen.Log files for the NetCDF error message.' 
+	     print *, 'ERROR: Unable to get dimension information from:', srcfile
            endif
-#endif
            if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
 	   srcIsReg = .true.
            srcrank = 2
-      else
+        else
 	   srcIsReg = .false.
-      endif
-      if (dstFileType == ESMF_FILEFORMAT_SCRIP) then
+        endif
+        if (dstFileType == ESMF_FILEFORMAT_SCRIP) then
 	   call ESMF_ScripInq(dstfile, grid_rank=dstrank, grid_dims=dstdims, rc=localrc)
-#if 1
-           if (localrc /= ESMF_SUCCESS) then
+	   if (localVerboseFlag .and. rc /= ESMF_SUCCESS) then 
              write(*,*)
-	     print *, 'ERROR: Unable to get dimension information from:', dstfile, &
-                      'Please check the PET*.RegridWeightGen.Log files for the NetCDF error message' 
+	     print *, 'ERROR: Unable to get dimension information from:', dstfile
            endif
-#endif
            if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
@@ -555,29 +547,63 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
            else
              dstIsReg = .false.
            endif
-       elseif (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+         elseif (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
 	   allocate(dstdims(2))
 	   if (useDstCoordVar) then
 	      call ESMF_GridspecInq(dstfile, dstrank, dstdims, coord_names=dstCoordinateVars, rc=localrc)
 	   else
 	      call ESMF_GridspecInq(dstfile, dstrank, dstdims, rc=localrc)
 	   endif 
-#if 1
-	   if (rc /= ESMF_SUCCESS) then 
+	   if (localVerboseFlag .and. rc /= ESMF_SUCCESS) then 
              write(*,*)
-	     print *, 'ERROR: Unable to get dimension information from:', dstfile, &
-                      'Please check the PET*.RegridWeightGen.Log files for the NetCDF error message.' 
+	     print *, 'ERROR: Unable to get dimension information from:', dstfile
            endif
-#endif	
            if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
 	   dstrank = 2
 	   dstIsReg = .true.
-      else
+        else
 	   dstIsReg = .false.
+        endif
+        commandbuf(:) = 0
+	if (srcIsReg) commandbuf(1) = 1
+	if (dstIsReg) commandbuf(2) = 1
+        commandbuf(3) = srcdims(1)
+        if (size(srcdims) == 2) then
+  	   commandbuf(4) = srcdims(2)
+        else 
+	   commandbuf(4) = 1
+        endif 
+	commandbuf(5) = dstdims(1)
+	commandbuf(6) = dstdims(2)   
+        call ESMF_VMBroadcast(vm, commandbuf, 6, 0, rc=rc)
+        if (ESMF_LogFoundError(localrc, &
+                               ESMF_ERR_PASSTHRU, &
+                               ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        ! Not the Root PET
+        allocate(srcdims(2),dstdims(2))
+        call ESMF_VMBroadcast(vm, commandbuf, 6, 0, rc=rc)
+        if (ESMF_LogFoundError(localrc, &
+                               ESMF_ERR_PASSTHRU, &
+                               ESMF_CONTEXT, rcToReturn=rc)) return
+        if (commandbuf(1) == 1) then
+	    srcIsReg = .true.
+        else
+            srcIsReg = .false.
+        endif        
+        if (commandbuf(2) == 1) then
+	    dstIsReg = .true.
+        else
+            dstIsReg = .false.
+        endif        
+	srcdims(1) = commandbuf(3)  
+	srcdims(2) = commandbuf(4)  
+	dstdims(1) = commandbuf(5)  
+	dstdims(2) = commandbuf(6)  
       endif
-        
+
       ! Print the regrid options
       if (localVerboseFlag .and. PetNo == 0) then
   	  print *, "Starting weight generation with these inputs: "
