@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.30 2012/09/06 17:21:11 w6ws Exp $
+// $Id: ESMC_Init.h,v 1.31 2012/09/12 17:05:07 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@ extern "C" {
 #endif
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_Initialize - Initialize the ESMF Framework
+// !IROUTINE: ESMC_Initialize - Initialize ESMF
 //
 // !INTERFACE:
   int ESMC_Initialize(
