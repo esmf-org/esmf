@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleIOUTest.F90,v 1.15 2012/05/16 22:19:19 svasquez Exp $
+! $Id: ESMF_ArrayBundleIOUTest.F90,v 1.16 2012/09/12 03:49:24 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -150,7 +150,8 @@ program ESMF_ArrayBundleIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleWrite Single file Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayBundleWrite(arraybundle_w, file="bundle.nc", rc=rc)
+  call ESMF_ArrayBundleWrite(arraybundle_w, file="bundle.nc",         &
+                             status=ESMF_FILESTATUS_REPLACE, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -162,7 +163,8 @@ program ESMF_ArrayBundleIOUTest
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayBundleWrite Multiple files Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS or ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_ArrayBundleWrite(arraybundle_w, file="sep.nc",  &
+  call ESMF_ArrayBundleWrite(arraybundle_w, file="sep.nc",      &
+                             status=ESMF_FILESTATUS_REPLACE,    &
                              singleFile=.false., rc=rc)
   if(rc==ESMF_RC_LIB_NOT_PRESENT) then
    call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)

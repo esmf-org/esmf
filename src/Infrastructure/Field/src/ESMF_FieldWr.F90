@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldWr.F90,v 1.19 2012/01/06 20:16:40 svasquez Exp $
+! $Id: ESMF_FieldWr.F90,v 1.20 2012/09/12 03:49:26 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -36,6 +36,7 @@ module ESMF_FieldWrMod
   use ESMF_FieldMod
   use ESMF_FieldGetMod
   use ESMF_InitMacrosMod
+  use ESMF_IOMod
 
   implicit none
 
@@ -48,7 +49,7 @@ module ESMF_FieldWrMod
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 ! - ESMF-public methods:
-   public ESMF_FieldWrite              ! Write Field to a file
+  public ESMF_FieldWrite              ! Write Field to a file
 
 !------------------------------------------------------------------------------
 
@@ -71,18 +72,20 @@ contains
 ! \label{api:FieldWrite}
 
 ! !INTERFACE:
-      subroutine ESMF_FieldWrite(field, file, &
-        keywordEnforcer, append, timeslice, iofmt, rc)
+  subroutine ESMF_FieldWrite(field, file, keywordEnforcer,   &
+      variableName, overwrite, status, timeslice, iofmt, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field),     intent(in)             :: field 
-      character(*),         intent(in)             :: file 
+    type(ESMF_Field),          intent(in)             :: field 
+    character(*),              intent(in)             :: file 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      logical,              intent(in),  optional  :: append
-      integer,              intent(in),  optional  :: timeslice
-      type(ESMF_IOFmtFlag), intent(in),  optional  :: iofmt
-      integer,              intent(out), optional  :: rc
+    character(*),              intent(in),  optional  :: variableName
+    logical,                   intent(in),  optional  :: overwrite
+    type(ESMF_FileStatusFlag), intent(in),  optional  :: status
+    integer,                   intent(in),  optional  :: timeslice
+    type(ESMF_IOFmtFlag),      intent(in),  optional  :: iofmt
+    integer,                   intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
 !   Write Field data into a file.  For this API to be functional, the 
@@ -102,17 +105,38 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The {\tt ESMF\_Field} object that contains data to be written.
 !   \item[file]
 !     The name of the output file to which Field data is written.
-!   \item[{[append]}]
-!     Logical: if .true., data (with attributes) is appended to an
-!     existing file; default is .false.
+!   \item[{[variableName]}]
+!    Variable name in the output file; default is the "name" of field.
+!    Use this argument only in the IO format (such as NetCDF) that
+!    supports variable name. If the IO format does not support this 
+!    (such as binary format), ESMF will return an error code.
+!   \item[{[overwrite]}]
+!    \begin{sloppypar}
+!    Logical: if .true., existing field data may be overwritten. If
+!    {\tt iofmt} is {\tt ESMF\_IOFMT\_BIN}, then all data in the file will
+!    be overwritten with this field's data. For a NetCDF format, only the
+!    data corresponding the {\tt variableName} or the field's name will be
+!    be overwritten. If the {\tt timeslice} option is given, only data for
+!    the given timeslice may be overwritten. default is .false.
+!    \end{sloppypar}
+!   \item[{[status]}]
+!    \begin{sloppypar}
+!    The file status. Please see Section~\ref{const:filestatusflag} for
+!    the list of options. If not present, defaults to
+!    {\tt ESMF\_FILESTATUS\_UNKNOWN}.
+!    \end{sloppypar}
 !   \item[{[timeslice]}]
-!     Some IO formats (e.g. NetCDF) support the output of data in form of
-!     time slices. The {\tt timeslice} argument provides access to this
-!     capability. Usage of this feature requires that the first slice is
-!     written with a positive {\tt timeslice} value, and that subsequent slices
-!     are written with a {\tt timeslice} argument that increments by one each
-!     time. By default, i.e. by omitting the {\tt timeslice} argument, no
-!     provisions for time slicing are made in the output file.
+!    \begin{sloppypar}
+!    Some IO formats (e.g. NetCDF) support the output of data in form of
+!    time slices. The {\tt timeslice} argument provides access to this
+!    capability. {\tt timeslice} must be positive.
+!    Note that if overwrite is .false. and a timeslice is given which is
+!    less than the maximum time already in the file, the write will fail.
+!    By default, i.e. by omitting the {\tt timeslice} argument, no
+!    provisions for time slicing are made in the output file,
+!    however, if the file already contains a time axis for the variable,
+!    a timeslice one greater than the maximum will be written..
+!    \end{sloppypar}
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
 !     The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
@@ -123,56 +147,96 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !EOP
-        character(len=ESMF_MAXSTR)      :: name
-        type(ESMF_FieldType), pointer   :: fp 
-        type(ESMF_Array)                :: array 
-        integer                         :: time, i, localrc
-        integer                         :: gridrank, arrayrank
-        logical                         :: appd_internal
-        type(ESMF_Status)               :: fieldstatus
-        type(ESMF_IOFmtFlag)            :: iofmtd
+    integer                         :: localrc
+    character(len=ESMF_MAXSTR)      :: name
+    type(ESMF_FieldType), pointer   :: fp 
+    type(ESMF_Array)                :: array 
+    integer                         :: time
+    type(ESMF_FieldStatus_Flag)     :: fieldstatus       ! Field's status
+    logical                         :: opt_overwriteflag ! helper variable
+    type(ESMF_FileStatusFlag)       :: opt_status        ! helper variable
+    type(ESMF_IOFmtFlag)            :: iofmtd
+    type(ESMF_IO)                   :: io                ! The I/O object
+    logical                         :: errorFound        ! True if err cond.
 
 #ifdef ESMF_PIO
-!       Initialize
-        localrc = ESMF_RC_NOT_IMPL
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
+!   Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    errorFound = .false.
 
-        ! check variables
-        ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
+    ! check variables
+    ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-        appd_internal = .false.
-        if(present(append)) appd_internal = append
+    time = -1   ! default, no time dimension
+    if (present(timeslice)) time = timeslice
 
-        time = -1   ! default, no time dimension
-        if (present(timeslice)) time = timeslice
+    ! Set default flags
+    opt_overwriteflag = .false.
+    if (present(overwrite)) opt_overwriteflag = overwrite
 
-        iofmtd = ESMF_IOFMT_NETCDF   ! default format
-        if(present(iofmt)) iofmtd = iofmt
+    opt_status = ESMF_FILESTATUS_UNKNOWN
+    if (present(status)) opt_status = status
 
-        fp => field%ftypep
+    iofmtd = ESMF_IOFMT_NETCDF   ! default format
+    if(present(iofmt)) iofmtd = iofmt
 
-        call c_ESMC_GetName(fp%base, name, localrc)
-        if (ESMF_LogFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present(variableName)) then
+      name = variableName
+    else
+      fp => field%ftypep
 
-        call ESMF_FieldGet(field, array=array, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+      call c_ESMC_GetName(fp%base, name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
-        call ESMF_ArrayWrite(array, file, variableName=trim(name), &
-          append=appd_internal, timeslice=time, iofmt=iofmtd, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_FieldGet(field, status=fieldstatus, array=array, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    if (fieldstatus .ne. ESMF_FIELDSTATUS_COMPLETE) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD,                &
+           msg="Uninitialized Field: field does not have an array",   &
+           ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
 
-        if (present(rc)) rc = ESMF_SUCCESS
+    ! Create an I/O object
+    io = ESMF_IOCreate(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! From here on out, we need to clean up so no returning on error
+    if (localrc .eq. ESMF_SUCCESS) then
+      call ESMF_IOAddArray(io, array, variableName=name, rc=localrc)
+      errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
+          ESMF_CONTEXT, rcToReturn=rc)
+    endif
+
+    if (.not. errorfound) then
+      call ESMF_IOWrite(io, trim(file), overwrite=opt_overwriteflag,  &
+          status=opt_status, timeslice=time, iofmt=iofmtd, rc=localrc)
+      errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
+          ESMF_CONTEXT, rcToReturn=rc)
+    endif
+
+    ! Set rc here in case we had an error but destroy succeeds
+    if (present(rc)) rc = localrc
+
+    call ESMF_IODestroy(io, rc=localrc)
+    ! Log error but don't reset rc
+    errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,       &
+        ESMF_CONTEXT, rcToReturn=localrc)
+
+    ! Last chance to return an error code (IODestroy failed)
+    if (present(rc) .and. (rc .eq. ESMF_SUCCESS)) rc = localrc
 
 #else
-        ! Return indicating PIO not present
-        if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+    ! Return indicating PIO not present
+    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
 #endif
 
-        end subroutine ESMF_FieldWrite
+  end subroutine ESMF_FieldWrite
 
 !------------------------------------------------------------------------------
 

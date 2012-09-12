@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.170 2012/08/06 01:25:14 gold2718 Exp $
+! $Id: ESMF_Array.F90,v 1.171 2012/09/12 03:49:15 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.170 2012/08/06 01:25:14 gold2718 Exp $'
+    '$Id: ESMF_Array.F90,v 1.171 2012/09/12 03:49:15 gold2718 Exp $'
 
 !==============================================================================
 ! 
@@ -1328,21 +1328,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_ArrayWrite(array, file, keywordEnforcer, &
-     variableName, append, timeslice, iofmt, rc)
-!   ! We need to terminate the strings on the way to C++
-#ifdef ESMF_PIO
-    use, intrinsic :: iso_c_binding, only: C_NULL_CHAR
-#endif // ESMF_PIO
+     variableName, overwrite, status, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),     intent(in)            :: array
-    character(*),         intent(in)            :: file
+    type(ESMF_Array),          intent(in)            :: array
+    character(*),              intent(in)            :: file
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    character(*),         intent(in),  optional :: variableName
-    logical,              intent(in),  optional :: append
-    integer,              intent(in),  optional :: timeslice
-    type(ESMF_IOFmtFlag), intent(in),  optional :: iofmt
-    integer,              intent(out), optional :: rc
+    character(*),              intent(in),  optional :: variableName
+    logical,                   intent(in),  optional :: overwrite
+    type(ESMF_FileStatusFlag), intent(in),  optional :: status
+    integer,                   intent(in),  optional :: timeslice
+    type(ESMF_IOFmtFlag),      intent(in),  optional :: iofmt
+    integer,                   intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Write Array data into a file. For this API to be functional, the 
@@ -1367,17 +1364,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    Use this argument only in the IO format (such as NetCDF) that
 !    supports variable name. If the IO format does not support this 
 !    (such as binary format), ESMF will return an error code.
-!   \item[{[append]}]
-!    Logical: if .true., data (with attributes) is appended to an
-!    existing file; default is .false.
+!   \item[{[overwrite]}]
+!    \begin{sloppypar}
+!    Logical: if .true., existing array data may be overwritten. If
+!    {\tt iofmt} is {\tt ESMF\_IOFMT\_BIN}, then all data in the file will
+!    be overwritten with this array's data. For a NetCDF format, only the
+!    data corresponding the {\tt variableName} or the array's name will be
+!    be overwritten. If the {\tt timeslice} option is given, only data for
+!    the given timeslice may be overwritten. default is .false.
+!    \end{sloppypar}
+!   \item[{[status]}]
+!    \begin{sloppypar}
+!    The file status. Please see Section~\ref{const:filestatusflag} for
+!    the list of options. If not present, defaults to
+!    {\tt ESMF\_FILESTATUS\_UNKNOWN}.
+!    \end{sloppypar}
 !   \item[{[timeslice]}]
+!    \begin{sloppypar}
 !    Some IO formats (e.g. NetCDF) support the output of data in form of
 !    time slices. The {\tt timeslice} argument provides access to this
-!    capability. Usage of this feature requires that the first slice is
-!    written with a positive {\tt timeslice} value, and that subsequent slices
-!    are written with a {\tt timeslice} argument that increments by one each
-!    time. By default, i.e. by omitting the {\tt timeslice} argument, no
-!    provisions for time slicing are made in the output file.
+!    capability. {\tt timeslice} must be positive.
+!    Note that if overwrite is .false. and a timeslice is given which is
+!    less than the maximum time already in the file, the write will fail.
+!    By default, i.e. by omitting the {\tt timeslice} argument, no
+!    provisions for time slicing are made in the output file,
+!    however, if the file already contains a time axis for the variable,
+!    a timeslice one greater than the maximum will be written..
+!    \end{sloppypar}
 !   \item[{[iofmt]}]
 !    \begin{sloppypar}
 !    The IO format. Please see Section~\ref{opt:iofmtflag} for the list 
@@ -1390,8 +1403,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     ! Local vars
-    integer             :: localrc              ! local return code
-    type(ESMF_Logical)  :: opt_appendflag       ! helper variable
+    integer                   :: localrc           ! local return code
+    integer                   :: len_fileName      ! helper variable
+    integer                   :: len_varName       ! helper variable
+    type(ESMF_Logical)        :: opt_overwriteflag ! helper variable
+    type(ESMF_FileStatusFlag) :: opt_status        ! helper variable
+    type(ESMF_IOFmtFlag)      :: opt_iofmt         ! helper variable
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1403,13 +1420,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
 
     ! Set default flags
-    opt_appendflag = ESMF_FALSE
-    if (present(append)) opt_appendflag = append
+    opt_overwriteflag = ESMF_FALSE
+    if (present(overwrite) .and. overwrite) opt_overwriteflag = ESMF_TRUE
+
+    opt_status = ESMF_FILESTATUS_UNKNOWN
+    if (present(status)) opt_status = status
+
+    opt_iofmt = ESMF_IOFMT_NETCDF;
+    if ( present(iofmt)) opt_iofmt = iofmt
+
+    ! Get string lengths
+    len_fileName = len(trim(file))
+    if (present(variableName)) then
+      len_varName = len(trim(variableName))
+    else
+      len_varName = 0
+    endif
 
     ! Call into the C++ interface, which will call IO object
-    call c_esmc_arraywrite(array, trim(file)//C_NULL_CHAR,     &
-        trim(variableName)//C_NULL_CHAR, opt_appendflag,       &
-        timeslice, iofmt, localrc)
+    call c_esmc_arraywrite(array, file, len_fileName,          &
+        variableName, len_varName, opt_overwriteflag,          &
+        opt_status, timeslice, opt_iofmt, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

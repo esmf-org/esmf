@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.153 2012/09/06 17:58:51 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.154 2012/09/12 03:49:39 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -678,6 +678,22 @@
         ESMF_FILEFORMAT_UGRID = ESMF_FileFormat_Flag(5), &
         ESMF_FILEFORMAT_GRIDSPEC = ESMF_FileFormat_Flag(6)
 
+!------------------------------------------------------------------------------
+!
+!     ! File status type (for ESMF_xxxWrite status input)
+
+      type ESMF_FileStatusFlag
+      sequence
+      private
+          integer :: status_type
+      end type
+
+      type(ESMF_FileStatusFlag), parameter ::  &
+                           ESMF_FILESTATUS_UNKNOWN  = ESMF_FileStatusFlag(0), &
+                           ESMF_FILESTATUS_OLD      = ESMF_FileStatusFlag(1), &
+                           ESMF_FILESTATUS_NEW      = ESMF_FileStatusFlag(2), &
+                           ESMF_FILESTATUS_REPLACE  = ESMF_FileStatusFlag(3)
+
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -812,6 +828,11 @@
 		 ESMF_FILEFORMAT_ESMFMESH, ESMF_FILEFORMAT_ESMFGRID, &
     	 	ESMF_FILEFORMAT_UGRID, ESMF_FILEFORMAT_GRIDSPEC
 
+      public ESMF_FileStatusFlag, ESMF_FILESTATUS_UNKNOWN,   &
+                                  ESMF_FILESTATUS_OLD,       &
+                                  ESMF_FILESTATUS_NEW,       &
+                                  ESMF_FILESTATUS_REPLACE
+
       
 !  Overloaded = operator functions
       public operator(==), operator(/=), assignment(=)
@@ -840,6 +861,7 @@ interface operator (==)
   module procedure ESMF_ioeq
   module procedure ESMF_RegridPoleEq
   module procedure ESMF_FileFormatEq
+  module procedure ESMF_FileStatusEq
   module procedure ESMF_RegridMethodEq
 end interface
 
@@ -855,6 +877,7 @@ interface operator (/=)
   module procedure ESMF_unmappedactionne
   module procedure ESMF_RegridPoleNe
   module procedure ESMF_FileFormatNe
+  module procedure ESMF_FileStatusNe
   module procedure ESMF_RegridMethodNe
 end interface
 
@@ -870,6 +893,7 @@ interface assignment (=)
   module procedure ESMF_ptas2
   module procedure ESMF_ioas
   module procedure ESMF_ifas_string
+  module procedure ESMF_FileStatusAs
 end interface  
 
 
@@ -1372,6 +1396,30 @@ end function ESMF_FileFormatEq
 
 end function ESMF_FileFormatNe
 
+
+!------------------------------------------------------------------------------
+! function to compare/assign two ESMF_FileStatusFlags
+
+subroutine ESMF_FileStatusAs(fs1, fs2)
+ type(ESMF_FileStatusFlag), intent(out) :: fs1
+ type(ESMF_FileStatusFlag), intent(in)  :: fs2
+
+ fs1%status_type = fs2%status_type
+end subroutine ESMF_FileStatusAs
+
+function ESMF_FileStatusEq(fs1, fs2)
+  logical ESMF_FileStatusEq
+  type(ESMF_FileStatusFlag), intent(in) :: fs1, fs2
+
+  ESMF_FileStatusEq = (fs1%status_type == fs2%status_type)
+end function ESMF_FileStatusEq
+
+function ESMF_FileStatusNe(fs1, fs2)
+  logical ESMF_FileStatusNe
+  type(ESMF_FileStatusFlag), intent(in) :: fs1, fs2
+
+  ESMF_FileStatusNe = (fs1%status_type == fs2%status_type)
+end function ESMF_FileStatusNe
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_RegridMethod types

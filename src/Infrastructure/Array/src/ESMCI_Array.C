@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.160 2012/08/14 22:58:00 gold2718 Exp $
+// $Id: ESMCI_Array.C,v 1.161 2012/09/12 03:49:16 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.160 2012/08/14 22:58:00 gold2718 Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.161 2012/09/12 03:49:16 gold2718 Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2624,7 +2624,7 @@ int Array::read(
   }
   if (ESMF_SUCCESS == localrc) {
     // Call the IO read function
-    localrc = newIO->read(file, &localiofmt, timeslice);
+    localrc = newIO->read(file, localiofmt, timeslice);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
   }
 
@@ -2655,9 +2655,10 @@ int Array::write(
   Array *array,                   // in    - Array
   char  *file,                    // in    - name of file being written
   char  *variableName,            // in    - optional variable name
-  bool  append,                   // in    - append array to file
+  bool  overwrite,                // in    - OK to overwrite file data
+  ESMC_FileStatusFlag status,     // in    - file status flag
   int   *timeslice,               // in    - timeslice option
-  ESMC_IOFmtFlag *iofmt           // in    - IO format flag
+  ESMC_IOFmtFlag iofmt            // in    - IO format flag
   ){
 //
 // !DESCRIPTION:
@@ -2668,38 +2669,30 @@ int Array::write(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  ESMC_IOFmtFlag localiofmt;
 
-  IO *newIO = IO::create(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+  IO *newIO = IO::create(&rc);
+  if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc)) {
     return rc;
   }
   // From now on, we have to be sure to clean up before returning
-  if (ESMF_SUCCESS == localrc) {
-    localrc = newIO->addArray(array, variableName);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+  if (ESMF_SUCCESS == rc) {
+    rc = newIO->addArray(array, variableName);
+    ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
   }
-  // Set optional parameters which are not optional at next layer
-  if ((ESMC_IOFmtFlag *)NULL != iofmt) {
-    localiofmt = *iofmt;
-  } else {
-    localiofmt = ESMF_IOFMT_NETCDF;
-  }
-  if (ESMF_SUCCESS == localrc) {
-    // It is an error to supply a variable name if not in NetCDF mode
-    if ((ESMF_IOFMT_NETCDF != localiofmt) &&
-        ((char *)NULL != variableName) && (strlen(variableName) > 0)) {
+
+  if (ESMF_SUCCESS == rc) {
+    // It is an error to supply a variable name in binary mode
+    if ((ESMF_IOFMT_BIN == iofmt) && (strlen(variableName) > 0)) {
       ESMC_LogDefault.Write("Array variable name not allowed in binary mode",
                             ESMC_LOG_ERROR, ESMC_CONTEXT);
       rc = ESMF_RC_ARG_BAD;
     }
   }
-  if (ESMF_SUCCESS == localrc) {
+  if (ESMF_SUCCESS == rc) {
     // Call the IO write function
-    localrc = newIO->write(file, &localiofmt, append, timeslice);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    rc = newIO->write(file, iofmt, overwrite, status, timeslice);
+    ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
   }
 
   // cleanup

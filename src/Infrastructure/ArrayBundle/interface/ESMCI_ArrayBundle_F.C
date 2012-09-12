@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.41 2012/08/06 01:29:07 gold2718 Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.42 2012/09/12 03:49:21 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -380,47 +380,84 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_arraybundlewrite)(ESMCI::ArrayBundle **bundle,
-    char *file, ESMC_Logical *singleFile,
-    ESMC_Logical *appendflag, int *timeslice, ESMC_IOFmtFlag *iofmt, int *rc){
+                                      char *file, int *len_file,
+                                      ESMC_Logical *opt_singleFile,
+                                      ESMC_Logical *opt_overwriteflag,
+                                      ESMC_FileStatusFlag *status,
+                                      int *timeslice,
+                                      ESMC_IOFmtFlag *iofmt, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlewrite()"
+    bool singleFile;
+    bool overwriteflag;
     // Initialize return code; assume routine not implemented
-    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    bool singleFileOpt = true;  // default
-    if ((ESMC_NOT_PRESENT_FILTER(singleFile) != ESMC_NULL_POINTER) &&
-        (*singleFile != ESMF_TRUE)) {
-      singleFileOpt = false;
+    if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) {
+      *rc = ESMC_RC_NOT_IMPL;
     }
-    bool appendflagOpt = false;  // default
-    if ((ESMC_NOT_PRESENT_FILTER(appendflag) != ESMC_NULL_POINTER) &&
-        (*appendflag == ESMF_TRUE)) {
-      appendflagOpt = true;
+    // The Fortran interface always sets the flags and optional variables
+    // except for timeslice. For character variables, create NULL-terminated
+    // C strings.
+    // helper variable
+    char fileName[ESMF_MAXSTR + 1];
+    int len_fileName = *len_file;
+    if (len_fileName > ESMF_MAXSTR) {
+      ESMC_LogDefault.Write("File name length > ESMF_MAXSTR",
+                            ESMC_LOG_WARN, ESMC_CONTEXT);
+      len_fileName = ESMF_MAXSTR;
+    } else if (len_fileName < 0) {
+      ESMC_LogDefault.Write("Negative file name length",
+                            ESMC_LOG_WARN, ESMC_CONTEXT);
+      len_fileName = 0;
     }
+    if (len_fileName > 0) {
+      strncpy(fileName, file, len_fileName);
+      fileName[len_fileName] = '\0';
+    } else {
+      fileName[0] = '\0';
+    }
+    singleFile = (*opt_singleFile == ESMF_TRUE);
+    overwriteflag = (*opt_overwriteflag == ESMF_TRUE);
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::write(
-      *bundle, file, singleFileOpt, appendflagOpt, timeslice, iofmt),
+      *bundle, fileName, singleFile,
+      overwriteflag, *status, timeslice, *iofmt),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN_X(c_esmc_arraybundleread)(ESMCI::ArrayBundle **bundle,
-    char *file, ESMC_Logical *singleFile,
+    char *file, int *len_file, ESMC_Logical *opt_singleFile,
     int *timeslice, ESMC_IOFmtFlag *iofmt, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundleread()"
+    bool singleFile;
     // Initialize return code; assume routine not implemented
-    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    bool singleFileOpt = true;  // default
-    if ((ESMC_NOT_PRESENT_FILTER(singleFile) != ESMC_NULL_POINTER) &&
-        (*singleFile != ESMF_TRUE)) {
-      singleFileOpt = false;
+    if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) {
+      *rc = ESMC_RC_NOT_IMPL;
     }
+    // Create NULL-terminated C string for string input
+    // helper variable
+    char fileName[ESMF_MAXSTR + 1];
+    int len_fileName = *len_file;
+    if (len_fileName > ESMF_MAXSTR) {
+      ESMC_LogDefault.Write("File name length > ESMF_MAXSTR",
+                            ESMC_LOG_WARN, ESMC_CONTEXT);
+      len_fileName = ESMF_MAXSTR;
+    } else if (len_fileName < 0) {
+      ESMC_LogDefault.Write("Negative file name length",
+                            ESMC_LOG_WARN, ESMC_CONTEXT);
+      len_fileName = 0;
+    }
+    if (len_fileName > 0) {
+      strncpy(fileName, file, len_fileName);
+      fileName[len_fileName] = '\0';
+    } else {
+      fileName[0] = '\0';
+    }
+    singleFile = (*opt_singleFile == ESMF_TRUE);
     // Call into the actual C++ method wrapped inside LogErr handling
-    std::cout << "Calling ArrayBundle read on file = \"" << file
-              << "\", " << (singleFileOpt ? "single file" : "multiple files")
-              << std::endl;
     ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::read(
-      *bundle, file, singleFileOpt, timeslice, iofmt),
+      *bundle, fileName, singleFile, timeslice, iofmt),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

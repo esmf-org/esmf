@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.C,v 1.17 2012/08/14 22:53:23 gold2718 Exp $
+// $Id: ESMCI_IO.C,v 1.18 2012/09/12 03:49:36 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -38,49 +38,12 @@
 #include <ESMF_LogMacros.inc>
 #include <ESMCI_ArrayBundle.h>
 
-#ifdef ESMFIO_DEBUG
-#include "ESMC_VM.h"
-#include "ESMCI_VM.h"
-// Debug version
-static int dbgio_getrank(void) {
-  static int my_rank = -1;
-  if (-1 == my_rank) {
-    int rc;
-    ESMC_VM evm;
-    ESMCI::VM *vm;
-    int localPet;
-    int petCount;
-    int peCount;
-    MPI_Comm communicator;
-    evm = ESMC_VMGetCurrent(&rc);
-    if (ESMF_SUCCESS == rc) {
-      vm = ESMCI::VM::getCurrent(&rc);
-      if (ESMF_SUCCESS == rc) {
-        rc = ESMC_VMGet(evm, &localPet, &petCount, &peCount,
-                        &communicator, (int *)NULL, (int *)NULL);
-        vm->barrier();
-        if (ESMF_SUCCESS == rc) {
-          my_rank = localPet;
-        }
-      }
-    }
-  }
-  return my_rank;
-}
-#define PRANKM "(" << dbgio_getrank() << "): " << ESMC_METHOD << " "
-#define PPOS " " << ESMC_FILENAME << ":" << __LINE__ << "; "
-#define PRINTPOS  std::cout << PRANKM << "called at" << PPOS << std::endl
-#define PRINTMSG(_msg)  std::cout << PRANKM "at" << PPOS << _msg << std::endl
-#else
-// Non-debug version
-#define PRINTPOS
-#define PRINTMSG(_msg)
-#endif
+#include "esmf_io_debug.h"
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO.C,v 1.17 2012/08/14 22:53:23 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_IO.C,v 1.18 2012/09/12 03:49:36 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -280,7 +243,7 @@ int IO::read(
 // !ARGUMENTS:
 
   char const * const file,        // (in)    - name of file being read
-  ESMC_IOFmtFlag *iofmt,          // (in)    - IO format flag
+  ESMC_IOFmtFlag iofmt,           // (in)    - IO format flag
   int   *timeslice                // (in)    - timeslice option
   ) {
 // !DESCRIPTION:
@@ -289,28 +252,32 @@ int IO::read(
 //EOP
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int localrc1 = ESMC_RC_NOT_IMPL;        // local return code
+  int localrc2 = ESMC_RC_NOT_IMPL;        // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   PRINTPOS;
   // Open the file
-  IOReadFlag readflag = IO_READ;
-  IOWriteFlag writeflag = IO_NO_WRITE;
-  localrc = open(file, &readflag, &writeflag, iofmt);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    return rc;
+  localrc1 = open(file, ESMC_FILESTATUS_OLD, iofmt);
+  if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, &rc)) {
+    return ESMF_RC_FILE_READ;
   }
 
-  localrc = read(timeslice);
+  localrc1 = read(timeslice);
+  // Can't quit even if error; Have to close first
+  PRINTMSG("read returned " << localrc1);
 
   // Close the file
-  localrc = close();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    return rc;
+  localrc2 = close();
+  PRINTMSG("close returned " << localrc2);
+  if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, &rc)) {
+    return ESMF_RC_FILE_READ;
+  } else if (ESMC_LogDefault.MsgFoundError(localrc2,
+                                           ESMCI_ERR_PASSTHRU, &rc)) {
+    return ESMF_RC_FILE_READ;
   }
     
-  // return successfully
-  rc = ESMF_SUCCESS;
+  // return
   return (rc);
 }  // end IO::read
 //-------------------------------------------------------------------------
@@ -389,8 +356,9 @@ int IO::write(
 //
 // !ARGUMENTS:
   char const * const file,        // (in)    - name of file being read
-  ESMC_IOFmtFlag *iofmt,          // (in)    - IO format flag
-  bool append,                    // (in)    - IO append flag
+  ESMC_IOFmtFlag iofmt,           // (in)    - IO format flag
+  bool overwrite,                 // (in)    - overwrite fields if true
+  ESMC_FileStatusFlag status,     // (in)    - file status flag
   int   *timeslice                // (in)    - timeslice option
   ) {
 // !DESCRIPTION:
@@ -398,89 +366,35 @@ int IO::write(
 //
 //EOP
   // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
-  IOWriteFlag iowriteflag;                // I/O write/append flag
-
-  PRINTPOS;
-  // Open the file
-  IOReadFlag readflag = IO_NO_READ;
-  if (append) {
-    iowriteflag = IO_APPEND;
-  } else {
-    iowriteflag = IO_TRUNCATE;
-  }
-  localrc = open(file, &readflag, &iowriteflag, iofmt);
-  PRINTMSG("open returned " << localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    return rc;
-  }
-
-  localrc = write(timeslice);
-  PRINTMSG("write returned " << localrc);
-
-  // Close the file
-  localrc = close();
-  PRINTMSG("close returned " << localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    return rc;
-  }
-    
-  // return successfully
-  rc = ESMF_SUCCESS;
-  return (rc);
-}  // end IO::write
-//-------------------------------------------------------------------------
-
-
-//-------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::IO::write()"
-//BOP
-// !IROUTINE:  IO::write - Performs a write on an IO object
-//
-// !INTERFACE:
-int IO::write(
-//
-// !RETURN VALUE:
-//     int error return code
-//
-// !ARGUMENTS:
-  char const * const file,        // (in)    - name of file being read
-  ESMC_IOFmtFlag *iofmt,          // (in)    - IO format flag
-  IOWriteFlag *iowriteflag,       // (in)    - IO write/append flag
-  int   *timeslice                // (in)    - timeslice option
-  ) {
-// !DESCRIPTION:
-//      Writes an {\tt ESMC\_IO} object to file
-//
-//EOP
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int localrc1 = ESMC_RC_NOT_IMPL;        // local return code
+  int localrc2 = ESMC_RC_NOT_IMPL;        // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   PRINTPOS;
   // Open the file
-  IOReadFlag readflag = IO_NO_READ;
-  localrc = open(file, &readflag, iowriteflag, iofmt);
-  PRINTMSG("open returned " << localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    return rc;
+  localrc1 = open(file, status, iofmt, overwrite);
+  PRINTMSG("open returned " << localrc1);
+  if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, &rc)) {
+    return ESMF_RC_FILE_WRITE;
   }
 
-  localrc = write(timeslice);
-  PRINTMSG("write returned " << localrc);
+  localrc1 = write(timeslice);
+  PRINTMSG("write returned " << localrc1);
+  // Can't quit even if error; Have to close first
 
   // Close the file
-  localrc = close();
-  PRINTMSG("close returned " << localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    return rc;
+  localrc2 = close();
+  PRINTMSG("close returned " << localrc2);
+  if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, &rc)) {
+    return ESMF_RC_FILE_WRITE;
+  } else if (ESMC_LogDefault.MsgFoundError(localrc2,
+                                           ESMCI_ERR_PASSTHRU, &rc)) {
+    return ESMF_RC_FILE_WRITE;
   }
     
-  // return successfully
-  rc = ESMF_SUCCESS;
+  // return
   return (rc);
+
 }  // end IO::write
 //-------------------------------------------------------------------------
 
@@ -558,10 +472,11 @@ int IO::open(
 //
 // !ARGUMENTS:
 
-  char const * const file,        // (in)    - name of file being read
-  IOReadFlag *ioreadflag,         // (in)    - open file for reading?
-  IOWriteFlag *iowriteflag,       // (in)    - open file for write/append?
-  ESMC_IOFmtFlag *iofmt           // (in)    - IO format flag
+  char const * const file,            // (in)  - name of file being read
+  ESMC_FileStatusFlag filestatusflag, // (in)  - file status flag
+  ESMC_IOFmtFlag iofmt,               // (in)  - IO format flag
+  bool overwrite,                     // (in)  - overwrite fields?
+  bool readonly                       // (in)  - If false then read/write
   ) {
 // !DESCRIPTION:
 //      Open a file or stream for I/O. Create a new IO_Handler if necessary
@@ -582,24 +497,6 @@ int IO::open(
                           ESMC_LOG_ERROR, ESMC_CONTEXT);
     return localrc;
   }
-  if ((IOReadFlag *)NULL == ioreadflag) {
-    localrc = ESMC_RC_PTR_NULL;
-    ESMC_LogDefault.Write("IO Read Flag cannot be NULL",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
-    return localrc;
-  }
-  if ((IOWriteFlag *)NULL == iowriteflag) {
-    localrc = ESMC_RC_PTR_NULL;
-    ESMC_LogDefault.Write("IO Write Flag cannot be NULL",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
-    return localrc;
-  }
-  if ((ESMC_IOFmtFlag *)NULL == iofmt) {
-    localrc = ESMC_RC_PTR_NULL;
-    ESMC_LogDefault.Write("IO Format cannot be NULL",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
-    return localrc;
-  }
 
   // Ensure that we have an IO_Handler (create if necessary)
   if ((IO_Handler *)NULL == ioHandler) {
@@ -609,10 +506,9 @@ int IO::open(
       ioHandler = (IO_Handler *)NULL;
       return localrc;
     }
-  } else if (ioHandler->getFormat() != *iofmt) {
+  } else if (ioHandler->getFormat() != iofmt) {
     PRINTMSG("IO_Handler::create is wrong format, " <<
-             ioHandler->getFormat() << " instead of, " <<
-             *iofmt);
+             ioHandler->getFormat() << " instead of, " << iofmt);
     localrc = ESMC_RC_FILE_OPEN;
     ESMC_LogDefault.Write("Internal error, ioHandler has wrong format",
                           ESMC_LOG_ERROR, ESMC_CONTEXT);
@@ -630,7 +526,7 @@ int IO::open(
   }
 
   // Open the file
-  ioHandler->open(file, ioreadflag, iowriteflag, &localrc);
+  ioHandler->open(file, filestatusflag, overwrite, readonly, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     PRINTMSG("IO_Handler::open returned " << localrc);
     return localrc;

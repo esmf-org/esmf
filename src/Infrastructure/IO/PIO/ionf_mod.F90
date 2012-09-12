@@ -126,9 +126,11 @@ contains
     
     if(.not. file%iosystem%ioproc) file%fh=-tmpfh
 
-    if(Debug.or.DebugAsync) print *,__PIO_FILE__,__LINE__,file%fh,ierr
+    if(Debug.or.DebugAsync) print *,__PIO_FILE__,__LINE__,file%iosystem%comp_rank,file%fh,ierr
     
     call check_netcdf(File, ierr,__PIO_FILE__,__LINE__)
+
+    if(Debug.or.DebugAsync) print *,__PIO_FILE__,__LINE__,file%iosystem%comp_rank,file%fh,ierr
 
   end function create_nf
 

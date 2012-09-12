@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.44 2012/07/27 17:35:51 gold2718 Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.45 2012/09/12 03:49:15 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.44 2012/07/27 17:35:51 gold2718 Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.45 2012/09/12 03:49:15 gold2718 Exp $'
 
 !==============================================================================
 ! 
@@ -501,9 +501,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_ArrayRead(array, file, keywordEnforcer, variableName, &
     timeslice, iofmt, rc)
 !   ! We need to terminate the strings on the way to C++
-#ifdef ESMF_PIO
-    use, intrinsic :: iso_c_binding, only: C_NULL_CHAR
-#endif // ESMF_PIO
 !
 ! !ARGUMENTS:
     type(ESMF_Array),     intent(inout)         :: array
@@ -551,7 +548,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     ! Local vars
-    integer :: localrc                   ! local return code
+    integer              :: localrc              ! local return code
+    integer              :: len_fileName         ! helper variable
+    integer              :: len_varName          ! helper variable
 
     ! Initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -562,11 +561,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
 
+    ! Get string lengths
+    len_fileName = len(trim(file))
+    if (present(variableName)) then
+      len_varName = len(trim(variableName))
+    else
+      len_varName = 0
+    endif
+
     ! Call into the C++ interface, which will call IO object
-    call c_esmc_arrayread(array, trim(file)//C_NULL_CHAR,  &
-        trim(variableName)//C_NULL_CHAR,                   &
-        timeslice, iofmt, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    call c_esmc_arrayread(array, file, len_fileName,          &
+        variableName, len_varName, timeslice, iofmt, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,        &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return successfully

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.30 2012/05/16 22:33:56 svasquez Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.31 2012/09/12 03:49:27 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -61,6 +61,8 @@ program ESMF_FieldIOUTest
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
   integer :: countfail = 0
+  ! Changing status for writing file in loop
+  type(ESMF_FileStatusFlag) :: statusFlag = ESMF_FILESTATUS_UNKNOWN
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally
@@ -144,7 +146,8 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Write Fortran array in Field
-  call ESMF_FieldWrite(field_w, file="field.nc", rc=rc)
+  call ESMF_FieldWrite(field_w, file="field.nc",        &
+       status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) ""
   write(name, *) "Write Fortran array in Field"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
@@ -164,6 +167,8 @@ program ESMF_FieldIOUTest
 ! ! Write data at time t on file, total number of time=endtime 
 
   endtime = 5
+  ! The first time through, we need to replace these files
+  statusFlag = ESMF_FILESTATUS_REPLACE
   
   do t = 1, endtime
 
@@ -191,7 +196,8 @@ program ESMF_FieldIOUTest
     enddo
 !------------------------------------------------------------------------
     ! Write Fortran array in Field
-    call ESMF_FieldWrite(field_t, file="field_time.nc", timeslice=t, rc=rc)
+    call ESMF_FieldWrite(field_t, file="field_time.nc", timeslice=t,     &
+         status=statusFlag, overwrite=.true., rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
     if(rc.ne.ESMF_SUCCESS) then
       countfail = countfail + 1
@@ -220,7 +226,8 @@ program ESMF_FieldIOUTest
     endif
 !------------------------------------------------------------------------
     ! Write Fortran array in Field withou halo
-    call ESMF_FieldWrite(field_s, file="fieldNoHalo_time.nc", timeslice=t, rc=rc)
+    call ESMF_FieldWrite(field_s, file="fieldNoHalo_time.nc", timeslice=t,   &
+         status=statusFlag, overwrite=.true., rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
     if(rc.ne.ESMF_SUCCESS) then
       countfail = countfail + 1
@@ -231,6 +238,8 @@ program ESMF_FieldIOUTest
       exit
     endif
 #endif
+    ! Next time through the loop, we expect the file to be there
+    statusFlag = ESMF_FILESTATUS_OLD
 
   enddo  ! t
 
@@ -469,6 +478,9 @@ program ESMF_FieldIOUTest
     rc=rc)
   if(rc /= ESMF_SUCCESS) finalrc = rc
   print *, tlb, tub
+
+  ! Replace file first time through
+  statusFlag = ESMF_FILESTATUS_REPLACE
   do k = 1, 5
     do i = tlb(1), tub(1)
       do j = tlb(2), tub(2)
@@ -479,13 +491,17 @@ program ESMF_FieldIOUTest
     ! something in this test blows up inside of FieldWrite() under MPICH
     rc=ESMF_SUCCESS
 #else
-    call ESMF_FieldWrite(field, file='halof.nc', timeslice=k, rc=rc)
+    call ESMF_FieldWrite(field, file='halof.nc', timeslice=k,   &
+         status=statusFlag, overwrite=.true., rc=rc)
 #endif
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
     if(rc.ne.ESMF_SUCCESS) finalrc = rc
 #else
     if(rc.ne.ESMF_RC_LIB_NOT_PRESENT) finalrc = rc
 #endif
+    ! Next time through the loop, write to same file
+    statusFlag = ESMF_FILESTATUS_OLD
+
   enddo
   call ESMF_Test((finalrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.25 2012/08/23 20:18:00 gold2718 Exp $
+! $Id: ESMF_IO.F90,v 1.26 2012/09/12 03:49:35 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -47,8 +47,6 @@ module ESMF_IOMod
   use ESMF_F90InterfaceMod  ! ESMF Fortran-C++ interface helper
   ! We need some ESMF types
   use ESMF_ArrayMod
-  use ESMF_FieldMod
-  use ESMF_FieldGetMod
   
   implicit none
 
@@ -109,26 +107,9 @@ module ESMF_IOMod
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
-<<<<<<< ESMF_IO.F90
-      public ESMF_IOAddArray
-      public ESMF_IOAddField
-      !public ESMF_IOClose
-      public ESMF_IOCreate
-      public ESMF_IODestroy
-      !public ESMF_IOFlush 
-      !public ESMF_IOGet     
-      !public ESMF_IOOpen
-      !public ESMF_IOPrint
-      public ESMF_IORead
-      !public ESMF_IOReadRestart
-      !public ESMF_IOSet
-      !public ESMF_IOValidate
-      public ESMF_IOWrite
-      !public ESMF_IOWriteRestart
-=======
-  !public ESMF_IOAddArray
-  public ESMF_IOAddField
+  public ESMF_IOAddArray
   !public ESMF_IOClose
+  public ESMF_IOClear
   public ESMF_IOCreate
   public ESMF_IODestroy
   !public ESMF_IOFlush 
@@ -139,15 +120,14 @@ module ESMF_IOMod
   !public ESMF_IOReadRestart
   !public ESMF_IOSet
   !public ESMF_IOValidate
-!  public ESMF_IOWrite
+  public ESMF_IOWrite
   !public ESMF_IOWriteRestart
->>>>>>> 1.24
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-       '$Id: ESMF_IO.F90,v 1.25 2012/08/23 20:18:00 gold2718 Exp $'
+       '$Id: ESMF_IO.F90,v 1.26 2012/09/12 03:49:35 gold2718 Exp $'
 
 !==============================================================================
 !
@@ -166,12 +146,7 @@ contains
 ! !IROUTINE: ESMF_IOCreate - Create a new ESMF IO object
 !
 ! !INTERFACE:
-<<<<<<< ESMF_IO.F90
-      function ESMF_IOCreate(name, <object>, fileFormat, fileName, &
-                             readWritetype, convention, purpose, rc)
-=======
   function ESMF_IOCreate(keywordEnforcer, rc)
->>>>>>> 1.24
 !
 ! !RETURN VALUE:
     type(ESMF_IO) :: ESMF_IOCreate
@@ -211,7 +186,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IODestroy()"
 !BOPI
-! !IROUTINE: ESMF_IODestroy - Release resources associated with an ESMF IO object
+! !IROUTINE: ESMF_IODestroy - Clean up and delete an ESMF IO object
 !
 ! !INTERFACE:
   subroutine ESMF_IODestroy(io, rc)
@@ -222,6 +197,7 @@ contains
 !     
 ! !DESCRIPTION:
 !     Releases resources associated with this {\tt ESMF\_IO} object.
+!     This includes deleting the {\tt ESMF\_IO} object itself.
 !
 !     The arguments are:
 !     \begin{description}
@@ -252,15 +228,43 @@ contains
   end subroutine ESMF_IODestroy
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_IOClear()"
 !BOPI
-! !IROUTINE: ESMF_IOAddField - Add a field to an IO object's element list
+! !IROUTINE: ESMF_IOClear - Clears the I/O queue of an ESMF IO object
+!
+! !INTERFACE:
+  subroutine ESMF_IOClear(io)
+!
+! !ARGUMENTS:
+    type(ESMF_IO)                  :: io
+!     
+! !DESCRIPTION:
+!     Clears the I/O queue of this {\tt ESMF\_IO} object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[io]
+!       Clear the I/O queue of this {\tt ESMF\_IO} object.
+!     \end{description}
+!
+!EOPI
+
+!   invoke C to C++ entry point
+    call c_ESMC_IOClear(io)
+
+  end subroutine ESMF_IOClear
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_IOAddArray - Add an array to an IO object's element list
 
 ! !INTERFACE:
-  subroutine ESMF_IOAddField(io, field, keywordEnforcer, variableName, rc)
+  subroutine ESMF_IOAddArray(io, array, keywordEnforcer, variableName, rc)
 
 ! !ARGUMENTS:
     type(ESMF_IO),           intent(in)            :: io
-    type(ESMF_Field),        intent(in)            :: field
+    type(ESMF_Array),        intent(in)            :: array
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer !keywords req. below
     character (len=*),        intent(in), optional :: variableName
     integer,                 intent(out), optional :: rc
@@ -272,10 +276,10 @@ contains
 !     \begin{description}
 !     \item[io]
 !          The {\tt ESMF\_IO} object instance to modify
-!     \item[field]
-!          The {\tt ESMF\_Field} object to add to io's element list
+!     \item[array]
+!          The {\tt ESMF\_Array} object to add to io's element list
 !     \item[{[variableName]}]
-!          Optional variableName to attach to this field for I/O purposes
+!          Optional variableName to attach to this array for I/O purposes
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -284,23 +288,10 @@ contains
 
     integer                     :: localrc     ! local return code
     integer                     :: len_varName ! name length or 0
-    type(ESMF_Array)            :: array       ! Field's array to pass
-    type(ESMF_FieldStatus_Flag) :: status      ! Field's status
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
-
-    ! Obtain the field's array (if present)
-    call ESMF_FieldGet(field, status=status, array=array, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-    if (status .ne. ESMF_FIELDSTATUS_COMPLETE) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-           msg="Uninitialized Field: field does not have an array", &
-           ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
 
     !   invoke C to C++ entry point
     if (present(variableName)) then
@@ -314,7 +305,7 @@ contains
     
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS
-  end subroutine ESMF_IOAddField
+  end subroutine ESMF_IOAddArray
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -348,43 +339,52 @@ contains
 !     \item[{[status]}]
 !          Determines the action to take with regard to the file's status.
 !     \item[{[timeslice]}]
-!          Some IO formats (e.g. NetCDF) support the output of data in form of
-!          time slices. The {\tt timeslice} argument provides access to this
-!          capability. Usage of this feature requires that the first slice is
-!          written with a positive {\tt timeslice} value, and that subsequent
-!          slices are written with a {\tt timeslice} argument that increments
-!          by one each time. By default, i.e. by omitting the {\tt timeslice}
-!          argument, no provisions for time slicing are made in the output
-!          file.
+!      The time-slice number of the variable read from file.
 !     \item[{[iofmt]}]
-!          The file format to be used during the read. Default is
-!          ESMF_IOFMT_NETCDF
+!      \begin{sloppypar}
+!      The IO format.  Please see Section~\ref{opt:iofmtflag} for the list 
+!      of options. If not present, defaults to {\tt ESMF\_IOFMT\_NETCDF}.
+!      \end{sloppypar}
 !     \item[{[schema]}]
 !          Selects, for reading, the Attribute package of the ESMF
-!          objects included in <io> (e.g., with ESMF_IOAddField)
+!          objects included in <io> (e.g., with ESMF_IOAddArray)
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !EOPI
 ! !REQUIREMENTS:
 
-     integer :: localrc
+    integer              :: localrc
+    integer              :: len_fileName         ! filename length or 0
+    type(ESMF_IOFmtFlag) :: opt_iofmt            ! helper variable
+    integer              :: len_schema           ! schema string length or 0
 
      ! Assume failure until success
      if (present(rc)) rc = ESMF_RC_NOT_IMPL
      localrc = ESMF_RC_NOT_IMPL
-!
-!     ! check variables  TODO
-!     ESMF_INIT_CHECK_DEEP(ESMF_IOGetInit,io,rc)
-!
+
+    ! Grab the filename length for the C++ level
+    len_fileName = len(trim(fileName))
+
+    ! Set default flags
+    opt_iofmt = ESMF_IOFMT_NETCDF;
+    if ( present(iofmt)) opt_iofmt = iofmt
+
+    ! Grab the schema string length for the C++ level
+    if (present(schema)) then
+      len_schema = len(trim(schema))
+    else
+      len_schema = 0
+    endif
+
 !     invoke C to C++ entry point  TODO
-!     call c_ESMC_IORead(io, <object>, fileFormat, fileName, &
-!                       readWriteType, convention, purpose, localrc)
-!     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!       ESMF_CONTEXT, rcToReturn=rc)) return
-!
-     ! Return success
-     if (present(rc)) rc = ESMF_SUCCESS
+    call c_ESMC_IORead(io, fileName, len_fileName, opt_iofmt,    &
+        timeslice, schema, len_schema, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,           &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_IORead
 !
 !------------------------------------------------------------------------------
@@ -398,15 +398,15 @@ contains
                           timeslice, iofmt, schema, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_IO),           intent(in)            :: io
-    character (len=*),       intent(in)            :: fileName
+    type(ESMF_IO),             intent(in)            :: io
+    character (len=*),         intent(in)            :: fileName
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer !keywords req. below
-    logical,                 intent(in),  optional :: overwrite
-    character (len=*),       intent(in),  optional :: status
-    integer,                 intent(in),  optional :: timeslice
-    type(ESMF_IOFmtFlag),    intent(in),  optional :: iofmt
-    character (len=*),       intent(in),  optional :: schema
-    integer,                 intent(out), optional :: rc
+    logical,                   intent(in),  optional :: overwrite
+    type(ESMF_FileStatusFlag), intent(in),  optional :: status
+    integer,                   intent(in),  optional :: timeslice
+    type(ESMF_IOFmtFlag),      intent(in),  optional :: iofmt
+    character (len=*),         intent(in),  optional :: schema
+    integer,                   intent(out), optional :: rc
    
 ! !DESCRIPTION:
 !     Perform a write on an {\tt ESMF\_IO} object.  Any properties specified
@@ -421,7 +421,11 @@ contains
 !     \item[{[overwrite]}]
 !          If .true. allow existing data fields to be overwritten.
 !     \item[{[status]}]
-!          Determines the action to take with regard to the file's status.
+!          \begin{sloppypar}
+!           The file status. Please see Section~\ref{const:filestatusflag} for
+!           the list of options. If not present, defaults to
+!           {\tt ESMF\_FILESTATUS\_UNKNOWN}.
+!          \end{sloppypar}
 !     \item[{[timeslice]}]
 !          Some IO formats (e.g. NetCDF) support the output of data in form of
 !          time slices. The {\tt timeslice} argument provides access to this
@@ -436,26 +440,49 @@ contains
 !          ESMF_IOFMT_NETCDF
 !     \item[{[schema]}]
 !          Selects, for reading, the Attribute package of the ESMF
-!          objects included in <io> (e.g., with ESMF_IOAddField)
+!          objects included in <io> (e.g., with ESMF_IOAddArray)
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !EOPI
 ! !REQUIREMENTS:
 !
-    integer   :: localrc
-    integer   :: len_fileName ! filename length or 0
+    integer                   :: localrc
+    integer                   :: len_fileName       ! filename length or 0
+    type(ESMF_Logical)        :: opt_overwriteflag  ! helper variable
+    type(ESMF_FileStatusFlag) :: opt_status         ! helper variable
+    type(ESMF_IOFmtFlag)      :: opt_iofmt          ! helper variable
+    integer                   :: len_schema         ! schema string length or 0
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
+    ! Set default flags
+    opt_overwriteflag = ESMF_FALSE
+    if (present(overwrite) .and. overwrite) opt_overwriteflag = ESMF_TRUE
+
+    opt_status = ESMF_FILESTATUS_UNKNOWN
+    if (present(status)) opt_status = status
+
+    opt_iofmt = ESMF_IOFMT_NETCDF;
+    if ( present(iofmt)) opt_iofmt = iofmt
+
+    ! Grab the filename length for the C++ level
     len_fileName = len(trim(fileName))
 
+    ! Grab the schema string length for the C++ level
+    if (present(schema)) then
+      len_schema = len(trim(schema))
+    else
+      len_schema = 0
+    endif
+
 !   invoke C to C++ entry point  TODO
-    call c_ESMC_IOWrite(io, fileName, len_fileName, iofmt,      &
-         overwrite, timeslice, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    call c_ESMC_IOWrite(io, fileName, len_fileName, opt_iofmt,   &
+         opt_overwriteflag, opt_status, timeslice,               &
+         schema, len_schema, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,           &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Return success

@@ -1,4 +1,4 @@
-// $Id: ESMCI_PIO_Handler.h,v 1.2 2012/08/14 22:52:56 gold2718 Exp $
+// $Id: ESMCI_PIO_Handler.h,v 1.3 2012/09/12 03:49:33 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ namespace ESMCI {
 
   public:
     // native constructor and destructor
-    PIO_Handler(ESMC_IOFmtFlag *fmtArg, int *rc);
+    PIO_Handler(ESMC_IOFmtFlag fmtArg, int *rc);
     // Static initialize and finalize routines for PIO
     static void initialize(int comp_rank, MPI_Comm comp_comm,
                            int num_iotasks, int num_aggregator,
@@ -127,9 +127,7 @@ namespace ESMCI {
     }
 
     // open() and close()
-    void open(IOReadFlag *ioreadflag,
-              IOWriteFlag *iowriteflag,
-              int *rc = NULL);
+    void open(bool readonly_arg, int *rc = NULL);
     ESMC_Logical isOpen(void);
     ESMC_Logical isNewFile(void) {
       return (new_file ? ESMF_TRUE : ESMF_FALSE);

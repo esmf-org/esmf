@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_Handler.C,v 1.2 2012/08/14 22:53:23 gold2718 Exp $
+// $Id: ESMCI_IO_Handler.C,v 1.3 2012/09/12 03:49:36 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -40,49 +40,14 @@
 #include <ESMCI_ArrayBundle.h>
 #include "ESMCI_PIO_Handler.h"
 
-#ifdef ESMFIO_DEBUG
-#include "ESMC_VM.h"
-#include "ESMCI_VM.h"
-// Debug version
-static int dbgio_getrank(void) {
-  static int my_rank = -1;
-  if (-1 == my_rank) {
-    int rc;
-    ESMC_VM evm;
-    ESMCI::VM *vm;
-    int localPet;
-    int petCount;
-    int peCount;
-    MPI_Comm communicator;
-    evm = ESMC_VMGetCurrent(&rc);
-    if (ESMF_SUCCESS == rc) {
-      vm = ESMCI::VM::getCurrent(&rc);
-      if (ESMF_SUCCESS == rc) {
-        rc = ESMC_VMGet(evm, &localPet, &petCount, &peCount,
-                        &communicator, (int *)NULL, (int *)NULL);
-        vm->barrier();
-        if (ESMF_SUCCESS == rc) {
-          my_rank = localPet;
-        }
-      }
-    }
-  }
-  return my_rank;
-}
-#define PRANKM "(" << dbgio_getrank() << "): " << ESMC_METHOD << " "
-#define PPOS " " << ESMC_FILENAME << ":" << __LINE__ << "; "
-#define PRINTPOS  std::cout << PRANKM << "called at" << PPOS << std::endl
-#define PRINTMSG(_msg)  std::cout << PRANKM "at" << PPOS << _msg << std::endl
-#else
-// Non-debug version
-#define PRINTPOS
-#define PRINTMSG(_msg)
-#endif
+#define ROOT_PET (0)
+
+#include "esmf_io_debug.h"
 
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_Handler.C,v 1.2 2012/08/14 22:53:23 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_IO_Handler.C,v 1.3 2012/09/12 03:49:36 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -108,7 +73,7 @@ IO_Handler::IO_Handler (
 //    
 //
 // !ARGUMENTS:
-  ESMC_IOFmtFlag *fmtArg               // (in)  - the desired I/O format
+  ESMC_IOFmtFlag fmtArg                // (in)  - the desired I/O format
 //
   ) {
 //
@@ -119,19 +84,11 @@ IO_Handler::IO_Handler (
 //-----------------------------------------------------------------------------
   localPet = 0;
   indexflag = ESMF_INDEX_DELOCAL;
-  if (fmtArg != (ESMC_IOFmtFlag *)NULL) {
-    iofmtFlag = *fmtArg;
-  } else {
-#if defined(ESMF_PNETCDF) || defined(ESMF_NETCDF)
-    iofmtFlag = ESMF_IOFMT_NETCDF;
-#else
-    iofmtFlag = ESMF_IOFMT_BIN;
-#endif
-  }
+  iofmtFlag = fmtArg;
+  fileStatusFlag = ESMC_FILESTATUS_UNKNOWN;
+  overwrite = false;
   filename[0] = '\0';
 
-  // invalidate the name for this PIO_Handler object in the Base class
-//  ESMC_BaseSetName(NULL, "IO_Handler");
 }
 //-----------------------------------------------------------------------------
 
@@ -155,9 +112,9 @@ IO_Handler *IO_Handler::create (
 //    IO_Handler * to newly allocated IO_Handler
 //
 // !ARGUMENTS:
-      ESMC_IOFmtFlag *iofmt,              // (in) the desired I/O format
+      ESMC_IOFmtFlag iofmt,               // (in)  the desired I/O format
 //
-  int *rc                                  // (out) return code
+  int *rc                                 // (out) return code
   ) {
 //
 // !DESCRIPTION:
@@ -176,14 +133,8 @@ IO_Handler *IO_Handler::create (
 
   // call class constructor
   try {
-    // We really should never get here because IO layer is supposed to check
-    if ((ESMC_IOFmtFlag *)NULL == iofmt) {
-      localrc = ESMF_RC_PTR_NULL;
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, "- NULL IOFmtFlag", rc);
-      return ESMC_NULL_POINTER;
-    }
     // Determine if we have the support for the requested I/O format
-    switch (*iofmt) {
+    switch (iofmt) {
     case ESMF_IOFMT_BIN:
 #ifdef ESMF_PIO
       iohandler = new PIO_Handler(iofmt, &localrc);
@@ -253,7 +204,7 @@ IO_Handler *IO_Handler::create (
 //
 // !ARGUMENTS:
       char const * const file,             // (in) A file for Handler
-      ESMC_IOFmtFlag *iofmt,              // (in) the desired I/O format
+      ESMC_IOFmtFlag iofmt,              // (in) the desired I/O format
 //
   int *rc                                  // (out) return code
   ) {
@@ -274,7 +225,7 @@ IO_Handler *IO_Handler::create (
   if (ESMC_NULL_POINTER != iohandler) {
     strncpy(iohandler->filename, file, ESMF_MAXSTR);
     // Ensure termination
-    iohandler->filename[ESMF_MAXSTR - 1] = '\0';
+    iohandler->filename[ESMF_MAXSTR] = '\0';
   }
 
   // return successfully
@@ -380,7 +331,7 @@ void IO_Handler::finalize (
     // PIO
     PRINTPOS;
     PIO_Handler::finalize(&localrc);
-    PRINTMSG(", after finalize, localrc = " << localrc);
+    PRINTMSG("after finalize, localrc = " << localrc);
     if (ESMF_SUCCESS != localrc) {
       char errmsg[256];
       sprintf(errmsg, "PIO_Handler::finalize error = %d", localrc);
@@ -392,17 +343,17 @@ void IO_Handler::finalize (
     // finalize routines even if one fails.
   } catch(int localrc) {
     // catch standard ESMF return code
-    PRINTMSG(", caught passthru, localrc = " << localrc);
+    PRINTMSG("caught passthru, localrc = " << localrc);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
     return;
   } catch(...) {
-    PRINTMSG(", caught unknown error");
+    PRINTMSG("caught unknown error");
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
                                           "- Caught exception", rc);
     return;
   }
 
-  PRINTMSG(", before return, localrc = " << localrc);
+  PRINTMSG("before return, localrc = " << localrc);
   // return successfully
   if ((int *)NULL != rc) {
     *rc = localrc;
@@ -481,7 +432,7 @@ bool IO_Handler::fileExists(
 //    bool true if file exists and meets the input requirements
 //
 // !ARGUMENTS:
-  bool needRead,                      // (in) - true if file read is required
+  const char * const name,            // (in) - filename to test
   bool needWrite                      // (in) - true if file write is required
 ) {
 //
@@ -495,22 +446,47 @@ bool IO_Handler::fileExists(
   // initialize return code
   bool fileOK = false;
   std::ios_base::openmode iomode = std::ios_base::binary;
+  ESMCI::VM *vm;
+  int localPet;
+  int localrc;
 
   // BOGUS: On some systems (I'm looking at you IBM), opening a file with
   //        write on but in off automatically truncates the file.
   //        Solution is to always use in.
-  needRead = true;
-  if (needRead) {
-    iomode |= std::ios_base::in;
-  }
+  iomode |= std::ios_base::in;
   if (needWrite) {
     iomode |= std::ios_base::out;
   }
 
-  std::fstream filestr (getFilename(), iomode);
-  fileOK = (filestr.good());
-  // filestr will automatically close when function exits
-
+  vm = ESMCI::VM::getCurrent(&localrc);
+  if (ESMF_SUCCESS == localrc) {
+    localPet = vm->getLocalPet();
+    if (ROOT_PET == localPet) {
+      // Get the file status and broadcast to all PETs
+      std::fstream filestr (name, iomode);
+      fileOK = (filestr.good());
+      // filestr will automatically close when function exits
+      localrc = vm->broadcast(&fileOK, sizeof(bool), ROOT_PET);
+    } else {
+      // Non-root PETs just participate in the broadcast
+      localrc = vm->broadcast(&fileOK, sizeof(bool), ROOT_PET);
+    }
+    if (ESMF_SUCCESS == localrc) {
+      char errmsg[ESMF_MAXSTR + 64];
+      sprintf(errmsg, "Error finding file status for \"%s\"", name);
+      ESMC_LogDefault.Write(errmsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+    }
+  } else {
+    // We don't seem to have a VM so just do this on all PETs
+    // Log a warning anyway
+    ESMC_LogDefault.Write("Unable to obtain a VM",
+                          ESMC_LOG_WARN, ESMC_CONTEXT);
+    std::fstream filestr (name, iomode);
+    fileOK = (filestr.good());
+    // filestr will automatically close when function exits
+  }
+  PRINTMSG("File, \"" << name << "\" " <<
+           (fileOK ? "exists" : "does not exist"));
   return fileOK;
 } // end IO_Handler::fileExists
 //-------------------------------------------------------------------------
@@ -530,11 +506,11 @@ void IO_Handler::open (
 //
 // !ARGUMENTS:
 
-  char const * const file,               // (in)  - name of file being read
-  IOReadFlag *ioreadflag,                // (in)  - open file for reading?
-  IOWriteFlag *iowriteflag,              // (in)  - open file for write/append?
-//
-  int *rc                                // (out) - return code
+  char const * const file,                // (in)  - name of file being read
+  ESMC_FileStatusFlag filestatusflag_arg, // (in)  - file status
+  bool overwrite_arg,                     // (in)  - overwrite fields is true
+  bool readonly_arg,                      // (in)  - if false then read/write
+  int *rc                                 // (out) - return code
   ) {
 // !DESCRIPTION:
 //      Open a file or stream for I/O. Create a new IO_Handler if necessary
@@ -554,12 +530,6 @@ void IO_Handler::open (
     localrc = ESMF_RC_PTR_NULL;
     ESMC_LogDefault.MsgFoundError(localrc,
                                   "- NULL filename argument pointer", rc);
-  } else if ((enum IOReadFlag *)NULL == ioreadflag) {
-    localrc = ESMF_RC_PTR_NULL;
-    ESMC_LogDefault.MsgFoundError(localrc, "- NULL IOReadFlag", rc);
-  } else if ((enum IOWriteFlag *)NULL == iowriteflag) {
-    localrc = ESMF_RC_PTR_NULL;
-    ESMC_LogDefault.MsgFoundError(localrc, "- NULL IOWriteFlag", rc);
   } else if (isOpen() == ESMF_TRUE) {
     // Check to make sure that a file is not already open
     localrc = ESMF_RC_FILE_OPEN;
@@ -572,8 +542,11 @@ void IO_Handler::open (
   }
 
   if (ESMF_SUCCESS == localrc) {
+    // Store the IO status and overwrite fields
+    fileStatusFlag = filestatusflag_arg;
+    overwrite = overwrite_arg;
     // Open the file
-    open(ioreadflag, iowriteflag, &localrc);
+    open(readonly_arg, &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, "- Error opening file", rc);
   }
 

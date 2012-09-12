@@ -142,7 +142,8 @@
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! FieldBundle Write to a single file Test
-  call ESMF_FieldBundleWrite(bundleTst, file="single.nc", rc=rc)
+  call ESMF_FieldBundleWrite(bundleTst, file="single.nc",      &
+      status=ESMF_FILESTATUS_REPLACE, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Writing a FieldBundle to a single file Test"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
@@ -159,7 +160,7 @@
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Writing a FieldBundle to multiple files Test"
   call ESMF_FieldBundleWrite(bundleTst, file="multi.nc",  &
-      singleFile=.false., rc=rc)
+      status=ESMF_FILESTATUS_REPLACE, singleFile=.false., rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else

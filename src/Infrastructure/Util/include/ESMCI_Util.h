@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.53 2012/09/07 20:21:01 feiliu Exp $
+// $Id: ESMCI_Util.h,v 1.54 2012/09/12 03:49:38 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -124,6 +124,12 @@ enum ESMC_AttTreeFlag { ESMC_ATTTREE_OFF=0,
 // attwrite flag type
 enum ESMC_AttWriteFlag { ESMC_ATTWRITE_TAB=0,
                          ESMC_ATTWRITE_XML};
+
+// File status flag (for IO write functions)
+enum ESMC_FileStatusFlag { ESMC_FILESTATUS_UNKNOWN=0,
+                           ESMC_FILESTATUS_OLD = 1,
+                           ESMC_FILESTATUS_NEW = 2,
+                           ESMC_FILESTATUS_REPLACE = 3};
 
 // TODO: investigate why this is a macro instead of an enum
 #define ESMC_GRIDITEM_INVALID -2

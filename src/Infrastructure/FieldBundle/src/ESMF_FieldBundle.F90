@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.140 2012/07/18 20:09:46 w6ws Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.141 2012/09/12 03:49:29 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -57,6 +57,7 @@ module ESMF_FieldBundleMod
   use ESMF_RegridMod
   use ESMF_StaggerLocMod    
   use ESMF_VMMod
+  use ESMF_IOMod
   
   implicit none
 
@@ -156,7 +157,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.140 2012/07/18 20:09:46 w6ws Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.141 2012/09/12 03:49:29 gold2718 Exp $'
 
 !==============================================================================
 ! 
@@ -1970,13 +1971,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_FieldBundleRead(fieldbundle, file, &
-    keywordEnforcer, singleFile, iofmt, rc)
+    keywordEnforcer, singleFile, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle), intent(inout)          :: fieldbundle
     character(*),           intent(in)             :: file
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
     logical,                intent(in),  optional  :: singleFile
+    integer,                intent(in),  optional  :: timeslice
     type(ESMF_IOFmtFlag),   intent(in),  optional  :: iofmt
     integer,                intent(out), optional  :: rc
 !
@@ -2004,6 +2006,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !     in separate files; these files are numbered with the name based on the
 !     argument "file". That is, a set of files are named: [file\_name]001,
 !     [file\_name]002, [file\_name]003,...
+!   \item[{[timeslice]}]
+!    The time-slice number of the variable read from file.
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
 !     The IO format. Please see Section~\ref{opt:iofmtflag} for the list
@@ -2015,14 +2019,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    character(len=80), allocatable :: Aname(:)
-    integer :: fieldCount,i
-    type(ESMF_Field), allocatable :: fieldList(:)
-    logical                       :: singlef
-    character(len=80)             :: filename
-    character(len=3)              :: cnum
-    type(ESMF_IOFmtFlag)          :: iofmtd
+    integer                        :: localrc      ! local return code
+    character(len=ESMF_MAXSTR)     :: name
+    integer                        :: fieldCount
+    integer                        :: i
+    type(ESMF_Field), allocatable  :: fieldList(:)
+    logical                        :: singlef
+    character(len=ESMF_MAXSTR)     :: filename
+    character(len=3)               :: cnum
+    type(ESMF_Array)               :: array 
+    type(ESMF_IOFmtFlag)           :: iofmtd
+    type(ESMF_IO)                  :: io           ! The I/O object
+    logical                        :: errorFound   ! True if error condition
+    integer                        :: time
 
 #ifdef ESMF_PIO
     ! initialize return code; assume routine not implemented
@@ -2037,44 +2046,83 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     if (present(singleFile)) singlef = singleFile
     iofmtd = ESMF_IOFMT_NETCDF   ! default format
     if(present(iofmt)) iofmtd = iofmt
+    time = 0
+    if(present(timeslice)) time = timeslice
+
+    ! Check to make sure that filename won't be too long
+    if (singlef .and. (len(trim(file)) .gt. (ESMF_MAXSTR - 3))) then
+      localrc = ESMF_RC_LONG_NAME
+      call ESMF_LogWrite("file argument is too long",                   &
+           ESMF_LOGMSG_ERROR, rc=localrc)
+      return
+    endif
 
     call ESMF_FieldBundleGet(fieldbundle, fieldCount=fieldCount, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-    allocate (Aname(fieldCount))
     allocate (fieldList(fieldCount))
     call ESMF_FieldBundleGet(fieldbundle, fieldList=fieldList, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Create an I/O object
+    io = ESMF_IOCreate(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! From here on out, we need to clean up so no returning on error
     if (singlef) then
       ! Get and read the fields in the Bundle
       do i=1,fieldCount
-       call ESMF_FieldGet(fieldList(i), name=Aname(i), rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_FieldRead(fieldList(i), file=file, &
-          iofmt=iofmtd, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_FieldGet(fieldList(i), array=array, name=name, rc=localrc)
+        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
+            ESMF_CONTEXT, rcToReturn=rc)
+        if (errorFound) exit
+        call ESMF_IOAddArray(io, array, variableName=name, rc=localrc)
+        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
+            ESMF_CONTEXT, rcToReturn=rc)
+        if (errorFound) exit
       enddo
+      if (.not. errorFound) then
+        call ESMF_IORead(io, trim(file), timeslice=time,                &
+            iofmt=iofmtd, rc=localrc)
+        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
+            ESMF_CONTEXT, rcToReturn=rc)
+      endif
     else
       do i=1,fieldCount
+        ! Clear the IO object (only need to do this for i > 1)
+        if (i .gt. 1) call ESMF_IOClear(io)
         write(cnum,"(i3.3)") i
         filename = file // cnum
-        call ESMF_FieldGet(fieldList(i), name=Aname(i), rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_FieldRead(fieldList(i), file=filename,  &
-               iofmt=iofmtd, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_FieldGet(fieldList(i), array=array, name=name, rc=localrc)
+        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
+            ESMF_CONTEXT, rcToReturn=rc)
+        if (errorFound) exit
+        call ESMF_IOAddArray(io, array, variableName=name, rc=localrc)
+        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
+            ESMF_CONTEXT, rcToReturn=rc)
+        if (errorFound) exit
+        if (.not. errorFound) then
+          call ESMF_IORead(io, trim(filename), timeslice=time,          &
+              iofmt=iofmtd, rc=localrc)
+          errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,   &
+              ESMF_CONTEXT, rcToReturn=rc)
+        endif
       enddo
     endif
 
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
+    ! Set rc here in case we had an error but destroy succeeds
+    if (present(rc)) rc = localrc
+
+    call ESMF_IODestroy(io, rc=localrc)
+    ! Log error but don't reset rc
+    errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &
+        ESMF_CONTEXT, rcToReturn=localrc)
+
+    ! Last chance to return an error code (IODestroy failed)
+    if (present(rc) .and. (rc .eq. ESMF_SUCCESS)) rc = localrc
 
 #else
     ! Return indicating PIO not present
@@ -4758,16 +4806,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   subroutine ESMF_FieldBundleWrite(fieldbundle, file, &
-    keywordEnforcer, singleFile, timeslice, iofmt, rc)
+    keywordEnforcer, singleFile, overwrite, status, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_FieldBundle), intent(in)              :: fieldbundle
-    character(*),           intent(in)              :: file
+    type(ESMF_FieldBundle),    intent(in)             :: fieldbundle
+    character(*),              intent(in)             :: file
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
-    logical,                intent(in),   optional  :: singleFile
-    integer,                intent(in),   optional  :: timeslice
-    type(ESMF_IOFmtFlag),   intent(in),   optional  :: iofmt
-    integer,                intent(out),  optional  :: rc  
+    logical,                   intent(in),  optional  :: singleFile
+    logical  ,                 intent(in),  optional  :: overwrite
+    type(ESMF_FileStatusFlag), intent(in),  optional  :: status
+    integer,                   intent(in),  optional  :: timeslice
+    type(ESMF_IOFmtFlag),      intent(in),  optional  :: iofmt
+    integer,                   intent(out), optional  :: rc  
 !
 ! !DESCRIPTION:
 !   Write the Fields into a file. For this API to be functional,
@@ -4793,14 +4843,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !     in separate files; these files are numbered with the name based on the
 !     argument "file". That is, a set of files are named: [file\_name]001,
 !     [file\_name]002, [file\_name]003,...
+!   \item[{[overwrite]}]
+!    \begin{sloppypar}
+!    Logical: if .true., existing field data may be overwritten. If
+!    {\tt iofmt} is {\tt ESMF\_IOFMT\_BIN}, then all data in the file will
+!    be overwritten with each field's data. For a NetCDF format, only the
+!    data corresponding to each field's name will be
+!    be overwritten. If the {\tt timeslice} option is given, only data for
+!    the given timeslice may be overwritten. default is .false.
+!    \end{sloppypar}
+!   \item[{[status]}]
+!    \begin{sloppypar}
+!    The file status. Please see Section~\ref{const:filestatusflag} for
+!    the list of options. If not present, defaults to
+!    {\tt ESMF\_FILESTATUS\_UNKNOWN}.
+!    \end{sloppypar}
 !   \item[{[timeslice]}]
-!     Some IO formats (e.g. NetCDF) support the output of data in form of
-!     time slices. The {\tt timeslice} argument provides access to this
-!     capability. Usage of this feature requires that the first slice is
-!     written with a positive {\tt timeslice} value, and that subsequent slices
-!     are written with a {\tt timeslice} argument that increments by one each
-!     time. By default, i.e. by omitting the {\tt timeslice} argument, no
-!     provisions for time slicing are made in the output file.
+!    \begin{sloppypar}
+!    Some IO formats (e.g. NetCDF) support the output of data in form of
+!    time slices. The {\tt timeslice} argument provides access to this
+!    capability. {\tt timeslice} must be positive.
+!    Note that if overwrite is .false. and a timeslice is given which is
+!    less than the maximum time already in the file, the write will fail.
+!    By default, i.e. by omitting the {\tt timeslice} argument, no
+!    provisions for time slicing are made in the output file,
+!    however, if the file already contains a time axis for the variable,
+!    a timeslice one greater than the maximum will be written..
+!    \end{sloppypar}
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
 !     The IO format. Please see Section~\ref{opt:iofmtflag} for the list
@@ -4812,14 +4881,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    character(len=80), allocatable :: Aname(:)
-    integer :: fieldCount,i,time
-    type(ESMF_Field), allocatable :: fieldList(:)
-    logical :: singlef
-    character(len=80) :: filename
-    character(len=3) :: cnum
-    type(ESMF_IOFmtFlag)        :: iofmtd
+    integer                        :: localrc           ! local return code
+    character(len=ESMF_MAXSTR)     :: name
+    integer                        :: fieldCount
+    integer                        :: i
+    type(ESMF_Field), allocatable  :: fieldList(:)
+    logical                        :: singlef
+    character(len=ESMF_MAXSTR)     :: filename
+    character(len=3)               :: cnum
+    type(ESMF_Array)               :: array 
+    logical                        :: opt_overwriteflag ! helper variable
+    type(ESMF_FileStatusFlag)      :: opt_status        ! helper variable
+    type(ESMF_IOFmtFlag)           :: iofmtd
+    type(ESMF_IO)                  :: io                ! The I/O object
+    logical                        :: errorFound        ! True if err. cond.
+    integer                        :: time
 
 #ifdef ESMF_PIO
     ! initialize return code; assume routine not implemented
@@ -4832,57 +4908,93 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     ! Check options
     singlef = .true.
     if (present(singleFile)) singlef = singleFile
+
+    opt_overwriteflag = .false.
+    if (present(overwrite)) opt_overwriteflag = overwrite
+
+    opt_status = ESMF_FILESTATUS_UNKNOWN
+    if (present(status)) opt_status = status
+
     iofmtd = ESMF_IOFMT_NETCDF   ! default format
     if(present(iofmt)) iofmtd = iofmt
-    time = -1   ! default, no time dimension
-    if (present(timeslice)) time = timeslice
-    
+    time = 0
+    if(present(timeslice)) time = timeslice
+
+    ! Check to make sure that filename won't be too long
+    if (singlef .and. (len(trim(file)) .gt. (ESMF_MAXSTR - 3))) then
+      localrc = ESMF_RC_LONG_NAME
+      call ESMF_LogWrite("file argument is too long",                   &
+           ESMF_LOGMSG_ERROR, rc=localrc)
+      return
+    endif
+
     call ESMF_FieldBundleGet(fieldbundle, fieldCount=fieldCount, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-    allocate (Aname(fieldCount))
     allocate (fieldList(fieldCount))
     call ESMF_FieldBundleGet(fieldbundle, fieldList=fieldList, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Create an I/O object
+    io = ESMF_IOCreate(rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! From here on out, we need to clean up so no returning on error
     if (singlef) then
-      ! Get and write the first field in the Bundle
-      call ESMF_FieldGet(fieldList(1), name=Aname(1), rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_FieldWrite(fieldList(1), file=file, timeslice=time, iofmt=iofmtd, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Get and write the rest of the fields in the Bundle
-      do i=2,fieldCount
-       call ESMF_FieldGet(fieldList(i), name=Aname(i), rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_FieldWrite(fieldList(i), file=file, timeslice=time, &
-         append=.true., iofmt=iofmtd, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Get and read the fields in the Bundle
+      do i=1,fieldCount
+        call ESMF_FieldGet(fieldList(i), array=array, name=name, rc=localrc)
+        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
+            ESMF_CONTEXT, rcToReturn=rc)
+        if (errorFound) exit
+        call ESMF_IOAddArray(io, array, variableName=name, rc=localrc)
+        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
+            ESMF_CONTEXT, rcToReturn=rc)
+        if (errorFound) exit
       enddo
+      if (.not. errorFound) then
+      call ESMF_IOWrite(io, trim(file), overwrite=opt_overwriteflag,    &
+          status=opt_status, timeslice=time, iofmt=iofmtd, rc=localrc)
+        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
+            ESMF_CONTEXT, rcToReturn=rc)
+      endif
     else
       do i=1,fieldCount
+        ! Clear the IO object (only need to do this for i > 1)
+        if (i .gt. 1) call ESMF_IOClear(io)
         write(cnum,"(i3.3)") i
         filename = file // cnum
-        ! Get and write the first field in the Bundle
-        call ESMF_FieldGet(fieldList(i), name=Aname(i), rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_FieldWrite(fieldList(i), file=trim(filename),  &
-           timeslice=time, iofmt=iofmtd, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_FieldGet(fieldList(i), array=array, name=name, rc=localrc)
+        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
+            ESMF_CONTEXT, rcToReturn=rc)
+        if (errorFound) exit
+        call ESMF_IOAddArray(io, array, variableName=name, rc=localrc)
+        errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
+            ESMF_CONTEXT, rcToReturn=rc)
+        if (errorFound) exit
+        if (.not. errorFound) then
+          call ESMF_IOWrite(io, trim(filename),                         &
+              overwrite=opt_overwriteflag, status=opt_status,           &
+              timeslice=time, iofmt=iofmtd, rc=localrc)
+          errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,   &
+              ESMF_CONTEXT, rcToReturn=rc)
+        endif
       enddo
     endif
 
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
+    ! Set rc here in case we had an error but destroy succeeds
+    if (present(rc)) rc = localrc
+
+    call ESMF_IODestroy(io, rc=localrc)
+    ! Log error but don't reset rc
+    errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &
+        ESMF_CONTEXT, rcToReturn=localrc)
+
+    ! Last chance to return an error code (IODestroy failed)
+    if (present(rc) .and. (rc .eq. ESMF_SUCCESS)) rc = localrc
 
 #else
     ! Return indicating PIO not present

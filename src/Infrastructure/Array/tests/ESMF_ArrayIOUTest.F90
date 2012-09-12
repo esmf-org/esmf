@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayIOUTest.F90,v 1.37 2012/07/23 21:05:26 gold2718 Exp $
+! $Id: ESMF_ArrayIOUTest.F90,v 1.38 2012/09/12 03:49:18 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -169,9 +169,24 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write ESMF_Array with Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_withhalo, file='file3D_withhalo.nc', rc=rc)
+  call ESMF_ArrayWrite(array_withhalo, file='file3D_withhalo.nc',    &
+      status=ESMF_FILESTATUS_REPLACE, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+#endif
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+! ! Given an ESMF array, attempt to overwrite an existing file (should fail)
+  write(name, *) "Write ESMF_Array with Halo Test overwrite test"
+  write(failMsg, *) "Did not return ESMF_RC_FILE_WRITE"
+  call ESMF_ArrayWrite(array_withhalo, file='file3D_withhalo.nc',    &
+      status=ESMF_FILESTATUS_NEW, rc=rc)
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_RC_FILE_WRITE), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
@@ -183,7 +198,7 @@ program ESMF_ArrayIOUTest
   write(name, *) "Write ESMF_Array with Halo to binary Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayWrite(array_withhalo, file='file3D_withhalo.bin', &
-       iofmt=ESMF_IOFMT_BIN, rc=rc)
+       status=ESMF_FILESTATUS_REPLACE, iofmt=ESMF_IOFMT_BIN, rc=rc)
 #if (defined ESMF_PIO && defined ESMF_MPIIO)
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -197,7 +212,8 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write ESMF_Array without Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_wouthalo, file='file3D_wouthalo.nc', rc=rc)
+  call ESMF_ArrayWrite(array_wouthalo, file='file3D_wouthalo.nc',         &
+      status=ESMF_FILESTATUS_REPLACE, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -467,7 +483,8 @@ program ESMF_ArrayIOUTest
 ! ! Given an ESMF array, write the netCDF file.
   write(name, *) "Write 2D ESMF_Array with Halo Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_ArrayWrite(array_withhalo, file='file2D_withhalo.nc', rc=rc)
+  call ESMF_ArrayWrite(array_withhalo, file='file2D_withhalo.nc',        &
+      status=ESMF_FILESTATUS_REPLACE, rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else

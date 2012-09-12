@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.h,v 1.13 2012/09/04 16:11:35 theurich Exp $
+// $Id: ESMCI_IO.h,v 1.14 2012/09/12 03:49:33 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -78,8 +78,9 @@ namespace ESMCI {
         } else {
           strcpy(name, arrName);
         }
-      }else
+      } else {
         name[0] = '\0';
+      }
       number = 0;
     }
     ~IO_ObjectContainer() {
@@ -139,7 +140,7 @@ namespace ESMCI {
   public:
     // read()
     // An atomic read function which transparently handles open and close
-    int read(const char * const file, ESMC_IOFmtFlag *iofmt,
+    int read(const char * const file, ESMC_IOFmtFlag iofmt,
              int *timeslice = NULL);
 
     // A non-atomic read which is only successful on an open IO stream
@@ -147,15 +148,13 @@ namespace ESMCI {
 
     // write()
     // An atomic write function which transparently handles open and close
-    // This version more closely matches the functionality in the ESMF
-    // interface
+    // This version closely matches the functionality in the ESMF
+    // interface. If NULL is passed for any arguments (except for file which is
+    // is required), defaults will be used.
     int write(const char * const file,
-              ESMC_IOFmtFlag *iofmt, bool append,
-              int *timeslice = NULL);
-
-    // An atomic write function which transparently handles open and close
-    int write(const char * const file,
-              ESMC_IOFmtFlag *iofmt, IOWriteFlag *iowriteflag,
+              ESMC_IOFmtFlag iofmt,
+              bool overwrite,
+              ESMC_FileStatusFlag status,
               int *timeslice = NULL);
 
     // A non-atomic write which is only successful on an open IO stream
@@ -175,9 +174,10 @@ namespace ESMCI {
 
     // open() and close()
     int open(const char * const file,
-             IOReadFlag *ioreadflag,
-             IOWriteFlag *iowriteflag,
-             ESMC_IOFmtFlag *iofmt);
+             ESMC_FileStatusFlag filestatusflag,
+             ESMC_IOFmtFlag iofmt,
+             bool overwrite = false,
+             bool readonly = false);
     int flush(void);
     int close(void);
 
