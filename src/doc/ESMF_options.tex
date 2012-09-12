@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.81 2012/07/12 19:38:58 rokuingh Exp $
+% $Id: ESMF_options.tex,v 1.82 2012/09/12 03:52:05 gold2718 Exp $
 
 \section{Appendix A:  Master List of Constants}
 \label{const:master}
@@ -170,6 +170,39 @@ This flag is documented in section \ref{const:fieldstatus}.
 
 \subsection{ESMF\_FILEFORMAT}
 This flag is documented in section \ref{const:fileformat}.
+
+\subsection{ESMF\_FILESTATUS}
+\label{const:filestatusflag}
+{\sf DESCRIPTION:\\}
+{\tt status} is similar to the same keyword in the Fortran {\tt open}
+statement. It is used by by I/O output functions such as
+{\tt ESMF\_ArrayWrite} and {\tt ESMF\_FieldBundleWrite}. It works in
+conjunction with other optional inputs from those functions, {\tt iofmt}
+and {\tt overwrite}. See the documentation of those functions for details.
+
+The type of this flag is:
+
+{\tt type(ESMF\_FileStatusFlag)}
+
+The valid values are:
+\begin{description}
+\item [ESMF\_FILESTATUS\_UNKNOWN]
+      The file is treated as if {\status} is 'OLD' if the
+      file already exists. Otherwise, the file is treated as 'NEW'.
+\item [ESMF\_FILESTATUS\_OLD]
+      The file must exist. New data can be added to a file if
+      it is in a NetCDF format, however, existing data will not be
+      overwritten unless overwrite permission is granted (through an
+      additional {\tt overwrite} flag.
+      If {\tt iofmt} is specified as {\tt ESMF\_IOFMT\_BIN},
+      the write will only succeed if {\tt overwrite} is .true.
+\item [ESMF\_FILESTATUS\_NEW]
+      The file must not exist, it will be created.
+\item [ESMF\_FILESTATUS\_REPLACE]
+      If the file exists, all of its contents will be deleted before writing.
+      If the file does not exist, it will be created.
+
+\end{description}
 
 \subsection{ESMF\_GEOMTYPE}
 \label{const:geomtype}
