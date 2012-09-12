@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.6 2012/09/11 20:14:13 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.7 2012/09/12 16:21:28 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -569,14 +569,14 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
         commandbuf(:) = 0
 	if (srcIsReg) commandbuf(1) = 1
 	if (dstIsReg) commandbuf(2) = 1
-        commandbuf(3) = srcdims(1)
-        if (size(srcdims) == 2) then
-  	   commandbuf(4) = srcdims(2)
-        else 
-	   commandbuf(4) = 1
+        if (srcIsReg) then
+           commandbuf(3) = srcdims(1)
+     	   commandbuf(4) = srcdims(2)
         endif 
-	commandbuf(5) = dstdims(1)
-	commandbuf(6) = dstdims(2)   
+	if (dstIsReg) then 
+  	   commandbuf(5) = dstdims(1)
+	   commandbuf(6) = dstdims(2)   
+        endif
         call ESMF_VMBroadcast(vm, commandbuf, 6, 0, rc=rc)
         if (ESMF_LogFoundError(localrc, &
                                ESMF_ERR_PASSTHRU, &
