@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.62 2012/09/13 07:49:19 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.63 2012/09/13 21:57:31 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -251,6 +251,33 @@ class Attribute
     int AttributeSetObjsInTree(const std::string &name, const std::string &object, 
       const ESMC_TypeKind_Flag &tk, const int &count, void *value);
 
+    // Print
+    int ESMC_Print(void) const;
+
+    // Modifiers, Constructors, Destructors, Serializers, Operators
+    Attribute(const std::string &conv, const std::string &purp, const std::string &obj);
+    Attribute(const std::string &name, const std::string &conv, const std::string &purp, 
+      const std::string &obj);
+    Attribute(void);
+    Attribute(const ESMC_Logical &attributeRoot);
+/*    Attribute(const std::string &name, const ESMC_TypeKind_Flag &typekind, 
+      void *datap);*/
+    Attribute(const std::string &name, const ESMC_TypeKind_Flag &typekind, 
+      int numitems, void *datap);
+    int AttrModifyValue(const ESMC_TypeKind_Flag &typekind, int numitems, 
+      void *datap);
+    Attribute& operator=(const Attribute& source);
+    ~Attribute(void);
+    int ESMC_Deserialize(char *buffer, int *offset);
+    int ESMC_Serialize(char *buffer, int *length, int *offset,
+      ESMC_InquireFlag inquireflag) const;
+    int ESMC_SerializeCC(char *buffer, int *length, int &offset,
+      bool cc, ESMC_InquireFlag inquireflag) const;
+
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
+    //  AttributeUpdate
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
+    
     // attribute update
     int AttributeUpdate(VM *vm, const std::vector<ESMC_I4> &rootList);
     int AttributeUpdateBufRecv(char *recvBuf, int localPet, int *offset,
@@ -268,6 +295,10 @@ class Attribute
       const std::vector<ESMC_I4> &roots, const std::vector<ESMC_I4> &nonroots) const;
     int AttributeUpdateRemove(int attrNum);
     int AttributeUpdateReset();
+
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
+    //  AttributeWrite
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
 
     // attribute read methods
     int AttributeRead(int fileNameLen, const char* fileName,
@@ -313,29 +344,6 @@ class Attribute
     int AttributeWriteInternalInfoGrid(IO_XML *io_xml, int nest_level, Attribute *attr) const;
     std::string AttributeGetInternalGridInt(std::string inputString) const;
     std::string AttributeGetInternalGridString(std::string inputString) const;
-
-    // Print
-    int ESMC_Print(void) const;
-
-    // Modifiers, Constructors, Destructors, Serializers, Operators
-    Attribute(const std::string &conv, const std::string &purp, const std::string &obj);
-    Attribute(const std::string &name, const std::string &conv, const std::string &purp, 
-      const std::string &obj);
-    Attribute(void);
-    Attribute(const ESMC_Logical &attributeRoot);
-/*    Attribute(const std::string &name, const ESMC_TypeKind_Flag &typekind, 
-      void *datap);*/
-    Attribute(const std::string &name, const ESMC_TypeKind_Flag &typekind, 
-      int numitems, void *datap);
-    int AttrModifyValue(const ESMC_TypeKind_Flag &typekind, int numitems, 
-      void *datap);
-    Attribute& operator=(const Attribute& source);
-    ~Attribute(void);
-    int ESMC_Deserialize(char *buffer, int *offset);
-    int ESMC_Serialize(char *buffer, int *length, int *offset,
-      ESMC_InquireFlag inquireflag) const;
-    int ESMC_SerializeCC(char *buffer, int *length, int &offset,
-      bool cc, ESMC_InquireFlag inquireflag) const;
 
 };
 } // namespace

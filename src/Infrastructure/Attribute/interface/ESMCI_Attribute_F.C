@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.56 2012/07/18 22:21:10 rokuingh Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.57 2012/09/13 21:57:33 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.56 2012/07/18 22:21:10 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.57 2012/09/13 21:57:33 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -2291,270 +2291,6 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 //-----------------------------------------------------------------------------
 
 
-      void FTN_X(c_esmc_attributeread)(ESMC_Base **base,
-                                     int *fileNameLen,
-                                     const char *fileName,
-                                     int *schemaFileNameLen,
-                                     const char *schemaFileName,
-                                     int *status,
-                                     ESMCI_FortranStrLenArg fnlen,
-                                     ESMCI_FortranStrLenArg sfnlen) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributeread()"
-
-// TODO convention, purpose, basename?
-// TODO match formatting of rest of this file
-
-         ESMF_CHECK_POINTER(*base, status)
-
-         // Read the attributes into the object.
-         int rc = (*base)->root.AttributeRead(
-                          *fileNameLen, // always present internal arg.
-                          ESMC_NOT_PRESENT_FILTER(fileName),
-                          *schemaFileNameLen, // always present internal arg.
-                          ESMC_NOT_PRESENT_FILTER(schemaFileName));
-                          
-         if (ESMC_PRESENT(status)) *status = rc;
-      }
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_esmc_attributewritetab - Setup the attribute package
-//
-// !INTERFACE:
-      void FTN_X(c_esmc_attributewritetab)(
-//
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributewritetab()"
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,          // in/out - base object
-      char *convention,          // in - convention
-      char *purpose,             // in - purpose
-      char *object,              // in - object type
-      char *targetobj,           // in - target object for writing
-      int *rc,                   // in - return code
-      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
-      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
-      ESMCI_FortranStrLenArg olen,// hidden/in - strlen count for object
-      ESMCI_FortranStrLenArg tlen) { // hidden/in - strlen count for target object
-// 
-// !DESCRIPTION:
-//     Associate a convention, purpose, and object type with an attribute package
-//
-//EOP
-
-  int status;
-  
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if (!base) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", &status);
-    if (rc) *rc = status;    
-    return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention", &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose", &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!targetobj) || (tlen <= 0) || (targetobj[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute target object", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  string cconv(convention, clen);
-  string cpurp(purpose, plen);
-  string cobj(object, olen);
-  string ctarobj(targetobj, tlen);
-  cconv.resize(cconv.find_last_not_of(" ")+1);
-  cpurp.resize(cpurp.find_last_not_of(" ")+1);
-  cobj.resize(cobj.find_last_not_of(" ")+1);
-  ctarobj.resize(ctarobj.find_last_not_of(" ")+1);
-
-  if (cconv.empty()) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (cpurp.empty()) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (cobj.empty()) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (ctarobj.empty()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute target object conversion", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  // Write the attributes from the object.
-  status = (**base).root.AttributeWriteTab(cconv, cpurp, cobj, ctarobj,
-    (*base)->ESMC_Base::ESMC_BaseGetName());
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
-        ESMC_NOT_PRESENT_FILTER(rc));
-
-}  // end c_esmc_attributewritetab
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  c_esmc_attributewritexml - Setup the attribute package
-//
-// !INTERFACE:
-      void FTN_X(c_esmc_attributewritexml)(
-//
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_attributewritexml()"
-//
-// !RETURN VALUE:
-//    none.  return code is passed thru the parameter list
-// 
-// !ARGUMENTS:
-      ESMC_Base **base,          // in/out - base object
-      char *convention,          // in - convention
-      char *purpose,             // in - purpose
-      char *object,              // in - object type
-      char *targetobj,           // in - target object for writing
-      int *rc,                   // in - return code
-      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
-      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
-      ESMCI_FortranStrLenArg olen,// hidden/in - strlen count for object
-      ESMCI_FortranStrLenArg tlen) { // hidden/in - strlen count for target object
-// 
-// !DESCRIPTION:
-//     Associate a convention, purpose, and object type with an attribute package
-//
-//EOP
-
-  int status;
-  
-  // Initialize return code; assume routine not implemented
-  if (rc) *rc = ESMC_RC_NOT_IMPL;
-
-  if (!base) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad base", &status);
-    if (rc) *rc = status;    
-    return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention", &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose", &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!targetobj) || (tlen <= 0) || (targetobj[0] == '\0')) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute target object", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  string cconv(convention, clen);
-  string cpurp(purpose, plen);
-  string cobj(object, olen);
-  string ctarobj(targetobj, tlen);
-  cconv.resize(cconv.find_last_not_of(" ")+1);
-  cpurp.resize(cpurp.find_last_not_of(" ")+1);
-  cobj.resize(cobj.find_last_not_of(" ")+1);
-  ctarobj.resize(ctarobj.find_last_not_of(" ")+1);
-
-  if (cconv.empty()) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (cpurp.empty()) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (cobj.empty()) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object conversion", &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (ctarobj.empty()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute target object conversion", &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  // Write the attributes from the object.
-  status = (**base).root.AttributeWriteXML(cconv, cpurp, cobj, ctarobj, 
-    (*base)->ESMC_Base::ESMC_BaseGetName());
-  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
-        ESMC_NOT_PRESENT_FILTER(rc));
-
-}  // end c_esmc_attpackwritexml
-
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  c_ESMC_AttributeCopy - copy an attribute between objects
@@ -4023,6 +3759,275 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
     ESMC_NOT_PRESENT_FILTER(rc));
 
 }  // end c_ESMC_AttributeUpdate
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_esmc_attributeread - Read the attribute package
+//
+// !INTERFACE:
+void FTN_X(c_esmc_attributeread)(ESMC_Base **base,
+                               int *fileNameLen,
+                               const char *fileName,
+                               int *schemaFileNameLen,
+                               const char *schemaFileName,
+                               int *status,
+                               ESMCI_FortranStrLenArg fnlen,
+                               ESMCI_FortranStrLenArg sfnlen) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributeread()"
+
+// TODO convention, purpose, basename?
+// TODO match formatting of rest of this file
+
+   ESMF_CHECK_POINTER(*base, status)
+
+   // Read the attributes into the object.
+   int rc = (*base)->root.AttributeRead(
+                    *fileNameLen, // always present internal arg.
+                    ESMC_NOT_PRESENT_FILTER(fileName),
+                    *schemaFileNameLen, // always present internal arg.
+                    ESMC_NOT_PRESENT_FILTER(schemaFileName));
+                    
+   if (ESMC_PRESENT(status)) *status = rc;
+}
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_esmc_attributewritetab - Setup the attribute package
+//
+// !INTERFACE:
+void FTN_X(c_esmc_attributewritetab)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributewritetab()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,          // in/out - base object
+      char *convention,          // in - convention
+      char *purpose,             // in - purpose
+      char *object,              // in - object type
+      char *targetobj,           // in - target object for writing
+      int *rc,                   // in - return code
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen,// hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg tlen) { // hidden/in - strlen count for target object
+// 
+// !DESCRIPTION:
+//     Associate a convention, purpose, and object type with an attribute package
+//
+//EOP
+
+  int status;
+  
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!targetobj) || (tlen <= 0) || (targetobj[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute target object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  string ctarobj(targetobj, tlen);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+  ctarobj.resize(ctarobj.find_last_not_of(" ")+1);
+
+  if (cconv.empty()) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention conversion", &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  if (cpurp.empty()) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose conversion", &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  if (cobj.empty()) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object conversion", &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  if (ctarobj.empty()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute target object conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // Write the attributes from the object.
+  status = (**base).root.AttributeWriteTab(cconv, cpurp, cobj, ctarobj,
+    (*base)->ESMC_Base::ESMC_BaseGetName());
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
+
+}  // end c_esmc_attributewritetab
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_esmc_attributewritexml - Setup the attribute package
+//
+// !INTERFACE:
+void FTN_X(c_esmc_attributewritexml)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_attributewritexml()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,          // in/out - base object
+      char *convention,          // in - convention
+      char *purpose,             // in - purpose
+      char *object,              // in - object type
+      char *targetobj,           // in - target object for writing
+      int *rc,                   // in - return code
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen,// hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg tlen) { // hidden/in - strlen count for target object
+// 
+// !DESCRIPTION:
+//     Associate a convention, purpose, and object type with an attribute package
+//
+//EOP
+
+  int status;
+  
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad base", &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", &status);
+      if (rc) *rc = status;
+      return;
+  }
+  
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!targetobj) || (tlen <= 0) || (targetobj[0] == '\0')) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute target object", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  string ctarobj(targetobj, tlen);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+  ctarobj.resize(ctarobj.find_last_not_of(" ")+1);
+
+  if (cconv.empty()) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention conversion", &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  if (cpurp.empty()) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose conversion", &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  if (cobj.empty()) {
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object conversion", &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  if (ctarobj.empty()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute target object conversion", &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // Write the attributes from the object.
+  status = (**base).root.AttributeWriteXML(cconv, cpurp, cobj, ctarobj, 
+    (*base)->ESMC_Base::ESMC_BaseGetName());
+  ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
+        ESMC_NOT_PRESENT_FILTER(rc));
+
+}  // end c_esmc_attpackwritexml
 
 #undef  ESMC_METHOD
 

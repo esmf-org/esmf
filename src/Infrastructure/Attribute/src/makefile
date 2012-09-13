@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.6 2008/12/02 22:24:33 rokuingh Exp $ 
+# $Id: makefile,v 1.7 2012/09/13 21:57:34 rokuingh Exp $ 
 
 # default rule if no explicit target is given to make
 ALL: build_here
 
-SOURCEC	  = ESMCI_Attribute.C ESMCI_AttributeUpdate.C
+SOURCEC	  = ESMCI_Attribute.C ESMCI_AttributeUpdate.C ESMCI_AttributeWrite.C
 SOURCEF	  = 
 STOREH    = ESMCI_Attribute.h 
 

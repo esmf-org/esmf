@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.7 2012/09/12 16:21:28 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.8 2012/09/13 21:57:39 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -82,6 +82,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 	character(len=*),  intent(in)         :: srcFile
 	character(len=*),  intent(in)         :: dstFile
 	character(len=*),  intent(in)         :: weightFile
+
 	type(ESMF_RegridMethod_Flag),  intent(in), optional :: regridMethod
 	type(ESMF_PoleMethod_Flag),  intent(in), optional :: poleMethod
 	integer,   intent(in), optional       :: poleNPnts
