@@ -1,4 +1,4 @@
-!  $Id: ESMF_Attribute_C.F90,v 1.2 2012/09/05 14:37:38 rokuingh Exp $
+!  $Id: ESMF_Attribute_C.F90,v 1.3 2012/09/13 07:41:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Attribute_C.F90,v 1.2 2012/09/05 14:37:38 rokuingh Exp $'
+!      '$Id: ESMF_Attribute_C.F90,v 1.3 2012/09/13 07:41:16 rokuingh Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -255,8 +255,8 @@
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "f_esmf_gridattgetinfologicallist"
-  subroutine f_esmf_gridattgetinfologicallist(gridp, name, valueList, len1, &
+#define ESMF_METHOD "f_esmf_gridattgetinfologicalist"
+  subroutine f_esmf_gridattgetinfologicalist(gridp, name, valueList, len1, &
                                               il_present, inputList, len2, rc)
 
     use ESMF_UtilTypesMod
@@ -300,6 +300,6 @@
     rc = localrc
     return
 
-  end subroutine f_esmf_gridattgetinfologicallist
+  end subroutine f_esmf_gridattgetinfologicalist
 !------------------------------------------------------------------------------
 

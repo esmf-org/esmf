@@ -1,10 +1,11 @@
-# $Id: makefile,v 1.16 2012/08/24 00:32:14 rokuingh Exp $ 
+# $Id: makefile,v 1.17 2012/09/13 07:41:23 rokuingh Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
 run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Superstructure/AttributeAPI/tests
+
 
 TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeABundleUTest \

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.2 2012/09/05 14:37:44 rokuingh Exp $
+! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.3 2012/09/13 07:41:23 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-program ESMF_AttributeWriteInternalUTest
+program ESMF_AttributeWriteIntrnalUTest
 
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -18,7 +18,7 @@ program ESMF_AttributeWriteInternalUTest
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_AttributeWriteInternalUTest - Attribute write internal info
+! !PROGRAM: ESMF_AttributeWriteIntrnalUTest - Attribute write internal info
 !
 ! !DESCRIPTION:
 !
@@ -33,7 +33,7 @@ program ESMF_AttributeWriteInternalUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.2 2012/09/05 14:37:44 rokuingh Exp $'
+  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.3 2012/09/13 07:41:23 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -64,7 +64,7 @@ program ESMF_AttributeWriteInternalUTest
   type(ESMF_State)        :: importState
   character(ESMF_MAXSTR)  :: conv, purp
   
-  character(ESMF_MAXSTR),dimension(9)   :: attrList         
+  character(ESMF_MAXSTR),dimension(11)   :: attrList         
   character(ESMF_MAXSTR),dimension(3)   :: inputList 
   character(ESMF_MAXSTR),dimension(4)   :: outValList
 
@@ -97,6 +97,7 @@ program ESMF_AttributeWriteInternalUTest
 
   !------------------------------------------------------------------------
   ! preparations
+
 
   ! Create Grid with coordinates, Attributes should work on an empty Grid as well
   grid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/10,10/), &
@@ -143,11 +144,6 @@ program ESMF_AttributeWriteInternalUTest
   !   <platform>. Uses built-in, standard CIM packages.
   !-------------------------------------------------------------------------
 
-call ESMF_GridGetCoord(grid, coorddim, farrayPtr=farrayPtr, &
-                       exclusiveCount=exclusiveCount, rc=rc)
-print *, "exclusiveCount = ", exclusiveCount
-print *, "xcoords = ", farrayPtr
-
 
     !-------------------------------------------------------------------------
     !EX_UTest
@@ -170,19 +166,6 @@ print *, "xcoords = ", farrayPtr
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a field to decorate with Attributes test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-#if 0
-    !-------------------------------------------------------------------------
-    !EX_disable_UTest
-    ! Create standard CIM attribute package on the field
-    call ESMF_AttributeAdd(field, &
-                           convention='CIM', &
-                           purpose='Inputs Description', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating std CIM Inputs attribute package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#endif
 
     !-------------------------------------------------------------------------
     !EX_UTest
@@ -246,14 +229,40 @@ print *, "xcoords = ", farrayPtr
     attrList(7) = 'numDims'
     attrList(8) = 'xcoords'
     attrList(9) = 'ycoords'
+    attrList(10) = 'isLeaf'
+    attrList(11) = 'gridType'
     call ESMF_AttributeAdd(grid, &
                            convention='CIM', &
                            purpose='Inputs Description', &
                            attrList=attrList, &  ! create a custom package
-                           count = 9, &
+                           count = 11, &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating custom Grid CIM Inputs attribute package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set an attribute value within the CIM Grid package
+    call ESMF_AttributeSet(grid, 'isLeaf', &
+                           'true', &
+                           convention='CIM', &
+                           purpose='Inputs Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set an attribute value in CIM Grid package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set an attribute value within the CIM Grid package
+    call ESMF_AttributeSet(grid, 'gridType', &
+                           'logically_rectangular', &
+                           convention='CIM', &
+                           purpose='Inputs Description', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set an attribute value in CIM Grid package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
@@ -355,13 +364,6 @@ print *, "xcoords = ", farrayPtr
     write(name, *) "Set an attribute value in CIM Grid package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#if 0
-    outValList = ""
-    call ESMF_AttributeGet(grid, 'xcoords', outValList, &
-                           convention="CIM", purpose="Inputs Description", rc=rc)
-    print *, "OUTVALLIST = ", outValList
-#endif
-
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Set an attribute value within the CIM Grid package
@@ -376,13 +378,6 @@ print *, "xcoords = ", farrayPtr
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set an attribute value in CIM Grid package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-#if 0
-    outValList = ""
-    call ESMF_AttributeGet(grid, 'xcoords', outValList, &
-                           convention="CIM", purpose="Inputs Description", rc=rc)
-    print *, "OUTVALLIST = ", outValList
-#endif
 
     !-------------------------------------------------------------------------
     !EX_UTest
@@ -431,4 +426,4 @@ print *, "xcoords = ", farrayPtr
   call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
   
-end program ESMF_AttributeWriteInternalUTest
+end program ESMF_AttributeWriteIntrnalUTest
