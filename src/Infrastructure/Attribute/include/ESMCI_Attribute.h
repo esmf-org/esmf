@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.61 2012/09/05 14:37:01 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.62 2012/09/13 07:49:19 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -309,8 +309,11 @@ class Attribute
     //int AttributeWriteCIMcomposition(IO_XML *io_xml) const;
     int AttributeWriteCIMinput(IO_XML *io_xml) const;
     int AttributeWriteCIMbuffer(IO_XML *io_xml) const; 
-    int AttributeWriteInternalInfoGrid(IO_XML *io_xml, Attribute *attr) const;
-    
+
+    int AttributeWriteInternalInfoGrid(IO_XML *io_xml, int nest_level, Attribute *attr) const;
+    std::string AttributeGetInternalGridInt(std::string inputString) const;
+    std::string AttributeGetInternalGridString(std::string inputString) const;
+
     // Print
     int ESMC_Print(void) const;
 

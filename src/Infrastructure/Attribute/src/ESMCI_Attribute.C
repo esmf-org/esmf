@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.134 2012/09/05 14:37:14 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.135 2012/09/13 07:49:20 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -33,7 +33,6 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Time.h"
 #include "ESMF_LogMacros.inc"
-//#include "ESMCI_VM.h"
 #include "ESMCI_Grid.h"
 
 #include <sstream>
@@ -50,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.134 2012/09/05 14:37:14 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.135 2012/09/13 07:49:20 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -4266,6 +4265,7 @@ if (attrRoot == ESMF_TRUE) {
   return localrc;
 
  } // end AttributeWriteXML
+ 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeWriteXMLtraverse"
@@ -4333,13 +4333,16 @@ if (attrRoot == ESMF_TRUE) {
 
   // do field write
   if (!fielddone) {
-    // TODO: replace this prototype for WaterML TimeSeries
+#if 0
+ // RLO: this was removed when prototyping the GridSpec CIM definition
+   // TODO: replace this prototype for WaterML TimeSeries
     if (!(convention.compare("WaterML")==0 && 
           purpose.compare("TimeSeries")==0)) {
       // write the field header
       localrc = io_xml->writeStartElement("variable_set", "", 2, 0);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
+#endif
     // call the field write buffer method
     localrc = AttributeWriteXMLbufferfield(io_xml, convention, purpose, index, columns);
     if (localrc != ESMF_SUCCESS) {
@@ -4348,12 +4351,15 @@ if (attrRoot == ESMF_TRUE) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       return ESMF_FAILURE;
     }
+#if 0
+// RLO: this was removed when prototyping the GridSpec CIM definition
     if (!(convention.compare("WaterML")==0 &&
           purpose.compare("TimeSeries")==0)) {
       // write the field footer
       localrc = io_xml->writeEndElement("variable_set", 2);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
+#endif
     // done with field
     fielddone = true;
   }
@@ -4369,33 +4375,101 @@ if (attrRoot == ESMF_TRUE) {
       localrc = io_xml->writeStartElement("GridSpec", "", 0, 1, "name", attpack->attrBase->ESMC_BaseGetName());
       localrc = io_xml->writeStartElement("Mosaic", "", 1, 1, "name", attpack->attrBase->ESMC_BaseGetName());
 #endif
-      localrc = io_xml->writeStartElement("esmModelGrid", "", 1, 5, 
-          "id", "fixMe",
-          "isLeaf", "fixMe",
-          "gridType", "fixMe",
-          "numTiles", "fixMe",
+
+      // start the esmModelGrid
+      localrc = io_xml->writeStartElement("esmModelGrid", "", 2, 5, 
+          "id", attpack->AttributeGetInternalGridString("ESMF:name").c_str(),
+          "isLeaf", attpack->AttributeGetInternalGridString("isLeaf").c_str(),
+          "gridType", attpack->AttributeGetInternalGridString("gridType").c_str(),
+          "numTiles", attpack->AttributeGetInternalGridInt("ESMF:gridTile").c_str(),
           "name", attpack->attrBase->ESMC_BaseGetName());
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
-      localrc = attpack->AttributeWriteXMLbuffergrid(io_xml);
+      // write the shortname and longname
+      localrc = io_xml->writeElement("shortName", 
+        (attpack->AttributeGetInternalGridString("ESMF:name")).c_str(), 2, 0);
+      localrc = io_xml->writeElement("longName", 
+        (attpack->AttributeGetInternalGridString("longName")).c_str(), 2, 0);
+
+      // start the gridTile
+      localrc = io_xml->writeStartElement("gridTile", "", 3, 3, 
+          "id", attpack->AttributeGetInternalGridInt("ESMF:gridTile").c_str(),
+          "discretizationType", attpack->AttributeGetInternalGridString("discretizationType").c_str(),
+          "geometryType", attpack->AttributeGetInternalGridString("geometryType").c_str());
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+
+      // start the simpleGridGeom
+      localrc = io_xml->writeStartElement("simpleGridGeom", "", 4, 1, 
+          "numDims", attpack->AttributeGetInternalGridInt("ESMF:dimCount").c_str());
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+
+      // write coords
+      for (int i=0;  i<attpack->attrList.size(); ++i) { 
+        string value = attpack->attrList.at(i)->vcpp.at(0); 
+        // if this is internal info, retrieve the correct Attribute
+        if (attpack->attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER && 
+          strcmp(value.c_str(), "ESMF:farrayPtr") == 0) {
+          // this is coordinate information, call internal routine and continue
+          int nest_level = 5;
+          AttributeWriteInternalInfoGrid(io_xml, nest_level, attpack->attrList.at(i));
+        }
+      }
+
+      // end the simpleGridGeom
+      localrc = io_xml->writeEndElement("simpleGridGeom", 4);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+
+      // end the gridTile
+      localrc = io_xml->writeEndElement("gridTile", 3);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+
+#if 0
+      //localrc = attpack->AttributeWriteXMLbuffergrid(io_xml);
       if (localrc != ESMF_SUCCESS) {
         sprintf(msgbuf, "AttributeWriteXMLtraverse failed AttributeWriteXMLbuffergrid");
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         return ESMF_FAILURE;
       }
+#endif
+
       // write the grid footer
 // RLO: this was removed when prototyping the GridSpec CIM definition
 #if 0 
       localrc = io_xml->writeEndElement("Mosaic", 1);
       localrc = io_xml->writeEndElement("GridSpec", 0);
 #endif
-      localrc = io_xml->writeEndElement("esmModelGrid", 1);
+
+      // end the esmModelGrid
+      localrc = io_xml->writeEndElement("esmModelGrid", 2);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       griddone = true;
       return ESMF_SUCCESS;
     }
   }
+
+#if 0
+      // start the esmModelGrid
+      localrc = io_xml->writeStartElement("esmModelGrid", "", 1, 4, 
+          "id", attpack->AttributeGetInternalGridString("ESMF:name").c_str(),
+          "isLeaf", attpack->AttributeGetInternalGridString("isLeaf").c_str(),
+          "gridType", attpack->AttributeGetInternalGridString("gridType").c_str(),
+          "numTiles", attpack->AttributeGetInternalGridInt("ESMF:gridTile").c_str(),
+          "name", attpack->attrBase->ESMC_BaseGetName());
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+#endif
+
+      // write the grid footer
+// RLO: this was removed when prototyping the GridSpec CIM definition
+#if 0 
+      localrc = io_xml->writeEndElement("Mosaic", 1);
+      localrc = io_xml->writeEndElement("GridSpec", 0);
+#endif
+#if 0
+      // end the esmModelGrid
+      localrc = io_xml->writeEndElement("esmModelGrid", 1);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+#endif
   
   // recurse across all linked ESMF objects (e.g. child components, states,
   // fieldBundles, fields, grids, arrays)
@@ -4406,6 +4480,154 @@ if (attrRoot == ESMF_TRUE) {
   return ESMF_SUCCESS;
 
  } // end AttributeWriteXMLtraverse
+
+//-----------------------------------------------------------------------------
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeGetInternalGridInt"
+//BOPI
+// !IROUTINE:  AttributeGetInternalGridInt - retrieve internal information for Grid CIM file
+//
+// !INTERFACE:
+      string Attribute::AttributeGetInternalGridInt(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      string inputString) const {   //  in - io pointer to write
+//
+// !DESCRIPTION:
+//    Return the contents of a CIM {\tt Attribute}.  Expected to be
+//    called internally.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+  char msgbuf[4*ESMF_MAXSTR];
+  
+    // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  // this is internal info
+  if (strncmp(inputString.c_str(), "ESMF:", 5) == 0) {
+    // strip the 'ESMF:' off of the value and set as name of Attribute to be retrieved
+    string mod_name = inputString.substr(5,inputString.length());
+    int nlen = strlen(mod_name.c_str());
+
+    // cast the base back to a Grid ;)
+    ESMCI::Grid *grid = dynamic_cast<ESMCI::Grid *> (attrList.at(0)->attrBase);
+ 
+    // initialize int return parameters
+    int int_value = 0;
+    // call into the glue layer to Fortran Attribute layer
+    FTN_X(f_esmf_gridattgetinfoint)(&grid, 
+          const_cast<char *> (mod_name.c_str()), &int_value, 
+          &localrc, nlen);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    
+    // return the output value
+    // TODO: get rid of the fixed size buffer!
+    char char_value[ESMF_MAXSTR];
+    //itoa(int_value, char_value, 10);
+    sprintf(char_value, "%x", int_value);
+    string string_value(char_value);
+    return string_value;
+
+  // this is not internal info
+  } else {
+    for (int i=0; i<attrList.size(); ++i) { 
+      Attribute *attr = attrList.at(i);
+      string mod_name = attr->attrName;
+
+      if (strcmp(mod_name.c_str(), inputString.c_str()) == 0) {
+        if (attr->tk == ESMC_TYPEKIND_I4 || attr->tk == ESMC_TYPEKIND_I8) {
+          int int_value = attr->vip.at(0);
+          // TODO: get rid of the fixed size buffer!
+          char char_value[ESMF_MAXSTR];
+          //std::itoa(int_value, char_value, 10);
+          sprintf(char_value, "%x", int_value);
+          string string_value(char_value);
+          return string_value;
+        }
+      }
+    } 
+    return "N/A";
+  }
+} // end AttributeGetInternalGridInt
+//-----------------------------------------------------------------------------
+
+        // character string valued info
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeGetInternalGridString"
+//BOPI
+// !IROUTINE:  AttributeGetInternalGridString - retrieve internal information for Grid CIM file
+//
+// !INTERFACE:
+      string  Attribute::AttributeGetInternalGridString(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      string inputString) const {   //  in - io pointer to write
+//
+// !DESCRIPTION:
+//    Return the contents of a CIM {\tt Attribute}.  Expected to be
+//    called internally.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  int localrc;
+  char msgbuf[4*ESMF_MAXSTR];
+
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  // this is internal info
+  if (strncmp(inputString.c_str(), "ESMF:", 5) == 0) {
+    // strip the 'ESMF:' off of the value and set as name of Attribute to be retrieved
+    string mod_name = inputString.substr(5,inputString.length());
+    int nlen = strlen(mod_name.c_str());
+
+    // cast the base back to a Grid ;)
+    ESMCI::Grid *grid = dynamic_cast<ESMCI::Grid *> (attrList.at(0)->attrBase);
+ 
+    // TODO: get rid of the fixed size buffer!
+    // initialize char return parameters
+    char char_value[ESMF_MAXSTR];
+    int vlen = ESMF_MAXSTR;
+      // call into the glue layer to Fortran Attribute layer
+    FTN_X(f_esmf_gridattgetinfochar)(&grid, 
+               const_cast<char *> (mod_name.c_str()), 
+               char_value, 
+               &localrc, nlen, vlen);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    
+    // TODO: related to fixed buffer, convert to string and resize to remove cruft
+    string char_string_value(char_value, vlen);
+    char_string_value.resize(char_string_value.find_last_not_of(" ")+1);
+  
+    // return the output value
+    return char_string_value;
+
+  // this is not internal info
+  } else {
+    for (int i=0; i<attrList.size(); ++i) { 
+      Attribute *attr = attrList.at(i);
+      string mod_name = attr->attrName;
+
+      if (strcmp(mod_name.c_str(), inputString.c_str()) == 0) {
+        string value = attr->vcpp.at(0);
+        return value;
+      }
+    } 
+    return "N/A";
+  }
+} // end AttributeGetInternalGridString
+//-----------------------------------------------------------------------------
+
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeWriteXMLbuffergrid"
@@ -4442,7 +4664,8 @@ if (attrRoot == ESMF_TRUE) {
       if (attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER && 
           strncmp(value.c_str(), "ESMF:", 5) == 0) {
         // this is internal information, call internal routine and continue
-        AttributeWriteInternalInfoGrid(io_xml, attrList.at(i));
+        int nest_level = 2;
+        AttributeWriteInternalInfoGrid(io_xml, nest_level, attrList.at(i));
         continue;
       }
 
@@ -4637,7 +4860,7 @@ if (attrRoot == ESMF_TRUE) {
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
-      IO_XML *io_xml, Attribute *attr) const {   //  in - io pointer to write
+      IO_XML *io_xml, int nest_level, Attribute *attr) const {
 //
 // !DESCRIPTION:
 //    Print the contents of a CIM {\tt Attribute}.  Expected to be
@@ -4688,7 +4911,7 @@ if (attrRoot == ESMF_TRUE) {
   
     // write the output value to the output stream and write to XML file
     outstring << int_value;
-    localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
+    localrc = io_xml->writeElement(name, outstring.str(), nest_level, 0);
   }
   // character string valued info
   else if (mod_name == "coordTypeKind" || 
@@ -4714,7 +4937,7 @@ if (attrRoot == ESMF_TRUE) {
   
     // write the output string to the output stream and write to XML file
     outstring << char_string_value;
-    localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
+    localrc = io_xml->writeElement(name, outstring.str(), nest_level, 0);
   }
   // list valued info
   else if (mod_name == "farrayPtr") {
@@ -4842,7 +5065,7 @@ if (attrRoot == ESMF_TRUE) {
     }
     for (int i=start; i<end; ++i)
       outstring << valueList[i] << " ";
-    localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
+    localrc = io_xml->writeElement(name, outstring.str(), nest_level, 0);
     delete [] valueList;
     delete [] lens;
     delete [] exclusiveCount;
@@ -4851,7 +5074,6 @@ if (attrRoot == ESMF_TRUE) {
   return ESMF_SUCCESS;
 
 } // end AttributeWriteInternalInfoGrid
-//-----------------------------------------------------------------------------
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeWriteCIM"
@@ -8991,4 +9213,5 @@ if (attrRoot == ESMF_TRUE) {
 
  } // end ESMC_SerializeCC
 //-----------------------------------------------------------------------------
+
 } // namespace ESMCI
