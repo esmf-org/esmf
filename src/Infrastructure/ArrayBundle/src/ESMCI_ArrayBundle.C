@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.45 2012/09/12 03:49:23 gold2718 Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.46 2012/09/14 23:05:31 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.45 2012/09/12 03:49:23 gold2718 Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.46 2012/09/14 23:05:31 gold2718 Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -288,9 +288,8 @@ int ArrayBundle::read(
 //
 // !ARGUMENTS:
 //
-  ArrayBundle *bundle,          // in    - ArrayBundle
   char  *file,                  // in    - name of file being read
-  bool singleFile,              // in    - All arrays from single file if true
+  bool *singleFile,             // in    - All arrays from single file if true
   int   *timeslice,             // in    - timeslice option
   ESMC_IOFmtFlag *iofmt         // in    - IO format flag
   ){
@@ -306,13 +305,9 @@ int ArrayBundle::read(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   ESMC_IOFmtFlag localiofmt;
+  bool localsingleFile;                   // For default handling
 
   // Check the required parameters
-  if ((ArrayBundle *)NULL == bundle) {
-    ESMC_LogDefault.Write("ArrayBundle argument required",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
-    return ESMF_RC_ARG_BAD;
-  }
   if ((char *)NULL == file) {
     ESMC_LogDefault.Write("filename argument required",
                           ESMC_LOG_ERROR, ESMC_CONTEXT);
@@ -329,12 +324,17 @@ int ArrayBundle::read(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
     return rc;
   }
+  if ((bool *)NULL == singleFile) {
+    localsingleFile = false;
+  } else {
+    localsingleFile = *singleFile;
+  }
 
   // From here out, we need to be sure to clean up before returning
-  if (singleFile) {
+  if (localsingleFile) {
     Container<std::string, Array *>::iterator it;
-    for (it = bundle->arrayContainer.begin();
-         it != bundle->arrayContainer.end(); ++it) {
+    for (it = arrayContainer.begin();
+         it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
         localrc = newIO->addArray(it->second, (char *)NULL);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
@@ -356,8 +356,8 @@ int ArrayBundle::read(
                             ESMC_LOG_ERROR, ESMC_CONTEXT);
       rc = localrc;
     }
-    for (it = bundle->arrayContainer.begin();
-         it != bundle->arrayContainer.end(); ++it) {
+    for (it = arrayContainer.begin();
+         it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
         localrc = newIO->addArray(it->second, (char *)NULL);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
@@ -401,13 +401,12 @@ int ArrayBundle::write(
 //
 // !ARGUMENTS:
 //
-  ArrayBundle *bundle,            // in    - ArrayBundle
   char  *file,                    // in    - name of file being read
-  bool singleFile,                // in    - All arrays to single file if true
-  bool overwrite,                 // in    - OK to overwrite fields if true
-  ESMC_FileStatusFlag status,     // in    - file status flag
+  bool *singleFile,               // in    - All arrays to single file if true
+  bool *overwrite,                // in    - OK to overwrite fields if true
+  ESMC_FileStatusFlag *status,    // in    - file status flag
   int   *timeslice,               // in    - timeslice option
-  ESMC_IOFmtFlag iofmt            // in    - IO format flag
+  ESMC_IOFmtFlag *iofmt           // in    - IO format flag
   ){
 //
 // !DESCRIPTION:
@@ -420,13 +419,12 @@ int ArrayBundle::write(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+  ESMC_IOFmtFlag localiofmt;              // For default handling
+  bool localoverwrite;                    // For default handling
+  bool localsingleFile;                   // For default handling
+  ESMC_FileStatusFlag localstatus;        // For default handling
 
   // Check the required parameters
-  if ((ArrayBundle *)NULL == bundle) {
-    ESMC_LogDefault.Write("ArrayBundle argument required",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
-    return ESMF_RC_ARG_BAD;
-  }
   if ((char *)NULL == file) {
     ESMC_LogDefault.Write("filename argument required",
                           ESMC_LOG_ERROR, ESMC_CONTEXT);
@@ -438,11 +436,36 @@ int ArrayBundle::write(
     return rc;
   }
 
+  // Handle format default
+  if ((ESMC_IOFmtFlag *)NULL == iofmt) {
+    localiofmt = ESMF_IOFMT_NETCDF;
+  } else {
+    localiofmt = *iofmt;
+  }
+  // Handle overwrite default
+  if ((bool *)NULL == overwrite) {
+    localoverwrite = false;
+  } else {
+    localoverwrite = *overwrite;
+  }
+  // Handle singleFile default
+  if ((bool *)NULL == singleFile) {
+    localsingleFile = false;
+  } else {
+    localsingleFile = *singleFile;
+  }
+  // Handle status default
+  if ((ESMC_FileStatusFlag *)NULL == status) {
+    localstatus = ESMC_FILESTATUS_UNKNOWN;
+  } else {
+    localstatus = *status;
+  }
+
   // From here out, we need to be sure to clean up before returning
-  if (singleFile) {
+  if (localsingleFile) {
     Container<std::string, Array *>::iterator it;
-    for (it = bundle->arrayContainer.begin();
-         it != bundle->arrayContainer.end(); ++it) {
+    for (it = arrayContainer.begin();
+         it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
         localrc = newIO->addArray(it->second, (char *)NULL);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
@@ -450,7 +473,8 @@ int ArrayBundle::write(
     }
     if (ESMF_SUCCESS == localrc) {
       // Call the IO read function
-      localrc = newIO->write(file, iofmt, overwrite, status, timeslice);
+      localrc = newIO->write(file, localiofmt, localoverwrite,
+                             localstatus, timeslice);
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
     }
   } else {
@@ -464,8 +488,8 @@ int ArrayBundle::write(
                             ESMC_LOG_WARN, ESMC_CONTEXT);
       file[ESMF_MAXSTR - 3] = '\0';
     }
-    for (it = bundle->arrayContainer.begin();
-         it != bundle->arrayContainer.end(); ++it) {
+    for (it = arrayContainer.begin();
+         it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
         localrc = newIO->addArray(it->second, (char *)NULL);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
@@ -476,8 +500,8 @@ int ArrayBundle::write(
           localrc = ESMF_RC_SYS;
         } else {
           // Call the IO read function
-          localrc = newIO->write(filename, iofmt,
-                                 overwrite, status, timeslice);
+          localrc = newIO->write(filename, localiofmt,
+                                 localoverwrite, localstatus, timeslice);
           ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
         }
         newIO->clear();

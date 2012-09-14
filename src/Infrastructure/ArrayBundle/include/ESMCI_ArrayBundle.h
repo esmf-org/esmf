@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.39 2012/09/12 03:49:20 gold2718 Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.40 2012/09/14 23:05:28 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -112,11 +112,11 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     }
     int setName(char *name){return ESMC_BaseSetName(name, "ArrayBundle");}
     // read and write
-    static int read(ArrayBundle *bundle, char *file, bool singleFile,
-                    int *timeslice, ESMC_IOFmtFlag *iofmt);
-    static int write(ArrayBundle *bundle, char *file, bool singleFile,
-                     bool overwrite, ESMC_FileStatusFlag status,
-                     int *timeslice, ESMC_IOFmtFlag iofmt);
+    int read(char *file, bool *singleFile,
+             int *timeslice, ESMC_IOFmtFlag *iofmt);
+    int write(char *file, bool *singleFile,
+              bool *overwrite, ESMC_FileStatusFlag *status,
+              int *timeslice, ESMC_IOFmtFlag *iofmt);
     // misc.
     int print() const;
     // serialize() and deserialize()

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.77 2012/09/12 03:49:13 gold2718 Exp $
+// $Id: ESMCI_Array.h,v 1.78 2012/09/14 23:05:20 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -309,11 +309,11 @@ namespace ESMCI {
     int setName(const char *name){return ESMC_BaseSetName(name, "Array");}
     // misc.
     static bool match(Array const *array1, Array const *array2, int *rc=NULL);
-    static int read(Array *array, char *file, char *variableName,
+    int read(char *file, char *variableName,
          int *timeslice, ESMC_IOFmtFlag *iofmt);
-    static int write(Array *array, char *file, char *variableName,
-         bool overwrite, ESMC_FileStatusFlag status,
-         int *timeslice, ESMC_IOFmtFlag iofmt);
+    int write(char *file, char *variableName,
+         bool *overwrite, ESMC_FileStatusFlag *status,
+         int *timeslice, ESMC_IOFmtFlag *iofmt);
     int print() const;
     int validate() const;
     // fileMapList is an int64_t to be compatible with PIO and MPI.

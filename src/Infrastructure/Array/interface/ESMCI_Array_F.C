@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.62 2012/09/12 03:49:15 gold2718 Exp $
+// $Id: ESMCI_Array_F.C,v 1.63 2012/09/14 23:05:22 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -612,6 +612,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) {
       *rc = ESMC_RC_NOT_IMPL;
     }
+    int localrc = ESMC_RC_NOT_IMPL;
     // The Fortran interface always sets the flags and optional variables
     // except for timeslice. For character variables, create NULL-terminated
     // C strings.
@@ -654,10 +655,10 @@ extern "C" {
 
     overwriteflag = (*opt_overwriteflag == ESMF_TRUE);
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.MsgFoundError(ESMCI::Array::write(
-      *array, fileName, varName, overwriteflag, *status, timeslice, *iofmt),
-      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+    localrc = (*array)->write(fileName, varName,
+                              &overwriteflag, status, timeslice, iofmt);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                  ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN_X(c_esmc_arrayread)(ESMCI::Array **array,
@@ -668,6 +669,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayread()"
     // Initialize return code; assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
     if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) {
       *rc = ESMC_RC_NOT_IMPL;
     }
@@ -710,10 +712,9 @@ extern "C" {
       varName[0] = '\0';
     }
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.MsgFoundError(ESMCI::Array::read(
-      *array, fileName, varName, timeslice, iofmt),
-      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+    localrc = (*array)->read(fileName, varName, timeslice, iofmt);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                  ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN_X(c_esmc_arrayprint)(ESMCI::Array **ptr, int *rc){

@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.42 2012/09/12 03:49:21 gold2718 Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.43 2012/09/14 23:05:30 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -391,6 +391,7 @@ extern "C" {
     bool singleFile;
     bool overwriteflag;
     // Initialize return code; assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
     if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) {
       *rc = ESMC_RC_NOT_IMPL;
     }
@@ -415,14 +416,21 @@ extern "C" {
     } else {
       fileName[0] = '\0';
     }
-    singleFile = (*opt_singleFile == ESMF_TRUE);
-    overwriteflag = (*opt_overwriteflag == ESMF_TRUE);
+    if (ESMC_NOT_PRESENT_FILTER(opt_singleFile) != ESMC_NULL_POINTER) {
+      singleFile = (ESMF_FALSE != *opt_singleFile);
+    } else {
+      singleFile = true;
+    }
+    if (ESMC_NOT_PRESENT_FILTER(opt_overwriteflag) != ESMC_NULL_POINTER) {
+      overwriteflag = (ESMF_TRUE == *opt_overwriteflag);
+    } else {
+      overwriteflag = false;
+    }
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::write(
-      *bundle, fileName, singleFile,
-      overwriteflag, *status, timeslice, *iofmt),
-      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+    localrc = (*bundle)->write(fileName, &singleFile, &overwriteflag,
+                               status, timeslice, iofmt);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                  ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN_X(c_esmc_arraybundleread)(ESMCI::ArrayBundle **bundle,
@@ -432,6 +440,7 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_arraybundleread()"
     bool singleFile;
     // Initialize return code; assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
     if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) {
       *rc = ESMC_RC_NOT_IMPL;
     }
@@ -454,12 +463,15 @@ extern "C" {
     } else {
       fileName[0] = '\0';
     }
-    singleFile = (*opt_singleFile == ESMF_TRUE);
+    if (ESMC_NOT_PRESENT_FILTER(opt_singleFile) != ESMC_NULL_POINTER) {
+      singleFile = (ESMF_FALSE != *opt_singleFile);
+    } else {
+      singleFile = true;
+    }
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.MsgFoundError(ESMCI::ArrayBundle::read(
-      *bundle, fileName, singleFile, timeslice, iofmt),
-      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+    localrc = (*bundle)->read(fileName, &singleFile, timeslice, iofmt);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                  ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN_X(c_esmc_arraybundlerediststore)(ESMCI::ArrayBundle **srcArraybundle,

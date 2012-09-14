@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.161 2012/09/12 03:49:16 gold2718 Exp $
+// $Id: ESMCI_Array.C,v 1.162 2012/09/14 23:05:26 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.161 2012/09/12 03:49:16 gold2718 Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.162 2012/09/14 23:05:26 gold2718 Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2581,7 +2581,6 @@ int Array::read(
 //
 // !ARGUMENTS:
 //
-  Array *array,                   // in    - Array
   char  *file,                    // in    - name of file being read
   char  *variableName,            // in    - optional variable name
   int   *timeslice,               // in    - timeslice option
@@ -2606,7 +2605,7 @@ int Array::read(
   }
   // For here on, we have to be sure to clean up before returning
   if (ESMF_SUCCESS == localrc) {
-    localrc = newIO->addArray(array, variableName);
+    localrc = newIO->addArray(this, variableName);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
   }
   // Set optional parameters which are not optional at next layer
@@ -2652,13 +2651,12 @@ int Array::write(
 //
 // !ARGUMENTS:
 //
-  Array *array,                   // in    - Array
   char  *file,                    // in    - name of file being written
   char  *variableName,            // in    - optional variable name
-  bool  overwrite,                // in    - OK to overwrite file data
-  ESMC_FileStatusFlag status,     // in    - file status flag
+  bool  *overwrite,               // in    - OK to overwrite file data
+  ESMC_FileStatusFlag *status,    // in    - file status flag
   int   *timeslice,               // in    - timeslice option
-  ESMC_IOFmtFlag iofmt            // in    - IO format flag
+  ESMC_IOFmtFlag *iofmt           // in    - IO format flag
   ){
 //
 // !DESCRIPTION:
@@ -2670,6 +2668,9 @@ int Array::write(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+  ESMC_IOFmtFlag localiofmt;              // For default handling
+  bool localoverwrite;                    // For default handling
+  ESMC_FileStatusFlag localstatus;        // For default handling
 
   IO *newIO = IO::create(&rc);
   if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc)) {
@@ -2677,13 +2678,31 @@ int Array::write(
   }
   // From now on, we have to be sure to clean up before returning
   if (ESMF_SUCCESS == rc) {
-    rc = newIO->addArray(array, variableName);
+    rc = newIO->addArray(this, variableName);
     ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
   }
 
+  // Handle format default
+  if ((ESMC_IOFmtFlag *)NULL == iofmt) {
+    localiofmt = ESMF_IOFMT_NETCDF;
+  } else {
+    localiofmt = *iofmt;
+  }
+  // Handle overwrite default
+  if ((bool *)NULL == overwrite) {
+    localoverwrite = false;
+  } else {
+    localoverwrite = *overwrite;
+  }
+  // Handle status default
+  if ((ESMC_FileStatusFlag *)NULL == status) {
+    localstatus = ESMC_FILESTATUS_UNKNOWN;
+  } else {
+    localstatus = *status;
+  }
   if (ESMF_SUCCESS == rc) {
     // It is an error to supply a variable name in binary mode
-    if ((ESMF_IOFMT_BIN == iofmt) && (strlen(variableName) > 0)) {
+    if ((ESMF_IOFMT_BIN == localiofmt) && (strlen(variableName) > 0)) {
       ESMC_LogDefault.Write("Array variable name not allowed in binary mode",
                             ESMC_LOG_ERROR, ESMC_CONTEXT);
       rc = ESMF_RC_ARG_BAD;
@@ -2691,7 +2710,8 @@ int Array::write(
   }
   if (ESMF_SUCCESS == rc) {
     // Call the IO write function
-    rc = newIO->write(file, iofmt, overwrite, status, timeslice);
+    rc = newIO->write(file, localiofmt,
+                      localoverwrite, localstatus, timeslice);
     ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
   }
 
