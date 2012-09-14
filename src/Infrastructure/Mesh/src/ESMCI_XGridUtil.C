@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.18 2012/07/25 20:39:45 feiliu Exp $
+// $Id: ESMCI_XGridUtil.C,v 1.19 2012/09/14 16:29:29 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -126,6 +126,22 @@ xpoint polygon::centroid(int sdim) const {
     Throw() << "Cannot handle sdim > 3\n";
 }
 
+void sintd_cell::get_centroid(double * centroid, int sdim, int pdim){
+  int n = nodes.size();
+  double * points = new double[sdim*n];
+  if(n <= 2) Throw() << "sintd_cell: get_centroid(): number of nodes must be greater than 2.\n";
+
+  std::vector<sintd_node *>::iterator it = nodes.begin();
+  for(int i=0; it != nodes.end(); it++, i++)
+    std::memcpy(points+i*sdim, (*it)->get_coord(), sdim*sizeof(double));
+
+  polygon res_poly;
+  coords_to_polygon(n, points, sdim, res_poly);
+  std::memcpy(centroid, res_poly.centroid(sdim).c, sdim*sizeof(double));
+
+  delete[] points;
+
+}
 /**
  *\brief check if two line segments intersect
  * @param[in] p1            start point of first line segment
@@ -1017,12 +1033,14 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
   // Intersection cells should not be masked, fraction should all be 1.0
   Context ctxt; ctxt.flip();
   MEField<> *elem_frac = meshmid.RegisterField("elem_frac",
-                     MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, sdim, true);
+                     MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
   MEField<> *elem_frac2 = meshmid.RegisterField("elem_frac2",
+                     MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+  // turn on elem_area so that user supplied area can be used during weight calculation
+  MEField<> *elem_area = meshmid.RegisterField("elem_area",
+                     MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+  MEField<> *elem_centroid = meshmid.RegisterField("elem_centroid",
                      MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, sdim, true);
-  // Can also attach elem_area here, an optimization
-  //MEField<> *elem_area = meshmid.RegisterField("elem_area",
-  //                   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
   // Finalize mesh
   meshmid.build_sym_comm_rel(MeshObj::NODE);
@@ -1032,14 +1050,17 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
 
   elem_frac = meshmid.GetField("elem_frac");
   elem_frac2 = meshmid.GetField("elem_frac2");
-  //elem_area = meshmid.GetField("elem_area");
+  elem_area = meshmid.GetField("elem_area");
+  elem_centroid = meshmid.GetField("elem_centroid");
   for (int i=0; i<num_cells; i++) {
     double *frac = elem_frac->data(*(elem_list[i]));
     *frac = 1.0;
     double *frac2 = elem_frac2->data(*(elem_list[i]));
     *frac2 = 1.0;
-    //double *area = elem_area->data(*(elem_list[i]));
-    //*area = sintd_cells[i]->get_area();
+    double *area = elem_area->data(*(elem_list[i]));
+    *area = sintd_cells[i]->get_area();
+    double *centroid = elem_centroid->data(*(elem_list[i]));
+    sintd_cells[i]->get_centroid(centroid, sdim, pdim);
   }
 
   //char str[64]; memset(str, 0, 64);

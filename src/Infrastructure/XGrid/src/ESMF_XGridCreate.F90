@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.65 2012/09/06 20:08:28 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.66 2012/09/14 16:29:47 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.65 2012/09/06 20:08:28 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.66 2012/09/14 16:29:47 feiliu Exp $'
 
 !==============================================================================
 !
@@ -522,7 +522,7 @@ function ESMF_XGridCreateDefaultGrid(sideA, sideB, &
 !
 !EOPI
     integer                       :: localrc, ngrid_a, ngrid_b, i, j
-    real(ESMF_KIND_R8), pointer   :: area(:), centroid(:,:)
+    real(ESMF_KIND_R8), pointer   :: centroid(:,:)
     type(ESMF_XGridType), pointer :: xgtype
     type(ESMF_Mesh)               :: meshA, meshB, mesh, tmpmesh
     type(ESMF_Mesh), allocatable  :: meshAt(:), meshBt(:)
@@ -539,7 +539,7 @@ function ESMF_XGridCreateDefaultGrid(sideA, sideB, &
     type(ESMF_INDEX_FLAG)         :: indexflag
     type(ESMF_DistGrid)           :: distgridTmp
     !real(ESMF_KIND_R8), pointer   :: fracFptr(:,:)
-    type(ESMF_XGridGeomBase), allocatable :: sideAxggb(:), sideBxggb(:)
+    integer                       :: localElemCount, sdim, pdim
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -750,10 +750,29 @@ function ESMF_XGridCreateDefaultGrid(sideA, sideB, &
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call compute_mesharea(mesh, mesharea, rc=localrc)
+
+    call ESMF_MeshGet(mesh, numOwnedElements=localElemCount, &
+            spatialDim=sdim, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    call C_ESMC_MeshGetDimensions(mesh%this, sdim, pdim, localrc);
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    allocate(mesharea(localElemCount), centroid(localElemCount, sdim), stat=localrc)
+    if(localrc /= 0) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="- Failed to allocate centroid", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+
+    call C_ESMC_MeshGetArea(mesh%this, localElemCount, mesharea, localrc);
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call C_ESMC_MeshGetCentroid(mesh%this, localElemCount, centroid, localrc);
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create and Retrieve fraction Arrays for store use, only for online
     allocate(xgtype%fracA2X(ngrid_a), xgtype%fracB2X(ngrid_b))
@@ -929,7 +948,8 @@ function ESMF_XGridCreateDefaultGrid(sideA, sideB, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
       
-    call ESMF_XGridConstruct(xgtype, xgtype%sideA, xgtype%sideB, area=mesharea, &
+    call ESMF_XGridConstruct(xgtype, xgtype%sideA, xgtype%sideB, &
+      area=mesharea, centroid=centroid, &
       sparseMatA2X=xgtype%sparseMatA2X, sparseMatX2A=xgtype%sparseMatX2A, &
       sparseMatB2X=xgtype%sparseMatB2X, sparseMatX2B=xgtype%sparseMatX2B, &
       offline=.false., &
@@ -950,8 +970,6 @@ function ESMF_XGridCreateDefaultGrid(sideA, sideB, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    deallocate(l_sideAPriority, l_sideBPriority)
-
     do i = 1, ngrid_a
       call ESMF_MeshDestroy(meshAt(i), rc=localrc)
       if (ESMF_LogFoundError(localrc, &
@@ -966,8 +984,9 @@ function ESMF_XGridCreateDefaultGrid(sideA, sideB, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
 
+    deallocate(l_sideAPriority, l_sideBPriority)
     deallocate(meshAt, meshBt)
-    deallocate(mesharea)
+    deallocate(mesharea, centroid)
 
     ! Finalize XGrid Creation
     xgtype%online = 1
@@ -1055,7 +1074,7 @@ function ESMF_XGridCreateDefaultMesh(sideA, sideB, &
 !
 !EOPI
     integer                       :: localrc, ngrid_a, ngrid_b, i, j
-    real(ESMF_KIND_R8), pointer   :: area(:), centroid(:,:)
+    real(ESMF_KIND_R8), pointer   :: centroid(:,:)
     type(ESMF_XGridType), pointer :: xgtype
     type(ESMF_Mesh)               :: meshA, meshB, mesh, tmpmesh
     type(ESMF_Mesh), allocatable  :: meshAt(:), meshBt(:)
@@ -1071,6 +1090,7 @@ function ESMF_XGridCreateDefaultMesh(sideA, sideB, &
     type(ESMF_INDEX_FLAG)         :: indexflag
     type(ESMF_DistGrid)           :: distgridTmp
     !real(ESMF_KIND_R8), pointer   :: fracFptr(:,:)
+    integer                       :: localElemCount, sdim, pdim
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -1273,10 +1293,29 @@ function ESMF_XGridCreateDefaultMesh(sideA, sideB, &
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call compute_mesharea(mesh, mesharea, rc=localrc)
+
+    call ESMF_MeshGet(mesh, numOwnedElements=localElemCount, &
+            spatialDim=sdim, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+    call C_ESMC_MeshGetDimensions(mesh%this, sdim, pdim, localrc);
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    allocate(mesharea(localElemCount), centroid(localElemCount, sdim), stat=localrc)
+    if(localrc /= 0) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="- Failed to allocate centroid", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+
+    call C_ESMC_MeshGetArea(mesh%this, localElemCount, mesharea, localrc);
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call C_ESMC_MeshGetCentroid(mesh%this, localElemCount, centroid, localrc);
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create and Retrieve fraction Arrays for store use, only for online
     allocate(xgtype%fracA2X(ngrid_a), xgtype%fracB2X(ngrid_b))
@@ -1451,7 +1490,8 @@ function ESMF_XGridCreateDefaultMesh(sideA, sideB, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
-    call ESMF_XGridConstruct(xgtype, xgtype%sideA, xgtype%sideB, area=mesharea, &
+    call ESMF_XGridConstruct(xgtype, xgtype%sideA, xgtype%sideB, &
+      area=mesharea, centroid=centroid, &
       sparseMatA2X=xgtype%sparseMatA2X, sparseMatX2A=xgtype%sparseMatX2A, &
       sparseMatB2X=xgtype%sparseMatB2X, sparseMatX2B=xgtype%sparseMatX2B, &
       offline=.false., &
@@ -1474,7 +1514,7 @@ function ESMF_XGridCreateDefaultMesh(sideA, sideB, &
 
     deallocate(l_sideAPriority, l_sideBPriority)
     deallocate(meshAt, meshBt)
-    deallocate(mesharea)
+    deallocate(mesharea, centroid)
 
     ! Finalize XGrid Creation
     xgtype%online = 1
@@ -1623,7 +1663,8 @@ integer, intent(out), optional             :: rc
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
-    call ESMF_XGridConstruct(xgtype, xgtype%sideA, xgtype%sideB, area=area, centroid=centroid, &
+    call ESMF_XGridConstruct(xgtype, xgtype%sideA, xgtype%sideB, &
+      area=area, centroid=centroid, &
       sparseMatA2X=sparseMatA2X, sparseMatX2A=sparseMatX2A, &
       sparseMatB2X=sparseMatB2X, sparseMatX2B=sparseMatX2B, offline=.true., rc=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
@@ -2420,90 +2461,6 @@ subroutine checkGrid(grid,staggerloc,rc)
 
    if(present(rc)) rc = ESMF_SUCCESS
 end subroutine checkGrid
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "compute_mesharea()"
-!BOPI
-! !IROUTINE:  compute_mesharea - Compute mesh Area
-
-! !INTERFACE:
-subroutine compute_mesharea(mesh, area, rc)
-
-!
-! !ARGUMENTS:
-type(ESMF_Mesh), intent(inout)             :: mesh
-real(ESMF_KIND_R8), pointer                :: area(:)
-integer, intent(out), optional             :: rc
-!
-! !DESCRIPTION:
-!      Allocate internal SMM parameters and copy from src.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [mesh]
-!           the {\tt ESMF\_Mesh} object.
-!     \item [area]
-!           the area of the mesh
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} only if successful.
-!     \end{description}
-!
-!EOPI
-
-logical :: hasSplitElem
-integer :: localrc, localElemCount
-
-
-  ! Find out if elements are split
-  call ESMF_MeshGetElemSplit(mesh, hasSplitElem=hasSplitElem, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-      rc=localrc
-      return
-  endif
-
-  ! Get area depending on split elements
-  if (hasSplitElem) then
-     ! Get local size of mesh areas before split
-     call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, &
-            rc=localrc)
-    if (localrc /=ESMF_SUCCESS) then
-      rc=localrc
-      return
-    endif
-
-    ! allocate space for areas
-    allocate(Area(localElemCount))
-
-    ! Get local Areas
-    call ESMF_MeshGetOrigElemArea(mesh, areaList=Area, rc=localrc)
-    if (localrc /=ESMF_SUCCESS) then
-      rc=localrc
-      return
-     endif
-  else
-     ! Get local size of mesh areas
-     call ESMF_MeshGet(mesh, numOwnedElements=localElemCount, &
-            rc=localrc)
-    if (localrc /=ESMF_SUCCESS) then
-      rc=localrc
-      return
-    endif
-
-    ! allocate space for areas
-    allocate(Area(localElemCount))
-
-    ! Get local Areas
-    call ESMF_MeshGetElemArea(mesh, areaList=Area, rc=localrc)
-    if (localrc /=ESMF_SUCCESS) then
-      rc=localrc
-      return
-     endif
-  endif
-
-  if(present(rc)) rc = ESMF_SUCCESS
-
-end subroutine compute_mesharea
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

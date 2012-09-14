@@ -1,4 +1,4 @@
-// $Id: ESMCI_Sintdnode.h,v 1.6 2012/05/10 13:59:32 feiliu Exp $
+// $Id: ESMCI_Sintdnode.h,v 1.7 2012/09/14 16:29:26 feiliu Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -19,6 +19,7 @@
 #include <Mesh/include/ESMCI_MeshObjTopo.h>
 #include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_Exception.h>
+#include <Mesh/include/ESMCI_MathUtil.h>
 #include <Mesh/src/Zoltan/zoltan.h>
 
 
@@ -157,6 +158,8 @@ class sintd_cell {
     }
 
     double get_area() { return area;   }
+
+    void get_centroid(double * centroid, int sdim, int pdim);
 
     void print(int me, int gid, int lid){
       printf("Cell (%d,%d,%d): { ", me, gid, lid+1);

@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.50 2012/09/06 20:08:29 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.51 2012/09/14 16:29:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -84,6 +84,15 @@
     call test6(rc)
     write(failMsg, *) ""
     write(name, *) "Creating an XGrid in 2D with Mesh merging"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    ! Create an XGrid in 2D from Meshes with user supplied area
+    print *, 'Starting test7'
+    call test7(rc)
+    write(failMsg, *) ""
+    write(name, *) "Creating an XGrid in 2D with user supplied area"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     call ESMF_TestEnd(ESMF_SRCLINE)
@@ -947,6 +956,44 @@ contains
 
   end subroutine test6
 
+  subroutine test7(rc)
+    integer, intent(out)                :: rc
+    integer                             :: localrc, i, npet
+    type(ESMF_XGrid)                    :: xgrid
+
+    type(ESMF_VM)                       :: vm
+    real(ESMF_KIND_R8)                  :: xgrid_area(12), B_area(2,2)
+
+    rc = ESMF_SUCCESS
+    localrc = ESMF_SUCCESS
+
+    call ESMF_VMGetCurrent(vm=vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_VMGet(vm, petcount=npet, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! partially overlap
+    xgrid = ESMF_XGridCreate((/make_grid_sph(4,4,1.,1.,0.,0.,area_adj=0.95, rc=localrc), &
+                               make_grid_sph(4,4,0.6,1.,3.5,3.5,area_adj=0.95, rc=localrc)/), &
+      (/make_grid_sph(8,8,1.,1.,0.,0.,area_adj=0.95, rc=localrc)/), &
+      storeOverlay = .true., &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call flux_exchange_sph(xgrid, area_adj=0.95, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine test7
+
   !------------------------------------------------------------------------
   ! Utility methods
   !------------------------------------------------------------------------
@@ -1044,7 +1091,7 @@ contains
 
   end function make_grid
 
-  function make_grid_sph(atm_nx, atm_ny, atm_dx, atm_dy, atm_sx, atm_sy, tag, scheme, rc)
+  function make_grid_sph(atm_nx, atm_ny, atm_dx, atm_dy, atm_sx, atm_sy, area_adj, tag, scheme, rc)
 
     ! return value
     type(ESMF_Grid)                           :: make_grid_sph
@@ -1052,6 +1099,7 @@ contains
     integer, intent(in)                       :: atm_nx, atm_ny
     real(ESMF_KIND_R4), intent(in)            :: atm_dx, atm_dy
     real(ESMF_KIND_R4), intent(in)            :: atm_sx, atm_sy
+    real(ESMF_KIND_R4), intent(in), optional  :: area_adj
     character(len=*), intent(in), optional    :: tag
     integer, intent(in) , optional            :: scheme
     integer, intent(out), optional            :: rc
@@ -1059,8 +1107,11 @@ contains
     ! local variables
     integer                                   :: localrc, i, j
     real(ESMF_KIND_R8), pointer               :: coordX(:,:), coordY(:,:)
+    real(ESMF_KIND_R8), pointer               :: f_area(:,:), f_area_m(:), o_area(:,:)
     real(ESMF_KIND_R8)                        :: startx, starty
     integer                                   :: l_scheme
+    type(ESMF_Mesh)                           :: mesh
+    type(ESMF_Field)                          :: field
 
     l_scheme = ESMF_REGRID_SCHEME_REGION3D
     if(present(scheme)) l_scheme = scheme
@@ -1136,6 +1187,57 @@ contains
         coordY(i,j) = starty + (j-1)*atm_dy
       enddo
     enddo
+
+    if(present(area_adj)) then
+      ! retrieve area
+
+      !mesh = ESMF_GridToMesh(make_grid_sph, &
+      !  ESMF_STAGGERLOC_CORNER, 0, &
+      !  regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
+      !if (ESMF_LogFoundError(localrc, &
+      !    ESMF_ERR_PASSTHRU, &
+      !    ESMF_CONTEXT, rcToReturn=rc)) return
+
+      !allocate(f_area_m(mesh%NumOwnedElements))
+      !call ESMF_MeshGetElemArea(mesh,  arealist=f_area_m, rc=localrc)
+      !if (ESMF_LogFoundError(localrc, &
+      !    ESMF_ERR_PASSTHRU, &
+      !    ESMF_CONTEXT, rcToReturn=rc)) return
+      !deallocate(f_area_m)
+
+      ! find out original Grid cell area
+      field = ESMF_FieldCreate(make_grid_sph, typekind=ESMF_TYPEKIND_R8, &
+        staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldRegridGetArea(field, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldGet(field, farrayPtr=o_area, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! add area to Grid
+      call ESMF_GridAddItem(make_grid_sph, ESMF_GRIDITEM_AREA, &
+        staggerloc=ESMF_STAGGERLOC_CENTER,  rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      call ESMF_GridGetItem(make_grid_sph, ESMF_GRIDITEM_AREA, &
+        staggerloc=ESMF_STAGGERLOC_CENTER, farrayptr=f_area, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! adjust Grid area
+      f_area = area_adj*o_area
+
+    endif
 
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -1623,10 +1725,12 @@ contains
 
   end subroutine compute_flux2D
 
-  subroutine flux_exchange_sph(xgrid, scheme, rc)
+  subroutine flux_exchange_sph(xgrid, scheme, area_adj, rc)
 
     type(ESMF_XGrid), intent(inout)           :: xgrid
     integer, intent(in),  optional            :: scheme
+    real(ESMF_KIND_R8), pointer               :: coordX(:), coordY(:)
+    real(ESMF_KIND_R4), intent(in), optional  :: area_adj
     integer, intent(out), optional            :: rc
 
 
@@ -1651,11 +1755,13 @@ contains
     type(ESMF_Field), allocatable             :: srcField(:)
     type(ESMF_Field), allocatable             :: dstField(:)
     integer                                   :: l_scheme
-    real(ESMF_KIND_R8)                        :: global_sum
+    real(ESMF_KIND_R8)                        :: global_sum, l_area_adj
     character(len=1)                          :: cids(10) = (/'0','1','2','3','4','5','6','7','8','9'/)
 
     l_scheme = ESMF_REGRID_SCHEME_REGION3D
     if(present(scheme)) l_scheme = scheme
+    l_area_adj = 1.0
+    if(present(area_adj)) l_area_adj = area_adj
 
     call ESMF_VMGetCurrent(vm=vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1845,7 +1951,7 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     if(lpet == 0) print *, ' xgrid flux and area: ', allsrcsum
-    if(abs(allsrcsum(1) - allsrcsum(2)*scale) .gt. 1.e-10) then
+    if(abs(allsrcsum(1) - allsrcsum(2)*scale*l_area_adj) .gt. 1.e-10) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
          msg="- inconsistent flux and area found", &
          ESMF_CONTEXT, rcToReturn=rc) 
@@ -1890,7 +1996,7 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
       if(lpet == 0) print *, 'dst flux and area: ', allsrcsum
       if(ndst == 1) then
-        if((abs(exf_tarea - allsrcsum(2)) .gt. 1.e-10) .or. &
+        if((abs(exf_tarea*l_area_adj - allsrcsum(2)) .gt. 1.e-10) .or. &
            (abs(exf_tflux - allsrcsum(1)) .gt. 1.e-10)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
              msg="- inconsistent flux and area found", &

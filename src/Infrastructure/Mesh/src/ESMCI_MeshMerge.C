@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshMerge.C,v 1.14 2012/05/10 13:59:18 feiliu Exp $
+// $Id: ESMCI_MeshMerge.C,v 1.15 2012/09/14 16:29:29 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.14 2012/05/10 13:59:18 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_MeshMerge.C,v 1.15 2012/09/14 16:29:29 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -292,8 +292,10 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
         //std::map<MeshObj::id_type,int>::iterator imi = id2ord.find(id);
         //ThrowRequire(imi != id2ord.end());
       }
+      polygon res_poly;
+      coords_to_polygon(topo->num_nodes, cd, sdim, res_poly);
 
-      construct_sintd(0., topo->num_nodes, cd, pdim, sdim, 
+      construct_sintd(res_poly.area(sdim), topo->num_nodes, cd, pdim, sdim, 
         &sintd_nodes, &sintd_cells);
       ncells ++;
       delete[] cd;
@@ -339,8 +341,10 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
           cd[(n*sdim)+i] = tmp[i];
         }
       }
+      polygon res_poly;
+      coords_to_polygon(topo->num_nodes, cd, sdim, res_poly);
 
-      construct_sintd(0., topo->num_nodes, cd, pdim, sdim, 
+      construct_sintd(res_poly.area(sdim), topo->num_nodes, cd, pdim, sdim, 
         &sintd_nodes, &sintd_cells);
       ncells ++;
       delete[] cd;
@@ -426,8 +430,10 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
       }
 
       int num_nodes = topo->num_nodes;
+      polygon res_poly;
+      coords_to_polygon(topo->num_nodes, cd, sdim, res_poly);
 
-      construct_sintd(0., num_nodes, cd, pdim, sdim, &sintd_nodes, &sintd_cells);
+      construct_sintd(res_poly.area(sdim), num_nodes, cd, pdim, sdim, &sintd_nodes, &sintd_cells);
       ncells ++;
       delete[] cd;
 
@@ -486,8 +492,10 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
       // dump_elem(elem, sdim, coord);
       interp_map_iter it = sres_map->find(&elem);
       if(it == sres_map->end()){ // Not intersected, just add it to the list
+        polygon res_poly;
+        coords_to_polygon(subject_num_nodes, cd, sdim, res_poly);
 
-        construct_sintd(0., subject_num_nodes, cd, pdim, sdim, 
+        construct_sintd(res_poly.area(sdim), subject_num_nodes, cd, pdim, sdim, 
           &sintd_nodes, &sintd_cells);
         delete[] cd;
         ncells ++;
@@ -636,7 +644,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
           int n_pts = res_it->points.size();
           double * poly_cd = new double[sdim*n_pts];
           polygon_to_coords(*res_it, sdim, poly_cd);
-          construct_sintd(0., n_pts, poly_cd, pdim, sdim, &sintd_nodes, &sintd_cells);
+          construct_sintd(res_it->area(sdim), n_pts, poly_cd, pdim, sdim, &sintd_nodes, &sintd_cells);
           delete [] poly_cd;
         }
       } // intersected dst element

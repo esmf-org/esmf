@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.46 2012/05/02 13:06:48 feiliu Exp $
+// $Id: ESMCI_Interp.C,v 1.47 2012/09/14 16:29:29 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.46 2012/05/02 13:06:48 feiliu Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.47 2012/09/14 16:29:29 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -918,93 +918,94 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
     std::copy(tmp_nodes.begin(), tmp_nodes.end(), std::back_inserter(sintd_nodes));
     std::copy(tmp_cells.begin(), tmp_cells.end(), std::back_inserter(sintd_cells));
 
-    // Temporary empty col with negatives so unset values
-    // can be detected if they sneak through
-    IWeights::Entry col_empty(-1, 0, -1.0, 0);
+    if(! midmesh) {
+      // Temporary empty col with negatives so unset values
+      // can be detected if they sneak through
+      IWeights::Entry col_empty(-1, 0, -1.0, 0);
 
-    // Insert fracs into src_frac
-    {
-      // Allocate column of empty entries
-      std::vector<IWeights::Entry> col;
-      col.resize(num_valid,col_empty);
-      
-      // Put weights into column
-      int j=0;
-      for (int i=0; i<sr.elems.size(); i++) {
-        if (valid[i]==1) {
-          col[j].id=sr.elems[i]->get_id();
-          col[j].value=areas[i]/src_elem_area;
-          j++;
+      // Insert fracs into src_frac
+      {
+        // Allocate column of empty entries
+        std::vector<IWeights::Entry> col;
+        col.resize(num_valid,col_empty);
+        
+        // Put weights into column
+        int j=0;
+        for (int i=0; i<sr.elems.size(); i++) {
+          if (valid[i]==1) {
+            col[j].id=sr.elems[i]->get_id();
+            col[j].value=areas[i]/src_elem_area;
+            j++;
+          }
+        }
+        
+        // Set row info
+        IWeights::Entry row(sr.elem->get_id(), 0, 0.0, 0);
+        
+        // Put weights into weight matrix
+        src_frac.InsertRowMerge(row, col);       
+      }
+
+      // Put weights into dst_frac and then add
+      // Don't do this if there are no user areas
+      if (use_dst_frac) {
+        for (int i=0; i<sr.elems.size(); i++) {
+          if (valid[i]==1) {
+            
+            // Allocate column of empty entries
+            std::vector<IWeights::Entry> col;
+            col.resize(1,col_empty);
+            
+            col[0].id=sr.elem->get_id();
+            col[0].value=src_frac2*wgts[i];
+            
+            // Set row info
+            IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
+            
+            // Put weights into dst frac
+            dst_frac.InsertRowMerge(row, col);       
+          }
         }
       }
       
-      // Set row info
-      IWeights::Entry row(sr.elem->get_id(), 0, 0.0, 0);
-      
-      // Put weights into weight matrix
-      src_frac.InsertRowMerge(row, col);       
-    }
 
-    // Put weights into dst_frac and then add
-    // Don't do this if there are no user areas
-    if (use_dst_frac) {
+      // Calculate source user area adjustment
+      double src_user_area_adj=1.0;
+      if (src_area_field) {
+          const MeshObj &src_elem = *sr.elem;
+          double *area=src_area_field->data(src_elem);
+          src_user_area_adj=*area/src_elem_area;
+      }
+
+      
+      // Put weights into row column and then add
       for (int i=0; i<sr.elems.size(); i++) {
         if (valid[i]==1) {
-          
+
+          // Calculate dest user area adjustment
+          double dst_user_area_adj=1.0;
+          if (dst_area_field) {
+            const MeshObj &dst_elem = *(sr.elems[i]);
+            double *area=dst_area_field->data(dst_elem);
+            if (*area==0.0) Throw() << "0.0 user area in destination grid";
+            dst_user_area_adj=dst_areas[i]/(*area);
+          }
+
           // Allocate column of empty entries
           std::vector<IWeights::Entry> col;
           col.resize(1,col_empty);
-          
+
           col[0].id=sr.elem->get_id();
-          col[0].value=src_frac2*wgts[i];
-          
+          col[0].value=src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i];
+
           // Set row info
           IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
-          
-          // Put weights into dst frac
-          dst_frac.InsertRowMerge(row, col);       
+
+          // Put weights into weight matrix
+          iw.InsertRowMerge(row, col);       
         }
       }
     }
-    
-
-    // Calculate source user area adjustment
-    double src_user_area_adj=1.0;
-    if (src_area_field) {
-        const MeshObj &src_elem = *sr.elem;
-        double *area=src_area_field->data(src_elem);
-        src_user_area_adj=*area/src_elem_area;
-    }
-
-    
-    // Put weights into row column and then add
-    for (int i=0; i<sr.elems.size(); i++) {
-      if (valid[i]==1) {
-
-        // Calculate dest user area adjustment
-        double dst_user_area_adj=1.0;
-        if (dst_area_field) {
-          const MeshObj &dst_elem = *(sr.elems[i]);
-          double *area=dst_area_field->data(dst_elem);
-          if (*area==0.0) Throw() << "0.0 user area in destination grid";
-          dst_user_area_adj=dst_areas[i]/(*area);
-        }
-
-	// Allocate column of empty entries
-	std::vector<IWeights::Entry> col;
-	col.resize(1,col_empty);
-
-	col[0].id=sr.elem->get_id();
-	col[0].value=src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i];
-
-	// Set row info
-	IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
-
-	// Put weights into weight matrix
-	iw.InsertRowMerge(row, col);       
-      }
-    }
-
   } // for searchresult
 
   if(midmesh != 0)
@@ -1133,94 +1134,95 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
     std::copy(tmp_nodes.begin(), tmp_nodes.end(), std::back_inserter(sintd_nodes));
     std::copy(tmp_cells.begin(), tmp_cells.end(), std::back_inserter(sintd_cells));
 
-    // Temporary empty col with negatives so unset values
-    // can be detected if they sneak through
-    IWeights::Entry col_empty(-1, 0, -1.0, 0);
+    if(! midmesh) {
+      // Temporary empty col with negatives so unset values
+      // can be detected if they sneak through
+      IWeights::Entry col_empty(-1, 0, -1.0, 0);
 
-    // Insert fracs into src_frac
-    {
-      // Allocate column of empty entries
-      std::vector<IWeights::Entry> col;
-      col.resize(num_valid,col_empty);
-      
-      // Put weights into column
-      int j=0;
-      for (int i=0; i<sr.elems.size(); i++) {
-        if (valid[i]==1) {
-          col[j].id=sr.elems[i]->get_id();
-          col[j].value=areas[i]/src_elem_area;
-          j++;
+      // Insert fracs into src_frac
+      {
+        // Allocate column of empty entries
+        std::vector<IWeights::Entry> col;
+        col.resize(num_valid,col_empty);
+        
+        // Put weights into column
+        int j=0;
+        for (int i=0; i<sr.elems.size(); i++) {
+          if (valid[i]==1) {
+            col[j].id=sr.elems[i]->get_id();
+            col[j].value=areas[i]/src_elem_area;
+            j++;
+          }
+        }
+        
+        // Set row info
+        IWeights::Entry row(sr.elem->get_id(), 0, 0.0, 0);
+        
+        // Put weights into weight matrix
+        src_frac.InsertRowMerge(row, col);       
+      }
+
+
+      // Put weights into dst_frac and then add
+      // Don't do this if there are no user areas
+      if (use_dst_frac) {
+        for (int i=0; i<sr.elems.size(); i++) {
+          if (valid[i]==1) {
+            
+            // Allocate column of empty entries
+            std::vector<IWeights::Entry> col;
+            col.resize(1,col_empty);
+            
+            col[0].id=sr.elem->get_id();
+            col[0].value=src_frac2*wgts[i];
+            
+            // Set row info
+            IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
+            
+            // Put weights into dst frac
+            dst_frac.InsertRowMerge(row, col);       
+          }
         }
       }
       
-      // Set row info
-      IWeights::Entry row(sr.elem->get_id(), 0, 0.0, 0);
+
+      // Calculate source user area adjustment
+      double src_user_area_adj=1.0;
+      if (src_area_field) {
+          const MeshObj &src_elem = *sr.elem;
+          double *area=src_area_field->data(src_elem);
+          src_user_area_adj=*area/src_elem_area;
+      }
+
       
-      // Put weights into weight matrix
-      src_frac.InsertRowMerge(row, col);       
-    }
-
-
-    // Put weights into dst_frac and then add
-    // Don't do this if there are no user areas
-    if (use_dst_frac) {
+      // Put weights into row column and then add
       for (int i=0; i<sr.elems.size(); i++) {
         if (valid[i]==1) {
-          
+
+          // Calculate dest user area adjustment
+          double dst_user_area_adj=1.0;
+          if (dst_area_field) {
+            const MeshObj &dst_elem = *(sr.elems[i]);
+            double *area=dst_area_field->data(dst_elem);
+            if (*area==0.0) Throw() << "0.0 user area in destination grid";
+            dst_user_area_adj=dst_areas[i]/(*area);
+          }
+
           // Allocate column of empty entries
           std::vector<IWeights::Entry> col;
           col.resize(1,col_empty);
-          
+
           col[0].id=sr.elem->get_id();
-          col[0].value=src_frac2*wgts[i];
-          
+          col[0].value=src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i];
+
           // Set row info
           IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
-          
-          // Put weights into dst frac
-          dst_frac.InsertRowMerge(row, col);       
+
+          // Put weights into weight matrix
+          iw.InsertRowMerge(row, col);       
         }
       }
-    }
-    
-
-    // Calculate source user area adjustment
-    double src_user_area_adj=1.0;
-    if (src_area_field) {
-        const MeshObj &src_elem = *sr.elem;
-        double *area=src_area_field->data(src_elem);
-        src_user_area_adj=*area/src_elem_area;
-    }
-
-    
-    // Put weights into row column and then add
-    for (int i=0; i<sr.elems.size(); i++) {
-      if (valid[i]==1) {
-
-        // Calculate dest user area adjustment
-        double dst_user_area_adj=1.0;
-        if (dst_area_field) {
-          const MeshObj &dst_elem = *(sr.elems[i]);
-          double *area=dst_area_field->data(dst_elem);
-          if (*area==0.0) Throw() << "0.0 user area in destination grid";
-          dst_user_area_adj=dst_areas[i]/(*area);
-        }
-
-	// Allocate column of empty entries
-	std::vector<IWeights::Entry> col;
-	col.resize(1,col_empty);
-
-	col[0].id=sr.elem->get_id();
-	col[0].value=src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i];
-
-	// Set row info
-	IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
-
-	// Put weights into weight matrix
-	iw.InsertRowMerge(row, col);       
-      }
-    }
-
+    } // not generating mid mesh, need to compute weights
   } // for searchresult
 
   if(midmesh != 0)
