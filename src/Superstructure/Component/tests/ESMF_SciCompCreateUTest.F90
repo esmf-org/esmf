@@ -1,4 +1,4 @@
-! $Id: ESMF_SciCompCreateUTest.F90,v 1.2 2012/09/10 17:27:03 ksaint Exp $
+! $Id: ESMF_SciCompCreateUTest.F90,v 1.3 2012/09/17 20:07:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
     call ESMF_SciCompDestroy(scicompAlias, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!! #ifdef ESMF_TESTEXHAUSTIVE
+#ifdef ESMF_TESTEXHAUSTIVE
 
 !-------------------------------------------------------------------------
 !   !
@@ -336,7 +336,7 @@
     write(name, *) "Destroying a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-!! #endif
+#endif
 
     call ESMF_TestEnd(ESMF_SRCLINE)
 
