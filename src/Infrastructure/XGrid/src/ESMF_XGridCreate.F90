@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.66 2012/09/14 16:29:47 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.67 2012/09/18 14:15:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.66 2012/09/14 16:29:47 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.67 2012/09/18 14:15:51 feiliu Exp $'
 
 !==============================================================================
 !
@@ -637,10 +637,6 @@ function ESMF_XGridCreateDefaultGrid(sideA, sideB, &
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    !call c_esmc_meshsetfraction(meshAt(1), fraction, localrc)
-    !if (ESMF_LogFoundError(localrc, &
-    !    ESMF_ERR_PASSTHRU, &
-    !    ESMF_CONTEXT, rcToReturn=rc)) return
     meshA = meshAt(1)
 
     do i = 2, ngrid_a
@@ -651,10 +647,6 @@ function ESMF_XGridCreateDefaultGrid(sideA, sideB, &
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      !call c_esmc_meshsetfraction(meshAt(i), fraction, localrc)
-      !if (ESMF_LogFoundError(localrc, &
-      !    ESMF_ERR_PASSTHRU, &
-      !    ESMF_CONTEXT, rcToReturn=rc)) return
       ! call into mesh merge with priority taken into account
       ! meshAt is truncated(if necessary) and concatenated onto meshA
       ! and result stored in tmpmesh
@@ -681,10 +673,6 @@ function ESMF_XGridCreateDefaultGrid(sideA, sideB, &
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    !call c_esmc_meshsetfraction(meshBt(1), fraction, localrc)
-    !if (ESMF_LogFoundError(localrc, &
-    !    ESMF_ERR_PASSTHRU, &
-    !    ESMF_CONTEXT, rcToReturn=rc)) return
     meshB = meshBt(1)
 
     do i = 2, ngrid_b
@@ -695,10 +683,6 @@ function ESMF_XGridCreateDefaultGrid(sideA, sideB, &
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-      !call c_esmc_meshsetfraction(meshBt(i), fraction, localrc)
-      !if (ESMF_LogFoundError(localrc, &
-      !    ESMF_ERR_PASSTHRU, &
-      !    ESMF_CONTEXT, rcToReturn=rc)) return
       ! call into mesh merge with priority taken into account
       ! meshBt is truncated(if necessary) and concatenated onto meshB 
       ! and result stored in tmpmesh
@@ -954,6 +938,7 @@ function ESMF_XGridCreateDefaultGrid(sideA, sideB, &
       sparseMatB2X=xgtype%sparseMatB2X, sparseMatX2B=xgtype%sparseMatX2B, &
       offline=.false., &
       mesh=mesh, &
+      internal_alloc=.true., &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -986,7 +971,6 @@ function ESMF_XGridCreateDefaultGrid(sideA, sideB, &
 
     deallocate(l_sideAPriority, l_sideBPriority)
     deallocate(meshAt, meshBt)
-    deallocate(mesharea, centroid)
 
     ! Finalize XGrid Creation
     xgtype%online = 1
@@ -1496,6 +1480,7 @@ function ESMF_XGridCreateDefaultMesh(sideA, sideB, &
       sparseMatB2X=xgtype%sparseMatB2X, sparseMatX2B=xgtype%sparseMatX2B, &
       offline=.false., &
       mesh=mesh, &
+      internal_alloc=.true., &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -1514,7 +1499,6 @@ function ESMF_XGridCreateDefaultMesh(sideA, sideB, &
 
     deallocate(l_sideAPriority, l_sideBPriority)
     deallocate(meshAt, meshBt)
-    deallocate(mesharea, centroid)
 
     ! Finalize XGrid Creation
     xgtype%online = 1
@@ -1696,19 +1680,20 @@ end function ESMF_XGridCreateFromSparseMat
 ! !INTERFACE:
 subroutine ESMF_XGridConstruct(xgtype, sideA, sideB, area, centroid, &
     sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, offline, &
-    mesh, rc)
+    mesh, internal_alloc, rc)
 !
 ! !ARGUMENTS:
 type(ESMF_XGridType), intent(inout)        :: xgtype
 type(ESMF_XGridGeomBase), intent(in)       :: sideA(:), sideB(:)
-real(ESMF_KIND_R8), intent(in), optional   :: area(:)
-real(ESMF_KIND_R8), intent(in), optional   :: centroid(:,:)
+real(ESMF_KIND_R8), intent(in), optional, target   :: area(:)
+real(ESMF_KIND_R8), intent(in), optional, target   :: centroid(:,:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatA2X(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2A(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatB2X(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2B(:)
 logical, intent(in), optional              :: offline
 type(ESMF_Mesh), intent(inout), optional   :: mesh
+logical, intent(in), optional              :: internal_alloc
 integer, intent(out), optional             :: rc 
 
 !
@@ -1751,7 +1736,7 @@ integer, intent(out), optional             :: rc
 
   integer :: localrc, ngrid_a, ngrid_b
   integer :: ndim, ncells, i
-  logical :: l_offline
+  logical :: l_offline, l_internal_alloc
   real(ESMF_KIND_R8), pointer :: xgrid_frac(:)
 
   localrc = ESMF_SUCCESS
@@ -1760,28 +1745,38 @@ integer, intent(out), optional             :: rc
   if(present(rc)) rc = ESMF_RC_NOT_IMPL
   l_offline = .true.
   if(present(offline)) l_offline = offline
+  l_internal_alloc = .false.
+  if(present(internal_alloc)) l_internal_alloc = internal_alloc
 
   ngrid_a = size(sideA, 1)
   ngrid_b = size(sideB, 1)
 
-  ! copy area and centroid
+  ! copy or reference area and centroid
   if(present(area)) then
-      ncells = size(area, 1)
-      allocate(xgtype%area(ncells), stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, &
-          msg="- Allocating xgtype%area ", &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      xgtype%area = area
+      if(.not. l_internal_alloc) then
+        ncells = size(area, 1)
+        allocate(xgtype%area(ncells), stat=localrc)
+        if (ESMF_LogFoundAllocError(localrc, &
+            msg="- Allocating xgtype%area ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        xgtype%area = area
+      else
+        xgtype%area => area
+      endif
   endif
 
   if(present(centroid)) then
-      ncells = size(centroid, 1)
-      ndim = size(centroid, 2)
-      allocate(xgtype%centroid(ncells, ndim), stat=localrc)
-      if (ESMF_LogFoundAllocError(localrc, &
-          msg="- Allocating xgtype%centroid ", &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      xgtype%centroid = centroid
+      if(.not. l_internal_alloc) then
+        ncells = size(centroid, 1)
+        ndim = size(centroid, 2)
+        allocate(xgtype%centroid(ncells, ndim), stat=localrc)
+        if (ESMF_LogFoundAllocError(localrc, &
+            msg="- Allocating xgtype%centroid ", &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        xgtype%centroid = centroid
+      else
+        xgtype%centroid => centroid
+      endif
   endif
 
   ! check and copy all the sparse matrix spec structures
