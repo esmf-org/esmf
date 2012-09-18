@@ -1,0 +1,20 @@
+The Model Component metadata is implemented as an ESMF Attribute Package:
+
+\begin{itemize}
+    \item Convention: NUOPC
+    \item Purpose: General
+    \item Includes:
+    \begin{itemize}
+        \item CIM Model Component Simulation Description 
+    \end{itemize} 
+    \item Description: Model component description and nesting metadata. 
+\end{itemize}
+
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
+     \hline\hline
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
+     \hline\hline
+     {\tt NestingGeneration} & Integer value enumerating nesting level.& 0, 1, 2, ...\\
+     {\tt Nestling} & Integer value enumerating siblings within the same generation.& 0, 1, 2, ...\\
+     \hline\hline
+\end{tabular}

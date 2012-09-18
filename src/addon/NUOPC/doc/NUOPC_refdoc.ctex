@@ -1,4 +1,4 @@
-% $Id: NUOPC_refdoc.ctex,v 1.9 2012/04/19 05:46:37 theurich Exp $ 
+% $Id: NUOPC_refdoc.ctex,v 1.10 2012/09/18 04:57:05 theurich Exp $ 
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -59,6 +59,29 @@
 \input{NUOPC_FieldDictionaryDef_fapi}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_FieldDictionaryDef_fapi}
+#endif
+
+\newpage
+
+\subsection{NUOPC Model Component Metadata}
+#ifdef STANDALONE
+\input{NUOPC_ModelComponent_metadata}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_ModelComponent_metadata}
+#endif
+
+\subsection{NUOPC Connector Component Metadata}
+#ifdef STANDALONE
+\input{NUOPC_ConnectorComponent_metadata}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_ConnectorComponent_metadata}
+#endif
+
+\subsection{NUOPC Field Metadata}
+#ifdef STANDALONE
+\input{NUOPC_Field_metadata}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_Field_metadata}
 #endif
 
 \newpage
