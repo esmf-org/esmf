@@ -65,7 +65,10 @@ Driver component that drives model and connector components. The default is to u
   \item {\it Required specialization} to set number of model components, {\tt modelCount}, in the internal state: {\tt label\_SetModelCount}.
   \item Allocate internal storage according to {\tt modelCount}.
   \item {\it Optional specialization} to provide model and connector {\tt petList} members in the internal state: {\tt label\_SetModelPetList}.
-  \item Create model components, their import and export states and connector components.
+  \item Create model components with their import and export states.
+  \item Attach standard NUOPC Model Component Metadata.
+  \item Create connector components.
+  \item Attach standard NUOPC Connector Component Metadata.
   \item Initialize default run sequence.
   \item {\it Required specialization} to set model component services: {\tt label\_SetModelServices}. 
   \begin{itemize}

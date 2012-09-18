@@ -1,0 +1,113 @@
+%                **** IMPORTANT NOTICE *****
+% This LaTeX file has been automatically produced by ProTeX v. 1.1
+% Any changes made to this file will likely be lost next time
+% this file is regenerated from its source. Send questions 
+% to Arlindo da Silva, dasilva@gsfc.nasa.gov
+ 
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+ 
+%--------------------- SHORT-HAND MACROS ----------------------
+\def\bv{\begin{verbatim}}
+\def\ev{\end{verbatim}}
+\def\be{\begin{equation}}
+\def\ee{\end{equation}}
+\def\bea{\begin{eqnarray}}
+\def\eea{\end{eqnarray}}
+\def\bi{\begin{itemize}}
+\def\ei{\end{itemize}}
+\def\bn{\begin{enumerate}}
+\def\en{\end{enumerate}}
+\def\bd{\begin{description}}
+\def\ed{\end{description}}
+\def\({\left (}
+\def\){\right )}
+\def\[{\left [}
+\def\]{\right ]}
+\def\<{\left  \langle}
+\def\>{\right \rangle}
+\def\cI{{\cal I}}
+\def\diag{\mathop{\rm diag}}
+\def\tr{\mathop{\rm tr}}
+%-------------------------------------------------------------
+
+\markboth{Left}{Source File: NUOPC\_Connector.F90,  Date: Mon Mar 28 16:35:43 PDT 2011
+}
+
+\bigskip{\sf MODULE:}
+\begin{verbatim}  module NUOPC_Connector
+\end{verbatim}
+
+\bigskip{\sf DESCRIPTION:\\}
+Connector component that uses a default bilinear regrid method during {\tt Run} to transfer data from the connected import Fields to the connected export Fields.
+
+\bigskip{\sf SUPER:}
+\begin{verbatim}  ESMF_CplComp
+\end{verbatim}
+
+\bigskip{\sf USE DEPENDENCIES:}
+\begin{verbatim}  use ESMF
+\end{verbatim}
+
+\bigskip{\sf SETSERVICES:}
+\begin{verbatim}  subroutine routine_SetServices(cplcomp, rc)
+    type(ESMF_CplComp)    :: cplcomp
+    integer, intent(out)  :: rc
+\end{verbatim}
+
+\bigskip{\sf INITIALIZE:}
+\begin{itemize}
+\item phase 0: {\sc Provided:} 
+  \begin{itemize}
+  \item Construct a list of matching Field pairs between import and export State based on the {\tt StandardName} Field metadata. 
+  \item Store this list of {\tt StandardName} entries in the {\tt CplList} attribute of the Connector Component metadata.
+  \end{itemize}
+\item phase 1: {\sc Provided:}
+  \begin{itemize}
+  \item Initialize the internal state.
+  \item Use the {\tt CplList} attribute to construct {\tt srcFields} and {\tt dstFields} FieldBundles in the internal state that hold matched Field pairs.
+  \item Set the {\tt Connected} attribute to {\tt true} in the Field metadata for each Field that is added to the {\tt srcFields} and {\tt dstFields} FieldBundles.
+  \item {\it Optional specialization} to precompute a Connector operation: {\tt label\_ComputeRouteHandle}.
+  \item By default (if {\tt label\_ComputeRouteHandle} was {\em not} provided) precompute the Connector RouteHandle as a bilinear Regrid operation between {\tt srcFields} and {\tt dstFields}, with {\tt unmappedaction} set to {\tt ESMF\_UNMAPPEDACTION\_IGNORE}.
+  \end{itemize}  
+\end{itemize}
+
+\bigskip{\sf RUN:}
+\begin{itemize}
+\item phase 1: {\sc Provided:}
+  \begin{itemize}
+  \item {\it Optional specialization} to execute a Connector operation: {\tt label\_ExecuteRouteHandle}.
+  \item By default (if {\tt label\_ExecuteRouteHandle} was {\em not} provided) execute the precomputed Connector RouteHandle between {\tt srcFields} and {\tt dstFields}.
+  \item Update the time stamp on the Fields in {\tt dstFields} to match the time stamp on the Fields in {\tt srcFields}.
+  \end{itemize}    
+\end{itemize}
+
+\bigskip{\sf FINALIZE:}
+\begin{itemize}
+\item phase 1: {\sc Provided:}
+  \begin{itemize}
+  \item {\it Optional specialization} to release a Connector operation: {\tt label\_ReleaseRouteHandle}.
+  \item By default (if {\tt label\_ReleaseRouteHandle} was {\em not} provided) release the precomputed Connector RouteHandle.
+  \item Destroy the internal state members.
+  \item Deallocate the internal state.
+  \end{itemize}      
+\end{itemize}
+
+\bigskip{\sf INTERNALSTATE:}
+\begin{verbatim}  label_InternalState
+
+  type type_InternalState
+    type(type_InternalStateStruct), pointer :: wrap
+  end type
+
+  type type_InternalStateStruct
+    type(ESMF_FieldBundle)  :: srcFields
+    type(ESMF_FieldBundle)  :: dstFields
+    type(ESMF_RouteHandle)  :: rh
+    type(ESMF_State)        :: state
+  end type
+
+\end{verbatim}
+%...............................................................
+
