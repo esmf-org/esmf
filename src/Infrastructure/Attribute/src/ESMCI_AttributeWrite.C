@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeWrite.C,v 1.1 2012/09/13 21:57:34 rokuingh Exp $
+// $Id: ESMCI_AttributeWrite.C,v 1.2 2012/09/18 10:40:06 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.1 2012/09/13 21:57:34 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.2 2012/09/18 10:40:06 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -1476,8 +1476,8 @@ namespace ESMCI {
   else if (mod_name == "farrayPtr") {
     
     // strip the 'Input:' off of the input arguments and organize
-    int lens_len = attr->items;
-    if (attr->items <= 1) {
+    int lens_len = attr->items-1; // -1 because we dont' need the 'value'
+    if (attr->items <= 0) {
       sprintf(msgbuf,"farrayPtr requires input arguments!");
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
       return ESMF_FAILURE;
@@ -1488,8 +1488,8 @@ namespace ESMCI {
     lens = new int[lens_len];
     int slen = 0;
     int coordDim = 0;
-    for (int j=1; j<attr->items; ++j) {
-      string temp_string = attr->vcpp.at(j);
+    for (int j=0; j<lens_len; ++j) {
+      string temp_string = attr->vcpp.at(j+1);
       if (strncmp(temp_string.c_str(), "Input:", 6) == 0) {
         string temp_substr = temp_string.substr(6,temp_string.length());
         inputString.append(temp_substr);
@@ -1498,7 +1498,7 @@ namespace ESMCI {
           string temp_numberstring = temp_substr.substr(9,temp_substr.length());
           coordDim = atoi(temp_numberstring.c_str());
         }
-        lens[j] = temp_string.length()-6;
+        lens[j] = temp_substr.length();
         slen = slen + lens[j];
       }
     }
