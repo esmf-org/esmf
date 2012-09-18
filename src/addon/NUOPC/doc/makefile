@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2012/09/18 04:57:05 theurich Exp $
+# $Id: makefile,v 1.3 2012/09/18 05:26:02 theurich Exp $
 
 All: onedoc
 
@@ -30,6 +30,8 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # all of the dependent files, but even a partial listing  will be helpful.
 #
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) NUOPC_desc.tex NUOPC_implnotes.tex NUOPC_ModelComponent_metadata.tex NUOPC_ConnectorComponent_metadata.tex NUOPC_Field_metadata.tex
+
+REFDOC_DEP_FILES += NUOPC_Driver_manual_fapi.tex NUOPC_ModelBase_manual_fapi.tex NUOPC_Model_manual_fapi.tex
 
 include $(ESMF_DIR)/makefile
 

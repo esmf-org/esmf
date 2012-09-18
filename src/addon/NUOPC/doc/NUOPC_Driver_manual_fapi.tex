@@ -62,12 +62,17 @@ Driver component that drives model and connector components. The default is to u
   \begin{itemize}
   \item Initialize internal state.
   \item Set default internal clock to be a copy of the incoming clock.
-  \item {\it Required specialization} to set number of model components: {\tt label\_SetModelCount}.
-  \item Allocate internal storage accrording to {\tt modelCount}.
-  \item {\it Optional specialization} to provide model and connector {\tt petList} members: {\tt label\_SetModelPetList}.
+  \item {\it Required specialization} to set number of model components, {\tt modelCount}, in the internal state: {\tt label\_SetModelCount}.
+  \item Allocate internal storage according to {\tt modelCount}.
+  \item {\it Optional specialization} to provide model and connector {\tt petList} members in the internal state: {\tt label\_SetModelPetList}.
   \item Create model components, their import and export states and connector components.
   \item Initialize default run sequence.
-  \item {\it Required specialization} to set model component services: {\tt label\_SetModelServices}. Must call into SetServices() for all model and connector components. Optionally replace default clock. Optionally replace default run sequence.
+  \item {\it Required specialization} to set model component services: {\tt label\_SetModelServices}. 
+  \begin{itemize}
+    \item Call into SetServices() for all model and connector components.
+    \item Optionally replace default clock. 
+    \item Optionally replace default run sequence.
+  \end{itemize}
   \item Execute model components' Initialize() phase 0, in order.
   \item Execute connector components' Initialize() phase 0, in order.
   \item Execute model components' Initialize() phase 1, in order.
@@ -119,6 +124,10 @@ Driver component that drives model and connector components. The default is to u
     integer                           :: runPhaseToRunSeqMap(10)
   end type
 
+  type type_PetList
+    integer, pointer :: petList(:)  ! lists that are set here transfer ownership
+  end type
+  
 \end{verbatim}
 %...............................................................
 
