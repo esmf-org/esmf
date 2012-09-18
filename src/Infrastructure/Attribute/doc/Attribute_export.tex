@@ -1,4 +1,4 @@
-% $Id: Attribute_export.tex,v 1.9 2012/01/06 20:15:45 svasquez Exp $
+% $Id: Attribute_export.tex,v 1.10 2012/09/18 23:34:45 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,3 +35,16 @@ When {\tt ESMF\_AttWriteFlag} is set to {\tt ESMF\_ATTWRITE\_XML}, an XML file c
 \begin{sloppypar}
 When the ESMF object from which {\tt ESMF\_AttributeWrite()} is called is a Component, and the Attribute package convention="CIM", and the purpose="Model Component Simulation Description", and {\tt ESMF\_AttWriteFlag} is set to {\tt ESMF\_ATTWRITE\_XML}, an XML file conforming to the CIM standard will be written.  The file will contain Attributes from the entire Component tree and their contained Fields.  The file will be named for the name of the ESMF Component object from which {\tt ESMF\_AttributeWrite()} is called, and the suffix will be .xml.
 \end{sloppypar}
+
+\subsubsection{GridSpec XML}
+
+** This is a prototype capability.
+
+When the ESMF object from which {\tt ESMF\_AttributeWrite()} is called is a Grid (or 
+it contains a Grid), and the Attribute package convention="CIM", and the 
+purpose="GridSpec", and {\tt ESMF\_AttWriteFlag} is set to {\tt ESMF\_ATTWRITE\_XML}, an XML file conforming to the CIM 1.5 GridSpec standard will be written.  The file will be named for the name of the ESMF Component object from which {\tt ESMF\_AttributeWrite()} is called, and the suffix will be .xml.
+
+This file is written by pulling internal information out of the Grid object.  It is 
+currently functional for one- and two-dimensional Grids which have coordinates defined 
+with the {\tt ESMF\_TYPEKIND\_R8} type.  Other information can be added to the output
+file by nesting an Attribute package inside of the GridSpec package on the Grid.

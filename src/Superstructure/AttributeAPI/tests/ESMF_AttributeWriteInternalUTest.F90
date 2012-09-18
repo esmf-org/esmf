@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.4 2012/09/13 21:57:37 rokuingh Exp $
+! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.5 2012/09/18 23:34:48 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_AttributeWriteIntrnalUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.4 2012/09/13 21:57:37 rokuingh Exp $'
+  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.5 2012/09/18 23:34:48 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -233,7 +233,7 @@ program ESMF_AttributeWriteIntrnalUTest
     attrList(11) = 'gridType'
     call ESMF_AttributeAdd(grid, &
                            convention='CIM', &
-                           purpose='Inputs Description', &
+                           purpose='GridSpec', &
                            attrList=attrList, &  ! create a custom package
                            count = 11, &
                            rc=rc)
@@ -247,7 +247,7 @@ program ESMF_AttributeWriteIntrnalUTest
     call ESMF_AttributeSet(grid, 'isLeaf', &
                            'true', &
                            convention='CIM', &
-                           purpose='Inputs Description', &
+                           purpose='GridSpec', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set an attribute value in CIM Grid package test"
@@ -259,7 +259,7 @@ program ESMF_AttributeWriteIntrnalUTest
     call ESMF_AttributeSet(grid, 'gridType', &
                            'logically_rectangular', &
                            convention='CIM', &
-                           purpose='Inputs Description', &
+                           purpose='GridSpec', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set an attribute value in CIM Grid package test"
@@ -271,7 +271,7 @@ program ESMF_AttributeWriteIntrnalUTest
     call ESMF_AttributeSet(grid, 'shortName', &
                            'ESMF:name', &
                            convention='CIM', &
-                           purpose='Inputs Description', &
+                           purpose='GridSpec', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set an attribute value in CIM Grid package test"
@@ -283,7 +283,7 @@ program ESMF_AttributeWriteIntrnalUTest
     call ESMF_AttributeSet(grid, 'longName', &
                            'ESMF Grid CIM definition to prototype ESMF internal Attributes', &
                            convention='CIM', &
-                           purpose='Inputs Description', &
+                           purpose='GridSpec', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set an attribute value in CIM Grid package test"
@@ -295,7 +295,7 @@ program ESMF_AttributeWriteIntrnalUTest
     call ESMF_AttributeSet(grid, 'gridTile', &
                            "ESMF:tileCount", &
                            convention='CIM', &
-                           purpose='Inputs Description', &
+                           purpose='GridSpec', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set an attribute value in CIM Grid package test"
@@ -307,7 +307,7 @@ program ESMF_AttributeWriteIntrnalUTest
     call ESMF_AttributeSet(grid, 'id', &
                            'ESMF:name', &
                            convention='CIM', &
-                           purpose='Inputs Description', &
+                           purpose='GridSpec', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set an attribute value in CIM Grid package test"
@@ -319,7 +319,7 @@ program ESMF_AttributeWriteIntrnalUTest
     call ESMF_AttributeSet(grid, 'discretizationType', &
                            'logically_rectangular', &
                            convention='CIM', &
-                           purpose='Inputs Description', &
+                           purpose='GridSpec', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set an attribute value in CIM Grid package test"
@@ -331,7 +331,7 @@ program ESMF_AttributeWriteIntrnalUTest
     call ESMF_AttributeSet(grid, 'geometryType', &
                            'sphere', &
                            convention='CIM', &
-                           purpose='Inputs Description', &
+                           purpose='GridSpec', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set an attribute value in CIM Grid package test"
@@ -343,7 +343,7 @@ program ESMF_AttributeWriteIntrnalUTest
     call ESMF_AttributeSet(grid, 'numDims', &
                            'ESMF:dimCount', &
                            convention='CIM', &
-                           purpose='Inputs Description', &
+                           purpose='GridSpec', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set an attribute value in CIM Grid package test"
@@ -358,7 +358,7 @@ program ESMF_AttributeWriteIntrnalUTest
                            'ESMF:farrayPtr', &
                            inputList=inputList, &
                            convention='CIM', &
-                           purpose='Inputs Description', &
+                           purpose='GridSpec', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set an attribute value in CIM Grid package test"
@@ -373,7 +373,7 @@ program ESMF_AttributeWriteIntrnalUTest
                            'ESMF:farrayPtr', &
                            inputList=inputList, &
                            convention='CIM', &
-                           purpose='Inputs Description', &
+                           purpose='GridSpec', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set an attribute value in CIM Grid package test"
@@ -396,7 +396,7 @@ program ESMF_AttributeWriteIntrnalUTest
     !EX_UTest
     ! Write out the attribute tree as a CIM-formatted XML file
     call ESMF_AttributeWrite(gridcomp, 'CIM', &
-                                 'Inputs Description', &
+                                 'GridSpec', &
       attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Write out CIM XML file test"

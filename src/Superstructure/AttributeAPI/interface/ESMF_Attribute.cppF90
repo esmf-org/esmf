@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.112 2012/09/07 18:41:02 ksaint Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.113 2012/09/18 23:34:46 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.112 2012/09/07 18:41:02 ksaint Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.113 2012/09/18 23:34:46 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -5425,7 +5425,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Logical) :: attpack @\
       integer :: count @\
       character (len=ESMF_MAXSTR) :: modName @\
-@\
+ @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       attpack = ESMF_FALSE @\
@@ -5435,7 +5435,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
       count = 1 @\
-@\
+ @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
@@ -5450,7 +5450,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
-@\
+ @\
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\

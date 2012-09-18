@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeDistGridUTest.F90,v 1.33 2012/05/16 21:56:51 svasquez Exp $
+! $Id: ESMF_AttributeDistGridUTest.F90,v 1.34 2012/09/18 23:34:48 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeDistGridUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.33 2012/05/16 21:56:51 svasquez Exp $'
+      '$Id: ESMF_AttributeDistGridUTest.F90,v 1.34 2012/09/18 23:34:48 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -56,6 +56,11 @@ program ESMF_AttributeDistGridUTest
       character(ESMF_MAXSTR)           :: inChar, outChar, defaultChar, dfltoutChar
       real(ESMF_KIND_I8), dimension(4)       :: defaultR8lWrong
   
+      ! non exhaustive constant value variables
+      real(ESMF_KIND_R8)                        :: outConstantR8
+      real(ESMF_KIND_R8), dimension(3)          :: outConstantR8l
+      character(ESMF_MAXSTR)                    :: outConstantChar
+      character(ESMF_MAXSTR), dimension(3)      :: outConstantCharl
   
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -81,6 +86,16 @@ program ESMF_AttributeDistGridUTest
       logical, dimension(3)            :: inLogl, defaultLogl, dfltoutLogl, outLogl
       logical, dimension(4)       :: defaultLoglWrong
       logical, dimension(10)            :: outLoglLong
+
+      ! exhaustive constant value variables
+      integer(ESMF_KIND_I4)                     :: outConstantI4
+      integer(ESMF_KIND_I4), dimension(3)       :: outConstantI4l
+      integer(ESMF_KIND_I8)                     :: outConstantI8
+      integer(ESMF_KIND_I8), dimension(3)       :: outConstantI8l
+      real(ESMF_KIND_R4)                        :: outConstantR4
+      real(ESMF_KIND_R4), dimension(3)          :: outConstantR4l
+      logical                                   :: outConstantLogical
+      logical, dimension(3)                     :: outConstantLogicall
 
       character(ESMF_MAXSTR), dimension(3)  :: attpackList, attpackListOut, &
                                                attpackListOut2, attpackDfltList, &
@@ -229,6 +244,26 @@ program ESMF_AttributeDistGridUTest
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
+    !  Constant value from variable
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Add a constant numerical Attribute to a DistGrid Test
+      call ESMF_AttributeSet(distgrid, name="ConstantI4", value=42, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding a constant I4 Attribute to a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get a constant numerical Attribute from a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name="ConstantI4", value=outConstantI4, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting a constant I4 Attribute from a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(42==outConstantI4), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
     !  ESMF_I4 list
     !-------------------------------------------------------------------------
       inI4l = (/1,2,3/)
@@ -271,6 +306,28 @@ program ESMF_AttributeDistGridUTest
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
+    !  Constant value from variable
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Add a constant numerical Attribute to a DistGrid Test
+      call ESMF_AttributeSet(distgrid, name="ConstantI4l", &
+        valueList=(/1,2,3/), rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding a constant I4 list Attribute to a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get a constant numerical Attribute from a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name="ConstantI4l", &
+        valueList=outConstantI4l, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting a constant I4 list Attribute from a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all((/1,2,3/)==outConstantI4l), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
     !  ESMF_I8
     !-------------------------------------------------------------------------
       inI8 = 4
@@ -307,6 +364,27 @@ program ESMF_AttributeDistGridUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting a default ESMF_I8 Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and.(defaultI8==dfltoutI8), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  Constant value from variable
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Add a constant numerical Attribute to a DistGrid Test
+      call ESMF_AttributeSet(distgrid, name="ConstantI8", value=42, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding a constant I8 Attribute to a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get a constant numerical Attribute from a DistGrid Test
+      ! expect fail because this will default to I4
+      call ESMF_AttributeGet(distgrid, name="ConstantI8", value=outConstantI8, rc=rc)
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE"
+      write(name, *) "Getting a constant I8 Attribute from a DistGrid Test - expect FAIL"
+      call ESMF_Test((rc==ESMC_RC_ATTR_WRONGTYPE), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -353,6 +431,29 @@ program ESMF_AttributeDistGridUTest
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
+    !  Constant value from variable
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Add a constant numerical Attribute to a DistGrid Test
+      call ESMF_AttributeSet(distgrid, name="ConstantI8l", &
+        valueList=(/1,2,3/), rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding a constant I8 list Attribute to a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get a constant numerical Attribute from a DistGrid Test
+      ! expect fail because this will default to I4
+      call ESMF_AttributeGet(distgrid, name="ConstantI8l", &
+        valueList=outConstantI8l, rc=rc)
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE"
+      write(name, *) "Getting a constant I8 list Attribute from a DistGrid Test - expect FAIL"
+      call ESMF_Test((rc==ESMC_RC_ATTR_WRONGTYPE), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
     !  ESMF_R4
     !-------------------------------------------------------------------------
       inR4 = 4
@@ -389,6 +490,26 @@ program ESMF_AttributeDistGridUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting a default ESMF_R4 Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and.(defaultR4==dfltoutR4), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  Constant value from variable
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Add a constant numerical Attribute to a DistGrid Test
+      call ESMF_AttributeSet(distgrid, name="ConstantR4", value=4.2, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding a constant R4 Attribute to a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get a constant numerical Attribute from a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name="ConstantR4", value=outConstantR4, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting a constant R4 Attribute from a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(4.2==outConstantR4), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -434,6 +555,28 @@ program ESMF_AttributeDistGridUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+    !-------------------------------------------------------------------------
+    !  Constant value from variable
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Add a constant numerical Attribute to a DistGrid Test
+      call ESMF_AttributeSet(distgrid, name="ConstantR4l", &
+        valueList=(/1.1,2.2,3.3/), rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding a constant R4 list Attribute to a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get a constant numerical Attribute from a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name="ConstantR4l", &
+        valueList=outConstantR4l, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting a constant R4 list Attribute from a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS).and. all((/1.1,2.2,3.3/)==outConstantR4l), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
 #endif
       
     !-------------------------------------------------------------------------
@@ -473,6 +616,27 @@ program ESMF_AttributeDistGridUTest
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting a default ESMF_R8 Attribute from a DistGrid Test"
       call ESMF_Test((rc==ESMF_SUCCESS).and.(defaultR8==dfltoutR8), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  Constant value from variable
+    !-------------------------------------------------------------------------
+      !NEX_UTest
+      ! Add a constant numerical Attribute to a DistGrid Test
+      call ESMF_AttributeSet(distgrid, name="ConstantR8", value=4.2, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding a constant R8 Attribute to a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Get a constant numerical Attribute from a DistGrid Test
+      ! expect fail because this will default to R4
+      call ESMF_AttributeGet(distgrid, name="ConstantR8", value=outConstantR8, rc=rc)
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE"
+      write(name, *) "Getting a constant R8 Attribute from a DistGrid Test - expect FAIL"
+      call ESMF_Test((rc==ESMC_RC_ATTR_WRONGTYPE), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -531,6 +695,28 @@ program ESMF_AttributeDistGridUTest
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
+    !  Constant value from variable
+    !-------------------------------------------------------------------------
+      !NEX_UTest
+      ! Add a constant numerical Attribute to a DistGrid Test
+      call ESMF_AttributeSet(distgrid, name="ConstantR8l", &
+        valueList=(/1,2,3/), rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding a constant R8 list Attribute to a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Get a constant numerical Attribute from a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name="ConstantI8l", &
+        valueList=outConstantR8l, rc=rc)
+      write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE"
+      write(name, *) "Getting a constant R8 list Attribute from a DistGrid Test"
+      call ESMF_Test((rc==ESMC_RC_ATTR_WRONGTYPE), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
     !  Character
     !-------------------------------------------------------------------------
       inChar = "charAttribute"
@@ -571,6 +757,26 @@ program ESMF_AttributeDistGridUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       
+    !-------------------------------------------------------------------------
+    !  Constant value from variable
+    !-------------------------------------------------------------------------
+      !NEX_UTest
+      ! Add a constant character Attribute to a DistGrid Test
+      call ESMF_AttributeSet(distgrid, name="ConstantChar", value="imacharacter", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding a constant character Attribute to a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Get a constant character Attribute from a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name="ConstantChar", value=outConstantChar, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting a constant character Attribute from a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS).and.("imacharacter"==outConstantChar), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
 #ifdef ESMF_TESTEXHAUSTIVE
 
     !-------------------------------------------------------------------------
@@ -644,6 +850,29 @@ program ESMF_AttributeDistGridUTest
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
+    !  Constant value from variable
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Add a constant character list Attribute to a DistGrid Test
+      call ESMF_AttributeSet(distgrid, name="ConstantCharList", &
+        valueList=(/"imachar1","imachar2","imachar3"/), rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding a constant character list Attribute to a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get a constant character list Attribute from a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name="ConstantCharList", &
+        valueList=outConstantCharl, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting a constant character list Attribute from a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS).and. &
+                      all((/"imachar1","imachar2","imachar3"/)==outConstantCharl), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
     !  Logical
     !-------------------------------------------------------------------------
       attrname = "flag"
@@ -685,6 +914,26 @@ program ESMF_AttributeDistGridUTest
       write(name, *) "Getting DistGrid default Attribute (type Fortran logical scalar)"
       call ESMF_Test((rc == ESMF_SUCCESS).and.(defaultLog .eqv. dfltoutLog),   &
         name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  Constant value from variable
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Add a constant Logical Attribute to a DistGrid Test
+      call ESMF_AttributeSet(distgrid, name="ConstantLogical", value=.true., rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding a constant Logical Attribute to a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get a constant Logical Attribute from a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name="ConstantLogical", value=outConstantLogical, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting a constant Logical Attribute from a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS).and.(.true..eqv.outConstantLogical), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
@@ -743,6 +992,29 @@ program ESMF_AttributeDistGridUTest
       call ESMF_Test((rc==ESMF_SUCCESS) .and. &
         all (dfltOutLogl.eqv.defaultLoglWrong(1:size(DfltOutLogl))), &
         name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+    !-------------------------------------------------------------------------
+    !  Constant value from variable
+    !-------------------------------------------------------------------------
+      !EX_UTest
+      ! Add a constant Logical list Attribute to a DistGrid Test
+      call ESMF_AttributeSet(distgrid, name="ConstantLogicalList", &
+        valueList=(/.true.,.false.,.true./), rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding a constant Logical list Attribute to a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Get a constant Logical list Attribute from a DistGrid Test
+      call ESMF_AttributeGet(distgrid, name="ConstantLogicalList", &
+        valueList=outConstantLogicall, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting a constant Logical list Attribute from a DistGrid Test"
+      call ESMF_Test((rc==ESMF_SUCCESS).and. &
+                      all((/.true.,.false.,.true./).eqv.outConstantLogicall), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------
