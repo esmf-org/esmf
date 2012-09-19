@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2012/09/13 21:57:37 rokuingh Exp $ 
+# $Id: makefile,v 1.19 2012/09/19 22:05:21 rokuingh Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -16,6 +16,7 @@ TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeGridCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeGridGetUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeGridUTest \
+		$(ESMF_TESTDIR)/ESMF_AttributeSciCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeStateUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdateUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdate2UTest \
@@ -34,6 +35,7 @@ TESTS_RUN = RUN_ESMF_AttributeArrayUTest \
 		RUN_ESMF_AttributeGridCompUTest \
 		RUN_ESMF_AttributeGridGetUTest \
 		RUN_ESMF_AttributeGridUTest \
+		RUN_ESMF_AttributeSciCompUTest \
 		RUN_ESMF_AttributeStateUTest \
 		RUN_ESMF_AttributeUpdateUTest \
 		RUN_ESMF_AttributeUpdateRemoveOnlyUTest \
@@ -54,6 +56,7 @@ TESTS_RUN_UNI = RUN_ESMF_AttributeGridGetUTestUNI \
 		RUN_ESMF_AttributeGridCompUTestUNI \
 		RUN_ESMF_AttributeGridGetUTestUNI \
 		RUN_ESMF_AttributeGridUTestUNI \
+		RUN_ESMF_AttributeSciCompUTestUNI \
 		RUN_ESMF_AttributeStateUTestUNI \
 		RUN_ESMF_AttributeWriteInternalUTestUNI \
 		RUN_ESMF_AttributeXMLUTestUNI \
@@ -202,6 +205,24 @@ RUN_ESMF_AttributeGridUTest:
 
 RUN_ESMF_AttributeGridUTestUNI:
 	$(MAKE) TNAME=AttributeGrid NP=1 ftest
+
+# --- SciComp
+
+RUN_ESMF_AttributeSciCompUTest:
+	$(MAKE) TNAME=AttributeSciComp NP=4 ftest
+
+RUN_ESMF_AttributeSciCompUTestUNI:
+	$(MAKE) TNAME=AttributeSciComp NP=1 ftest
+
+RUN_ESMF_AttReadSciCompUTest:
+	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_scicomp.xml $(ESMF_TESTDIR)
+	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
+	$(MAKE) TNAME=AttReadSciComp NP=4 ftest
+
+RUN_ESMF_AttReadSciCompUTestUNI:
+	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_scicomp.xml $(ESMF_TESTDIR)
+	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
+	$(MAKE) TNAME=AttReadSciComp NP=1 ftest
 
 # --- State
 
