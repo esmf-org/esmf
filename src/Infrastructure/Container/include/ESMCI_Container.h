@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container.h,v 1.17 2012/09/19 00:57:01 theurich Exp $
+// $Id: ESMCI_Container.h,v 1.18 2012/09/19 16:07:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -30,8 +30,9 @@
 namespace ESMCI {
 
   template <typename Key, typename T>
-  class Container : public std::multimap<Key, typename std::list<T>::iterator>{
-    std::list<T> orderedList;
+  class Container : public std::multimap<Key, 
+    typename std::list<std::pair<Key,T> >::iterator>{
+    std::list<std::pair<Key,T> > orderedList;
     bool garbageActive;
     std::vector<T> garbage;
    public:
@@ -83,13 +84,14 @@ namespace ESMCI {
   void Container<Key, T>::add(Key k, T t, bool multi, bool relaxed){
     int rc = ESMC_RC_NOT_IMPL;              // final return code
     typename Container::iterator pos = this->lower_bound(k);
-    typename std::list<T>::iterator lastElement;
+    typename std::list<std::pair<Key,T> >::iterator lastElement;
     if (pos != this->end() && pos->first == k){
       // key already exists
       if (multi){
-        orderedList.push_back(t); // append as the last item
+        orderedList.push_back(std::pair<Key,T>(k, t)); // append to list
         lastElement = orderedList.end();
-        this->insert(pos, std::pair<Key, typename std::list<T>::iterator>
+        this->insert(pos, std::pair<Key, 
+          typename std::list<std::pair<Key,T> >::iterator>
           (k, --lastElement));      // store the iterator in multimap
       }else{
         if (!relaxed){
@@ -102,9 +104,10 @@ namespace ESMCI {
       }
     }else{
       // this is a new key
-      orderedList.push_back(t); // append as the last item
+      orderedList.push_back(std::pair<Key,T>(k, t)); // append to list
       lastElement = orderedList.end();
-      this->insert(pos, std::pair<Key, typename std::list<T>::iterator>
+      this->insert(pos, std::pair<Key, 
+        typename std::list<std::pair<Key,T> >::iterator>
         (k, --lastElement));      // store the iterator in multimap
     }
   }
@@ -116,17 +119,18 @@ namespace ESMCI {
   template <typename Key, typename T>
   void Container<Key, T>::addReplace(Key k, T t){
     typename Container::iterator pos = this->find(k);
-    typename std::list<T>::iterator lastElement;
+    typename std::list<std::pair<Key,T> >::iterator lastElement;
     if (pos!=this->end()){
       // key already exists
       if (garbageActive)
-        garbage.push_back(*(pos->second)); // replaced object goes into garbage
-      *(pos->second) = t; // store new object in the same orderedListElement
+        garbage.push_back(pos->second->second); // replaced object into garbage
+      pos->second->second = t; // store new object in the same list element
     }else{
       // this is a new key
-      orderedList.push_back(t); // append as the last item
+      orderedList.push_back(std::pair<Key,T>(k, t)); // append to list
       lastElement = orderedList.end();
-      this->insert(pos, std::pair<Key, typename std::list<T>::iterator>
+      this->insert(pos, std::pair<Key, 
+        typename std::list<std::pair<Key,T> >::iterator>
         (k, --lastElement));      // store the iterator in multimap
     }
   }
@@ -137,11 +141,11 @@ namespace ESMCI {
   template <typename Key, typename T>
   void Container<Key, T>::clear(){
     int rc = ESMC_RC_NOT_IMPL;              // final return code
-    typename std::list<T>::iterator pos;
+    typename std::list<std::pair<Key,T> >::iterator pos;
     for (pos = orderedList.begin(); pos != orderedList.end(); ++pos)
-      garbage.push_back(*pos); // object goes into garbage
+      garbage.push_back(pos->second); // object goes into garbage
     orderedList.clear();   // clear the orderedList part of the container
-    std::multimap<Key, typename std::list<T>::iterator>
+    std::multimap<Key, typename std::list<std::pair<Key,T> >::iterator>
       ::clear(); // clear the multimap part of the container
   }
   
@@ -167,7 +171,7 @@ namespace ESMCI {
         "key is not unique", &rc);
       throw rc;  // bail out with exception
     }
-    return *(range.first->second);
+    return range.first->second->second;
   }
 
 #undef  ESMC_METHOD
@@ -181,7 +185,7 @@ namespace ESMCI {
     typename Container::const_iterator pos;
     v.clear();
     for (pos=range.first; pos!=range.second; ++pos)
-      v.push_back(*(pos->second));
+      v.push_back(pos->second->second);
   }
     
 #undef  ESMC_METHOD
@@ -211,13 +215,13 @@ namespace ESMCI {
     typename Container::const_iterator pos;
     int i = 0;
     for (pos = this->begin(); pos != this->end(); ++pos)
-      v[i++] = *(pos->second);
+      v[i++] = pos->second->second;
 #else
     v.resize(orderedList.size());
     int i = 0;
-    typename std::list<T>::const_iterator pos;
+    typename std::list<std::pair<Key,T> >::const_iterator pos;
     for (pos = orderedList.begin(); pos != orderedList.end(); ++pos)
-      v[i++] = *pos;
+      v[i++] = pos->second;
 #endif
   }
 
@@ -246,7 +250,7 @@ namespace ESMCI {
     typename Container::const_iterator pos;
     for (pos = this->begin(); pos != this->end(); ++pos)
       std::cout << "Container::print() item="<<i++<<" key="<<pos->first
-        <<" value="<<*(pos->second)<<"\n";
+        <<" value="<<pos->second->second<<"\n";
   }
 
 #undef  ESMC_METHOD
@@ -290,7 +294,7 @@ namespace ESMCI {
     }
     if (garbageActive)
       for (pos=range.first; pos!=range.second; ++pos){
-        garbage.push_back(*(pos->second)); // removed object goes into garbage
+        garbage.push_back(pos->second->second); // removed object into garbage
         orderedList.erase(pos->second); // remove entry from orderedList
       }
     this->erase(range.first, range.second); // remove entries from multimap part
@@ -340,13 +344,13 @@ namespace ESMCI {
     }
     if (garbageActive)
       for (pos=range.first; pos!=range.second; ++pos){
-        garbage.push_back(*(pos->second)); // removed object goes into garbage
+        garbage.push_back(pos->second->second); // removed object into garbage
         if (pos!=range.first)
           orderedList.erase(pos->second); // remove entry from orderedList
       }
     pos = range.first;
     this->erase(++pos, range.second);
-    *(range.first->second) = t; // fill orderedList element with new value
+    range.first->second->second = t; // fill orderedList element with new value
   }
 
 } // namespace ESMCI
