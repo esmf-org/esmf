@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.46 2012/09/14 23:05:31 gold2718 Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.47 2012/09/19 00:56:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.46 2012/09/14 23:05:31 gold2718 Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.47 2012/09/19 00:56:58 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -336,7 +336,7 @@ int ArrayBundle::read(
     for (it = arrayContainer.begin();
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
-        localrc = newIO->addArray(it->second, (char *)NULL);
+        localrc = newIO->addArray(*(it->second), (char *)NULL);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
       }
     }
@@ -359,7 +359,7 @@ int ArrayBundle::read(
     for (it = arrayContainer.begin();
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
-        localrc = newIO->addArray(it->second, (char *)NULL);
+        localrc = newIO->addArray(*(it->second), (char *)NULL);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
       }
       if (ESMF_SUCCESS == localrc) {
@@ -467,7 +467,7 @@ int ArrayBundle::write(
     for (it = arrayContainer.begin();
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
-        localrc = newIO->addArray(it->second, (char *)NULL);
+        localrc = newIO->addArray(*(it->second), (char *)NULL);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
       }
     }
@@ -491,7 +491,7 @@ int ArrayBundle::write(
     for (it = arrayContainer.begin();
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
-        localrc = newIO->addArray(it->second, (char *)NULL);
+        localrc = newIO->addArray(*(it->second), (char *)NULL);
         ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
       }
       if (ESMF_SUCCESS == localrc) {
