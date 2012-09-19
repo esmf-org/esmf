@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.83 2012/09/12 17:49:03 gold2718 Exp $
+% $Id: ESMF_options.tex,v 1.84 2012/09/19 16:35:10 gold2718 Exp $
 
 \section{Appendix A:  Master List of Constants}
 \label{const:master}
@@ -187,8 +187,9 @@ The type of this flag is:
 The valid values are:
 \begin{description}
 \item [ESMF\_FILESTATUS\_UNKNOWN]
-      The file is treated as if {\tt status} is 'OLD' if the
-      file already exists. Otherwise, the file is treated as 'NEW'.
+      The value is treated as if it were {\tt ESMF\_FILESTATUS\_OLD} if
+      the corresponding file already exists. Otherwise, the value is
+      treated as if it were {\tt ESMF\_FILESTATUS\_NEW}.
 \item [ESMF\_FILESTATUS\_OLD]
       The file must exist. New data can be added to a file if
       it is in a NetCDF format, however, existing data will not be
