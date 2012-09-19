@@ -1,4 +1,4 @@
-// $Id: ESMC.h,v 1.35 2012/03/07 16:44:54 rokuingh Exp $
+// $Id: ESMC.h,v 1.36 2012/09/19 20:37:41 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -51,6 +51,7 @@
 #include "ESMC_State.h"
 #include "ESMC_GridComp.h"
 #include "ESMC_CplComp.h"
+#include "ESMC_SciComp.h"
 
 // framework-wide initialization and finalization
 #include "ESMC_Init.h"
