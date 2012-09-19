@@ -1,4 +1,4 @@
-// $Id: ESMC_SciComp.h,v 1.1 2012/09/07 18:38:44 ksaint Exp $
+// $Id: ESMC_SciComp.h,v 1.2 2012/09/19 20:35:22 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
 // ESMC_SciComp - Public C interface to the ESMF SciComp class
 //
 // The code in this file defines the public C SciComp class and declares method
-// signatures (prototypes).  The companion file {\tt ESMC\_Comp.C} contains
+// signatures (prototypes).  The companion file {\tt ESMC\_SciComp.C} contains
 // the definitions (full code bodies) for the SciComp methods.
 //-----------------------------------------------------------------------------
 
@@ -50,7 +50,7 @@ typedef struct
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_SciCompCreate - Create a Gridded Component
+// !IROUTINE: ESMC_SciCompCreate - Create a Science Component
 //
 // !INTERFACE:
 ESMC_SciComp ESMC_SciCompCreate(
@@ -71,21 +71,6 @@ ESMC_SciComp ESMC_SciCompCreate(
 //  \begin{description}
 //  \item[name]
 //    Name of the newly-created {\tt ESMC\_SciComp}.
-//  \item[mtype]
-//   {\tt ESMC\_SciComp} model type, where models includes {\tt ESMF\_ATM},
-//   {\tt ESMF\_LAND}, {\tt ESMF\_OCEAN}, {\tt ESMF\_SEAICE}, {\tt ESMF\_RIVER},
-//   and {\tt ESMF\_GRIDCOMPTYPE\_UNKNOWN}. Note that this has no meaning to the
-//   framework, it is an annotation for user code to query. See section
-//   \ref{opt:gridcomptype} for a complete list of valid types. 
-//  \item[configFile]
-//   The filename of an {\tt ESMC\_Config} format file. If specified, this file
-//   is opened an {\tt ESMC\_Config}  configuration object is created for the
-//   file, and attached to the new component. 
-//  \item[clock]
-//   Component-specific {\tt ESMC\_Clock}. This clock is available to be queried
-//   and updated by the new {\tt ESMC\_SciComp} as it chooses. This should not
-//   be the parent component clock, which should be maintained and passed down
-//   to the initialize/run/finalize routines separately. 
 //  \item[{[rc]}]
 //   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
@@ -95,7 +80,7 @@ ESMC_SciComp ESMC_SciCompCreate(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_SciCompDestroy - Destroy a Gridded Component
+// !IROUTINE: ESMC_SciCompDestroy - Destroy a Science Component
 //
 // !INTERFACE:
 int ESMC_SciCompDestroy(
@@ -121,11 +106,11 @@ int ESMC_SciCompDestroy(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_SciCompGetInternalState - Get the Internal State of a Gridded Component
+// !IROUTINE: ESMC_SciCompGetInternalState - Get the Internal State of a Science Component
 //
 // !INTERFACE:
 void *ESMC_SciCompGetInternalState(
-  ESMC_SciComp comp,           // in
+  ESMC_SciComp comp,            // in
   int *rc                       // out
 );
 // !RETURN VALUE:
@@ -134,11 +119,8 @@ void *ESMC_SciCompGetInternalState(
 // !DESCRIPTION:
 //
 //  Available to be called by an {\tt ESMC\_SciComp} at any time after 
-//  {\tt ESMC\_SciCompSetInternalState} has been called. Since init, run, and
-//  finalize must be separate subroutines, data that they need to share in 
-//  common can either be global data, or can be allocated in a private data
-//  block and the address of that block can be registered with the framework 
-//  and retrieved by this call. When running multiple instantiations of an 
+//  {\tt ESMC\_SciCompSetInternalState} has been called. 
+//  When running multiple instantiations of an 
 //  {\tt ESMC\_SciComp}, for example during ensemble runs, it may be simpler 
 //  to maintain private data specific to each run with private data blocks. A 
 //  corresponding {\tt ESMC\_SciCompSetInternalState} call sets the data
@@ -184,7 +166,7 @@ int ESMC_SciCompPrint(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMC_SciCompSetInternalState - Set the Internal State of a Gridded Component
+// !IROUTINE: ESMC_SciCompSetInternalState - Set the Internal State of a Science Component
 //
 // !INTERFACE:
 int ESMC_SciCompSetInternalState(
@@ -196,13 +178,7 @@ int ESMC_SciCompSetInternalState(
 //
 // !DESCRIPTION:
 //
-//  Available to be called by an {\tt ESMC\_SciComp} at any time, but
-//  expected to be most useful when called during the registration process, 
-//  or initialization. Since init, run, and finalize must be separate
-//  subroutines, data that they need to share in common can either be global
-//  data, or can be allocated in a private data block and the address of that 
-//  block can be registered with the framework and retrieved by subsequent
-//  calls.
+//  Available to be called by an {\tt ESMC\_SciComp} at any time.
 //  When running multiple instantiations of an {\tt ESMC\_SciComp}, 
 //  for example during ensemble runs, it may be simpler to maintain private 
 //  data specific to each run with private data blocks.  A corresponding 

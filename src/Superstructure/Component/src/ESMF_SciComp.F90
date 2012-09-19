@@ -1,4 +1,4 @@
-! $Id: ESMF_SciComp.F90,v 1.1 2012/09/07 18:38:47 ksaint Exp $
+! $Id: ESMF_SciComp.F90,v 1.2 2012/09/19 20:35:46 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -38,13 +38,6 @@ module ESMF_SciCompMod
   use ESMF_UtilTypesMod
   use ESMF_LogErrMod
   use ESMF_BaseMod
-  use ESMF_VMMod
-  use ESMF_ConfigMod
-  use ESMF_ClockTypeMod
-  use ESMF_ClockMod
-  use ESMF_StateTypesMod
-  use ESMF_StateMod
-  use ESMF_GridMod
   use ESMF_CompMod
   use ESMF_InitMacrosMod
   use ESMF_IOUtilMod
@@ -78,7 +71,7 @@ module ESMF_SciCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_SciComp.F90,v 1.1 2012/09/07 18:38:47 ksaint Exp $'
+    '$Id: ESMF_SciComp.F90,v 1.2 2012/09/19 20:35:46 ksaint Exp $'
 
 !==============================================================================
 !
@@ -324,8 +317,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 ! \begin{description}
 ! \item[{[name]}]
-!   Name of the newly-created {\tt ESMF\_GridComp}.  This name can be altered
-!   from within the {\tt ESMF\_GridComp} code once the initialization routine
+!   Name of the newly-created {\tt ESMF\_SciComp}.  This name can be altered
+!   from within the {\tt ESMF\_SciComp} code once the initialization routine
 !   is called.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -334,8 +327,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     type(ESMF_CompClass), pointer :: compclass       ! generic comp
-    type(ESMF_SciComp)           :: gcomp
-    integer :: localrc                               ! local error status
+    type(ESMF_SciComp)            :: scomp
+    integer                       :: localrc         ! local error status
 
     ! Initialize the pointer to null.
     nullify(ESMF_SciCompCreate%compp)
@@ -359,9 +352,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
 
-    gcomp%compp => compclass
+    scomp%compp => compclass
     ! Add reference to this object into ESMF garbage collection table
-    call c_ESMC_VMAddFObject(gcomp, ESMF_ID_COMPONENT%objectID)
+    call c_ESMC_VMAddFObject(scomp, ESMF_ID_COMPONENT%objectID)
       
     ! Set return values
     ESMF_SciCompCreate%compp => compclass
@@ -386,7 +379,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     timeout, timeoutFlag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_SciComp), intent(inout)          :: scicomp
+    type(ESMF_SciComp), intent(inout)           :: scicomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),   optional :: timeout
     logical,             intent(out),  optional :: timeoutFlag
@@ -488,7 +481,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_SciCompGet(scicomp, keywordEnforcer, comptype, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_SciComp),      intent(in)            :: scicomp
+    type(ESMF_SciComp),       intent(in)            :: scicomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_CompType_Flag), intent(out), optional :: comptype
     character(len=*),         intent(out), optional :: name
@@ -507,8 +500,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[scicomp]
 !   The {\tt ESMF\_SciComp} object being queried.
 ! \item[{[comptype]}]
-!   Return the Component type: {\tt ESMF\_COMPTYPE\_GRID} or 
-!   {\tt ESMF\_COMPTYPE\_CPL}.
+!   Return the Component type: {\tt ESMF\_COMPTYPE\_GRID}, 
+!   {\tt ESMF\_COMPTYPE\_CPL} or {\tt ESMF\_COMPTYPE\_SCI}.
 ! \item[{[name]}]
 !   Return the name of the {\tt ESMF\_SciComp}.
 ! \item[{[rc]}]
@@ -534,10 +527,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! call Comp method
-    call ESMF_CompStatusGet(compStatus, &
-      rc = localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
+    call ESMF_CompStatusGet(compStatus, rc = localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
@@ -551,10 +542,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_SciCompGetInternalState - Get private data block pointer
 !
 ! !INTERFACE:
-! subroutine ESMF_SciCompGetInternalState(gridcomp, wrappedDataPointer, rc)
+! subroutine ESMF_SciCompGetInternalState(scicomp, wrappedDataPointer, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_SciComp)             :: gridcomp
+!   type(ESMF_SciComp)              :: scicomp
 !   type(wrapper)                   :: wrappedDataPointer
 !   integer,            intent(out) :: rc
 !
@@ -564,13 +555,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Available to be called by an {\tt ESMF\_GridComp} at any time after 
+! Available to be called by an {\tt ESMF\_SciComp} at any time after 
 ! {\tt ESMF\_SciCompSetInternalState} has been called.
-! Since init, run, and finalize must be separate subroutines, data that
-! they need to share in common can either be module global data, or can
-! be allocated in a private data block and the address of that block
-! can be registered with the framework and retrieved by this call.
-! When running multiple instantiations of an {\tt ESMF\_GridComp}, 
+! When running multiple instantiations of an {\tt ESMF\_SciComp}, 
 ! for example during ensemble runs, 
 ! it may be simpler to maintain private data specific to 
 ! each run with private data blocks.  A corresponding 
@@ -591,8 +578,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   
 ! The arguments are:
 ! \begin{description}
-! \item[gridcomp]
-!   An {\tt ESMF\_GridComp} object.
+! \item[scicomp]
+!   An {\tt ESMF\_SciComp} object.
 ! \item[wrappedDataPointer]
 !   A derived type (wrapper), containing only an unassociated pointer 
 !   to the private data block.
@@ -621,7 +608,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_SciCompPrint(scicomp, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_SciComp), intent(in)            :: scicomp
+    type(ESMF_SciComp), intent(in)             :: scicomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
 !
@@ -668,13 +655,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_SciCompSet"
 !BOP
-! !IROUTINE: ESMF_SciCompSet - Set or reset information about the GridComp
+! !IROUTINE: ESMF_SciCompSet - Set or reset information about the SciComp
 !
 ! !INTERFACE:
-  subroutine ESMF_SciCompSet(gridcomp, keywordEnforcer, name, rc)
+  subroutine ESMF_SciCompSet(scicomp, keywordEnforcer, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_SciComp), intent(inout)         :: gridcomp
+    type(ESMF_SciComp), intent(inout)          :: scicomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),    intent(in),  optional :: name
     integer,             intent(out), optional :: rc
@@ -685,14 +672,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Sets or resets information about an {\tt ESMF\_GridComp}.
+! Sets or resets information about an {\tt ESMF\_SciComp}.
 !
 ! The arguments are:
 ! \begin{description}
-! \item[gridcomp]
-!   {\tt ESMF\_GridComp} to change.
+! \item[scicomp]
+!   {\tt ESMF\_SciComp} to change.
 ! \item[{[name]}]
-!   Set the name of the {\tt ESMF\_GridComp}.
+!   Set the name of the {\tt ESMF\_SciComp}.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -705,10 +692,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_DEEP(ESMF_SciCompGetInit,gridcomp,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_SciCompGetInit,scicomp,rc)
 
     ! call Comp method
-    call ESMF_CompSet(gridcomp%compp, name=name, rc=localrc)
+    call ESMF_CompSet(scicomp%compp, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -724,10 +711,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_SciCompSetInternalState - Set private data block pointer
 !
 ! !INTERFACE:
-! subroutine ESMF_SciCompSetInternalState(gridcomp, wrappedDataPointer, rc)
+! subroutine ESMF_SciCompSetInternalState(scicomp, wrappedDataPointer, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_SciComp)             :: gridcomp
+!   type(ESMF_SciComp)              :: scicomp
 !   type(wrapper)                   :: wrappedDataPointer
 !   integer,            intent(out) :: rc
 !
@@ -737,14 +724,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Available to be called by an {\tt ESMF\_GridComp} at any time, but 
-! expected to be
-! most useful when called during the registration process, or initialization.
-! Since init, run, and finalize must be separate subroutines, data that
-! they need to share in common can either be module global data, or can
-! be allocated in a private data block and the address of that block
-! can be registered with the framework and retrieved by subsequent calls.
-! When running multiple instantiations of an {\tt ESMF\_GridComp}, 
+! Available to be called by an {\tt ESMF\_SciComp} at any time.
+! When running multiple instantiations of an {\tt ESMF\_SciComp}, 
 ! for example during
 ! ensemble runs, it may be simpler to maintain private data specific to 
 ! each run with private data blocks.  A corresponding 
@@ -758,8 +739,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   
 ! The arguments are:
 ! \begin{description}
-! \item[gridcomp]
-!   An {\tt ESMF\_GridComp} object.
+! \item[scicomp]
+!   An {\tt ESMF\_SciComp} object.
 ! \item[wrappedDataPointer]
 !   A pointer to the private data block, wrapped in a derived type which
 !   contains only a pointer to the block.  This level of indirection is
@@ -782,10 +763,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_SciCompValidate - Check validity of a SciComp
 !
 ! !INTERFACE:
-  subroutine ESMF_SciCompValidate(gridcomp, keywordEnforcer, rc)
+  subroutine ESMF_SciCompValidate(scicomp, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_SciComp), intent(in)            :: gridcomp
+    type(ESMF_SciComp), intent(in)             :: scicomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
 !
@@ -795,12 +776,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Currently all this method does is to check that the {\tt gridcomp}
+! Currently all this method does is to check that the {\tt scicomp}
 ! was created.
 !
 ! The arguments are:
 ! \begin{description}
-! \item[gridcomp]
+! \item[scicomp]
 !   {\tt ESMF\_SciComp} to validate.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -814,10 +795,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_DEEP(ESMF_SciCompGetInit,gridcomp,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_SciCompGetInit,scicomp,rc)
 
     ! call Comp method
-    call ESMF_CompValidate(gridcomp%compp, rc=localrc)
+    call ESMF_CompValidate(scicomp%compp, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -832,14 +813,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_SciCompWait"
 !BOP
-! !IROUTINE: ESMF_SciCompWait - Wait for a GridComp to return
+! !IROUTINE: ESMF_SciCompWait - Wait for a SciComp to return
 !
 ! !INTERFACE:
   subroutine ESMF_SciCompWait(scicomp, keywordEnforcer, syncflag, &
     timeout, timeoutFlag, userRc, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_SciComp),  intent(inout)         :: scicomp
+    type(ESMF_SciComp),  intent(inout)          :: scicomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Sync_Flag), intent(in),  optional :: syncflag
     integer,              intent(in),  optional :: timeout
@@ -860,7 +841,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! When executing asychronously, wait for an {\tt ESMF\_GridComp} to return.
+! When executing asychronously, wait for an {\tt ESMF\_SciComp} to return.
 !
 ! The arguments are:
 ! \begin{description}

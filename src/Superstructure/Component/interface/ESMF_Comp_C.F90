@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.79 2012/09/07 18:38:45 ksaint Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.80 2012/09/19 20:35:36 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !character(*), parameter, private :: version = &
-!  '$Id: ESMF_Comp_C.F90,v 1.79 2012/09/07 18:38:45 ksaint Exp $'
+!  '$Id: ESMF_Comp_C.F90,v 1.80 2012/09/19 20:35:36 ksaint Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -1057,7 +1057,7 @@ end subroutine f_esmf_cplcompprint
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_scicompcreate"
-subroutine f_esmf_scicompcreate(gcomp, name, rc)
+subroutine f_esmf_scicompcreate(scomp, name, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_CompMod
@@ -1066,7 +1066,7 @@ subroutine f_esmf_scicompcreate(gcomp, name, rc)
   
   implicit none
 
-  type(ESMF_SciComp)       :: gcomp
+  type(ESMF_SciComp)        :: scomp
   character(len=*)          :: name
   integer                   :: rc
 
@@ -1075,7 +1075,7 @@ subroutine f_esmf_scicompcreate(gcomp, name, rc)
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
-  gcomp = ESMF_SciCompCreate(name=name, rc=rc)
+  scomp = ESMF_SciCompCreate(name=name, rc=rc)
 
 end subroutine f_esmf_scicompcreate
 
@@ -1091,7 +1091,7 @@ subroutine f_esmf_scicompdestroy(comp, rc)
   
   implicit none
 
-  type(ESMF_SciComp) :: comp
+  type(ESMF_SciComp)  :: comp
   integer             :: rc              
 
   call ESMF_SciCompDestroy(comp, rc=rc)
@@ -1110,7 +1110,7 @@ subroutine f_esmf_scicompset(comp, rc)
   
   implicit none
 
-  type(ESMF_SciComp) :: comp
+  type(ESMF_SciComp)  :: comp
   integer             :: rc     
 
   ! Initialize return code; assume routine not implemented
@@ -1134,7 +1134,7 @@ subroutine f_esmf_scicompget(comp, rc)
   
   implicit none
 
-  type(ESMF_SciComp) :: comp
+  type(ESMF_SciComp)  :: comp
   integer             :: rc     
 
   ! Initialize return code; assume routine not implemented
@@ -1156,7 +1156,7 @@ subroutine f_esmf_scicompvalidate(comp, rc)
   
   implicit none
 
-  type(ESMF_SciComp) :: comp
+  type(ESMF_SciComp)  :: comp
   integer             :: rc     
 
   ! Initialize return code; assume routine not implemented
@@ -1178,7 +1178,7 @@ subroutine f_esmf_scicompprint(comp, rc)
   
   implicit none
 
-  type(ESMF_SciComp) :: comp
+  type(ESMF_SciComp)  :: comp
   integer             :: rc     
 
   ! Initialize return code; assume routine not implemented

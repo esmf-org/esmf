@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeSciEx.F90,v 1.2 2012/09/10 18:22:22 svasquez Exp $
+! $Id: ESMF_AttributeSciEx.F90,v 1.3 2012/09/19 20:36:50 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -46,7 +46,6 @@ program ESMF_AttributeSciEx
       ! Use ESMF framework module
       use ESMF
       use ESMF_TestMod
-      use ESMF_SciCompMod
       implicit none
 
       ! Local variables  
@@ -614,9 +613,9 @@ program ESMF_AttributeSciEx
   
       if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
       if (finalrc==ESMF_SUCCESS) then
-        print *, "PASS: ESMF_AttributeCIMEx.F90"
+        print *, "PASS: ESMF_AttributeSciEx.F90"
       else
-        print *, "FAIL: ESMF_AttributeCIMEx.F90"
+        print *, "FAIL: ESMF_AttributeSciEx.F90"
       endif
   
 end program

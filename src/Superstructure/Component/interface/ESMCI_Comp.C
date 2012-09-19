@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.C,v 1.27 2012/09/07 18:38:45 ksaint Exp $
+// $Id: ESMCI_Comp.C,v 1.28 2012/09/19 20:35:36 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Comp.C,v 1.27 2012/09/07 18:38:45 ksaint Exp $";
+static const char *const version = "$Id: ESMCI_Comp.C,v 1.28 2012/09/19 20:35:36 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -110,7 +110,7 @@ extern "C" {
   void FTN_X(f_esmf_scicompcreate)(ESMCI::SciComp *comp, char const *name, 
     int *rc, ESMCI_FortranStrLenArg nlen);
   void FTN_X(f_esmf_scicompdestroy)(ESMCI::SciComp *comp, int *rc);
-  void FTN_X(f_esmf_scicompprint)(const ESMCI::SciComp *gcomp, int *rc);
+  void FTN_X(f_esmf_scicompprint)(const ESMCI::SciComp *comp, int *rc);
 };
 //==============================================================================
 

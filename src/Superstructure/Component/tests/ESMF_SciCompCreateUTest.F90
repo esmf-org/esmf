@@ -1,4 +1,4 @@
-! $Id: ESMF_SciCompCreateUTest.F90,v 1.3 2012/09/17 20:07:51 svasquez Exp $
+! $Id: ESMF_SciCompCreateUTest.F90,v 1.4 2012/09/19 20:35:54 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -28,7 +28,6 @@
 ! !USES:
     use ESMF_TestMod     ! test methods
     use ESMF
-    use ESMF_SciCompMod
     implicit none
     
 !   ! Local variables
