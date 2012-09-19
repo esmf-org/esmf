@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2012/09/19 22:05:21 rokuingh Exp $ 
+# $Id: makefile,v 1.20 2012/09/19 22:09:42 w6ws Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -38,7 +38,6 @@ TESTS_RUN = RUN_ESMF_AttributeArrayUTest \
 		RUN_ESMF_AttributeSciCompUTest \
 		RUN_ESMF_AttributeStateUTest \
 		RUN_ESMF_AttributeUpdateUTest \
-		RUN_ESMF_AttributeUpdateRemoveOnlyUTest \
 		RUN_ESMF_AttributeUpdate2UTest \
 		RUN_ESMF_AttributeWriteInternalUTest \
 		RUN_ESMF_AttributeXMLUTest \
