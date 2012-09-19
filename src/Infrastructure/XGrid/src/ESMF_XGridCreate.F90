@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.67 2012/09/18 14:15:51 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.68 2012/09/19 14:43:12 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.67 2012/09/18 14:15:51 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.68 2012/09/19 14:43:12 feiliu Exp $'
 
 !==============================================================================
 !
@@ -378,7 +378,7 @@ function ESMF_XGridCreateMesh(sideA, sideB, keywordEnforcer, &
 !  uniquely determined by the Meshes provided in {\tt sideA} and {\tt sideB}. User can supply
 !  a single {\tt ESMF\_Mesh} or an array of {\tt ESMF\_Mesh} on either side of the 
 !  {\tt ESMF\_XGrid}. For an array of {\tt ESMF\_Mesh} in {\tt sideA} or {\tt sideB},
-!  a merging process concatenates all the {\tt ESMF\_Mesh}s into a super mesh represented
+!  a merging process concatenates all the {\tt ESMF\_Mesh}es into a super mesh represented
 !  by {\tt ESMF\_Mesh}. The super mesh is then used to compute the XGrid. 
 !  Mesh objects in {\tt sideA} and {\tt sideB} arguments must have coordinates defined for
 !  the corners of a Mesh cell. XGrid created this way can be potentially memory expensive, 
