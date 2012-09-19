@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.112 2012/09/06 20:12:29 feiliu Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.113 2012/09/19 14:47:34 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.112 2012/09/06 20:12:29 feiliu Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.113 2012/09/19 14:47:34 feiliu Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1006,10 +1006,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       communications necessary to interpolate from {\tt srcField} to {\tt dstField}. 
 !       The routehandle can then be used in the call
 !       {\tt ESMF\_FieldRegrid()} to interpolate between the {\tt ESMF\_Field}s. Informaton such as
-!       index mapping and weights are obtained from the XGrid by matching the Field Grids in the XGrid. 
-!       It's erroneous to have matching Grid objects in the {\tt srcField} and {\tt dstField}. 
+!       index mapping and weights are obtained from the XGrid by matching the Field Grids or Meshes in the XGrid. 
+!       It's erroneous to have matching Grid or Mesh objects in the {\tt srcField} and {\tt dstField}. 
 !       They must be different in either tological or geometric characteristics. For {\tt ESMF\_Field}s 
-!       built on identical {\tt ESMF\_Grid} on
+!       built on identical {\tt ESMF\_Grid} or {\tt ESMF\_Mesh} on
 !       different VM, user can use {\tt ESMF\_FieldRedistStore()} and {\tt ESMF\_FieldRedist()} 
 !       methods to communicate data across different VM.
 !       \end{sloppypar}
@@ -1019,7 +1019,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       from the source Field to the destination Field. 
 !       This is true even if the data in the Fields changes. The routehandle may also be used to 
 !       interpolate between any source and 
-!       destination Field which are created on the same stagger location and Grid as the original Fields.        
+!       destination Field which are created on the same stagger location and Grid
+!       or on the same mesh location and Mesh as the original Fields.        
 !
 !       When it's no longer needed the routehandle should be destroyed by using 
 !       {\tt ESMF\_FieldRegridRelease()} to free the memory it's using. 
