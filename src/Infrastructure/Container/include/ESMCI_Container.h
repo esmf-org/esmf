@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container.h,v 1.19 2012/09/20 20:24:49 theurich Exp $
+// $Id: ESMCI_Container.h,v 1.20 2012/09/20 23:56:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -276,8 +276,13 @@ namespace ESMCI {
     int i = 0;
     typename Container::const_iterator pos;
     for (pos = this->begin(); pos != this->end(); ++pos)
-      std::cout << "Container::print() item="<<i++<<" key="<<pos->first
-        <<" value="<<pos->second->second<<"\n";
+      std::cout << "Container::print() multipmap:item="<<i++<<
+        " key="<<pos->first <<" value="<<pos->second->second<<"\n";
+    i = 0;  // reset
+    typename std::list<std::pair<Key,T> >::const_iterator posl;
+    for (posl = orderedList.begin(); posl != orderedList.end(); ++posl)
+      std::cout << "Container::print()      list:item="<<i++<<
+        " key="<<posl->first <<" value="<<posl->second<<"\n";
   }
 
 #undef  ESMC_METHOD
@@ -319,11 +324,11 @@ namespace ESMCI {
         return; // bail out without exception
       }
     }
-    if (garbageActive)
-      for (pos=range.first; pos!=range.second; ++pos){
+    for (pos=range.first; pos!=range.second; ++pos){
+      if (garbageActive)
         garbage.push_back(pos->second->second); // removed object into garbage
-        orderedList.erase(pos->second); // remove entry from orderedList
-      }
+      orderedList.erase(pos->second); // remove entry from orderedList
+    }
     this->erase(range.first, range.second); // remove entries from multimap part
   }
   
@@ -369,12 +374,13 @@ namespace ESMCI {
         return; // bail out without exception
       }
     }
-    if (garbageActive)
-      for (pos=range.first; pos!=range.second; ++pos){
+    for (pos=range.first; pos!=range.second; ++pos){
+      if (garbageActive)
         garbage.push_back(pos->second->second); // removed object into garbage
-        if (pos!=range.first)
-          orderedList.erase(pos->second); // remove entry from orderedList
+      if (pos!=range.first){
+        orderedList.erase(pos->second); // remove entry from orderedList
       }
+    }
     pos = range.first;
     this->erase(++pos, range.second);
     range.first->second->second = t; // fill orderedList element with new value
