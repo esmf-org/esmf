@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.31 2012/09/12 17:05:07 w6ws Exp $
+// $Id: ESMC_Init.h,v 1.32 2012/09/20 16:39:23 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -32,8 +32,10 @@
 
 // identifier list for optional ESMC arguments
 enum {
-  ESMCI_InitArgDefaultConfigFilenameID   = ESMCI_ArgBaseID,
-  ESMCI_InitArgLogKindFlagID             = ESMCI_ArgBaseID + 1
+  ESMCI_InitArgDefaultCalendarID         = ESMCI_ArgBaseID,
+  ESMCI_InitArgDefaultConfigFilenameID   = ESMCI_ArgBaseID + 1,
+  ESMCI_InitArgLogFilenameID             = ESMCI_ArgBaseID + 2,
+  ESMCI_InitArgLogKindFlagID             = ESMCI_ArgBaseID + 3
 };
 
 // prototypes for C routines
@@ -49,8 +51,12 @@ extern "C" {
   int ESMC_Initialize(
     int *rc,        // return code
     ...);           // optional arguments
+#define ESMC_InitArgDefaultCalendarFlag(ARG)  \
+ESMCI_Arg(ESMCI_InitArgDefaultCalendarID,ARG)
 #define ESMC_InitArgDefaultConfigFilename(ARG)  \
 ESMCI_Arg(ESMCI_InitArgDefaultConfigFilenameID,ARG)
+#define ESMC_InitArgLogFilename(ARG)  \
+ESMCI_Arg(ESMCI_InitArgLogFilenameID,ARG)
 #define ESMC_InitArgLogKindFlag(ARG)  \
 ESMCI_Arg(ESMCI_InitArgLogKindFlagID,ARG)
 
@@ -89,10 +95,18 @@ ESMCI_Arg(ESMCI_InitArgLogKindFlagID,ARG)
 //  \item [{[rc]}]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //    {\tt NULL} may be passed when the return code is not desired.
+//  \item [{[defaultCalendar]}]
+//    Name of the default calendar for the entire application.
+//    This flag is documented in section \ref{const:calkindflag_c}
+//    If not specified, defaults to {\tt ESMC\_CALKIND\_NOCALENDAR}.
 //  \item [{[defaultConfigFilename]}]
-//    Name of the default configuration file for the entire application.
+//    Name of the default configuration file for the Config class.
+//    If not specified, no default file is used.
+//  \item [{[defaultLogFilename]}]
+//    Name used as part of the default log file name for the default log.
+//    If not specified, defaults to {\tt ESMF\_LogFile}.
 //  \item [{[LogKindFlag]}]
-//    Sets the default Log Type to be used by ESMF Log Manager.
+//    Sets the default Log kind to be used by ESMF Log Manager.
 //    This flag is documented in section \ref{const:clogkindflag}.
 //    If not specified, defaults to {\tt ESMC\_LOGKIND\_MULTI}.
 //  \item [ESMC\_ArgLast]
