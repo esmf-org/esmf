@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.38 2012/04/27 17:18:09 w6ws Exp $
+# $Id: build_rules.mk,v 1.39 2012/09/20 22:08:59 w6ws Exp $
 # 
 # IRIX64.default.default
 #
@@ -82,6 +82,8 @@ ESMF_LAPACKDEFAULT         = scsl
 #
 # abide to C++ language standard; don't put libc into std name space
 ESMF_CXXCOMPILEOPTS       += -LANG:std=on
+# allow C9x (and g++) variable length arrays
+ESMF_CXXCOMPILEOPTS       += -LANG:vla=on
 #
 # defer template instantiation in the compiler front end
 ESMF_CXXCOMPILEOPTS       += -ptused
