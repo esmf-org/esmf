@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogMacros.inc,v 1.13 2012/01/06 20:18:17 svasquez Exp $
+ $Id: ESMF_LogMacros.inc,v 1.14 2012/09/20 18:21:39 w6ws Exp $
 
  Earth System Modeling Framework
  Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -21,9 +21,6 @@
 #ifndef ESMF_LOGMACROS_INC
 #define ESMF_LOGMACROS_INC
 
-#define ESMF_CONTEXT  line=__LINE__,file=ESMF_FILENAME,method=ESMF_METHOD
-#define ESMC_CONTEXT  __LINE__,ESMC_FILENAME,ESMC_METHOD
-
 #ifndef ESMF_FILENAME
 #define ESMF_FILENAME __FILE__
 #endif
@@ -31,6 +28,9 @@
 #ifndef ESMC_FILENAME
 #define ESMC_FILENAME __FILE__
 #endif
+
+#define ESMF_CONTEXT  line=__LINE__,file=ESMF_FILENAME,method=ESMF_METHOD
+#define ESMC_CONTEXT  __LINE__,ESMC_FILENAME,ESMC_METHOD
 
 #if 0
  TODO: Remove dependencies on the following macros and remove them! *gjt*
