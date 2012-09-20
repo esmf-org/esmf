@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridGetUTest.F90,v 1.8 2012/08/24 00:32:14 rokuingh Exp $
+! $Id: ESMF_AttributeGridGetUTest.F90,v 1.9 2012/09/20 23:54:18 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.8 2012/08/24 00:32:14 rokuingh Exp $'
+  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.9 2012/09/20 23:54:18 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -71,7 +71,7 @@ program ESMF_AttributeGridGetUTest
   integer(ESMF_KIND_I4)  :: computationalLBound(2), computationalUBound(2), computationalCount(2)
   integer(ESMF_KIND_I4)  :: totalLBound(2), totalUBound(2), totalCount(2)
   logical                :: isLBound(2), isUBound(2)
-  real(ESMF_KIND_R8)     :: xcoords(10), ycoords(10)
+  real(ESMF_KIND_R8)     :: xcoords(100), ycoords(100)
 
   character(ESMF_MAXSTR),dimension(3) :: inputList 
 #endif
