@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.C,v 1.18 2012/09/12 03:49:36 gold2718 Exp $
+// $Id: ESMCI_IO.C,v 1.19 2012/09/20 21:19:44 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO.C,v 1.18 2012/09/12 03:49:36 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_IO.C,v 1.19 2012/09/20 21:19:44 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -494,7 +494,7 @@ int IO::open(
   if ((char const * const)NULL == file) {
     localrc = ESMC_RC_PTR_NULL;
     ESMC_LogDefault.Write("Filename to open cannot be NULL",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     return localrc;
   }
 
@@ -511,7 +511,7 @@ int IO::open(
              ioHandler->getFormat() << " instead of, " << iofmt);
     localrc = ESMC_RC_FILE_OPEN;
     ESMC_LogDefault.Write("Internal error, ioHandler has wrong format",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     return localrc;
   }
   // No else (state looks OK)
@@ -521,7 +521,7 @@ int IO::open(
     PRINTMSG("IO_Handler is already open ");
     localrc = ESMC_RC_FILE_OPEN;
     ESMC_LogDefault.Write("Internal error, ioHandler is already open",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     return localrc;
   }
 
@@ -677,12 +677,12 @@ int IO::addArray(
   if ((ESMC_Base *)NULL == arr_p) {
     localrc = ESMC_RC_PTR_NULL;
     ESMC_LogDefault.Write("Array argument cannot be NULL",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
   } else {
     if (((const char * const)NULL != variableName) &&
         (strlen(variableName) > ESMF_MAXSTR)) {
       ESMC_LogDefault.Write("Array name length exceeds ESMF_MAXSTR, truncated",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
     try {
       IO_ObjectContainer *newObj = new IO_ObjectContainer((Array *)arr_p,
@@ -691,7 +691,7 @@ int IO::addArray(
         localrc = ESMC_RC_MEM_ALLOCATE;
         ESMC_LogDefault.AllocError(ESMC_CONTEXT, &rc);
         ESMC_LogDefault.Write("Unable to allocate storage for IO object",
-                              ESMC_LOG_ERROR, ESMC_CONTEXT);
+                              ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       } else {
         objects.push_back(newObj);
       }

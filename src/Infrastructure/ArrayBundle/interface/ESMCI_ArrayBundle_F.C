@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.44 2012/09/20 20:24:47 theurich Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.45 2012/09/20 21:19:20 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -405,11 +405,11 @@ extern "C" {
     int len_fileName = *len_file;
     if (len_fileName > ESMF_MAXSTR) {
       ESMC_LogDefault.Write("File name length > ESMF_MAXSTR",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_fileName = ESMF_MAXSTR;
     } else if (len_fileName < 0) {
       ESMC_LogDefault.Write("Negative file name length",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_fileName = 0;
     }
     if (len_fileName > 0) {
@@ -452,11 +452,11 @@ extern "C" {
     int len_fileName = *len_file;
     if (len_fileName > ESMF_MAXSTR) {
       ESMC_LogDefault.Write("File name length > ESMF_MAXSTR",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_fileName = ESMF_MAXSTR;
     } else if (len_fileName < 0) {
       ESMC_LogDefault.Write("Negative file name length",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_fileName = 0;
     }
     if (len_fileName > 0) {

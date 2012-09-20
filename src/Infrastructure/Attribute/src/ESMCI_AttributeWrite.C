@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeWrite.C,v 1.2 2012/09/18 10:40:06 rokuingh Exp $
+// $Id: ESMCI_AttributeWrite.C,v 1.3 2012/09/20 21:19:28 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.2 2012/09/18 10:40:06 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.3 2012/09/20 21:19:28 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -1256,7 +1256,7 @@ namespace ESMCI {
       } else if (attrList.at(i)->items >1) { 
       //if (attrList.at(i)->items > 1 && value.substr(5,value.length()) != "farrayPtr") { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
-        ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+        ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
       } else if (attrList.at(i)->items == 0) {
         // do nothing
       } else {
@@ -1362,7 +1362,7 @@ namespace ESMCI {
       //ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     } else if (attrList.at(i)->items >1) {
       sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
     } else if (attrList.at(i)->items == 0) {
       //do nothing
     } else {
@@ -1798,7 +1798,7 @@ namespace ESMCI {
     ESMC_LogDefault.Write("Attribute ShortName in standard attribute package "
       "(convention='CIM', purpose='Model Component Simulation Description')"
       " required to be set, to produce valid CIM XML output.",
-      ESMC_LOG_WARN, ESMC_CONTEXT);
+      ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
   if (attpack->AttributeIsSet("LongName")) {
     localrc = attpack->AttributeGet("LongName", &valuevector);
@@ -2023,7 +2023,7 @@ namespace ESMCI {
     ESMC_LogDefault.Write("Attribute ModelType in standard attribute package "
       "(convention='CIM', purpose='Model Component Simulation Description')"
       " required to be set, to produce valid CIM XML output.",
-      ESMC_LOG_WARN, ESMC_CONTEXT);
+      ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
 
   // generate and save a GUID for this component, then output it
@@ -2132,7 +2132,7 @@ namespace ESMCI {
         "purpose='Model Component Simulation Description') "
         "required to be set, when attribute PreviousVersionDescription is also "
         "set, to produce valid CIM XML output.",
-        ESMC_LOG_WARN, ESMC_CONTEXT);
+        ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
 
     localrc = io_xml->writeEndElement("documentRelationship", --indent);
@@ -2247,7 +2247,7 @@ namespace ESMCI {
       "package (convention='CIM', "
       "purpose='Model Component Simulation Description') "
       "required to be set, to produce valid CIM XML output.",
-      ESMC_LOG_WARN, ESMC_CONTEXT);
+      ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
   if (attpack->AttributeIsSet("SimulationLongName")) {
     localrc = attpack->AttributeGet("SimulationLongName", &valuevector);
@@ -2269,7 +2269,7 @@ namespace ESMCI {
       "package (convention='CIM', "
       "purpose='Model Component Simulation Description') "
       "required to be set, to produce valid CIM XML output.",
-      ESMC_LOG_WARN, ESMC_CONTEXT);
+      ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
 
   // TODO: required elements in CIM; need atts defined in package ?
@@ -2342,7 +2342,7 @@ namespace ESMCI {
       "package (convention='CIM', "
       "purpose='Model Component Simulation Description') "
       "required to be set, to produce valid CIM XML output.",
-      ESMC_LOG_WARN, ESMC_CONTEXT);
+      ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
   localrc = io_xml->writeEndElement("closedDateRange", 3);
   localrc = io_xml->writeEndElement("dateRange", 2);
@@ -2463,7 +2463,7 @@ namespace ESMCI {
       "standard attribute package (convention='CIM', "
       "purpose='Platform Description') "
       "required to be set, to produce valid CIM XML output.",
-      ESMC_LOG_WARN, ESMC_CONTEXT);
+      ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
   if (attpack->AttributeIsSet("CompilerName")) {
     localrc = attpack->AttributeGet("CompilerName", &valuevector);
@@ -2674,7 +2674,7 @@ namespace ESMCI {
        "purpose='Platform Description') "
        "required to be set, when attribute CompilerVersion is also set, "
        "to produce valid CIM XML output.",
-        ESMC_LOG_WARN, ESMC_CONTEXT);
+        ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
     if (attpack->AttributeIsSet("CompilerVersion")) {
       localrc = attpack->AttributeGet("CompilerVersion", &valuevector);
@@ -2697,7 +2697,7 @@ namespace ESMCI {
        "purpose='Platform Description') "
        "required to be set, when attribute CompilerName is also set, "
        "to produce valid CIM XML output.",
-        ESMC_LOG_WARN, ESMC_CONTEXT);
+        ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
     localrc = io_xml->writeEndElement("compiler", 3);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
@@ -2826,7 +2826,7 @@ namespace ESMCI {
             "standard attribute package (convention='ISO 19115', "
             "purpose='Responsible Party Description' should be one of "
             "{Individual, Organization, Position}.",
-            ESMC_LOG_WARN, ESMC_CONTEXT);
+            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         }
       // ... otherwise guess based on the role ...
       } else if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
@@ -3032,7 +3032,7 @@ namespace ESMCI {
         "purpose='Responsible Party Description') "
         "required to be set, when other attributes in this package are set, "
         "to produce valid CIM XML output.",
-        ESMC_LOG_WARN, ESMC_CONTEXT);
+        ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
 
     // use "Abbreviation" attribute if set ...
@@ -3271,7 +3271,7 @@ namespace ESMCI {
             "standard attribute package (convention='CIM', "
             "purpose='Inputs Description') must be one of "
             "{Export, Import} to produce valid CIM XML output.",
-            ESMC_LOG_WARN, ESMC_CONTEXT);
+            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         }
         localrc = io_xml->writeStartElement("componentProperty", "", indent+1,
                                             2, "intent", value.c_str(), 
@@ -3313,7 +3313,7 @@ namespace ESMCI {
           "purp='Inputs Description'), required to be set, if other "
           "attributes are set in nested packages CF/General, "
           "CF/Extended, or ESMF/General, to produce valid CIM XML output.",
-          ESMC_LOG_WARN, ESMC_CONTEXT);
+          ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
       if (((ap = attpack->AttPackGetAttribute("LongName")) != NULL) &&
            (ap->parent->AttributeIsSet("LongName"))) {
@@ -3461,7 +3461,7 @@ namespace ESMCI {
         "purpose='Citation Description') "
         "required to be set, when other attributes in this package are set, "
         "to produce valid CIM XML output.",
-        ESMC_LOG_WARN, ESMC_CONTEXT);
+        ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
     if (attpack->AttributeIsSet("Date")) {
       localrc = attpack->AttributeGet("Date", &valuevector);
@@ -3505,7 +3505,7 @@ namespace ESMCI {
         "purpose='Citation Description') "
         "required to be set, when other attributes in this package are set, "
         "to produce valid CIM XML output.",
-        ESMC_LOG_WARN, ESMC_CONTEXT);
+        ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
     if (attpack->AttributeIsSet("PresentationForm")) {
       localrc = attpack->AttributeGet("PresentationForm", &valuevector);
@@ -3668,7 +3668,7 @@ namespace ESMCI {
             "purpose='Inputs Description') must be one of "
             "{Ancillary, Boundary, Initial} "
             "to produce valid CIM XML output.",
-            ESMC_LOG_WARN, ESMC_CONTEXT);
+            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         }
         localrc = io_xml->writeStartElement("coupling", "", 3, 2,
                      "fullySpecified", "false", "purpose", value.c_str());
@@ -3688,7 +3688,7 @@ namespace ESMCI {
           "purpose='Inputs Description') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
-          ESMC_LOG_WARN, ESMC_CONTEXT);
+          ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
       if (attpack->AttributeIsSet("Frequency")) {
         localrc = attpack->AttributeGet("Frequency", &valuevector);
@@ -3707,7 +3707,7 @@ namespace ESMCI {
           ESMC_LogDefault.Write("Attribute InputFrequency, in CIM/Inputs "
             "Description standard attribute package, must have both a time "
             "value and a units specification, e.g. '15 Minutes'.",
-            ESMC_LOG_WARN, ESMC_CONTEXT);
+            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
           // prevent Xerces crash upon null ptr exception throw (with F90 main)
           if (freq == NULL) freq = empty;
           if (units == NULL) units = empty;
@@ -3723,7 +3723,7 @@ namespace ESMCI {
             "Description standard attribute package, must have units as one of "
             "{Seconds, Minutes, Hours, Days, Months, Years, "
             "Decades, Centuries}, to produce valid CIM XML output.",
-            ESMC_LOG_WARN, ESMC_CONTEXT);
+            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         }
         localrc = io_xml->writeStartElement("timeProfile", "", 4, 2,
                               "units", value.c_str(), "variableRate", "false");
@@ -3747,7 +3747,7 @@ namespace ESMCI {
             ESMC_LogDefault.Write("Attribute SpatialRegriddingDimension, in "
               "CIM/Inputs Description standard attribute package, must "
               "be one of {1D, 2D, 3D} to produce valid CIM XML output.",
-              ESMC_LOG_WARN, ESMC_CONTEXT);
+              ESMC_LOGMSG_WARN, ESMC_CONTEXT);
           }
           localrc = io_xml->writeStartElement("spatialRegridding", "", 4, 1,
                              "spatialRegriddingDimension", value.c_str()); 
@@ -3780,7 +3780,7 @@ namespace ESMCI {
               "Conservative-First-Order, Conservative-Second-Order, "
               "Conservative, Non-Conservative} to produce valid CIM "
               "XML output.",
-              ESMC_LOG_WARN, ESMC_CONTEXT);
+              ESMC_LOGMSG_WARN, ESMC_CONTEXT);
           }
           localrc = io_xml->writeElement("spatialRegriddingStandardMethod", 
                                        value2.c_str(), 5, 0);
@@ -3823,7 +3823,7 @@ namespace ESMCI {
           "purpose='Inputs Description') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
-          ESMC_LOG_WARN, ESMC_CONTEXT);
+          ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
       if (attpack->AttributeIsSet("CouplingTarget")) {
         localrc = attpack->AttributeGet("CouplingTarget", &valuevector);
@@ -3846,7 +3846,7 @@ namespace ESMCI {
           "purpose='Inputs Description') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
-          ESMC_LOG_WARN, ESMC_CONTEXT);
+          ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
       if (((ap = attpack->AttPackGetAttribute("ShortName")) != NULL) &&
            (ap->parent->AttributeIsSet("ShortName"))) {
@@ -3944,7 +3944,7 @@ namespace ESMCI {
             "purpose='Inputs Description') must be one of "
             "{Ancillary, Boundary, Initial} "
             "to produce valid CIM XML output.",
-            ESMC_LOG_WARN, ESMC_CONTEXT);
+            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         }
         localrc = io_xml->writeStartElement("input", "", 2, 2,
                      "fullySpecified", "true", "purpose", 
@@ -3974,7 +3974,7 @@ namespace ESMCI {
           "purpose='Inputs Description') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
-          ESMC_LOG_WARN, ESMC_CONTEXT);
+          ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
       if (attpack->AttributeIsSet("Description")) {
         localrc = attpack->AttributeGet("Description", &valuevector);
@@ -4025,7 +4025,7 @@ namespace ESMCI {
           ESMC_LogDefault.Write("Attribute InputFrequency, in CIM/Inputs "
             "Description standard attribute package, must have both a time "
             "value and a units specification, e.g. '15 Minutes'.",
-            ESMC_LOG_WARN, ESMC_CONTEXT);
+            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
           // prevent Xerces crash upon null ptr exception throw (with F90 main)
           if (freq == NULL) freq = empty;
           if (units == NULL) units = empty;
@@ -4041,7 +4041,7 @@ namespace ESMCI {
             "Description standard attribute package, must have units as one of "
             "{Seconds, Minutes, Hours, Days, Months, Years, "
             "Decades, Centuries}, to produce valid CIM XML output.",
-            ESMC_LOG_WARN, ESMC_CONTEXT);
+            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         }
         localrc = io_xml->writeStartElement("timeProfile", "", 3, 2,
                               "units", value.c_str(), "variableRate", "false");
@@ -4070,7 +4070,7 @@ namespace ESMCI {
             ESMC_LogDefault.Write("Attribute SpatialRegriddingDimension, in "
               "CIM/Inputs Description standard attribute package, must "
               "be one of {1D, 2D, 3D} to produce valid CIM XML output.",
-              ESMC_LOG_WARN, ESMC_CONTEXT);
+              ESMC_LOGMSG_WARN, ESMC_CONTEXT);
           }
           localrc = io_xml->writeStartElement("spatialRegridding", "", 3, 1,
                              "spatialRegriddingDimension", value.c_str()); 
@@ -4111,7 +4111,7 @@ namespace ESMCI {
               "Conservative-First-Order, Conservative-Second-Order, "
               "Conservative, Non-Conservative} to produce valid CIM "
               "XML output.",
-              ESMC_LOG_WARN, ESMC_CONTEXT);
+              ESMC_LOGMSG_WARN, ESMC_CONTEXT);
           }
           localrc = io_xml->writeElement("spatialRegriddingStandardMethod", 
                                        value2.c_str(), 4, 0);
@@ -4181,7 +4181,7 @@ namespace ESMCI {
             "(convention='CIM', "
             "purpose='Model Component Simulation Description'). "
             "Skipping output of <couplingSource>...<id>.",
-            ESMC_LOG_WARN, ESMC_CONTEXT);
+            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         }
 
         localrc = io_xml->writeElement("name", value, 6, 0);
@@ -4212,7 +4212,7 @@ namespace ESMCI {
           "purpose='Inputs Description') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
-          ESMC_LOG_WARN, ESMC_CONTEXT);
+          ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
       if (attpack->AttributeIsSet("CouplingTarget")) {
         localrc = attpack->AttributeGet("CouplingTarget", &valuevector);
@@ -4243,7 +4243,7 @@ namespace ESMCI {
             "(convention='CIM', "
             "purpose='Model Component Simulation Description'). "
             "Skipping output of <couplingSource>...<id>.",
-            ESMC_LOG_WARN, ESMC_CONTEXT);
+            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         }
 
         localrc = io_xml->writeElement("name", value, 6, 0);
@@ -4270,7 +4270,7 @@ namespace ESMCI {
           "purpose='Inputs Description') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
-          ESMC_LOG_WARN, ESMC_CONTEXT);
+          ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       }
       if (((ap = attpack->AttPackGetAttribute("ShortName")) != NULL) &&
            (ap->parent->AttributeIsSet("ShortName"))) {
@@ -4529,7 +4529,7 @@ namespace ESMCI {
 
       } else if (attrList.at(i)->items > 1) { 
           sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
-          ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+          ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
       } else {
         sprintf(msgbuf,"Items < 1, problem.");
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);

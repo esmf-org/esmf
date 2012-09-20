@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.48 2012/09/19 16:07:08 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.49 2012/09/20 21:19:26 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.48 2012/09/19 16:07:08 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.49 2012/09/20 21:19:26 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -310,7 +310,7 @@ int ArrayBundle::read(
   // Check the required parameters
   if ((char *)NULL == file) {
     ESMC_LogDefault.Write("filename argument required",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     return ESMF_RC_ARG_BAD;
   }
   // Set optional parameters which are not optional at next layer
@@ -353,7 +353,7 @@ int ArrayBundle::read(
     if (strlen(file) >= (ESMF_MAXSTR - 3)) {
       localrc = ESMF_RC_LONG_NAME;
       ESMC_LogDefault.Write("file argument is too long",
-                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       rc = localrc;
     }
     for (it = arrayContainer.begin();
@@ -427,7 +427,7 @@ int ArrayBundle::write(
   // Check the required parameters
   if ((char *)NULL == file) {
     ESMC_LogDefault.Write("filename argument required",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     return ESMF_RC_ARG_BAD;
   }
 
@@ -485,7 +485,7 @@ int ArrayBundle::write(
     if (strlen(file) > (ESMF_MAXSTR - 3)) {
       localrc = ESMF_RC_LONG_NAME;
       ESMC_LogDefault.Write("file argument is too long, truncating",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       file[ESMF_MAXSTR - 3] = '\0';
     }
     for (it = arrayContainer.begin();

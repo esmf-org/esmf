@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.63 2012/09/14 23:05:22 gold2718 Exp $
+// $Id: ESMCI_Array_F.C,v 1.64 2012/09/20 21:19:17 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -621,11 +621,11 @@ extern "C" {
     int len_fileName = *len_file;
     if (len_fileName > ESMF_MAXSTR) {
       ESMC_LogDefault.Write("File name length > ESMF_MAXSTR",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_fileName = ESMF_MAXSTR;
     } else if (len_fileName < 0) {
       ESMC_LogDefault.Write("Negative file name length",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_fileName = 0;
     }
     if (len_fileName > 0) {
@@ -638,11 +638,11 @@ extern "C" {
     int len_varName = *len_variableName;
     if (len_varName > ESMF_MAXSTR) {
       ESMC_LogDefault.Write("Variable name length > ESMF_MAXSTR",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_varName = ESMF_MAXSTR;
     } else if (len_varName < 0) {
       ESMC_LogDefault.Write("Negative variable name length",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_varName = 0;
     }
     if (len_varName > 0) {
@@ -680,11 +680,11 @@ extern "C" {
     int len_fileName = *len_file;
     if (len_fileName > ESMF_MAXSTR) {
       ESMC_LogDefault.Write("File name length > ESMF_MAXSTR",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_fileName = ESMF_MAXSTR;
     } else if (len_fileName < 0) {
       ESMC_LogDefault.Write("Negative file name length",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_fileName = 0;
     }
     if (len_fileName > 0) {
@@ -697,11 +697,11 @@ extern "C" {
     int len_varName = *len_variableName;
     if (len_varName > ESMF_MAXSTR) {
       ESMC_LogDefault.Write("Variable name length > ESMF_MAXSTR",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_varName = ESMF_MAXSTR;
     } else if (len_varName < 0) {
       ESMC_LogDefault.Write("Negative variable name length",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_varName = 0;
     }
     if (len_varName > 0) {

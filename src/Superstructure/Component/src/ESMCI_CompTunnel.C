@@ -1,4 +1,4 @@
-// $Id: ESMCI_CompTunnel.C,v 1.11 2012/04/24 23:05:49 theurich Exp $
+// $Id: ESMCI_CompTunnel.C,v 1.12 2012/09/20 21:20:36 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -344,7 +344,7 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
           // master PET on actual side -> initialize server side
           sprintf(logmsg, "negotiate socketBased actual: port=%d, timeout=%g",
             port, timeout);
-          ESMC_LogDefault.Write(logmsg, ESMC_LOG_INFO);
+          ESMC_LogDefault.Write(logmsg, ESMC_LOGMSG_INFO);
           char buffer[160];
           int len;
           bool continueFlag = false;
@@ -466,14 +466,14 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
             return rc;
         }
         ESMC_LogDefault.Write("finished socketBased negotiate() on actual "
-          "component side", ESMC_LOG_INFO);
+          "component side", ESMC_LOGMSG_INFO);
       }else{
         // dual: set up client side of the socket based component tunnel
         if (localPet == 0){
           // master PET on dual side -> initialize client side
           sprintf(logmsg, "negotiate socketBased dual: port=%d, timeout=%g",
             port, timeout);
-          ESMC_LogDefault.Write(logmsg, ESMC_LOG_INFO);
+          ESMC_LogDefault.Write(logmsg, ESMC_LOGMSG_INFO);
           sock = socketClientInit(server.c_str(), port, timeout);
           if (sock <= SOCKERR_UNSPEC){
             if (sock == SOCKERR_TIMEOUT){
@@ -563,7 +563,7 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
             return rc;
         }
         ESMC_LogDefault.Write("finished socketBased negotiate() on dual "
-          "component side", ESMC_LOG_INFO);
+          "component side", ESMC_LOGMSG_INFO);
       }
       // return successfully
       rc = ESMF_SUCCESS;
@@ -809,13 +809,13 @@ printf("local rootPet was determined as %d\n", interRootPet);
       if (isDual){
         // this is a dual component side -> sender
         ESMC_LogDefault.Write("dual2actual() vmBased (dual side)...",
-          ESMC_LOG_INFO);
+          ESMC_LOGMSG_INFO);
         for (int i=0; i<localSendToPetList.size(); i++)
           bridgeVM->send(msg, len, localSendToPetList[i], tag);
       }else{
         // this is the actual component side -> receiver
         ESMC_LogDefault.Write("dual2actual() vmBased (actual side)...",
-          ESMC_LOG_INFO);
+          ESMC_LOGMSG_INFO);
         bridgeVM->recv(msg, len, localRecvFromPet, tag);
       }
     }else if (socketBased){
@@ -827,7 +827,7 @@ printf("local rootPet was determined as %d\n", interRootPet);
       if (isDual){
         // this is a dual component side -> sender
         ESMC_LogDefault.Write("dual2actual() socketBased (dual side)...",
-          ESMC_LOG_INFO);
+          ESMC_LOGMSG_INFO);
         // only master sends through socket
         if (masterFlag){
           int sLen = socketSend(sock, msg, len, timeout);
@@ -857,7 +857,7 @@ printf("local rootPet was determined as %d\n", interRootPet);
       }else{
         // this is the actual component side -> receiver
         ESMC_LogDefault.Write("dual2actual() socketBased (actual side)...",
-          ESMC_LOG_INFO);
+          ESMC_LOGMSG_INFO);
         // only master receives through socket and then broadcasts
         if (masterFlag){
           int rLen = socketRecv(sock, msg, len, timeout);
@@ -922,13 +922,13 @@ printf("local rootPet was determined as %d\n", interRootPet);
       if (isActual){
         // this is a actual component side -> sender
         ESMC_LogDefault.Write("actual2dual() vmBased (actual side)...",
-          ESMC_LOG_INFO);
+          ESMC_LOGMSG_INFO);
         for (int i=0; i<localSendToPetList.size(); i++)
           bridgeVM->send(msg, len, localSendToPetList[i], tag);
       }else{
         // this is the dual component side -> receiver
         ESMC_LogDefault.Write("actual2dual() vmBased (dual side)...",
-          ESMC_LOG_INFO);
+          ESMC_LOGMSG_INFO);
         bridgeVM->recv(msg, len, localRecvFromPet, tag);
       }
     }else if (socketBased){
@@ -941,7 +941,7 @@ printf("local rootPet was determined as %d\n", interRootPet);
       if (isActual){
         // this is a actual component side -> sender
         ESMC_LogDefault.Write("actual2dual() socketBased (actual side)...",
-          ESMC_LOG_INFO);
+          ESMC_LOGMSG_INFO);
         // only master sends through socket
         if (masterFlag){
           int sLen = socketSend(sock, msg, len, timeout);
@@ -971,7 +971,7 @@ printf("local rootPet was determined as %d\n", interRootPet);
       }else{
         // this is the dual component side -> receiver
         ESMC_LogDefault.Write("actual2dual() socketBased (dual side)...", 
-          ESMC_LOG_INFO);
+          ESMC_LOGMSG_INFO);
         // only master receives through socket and then broadcasts
         if (masterFlag){
           int rLen = socketRecv(sock, msg, len, timeout);
@@ -1044,7 +1044,7 @@ namespace ESMCI {
 
     sprintf(logmsg, "ServiceLoop: entering with port argument: %d and timeout: "
       "%d", port, timeout);
-    ESMC_LogDefault.Write(logmsg, ESMC_LOG_INFO);
+    ESMC_LogDefault.Write(logmsg, ESMC_LOGMSG_INFO);
     
     // determine whether to use socket or VM based tunnel; if socket set port
     bool socketBasedTunnel = true;
@@ -1102,7 +1102,7 @@ namespace ESMCI {
       
       sprintf(logmsg, "ServiceLoop: received method: %s and phase: %d", 
         FTable::methodString(method), phase);
-      ESMC_LogDefault.Write(logmsg, ESMC_LOG_INFO);
+      ESMC_LogDefault.Write(logmsg, ESMC_LOGMSG_INFO);
 
       // break condition
       if (method == METHOD_NONE) break;
@@ -1129,7 +1129,7 @@ namespace ESMCI {
     localrc = compTunnel.actual2dual(rcs, 2*sizeof(int), timeout);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, NULL);
         
-    ESMC_LogDefault.Write("ServiceLoop: exiting", ESMC_LOG_INFO);
+    ESMC_LogDefault.Write("ServiceLoop: exiting", ESMC_LOGMSG_INFO);
     
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeUpdate.C,v 1.40 2012/01/06 20:15:50 svasquez Exp $
+// $Id: ESMCI_AttributeUpdate.C,v 1.41 2012/09/20 21:19:28 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.40 2012/01/06 20:15:50 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeUpdate.C,v 1.41 2012/09/20 21:19:28 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -1245,7 +1245,7 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
   // if link changes, we bail and recommend StateReconcile
   if (linkChangesOut > 0) {
     ESMC_LogDefault.Write(
-                  "Attribute link changes made, call ESMF_StateReconcile() first", ESMC_LOG_INFO);
+                  "Attribute link changes made, call ESMF_StateReconcile() first", ESMC_LOGMSG_INFO);
     delete [] recvBuf;
     delete [] sendBuf;
     return ESMF_FAILURE;
@@ -1253,7 +1253,7 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
   // if no changes, nothing to do
   else if (realChangesOut == 0) {
     ESMC_LogDefault.Write(
-                  "There is nothing to update, gracefully exiting.", ESMC_LOG_INFO);
+                  "There is nothing to update, gracefully exiting.", ESMC_LOGMSG_INFO);
     delete [] recvBuf;
     delete [] sendBuf;
     return ESMF_FAILURE;

@@ -1,4 +1,4 @@
-// $Id: esmf_io_debug.h,v 1.1 2012/09/12 03:49:33 gold2718 Exp $
+// $Id: esmf_io_debug.h,v 1.2 2012/09/20 21:19:38 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -58,8 +58,8 @@ static int dbgio_getrank(void) {
 #include <sstream>
 #define PRINTMSG(_msg) { std::stringstream errmsg;                            \
     errmsg << _msg;                                                           \
-    ESMC_LogDefault.Write(errmsg.str().c_str(), ESMC_LOG_INFO, ESMC_CONTEXT); }
-#define PRINTPOS ESMC_LogDefault.Write("", ESMC_LOG_INFO, ESMC_CONTEXT);
+    ESMC_LogDefault.Write(errmsg.str().c_str(), ESMC_LOGMSG_INFO, ESMC_CONTEXT); }
+#define PRINTPOS ESMC_LogDefault.Write("", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
 #endif // ESMFIO_PRINTSTDOUT
 #else // ESMFIO_DEBUG
 // Non-debug version

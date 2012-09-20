@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_NetCDF.C,v 1.23 2012/07/18 22:21:37 rokuingh Exp $
+// $Id: ESMCI_IO_NetCDF.C,v 1.24 2012/09/20 21:19:44 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.23 2012/07/18 22:21:37 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.24 2012/09/20 21:19:44 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -206,7 +206,7 @@ namespace ESMCI
     if ((globalVM == ESMC_NULL_POINTER) || (rc != ESMF_SUCCESS)) {
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "FAIL rc=%d, Unable to get GlobalVM\n", rc);
-      ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       return(ESMF_FAILURE);
     }
     mypet = globalVM->getLocalPet(); 
@@ -238,7 +238,7 @@ namespace ESMCI
         sprintf(logMsg,
                 "io_netcdf fileName %s, length >= ESMF_MAXSTR; truncated.",
                 fileName);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         // TODO: return ESMF_WARNING when defined
         // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
       }
@@ -406,7 +406,7 @@ namespace ESMCI
     if ((globalVM == ESMC_NULL_POINTER) || (rc != ESMF_SUCCESS)) {
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "FAIL rc=%d, Unable to get GlobalVM\n", rc);
-      ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       return(ESMF_FAILURE);
     }
     mypet = globalVM->getLocalPet(); 
@@ -448,7 +448,7 @@ namespace ESMCI
         sprintf(logMsg,
                 "io_netcdf fileName %s, length >= ESMF_MAXSTR; truncated.",
                 fileName);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
         // TODO: return ESMF_WARNING when defined
         // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
       }

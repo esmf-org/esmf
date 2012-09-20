@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2ReadHandler.C,v 1.14 2012/01/06 20:17:14 svasquez Exp $
+// $Id: ESMCI_SAX2ReadHandler.C,v 1.15 2012/09/20 21:19:44 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@ using std::vector;
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.14 2012/01/06 20:17:14 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.15 2012/09/20 21:19:44 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -120,7 +120,7 @@ void SAX2ReadHandler::startElement(const XMLCh* const uri,
  
       if (cvalue.empty()) {
           ESMC_LogDefault.Write("Attribute has an empty value argument",
-                                  ESMC_LOG_INFO);
+                                  ESMC_LOGMSG_INFO);
           cvalue = '\0';
       }
 
@@ -208,7 +208,7 @@ void SAX2ReadHandler::characters(const XMLCh *const chars,
  
       if (cvalue.empty()) {
           ESMC_LogDefault.Write("Attribute has an empty value argument",
-                                 ESMC_LOG_INFO);
+                                 ESMC_LOGMSG_INFO);
           cvalue = '\0';
       }
 
@@ -295,14 +295,14 @@ void SAX2ErrorHandler::warning(const SAXParseException& exc)
     sprintf(logMsg, "SAX2 parse warning in %s, line %d, column %d, "
                     "message is: %s\n", id, exc.getLineNumber(),
                                             exc.getColumnNumber(), msg);
-    ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+    ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
 
     XMLString::release(&msg);
     XMLString::release(&id);
 #else
     char logMsg[ESMF_MAXSTR];
     sprintf(logMsg, "SAX2 warning\n");
-    ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+    ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
 #endif
 
 } // SAX2ErrorHandler::warning()
@@ -329,7 +329,7 @@ void SAX2ErrorHandler::error(const SAXParseException& exc)
     sprintf(logMsg, "SAX2 parse error in %s, line %d, column %d, "
                     "message is: %s\n", id, exc.getLineNumber(),
                                             exc.getColumnNumber(), msg);
-    ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+    ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
 
     XMLString::release(&msg);
     XMLString::release(&id);
@@ -338,7 +338,7 @@ void SAX2ErrorHandler::error(const SAXParseException& exc)
 #else
     char logMsg[ESMF_MAXSTR];
     sprintf(logMsg, "SAX2 parse error\n");
-    ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+    ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     throw exception();
 #endif
 
@@ -366,7 +366,7 @@ void SAX2ErrorHandler::fatalError(const SAXParseException& exc)
     sprintf(logMsg, "SAX2 parse fatal error in %s, line %d, column %d, "
                     "message is: %s\n", id, exc.getLineNumber(),
                                             exc.getColumnNumber(), msg);
-    ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+    ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
 
     XMLString::release(&msg);
     XMLString::release(&id);
@@ -375,7 +375,7 @@ void SAX2ErrorHandler::fatalError(const SAXParseException& exc)
 #else
     char logMsg[ESMF_MAXSTR];
     sprintf(logMsg, "SAX2 parse fatal error\n");
-    ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+    ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     throw exception();
 #endif
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Base.C,v 1.7 2012/06/28 01:10:39 w6ws Exp $
+// $Id: ESMCI_Base.C,v 1.8 2012/09/20 21:19:31 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Base.C,v 1.7 2012/06/28 01:10:39 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_Base.C,v 1.8 2012/09/20 21:19:31 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -648,7 +648,7 @@ static const char *const version = "$Id: ESMCI_Base.C,v 1.7 2012/06/28 01:10:39 
     //   "Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n", 
     //       ID, refCount, ESMC_StatusString(baseStatus), baseName, className);
     // printf(msgbuf);
-    // ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+    // ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
     
   // root Attribute
   if (level > 0) {
@@ -664,7 +664,7 @@ static const char *const version = "$Id: ESMCI_Base.C,v 1.7 2012/06/28 01:10:39 
   }
   sprintf(msgbuf, "Root Attributes:\n");
   printf("%s", msgbuf);
-  // ESMC_LogDefault.Write(msgbuf, ESMC_LOG_INFO);
+  // ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
   
   // traverse the Attribute hierarchy, printing as we go
   root.ESMC_Print();

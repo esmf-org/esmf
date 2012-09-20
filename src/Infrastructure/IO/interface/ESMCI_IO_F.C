@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_F.C,v 1.5 2012/09/12 03:49:35 gold2718 Exp $
+// $Id: ESMCI_IO_F.C,v 1.6 2012/09/20 21:19:42 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -104,11 +104,11 @@ extern "C" {
     int len_varName = *len_variableName;
     if (len_varName > ESMF_MAXSTR) {
       ESMC_LogDefault.Write("Variable name length > ESMF_MAXSTR",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_varName = ESMF_MAXSTR;
     } else if (len_varName < 0) {
       ESMC_LogDefault.Write("Negative variable name length",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_varName = 0;
     }
     if (len_varName > 0) {
@@ -152,11 +152,11 @@ extern "C" {
 
     if (len_fileName > ESMF_MAXSTR) {
       ESMC_LogDefault.Write("File name length > ESMF_MAXSTR",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_fileName = ESMF_MAXSTR;
     } else if (len_fileName < 0) {
       ESMC_LogDefault.Write("Negative file name length",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_fileName = 0;
     }
     if (len_fileName > 0) {
@@ -183,7 +183,7 @@ extern "C" {
     if (*len_schema > 0) {
       // We don't yet support the schema argument.
       ESMC_LogDefault.Write("Schema argument not yet supported, ignoring",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
 
     // Call into the actual C++ method
@@ -214,11 +214,11 @@ extern "C" {
     int len_fileName = *len_file;
     if (len_fileName > ESMF_MAXSTR) {
       ESMC_LogDefault.Write("File name length > ESMF_MAXSTR",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_fileName = ESMF_MAXSTR;
     } else if (len_fileName < 0) {
       ESMC_LogDefault.Write("Negative file name length",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       len_fileName = 0;
     }
     if (len_fileName > 0) {
@@ -236,7 +236,7 @@ extern "C" {
     if (*len_schema > 0) {
       // We don't yet support the schema argument.
       ESMC_LogDefault.Write("Schema argument not yet supported, ignoring",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
 
     // Call into the actual C++ method

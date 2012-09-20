@@ -1,4 +1,4 @@
-// $Id: ESMCI_Base_F.C,v 1.6 2012/01/06 20:15:55 svasquez Exp $
+// $Id: ESMCI_Base_F.C,v 1.7 2012/09/20 21:19:30 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -154,7 +154,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOG_INFO);
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO);
     if (rc) *rc = ESMF_SUCCESS;
     return;
     // for Print, it's not a failure for an uninit object to be printed
@@ -209,7 +209,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOG_INFO);
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO);
     if (rc) *rc = ESMF_SUCCESS;
     return;
   }
@@ -258,7 +258,7 @@ extern "C" {
   *base = new ESMC_Base(-1);
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object error", ESMC_LOG_INFO);
+    ESMC_LogDefault.Write("Base object error", ESMC_LOGMSG_INFO);
     if (rc) *rc = ESMF_FAILURE;
     return;
   }
@@ -297,7 +297,7 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOG_INFO);
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO);
     if (rc) *rc = ESMF_FAILURE;
     return;
   }

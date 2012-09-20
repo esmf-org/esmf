@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.53 2012/07/25 22:35:08 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.54 2012/09/20 21:19:33 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.53 2012/07/25 22:35:08 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.54 2012/09/20 21:19:33 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -310,7 +310,7 @@ DELayout *DELayout::create(
   vector<int> deCountArgHelper(2);
   if (ndim==0){
     // ESMC_LogDefault.ESMC_LogWrite("Promoting 1D DELayout to 2D",
-    //   ESMC_LOG_WARN);
+    //   ESMC_LOGMSG_WARN);
     ndim = 2;
     deCountArg = &(deCountArgHelper[0]);
     deCountArg[0] = vm.getNpets();
@@ -318,7 +318,7 @@ DELayout *DELayout::create(
   }
   if (ndim==1){
     // ESMC_LogDefault.ESMC_LogWrite("Promoting 1D DELayout to 2D",
-    //  ESMC_LOG_WARN);
+    //  ESMC_LOGMSG_WARN);
     ndim = 2;
     int firstDEdim = deCountArg[0];
     deCountArg = &(deCountArgHelper[0]);
@@ -702,14 +702,14 @@ int DELayout::construct1D(VM &vmArg, int deCountArg,
   if (oneToOneFlag == ESMF_FALSE){
     ESMC_LogDefault.ESMC_LogWrite("A layout without 1:1 DE:PET mapping was"
       " created! This may cause problems in higher layers of ESMF!", 
-      ESMC_LOG_WARN);
+      ESMC_LOGMSG_WARN);
   }
   // Issue warning if this is not logically rectangular
   // TODO: remove this warning when non logRect layouts o.k.
   if (logRectFlag == ESMF_FALSE){
     ESMC_LogDefault.ESMC_LogWrite("A non logRect layout was"
       " created! This may cause problems in higher layers of ESMF!", 
-      ESMC_LOG_WARN);
+      ESMC_LOGMSG_WARN);
   }
   // Fill local part of layout object
   int mypet = vm->getMypet();    // get my PET id
@@ -819,14 +819,14 @@ int DELayout::constructND(VM &vmArg, int *deCountArg, int nndim,
   if (oneToOneFlag == ESMF_FALSE){
     ESMC_LogDefault.ESMC_LogWrite("A layout without 1:1 DE:PET mapping was"
       " created! This may cause problems in higher layers of ESMF!", 
-      ESMC_LOG_WARN);
+      ESMC_LOGMSG_WARN);
   }
   // Issue warning if this is not logically rectangular
   // TODO: remove this warning when non logRect layouts o.k.
   if (logRectFlag == ESMF_FALSE){
     ESMC_LogDefault.ESMC_LogWrite("A non logRect layout was"
       " created! This may cause problems in higher layers of ESMF!", 
-      ESMC_LOG_WARN);
+      ESMC_LOGMSG_WARN);
   }
   // Fill local part of layout object
   int mypet = vm->getMypet();    // get my PET id

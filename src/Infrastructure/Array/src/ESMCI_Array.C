@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.162 2012/09/14 23:05:26 gold2718 Exp $
+// $Id: ESMCI_Array.C,v 1.163 2012/09/20 21:19:18 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.162 2012/09/14 23:05:26 gold2718 Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.163 2012/09/20 21:19:18 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2618,7 +2618,7 @@ int Array::read(
   if ((ESMF_IOFMT_NETCDF != localiofmt) &&
       ((char *)NULL != variableName) && (strlen(variableName) > 0)) {
     ESMC_LogDefault.Write("Array variable name not allowed in binary mode",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     return ESMF_RC_ARG_BAD;
   }
   if (ESMF_SUCCESS == localrc) {
@@ -2704,7 +2704,7 @@ int Array::write(
     // It is an error to supply a variable name in binary mode
     if ((ESMF_IOFMT_BIN == localiofmt) && (strlen(variableName) > 0)) {
       ESMC_LogDefault.Write("Array variable name not allowed in binary mode",
-                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       rc = ESMF_RC_ARG_BAD;
     }
   }
@@ -7906,7 +7906,7 @@ int Array::sparseMatMulStore(
 //sprintf(msg, "srcLocalDeCount=%d, srcLocalDeElementCount[0]=%d,"
 //  " sizeof(DD::AssociationElement)=%d", srcLocalDeCount,
 //  srcLocalDeElementCount[0], sizeof(DD::AssociationElement));
-//ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOG_INFO);
+//ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
 // return successfully
 //rc = ESMF_SUCCESS;
 //return rc;
@@ -7979,7 +7979,7 @@ int Array::sparseMatMulStore(
 //sprintf(msg, "dstLocalDeCount=%d, dstLocalDeElementCount[0]=%d,"
 //  " sizeof(DD::AssociationElement)=%d", dstLocalDeCount,
 //  dstLocalDeElementCount[0], sizeof(DD::AssociationElement));
-//ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOG_INFO);
+//ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
 // return successfully
 //rc = ESMF_SUCCESS;
 //return rc;
@@ -9225,7 +9225,7 @@ char msg[160];
 sprintf(msg, "recv: deflator[%d]: index=%d, bufferIndex=%d, seqIndex=%d",
   k, deflator[k].index, dstInfoTable[i][deflator[k].index].bufferIndex,
 deflator[k].seqIndex.decompSeqIndex);
-ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOG_INFO);
+ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
 
       }
 #endif
@@ -9467,7 +9467,7 @@ char msg[160];
 sprintf(msg, "send: deflator[%d]: index=%d, seqIndex=%d",
   k, deflator[k].index,
 deflator[k].seqIndex.decompSeqIndex);
-ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOG_INFO);
+ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
       }
 #endif      
       
@@ -9532,7 +9532,7 @@ ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOG_INFO);
         sprintf(msg, "linIndexContigBlockList[%d]: linIndex=%d, "
           "linIndexCount=%d", k, linIndexContigBlockList[k].linIndex,
           linIndexContigBlockList[k].linIndexCount);
-ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOG_INFO);
+ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
         
       }
 #endif
@@ -12992,7 +12992,7 @@ localrc = ESMC_RC_NOT_IMPL;
     return(ESMF_SUCCESS);
   }else{
     ESMC_LogDefault.ESMC_LogWrite("Cannot delete bad newArray object.", 
-      ESMC_LOG_ERROR);
+      ESMC_LOGMSG_ERROR);
     return(ESMC_RC_PTR_NULL);
   }
 return localrc;

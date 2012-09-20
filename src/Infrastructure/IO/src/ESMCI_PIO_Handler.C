@@ -1,4 +1,4 @@
-// $Id: ESMCI_PIO_Handler.C,v 1.9 2012/09/12 03:49:36 gold2718 Exp $
+// $Id: ESMCI_PIO_Handler.C,v 1.10 2012/09/20 21:19:44 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.9 2012/09/12 03:49:36 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.10 2012/09/20 21:19:44 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -211,7 +211,7 @@ void PIO_Handler::initialize (
         // Something went wrong (this really shouldn't happen)
         localrc = ESMF_RC_INTNRL_BAD;
         ESMC_LogDefault.Write("Unknown error in pio_cpp_init_intracom",
-                              ESMC_LOG_ERROR, ESMC_CONTEXT);
+                              ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       }
     }
   } catch (int catchrc) {
@@ -615,13 +615,13 @@ void PIO_Handler::arrayRead(
     statusOK = !ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
                                                       ESMCI_ERR_PASSTHRU, rc);
   } else {
-    ESMC_LogDefault.Write("file not open", ESMC_LOG_ERROR, ESMC_CONTEXT);
+    ESMC_LogDefault.Write("file not open", ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
   }
   if (statusOK) {
     vardesc = (pio_var_desc_t)malloc(PIO_SIZE_VAR_DESC);
     if ((pio_var_desc_t)NULL == vardesc) {
       ESMC_LogDefault.Write(" failed to allocate pio variable desc",
-                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       statusOK = false;
       vardesc = (pio_var_desc_t)NULL;
     }
@@ -667,7 +667,7 @@ void PIO_Handler::arrayRead(
         PRINTMSG(" Time dimension = " << dimid_time <<
                  ", unlimited dim = " << unlim);
          ESMC_LogDefault.Write(" Time is not the file's unlimited dimension",
-                              ESMC_LOG_ERROR, ESMC_CONTEXT);
+                              ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
         statusOK = false;
       }
       if (statusOK) {
@@ -683,7 +683,7 @@ void PIO_Handler::arrayRead(
                  getFilename() << ", file time = " << time_len <<
                  ", requested record = " << *timeslice);
         ESMC_LogDefault.Write("Timeframe is greater than max in file",
-                              ESMC_LOG_ERROR, ESMC_CONTEXT);
+                              ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
         statusOK = false;
       }
       frame = *timeslice;
@@ -721,7 +721,7 @@ void PIO_Handler::arrayRead(
       break;
     default:
       localrc = ESMF_RC_INTNRL_BAD;
-      ESMC_LogDefault.Write("Bad PIO IO type", ESMC_LOG_ERROR, ESMC_CONTEXT);
+      ESMC_LogDefault.Write("Bad PIO IO type", ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     }
   }
 
@@ -800,13 +800,13 @@ void PIO_Handler::arrayWrite(
     statusOK = !ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
                                                       ESMCI_ERR_PASSTHRU, rc);
   } else {
-    ESMC_LogDefault.Write("file not open", ESMC_LOG_ERROR, ESMC_CONTEXT);
+    ESMC_LogDefault.Write("file not open", ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
   }
   if (statusOK) {
     vardesc = (pio_var_desc_t)malloc(PIO_SIZE_VAR_DESC);
     if ((pio_var_desc_t)NULL == vardesc) {
       ESMC_LogDefault.Write(" failed to allocate pio variable desc",
-                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       statusOK = false;
       vardesc = (pio_var_desc_t)NULL;
     }
@@ -888,7 +888,7 @@ void PIO_Handler::arrayWrite(
       // Check to make sure that time is the unlimited dimension
       if (dimidTime != unlim) {
         ESMC_LogDefault.Write("Time is not the file's unlimited dimension",
-                              ESMC_LOG_ERROR, ESMC_CONTEXT);
+                              ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
         statusOK = false;
       }
     }
@@ -900,7 +900,7 @@ void PIO_Handler::arrayWrite(
         localrc = ESMF_RC_FILE_WRITE;
         statusOK = false;
         ESMC_LogDefault.Write("Field already exists without time dimension",
-                              ESMC_LOG_ERROR, ESMC_CONTEXT);
+                              ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       } else {
         timeFrame = timesliceVal;
       }
@@ -920,7 +920,7 @@ void PIO_Handler::arrayWrite(
     if (statusOK && (nDims != nArrdims)) {
       localrc = ESMF_RC_FILE_UNEXPECTED;;
       ESMC_LogDefault.Write("Variable rank in file does not match array",
-                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       PRINTMSG("Variable rank mismatch: nioDims = " << nioDims <<
                ", nArrdims = " << nArrdims << ", nDims = " << nDims);
       statusOK = false;
@@ -930,7 +930,7 @@ void PIO_Handler::arrayWrite(
       if ((int *)NULL == dimIds) {
         localrc = ESMF_RC_MEM_ALLOCATE;
         ESMC_LogDefault.Write("Error allocating memory",
-                              ESMC_LOG_ERROR, ESMC_CONTEXT);
+                              ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
         statusOK = false;
       }
     }
@@ -957,21 +957,21 @@ void PIO_Handler::arrayWrite(
             if (timesliceVal <= 0) {
               localrc = ESMF_RC_FILE_UNEXPECTED;
               ESMC_LogDefault.Write("File variable requires time dimension",
-                                    ESMC_LOG_ERROR, ESMC_CONTEXT);
+                                    ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
               statusOK = false;
             } else if ((timesliceVal <= dimLen) && !overwriteFields()) {
               // This 'error' might be incorrect in that we can't figure
               // out the max frame of this variable, only for the whole file.
               localrc = ESMF_RC_FILE_UNEXPECTED;
               ESMC_LogDefault.Write("Can't overwrite timeslice",
-                                    ESMC_LOG_ERROR, ESMC_CONTEXT);
+                                    ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
               statusOK = false;
             }
           } else if (dimLen != ioDims[ioDimNum]) {
             localrc = ESMF_RC_FILE_UNEXPECTED;
             ESMC_LogDefault.Write("Variable dimension in file does "
                                   "not match array",
-                                  ESMC_LOG_ERROR, ESMC_CONTEXT);
+                                  ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
             statusOK = false;
             break;
           } else {
@@ -990,7 +990,7 @@ void PIO_Handler::arrayWrite(
     localrc = ESMF_RC_FILE_WRITE;
     statusOK = false;
     ESMC_LogDefault.Write("Field exists, however, overwrite is .false.",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
   }
 
   if (statusOK && (getFormat() != ESMF_IOFMT_BIN) && !varExists) {
@@ -1099,7 +1099,7 @@ void PIO_Handler::arrayWrite(
     default:
       localrc = ESMF_RC_INTNRL_BAD;
       PRINTMSG(" Attempt to write basepiotype = " << basepiotype);
-      ESMC_LogDefault.Write("Bad PIO IO type", ESMC_LOG_WARN, ESMC_CONTEXT);
+      ESMC_LogDefault.Write("Bad PIO IO type", ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
   }
   PRINTMSG("calling cleanup, status = " << statusOK);
@@ -1154,14 +1154,14 @@ void PIO_Handler::open(
   if (isPioInitialized() != ESMF_TRUE) {
     localrc = ESMF_RC_INTNRL_BAD;
     ESMC_LogDefault.Write("PIO not initialized",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     if (rc != NULL) {
       *rc = localrc;
     }
     return;
   } else if (isOpen() == ESMF_TRUE) {
     localrc = ESMF_RC_FILE_OPEN;
-    ESMC_LogDefault.Write("file already open", ESMC_LOG_ERROR, ESMC_CONTEXT);
+    ESMC_LogDefault.Write("file already open", ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     if (rc != NULL) {
       *rc = localrc;
     }
@@ -1215,15 +1215,15 @@ void PIO_Handler::open(
     switch(localrc) {
     case ESMF_RC_ARG_BAD:
       ESMC_LogDefault.Write("unknown I/O format",
-                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       break;
     case ESMF_RC_LIB_NOT_PRESENT:
       ESMC_LogDefault.Write("Library for requested I/O format is not present",
-                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       break;
     default:
       ESMC_LogDefault.Write("Unknown I/O error",
-                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       break;
     }
     if (rc != NULL) {
@@ -1267,7 +1267,7 @@ void PIO_Handler::open(
   default:
     localrc = ESMF_RC_ARG_BAD;
     ESMC_LogDefault.Write("unknown file status argument",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     if (rc != NULL) {
       *rc = localrc;
     }
@@ -1281,7 +1281,7 @@ void PIO_Handler::open(
     sprintf(errmsg, " calling pio_cpp_createfile: file = \"");
     strncpy((errmsg + strlen(errmsg)), getFilename(), 256);
     strcpy((errmsg + strlen(errmsg)), "\"");
-    ESMC_LogDefault.Write(errmsg, ESMC_LOG_INFO, ESMC_CONTEXT);
+    ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
 #endif // ESMFIO_DEBUG
     localrc = pio_cpp_createfile(&pioSystemDesc, pioFileDesc,
                                  iotype, getFilename(), clobberMode);
@@ -1347,7 +1347,7 @@ ESMC_Logical PIO_Handler::isOpen(
     // This really should not happen, warn and clean up just in case
     char errmsg[32 + ESMF_MAXSTR];
     sprintf(errmsg, "File, %s, closed by PIO", getFilename());
-    ESMC_LogDefault.Write(errmsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+    ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     free(pioFileDesc);
     pioFileDesc = (pio_file_desc_t)NULL;
     return ESMF_FALSE;
@@ -1569,9 +1569,9 @@ bool PIO_Handler::CheckPIOError(
       sprintf(errmsg, " (PIO error = %d)", pioRetCode);
     }
     if (warn) {
-      ESMC_LogDefault.Write(errmsg, ESMC_LOG_WARN, line, file, method);
+      ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, line, file, method);
     } else {
-      ESMC_LogDefault.Write(errmsg, ESMC_LOG_ERROR, line, file, method);
+      ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, line, file, method);
     }
     PRINTMSG("PIO ERROR: " << errmsg);
     // Attempt to find a corresponding ESMC error code
@@ -1739,7 +1739,7 @@ int PIO_IODescHandler::constructPioDecomp(
   //TODO: Remove this restriction (possibly with multiple IO descriptors)
   if (localDeCount > 1) {
     ESMC_LogDefault.Write("I/O does not support multiple DEs per PET",
-                          ESMC_LOG_WARN, ESMC_CONTEXT);
+                          ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     return ESMF_RC_NOT_IMPL;
   }
 
@@ -1808,7 +1808,7 @@ int PIO_IODescHandler::constructPioDecomp(
     case ESMC_TYPEKIND_LOGICAL:
     default:
       ESMC_LogDefault.Write("Unsupported typekind",
-                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       localrc = ESMF_RC_ARG_BAD;
     }
   } else {
@@ -1944,7 +1944,7 @@ int PIO_IODescHandler::freePioDecomp(
     localrc = ESMF_SUCCESS;
   } else {
     ESMC_LogDefault.Write("PIO IO descriptor not found or freed",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     localrc = ESMF_RC_MEM_DEALLOCATE;
   }
 

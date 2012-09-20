@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_XML.C,v 1.23 2012/01/06 20:17:14 svasquez Exp $
+// $Id: ESMCI_IO_XML.C,v 1.24 2012/09/20 21:19:44 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.23 2012/01/06 20:17:14 svasquez Exp $";
+ static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.24 2012/09/20 21:19:44 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 
@@ -135,7 +135,7 @@ namespace ESMCI{
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "io_xml fileName %s, length >= ESMF_MAXSTR; truncated.",
                 fileName);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
         // TODO: return ESMF_WARNING when defined
         // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
       }
@@ -156,7 +156,7 @@ namespace ESMCI{
         char* message = XMLString::transcode(toCatch.getMessage());
         sprintf(logMsg, "Error during Xerces initialization! :\n"
                         "  Exception message is: %s\n", message);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         XMLString::release(&message);
         returnCode = ESMC_RC_LIB;
         ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc);
@@ -268,7 +268,7 @@ namespace ESMCI{
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "io_xml fileName %s, length >= ESMF_MAXSTR; truncated.",
                 fileName);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
         // TODO: return ESMF_WARNING when defined
         // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
       }
@@ -291,7 +291,7 @@ namespace ESMCI{
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "io_xml schemaFileName %s, length >= ESMF_MAXSTR; truncated.",
                 schemaFileName);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
         // TODO: return ESMF_WARNING when defined
         // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
       }
@@ -355,7 +355,7 @@ namespace ESMCI{
     {
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "Unable to load esmf_comp.xsd file\n");
-      ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
       return rc;
     }
@@ -364,7 +364,7 @@ namespace ESMCI{
     {
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "Unable to load esmf_grid.xsd file\n");
-      ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
       return rc;
     }
@@ -373,7 +373,7 @@ namespace ESMCI{
     {
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "Unable to load esmf_field.xsd file\n");
-      ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+      ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
       return rc;
     }
@@ -386,7 +386,7 @@ namespace ESMCI{
       {
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "Unable to load file %s\n", this->schemaFileName);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
         ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
         return rc;
       }
@@ -412,7 +412,7 @@ namespace ESMCI{
         char logMsg[ESMF_MAXSTR];
         char* message = XMLString::transcode(toCatch.getMessage());
         sprintf(logMsg, "XML Parse Exception, message is: %s\n", message);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
         XMLString::release(&message);
         ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
         return rc;
@@ -421,7 +421,7 @@ namespace ESMCI{
         char logMsg[ESMF_MAXSTR];
         char* message = XMLString::transcode(toCatch.getMessage());
         sprintf(logMsg, "SAX Parse Exception, message is: %s\n", message);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
         XMLString::release(&message);
         ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
         return rc;
@@ -429,7 +429,7 @@ namespace ESMCI{
     catch (...) {
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "Unexpected, unknown exception during SAX parse.\n");
-        ESMC_LogDefault.Write(logMsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
         ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
         return rc;
     }
@@ -981,7 +981,7 @@ namespace ESMCI{
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "io_xml fileName %s, length >= ESMF_MAXSTR; truncated.",
                 fileName);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOG_WARN,ESMC_CONTEXT);
+        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
         // TODO: return ESMF_WARNING when defined
         // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
       }

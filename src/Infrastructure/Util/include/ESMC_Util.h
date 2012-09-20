@@ -1,4 +1,4 @@
-// $Id: ESMC_Util.h,v 1.49 2012/09/07 19:11:33 w6ws Exp $
+// $Id: ESMC_Util.h,v 1.50 2012/09/20 21:19:56 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -60,10 +60,10 @@ enum ESMC_LogKind_Flag{
 
 // Values must match F90
 enum ESMC_LogMsgType_Flag{
-		ESMC_LOG_INFO =1,
-		ESMC_LOG_WARN =2,
-		ESMC_LOG_ERROR=3,
-		ESMC_LOG_TRACE=4 };
+		ESMC_LOGMSG_INFO =1,
+		ESMC_LOGMSG_WARN =2,
+		ESMC_LOGMSG_ERROR=3,
+		ESMC_LOGMSG_TRACE=4 };
 
 enum ESMC_MeshLoc_Flag {ESMC_MESHLOC_NODE=1,
                         ESMC_MESHLOC_ELEMENT};

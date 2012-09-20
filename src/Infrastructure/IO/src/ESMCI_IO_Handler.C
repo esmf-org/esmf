@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_Handler.C,v 1.3 2012/09/12 03:49:36 gold2718 Exp $
+// $Id: ESMCI_IO_Handler.C,v 1.4 2012/09/20 21:19:44 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_Handler.C,v 1.3 2012/09/12 03:49:36 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_IO_Handler.C,v 1.4 2012/09/20 21:19:44 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -141,7 +141,7 @@ IO_Handler *IO_Handler::create (
 #else // ESMF_PIO
       localrc = ESMF_RC_LIB_NOT_PRESENT;
       ESMC_LogDefault.Write("PIO library required for I/O operation",
-                            ESMC_LOG_WARN, ESMC_CONTEXT);
+                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
 #endif // ESMF_PIO
       break;
     case ESMF_IOFMT_NETCDF:
@@ -166,15 +166,15 @@ IO_Handler *IO_Handler::create (
       // No action needed, should have a good PIO Handler.
       break;
     case ESMF_RC_LIB_NOT_PRESENT:
-      ESMC_LogDefault.Write(errmsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+      ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
       break;
     case ESMF_RC_ARG_BAD:
       ESMC_LogDefault.Write("Unknown I/O Format",
-                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       break;
     default:
       ESMC_LogDefault.Write("Unknown I/O Error",
-                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     }
   } catch(...) {
     // allocation error
@@ -335,7 +335,7 @@ void IO_Handler::finalize (
     if (ESMF_SUCCESS != localrc) {
       char errmsg[256];
       sprintf(errmsg, "PIO_Handler::finalize error = %d", localrc);
-      ESMC_LogDefault.Write(errmsg, ESMC_LOG_WARN, ESMC_CONTEXT);
+      ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
 #endif // ESMF_PIO
     // If we need to call other finalize routines, we need to decide what
@@ -474,13 +474,13 @@ bool IO_Handler::fileExists(
     if (ESMF_SUCCESS == localrc) {
       char errmsg[ESMF_MAXSTR + 64];
       sprintf(errmsg, "Error finding file status for \"%s\"", name);
-      ESMC_LogDefault.Write(errmsg, ESMC_LOG_ERROR, ESMC_CONTEXT);
+      ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     }
   } else {
     // We don't seem to have a VM so just do this on all PETs
     // Log a warning anyway
     ESMC_LogDefault.Write("Unable to obtain a VM",
-                          ESMC_LOG_WARN, ESMC_CONTEXT);
+                          ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     std::fstream filestr (name, iomode);
     fileOK = (filestr.good());
     // filestr will automatically close when function exits

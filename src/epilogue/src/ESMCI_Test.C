@@ -1,4 +1,4 @@
-// $Id: ESMCI_Test.C,v 1.22 2012/09/20 17:41:08 w6ws Exp $
+// $Id: ESMCI_Test.C,v 1.23 2012/09/20 21:21:22 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,    
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Test.C,v 1.22 2012/09/20 17:41:08 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_Test.C,v 1.23 2012/09/20 21:21:22 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -89,7 +89,7 @@ int Test(
   if (name == NULL || result == NULL || failMsg == NULL || file == NULL) {
     sprintf(msgbuf, "FAIL %s, line %d, null pointer(s) passed to "
       "ESMCI::Test()\n", __FILE__, __LINE__);
-    whichLog->Write(msgbuf, ESMC_LOG_INFO);
+    whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
     return(ESMF_FAILURE);
@@ -97,12 +97,12 @@ int Test(
 
   if (condition) {
     sprintf(msgbuf, "PASS %s, %s, line %d\n", name, file, line);
-    whichLog->Write(msgbuf, ESMC_LOG_INFO);
+    whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
   }else {
     sprintf(msgbuf, "FAIL %s, %s, line %d, %s\n", name, file, line, failMsg);
-    whichLog->Write(msgbuf, ESMC_LOG_INFO);
+    whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
     (*result)++; // count total failures; 0 = all pass
@@ -146,21 +146,21 @@ int TestEnd(
   if (file == NULL) {
     sprintf(msgbuf, "FAIL %s, line %d, null filename passed to "
       "ESMCI::TestEnd()\n", __FILE__, __LINE__);
-    whichLog->Write(msgbuf, ESMC_LOG_INFO);
+    whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
     return(ESMF_FAILURE);
   }
 
   sprintf(msgbuf, "Ending Test, file %s, line %d\n", file, line);
-  whichLog->Write(msgbuf, ESMC_LOG_INFO);
+  whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
   if (!only)
     fprintf(stderr, "%s", msgbuf);
 
   rc = ESMCI_Finalize();
   if (rc != ESMF_SUCCESS) {
     sprintf(msgbuf, "FAIL: %s, line %d, Finalizing ESMF\n", file, line);
-    whichLog->Write(msgbuf, ESMC_LOG_INFO);
+    whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
     return(rc);
@@ -207,7 +207,7 @@ bool TestMaxPETs(
   if (file == NULL) {
     sprintf(msgbuf, "FAIL %s, line %d, null filename passed to "
       "ESMCI::TestMaxPETs()\n", __FILE__, __LINE__);
-    whichLog->Write(msgbuf, ESMC_LOG_INFO);
+    whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
     return (false);
@@ -218,7 +218,7 @@ bool TestMaxPETs(
     sprintf(msgbuf, "FAIL  rc=%d, %s, line %d, Unable to get GlobalVM\n", 
       rc, file, line);
 
-    whichLog->Write(msgbuf, ESMC_LOG_INFO);
+    whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
 
@@ -231,7 +231,7 @@ bool TestMaxPETs(
     sprintf(failMsg, "These tests must not run on more than %d processors.\n", 
       petCount);
     sprintf(msgbuf, "SKIP  %s, %s, line %d\n", failMsg, file, line);
-    whichLog->Write(msgbuf, ESMC_LOG_INFO);
+    whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
 
@@ -279,7 +279,7 @@ bool TestMinPETs(
   if (file == NULL) {
     sprintf(msgbuf, "FAIL %s, line %d, null filename passed to "
       "ESMCI::TestMinPETs()\n", __FILE__, __LINE__);
-    whichLog->Write(msgbuf, ESMC_LOG_INFO);
+    whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
     return (false);
@@ -290,7 +290,7 @@ bool TestMinPETs(
     sprintf(msgbuf, "FAIL  rc=%d, %s, line %d, Unable to get GlobalVM\n", 
       rc, file, line);
 
-    whichLog->Write(msgbuf, ESMC_LOG_INFO);
+    whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
 
@@ -303,7 +303,7 @@ bool TestMinPETs(
     sprintf(failMsg, "These tests must not run on less than %d processors.\n",
       petCount);
     sprintf(msgbuf, "SKIP  %s, %s, line %d\n", failMsg, file, line);
-   whichLog->Write(msgbuf, ESMC_LOG_INFO);
+   whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
 
@@ -351,7 +351,7 @@ bool TestNumPETs(
   if (file == NULL) {
     sprintf(msgbuf, "FAIL %s, line %d, null filename passed to "
       "ESMCI::TestNumPETs()\n", __FILE__, __LINE__);
-    whichLog->Write(msgbuf, ESMC_LOG_INFO);
+    whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
     return (false);
@@ -362,7 +362,7 @@ bool TestNumPETs(
     sprintf(msgbuf, "FAIL  rc=%d, %s, line %d, Unable to get GlobalVM\n", rc,
       file, line);
 
-    whichLog->Write(msgbuf, ESMC_LOG_INFO);
+    whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
 
@@ -375,7 +375,7 @@ bool TestNumPETs(
     sprintf(failMsg, "These tests must run on exactly %d processors.\n", 
                     petCount);
     sprintf(msgbuf, "SKIP  %s, %s, line %d\n", failMsg, file, line);
-    whichLog->Write(msgbuf, ESMC_LOG_INFO);
+    whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
 
@@ -423,7 +423,7 @@ int TestStart(
   if (file == NULL) {
     sprintf(msgbuf, "FAIL %s, line %d, null filename passed to "
       "ESMCI::TestStart()\n", __FILE__, __LINE__);
-    whichLog->Write(msgbuf, ESMC_LOG_INFO);
+    whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
     return(ESMF_FAILURE);
@@ -448,7 +448,7 @@ int TestStart(
   if (rc != ESMF_SUCCESS) {
     sprintf(msgbuf, "FAIL  rc=%d, %s, line %d, Unable to initialize ESMF\n", rc,
       file, line);
-    whichLog->Write(msgbuf, ESMC_LOG_INFO);
+    whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
     return(rc);
@@ -459,7 +459,7 @@ int TestStart(
     sprintf(msgbuf, "FAIL  rc=%d, %s, line %d, Unable to get GlobalVM\n", rc,
       file, line);
 
-    whichLog->Write(msgbuf, ESMC_LOG_INFO);
+    whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
     if (!only)
       fprintf(stderr, "%s", msgbuf);
 
@@ -469,12 +469,12 @@ int TestStart(
   numPETs = globalVM->getPetCount();
 
   sprintf(msgbuf, "Beginning Test, file %s, line %d\n", file, line);
-  whichLog->Write(msgbuf, ESMC_LOG_INFO);
+  whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
   if (!only)
     fprintf(stderr, "%s", msgbuf);
 
   sprintf(msgbuf, "NUMBER_OF_PROCESSORS %d\n", numPETs);
-  whichLog->Write(msgbuf, ESMC_LOG_INFO);
+  whichLog->Write(msgbuf, ESMC_LOGMSG_INFO);
   if (!only)
     fprintf(stderr, "%s", msgbuf);
  

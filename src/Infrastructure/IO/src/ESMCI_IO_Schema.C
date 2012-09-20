@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_Schema.C,v 1.1 2012/09/12 03:49:36 gold2718 Exp $
+// $Id: ESMCI_IO_Schema.C,v 1.2 2012/09/20 21:19:44 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -52,7 +52,7 @@ lonUnits=('degrees_north','degree_north','degrees_N', # Allowed lon unit names
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_Schema.C,v 1.1 2012/09/12 03:49:36 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_IO_Schema.C,v 1.2 2012/09/20 21:19:44 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -131,7 +131,7 @@ IO_Schema::IO_Schema(
       localrc = ESMF_RC_PTR_NULL;
       filename = (char *)NULL;
       ESMC_LogDefault.Write("file argument to IO_Schema cannot be NULL",
-                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     } else {
       filename = new new char[strlen(file) + 1];
       if ((char *)NULL == filename) {
@@ -292,27 +292,27 @@ IOParseStream::IOParseStream(
     filename = new char[inbufferSize];
     if ((char *)NULL == filename) {
       ESMC_LogDefault.Write("Schema file open error, cannot allocate buffer",
-                            ESMC_LOG_ERROR, ESMC_CONTEXT);
+                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
       localrc = ESMF_RC_MEM_ALLOCATE;
     } else {
       localrc = ESMF_SUCCESS;
     }
   } else if (eof()) {
     ESMC_LogDefault.Write("Schema file open failed -- empty file?",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     localrc = ESMF_RC_FILE_OPEN;
   } else if (bad()) {
     ESMC_LogDefault.Write("Schema file open failed -- bad stream",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     localrc = ESMF_RC_FILE_OPEN;
   } else if (fail()) {
     // Fail should be after bad since it includes the bad bit
     ESMC_LogDefault.Write("Schema file open failed -- open failed",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     localrc = ESMF_RC_FILE_OPEN;
   } else {
     ESMC_LogDefault.Write("Schema file open failed -- unknown error",
-                          ESMC_LOG_ERROR, ESMC_CONTEXT);
+                          ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     localrc = ESMF_RC_FILE_OPEN;
   }
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_LogErr.C,v 1.24 2012/09/05 15:10:12 rokuingh Exp $
+// $Id: ESMCI_LogErr.C,v 1.25 2012/09/20 21:19:47 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_LogErr.C,v 1.24 2012/09/05 15:10:12 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_LogErr.C,v 1.25 2012/09/20 21:19:47 w6ws Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -90,7 +90,7 @@ bool LogErr::AllocError(
     FTN_X(esmf_breakpoint)();  // no-op to assist debugging
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
-    Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE),ESMC_LOG_ERROR);
+    Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE),ESMC_LOGMSG_ERROR);
     result=true;
     return result;
 }
@@ -120,7 +120,7 @@ bool LogErr::AllocError(
     FTN_X(esmf_breakpoint)();  // no-op to assist debugging
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_ALLOCATE;
-    Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE),ESMC_LOG_ERROR,LINE,FILE,
+    Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE),ESMC_LOGMSG_ERROR,LINE,FILE,
     method);
     result=true;
     return result;
@@ -152,7 +152,7 @@ bool LogErr::MsgAllocError(
 
     string logMsg = ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE);
     logMsg += msg;
-    Write(logMsg.c_str (),ESMC_LOG_ERROR);
+    Write(logMsg.c_str (),ESMC_LOGMSG_ERROR);
     result=true;
     return result;
 }
@@ -186,7 +186,7 @@ bool LogErr::MsgAllocError(
 
     string logMsg = ESMC_LogGetErrMsg(ESMC_RC_MEM_ALLOCATE);
     logMsg += msg;
-    Write(logMsg.c_str (),ESMC_LOG_ERROR,LINE,FILE,method);
+    Write(logMsg.c_str (),ESMC_LOGMSG_ERROR,LINE,FILE,method);
     result=true;
     return result;
 }
@@ -209,7 +209,7 @@ bool LogErr::DeallocError(
     FTN_X(esmf_breakpoint)();  // no-op to assist debugging
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
-    Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE),ESMC_LOG_ERROR);
+    Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE),ESMC_LOGMSG_ERROR);
     result=true;
     return result;
 }
@@ -239,7 +239,7 @@ bool LogErr::DeallocError(
     FTN_X(esmf_breakpoint)();  // no-op to assist debugging
     bool result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM_DEALLOCATE;
-    Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE),ESMC_LOG_ERROR,LINE,FILE,
+    Write(ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE),ESMC_LOGMSG_ERROR,LINE,FILE,
     method);
     result=true;
     return result;
@@ -271,7 +271,7 @@ bool LogErr::MsgDeallocError(
 
     string logMsg = ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE);
     logMsg += msg;
-    Write(logMsg.c_str (),ESMC_LOG_ERROR);
+    Write(logMsg.c_str (),ESMC_LOGMSG_ERROR);
     result=true;
     return result;
 }
@@ -305,7 +305,7 @@ bool LogErr::MsgDeallocError(
 
     string logMsg = ESMC_LogGetErrMsg(ESMC_RC_MEM_DEALLOCATE);
     logMsg += msg;
-    Write(logMsg.c_str (),ESMC_LOG_ERROR,LINE,FILE,method);
+    Write(logMsg.c_str (),ESMC_LOGMSG_ERROR,LINE,FILE,method);
     result=true;
     return result;
 }
@@ -560,7 +560,7 @@ bool LogErr::FoundError(
         // this means that rcToCheck was _not_ in the errorMask -> flag error
         result=true;
         if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
-        Write(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOG_ERROR);
+        Write(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOGMSG_ERROR);
       }
     }
     return result;
@@ -603,7 +603,7 @@ bool LogErr::FoundError(
         // this means that rcToCheck was _not_ in the errorMask -> flag error
         result=true;
         if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
-        Write(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOG_ERROR,LINE,FILE,method);
+        Write(ESMC_LogGetErrMsg(rcToCheck),ESMC_LOGMSG_ERROR,LINE,FILE,method);
       }
     }
     return result;
@@ -647,7 +647,7 @@ bool LogErr::MsgFoundError(
 
         string logMsg = ESMC_LogGetErrMsg(rcToCheck);
         logMsg += msg;
-        Write(logMsg.c_str (),ESMC_LOG_ERROR);
+        Write(logMsg.c_str (),ESMC_LOGMSG_ERROR);
       }
     }
     return result;
@@ -695,7 +695,7 @@ bool LogErr::MsgFoundError(
 
         string logMsg = ESMC_LogGetErrMsg(rcToCheck);
         logMsg += msg;
-        Write(logMsg.c_str (),ESMC_LOG_ERROR,LINE,FILE,method);
+        Write(logMsg.c_str (),ESMC_LOGMSG_ERROR,LINE,FILE,method);
       }
     }
     return result;
