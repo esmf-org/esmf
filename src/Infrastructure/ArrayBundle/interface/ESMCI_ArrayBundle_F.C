@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.43 2012/09/14 23:05:30 gold2718 Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.44 2012/09/20 20:24:47 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -182,8 +182,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_arraybundlegetlist)(ESMCI::ArrayBundle **ptr, char *arrayName,
-    int *arrayCount, ESMCI::Array **opt_arrayList, int *len_arrayList, int *rc,
+  void FTN_X(c_esmc_arraybundlegetlist)(ESMCI::ArrayBundle **ptr,
+    char *arrayName, int *arrayCount, ESMCI::Array **opt_arrayList, 
+    int *len_arrayList, ESMC_ItemOrder_Flag *itemorderflag, int *rc,
     ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlegetlist()"
@@ -202,7 +203,7 @@ extern "C" {
       }
       // opt_arrayList has correct number of elements
       vector<ESMCI::Array *> arrayVector;
-      (*ptr)->get(std::string(arrayName, nlen), arrayVector);
+      (*ptr)->get(std::string(arrayName, nlen), arrayVector, *itemorderflag);
       for (int i=0; i<*arrayCount; i++)
         opt_arrayList[i] = arrayVector[i];
     }
@@ -211,7 +212,8 @@ extern "C" {
   }
  
   void FTN_X(c_esmc_arraybundlegetlistall)(ESMCI::ArrayBundle **ptr,
-    int *arrayCount, ESMCI::Array **opt_arrayList, int *len_arrayList, int *rc){
+    int *arrayCount, ESMCI::Array **opt_arrayList, int *len_arrayList, 
+    ESMC_ItemOrder_Flag *itemorderflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlegetlistall()"
     // Initialize return code; assume routine not implemented
@@ -230,7 +232,7 @@ extern "C" {
       }
       // opt_arrayList has correct number of elements
       vector<ESMCI::Array *> arrayVector;
-      (*ptr)->getVector(arrayVector);
+      (*ptr)->getVector(arrayVector, *itemorderflag);
       for (int i=0; i<(*ptr)->getCount(); i++)
         opt_arrayList[i] = arrayVector[i];
     }

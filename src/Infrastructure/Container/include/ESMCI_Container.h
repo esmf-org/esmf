@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container.h,v 1.18 2012/09/19 16:07:20 theurich Exp $
+// $Id: ESMCI_Container.h,v 1.19 2012/09/20 20:24:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -43,10 +43,13 @@ namespace ESMCI {
     void addReplace(Key k, T t);
     void clear();
     T get(Key k)const;
-    void get(Key k, std::vector<T> &v)const;
+    void get(Key k, std::vector<T> &v,
+      ESMC_ItemOrder_Flag itemorderflag=ESMC_ITEMORDER_ABC)const;
     int getCount(Key k)const;
-    void getVector(std::vector<T> &v)const;
-    void getKeyVector(std::vector<Key> &v)const;
+    void getVector(std::vector<T> &v,
+      ESMC_ItemOrder_Flag itemorderflag=ESMC_ITEMORDER_ABC)const;
+    void getKeyVector(std::vector<Key> &v,
+      ESMC_ItemOrder_Flag itemorderflag=ESMC_ITEMORDER_ABC)const;
     bool isPresent(Key k)const{
       if (this->find(k)!=this->end())
         return true;  // key found
@@ -178,14 +181,24 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::Container::get()"
   // Access all elements that match the key.
   template <typename Key, typename T>
-  void Container<Key, T>::get(Key k, std::vector<T> &v)const{
-    std::pair<typename Container::const_iterator,
-      typename Container::const_iterator> range;
-    range = this->equal_range(k);
-    typename Container::const_iterator pos;
+  void Container<Key, T>::get(Key k, std::vector<T> &v,
+    ESMC_ItemOrder_Flag itemorderflag)const{
     v.clear();
-    for (pos=range.first; pos!=range.second; ++pos)
-      v.push_back(pos->second->second);
+    if (itemorderflag == ESMC_ITEMORDER_ABC){
+      std::pair<typename Container::const_iterator,
+        typename Container::const_iterator> range;
+      range = this->equal_range(k);
+      typename Container::const_iterator pos;
+      for (pos=range.first; pos!=range.second; ++pos)
+        v.push_back(pos->second->second);
+    }else if (itemorderflag == ESMC_ITEMORDER_ADDORDER){
+      typename std::list<std::pair<Key,T> >::const_iterator pos;
+      for (pos = orderedList.begin(); pos != orderedList.end(); ++pos)
+        if (pos->first == k)
+          v.push_back(pos->second);
+    }else{
+      v.resize(0);
+    }
   }
     
 #undef  ESMC_METHOD
@@ -207,22 +220,25 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::Container::getVector()"
   // Access the entire contents of the container in form of a vector.
   template <typename Key, typename T>
-  void Container<Key, T>::getVector(std::vector<T> &v)const{
+  void Container<Key, T>::getVector(std::vector<T> &v,
+    ESMC_ItemOrder_Flag itemorderflag)const{
     int rc = ESMC_RC_NOT_IMPL;              // final return code
     v.clear();
-#if 1
-    v.resize(this->size());
-    typename Container::const_iterator pos;
-    int i = 0;
-    for (pos = this->begin(); pos != this->end(); ++pos)
-      v[i++] = pos->second->second;
-#else
-    v.resize(orderedList.size());
-    int i = 0;
-    typename std::list<std::pair<Key,T> >::const_iterator pos;
-    for (pos = orderedList.begin(); pos != orderedList.end(); ++pos)
-      v[i++] = pos->second;
-#endif
+    if (itemorderflag == ESMC_ITEMORDER_ABC){
+      v.resize(this->size());
+      typename Container::const_iterator pos;
+      int i = 0;
+      for (pos = this->begin(); pos != this->end(); ++pos)
+        v[i++] = pos->second->second;
+    }else if (itemorderflag == ESMC_ITEMORDER_ADDORDER){
+      v.resize(orderedList.size());
+      int i = 0;
+      typename std::list<std::pair<Key,T> >::const_iterator pos;
+      for (pos = orderedList.begin(); pos != orderedList.end(); ++pos)
+        v[i++] = pos->second;
+    }else{
+      v.resize(0);
+    }
   }
 
 #undef  ESMC_METHOD
@@ -230,14 +246,25 @@ namespace ESMCI {
   // Access the keys of the entire contents of the container in form of a
   // vector.
   template <typename Key, typename T>
-  void Container<Key, T>::getKeyVector(std::vector<Key> &v)const{
+  void Container<Key, T>::getKeyVector(std::vector<Key> &v,
+    ESMC_ItemOrder_Flag itemorderflag)const{
     int rc = ESMC_RC_NOT_IMPL;              // final return code
     v.clear();
-    v.resize(this->size());
-    int i = 0;
-    typename Container::const_iterator pos;
-    for (pos = this->begin(); pos != this->end(); ++pos)
-      v[i++] = pos->first;
+    if (itemorderflag == ESMC_ITEMORDER_ABC){
+      v.resize(this->size());
+      int i = 0;
+      typename Container::const_iterator pos;
+      for (pos = this->begin(); pos != this->end(); ++pos)
+        v[i++] = pos->first;
+    }else if (itemorderflag == ESMC_ITEMORDER_ADDORDER){
+      v.resize(orderedList.size());
+      int i = 0;
+      typename std::list<std::pair<Key,T> >::const_iterator pos;
+      for (pos = orderedList.begin(); pos != orderedList.end(); ++pos)
+        v[i++] = pos->first;
+    }else{
+      v.resize(0);
+    }
   }
 
 #undef  ESMC_METHOD

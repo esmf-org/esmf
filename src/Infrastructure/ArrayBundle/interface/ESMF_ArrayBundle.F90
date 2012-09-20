@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.85 2012/09/12 03:49:21 gold2718 Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.86 2012/09/20 20:24:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.85 2012/09/12 03:49:21 gold2718 Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.86 2012/09/20 20:24:47 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -902,14 +902,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayBundleGet()   
     subroutine ESMF_ArrayBundleGetList(arraybundle, arrayName, arrayList, &
-      keywordEnforcer, rc)
+      keywordEnforcer, itemorderflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)            :: arraybundle
-    character(len=*),       intent(in)            :: arrayName
-    type(ESMF_Array),       intent(out)           :: arrayList(:)
+    type(ESMF_ArrayBundle),    intent(in)            :: arraybundle
+    character(len=*),          intent(in)            :: arrayName
+    type(ESMF_Array),          intent(out)           :: arrayList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out), optional :: rc
+    type(ESMF_ItemOrder_Flag), intent(in),  optional :: itemorderflag
+    integer,                   intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -924,10 +925,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_ArrayBundle} to be queried.
 !   \item [arrayName]
 !     Specified name.
-!   \item [{[arrayList]}]
+!   \item [arrayList]
 !     List of Arrays in {\tt arraybundle} that match {\tt arrayName}. The
 !     argument must be allocated to be at least of size {\tt arrayCount}
 !     returned for this {\tt arrayName}.
+!   \item[{[itemorderflag]}]
+!     Specifies the order of the returned items in the {\tt arrayList}.
+!     The default is {\tt ESMF\_ITEMORDER\_ABC}.
+!     See \ref{const:itemorderflag} for a full list of options.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -939,6 +944,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Pointer), pointer   :: opt_arrayPtrList(:)    ! helper variable
     integer                       :: len_arrayPtrList       ! helper variable
     integer                       :: i                      ! helper variable
+    type(ESMF_ItemOrder_Flag)     :: itemorderflagArg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -947,13 +953,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
     
+    ! Deal with optional itemorderflag argument
+    itemorderflagArg = ESMF_ITEMORDER_ABC ! default
+    if (present(itemorderflag)) &
+      itemorderflagArg = itemorderflag
+    
     ! Prepare local variables
     len_arrayPtrList = size(arrayList)
     allocate(opt_arrayPtrList(len_arrayPtrList))
 
     ! Call into the C++ interface layer
     call c_ESMC_ArrayBundleGetList(arraybundle, trim(arrayName), &
-      opt_arrayCount, opt_arrayPtrList, len_arrayPtrList, localrc)
+      opt_arrayCount, opt_arrayPtrList, len_arrayPtrList, itemorderflagArg, &
+      localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -985,17 +997,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayBundleGet()   
-    subroutine ESMF_ArrayBundleGetListAll(arraybundle, keywordEnforcer, arrayCount, &
-      arrayList, arrayNameList, name, rc)
+    subroutine ESMF_ArrayBundleGetListAll(arraybundle, keywordEnforcer, &
+      itemorderflag, arrayCount, arrayList, arrayNameList, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_ArrayBundle), intent(in)            :: arraybundle
+    type(ESMF_ArrayBundle),    intent(in)            :: arraybundle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(out), optional :: arrayCount
-    type(ESMF_Array),       intent(out), optional :: arrayList(:)
-    character(len=*),       intent(out), optional :: arrayNameList(:)
-    character(len=*),       intent(out), optional :: name
-    integer,                intent(out), optional :: rc
+    type(ESMF_ItemOrder_Flag), intent(in),  optional :: itemorderflag
+    integer,                   intent(out), optional :: arrayCount
+    type(ESMF_Array),          intent(out), optional :: arrayList(:)
+    character(len=*),          intent(out), optional :: arrayNameList(:)
+    character(len=*),          intent(out), optional :: name
+    integer,                   intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -1007,20 +1020,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   \begin{description}
 !   \item [arraybundle]
-!         {\tt ESMF\_ArrayBundle} to be queried.
+!     {\tt ESMF\_ArrayBundle} to be queried.
+!   \item[{[itemorderflag]}]
+!     Specifies the order of the returned items in the {\tt arrayList}.
+!     The default is {\tt ESMF\_ITEMORDER\_ABC}.
+!     See \ref{const:itemorderflag} for a full list of options.
 !   \item [{[arrayCount]}]
-!         Upon return holds the number of Arrays bundled in the ArrayBundle.
+!     Upon return holds the number of Arrays bundled in the ArrayBundle.
 !   \item [{[arrayList]}]
-!         Upon return holds a list of Arrays bundled in {\tt arraybundle}. The
-!         argument must be allocated to be at least of size {\tt arrayCount}.
+!     Upon return holds a list of Arrays bundled in {\tt arraybundle}. The
+!     argument must be allocated to be at least of size {\tt arrayCount}.
 !   \item [{[arrayNameList]}]
-!         Upon return holds a list of the names of the Array bundled in 
-!         {\tt arraybundle}. The argument must be allocated to be at least of
-!         size {\tt arrayCount}.
+!     Upon return holds a list of the names of the Array bundled in 
+!     {\tt arraybundle}. The argument must be allocated to be at least of
+!     size {\tt arrayCount}.
 !   \item [{[name]}]
-!         Name of the ArrayBundle object.
+!     Name of the ArrayBundle object.
 !   \item [{[rc]}]
-!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
@@ -1030,6 +1047,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Pointer), pointer   :: opt_arrayPtrList(:)    ! helper variable
     integer                       :: len_arrayPtrList       ! helper variable
     integer                       :: i                      ! helper variable
+    type(ESMF_ItemOrder_Flag)     :: itemorderflagArg
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -1037,6 +1055,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
+    
+    ! Deal with optional itemorderflag argument
+    itemorderflagArg = ESMF_ITEMORDER_ABC ! default
+    if (present(itemorderflag)) &
+      itemorderflagArg = itemorderflag
     
     ! Deal with (optional) array arguments
     len_arrayPtrList = 0
@@ -1054,7 +1077,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface layer
     call c_ESMC_ArrayBundleGetListAll(arraybundle, opt_arrayCount, &
-      opt_arrayPtrList, len_arrayPtrList, localrc)
+      opt_arrayPtrList, len_arrayPtrList, itemorderflagArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

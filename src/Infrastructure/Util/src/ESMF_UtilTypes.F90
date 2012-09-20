@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.154 2012/09/12 03:49:39 gold2718 Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.155 2012/09/20 20:24:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -694,6 +694,17 @@
                            ESMF_FILESTATUS_NEW      = ESMF_FileStatusFlag(2), &
                            ESMF_FILESTATUS_REPLACE  = ESMF_FileStatusFlag(3)
 
+!------------------------------------------------------------------------------
+!
+      type ESMF_ItemOrder_Flag
+      sequence
+      private
+          integer :: flag
+      end type
+
+      type(ESMF_ItemOrder_Flag), parameter ::  &
+        ESMF_ITEMORDER_ABC        = ESMF_ItemOrder_Flag(0), &
+        ESMF_ITEMORDER_ADDORDER   = ESMF_ItemOrder_Flag(1)
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -832,6 +843,9 @@
                                   ESMF_FILESTATUS_OLD,       &
                                   ESMF_FILESTATUS_NEW,       &
                                   ESMF_FILESTATUS_REPLACE
+
+      public ESMF_ItemOrder_Flag
+      public ESMF_ITEMORDER_ABC, ESMF_ITEMORDER_ADDORDER
 
       
 !  Overloaded = operator functions

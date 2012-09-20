@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.40 2012/09/14 23:05:28 gold2718 Exp $
+// $Id: ESMCI_ArrayBundle.h,v 1.41 2012/09/20 20:24:45 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -87,14 +87,17 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     Array *get(std::string arrayName)const{
       return arrayContainer.get(arrayName);
     }
-    void get(std::string arrayName, std::vector<Array *> &arrayVector)const{ 
-      arrayContainer.get(arrayName, arrayVector);
+    void get(std::string arrayName, std::vector<Array *> &arrayVector,
+      ESMC_ItemOrder_Flag itemorderflag=ESMC_ITEMORDER_ABC)const{ 
+      arrayContainer.get(arrayName, arrayVector, itemorderflag);
     }
-    void getVector(std::vector<Array *> &arrayVector)const{ 
-      arrayContainer.getVector(arrayVector);
+    void getVector(std::vector<Array *> &arrayVector,
+      ESMC_ItemOrder_Flag itemorderflag=ESMC_ITEMORDER_ABC)const{ 
+      arrayContainer.getVector(arrayVector, itemorderflag);
     }
-    void getNameVector(std::vector<std::string> &arrayNameVector)const{ 
-      arrayContainer.getKeyVector(arrayNameVector);
+    void getNameVector(std::vector<std::string> &arrayNameVector,
+      ESMC_ItemOrder_Flag itemorderflag=ESMC_ITEMORDER_ABC)const{ 
+      arrayContainer.getKeyVector(arrayNameVector, itemorderflag);
     }
     int getCount()const{return arrayContainer.size();}
     int getCount(std::string arrayName)const{

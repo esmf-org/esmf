@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container_F.C,v 1.21 2012/01/06 20:16:11 svasquez Exp $
+// $Id: ESMCI_Container_F.C,v 1.22 2012/09/20 20:24:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -546,7 +546,8 @@ extern "C" {
 
   void FTN_X(c_esmc_containergetvector)
     (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
-    char const *itemName, std::vector<ESMCI::F90ClassHolder> **vector, int *rc,
+    char const *itemName, std::vector<ESMCI::F90ClassHolder> **vector, 
+    ESMC_ItemOrder_Flag *itemorderflag, int *rc,
     ESMCI_FortranStrLenArg nlen){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_containergetvector()"
@@ -560,7 +561,7 @@ extern "C" {
       // construct persistent vector object
       *vector = new std::vector<ESMCI::F90ClassHolder>;
       // query the C++ layer
-      (*ptr)->get(std::string(itemName, nlen), **vector);
+      (*ptr)->get(std::string(itemName, nlen), **vector, *itemorderflag);
       
     }catch(int localrc){
       // catch standard ESMF return code
@@ -584,7 +585,8 @@ extern "C" {
 
   void FTN_X(c_esmc_containergetvectorall)
     (ESMCI::Container<std::string, ESMCI::F90ClassHolder> **ptr, 
-    std::vector<ESMCI::F90ClassHolder> **vector, int *rc){
+    std::vector<ESMCI::F90ClassHolder> **vector, 
+    ESMC_ItemOrder_Flag *itemorderflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_containergetvectorall()"
     // Initialize return code; assume routine not implemented
@@ -597,7 +599,7 @@ extern "C" {
       // construct persistent vector object
       *vector = new std::vector<ESMCI::F90ClassHolder>;
       // query the C++ layer
-      (*ptr)->getVector(**vector);
+      (*ptr)->getVector(**vector, *itemorderflag);
       
     }catch(int localrc){
       // catch standard ESMF return code

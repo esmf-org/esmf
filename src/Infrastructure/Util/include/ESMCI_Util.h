@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.54 2012/09/12 03:49:38 gold2718 Exp $
+// $Id: ESMCI_Util.h,v 1.55 2012/09/20 20:24:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -115,7 +115,7 @@ enum ESMC_AttGetCountFlag { ESMC_ATTGETCOUNT_ATTRIBUTE=0,
                         
 // Attribute reconcile type
 enum ESMC_AttReconcileFlag { ESMC_ATTRECONCILE_OFF=0,
-                            ESMC_ATTRECONCILE_ON};
+                             ESMC_ATTRECONCILE_ON};
 
 // Attribute reconcile type
 enum ESMC_AttTreeFlag { ESMC_ATTTREE_OFF=0,
@@ -130,6 +130,10 @@ enum ESMC_FileStatusFlag { ESMC_FILESTATUS_UNKNOWN=0,
                            ESMC_FILESTATUS_OLD = 1,
                            ESMC_FILESTATUS_NEW = 2,
                            ESMC_FILESTATUS_REPLACE = 3};
+
+// File status flag (for IO write functions)
+enum ESMC_ItemOrder_Flag { ESMC_ITEMORDER_ABC=0,
+                           ESMC_ITEMORDER_ADDORDER};
 
 // TODO: investigate why this is a macro instead of an enum
 #define ESMC_GRIDITEM_INVALID -2

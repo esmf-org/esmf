@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.84 2012/09/19 16:35:10 gold2718 Exp $
+% $Id: ESMF_options.tex,v 1.85 2012/09/20 20:25:07 theurich Exp $
 
 \section{Appendix A:  Master List of Constants}
 \label{const:master}
@@ -37,11 +37,14 @@ The valid values are:
 \subsection{ESMF\_ATTTREE}
 This flag is documented in section \ref{const:atttree}.
 
+
 \subsection{ESMF\_ATTWRITE}
 This flag is documented in section \ref{const:attwrite}.
 
+
 \subsection{ESMF\_CALKIND}
 This flag is documented in section \ref{const:calkindflag}.
+
 
 \subsection{ESMF\_COMPTYPE}
 \label{const:comptype}
@@ -88,6 +91,7 @@ The valid values are:
          the MPI communicator, the number of PETs, the PET labeling, 
          communication attributes, threading-level.
 \end{description}
+
 
 \subsection{ESMF\_COORDSYS}
 This flag is documented in section \ref{const:coordsys}.
@@ -276,6 +280,26 @@ The valid values are:
 \item [ESMF\_IOFMT\_NETCDF]
       NETCDF and PNETCDF format.
 \end{description}
+
+
+\subsection{ESMF\_ITEMORDER}
+\label{const:itemorderflag}
+{\sf DESCRIPTION:\\}  
+Specifies the order of items in a list.
+
+The type of this flag is:
+
+{\tt type(ESMF\_ItemOrder\_Flag)}
+
+The valid values are:
+\begin{description}
+
+\item [ESMF\_ITEMORDER\_ABC]
+         The items ordered alphabetically according to their names.
+\item [ESMF\_ITEMORDER\_ADDORDER]
+         The items are in the order in which they were added to the container
+\end{description}
+
 
 \subsection{ESMF\_KIND}
 \label{const:kind}

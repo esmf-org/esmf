@@ -1,4 +1,4 @@
-! $Id: ESMF_StateContainer.F90,v 1.10 2012/01/06 20:19:21 svasquez Exp $
+! $Id: ESMF_StateContainer.F90,v 1.11 2012/09/20 20:24:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -64,7 +64,7 @@ module ESMF_StateContainerMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_StateContainer.F90,v 1.10 2012/01/06 20:19:21 svasquez Exp $'
+    '$Id: ESMF_StateContainer.F90,v 1.11 2012/09/20 20:24:57 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -423,14 +423,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerGet()
   subroutine ESMF_ContainerGetSIL(container, itemName, itemList, &
-    keywordEnforcer, rc)
+    keywordEnforcer, itemorderflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Container),     intent(in)            :: container
-    character(len=*),         intent(in)            :: itemName
-    type(ESMF_StateItemWrap), pointer               :: itemList(:)
+    type(ESMF_Container),      intent(in)            :: container
+    character(len=*),          intent(in)            :: itemName
+    type(ESMF_StateItemWrap),  pointer               :: itemList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                  intent(out), optional :: rc
+    type(ESMF_ItemOrder_Flag), intent(in),  optional :: itemorderflag
+    integer,                   intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
 !   Get items from a {\tt ESMF\_Container} object.
@@ -455,6 +456,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt itemName} - even if that number is zero.
 !     In both cases the returned {\tt itemList} will be associated. It is the
 !     responsibility of the caller to deallocate the memory.
+!   \item[{[itemorderflag]}]
+!     Specifies the order of the returned container items in the {\tt itemList}.
+!     The default is {\tt ESMF\_ITEMORDER\_ABC}.
+!     See \ref{const:itemorderflag} for a full list of options.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -466,6 +471,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                       :: i, itemC
     type(ESMF_Pointer)            :: vector
     type(ESMF_StateItemWrap)      :: siw
+    type(ESMF_ItemOrder_Flag)     :: itemorderflagArg
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -473,6 +479,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
+    
+    ! Deal with optional itemorderflag argument
+    itemorderflagArg = ESMF_ITEMORDER_ABC ! default
+    if (present(itemorderflag)) &
+      itemorderflagArg = itemorderflag
     
     ! Call into the C++ interface
     call c_ESMC_ContainerGetCount(container, trim(itemName), itemC, localrc)
@@ -493,7 +504,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
       
     ! Call into the C++ interface to set up the vector on the C++ side
-    call c_ESMC_ContainerGetVector(container, trim(itemName), vector, localrc)
+    call c_ESMC_ContainerGetVector(container, trim(itemName), vector, &
+      itemorderflagArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -529,14 +541,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ContainerGet()
   subroutine ESMF_ContainerGetSILAll(container, itemList, keywordEnforcer, &
-    itemCount, rc)
+    itemorderflag, itemCount, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Container),     intent(in)            :: container
-    type(ESMF_StateItemWrap), pointer               :: itemList(:)
+    type(ESMF_Container),      intent(in)            :: container
+    type(ESMF_StateItemWrap),  pointer               :: itemList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                  intent(out), optional :: itemCount
-    integer,                  intent(out), optional :: rc
+    type(ESMF_ItemOrder_Flag), intent(in),  optional :: itemorderflag
+    integer,                   intent(out), optional :: itemCount
+    integer,                   intent(out), optional :: rc
 !         
 ! !DESCRIPTION:
 !   Get items from a {\tt ESMF\_Container} object.
@@ -558,6 +571,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     number is zero.
 !     In both cases the returned {\tt itemList} will be associated. It is the
 !     responsibility of the caller to deallocate the memory.
+!   \item[{[itemorderflag]}]
+!     Specifies the order of the returned container items in the {\tt itemList}.
+!     The default is {\tt ESMF\_ITEMORDER\_ABC}.
+!     See \ref{const:itemorderflag} for a full list of options.
 !   \item[{[itemCount]}]
 !     Number of items {\tt container}.
 !   \item[{[rc]}]
@@ -571,6 +588,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                       :: i, itemC
     type(ESMF_Pointer)            :: vector
     type(ESMF_StateItemWrap)      :: siw
+    type(ESMF_ItemOrder_Flag)     :: itemorderflagArg
     
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -578,6 +596,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ContainerGetInit, container, rc)
+    
+    ! Deal with optional itemorderflag argument
+    itemorderflagArg = ESMF_ITEMORDER_ABC ! default
+    if (present(itemorderflag)) &
+      itemorderflagArg = itemorderflag
     
     ! Call into the C++ interface
     call c_ESMC_ContainerGetCountAll(container, itemC, localrc)
@@ -598,7 +621,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
       
     ! Call into the C++ interface to set up the vector on the C++ side
-    call c_ESMC_ContainerGetVectorAll(container, vector, localrc)
+    call c_ESMC_ContainerGetVectorAll(container, vector, itemorderflagArg, &
+      localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
