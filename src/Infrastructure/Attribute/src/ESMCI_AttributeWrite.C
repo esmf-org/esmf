@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeWrite.C,v 1.3 2012/09/20 21:19:28 w6ws Exp $
+// $Id: ESMCI_AttributeWrite.C,v 1.4 2012/09/20 22:53:51 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.3 2012/09/20 21:19:28 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.4 2012/09/20 22:53:51 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -928,6 +928,11 @@ namespace ESMCI {
 
       // start the gridTile
       localrc = io_xml->writeStartElement("gridTile", "", 3, 3, 
+          // TODO: This information is retrieved incorrectly right now because
+          // there is no way to get grid tile numbers yet because multi-tile
+          // grids are not yet supported.  This could be done by asking the 
+          // DistGrid for the deToTileMap, from which you can get a tile number
+          // but we will wait for proper multi-tile support anyway.
           "id", attpack->AttributeGetInternalGridInt("ESMF:tileCount").c_str(),
           "discretizationType", attpack->AttributeGetInternalGridString("discretizationType").c_str(),
           "geometryType", attpack->AttributeGetInternalGridString("geometryType").c_str());
@@ -1051,7 +1056,7 @@ namespace ESMCI {
     int nlen = strlen(mod_name.c_str());
 
     // cast the base back to a Grid ;)
-    ESMCI::Grid *grid = dynamic_cast<ESMCI::Grid *> (attrList.at(0)->attrBase);
+    ESMCI::Grid *grid = reinterpret_cast<ESMCI::Grid *> (attrList.at(0)->attrBase);
  
     // initialize int return parameters
     int int_value = 0;
@@ -1124,7 +1129,7 @@ namespace ESMCI {
     int nlen = strlen(mod_name.c_str());
 
     // cast the base back to a Grid ;)
-    ESMCI::Grid *grid = dynamic_cast<ESMCI::Grid *> (attrList.at(0)->attrBase);
+    ESMCI::Grid *grid = reinterpret_cast<ESMCI::Grid *> (attrList.at(0)->attrBase);
  
     // TODO: get rid of the fixed size buffer!
     // initialize char return parameters
@@ -1414,7 +1419,7 @@ namespace ESMCI {
   int nlen = strlen(mod_name.c_str());
    
   // cast the base back to a Grid ;)
-  ESMCI::Grid *grid = dynamic_cast<ESMCI::Grid *> (attr->attrBase);
+  ESMCI::Grid *grid = reinterpret_cast<ESMCI::Grid *> (attr->attrBase);
   /* debugging
   if (grid) {
     ESMC_GridStatus_Flag gridstatus = grid->getStatus();
@@ -1540,9 +1545,9 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     int *exclusiveCount;
     exclusiveCount = new int[dimCount];
-    exclusiveCount[0] = 0;
-    exclusiveCount[1] = 0;
-    exclusiveCount[2] = 0;
+    exclusiveCount[0] = 1;
+    exclusiveCount[1] = 1;
+    exclusiveCount[2] = 1;
     FTN_X(f_esmf_gridattgetinfointlist)(&grid, exclusiveCount_fname, 
                exclusiveCount, &dimCount,
                &il_present, const_cast<char *> (inputString.c_str()), 
@@ -1552,7 +1557,7 @@ namespace ESMCI {
 
     // allocate space for the coordinates
     //int num_coords = exclusiveCount[coordDim];
-    int num_coords = exclusiveCount[0]+exclusiveCount[1]+exclusiveCount[2];
+    int num_coords = exclusiveCount[0]*exclusiveCount[1]*exclusiveCount[2];
     if (cTK_string != "ESMF_TYPEKIND_R8") {
       sprintf(msgbuf,"coordinates are only available in ESMF_TYPEKIND_R8 right now..");
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
@@ -1576,27 +1581,7 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     
     // write the output values to the output stream and write to XML file
-    // TODO: this if statement only required while coordinate problem with Grid
-    // can only retrieve grid coordinates in multi dimensional lists
-    int start = 0;
-    int end = 0;
-    if (coordDim == 1) {
-      start = 0;
-      end = 10;
-    } else if (coordDim == 2) {
-      start = 10;
-      end = 20;
-    }
-    else {
-      sprintf(msgbuf,"coordinates cannot be retrieved for 3D grids now");
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-      delete [] valueList;
-      delete [] lens;
-      delete [] exclusiveCount;
-      return ESMF_FAILURE;
-
-    }
-    for (int i=start; i<end; ++i)
+    for (int i=0; i<num_coords; ++i)
       outstring << valueList[i] << " ";
     localrc = io_xml->writeElement(name, outstring.str(), nest_level, 0);
     delete [] valueList;

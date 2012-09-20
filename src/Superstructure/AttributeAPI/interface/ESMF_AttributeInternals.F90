@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeInternals.F90,v 1.6 2012/09/05 14:37:38 rokuingh Exp $
+! $Id: ESMF_AttributeInternals.F90,v 1.7 2012/09/20 22:54:16 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -86,7 +86,7 @@ module ESMF_AttributeInternalsMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_AttributeInternals.F90,v 1.6 2012/09/05 14:37:38 rokuingh Exp $'
+               '$Id: ESMF_AttributeInternals.F90,v 1.7 2012/09/20 22:54:16 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -633,7 +633,7 @@ contains
 !
 !EOPI
 
-      integer :: localrc, i
+      integer :: localrc
       
       integer :: localDel
       type(ESMF_StaggerLoc) :: staggerlocl
@@ -648,6 +648,7 @@ contains
       integer(ESMF_KIND_I4), dimension(3) :: exclusiveCount
 
       logical :: getLDe, getStagger, getCoord
+      integer :: ind, i, j, k
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -698,48 +699,62 @@ contains
                                      exclusiveCount=exclusiveCount, rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-                ! check that valueList is large enough
-                min_size = exclusiveCount(1)
-                if (size(valueList) < min_size) then 
-                  call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
-                    msg="The valueList size is not large enough!", &
-                    ESMF_CONTEXT, rcToReturn=rc)
-                endif
-                ! fill the valueList with coordinates
-                valueList(1:exclusiveCount(1)) = coords1D
+              ! check that valueList is large enough
+              min_size = exclusiveCount(1)
+              if (size(valueList) < min_size) then 
+                call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
+                  msg="The valueList size is not large enough!", &
+                  ESMF_CONTEXT, rcToReturn=rc)
+                return
+              endif
+              ! fill the valueList with coordinates
+              valueList(1:exclusiveCount(1)) = coords1D
             else if (dimCount == 2) then
               ! get the coordinates
               call ESMF_GridGetCoord(grid, coordDiml, farrayPtr=coords2D, &
                                      exclusiveCount=exclusiveCount, rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-                ! check that valueList is large enough
-                min_size = exclusiveCount(1)*exclusiveCount(2)
-                if (size(valueList) < min_size) then 
-                  call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
-                    msg="The valueList size is not large enough!", &
-                    ESMF_CONTEXT, rcToReturn=rc)
-                endif
-                ! fill the valueList with coordinates
-                valueList(1:exclusiveCount(1)) = coords2D(1,:)
-                valueList(exclusiveCount(1)+1:exclusiveCount(2)) = coords2D(2,:)
+              ! check that valueList is large enough
+              min_size = exclusiveCount(1)*exclusiveCount(2)
+              if (size(valueList) < min_size) then 
+                call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
+                  msg="The valueList size is not large enough!", &
+                  ESMF_CONTEXT, rcToReturn=rc)
+                return
+              endif
+              ! fill the valueList with coordinates
+              ind = 1
+              do i=1,exclusiveCount(1)
+                do j=1,exclusiveCount(2)
+                  valueList(ind) = coords2D(i,j)
+                  ind = ind + 1
+                enddo
+              enddo
             else if (dimCount == 3) then
               ! get the coordinates
               call ESMF_GridGetCoord(grid, coordDiml, farrayPtr=coords3D, &
                                      exclusiveCount=exclusiveCount, rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-                ! check that valueList is large enough
-                min_size = exclusiveCount(1)*exclusiveCount(2)*exclusiveCount(3)
-                if (size(valueList) < min_size) then 
-                  call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
-                    msg="The valueList size is not large enough!", &
-                    ESMF_CONTEXT, rcToReturn=rc)
-                endif
-                ! fill the valueList with coordinates
-                !valueList(1:exclusiveCount(1)) = coords3D(1,:,:)
-                !valueList(exclusiveCount(1)+1:exclusiveCount(2)) = coords3D(2,:,:)
-                !valueList(exclusiveCount(2)+1:exclusiveCount(3)) = coords3D(3,:,:)
+              ! check that valueList is large enough
+              min_size = exclusiveCount(1)*exclusiveCount(2)*exclusiveCount(3)
+              if (size(valueList) < min_size) then 
+                call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
+                  msg="The valueList size is not large enough!", &
+                  ESMF_CONTEXT, rcToReturn=rc)
+                return
+              endif
+              ! fill the valueList with coordinates
+              ind = 1
+              do i=1,exclusiveCount(1)
+                do j=1,exclusiveCount(2)
+                  do k=1,exclusiveCount(3)
+                    valueList(ind) = coords3D(i,j,k)
+                    ind = ind + 1
+                  enddo
+                enddo
+              enddo
             endif
           else
             call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, &
