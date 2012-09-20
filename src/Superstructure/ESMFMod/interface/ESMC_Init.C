@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.C,v 1.21 2012/09/07 19:11:42 w6ws Exp $
+// $Id: ESMC_Init.C,v 1.22 2012/09/20 16:46:43 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -58,14 +58,23 @@ extern "C" {
     int localrc;
     ESMCI_ArgList   argPtr;
     ESMCI_ArgID     argID;
-    char           *defaultConfigFilename = NULL;
-    ESMC_LogKind_Flag logtype = ESMC_LOGKIND_MULTI;
+
+    ESMC_CalKind_Flag defaultCalendar       = ESMC_CALKIND_NOCALENDAR;
+    char             *defaultConfigFilename = NULL;
+    char             *defaultLogFilename    = NULL;
+    ESMC_LogKind_Flag logtype               = ESMC_LOGKIND_MULTI;
 
     // check the optional argument list
     ESMCI_ArgStart(argPtr, rc);
     while ( (argID=ESMCI_ArgGetID(argPtr)) != ESMCI_ArgLastID ) {
       switch ( argID ) {
+        case ESMCI_InitArgDefaultCalendarID:
+          ESMCI_ArgGetInt(argPtr);
+          break;
         case ESMCI_InitArgDefaultConfigFilenameID:
+          ESMCI_ArgGetString(argPtr);
+          break;
+        case ESMCI_InitArgLogFilenameID:
           ESMCI_ArgGetString(argPtr);
           break;
         case ESMCI_InitArgLogKindFlagID:
@@ -81,8 +90,14 @@ extern "C" {
     ESMCI_ArgStart(argPtr, rc);
     while ( (argID=ESMCI_ArgGetID(argPtr)) != ESMCI_ArgLastID ) {
       switch ( argID ) {
+        case ESMCI_InitArgDefaultCalendarID:
+          defaultCalendar = (ESMC_CalKind_Flag)ESMCI_ArgGetInt(argPtr);
+          break;
         case ESMCI_InitArgDefaultConfigFilenameID:
           defaultConfigFilename = ESMCI_ArgGetString(argPtr);
+          break;
+        case ESMCI_InitArgLogFilenameID:
+          defaultLogFilename = ESMCI_ArgGetString(argPtr);
           break;
         case ESMCI_InitArgLogKindFlagID:
           logtype = (ESMC_LogKind_Flag)ESMCI_ArgGetInt(argPtr);
@@ -97,12 +112,12 @@ extern "C" {
     // todo: if this was implemented right it were to use the defaultConfigFile.
     localrc = ESMCI_Initialize(
         defaultConfigFilename,
-        ESMC_CALKIND_NOCALENDAR,
-        NULL,
+        defaultCalendar,
+        defaultLogFilename,
         logtype);
     
     // todo: use LogErr to do error handling for localrc
-
+    if (rc != NULL) *rc = localrc;
     return localrc;
 
   } // end ESMC_Initialize
