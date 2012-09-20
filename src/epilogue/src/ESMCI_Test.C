@@ -1,4 +1,4 @@
-// $Id: ESMCI_Test.C,v 1.21 2012/08/31 20:34:14 w6ws Exp $
+// $Id: ESMCI_Test.C,v 1.22 2012/09/20 17:41:08 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,    
@@ -25,6 +25,7 @@
 // insert any higher level, 3rd party or system includes here
 #include <stdio.h>
 #include "ESMCI.h"
+#include "ESMC.h"
 
 // remove define which automatically appends the "CONTEXT" to all
 // LogWrite() calls - we do not want to add this file name and line number;
@@ -38,7 +39,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Test.C,v 1.21 2012/08/31 20:34:14 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_Test.C,v 1.22 2012/09/20 17:41:08 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -410,7 +411,7 @@ int TestStart(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  int rc;
+  int rc, rc2;
   ESMCI::VM *globalVM;
   char msgbuf[ESMF_MAXSTR], failMsg[ESMF_MAXSTR];
   int numPETs;
@@ -436,8 +437,14 @@ int TestStart(
   strncpy(logFileName, underScore+1, numChars);
   strcpy(logFileName+numChars, "Log\0");
 
-  rc = ESMCI_Initialize((char *)"", ESMC_CALKIND_NOCALENDAR, logFileName,
-    ESMC_LOGKIND_MULTI);
+  rc = ESMC_Initialize(&rc2,
+    ESMC_InitArgDefaultConfigFilename(NULL),
+    ESMC_InitArgDefaultCalendarFlag(ESMC_CALKIND_NOCALENDAR),
+    ESMC_InitArgLogFilename(logFileName),
+    ESMC_InitArgLogKindFlag(ESMC_LOGKIND_MULTI),
+    ESMC_ArgLast);
+  if (rc2 != ESMF_SUCCESS)
+    rc = rc2;
   if (rc != ESMF_SUCCESS) {
     sprintf(msgbuf, "FAIL  rc=%d, %s, line %d, Unable to initialize ESMF\n", rc,
       file, line);
