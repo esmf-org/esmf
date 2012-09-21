@@ -1,4 +1,4 @@
-% $Id: AppDriver_reqmethods.tex,v 1.20 2012/01/06 20:18:42 svasquez Exp $
+% $Id: AppDriver_reqmethods.tex,v 1.21 2012/09/21 18:18:24 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -83,28 +83,13 @@ standard ESMF Component methods.
 When the AppDriver or parent component code calls
 {\tt ESMF\_<Grid/Cpl>CompCreate()} it has the option to specify a 
 {\tt petList} argument. All of the parent PETs contained in this list become
-resources of the child component. By default all of the parent PETs are 
-provided to the child component.
+resources of the child component. By default, without the {\tt petList} argument, all of the parent PETs are provided to the child component.
 
-Unless the optional {\tt contextflag} argument is used during 
-{\tt ESMF\_<Grid/Cpl>CompCreate()}, to indicate that the child component will
-execute in the same VM as the parent, the child component has the option
-to set certain aspects of how the provided resources are to be used when
-executing child component methods. The resources provided via the parent PETs
-are the associated processing elements (PEs) and virtual address spaces (VASs).
+Typically each component has its own virtual machine (VM) object. However, using the optional {\tt contextflag} argument during {\tt ESMF\_<Grid/Cpl>CompCreate()} a child component can inherit its parent component's VM. Unless a child component inherits the parent VM, it has the option to set certain aspects of how its VM utilizes the provided resources. The resources provided via the parent PETs are the associated processing elements (PEs) and virtual address spaces (VASs).
 
-The optional user-written set vm routine is called from the parent
-through the {\tt ESMF\_<Grid/Cpl>CompSetVM()} library code, and is the only
-place where the child component can set aspects of its own VM before it is 
-started up. The child component's VM must be running before its set services
-routine can be called, and thus the optional {\tt ESMF\_<Grid/Cpl>CompSetVM()}
-call must be placed {\em before} {\tt ESMF\_<Grid/Cpl>CompSetServices()}.
+The optional user-written SetVM routine is called from the parent for the child through the {\tt ESMF\_<Grid/Cpl>CompSetVM()} method. This is the only place where the child component can set aspects of its own VM before it is started up. The child component's VM must be running before the SetServices routine can be called, and thus the parent must call the optional {\tt ESMF\_<Grid/Cpl>CompSetVM()} method {\em before} {\tt ESMF\_<Grid/Cpl>CompSetServices()}.
 
-If called by the parent, the user-code set vm routine has the option to
-specify how the PETs of the child component share the provided parent PEs.
-Further, PETs on the same single system image can be set to run multi-threaded,
-within a reduced number of VAS, allowing a component to leverage shared memory
-concepts.
+Inside the user-code called by the SetVM routine, the component has the option to specify how the PETs share the provided parent PEs. Further, PETs on the same single system image (SSI) can be set to run multi-threaded within a reduced number of virtual address spaces (VAS), allowing a component to leverage shared memory concepts.
 
 Sections \ref{sec:GridSetVM} and \ref{sec:CplSetVM} provide examples for
-simple user-written set vm routines.
+simple user-written SetVM routines.
