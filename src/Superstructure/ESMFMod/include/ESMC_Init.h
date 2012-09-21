@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.32 2012/09/20 16:39:23 w6ws Exp $
+// $Id: ESMC_Init.h,v 1.33 2012/09/21 15:17:10 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -78,17 +78,19 @@ ESMCI_Arg(ESMCI_InitArgLogKindFlagID,ARG)
 //  such as MPICH, to do IO before the MPI environment is initialized. Please
 //  consult the documentation of your MPI implementation for details.
 //
-//  Optional arguments are recognised.  For example to turn off logging
-//  so that no log files would be created, the {\tt ESMC\_Initialize()} call
-//  would be coded as:
-//
-//    ESMC\_Initialize (\&rc,
-//      ESMC\_InitArgLogKindFlag(ESMC\_LOGKIND\_NONE),
-//      ESMC\_ArgLast);
-//
-//  Before exiting the application
-//  the user must call {\tt ESMC\_Finalize()} to release resources 
-//  and clean up the ESMF gracefully.
+//  Optional arguments are recognised.  To indicate the end of the optional
+//  argument list, {\tt ESMC\_ArgLast} must be used.  A minimal call to
+//  {\tt ESMC\_initialize()} would be:
+// \begin{verbatim}
+//    ESMC_Initialize (NULL, ESMC_ArgLast);\end{verbatim}
+//  To turn off logging so that no log files would be created, the
+//  {\tt ESMC\_Initialize()} call would be coded as:
+// \begin{verbatim}
+//    ESMC_Initialize (&rc,
+//      ESMC_InitArgLogKindFlag(ESMC_LOGKIND_NONE),
+//      ESMC_ArgLast);\end{verbatim}
+//  Before exiting the application the user must call {\tt ESMC\_Finalize()}
+//  to release resources and clean up the ESMF gracefully.
 //
 //  The arguments are:
 //  \begin{description}
