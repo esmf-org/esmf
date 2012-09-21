@@ -1,4 +1,4 @@
-! $Id: ESMF_ContainerUTest.F90,v 1.27 2012/09/19 00:57:05 theurich Exp $
+! $Id: ESMF_ContainerUTest.F90,v 1.28 2012/09/21 00:00:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ContainerUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ContainerUTest.F90,v 1.27 2012/09/19 00:57:05 theurich Exp $'
+    '$Id: ESMF_ContainerUTest.F90,v 1.28 2012/09/21 00:00:10 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -68,6 +68,7 @@ program ESMF_ContainerUTest
   type(ESMF_Field)                :: field, fieldOut
   type(ESMF_Field), pointer       :: fieldListOut(:)
   type(ESMF_Field), pointer       :: fieldGarbageList(:)
+  integer, allocatable            :: fieldListOutIndexMap(:)
   character(ESMF_MAXSTR)          :: iString
   character(ESMF_MAXSTR)          :: fieldName
   integer, parameter              :: fieldCount = 5
@@ -391,6 +392,91 @@ program ESMF_ContainerUTest
   call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Container Get fieldList w/ ESMF_ITEMORDER_ABC Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  nullify(fieldListOut)
+  call ESMF_ContainerGet(container, itemList=fieldListOut, &
+    itemorderflag=ESMF_ITEMORDER_ABC, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (associated) w/ ESMF_ITEMORDER_ABC Test"
+  write(failMsg, *) "fieldListOut not associated"
+  call ESMF_Test(associated(fieldListOut), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (size) w/ ESMF_ITEMORDER_ABC Test"
+  write(failMsg, *) "fieldListOut not right size"
+  if (associated(fieldListOut)) then
+    call ESMF_Test(size(fieldListOut)==5, name, failMsg, result, ESMF_SRCLINE)
+  else
+    call ESMF_Test(.false., name, failMsg, result, ESMF_SRCLINE)
+  endif
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (item) w/ ESMF_ITEMORDER_ABC Test"
+  write(failMsg, *) "fieldListOut does not contain correct Fields"
+  loopResult = .false. ! initialize
+  if (associated(fieldListOut)) then
+    loopResult = .true. ! initialize
+    do i=1, size(fieldListOut)
+      if (fieldListOut(i)/=fieldList(i)) loopResult = .false.
+    enddo
+  endif
+  call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Container Get fieldList w/ ESMF_ITEMORDER_ADDORDER Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  nullify(fieldListOut)
+  call ESMF_ContainerGet(container, itemList=fieldListOut, &
+    itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (associated) w/ ESMF_ITEMORDER_ADDORDER Test"
+  write(failMsg, *) "fieldListOut not associated"
+  call ESMF_Test(associated(fieldListOut), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (size) w/ ESMF_ITEMORDER_ADDORDER Test"
+  write(failMsg, *) "fieldListOut not right size"
+  if (associated(fieldListOut)) then
+    call ESMF_Test(size(fieldListOut)==5, name, failMsg, result, ESMF_SRCLINE)
+  else
+    call ESMF_Test(.false., name, failMsg, result, ESMF_SRCLINE)
+  endif
+  
+  ! the 3rd item was removed and later replaceadd'ed, putting it last
+  allocate(fieldListOutIndexMap(fieldCount))
+  fieldListOutIndexMap(1) = 1
+  fieldListOutIndexMap(2) = 2
+  fieldListOutIndexMap(3) = 4
+  fieldListOutIndexMap(4) = 5
+  fieldListOutIndexMap(5) = 3
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (item) w/ ESMF_ITEMORDER_ADDORDER Test"
+  write(failMsg, *) "fieldListOut does not contain correct Fields"
+  loopResult = .false. ! initialize
+  if (associated(fieldListOut)) then
+    loopResult = .true. ! initialize
+    do i=1, size(fieldListOut)
+      if (fieldListOut(i)/=fieldList(fieldListOutIndexMap(i))) &
+        loopResult = .false.
+    enddo
+  endif
+  call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
   ! final garbage collection
   do i=1, size(fieldListOut)
     call ESMF_FieldGet(fieldListOut(i), name=fieldName, rc=rc)
@@ -523,7 +609,7 @@ program ESMF_ContainerUTest
 
   !------------------------------------------------------------------------
   allocate(fieldList(1))
-  fieldList(1) = ESMF_FieldEmptyCreate(name="testField2", rc=rc)
+  fieldList(1) = ESMF_FieldEmptyCreate(name="testField0", rc=rc)
   if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_ContainerAdd(container, itemList=fieldList, rc=rc)
   if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -585,6 +671,82 @@ program ESMF_ContainerUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "Container Get fieldList for itemName w/ ESMF_ITEMORDER_ABC Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  nullify(fieldListOut)
+  call ESMF_ContainerGet(container, itemName="testField1", &
+    itemorderflag=ESMF_ITEMORDER_ABC, itemList=fieldListOut, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (associated) w/ ESMF_ITEMORDER_ABC Test"
+  write(failMsg, *) "fieldListOut not associated"
+  call ESMF_Test(associated(fieldListOut), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (size) Test"
+  write(failMsg, *) "fieldListOut not right size"
+  if (associated(fieldListOut)) then
+    call ESMF_Test(size(fieldListOut)==fieldCountOut, name, failMsg, result, ESMF_SRCLINE)
+  else
+    call ESMF_Test(.false., name, failMsg, result, ESMF_SRCLINE)
+  endif
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (item) w/ ESMF_ITEMORDER_ABC Test"
+  write(failMsg, *) "fieldListOut does not contain correct Fields"
+  loopResult = .false. ! initialize
+  if (associated(fieldListOut)) then
+    loopResult = .true. ! initialize
+    do i=1, size(fieldListOut)
+      if (fieldListOut(i)/=field) loopResult = .false.
+    enddo
+  endif
+  call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Container Get fieldList for itemName w/ ESMF_ITEMORDER_ADDORDER Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  nullify(fieldListOut)
+  call ESMF_ContainerGet(container, itemName="testField1", &
+    itemorderflag=ESMF_ITEMORDER_ADDORDER, itemList=fieldListOut, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (associated) w/ ESMF_ITEMORDER_ADDORDER Test"
+  write(failMsg, *) "fieldListOut not associated"
+  call ESMF_Test(associated(fieldListOut), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (size) Test"
+  write(failMsg, *) "fieldListOut not right size"
+  if (associated(fieldListOut)) then
+    call ESMF_Test(size(fieldListOut)==fieldCountOut, name, failMsg, result, ESMF_SRCLINE)
+  else
+    call ESMF_Test(.false., name, failMsg, result, ESMF_SRCLINE)
+  endif
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (item) w/ ESMF_ITEMORDER_ADDORDER Test"
+  write(failMsg, *) "fieldListOut does not contain correct Fields"
+  loopResult = .false. ! initialize
+  if (associated(fieldListOut)) then
+    loopResult = .true. ! initialize
+    do i=1, size(fieldListOut)
+      if (fieldListOut(i)/=field) loopResult = .false.
+    enddo
+  endif
+  call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Container Replace Field in multiple item container multi Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ContainerReplace(container, itemList=(/field/), multiflag=.true., &
@@ -598,6 +760,125 @@ program ESMF_ContainerUTest
   call ESMF_ContainerGet(container, itemCount=fieldCountOut, rc=rc)
   if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_Test(fieldCountOut==2, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Container Get fieldList Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  nullify(fieldListOut)
+  call ESMF_ContainerGet(container, itemList=fieldListOut, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (associated) Test"
+  write(failMsg, *) "fieldListOut not associated"
+  call ESMF_Test(associated(fieldListOut), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (size) Test"
+  write(failMsg, *) "fieldListOut not right size"
+  if (associated(fieldListOut)) then
+    call ESMF_Test(size(fieldListOut)==2, name, failMsg, result, ESMF_SRCLINE)
+  else
+    call ESMF_Test(.false., name, failMsg, result, ESMF_SRCLINE)
+  endif
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (item) Test"
+  write(failMsg, *) "fieldListOut does not contain correct Fields"
+  loopResult = .false. ! initialize
+  if (associated(fieldListOut)) then
+    if (size(fieldListOut)==2) then
+      loopResult = .true. ! initialize
+      ! default order will be alphabetical
+      if (fieldListOut(1)/=fieldList(1)) loopResult = .false. ! "testField0"
+      if (fieldListOut(2)/=field) loopResult = .false.        ! "testField1"
+    endif
+  endif
+  call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Container Get fieldList w/ ESMF_ITEMORDER_ABC Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  nullify(fieldListOut)
+  call ESMF_ContainerGet(container, itemList=fieldListOut, &
+    itemorderflag=ESMF_ITEMORDER_ABC, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (associated) w/ ESMF_ITEMORDER_ABC Test"
+  write(failMsg, *) "fieldListOut not associated"
+  call ESMF_Test(associated(fieldListOut), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (size) w/ ESMF_ITEMORDER_ABC Test"
+  write(failMsg, *) "fieldListOut not right size"
+  if (associated(fieldListOut)) then
+    call ESMF_Test(size(fieldListOut)==2, name, failMsg, result, ESMF_SRCLINE)
+  else
+    call ESMF_Test(.false., name, failMsg, result, ESMF_SRCLINE)
+  endif
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (item) w/ ESMF_ITEMORDER_ABC Test"
+  write(failMsg, *) "fieldListOut does not contain correct Fields"
+  loopResult = .false. ! initialize
+  if (associated(fieldListOut)) then
+    if (size(fieldListOut)==2) then
+      loopResult = .true. ! initialize
+      ! explicitly requested order to be alphabetical
+      if (fieldListOut(1)/=fieldList(1)) loopResult = .false. ! "testField0"
+      if (fieldListOut(2)/=field) loopResult = .false.        ! "testField1"
+    endif
+  endif
+  call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Container Get fieldList w/ ESMF_ITEMORDER_ADDORDER Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  nullify(fieldListOut)
+  call ESMF_ContainerGet(container, itemList=fieldListOut, &
+    itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (associated) w/ ESMF_ITEMORDER_ADDORDER Test"
+  write(failMsg, *) "fieldListOut not associated"
+  call ESMF_Test(associated(fieldListOut), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (size) w/ ESMF_ITEMORDER_ADDORDER Test"
+  write(failMsg, *) "fieldListOut not right size"
+  if (associated(fieldListOut)) then
+    call ESMF_Test(size(fieldListOut)==2, name, failMsg, result, ESMF_SRCLINE)
+  else
+    call ESMF_Test(.false., name, failMsg, result, ESMF_SRCLINE)
+  endif
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get fieldListOut (item) w/ ESMF_ITEMORDER_ADDORDER Test"
+  write(failMsg, *) "fieldListOut does not contain correct Fields"
+  loopResult = .false. ! initialize
+  if (associated(fieldListOut)) then
+    if (size(fieldListOut)==2) then
+      loopResult = .true. ! initialize
+      ! explicitly requested order of how items were added
+      if (fieldListOut(1)/=field) loopResult = .false.        ! "testField1"
+      if (fieldListOut(2)/=fieldList(1)) loopResult = .false. ! "testField0"
+    endif
+  endif
+  call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
   !NEX_UTest
