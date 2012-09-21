@@ -1,4 +1,4 @@
-% $Id: Array_refdoc.ctex,v 1.33 2012/01/06 20:15:15 svasquez Exp $ 
+% $Id: Array_refdoc.ctex,v 1.34 2012/09/21 23:16:48 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -21,8 +21,17 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{\Large {\bf Array Reference}}
+\newcommand{\mytitle}{\Large {\bf Array Fortran Reference}}
 \newcommand{\myauthors}{\large {\it Gerhard Theurich}}
+% set a standard paragraph style
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+% these are temporary patches until something more
+% permanent is done to the protex script.
+\newlength{\oldparskip}
+\newlength{\oldparindent}
+\newlength{\oldbaselineskip}
 #endif
 
 #ifdef STANDALONE
@@ -39,6 +48,8 @@
 \tableofcontents
 
 \newpage
+\setlength{\parskip}{1.5ex}
+
 #endif
 
 

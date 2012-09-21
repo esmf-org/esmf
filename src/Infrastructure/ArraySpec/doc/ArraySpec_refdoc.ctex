@@ -1,4 +1,4 @@
-% $Id: ArraySpec_refdoc.ctex,v 1.6 2008/09/26 21:11:36 cdeluca Exp $
+% $Id: ArraySpec_refdoc.ctex,v 1.7 2012/09/21 23:17:05 theurich Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -13,8 +13,17 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{ArraySpec Design}
-\newcommand{\myauthors}{Nancy Collins}
+\newcommand{\mytitle}{\Large {\bf ArraySpec Fortran Reference}}
+\newcommand{\myauthors}{\large {\it Gerhard Theurich}}
+% set a standard paragraph style
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+% these are temporary patches until something more
+% permanent is done to the protex script.
+\newlength{\oldparskip}
+\newlength{\oldparindent}
+\newlength{\oldbaselineskip}
 #endif
 
 #ifdef STANDALONE
@@ -31,6 +40,8 @@
 \tableofcontents
 
 \newpage
+\setlength{\parskip}{1.5ex}
+
 #endif
 
 \section{ArraySpec Class}
