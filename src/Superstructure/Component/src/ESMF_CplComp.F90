@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.170 2012/05/10 02:16:15 w6ws Exp $
+! $Id: ESMF_CplComp.F90,v 1.171 2012/09/21 18:19:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.170 2012/05/10 02:16:15 w6ws Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.171 2012/09/21 18:19:46 theurich Exp $'
 
 !==============================================================================
 !
@@ -2041,7 +2041,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompSetServicesShObj"
 !BOP
-! !IROUTINE: ESMF_CplCompSetServices - Call user routine, located in shared object, to register CplComp methods
+! !IROUTINE: ESMF_CplCompSetServices - Call user routine through name lookup, to register CplComp methods
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_CplCompSetServices()
@@ -2062,11 +2062,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Call into user provided routine which is responsible for setting
+! Call into a user provided routine which is responsible for setting
 ! Component's Initialize(), Run(), and Finalize() services. The named
-! {\tt userRoutine} must exist in the shared object file specified in the
-! {\tt sharedObj} argument. All of the platform specific details about 
-! dynamic linking and loading apply.
+! {\tt userRoutine} must exist in the executable, or in the shared object
+! specified by {\tt sharedObj}. In the latter case all of the platform
+! specific details about dynamic linking and loading apply.
 !    
 ! The arguments are:
 ! \begin{description}
@@ -2389,7 +2389,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompSetVMShObj"
 !BOP
-! !IROUTINE: ESMF_CplCompSetVM - Set CplComp VM properties in routine located in shared object
+! !IROUTINE: ESMF_CplCompSetVM - Call user routine through name lookup, to set CplComp VM properties
 ! !INTERFACE:
   ! Private name; call using ESMF_CplCompSetVM()
   recursive subroutine ESMF_CplCompSetVMShObj(cplcomp, userRoutine, &
@@ -2410,9 +2410,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! Optionally call into user provided {\tt userRoutine} which is responsible for
-! for setting Component's VM properties. The named {\tt userRoutine} must exist
-! in the shared object file specified in the {\tt sharedObj} argument. All of
-! the platform specific details about dynamic linking and loading apply.
+! for setting Component's VM properties. The named
+! {\tt userRoutine} must exist in the executable, or in the shared object
+! specified by {\tt sharedObj}. In the latter case all of the platform
+! specific details about dynamic linking and loading apply.
 !    
 ! The arguments are:
 ! \begin{description}
