@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.33 2012/09/21 15:17:10 w6ws Exp $
+// $Id: ESMC_Init.h,v 1.34 2012/09/21 15:43:49 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -83,7 +83,8 @@ ESMCI_Arg(ESMCI_InitArgLogKindFlagID,ARG)
 //  {\tt ESMC\_initialize()} would be:
 // \begin{verbatim}
 //    ESMC_Initialize (NULL, ESMC_ArgLast);\end{verbatim}
-//  To turn off logging so that no log files would be created, the
+//  The optional arguments are specified using the {\tt ESMC\_InitArg} macros.
+//  For example, to turn off logging so that no log files would be created, the
 //  {\tt ESMC\_Initialize()} call would be coded as:
 // \begin{verbatim}
 //    ESMC_Initialize (&rc,
