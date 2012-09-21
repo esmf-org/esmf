@@ -1,4 +1,4 @@
-% $Id: AppDriver_reqmethods.tex,v 1.21 2012/09/21 18:18:24 theurich Exp $
+% $Id: AppDriver_reqmethods.tex,v 1.22 2012/09/21 22:08:47 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@ For technical reasons {\em none} of the arguments in user-provided subroutines
 must be declared as {\em optional}.
 
 The only {\em required} public interface of a Component is its
-set services method.  This subroutine must have an
+SetServices method.  This subroutine must have an
 externally accessible name (be a public symbol), take a component
 as the first argument, and an integer return code as the second. 
 Both arguments are required and must {\em not} be declared as 
@@ -33,23 +33,38 @@ second argument. The subroutine name is not predefined, it is set by the
 component writer, but must be provided as part of the component 
 documentation.
 
-The required function that the set services subroutine must provide is to
+The required function that the SetServices subroutine must provide is to
 specify the user-code entry points for the standard ESMF Component methods. To
-this end the user-written set services routine calls the
+this end the user-written SetServices routine calls the 
 
 {\tt ESMF\_<Grid/Cpl>CompSetEntryPoint()} method to set each 
 Component entry point.
 
 See sections \ref{sec:GridSetServ} and \ref{sec:CplSetServ} for examples of
-how to write a user-code set services routine.
+how to write a user-code SetServices routine.
 
-Note that a component does not call its own set services routine;
+Note that a component does not call its own SetServices routine;
 the AppDriver or parent component code, which is creating a component, 
-will first call {\tt ESMF\_<Grid/Cpl>CompCreate()} to create an "empty" 
-component, and then must call into {\tt ESMF\_<Grid/Cpl>CompSetServices()}, 
-supplying the user-code set services routine as an argument. The framework
-calls into the user-code set services, after the Component's VM has been
-started up.
+will first call {\tt ESMF\_<Grid/Cpl>CompCreate()} to create a component object, and then must call into {\tt ESMF\_<Grid/Cpl>CompSetServices()}, supplying the user-code SetServices routine as an argument. The framework then calls into the user-code SetServices, after the Component's VM has been started up.
+
+It is good practice to package all user-code implementing a component into a Fortran module, with the user-code SetService routine being the only public module method. ESMF implements two mechanisms for accessing the user-code SetServices routine from the calling AppDriver or parent component.
+
+\begin{itemize}
+\item {\bf Fortran USE association}: The AppDriver or parent component utilizes the standard Fortran USE statement on the component module to make all public entities available. The user-code SetServices routine can then be passed directly into the {\tt ESMF\_<Grid/Cpl>CompSetServices()} interface documented in \ref{GridComp:SetServices} and \ref{CplComp:SetServices}, respectively.
+
+{\em Pros}: Standard Fortran module use: all name mangeling is handled by the Fortran compiler, completely transparent to the user.
+
+{\em Cons}: Fortran currently has no mechanism to implement a "smart" dependency scheme for code that depends on other code through USE association. Thus any change in a lower level component module (even just adding or changing a comment) will trigger a complete recompile of all of the higher level components throughout the component hierarchy.
+
+\begin{sloppypar}
+\item {\bf Name lookup}: The AppDriver or parent component specifies the user-code SetServices routine by name. The actual lookup does not occur until runtime. The name string is passed into the {\tt ESMF\_<Grid/Cpl>CompSetServices()} interface documented in \ref{GridComp:SetServicesShObj} and \ref{CplComp:SetServicesShObj}, respectively.
+
+{\em Pros}: Avoids Fortran USE dependencies: a change to lower level component code will not trigger a complete recompile of all of the higher level components throughout the component hierarchy.
+
+{\em Cons}: The user-code SetServices interface is not checked by the compiler. User must deal explicitly with all name mangeling issues: 1) Accessing a module routine requires knowing the name mangeling rules of the specific compiler. 2) Alternatively the user-code SetServices routine may be implemented as an external routine (avoiding the module name mangeling), but then the user must ensure uniqueness of the name. 3) Fortran compilers typically append one or two underscores on a symbol name. This must be considered when passing the name into the {\tt ESMF\_<Grid/Cpl>CompSetServices()} method.
+
+\end{sloppypar}
+\end{itemize}
 
 
 \subsubsection{User-code {\tt Initialize}, {\tt Run}, and {\tt Finalize} methods}
@@ -61,7 +76,7 @@ ReadRestart methods.
 
 Sections \ref{sec:GridSetServ} and \ref{sec:CplSetServ} provide examples
 of how the entry points for Initialize, Run, and Finalize are set during
-the user-code set services routine, using the 
+the user-code SetServices routine, using the 
 {\tt ESMF\_<Grid/Cpl>CompSetEntryPoint()} library call.
 
 All standard user-code methods must abide {\em exactly} to the prescribed

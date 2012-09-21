@@ -1,4 +1,4 @@
-% $Id: ESMC_crefdoc.ctex,v 1.29 2012/09/06 17:58:53 theurich Exp $
+% $Id: ESMC_crefdoc.ctex,v 1.30 2012/09/21 22:08:52 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -45,6 +45,15 @@
 \setlength{\oddsidemargin}{0in}
 \setlength{\unitlength}{1truecm}
 
+% need the following for protex
+\newlength{\oldparskip}
+\newlength{\oldparindent}
+\newlength{\oldbaselineskip}
+% set a standard paragraph style
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+
 % setting hbadness this high is supposed to suppress warnings about underfull 
 % boxes, which seems to work.  setting tolerance to 10000 was supposed to
 % suppress all the overfull box warnings but it seemed to have no effect  
@@ -66,6 +75,8 @@
 
 \newpage
 \tableofcontents
+
+\setlength{\parskip}{1.5ex}
 
 \newpage
 \begin{htmlonly}

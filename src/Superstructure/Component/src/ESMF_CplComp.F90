@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.171 2012/09/21 18:19:46 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.172 2012/09/21 22:08:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@ module ESMF_CplCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_CplComp.F90,v 1.171 2012/09/21 18:19:46 theurich Exp $'
+    '$Id: ESMF_CplComp.F90,v 1.172 2012/09/21 22:08:50 theurich Exp $'
 
 !==============================================================================
 !
@@ -1982,6 +1982,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
+! \label{CplComp:SetServices}
 ! Call into user provided {\tt userRoutine} which is responsible for
 ! for setting Component's Initialize(), Run(), and Finalize() services.
 !    
@@ -2062,6 +2063,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
+! \label{CplComp:SetServicesShObj}
 ! Call into a user provided routine which is responsible for setting
 ! Component's Initialize(), Run(), and Finalize() services. The named
 ! {\tt userRoutine} must exist in the executable, or in the shared object

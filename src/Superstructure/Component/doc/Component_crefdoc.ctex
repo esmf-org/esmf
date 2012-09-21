@@ -1,4 +1,4 @@
-% $Id: Component_crefdoc.ctex,v 1.24 2012/01/06 20:18:53 svasquez Exp $
+% $Id: Component_crefdoc.ctex,v 1.25 2012/09/21 22:08:49 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -23,6 +23,10 @@
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{\Large {\bf Component Reference}}
 \newcommand{\myauthors}{\large {\it Gerhard Theurich}}
+% set a standard paragraph style
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
 % these are temporary patches until something more
 % permanent is done to the protex script.
 \newlength{\oldparskip}
@@ -44,6 +48,8 @@
 \tableofcontents
 
 \newpage
+\setlength{\parskip}{1.5ex}
+
 #endif
 
 %%%%%%%%%%%%% Gridded Component Class %%%%%%%%%

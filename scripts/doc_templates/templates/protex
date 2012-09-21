@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  $Id: protex,v 1.21 2011/05/13 17:47:35 theurich Exp $
+#  $Id: protex,v 1.22 2012/09/21 22:08:45 theurich Exp $
 #
 #BOP
 #
@@ -802,9 +802,9 @@ KEY:       foreach $key ( @keys ) {
   print '%...............................................................';
  
   # see comment above where these are originally set.
-  #print "\\setlength{\\parskip}{\\oldparskip}";
-  #print "\\setlength{\\parindent}{\\oldparindent}";
-  #print "\\setlength{\\baselineskip}{\\oldbaselineskip}";
+  print "\\setlength{\\parskip}{\\oldparskip}";
+  print "\\setlength{\\parindent}{\\oldparindent}";
+  print "\\setlength{\\baselineskip}{\\oldbaselineskip}";
 
   unless ( $opt_b ) {
      print "\\end{document}";
@@ -1049,11 +1049,11 @@ sub print_preamble {
     # this fully self-contained.
     # nsc feb 2003
 
-    #print "\\setlength{\\oldparskip}{\\parskip}";
-    print "\\setlength{\\parskip}{0pt}";
-    #print "\\setlength{\\oldparindent}{\\parindent}";
+    print "\\setlength{\\oldparskip}{\\parskip}";
+    print "\\setlength{\\parskip}{1.5ex}";
+    print "\\setlength{\\oldparindent}{\\parindent}";
     print "\\setlength{\\parindent}{0pt}";
-    #print "\\setlength{\\oldbaselineskip}{\\baselineskip}";
+    print "\\setlength{\\oldbaselineskip}{\\baselineskip}";
     print "\\setlength{\\baselineskip}{11pt}";
 
 }# end sub print_preamble
