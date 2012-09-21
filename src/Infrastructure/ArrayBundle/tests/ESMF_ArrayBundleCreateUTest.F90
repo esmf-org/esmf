@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.28 2012/09/21 04:17:42 theurich Exp $
+! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.29 2012/09/21 05:59:29 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_ArrayBundleCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.28 2012/09/21 04:17:42 theurich Exp $'
+    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.29 2012/09/21 05:59:29 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -55,7 +55,7 @@ program ESMF_ArrayBundleCreateUTest
   type(ESMF_Array):: array(10), arrayOut(5), arraySingle
   type(ESMF_Array), pointer :: arrays(:)
   type(ESMF_Array), allocatable :: arrayList(:)
-  character(len=ESMF_MAXSTR):: arrayNameList(5)
+  character(len=ESMF_MAXSTR):: arrayNameList(9)
   integer:: arrayCount, i
   type(ESMF_ArrayBundle):: arraybundle, arraybundleAlias
   character (len=80)      :: arrayName
@@ -143,7 +143,6 @@ program ESMF_ArrayBundleCreateUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  ! Testing ESMF_ArrayBundleAssignment(=)()
   write(name, *) "ArrayBundle assignment and equality Test"
   write(failMsg, *) "Did not compare correctly"
   arraybundleAlias = arraybundle
@@ -159,7 +158,6 @@ program ESMF_ArrayBundleCreateUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  ! Testing ESMF_ArrayBundleOperator(==)()
   write(name, *) "ArrayBundle equality after destroy Test"
   write(failMsg, *) "Did not compare correctly"
   arraybundleBool = (arraybundleAlias==arraybundle)
@@ -167,7 +165,6 @@ program ESMF_ArrayBundleCreateUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest
-  ! Testing ESMF_ArrayBundleOperator(/=)()
   write(name, *) "ArrayBundle non-equality after destroy Test"
   write(failMsg, *) "Did not compare correctly"
   arraybundleBool = (arraybundleAlias/=arraybundle)
@@ -393,6 +390,12 @@ program ESMF_ArrayBundleCreateUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Check arrayCount Test"
+  write(failMsg, *) "Value incorrect"
+  call ESMF_Test((arrayCount==3), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
   allocate(arrayList(arrayCount))
   
   !------------------------------------------------------------------------
@@ -419,6 +422,153 @@ program ESMF_ArrayBundleCreateUTest
   endif
   call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
   
+  deallocate(arrayList)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ArrayBundleGet arrayCount Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleGet(arraybundle, arrayCount=arrayCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Check arrayCount Test"
+  write(failMsg, *) "Value incorrect"
+  call ESMF_Test((arrayCount==9), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+
+  allocate(arrayList(arrayCount))
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ArrayBundleGet arrayList default order (abc) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleGet(arraybundle, arrayList=arrayList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get arrayList for arrayname default order (abc) Test"
+  write(failMsg, *) "arrayList contains incorrect Arrays"
+  loopResult = .false. ! initialize
+  if (allocated(arrayList)) then
+    if (arrayCount == 9) then
+      loopResult = .true. ! initialize
+      do i=1, arrayCount
+        call ESMF_ArrayGet(arrayList(i), name=arrayName, rc=rc)
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        print *, "name of arrayList(",i,") is: ", arrayName
+        if (i==1 .and. trim(arrayName)/="MyArray2") loopResult = .false.
+        if (i==2 .and. trim(arrayName)/="MyArray4") loopResult = .false.
+        if (i==3 .and. trim(arrayName)/="MyArray4") loopResult = .false.
+        if (i==4 .and. trim(arrayName)/="MyArray4") loopResult = .false.
+        if (i==5 .and. trim(arrayName)/="MyArray5") loopResult = .false.
+        if (i==6 .and. trim(arrayName)/="MyArray5") loopResult = .false.
+        if (i==7 .and. trim(arrayName)/="MyArray6") loopResult = .false.
+        if (i==8 .and. trim(arrayName)/="MyArray6") loopResult = .false.
+        if (i==9 .and. trim(arrayName)/="MyArray6") loopResult = .false.
+      enddo
+    endif
+  endif
+  call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ArrayBundleGet arrayNameList default order (abc) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleGet(arraybundle, arrayNameList=arrayNameList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get arrayNameList for arrayname default order (abc) Test"
+  write(failMsg, *) "arrayNameList contains incorrect names"
+  loopResult = .false. ! initialize
+  loopResult = .true. ! initialize
+  do i=1, arrayCount
+    arrayName = arrayNameList(i)
+    print *, "arrayNameList(",i,") is: ", arrayName
+    if (i==1 .and. trim(arrayName)/="MyArray2") loopResult = .false.
+    if (i==2 .and. trim(arrayName)/="MyArray4") loopResult = .false.
+    if (i==3 .and. trim(arrayName)/="MyArray4") loopResult = .false.
+    if (i==4 .and. trim(arrayName)/="MyArray4") loopResult = .false.
+    if (i==5 .and. trim(arrayName)/="MyArray5") loopResult = .false.
+    if (i==6 .and. trim(arrayName)/="MyArray5") loopResult = .false.
+    if (i==7 .and. trim(arrayName)/="MyArray6") loopResult = .false.
+    if (i==8 .and. trim(arrayName)/="MyArray6") loopResult = .false.
+    if (i==9 .and. trim(arrayName)/="MyArray6") loopResult = .false.
+  enddo
+  call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ArrayBundleGet arrayList ESMF_ITEMORDER_ADDORDER Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleGet(arraybundle, arrayList=arrayList, &
+    itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get arrayList for arrayname ESMF_ITEMORDER_ADDORDER Test"
+  write(failMsg, *) "arrayList contains incorrect Arrays"
+  loopResult = .false. ! initialize
+  if (allocated(arrayList)) then
+    if (arrayCount == 9) then
+      loopResult = .true. ! initialize
+      do i=1, arrayCount
+        call ESMF_ArrayGet(arrayList(i), name=arrayName, rc=rc)
+        if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        print *, "name of arrayList(",i,") is: ", arrayName
+        if (i==1 .and. trim(arrayName)/="MyArray2") loopResult = .false.
+        if (i==2 .and. trim(arrayName)/="MyArray6") loopResult = .false.
+        if (i==3 .and. trim(arrayName)/="MyArray4") loopResult = .false.
+        if (i==4 .and. trim(arrayName)/="MyArray4") loopResult = .false.
+        if (i==5 .and. trim(arrayName)/="MyArray6") loopResult = .false.
+        if (i==6 .and. trim(arrayName)/="MyArray5") loopResult = .false.
+        if (i==7 .and. trim(arrayName)/="MyArray4") loopResult = .false.
+        if (i==8 .and. trim(arrayName)/="MyArray6") loopResult = .false.
+        if (i==9 .and. trim(arrayName)/="MyArray5") loopResult = .false.
+      enddo
+    endif
+  endif
+  call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ArrayBundleGet arrayNameList ESMF_ITEMORDER_ADDORDER Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleGet(arraybundle, arrayNameList=arrayNameList, &
+    itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify Container Get arrayNameList for arrayname ESMF_ITEMORDER_ADDORDER Test"
+  write(failMsg, *) "arrayNameList contains incorrect names"
+  loopResult = .false. ! initialize
+  loopResult = .true. ! initialize
+  do i=1, arrayCount
+    arrayName = arrayNameList(i)
+    print *, "arrayNameList(",i,") is: ", arrayName
+    if (i==1 .and. trim(arrayName)/="MyArray2") loopResult = .false.
+    if (i==2 .and. trim(arrayName)/="MyArray6") loopResult = .false.
+    if (i==3 .and. trim(arrayName)/="MyArray4") loopResult = .false.
+    if (i==4 .and. trim(arrayName)/="MyArray4") loopResult = .false.
+    if (i==5 .and. trim(arrayName)/="MyArray6") loopResult = .false.
+    if (i==6 .and. trim(arrayName)/="MyArray5") loopResult = .false.
+    if (i==7 .and. trim(arrayName)/="MyArray4") loopResult = .false.
+    if (i==8 .and. trim(arrayName)/="MyArray6") loopResult = .false.
+    if (i==9 .and. trim(arrayName)/="MyArray5") loopResult = .false.
+  enddo
+  call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+
+  deallocate(arrayList)
+
   !------------------------------------------------------------------------
   !------------------------------------------------------------------------
   !------------------------------------------------------------------------
