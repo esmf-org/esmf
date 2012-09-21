@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.141 2012/09/12 03:49:29 gold2718 Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.142 2012/09/21 20:56:12 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.141 2012/09/12 03:49:29 gold2718 Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.142 2012/09/21 20:56:12 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1233,13 +1233,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
     ! Private name; call using ESMF_FieldBundleGet()   
     subroutine ESMF_FieldBundleGetList(fieldbundle, fieldName, fieldList, &
-      keywordEnforcer, rc)
+      keywordEnforcer, itemorderflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle), intent(in)            :: fieldbundle
     character(len=*),       intent(in)            :: fieldName
     type(ESMF_Field),       intent(out)           :: fieldList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_ItemOrder_Flag), intent(in), optional :: itemorderflag
     integer,                intent(out), optional :: rc
 !
 ! !STATUS:
@@ -1259,6 +1260,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     List of Fields in {\tt ESMF\_FieldBundle} that match {\tt fieldName}. The
 !     argument must be allocated to be at least of size {\tt fieldCount}
 !     returned for this {\tt fieldName}.
+!   \item [{[itemorderflag]}]
+!     Specifies the order of the returned items in the {\tt fieldList}.
+!     The default is {\tt ESMF\_ITEMORDER\_ABC}.
+!     See \ref{const:itemorderflag} for a full list of options.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1268,10 +1273,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                       :: localrc      ! local return code
     integer                       :: fieldCount
     type(ESMF_Field), pointer     :: l_fieldList(:)
+    type(ESMF_ItemOrder_Flag)     :: l_itemorderflag
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    l_itemorderflag = ESMF_ITEMORDER_ABC
+    if(present(itemorderflag)) l_itemorderflag = itemorderflag
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
@@ -1299,7 +1308,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     call ESMF_ContainerGet(fieldbundle%this%container, trim(fieldName), &
-      l_fieldList, rc=localrc)
+      l_fieldList, itemorderflag=l_itemorderflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1324,7 +1333,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Private name; call using ESMF_FieldBundleGet()   
     subroutine ESMF_FieldBundleGetListAll(fieldbundle, keywordEnforcer, &
       geomtype, grid, locstream, mesh, xgrid, &
-      fieldCount, fieldList, fieldNameList, name, rc)
+      fieldCount, fieldList, fieldNameList, itemorderflag, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),  intent(in)            :: fieldbundle
@@ -1337,6 +1346,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(out), optional :: fieldCount
     type(ESMF_Field),        intent(out), optional :: fieldList(:)
     character(len=*),        intent(out), optional :: fieldNameList(:)
+    type(ESMF_ItemOrder_Flag), intent(in),optional :: itemorderflag
     character(len=*),        intent(out), optional :: name
     integer,                 intent(out), optional :: rc
 !
@@ -1372,6 +1382,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         Upon return holds a list of the names of the field bundled in 
 !         {\tt ESMF\_FieldBundle}. The argument must be allocated to be at least of
 !         size {\tt fieldCount}.
+!   \item [{[itemorderflag]}]
+!         Specifies the order of the returned items in the {\tt fieldList}.
+!         The default is {\tt ESMF\_ITEMORDER\_ABC}.
+!         See \ref{const:itemorderflag} for a full list of options.
 !   \item [{[name]}]
 !         Name of the fieldbundle object.
 !   \item [{[rc]}]
