@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.7 2011/06/30 06:00:19 theurich Exp $
+! $Id: user_model2.F90,v 1.8 2012/09/21 04:07:24 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -114,20 +114,22 @@ module user_model2
     call ESMF_VMGet(vm, petCount=petCount, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    ! Create the destination Array and add it to the import State
+    ! Create the destination Arrays and add them to the import State
+    ! -> choose Z, Y, X in the name as to ensure that alphabetic ordering
+    ! -> would _not_ result in correct mapping during communication calls
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/100,150/), &
       regDecomp=(/1,petCount/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     array(1) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-      indexflag=ESMF_INDEX_GLOBAL, name="array data 1", rc=rc)
+      indexflag=ESMF_INDEX_GLOBAL, name="Z array data 1", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     array(2) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-      indexflag=ESMF_INDEX_GLOBAL, name="array data 2", rc=rc)
+      indexflag=ESMF_INDEX_GLOBAL, name="Y array data 2", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     array(3) = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
-      indexflag=ESMF_INDEX_GLOBAL, name="array data 3", rc=rc)
+      indexflag=ESMF_INDEX_GLOBAL, name="X array data 3", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     arraybundle = ESMF_ArrayBundleCreate(arrayList=array, name="dstAryBndl", &
       rc=rc)
@@ -171,7 +173,14 @@ module user_model2
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Get the destination Arrays from the ArrayBundle
-    call ESMF_ArrayBundleGet(arraybundle, arrayList=array, rc=rc)
+    call ESMF_ArrayBundleGet(arraybundle, "Z array data 1", &
+      array=array(1), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayBundleGet(arraybundle, "Y array data 2", &
+      array=array(2), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_ArrayBundleGet(arraybundle, "X array data 3", &
+      array=array(3), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Gain access to actual data via F90 array pointer

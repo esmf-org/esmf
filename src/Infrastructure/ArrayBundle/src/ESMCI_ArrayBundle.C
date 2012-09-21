@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.49 2012/09/20 21:19:26 w6ws Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.50 2012/09/21 04:07:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.49 2012/09/20 21:19:26 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.50 2012/09/21 04:07:22 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -638,7 +638,7 @@ int ArrayBundle::haloStore(
     // construct local matchList
     vector<int> matchList(arrayCount);
     vector<Array *> arrayVector;
-    arraybundle->getVector(arrayVector);
+    arraybundle->getVector(arrayVector, ESMC_ITEMORDER_ADDORDER);
     for (int i=0; i<arrayCount; i++){
       matchList[i] = i; // initialize
       Array *array = arrayVector[i];
@@ -902,8 +902,8 @@ int ArrayBundle::redistStore(
     vector<int> matchList(arrayCount);
     vector<Array *> srcArrayVector;
     vector<Array *> dstArrayVector;
-    srcArraybundle->getVector(srcArrayVector);
-    dstArraybundle->getVector(dstArrayVector);
+    srcArraybundle->getVector(srcArrayVector, ESMC_ITEMORDER_ADDORDER);
+    dstArraybundle->getVector(dstArrayVector, ESMC_ITEMORDER_ADDORDER);
     for (int i=0; i<arrayCount; i++){
       matchList[i] = i; // initialize
       Array *srcArray = srcArrayVector[i];
@@ -1172,8 +1172,8 @@ int ArrayBundle::sparseMatMulStore(
     vector<int> matchList(arrayCount);
     vector<Array *> srcArrayVector;
     vector<Array *> dstArrayVector;
-    srcArraybundle->getVector(srcArrayVector);
-    dstArraybundle->getVector(dstArrayVector);    
+    srcArraybundle->getVector(srcArrayVector, ESMC_ITEMORDER_ADDORDER);
+    dstArraybundle->getVector(dstArrayVector, ESMC_ITEMORDER_ADDORDER);    
     for (int i=0; i<arrayCount; i++){
       matchList[i] = i; // initialize
       Array *srcArray = srcArrayVector[i];
@@ -1332,8 +1332,8 @@ int ArrayBundle::sparseMatMul(
     Array *dstArray = NULL;
     vector<Array *> srcArrayVector;
     vector<Array *> dstArrayVector;
-    srcArraybundle->getVector(srcArrayVector);
-    dstArraybundle->getVector(dstArrayVector);    
+    srcArraybundle->getVector(srcArrayVector, ESMC_ITEMORDER_ADDORDER);
+    dstArraybundle->getVector(dstArrayVector, ESMC_ITEMORDER_ADDORDER);    
     if (rhType == ESMC_ARRAYXXE){
       // apply same routehandle to each src/dst Array pair
       if (srcArraybundle != NULL && dstArraybundle != NULL){
@@ -1639,7 +1639,7 @@ int ArrayBundle::serialize(
   cp = (char *)ip;
   *offset = (cp - buffer);
   vector<Array *> arrayVector;
-  getVector(arrayVector);
+  getVector(arrayVector, ESMC_ITEMORDER_ADDORDER);
   for (int i=0; i<getCount(); i++){
     localrc =
       arrayVector[i]->serialize(buffer,length,offset,attreconflag,inquireflag);
