@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.C,v 1.19 2012/09/20 21:19:44 w6ws Exp $
+// $Id: ESMCI_IO.C,v 1.20 2012/09/22 06:06:47 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO.C,v 1.19 2012/09/20 21:19:44 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_IO.C,v 1.20 2012/09/22 06:06:47 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -260,7 +260,13 @@ int IO::read(
   // Open the file
   localrc1 = open(file, ESMC_FILESTATUS_OLD, iofmt);
   if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, &rc)) {
-    return ESMF_RC_FILE_READ;
+    switch(rc) {
+    case ESMF_RC_LIB_NOT_PRESENT:
+    case ESMF_RC_ARG_BAD:
+      return rc;
+    default:
+      return ESMF_RC_FILE_READ;
+    }
   }
 
   localrc1 = read(timeslice);
@@ -375,7 +381,13 @@ int IO::write(
   localrc1 = open(file, status, iofmt, overwrite);
   PRINTMSG("open returned " << localrc1);
   if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, &rc)) {
-    return ESMF_RC_FILE_WRITE;
+    switch(rc) {
+    case ESMF_RC_LIB_NOT_PRESENT:
+    case ESMF_RC_ARG_BAD:
+      return rc;
+    default:
+      return ESMF_RC_FILE_WRITE;
+    }
   }
 
   localrc1 = write(timeslice);
