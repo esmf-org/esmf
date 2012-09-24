@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.37 2012/05/16 22:55:07 svasquez Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.38 2012/09/24 19:45:17 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -29,12 +29,13 @@
       use ESMF_TestMod     ! test methods
       use ESMF         ! the ESMF Framework
       use ESMF_IOUtilMod   ! Internal Fortran I/O routines
+      use ESMF_UtilSortMod
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.37 2012/05/16 22:55:07 svasquez Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.38 2012/09/24 19:45:17 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -76,6 +77,14 @@
       integer :: nargs
       character(ESMF_MAXSTR) :: program_path
       integer :: argindex
+
+      character(8) :: sort_array(4)
+      character(8), parameter :: sort_input(4) =  &
+          (/ "this", "is  ", "a   ", "test" /)
+      character(8), parameter :: sort_ascend(4) =  &
+          (/ "a   ", "is  ", "test", "this" /)
+      character(8), parameter :: sort_descend(4) =  &
+          (/ "this", "test", "is  ", "a   " /)
 
       type(ESMF_MapPtr) :: mapcontainer
       integer :: newvalue
@@ -287,6 +296,52 @@
     call ESMF_UtilGetArgIndex (argvalue="esmf_xyzzy", argindex=argindex, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS .and. argindex == -1,  &
       name, failMsg, result, ESMF_SRCLINE)
+
+
+!Sorting
+!=======
+
+! Note: These are internal ESMF routines, subject to change, and
+! not intended to be end-user callable.
+
+    !
+    !EX_UTest
+    ! Test ascending sort
+    write (name, *) "Testing ascending sort"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    sort_array = sort_input
+    call ESMF_UtilSort (sort_array, direction=ESMF_SORTFLAG_ASCENDING, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    !
+    !EX_UTest
+    ! Test for correctly sorted results
+    write (name, *) "Testing sorted ascending results"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    if (all (sort_array == sort_ascend)) then
+      rc = ESMF_SUCCESS
+    else
+      rc = ESMF_FAILURE
+    end if
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    !
+    !EX_UTest
+    ! Test descending sort
+    write (name, *) "Testing descending sort"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    sort_array = sort_input
+    call ESMF_UtilSort (sort_array, direction=ESMF_SORTFLAG_DESCENDING, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+    !
+    !EX_UTest
+    ! Test for correctly sorted results
+    write (name, *) "Testing sorted descending results"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    if (all (sort_array == sort_descend)) then
+      rc = ESMF_SUCCESS
+    else
+      rc = ESMF_FAILURE
+    end if
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 
 !MapName Containers
