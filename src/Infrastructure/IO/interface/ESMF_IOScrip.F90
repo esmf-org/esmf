@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.45 2012/05/30 23:15:52 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.46 2012/09/24 21:57:26 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -290,7 +290,7 @@ end subroutine ESMF_ScripInqUnits
 ! !INTERFACE:
   subroutine ESMF_ScripGetVar(filename, grid_center_lon, grid_center_lat, &
 	      		grid_imask, grid_corner_lon, grid_corner_lat, &
-			grid_area, convertToDeg, rc)
+			grid_area, convertToDeg, start, count, rc)
 !
 ! !ARGUMENTS:
     character(len=*), intent(in)  :: filename
@@ -301,6 +301,7 @@ end subroutine ESMF_ScripInqUnits
     real(ESMF_KIND_R8), intent(inout),optional:: grid_corner_lat(:,:)
     real(ESMF_KIND_R8), intent(inout),optional:: grid_area(:)
     logical, intent(in), optional:: convertToDeg
+    integer, intent(in), optional:: start, count
     integer, intent(out), optional:: rc
 
     integer:: ncStatus
@@ -309,11 +310,19 @@ end subroutine ESMF_ScripInqUnits
     character(len=128) :: units
     character(len=256) :: errmsg
     real(ESMF_KIND_R8) :: rad2deg
+    integer:: start1(1), count1(1), start2(2), count2(2)
+    integer:: totalcells, grid_corners
     logical :: convertToDegLocal
+    integer:: localrc
 
 #ifdef ESMF_NETCDF
     convertToDegLocal = .false.
     if (present(convertToDeg)) convertToDegLocal = convertToDeg
+
+    call ESMF_ScripInq(trim(filename), grid_size=totalcells, &
+           grid_corners=grid_corners, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
     ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
     if (CDFCheckError (ncStatus, &
@@ -321,6 +330,24 @@ end subroutine ESMF_ScripInqUnits
       ESMF_SRCLINE,&
       trim(filename), &
       rc)) return
+
+    if (present(start)) then
+	start1(1)=start
+        start2(2)=start
+        start2(1)=1
+    else
+	start1(1)=1
+	start2(:)=1
+    endif 
+    if (present(count)) then
+        count1(1)=count
+        count2(2)=count
+	count2(1)=grid_corners
+    else
+	count1(1)=totalcells
+        count2(2)=totalcells
+        count2(1)=grid_corners
+    endif
 
     ! Read in grid_center_lon and grid_center_lat
     if (present(grid_center_lon)) then
@@ -331,7 +358,7 @@ end subroutine ESMF_ScripInqUnits
         ESMF_SRCLINE,&
 	errmsg,&
         rc)) return
-      ncStatus = nf90_get_var (ncid, VarId, grid_center_lon)
+      ncStatus = nf90_get_var (ncid, VarId, grid_center_lon, start1, count1)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
@@ -377,7 +404,7 @@ end subroutine ESMF_ScripInqUnits
         ESMF_SRCLINE,&
 	errmsg,&
         rc)) return
-      ncStatus = nf90_get_var (ncid, VarId, grid_center_lat)
+      ncStatus = nf90_get_var (ncid, VarId, grid_center_lat, start1, count1)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
@@ -423,7 +450,7 @@ end subroutine ESMF_ScripInqUnits
 	errmsg,&
         rc)) return
 	grid_imask=1
-      ncStatus = nf90_get_var (ncid, VarId, grid_imask)
+      ncStatus = nf90_get_var (ncid, VarId, grid_imask, start1, count1)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
@@ -440,7 +467,7 @@ end subroutine ESMF_ScripInqUnits
         ESMF_SRCLINE,&
 	errmsg,&
         rc)) return
-      ncStatus = nf90_get_var (ncid, VarId, grid_corner_lon)
+      ncStatus = nf90_get_var (ncid, VarId, grid_corner_lon, start2, count2)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
@@ -485,7 +512,7 @@ end subroutine ESMF_ScripInqUnits
         ESMF_SRCLINE,&
 	errmsg,&
         rc)) return
-      ncStatus = nf90_get_var (ncid, VarId, grid_corner_lat)
+      ncStatus = nf90_get_var (ncid, VarId, grid_corner_lat, start2, count2)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
@@ -531,7 +558,7 @@ end subroutine ESMF_ScripInqUnits
         ESMF_SRCLINE,&
 	errmsg,&
         rc)) return
-      ncStatus = nf90_get_var (ncid, VarId, grid_area)
+      ncStatus = nf90_get_var (ncid, VarId, grid_area, start1, count1)
       if (CDFCheckError (ncStatus, &
         ESMF_METHOD, &
         ESMF_SRCLINE,&
