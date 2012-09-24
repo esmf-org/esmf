@@ -1,8 +1,9 @@
-# $Id: makefile,v 1.34 2011/04/12 00:15:45 theurich Exp $ 
+# $Id: makefile,v 1.35 2012/09/24 19:44:04 w6ws Exp $ 
 
 ALL: build_here
 
-AUTOGEN   = ESMF_FortranWordsize.F90 ESMF_TypeKindGet.F90
+AUTOGEN   = ESMF_FortranWordsize.F90 ESMF_TypeKindGet.F90 \
+            ESMF_UtilSort.F90
 
 SOURCEC	  = ESMCI_Util.C ESMCI_Fraction.C ESMCI_F90Interface.C
 SOURCEF	  = ESMF_UtilTypes.F90 \

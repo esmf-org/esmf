@@ -1,0 +1,301 @@
+! $Id: ESMF_UtilSort.cppF90,v 1.1 2012/09/24 19:44:04 w6ws Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2012, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the University of Illinois-NCSA License.
+!
+!==============================================================================
+^define ESMF_FILENAME "ESMF_UtilSort.F90"
+!==============================================================================
+!
+!     ESMF sorting module
+module ESMF_UtilSortMod
+
+  use ESMF_UtilTypesMod
+
+^include "ESMF_ErrReturnCodes.inc"
+
+!==============================================================================
+!
+! This file contains methods for sorting arrays of data.
+!
+ 
+  implicit none
+  private
+
+  type :: ESMF_SortFlag
+    logical :: descending
+  end type
+
+  type(ESMF_SortFlag), parameter ::  &
+      ESMF_SORTFLAG_ASCENDING  = ESMF_SortFlag (.false.),  &
+      ESMF_SORTFLAG_DESCENDING = ESMF_SortFlag (.true.)
+
+  interface ESMF_UtilSort
+    module procedure ESMF_UtilSort_string
+  end interface
+
+!------------------------------------------------------------------------------
+!
+! !PUBLIC MEMBER FUNCTIONS:
+  public :: ESMF_UtilSort
+
+!------------------------------------------------------------------------------
+!
+! !PUBLIC NAMED CONSTANTS:
+  public :: ESMF_SORTFLAG_ASCENDING, ESMF_SORTFLAG_DESCENDING
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+  character(*), parameter, private :: version = &
+    '$Id: ESMF_UtilSort.cppF90,v 1.1 2012/09/24 19:44:04 w6ws Exp $'
+
+!----------------------------------------------------------------------------
+
+contains
+
+#define SortMacro(mname, mtypekind, mtypekindtemp) \
+!------------------------------------------------------------------------------ @\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_UtilSort()" @\
+!BOPI @\
+! !IROUTINE:  ESMF_UtilSort_string - Sort array of strings @\
+ @\
+! !INTERFACE: @\
+  subroutine ESMF_UtilSort_##mname(array, direction, rc) @\
+! @\
+! !ARGUMENTS: @\
+    mtypekind,           intent(inout) :: array(:) @\
+    type(ESMF_SortFlag), intent(in)    :: direction @\
+    integer,             intent(out), optional :: rc @\
+! @\
+! !DESCRIPTION: @\
+!  Sort an array of character strings. @\
+! @\
+!  Use Quick Sort, reverting to Insertion sort on arrays of @\
+!  size <= 20. Dimension of STACK limits N to about 2**32. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [array] @\
+!       Array of data to be sorted.  The sorted data is returned @\
+!       in the array. @\
+!     \item [direction] @\
+!       Direction of sorting.  Legal values are {\tt ESMF_SORT_ASCENDING} @\
+!       and {\tt ESMF_SORT_DESCENDING}. @\
+!     \item [{[rc]}] @\
+!       Return code; equals {\tt ESMF_SUCCESS} if the sorting is successful. @\
+!     \end{description} @\
+! @\
+!  This is an ESMFized version of SLASRT from LAPACK version 3.1. @\
+! @\
+!  Univ. of Tennessee, Univ. of California Berkeley and NAG Ltd. @\
+! @\
+!  November 2006 @\
+! @\
+!EOPI @\
+! @\
+!     .. Parameters .. @\
+    INTEGER, PARAMETER :: SELECT = 20 @\
+!     .. @\
+!     .. Local Scalars .. @\
+    INTEGER :: ENDD, I, J, START, STKPNT @\
+    integer :: n @\
+    mtypekindtemp :: array1, array2, array3, array_minmax, array_temp @\
+!     .. @\
+!     .. Local Arrays .. @\
+    INTEGER :: STACK( 2, 32 ) @\
+!     .. @\
+!     .. Executable Statements .. @\
+ @\
+    ! Initialize return code; assume routine not implemented @\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+! @\
+!     Test the input paramters. @\
+ @\
+    n = size (array) @\
+    if (n < 1) then @\
+      if (present (rc)) rc = ESMF_SUCCESS @\
+      return @\
+    end if @\
+! @\
+! @\
+    STKPNT = 1 @\
+    STACK( 1, 1 ) = 1 @\
+    STACK( 2, 1 ) = N @\
+ @\
+ 10 CONTINUE @\
+    START = STACK( 1, STKPNT ) @\
+    ENDD = STACK( 2, STKPNT ) @\
+    STKPNT = STKPNT - 1 @\
+    IF( ENDD-START.LE.SELECT .AND. ENDD-START > 0 ) THEN @\
+! @\
+!        Do Insertion sort on D( START:ENDD ) @\
+! @\
+         IF(direction%descending) THEN @\
+! @\
+!           Sort into decreasing order @\
+! @\
+            DO 30 I = START + 1, ENDD @\
+               do, J = I, START + 1, -1 @\
+                  IF( array( J ) > array( J-1 ) ) THEN @\
+                     array_minmax = array( J ) @\
+                     array( J )   = array( J-1 ) @\
+                     array( J-1 ) = array_minmax @\
+                  ELSE @\
+                     GO TO 30 @\
+                  END IF @\
+               end do @\
+   30       end do @\
+! @\
+         ELSE @\
+! @\
+!           Sort into increasing order @\
+! @\
+            DO 50 I = START + 1, ENDD @\
+               DO, J = I, START + 1, -1 @\
+                  IF( array( J ) < array( J-1 ) ) THEN @\
+                     array_minmax = array( J ) @\
+                     array( J )   = array( J-1 ) @\
+                     array( J-1 ) = array_minmax @\
+                  ELSE @\
+                     GO TO 50 @\
+                  END IF @\
+               end do @\
+   50       end do @\
+! @\
+         END IF @\
+! @\
+      ELSE IF( ENDD-START > SELECT ) THEN @\
+! @\
+!        Partition array( START:ENDD ) and stack parts, largest one first @\
+! @\
+!        Choose partition entry as median of 3 @\
+! @\
+         array1 = array( START ) @\
+         array2 = array( ENDD ) @\
+         I = ( START+ENDD ) / 2 @\
+         array3 = array( I ) @\
+         IF( array1 < array2 ) THEN @\
+            IF( array3 < array1 ) THEN @\
+               array_minmax = array1 @\
+            ELSE IF( array3 < array2 ) THEN @\
+               array_minmax = array3 @\
+            ELSE @\
+               array_minmax = array2 @\
+            END IF @\
+         ELSE @\
+            IF( array3 < array2 ) THEN @\
+               array_minmax = array2 @\
+            ELSE IF( array3 < array1 ) THEN @\
+               array_minmax = array3 @\
+            ELSE @\
+               array_minmax = array1 @\
+            END IF @\
+         END IF @\
+! @\
+         IF(direction%descending) THEN @\
+! @\
+!           Sort into decreasing order @\
+! @\
+            I = START - 1 @\
+            J = ENDD + 1 @\
+ @\
+   60       CONTINUE @\
+            do @\
+              J = J - 1 @\
+              IF( array( J ) >= array_minmax )& @\
+     &           exit @\
+            end do @\
+ @\
+            do @\
+              I = I + 1 @\
+              IF( array( I ) <= array_minmax )& @\
+     &           exit @\
+            end do @\
+ @\
+            IF( I < J ) THEN @\
+               array_temp = array( I ) @\
+               array( I ) = array( J ) @\
+               array( J ) = array_temp @\
+               GO TO 60 @\
+            END IF @\
+            IF( J-START > ENDD-J-1 ) THEN @\
+               STKPNT = STKPNT + 1 @\
+               STACK( 1, STKPNT ) = START @\
+               STACK( 2, STKPNT ) = J @\
+               STKPNT = STKPNT + 1 @\
+               STACK( 1, STKPNT ) = J + 1 @\
+               STACK( 2, STKPNT ) = ENDD @\
+            ELSE @\
+               STKPNT = STKPNT + 1 @\
+               STACK( 1, STKPNT ) = J + 1 @\
+               STACK( 2, STKPNT ) = ENDD @\
+               STKPNT = STKPNT + 1 @\
+               STACK( 1, STKPNT ) = START @\
+               STACK( 2, STKPNT ) = J @\
+            END IF @\
+         ELSE @\
+! @\
+!           Sort into increasing order @\
+! @\
+            I = START - 1 @\
+            J = ENDD + 1 @\
+ @\
+   90       CONTINUE @\
+            do @\
+              J = J - 1 @\
+              IF( array( J ) <= array_minmax )& @\
+     &           exit @\
+            end do @\
+ @\
+            do @\
+              I = I + 1 @\
+              IF( array( I ) >= array_minmax )& @\
+     &          exit @\
+            end do @\
+ @\
+            IF( I < J ) THEN @\
+               array_temp = array( I ) @\
+               array( I ) = array( J ) @\
+               array( J ) = array_temp @\
+               GO TO 90 @\
+            END IF @\
+            IF( J-START > ENDD-J-1 ) THEN @\
+               STKPNT = STKPNT + 1 @\
+               STACK( 1, STKPNT ) = START @\
+               STACK( 2, STKPNT ) = J @\
+               STKPNT = STKPNT + 1 @\
+               STACK( 1, STKPNT ) = J + 1 @\
+               STACK( 2, STKPNT ) = ENDD @\
+            ELSE @\
+               STKPNT = STKPNT + 1 @\
+               STACK( 1, STKPNT ) = J + 1 @\
+               STACK( 2, STKPNT ) = ENDD @\
+               STKPNT = STKPNT + 1 @\
+               STACK( 1, STKPNT ) = START @\
+               STACK( 2, STKPNT ) = J @\
+            END IF @\
+         END IF @\
+      END IF @\
+      IF( STKPNT > 0 ) & @\
+     &   GO TO 10 @\
+ @\
+      if (present (rc)) rc = ESMF_SUCCESS @\
+ @\
+      RETURN @\
+ @\
+  end subroutine ESMF_UtilSort_##mname @\
+
+!------------------------------------------------------------------------------
+
+SortMacro(string,character(*),character(len (array)))
+
+! Not tested yet:
+! SortMacro(integer,integer,integer)
+
+end module ESMF_UtilSortMod
