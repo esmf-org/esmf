@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.56 2012/01/06 20:18:03 svasquez Exp $
+! $Id: ESMF_RHandle.F90,v 1.57 2012/09/24 23:24:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -90,6 +90,8 @@ module ESMF_RHandleMod
   public ESMF_RouteHandleValidate
   public ESMF_RouteHandlePrint
   
+  public ESMF_RouteHandleOptimize
+
   public ESMF_RouteHandleCopyThis
  
 !EOPI
@@ -98,7 +100,7 @@ module ESMF_RHandleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_RHandle.F90,v 1.56 2012/01/06 20:18:03 svasquez Exp $'
+    '$Id: ESMF_RHandle.F90,v 1.57 2012/09/24 23:24:23 theurich Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -579,8 +581,8 @@ contains
   subroutine ESMF_RouteHandleValidate(rhandle, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(in) :: rhandle       
-    integer, intent(out), optional :: rc            
+    type(ESMF_RouteHandle), intent(in)            :: rhandle       
+    integer,                intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
 !   Validates that an {\tt ESMF\_RouteHandle} is internally consistent.
@@ -603,22 +605,14 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
 
-    ! See if this has been created yet or not.
-    if ((rhandle%this).eq.ESMF_NULL_POINTER) then
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      return
-    endif
+    call c_ESMC_RouteHandleValidate(rhandle, localrc)   
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! TODO: the following code is commented out because the C-side
-    !       validate routine is empty
-    !    call c_ESMC_RouteHandleValidate(rhandle, localrc)   
-    !if (ESMF_LogFoundError(localrc, &
-    !                           ESMF_ERR_PASSTHRU, &
-    !                           ESMF_CONTEXT, rc)) return
-
-    ! Return successfully
+    ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
-
+ 
   end subroutine ESMF_RouteHandleValidate
 !------------------------------------------------------------------------------
 
@@ -626,40 +620,29 @@ contains
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RouteHandlePrint"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_RouteHandlePrint - Print the contents of a RouteHandle
 
 ! !INTERFACE:
-      subroutine ESMF_RouteHandlePrint(rhandle, options, rc)
+  subroutine ESMF_RouteHandlePrint(rhandle, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_RouteHandle), intent(in) :: rhandle      
-      character (len=*), intent(in), optional :: options      
-      integer, intent(out), optional :: rc           
+    type(ESMF_RouteHandle), intent(in)            :: rhandle      
+    integer,                intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!     Print information about an {\tt ESMF\_RouteHandle}. \\
+!   Print information about an {\tt ESMF\_RouteHandle}.
 !
-!     Note:  Many {\tt ESMF\_<class>Print} methods are implemented in C++.
-!     On some platforms/compilers there is a potential issue with interleaving
-!     Fortran and C++ output to {\tt stdout} such that it doesn't appear in
-!     the expected order.  If this occurs, the {\tt ESMF\_IOUnitFlush()} method
-!     may be used on unit 6 to get coherent output.  \\
+!   The arguments are:
+!   \begin{description}
+!   \item[rhandle] 
+!     {\tt ESMF\_RouteHandle} to print contents of.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[rhandle] 
-!          {\tt ESMF\_RouteHandle} to print contents of.
-!     \item[{[options]}]
-!          Print options that control the type of information and level of 
-!          detail. 
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
-    character (len=6) :: defaultopts      ! default print options
     integer                 :: localrc      ! local return code
 
     ! initialize return code; assume routine not implemented
@@ -668,18 +651,11 @@ contains
 
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
 
-    defaultopts = "brief"
-
     call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if(present(options)) then
-      call c_ESMC_RouteHandlePrint(rhandle, options, localrc)   
-    else
-      call c_ESMC_RouteHandlePrint(rhandle, defaultopts, localrc)
-    endif
-
+    call c_ESMC_RouteHandlePrint(rhandle, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -688,6 +664,54 @@ contains
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_RouteHandlePrint
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandleOptimize"
+!BOPI
+! !IROUTINE: ESMF_RouteHandleOptimize - Optimization based on a RouteHandle
+
+! !INTERFACE:
+  subroutine ESMF_RouteHandleOptimize(rhandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_RouteHandle), intent(in)            :: rhandle      
+    integer,                intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!   Optimize communications based on the information available in the
+!   {\tt ESMF\_RouteHandle} object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[rhandle] 
+!     {\tt ESMF\_RouteHandle} holding the communication patter for which the
+!     optimization is carried out.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,rhandle,rc)
+
+    call c_ESMC_RouteHandleOptimize(rhandle, localrc)   
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set return values
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_RouteHandleOptimize
 !------------------------------------------------------------------------------
 
 

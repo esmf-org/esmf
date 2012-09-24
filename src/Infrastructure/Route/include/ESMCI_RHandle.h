@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle.h,v 1.7 2012/01/06 20:18:01 svasquez Exp $
+// $Id: ESMCI_RHandle.h,v 1.8 2012/09/24 23:24:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -48,10 +48,12 @@ namespace ESMCI {
 
   // class definition
   class RouteHandle : public ESMC_Base {    // inherits from ESMC_Base class
+    
+#define RHSTORAGECOUNT  10
 
    private:
     RouteHandleType htype;          // type info
-    void *storage;                  // storage used by specific communication
+    void *storage[RHSTORAGECOUNT];  // storage used by specific communication
  
    public:
     RouteHandle():ESMC_Base(-1){}   // use Base constructor w/o BaseID increment
@@ -61,13 +63,24 @@ namespace ESMCI {
     int destruct(void);    
     RouteHandleType getType(void) const { return htype; }
     int setType(RouteHandleType h){ htype = h; return ESMF_SUCCESS; }
-    void *getStorage(void) const{ return storage; }
-    int setStorage(void *ptr){ storage = ptr; return ESMF_SUCCESS; }
+    void *getStorage(int i=0) const{
+      if (i<0 || i>=RHSTORAGECOUNT)
+        return NULL;
+      return storage[i];
+    }
+    int setStorage(void *ptr, int i=0){
+      if (i<0 || i>=RHSTORAGECOUNT)
+        return ESMC_RC_ARG_BAD;
+      storage[i] = ptr; 
+      return ESMF_SUCCESS;
+    }
         
     // required methods inherited and overridden from the ESMC_Base class
-    int validate(const char *options) const;
-    int print(const char *options) const;
+    int validate() const;
+    int print() const;
 
+    // optimize for the communication pattern stored inside the RouteHandle
+    int optimize() const;
   };   // class RouteHandle
 
 } // namespace ESMCI

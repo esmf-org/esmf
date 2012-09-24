@@ -1,0 +1,10 @@
+% $Id: RHandle_implnotes.tex,v 1.1 2012/09/24 23:24:19 theurich Exp $
+
+%\subsection{Design and Implementation Notes}
+
+Internally all route-based communication calls are implemented as sparse matrix multiplications. The precompute step for all of the supported communication methods can be broke into three steps:
+\begin{enumerate}
+\item Construction of the sparse matrix for the specific communication method.
+\item Generation of the communication pattern according to the sparse matrix.
+\item Encoding of the communication pattern for each participating PET in form of an XXE stream.
+\end{enumerate}

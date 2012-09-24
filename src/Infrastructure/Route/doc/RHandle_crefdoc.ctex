@@ -1,0 +1,116 @@
+% $Id: RHandle_crefdoc.ctex,v 1.1 2012/09/24 23:24:19 theurich Exp $ 
+%
+% Earth System Modeling Framework
+% Copyright 2002-2012, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage{alltt}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{\Large {\bf RouteHandle C Reference}}
+\newcommand{\myauthors}{\large {\it Gerhard Theurich}}
+% set a standard paragraph style
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+% these are temporary patches until something more
+% permanent is done to the protex script.
+\newlength{\oldparskip}
+\newlength{\oldparindent}
+\newlength{\oldbaselineskip}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../doc/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+\setlength{\parskip}{1.5ex}
+
+#endif
+
+
+%============================================================================
+% RouteHandle Class
+%============================================================================
+
+\section{RouteHandle Class}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{RHandle_desc}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Route/doc/RHandle_desc}
+#endif
+
+%\subsection{Constants}
+#ifdef STANDALONE
+%\input{RHandle_options}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Route/doc/RHandle_options}
+#endif
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{RHandle_usage}
+%\input{ESMF_RHandleEx_fapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Route/doc/RHandle_usage}
+%\input{../Infrastructure/Route/doc/ESMF_RHandleEx_fapi}
+#endif
+
+\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+\input{RHandle_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Route/doc/RHandle_rest}
+#endif
+
+\subsection{Design and Implementation Notes}
+#ifdef STANDALONE
+\input{RHandle_implnotes}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Route/doc/RHandle_implnotes}
+#endif
+
+\subsection{Class API}
+#ifdef STANDALONE
+\input{ESMC_RHandle_chapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Route/doc/ESMC_RHandle_chapi}
+#endif
+
+%#ifdef STANDALONE
+%\section{Bibliography}
+%\bibliography{comp} 
+%\bibliographystyle{plain}
+%\addcontentsline{toc}{section}{Bibliography}
+%#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif
+

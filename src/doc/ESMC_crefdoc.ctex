@@ -1,4 +1,4 @@
-% $Id: ESMC_crefdoc.ctex,v 1.30 2012/09/21 22:08:52 theurich Exp $
+% $Id: ESMC_crefdoc.ctex,v 1.31 2012/09/24 23:24:05 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -171,18 +171,14 @@
 
 #include "../Infrastructure/DistGrid/doc/DistGrid_crefdoc.ctex"
 
+#include "../Infrastructure/Route/doc/RHandle_crefdoc.ctex"
+
 %#include "../Infrastructure/IO/doc/IO_crefdoc.ctex"
 
 \newpage
 
 %\section{Overview of Distributed Data Methods}
 %\input{ESMF_inframethodoverview.tex}
-
-%#include "../Infrastructure/InternArrayComm/doc/InternArrayHalo_refdoc.ctex"
-
-%#include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
-
-%#include "../Infrastructure/InternArrayComm/doc/InternArrayRedist_refdoc.ctex"
 
 %===============================================================================
 \newpage

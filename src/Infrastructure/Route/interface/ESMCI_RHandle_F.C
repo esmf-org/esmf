@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle_F.C,v 1.15 2012/01/06 20:18:03 svasquez Exp $
+// $Id: ESMCI_RHandle_F.C,v 1.16 2012/09/24 23:24:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -151,33 +151,45 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_routehandlevalidate)(ESMCI::RouteHandle **ptr, char *opts,
-    int *rc, ESMCI_FortranStrLenArg opts_l) {
+  void FTN_X(c_esmc_routehandlevalidate)(ESMCI::RouteHandle **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_routehandlevalidate()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
-    localrc = (*ptr)->validate(opts);
+    localrc = (*ptr)->validate();
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_routehandleprint)(ESMCI::RouteHandle **ptr, char *opts, 
-    int *rc, ESMCI_FortranStrLenArg opts_l) {
+  void FTN_X(c_esmc_routehandleprint)(ESMCI::RouteHandle **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_routehandleprint()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
-    localrc = (*ptr)->print(opts);
+    localrc = (*ptr)->print();
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     fflush (stdout);
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_routehandleoptimize)(ESMCI::RouteHandle **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandleoptimize()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    localrc = (*ptr)->optimize();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }

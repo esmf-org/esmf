@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.h,v 1.20 2012/01/06 20:18:01 svasquez Exp $
+// $Id: ESMC_RHandle.h,v 1.21 2012/09/24 23:24:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ typedef struct{
 // Class API
 
 //-----------------------------------------------------------------------------
-//BOPI
+//BOP
 // !IROUTINE: ESMC_RouteHandlePrint - Print a RouteHandle
 //
 // !INTERFACE:
@@ -64,7 +64,7 @@ int ESMC_RouteHandlePrint(
 //    {\tt ESMC\_RouteHandle} object to be printed.
 //  \end{description}
 //
-//EOPI
+//EOP
 //-----------------------------------------------------------------------------
 
 #ifdef __cplusplus
