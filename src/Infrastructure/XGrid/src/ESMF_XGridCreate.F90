@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.68 2012/09/19 14:43:12 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.69 2012/09/24 18:47:07 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.68 2012/09/19 14:43:12 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.69 2012/09/24 18:47:07 feiliu Exp $'
 
 !==============================================================================
 !
@@ -938,7 +938,7 @@ function ESMF_XGridCreateDefaultGrid(sideA, sideB, &
       sparseMatB2X=xgtype%sparseMatB2X, sparseMatX2B=xgtype%sparseMatX2B, &
       offline=.false., &
       mesh=mesh, &
-      internal_alloc=.true., &
+      !internal_alloc=.true., &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
@@ -1480,7 +1480,7 @@ function ESMF_XGridCreateDefaultMesh(sideA, sideB, &
       sparseMatB2X=xgtype%sparseMatB2X, sparseMatX2B=xgtype%sparseMatX2B, &
       offline=.false., &
       mesh=mesh, &
-      internal_alloc=.true., &
+      !internal_alloc=.true., &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
