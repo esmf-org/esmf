@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.142 2012/09/21 20:56:12 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.143 2012/09/25 16:11:08 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.142 2012/09/21 20:56:12 feiliu Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.143 2012/09/25 16:11:08 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1399,10 +1399,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Field), pointer     :: l_fieldList(:)
     type(ESMF_FieldBundleType), pointer     :: this
     type(ESMF_GeomType_Flag)           :: l_geomtype
+    type(ESMF_ItemOrder_Flag)          :: l_itemorderflag
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    l_itemorderflag = ESMF_ITEMORDER_ABC
+    if (present(itemorderflag)) l_itemorderflag = itemorderflag
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
@@ -1496,7 +1499,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     call ESMF_ContainerGet(fieldbundle%this%container, &
-      itemList=l_fieldList, rc=localrc)
+      itemList=l_fieldList, itemorderflag=l_itemorderflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

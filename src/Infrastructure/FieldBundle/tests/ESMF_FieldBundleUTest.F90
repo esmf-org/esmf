@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.40 2012/09/21 20:56:13 feiliu Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.41 2012/09/25 16:11:10 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.40 2012/09/21 20:56:13 feiliu Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.41 2012/09/25 16:11:10 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -54,7 +54,7 @@
       character(ESMF_MAXSTR) :: name
 #ifdef ESMF_TESTEXHAUSTIVE
       type(ESMF_Grid) :: grid
-      integer :: i, fieldcount,localrc, loop_rc
+      integer :: i, fieldcount,localrc, loop_rc, n_match
       integer :: number, count
       character (len = ESMF_MAXSTR) :: fname1, fname2,fname3
       character(len = ESMF_MAXSTR), dimension(10) :: fieldNameList
@@ -2140,7 +2140,7 @@
       enddo
       write(failMsg, *) "Getting Names from Fields"
       write(name, *) "Getting Names from Fields"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -2151,7 +2151,55 @@
       enddo
       write(failMsg, *) "Comparing two modes of BundleGet"
       write(name, *) "Comparing two modes of BundleGet"
+      call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      call ESMF_FieldBundleAdd(bundle5, (/ft/), multiflag=.true., rc=rc)
+      write(failMsg, *) "Adding a Field to a FieldBundle"
+      write(name, *) "Adding a Field to a FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      call ESMF_FieldBundleGet(bundle5, fieldList=fields(1:3), &
+        itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
+      write(failMsg, *) "Getting Fields from a FieldBundle"
+      write(name, *) "Getting Fields from a FieldBundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      call ESMF_FieldBundleGet(bundle5, fieldList=fields(4:6), &
+        itemorderflag=ESMF_ITEMORDER_ABC, rc=rc)
+      write(failMsg, *) "Getting Fields from a FieldBundle"
+      write(name, *) "Getting Fields from a FieldBundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      loop_rc = ESMF_SUCCESS
+      do i = 1,3
+        call ESMF_FieldGet(fields(i), name=fnames(i), rc=rc)
+        if(rc /= ESMF_SUCCESS) loop_rc=ESMF_FAILURE
+        call ESMF_FieldGet(fields(i+3), name=fnames(i+3), rc=rc)
+        if(rc /= ESMF_SUCCESS) loop_rc=ESMF_FAILURE
+      enddo
+      write(failMsg, *) "Getting Names from Fields"
+      write(name, *) "Getting Names from Fields"
+      call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! The two retrieved name lists are expected to be different.
+      ! TPT PTT
+      n_match = 0
+      do i = 1,3 
+        if(trim(fnames(i)) == trim(fnames(i+3))) n_match = n_match + 1
+      enddo
+      write(failMsg, *) "Comparing two modes of BundleGet"
+      write(name, *) "Comparing two modes of BundleGet"
+      call ESMF_Test((n_match .eq. 1), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
