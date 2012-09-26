@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.117 2012/04/07 04:17:39 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.118 2012/09/26 14:05:26 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -1273,8 +1273,9 @@ end function ESMF_LogFoundError
         integer :: lma_size
 
         ! Initialize return code; assume routine not implemented
+        localrc = ESMF_RC_NOT_IMPL
 	if (present(rc)) then
-          rc=ESMF_FAILURE
+          rc=localrc
         endif
 
         ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
@@ -1323,16 +1324,20 @@ end function ESMF_LogFoundError
             end if
           else
             allocate (logmsgAbort(lma_size), stat=memstat)
+              if (ESMF_LogFoundAllocError (memstat,   &
+                  msg='allocating logmsgAbort array', &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
           end if
 
           if (associated (alog%logmsgAbort)) then
             logmsgAbort = alog%logmsgAbort(:lma_size)
           end if
         endif
+    endif
 
-	if (present(rc)) then
-          rc=ESMF_SUCCESS
-        endif
+    localrc = ESMF_SUCCESS
+    if (present(rc)) then
+      rc=localrc
     endif
 
 end subroutine ESMF_LogGet
