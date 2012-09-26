@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridGetUTest.F90,v 1.9 2012/09/20 23:54:18 rokuingh Exp $
+! $Id: ESMF_AttributeGridGetUTest.F90,v 1.10 2012/09/26 19:49:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.9 2012/09/20 23:54:18 rokuingh Exp $'
+  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.10 2012/09/26 19:49:36 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -57,6 +57,9 @@ program ESMF_AttributeGridGetUTest
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer                :: result = 0
+
+  integer                :: nx, ny
+  real(ESMF_KIND_R8)     :: dx, dy
 
 #ifdef ESMF_TESTEXHAUSTIVE
 
@@ -92,8 +95,13 @@ program ESMF_AttributeGridGetUTest
   !------------------------------------------------------------------------
   ! preparations
 
+  nx = 10
+  ny = 10
+  dx = 360./nx
+  dy = 180./ny
+
   ! Create Grid with coordinates, Attributes should work on an empty Grid as well
-  grid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/10,10/), &
+  grid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/nx,ny/), &
                                 indexflag=ESMF_INDEX_GLOBAL,         &
                                 name="AttributeTestGrid", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -122,8 +130,8 @@ program ESMF_AttributeGridGetUTest
 
     do i1=clbnd(1),cubnd(1)
     do i2=clbnd(2),cubnd(2)
-      farrayPtrX(i1,i2)=REAL(i1,ESMF_KIND_R8)
-      farrayPtrY(i1,i2)=REAL(i2,ESMF_KIND_R8)
+      farrayPtrX(i1,i2)=REAL(i1-1)*dx
+      farrayPtrY(i1,i2)=-90. + (REAL(i2-1)*dy + 0.5*dy)
     enddo
     enddo
 
@@ -276,7 +284,7 @@ print *, "arbDimCount= ", outI4
   ! this should fail because arbIndexCount is not available for non-arbitrarily
   !  distributed grids
   inputList(:) = ''
-  inputList(1) = 'localde:0'
+  inputList(1) = 'localde=0'
   call ESMF_AttributeGet(grid, name="ESMF:arbIndexCount", &
                          value=outI4, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -407,9 +415,9 @@ print *, "gridAlign=", gridAlign
   ! Test that Fortran sublisting works
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'junk:blah'
-  inputList(2) = 'junk:blah'
-  inputList(3) = 'tile:1'
+  inputList(1) = 'junk=blah'
+  inputList(2) = 'junk=blah'
+  inputList(3) = 'tile=1'
   call ESMF_AttributeGet(grid, name="ESMF:minIndex", &
                          valueList=minIndex, inputList=inputList(3:3), rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -420,7 +428,7 @@ print *, "minIndex=", minIndex
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'tile:1'
+  inputList(1) = 'tile=1'
   call ESMF_AttributeGet(grid, name="ESMF:maxIndex", &
                          valueList=maxIndex, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -431,7 +439,7 @@ print *, "maxIndex=", maxIndex
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
+  inputList(1) = 'localDe=0'
   call ESMF_AttributeGet(grid, name="ESMF:exclusiveLBound", &
                          valueList=exclusiveLBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -442,8 +450,8 @@ print *, "exclusiveLBound=", exclusiveLBound
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(2) = 'coordDim:1'
+  inputList(1) = 'localDe=0'
+  inputList(2) = 'coordDim=1'
   call ESMF_AttributeGet(grid, name="ESMF:exclusiveLBound", &
                          valueList=exclusiveLBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -454,9 +462,9 @@ print *, "exclusiveLBound=", exclusiveLBound
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
-  inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
+  inputList(1) = 'localDe=0'
+  inputList(2) = 'itemflag=ESMF_GRIDITEM_MASK'
+  inputList(3) = 'staggerloc=ESMF_STAGGERLOC_CENTER'
   call ESMF_AttributeGet(grid, name="ESMF:exclusiveLBound", &
                          valueList=exclusiveLBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -467,7 +475,7 @@ print *, "exclusiveLBound=", exclusiveLBound
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
+  inputList(1) = 'localDe=0'
   call ESMF_AttributeGet(grid, name="ESMF:exclusiveUBound", &
                          valueList=exclusiveUBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -478,8 +486,8 @@ print *, "exclusiveUBound=", exclusiveUBound
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(1) = 'coordDim:1'
+  inputList(1) = 'localDe=0'
+  inputList(1) = 'coordDim=1'
   call ESMF_AttributeGet(grid, name="ESMF:exclusiveUBound", &
                          valueList=exclusiveUBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -490,9 +498,9 @@ print *, "exclusiveUBound=", exclusiveUBound
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
-  inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
+  inputList(1) = 'localDe=0'
+  inputList(2) = 'itemflag=ESMF_GRIDITEM_MASK'
+  inputList(3) = 'staggerloc=ESMF_STAGGERLOC_CENTER'
   call ESMF_AttributeGet(grid, name="ESMF:exclusiveUBound", &
                          valueList=exclusiveUBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -503,7 +511,7 @@ print *, "exclusiveUBound=", exclusiveUBound
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
+  inputList(1) = 'localDe=0'
   call ESMF_AttributeGet(grid, name="ESMF:exclusiveCount", &
                          valueList=exclusiveCount, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -514,8 +522,8 @@ print *, "exclusiveCount=", exclusiveCount
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(2) = 'coordDim:1'
+  inputList(1) = 'localDe=0'
+  inputList(2) = 'coordDim=1'
   call ESMF_AttributeGet(grid, name="ESMF:exclusiveCount", &
                          valueList=exclusiveCount, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -526,9 +534,9 @@ print *, "exclusiveCount=", exclusiveCount
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
-  inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
+  inputList(1) = 'localDe=0'
+  inputList(2) = 'itemflag=ESMF_GRIDITEM_MASK'
+  inputList(3) = 'staggerloc=ESMF_STAGGERLOC_CENTER'
   call ESMF_AttributeGet(grid, name="ESMF:exclusiveCount", &
                          valueList=exclusiveCount, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -539,7 +547,7 @@ print *, "exclusiveCount=", exclusiveCount
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
+  inputList(1) = 'localDe=0'
   call ESMF_AttributeGet(grid, name="ESMF:computationalLBound", &
                          valueList=computationalLBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -550,8 +558,8 @@ print *, "computationalLBound=", computationalLBound
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(2) = 'coordDim:1'
+  inputList(1) = 'localDe=0'
+  inputList(2) = 'coordDim=1'
   call ESMF_AttributeGet(grid, name="ESMF:computationalLBound", &
                          valueList=computationalLBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -562,9 +570,9 @@ print *, "computationalLBound=", computationalLBound
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
-  inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
+  inputList(1) = 'localDe=0'
+  inputList(2) = 'itemflag=ESMF_GRIDITEM_MASK'
+  inputList(3) = 'staggerloc=ESMF_STAGGERLOC_CENTER'
   call ESMF_AttributeGet(grid, name="ESMF:computationalLBound", &
                          valueList=computationalLBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -575,7 +583,7 @@ print *, "computationalLBound=", computationalLBound
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
+  inputList(1) = 'localDe=0'
   call ESMF_AttributeGet(grid, name="ESMF:computationalUBound", &
                          valueList=computationalUBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -586,8 +594,8 @@ print *, "computationalUBound=", computationalUBound
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(1) = 'coordDim:1'
+  inputList(1) = 'localDe=0'
+  inputList(1) = 'coordDim=1'
   call ESMF_AttributeGet(grid, name="ESMF:computationalUBound", &
                          valueList=computationalUBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -598,9 +606,9 @@ print *, "computationalUBound=", computationalUBound
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
-  inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
+  inputList(1) = 'localDe=0'
+  inputList(2) = 'itemflag=ESMF_GRIDITEM_MASK'
+  inputList(3) = 'staggerloc=ESMF_STAGGERLOC_CENTER'
   call ESMF_AttributeGet(grid, name="ESMF:computationalUBound", &
                          valueList=computationalUBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -611,7 +619,7 @@ print *, "computationalUBound=", computationalUBound
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
+  inputList(1) = 'localDe=0'
   call ESMF_AttributeGet(grid, name="ESMF:computationalCount", &
                          valueList=computationalCount, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -622,8 +630,8 @@ print *, "computationalCount=", computationalCount
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(2) = 'coordDim:1'
+  inputList(1) = 'localDe=0'
+  inputList(2) = 'coordDim=1'
   call ESMF_AttributeGet(grid, name="ESMF:computationalCount", &
                          valueList=computationalCount, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -634,9 +642,9 @@ print *, "computationalCount=", computationalCount
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
-  inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
+  inputList(1) = 'localDe=0'
+  inputList(2) = 'itemflag=ESMF_GRIDITEM_MASK'
+  inputList(3) = 'staggerloc=ESMF_STAGGERLOC_CENTER'
   call ESMF_AttributeGet(grid, name="ESMF:computationalCount", &
                          valueList=computationalCount, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -647,8 +655,8 @@ print *, "computationalCount=", computationalCount
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(2) = 'coordDim:1'
+  inputList(1) = 'localDe=0'
+  inputList(2) = 'coordDim=1'
   call ESMF_AttributeGet(grid, name="ESMF:totalLBound", &
                          valueList=totalLBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -659,9 +667,9 @@ print *, "totalLBound=", totalLBound
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
-  inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
+  inputList(1) = 'localDe=0'
+  inputList(2) = 'itemflag=ESMF_GRIDITEM_MASK'
+  inputList(3) = 'staggerloc=ESMF_STAGGERLOC_CENTER'
   call ESMF_AttributeGet(grid, name="ESMF:totalLBound", &
                          valueList=totalLBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -672,8 +680,8 @@ print *, "totalLBound=", totalLBound
   
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(1) = 'coordDim:1'
+  inputList(1) = 'localDe=0'
+  inputList(1) = 'coordDim=1'
   call ESMF_AttributeGet(grid, name="ESMF:totalUBound", &
                          valueList=totalUBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -684,9 +692,9 @@ print *, "totalUBound=", totalUBound
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
-  inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
+  inputList(1) = 'localDe=0'
+  inputList(2) = 'itemflag=ESMF_GRIDITEM_MASK'
+  inputList(3) = 'staggerloc=ESMF_STAGGERLOC_CENTER'
   call ESMF_AttributeGet(grid, name="ESMF:totalUBound", &
                          valueList=totalUBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -698,8 +706,8 @@ print *, "totalUBound=", totalUBound
   
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(2) = 'coordDim:1'                                              
+  inputList(1) = 'localDe=0'
+  inputList(2) = 'coordDim=1'                                              
   call ESMF_AttributeGet(grid, name="ESMF:totalCount", &
                          valueList=totalCount, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -710,9 +718,9 @@ print *, "totalCount=", totalCount
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
-  inputList(2) = 'itemflag:ESMF_GRIDITEM_MASK'
-  inputList(3) = 'staggerloc:ESMF_STAGGERLOC_CENTER'
+  inputList(1) = 'localDe=0'
+  inputList(2) = 'itemflag=ESMF_GRIDITEM_MASK'
+  inputList(3) = 'staggerloc=ESMF_STAGGERLOC_CENTER'
   call ESMF_AttributeGet(grid, name="ESMF:totalCount", &
                          valueList=totalCount, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -723,7 +731,7 @@ print *, "totalCount=", totalCount
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
+  inputList(1) = 'localDe=0'
   call ESMF_AttributeGet(grid, name="ESMF:isLBound", &
                          valueList=isLBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -734,7 +742,7 @@ print *, "isLBound=", isLBound
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'localDe:0'
+  inputList(1) = 'localDe=0'
   call ESMF_AttributeGet(grid, name="ESMF:isUBound", &
                          valueList=isUBound, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -745,7 +753,7 @@ print *, "isUBound=", isUBound
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'coordDim:1'
+  inputList(1) = 'coordDim=1'
   call ESMF_AttributeGet(grid, name="ESMF:farrayPtr", &
                          valueList=xcoords, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -756,7 +764,7 @@ print *, "xcoords=", xcoords
 
   !EX_UTest
   inputList(:) = ''
-  inputList(1) = 'coordDim:2'
+  inputList(1) = 'coordDim=2'
   call ESMF_AttributeGet(grid, name="ESMF:farrayPtr", &
                          valueList=ycoords, inputList=inputList, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"

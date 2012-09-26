@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeInternals.F90,v 1.7 2012/09/20 22:54:16 rokuingh Exp $
+! $Id: ESMF_AttributeInternals.F90,v 1.8 2012/09/26 19:49:34 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -86,7 +86,7 @@ module ESMF_AttributeInternalsMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_AttributeInternals.F90,v 1.7 2012/09/20 22:54:16 rokuingh Exp $'
+               '$Id: ESMF_AttributeInternals.F90,v 1.8 2012/09/26 19:49:34 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -952,15 +952,22 @@ contains
 !
 !EOPI
 
-      integer :: ind
+      integer :: ind, rc
       ! TODO remove ESMF_MAXSTR
       character(len=ESMF_MAXSTR) :: temp
 
       ! take everything after the colon, minus whitespace
-      ind = index(string, ":")
-      temp = trim(adjustl(string((ind+1):len(string))))
-      ! convert 'temp' (string) to integer
-      read (temp, '(i1)') extractInfoInt
+      if (index(string, "=") == 0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
+          msg="The format of the input info is incorrect", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        extractInfoInt = -1
+      else
+        ind = index(string, "=")
+        temp = trim(adjustl(string((ind+1):len(string))))
+        ! convert 'temp' (string) to integer
+        read (temp, '(i1)') extractInfoInt
+      endif
 
       end function extractInfoInt
 !------------------------------------------------------------------------------
@@ -995,11 +1002,18 @@ contains
 !
 !EOPI
 
-      integer :: ind
+      integer :: ind, rc
 
       ! take everything after the colon, minus whitespace
-      ind = index(string, ":")
-      extractInfoValueString = trim(adjustl(string((ind+1):len(string))))
+      if (index(string, "=") == 0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
+          msg="The format of the input info is incorrect", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        extractInfoValueString = "-1"
+      else
+        ind = index(string, "=")
+        extractInfoValueString = trim(adjustl(string((ind+1):len(string))))
+      endif
       
       end function extractInfoValueString
 !------------------------------------------------------------------------------

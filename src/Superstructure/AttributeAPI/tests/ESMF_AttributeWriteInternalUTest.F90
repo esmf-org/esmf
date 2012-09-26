@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.5 2012/09/18 23:34:48 rokuingh Exp $
+! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.6 2012/09/26 19:49:36 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_AttributeWriteIntrnalUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.5 2012/09/18 23:34:48 rokuingh Exp $'
+  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.6 2012/09/26 19:49:36 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -55,6 +55,9 @@ program ESMF_AttributeWriteIntrnalUTest
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer                :: result = 0
+
+  integer                :: nx, ny
+  real(ESMF_KIND_R8)     :: dx, dy
 
 #ifdef ESMF_TESTEXHAUSTIVE
 
@@ -98,6 +101,10 @@ program ESMF_AttributeWriteIntrnalUTest
   !------------------------------------------------------------------------
   ! preparations
 
+  nx = 10
+  ny = 10
+  dx = 360./nx
+  dy = 180./ny
 
   ! Create Grid with coordinates, Attributes should work on an empty Grid as well
   grid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/10,10/), &
@@ -129,8 +136,8 @@ program ESMF_AttributeWriteIntrnalUTest
 
     do i1=clbnd(1),cubnd(1)
     do i2=clbnd(2),cubnd(2)
-      farrayPtrX(i1,i2)=REAL(i1,ESMF_KIND_R8)
-      farrayPtrY(i1,i2)=REAL(i2,ESMF_KIND_R8)
+      farrayPtrX(i1,i2)=REAL(i1-1)*dx
+      farrayPtrY(i1,i2)=-90. + (REAL(i2-1)*dy + 0.5*dy)
     enddo
     enddo
 
@@ -257,7 +264,7 @@ program ESMF_AttributeWriteIntrnalUTest
     !EX_UTest
     ! Set an attribute value within the CIM Grid package
     call ESMF_AttributeSet(grid, 'gridType', &
-                           'logically_rectangular', &
+                           'regular_lat_lon', &
                            convention='CIM', &
                            purpose='GridSpec', &
                            rc=rc)
@@ -353,7 +360,7 @@ program ESMF_AttributeWriteIntrnalUTest
     !EX_UTest
     ! Set an attribute value within the CIM Grid package
     inputList(:) = ''
-    inputList(1) = 'coordDim:1'
+    inputList(1) = 'coordDim=1'
     call ESMF_AttributeSet(grid, 'xcoords', &
                            'ESMF:farrayPtr', &
                            inputList=inputList, &
@@ -368,7 +375,7 @@ program ESMF_AttributeWriteIntrnalUTest
     !EX_UTest
     ! Set an attribute value within the CIM Grid package
     inputList(:) = ''
-    inputList(1) = 'coordDim:2'
+    inputList(1) = 'coordDim=2'
     call ESMF_AttributeSet(grid, 'ycoords', &
                            'ESMF:farrayPtr', &
                            inputList=inputList, &
