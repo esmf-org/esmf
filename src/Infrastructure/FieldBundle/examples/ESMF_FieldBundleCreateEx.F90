@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.21 2012/09/25 16:11:07 feiliu Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.23 2012/09/26 00:26:27 feiliu Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -108,7 +108,7 @@ program ESMF_FieldBundleCreateEx
 
 !-------------------------------------------------------------------------
 !BOE
-! \subsubsection{Creating an empty FieldBundle then add Fields to it}
+! \subsubsection{Creating an empty FieldBundle then add one Field to it}
 ! \label{sec:fieldbundle:usage:create_empty}
 ! A user can create an empty FieldBundle then add Fields to the empty FieldBundle.
 ! In the following example, we use the previously defined {\tt ESMF\_Grid}
@@ -150,7 +150,7 @@ program ESMF_FieldBundleCreateEx
 
 !-------------------------------------------------------------------------
 !BOE
-! \subsubsection{Creating an empty FieldBundle then add Fields to it}
+! \subsubsection{Creating an empty FieldBundle then add a list of Fields to it}
 ! \label{sec:fieldbundle:usage:create_emptylist}
 ! A user can create an empty FieldBundle then add multiple 
 ! Fields to the empty FieldBundle.
@@ -271,6 +271,16 @@ program ESMF_FieldBundleCreateEx
     enddo
 !EOC
 
+!BOE
+!\subsubsection{Destroy a FieldBundle}
+!
+!The user must call {\tt ESMF\_FieldBundleDestroy()} before 
+!deleting any of the Fields it contains.  Because Fields
+!can be shared by multiple FieldBundles and States, they are
+!not deleted by this call.
+!EOE
+
+
 !BOC
 !-------------------------------------------------------------------------
 
@@ -322,7 +332,5 @@ program ESMF_FieldBundleCreateEx
 
       call ESMF_Finalize(rc=rc)
 
-!BOC
      end program ESMF_FieldBundleCreateEx
-!EOC
     
