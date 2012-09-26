@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeWrite.C,v 1.4 2012/09/20 22:53:51 rokuingh Exp $
+// $Id: ESMCI_AttributeWrite.C,v 1.5 2012/09/26 19:49:59 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.4 2012/09/20 22:53:51 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.5 2012/09/26 19:49:59 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -789,6 +789,15 @@ namespace ESMCI {
     // write the ESMF XML footer
 // RLO: this was replaced when prototyping the GridSpec CIM definition
 //    localrc = io_xml->writeEndElement("model_component", 1);
+    localrc = io_xml->writeElement("documentID", "some generated GUID", 1, 0);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    localrc = io_xml->writeElement("documentVersion", 
+      "any string of numbers, optionally including \".\" (ie: 1.2.3)", 1, 0);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    localrc = io_xml->writeElement("documentCreationDate", 
+      "the current date, formatted like 2012-09-25T09:54:30", 1, 0);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+
     localrc = io_xml->writeEndElement("gridSpec", 1);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   }
@@ -912,12 +921,11 @@ namespace ESMCI {
 #endif
 
       // start the esmModelGrid
-      localrc = io_xml->writeStartElement("esmModelGrid", "", 2, 5, 
+      localrc = io_xml->writeStartElement("esmModelGrid", "", 2, 4, 
           "id", attpack->AttributeGetInternalGridString("ESMF:name").c_str(),
           "isLeaf", attpack->AttributeGetInternalGridString("isLeaf").c_str(),
           "gridType", attpack->AttributeGetInternalGridString("gridType").c_str(),
-          "numTiles", attpack->AttributeGetInternalGridInt("ESMF:tileCount").c_str(),
-          "name", attpack->attrBase->ESMC_BaseGetName());
+          "numTiles", attpack->AttributeGetInternalGridInt("ESMF:tileCount").c_str());
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
       // write the shortname and longname
@@ -1499,7 +1507,7 @@ namespace ESMCI {
         string temp_substr = temp_string.substr(6,temp_string.length());
         inputString.append(temp_substr);
         // test if substring == coordDim and get the number if so
-        if (strncmp(temp_substr.c_str(),"coordDim:", 9) == 0) {
+        if (strncmp(temp_substr.c_str(),"coordDim=", 9) == 0) {
           string temp_numberstring = temp_substr.substr(9,temp_substr.length());
           coordDim = atoi(temp_numberstring.c_str());
         }
