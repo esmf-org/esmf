@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.23 2012/09/26 00:26:27 feiliu Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.22 2012/09/26 00:25:49 feiliu Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -332,5 +332,7 @@ program ESMF_FieldBundleCreateEx
 
       call ESMF_Finalize(rc=rc)
 
+!BOC
      end program ESMF_FieldBundleCreateEx
+!EOC
     
