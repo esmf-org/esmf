@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleSMMEx.F90,v 1.23 2012/02/15 23:13:36 svasquez Exp $
+! $Id: ESMF_FieldBundleSMMEx.F90,v 1.24 2012/09/26 14:49:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleSMMEx.F90,v 1.23 2012/02/15 23:13:36 svasquez Exp $'
+    '$Id: ESMF_FieldBundleSMMEx.F90,v 1.24 2012/09/26 14:49:51 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -99,58 +99,84 @@
 !EOE
 !BOC 
     call ESMF_VMGetCurrent(vm, rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
     call ESMF_VMGet(vm, localPet=lpe, rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
     ! create distgrid and grid
     distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/16/), &
         regDecomp=(/4/), &
         rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
     grid = ESMF_GridCreate(distgrid=distgrid, &
         gridEdgeLWidth=(/0/), gridEdgeUWidth=(/0/), &
         name="grid", rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
     call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_I4, rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
     ! create field bundles and fields
     srcFieldBundle = ESMF_FieldBundleCreate(rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
     dstFieldBundle = ESMF_FieldBundleCreate(rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
     do i = 1, 3
         srcField(i) = ESMF_FieldCreate(grid, arrayspec, &
             totalLWidth=(/1/), totalUWidth=(/2/), &
             rc=rc)
+!EOC
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
         call ESMF_FieldGet(srcField(i), localDe=0, farrayPtr=srcfptr, rc=rc)
+!EOC
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
         srcfptr = 1
 
         call ESMF_FieldBundleAdd(srcFieldBundle, (/srcField(i)/), rc=rc)
+!EOC
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
         dstField(i) = ESMF_FieldCreate(grid, arrayspec, &
             totalLWidth=(/1/), totalUWidth=(/2/), &
             rc=rc)
+!EOC
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
         call ESMF_FieldGet(dstField(i), localDe=0, farrayPtr=dstfptr, rc=rc)
+!EOC
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
         dstfptr = 0
 
         call ESMF_FieldBundleAdd(dstFieldBundle, (/dstField(i)/), rc=rc)
+!EOC
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
     enddo
 
     ! initialize factorList and factorIndexList
@@ -161,11 +187,14 @@
     factorIndexList(2,:) = (/lpe*4+1,lpe*4+2,lpe*4+3,lpe*4+4/)
     call ESMF_FieldBundleSMMStore(srcFieldBundle, dstFieldBundle, &
         routehandle, factorList, factorIndexList, rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
     ! perform smm
     call ESMF_FieldBundleSMM(srcFieldBundle, dstFieldBundle, routehandle, &
           rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! verify smm
@@ -185,8 +214,10 @@
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     enddo
 
+!BOC
     ! release SMM route handle
     call ESMF_FieldBundleSMMRelease(routehandle, rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! release all acquired resources
@@ -205,8 +236,6 @@
     call ESMF_DistGridDestroy(distgrid, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     deallocate(factorList, factorIndexList)
-
-!EOC
 
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
     ! file that the scripts grep for.

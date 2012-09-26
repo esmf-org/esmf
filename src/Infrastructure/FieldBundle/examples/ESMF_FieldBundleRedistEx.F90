@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistEx.F90,v 1.23 2012/02/15 23:13:36 svasquez Exp $
+! $Id: ESMF_FieldBundleRedistEx.F90,v 1.24 2012/09/26 14:49:51 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleRedistEx.F90,v 1.23 2012/02/15 23:13:36 svasquez Exp $'
+    '$Id: ESMF_FieldBundleRedistEx.F90,v 1.24 2012/09/26 14:49:51 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -87,7 +87,6 @@
 ! FieldBundle. Then we use {\tt ESMF\_FieldBundleRedist} to
 ! redistribute data from source FieldBundle to destination FieldBundle.
 !EOE
-!BOC 
     ! retrieve VM and its context info such as PET number
     call ESMF_VMGetCurrent(vm, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -144,13 +143,17 @@
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     enddo
 
+!BOC
     ! perform redist
     call ESMF_FieldBundleRedistStore(srcFieldBundle, dstFieldBundle, &
          routehandle, rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
     call ESMF_FieldBundleRedist(srcFieldBundle, dstFieldBundle, &
          routehandle, rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! verify redist
@@ -193,8 +196,6 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_DistGridDestroy(distgrid, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-!EOC
 
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
     ! file that the scripts grep for.

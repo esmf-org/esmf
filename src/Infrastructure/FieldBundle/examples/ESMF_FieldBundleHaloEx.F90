@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleHaloEx.F90,v 1.18 2012/02/15 23:13:36 svasquez Exp $
+! $Id: ESMF_FieldBundleHaloEx.F90,v 1.19 2012/09/26 14:49:50 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_FieldBundleHaloEx.F90,v 1.18 2012/02/15 23:13:36 svasquez Exp $'
+    '$Id: ESMF_FieldBundleHaloEx.F90,v 1.19 2012/09/26 14:49:50 feiliu Exp $'
 !------------------------------------------------------------------------------
 
     ! Local variables
@@ -85,7 +85,7 @@
 !\end{sloppypar}
 ! 
 !
-! In this example, we will set up a FieldBundle for a 2D viscous and compressible
+! In this example, we will set up a FieldBundle for a 2D inviscid and compressible
 ! flow problem. We will illustrate the FieldBundle halo update operation but we will
 ! not solve the non-linear PDEs here. The emphasis here is to demonstrate
 ! how to set up halo regions, how a numerical scheme updates
@@ -144,18 +144,25 @@
     distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/256,256/), &
         regDecomp=(/2,2/), &
         rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
+!BOC
     grid = ESMF_GridCreate(distgrid=distgrid, name="grid", rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R4, rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
     ! create field bundles and fields
     fieldBundle = ESMF_FieldBundleCreate(rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
     ! set up exclusive/total region for the fields
     !
     ! halo: L/U, nDim, nField, nPet
@@ -248,21 +255,29 @@
                 totalUWidth=(/halo(2,1,i,lpe), halo(2,2,i,lpe)/), &
                 staggerloc=staggers(i), name=names(i), &
                 rc=rc)
+!EOC
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
         call ESMF_FieldBundleAdd(fieldBundle, (/field(i)/), rc=rc)
+!EOC
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
     enddo
 
     ! compute the routehandle
     call ESMF_FieldBundleHaloStore(fieldBundle, routehandle=routehandle, &
                                    rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOC
     do iter = 1, 10
         do i = 1, 4
             call ESMF_FieldGet(field(i), farrayPtr=fptr, &
                 exclusiveLBound=excllb, exclusiveUBound=exclub, rc=rc)
+!EOC
             if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
             sizes = exclub - excllb
             ! fill the total region with 0.
             fptr = 0.
@@ -277,13 +292,15 @@
         ! it can be verified that the halo regions change from 0. 
         ! to non zero values.
         call ESMF_FieldBundleHalo(fieldbundle, routehandle=routehandle, rc=rc)
+!EOC
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
     enddo
     ! release halo route handle
     call ESMF_FieldBundleHaloRelease(routehandle, rc=rc)
+!EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-!EOC
 
     ! release all acquired resources
     call ESMF_FieldBundleDestroy(fieldBundle, rc=rc)
