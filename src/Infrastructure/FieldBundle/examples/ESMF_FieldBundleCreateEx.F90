@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.24 2012/09/28 19:56:15 feiliu Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.25 2012/09/28 20:35:03 svasquez Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -231,8 +231,7 @@ program ESMF_FieldBundleCreateEx
 
 !-------------------------------------------------------------------------
 !BOE
-! \subsubsection{Query FieldBundle for a list of Fields alphabetically or in the order they
-!  were added to the FieldBundle}
+! \subsubsection{Query FieldBundle for Fields list either alphabetical or in order of addition}
 ! \label{sec:fieldbundle:usage:getlist}
 ! User can query the list of Fields stored in a FieldBundle.
 ! By default the returned list of Fields are ordered alphabetically by
