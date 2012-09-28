@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGSMMUTest.F90,v 1.4 2012/09/06 20:12:47 feiliu Exp $
+! $Id: ESMF_FieldRegridXGSMMUTest.F90,v 1.5 2012/09/28 19:58:48 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -412,7 +412,7 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_XGridGet(xgrid, ngridA=ngridA, ngridB=ngridB, &
-            sideAGrids=l_sideA, sideBGrids=l_sideB, area=l_area, &
+            sideAGrid=l_sideA, sideBGrid=l_sideB, area=l_area, &
             centroid=l_centroid, distgridA=l_sideAdg, &
             distgridM = distgrid, sparseMatA2X=l_sparseMatA2X, &
             sparseMatX2B=l_sparseMatX2B, &
@@ -885,7 +885,7 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_XGridGet(xgrid, ngridA=ngridA, ngridB=ngridB, &
-            sideAGrids=l_sideA, sideBGrids=l_sideB, area=l_area, &
+            sideAGrid=l_sideA, sideBGrid=l_sideB, area=l_area, &
             centroid=l_centroid, distgridA=l_sideAdg, &
             distgridM = distgrid, sparseMatA2X=l_sparseMatA2X, &
             sparseMatX2B=l_sparseMatX2B, &

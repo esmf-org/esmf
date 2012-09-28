@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridMaskingUTest.F90,v 1.9 2012/09/06 20:08:29 feiliu Exp $
+! $Id: ESMF_XGridMaskingUTest.F90,v 1.10 2012/09/28 19:58:23 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -123,7 +123,8 @@ contains
     !  ESMF_ERR_PASSTHRU, &
     !  ESMF_CONTEXT, rcToReturn=rc)) return
 
-    xgrid = ESMF_XGridCreate(sideA, sideB, sideAMaskValues=(/2/), sideBMaskValues=(/2/), rc=localrc)
+    xgrid = ESMF_XGridCreate(sideAGrid=sideA, sideBGrid=sideB, &
+      sideAMaskValues=(/2/), sideBMaskValues=(/2/), rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -134,9 +135,11 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     xgrid = ESMF_XGridCreate(  &
-      (/make_grid(4,4,1.,1.,0.,0.,msx=3.,mex=4., msy=0., mey=4., maskvalue=2, field=srcField(1), rc=localrc), &
-        make_grid(4,4,1.,1.,0.,0.,msx=0.,mex=1., msy=0., mey=4., maskvalue=2, field=srcField(2), rc=localrc)/), &
-      (/make_grid(8,8,1.,1.,0.,0.,field=dstField(1), rc=localrc)/), &
+      sideAGrid=(/make_grid(4,4,1.,1.,0.,0.,msx=3.,mex=4., msy=0., mey=4., &
+          maskvalue=2, field=srcField(1), rc=localrc), &
+        make_grid(4,4,1.,1.,0.,0.,msx=0.,mex=1., msy=0., mey=4., &
+          maskvalue=2, field=srcField(2), rc=localrc)/), &
+      sideBGrid=(/make_grid(8,8,1.,1.,0.,0.,field=dstField(1), rc=localrc)/), &
       sideAMaskValues=(/2,3,4/), sideBMaskValues=(/2,3,4/), &
       rc=localrc)
 
@@ -170,9 +173,10 @@ contains
 
 
     ! partially overlap
-    xgrid = ESMF_XGridCreate((/make_grid_sph(4,4,1.,1.,0.,0.,msx=3.,mex=4., msy=0., mey=4., maskvalue=2, rc=localrc), &
+    xgrid = ESMF_XGridCreate(&
+      sideAGrid=(/make_grid_sph(4,4,1.,1.,0.,0.,msx=3.,mex=4., msy=0., mey=4., maskvalue=2, rc=localrc), &
         make_grid_sph(4,4,1.,1.,0.,0.,msx=0.,mex=1., msy=0., mey=4., maskvalue=2, rc=localrc)/), &
-      (/make_grid_sph(8,8,1.,1.,0.,0.,rc=localrc)/), &
+      sideBGrid=(/make_grid_sph(8,8,1.,1.,0.,0.,rc=localrc)/), &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -184,9 +188,10 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Grids near north pole
-    xgrid = ESMF_XGridCreate((/make_grid_sph(4,4,1.,1.,0.,86.,msx=3.,mex=4., msy=-90., mey=90., maskvalue=2, rc=localrc), &
+    xgrid = ESMF_XGridCreate(&
+      sideAGrid=(/make_grid_sph(4,4,1.,1.,0.,86.,msx=3.,mex=4., msy=-90., mey=90., maskvalue=2, rc=localrc), &
         make_grid_sph(4,4,1.,1.,0.,86.,msx=0.,mex=1., msy=-90., mey=90., maskvalue=2, rc=localrc)/), &
-      (/make_grid_sph(8,8,1.,1.,0.,82.,rc=localrc)/), &
+      sideBGrid=(/make_grid_sph(8,8,1.,1.,0.,82.,rc=localrc)/), &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -198,9 +203,10 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Grids near south pole
-    xgrid = ESMF_XGridCreate((/make_grid_sph(4,4,1.,1.,0.,-90.,msx=3.,mex=4., msy=-90., mey=90., maskvalue=2, rc=localrc), &
+    xgrid = ESMF_XGridCreate(&
+      sideAGrid=(/make_grid_sph(4,4,1.,1.,0.,-90.,msx=3.,mex=4., msy=-90., mey=90., maskvalue=2, rc=localrc), &
         make_grid_sph(4,4,1.,1.,0.,-90.,msx=0.,mex=1., msy=-90., mey=90., maskvalue=2, rc=localrc)/), &
-      (/make_grid_sph(8,8,1.,1.,0.,-90.,rc=localrc)/), &
+      sideBGrid=(/make_grid_sph(8,8,1.,1.,0.,-90.,rc=localrc)/), &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -211,17 +217,19 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    xgrid = ESMF_XGridCreate((/make_grid_sph(40,40,1.,1.,0.,0.,msx=30.,mex=40., msy=0., mey=40., maskvalue=2, rc=localrc), &
+    xgrid = ESMF_XGridCreate(&
+      sideAGrid=(/make_grid_sph(40,40,1.,1.,0.,0.,msx=30.,mex=40., msy=0., mey=40., maskvalue=2, rc=localrc), &
         make_grid_sph(40,40,1.,1.,0.,0.,msx=0.,mex=10., msy=0., mey=40., maskvalue=2, rc=localrc)/), &
-      (/make_grid_sph(80,80,1.,1.,0.,0.,rc=localrc)/), &
+      sideBGrid=(/make_grid_sph(80,80,1.,1.,0.,0.,rc=localrc)/), &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    xgrid = ESMF_XGridCreate((/make_grid_sph(40,40,1.,1.,0.,0.,rc=localrc), &
+    xgrid = ESMF_XGridCreate(&
+      sideAGrid=(/make_grid_sph(40,40,1.,1.,0.,0.,rc=localrc), &
         make_grid_sph(40,40,1.,1.,20.5,30.5,rc=localrc)/), &
-      (/make_grid_sph(80,80,1.,1.,0.,0.,rc=localrc)/), &
+      sideBGrid=(/make_grid_sph(80,80,1.,1.,0.,0.,rc=localrc)/), &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -229,9 +237,10 @@ contains
 
     ! With masking in XGrid
     ! partially overlap
-    xgrid = ESMF_XGridCreate((/make_grid_sph(4,4,1.,1.,0.,0.,msx=3.,mex=4., msy=0., mey=4., maskvalue=2, rc=localrc), &
+    xgrid = ESMF_XGridCreate(&
+      sideAGrid=(/make_grid_sph(4,4,1.,1.,0.,0.,msx=3.,mex=4., msy=0., mey=4., maskvalue=2, rc=localrc), &
         make_grid_sph(4,4,1.,1.,0.,0.,msx=0.,mex=1., msy=0., mey=4., maskvalue=2, rc=localrc)/), &
-      (/make_grid_sph(8,8,1.,1.,0.,0.,rc=localrc)/), &
+      sideBGrid=(/make_grid_sph(8,8,1.,1.,0.,0.,rc=localrc)/), &
       sideAMaskValues=(/2,3,4/), sideBMaskValues=(/2,3,4/), &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -244,9 +253,10 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Grids near south pole
-    xgrid = ESMF_XGridCreate((/make_grid_sph(4,4,1.,1.,0.,-90.,msx=3.,mex=4., msy=-90., mey=90., maskvalue=2, rc=localrc), &
+    xgrid = ESMF_XGridCreate(&
+      sideAGrid=(/make_grid_sph(4,4,1.,1.,0.,-90.,msx=3.,mex=4., msy=-90., mey=90., maskvalue=2, rc=localrc), &
         make_grid_sph(4,4,1.,1.,0.,-90.,msx=0.,mex=1., msy=-90., mey=90., maskvalue=2, rc=localrc)/), &
-      (/make_grid_sph(8,8,1.,1.,0.,-90.,rc=localrc)/), &
+      sideBGrid=(/make_grid_sph(8,8,1.,1.,0.,-90.,rc=localrc)/), &
       sideAMaskValues=(/2,3,4/), sideBMaskValues=(/2,3,4/), &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -258,18 +268,20 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    xgrid = ESMF_XGridCreate((/make_grid_sph(40,40,1.,1.,0.,0.,msx=30.,mex=40., msy=0., mey=40., maskvalue=2, rc=localrc), &
+    xgrid = ESMF_XGridCreate(&
+      sideAGrid=(/make_grid_sph(40,40,1.,1.,0.,0.,msx=30.,mex=40., msy=0., mey=40., maskvalue=2, rc=localrc), &
         make_grid_sph(40,40,1.,1.,0.,0.,msx=0.,mex=10., msy=0., mey=40., maskvalue=2, rc=localrc)/), &
-      (/make_grid_sph(80,80,1.,1.,0.,0.,rc=localrc)/), &
+      sideBGrid=(/make_grid_sph(80,80,1.,1.,0.,0.,rc=localrc)/), &
       sideAMaskValues=(/2,3,4/), sideBMaskValues=(/2,3,4/), &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    xgrid = ESMF_XGridCreate((/make_grid_sph(40,40,1.,1.,0.,0.,rc=localrc), &
+    xgrid = ESMF_XGridCreate(&
+      sideAGrid=(/make_grid_sph(40,40,1.,1.,0.,0.,rc=localrc), &
         make_grid_sph(40,40,1.,1.,20.5,30.5,rc=localrc)/), &
-      (/make_grid_sph(80,80,1.,1.,0.,0.,rc=localrc)/), &
+      sideBGrid=(/make_grid_sph(80,80,1.,1.,0.,0.,rc=localrc)/), &
       sideAMaskValues=(/2,3,4/), sideBMaskValues=(/2,3,4/), &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -311,12 +323,13 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    xgrid = ESMF_XGridCreate((/ &
+    xgrid = ESMF_XGridCreate(&
+      sideAGrid=(/ &
         make_grid_sph(12,9,30.,20.,0.,-90.,msx=0., mex=160., msy=-90., mey=90., &
           maskvalue=3, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc), &
         make_grid_sph(9,6,40.,30.,0.,-90., msx=200., mex=360., msy=-90., mey=90., &
           maskvalue=4, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
-      (/make_grid_sph(12,18,30.,10.,0.,-90.,scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
+      sideBGrid=(/make_grid_sph(12,18,30.,10.,0.,-90.,scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
       sideAMaskValues=(/2,3,4/), sideBMaskValues=(/2,3,4/), &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -328,12 +341,13 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    xgrid = ESMF_XGridCreate((/ &
+    xgrid = ESMF_XGridCreate(&
+      sideAGrid=(/ &
         make_grid_sph(12,9,30.,20.,0.,-90.,msx=0., mex=160., msy=-90., mey=90., &
           maskvalue=3, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc), &
         make_grid_sph(9,9,40.,20.,0.,-90., msx=200., mex=360., msy=-90., mey=90., &
           maskvalue=4, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
-      (/make_grid_sph(12,18,30.,10.,0.,-90.,scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
+      sideBGrid=(/make_grid_sph(12,18,30.,10.,0.,-90.,scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
       sideAMaskValues=(/2,3,4/), sideBMaskValues=(/2,3,4/), &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -346,12 +360,13 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! partially overlap
-    xgrid = ESMF_XGridCreate((/ &
+    xgrid = ESMF_XGridCreate(&
+      sideAGrid=(/ &
         make_grid_sph(120,90,3.,2.,0.,-90.,msx=0., mex=160., msy=-90., mey=90., &
           maskvalue=3, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc), &
         make_grid_sph(45,120,8.,1.5,0.,-90., msx=200., mex=360., msy=-90., mey=90., &
           maskvalue=4, scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
-      (/make_grid_sph(120,120,3.,1.5,0.,-90.,scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
+      sideBGrid=(/make_grid_sph(120,120,3.,1.5,0.,-90.,scheme=ESMF_REGRID_SCHEME_FULL3D,rc=localrc)/), &
       sideAMaskValues=(/2,3,4/), sideBMaskValues=(/2,3,4/), &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1084,7 +1099,7 @@ contains
     allocate(srcGrid(nsrc), srcField(nsrc), srcFrac(nsrc), srcFrac2(nsrc), srcArea(nsrc))
     allocate(dstGrid(ndst), dstField(ndst), dstFrac(ndst), dstFrac2(ndst), dstArea(ndst))
 
-    call ESMF_XGridGet(xgrid, sideAGrids=srcGrid, sideBGrids=dstGrid, rc=localrc)
+    call ESMF_XGridGet(xgrid, sideAGrid=srcGrid, sideBGrid=dstGrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

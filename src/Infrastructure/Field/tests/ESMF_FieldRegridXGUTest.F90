@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGUTest.F90,v 1.52 2012/05/16 22:33:56 svasquez Exp $
+! $Id: ESMF_FieldRegridXGUTest.F90,v 1.53 2012/09/28 19:58:49 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -493,7 +493,7 @@ contains
     !----------------------------------------------------
     ! Call into online XGrid generation
     !----------------------------------------------------
-    xgrid = ESMF_XGridCreate(sideA=(/grid_atm/), sideB=(/grid_ocn/), &
+    xgrid = ESMF_XGridCreate(sideAGrid=(/grid_atm/), sideBGrid=(/grid_ocn/), &
         storeOverlay=.false.,&
         rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1197,7 +1197,7 @@ contains
     !----------------------------------------------------
     ! Call into online generation
     !----------------------------------------------------
-    xgrid = ESMF_XGridCreate(sideA=(/grid_atm/), sideB=(/grid_ocn/), &
+    xgrid = ESMF_XGridCreate(sideAGrid=(/grid_atm/), sideBGrid=(/grid_ocn/), &
         storeOverlay=.true.,&
         rc=localrc)
     if (ESMF_LogFoundError(localrc, &

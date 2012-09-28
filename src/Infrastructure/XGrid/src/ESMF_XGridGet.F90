@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridGet.F90,v 1.32 2012/09/19 14:43:12 feiliu Exp $
+! $Id: ESMF_XGridGet.F90,v 1.33 2012/09/28 19:58:21 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -67,7 +67,7 @@ module ESMF_XGridGetMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridGet.F90,v 1.32 2012/09/19 14:43:12 feiliu Exp $'
+    '$Id: ESMF_XGridGet.F90,v 1.33 2012/09/28 19:58:21 feiliu Exp $'
 
 !==============================================================================
 !
@@ -116,8 +116,7 @@ contains
 ! ! Private name; call using ESMF_XGridGet()
 
 subroutine ESMF_XGridGetDefault(xgrid, keywordEnforcer, &
-    sideAGeomtype, sideBGeomtype, &
-    sideAGrids, sideBGrids, sideAMeshes, sideBMeshes, &
+    sideAGrid, sideBGrid, sideAMesh, sideBMesh, &
     ngridA, ngridB, area, centroid, &
     distgridA, distgridB, distgridM, &
     dimCount, localDECount, &
@@ -129,10 +128,8 @@ subroutine ESMF_XGridGetDefault(xgrid, keywordEnforcer, &
 ! !ARGUMENTS:
 type(ESMF_XGrid), intent(in)                :: xgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-type(ESMF_XGridGeomType_Flag), intent(out), optional :: sideAGeomtype
-type(ESMF_XGridGeomType_Flag), intent(out), optional :: sideBGeomtype
-type(ESMF_Grid), intent(out), optional      :: sideAGrids(:), sideBGrids(:)
-type(ESMF_Mesh), intent(out), optional      :: sideAMeshes(:), sideBMeshes(:)
+type(ESMF_Grid), intent(out), optional      :: sideAGrid(:), sideBGrid(:)
+type(ESMF_Mesh), intent(out), optional      :: sideAMesh(:), sideBMesh(:)
 integer, intent(out), optional              :: ngridA, ngridB
 real(ESMF_KIND_R8), intent(out), optional   :: area(:)
 real(ESMF_KIND_R8), intent(out), optional   :: centroid(:,:)
@@ -155,17 +152,13 @@ integer, intent(out), optional              :: rc
 !     \begin{description}
 !     \item [xgrid]
 !       The {\tt ESMF\_XGrid} object used to retrieve information from.
-!     \item [{[sideAGeomtype]}]
-!           XGrid Geom type of objects on sideA
-!     \item [{[sideBGeomtype]}]
-!           XGrid Geom type of objects on sideB
-!     \item [{[sideAGrids]}]
+!     \item [{[sideAGrid]}]
 !           List of 2D Grids on side A
-!     \item [{[sideBGrids]}]
+!     \item [{[sideBGrid]}]
 !           List of 2D Grids on side B
-!     \item [{[sideAMeshes]}]
+!     \item [{[sideAMesh]}]
 !           List of 2D Meshes on side A
-!     \item [{[sideBMeshes]}]
+!     \item [{[sideBMesh]}]
 !           List of 2D Meshes on side B
 !     \item [{[ngridA]}]
 !           Number of Grids or Meshes on the A side
@@ -209,9 +202,10 @@ integer, intent(out), optional              :: rc
 !EOP
 
     integer :: localrc, ngrid_a, ngrid_b, n_idx_a2x, n_idx_x2a, n_idx_b2x, n_idx_x2b
-    integer :: n_wgts_a, n_wgts_b, ndim, ncells, i
+    integer :: n_wgts_a, n_wgts_b, ndim, ncells, i, count
     type(ESMF_XGridType), pointer :: xgtypep
     type(ESMF_DELayout)           :: delayout
+    type(ESMF_XGridGeomType_Flag) :: xggt
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -232,72 +226,117 @@ integer, intent(out), optional              :: rc
         ngridB = size(xgtypep%sideB, 1)
     endif
 
-    if(present(sideAGeomtype)) then
-      if(size(xgtypep%sideA, 1) .lt. 1) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-           msg="- Empty XGrid sideA, cannot determine side A XGridGeom_Type", &
-           ESMF_CONTEXT, rcToReturn=rc) 
-        return
-      endif
-      sideAGeomtype = xgtypep%sideA(1)%gbcp%type
+    if(present(sideAGrid)) then
+        ngrid_a = size(sideAGrid, 1)
+        count = 0
+        do i = 1, size(xgtypep%sideA, 1)
+          call ESMF_XGridGeomBaseGet(xgtypep%sideA(i), geomtype=xggt, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          if(xggt == ESMF_XGRIDGEOMTYPE_GRID) count = count + 1
+        enddo
+        if(ngrid_a /= count) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- size of sideAGrid doesn't match the number Grids on sideA in the XGrid", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+        endif
+        count = 0
+        do i = 1, size(xgtypep%sideA, 1)
+          call ESMF_XGridGeomBaseGet(xgtypep%sideA(i), geomtype=xggt, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          if(xggt == ESMF_XGRIDGEOMTYPE_GRID) then
+            count = count + 1
+            sideAGrid(count) = xgtypep%sideA(i)%gbcp%grid
+          endif
+        enddo 
     endif
-    if(present(sideBGeomtype)) then
-      if(size(xgtypep%sideB, 1) .lt. 1) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-           msg="- Empty XGrid sideB, cannot determine side B XGridGeom_Type", &
-           ESMF_CONTEXT, rcToReturn=rc) 
-        return
-      endif
-      sideBGeomtype = xgtypep%sideB(1)%gbcp%type
+    if(present(sideAMesh)) then
+        ngrid_a = size(sideAMesh, 1)
+        count = 0
+        do i = 1, size(xgtypep%sideA, 1)
+          call ESMF_XGridGeomBaseGet(xgtypep%sideA(i), geomtype=xggt, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          if(xggt == ESMF_XGRIDGEOMTYPE_MESH) count = count + 1
+        enddo
+        if(ngrid_a /= count) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- size of sideAMesh doesn't match the number Meshes on sideA in the XGrid", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+        endif
+        count = 0
+        do i = 1, size(xgtypep%sideA, 1)
+          call ESMF_XGridGeomBaseGet(xgtypep%sideA(i), geomtype=xggt, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          if(xggt == ESMF_XGRIDGEOMTYPE_MESH) then
+            count = count + 1
+            sideAMesh(count) = xgtypep%sideA(i)%gbcp%mesh
+          endif
+        enddo 
     endif
 
-    if(present(sideAGrids)) then
-        ngrid_a = size(sideAGrids, 1)
-        if(ngrid_a /= size(xgtypep%sideA, 1)) then
+    if(present(sideBGrid)) then
+        ngrid_b = size(sideBGrid, 1)
+        count = 0
+        do i = 1, size(xgtypep%sideB, 1)
+          call ESMF_XGridGeomBaseGet(xgtypep%sideB(i), geomtype=xggt, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          if(xggt == ESMF_XGRIDGEOMTYPE_GRID) count = count + 1
+        enddo
+        if(ngrid_b /= count) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-               msg="- size of sideA doesn't match the size of sideA in the XGrid", &
+               msg="- size of sideBGrid doesn't match the number Grids on sideB in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc) 
             return
         endif
-        do i = 1, ngrid_a
-            sideAGrids(i) = xgtypep%sideA(i)%gbcp%grid
+        count = 0
+        do i = 1, size(xgtypep%sideB, 1)
+          call ESMF_XGridGeomBaseGet(xgtypep%sideB(i), geomtype=xggt, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          if(xggt == ESMF_XGRIDGEOMTYPE_GRID) then
+            count = count + 1
+            sideBGrid(count) = xgtypep%sideB(i)%gbcp%grid
+          endif
         enddo 
     endif
-    if(present(sideBGrids)) then
-        ngrid_b = size(sideBGrids, 1)
-        if(ngrid_b /= size(xgtypep%sideB, 1)) then
+    if(present(sideBMesh)) then
+        ngrid_b = size(sideBMesh, 1)
+        count = 0
+        do i = 1, size(xgtypep%sideB, 1)
+          call ESMF_XGridGeomBaseGet(xgtypep%sideB(i), geomtype=xggt, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          if(xggt == ESMF_XGRIDGEOMTYPE_MESH) count = count + 1
+        enddo
+        if(ngrid_b /= count) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-               msg="- size of sideB doesn't match the size of sideB in the XGrid", &
+               msg="- size of sideBMesh doesn't match the number Meshes on sideB in the XGrid", &
                ESMF_CONTEXT, rcToReturn=rc) 
             return
         endif
-        do i = 1, ngrid_b
-            sideBGrids(i) = xgtypep%sideB(i)%gbcp%grid
-        enddo 
-    endif
-
-    if(present(sideAMeshes)) then
-        ngrid_a = size(sideAMeshes, 1)
-        if(ngrid_a /= size(xgtypep%sideA, 1)) then
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-               msg="- size of sideA doesn't match the size of sideA in the XGrid", &
-               ESMF_CONTEXT, rcToReturn=rc) 
-            return
-        endif
-        do i = 1, ngrid_a
-            sideAMeshes(i) = xgtypep%sideA(i)%gbcp%mesh
-        enddo 
-    endif
-    if(present(sideBMeshes)) then
-        ngrid_b = size(sideBMeshes, 1)
-        if(ngrid_b /= size(xgtypep%sideB, 1)) then
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-               msg="- size of sideB doesn't match the size of sideB in the XGrid", &
-               ESMF_CONTEXT, rcToReturn=rc) 
-            return
-        endif
-        do i = 1, ngrid_b
-            sideBMeshes(i) = xgtypep%sideB(i)%gbcp%mesh
+        count = 0
+        do i = 1, size(xgtypep%sideB, 1)
+          call ESMF_XGridGeomBaseGet(xgtypep%sideB(i), geomtype=xggt, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          if(xggt == ESMF_XGRIDGEOMTYPE_MESH) then
+            count = count + 1
+            sideBMesh(count) = xgtypep%sideB(i)%gbcp%mesh
+          endif
         enddo 
     endif
 

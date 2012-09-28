@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridSparseMatEx.F90,v 1.6 2012/09/07 13:56:18 feiliu Exp $
+! $Id: ESMF_XGridSparseMatEx.F90,v 1.7 2012/09/28 19:58:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -540,8 +540,8 @@
     call ESMF_XGridGet(xgrid, &
         ngridA=ngridA, &    ! number of Grids on side A
         ngridB=ngridB, &    ! number of Grids on side B
-        sideAGrids=l_sideA, &    ! list of Grids on side A
-        sideBGrids=l_sideB, &    ! list of Grids on side B
+        sideAGrid=l_sideA, &    ! list of Grids on side A
+        sideBGrid=l_sideB, &    ! list of Grids on side B
         area=l_area, &      ! list of area of XGrid
         centroid=l_centroid, &  ! list of centroid of XGrid
         distgridA=l_sideAdg, &  ! list of Distgrids on side A

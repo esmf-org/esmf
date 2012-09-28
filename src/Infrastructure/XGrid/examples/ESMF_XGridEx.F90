@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.47 2012/09/07 13:56:17 feiliu Exp $
+! $Id: ESMF_XGridEx.F90,v 1.48 2012/09/28 19:58:20 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -224,7 +224,7 @@
 ! identical to the Grid on side B. Calling the {\tt ESMF\_XGridCreate()} method is straightforward:
 !EOE
 !BOC
-    xgrid = ESMF_XGridCreate(sideA, sideB, rc=localrc)
+    xgrid = ESMF_XGridCreate(sideAGrid=sideA, sideBGrid=sideB, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
 		endflag=ESMF_END_ABORT)
@@ -439,7 +439,7 @@
 !EOE
 
 !BOC
-    xgrid = ESMF_XGridCreate(sideA, sideB, &
+    xgrid = ESMF_XGridCreate(sideAGrid=sideA, sideBGrid=sideB, &
       sideAMaskValues=(/2/), sideBMaskValues=(/3,4/), rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
@@ -448,8 +448,8 @@
     call ESMF_XGridGet(xgrid, &
       ngridA=ngridA, &    ! number of Grids on side A
       ngridB=ngridB, &    ! number of Grids on side B
-      sideAGrids=l_sideA, &    ! list of Grids on side A
-      sideBGrids=l_sideB, &    ! list of Grids on side B
+      sideAGrid=l_sideA, &    ! list of Grids on side A
+      sideBGrid=l_sideB, &    ! list of Grids on side B
       distgridA=l_sideAdg, &  ! list of Distgrids on side A
       distgridM = distgrid, & ! balanced distgrid
       sparseMatA2X=l_sparseMatA2X, & !sparse matrix matmul parameters A to X

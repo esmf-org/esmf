@@ -1,4 +1,4 @@
-! $Id: coupler_comp.F90,v 1.10 2012/07/31 20:45:49 feiliu Exp $
+! $Id: coupler_comp.F90,v 1.11 2012/09/28 20:00:40 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -144,7 +144,7 @@ module coupler_comp
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Finally ready to do an flux exchange from A side to B side
-    xgrid = ESMF_XGridCreate((/ocn_grid, lnd_grid/), (/atm_grid/), &
+    xgrid = ESMF_XGridCreate(sideAGrid=(/ocn_grid, lnd_grid/), sideBGrid=(/atm_grid/), &
         sideAMaskValues=(/2,3,4/), &
         rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
