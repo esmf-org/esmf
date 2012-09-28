@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleUTest.F90,v 1.42 2012/09/27 16:08:48 feiliu Exp $
+! $Id: ESMF_FieldBundleUTest.F90,v 1.43 2012/09/28 20:52:31 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldBundleUTest.F90,v 1.42 2012/09/27 16:08:48 feiliu Exp $'
+      '$Id: ESMF_FieldBundleUTest.F90,v 1.43 2012/09/28 20:52:31 feiliu Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -72,7 +72,7 @@
       real(ESMF_KIND_R8), pointer :: nodeCoords(:)
       integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
       integer :: numNodes, numElems
-      character(len=ESMF_MAXSTR) :: fnames(4), fnames5(10)
+      character(len=ESMF_MAXSTR) :: fnames(10), fnames5(10)
 #endif
 
 
@@ -2184,6 +2184,7 @@
         if(rc /= ESMF_SUCCESS) loop_rc=ESMF_FAILURE
         call ESMF_FieldGet(fields(i+3), name=fnames(i+3), rc=rc)
         if(rc /= ESMF_SUCCESS) loop_rc=ESMF_FAILURE
+        !print *, 'n_match = ', fnames(i), fnames(i+3)
       enddo
       write(failMsg, *) "Getting Names from Fields"
       write(name, *) "Getting Names from Fields"
@@ -2196,7 +2197,7 @@
       n_match = 0
       do i = 1,3 
         if(trim(fnames(i)) == trim(fnames(i+3))) n_match = n_match + 1
-        print *, 'n_match = ', n_match
+        !print *, 'n_match = ', trim(fnames(i)), trim(fnames(i+3)), n_match
       enddo
       write(failMsg, *) "Comparing two modes of BundleGet"
       write(name, *) "Comparing two modes of BundleGet"
