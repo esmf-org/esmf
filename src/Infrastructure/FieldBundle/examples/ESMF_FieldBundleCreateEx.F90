@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.22 2012/09/26 00:25:49 feiliu Exp $
+! $Id: ESMF_FieldBundleCreateEx.F90,v 1.24 2012/09/28 19:56:15 feiliu Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -289,30 +289,22 @@ program ESMF_FieldBundleCreateEx
 
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-!BOC
      call ESMF_FieldBundleDestroy(bundle2, rc=rc)
-!EOC
 
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-!BOC
      call ESMF_FieldBundleDestroy(bundle3, rc=rc)
-!EOC
 
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-!BOC
      do i=1, 3
          call ESMF_FieldDestroy(field(i),rc=rc)
-!EOC
 
          if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-!BOC
      enddo
 
      call ESMF_FieldDestroy(simplefield, rc=rc)
-!EOC
 
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -332,7 +324,5 @@ program ESMF_FieldBundleCreateEx
 
       call ESMF_Finalize(rc=rc)
 
-!BOC
      end program ESMF_FieldBundleCreateEx
-!EOC
     
