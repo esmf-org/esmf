@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.75 2012/08/20 21:19:10 oehmke Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.76 2012/09/28 20:44:49 svasquez Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -334,20 +334,21 @@ where
 			 values of the data variable.  The missing value is defined
 			 using an attribute called "_FillValue" or "missing_value"
 
-    --dst_missingvalue - an optional argument that defines the variable name in
-                         the destination grid file if the file type is GRIDSPEC. 
-                         The regridder will generate a mask using the missing 
-			 values of the data variable.  The missing value is defined
-			 using an attribute called "_FillValue" or "missing_value"
+    --dst_missingvalue - an optional argument that defines the variable name 
+			 in the destination grid file if the file type is 
+			 GRIDSPEC.  The regridder will generate a mask using 
+			 the missing values of the data variable.  The missing 
+			 value is defined using an attribute called "_FillValue" 
+			 or "missing_value"
 
-    --src_coordinates - an optional argument that defines the longitude and latitude
-                         variable names in the source grid file if the file type is 
-			 GRIDSPEC.  The variable names are separated by comma.  This
-			 argument is required in case there are multiple sets of
-			 coordinate variables defined in the file.  Without this
-			 argument, the offline regrid application will terminate
-			 with an error mesasge when multiple coordinate variables
-			 are found in the file.
+    --src_coordinates - an optional argument that defines the longitude and 
+			 latitude variable names in the source grid file if 
+			 the file type is GRIDSPEC.  The variable names are 
+			 separated by comma.  This argument is required in case 
+			 there are multiple sets of coordinate variables defined 
+			 in the file.  Without this argument, the offline regrid 
+			 application will terminate with an error mesasge when 
+			 multiple coordinate variables are found in the file.
 
     --dst_coordinates - an optional argument that defines the longitude and latitude
                          variable names in the destination grid file if the file type is 
