@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.110 2012/06/27 22:06:09 w6ws Exp $
+! $Id: ESMF_StateUTest.F90,v 1.111 2012/09/28 23:49:16 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.110 2012/06/27 22:06:09 w6ws Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.111 2012/09/28 23:49:16 w6ws Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -71,6 +71,7 @@
       type(ESMF_Array)       :: alist10(1), alist11(1)
       type(ESMF_Field)       :: field10, field11, field12
       type(ESMF_Field)       :: field1x
+      type(ESMF_Field)       :: fieldrnd(30)
       type(ESMF_FieldBundle) :: fbundle12
       type(ESMF_FieldBundle) :: fbundle1x
       type(ESMF_RouteHandle) :: routehandle11, routehandle12
@@ -78,7 +79,15 @@
       type(ESMF_State)       :: state10, state11, state12, state_attr
       type(ESMF_State)       :: state1x
       type(ESMF_State)       :: state20, state30
+      type(ESMF_State)       :: staternd
 
+      character(4)           :: rndchars
+      character(20)          :: rndfieldnames(size (fieldrnd))
+      character(20)          :: namelist(size (fieldrnd))
+      character(20)          :: sortedfieldnames (size (fieldrnd))
+      real                   :: rndnums(size (fieldrnd) * len (rndchars))
+      real                   :: rndnums2d(len (rndchars), size (fieldrnd))
+      equivalence              (rndnums, rndnums2d)
       integer :: i
       integer :: linkcount
 #endif
@@ -1591,12 +1600,115 @@
       !------------------------------------------------------------------------
       ! Test StateAdd w/relaxed on nested State
       !------------------------------------------------------------------------
-
+      ! insert test code here
       !------------------------------------------------------------------------
       ! Test StateReplace w/relaxed on nested State
       !------------------------------------------------------------------------
 
 ! call ESMF_StatePrint (state30, options='debug', nestedFlag=.true.)
+
+      !------------------------------------------------------------------------
+      ! Test adding Fields with random names, and obtaining lists
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Create a few Fields with random names
+      call random_number (rndnums)
+      rndnums = rndnums*26 + 65  ! Convert to ASCII A-Z
+      do, i=1, size (fieldrnd)
+        write (rndfieldnames(i),'(a,4a)')  &
+            'random field ', achar (int (rndnums2d(:,i)))
+        fieldrnd(i) = ESMF_FieldCreate (name=rndfieldnames(i),  &
+            locstream=lstream, arrayspec=aspec, rc=rc)
+        if (rc /= ESMF_SUCCESS) exit
+      end do
+
+      write (failmsg, *) "Creating Fields for random Field test"
+      write (name, *) "Create Field array for random Field test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Create a State for random Fields
+      staternd = ESMF_StateCreate (name='random Field State', rc=rc)
+      write (failmsg, *) "Creating Fields for random Field test"
+      write (name, *) "Create Field array for random Field test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Add random Fields to the State
+      call ESMF_StateAdd (staternd, FieldList=fieldrnd, rc=rc)
+      write (failmsg, *) "Adding random Fields to State test"
+      write (name, *) "Adding random Fields to State test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Sort names
+      sortedfieldnames = rndfieldnames
+      call ESMF_UtilSort (sortedfieldnames,  &
+          direction=ESMF_SORTFLAG_ASCENDING, rc=rc)
+      write (failmsg, *) "Adding random Fields to State test"
+      write (name, *) "Adding random Fields to State test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+!      print '(a, (a))', 'sorted Field name:', ' ',  &
+!          (trim (sortedfieldnames(i)),i=1, size (sortedfieldnames))
+
+      !EX_UTest
+      ! Get list of names from State
+      call ESMF_StateGet (staternd, itemNameList=namelist,  &
+          rc=rc)
+      write (failmsg, *) "Obtaining names from State test"
+      write (name, *) "Obtaining names from State test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Verify they are in sorted order (default)
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (namelist == sortedfieldnames))
+      write (failmsg, *) "Verification error in sorted names from State test"
+      write (name, *) "Verifying sorted names from State test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Get list of explicitly sorted names from State
+      call ESMF_StateGet (staternd, itemNameList=namelist,  &
+          itemorderflag=ESMF_ITEMORDER_ABC,  &
+          rc=rc)
+      write (failmsg, *) "Obtaining explicitly sorted names from State test"
+      write (name, *) "Obtaining explicitly sorted names from State test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Verify they are in sorted order
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (namelist == sortedfieldnames))
+      write (failmsg, *) "Verification error in explicitly sorted names from State test"
+      write (name, *) "Verifying explicitly sorted sorted names from State test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Get list of names from State in order added
+      call ESMF_StateGet (staternd, itemNameList=namelist,  &
+          itemorderflag=ESMF_ITEMORDER_ADDORDER,  &
+          rc=rc)
+      write (failmsg, *) "Obtaining added order names from State test"
+      write (name, *) "Obtaining added order names from State test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Verify they are in added order
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (namelist == rndfieldnames))
+      write (failmsg, *) "Verification error in added order names from State test"
+      write (name, *) "Verifying added order names from State test"
+      call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg,  &
+        result, ESMF_SRCLINE)
+
 
 #if 0
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
