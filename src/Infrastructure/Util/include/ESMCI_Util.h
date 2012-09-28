@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.55 2012/09/20 20:24:53 theurich Exp $
+// $Id: ESMCI_Util.h,v 1.56 2012/09/28 23:01:49 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -131,9 +131,14 @@ enum ESMC_FileStatusFlag { ESMC_FILESTATUS_UNKNOWN=0,
                            ESMC_FILESTATUS_NEW = 2,
                            ESMC_FILESTATUS_REPLACE = 3};
 
-// File status flag (for IO write functions)
+// Item order when retrieving item lists from a Container object
 enum ESMC_ItemOrder_Flag { ESMC_ITEMORDER_ABC=0,
                            ESMC_ITEMORDER_ADDORDER};
+
+// Source term order in the destination sums during SMM
+enum ESMC_TermOrder_Flag { ESMC_TERMORDER_STRICT=0,
+                           ESMC_TERMORDER_SRCPET,
+                           ESMC_TERMORDER_FREE};
 
 // TODO: investigate why this is a macro instead of an enum
 #define ESMC_GRIDITEM_INVALID -2

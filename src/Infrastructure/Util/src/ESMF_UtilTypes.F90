@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.155 2012/09/20 20:24:55 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.156 2012/09/28 23:01:51 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -707,6 +707,19 @@
         ESMF_ITEMORDER_ADDORDER   = ESMF_ItemOrder_Flag(1)
 
 !------------------------------------------------------------------------------
+!
+      type ESMF_TermOrder_Flag
+      sequence
+      private
+          integer :: flag
+      end type
+
+      type(ESMF_TermOrder_Flag), parameter ::  &
+        ESMF_TERMORDER_STRICT     = ESMF_TermOrder_Flag(0), &
+        ESMF_TERMORDER_SRCPET     = ESMF_TermOrder_Flag(1), &
+        ESMF_TERMORDER_FREE       = ESMF_TermOrder_Flag(2)
+
+!------------------------------------------------------------------------------
 !BOPI
 !
 ! !PUBLIC TYPES:
@@ -846,6 +859,9 @@
 
       public ESMF_ItemOrder_Flag
       public ESMF_ITEMORDER_ABC, ESMF_ITEMORDER_ADDORDER
+      
+      public ESMF_TermOrder_Flag
+      public ESMF_TERMORDER_STRICT, ESMF_TERMORDER_SRCPET, ESMF_TERMORDER_FREE
 
       
 !  Overloaded = operator functions

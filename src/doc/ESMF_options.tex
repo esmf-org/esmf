@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.86 2012/09/20 21:40:46 theurich Exp $
+% $Id: ESMF_options.tex,v 1.87 2012/09/28 23:01:52 theurich Exp $
 
 \section{Appendix A:  Master List of Constants}
 \label{const:master}
@@ -616,6 +616,33 @@ The valid values are:
          block the local parent PET until the child component method has
          completed in the local VAS.
 \end{description}
+
+
+\subsection{ESMF\_TERMORDER}
+\label{const:termorderflag}
+{\sf DESCRIPTION:\\}  
+Specifies the order of source terms in a destination sum, e.g. during sparse
+matrix multiplication.
+
+The type of this flag is:
+
+{\tt type(ESMF\_TermOrder\_Flag)}
+
+The valid values are:
+\begin{description}
+
+\item [ESMF\_TERMORDER\_STRICT]
+         The source terms are in strict ascending order according to
+         their source sequence index.
+\item [ESMF\_TERMORDER\_SRCPET]
+         The source terms are ordered first according to their location on 
+         the source side PETs. The term order within each source PET is given 
+         by the source term sequence index.
+\item [ESMF\_TERMORDER\_FREE]
+         There is no prescribed term order. The source terms may be summed in 
+         any order that optimizes performance.
+\end{description}
+
 
 \subsection{ESMF\_TYPEKIND}
 \label{const:typekind}
