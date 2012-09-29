@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.38 2012/09/24 19:45:17 w6ws Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.39 2012/09/29 00:22:12 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -28,14 +28,12 @@
 ! !USES:
       use ESMF_TestMod     ! test methods
       use ESMF         ! the ESMF Framework
-      use ESMF_IOUtilMod   ! Internal Fortran I/O routines
-      use ESMF_UtilSortMod
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.38 2012/09/24 19:45:17 w6ws Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.39 2012/09/29 00:22:12 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
