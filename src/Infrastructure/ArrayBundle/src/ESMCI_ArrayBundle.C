@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.50 2012/09/21 04:07:22 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.51 2012/10/01 15:42:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.50 2012/09/21 04:07:22 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.51 2012/10/01 15:42:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1347,7 +1347,8 @@ int ArrayBundle::sparseMatMul(
           srcArray = srcArrayVector[i];
           dstArray = dstArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, checkflag, haloFlag);
+            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, ESMC_TERMORDER_FREE,
+            checkflag, haloFlag);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &rc)) return rc;
         }
@@ -1355,7 +1356,8 @@ int ArrayBundle::sparseMatMul(
         for (int i=0; i<srcArraybundle->getCount(); i++){
           srcArray = srcArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, checkflag, haloFlag);
+            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, ESMC_TERMORDER_FREE,
+            checkflag, haloFlag);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &rc)) return rc;
         }
@@ -1363,7 +1365,8 @@ int ArrayBundle::sparseMatMul(
         for (int i=0; i<dstArraybundle->getCount(); i++){
           dstArray = dstArrayVector[i];
           localrc = Array::sparseMatMul(srcArray, dstArray, routehandle,
-            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, checkflag, haloFlag);
+            ESMF_COMM_BLOCKING, NULL, NULL, zeroflag, ESMC_TERMORDER_FREE,
+            checkflag, haloFlag);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &rc)) return rc;
         }

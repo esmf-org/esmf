@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.64 2012/09/20 21:19:17 w6ws Exp $
+// $Id: ESMCI_Array_F.C,v 1.65 2012/10/01 15:42:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -950,7 +950,7 @@ extern "C" {
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle,
     ESMC_CommFlag *commflag, ESMC_Logical *finishedflag,
     ESMC_Logical *cancelledflag, ESMC_Region_Flag *zeroflag,
-    ESMC_Logical *checkflag, int *rc){
+    ESMC_TermOrder_Flag *termorderflag, ESMC_Logical *checkflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraysmm()"
     // Initialize return code; assume routine not implemented
@@ -964,7 +964,7 @@ extern "C" {
     bool cancelled;
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMul(
       *srcArray, *dstArray, routehandle, *commflag, &finished, &cancelled,
-      *zeroflag, checkflagOpt),
+      *zeroflag, *termorderflag, checkflagOpt),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
     // translate back finishedflag

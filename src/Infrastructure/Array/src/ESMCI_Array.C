@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.163 2012/09/20 21:19:18 w6ws Exp $
+// $Id: ESMCI_Array.C,v 1.164 2012/10/01 15:42:40 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.163 2012/09/20 21:19:18 w6ws Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.164 2012/10/01 15:42:40 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -4318,7 +4318,8 @@ int Array::halo(
 
   // implemented via sparseMatMul
   localrc = sparseMatMul(array, array, routehandle,
-    commflag, finishedflag, cancelledflag, ESMC_REGION_SELECT, checkflag, true);
+    commflag, finishedflag, cancelledflag, ESMC_REGION_SELECT, 
+    ESMC_TERMORDER_FREE, checkflag, true);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -4910,7 +4911,8 @@ int Array::redist(
 
   // implemented via sparseMatMul
   localrc = sparseMatMul(srcArray, dstArray, routehandle,
-    commflag, finishedflag, cancelledflag, ESMC_REGION_SELECT, checkflag);
+    commflag, finishedflag, cancelledflag, ESMC_REGION_SELECT, 
+    ESMC_TERMORDER_FREE, checkflag);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -9564,6 +9566,36 @@ ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
   // sorting also ensures correct ordering of sendnb and recvnb calls w/o tags
   sort(recvnbVector.begin(), recvnbVector.end());
   sort(sendnbVector.begin(), sendnbVector.end());
+  
+#define ASMMSTORECOMMMATRIX___disable
+#ifdef ASMMSTORECOMMMATRIX
+  // store the communication matrix in compact (sparse) distributed fashion,
+  vector<int> *commMatrixDstPet        = new vector<int>(sendnbVector.size());
+  vector<int> *commMatrixDstDataCount  = new vector<int>(sendnbVector.size());
+  vector<int> *commMatrixSrcPet        = new vector<int>(recvnbVector.size());
+  vector<int> *commMatrixSrcDataCount  = new vector<int>(recvnbVector.size());
+  for (int i=0; i<sendnbVector.size(); i++){
+    (*commMatrixDstPet)[i]       = sendnbVector[i].dstPet;
+    (*commMatrixDstDataCount)[i] = sendnbVector[i].partnerDeDataCount;
+  }
+  for (int i=0; i<recvnbVector.size(); i++){
+    (*commMatrixSrcPet)[i]       = recvnbVector[i].srcPet;
+    (*commMatrixSrcDataCount)[i] = recvnbVector[i].partnerDeDataCount;
+  }
+  // attach the communication matrix to the routehandle
+  localrc = (*routehandle)->setStorage(commMatrixDstPet, 1);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;
+  localrc = (*routehandle)->setStorage(commMatrixDstDataCount, 2);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;
+  localrc = (*routehandle)->setStorage(commMatrixSrcPet, 3);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;
+  localrc = (*routehandle)->setStorage(commMatrixSrcDataCount, 4);
+  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    return rc;
+#endif
 
 #ifdef ASMMSTORETIMING
   VMK::wtime(t11);   //gjt - profile
@@ -9603,15 +9635,18 @@ ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
   int srcTermProcessingOpt; // optimium src term processing ... to be determined
 
 #define FORCE_SRCTERMPROCESSING___disable
-#define FORCE_SRCTERMPROCESSING
 #ifdef FORCE_SRCTERMPROCESSING
   int dummyVar = 0;
   srcTermProcessingArg = &dummyVar; // ignore optionally incoming value
 #endif
   
-  if (srcTermProcessingArg)
+  if (srcTermProcessingArg){
+    char msg[160];
+    sprintf(msg, "srcTermProcessingArg = %d was provided -> do not tune",
+      *srcTermProcessingArg);
+    ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
     srcTermProcessingOpt = *srcTermProcessingArg;
-  else{
+  }else{
 
   // optimize srcTermProcessing
   int pipelineDepth = 4;  // safe value during srcTermProcessing optimization
@@ -10184,6 +10219,10 @@ int sparseMatMulStoreEncodeXXEStream(
         }
       }
     }
+    // post all XXE::waitOnAllSendnb at the end
+    //  localrc = xxe->appendWaitOnAllSendnb(0x0);
+    //  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+    //    ESMCI_ERR_PASSTHRU, &rc)) return rc;
   
 #else
     
@@ -10211,7 +10250,6 @@ int sparseMatMulStoreEncodeXXEStream(
         sendStage = recvStage + 1;  // allow the recv to post
       // ensure to schedule sends and receives correctly
       if (sendStage == recvStage){
-        //TODO: requires the use of sendrecv() to prevent deadlocks
         int kSend = pSend - sendnbVector.begin();
         int kRecv = pRecv - recvnbVector.begin();
         localrc = pSend->appendSendRecv(xxe, 0x0|XXE::filterBitNbStart,
@@ -10241,7 +10279,7 @@ int sparseMatMulStoreEncodeXXEStream(
       }
     }
     
-    // here all comms are done ... -> simple ProductSum() elements follow.
+    // here all blk. comms are done ... -> simple ProductSum() elements follow.
     
     while (pRecvWait!=recvnbVector.end()){
       int k = pRecvWait-recvnbVector.begin();
@@ -10253,39 +10291,9 @@ int sparseMatMulStoreEncodeXXEStream(
         ESMCI_ERR_PASSTHRU, &rc)) return rc;
       ++pRecvWait;
     }
-    
-    
-
-#if 0
-    while (pRecvWait!=recvnbVector.end()){
-      int k = pRecvWait-recvnbVector.begin();
-      localrc = pRecvWait->appendTestWaitProductSum(xxe,
-        0x0, srcTermProcessing, srcLocalDeCount,
-        elementTK, valueTK, factorTK, dataSizeDst, dataSizeSrc,
-        dataSizeFactors, rraList, rraCount, k);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-        ESMCI_ERR_PASSTHRU, &rc)) return rc;
-      ++pRecvWait;
-    }
+        
 #endif
-#if 0
-    while (pSendWait!=sendnbVector.end()){
-      localrc = xxe->appendWaitOnIndex(0x0|XXE::filterBitNbWaitFinish,
-        pSendWait->sendnbIndex);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-        ESMCI_ERR_PASSTHRU, &rc)) return rc;
-      ++pSendWait;
-    }
-#endif
-    
-#endif
-    
-    
-    // post all XXE::waitOnAllSendnb at the end
-    //  localrc = xxe->appendWaitOnAllSendnb(0x0);
-    //  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
-    //    ESMCI_ERR_PASSTHRU, &rc)) return rc;
-      
+          
 #ifdef ASMMPROFILE
     localrc = xxe->appendWtimer(0x0, "Wtimer End", xxe->count, xxe->count);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
@@ -10341,6 +10349,12 @@ int Array::sparseMatMul(
                                         //          -> zero out target points
                                         //         ESMC_REGION_EMPTY:
                                         //          -> don't zero out any points
+  ESMC_TermOrder_Flag termorderflag,    // in    - ESMC_TERMORDER_STRICT:
+                                        //          -> strict srcSeqInd order
+                                        //         ESMC_TERMORDER_SRCPET:
+                                        //          -> order by src PET & seqInd
+                                        //         ESMC_TERMORDER_FREE:
+                                        //          -> free order
   bool checkflag,                       // in    - false: (def.) basic chcks
                                         //         true:  full input check
   bool haloFlag                         // in    - support halo conditions
@@ -10418,6 +10432,11 @@ int Array::sparseMatMul(
     // info to perform the congurence check here.
   }
   
+  // deal with finishedflag argument which can be NULL, but is also needed
+  // locally -> therefore ensure that finishedflag locally is always valid
+  bool finishedflagLocal;
+  if (!finishedflag) finishedflag = &finishedflagLocal;
+  
 #ifdef ASMMTIMING
   VMK::wtime(&t2);      //gjt - profile
 #endif
@@ -10448,8 +10467,20 @@ int Array::sparseMatMul(
   
   if (commflag==ESMF_COMM_BLOCKING){
     // blocking mode
-    filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
-    filterBitField |= XXE::filterBitCancel;           // set Cancel filter
+    if (termorderflag == ESMC_TERMORDER_SRCPET){
+      filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
+      filterBitField |= XXE::filterBitCancel;       // set Cancel filter
+    }else if (termorderflag == ESMC_TERMORDER_FREE){
+      filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
+      filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
+      ESMC_LogDefault.ESMC_LogWrite("setting up free-order",
+        ESMC_LOGMSG_INFO);
+    }else{
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL, 
+        "- not a supported choice for termorderflag under ESMF_COMM_BLOCKING",
+        &rc);
+      return rc;
+    }
   }else if (commflag==ESMF_COMM_NBSTART){
     // non-blocking start
     filterBitField |= XXE::filterBitNbWaitFinish;     // set NbWaitFinish filter
@@ -10542,6 +10573,24 @@ int Array::sparseMatMul(
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
 
+  while (commflag==ESMF_COMM_BLOCKING && !(*finishedflag)){
+    // blocking free-order loop
+    
+    ESMC_LogDefault.ESMC_LogWrite("...within free-order while",
+      ESMC_LOGMSG_INFO);
+    
+    filterBitField = 0x0; // init. to execute _all_ operations in XXE stream
+    // same as non-blocking test and finish
+    filterBitField |= XXE::filterBitNbStart;          // set NbStart filter
+    filterBitField |= XXE::filterBitNbWaitFinish;     // set NbWaitFinish filter
+    filterBitField |= XXE::filterBitCancel;           // set Cancel filter
+    localrc = xxe->exec(rraCount, rraList, &vectorLength, filterBitField,
+      finishedflag, cancelledflag);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+      return rc;
+  }
+  
+  
 #ifdef ASMMTIMING
   VMK::wtime(&t6);      //gjt - profile
 #endif

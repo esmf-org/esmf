@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.171 2012/09/12 03:49:15 gold2718 Exp $
+! $Id: ESMF_Array.F90,v 1.172 2012/10/01 15:42:33 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.171 2012/09/12 03:49:15 gold2718 Exp $'
+    '$Id: ESMF_Array.F90,v 1.172 2012/10/01 15:42:33 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -527,7 +527,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_ArraySMM(srcArray, dstArray, routehandle, keywordEnforcer, &
-    routesyncflag, finishedflag, cancelledflag, zeroregion, checkflag, rc)
+    routesyncflag, finishedflag, cancelledflag, zeroregion, termorderflag, &
+    checkflag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Array),          intent(in),    optional :: srcArray
@@ -538,6 +539,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                   intent(out),   optional :: finishedflag
     logical,                   intent(out),   optional :: cancelledflag
     type(ESMF_Region_Flag),    intent(in),    optional :: zeroregion
+    type(ESMF_TermOrder_Flag), intent(in),    optional :: termorderflag
     logical,                   intent(in),    optional :: checkflag
     integer,                   intent(out),   optional :: rc
 !
@@ -618,6 +620,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     multiplication. See section \ref{const:region} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
+!   \item [{[termorderflag]}]
+!     Specifies the order of the source side terms in all of the destination
+!     sums. The {\tt termorderflag} only affects the order of terms during 
+!     the execution of the RouteHandle. See the \ref{RH:bfb} section for an
+!     in-depth discussion of {\em all} of the bit-for-bit reproducibility
+!     aspects related to route-based communication methods.
+!     See \ref{const:termorderflag} for a full list of options.
+!     The default is {\tt ESMF\_TERMORDER\_FREE}, allowing maximum flexibility
+!     in the order of terms for optimum performance.
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input Array pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
@@ -630,14 +641,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_Array)        :: opt_srcArray ! helper variable
-    type(ESMF_Array)        :: opt_dstArray ! helper variable
-    type(ESMF_RouteSync_Flag)     :: opt_routesyncflag ! helper variable
-    type(ESMF_Logical)      :: opt_finishedflag   ! helper variable
-    type(ESMF_Logical)      :: opt_cancelledflag  ! helper variable
-    type(ESMF_Region_Flag)  :: opt_zeroregion ! helper variable
-    type(ESMF_Logical)      :: opt_checkflag! helper variable
+    integer                   :: localrc            ! local return code
+    type(ESMF_Array)          :: opt_srcArray       ! helper variable
+    type(ESMF_Array)          :: opt_dstArray       ! helper variable
+    type(ESMF_RouteSync_Flag) :: opt_routesyncflag  ! helper variable
+    type(ESMF_Logical)        :: opt_finishedflag   ! helper variable
+    type(ESMF_Logical)        :: opt_cancelledflag  ! helper variable
+    type(ESMF_Region_Flag)    :: opt_zeroregion     ! helper variable
+    type(ESMF_TermOrder_Flag) :: opt_termorderflag  ! helper variable
+    type(ESMF_Logical)        :: opt_checkflag      ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -667,13 +679,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(routesyncflag)) opt_routesyncflag = routesyncflag
     opt_zeroregion = ESMF_REGION_TOTAL
     if (present(zeroregion)) opt_zeroregion = zeroregion
+    opt_termorderflag = ESMF_TERMORDER_FREE
+    if (present(termorderflag)) opt_termorderflag = termorderflag
     opt_checkflag = ESMF_FALSE
     if (present(checkflag)) opt_checkflag = checkflag
         
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMM(opt_srcArray, opt_dstArray, routehandle, &
       opt_routesyncflag, opt_finishedflag, opt_cancelledflag, opt_zeroregion, &
-      opt_checkflag, localrc)
+      opt_termorderflag, opt_checkflag, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       

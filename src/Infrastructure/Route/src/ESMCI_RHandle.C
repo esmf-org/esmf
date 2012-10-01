@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle.C,v 1.14 2012/09/26 19:34:46 theurich Exp $
+// $Id: ESMCI_RHandle.C,v 1.15 2012/10/01 15:42:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using namespace std;
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version = 
-  "$Id: ESMCI_RHandle.C,v 1.14 2012/09/26 19:34:46 theurich Exp $";
+  "$Id: ESMCI_RHandle.C,v 1.15 2012/10/01 15:42:48 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -304,6 +304,7 @@ int RouteHandle::print(
     fclose(fp);
     
     // -------------------------------------------------------------------------
+#define PRINTCOMMMATRIX_disable
 #ifdef PRINTCOMMMATRIX
     // get the communication matrix from routehandle
     std::vector<int> *commMatrixDstPet       =(std::vector<int> *)getStorage(1);
