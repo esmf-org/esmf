@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.164 2012/10/01 15:42:40 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.165 2012/10/01 23:27:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.164 2012/10/01 15:42:40 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.165 2012/10/01 23:27:00 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -9632,117 +9632,132 @@ ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
   if (vectorFlag)
     vectorLength = srcTensorContigLength; // consistent vectorLength
   
+  //TODO: Implement a smarter optimization algorithm to optimize both
+  //TODO: srcTermProcessing and pipelineDepth in a concurrent manner, rather
+  //TODO: than the one-after-the-other approach below.
+  
+  // Optimize srcTermProcessing, finding srcTermProcessingOpt:
   int srcTermProcessingOpt; // optimium src term processing ... to be determined
 
 #define FORCE_SRCTERMPROCESSING___disable
 #ifdef FORCE_SRCTERMPROCESSING
-  int dummyVar = 0;
+  int dummyVar = 0; // force to do all processing on the dst side
   srcTermProcessingArg = &dummyVar; // ignore optionally incoming value
 #endif
   
-  if (srcTermProcessingArg){
+  if (srcTermProcessingArg && *srcTermProcessingArg >= 0){
     char msg[160];
     sprintf(msg, "srcTermProcessingArg = %d was provided -> do not tune",
       *srcTermProcessingArg);
     ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
     srcTermProcessingOpt = *srcTermProcessingArg;
   }else{
-
-  // optimize srcTermProcessing
-  int pipelineDepth = 4;  // safe value during srcTermProcessing optimization
-  const int srcTermProcMax = 8;
-  const int srcTermProcList[] = {0, 1, 2, 3, 4, 6, 8, 20};  // trial settings
-  for (int srcTermProc=0; srcTermProc<srcTermProcMax; srcTermProc++){
-    int srcTermProcessing=srcTermProcList[srcTermProc];
-    // start writing a fresh XXE stream
-    xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
-      startXxeSubCount, startBufferInfoListSize);
-    localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
-      srcTermProcessing, pipelineDepth, elementTK, valueTK, factorTK,
-      dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
-      dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount, 
-      vectorLength, xxe);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
-#if 0  
-    // optimize the XXE entire stream
-    localrc = xxe->optimize();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
-#endif 
-    // get XXE ready for execution
-    localrc = xxe->execReady();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
-    // obtain timing
-    double dtAverage = 0.;
-    double dtStart, dtEnd;
-    const int dtCount = 10;
-    for (int i=0; i<dtCount; i++){
-      vm->barrier();
-      vm->wtime(&dtStart);
-      localrc = xxe->exec(rraCount, rraList, &vectorLength,
-        0x0|XXE::filterBitRegionTotalZero|XXE::filterBitNbTestFinish
-        |XXE::filterBitCancel);
+    // optimize srcTermProcessing
+    char msg[160];
+    sprintf(msg, "srcTermProcessingArg was NOT provided -> tuning...");
+    ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
+    int pipelineDepth = petCount/2; // tricky to pick a good value here for all
+                                    // cases (different interconnects!!!)
+                                    // therefore need a concurrent opt scheme!!
+    const int srcTermProcMax = 8; // 8 different values in the srcTermProcList[]
+    const int srcTermProcList[] = {0, 1, 2, 3, 4, 6, 8, 20};  // trial settings
+    for (int srcTermProc=0; srcTermProc<srcTermProcMax; srcTermProc++){
+      int srcTermProcessing=srcTermProcList[srcTermProc];
+      // start writing a fresh XXE stream
+      xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
+        startXxeSubCount, startBufferInfoListSize);
+      localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
+        srcTermProcessing, pipelineDepth, elementTK, valueTK, factorTK,
+        dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
+        dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount, 
+        vectorLength, xxe);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &rc)) return rc;
-      vm->barrier();
-      vm->wtime(&dtEnd);
-      dtAverage += dtEnd - dtStart;
-    }
-    dtAverage /= dtCount;
+#if 0  
+      // optimize the XXE entire stream
+      localrc = xxe->optimize();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        &rc)) return rc;
+#endif 
+      // get XXE ready for execution
+      localrc = xxe->execReady();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+        return rc;
+      // obtain timing
+      double dtAverage = 0.;
+      double dtStart, dtEnd;
+      const int dtCount = 10;
+      for (int i=0; i<dtCount; i++){
+        vm->barrier();
+        vm->wtime(&dtStart);
+        localrc = xxe->exec(rraCount, rraList, &vectorLength,
+          0x0|XXE::filterBitRegionTotalZero|XXE::filterBitNbTestFinish
+          |XXE::filterBitCancel);
+        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          &rc)) return rc;
+        vm->barrier();
+        vm->wtime(&dtEnd);
+        dtAverage += dtEnd - dtStart;
+      }
+      dtAverage /= dtCount;
 #ifdef ASMMSTOREOPTPRINT
-    fprintf(asmmstoreoptprintfp, "localPet: %d, srcTermProcessing=%d -> dtAverage=%gs\n", 
-      localPet, srcTermProcessing, dtAverage);
+      fprintf(asmmstoreoptprintfp, "localPet: %d, srcTermProcessing=%d -> dtAverage=%gs\n", 
+        localPet, srcTermProcessing, dtAverage);
 #endif
-    // determine optimum srcTermProcessing  
-    if (srcTermProcessing==0){
-      // first time through -> initialize to find minimum
-      dtMin = dtAverage;
-      srcTermProcessingOpt = srcTermProcessing;
-    }else{
-      // compare to current minimum
-      if (dtAverage < dtMin){
-        // found better time
+      // determine optimum srcTermProcessing  
+      if (srcTermProcessing==0){
+        // first time through -> initialize to find minimum
         dtMin = dtAverage;
         srcTermProcessingOpt = srcTermProcessing;
+      }else{
+        // compare to current minimum
+        if (dtAverage < dtMin){
+          // found better time
+          dtMin = dtAverage;
+          srcTermProcessingOpt = srcTermProcessing;
+        }
       }
-    }
-  } // srcTermProcessing
+    } // srcTermProc
   
 #ifdef ASMMSTOREOPTPRINT
-  fprintf(asmmstoreoptprintfp, "localPet: %d, srcTermProcessingOpt=%d -> "
-    "dtMin=%gs (local)\n", localPet, srcTermProcessingOpt, dtMin);
+    fprintf(asmmstoreoptprintfp, "localPet: %d, srcTermProcessingOpt=%d -> "
+      "dtMin=%gs (local)\n", localPet, srcTermProcessingOpt, dtMin);
 #endif
     
-  // all PETs vote on srcTermProcessingOpt
-  vector<int> srcTermProcessingOptList(petCount);
-  vm->allgather(&srcTermProcessingOpt, &srcTermProcessingOptList[0],
-    sizeof(int));
-  sort(srcTermProcessingOptList.begin(), srcTermProcessingOptList.end());
-  int votes = 1; // initialize
-  int votesMax = 0; // initialize
-  for (int i=1; i<petCount; i++){
-    if (srcTermProcessingOptList[i-1] == srcTermProcessingOptList[i]){
-      // same vote
-      ++votes;
-    }else{
-      // different vote
-      if (votes > votesMax){
-        // new high vote found
-        votesMax = votes;
-        srcTermProcessingOpt = srcTermProcessingOptList[i-1];
+    // all PETs vote on srcTermProcessingOpt
+    vector<int> srcTermProcessingOptList(petCount);
+    vm->allgather(&srcTermProcessingOpt, &srcTermProcessingOptList[0],
+      sizeof(int));
+    sort(srcTermProcessingOptList.begin(), srcTermProcessingOptList.end());
+    int votes = 1; // initialize
+    int votesMax = 0; // initialize
+    for (int i=1; i<petCount; i++){
+      if (srcTermProcessingOptList[i-1] == srcTermProcessingOptList[i]){
+        // same vote
+        ++votes;
+      }else{
+        // different vote
+        if (votes > votesMax){
+          // new high vote found
+          votesMax = votes;
+          srcTermProcessingOpt = srcTermProcessingOptList[i-1];
+        }
+        votes = 1;
       }
-      votes = 1;
     }
-  }
-  // check last votes
-  if (votes > votesMax){
-    // new high vote found
-    srcTermProcessingOpt = srcTermProcessingOptList[petCount-1];
-  }
+    // check last votes
+    if (votes > votesMax){
+      // new high vote found
+      srcTermProcessingOpt = srcTermProcessingOptList[petCount-1];
+    }
+    sprintf(msg, "... finished tuning, found srcTermProcessingOpt = %d",
+      srcTermProcessingOpt);
+    ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
+    
+    if (srcTermProcessingArg) *srcTermProcessingArg = srcTermProcessingOpt;
   
-  } // whether srcTermProcessingArg was provided as argument
+  } // finished finding srcTermProcessingOpt
+
 
 #ifdef ASMMSTOREOPTPRINT
   fprintf(asmmstoreoptprintfp, "localPet: %d, srcTermProcessingOpt=%d "
@@ -9753,108 +9768,120 @@ ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
   VMK::wtime(t12);   //gjt - profile
 #endif
 
+  // Optimize pipelineDepth, finding pipelineDepthOpt:
   int pipelineDepthOpt;     // optimium pipeline depth ... to be determined
 
 #define FORCE_PIPELINEDEPTH___disable
 #ifdef FORCE_PIPELINEDEPTH
-  int dummyVar2 = petCount;
+  int dummyVar2 = petCount; // force pipeline depth to be "petCount" deep
   pipelineDepthArg = &dummyVar2; // ignore optionally incoming value
 #endif
 
-  if (pipelineDepthArg)
+  if (pipelineDepthArg && *pipelineDepthArg >= 0){
+    char msg[160];
+    sprintf(msg, "pipelineDepthArg = %d was provided -> do not tune",
+      *pipelineDepthArg);
+    ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
     pipelineDepthOpt = *pipelineDepthArg;
-  else{
-
-  // optimize pipeline depth
-  for (int pipelineDepth=1; pipelineDepth<=petCount; pipelineDepth*=2){
-    // start writing a fresh XXE stream
-    xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
-      startXxeSubCount, startBufferInfoListSize);
-    localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
-      srcTermProcessingOpt, pipelineDepth, elementTK, valueTK, factorTK,
-      dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
-      dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount, 
-      vectorLength, xxe);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+  }else{
+    // optimize pipeline depth
+    char msg[160];
+    sprintf(msg, "pipelineDepthArg was NOT provided -> tuning...");
+    ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
+    for (int pipelineDepth=1; pipelineDepth<=petCount; pipelineDepth*=2){
+      // start writing a fresh XXE stream
+      xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
+        startXxeSubCount, startBufferInfoListSize);
+      localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
+        srcTermProcessingOpt, pipelineDepth, elementTK, valueTK, factorTK,
+        dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
+        dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount, 
+        vectorLength, xxe);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+        return rc;
 #if 0  
-    // optimize the XXE entire stream
-    localrc = xxe->optimize();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+      // optimize the XXE entire stream
+      localrc = xxe->optimize();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+        return rc;
 #endif 
-    // get XXE ready for execution
-    localrc = xxe->execReady();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
-    // obtain timing
-    double dtAverage = 0.;
-    double dtStart, dtEnd;
-    const int dtCount = 10;
-    for (int i=0; i<dtCount; i++){
-      vm->barrier();
-      vm->wtime(&dtStart);
-        localrc = xxe->exec(rraCount, rraList, &vectorLength,
-          0x0|XXE::filterBitRegionTotalZero|XXE::filterBitNbTestFinish
-          |XXE::filterBitCancel);
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          &rc)) return rc;
-      vm->barrier();
-      vm->wtime(&dtEnd);
-      dtAverage += dtEnd - dtStart;
-    }
-    dtAverage /= dtCount;
+      // get XXE ready for execution
+      localrc = xxe->execReady();
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+        return rc;
+      // obtain timing
+      double dtAverage = 0.;
+      double dtStart, dtEnd;
+      const int dtCount = 10;
+      for (int i=0; i<dtCount; i++){
+        vm->barrier();
+        vm->wtime(&dtStart);
+          localrc = xxe->exec(rraCount, rraList, &vectorLength,
+            0x0|XXE::filterBitRegionTotalZero|XXE::filterBitNbTestFinish
+            |XXE::filterBitCancel);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            &rc)) return rc;
+        vm->barrier();
+        vm->wtime(&dtEnd);
+        dtAverage += dtEnd - dtStart;
+      }
+      dtAverage /= dtCount;
 #ifdef ASMMSTOREOPTPRINT
-    fprintf(asmmstoreoptprintfp, "localPet: %d, pipelineDepth=%d -> "
-      "dtAverage=%gs\n", localPet, pipelineDepth, dtAverage);
+      fprintf(asmmstoreoptprintfp, "localPet: %d, pipelineDepth=%d -> "
+        "dtAverage=%gs\n", localPet, pipelineDepth, dtAverage);
 #endif
-    // determine optimum pipelineDepth  
-    if (pipelineDepth==1){
-      // first time through -> initialize to find minimum
-      dtMin = dtAverage;
-      pipelineDepthOpt = pipelineDepth;
-    }else{
-      // compare to current minimum
-      if (dtAverage < dtMin){
-        // found better time
+      // determine optimum pipelineDepth  
+      if (pipelineDepth==1){
+        // first time through -> initialize to find minimum
         dtMin = dtAverage;
         pipelineDepthOpt = pipelineDepth;
+      }else{
+        // compare to current minimum
+        if (dtAverage < dtMin){
+          // found better time
+          dtMin = dtAverage;
+          pipelineDepthOpt = pipelineDepth;
+        }
       }
-    }
-  } // pipelineDepth
-  
-#ifdef ASMMSTOREOPTPRINT
-  fprintf(asmmstoreoptprintfp, "localPet: %d, pipelineDepthOpt=%d -> "
-    "dtMin=%gs (local)\n", localPet, pipelineDepthOpt, dtMin);
-#endif
+    } // pipelineDepth
     
-  // all PETs vote on pipelineDepthOpt
-  vector<int> pipelineDepthOptList(petCount);
-  vm->allgather(&pipelineDepthOpt, &pipelineDepthOptList[0], sizeof(int));
-  sort(pipelineDepthOptList.begin(), pipelineDepthOptList.end());
-  int votes = 1; // initialize
-  int votesMax = 0; // initialize
-  for (int i=1; i<petCount; i++){
-    if (pipelineDepthOptList[i-1] == pipelineDepthOptList[i]){
-      // same vote
-      ++votes;
-    }else{
-      // different vote
-      if (votes > votesMax){
-        // new high vote found
-        votesMax = votes;
-        pipelineDepthOpt = pipelineDepthOptList[i-1];
+#ifdef ASMMSTOREOPTPRINT
+    fprintf(asmmstoreoptprintfp, "localPet: %d, pipelineDepthOpt=%d -> "
+      "dtMin=%gs (local)\n", localPet, pipelineDepthOpt, dtMin);
+#endif
+      
+    // all PETs vote on pipelineDepthOpt
+    vector<int> pipelineDepthOptList(petCount);
+    vm->allgather(&pipelineDepthOpt, &pipelineDepthOptList[0], sizeof(int));
+    sort(pipelineDepthOptList.begin(), pipelineDepthOptList.end());
+    int votes = 1; // initialize
+    int votesMax = 0; // initialize
+    for (int i=1; i<petCount; i++){
+      if (pipelineDepthOptList[i-1] == pipelineDepthOptList[i]){
+        // same vote
+        ++votes;
+      }else{
+        // different vote
+        if (votes > votesMax){
+          // new high vote found
+          votesMax = votes;
+          pipelineDepthOpt = pipelineDepthOptList[i-1];
+        }
+        votes = 1;
       }
-      votes = 1;
     }
-  }
-  // check last votes
-  if (votes > votesMax){
-    // new high vote found
-    pipelineDepthOpt = pipelineDepthOptList[petCount-1];
-  }
-
-  } // whether pipelineDepthArg was provided as argument
+    // check last votes
+    if (votes > votesMax){
+      // new high vote found
+      pipelineDepthOpt = pipelineDepthOptList[petCount-1];
+    }
+    sprintf(msg, "... finished tuning, found pipelineDepthOpt = %d",
+      pipelineDepthOpt);
+    ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
+  
+    if (pipelineDepthArg) *pipelineDepthArg = pipelineDepthOpt;
+  
+  } // finished finding pipelineDepthOpt
 
 #ifdef ASMMSTOREOPTPRINT
   fprintf(asmmstoreoptprintfp, "localPet: %d, pipelineDepthOpt=%d "
@@ -9918,7 +9945,6 @@ ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
       "- Caught exception", &rc);
     return rc;
   }
-  
   
   // return successfully
   rc = ESMF_SUCCESS;
