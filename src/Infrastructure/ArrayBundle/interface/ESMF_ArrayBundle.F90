@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.86 2012/09/20 20:24:47 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.87 2012/10/01 20:07:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.86 2012/09/20 20:24:47 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.87 2012/10/01 20:07:37 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -915,6 +915,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.1.0] Added argument {\tt itemorderflag}.
+!              The new argument gives the user control over the order in which
+!              the items are returned.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1013,6 +1019,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.1.0] Added argument {\tt itemorderflag}.
+!              The new argument gives the user control over the order in which
+!              the items are returned.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
