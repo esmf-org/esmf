@@ -1,4 +1,4 @@
-// $Id: ESMCI_PIO_Handler.C,v 1.10 2012/09/20 21:19:44 w6ws Exp $
+// $Id: ESMCI_PIO_Handler.C,v 1.11 2012/10/01 00:46:50 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.10 2012/09/20 21:19:44 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.11 2012/10/01 00:46:50 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -904,6 +904,12 @@ void PIO_Handler::arrayWrite(
       } else {
         timeFrame = timesliceVal;
       }
+    } else if (statusOK && (timesliceVal < 0)) {
+      // Special case for no timeslice input passed but time dimension exists
+      if (varExists && hasTimeDim) {
+        timeFrame = timeLen + 1;
+        PRINTMSG("timeslice not passed but set to " << timeFrame);
+      }
     }
   }
   PRINTMSG("ready to check var compat., status = " <<
@@ -954,12 +960,12 @@ void PIO_Handler::arrayWrite(
             break;
           }
           if (dimIds[i] == unlim) {
-            if (timesliceVal <= 0) {
+            if (timeFrame <= 0) {
               localrc = ESMF_RC_FILE_UNEXPECTED;
               ESMC_LogDefault.Write("File variable requires time dimension",
                                     ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
               statusOK = false;
-            } else if ((timesliceVal <= dimLen) && !overwriteFields()) {
+            } else if ((timeFrame <= dimLen) && !overwriteFields()) {
               // This 'error' might be incorrect in that we can't figure
               // out the max frame of this variable, only for the whole file.
               localrc = ESMF_RC_FILE_UNEXPECTED;
@@ -985,7 +991,7 @@ void PIO_Handler::arrayWrite(
       dimIds = (int *)NULL;
     }
   }
-  if (statusOK && varExists && !overwriteFields() && (timesliceVal <= 0)) {
+  if (statusOK && varExists && !overwriteFields() && (timeFrame <= 0)) {
     // Check to see if we can overwrite an existing field or timeslice
     localrc = ESMF_RC_FILE_WRITE;
     statusOK = false;

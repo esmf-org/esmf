@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_Handler.C,v 1.4 2012/09/20 21:19:44 w6ws Exp $
+// $Id: ESMCI_IO_Handler.C,v 1.5 2012/10/01 00:46:50 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_Handler.C,v 1.4 2012/09/20 21:19:44 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_IO_Handler.C,v 1.5 2012/10/01 00:46:50 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -471,7 +471,7 @@ bool IO_Handler::fileExists(
       // Non-root PETs just participate in the broadcast
       localrc = vm->broadcast(&fileOK, sizeof(bool), ROOT_PET);
     }
-    if (ESMF_SUCCESS == localrc) {
+    if (ESMF_SUCCESS != localrc) {
       char errmsg[ESMF_MAXSTR + 64];
       sprintf(errmsg, "Error finding file status for \"%s\"", name);
       ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
