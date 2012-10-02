@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.54 2012/10/02 02:25:34 ksaint Exp $
+% $Id: Component_refdoc.ctex,v 1.55 2012/10/02 04:44:17 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -149,10 +149,10 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{SciComp_usage}
-\input{ESMF_SCompEx_fapi}
+%\input{ESMF_SCompEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/Component/doc/SciComp_usage}
-\input{../Superstructure/Component/doc/ESMF_SCompEx_fapi}
+%\input{../Superstructure/Component/doc/ESMF_SCompEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
@@ -164,9 +164,9 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{ESMF_GridComp_fapi}
+\input{ESMF_SciComp_fapi}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_GridComp_fapi}
+\input{../Superstructure/Component/doc/ESMF_SciComp_fapi}
 #endif
 
 %%%%%%%%%%%%% Fault-tolerant Component Tunnel %%%%%%%%%
