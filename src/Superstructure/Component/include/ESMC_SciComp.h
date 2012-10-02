@@ -1,4 +1,4 @@
-// $Id: ESMC_SciComp.h,v 1.2 2012/09/19 20:35:22 ksaint Exp $
+// $Id: ESMC_SciComp.h,v 1.3 2012/10/02 02:25:36 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -104,41 +104,6 @@ int ESMC_SciCompDestroy(
 //EOP
 //-----------------------------------------------------------------------------
 
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_SciCompGetInternalState - Get the Internal State of a Science Component
-//
-// !INTERFACE:
-void *ESMC_SciCompGetInternalState(
-  ESMC_SciComp comp,            // in
-  int *rc                       // out
-);
-// !RETURN VALUE:
-//  Pointer to private data block that is stored in the internal state.
-//
-// !DESCRIPTION:
-//
-//  Available to be called by an {\tt ESMC\_SciComp} at any time after 
-//  {\tt ESMC\_SciCompSetInternalState} has been called. 
-//  When running multiple instantiations of an 
-//  {\tt ESMC\_SciComp}, for example during ensemble runs, it may be simpler 
-//  to maintain private data specific to each run with private data blocks. A 
-//  corresponding {\tt ESMC\_SciCompSetInternalState} call sets the data
-//  pointer to this block, and this call retrieves the data pointer. 
-//
-//  Only the {\em last} data block set via {\tt ESMC\_SciCompSetInternalState}
-//  will be accessible. 
-//
-//  The arguments are:
-//  \begin{description}
-//  \item[comp]
-//    An {\tt ESMC\_SciComp} object.
-//  \item[{[rc]}]
-//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-// \end{description}
-//
-//EOP
-//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -159,40 +124,6 @@ int ESMC_SciCompPrint(
 //  \begin{description}
 //  \item[comp]
 //    An {\tt ESMC\_SciComp} object.
-// \end{description}
-//
-//EOP
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_SciCompSetInternalState - Set the Internal State of a Science Component
-//
-// !INTERFACE:
-int ESMC_SciCompSetInternalState(
-  ESMC_SciComp comp,           // inout
-  void *data                    // in
-);
-// !RETURN VALUE:
-//  Return code; equals ESMF_SUCCESS if there are no errors.
-//
-// !DESCRIPTION:
-//
-//  Available to be called by an {\tt ESMC\_SciComp} at any time.
-//  When running multiple instantiations of an {\tt ESMC\_SciComp}, 
-//  for example during ensemble runs, it may be simpler to maintain private 
-//  data specific to each run with private data blocks.  A corresponding 
-//  {\tt ESMC\_SciCompGetInternalState} call retrieves the data pointer.
-//   
-//  Only the {\em last} data block set via
-//  {\tt ESMC\_SciCompSetInternalState} will be accessible.
-//
-//  The arguments are:
-//  \begin{description}
-//  \item[comp]
-//    An {\tt ESMC\_SciComp} object.
-//  \item[data]
-//    Pointer to private data block to be stored.
 // \end{description}
 //
 //EOP

@@ -1,4 +1,4 @@
-! $Id: ESMF_SciCompCreateUTest.F90,v 1.4 2012/09/19 20:35:54 ksaint Exp $
+! $Id: ESMF_SciCompCreateUTest.F90,v 1.5 2012/10/02 02:25:42 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -41,23 +41,9 @@
     character(ESMF_MAXSTR) :: name
     integer :: result = 0
 
-    ! Internal State Variables
-    type testData
-    sequence
-        integer :: testNumber
-    end type
-
-    type dataWrapper
-    sequence
-        type(testData), pointer :: p
-    end type
-
 
 !! #ifdef ESMF_TESTEXHAUSTIVE
     character(ESMF_MAXSTR) :: bname
-    type(dataWrapper) :: wrap1, wrap2, wrap3, wrap4, wrap5, wrap6
-!    type(ESMF_Grid) :: grid, gridIn
-    logical         :: isPresent
 !! #endif
 
 !-------------------------------------------------------------------------------
@@ -178,16 +164,6 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Validating a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-!-------------------------------------------------------------------------
-!   !
-    !EX_UTest
-    ! Wait for a concurrent component to finish executing.
-
-    call ESMF_SciCompWait(comp1, rc=rc)
-
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Waiting for a Component Test"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
@@ -208,99 +184,6 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Verifying the correct Component name was returned Test"
     call ESMF_Test((bname.eq.cname), name, failMsg, result, ESMF_SRCLINE)
-
-!-------------------------------------------------------------------------
-!   !
-!   !  Set Internal State
-    !NEX_disable_UTest
-!!    allocate(wrap1%p)
-!!    wrap1%p%testnumber=4567
-
-!!    write(failMsg, *) "Did not return ESMF_SUCCESS"
-!!    write(name, *) "Set Internal State Test"
-!!    call ESMF_SciCompSetInternalState(comp1, wrap1, rc)
-!!    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-!-------------------------------------------------------------------------
-!   !
-!   !  Get Internal State
-    !NEX_disable_UTest
-!!    write(failMsg, *) "Did not return ESMF_SUCCESS"
-!!    write(name, *) "Get Internal State Test"
-!!    call ESMF_SciCompGetInternalState(comp1, wrap2, rc)
-!!    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-!-------------------------------------------------------------------------
-!   !
-!   !  Verify Internal State
-    !NEX_disable_UTest
-!!    write(failMsg, *) "Did not return correct data"
-!!    write(name, *) "Verify Internal State Test"
-!!    call ESMF_Test((wrap2%p%testnumber.eq.4567), name, failMsg, result, ESMF_SRCLINE)
-!!    print *, "wrap2%p%testnumber = ", wrap2%p%testnumber
-    
-!-------------------------------------------------------------------------
-!   !
-!   !  Set Internal State
-    !NEX_disable_UTest
-!!    allocate(wrap3%p)
-!!    wrap3%p%testnumber=1234
-
-!!    write(failMsg, *) "Did not return ESMF_SUCCESS"
-!!    write(name, *) "Set Internal State 2nd time Test"
-!!    call ESMF_SciCompSetInternalState(comp1, wrap3, rc)
-!!    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-!-------------------------------------------------------------------------
-!   !
-!   !  Get Internal State
-    !NEX_disable_UTest
-!!    write(failMsg, *) "Did not return ESMF_SUCCESS"
-!!    write(name, *) "Get Internal State 2nd time Test"
-!!    call ESMF_SciCompGetInternalState(comp1, wrap4, rc)
-!!    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-!-------------------------------------------------------------------------
-!   !
-!   !  Verify Internal State
-    !NEX_disable_UTest
-!!    write(failMsg, *) "Did not return correct data"
-!!    write(name, *) "Verify Internal State 2nd time Test"
-!!    call ESMF_Test((wrap4%p%testnumber.eq.1234), name, failMsg, result, ESMF_SRCLINE)
-!!    print *, "wrap4%p%testnumber = ", wrap4%p%testnumber
-    
-!-------------------------------------------------------------------------
-!   !  Set Internal State
-    !NEX_disable_UTest
-!!    allocate(wrap5%p)
-!!    wrap3%p%testnumber=9182
-
-!!    write(failMsg, *) "Did not return ESMF_SUCCESS"
-!!    write(name, *) "Set Internal State 3rd time Test"
-!!    call ESMF_SciCompSetInternalState(comp1, wrap5, rc)
-!!    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-!-------------------------------------------------------------------------
-!   !
-!   !  Get Internal State
-    !NEX_disable_UTest
-!!    write(failMsg, *) "Did not return ESMF_SUCCESS"
-!!    write(name, *) "Get Internal State 3rd time Test"
-!!    call ESMF_SciCompGetInternalState(comp1, wrap6, rc)
-!!    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-!-------------------------------------------------------------------------
-!   !
-!   !  Verify Internal State
-    !EX_disable_UTest
-!!    write(failMsg, *) "Did not return correct data"
-!!    write(name, *) "Verify Internal State 3rd time Test"
-!!    call ESMF_Test((wrap4%p%testnumber.eq.9182), name, failMsg, result, ESMF_SRCLINE)
-!!    print *, "wrap4%p%testnumber = ", wrap6%p%testnumber
-    
-!!    deallocate(wrap1%p)
-!!    deallocate(wrap3%p)
-!!    deallocate(wrap5%p)
 
 !-------------------------------------------------------------------------
 !   !

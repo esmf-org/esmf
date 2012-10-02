@@ -1,0 +1,27 @@
+% $Id: SciComp_desc.tex,v 1.1 2012/10/02 02:25:34 ksaint Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2012, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the University of Illinois-NCSA License.
+
+%\subsection{Description}
+\label{sec:SciComp}
+
+In Earth system modeling, a particular piece of code representing a physical 
+domain, such as an atmospheric model or an ocean model, is typically 
+implemented as an ESMF Gridded Component, or {\tt ESMC\_GridComp}.  
+However, there are times when physical domains, or realms, need to be 
+represented, but aren't actual pieces of code, or software.  These domains 
+cam be implmentd as ESMF Science Components, or {\\tt ESMC_SciComp}.
+
+Unlike Gridded and Coupler Components, Science Components are not associated 
+with software, so they don't require the overhead of handling execution 
+routines, such as initialize, run and finalize.  Instead, a Science Component 
+is a simple container object, that contains basic information, such as name,
+as well as lists of other objects, such as Attributes.  In addition, Science
+Components can contain other Components, so they can be nested within a
+Component hierarchy.
