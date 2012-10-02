@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.79 2012/10/01 15:42:27 theurich Exp $
+// $Id: ESMCI_Array.h,v 1.80 2012/10/02 16:15:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -335,14 +335,16 @@ namespace ESMCI {
       int *counts, int *tile, int rootPet, VM *vm);
     static int haloStore(Array *array, RouteHandle **routehandle,
       ESMC_HaloStartRegionFlag halostartregionflag=ESMF_REGION_EXCLUSIVE,
-      InterfaceInt *haloLDepth=NULL, InterfaceInt *haloUDepth=NULL);
+      InterfaceInt *haloLDepth=NULL, InterfaceInt *haloUDepth=NULL,
+      int *pipelineDepthArg=NULL);
     static int halo(Array *array,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
       bool *finishedflag=NULL, bool *cancelledflag=NULL, bool checkflag=false);
     static int haloRelease(RouteHandle *routehandle);
     static int redistStore(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, InterfaceInt *srcToDstTransposeMap,
-      ESMC_TypeKind_Flag typekindFactor = ESMF_NOKIND, void *factor = NULL);
+      ESMC_TypeKind_Flag typekindFactor = ESMF_NOKIND, void *factor = NULL,
+      int *pipelineDepthArg = NULL);
     static int redist(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
       bool *finishedflag=NULL, bool *cancelledflag=NULL, bool checkflag=false);

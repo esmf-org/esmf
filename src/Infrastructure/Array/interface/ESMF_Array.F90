@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.173 2012/10/01 23:26:58 theurich Exp $
+! $Id: ESMF_Array.F90,v 1.174 2012/10/02 16:15:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.173 2012/10/01 23:26:58 theurich Exp $'
+    '$Id: ESMF_Array.F90,v 1.174 2012/10/02 16:15:25 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -934,7 +934,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     Note that the pipeline depth has no affect on the bit-for-bit
 !     reproducibility of the restuls. However, it may affect the performance
-!     reproducibility of a sparse matrix multiplication.
+!     reproducibility of the exchange.
 !
 !     The {\tt ESMF\_ArraySMMStore()} method implements an auto-tuning scheme
 !     for the {\tt pipelineDepth} parameter. The intent on the 
@@ -1363,7 +1363,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     Note that the pipeline depth has no affect on the bit-for-bit
 !     reproducibility of the restuls. However, it may affect the performance
-!     reproducibility of a sparse matrix multiplication.
+!     reproducibility of the exchange.
 !
 !     The {\tt ESMF\_ArraySMMStore()} method implements an auto-tuning scheme
 !     for the {\tt pipelineDepth} parameter. The intent on the 

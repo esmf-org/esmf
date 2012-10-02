@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.65 2012/10/01 15:42:33 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.66 2012/10/02 16:15:25 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -745,14 +745,15 @@ extern "C" {
     ESMCI::RouteHandle **routehandle,
     ESMC_HaloStartRegionFlag *halostartregionflag,
     ESMCI::InterfaceInt **haloLDepth, ESMCI::InterfaceInt **haloUDepth,
-    int *rc){
+    int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayhalostore()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::haloStore(
-      *array, routehandle, *halostartregionflag, *haloLDepth, *haloUDepth),
+      *array, routehandle, *halostartregionflag, *haloLDepth, *haloUDepth,
+      pipelineDepth),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
@@ -795,7 +796,7 @@ extern "C" {
   void FTN_X(c_esmc_arrayrediststore)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
     ESMCI::InterfaceInt **srcToDstTransposeMap, ESMC_TypeKind_Flag *typekind,
-    void *factor, int *rc){
+    void *factor, int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayrediststore()"
     // Initialize return code; assume routine not implemented
@@ -803,21 +804,22 @@ extern "C" {
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::redistStore(
       *srcArray, *dstArray, routehandle, *srcToDstTransposeMap, *typekind,
-      factor),
+      factor, pipelineDepth),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN_X(c_esmc_arrayrediststorenf)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
-    ESMCI::InterfaceInt **srcToDstTransposeMap, int *rc){
+    ESMCI::InterfaceInt **srcToDstTransposeMap, int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayrediststorenf()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.MsgFoundError(ESMCI::Array::redistStore(
-      *srcArray, *dstArray, routehandle, *srcToDstTransposeMap),
+      *srcArray, *dstArray, routehandle, *srcToDstTransposeMap, ESMF_NOKIND,
+      NULL, pipelineDepth),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.165 2012/10/01 23:27:00 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.166 2012/10/02 16:15:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.165 2012/10/01 23:27:00 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.166 2012/10/02 16:15:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -3159,7 +3159,7 @@ int Array::gather(
   int *tileArg,                         // in -
   int rootPet,                          // in -
   VM *vm                                // in -
-  ){    
+  ){
 //
 //
 // !DESCRIPTION:
@@ -3567,7 +3567,7 @@ int Array::scatter(
   int *tileArg,                         // in -
   int rootPet,                          // in -
   VM *vm                                // in -
-  ){    
+  ){
 //
 //
 // !DESCRIPTION:
@@ -3971,8 +3971,9 @@ int Array::haloStore(
   RouteHandle **routehandle,            // inout - handle to precomputed comm
   ESMC_HaloStartRegionFlag halostartregionflag, // in - start of halo region
   InterfaceInt *haloLDepth,             // in    - lower corner halo depth
-  InterfaceInt *haloUDepth              // in    - upper corner halo depth
-  ){    
+  InterfaceInt *haloUDepth,             // in    - upper corner halo depth
+  int *pipelineDepthArg                 // in (optional)
+  ){
 //
 // !DESCRIPTION:
 //  Precompute and store communication pattern for halo
@@ -4233,9 +4234,11 @@ int Array::haloStore(
 #else
       factorListCount, 1, 1, factorIndexListPtr));
 #endif
-  
+    
     // precompute sparse matrix multiplication
-    localrc = sparseMatMulStore(array, array, routehandle, sparseMatrix, true);
+    int srcTermProcessing = 0;  // no need to use auto-tuning to figure this out
+    localrc = sparseMatMulStore(array, array, routehandle, sparseMatrix, true,
+      &srcTermProcessing, pipelineDepthArg);
     
     // remove seqIndex masking in Array rim region before evaluating return code
     for (int i=0; i<localDeCount; i++){
@@ -4305,7 +4308,7 @@ int Array::halo(
   bool *cancelledflag,                  // out   - any cancelled operations
   bool checkflag                        // in    - false: (def.) basic chcks
                                         //         true:  full input check
-  ){    
+  ){
 //
 // !DESCRIPTION:
 //    Execute an Array halo
@@ -4345,7 +4348,7 @@ int Array::haloRelease(
 // !ARGUMENTS:
 //
   RouteHandle *routehandle        // inout -
-  ){    
+  ){
 //
 // !DESCRIPTION:
 //    Release information for an Array halo
@@ -4387,8 +4390,9 @@ int Array::redistStore(
   RouteHandle **routehandle,            // inout - handle to precomputed comm
   InterfaceInt *srcToDstTransposeMap,   // in    - mapping src -> dst dims
   ESMC_TypeKind_Flag typekindFactor,    // in    - typekind of factor
-  void *factor                          // in    - redist factor
-  ){    
+  void *factor,                         // in    - redist factor
+  int *pipelineDepthArg                 // in (optional)
+  ){
 //
 // !DESCRIPTION:
 //  Precompute and store communication pattern for redistribution
@@ -4836,7 +4840,9 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
     factorListCount, srcN, dstN, factorIndexList));
   
   // precompute sparse matrix multiplication
-  localrc = sparseMatMulStore(srcArray, dstArray, routehandle, sparseMatrix);
+  int srcTermProcessing = 0;  // no need to use auto-tuning to figure this out
+  localrc = sparseMatMulStore(srcArray, dstArray, routehandle, sparseMatrix,
+    false, &srcTermProcessing, pipelineDepthArg);
   // garbage collection
   delete [] factorIndexList;
   if (typekindFactor == ESMC_TYPEKIND_R4){
@@ -4898,7 +4904,7 @@ int Array::redist(
   bool *cancelledflag,                  // out   - any cancelled operations
   bool checkflag                        // in    - false: (def.) basic chcks
                                         //         true:  full input check
-  ){    
+  ){
 //
 // !DESCRIPTION:
 //    Execute an Array redistribution
@@ -4938,7 +4944,7 @@ int Array::redistRelease(
 // !ARGUMENTS:
 //
   RouteHandle *routehandle        // inout -
-  ){    
+  ){
 //
 // !DESCRIPTION:
 //    Release information for an Array redistribution
@@ -6851,7 +6857,7 @@ void clientRequest(FillPartnerDeInfo *fillPartnerDeInfo, int dstPet,
   int jj = 0; // reset
   int localLookupIndex = 0; // reset
   for (vector<DD::SeqIndexFactorLookup>::const_iterator
-    j=seqIndexFactorLookupOut.begin(); j!=seqIndexFactorLookupOut.end(); ++j){  
+    j=seqIndexFactorLookupOut.begin(); j!=seqIndexFactorLookupOut.end(); ++j){
     for (int k=0; k<j->factorCount; k++){
       int partnerSeqInd = j->factorList[k]
         .partnerSeqIndex.decompSeqIndex;
@@ -6886,7 +6892,7 @@ void localClientServerExchange(FillPartnerDeInfo *fillPartnerDeInfo){
   int seqIndMax = seqIndexIntervalIn[localPet].max;
   int seqIndCount = seqIndexIntervalIn[localPet].count;
   for (vector<DD::SeqIndexFactorLookup>::iterator
-    j=seqIndexFactorLookupOut.begin(); j!=seqIndexFactorLookupOut.end(); ++j){  
+    j=seqIndexFactorLookupOut.begin(); j!=seqIndexFactorLookupOut.end(); ++j){
     for (int k=0; k<j->factorCount; k++){
       int partnerSeqInd = j->factorList[k]
         .partnerSeqIndex.decompSeqIndex;
@@ -7600,7 +7606,7 @@ int Array::sparseMatMulStore(
   bool haloFlag,                            // in    - support halo conditions
   int *srcTermProcessingArg,                // in (optional)
   int *pipelineDepthArg                     // in (optional)
-  ){    
+  ){
 //
 // !DESCRIPTION:
 //  Precompute and store communication pattern for sparse matrix multiplication
@@ -8868,7 +8874,7 @@ int sparseMatMulStoreEncodeXXE(
 #endif
   int *srcTermProcessingArg,              // in (optional)
   int *pipelineDepthArg                   // in (optional)
-  ){    
+  ){
 //
 // !DESCRIPTION:
 //    Take the incoming sparse matrix information in "run distribution" and
@@ -9985,7 +9991,7 @@ int sparseMatMulStoreEncodeXXEStream(
   int rraCount,                           // in
   int vectorLength,                       // in
   XXE *xxe                                // inout - XXE stream
-  ){    
+  ){
 //
 // !DESCRIPTION:
 //    Encode a pipelined XXE stream with the specified degree of
@@ -10384,7 +10390,7 @@ int Array::sparseMatMul(
   bool checkflag,                       // in    - false: (def.) basic chcks
                                         //         true:  full input check
   bool haloFlag                         // in    - support halo conditions
-  ){    
+  ){
 //
 // !DESCRIPTION:
 //    Execute an Array sparse matrix multiplication operation
@@ -10426,7 +10432,7 @@ int Array::sparseMatMul(
   // get a handle on the XXE stored in routehandle
   XXE *xxe = (XXE *)(*routehandle)->getStorage();
 
-  if (xxe == NULL){  
+  if (xxe == NULL){
     // NOP
     // return successfully
     rc = ESMF_SUCCESS;
@@ -10681,7 +10687,7 @@ int Array::sparseMatMulRelease(
 // !ARGUMENTS:
 //
   RouteHandle *routehandle        // inout -
-  ){    
+  ){
 //
 // !DESCRIPTION:
 //    Release information for an Array sparse matrix multiplication operation
@@ -10697,7 +10703,7 @@ int Array::sparseMatMulRelease(
     // get XXE from routehandle
     XXE *xxe = (XXE *)routehandle->getStorage();
 
-    if (xxe == NULL){  
+    if (xxe == NULL){
       // NOP
       // return successfully
       rc = ESMF_SUCCESS;
@@ -10775,7 +10781,7 @@ ArrayElement::ArrayElement(
 //
   Array const *arrayArg,
   int localDeArg
-  ){    
+  ){
 //
 // !DESCRIPTION:
 //    Constructor of ArrayElement iterator through Array elements in exclusive
@@ -10857,7 +10863,7 @@ ArrayElement::ArrayElement(
   Array const *arrayArg,
   int localDeArg,
   bool blockExclusiveFlag   // in - block exclusive region if set to true
-  ){    
+  ){
 //
 // !DESCRIPTION:
 //    Constructor of ArrayElement iterator through Array elements in total
@@ -11157,7 +11163,7 @@ SparseMatrix::SparseMatrix(
   int const srcN_,
   int const dstN_,
   int const *factorIndexList_
-  ){    
+  ){
 //
 // !DESCRIPTION:
 //    Constructor

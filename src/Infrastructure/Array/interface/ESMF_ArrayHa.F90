@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.45 2012/09/12 03:49:15 gold2718 Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.46 2012/10/02 16:15:25 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.45 2012/09/12 03:49:15 gold2718 Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.46 2012/10/02 16:15:25 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -297,20 +297,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
     subroutine ESMF_ArrayHaloStore(array, routehandle, keywordEnforcer, &
-      startregion, haloLDepth, haloUDepth, rc)
+      startregion, haloLDepth, haloUDepth, pipelineDepth, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),            intent(inout)         :: array
-    type(ESMF_RouteHandle),      intent(inout)         :: routehandle
+    type(ESMF_Array),            intent(inout)           :: array
+    type(ESMF_RouteHandle),      intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_StartRegion_Flag), intent(in),  optional ::startregion
-    integer,                     intent(in),  optional :: haloLDepth(:)
-    integer,                     intent(in),  optional :: haloUDepth(:)
-    integer,                     intent(out), optional :: rc
+    type(ESMF_StartRegion_Flag), intent(in),    optional ::startregion
+    integer,                     intent(in),    optional :: haloLDepth(:)
+    integer,                     intent(in),    optional :: haloUDepth(:)
+    integer,                     intent(inout), optional :: pipelineDepth
+    integer,                     intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.1.0] Added argument {\tt pipelineDepth}.
+!              The new argument provide access to the tuning parameter
+!              affecting the sparse matrix execution.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -376,6 +383,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     region with respect to the upper corner of {\tt startregion}.
 !     The size of {\tt haloUDepth} must equal the number of distributed Array
 !     dimensions.
+!   \item [{[pipelineDepth]}]
+!     The {\tt pipelineDepth} parameter controls how many messages a PET
+!     may have outstanding during a halo exchange. Larger values
+!     of {\tt pipelineDepth} typically lead to better performance. However,
+!     on some systems too large a value may lead to performance degradation,
+!     or runtime errors.
+!
+!     Note that the pipeline depth has no affect on the bit-for-bit
+!     reproducibility of the restuls. However, it may affect the performance
+!     reproducibility of the exchange.
+!
+!     The {\tt ESMF\_ArraySMMStore()} method implements an auto-tuning scheme
+!     for the {\tt pipelineDepth} parameter. The intent on the 
+!     {\tt pipelineDepth} argument is "{\tt inout}" in order to 
+!     support both overriding and accessing the auto-tuning parameter.
+!     If an argument $>= 0$ is specified, it is used for the 
+!     {\tt pipelineDepth} parameter, and the auto-tuning phase is skipped.
+!     In this case the {\tt pipelineDepth} argument is not modified on
+!     return. If the provided argument is $< 0$, the {\tt pipelineDepth}
+!     parameter is determined internally using the auto-tuning scheme. In this
+!     case the {\tt pipelineDepth} argument is re-set to the internally
+!     determined value on return. Auto-tuning is also used if the optional 
+!     {\tt pipelineDepth} argument is omitted.
+!
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -408,7 +439,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayHaloStore(array, routehandle, opt_startregion, &
-      haloLDepthArg, haloUDepthArg, localrc)
+      haloLDepthArg, haloUDepthArg, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -802,20 +833,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
 ! ! Private name; call using ESMF_ArrayRedistStore()
 ! subroutine ESMF_ArrayRedistStore<type><kind>(srcArray, dstArray, &
-!   routehandle, factor, keywordEnforcer, srcToDstTransposeMap, rc)
+!   routehandle, factor, keywordEnforcer, srcToDstTransposeMap, &
+!   pipelineDepth, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_Array),         intent(in)            :: srcArray
-!   type(ESMF_Array),         intent(inout)         :: dstArray
-!   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)            :: factor
+!   type(ESMF_Array),         intent(in)              :: srcArray
+!   type(ESMF_Array),         intent(inout)           :: dstArray
+!   type(ESMF_RouteHandle),   intent(inout)           :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)              :: factor
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                  intent(in),  optional :: srcToDstTransposeMap(:)
-!   integer,                  intent(out), optional :: rc
+!   integer,                  intent(in),    optional :: srcToDstTransposeMap(:)
+!   integer,                  intent(inout), optional :: pipelineDepth
+!   integer,                  intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.1.0] Added argument {\tt pipelineDepth}.
+!              The new argument provide access to the tuning parameter
+!              affecting the sparse matrix execution.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -893,6 +932,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     entry maps the corresponding {\tt srcArray} dimension against the 
 !     specified {\tt dstArray} dimension. Mixing of distributed and
 !     undistributed dimensions is supported.
+!   \item [{[pipelineDepth]}]
+!     The {\tt pipelineDepth} parameter controls how many messages a PET
+!     may have outstanding during a redist exchange. Larger values
+!     of {\tt pipelineDepth} typically lead to better performance. However,
+!     on some systems too large a value may lead to performance degradation,
+!     or runtime errors.
+!
+!     Note that the pipeline depth has no affect on the bit-for-bit
+!     reproducibility of the restuls. However, it may affect the performance
+!     reproducibility of the exchange.
+!
+!     The {\tt ESMF\_ArraySMMStore()} method implements an auto-tuning scheme
+!     for the {\tt pipelineDepth} parameter. The intent on the 
+!     {\tt pipelineDepth} argument is "{\tt inout}" in order to 
+!     support both overriding and accessing the auto-tuning parameter.
+!     If an argument $>= 0$ is specified, it is used for the 
+!     {\tt pipelineDepth} parameter, and the auto-tuning phase is skipped.
+!     In this case the {\tt pipelineDepth} argument is not modified on
+!     return. If the provided argument is $< 0$, the {\tt pipelineDepth}
+!     parameter is determined internally using the auto-tuning scheme. In this
+!     case the {\tt pipelineDepth} argument is re-set to the internally
+!     determined value on return. Auto-tuning is also used if the optional 
+!     {\tt pipelineDepth} argument is omitted.
+!
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -910,16 +973,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreI4(srcArray, dstArray, routehandle, &
-    factor, keywordEnforcer, srcToDstTransposeMap, rc)
+    factor, keywordEnforcer, srcToDstTransposeMap, pipelineDepth, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)            :: srcArray
-    type(ESMF_Array),           intent(inout)         :: dstArray
-    type(ESMF_RouteHandle),     intent(inout)         :: routehandle
-    integer(ESMF_KIND_I4),      intent(in)            :: factor
+    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    integer(ESMF_KIND_I4),      intent(in)              :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(in),  optional :: srcToDstTransposeMap(:)
-    integer,                    intent(out), optional :: rc
+    integer,                    intent(in),    optional :: srcToDstTransposeMap(:)
+    integer,                    intent(inout), optional :: pipelineDepth
+    integer,                    intent(out),   optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -942,7 +1006,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, &
-      srcToDstTransposeMapArg, ESMF_TYPEKIND_I4, factor, localrc)
+      srcToDstTransposeMapArg, ESMF_TYPEKIND_I4, factor, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -972,16 +1036,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreI8(srcArray, dstArray, routehandle, &
-    factor, keywordEnforcer, srcToDstTransposeMap, rc)
+    factor, keywordEnforcer, srcToDstTransposeMap, pipelineDepth, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)            :: srcArray
-    type(ESMF_Array),           intent(inout)         :: dstArray
-    type(ESMF_RouteHandle),     intent(inout)         :: routehandle
-    integer(ESMF_KIND_I8),      intent(in)            :: factor
+    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    integer(ESMF_KIND_I8),      intent(in)              :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(in),  optional :: srcToDstTransposeMap(:)
-    integer,                    intent(out), optional :: rc
+    integer,                    intent(in),    optional :: srcToDstTransposeMap(:)
+    integer,                    intent(inout), optional :: pipelineDepth
+    integer,                    intent(out),   optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -1004,7 +1069,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, &
-      srcToDstTransposeMapArg, ESMF_TYPEKIND_I8, factor, localrc)
+      srcToDstTransposeMapArg, ESMF_TYPEKIND_I8, factor, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1034,16 +1099,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreR4(srcArray, dstArray, routehandle, &
-    factor, keywordEnforcer, srcToDstTransposeMap, rc)
+    factor, keywordEnforcer, srcToDstTransposeMap, pipelineDepth, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)            :: srcArray
-    type(ESMF_Array),           intent(inout)         :: dstArray
-    type(ESMF_RouteHandle),     intent(inout)         :: routehandle
-    real(ESMF_KIND_R4),         intent(in)            :: factor
+    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    real(ESMF_KIND_R4),         intent(in)              :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(in),  optional :: srcToDstTransposeMap(:)
-    integer,                    intent(out), optional :: rc
+    integer,                    intent(in),    optional :: srcToDstTransposeMap(:)
+    integer,                    intent(inout), optional :: pipelineDepth
+    integer,                    intent(out),   optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -1096,16 +1162,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreR8(srcArray, dstArray, routehandle, &
-    factor, keywordEnforcer, srcToDstTransposeMap, rc)
+    factor, keywordEnforcer, srcToDstTransposeMap, pipelineDepth, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),           intent(in)            :: srcArray
-    type(ESMF_Array),           intent(inout)         :: dstArray
-    type(ESMF_RouteHandle),     intent(inout)         :: routehandle
-    real(ESMF_KIND_R8),         intent(in)            :: factor
+    type(ESMF_Array),           intent(in)              :: srcArray
+    type(ESMF_Array),           intent(inout)           :: dstArray
+    type(ESMF_RouteHandle),     intent(inout)           :: routehandle
+    real(ESMF_KIND_R8),         intent(in)              :: factor
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                    intent(in),  optional :: srcToDstTransposeMap(:)
-    integer,                    intent(out), optional :: rc
+    integer,                    intent(in),    optional :: srcToDstTransposeMap(:)
+    integer,                    intent(inout), optional :: pipelineDepth
+    integer,                    intent(out),   optional :: rc
 !
 !EOPI
 !------------------------------------------------------------------------------
@@ -1128,7 +1195,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayRedistStore(srcArray, dstArray, routehandle, &
-      srcToDstTransposeMapArg, ESMF_TYPEKIND_R8, factor, localrc)
+      srcToDstTransposeMapArg, ESMF_TYPEKIND_R8, factor, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -1158,19 +1225,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayRedistStore()
   subroutine ESMF_ArrayRedistStoreNF(srcArray, dstArray, routehandle, &
-    keywordEnforcer, srcToDstTransposeMap, rc)
+    keywordEnforcer, srcToDstTransposeMap, pipelineDepth, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),       intent(in)            :: srcArray
-    type(ESMF_Array),       intent(inout)         :: dstArray
-    type(ESMF_RouteHandle), intent(inout)         :: routehandle
+    type(ESMF_Array),       intent(in)              :: srcArray
+    type(ESMF_Array),       intent(inout)           :: dstArray
+    type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(in),  optional :: srcToDstTransposeMap(:)
-    integer,                intent(out), optional :: rc
+    integer,                intent(in),    optional :: srcToDstTransposeMap(:)
+    integer,                intent(inout), optional :: pipelineDepth
+    integer,                intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.1.0] Added argument {\tt pipelineDepth}.
+!              The new argument provide access to the tuning parameter
+!              affecting the sparse matrix execution.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1242,6 +1316,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     entry maps the corresponding {\tt srcArray} dimension against the 
 !     specified {\tt dstArray} dimension. Mixing of distributed and
 !     undistributed dimensions is supported.
+!   \item [{[pipelineDepth]}]
+!     The {\tt pipelineDepth} parameter controls how many messages a PET
+!     may have outstanding during a redist exchange. Larger values
+!     of {\tt pipelineDepth} typically lead to better performance. However,
+!     on some systems too large a value may lead to performance degradation,
+!     or runtime errors.
+!
+!     Note that the pipeline depth has no affect on the bit-for-bit
+!     reproducibility of the restuls. However, it may affect the performance
+!     reproducibility of the exchange.
+!
+!     The {\tt ESMF\_ArraySMMStore()} method implements an auto-tuning scheme
+!     for the {\tt pipelineDepth} parameter. The intent on the 
+!     {\tt pipelineDepth} argument is "{\tt inout}" in order to 
+!     support both overriding and accessing the auto-tuning parameter.
+!     If an argument $>= 0$ is specified, it is used for the 
+!     {\tt pipelineDepth} parameter, and the auto-tuning phase is skipped.
+!     In this case the {\tt pipelineDepth} argument is not modified on
+!     return. If the provided argument is $< 0$, the {\tt pipelineDepth}
+!     parameter is determined internally using the auto-tuning scheme. In this
+!     case the {\tt pipelineDepth} argument is re-set to the internally
+!     determined value on return. Auto-tuning is also used if the optional 
+!     {\tt pipelineDepth} argument is omitted.
+!
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1267,7 +1365,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArrayRedistStoreNF(srcArray, dstArray, routehandle, &
-      srcToDstTransposeMapArg, localrc)
+      srcToDstTransposeMapArg, pipelineDepth, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
