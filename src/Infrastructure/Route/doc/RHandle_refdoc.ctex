@@ -1,4 +1,4 @@
-% $Id: RHandle_refdoc.ctex,v 1.1 2012/09/24 23:24:19 theurich Exp $ 
+% $Id: RHandle_refdoc.ctex,v 1.2 2012/10/02 04:06:45 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -76,10 +76,12 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{RHandle_usage}
-%\input{ESMF_RHandleBitForBitEx_fapi}
+% -> transferability to weakly congruent objects
+% -> non-blocking options
+\input{ESMF_RHandleBitForBitEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Route/doc/RHandle_usage}
-%\input{../Infrastructure/Route/doc/ESMF_RHandleBitForBitEx_fapi}
+\input{../Infrastructure/Route/doc/ESMF_RHandleBitForBitEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
