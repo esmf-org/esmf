@@ -1,4 +1,4 @@
-// $Id: ESMCI_VM.C,v 1.35 2012/09/07 20:20:25 feiliu Exp $
+// $Id: ESMCI_VM.C,v 1.36 2012/10/02 04:32:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -60,7 +60,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_VM.C,v 1.35 2012/09/07 20:20:25 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_VM.C,v 1.36 2012/10/02 04:32:32 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //==============================================================================
@@ -823,7 +823,7 @@ int VM::getPETMatchPET(
 //    matching PET id's that operate in the same virtual address space as
 //    the specified PET.
 //    Returns ESMC_RC_ARG_SIZE if {\tt petMatchList} was provided 
-//    (i.e. not equal to {\tt ESMC_NULL_POINTER) but 
+//    (i.e. not equal to {\tt ESMC\_NULL\_POINTER) but 
 //    {\tt len_petMatchList} < number of matching PETs found.
 //    Otherwise returns ESMF_SUCCESS (even if no matching PETs were found!).
 //

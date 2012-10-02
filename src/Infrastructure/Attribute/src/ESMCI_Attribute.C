@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.137 2012/09/20 21:19:28 w6ws Exp $
+// $Id: ESMCI_Attribute.C,v 1.138 2012/10/02 04:32:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.137 2012/09/20 21:19:28 w6ws Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.138 2012/10/02 04:32:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2226,7 +2226,7 @@ if (attrRoot == ESMF_TRUE) {
       vector<ESMC_I4> *value) const {        // out - Attribute value
 // 
 // !DESCRIPTION:
-//    Get the {\tt ESMC_I4} valueList of an {\tt Attribute}.
+//    Get the {\tt ESMC\_I4} valueList of an {\tt Attribute}.
 //
 //EOPI
 
@@ -2281,7 +2281,7 @@ if (attrRoot == ESMF_TRUE) {
       vector<ESMC_I8> *value) const {        // out - Attribute value
 // 
 // !DESCRIPTION:
-//    Get the {\tt ESMC_I8} valueList of an {\tt Attribute}.
+//    Get the {\tt ESMC\_I8} valueList of an {\tt Attribute}.
 //
 //EOPI
 
@@ -2336,7 +2336,7 @@ if (attrRoot == ESMF_TRUE) {
       vector<ESMC_R4> *value) const {        // out - Attribute value
 // 
 // !DESCRIPTION:
-//    Get the {\tt ESMC_R4} valueList of an {\tt Attribute}.
+//    Get the {\tt ESMC\_R4} valueList of an {\tt Attribute}.
 //
 //EOPI
 
@@ -2391,7 +2391,7 @@ if (attrRoot == ESMF_TRUE) {
       vector<ESMC_R8> *value) const {        // out - Attribute value
 // 
 // !DESCRIPTION:
-//    Get the {\tt ESMC_R8} valueList of an {\tt Attribute}.
+//    Get the {\tt ESMC\_R8} valueList of an {\tt Attribute}.
 //
 //EOPI
 
@@ -2446,7 +2446,7 @@ if (attrRoot == ESMF_TRUE) {
       vector<ESMC_Logical> *value) const {   // out - Attribute value
 // 
 // !DESCRIPTION:
-//    Get the {\tt ESMC_Logical} valueList of an {\tt Attribute}.
+//    Get the {\tt ESMC\_Logical} valueList of an {\tt Attribute}.
 //
 //EOPI
 
@@ -3229,7 +3229,7 @@ if (attrRoot == ESMF_TRUE) {
       vector<ESMC_I4> *value) {        // in - Attribute values
 // 
 // !DESCRIPTION:
-//    Set the {\tt ESMC_I4} valueList of an {\tt Attribute}.
+//    Set the {\tt ESMC\_I4} valueList of an {\tt Attribute}.
 //
 //EOPI
 
@@ -3273,7 +3273,7 @@ if (attrRoot == ESMF_TRUE) {
       vector<ESMC_I8> *value) {        // in - Attribute values
 // 
 // !DESCRIPTION:
-//    Set the {\tt ESMC_I8} valueList of an {\tt Attribute}.
+//    Set the {\tt ESMC\_I8} valueList of an {\tt Attribute}.
 //
 //EOPI
 
@@ -3317,7 +3317,7 @@ if (attrRoot == ESMF_TRUE) {
       vector<ESMC_R4> *value) {        // in - Attribute values
 // 
 // !DESCRIPTION:
-//    Set the {\tt ESMC_R4} valueList of an {\tt Attribute}.
+//    Set the {\tt ESMC\_R4} valueList of an {\tt Attribute}.
 //
 //EOPI
 
@@ -3361,7 +3361,7 @@ if (attrRoot == ESMF_TRUE) {
       vector<ESMC_R8> *value) {        // in - Attribute values
 // 
 // !DESCRIPTION:
-//    Set the {\tt ESMC_R8} valueList of an {\tt Attribute}.
+//    Set the {\tt ESMC\_R8} valueList of an {\tt Attribute}.
 //
 //EOPI
 
@@ -3405,7 +3405,7 @@ if (attrRoot == ESMF_TRUE) {
       vector<ESMC_Logical> *value) {   // in - Attribute values
 // 
 // !DESCRIPTION:
-//    Set the {\tt ESMC_Logical} valueList of an {\tt Attribute}.
+//    Set the {\tt ESMC\_Logical} valueList of an {\tt Attribute}.
 //
 //EOPI
 

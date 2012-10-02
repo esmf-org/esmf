@@ -1,4 +1,4 @@
-! $Id: ESMF_State_C.F90,v 1.36 2012/01/06 20:19:19 svasquez Exp $
+! $Id: ESMF_State_C.F90,v 1.37 2012/10/02 04:32:36 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_State_C.F90,v 1.36 2012/01/06 20:19:19 svasquez Exp $'
+!      '$Id: ESMF_State_C.F90,v 1.37 2012/10/02 04:32:36 theurich Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -33,7 +33,7 @@
 ! 
 ! The code in this file implements the interface code between C++ and F90
 !  for the {\tt State} entry points.  When the user calls an
-!  {\tt ESMC_State}XXX method, that code calls these functions, which
+!  ESMC_StateXXX method, that code calls these functions, which
 !  in turn call the F90 module code.  C++ cannot call directly into an
 !  F90 module because the module routine names are altered in a similar
 !  fashion as C++ name mangling.
