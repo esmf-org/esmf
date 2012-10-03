@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_Handler.h,v 1.3 2012/09/12 03:49:33 gold2718 Exp $
+// $Id: ESMCI_IO_Handler.h,v 1.4 2012/10/03 18:29:11 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -62,23 +62,23 @@ namespace ESMCI {
   
   private:
     // global information
-    int            localPet;
-    ESMC_IndexFlag indexflag;
-    ESMC_IOFmtFlag iofmtFlag;
-    char           filename[ESMF_MAXSTR + 1]; // The filename for this object
-    ESMC_FileStatusFlag fileStatusFlag;       // Store file status
-    bool           overwrite;                 // OK to overwrite fields if true
+    int             localPet;
+    ESMC_IndexFlag  indexflag;
+    ESMC_IOFmt_Flag iofmtFlag;
+    char            filename[ESMF_MAXSTR + 1];// The filename for this object
+    ESMC_FileStatus_Flag fileStatusFlag;      // Store file status
+    bool            overwrite;                // OK to overwrite fields if true
   protected:
-    IO_Handler(ESMC_IOFmtFlag fmtArg);        // native constructor
+    IO_Handler(ESMC_IOFmt_Flag fmtArg);        // native constructor
   private:
-//    IO(ESMC_IOFmtFlag fmtArg, int rank, int *rc);
+//    IO(ESMC_IOFmt_Flag fmtArg, int rank, int *rc);
   protected:
     ~IO_Handler() { destruct(); }
     // create() and destroy()
   public:
-    static IO_Handler *create(ESMC_IOFmtFlag iofmt, int *rc = NULL);
+    static IO_Handler *create(ESMC_IOFmt_Flag iofmt, int *rc = NULL);
     static IO_Handler *create(char const * const file,
-                              ESMC_IOFmtFlag iofmt, int *rc = NULL);
+                              ESMC_IOFmt_Flag iofmt, int *rc = NULL);
     static int destroy(IO_Handler **io);
     static void finalize(int *rc = NULL);
   private:
@@ -98,17 +98,17 @@ namespace ESMCI {
     // get() and set()
   public:
     const char *getName(void) const { return "ESMCI::IO_Handler"; }
-    ESMC_IOFmtFlag getFormat(void) { return iofmtFlag; }
-    virtual bool formatOk(ESMC_IOFmtFlag *newIofmt) {
-      return (((ESMC_IOFmtFlag *)NULL != newIofmt) &&
+    ESMC_IOFmt_Flag getFormat(void) { return iofmtFlag; }
+    virtual bool formatOk(ESMC_IOFmt_Flag *newIofmt) {
+      return (((ESMC_IOFmt_Flag *)NULL != newIofmt) &&
               (*newIofmt == iofmtFlag));
     }
     const char *getFilename(void) const { return filename; }
     bool overwriteFields(void) { return overwrite; }
-    ESMC_FileStatusFlag getFileStatusFlag(void) { return fileStatusFlag; }
+    ESMC_FileStatus_Flag getFileStatusFlag(void) { return fileStatusFlag; }
   protected:
-    virtual void setFormat(ESMC_IOFmtFlag *newIofmt) {
-      if ((ESMC_IOFmtFlag *)NULL != newIofmt) {
+    virtual void setFormat(ESMC_IOFmt_Flag *newIofmt) {
+      if ((ESMC_IOFmt_Flag *)NULL != newIofmt) {
         iofmtFlag = *newIofmt;
       }
     }
@@ -132,7 +132,7 @@ namespace ESMCI {
     virtual void open(bool readonly_arg, int *rc = NULL) = 0;
   public:
     void open(char const * const file,
-              ESMC_FileStatusFlag filestatusflag_arg,
+              ESMC_FileStatus_Flag filestatusflag_arg,
               bool overwrite_arg,
               bool readonly_arg,
               int *rc = NULL);

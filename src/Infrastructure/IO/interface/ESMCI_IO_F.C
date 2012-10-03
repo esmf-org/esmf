@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_F.C,v 1.7 2012/10/03 03:23:48 gold2718 Exp $
+// $Id: ESMCI_IO_F.C,v 1.8 2012/10/03 18:29:12 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -130,9 +130,9 @@ extern "C" {
 
   void FTN_X(c_esmc_iowrite)(ESMCI::IO **ptr,
                              char *file, int *len_file,
-                             ESMC_IOFmtFlag *opt_iofmt,
+                             ESMC_IOFmt_Flag *opt_iofmt,
                              ESMC_Logical *opt_overwrite,
-                             ESMC_FileStatusFlag *opt_status,
+                             ESMC_FileStatus_Flag *opt_status,
                              int *timeslice,
                              char *schema, int *len_schema, int *rc) {
 #undef  ESMC_METHOD
@@ -145,9 +145,9 @@ extern "C" {
     // helper variable
     char fileName[ESMF_MAXSTR + 1];
     int len_fileName = *len_file;
-    ESMC_IOFmtFlag iofmt = ESMF_IOFMT_NETCDF;             // default
-    bool overwrite = false;                               // default
-    ESMC_FileStatusFlag status = ESMC_FILESTATUS_UNKNOWN; // default
+    ESMC_IOFmt_Flag iofmt = ESMF_IOFMT_NETCDF;             // default
+    bool overwrite = false;                                // default
+    ESMC_FileStatus_Flag status = ESMC_FILESTATUS_UNKNOWN; // default
 
     if (len_fileName > ESMF_MAXSTR) {
       ESMC_LogDefault.Write("File name length > ESMF_MAXSTR",
@@ -191,7 +191,7 @@ extern "C" {
 
   void FTN_X(c_esmc_ioread)(ESMCI::IO **ptr,
                             char *file, int *len_file,
-                            ESMC_IOFmtFlag *opt_iofmt,
+                            ESMC_IOFmt_Flag *opt_iofmt,
                             int *opt_timeslice,
                             char *schema, int *len_schema, int *rc) {
 #undef  ESMC_METHOD
@@ -203,7 +203,7 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     // helper variables
     char fileName[ESMF_MAXSTR + 1];
-    ESMC_IOFmtFlag iofmt = ESMF_IOFMT_NETCDF; // default
+    ESMC_IOFmt_Flag iofmt = ESMF_IOFMT_NETCDF; // default
     int timeslice = 0; // default
 
     // Create NULL-terminated C strings for string inputs

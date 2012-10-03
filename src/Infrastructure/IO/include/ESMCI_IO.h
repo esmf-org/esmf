@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.h,v 1.14 2012/09/12 03:49:33 gold2718 Exp $
+// $Id: ESMCI_IO.h,v 1.15 2012/10/03 18:29:11 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -140,7 +140,7 @@ namespace ESMCI {
   public:
     // read()
     // An atomic read function which transparently handles open and close
-    int read(const char * const file, ESMC_IOFmtFlag iofmt,
+    int read(const char * const file, ESMC_IOFmt_Flag iofmt,
              int *timeslice = NULL);
 
     // A non-atomic read which is only successful on an open IO stream
@@ -152,9 +152,9 @@ namespace ESMCI {
     // interface. If NULL is passed for any arguments (except for file which is
     // is required), defaults will be used.
     int write(const char * const file,
-              ESMC_IOFmtFlag iofmt,
+              ESMC_IOFmt_Flag iofmt,
               bool overwrite,
-              ESMC_FileStatusFlag status,
+              ESMC_FileStatus_Flag status,
               int *timeslice = NULL);
 
     // A non-atomic write which is only successful on an open IO stream
@@ -174,8 +174,8 @@ namespace ESMCI {
 
     // open() and close()
     int open(const char * const file,
-             ESMC_FileStatusFlag filestatusflag,
-             ESMC_IOFmtFlag iofmt,
+             ESMC_FileStatus_Flag filestatusflag,
+             ESMC_IOFmt_Flag iofmt,
              bool overwrite = false,
              bool readonly = false);
     int flush(void);

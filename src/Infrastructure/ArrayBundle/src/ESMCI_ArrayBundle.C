@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.51 2012/10/01 15:42:41 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.52 2012/10/03 18:29:03 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.51 2012/10/01 15:42:41 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.52 2012/10/03 18:29:03 gold2718 Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -291,7 +291,7 @@ int ArrayBundle::read(
   char  *file,                  // in    - name of file being read
   bool *singleFile,             // in    - All arrays from single file if true
   int   *timeslice,             // in    - timeslice option
-  ESMC_IOFmtFlag *iofmt         // in    - IO format flag
+  ESMC_IOFmt_Flag *iofmt        // in    - IO format flag
   ){
 //
 // !DESCRIPTION:
@@ -304,7 +304,7 @@ int ArrayBundle::read(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  ESMC_IOFmtFlag localiofmt;
+  ESMC_IOFmt_Flag localiofmt;
   bool localsingleFile;                   // For default handling
 
   // Check the required parameters
@@ -314,7 +314,7 @@ int ArrayBundle::read(
     return ESMF_RC_ARG_BAD;
   }
   // Set optional parameters which are not optional at next layer
-  if ((ESMC_IOFmtFlag *)NULL != iofmt) {
+  if ((ESMC_IOFmt_Flag *)NULL != iofmt) {
     localiofmt = *iofmt;
   } else {
     localiofmt = ESMF_IOFMT_NETCDF;
@@ -404,9 +404,9 @@ int ArrayBundle::write(
   char  *file,                    // in    - name of file being read
   bool *singleFile,               // in    - All arrays to single file if true
   bool *overwrite,                // in    - OK to overwrite fields if true
-  ESMC_FileStatusFlag *status,    // in    - file status flag
+  ESMC_FileStatus_Flag *status,   // in    - file status flag
   int   *timeslice,               // in    - timeslice option
-  ESMC_IOFmtFlag *iofmt           // in    - IO format flag
+  ESMC_IOFmt_Flag *iofmt          // in    - IO format flag
   ){
 //
 // !DESCRIPTION:
@@ -419,10 +419,10 @@ int ArrayBundle::write(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  ESMC_IOFmtFlag localiofmt;              // For default handling
+  ESMC_IOFmt_Flag localiofmt;             // For default handling
   bool localoverwrite;                    // For default handling
   bool localsingleFile;                   // For default handling
-  ESMC_FileStatusFlag localstatus;        // For default handling
+  ESMC_FileStatus_Flag localstatus;       // For default handling
 
   // Check the required parameters
   if ((char *)NULL == file) {
@@ -437,7 +437,7 @@ int ArrayBundle::write(
   }
 
   // Handle format default
-  if ((ESMC_IOFmtFlag *)NULL == iofmt) {
+  if ((ESMC_IOFmt_Flag *)NULL == iofmt) {
     localiofmt = ESMF_IOFMT_NETCDF;
   } else {
     localiofmt = *iofmt;
@@ -455,7 +455,7 @@ int ArrayBundle::write(
     localsingleFile = *singleFile;
   }
   // Handle status default
-  if ((ESMC_FileStatusFlag *)NULL == status) {
+  if ((ESMC_FileStatus_Flag *)NULL == status) {
     localstatus = ESMC_FILESTATUS_UNKNOWN;
   } else {
     localstatus = *status;

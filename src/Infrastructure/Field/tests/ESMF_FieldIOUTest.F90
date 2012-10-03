@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.32 2012/10/03 03:11:51 gold2718 Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.33 2012/10/03 18:29:06 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@ program ESMF_FieldIOUTest
   integer :: result = 0
   integer :: countfail = 0
   ! Changing status for writing file in loop
-  type(ESMF_FileStatusFlag) :: statusFlag = ESMF_FILESTATUS_UNKNOWN
+  type(ESMF_FileStatus_Flag) :: statusFlag = ESMF_FILESTATUS_UNKNOWN
 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)  ! calls ESMF_Initialize() internally

@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO.C,v 1.20 2012/09/22 06:06:47 gold2718 Exp $
+// $Id: ESMCI_IO.C,v 1.21 2012/10/03 18:29:14 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -43,7 +43,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO.C,v 1.20 2012/09/22 06:06:47 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_IO.C,v 1.21 2012/10/03 18:29:14 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -243,7 +243,7 @@ int IO::read(
 // !ARGUMENTS:
 
   char const * const file,        // (in)    - name of file being read
-  ESMC_IOFmtFlag iofmt,           // (in)    - IO format flag
+  ESMC_IOFmt_Flag iofmt,          // (in)    - IO format flag
   int   *timeslice                // (in)    - timeslice option
   ) {
 // !DESCRIPTION:
@@ -362,9 +362,9 @@ int IO::write(
 //
 // !ARGUMENTS:
   char const * const file,        // (in)    - name of file being read
-  ESMC_IOFmtFlag iofmt,           // (in)    - IO format flag
+  ESMC_IOFmt_Flag iofmt,          // (in)    - IO format flag
   bool overwrite,                 // (in)    - overwrite fields if true
-  ESMC_FileStatusFlag status,     // (in)    - file status flag
+  ESMC_FileStatus_Flag status,    // (in)    - file status flag
   int   *timeslice                // (in)    - timeslice option
   ) {
 // !DESCRIPTION:
@@ -484,11 +484,11 @@ int IO::open(
 //
 // !ARGUMENTS:
 
-  char const * const file,            // (in)  - name of file being read
-  ESMC_FileStatusFlag filestatusflag, // (in)  - file status flag
-  ESMC_IOFmtFlag iofmt,               // (in)  - IO format flag
-  bool overwrite,                     // (in)  - overwrite fields?
-  bool readonly                       // (in)  - If false then read/write
+  char const * const file,             // (in)  - name of file being read
+  ESMC_FileStatus_Flag filestatusflag, // (in)  - file status flag
+  ESMC_IOFmt_Flag iofmt,               // (in)  - IO format flag
+  bool overwrite,                      // (in)  - overwrite fields?
+  bool readonly                        // (in)  - If false then read/write
   ) {
 // !DESCRIPTION:
 //      Open a file or stream for I/O. Create a new IO_Handler if necessary

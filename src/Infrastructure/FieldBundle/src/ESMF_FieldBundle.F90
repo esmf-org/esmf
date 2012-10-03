@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.144 2012/10/03 03:22:58 gold2718 Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.145 2012/10/03 18:29:07 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.144 2012/10/03 03:22:58 gold2718 Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.145 2012/10/03 18:29:07 gold2718 Exp $'
 
 !==============================================================================
 ! 
@@ -1996,7 +1996,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
     logical,                intent(in),  optional  :: singleFile
     integer,                intent(in),  optional  :: timeslice
-    type(ESMF_IOFmtFlag),   intent(in),  optional  :: iofmt
+    type(ESMF_IOFmt_Flag),  intent(in),  optional  :: iofmt
     integer,                intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
@@ -2045,7 +2045,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     character(len=ESMF_MAXSTR)     :: filename
     character(len=3)               :: cnum
     type(ESMF_Array)               :: array 
-    type(ESMF_IOFmtFlag)           :: iofmtd
+    type(ESMF_IOFmt_Flag)          :: iofmtd
     type(ESMF_IO)                  :: io           ! The I/O object
     logical                        :: errorFound   ! True if error condition
     integer                        :: time
@@ -4826,15 +4826,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     keywordEnforcer, singleFile, overwrite, status, timeslice, iofmt, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_FieldBundle),    intent(in)             :: fieldbundle
-    character(*),              intent(in)             :: file
+    type(ESMF_FieldBundle),     intent(in)             :: fieldbundle
+    character(*),               intent(in)             :: file
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
-    logical,                   intent(in),  optional  :: singleFile
-    logical  ,                 intent(in),  optional  :: overwrite
-    type(ESMF_FileStatusFlag), intent(in),  optional  :: status
-    integer,                   intent(in),  optional  :: timeslice
-    type(ESMF_IOFmtFlag),      intent(in),  optional  :: iofmt
-    integer,                   intent(out), optional  :: rc  
+    logical,                    intent(in),  optional  :: singleFile
+    logical  ,                  intent(in),  optional  :: overwrite
+    type(ESMF_FileStatus_Flag), intent(in),  optional  :: status
+    integer,                    intent(in),  optional  :: timeslice
+    type(ESMF_IOFmt_Flag),      intent(in),  optional  :: iofmt
+    integer,                    intent(out), optional  :: rc  
 !
 ! !DESCRIPTION:
 !   Write the Fields into a file. For this API to be functional,
@@ -4868,10 +4868,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !    \begin{description}
 !    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
 !      be overwritten with each field's data.
-!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ Only the
+!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_NETCDF}:]\ Only the
 !      data corresponding to each field's name will be
 !      be overwritten. If the {\tt timeslice} option is given, only data for
 !      the given timeslice may be overwritten.
+!      Note that it is always an error to attempt to overwrite a NetCDF
+!      variable with data which has a different shape.
 !    \end{description}
 !    default is .false.
 !    \end{sloppypar}
@@ -4885,9 +4887,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !    \begin{sloppypar}
 !    Some IO formats (e.g. NetCDF) support the output of data in form of
 !    time slices. The {\tt timeslice} argument provides access to this
-!    capability. {\tt timeslice} must be positive.
-!    Note that if overwrite is .false. and a timeslice is given which is
+!    capability. {\tt timeslice} must be positive. The behavior of this
+!    option may depend on the setting of the {\tt overwrite} flag:
+!    \begin{description}
+!    \item[{\tt overwrite = .false.}:]\ If the timeslice value is
 !    less than the maximum time already in the file, the write will fail.
+!    \item[{\tt overwrite = .true.}:]\ Any positive timeslice value is valid.
+!    \end{description}
 !    By default, i.e. by omitting the {\tt timeslice} argument, no
 !    provisions for time slicing are made in the output file,
 !    however, if the file already contains a time axis for the variable,
@@ -4904,20 +4910,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                        :: localrc           ! local return code
-    character(len=ESMF_MAXSTR)     :: name
-    integer                        :: fieldCount
-    integer                        :: i
-    type(ESMF_Field), allocatable  :: fieldList(:)
-    logical                        :: singlef
-    character(len=ESMF_MAXSTR)     :: filename
-    character(len=3)               :: cnum
-    type(ESMF_Array)               :: array 
-    logical                        :: opt_overwriteflag ! helper variable
-    type(ESMF_FileStatusFlag)      :: opt_status        ! helper variable
-    type(ESMF_IOFmtFlag)           :: iofmtd
-    type(ESMF_IO)                  :: io                ! The I/O object
-    logical                        :: errorFound        ! True if err. cond.
+    integer                         :: localrc           ! local return code
+    character(len=ESMF_MAXSTR)      :: name
+    integer                         :: fieldCount
+    integer                         :: i
+    type(ESMF_Field), allocatable   :: fieldList(:)
+    logical                         :: singlef
+    character(len=ESMF_MAXSTR)      :: filename
+    character(len=3)                :: cnum
+    type(ESMF_Array)                :: array 
+    logical                         :: opt_overwriteflag ! helper variable
+    type(ESMF_FileStatus_Flag)      :: opt_status        ! helper variable
+    type(ESMF_IOFmt_Flag)           :: iofmtd
+    type(ESMF_IO)                   :: io                ! The I/O object
+    logical                         :: errorFound        ! True if err. cond.
 
 #ifdef ESMF_PIO
     ! initialize return code; assume routine not implemented

@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.156 2012/09/28 23:01:51 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.157 2012/10/03 18:29:18 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -437,17 +437,17 @@
 !
 !     ! PIO Format type
 
-      type ESMF_IOFmtFlag
+      type ESMF_IOFmt_Flag
       sequence
       private
           integer :: io_type
       end type
 
-      type(ESMF_IOFmtFlag), parameter ::  &
-                           ESMF_IOFMT_BIN      = esmf_IOFmtFlag(0), &
-                           ESMF_IOFMT_NETCDF   = ESMF_IOFmtFlag(1), &
-                           ESMF_IOFMT_NETCDF4P = ESMF_IOFmtFlag(2), &
-                           ESMF_IOFMT_NETCDF4C = ESMF_IOFmtFlag(3)
+      type(ESMF_IOFmt_Flag), parameter ::  &
+                           ESMF_IOFMT_BIN      = esmf_IOFmt_Flag(0), &
+                           ESMF_IOFMT_NETCDF   = ESMF_IOFmt_Flag(1), &
+                           ESMF_IOFMT_NETCDF4P = ESMF_IOFmt_Flag(2), &
+                           ESMF_IOFMT_NETCDF4C = ESMF_IOFmt_Flag(3)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_Index_Flag
@@ -682,17 +682,17 @@
 !
 !     ! File status type (for ESMF_xxxWrite status input)
 
-      type ESMF_FileStatusFlag
+      type ESMF_FileStatus_Flag
       sequence
       private
           integer :: status_type
       end type
 
-      type(ESMF_FileStatusFlag), parameter ::  &
-                           ESMF_FILESTATUS_UNKNOWN  = ESMF_FileStatusFlag(0), &
-                           ESMF_FILESTATUS_OLD      = ESMF_FileStatusFlag(1), &
-                           ESMF_FILESTATUS_NEW      = ESMF_FileStatusFlag(2), &
-                           ESMF_FILESTATUS_REPLACE  = ESMF_FileStatusFlag(3)
+      type(ESMF_FileStatus_Flag), parameter ::  &
+                          ESMF_FILESTATUS_UNKNOWN  = ESMF_FileStatus_Flag(0), &
+                          ESMF_FILESTATUS_OLD      = ESMF_FileStatus_Flag(1), &
+                          ESMF_FILESTATUS_NEW      = ESMF_FileStatus_Flag(2), &
+                          ESMF_FILESTATUS_REPLACE  = ESMF_FileStatus_Flag(3)
 
 !------------------------------------------------------------------------------
 !
@@ -761,7 +761,7 @@
 
       public ESMF_Direction_Flag, ESMF_DIRECTION_FORWARD, ESMF_DIRECTION_REVERSE
 
-      public ESMF_IOFmtFlag, ESMF_IOFMT_BIN, ESMF_IOFMT_NETCDF, &
+      public ESMF_IOFmt_Flag, ESMF_IOFMT_BIN, ESMF_IOFMT_NETCDF, &
              ESMF_IOFMT_NETCDF4P, ESMF_IOFMT_NETCDF4C
 
       public ESMF_Index_Flag
@@ -852,7 +852,7 @@
 		 ESMF_FILEFORMAT_ESMFMESH, ESMF_FILEFORMAT_ESMFGRID, &
     	 	ESMF_FILEFORMAT_UGRID, ESMF_FILEFORMAT_GRIDSPEC
 
-      public ESMF_FileStatusFlag, ESMF_FILESTATUS_UNKNOWN,   &
+      public ESMF_FileStatus_Flag, ESMF_FILESTATUS_UNKNOWN,   &
                                   ESMF_FILESTATUS_OLD,       &
                                   ESMF_FILESTATUS_NEW,       &
                                   ESMF_FILESTATUS_REPLACE
@@ -1279,18 +1279,18 @@ function ESMF_frne(fr1, fr2)
 end function
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_IOFmtFlag
+! function to compare two ESMF_IOFmt_Flag
 
 subroutine ESMF_ioas(io1, io2)
- type(ESMF_IOFmtFlag), intent(out) :: io1
- type(ESMF_IOFmtFlag), intent(in)  :: io2
+ type(ESMF_IOFmt_Flag), intent(out) :: io1
+ type(ESMF_IOFmt_Flag), intent(in)  :: io2
 
  io1%io_type = io2%io_type
 end subroutine
 
 function ESMF_ioeq(io1, io2)
   logical ESMF_ioeq
-  type(ESMF_IOFmtFlag), intent(in) :: io1, io2
+  type(ESMF_IOFmt_Flag), intent(in) :: io1, io2
 
   ESMF_ioeq = (io1%io_type == io2%io_type)
 end function
@@ -1428,25 +1428,25 @@ end function ESMF_FileFormatNe
 
 
 !------------------------------------------------------------------------------
-! function to compare/assign two ESMF_FileStatusFlags
+! function to compare/assign two ESMF_FileStatus_Flags
 
 subroutine ESMF_FileStatusAs(fs1, fs2)
- type(ESMF_FileStatusFlag), intent(out) :: fs1
- type(ESMF_FileStatusFlag), intent(in)  :: fs2
+ type(ESMF_FileStatus_Flag), intent(out) :: fs1
+ type(ESMF_FileStatus_Flag), intent(in)  :: fs2
 
  fs1%status_type = fs2%status_type
 end subroutine ESMF_FileStatusAs
 
 function ESMF_FileStatusEq(fs1, fs2)
   logical ESMF_FileStatusEq
-  type(ESMF_FileStatusFlag), intent(in) :: fs1, fs2
+  type(ESMF_FileStatus_Flag), intent(in) :: fs1, fs2
 
   ESMF_FileStatusEq = (fs1%status_type == fs2%status_type)
 end function ESMF_FileStatusEq
 
 function ESMF_FileStatusNe(fs1, fs2)
   logical ESMF_FileStatusNe
-  type(ESMF_FileStatusFlag), intent(in) :: fs1, fs2
+  type(ESMF_FileStatus_Flag), intent(in) :: fs1, fs2
 
   ESMF_FileStatusNe = (fs1%status_type == fs2%status_type)
 end function ESMF_FileStatusNe

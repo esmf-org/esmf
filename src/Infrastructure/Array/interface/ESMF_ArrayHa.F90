@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.46 2012/10/02 16:15:25 theurich Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.47 2012/10/03 18:28:56 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.46 2012/10/02 16:15:25 theurich Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.47 2012/10/03 18:28:56 gold2718 Exp $'
 
 !==============================================================================
 ! 
@@ -534,13 +534,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   ! We need to terminate the strings on the way to C++
 !
 ! !ARGUMENTS:
-    type(ESMF_Array),     intent(inout)         :: array
-    character(*),         intent(in)            :: file
+    type(ESMF_Array),      intent(inout)         :: array
+    character(*),          intent(in)            :: file
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    character(*),         intent(in),  optional :: variableName
-    integer,              intent(in),  optional :: timeslice
-    type(ESMF_IOFmtFlag), intent(in),  optional :: iofmt
-    integer,              intent(out), optional :: rc
+    character(*),          intent(in),  optional :: variableName
+    integer,               intent(in),  optional :: timeslice
+    type(ESMF_IOFmt_Flag), intent(in),  optional :: iofmt
+    integer,               intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Read Array data from file and put it into an {\tt ESMF\_Array} object.

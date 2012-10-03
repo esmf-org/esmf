@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.45 2012/09/20 21:19:20 w6ws Exp $
+// $Id: ESMCI_ArrayBundle_F.C,v 1.46 2012/10/03 18:29:01 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -385,9 +385,9 @@ extern "C" {
                                       char *file, int *len_file,
                                       ESMC_Logical *opt_singleFile,
                                       ESMC_Logical *opt_overwriteflag,
-                                      ESMC_FileStatusFlag *status,
+                                      ESMC_FileStatus_Flag *status,
                                       int *timeslice,
-                                      ESMC_IOFmtFlag *iofmt, int *rc) {
+                                      ESMC_IOFmt_Flag *iofmt, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundlewrite()"
     bool singleFile;
@@ -437,7 +437,7 @@ extern "C" {
 
   void FTN_X(c_esmc_arraybundleread)(ESMCI::ArrayBundle **bundle,
     char *file, int *len_file, ESMC_Logical *opt_singleFile,
-    int *timeslice, ESMC_IOFmtFlag *iofmt, int *rc){
+    int *timeslice, ESMC_IOFmt_Flag *iofmt, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraybundleread()"
     bool singleFile;

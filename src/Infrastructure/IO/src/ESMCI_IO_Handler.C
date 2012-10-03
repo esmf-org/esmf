@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_Handler.C,v 1.5 2012/10/01 00:46:50 gold2718 Exp $
+// $Id: ESMCI_IO_Handler.C,v 1.6 2012/10/03 18:29:14 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_Handler.C,v 1.5 2012/10/01 00:46:50 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_IO_Handler.C,v 1.6 2012/10/03 18:29:14 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -73,7 +73,7 @@ IO_Handler::IO_Handler (
 //    
 //
 // !ARGUMENTS:
-  ESMC_IOFmtFlag fmtArg                // (in)  - the desired I/O format
+  ESMC_IOFmt_Flag fmtArg               // (in)  - the desired I/O format
 //
   ) {
 //
@@ -112,7 +112,7 @@ IO_Handler *IO_Handler::create (
 //    IO_Handler * to newly allocated IO_Handler
 //
 // !ARGUMENTS:
-      ESMC_IOFmtFlag iofmt,               // (in)  the desired I/O format
+      ESMC_IOFmt_Flag iofmt,              // (in)  the desired I/O format
 //
   int *rc                                 // (out) return code
   ) {
@@ -204,7 +204,7 @@ IO_Handler *IO_Handler::create (
 //
 // !ARGUMENTS:
       char const * const file,             // (in) A file for Handler
-      ESMC_IOFmtFlag iofmt,              // (in) the desired I/O format
+      ESMC_IOFmt_Flag iofmt,               // (in) the desired I/O format
 //
   int *rc                                  // (out) return code
   ) {
@@ -506,11 +506,11 @@ void IO_Handler::open (
 //
 // !ARGUMENTS:
 
-  char const * const file,                // (in)  - name of file being read
-  ESMC_FileStatusFlag filestatusflag_arg, // (in)  - file status
-  bool overwrite_arg,                     // (in)  - overwrite fields is true
-  bool readonly_arg,                      // (in)  - if false then read/write
-  int *rc                                 // (out) - return code
+  char const * const file,                 // (in)  - name of file being read
+  ESMC_FileStatus_Flag filestatusflag_arg, // (in)  - file status
+  bool overwrite_arg,                      // (in)  - overwrite fields is true
+  bool readonly_arg,                       // (in)  - if false then read/write
+  int *rc                                  // (out) - return code
   ) {
 // !DESCRIPTION:
 //      Open a file or stream for I/O. Create a new IO_Handler if necessary

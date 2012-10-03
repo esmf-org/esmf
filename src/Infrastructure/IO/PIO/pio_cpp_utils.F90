@@ -196,7 +196,7 @@ subroutine get_pio_iosys_handle(iosystem_handle, iosystem)
 
   !  dummy arguments
   integer, intent(in) :: iosystem_handle
-  type(iosystem_desc_t), pointer, intent(out) :: iosystem
+  type(iosystem_desc_t), pointer :: iosystem
 
   ! local
   logical :: found_handle = .false.

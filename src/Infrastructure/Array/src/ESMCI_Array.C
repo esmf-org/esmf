@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.166 2012/10/02 16:15:27 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.167 2012/10/03 18:28:58 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.166 2012/10/02 16:15:27 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.167 2012/10/03 18:28:58 gold2718 Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2584,7 +2584,7 @@ int Array::read(
   char  *file,                    // in    - name of file being read
   char  *variableName,            // in    - optional variable name
   int   *timeslice,               // in    - timeslice option
-  ESMC_IOFmtFlag *iofmt           // in    - IO format flag
+  ESMC_IOFmt_Flag *iofmt          // in    - IO format flag
   ){
 //
 // !DESCRIPTION:
@@ -2597,7 +2597,7 @@ int Array::read(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  ESMC_IOFmtFlag localiofmt;
+  ESMC_IOFmt_Flag localiofmt;
 
   IO *newIO = IO::create(&localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
@@ -2609,7 +2609,7 @@ int Array::read(
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
   }
   // Set optional parameters which are not optional at next layer
-  if ((ESMC_IOFmtFlag *)NULL != iofmt) {
+  if ((ESMC_IOFmt_Flag *)NULL != iofmt) {
     localiofmt = *iofmt;
   } else {
     localiofmt = ESMF_IOFMT_NETCDF;
@@ -2654,9 +2654,9 @@ int Array::write(
   char  *file,                    // in    - name of file being written
   char  *variableName,            // in    - optional variable name
   bool  *overwrite,               // in    - OK to overwrite file data
-  ESMC_FileStatusFlag *status,    // in    - file status flag
+  ESMC_FileStatus_Flag *status,   // in    - file status flag
   int   *timeslice,               // in    - timeslice option
-  ESMC_IOFmtFlag *iofmt           // in    - IO format flag
+  ESMC_IOFmt_Flag *iofmt          // in    - IO format flag
   ){
 //
 // !DESCRIPTION:
@@ -2668,9 +2668,9 @@ int Array::write(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  ESMC_IOFmtFlag localiofmt;              // For default handling
+  ESMC_IOFmt_Flag localiofmt;              // For default handling
   bool localoverwrite;                    // For default handling
-  ESMC_FileStatusFlag localstatus;        // For default handling
+  ESMC_FileStatus_Flag localstatus;        // For default handling
 
   IO *newIO = IO::create(&rc);
   if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc)) {
@@ -2683,7 +2683,7 @@ int Array::write(
   }
 
   // Handle format default
-  if ((ESMC_IOFmtFlag *)NULL == iofmt) {
+  if ((ESMC_IOFmt_Flag *)NULL == iofmt) {
     localiofmt = ESMF_IOFMT_NETCDF;
   } else {
     localiofmt = *iofmt;
@@ -2695,7 +2695,7 @@ int Array::write(
     localoverwrite = *overwrite;
   }
   // Handle status default
-  if ((ESMC_FileStatusFlag *)NULL == status) {
+  if ((ESMC_FileStatus_Flag *)NULL == status) {
     localstatus = ESMC_FILESTATUS_UNKNOWN;
   } else {
     localstatus = *status;

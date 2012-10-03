@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.26 2012/09/12 03:49:35 gold2718 Exp $
+! $Id: ESMF_IO.F90,v 1.27 2012/10/03 18:29:12 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@ module ESMF_IOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-       '$Id: ESMF_IO.F90,v 1.26 2012/09/12 03:49:35 gold2718 Exp $'
+       '$Id: ESMF_IO.F90,v 1.27 2012/10/03 18:29:12 gold2718 Exp $'
 
 !==============================================================================
 !
@@ -316,13 +316,13 @@ contains
                          iofmt, schema, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_IO),           intent(in)            :: io
-    character (len=*),       intent(in)            :: fileName
+    type(ESMF_IO),            intent(in)            :: io
+    character (len=*),        intent(in)            :: fileName
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer !keywords req. below
-    integer,                 intent(in),  optional :: timeslice
-    type(ESMF_IOFmtFlag),    intent(in),  optional :: iofmt
-    character (len=*),       intent(in),  optional :: schema
-    integer,                 intent(out), optional :: rc
+    integer,                  intent(in),  optional :: timeslice
+    type(ESMF_IOFmt_Flag),    intent(in),  optional :: iofmt
+    character (len=*),        intent(in),  optional :: schema
+    integer,                  intent(out), optional :: rc
    
 ! !DESCRIPTION:
 !     Perform a read on an {\tt ESMF\_IO} object.  Any properties specified
@@ -354,10 +354,10 @@ contains
 !EOPI
 ! !REQUIREMENTS:
 
-    integer              :: localrc
-    integer              :: len_fileName         ! filename length or 0
-    type(ESMF_IOFmtFlag) :: opt_iofmt            ! helper variable
-    integer              :: len_schema           ! schema string length or 0
+    integer               :: localrc
+    integer               :: len_fileName         ! filename length or 0
+    type(ESMF_IOFmt_Flag) :: opt_iofmt            ! helper variable
+    integer               :: len_schema           ! schema string length or 0
 
      ! Assume failure until success
      if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -398,61 +398,83 @@ contains
                           timeslice, iofmt, schema, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_IO),             intent(in)            :: io
-    character (len=*),         intent(in)            :: fileName
+    type(ESMF_IO),              intent(in)            :: io
+    character (len=*),          intent(in)            :: fileName
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer !keywords req. below
-    logical,                   intent(in),  optional :: overwrite
-    type(ESMF_FileStatusFlag), intent(in),  optional :: status
-    integer,                   intent(in),  optional :: timeslice
-    type(ESMF_IOFmtFlag),      intent(in),  optional :: iofmt
-    character (len=*),         intent(in),  optional :: schema
-    integer,                   intent(out), optional :: rc
+    logical,                    intent(in),  optional :: overwrite
+    type(ESMF_FileStatus_Flag), intent(in),  optional :: status
+    integer,                    intent(in),  optional :: timeslice
+    type(ESMF_IOFmt_Flag),      intent(in),  optional :: iofmt
+    character (len=*),          intent(in),  optional :: schema
+    integer,                    intent(out), optional :: rc
    
 ! !DESCRIPTION:
-!     Perform a write on an {\tt ESMF\_IO} object.  Any properties specified
-!     will override, but not reset, those previously set on the io object.
+!   Perform a write on an {\tt ESMF\_IO} object.  Any properties specified
+!   will override, but not reset, those previously set on the io object.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[io]
-!          The object instance to write.
-!     \item[fileName]
-!          The file name to be writtten to.
-!     \item[{[overwrite]}]
-!          If .true. allow existing data fields to be overwritten.
-!     \item[{[status]}]
-!          \begin{sloppypar}
-!           The file status. Please see Section~\ref{const:filestatusflag} for
-!           the list of options. If not present, defaults to
-!           {\tt ESMF\_FILESTATUS\_UNKNOWN}.
-!          \end{sloppypar}
-!     \item[{[timeslice]}]
-!          Some IO formats (e.g. NetCDF) support the output of data in form of
-!          time slices. The {\tt timeslice} argument provides access to this
-!          capability. Usage of this feature requires that the first slice is
-!          written with a positive {\tt timeslice} value, and that subsequent
-!          slices are written with a {\tt timeslice} argument that increments
-!          by one each time. By default, i.e. by omitting the {\tt timeslice}
-!          argument, no provisions for time slicing are made in the output
-!          file.
-!     \item[{[iofmt]}]
-!          The file format to be used during the read. Default is
-!          ESMF_IOFMT_NETCDF
-!     \item[{[schema]}]
-!          Selects, for reading, the Attribute package of the ESMF
-!          objects included in <io> (e.g., with ESMF_IOAddArray)
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!   The arguments are:
+!   \begin{description}
+!   \item[io]
+!        The object instance to write.
+!   \item[fileName]
+!        The file name to be writtten to.
+!   \item[{[overwrite]}]
+!    \begin{sloppypar}
+!      Logical: if .true., existing field data may be overwritten. The
+!      behavior of this flag depends on the value of {\tt iofmt} as
+!      shown below:
+!    \begin{description}
+!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
+!      be overwritten with each field's data.
+!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_NETCDF}:]\ Only the
+!      data corresponding to each field's name will be
+!      be overwritten. If the {\tt timeslice} option is given, only data for
+!      the given timeslice may be overwritten.
+!      Note that it is always an error to attempt to overwrite a NetCDF
+!      variable with data which has a different shape.
+!    \end{description}
+!    default is .false.
+!    \end{sloppypar}
+!   \item[{[status]}]
+!    \begin{sloppypar}
+!    The file status. Please see Section~\ref{const:filestatusflag} for
+!    the list of options. If not present, defaults to
+!    {\tt ESMF\_FILESTATUS\_UNKNOWN}.
+!    \end{sloppypar}
+!   \item[{[timeslice]}]
+!    \begin{sloppypar}
+!    Some IO formats (e.g. NetCDF) support the output of data in form of
+!    time slices. The {\tt timeslice} argument provides access to this
+!    capability. {\tt timeslice} must be positive. The behavior of this
+!    option may depend on the setting of the {\tt overwrite} flag:
+!    \begin{description}
+!    \item[{\tt overwrite = .false.}:]\ If the timeslice value is
+!    less than the maximum time already in the file, the write will fail.
+!    \item[{\tt overwrite = .true.}:]\ Any positive timeslice value is valid.
+!    \end{description}
+!    By default, i.e. by omitting the {\tt timeslice} argument, no
+!    provisions for time slicing are made in the output file,
+!    however, if the file already contains a time axis for the variable,
+!    a timeslice one greater than the maximum will be written.
+!    \end{sloppypar}
+!   \item[{[iofmt]}]
+!        The file format to be used during the read. Default is
+!        ESMF_IOFMT_NETCDF
+!   \item[{[schema]}]
+!        Selects, for reading, the Attribute package of the ESMF
+!        objects included in <io> (e.g., with ESMF_IOAddArray)
+!   \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !EOPI
 ! !REQUIREMENTS:
 !
-    integer                   :: localrc
-    integer                   :: len_fileName       ! filename length or 0
-    type(ESMF_Logical)        :: opt_overwriteflag  ! helper variable
-    type(ESMF_FileStatusFlag) :: opt_status         ! helper variable
-    type(ESMF_IOFmtFlag)      :: opt_iofmt          ! helper variable
-    integer                   :: len_schema         ! schema string length or 0
+    integer                    :: localrc
+    integer                    :: len_fileName       ! filename length or 0
+    type(ESMF_Logical)         :: opt_overwriteflag  ! helper variable
+    type(ESMF_FileStatus_Flag) :: opt_status         ! helper variable
+    type(ESMF_IOFmt_Flag)      :: opt_iofmt          ! helper variable
+    integer                    :: len_schema         ! schema string len or 0
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array_F.C,v 1.66 2012/10/02 16:15:25 theurich Exp $
+// $Id: ESMCI_Array_F.C,v 1.67 2012/10/03 18:28:56 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -602,8 +602,8 @@ extern "C" {
                                 char *file, int *len_file,
                                 char *variableName, int *len_variableName,
                                 ESMC_Logical *opt_overwriteflag,
-                                ESMC_FileStatusFlag *status,
-                                int *timeslice, ESMC_IOFmtFlag *iofmt,
+                                ESMC_FileStatus_Flag *status,
+                                int *timeslice, ESMC_IOFmt_Flag *iofmt,
                                 int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraywrite()"
@@ -665,7 +665,7 @@ extern "C" {
                                char *file, int *len_file,
                                char *variableName, int *len_variableName,
                                int *timeslice,
-                               ESMC_IOFmtFlag *iofmt, int *rc) {
+                               ESMC_IOFmt_Flag *iofmt, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayread()"
     // Initialize return code; assume routine not implemented

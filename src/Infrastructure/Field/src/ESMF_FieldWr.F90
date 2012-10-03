@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldWr.F90,v 1.21 2012/10/03 03:22:37 gold2718 Exp $
+! $Id: ESMF_FieldWr.F90,v 1.22 2012/10/03 18:29:04 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -77,15 +77,15 @@ contains
 !
 !
 ! !ARGUMENTS:
-    type(ESMF_Field),          intent(in)             :: field 
-    character(*),              intent(in)             :: file 
+    type(ESMF_Field),           intent(in)             :: field 
+    character(*),               intent(in)             :: file 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    character(*),              intent(in),  optional  :: variableName
-    logical,                   intent(in),  optional  :: overwrite
-    type(ESMF_FileStatusFlag), intent(in),  optional  :: status
-    integer,                   intent(in),  optional  :: timeslice
-    type(ESMF_IOFmtFlag),      intent(in),  optional  :: iofmt
-    integer,                   intent(out), optional  :: rc
+    character(*),               intent(in),  optional  :: variableName
+    logical,                    intent(in),  optional  :: overwrite
+    type(ESMF_FileStatus_Flag), intent(in),  optional  :: status
+    integer,                    intent(in),  optional  :: timeslice
+    type(ESMF_IOFmt_Flag),      intent(in),  optional  :: iofmt
+    integer,                    intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
 !   Write Field data into a file.  For this API to be functional, the 
@@ -112,12 +112,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    (such as binary format), ESMF will return an error code.
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
-!    Logical: if .true., existing field data may be overwritten. If
-!    {\tt iofmt} is {\tt ESMF\_IOFMT\_BIN}, then all data in the file will
-!    be overwritten with this field's data. For a NetCDF format, only the
-!    data corresponding the {\tt variableName} or the field's name will be
-!    be overwritten. If the {\tt timeslice} option is given, only data for
-!    the given timeslice may be overwritten. default is .false.
+!      Logical: if .true., existing field data may be overwritten. The
+!      behavior of this flag depends on the value of {\tt iofmt} as
+!      shown below:
+!    \begin{description}
+!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
+!      be overwritten with each field's data.
+!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_NETCDF}:]\ Only the
+!      data corresponding to each field's name will be
+!      be overwritten. If the {\tt timeslice} option is given, only data for
+!      the given timeslice may be overwritten.
+!      Note that it is always an error to attempt to overwrite a NetCDF
+!      variable with data which has a different shape.
+!    \end{description}
+!    default is .false.
 !    \end{sloppypar}
 !   \item[{[status]}]
 !    \begin{sloppypar}
@@ -129,13 +137,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    \begin{sloppypar}
 !    Some IO formats (e.g. NetCDF) support the output of data in form of
 !    time slices. The {\tt timeslice} argument provides access to this
-!    capability. {\tt timeslice} must be positive.
-!    Note that if overwrite is .false. and a timeslice is given which is
+!    capability. {\tt timeslice} must be positive. The behavior of this
+!    option may depend on the setting of the {\tt overwrite} flag:
+!    \begin{description}
+!    \item[{\tt overwrite = .false.}:]\ If the timeslice value is
 !    less than the maximum time already in the file, the write will fail.
+!    \item[{\tt overwrite = .true.}:]\ Any positive timeslice value is valid.
+!    \end{description}
 !    By default, i.e. by omitting the {\tt timeslice} argument, no
 !    provisions for time slicing are made in the output file,
 !    however, if the file already contains a time axis for the variable,
-!    a timeslice one greater than the maximum will be written..
+!    a timeslice one greater than the maximum will be written.
 !    \end{sloppypar}
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
@@ -153,8 +165,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array)                :: array 
     type(ESMF_FieldStatus_Flag)     :: fieldstatus       ! Field's status
     logical                         :: opt_overwriteflag ! helper variable
-    type(ESMF_FileStatusFlag)       :: opt_status        ! helper variable
-    type(ESMF_IOFmtFlag)            :: iofmtd
+    type(ESMF_FileStatus_Flag)      :: opt_status        ! helper variable
+    type(ESMF_IOFmt_Flag)           :: iofmtd
     type(ESMF_IO)                   :: io                ! The I/O object
     logical                         :: errorFound        ! True if err cond.
 

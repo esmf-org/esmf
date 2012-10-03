@@ -1,4 +1,4 @@
-// $Id: ESMCI_PIO_Handler.C,v 1.11 2012/10/01 00:46:50 gold2718 Exp $
+// $Id: ESMCI_PIO_Handler.C,v 1.12 2012/10/03 18:29:14 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.11 2012/10/01 00:46:50 gold2718 Exp $";
+ static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.12 2012/10/03 18:29:14 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -194,7 +194,7 @@ void PIO_Handler::initialize (
       pio_cpp_init_intracom(comp_rank, comp_comm,
                             num_iotasks, num_aggregator,
                             stride, rearr, &instance, base);
-      PRINTMSG("After pio_cpp_init_intracom");
+      PRINTMSG("After pio_cpp_init_intracom, instance = " << instance);
       // If we get here, hopefully everything is OK.
       if (instance != PIO_IOSYSTEM_DESC_NULL) {
         // Set the error handling to return PIO errors
@@ -462,7 +462,7 @@ PIO_Handler::PIO_Handler(
 //
 // !ARGUMENTS:
 //
-  ESMC_IOFmtFlag fmtArg,                  // (in)  - File format for PIO to use
+  ESMC_IOFmt_Flag fmtArg,                 // (in)  - File format for PIO to use
   int *rc                                 // (out) - Error return code
   ) : IO_Handler(fmtArg) {
 //

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.56 2012/09/28 23:01:49 theurich Exp $
+// $Id: ESMCI_Util.h,v 1.57 2012/10/03 18:29:15 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -74,10 +74,10 @@ enum ESMC_Direction { ESMF_DIRECTION_FORWARD=1,
                       ESMF_DIRECTION_REVERSE};
 
 // io format type
-enum ESMC_IOFmtFlag { ESMF_IOFMT_BIN=0,
-                      ESMF_IOFMT_NETCDF,
-                      ESMF_IOFMT_NETCDF4P,
-                      ESMF_IOFMT_NETCDF4C};
+enum ESMC_IOFmt_Flag { ESMF_IOFMT_BIN=0,
+                       ESMF_IOFMT_NETCDF,
+                       ESMF_IOFMT_NETCDF4P,
+                       ESMF_IOFMT_NETCDF4C};
 
 // indexflag type
 enum ESMC_IndexFlag { ESMF_INDEX_DELOCAL=0,
@@ -126,10 +126,10 @@ enum ESMC_AttWriteFlag { ESMC_ATTWRITE_TAB=0,
                          ESMC_ATTWRITE_XML};
 
 // File status flag (for IO write functions)
-enum ESMC_FileStatusFlag { ESMC_FILESTATUS_UNKNOWN=0,
-                           ESMC_FILESTATUS_OLD = 1,
-                           ESMC_FILESTATUS_NEW = 2,
-                           ESMC_FILESTATUS_REPLACE = 3};
+enum ESMC_FileStatus_Flag { ESMC_FILESTATUS_UNKNOWN=0,
+                            ESMC_FILESTATUS_OLD = 1,
+                            ESMC_FILESTATUS_NEW = 2,
+                            ESMC_FILESTATUS_REPLACE = 3};
 
 // Item order when retrieving item lists from a Container object
 enum ESMC_ItemOrder_Flag { ESMC_ITEMORDER_ABC=0,

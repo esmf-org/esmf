@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.52 2012/09/12 03:49:26 gold2718 Exp $
+! $Id: ESMF_FieldPr.F90,v 1.53 2012/10/03 18:29:04 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -225,13 +225,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !
 ! !ARGUMENTS:
-    type(ESMF_Field),     intent(inout)          :: field 
-    character(*),         intent(in)             :: file 
+    type(ESMF_Field),      intent(inout)          :: field 
+    character(*),          intent(in)             :: file 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    character(*),         intent(in),  optional  :: variableName
-    integer,              intent(in),  optional  :: timeslice
-    type(ESMF_IOFmtFlag), intent(in),  optional  :: iofmt 
-    integer,              intent(out), optional  :: rc
+    character(*),          intent(in),  optional  :: variableName
+    integer,               intent(in),  optional  :: timeslice
+    type(ESMF_IOFmt_Flag), intent(in),  optional  :: iofmt 
+    integer,               intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
 !   Read Field data from a file and put it into an {ESMF\_Field} object.
@@ -273,7 +273,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Array)                :: array 
     integer                         :: localrc
     type(ESMF_FieldStatus_Flag)     :: fieldstatus  ! Field's status
-    type(ESMF_IOFmtFlag)            :: iofmtd
+    type(ESMF_IOFmt_Flag)           :: iofmtd
     type(ESMF_IO)                   :: io           ! The I/O object
     logical                         :: errorFound   ! True if error condition
     integer                         :: time
