@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilSort.cppF90,v 1.4 2012/10/03 21:18:27 w6ws Exp $
+! $Id: ESMF_UtilSort.cppF90,v 1.5 2012/10/03 22:45:20 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@ module ESMF_UtilSortMod
 
 !==============================================================================
 !
-! This file contains methods for sorting arrays of data.
+! This file contains methods for sorting lists of data.
 !
  
   implicit none
@@ -57,39 +57,44 @@ module ESMF_UtilSortMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_UtilSort.cppF90,v 1.4 2012/10/03 21:18:27 w6ws Exp $'
+    '$Id: ESMF_UtilSort.cppF90,v 1.5 2012/10/03 22:45:20 w6ws Exp $'
 
 !----------------------------------------------------------------------------
 
 contains
 
 !BOP @\
-! !IROUTINE:  ESMF_UtilSort - Sort array of data @\
+! !IROUTINE:  ESMF_UtilSort - Sort data @\
 ! @\
 ! !INTERFACE: @\
-! subroutine ESMF_UtilSort (array, direction, rc) @\
+! subroutine ESMF_UtilSort (list, direction, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-!    <array>, see below for supported values @\
+!    <list>, see below for supported values @\
 !    type(ESMF_SortFlag), intent(in)    :: direction @\
 !    integer,             intent(out), optional :: rc @\
 ! @\
+! !STATUS: @\
+! \begin{itemize} @\
+! \item\apiStatusCompatibleVersion{6.1.0r} @\
+! \end{itemize} @\
+! @\
 ! !DESCRIPTION: @\
-!  Supported values for <array> are: @\
+!  Supported values for <list> are: @\
 ! \begin{description} @\
-! \item integer(ESMF\_KIND\_I4), intent(inout) :: array(:) @\
-! \item integer(ESMF\_KIND\_I8), intent(inout) :: array(:) @\
-! \item real(ESMF\_KIND\_R4),	 intent(inout) :: array(:) @\
-! \item real(ESMF\_KIND\_R8),	 intent(inout) :: array(:) @\
-! \item character(len=*),      intent(inout) :: array(:) @\
+! \item integer(ESMF\_KIND\_I4), intent(inout) :: list(:) @\
+! \item integer(ESMF\_KIND\_I8), intent(inout) :: list(:) @\
+! \item real(ESMF\_KIND\_R4),	 intent(inout) :: list(:) @\
+! \item real(ESMF\_KIND\_R8),	 intent(inout) :: list(:) @\
+! \item character(len=*),      intent(inout) :: list(:) @\
 ! \end{description}
 ! @\
-!  Use Quick Sort, reverting to Insertion sort on arrays of @\
+!  Use Quick Sort, reverting to Insertion sort on lists of @\
 !  size <= 20. Internally, the size of the array is limited to about 2**32. @\
 ! @\
 !     The arguments are: @\
 !     \begin{description} @\
-!     \item [array] @\
+!     \item [list] @\
 !       Array of data to be sorted.  The original data is overwritten by the @\
 !       sorted data.  @\
 !     \item [direction] @\
@@ -112,27 +117,27 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_UtilSort()" @\
 !BOPI @\
-! !IROUTINE:  ESMF_UtilSort_string - Sort array of strings @\
+! !IROUTINE:  ESMF_UtilSort_string - Sort list of strings @\
  @\
 ! !INTERFACE: @\
-  subroutine ESMF_UtilSort_##mname(array, direction, rc) @\
+  subroutine ESMF_UtilSort_##mname(list, direction, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-    mtypekind,           intent(inout) :: array(:) @\
+    mtypekind,           intent(inout) :: list(:) @\
     type(ESMF_SortFlag), intent(in)    :: direction @\
     integer,             intent(out), optional :: rc @\
 ! @\
 ! !DESCRIPTION: @\
-!  Sort an array of character strings. @\
+!  Sort an list of character strings. @\
 ! @\
 !  Use Quick Sort, reverting to Insertion sort on arrays of @\
 !  size <= 20. Dimension of STACK limits N to about 2**32. @\
 ! @\
 !     The arguments are: @\
 !     \begin{description} @\
-!     \item [array] @\
+!     \item [list] @\
 !       Array of data to be sorted.  The sorted data is returned @\
-!       in the array. @\
+!       in the list. @\
 !     \item [direction] @\
 !       Direction of sorting.  Legal values are {\tt ESMF_SORT_ASCENDING} @\
 !       and {\tt ESMF_SORT_DESCENDING}. @\
@@ -154,7 +159,7 @@ contains
 !     .. Local Scalars .. @\
     INTEGER :: ENDD, I, J, START, STKPNT @\
     integer :: n @\
-    mtypekindtemp :: array1, array2, array3, array_minmax, array_temp @\
+    mtypekindtemp :: arrayel1, arrayel2, arrayel3, arrayel_minmax, arrayel_temp @\
 !     .. @\
 !     .. Local Arrays .. @\
     INTEGER :: STACK( 2, 32 ) @\
@@ -166,7 +171,7 @@ contains
 ! @\
 !     Test the input paramters. @\
  @\
-    n = size (array) @\
+    n = size (list) @\
     if (n < 1) then @\
       if (present (rc)) rc = ESMF_SUCCESS @\
       return @\
@@ -191,10 +196,10 @@ contains
 ! @\
             DO 30 I = START + 1, ENDD @\
                do, J = I, START + 1, -1 @\
-                  IF( array( J ) > array( J-1 ) ) THEN @\
-                     array_minmax = array( J ) @\
-                     array( J )   = array( J-1 ) @\
-                     array( J-1 ) = array_minmax @\
+                  IF( list( J ) > list( J-1 ) ) THEN @\
+                     arrayel_minmax = list( J ) @\
+                     list( J )      = list( J-1 ) @\
+                     list( J-1 )    = arrayel_minmax @\
                   ELSE @\
                      GO TO 30 @\
                   END IF @\
@@ -207,10 +212,10 @@ contains
 ! @\
             DO 50 I = START + 1, ENDD @\
                DO, J = I, START + 1, -1 @\
-                  IF( array( J ) < array( J-1 ) ) THEN @\
-                     array_minmax = array( J ) @\
-                     array( J )   = array( J-1 ) @\
-                     array( J-1 ) = array_minmax @\
+                  IF( list( J ) < list( J-1 ) ) THEN @\
+                     arrayel_minmax = list( J ) @\
+                     list( J )      = list( J-1 ) @\
+                     list( J-1 )    = arrayel_minmax @\
                   ELSE @\
                      GO TO 50 @\
                   END IF @\
@@ -221,29 +226,29 @@ contains
 ! @\
       ELSE IF( ENDD-START > SELECT ) THEN @\
 ! @\
-!        Partition array( START:ENDD ) and stack parts, largest one first @\
+!        Partition list( START:ENDD ) and stack parts, largest one first @\
 ! @\
 !        Choose partition entry as median of 3 @\
 ! @\
-         array1 = array( START ) @\
-         array2 = array( ENDD ) @\
+         arrayel1 = list( START ) @\
+         arrayel2 = list( ENDD ) @\
          I = ( START+ENDD ) / 2 @\
-         array3 = array( I ) @\
-         IF( array1 < array2 ) THEN @\
-            IF( array3 < array1 ) THEN @\
-               array_minmax = array1 @\
-            ELSE IF( array3 < array2 ) THEN @\
-               array_minmax = array3 @\
+         arrayel3 = list( I ) @\
+         IF( arrayel1 < arrayel2 ) THEN @\
+            IF( arrayel3 < arrayel1 ) THEN @\
+               arrayel_minmax = arrayel1 @\
+            ELSE IF( arrayel3 < arrayel2 ) THEN @\
+               arrayel_minmax = arrayel3 @\
             ELSE @\
-               array_minmax = array2 @\
+               arrayel_minmax = arrayel2 @\
             END IF @\
          ELSE @\
-            IF( array3 < array2 ) THEN @\
-               array_minmax = array2 @\
-            ELSE IF( array3 < array1 ) THEN @\
-               array_minmax = array3 @\
+            IF( arrayel3 < arrayel2 ) THEN @\
+               arrayel_minmax = arrayel2 @\
+            ELSE IF( arrayel3 < arrayel1 ) THEN @\
+               arrayel_minmax = arrayel3 @\
             ELSE @\
-               array_minmax = array1 @\
+               arrayel_minmax = arrayel1 @\
             END IF @\
          END IF @\
 ! @\
@@ -257,20 +262,20 @@ contains
    60       CONTINUE @\
             do @\
               J = J - 1 @\
-              IF( array( J ) >= array_minmax )& @\
+              IF( list( J ) >= arrayel_minmax )& @\
      &           exit @\
             end do @\
  @\
             do @\
               I = I + 1 @\
-              IF( array( I ) <= array_minmax )& @\
+              IF( list( I ) <= arrayel_minmax )& @\
      &           exit @\
             end do @\
  @\
             IF( I < J ) THEN @\
-               array_temp = array( I ) @\
-               array( I ) = array( J ) @\
-               array( J ) = array_temp @\
+               arrayel_temp = list( I ) @\
+               list( I )   = list( J ) @\
+               list( J )   = arrayel_temp @\
                GO TO 60 @\
             END IF @\
             IF( J-START > ENDD-J-1 ) THEN @\
@@ -298,20 +303,20 @@ contains
    90       CONTINUE @\
             do @\
               J = J - 1 @\
-              IF( array( J ) <= array_minmax )& @\
+              IF( list( J ) <= arrayel_minmax )& @\
      &           exit @\
             end do @\
  @\
             do @\
               I = I + 1 @\
-              IF( array( I ) >= array_minmax )& @\
+              IF( list( I ) >= arrayel_minmax )& @\
      &          exit @\
             end do @\
  @\
             IF( I < J ) THEN @\
-               array_temp = array( I ) @\
-               array( I ) = array( J ) @\
-               array( J ) = array_temp @\
+               arrayel_temp = list( I ) @\
+               list( I )    = list( J ) @\
+               list( J )    = arrayel_temp @\
                GO TO 90 @\
             END IF @\
             IF( J-START > ENDD-J-1 ) THEN @\
@@ -342,7 +347,7 @@ contains
 
 !------------------------------------------------------------------------------
 
-SortMacro(string,character(*),character(len (array)))
+SortMacro(string,character(*),character(len (list)))
 SortMacro(int,integer(ESMF_KIND_I4),integer(ESMF_KIND_I4))
 SortMacro(dblint,integer(ESMF_KIND_I8),integer(ESMF_KIND_I8))
 SortMacro(real,real (ESMF_KIND_R4),real (ESMF_KIND_R4))
