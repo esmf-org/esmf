@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.114 2012/10/02 02:23:03 ksaint Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.115 2012/10/03 18:15:25 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.114 2012/10/02 02:23:03 ksaint Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.115 2012/10/03 18:15:25 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -1053,6 +1053,86 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class
+!                                information
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(<object>, name, <value argument>, &
+!                    <defaultvalue argument>, inputList, &
+!                    convention, purpose, attPackInstanceName, &
+!                    isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     character (len = *), intent(in)            :: name
+!     <value argument>, see below for supported values
+!     <defaultvalue argument>, see below for supported values   
+!     character (len=*),   intent(in),  optional :: inputList(:)
+!     character (len = *), intent(in),  optional :: convention
+!     character (len = *), intent(in),  optional :: purpose
+!     character (len = *), intent(in),  optional :: attPackInstanceName
+!     logical,             intent(out), optional :: isPresent
+!     integer,             intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Return an Attribute {\tt value} from the <object>, or from an Attribute 
+!     package on the <object>, specified by {\tt convention} and {\tt purpose},
+!     and optionally {\tt attPackInstanceName}.  Internal class information can
+!     be retrieved by prepending 'ESMF:' to the name of the 
+!     piece of information that is requested.  See 
+!     Section~\ref{sec:InternalInfo} for more information
+!     on this capability.
+!     A {\tt defaultvalue} argument
+!     may be given if a return code is not desired when the Attribute is not
+!     found.  See Section~\ref{sec:AttPacks} for a description of Attribute 
+!     packages and their conventions, purposes, and object types.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \end{description}
+!     Supported values for <value argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: value
+!     \item character (len = *), intent(out), value
+!     \end{description}
+!     Supported values for <defaultvalue argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in), optional :: defaultvalue
+!     \item character (len = *), intent(in), optional :: defaultvalue
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object
+!     \item [name]
+!           The name of the Attribute to retrieve
+!     \item [<value argument>]
+!           The value of the named Attribute
+!     \item [{[<defaultvalue argument>]}]
+!           The default value of the named Attribute
+!     \item [{[inputList]}]
+!           A list of the input parameters required to retrieve internal info
+!     \item [{[convention]}]
+!           The convention of the Attribute package
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one of
+!           multiple Attribute package instances of the same convention and
+!           purpose, within a nest.  If not specified, defaults to the first
+!           instance.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_AttributeGet  - Get an Attribute
 !
 ! !INTERFACE:
@@ -1127,6 +1207,91 @@ contains
 !           The valueList of the named Attribute
 !     \item [{[<defaultvalueList argument>]}]
 !           The default value list of the named Attribute
+!     \item [{[convention]}]
+!           The convention of the Attribute package
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one of
+!           multiple Attribute package instances of the same convention and
+!           purpose, within a nest.  If not specified, defaults to the first
+!           instance.  (Not implemented yet)
+!     \item [{[itemCount]}]
+!           The number of items in a multi-valued Attribute
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute is present or not
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class
+!                                information
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeGet(<object>, name, <valueList argument>, &
+!                            <defaultvalueList argument>, inputList, &
+!                            convention, purpose, attPackInstanceName, &
+!                            itemCount, isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     character (len = *), intent(in) :: name
+!     <valueList argument>, see below for supported values
+!     <defaultvalueList argument>, see below for supported values   
+!     character (len=*),   intent(in),    optional :: inputList(:)
+!     character (len = *), intent(in),    optional :: convention
+!     character (len = *), intent(in),    optional :: purpose
+!     character (len = *), intent(in),    optional :: attPackInstanceName
+!     integer,             intent(out),   optional :: itemCount
+!     logical,             intent(out),   optional :: isPresent
+!     integer,             intent(out),   optional :: rc   
+!
+! !DESCRIPTION:
+!     Return an Attribute {\tt valueList} from the <object>, or from an
+!     Attribute package on the <object>, specified by {\tt convention} and
+!     {\tt purpose}, and optionally {\tt attPackInstanceName}.  Internal class
+!     information can be retrieved by prepending 'ESMF:' 
+!     to the name of the piece of information that is requested.  See 
+!     Section~\ref{sec:InternalInfo} for more information
+!     on this capability.
+!     A {\tt defaultvalueList} list argument may be given if
+!     a return code is not desired when the Attribute is not found.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
+!     and their conventions, purposes, and object types.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \end{description}
+!     Supported values for <valueList argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(out) :: valueList(:)
+!     \item real (ESMF\_KIND\_R8), intent(out) :: valueList(:)
+!     \item logical, intent(out) :: valueList(:)
+!     \end{description}
+!     Supported values for <defaultvalueList argument> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in), optional :: defaultvalueList(:)
+!     \item real (ESMF\_KIND\_R8), intent(in), optional :: defaultvalueList(:)
+!     \item logical,  intent(in), optional :: defaultvalueList(:)
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object
+!     \item [name]
+!           The name of the Attribute to retrieve
+!     \item [<valueList argument>]
+!           The valueList of the named Attribute
+!     \item [{[<defaultvalueList argument>]}]
+!           The default value list of the named Attribute
+!     \item [{[inputList]}]
+!           A list of the input parameters required to retrieve internal info
 !     \item [{[convention]}]
 !           The convention of the Attribute package
 !     \item [{[purpose]}]
@@ -1892,6 +2057,69 @@ contains
 !           The name of the Attribute to set
 !     \item [<value argument>]
 !           The value of the Attribute to set
+!     \item [{[convention]}]
+!           The convention of the Attribute package
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one of
+!           multiple Attribute package instances of the same convention and
+!           purpose, within a nest.  If not specified, defaults to the first
+!           instance.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute to point to internal class
+!                                information
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeSet(<object>, name, <value argument>, inputList, &
+!                              convention, purpose, attPackInstanceName, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values  
+!     character (len = *), intent(in) :: name
+!     <value argument>, see below for supported values
+!     character (len = *), intent(in), optional :: inputList(:)
+!     character (len = *), intent(in), optional :: convention
+!     character (len = *), intent(in), optional :: purpose
+!     character (len = *), intent(in), optional :: attPackInstanceName
+!     integer, intent(out), optional :: rc   
+!
+! !DESCRIPTION:
+!     Attach an Attribute to <object>, or set an Attribute in an 
+!     Attribute package.  The Attribute has a {\tt name} and {\tt value},
+!     and, if in an Attribute package, a {\tt convention} and {\tt purpose},
+!     and optionally an {\tt attPackInstanceName}.  
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
+!     and their conventions, purposes, and object types.  The Attribute can
+!     also be set to be a pointer to internal class information.  See Section
+!     \ref(sec:InternalInfo) for a description of this capability.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \end{description}
+!     Supported values for the <value argument> are:
+!     \begin{description}
+!     \item character (len = *), intent(in), :: value
+!     \end{description}
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object
+!     \item [name]
+!           The name of the Attribute to set
+!     \item [<value argument>]
+!           The value of the Attribute to set
+!     \item [{[inputList]}]
+!           A list of the input parameters required to set internal info
 !     \item [{[convention]}]
 !           The convention of the Attribute package
 !     \item [{[purpose]}]
@@ -6153,6 +6381,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The character value of the Attribute to add. @\
+!     \item [{[inputList]}] @\
+!           A list of the input parameters required to set internal info. @\
 !     \item [{[convention]}] @\
 !           The convention of the Attribute package. @\
 !     \item [{[purpose]}] @\
@@ -6894,7 +7124,7 @@ AttGet1DBMacro(integer, I4, ESMF_Grid, grid, grid)
 AttGetMacro(integer, I8, ESMF_Grid, grid, grid)
 AttGet1DMacro(integer, I8, ESMF_Grid, grid, grid)
 AttGetMacro(real, R4, ESMF_Grid, grid, grid)
-AttGet1DMacro(real, R4, ESMF_Grid, grid, grid)
+AttGet1DBMacro(real, R4, ESMF_Grid, grid, grid)
 AttGetMacro(real, R8, ESMF_Grid, grid, grid)
 AttGet1DBMacro(real, R8, ESMF_Grid, grid, grid)
 AttGetLogicalBMacro(ESMF_Grid, grid, grid)

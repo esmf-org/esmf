@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.6 2012/09/26 19:49:36 rokuingh Exp $
+! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.7 2012/10/03 18:15:30 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_AttributeWriteIntrnalUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.6 2012/09/26 19:49:36 rokuingh Exp $'
+  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.7 2012/10/03 18:15:30 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -245,7 +245,63 @@ program ESMF_AttributeWriteIntrnalUTest
                            count = 11, &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating custom Grid CIM Inputs attribute package test"
+    write(name, *) "Creating custom Grid CIM attribute package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Create package nested inside the CIM attribute package on the grid
+    attrList(1) = 'nestPack1'
+    attrList(2) = 'nestPack2'
+    attrList(3) = 'nestPack3'
+    call ESMF_AttributeAdd(grid, &
+                           convention='CIM-nested', &
+                           purpose='GridSpec-nested', &
+                           attrList=attrList(1:3), &
+                           count = 11, &
+                           nestConvention='CIM', &
+                           nesPurpose='GridSpec', &
+                           nestCount = 3, &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a package nested inside the CIM package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set an attribute value within the CIM Grid package
+    call ESMF_AttributeSet(grid, 'nestPack1', &
+                           'nestPack1', &
+                           convention='CIM-nested', &
+                           purpose='GridSpec-nested', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set an attribute value in CIM Grid package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set an attribute value within the CIM Grid package
+    call ESMF_AttributeSet(grid, 'nestPack2', &
+                           'nestPack2', &
+                           convention='CIM-nested', &
+                           purpose='GridSpec-nested', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set an attribute value in CIM Grid package test"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-------------------------------------------------------------------------
+    !EX_UTest
+    ! Set an attribute value within the CIM Grid package
+    call ESMF_AttributeSet(grid, 'nestPack3', &
+                           'nestPack3', &
+                           convention='CIM-nested', &
+                           purpose='GridSpec-nested', &
+                           rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Set an attribute value in CIM Grid package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
@@ -375,7 +431,7 @@ program ESMF_AttributeWriteIntrnalUTest
     !EX_UTest
     ! Set an attribute value within the CIM Grid package
     inputList(:) = ''
-    inputList(1) = 'coordDim=2'
+    inputList(1) = 'coordDim:2'
     call ESMF_AttributeSet(grid, 'ycoords', &
                            'ESMF:farrayPtr', &
                            inputList=inputList, &

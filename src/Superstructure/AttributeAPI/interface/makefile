@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.4 2012/08/24 00:32:13 rokuingh Exp $ 
+# $Id: makefile,v 1.5 2012/10/03 18:15:25 rokuingh Exp $ 
 
 ALL: build_here 
 
-AUTOGEN	  = ESMF_Attribute.F90
+AUTOGEN	  = ESMF_AttributeInternals.F90 ESMF_Attribute.F90
 SOURCEC	  = 
-SOURCEF	  = ESMF_AttributeInternals.F90 $(AUTOGEN) ESMF_Attribute_C.F90
+SOURCEF	  = $(AUTOGEN) ESMF_Attribute_C.F90
 SOURCEH	  = 
 TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
 

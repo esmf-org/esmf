@@ -1,4 +1,4 @@
-% $Id: Attribute_internalinfo.tex,v 1.8 2012/04/30 21:40:16 rokuingh Exp $
+% $Id: Attribute_internalinfo.tex,v 1.9 2012/10/03 18:15:58 rokuingh Exp $
 
 \label{sec:InternalInfo}
 
@@ -7,7 +7,7 @@ class with the {\tt ESMF\_AttributeGet()} interface.  The Grid class is
 the prototype for this capability.  Internal information is retrieved by 
 specifying the name in {\tt ESMF\_AttributeGet()} as the keyword of the 
 desired argument from one of the {\tt ESMF\_GridGet()}interfaces.  
-The 'value' of the Attribute must be of the corresponding type
+The `value' of the Attribute must be of the corresponding type
 that is required to retrieve the desired piece of information.  There are 
 a few pieces of information that cannot be retrieved from the Grid
 through the Attribute interface at this time, see Tables 
@@ -15,11 +15,11 @@ through the Attribute interface at this time, see Tables
 determine what is currently available.
 
 The name of an Attribute that represents internal class information must have 
-'ESMF:' prepended.  This is to indicate that the information should be retrieved
-directly from class methods.  The input arguments must not have the 'ESMF:'
+`ESMF:' prepended.  This is to indicate that the information should be retrieved
+directly from class methods.  The input arguments must not have the `ESMF:'
 string prepended, and they should be specified as a character string with the name
-and value separated by a colon.  For example, the {\tt localDe=0} would be specified 
-like this: {\tt 'localDe:0'}.
+and value separated by an equal sign.  For example, the {\tt localDe=0} would be 
+specified like this: {\tt `localDe=0'}.
 
 Note: Attribute access to internal class information does not
 have the normal Attribute restriction that the values of the Attributes must be
@@ -96,6 +96,7 @@ method: distgrid, coordDimMap, arbIndexList, and coord.
     \hline
 %%%
     % array & {\tt ESMF\_Array} & coordDim, (optional) staggerloc & \hyperref[hyper][API:GridGetCoordIntoArray]{\tt ESMF\_GridGetCoord()}\\
+    farrayPtr & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe & \hyperref[hyper][API:GridGetCoord]{\tt ESMF\_GridGetCoord()}\\
     computationalCount & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe & \hyperref[hyper][API:GridGetCoord]{\tt ESMF\_GridGetCoord()}\\
     computationalLBound & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe & \hyperref[hyper][API:GridGetCoord]{\tt ESMF\_GridGetCoord()}\\
     computationalUBound & {\tt integer(:)} & coordDim, (optional) staggerloc, (optional) localDe & \hyperref[hyper][API:GridGetCoord]{\tt ESMF\_GridGetCoord()}\\
