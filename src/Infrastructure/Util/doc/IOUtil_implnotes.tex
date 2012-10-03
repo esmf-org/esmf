@@ -1,4 +1,4 @@
-% $Id: IOUtil_implnotes.tex,v 1.4 2012/10/03 19:50:26 w6ws Exp $
+% $Id: IOUtil_implnotes.tex,v 1.5 2012/10/03 21:18:25 w6ws Exp $
 
 %\subsection{Design and Implementation Notes}
 
@@ -44,8 +44,8 @@ With older compilers, the appropriate library call is made.
 
 \subsubsection{Sorting algorithms}
 
-The {\tt ESMF\_UtilSort} is based on the {\tt LAPACK} sorting procedures,
-i.e., {\tt SLASRT} and {\tt DLASRT}.  Two algorithms are used.
+The {\tt ESMF\_UtilSort()} algorithms are the same as those in the {\tt LAPACK}
+sorting procedures {\tt SLASRT()} and {\tt DLASRT()}.  Two algorithms are used.
 For small sorts, arrays with 20 or fewer elements, a simple Insertion sort is
 used.  For larger sorts, a Quicksort algorithm is used.
 
