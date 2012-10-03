@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.39 2012/09/29 00:22:12 w6ws Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.40 2012/10/03 20:37:17 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.39 2012/09/29 00:22:12 w6ws Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.40 2012/10/03 20:37:17 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -75,6 +75,12 @@
       integer :: nargs
       character(ESMF_MAXSTR) :: program_path
       integer :: argindex
+
+      real(ESMF_KIND_R8) :: random_values(50)
+      integer :: sorted_ints (size (random_values))
+      real    :: sorted_reals(size (random_values))
+      integer(ESMF_KIND_I8) :: sorted_dblints (size (random_values))
+      real(ESMF_KIND_R8)    :: sorted_dblreals(size (random_values))
 
       character(8) :: sort_array(4)
       character(8), parameter :: sort_input(4) =  &
@@ -299,21 +305,189 @@
 !Sorting
 !=======
 
-! Note: These are internal ESMF routines, subject to change, and
-! not intended to be end-user callable.
+    call random_number (random_values)
 
-    !
+! Reals
+
     !EX_UTest
     ! Test ascending sort
-    write (name, *) "Testing ascending sort"
+    write (name, *) "Testing ascending real sort"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    sorted_reals = random_values
+    call ESMF_UtilSort (sorted_reals, direction=ESMF_SORTFLAG_ASCENDING, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test for correctly sorted results
+    write (name, *) "Testing sorted ascending real results"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    rc = ESMF_SUCCESS
+    do, i=2, size (sorted_reals)
+      if (sorted_reals(i-1) < sorted_reals(i)) cycle
+      rc = ESMF_FAILURE
+      exit
+    end do
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test descending sort
+    write (name, *) "Testing descending real sort"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    sorted_reals = random_values
+    call ESMF_UtilSort (sorted_reals, direction=ESMF_SORTFLAG_DESCENDING, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test for correctly sorted results
+    write (name, *) "Testing sorted descending real results"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    rc = ESMF_SUCCESS
+    do, i=2, size (sorted_reals)
+      if (sorted_reals(i-1) > sorted_reals(i)) cycle
+      rc = ESMF_FAILURE
+      exit
+    end do
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+! Double precision reals
+
+    !EX_UTest
+    ! Test ascending sort
+    write (name, *) "Testing ascending double precision real sort"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    sorted_dblreals = random_values
+    call ESMF_UtilSort (sorted_dblreals, direction=ESMF_SORTFLAG_ASCENDING, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test for correctly sorted results
+    write (name, *) "Testing sorted ascending double precision real results"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    rc = ESMF_SUCCESS
+    do, i=2, size (sorted_dblreals)
+      if (sorted_dblreals(i-1) < sorted_dblreals(i)) cycle
+      rc = ESMF_FAILURE
+      exit
+    end do
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test descending sort
+    write (name, *) "Testing descending double precision real sort"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    sorted_dblreals = random_values
+    call ESMF_UtilSort (sorted_dblreals, direction=ESMF_SORTFLAG_DESCENDING, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test for correctly sorted results
+    write (name, *) "Testing sorted descending double precision real results"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    rc = ESMF_SUCCESS
+    do, i=2, size (sorted_dblreals)
+      if (sorted_dblreals(i-1) > sorted_dblreals(i)) cycle
+      rc = ESMF_FAILURE
+      exit
+    end do
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+! Integers
+
+    !EX_UTest
+    ! Test ascending sort
+    write (name, *) "Testing ascending integer sort"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    sorted_ints = random_values * 1234
+    call ESMF_UtilSort (sorted_ints, direction=ESMF_SORTFLAG_ASCENDING, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test for correctly sorted results
+    write (name, *) "Testing sorted ascending integer results"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    rc = ESMF_SUCCESS
+    do, i=2, size (sorted_ints)
+      if (sorted_ints(i-1) < sorted_ints(i)) cycle
+      rc = ESMF_FAILURE
+      exit
+    end do
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test descending sort
+    write (name, *) "Testing descending integer sort"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    sorted_ints = random_values * 1234
+    call ESMF_UtilSort (sorted_ints, direction=ESMF_SORTFLAG_DESCENDING, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test for correctly sorted results
+    write (name, *) "Testing sorted descending integer results"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    rc = ESMF_SUCCESS
+    do, i=2, size (sorted_ints)
+      if (sorted_ints(i-1) > sorted_ints(i)) cycle
+      rc = ESMF_FAILURE
+      exit
+    end do
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+! Double integers
+
+    !EX_UTest
+    ! Test ascending sort
+    write (name, *) "Testing ascending double integer sort"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    sorted_dblints = random_values
+    call ESMF_UtilSort (sorted_dblints, direction=ESMF_SORTFLAG_ASCENDING, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test for correctly sorted results
+    write (name, *) "Testing sorted ascending double integer results"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    rc = ESMF_SUCCESS
+    do, i=2, size (sorted_dblints)
+      if (sorted_dblints(i-1) < sorted_dblints(i)) cycle
+      rc = ESMF_FAILURE
+      exit
+    end do
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test descending sort
+    write (name, *) "Testing descending double integer sort"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    sorted_dblints = random_values
+    call ESMF_UtilSort (sorted_dblints, direction=ESMF_SORTFLAG_DESCENDING, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test for correctly sorted results
+    write (name, *) "Testing sorted descending double integer results"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    rc = ESMF_SUCCESS
+    do, i=2, size (sorted_dblints)
+      if (sorted_dblints(i-1) > sorted_dblints(i)) cycle
+      rc = ESMF_FAILURE
+      exit
+    end do
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+! Character strings
+
+    !EX_UTest
+    ! Test ascending sort
+    write (name, *) "Testing ascending character string sort"
     write (failMsg, *) "did not return ESMF_SUCCESS"
     sort_array = sort_input
     call ESMF_UtilSort (sort_array, direction=ESMF_SORTFLAG_ASCENDING, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-    !
+
     !EX_UTest
     ! Test for correctly sorted results
-    write (name, *) "Testing sorted ascending results"
+    write (name, *) "Testing sorted ascending character string results"
     write (failMsg, *) "did not return ESMF_SUCCESS"
     if (all (sort_array == sort_ascend)) then
       rc = ESMF_SUCCESS
@@ -321,18 +495,18 @@
       rc = ESMF_FAILURE
     end if
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-    !
+
     !EX_UTest
     ! Test descending sort
-    write (name, *) "Testing descending sort"
+    write (name, *) "Testing descending character string sort"
     write (failMsg, *) "did not return ESMF_SUCCESS"
     sort_array = sort_input
     call ESMF_UtilSort (sort_array, direction=ESMF_SORTFLAG_DESCENDING, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-    !
+
     !EX_UTest
     ! Test for correctly sorted results
-    write (name, *) "Testing sorted descending results"
+    write (name, *) "Testing sorted descending character string results"
     write (failMsg, *) "did not return ESMF_SUCCESS"
     if (all (sort_array == sort_descend)) then
       rc = ESMF_SUCCESS
