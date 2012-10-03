@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_F.C,v 1.6 2012/09/20 21:19:42 w6ws Exp $
+// $Id: ESMCI_IO_F.C,v 1.7 2012/10/03 03:23:48 gold2718 Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -133,7 +133,7 @@ extern "C" {
                              ESMC_IOFmtFlag *opt_iofmt,
                              ESMC_Logical *opt_overwrite,
                              ESMC_FileStatusFlag *opt_status,
-                             int *opt_timeslice,
+                             int *timeslice,
                              char *schema, int *len_schema, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_iowrite()"
@@ -148,7 +148,6 @@ extern "C" {
     ESMC_IOFmtFlag iofmt = ESMF_IOFMT_NETCDF;             // default
     bool overwrite = false;                               // default
     ESMC_FileStatusFlag status = ESMC_FILESTATUS_UNKNOWN; // default
-    int timeslice = 0;                                    // default
 
     if (len_fileName > ESMF_MAXSTR) {
       ESMC_LogDefault.Write("File name length > ESMF_MAXSTR",
@@ -177,9 +176,6 @@ extern "C" {
       status = *opt_status;
     }
 
-    if (ESMC_NOT_PRESENT_FILTER(opt_timeslice) != ESMC_NULL_POINTER) {
-      timeslice = *opt_timeslice;
-    }
     if (*len_schema > 0) {
       // We don't yet support the schema argument.
       ESMC_LogDefault.Write("Schema argument not yet supported, ignoring",
@@ -187,7 +183,7 @@ extern "C" {
     }
 
     // Call into the actual C++ method
-    localrc = (*ptr)->write(fileName, iofmt, overwrite, status, &timeslice);
+    localrc = (*ptr)->write(fileName, iofmt, overwrite, status, timeslice);
     ESMC_LogDefault.MsgFoundError(localrc,
                                   ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));

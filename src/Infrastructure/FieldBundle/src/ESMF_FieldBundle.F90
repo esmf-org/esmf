@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.143 2012/09/25 16:11:08 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.144 2012/10/03 03:22:58 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.143 2012/09/25 16:11:08 feiliu Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.144 2012/10/03 03:22:58 gold2718 Exp $'
 
 !==============================================================================
 ! 
@@ -4862,12 +4862,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !     [file\_name]002, [file\_name]003,...
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
-!    Logical: if .true., existing field data may be overwritten. If
-!    {\tt iofmt} is {\tt ESMF\_IOFMT\_BIN}, then all data in the file will
-!    be overwritten with each field's data. For a NetCDF format, only the
-!    data corresponding to each field's name will be
-!    be overwritten. If the {\tt timeslice} option is given, only data for
-!    the given timeslice may be overwritten. default is .false.
+!      Logical: if .true., existing field data may be overwritten. The
+!      behavior of this flag depends on the value of {\tt iofmt} as
+!      shown below:
+!    \begin{description}
+!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
+!      be overwritten with each field's data.
+!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ Only the
+!      data corresponding to each field's name will be
+!      be overwritten. If the {\tt timeslice} option is given, only data for
+!      the given timeslice may be overwritten.
+!    \end{description}
+!    default is .false.
 !    \end{sloppypar}
 !   \item[{[status]}]
 !    \begin{sloppypar}
@@ -4885,7 +4891,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !    By default, i.e. by omitting the {\tt timeslice} argument, no
 !    provisions for time slicing are made in the output file,
 !    however, if the file already contains a time axis for the variable,
-!    a timeslice one greater than the maximum will be written..
+!    a timeslice one greater than the maximum will be written.
 !    \end{sloppypar}
 !   \item[{[iofmt]}]
 !     \begin{sloppypar}
@@ -4912,7 +4918,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     type(ESMF_IOFmtFlag)           :: iofmtd
     type(ESMF_IO)                  :: io                ! The I/O object
     logical                        :: errorFound        ! True if err. cond.
-    integer                        :: time
 
 #ifdef ESMF_PIO
     ! initialize return code; assume routine not implemented
@@ -4934,8 +4939,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 
     iofmtd = ESMF_IOFMT_NETCDF   ! default format
     if(present(iofmt)) iofmtd = iofmt
-    time = 0
-    if(present(timeslice)) time = timeslice
 
     ! Check to make sure that filename won't be too long
     if (singlef .and. (len(trim(file)) .gt. (ESMF_MAXSTR - 3))) then
@@ -4974,7 +4977,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
       enddo
       if (.not. errorFound) then
       call ESMF_IOWrite(io, trim(file), overwrite=opt_overwriteflag,    &
-          status=opt_status, timeslice=time, iofmt=iofmtd, rc=localrc)
+          status=opt_status, timeslice=timeslice, iofmt=iofmtd, rc=localrc)
         errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
             ESMF_CONTEXT, rcToReturn=rc)
       endif
@@ -4995,7 +4998,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         if (.not. errorFound) then
           call ESMF_IOWrite(io, trim(filename),                         &
               overwrite=opt_overwriteflag, status=opt_status,           &
-              timeslice=time, iofmt=iofmtd, rc=localrc)
+              timeslice=timeslice, iofmt=iofmtd, rc=localrc)
           errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,   &
               ESMF_CONTEXT, rcToReturn=rc)
         endif

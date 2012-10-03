@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldWr.F90,v 1.20 2012/09/12 03:49:26 gold2718 Exp $
+! $Id: ESMF_FieldWr.F90,v 1.21 2012/10/03 03:22:37 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -151,7 +151,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=ESMF_MAXSTR)      :: name
     type(ESMF_FieldType), pointer   :: fp 
     type(ESMF_Array)                :: array 
-    integer                         :: time
     type(ESMF_FieldStatus_Flag)     :: fieldstatus       ! Field's status
     logical                         :: opt_overwriteflag ! helper variable
     type(ESMF_FileStatusFlag)       :: opt_status        ! helper variable
@@ -167,9 +166,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! check variables
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
-
-    time = -1   ! default, no time dimension
-    if (present(timeslice)) time = timeslice
 
     ! Set default flags
     opt_overwriteflag = .false.
@@ -215,7 +211,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (.not. errorfound) then
       call ESMF_IOWrite(io, trim(file), overwrite=opt_overwriteflag,  &
-          status=opt_status, timeslice=time, iofmt=iofmtd, rc=localrc)
+          status=opt_status, timeslice=timeslice, iofmt=iofmtd, rc=localrc)
       errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
           ESMF_CONTEXT, rcToReturn=rc)
     endif
