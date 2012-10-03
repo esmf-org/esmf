@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2008/05/01 17:42:26 rokuingh Exp $
+# $Id: makefile,v 1.3 2012/10/03 22:20:05 theurich Exp $
 
 ALL: onedoc
 
@@ -29,6 +29,27 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.F90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f90))))
+
+TEXFILES_TO_MAKE_XDIR = ../../../Superstructure/AttributeAPI
+
+TEXFILES_TO_MAKE += $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/src/*.C))))
+TEXFILES_TO_MAKE += $(addsuffix _chapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/include/*.h))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/src/*.F))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/src/*.F90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/src/*.f))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/src/*.f90))))
+
+TEXFILES_TO_MAKE += $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/interface/*.C))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/interface/*.F))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/interface/*.F90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/interface/*.f))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/interface/*.f90))))
+
+TEXFILES_TO_MAKE += $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/examples/*.C))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/examples/*.F))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/examples/*.F90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/examples/*.f))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/examples/*.f90))))
 
 
 # Files that a doc depends on.  Do not list the the ctex file !  

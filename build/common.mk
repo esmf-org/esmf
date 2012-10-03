@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.358 2012/08/17 21:56:28 theurich Exp $
+#  $Id: common.mk,v 1.359 2012/10/03 22:19:58 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -3191,6 +3191,10 @@ endif
 # protex script is Fortran, C or .h source code.
 #-------------------------------------------------------------------------------
 
+%_fapi.tex : $(TEXFILES_TO_MAKE_XDIR)/interface/%.F90
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
 %_fapi.tex : ../src/%.F 
 	export PROTEX=$(PROTEX) ;\
 	$(F_PROTEX) $* $<
@@ -3256,6 +3260,74 @@ endif
 	$(F_PROTEX) $* $<
 
 %_ccapi.tex : ../examples/%.C
+	export PROTEX=$(PROTEX) ;\
+	$(CC_PROTEX) $* $<
+
+%_fapi.tex : $(TEXFILES_TO_MAKE_XDIR)/src/%.F 
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : $(TEXFILES_TO_MAKE_XDIR)/src/%.F90
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : $(TEXFILES_TO_MAKE_XDIR)/src/%.f
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : $(TEXFILES_TO_MAKE_XDIR)/src/%.f90
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : $(TEXFILES_TO_MAKE_XDIR)/interface/%.F 
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : $(TEXFILES_TO_MAKE_XDIR)/interface/%.F90
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : $(TEXFILES_TO_MAKE_XDIR)/interface/%.f
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : $(TEXFILES_TO_MAKE_XDIR)/interface/%.f90
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_chapi.tex : $(TEXFILES_TO_MAKE_XDIR)/include/%.h
+	export PROTEX=$(PROTEX) ;\
+	$(CH_PROTEX) $* $<
+
+%_chapi.tex : $(TEXFILES_TO_MAKE_XDIR)/include/%.inc
+	export PROTEX=$(PROTEX) ;\
+	$(CH_PROTEX) $* $<
+
+%_ccapi.tex : $(TEXFILES_TO_MAKE_XDIR)/src/%.C
+	export PROTEX=$(PROTEX) ;\
+	$(CC_PROTEX) $* $<
+
+%_ccapi.tex : $(TEXFILES_TO_MAKE_XDIR)/interface/%.C
+	export PROTEX=$(PROTEX) ;\
+	$(CC_PROTEX) $* $<
+
+%_fapi.tex : $(TEXFILES_TO_MAKE_XDIR)/examples/%.F 
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : $(TEXFILES_TO_MAKE_XDIR)/examples/%.F90
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : $(TEXFILES_TO_MAKE_XDIR)/examples/%.f
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : $(TEXFILES_TO_MAKE_XDIR)/examples/%.f90
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_ccapi.tex : $(TEXFILES_TO_MAKE_XDIR)/examples/%.C
 	export PROTEX=$(PROTEX) ;\
 	$(CC_PROTEX) $* $<
 

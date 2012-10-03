@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.37 2012/04/27 05:43:26 rokuingh Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.38 2012/10/03 22:20:04 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -15,11 +15,12 @@
 \usepackage{html}
 \usepackage{times}
 \usepackage{alltt}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+
+\usepackage{longtable}
 
 \usepackage{hyperref}
-
-\usepackage[T1]{fontenc}
-\usepackage[dvips]{graphics,color}
 
 \usepackage{array}
 \setlength\extratabsurround{10pt}
@@ -27,8 +28,17 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{\bf Attribute Design}
-%\newcommand{\myauthors}{Ryan O\'Kuinghttons}
+\newcommand{\mytitle}{\bf Attribute Fortran Reference}
+\newcommand{\myauthors}{Ryan O\'Kuinghttons}
+% set a standard paragraph style
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+% these are temporary patches until something more
+% permanent is done to the protex script.
+\newlength{\oldparskip}
+\newlength{\oldparindent}
+\newlength{\oldbaselineskip}
 #endif
 
 #ifdef STANDALONE
@@ -44,6 +54,8 @@
 \tableofcontents
 
 \newpage
+\setlength{\parskip}{1.5ex}
+
 #endif
 
 \section{Attribute Class}
@@ -93,17 +105,18 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Attribute_usage} 
-\input{AttributeEx_fapi}
-\input{AttributePackageEx_fapi}
-\input{AttributeCustPackEx_fapi}
-\input{AttributeUpdateEx_fapi}
-\input{AttributeUpdateMod_fapi}
-\input{AttributeInternalInfoEx_fapi}
-\input{AttributeCIMEx_fapi}
-\input{AttReadGridCompEx_fapi}
-\input{AttReadFieldEx_fapi}
-\input{AttReadGridEx_fapi}
-\input{AttReadCustCplCompEx_fapi}
+\input{ESMF_AttributeEx_fapi}
+\input{ESMF_AttributePackageEx_fapi}
+\input{ESMF_AttributeCustPackEx_fapi}
+\input{ESMF_AttributeUpdateEx_fapi}
+\input{ESMF_AttributeUpdateMod_fapi}
+\input{ESMF_AttributeInternalInfoEx_fapi}
+\input{ESMF_AttributeCIMEx_fapi}
+\input{ESMF_AttributeSciEx_fapi}
+\input{ESMF_AttReadGridCompEx_fapi}
+\input{ESMF_AttReadFieldEx_fapi}
+\input{ESMF_AttReadGridEx_fapi}
+\input{ESMF_AttReadCustCplCompEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Attribute/doc/Attribute_usage} 
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeEx_fapi}
@@ -113,6 +126,7 @@
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeUpdateMod_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeInternalInfoEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeCIMEx_fapi}
+\input{../Superstructure/AttributeAPI/doc/ESMF_AttributeSciEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttReadGridCompEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttReadFieldEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttReadGridEx_fapi}
@@ -142,7 +156,7 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{Attribute_fapi}
+\input{ESMF_Attribute_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/AttributeAPI/doc/ESMF_Attribute_fapi}
 #endif
