@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpecUTest.F90,v 1.17 2012/05/16 22:20:54 svasquez Exp $
+! $Id: ESMF_ArraySpecUTest.F90,v 1.18 2012/10/03 22:18:10 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_ArraySpecUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArraySpecUTest.F90,v 1.17 2012/05/16 22:20:54 svasquez Exp $'
+    '$Id: ESMF_ArraySpecUTest.F90,v 1.18 2012/10/03 22:18:10 svasquez Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -108,6 +108,8 @@ program ESMF_ArraySpecUTest
     
   !------------------------------------------------------------------------
   !NEX_UTest 
+  ! Test ESMF_ArraySpecAssignment(=)(arraySpec, arraySpec)
+  ! Test ESMF_ArraySpecOperator(==)(arraySpec1, arraySpec2)
   write(name, *) "Test ESMF_ArraySpec assignment and (==) operator"
   write(failMsg, *) "Incorrect behavior"
   arrayspec2 = arrayspec
@@ -115,6 +117,7 @@ program ESMF_ArraySpecUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest 
+  ! Test ESMF_ArraySpecOperator(/=)(arraySpec1, arraySpec2)
   write(name, *) "Test ESMF_ArraySpec (/=) operator"
   write(failMsg, *) "Incorrect behavior"
   call ESMF_Test(.not.(arrayspec2/=arrayspec), name, failMsg, result, ESMF_SRCLINE)
@@ -151,12 +154,14 @@ program ESMF_ArraySpecUTest
 
   !------------------------------------------------------------------------
   !EX_UTest 
+  ! Test ESMF_ArraySpecOperator(==)(arraySpec1, arraySpec2)
   write(name, *) "Test ESMF_ArraySpec (==) operator"
   write(failMsg, *) "Incorrect behavior"
   call ESMF_Test(.not.(arrayspec2==arrayspec), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !EX_UTest 
+  ! Test ESMF_ArraySpecOperator(/=)(arraySpec1, arraySpec2)
   write(name, *) "Test ESMF_ArraySpec (/=) operator"
   write(failMsg, *) "Incorrect behavior"
   call ESMF_Test(arrayspec2/=arrayspec, name, failMsg, result, ESMF_SRCLINE)
@@ -177,12 +182,14 @@ program ESMF_ArraySpecUTest
 
   !------------------------------------------------------------------------
   !EX_UTest 
+  ! Test ESMF_ArraySpecOperator(==)(arraySpec1, arraySpec2)
   write(name, *) "Test ESMF_ArraySpec (==) operator"
   write(failMsg, *) "Incorrect behavior"
   call ESMF_Test(.not.(arrayspec2==arrayspec), name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !EX_UTest 
+  ! Test ESMF_ArraySpecOperator(/=)(arraySpec1, arraySpec2)
   write(name, *) "Test ESMF_ArraySpec (/=) operator"
   write(failMsg, *) "Incorrect behavior"
   call ESMF_Test(arrayspec2/=arrayspec, name, failMsg, result, ESMF_SRCLINE)
