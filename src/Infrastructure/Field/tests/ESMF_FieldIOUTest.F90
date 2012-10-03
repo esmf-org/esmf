@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldIOUTest.F90,v 1.31 2012/09/12 03:49:27 gold2718 Exp $
+! $Id: ESMF_FieldIOUTest.F90,v 1.32 2012/10/03 03:11:51 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -196,8 +196,18 @@ program ESMF_FieldIOUTest
     enddo
 !------------------------------------------------------------------------
     ! Write Fortran array in Field
-    call ESMF_FieldWrite(field_t, file="field_time.nc", timeslice=t,     &
-         status=statusFlag, overwrite=.true., rc=rc)
+    ! After two timesteps, test the auto-increment feature.
+    ! Also, stop using the status flag after t = 3
+    if (t .le. 2) then
+      call ESMF_FieldWrite(field_t, file="field_time.nc", timeslice=t,     &
+           status=statusFlag, overwrite=.true., rc=rc)
+    else if (t .le. 3) then
+      call ESMF_FieldWrite(field_t, file="field_time.nc",                  &
+           status=statusFlag, overwrite=.true., rc=rc)
+    else
+      call ESMF_FieldWrite(field_t, file="field_time.nc",                  &
+           overwrite=.true., rc=rc)
+    endif
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
     if(rc.ne.ESMF_SUCCESS) then
       countfail = countfail + 1
