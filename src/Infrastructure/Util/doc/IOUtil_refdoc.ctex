@@ -1,4 +1,4 @@
-% $Id: IOUtil_refdoc.ctex,v 1.9 2012/10/03 19:50:26 w6ws Exp $
+% $Id: IOUtil_refdoc.ctex,v 1.10 2012/10/03 21:26:40 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -23,6 +23,15 @@
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{\Large {\bf Fortran I/O Utilites Reference}}
 \newcommand{\myauthors}{\large {\it Walter Spector}}
+% set a standard paragraph style
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+% these are temporary patches until something more
+% permanent is done to the protex script.
+\newlength{\oldparskip}
+\newlength{\oldparindent}
+\newlength{\oldbaselineskip}
 #endif
 
 #ifdef STANDALONE
