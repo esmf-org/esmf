@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.29 2012/09/21 05:59:29 theurich Exp $
+! $Id: ESMF_ArrayBundleCreateUTest.F90,v 1.30 2012/10/03 21:09:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@ program ESMF_ArrayBundleCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.29 2012/09/21 05:59:29 theurich Exp $'
+    '$Id: ESMF_ArrayBundleCreateUTest.F90,v 1.30 2012/10/03 21:09:41 svasquez Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -136,6 +136,7 @@ program ESMF_ArrayBundleCreateUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest
+  ! Testing ESMF_ArrayBundleOperator(==)(fieldBundle1,fieldBundle2)
   write(name, *) "ArrayBundle equality before assignment Test"
   write(failMsg, *) "Did not compare correctly"
   arraybundleBool = (arraybundleAlias.eq.arraybundle)
@@ -143,6 +144,8 @@ program ESMF_ArrayBundleCreateUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest
+  ! Testing ESMF_ArrayBundleAssignment(=)(fieldBundle1)
+  ! Testing ESMF_ArrayBundleOperator(==)(fieldBundle1,fieldBundle2)
   write(name, *) "ArrayBundle assignment and equality Test"
   write(failMsg, *) "Did not compare correctly"
   arraybundleAlias = arraybundle
@@ -158,6 +161,7 @@ program ESMF_ArrayBundleCreateUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest
+  ! Testing ESMF_ArrayBundleOperator(==)(fieldBundle1,fieldBundle2)
   write(name, *) "ArrayBundle equality after destroy Test"
   write(failMsg, *) "Did not compare correctly"
   arraybundleBool = (arraybundleAlias==arraybundle)
@@ -165,6 +169,7 @@ program ESMF_ArrayBundleCreateUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest
+  ! Testing ESMF_ArrayBundleOperator(/=)(fieldBundle1,fieldBundle2)
   write(name, *) "ArrayBundle non-equality after destroy Test"
   write(failMsg, *) "Did not compare correctly"
   arraybundleBool = (arraybundleAlias/=arraybundle)
