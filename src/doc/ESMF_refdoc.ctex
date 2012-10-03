@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.119 2012/09/24 23:24:05 theurich Exp $
+% $Id: ESMF_refdoc.ctex,v 1.120 2012/10/03 03:41:32 oehmke Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -161,7 +161,7 @@
 \input{ESMF_infradataoverview.tex}
 
 %\section{Design and Implementation Notes}
-\input{ESMF_infradataimplnotes.tex}
+%\input{ESMF_infradataimplnotes.tex}
 
 \newpage
 
