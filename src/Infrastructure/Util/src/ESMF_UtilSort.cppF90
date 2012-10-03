@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilSort.cppF90,v 1.2 2012/09/25 16:28:29 w6ws Exp $
+! $Id: ESMF_UtilSort.cppF90,v 1.3 2012/10/03 19:50:32 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,6 +37,10 @@ module ESMF_UtilSortMod
 
   interface ESMF_UtilSort
     module procedure ESMF_UtilSort_string
+    module procedure ESMF_UtilSort_int
+    module procedure ESMF_UtilSort_dblint
+    module procedure ESMF_UtilSort_real
+    module procedure ESMF_UtilSort_dblreal
   end interface
 
 !------------------------------------------------------------------------------
@@ -53,11 +57,59 @@ module ESMF_UtilSortMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_UtilSort.cppF90,v 1.2 2012/09/25 16:28:29 w6ws Exp $'
+    '$Id: ESMF_UtilSort.cppF90,v 1.3 2012/10/03 19:50:32 w6ws Exp $'
 
 !----------------------------------------------------------------------------
 
 contains
+
+!BOP @\
+! !IROUTINE:  ESMF_UtilSort - Sort array of data @\
+! @\
+! !INTERFACE: @\
+! subroutine ESMF_UtilSort (array, direction, rc) @\
+! @\
+! !ARGUMENTS: @\
+!    <array>, see below for supported values @\
+!    type(ESMF_SortFlag), intent(in)    :: direction @\
+!    integer,             intent(out), optional :: rc @\
+! @\
+! !DESCRIPTION: @\
+!  Supported values for <array> are: @\
+! @\
+!    integer(ESMF\_KIND\_I4), intent(inout) :: array(:) @\
+! @\
+!    integer(ESMF\_KIND\_I8), intent(inout) :: array(:) @\
+! @\
+!    real(ESMF\_KIND\_R4),    intent(inout) :: array(:) @\
+! @\
+!    real(ESMF\_KIND\_R8),    intent(inout) :: array(:) @\
+! @\
+!    character(len=*),      intent(inout) :: array(:) @\
+! @\    
+! @\
+!  Use Quick Sort, reverting to Insertion sort on arrays of @\
+!  size <= 20. Internally, the size of the array is limited to about 2**32. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [array] @\
+!       Array of data to be sorted.  The original data is overwritten by the @\
+!       sorted data.  @\
+!     \item [direction] @\
+!       Direction of sorting.  Legal values are {\tt ESMF\_SORT\_ASCENDING} @\
+!       and {\tt ESMF\_SORT\_DESCENDING}. @\
+!     \item [{[rc]}] @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if the sorting is successful. @\
+!     \end{description} @\
+! @\
+!  This is an ESMFized version of SLASRT from LAPACK version 3.1. @\
+! @\
+!  Univ. of Tennessee, Univ. of California Berkeley and NAG Ltd. @\
+! @\
+!  November 2006 @\
+! @\
+!EOP @\
 
 #define SortMacro(mname, mtypekind, mtypekindtemp) \
 !------------------------------------------------------------------------------ @\
@@ -295,8 +347,9 @@ contains
 !------------------------------------------------------------------------------
 
 SortMacro(string,character(*),character(len (array)))
-
-! Not tested yet:
-! SortMacro(integer,integer,integer)
+SortMacro(int,integer(ESMF_KIND_I4),integer(ESMF_KIND_I4))
+SortMacro(dblint,integer(ESMF_KIND_I8),integer(ESMF_KIND_I8))
+SortMacro(real,real (ESMF_KIND_R4),real (ESMF_KIND_R4))
+SortMacro(dblreal,real (ESMF_KIND_R8),real (ESMF_KIND_R8))
 
 end module ESMF_UtilSortMod
