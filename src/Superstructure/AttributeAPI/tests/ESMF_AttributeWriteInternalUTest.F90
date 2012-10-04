@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.7 2012/10/03 18:15:30 rokuingh Exp $
+! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.8 2012/10/04 20:52:37 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_AttributeWriteIntrnalUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.7 2012/10/03 18:15:30 rokuingh Exp $'
+  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.8 2012/10/04 20:52:37 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -259,10 +259,9 @@ program ESMF_AttributeWriteIntrnalUTest
                            convention='CIM-nested', &
                            purpose='GridSpec-nested', &
                            attrList=attrList(1:3), &
-                           count = 11, &
+                           count = 3, &
                            nestConvention='CIM', &
-                           nesPurpose='GridSpec', &
-                           nestCount = 3, &
+                           nestPurpose='GridSpec', &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a package nested inside the CIM package test"
