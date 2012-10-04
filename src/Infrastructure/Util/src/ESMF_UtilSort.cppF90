@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilSort.cppF90,v 1.5 2012/10/03 22:45:20 w6ws Exp $
+! $Id: ESMF_UtilSort.cppF90,v 1.6 2012/10/04 00:41:57 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@ module ESMF_UtilSortMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_UtilSort.cppF90,v 1.5 2012/10/03 22:45:20 w6ws Exp $'
+    '$Id: ESMF_UtilSort.cppF90,v 1.6 2012/10/04 00:41:57 w6ws Exp $'
 
 !----------------------------------------------------------------------------
 
@@ -73,11 +73,6 @@ contains
 !    <list>, see below for supported values @\
 !    type(ESMF_SortFlag), intent(in)    :: direction @\
 !    integer,             intent(out), optional :: rc @\
-! @\
-! !STATUS: @\
-! \begin{itemize} @\
-! \item\apiStatusCompatibleVersion{6.1.0r} @\
-! \end{itemize} @\
 ! @\
 ! !DESCRIPTION: @\
 !  Supported values for <list> are: @\
