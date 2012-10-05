@@ -1,4 +1,4 @@
-% $Id: NUOPC_refdoc.ctex,v 1.11 2012/09/18 15:49:31 theurich Exp $ 
+% $Id: NUOPC_refdoc.ctex,v 1.12 2012/10/05 05:59:17 theurich Exp $ 
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -15,6 +15,15 @@
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{\Large {\bf NUOPC Layer Reference}}
 \newcommand{\myauthors}{\large {\it CSC Committee Members}}
+% set a standard paragraph style
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+% these are temporary patches until something more
+% permanent is done to the protex script.
+\newlength{\oldparskip}
+\newlength{\oldparindent}
+\newlength{\oldbaselineskip}
 #endif
 
 #ifdef STANDALONE
@@ -31,6 +40,8 @@
 \tableofcontents
 
 \newpage
+\setlength{\parskip}{1.5ex}
+
 #endif
 
 
