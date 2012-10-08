@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilUTest.F90,v 1.41 2012/10/03 22:30:08 w6ws Exp $
+! $Id: ESMF_UtilUTest.F90,v 1.42 2012/10/08 22:04:52 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_UtilUTest.F90,v 1.41 2012/10/03 22:30:08 w6ws Exp $'
+      '$Id: ESMF_UtilUTest.F90,v 1.42 2012/10/08 22:04:52 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -397,7 +397,7 @@
     ! Test ascending sort
     write (name, *) "Testing ascending integer sort"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    sorted_ints = random_values * 1234
+    sorted_ints = random_values * 12345
     call ESMF_UtilSort (sorted_ints, direction=ESMF_SORTFLAG_ASCENDING, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -408,6 +408,7 @@
     rc = ESMF_SUCCESS
     do, i=2, size (sorted_ints)
       if (sorted_ints(i-1) < sorted_ints(i)) cycle
+      print *, 'failed testing: ', sorted_ints(i-1), " < ", sorted_ints(i)
       rc = ESMF_FAILURE
       exit
     end do
@@ -417,7 +418,7 @@
     ! Test descending sort
     write (name, *) "Testing descending integer sort"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    sorted_ints = random_values * 1234
+    sorted_ints = random_values * 12345
     call ESMF_UtilSort (sorted_ints, direction=ESMF_SORTFLAG_DESCENDING, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -428,6 +429,7 @@
     rc = ESMF_SUCCESS
     do, i=2, size (sorted_ints)
       if (sorted_ints(i-1) > sorted_ints(i)) cycle
+      print *, 'failed testing: ', sorted_ints(i-1), " > ", sorted_ints(i)
       rc = ESMF_FAILURE
       exit
     end do
@@ -439,7 +441,7 @@
     ! Test ascending sort
     write (name, *) "Testing ascending double integer sort"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    sorted_dblints = random_values * 1234
+    sorted_dblints = random_values * 12345
     call ESMF_UtilSort (sorted_dblints, direction=ESMF_SORTFLAG_ASCENDING, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -450,6 +452,7 @@
     rc = ESMF_SUCCESS
     do, i=2, size (sorted_dblints)
       if (sorted_dblints(i-1) < sorted_dblints(i)) cycle
+      print *, 'failed testing: ', sorted_dblints(i-1), " < ", sorted_dblints(i)
       rc = ESMF_FAILURE
       exit
     end do
@@ -459,7 +462,7 @@
     ! Test descending sort
     write (name, *) "Testing descending double integer sort"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    sorted_dblints = random_values * 1234
+    sorted_dblints = random_values * 12345
     call ESMF_UtilSort (sorted_dblints, direction=ESMF_SORTFLAG_DESCENDING, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -470,6 +473,7 @@
     rc = ESMF_SUCCESS
     do, i=2, size (sorted_dblints)
       if (sorted_dblints(i-1) > sorted_dblints(i)) cycle
+      print *, 'failed testing: ', sorted_dblints(i-1), " > ", sorted_dblints(i)
       rc = ESMF_FAILURE
       exit
     end do
