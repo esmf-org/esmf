@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.C,v 1.30 2012/04/12 18:33:38 oehmke Exp $
+// $Id: ESMCI_MeshCXX.C,v 1.31 2012/10/08 23:59:01 jcjacob Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@ using std::endl;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.30 2012/04/12 18:33:38 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_MeshCXX.C,v 1.31 2012/10/08 23:59:01 jcjacob Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -135,6 +135,98 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
 
    return meshCXXp;
 } // MeshCXX::create
+
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MeshCXX::createFromFile()"
+MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag, 
+				 int *convert3D, 
+				 int *convertToDual,
+				 int *addUserArea,
+				 char *meshname,
+				 int *addMask,
+				 char *varname,
+				 int *rc) {
+   MeshCXX* meshCXXp;
+   Mesh* meshp;
+   try {
+
+     // Initialize the parallel environment for mesh (if not already done)
+     {
+       int localrc;
+       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+	 throw localrc;  // bail out with exception
+     }
+
+    meshp = new Mesh();
+    int localrc;
+    meshp = ESMCI::Mesh::createfromfile(filename, fileTypeFlag, convert3D, 
+					convertToDual, addUserArea, meshname, 
+					addMask, varname, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+      throw localrc;  // bail out with exception
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", rc);
+    }
+
+    return (MeshCXX *)NULL;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    return (MeshCXX *)NULL;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", rc);
+    return (MeshCXX *)NULL;
+  }
+   meshCXXp = new MeshCXX();
+   (meshCXXp)->meshPointer = meshp;
+
+   // Set the number of nodes and elements
+   ThrowAssert(meshp->num_elems() == 0);
+   meshCXXp->numLElements = meshp->num_elems();
+   ThrowAssert(meshp->num_nodes() == 0);
+   meshCXXp->numLNodes = meshp->num_nodes();
+
+   meshCXXp->meshFreed = 0;
+
+   // Mark Mesh as finshed
+   meshCXXp->level=MeshCXXLevel_Finished;
+
+   // Calc and set the number of owned nodes
+   int num_owned_nodes=0;
+   Mesh::iterator ni2 = meshp->node_begin(), ne2 = meshp->node_end();
+   for (ni2; ni2 != ne2; ++ni2) {
+     MeshObj &node = *ni2;
+     if (!GetAttr(node).is_locally_owned()) continue;
+     num_owned_nodes++;
+   }
+   meshCXXp->numOwnedNodes=num_owned_nodes;
+
+   // Calc and set the number of owned elements
+   int num_owned_elems=0;
+   Mesh::iterator ei = meshp->elem_begin(), ee = meshp->elem_end();
+   for (; ei != ee; ++ei) {
+     MeshObj &elem = *ei;
+     if (!GetAttr(elem).is_locally_owned()) continue;
+     num_owned_elems++;
+   }   
+   meshCXXp->numOwnedElements=num_owned_elems;
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+   return meshCXXp;
+} // MeshCXX::createFromFile
+  
 
   int MeshCXX::destroy(MeshCXX **meshpp) {
     int localrc;
