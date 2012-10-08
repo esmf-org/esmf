@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.277 2012/10/05 00:04:09 peggyli Exp $
+! $Id: ESMF_Grid.F90,v 1.278 2012/10/08 19:57:43 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -308,7 +308,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.277 2012/10/05 00:04:09 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.278 2012/10/08 19:57:43 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5381,7 +5381,7 @@ subroutine pack_and_send_float(vm, bufsize, recvPets, rootPet, buffer, &
     outbuffer(:, lbnd(2)+i-1) = buffer((i-1)*bufsize(1)+1 : (i-1)*bufsize(1)+xdim)
   enddo
   allocate(sendbuf(dims(1)*bufsize(2)))
-  start=dims(1)
+  start=xdim
   do k = 1, recvPets-1
     if (k>1 .and. dims(k) /= dims(k-1)) then
       deallocate(sendbuf)
@@ -5431,7 +5431,7 @@ subroutine pack_and_send_int(vm, bufsize, recvPets, rootPet, buffer, &
   enddo
 
   allocate(sendbuf(dims(1)*bufsize(2)))
-  start=dims(1)
+  start=xdim
   do k = 1, recvPets-1
     if (k>1 .and. dims(k) /= dims(k-1)) then
       deallocate(sendbuf)
@@ -5478,7 +5478,7 @@ subroutine pack_and_send_float2D(vm, bufsize, recvPets, rootPet, buffer, &
   bufsize(2)=ubnd(2)-lbnd(2)+1
   outbuffer = buffer(1:xdim,1:bufsize(2))
   allocate(sendbuf(dims(1)*bufsize(2)))
-  start=dims(1)
+  start=xdim
   do k = 1, recvPets-1
     if (k>1 .and. dims(k) /= dims(k-1)) then
       deallocate(sendbuf)
@@ -5525,7 +5525,7 @@ subroutine pack_and_send_int2D(vm, bufsize, recvPets, rootPet, buffer, &
   bufsize(2) = ubnd(2)-lbnd(2)+1
   outbuffer = buffer(1:xdim,1:bufsize(2))
   allocate(sendbuf(dims(1)*bufsize(2)))
-  start=dims(1)
+  start=xdim
   do k = 1, recvPets-1
     if (k>1 .and. dims(k) /= dims(k-1)) then
       deallocate(sendbuf)
