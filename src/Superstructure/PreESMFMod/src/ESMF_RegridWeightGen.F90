@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.8 2012/09/13 21:57:39 rokuingh Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.9 2012/10/08 23:20:27 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RegridWeightGen"
 
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_RegridWeightGen - Compute a regridding operation
 !
 ! !INTERFACE:
@@ -107,6 +107,22 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 	integer, intent(out), optional         :: rc
 
 ! !DESCRIPTION:
+! This subroutine provides the same function as the {\tt ESMF\_RegridWeightGen} application
+! described in Section~\ref{sec:ESMF_RegridWeightGen}.  It takes two grid files in NetCDF format and writes out an 
+! interpolation weight file also in NetCDF format.  The interpolation weights can be generated with the
+! bilinar, patch, or first order conservative methods.  The grid files can be in the SCRIP format~\ref{sec:fileformat:scrip}, the native
+! ESMF format for an unstructured grid~\ref{sec:fileformat:esmf}, the GRIDSPEC Tile grid file following the CF metadata
+! convention~\ref{sec:fileformat:gridspec}, or the proposed CF Unstructured grid (UGRID) format~\ref{sec:fileformat:ugrid}.  
+! The weight file is the same format as is output by SCRIP~\ref{sec:weightfileformat}.  
+!
+! The optional arguments allow users to specify various options while doing the regrid, such as which pole option to use,
+! whether to use user-specified area in the conservative regridding, or should ESMF generate masks using a given 
+! variable's missing value.  There are also optional arguments specfic to a certain type of the grid file.  
+! All the option arguments are similar to the command line arguments for the {\tt ESMF\_RegridWeightGen} application~\ref{sec:regridusage}.
+! The acceptable values and the default value for the optional arguments are listed below.
+
+! 
+! The arguments are:
 !   \begin{description}
 !   \item [srcFile]
 !     The source grid file name.
@@ -200,7 +216,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
-!EOPI
+!EOP
 
       
       type(ESMF_RegridMethod_Flag) :: localRegridMethod
@@ -503,7 +519,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
       if (PetNo == 0) then
         if (localSrcFileType == ESMF_FILEFORMAT_SCRIP) then
 	    call ESMF_ScripInq(srcfile, grid_rank= srcrank, grid_dims=srcdims, rc=localrc)
-	   if (localVerboseFlag .and. rc /= ESMF_SUCCESS) then 
+	   if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
              write(*,*)
 	     print *, 'ERROR: Unable to get dimension information from:', srcfile
            endif
@@ -522,7 +538,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 	   else
 	      call ESMF_GridspecInq(srcfile, srcrank, srcdims, rc=localrc)
  	   endif
-	   if (localVerboseFlag .and. rc /= ESMF_SUCCESS) then 
+	   if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
              write(*,*)
 	     print *, 'ERROR: Unable to get dimension information from:', srcfile
            endif
@@ -536,7 +552,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
         endif
         if (dstFileType == ESMF_FILEFORMAT_SCRIP) then
 	   call ESMF_ScripInq(dstfile, grid_rank=dstrank, grid_dims=dstdims, rc=localrc)
-	   if (localVerboseFlag .and. rc /= ESMF_SUCCESS) then 
+	   if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
              write(*,*)
 	     print *, 'ERROR: Unable to get dimension information from:', dstfile
            endif
@@ -555,7 +571,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 	   else
 	      call ESMF_GridspecInq(dstfile, dstrank, dstdims, rc=localrc)
 	   endif 
-	   if (localVerboseFlag .and. rc /= ESMF_SUCCESS) then 
+	   if (localVerboseFlag .and. localrc /= ESMF_SUCCESS) then 
              write(*,*)
 	     print *, 'ERROR: Unable to get dimension information from:', dstfile
            endif
