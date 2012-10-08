@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh.C,v 1.9 2012/01/06 20:17:51 svasquez Exp $
+// $Id: ESMCI_Mesh.C,v 1.10 2012/10/08 23:46:08 jcjacob Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
+#include "ESMCI_Macros.h"
 #include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/ESMCI_MeshField.h>
 #include <Mesh/include/ESMCI_MeshOBjConn.h>
@@ -18,16 +19,34 @@
 #include <Mesh/include/ESMCI_ParEnv.h>
 #include <Mesh/include/ESMCI_GlobalIds.h>
 
+// LogErr headers
+#include "ESMCI_LogErr.h"                  // for LogErr
+#include "ESMF_LogMacros.inc"             // for LogErr
+
 #include <bitset>
 #include <cstdio>
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Mesh.C,v 1.9 2012/01/06 20:17:51 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_Mesh.C,v 1.10 2012/10/08 23:46:08 jcjacob Exp $";
 //-----------------------------------------------------------------------------
 
 //#define CRE_DEBUG
+
+extern "C" {
+  void FTN_X(f_esmf_meshcreatefromfile)(ESMCI::Mesh **meshp, 
+					char *filename, int *fileTypeFlag, 
+ 					int *convert3D, int *c3dpresent,
+ 					int *convertToDual, int *ctodpresent,
+ 					int *addUserArea, int *auapresent,
+					char *meshname, int *mnpresent,
+ 					int *addMask, int *ampresent,
+ 					char *varname, int *vnpresent,
+					int *rc,
+					int len_filename, int len_meshname,
+					int len_varname);
+}
 
 namespace ESMCI {
 
@@ -45,6 +64,53 @@ committed(false)
 }
 
 Mesh::~Mesh() {
+}
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Mesh::createfromfile()"
+Mesh *Mesh::createfromfile(char *filename, int fileTypeFlag, 
+			   int *convert3D, 
+			   int *convertToDual,
+			   int *addUserArea,
+			   char *meshname,
+			   int *addMask,
+			   char *varname,
+			   int *rc) {
+
+    // Initialize return code. Assume routine not implemented
+    int localrc = ESMC_RC_NOT_IMPL;
+    if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+  
+    // handle the optional arguments
+    int c3dpresent, ctodpresent, auapresent, mnpresent, ampresent, vnpresent;
+    c3dpresent = convert3D != NULL;
+    ctodpresent = convertToDual != NULL;
+    auapresent = addUserArea != NULL;
+    mnpresent = strlen(meshname) > 0;
+    ampresent = addMask != NULL;
+    vnpresent = strlen(varname) > 0;
+
+    // allocate the mesh object
+    Mesh *mesh;
+
+    FTN_X(f_esmf_meshcreatefromfile)(&mesh, 
+				     filename, &fileTypeFlag, 
+				     convert3D, &c3dpresent,
+				     convertToDual, &ctodpresent,
+				     addUserArea, &auapresent,
+				     meshname, &mnpresent,
+				     addMask, &ampresent,
+				     varname, &vnpresent,
+				     &localrc, strlen(filename),
+				     strlen(meshname), strlen(varname));
+
+    if (rc) *rc = localrc;
+
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+      return ESMC_NULL_POINTER;
+    }
+  
+    return mesh;
 }
 
 void Mesh::assign_new_ids() {
