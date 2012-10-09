@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.78 2012/10/08 22:56:28 peggyli Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.79 2012/10/09 23:37:56 rokuingh Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -39,8 +39,7 @@ It assumes that the source and destination grids are on a sphere and that the co
 the files are latitude and longitude values. The coordinates can either be in degrees or radians (this is indicated by the "units" attribute attached to the value). 
 As is true with many global models, this application currently assumes the latitude and longitude refer to positions on a perfect sphere, as opposed to a more complex 
 and accurate representation of the earth's true shape such as would be used in a GIS system. (ESMF's current user base doesn't require this level of detail in representing the earth's shape, but it could be added in the future if necessary.)  This file based regrid weight generation application 
-is parallel. This application is used in the
-\htmladdnormallink{ESMF\_RegridWeightGenCheck external demo}{http://www.earthsystemmodeling.org/users/code_examples/external_demos/external_demos.shtml}, so that can serve as an example of its use.
+is parallel. 
 
 This application requires the NetCDF libary to read the grid files and to write out the weight files in NetCDF format.  To compile ESMF with
 the NetCDF library, please refer to the "Third Party Libraries" Section in the ESMF User's Guide for more information.
@@ -773,3 +772,8 @@ grid file name.
 The attributes {\tt domain\_b} and {\tt grid\_file\_dst} both indicate the destination grid file name. 
 {\tt CVS\_revision} indicates the version of ESMF containing the application which was used to generate the 
 weight file.  
+
+\subsection{ESMF\_RegridWeightGenCheck}\label{sec:regridweightgencheck}
+
+The ESMF\_RegridWeightGen application is used in the
+\htmladdnormallink{ESMF\_RegridWeightGenCheck external demo}{http://www.earthsystemmodeling.org/users/code_examples/external_demos/external_demos.shtml} to generate interpolation weights.  These weights are then tested by using them for a regridding operation and then comparing them against an analytic function on the destination grid.  This external demo is also used to regression test ESMF regridding, and it is run nightly on over 60 combinations of structured and unstructured, regional and global grids with each of the available regridding methods.
