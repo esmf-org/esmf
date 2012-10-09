@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh.h,v 1.10 2012/01/06 20:17:47 svasquez Exp $
+// $Id: ESMCI_Mesh.h,v 1.11 2012/10/09 00:23:58 jcjacob Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -42,6 +42,10 @@ friend void LoadExMesh(MeshDB &mesh, const std::string &filename,int);
 friend void ReadMesh(Mesh&,const std::string&, bool,int);
 Mesh();
 ~Mesh();
+static Mesh *createfromfile(char *filename, int fileTypeFlag, int *convert3D, 
+			    int *convertToDual, int *addUserArea, 
+			    char *meshname, int *addMask, char *varname, 
+			    int *rc);
 
 /**
  * Sets the mesh in 'stone'.  Builds the field data storage
