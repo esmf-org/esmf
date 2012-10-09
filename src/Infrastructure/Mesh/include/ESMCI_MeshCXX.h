@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshCXX.h,v 1.18 2012/04/12 18:33:30 oehmke Exp $
+// $Id: ESMCI_MeshCXX.h,v 1.19 2012/10/09 00:25:10 jcjacob Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -26,6 +26,8 @@ namespace ESMCI {
     ~MeshCXX();
 
     static MeshCXX* create(int, int, int*);
+    static MeshCXX* createFromFile(char *, int, int *, int *, int *, 
+				   char *, int *, char *, int *);
     static int destroy(MeshCXX **);
 
     int addElements(int, int*, int*, int*, int*, double *);
