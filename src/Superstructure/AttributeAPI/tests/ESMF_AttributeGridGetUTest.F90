@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridGetUTest.F90,v 1.11 2012/10/03 18:15:30 rokuingh Exp $
+! $Id: ESMF_AttributeGridGetUTest.F90,v 1.12 2012/10/09 21:34:38 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.11 2012/10/03 18:15:30 rokuingh Exp $'
+  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.12 2012/10/09 21:34:38 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -61,6 +61,9 @@ program ESMF_AttributeGridGetUTest
 
   integer                :: nx, ny
   real(ESMF_KIND_R8)     :: dx, dy
+  real(ESMF_KIND_R8)     :: xcoords(100), ycoords(100)
+
+  character(ESMF_MAXSTR),dimension(3) :: inputList 
 
 #ifdef ESMF_TESTEXHAUSTIVE
 
@@ -75,10 +78,7 @@ program ESMF_AttributeGridGetUTest
   integer(ESMF_KIND_I4)  :: computationalLBound(2), computationalUBound(2), computationalCount(2)
   integer(ESMF_KIND_I4)  :: totalLBound(2), totalUBound(2), totalCount(2)
   logical                :: isLBound(2), isUBound(2)
-  real(ESMF_KIND_R8)     :: xcoords(100), ycoords(100)
   real(ESMF_KIND_R4)     :: xcoordsR4(100), ycoordsR4(100)
-
-  character(ESMF_MAXSTR),dimension(3) :: inputList 
 #endif
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
