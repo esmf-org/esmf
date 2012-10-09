@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.53 2012/08/14 21:08:31 rokuingh Exp $ 
+# $Id: makefile,v 1.54 2012/10/09 22:41:49 theurich Exp $ 
 
 ALL: doc
 
@@ -22,7 +22,7 @@ HTMLFILES =	${ESMC_DOCDIR}/ESMF_refdoc \
 		${ESMC_DOCDIR}/ESMC_crefdoc \
 		${ESMC_DOCDIR}/ESMF_usrdoc
 
-TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/demo/coupled_flow:" 
+TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):"
 
 # Files that a doc depends on.  Do not list the the ctex file !  
 # The ctex file is listed in the rule found in the build/common file.
