@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.28 2012/04/12 18:33:31 oehmke Exp $
+// $Id: ESMC_Mesh.C,v 1.29 2012/10/09 00:32:48 jcjacob Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Mesh.C,v 1.28 2012/04/12 18:33:31 oehmke Exp $";
+ static const char *const version = "$Id: ESMC_Mesh.C,v 1.29 2012/10/09 00:32:48 jcjacob Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -62,6 +62,36 @@ ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc){
 }
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshCreateFromFile()"
+ESMC_Mesh ESMC_MeshCreateFromFile(char *filename, int fileTypeFlag, 
+				  int *convert3D, 
+				  int *convertToDual,
+				  int *addUserArea,
+				  char *meshname,
+				  int *addMask,
+				  char *varname,
+				  int *rc) {
+  // Initialize return code. Assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;
+
+  if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
+  // Init Mesh
+  ESMC_Mesh mesh;
+  mesh.ptr = NULL;
+
+  // Call into ESMCI method
+  mesh.ptr = (void *)MeshCXX::createFromFile(filename, fileTypeFlag, convert3D, convertToDual, addUserArea, meshname, addMask, varname, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+    return mesh; // bail out
+
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+  return mesh;
+}
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
