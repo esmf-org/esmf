@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.53 2012/01/06 20:15:45 svasquez Exp $
+% $Id: Attribute_pack.tex,v 1.53.4.1 2012/10/09 16:13:50 ksaint Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -85,6 +85,8 @@ There are many attributes that are used to describe components. There are curren
 \begin{itemize}
     \item Convention: CIM
     \item Purpose: Model Component Simulation Description
+    \item Version: CIM 1.5 
+    \item URL: \htmladdnormallink{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}
     \item Includes:
     \begin{itemize}
        \item CIM Platform
@@ -107,29 +109,29 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{tabular}{|p{7cm}|p{5cm}|p{15mm}|}
+\begin{tabular}{|p{7cm}|p{5cm}|p{15mm}|p{15mm}|}
      \hline\hline
-     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
-     {\tt Description} & A multi-line description of the component. & N/A \\
-     {\tt LongName} & A version of the component name with all acronyms spelled out. & N/A\\
-     {\tt MetadataVersion***} & The version number of the simulation metadata. & N/A \\ 
-     {\tt ModelType*} & A short string describing the discipline of a model component. & Advection, Aerosol3D-Sources etc.\\
-     {\tt PreviousVersion**} & Name of the previous version of a model or model component. & N/A\\ 
-     {\tt PreviousVersionDescription**} &  A short note about the previous version of the model or model component. & N/A \\ 
-     {\tt ReleaseDate} & The date a model component was issued. & N/A \\
-     {\tt ShortName*} & A version of the component name that contains acronyms. & N/A \\
-     {\tt SimulationDuration} & The length of time a simulation runs. & N/A \\
-     {\tt SimulationEndDate} & The date in simulated time of the end of a model simulation. & N/A\\ 
-     {\tt SimulationEnsembleID} & The reference name or number of the ensemble to which a simulation belongs. & N/A\\ 
-     {\tt SimulationLongName} & The name of the simulation with any acronyms spelled out. & N/A \\ 
-     {\tt SimulationNumberOfProcessingElements} & The number of PEs used in the simulation. & N/A \\ 
-     {\tt SimulationProjectName} & A campaign, such as a model intercomparison project, that may involve multiple groups and experiments. & N/A \\ 
-     {\tt SimulationRationale} & The reason for performing a simulation. & N/A\\
-     {\tt SimulationShortName} & The name of the simulation. & N/A \\
-     {\tt SimulationStartDate*} & The date in simulated time of the start of a model simulation. & N/A\\ 
-     {\tt URL} & A URL associated with a model component. & N/A \\
-     {\tt Version} & Version number of the component. & N/A \\
+     {\tt Description} & A multi-line description of the component. & N/A & software:SoftwareComponent:description \\
+     {\tt LongName} & A version of the component name with all acronyms spelled out. & N/A & software:SoftwareComponent:longName \\
+     {\tt MetadataVersion***} & The version number of the simulation metadata. & N/A & software:modelComponent:metadataVersion \\ 
+     {\tt ModelType*} & A short string describing the discipline of a model component. & Advection, Aerosol3D-Sources etc. & software:ModelComponent:type \\
+     {\tt PreviousVersion**} & Name of the previous version of a model or model component. & N/A & shared:Reference:name \\ 
+     {\tt PreviousVersionDescription**} &  A short note about the previous version of the model or model component. & N/A & shared:Relationship:description \\ 
+     {\tt ReleaseDate} & The date a model component was issued. & N/A & software:SoftwareComponent:releaseDate \\
+     {\tt ShortName*} & A version of the component name that contains acronyms. & N/A & software:SoftwareComponent:shortName \\
+     {\tt SimulationDuration} & The length of time a simulation runs. & N/A & activity:SimulationRun:dateRange \\
+     {\tt SimulationEndDate} & The date in simulated time of the end of a model simulation. & N/A & activity:SimulationRun:dateRange \\ 
+     {\tt SimulationEnsembleID} & The reference name or number of the ensemble to which a simulation belongs. & N/A & activity:EnsembleMember:ensembleMemberID \\ 
+     {\tt SimulationLongName} & The name of the simulation with any acronyms spelled out. & N/A & activity:NumericalActivity:longName \\ 
+     {\tt SimulationNumberOfProcessingElements} & The number of PEs used in the simulation. & N/A & software:Parallelization:processes \\ 
+     {\tt SimulationProjectName} & A campaign, such as a model intercomparison project, that may involve multiple groups and experiments. & N/A & activity:Activity:project \\ 
+     {\tt SimulationRationale} & The reason for performing a simulation. & N/A  & activity:Activity:rationale \\
+     {\tt SimulationShortName} & The name of the simulation. & N/A & activity:NumericalActivity:shortName \\
+     {\tt SimulationStartDate*} & The date in simulated time of the start of a model simulation. & N/A & activity:SimulationRun:dateRange \\ 
+     {\tt URL} & A URL associated with a model component. & N/A & shared:CI_OnlineResource:linkage \\
+     {\tt Version} & Version number of the component. & N/A  & appended to software:SoftwareComponent:shortName \\
      \hline\hline
 \end{tabular}
 \linebreak
@@ -144,6 +146,8 @@ There are many attributes that are used to describe components. There are curren
 \begin{itemize}
     \item Convention: CIM
     \item Purpose: Platform Description
+    \item Version: CIM 1.5 
+    \item URL: \htmladdnormallink{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}
     \item Output Options:
     \begin{itemize}
        \item CIM XML 
@@ -151,21 +155,21 @@ There are many attributes that are used to describe components. There are curren
     \item Description: This package describes the platform a particular simulation is run on. It must be created in conjunction with the CIM Main Package (see above). This package is nested within the CIM Main Package (above); see the description in Section \ref{sec:AttPackNesting}.
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|p{15mm}|}
      \hline\hline
-     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
-     {\tt CompilerName**} & The brand of the software that takes source code and turns it into an executable.& Absoft, Default, Intel, Lahey, NAG, Pathscale, PGI, PGIGCC, XLF, XLFGCC\\
-     {\tt CompilerVersion**} & The specific configuration value of the software used to take source code and turn it into executable code. & N/A \\
-     {\tt MachineCoresPerProcessor} & The number of sub-divided elements or mini-chips on a computer chip. &  N/A\\
-     {\tt MachineDescription} & A short note about the machine. & N/A \\
-     {\tt MachineInterconnectType} & The technology used to associate each node in a supercomputer with every other node. & Cray Interconnect, Fat Tree, Gigabit Ethernet, Infiniband, Mixed, Myrinet, Numalink, Quadrics, SP Switch\\
-     {\tt MachineMaximumProcessors} & The highest number of computer chips on a computer system. & N/A\\
-     {\tt MachineName*} & The name given to a computer by its system administrators. This is not the brand name of the system.& N/A \\
-     {\tt MachineOperatingSystem} & The software that is responsible for the management and coordination of activities and the sharing of resources of a computer. & Aix, Darwin, Irix64, Linux, SUNOS, Unicos\\
-     {\tt MachineProcessorType} & The type of computer chip used in a particular computer platform. & Altix, AMD x86-64, Bluegene, G4, G5, Intel EM64T, Intel IA-64, Itanium, NEC, Opteron, Origin3800, Pentium 3, Pentium 4, SP, SPARC, X1, Xeon, XT3-4, ZX6000\\
-     {\tt MachineSystem} & The type of computer system (e.g. vector, parallel, cluster, etc.).& Beowulf, Parallel, Vector \\
-     {\tt MachineVendor} & The brand name of a computer system. & ACS, Action, Appro International, Bull SA, Cray Inc, Dalco AG Switzerland, Dawning, Dell, Fujitsu, Hitachi, HP, IMB, Intel, Koi Computers, Lenovo, Mac, NEC, NEC SUN, NUDT, PC, Pyramid Computer, Raytheon-Aspen Systems, Self Made, SGI, Sun Microsystems, T-platorms\\
+     {\tt CompilerName**} & The brand of the software that takes source code and turns it into an executable.& Absoft, Default, Intel, Lahey, NAG, Pathscale, PGI, PGIGCC, XLF, XLFGCC & shared:Compiler:compilerName \\
+     {\tt CompilerVersion**} & The specific configuration value of the software used to take source code and turn it into executable code. & N/A & shared:Compiler:compilerVersion \\
+     {\tt MachineCoresPerProcessor} & The number of sub-divided elements or mini-chips on a computer chip. &  N/A & shared:Machine:machineCoresPerProcessor \\
+     {\tt MachineDescription} & A short note about the machine. & N/A & shared:Machine:machineDescription \\
+     {\tt MachineInterconnectType} & The technology used to associate each node in a supercomputer with every other node. & Cray Interconnect, Fat Tree, Gigabit Ethernet, Infiniband, Mixed, Myrinet, Numalink, Quadrics, SP Switch & shared:Machine:machineInterconnect \\
+     {\tt MachineMaximumProcessors} & The highest number of computer chips on a computer system. & N/A & shared:Machine:machineMaximumProcessors \\
+     {\tt MachineName*} & The name given to a computer by its system administrators. This is not the brand name of the system.& N/A & shared:Machine:machineName \\
+     {\tt MachineOperatingSystem} & The software that is responsible for the management and coordination of activities and the sharing of resources of a computer. & Aix, Darwin, Irix64, Linux, SUNOS, Unicos & shared:Machine:machineOperatingSystem \\
+     {\tt MachineProcessorType} & The type of computer chip used in a particular computer platform. & Altix, AMD x86-64, Bluegene, G4, G5, Intel EM64T, Intel IA-64, Itanium, NEC, Opteron, Origin3800, Pentium 3, Pentium 4, SP, SPARC, X1, Xeon, XT3-4, ZX6000 & shared:Machine:machineProcessorType \\
+     {\tt MachineSystem} & The type of computer system (e.g. vector, parallel, cluster, etc.).& Beowulf, Parallel, Vector & shared:Machine:machineSystem \\
+     {\tt MachineVendor} & The brand name of a computer system. & ACS, Action, Appro International, Bull SA, Cray Inc, Dalco AG Switzerland, Dawning, Dell, Fujitsu, Hitachi, HP, IMB, Intel, Koi Computers, Lenovo, Mac, NEC, NEC SUN, NUDT, PC, Pyramid Computer, Raytheon-Aspen Systems, Self Made, SGI, Sun Microsystems, T-platorms & shared:Machine:machineVendor \\
      \hline\hline
 \end{tabular}
 \linebreak
@@ -188,17 +192,17 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|p{15mm}|}
      \hline\hline
-     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
-     {\tt Abbreviation} & The abbreviation of an individual or organization associated with a model component or simulation. & N/A \\
-     {\tt EmailAddress} & The email address that others can use to ask questions about a model component. & N/A \\
-     {\tt Name} & The name of an author, contact, funder, centre, or principal investigator. & N/A \\
-     {\tt NameType} & The type of entity that Name references. & Individual, Organization, Position \\
-     {\tt PhysicalAddress} & The address of the person designated to provide information about a model component. & N/A \\
-     {\tt ResponsiblePartyRole*} & A flag to define the role of the Responsible Party. & Author, PI, Contact, Center, Funder \\
-     {\tt URL} & A URL of an individual or organization. & N/A \\
+     {\tt Abbreviation} & The abbreviation of an individual or organization associated with a model component or simulation. & N/A & shared:ResponsibleParty:abbreviation \\
+     {\tt EmailAddress} & The email address that others can use to ask questions about a model component. & N/A & shared:CI_Address:electronicMailAddress \\
+     {\tt Name} & The name of an author, contact, funder, centre, or principal investigator. & N/A & shared:CI_ResponsibleParty:individualName, shared:CI_ResponsibleParty:organisationName, shared:CI_ResponsibleParty:positionName (depending on NameType value) \\
+     {\tt NameType} & The type of entity that Name references. & Individual, Organization, Position & Not part of CIM; used to determine which CIM field to use for Name \\
+     {\tt PhysicalAddress} & The address of the person designated to provide information about a model component. & N/A & shared:CI_Address:deliveryPoint \\
+     {\tt ResponsiblePartyRole*} & A flag to define the role of the Responsible Party. & Author, PI, Contact, Center, Funder & shared:CI_ResponsibleParty:role \\
+     {\tt URL} & A URL of an individual or organization. & N/A & shared:CI_OnlineResource:linkage \\
      \hline\hline
 \end{tabular}
 \linebreak
@@ -218,15 +222,16 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|p{15mm}|}
      \hline\hline
-     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
-     {\tt Date*} & The date of the citation. & N/A\\
-     {\tt DOI} & The assigned Digital Object Identifier (DOI) of the citation. & N/A\\
-     {\tt LongTitle} & The text of the citation or pointer (e.g. URL) that further describes a model component or simulation. & N/A\\
-     {\tt PresentationForm} & A description of the type of citation. & documentDigital, documentHardcopy, imageDigital, imageHardcopy, mapDigital, mapHardcopy, modelDigital, modelHardcopy, profileDigital, profileHardcopy, tableDigital, tableHardcopy, videoDigital, videoHardcopy\\
-     {\tt ShortTitle*} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & N/A \\     {\tt URL} & Website associated with the citation. & N/A\\
+     {\tt Date*} & The date of the citation. & N/A & shared:CI_Citation:Date \\
+     {\tt DOI} & The assigned Digital Object Identifier (DOI) of the citation. & N/A & shared:CI_Citation:otherCitationDetails \\
+     {\tt LongTitle} & The text of the citation or pointer (e.g. URL) that further describes a model component or simulation. & N/A & shared:CI_Citation:collectiveTitle \\
+     {\tt PresentationForm} & A description of the type of citation. & documentDigital, documentHardcopy, imageDigital, imageHardcopy, mapDigital, mapHardcopy, modelDigital, modelHardcopy, profileDigital, profileHardcopy, tableDigital, tableHardcopy, videoDigital, videoHardcopy & shared:CI_Citation:presentationForm \\
+     {\tt ShortTitle*} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & N/A & shared:CI_Citation:title \\
+     {\tt URL} & Website associated with the citation. & N/A & appended to shared:CI_Citation:collectiveTitle \\
      \hline\hline
 \end{tabular}
 \linebreak
@@ -239,19 +244,44 @@ There are many attributes that are used to describe components. There are curren
 \begin{itemize}
     \item Convention: CIM
     \item Purpose: Scientific Properties Description
+    \item Version: CIM 1.5 
+    \item URL: \htmladdnormallink{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}
     \item Output Options: 
     \begin{itemize}
         \item CIM XML
     \end{itemize}  
-    \item Description: This package is used to describe the scientific properties of a component.  The names and values of these properties are part of controlled vocabularies maintained by \htmladdnormallink{METAFOR}{http://metaforclimate.eu/}.  One or more values can be set (via an array) for a property name.
+    \item Description: 
+    \begin{itemize}
+\item This package is used to describe the scientific properties of a component.  The names and values of these properties are part of controlled vocabularies; the recommended version of the controlled vocabulary in the timeframe of this ESMF release is located in a set of mindmap files, located \htmladdnormallink{here}{http://metaforclimate.eu/trac/browser?order=name\#cmip5q/tags/version-1.3/trunk/cmip5q/cmip5q/data/mindmaps}.  This is the controlled vocabulary that was used for the \htmladdnormallink{5th Coupled Model Intercomparison Project}{http://q.cmip5.ceda.ac.uk/}.  One or more values can be set (via an array) for a property name.
+
+\item A system was set up that enabled ESMF Attribute outputs to be ingested
+and displayed automatically in the Earth System Grid (ESG) gateway.  Scientific
+properties were displayed hierarchically, according to the Component with 
+which they were associated.  To specify this component hierarchy for a given 
+scientific property, it was necessary to prepend the virtual component name 
+(or hierarchy of component names) to the scientific property name.  An example 
+of this is shown here:
+
+The AtmosAdvection Component has a scientific property named: TracersSchemeName
+AtmosAdvection is a sub-component of the AtmosDynamicalCore component, which 
+is a sub-component of Atmosphere.  Therefore, the name to use for this
+Scientific Property is: AtmosphereAtmosDynamicalCoreAdmosAdvectionTracersSchemeName.
+
+\item This approach is being changed for future releases of ESMF.  Instead of
+prepending the component hierarchy to the property name, you will be able to 
+link scientific properties to a component, even if they are not represented 
+as ESMF Gridded Components.  This will mean that there will be some 
+straightforward changes to the Attribute interfaces and the attribute names
+for scientific properties will be directly extracted from the CIM controlled
+vocabularies.
+    \end{itemize}  
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|p{15mm}|}
      \hline\hline
-     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
-     {\tt <Scientific property name>} & <METAFOR definition>. & Names and values per METAFOR \\
-     {\tt ...} & ... & ... \\
+     {\tt <Scientific property name>} & <METAFOR definition>. & <Link to spreadsheet containing current Scientific Property Names> & software:SoftwareComponent:scientificProperties \\
      \hline\hline
 \end{tabular}
 
@@ -262,6 +292,8 @@ There are many attributes that are used to describe components. There are curren
 \begin{itemize}
     \item Convention: CIM
     \item Purpose: General Component Properties Description
+    \item Version: CIM 1.5 
+    \item URL: \htmladdnormallink{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}
     \item Output Options: 
     \begin{itemize}
         \item CIM XML
@@ -269,12 +301,11 @@ There are many attributes that are used to describe components. There are curren
     \item Description: This package is used to specify any number of custom, user-defined attributes of a component and have them output in valid CIM XML format.  This differs from the scientific properties package above in that the names and values are custom, not part of any controlled vocabulary.  It also differs from a custom attribute package (see Section \ref{sec:CustomAttPacks}) in that this package has a standard convention and purpose, which is used to control the output of the user-defined attributes in standard CIM XML format.  One or more values can be set (via an array) for an attribute name.
 \end{itemize}
 
-\begin{tabular}{|p{7cm}|p{5cm}|p{15mm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|p{15mm}|}
      \hline\hline
-     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
-     {\tt <User-defined name>} & <User-defined definition>. & N/A \\
-     {\tt ...} & ... & N/A \\
+     {\tt <User-defined name>} & <User-defined definition>. & N/A & software:SoftwareComponent:componentProperties \\
      \hline\hline
 \end{tabular}
 
@@ -333,6 +364,8 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
 \begin{itemize}
     \item Convention: CIM
     \item Purpose: Inputs Description
+    \item Version: CIM 1.5 
+    \item URL: \htmladdnormallink{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}
     \item Includes: 
     \begin{itemize}
         \item ESG (or ESMF) General
@@ -346,19 +379,19 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     \item Description: This package is used to describe a simulation and the input (initial and boundary) conditions used in that simulation. It is also used to describe any ancillary data sets that contain input condition variables. This package should not be used to describe the variables in an unconfigured model component. A pre-defined Attribute package for that case will be implemented in a future release of ESMF.  This package nests the ESG (or ESMF) General, CF Extended, and CF General Field packages (below) within it; this is described in Section \ref{sec:AttPackNesting}.  The attribute values within these ESG and CF nested packages currently appear in the Component Properties section of the CIM output file.  A separate Component Properties package may be developed for this purpose in a future ESMF release.
 \end{itemize}
 
-\begin{tabular}{|p{6cm}|p{5cm}|p{3cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|p{15mm}|}
     \hline\hline
-    {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
+    {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
     \hline\hline
-    {\tt CouplingPurpose*} & The form of the input condition (e.g. initial condition or boundary condition). &  Ancillary, Boundary, Initial\\
-    {\tt CouplingSource*} & The component the input condition is coming from. & N/A \\ 
-    {\tt CouplingTarget*} & The component the input condition is going to. & N/A \\ 
-    {\tt Description} &  A multi-line description of the input. & N/A \\ 
-    {\tt Frequency} & The frequency (e.g. 2 months or 5 days) that a field from one component is input to another. & n Seconds, n Minutes, n Hours, n Days, n Months, n Years, n Decades, n Centuries\\ 
-    {\tt SpatialRegriddingMethod} & Method used to interpolate a field from one grid (source grid) to another (target grid). & Linear, Near-Neighbor, Cubic, Conservative-First-Order, Conservative-Second-Order, Conservative, Non-Conservative\\ 
-    {\tt SpatialRegriddingDimension} & Dimension of the regridding method. & 1D, 2D, 3D\\ 
-    {\tt Technique} & The software package or mechanism used to transfer and transform data between model components. & CCSM Flux Coupler, ESMF, Files, FMS, MCT, OASIS3, Shared\\ 
-    {\tt TimeTransformationType} & Temporal transformation performed on the input field before or after regridding onto the target grid.& Exact, None, Time Accumulation, Time Average, Time Interpolation\\ 
+    {\tt CouplingPurpose*} & The form of the input condition (e.g. initial condition or boundary condition). &  Ancillary, Boundary, Initial & software:Coupling:purpose \\
+    {\tt CouplingSource*} & The component the input condition is coming from. & N/A & software:Coupling:couplingSource \\ 
+    {\tt CouplingTarget*} & The component the input condition is going to. & N/A & software:Coupling:couplingTarget \\ 
+    {\tt Description} &  A multi-line description of the input. & N/A & software:Coupling:description \\ 
+    {\tt Frequency} & The frequency (e.g. 2 months or 5 days) that a field from one component is input to another. & n Seconds, n Minutes, n Hours, n Days, n Months, n Years, n Decades, n Centuries & software:Timing:rate \\ 
+    {\tt SpatialRegriddingMethod} & Method used to interpolate a field from one grid (source grid) to another (target grid). & Linear, Near-Neighbor, Cubic, Conservative-First-Order, Conservative-Second-Order, Conservative, Non-Conservative & software:SpatialRegridding:spatialRegriddingStandardMethod \\ 
+    {\tt SpatialRegriddingDimension} & Dimension of the regridding method. & 1D, 2D, 3D & software:SpatialRegridding:spatialRegriddingDimension \\ 
+    {\tt Technique} & The software package or mechanism used to transfer and transform data between model components. & CCSM Flux Coupler, ESMF, Files, FMS, MCT, OASIS3, Shared & N/A \\ 
+    {\tt TimeTransformationType} & Temporal transformation performed on the input field before or after regridding onto the target grid.& Exact, None, Time Accumulation, Time Average, Time Interpolation & software:TimeTransformation:mappingType \\ 
     \hline\hline
 \end{tabular}
 \linebreak

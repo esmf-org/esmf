@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.54 2012/01/06 20:15:45 svasquez Exp $
+% $Id: Attribute_desc.tex,v 1.54.4.1 2012/10/09 16:13:50 ksaint Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -44,6 +44,20 @@ Reading Attribute XML files requires the Xerces C++ library, v3.1.0
 or better.  For more details, see the "ESMF Users Guide", "Building and 
 Installing the ESMF, Third Party Libraries, Xerces".  Writing Attribute XML 
 files is performed with the standard C++ output file stream facility.
+
+\subsubsection{Schemas and Controlled Vocabularies}
+
+There are two pieces to the information stored in Attributes.  One piece
+is the property name and type, and its relation to other properties; this
+is the schema.  The other piece is the range of values that are valid for
+a particular property; this is the controlled vocabulary.  For many
+information models, including the Common Information Model (CIM), these two 
+pieces are managed and versioned separately.
+
+ESMF implements the appropriate schema internally; it translates the Attributes
+as specified in the Attribute Packages into the correct format based on the
+Convention and Purpose specified.  The Controlled Vocabularies, or Attribute
+values, however, are not controlled or validated within ESMF.
 
 \subsubsection{The ESMF approach to Attributes}
 
