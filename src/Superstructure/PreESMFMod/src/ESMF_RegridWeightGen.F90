@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.9 2012/10/08 23:20:27 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.10 2012/10/09 22:41:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -138,7 +138,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 !     {\tt ESMF\_POLEMETHOD\_NONE}, {\tt ESMF\_POLEMETHOD\_NPNTAVG} or {\tt ESMF\_POLEMETHOD\_TEETH}.
 !     The default value varies depending on the regridding method and the grid type and foramt.  
 !   \item [{[poleNPnts]}]
-!     If {\tt poleMethod} is set to {\tt ESMF_POLEMETHOD\_NPNTAVG}, this argument is required to 
+!     If {\tt poleMethod} is set to {\tt ESMF\_POLEMETHOD\_NPNTAVG}, this argument is required to 
 !     specify how many points are used to represent the pole.
 !   \item [{[ignoreUnmappedFlag]}]
 !     If .TRUE., the unmapped destination points will be ignored.  If not 
