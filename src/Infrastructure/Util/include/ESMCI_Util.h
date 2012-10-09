@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.57 2012/10/03 18:29:15 gold2718 Exp $
+// $Id: ESMCI_Util.h,v 1.58 2012/10/09 00:52:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -136,7 +136,7 @@ enum ESMC_ItemOrder_Flag { ESMC_ITEMORDER_ABC=0,
                            ESMC_ITEMORDER_ADDORDER};
 
 // Source term order in the destination sums during SMM
-enum ESMC_TermOrder_Flag { ESMC_TERMORDER_STRICT=0,
+enum ESMC_TermOrder_Flag { ESMC_TERMORDER_SRCSEQ=0,
                            ESMC_TERMORDER_SRCPET,
                            ESMC_TERMORDER_FREE};
 

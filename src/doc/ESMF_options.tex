@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.89 2012/10/04 12:08:39 rokuingh Exp $
+% $Id: ESMF_options.tex,v 1.90 2012/10/09 00:52:20 theurich Exp $
 
 \section{Appendix A:  Master List of Constants}
 \label{const:master}
@@ -623,13 +623,15 @@ The type of this flag is:
 The valid values are:
 \begin{description}
 
-\item [ESMF\_TERMORDER\_STRICT]
+\item [ESMF\_TERMORDER\_SRCSEQ]
          The source terms are in strict ascending order according to
          their source sequence index.
 \item [ESMF\_TERMORDER\_SRCPET]
-         The source terms are ordered first according to their location on 
-         the source side PETs. The term order within each source PET is given 
-         by the source term sequence index.
+         The source terms are first ordered according to their distribution
+         across the source side PETs: for each destination PET the source PET
+         order starts with the localPet and decrements from there, modulo
+         petCount, until all petCount PETs are accounted for. The term order
+         within each source PET is given by the source term sequence index.
 \item [ESMF\_TERMORDER\_FREE]
          There is no prescribed term order. The source terms may be summed in 
          any order that optimizes performance.

@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandleBitForBitEx.F90,v 1.1 2012/10/02 04:06:46 theurich Exp $
+! $Id: ESMF_RHandleBitForBitEx.F90,v 1.2 2012/10/09 00:52:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -23,21 +23,21 @@ program ESMF_RHandleBitForBitEx
   implicit none
   
   ! local variables
-  integer               :: rc, i
+  integer               :: rc, i, iounit, iostat
   integer               :: petCount, localPet
   type(ESMF_VM)         :: vm
   type(ESMF_DistGrid)   :: distgrid
   type(ESMF_Array)      :: srcArray, dstArray
   integer, allocatable  :: indexList(:)
   real(ESMF_KIND_R4), pointer:: farrayPtr(:)
-  real(ESMF_KIND_R4)    :: sumA, sumB
+  real(ESMF_KIND_R4)    :: sumA, sumB, sumC, sumD, sumE, sumCompare
   
   integer               :: smmElementCount
   integer, allocatable  :: factorIndexList(:,:)
   real(ESMF_KIND_R4), allocatable:: factorList(:)
   type(ESMF_RouteHandle):: rh
   
-  integer               :: srcTermProcessing
+  integer               :: srcTermProcessing, pipelineDepth
 
   ! result code
   integer :: finalrc, result
@@ -73,33 +73,90 @@ program ESMF_RHandleBitForBitEx
 !
 ! Bit-for-bit (bfb) reproducibility is at the core of the regression testing
 ! schemes of many scientific model codes. The bfb requirement makes it possible
-! to compare the numerical results of a simulation using standard binary diff
-! tools.
+! to easily compare the numerical results of simulation runs using standard
+! binary diff tools.
 !
 ! While bfb reproducibility is desirable (and often required) for regression
-! testing, it can at the same time prevent otherwise possible performance
-! optimizations. Especially in highly parallelized code, best performance is 
-! often achieved by allowing operations to occur in flexible order. Under the
-! right conditions, however, a change in the order of numerical operations will
-! lead to small numerical differences in the results, and thus break bfb
+! testing, it does, at the same, limit the performance optimization
+! optimizations. Especially in highly parallelized code best performance is 
+! often achieved by allowing operations to occur in a flexible order. Under
+! some conditions, however, a change in the order of numerical operations
+! leads to small numerical differences in the results, breaking bfb
 ! reproducibility.
 !
-! The following discussion uses a very simple numerical example to demonstrate
-! how the order of terms in a three part sum can lead to results that are not
-! bit-for-bit identical.
-! 
+! The following discussion uses very simple numerical examples to demonstrate
+! how the order of terms in a sum can lead to results that are not
+! bit-for-bit identical. The examples use single precision,
+! {\tt ESMF\_KIND\_R4} numbers, but the concepts apply the same
+! to double precision, {\tt ESMF\_KIND\_R8}; only that the decimals, for
+! which bfb differences in the sums occur, are different ones.
+!
+! With {\tt sumA}, {\tt sumB}, {\tt sumC}, {\tt sumD}, and {\tt sumE} all of
+! type {\tt real(ESMF\_KIND\_R4)}, one finds the following bfb differences:
 !EOE
 
 !BOC
-  sumA = (0.5 + 0.1) + 0.1  ! results in 0.700000048
-  sumB = 0.5 + (0.1 + 0.1)  ! results in 0.699999988
+  sumA = (0.5 + 0.1) + 0.1        ! results in 0.700000048
+  sumB = 0.5 + (0.1 + 0.1)        ! results in 0.699999988
+  
+  sumC = 0.5 +  0.2 + 0.1  + 0.1  ! results in 0.900000036
+  sumD = 0.5 + (0.2 + 0.1) + 0.1  ! results in 0.900000036
+  sumE = 0.5 + (0.2 + 0.1 + 0.1)  ! results in 0.899999976
 !EOC
 
-  print *, "sumA = ", sumA
-  print *, "sumB = ", sumB
+  if (localPet == 0) then
+    print *, "sumA = ", sumA
+    print *, "sumB = ", sumB
+    print *, "sumC = ", sumC
+    print *, "sumD = ", sumD
+    print *, "sumE = ", sumE
+  endif
 
+!BOE
+! These differences result from the fact that many decimals (even very simple
+! ones like 0.1 or 0.2) lead to periodic binary floating point numbers.
+! Periodic floating point numbers must be truncated to be represented by a
+! finite number of bits, leading to small rounding errors. Further truncation
+! occurs when the radix point of two numbers must be aligned during
+! floating point arithmetic, resulting in a shift of bits of one of the
+! numbers. This truncation depends on the precise numbers that need to be 
+! aligned. Hence, executing the "same" sum in a different order may lead to 
+! different trunctation steps and consequently in restults that are not
+! bit-for-bit identical.
+!
+! ESMF provides control over the term order in sparse matrix multiplications in
+! order to help users implement their bfb requirement, while at the same time
+! offering performance optimization options. For the purpose of demonstration, a 
+! one-dimensional, arbitrarily distributed source Array is constructed. There
+! are three Array elements on each of the four PETs. Their local storage index,
+! sequence index and data value is as follows:
+!
+! \begin{verbatim}
+!
+!         +-----+-------+----------------+------------+
+!         | PET | index | sequence index | data value |
+!         +-----+-------+----------------+------------+
+!         |  0  |   1   |          1     |     0.5    |
+!         |  0  |   2   |          6     |     0.1    |
+!         |  0  |   3   |          9     |     0.1    |
+!         +-----+-------+----------------+------------+
+!         |  1  |   1   |          4     |     0.5    |
+!         |  1  |   2   |          3     |     0.1    |
+!         |  1  |   3   |         10     |     0.1    |
+!         +-----+-------+----------------+------------+
+!         |  2  |   1   |         11     |     0.5    |
+!         |  2  |   2   |          7     |     0.1    |
+!         |  2  |   3   |          5     |     0.1    |
+!         +-----+-------+----------------+------------+
+!         |  3  |   1   |          8     |     0.1    |
+!         |  3  |   2   |          2     |     0.2    |
+!         |  3  |   3   |         12     |     0.1    |
+!         +-----+-------+----------------+------------+
+!
+! \end{verbatim}
+!EOE
+  
   ! -- srcArray --
-
   allocate(indexList(3))
   if (localPet == 0) then
     indexList(1) = 1
@@ -110,9 +167,9 @@ program ESMF_RHandleBitForBitEx
     indexList(2) = 3
     indexList(3) = 10
   elseif (localPet == 2) then
-    indexList(1) = 5
+    indexList(1) = 11
     indexList(2) = 7
-    indexList(3) = 11
+    indexList(3) = 5
   elseif (localPet == 3) then
     indexList(1) = 8
     indexList(2) = 2
@@ -139,12 +196,11 @@ program ESMF_RHandleBitForBitEx
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   do i=1, 3
-!BOC
     select case (indexList(i))
     case (1)
       farrayPtr(i) = 0.5_ESMF_KIND_R4
     case (2)
-      farrayPtr(i) = 0.1_ESMF_KIND_R4
+      farrayPtr(i) = 0.2_ESMF_KIND_R4
     case (3)
       farrayPtr(i) = 0.1_ESMF_KIND_R4
     case (4)
@@ -156,7 +212,7 @@ program ESMF_RHandleBitForBitEx
     case (7)
       farrayPtr(i) = 0.1_ESMF_KIND_R4    
     case (8)
-      farrayPtr(i) = 0.5_ESMF_KIND_R4    
+      farrayPtr(i) = 0.1_ESMF_KIND_R4    
     case (9)
       farrayPtr(i) = 0.1_ESMF_KIND_R4    
     case (10)
@@ -166,12 +222,27 @@ program ESMF_RHandleBitForBitEx
     case (12)
       farrayPtr(i) = 0.1_ESMF_KIND_R4    
     end select
-!EOC
   enddo
   
   deallocate(indexList)
 
 !  call ESMF_ArrayPrint(srcArray)
+
+  ! ---------------------------------------------------------------------------
+
+!BOE
+! The destination Array consists of only a single element, located on PET 0:
+!
+! \begin{verbatim}
+!
+!         +-----+-------+----------------+------------+
+!         | PET | index | sequence index | data value |
+!         +-----+-------+----------------+------------+
+!         |  0  |   1   |          1     |     n/a    |
+!         +-----+-------+----------------+------------+
+!
+! \end{verbatim}
+!EOE
  
   ! -- dstArray --
 
@@ -202,21 +273,297 @@ program ESMF_RHandleBitForBitEx
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  ! -- sparse matrix --
-    
+  ! ---------------------------------------------------------------------------
+
+  ! -- sparse matrix --    
   smmElementCount = 0
   if (localPet == 0) then
     smmElementCount = 3
   endif
   allocate(factorIndexList(2,smmElementCount), factorList(smmElementCount))
   
-  
+  ! ---------------------------------------------------------------------------
+
+!BOE
+! As a first example consider the following sparse matrix with three entries:
+!EOE
+
   if (localPet == 0) then
-    ! -> factors into dst element 1
-    ! * sum with 3 addends: 0.5 + 0.1 + 0.1
-    ! * addend 1 & 2 are on PET 0, addend 3 is on PET 1
-    ! * due to the arrangement of addends the order is preserved for different
-    !   values of srcTermProcessing
+    !
+    ! Place all src terms on the same PET demonstrating that the src term order
+    ! is then defined by SRCSEQ.
+    !
+    ! -> factors into dst element 1 on PET 0
+    ! * sum with 3 addends (order by src seq. index): 0.5 + 0.1 + 0.1
+    ! * addend 1 is on PET 0
+    ! * addend 2 is on PET 0
+    ! * addend 3 is on PET 0
+    ! All three addends are on the same PET, therefore src seq index order,
+    ! independent of the order in which they are stored in memory on the src Pet
+    ! Also order in which sparse matrix elements are given is irrelevant.
+    ! (1,1)*s[1]Pet0 + (6,1)*s[6]Pet0 + (9,1)*s[9]Pet0  = 
+    !       0.5      +       0.1      +       0.1
+!BOC
+    factorIndexList(1,1) = 1  ! src
+    factorIndexList(2,1) = 1  ! dst
+    factorList(1) = 1.
+    factorIndexList(1,2) = 6  ! src
+    factorIndexList(2,2) = 1  ! dst
+    factorList(2) = 1.
+    factorIndexList(1,3) = 9  ! src
+    factorIndexList(2,3) = 1  ! dst
+    factorList(3) = 1.
+!EOC
+  endif
+  
+!BOE
+! For all bfb considerations, the order in which the sparse matrix entries are
+! specified in {\tt factorIndexList} and {\tt factorList} is completely 
+! irrelevant. Further, it is of no consequence on which PET a sparse 
+! matrix entry is provided.
+!
+! There is one aspect of the sparse matrix format that is relevant to the
+! bfb considerations: When multiple entries for the same (src, dst) pair are
+! present in a sparse matrix definition, the entries are combined into a
+! single (src, dst) entry. In other words, the {\tt factorList} entries are
+! summed up into a single entry. Therefore, even if there had been multiple
+! sparse matrix entries for the same (src, dst) pair, there will only be a
+! single term for this (src, dst) pair in the resulting expression.
+!
+! Going back to the sparse matrix definition above, the {\em canonical} term
+! order is defined by the source sequence indices in ascending order. With
+! {\tt (src,dst)} denoting the sparse matrix factors, and {\tt s(src)} and
+! {\tt d(dst)} denoting source and destination Array elements, respectively,
+! for {\tt src} and {\tt dst} sequence indices, the sum in canonical order is:
+!
+!     d(1) = (1,1)*s(1) + (6,1)*s(6) + (9,1)*s(9)
+!
+! For simplicity, the factors in all of the examples are set to 1, allowing us
+! to drop them in the expressions. This helps focus on the cricital issue -- 
+! term order:
+!
+!     d(1) = s(1) + s(6) + s(9)
+!
+! There are two parameters that affect term order, and therefore bfb
+! reproducibility of the ESMF sparse matrix multiplication (SMM). First there
+! is the {\tt srcTermProcessing} parameter, which controls grouping of source
+! terms. Grouping is a decision that is made during RouteHandle store-time.
+!
+! The second parameter comes into play at execution-time of the precomputed 
+! RouteHandle. It is accessible via the {\tt termorderflag} argument; a typed 
+! flag with the following values:
+! \begin{itemize}
+!   \item {\tt ESMF\_TERMORDER\_SRCSEQ} -- Strictly enforces the canonical order
+!      of the source terms according to the source sequence index. Terms that
+!      are grouped in the RouteHandle at store-time are treated as single 
+!      entities with the sequence index equal to the lowest original sequence
+!      index in the group. 
+!   \item {\tt ESMF\_TERMORDER\_SRCPET} -- The source terms in the sum are 
+!      first arranged according to the relative position of the PET on which 
+!      they reside with respect to the destination PET. Second, the terms
+!      coming from a single PET are sorted in canonical sequence index order.
+!   \item {\tt ESMF\_TERMORDER\_FREE} -- There are no restrictions on the term
+!      order. Terms can be summed in any order, and the order may change between
+!      executions of the same RouteHandle.
+! \end{itemize}
+!
+! The {\tt ESMF\_TERMORDER\_FREE} setting grants greatest flexibility
+! to the RouteHandle execution implementation. It is available for all the 
+! methods that take the {\tt termorderflag} argument. However, since there is
+! no guaranteed source term order, the {\tt ESMF\_TERMORDER\_FREE} option is
+! not suitable for situations that require bfb reproducibility. 
+! 
+! The {\tt ESMF\_TERMORDER\_SRCPET} and {\tt ESMF\_TERMORDER\_SRCSEQ} options
+! implement fixed order schemes suitable for bit-for-bit 
+! reproducibility. The difference is that {\tt ESMF\_TERMORDER\_SRCPET} 
+! ensures a fixed execution-time term order only as long as the number of PETs
+! is not changed. If bfb reproducibility is required even for changing
+! numbers of PETs, then {\tt ESMF\_TERMORDER\_SRCSEQ} is required to enfore
+! a strict canonical term order. However, bfb reproducibility for different 
+! petCounts further requires that the {\tt srcTermProcessing} argument is set
+! to 0 during store-time to prevent petCount dependent term grouping. The 
+! {\tt ESMF\_TERMORDER\_SRCSEQ} option is not generally implemented yet, but
+! will be added if/when bfb reproducibility for different petCounts becomes
+! a requested feature of ESMF.
+!
+! In the following examples the {\tt termorderflag} is consistently set to
+! {\tt ESMF\_TERMORDER\_SRCPET} in order to ensure execution-time
+! reproducibility. At store-time, the {\tt srcTermProcessing} argument is first
+! set to 0, forcing all of the source terms to be sent to the destination PET
+! unmodified.
+!EOE
+
+!BOC
+  ! forced srcTermProcessing
+  srcTermProcessing=0
+  
+  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
+    factorList=factorList, routehandle=rh, &
+    srcTermProcessing=srcTermProcessing, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+!BOC
+  call ESMF_ArraySMM(srcArray, dstArray, routehandle=rh, &
+    termorderflag=ESMF_TERMORDER_SRCPET, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+!BOE
+! Here all of the source elements originate from the same PET (PET 0). This
+! fact, together with the {\tt ESMF\_TERMORDER\_SRCPET} execution-time option,
+! results in the canoncial term order:
+!
+!     d(1) = s(1) + s(6) + s(9) = 0.5 + 0.1 + 0.1
+!
+! This is exactly the same term order that was used above to produce the
+! result stored in {\tt sumA}.
+!EOE
+
+!BOC
+  if (localPet == 0) then
+    print *, "result #1 = ", farrayPtr(1), " expect: ", sumA
+    if (farrayPtr(1) /= sumA) &
+      finalrc = ESMF_FAILURE
+  endif
+!EOC
+
+  call ESMF_ArraySMMRelease(rh, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! ---------------------------------------------------------------------------
+
+!BOE
+! The sequence indices of the source terms are the only relevant aspect in 
+! determining the source term order. Consider, for example, the following 
+! sparse matrix, where again all source terms are located on the same PET 
+! (PET 2):
+!EOE
+
+  if (localPet == 0) then
+    !
+    ! Place all src terms on the same PET demonstrating that the src term order
+    ! is then defined by SRCSEQ.
+    !
+    ! -> factors into dst element 1 on PET 0
+    ! * sum with 3 addends (order by src seq. index): 0.1 + 0.1 + 0.5
+    ! * addend 1 is on PET 2
+    ! * addend 2 is on PET 2
+    ! * addend 3 is on PET 2
+    ! All three addends are on the same PET, therefore src seq index order,
+    ! independent of the order in which they are stored in memory on the src Pet
+    ! Also order in which sparse matrix elements are given is irrelevant.
+    ! (5,1)*s[5]Pet2 + (7,1)*s[7]Pet2 + (11,1)*s[11]Pet2  = 
+    !       0.1      +       0.1      +        0.5
+!BOC
+    factorIndexList(1,1) = 11 ! src
+    factorIndexList(2,1) = 1  ! dst
+    factorList(1) = 1.
+    factorIndexList(1,2) = 5  ! src
+    factorIndexList(2,2) = 1  ! dst
+    factorList(2) = 1.
+    factorIndexList(1,3) = 7  ! src
+    factorIndexList(2,3) = 1  ! dst
+    factorList(3) = 1.
+!EOC
+  endif
+  
+!BOE
+! This time the source term order in memory is not the same
+! as their sequence index order. Specifically, the squence indices of the
+! source terms, in the order they are stored in memory, is 11, 7, 5 (see the
+! source Array diagram above for reference). 
+! Further, as mentioned already, the order of entries in the sparse matrix
+! also have not bearing on the term order in the SMM sums.
+! Then, for the {\tt ESMF\_TERMORDER\_SRCPET} option, and because all source
+! terms are located on the same PET, the resulting source term order is the 
+! canonical one determined by the source term sequence indices alone:
+!
+!     d(1) = s(5) + s(7) + s(11)
+!
+! Filling in the source element data, we find
+! 
+!     d(1) = 0.1 + 0.1 + 0.5,
+!
+! which is expected to be bfb equivalent to the result stored in {\tt sumB}
+! from above.
+!EOE
+
+!BOC
+  ! forced srcTermProcessing
+  srcTermProcessing=0
+  
+  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
+    factorList=factorList, routehandle=rh, &
+    srcTermProcessing=srcTermProcessing, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+!BOC
+  call ESMF_ArraySMM(srcArray, dstArray, routehandle=rh, &
+    termorderflag=ESMF_TERMORDER_SRCPET, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+!BOC
+  if (localPet == 0) then
+    print *, "result #2 = ", farrayPtr(1), " expect: ", sumB
+    if (farrayPtr(1) /= sumB) &
+      finalrc = ESMF_FAILURE
+  endif
+!EOC
+
+  call ESMF_ArraySMMRelease(rh, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! ---------------------------------------------------------------------------
+
+!BOE
+! When the source terms are distributed across multiple PETs, the 
+! {\tt ESMF\_TERMORDER\_SRCPET} option first bundles the terms according to
+! the PET that they are located on. These source term bundles are then arranged
+! in an order that depends on the destination PET: starting with the local PET
+! of the destination, the source term bundles are in descending order of
+! source PET, modulo petCount. The source terms within a source term bundle are
+! in canonical order according to their sequence index.
+!
+! The following sparse matrix demonstrates the effect of the
+! {\tt ESMF\_TERMORDER\_SRCPET} option.
+!EOE
+
+  if (localPet == 0) then
+    !
+    ! Placing src terms on PETs so that SRCSEQ and SRCPET order are identical.
+    !
+    ! -> factors into dst element 1 on PET 0
+    ! * sum with 3 addends (order by src seq. index): 0.5 + 0.1 + 0.1
+    ! * addend 1 is on PET 0
+    ! * addend 2 is on PET 1
+    ! * addend 3 is on PET 2
+    ! The "SRCPET" order of the three addends is given by the cyclic scheme
+    ! src PET scheme, starting at dstPet, going to dstPet-petCount, modulo
+    ! petCount. With that the sum order is this:
+    ! (1,1)*s[1]Pet0 + (7,1)*s[7]Pet2 + (3,1)*s[3]Pet1  = 
+    !       0.5      +       0.1      +       0.1       
+!BOC
     factorIndexList(1,1) = 1  ! src
     factorIndexList(2,1) = 1  ! dst
     factorList(1) = 1.
@@ -226,39 +573,139 @@ program ESMF_RHandleBitForBitEx
     factorIndexList(1,3) = 7  ! src
     factorIndexList(2,3) = 1  ! dst
     factorList(3) = 1.
+!EOC
   endif
   
-  ! -- SMM
+!BOE
+! Here the source terms are located on PETs 0, 1, and 2. Using a [] notion to
+! indicate the source PET of each term, the term order under 
+! {\tt ESMF\_TERMORDER\_SRCPET} is given by:
+!
+!     d(1) = s(1)[0] + s(7)[2] + s(3)[1] = 0.5 + 0.1 + 0.1
+!
+! This is again the same order of terms that was used to produce the result 
+! stored in {\tt sumA} above.
+!EOE
+
+!BOC
+  ! forced srcTermProcessing
   srcTermProcessing=0
-  
+    
   call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
     factorList=factorList, routehandle=rh, &
     srcTermProcessing=srcTermProcessing, rc=rc)
+!EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
     
-  call ESMF_ArraySMM(srcArray, dstArray, routehandle=rh, rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, &
-    file=__FILE__)) &
-    call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
-  if (localPet == 0) then
-    print *, "result #1 = ", farrayPtr(1)
-  endif
-
+!BOC
   call ESMF_ArraySMM(srcArray, dstArray, routehandle=rh, &
     termorderflag=ESMF_TERMORDER_SRCPET, rc=rc)
+!EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
+!BOC
   if (localPet == 0) then
-    print *, "result #2 = ", farrayPtr(1)
+    print *, "result #3 = ", farrayPtr(1), " expect: ", sumA
+    if (farrayPtr(1) /= sumA) &
+      finalrc = ESMF_FAILURE
   endif
+!EOC
+  
+  call ESMF_ArraySMMRelease(rh, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! ---------------------------------------------------------------------------
+
+!BOE
+! In the above example, the fact that the terms were ordered by source PET
+! first, lead to no numerical bfb differences compared to the canoncial source 
+! term order. However, this was purely coincidental in the way the numbers
+! worked out. The following case looks
+! at a situation where the source PET order does lead to a result that shows
+! bfb differences compared to the canonical term order.
+!EOE
+
+  if (localPet == 0) then
+    !
+    ! This time place the src terms across PETs so that SRCPET order results
+    ! in a different order than SRCSEQ - and resulting numerical differences.
+    !
+    ! -> factors into dst element 1 on PET 0
+    ! * sum with 3 addends (order by src seq. index): 0.5 + 0.1 + 0.1
+    ! * addend 1 is on PET 1
+    ! * addend 2 is on PET 2
+    ! * addend 3 is on PET 3
+    ! The "SRCPET" order of the three addends is given by the cyclic scheme
+    ! src PET scheme, starting at dstPet, going to dstPet-petCount, modulo
+    ! petCount. With that the sum order is this:
+    ! (12,1)*s[12]Pet3 + (5,1)*s[5]Pet2 + (4,1)*s[4]Pet1  = 
+    !       0.1        +       0.1      +       0.5      
+!BOC 
+    factorIndexList(1,1) = 4  ! src
+    factorIndexList(2,1) = 1  ! dst
+    factorList(1) = 1.
+    factorIndexList(1,2) = 5  ! src
+    factorIndexList(2,2) = 1  ! dst
+    factorList(2) = 1.
+    factorIndexList(1,3) = 12 ! src
+    factorIndexList(2,3) = 1  ! dst
+    factorList(3) = 1.
+!EOC
+  endif
+  
+!BOE
+! The canonical source term order of this SMM sum, determined by the source
+! squence indices alone, is:
+!
+!     d(1) = s(4) + s(5) + s(12) = 0.5 + 0.1 + 0.1,
+!
+! which again would lead to a result that is bfb identical to {\tt sumA}. 
+! However, this is not the term order resulting from the
+! {\tt ESMF\_TERMORDER\_SRCPET} option. Under this option the order is given by
+!
+!     d(1) = s(12)[3] + s(5)[2] + s(4)[1] = 0.1 + 0.1 + 0.5,
+!
+! resulting in a sum that is bfb identical to {\tt sumB} instead.
+!EOE
+  
+!BOC
+  ! forced srcTermProcessing
+  srcTermProcessing=0
+  
+  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
+    factorList=factorList, routehandle=rh, &
+    srcTermProcessing=srcTermProcessing, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+!BOC
+  call ESMF_ArraySMM(srcArray, dstArray, routehandle=rh, &
+    termorderflag=ESMF_TERMORDER_SRCPET, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+!BOC
+  if (localPet == 0) then
+    print *, "result #4 = ", farrayPtr(1), " expect: ", sumB
+    if (farrayPtr(1) /= sumB) &
+      finalrc = ESMF_FAILURE
+  endif
+!EOC
 
   call ESMF_ArraySMMRelease(rh, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -266,6 +713,560 @@ program ESMF_RHandleBitForBitEx
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  ! ---------------------------------------------------------------------------
+
+!BOE
+! So far the {\tt srcTermProcessing} argument was kept at 0, and therefore
+! source term grouping had not to be considered. Source term grouping is only
+! possible for terms that originate from the same PET. In preparation
+! for a closer look at source term grouping, consider a sparse matrix 
+! where two source terms are located on the same PET.
+!EOE
+
+  ! start looking into srcTermProcessing
+
+  if (localPet == 0) then
+    !
+    ! Place the last two terms on the same PET, but still have srcTermProcessing
+    ! at 0, therefore not different from having them on different PETs.
+    !
+    ! -> factors into dst element 1 on PET 0
+    ! * sum with 3 addends (order by src seq. index): 0.5 + 0.1 + 0.1
+    ! * addend 1 is on PET 0
+    ! * addend 2 is on PET 2
+    ! * addend 3 is on PET 2
+    ! The "SRCPET" order of the three addends is given by the cyclic scheme
+    ! src PET scheme, starting at dstPet, going to dstPet-petCount, modulo
+    ! petCount. With that the sum order is this:
+    ! (1,1)*s[1]Pet0 + (5,1)*s[5]Pet2 + (7,1)*s[7]Pet2  = 
+    !       0.5      +       0.1      +       0.1       
+!BOC
+    factorIndexList(1,1) = 1  ! src
+    factorIndexList(2,1) = 1  ! dst
+    factorList(1) = 1.
+    factorIndexList(1,2) = 5  ! src
+    factorIndexList(2,2) = 1  ! dst
+    factorList(2) = 1.
+    factorIndexList(1,3) = 7  ! src
+    factorIndexList(2,3) = 1  ! dst
+    factorList(3) = 1.
+!EOC
+  endif
+  
+!BOE
+! Here one of the source terms is located on PET 0 while the other two
+! source terms are originating on PET 2. Keeping the {\tt srcTermProcessing}
+! argument at 0 first, the term order under {\tt ESMF\_TERMORDER\_SRCPET} is 
+! given by:
+!
+!     d(1) = s(1)[0] + s(5)[2] + s(7)[2] = 0.5 + 0.1 + 0.1
+!
+! And again the result is expected to be bfb identical to the number stored 
+! in {\tt sumA}.
+!EOE
+
+!BOC
+  ! forced srcTermProcessing
+  srcTermProcessing=0
+  
+  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
+    factorList=factorList, routehandle=rh, &
+    srcTermProcessing=srcTermProcessing, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+!BOC
+  call ESMF_ArraySMM(srcArray, dstArray, routehandle=rh, &
+    termorderflag=ESMF_TERMORDER_SRCPET, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+!BOC
+  if (localPet == 0) then
+    print *, "result #5 = ", farrayPtr(1), " expect: ", sumA
+    if (farrayPtr(1) /= sumA) &
+      finalrc = ESMF_FAILURE
+  endif
+!EOC
+  
+  call ESMF_ArraySMMRelease(rh, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! ---------------------------------------------------------------------------
+
+!BOE
+! The same result is also expected with {\tt srcTermProcessing} set to 1. The
+! reason for this is that a value of 1 only allows source term groups up to a
+! size of 1, essentially resulting in the exact same sum as before. However, 
+! setting {\tt srcTermProcessing} to 1 does mean that the multiplication of the
+! source term with the sparse matrix factor is carried out on the source side
+! before sending the product to the destination PET. Nevertheless, peforming
+! this multipliation on the source PET, versus doing it on the destination PET,
+! has no bfb effect on the result. 
+!EOE
+
+!BOC
+  ! forced srcTermProcessing
+  srcTermProcessing=1
+  
+  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
+    factorList=factorList, routehandle=rh, &
+    srcTermProcessing=srcTermProcessing, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+!BOC
+  call ESMF_ArraySMM(srcArray, dstArray, routehandle=rh, &
+    termorderflag=ESMF_TERMORDER_SRCPET, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+!BOC
+  if (localPet == 0) then
+    print *, "result #6 = ", farrayPtr(1), " expect: ", sumA
+    if (farrayPtr(1) /= sumA) &
+      finalrc = ESMF_FAILURE
+  endif
+!EOC
+
+  call ESMF_ArraySMMRelease(rh, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! ---------------------------------------------------------------------------
+
+!BOE
+! Increasing the {\tt srcTermProcessing} argument to 2 (or above) results in 
+! source term grouping of the terms that are on the same source PET.
+!
+!     d(1) = s(1)[0] + ( s(5)[2] + s(7)[2] ) = 0.5 + (0.1 + 0.1)
+!
+! This result is bfb identical to first adding 0.1 and 0.1 into a partial sum,
+! and then adding this sum to 0.5. However, this is the exact grouping of
+! terms that was used to obtain the result {\tt sumB} above.
+!EOE
+
+!BOC
+  ! forced srcTermProcessing
+  srcTermProcessing=2
+  
+  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
+    factorList=factorList, routehandle=rh, &
+    srcTermProcessing=srcTermProcessing, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+!BOC
+  call ESMF_ArraySMM(srcArray, dstArray, routehandle=rh, &
+    termorderflag=ESMF_TERMORDER_SRCPET, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+!BOC
+  if (localPet == 0) then
+    print *, "result #7 = ", farrayPtr(1), " expect: ", sumB
+    if (farrayPtr(1) /= sumB) &
+      finalrc = ESMF_FAILURE
+  endif
+!EOC
+  
+  call ESMF_ArraySMMRelease(rh, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! ---------------------------------------------------------------------------
+
+  ! the following examples will have 4 src terms
+  deallocate(factorIndexList, factorList)
+  smmElementCount = 0
+  if (localPet == 0) then
+    smmElementCount = 4
+  endif
+  allocate(factorIndexList(2,smmElementCount), factorList(smmElementCount))
+    
+  ! ---------------------------------------------------------------------------
+
+!BOE
+! In order to explore the effects of the {\tt srcTermProcessing} argument
+! further, more terms are needed in the SMM sum that have the same source PET.
+! The following sparse matrix has four entries, three of which originate from
+! the same PET (PET 3).
+!EOE
+
+  if (localPet == 0) then
+    !
+    ! First with srcTermProcessing set to 0
+    !
+    ! -> factors into dst element 1 on PET 0
+    ! * sum with 4 addends (order by src seq. index): 0.5 + 0.2 + 0.1 + 0.1
+    ! * addend 1 is on PET 0
+    ! * addend 2 is on PET 3
+    ! * addend 3 is on PET 3
+    ! * addend 4 is on PET 3
+    ! The "SRCPET" order of the three addends is given by the cyclic scheme
+    ! src PET scheme, starting at dstPet, going to dstPet-petCount, modulo
+    ! petCount. With that the sum order is this:
+    ! (1,1)*s[1]Pet0 +  (2,1)*s[2]Pet3 + (8,1)*s[8]Pet3 + (12,1)*s[12]Pet3 = 
+    !       0.5      +        0.2      +       0.1      +        0.1
+!BOC
+    factorIndexList(1,1) = 1  ! src
+    factorIndexList(2,1) = 1  ! dst
+    factorList(1) = 1.
+    factorIndexList(1,2) = 2  ! src
+    factorIndexList(2,2) = 1  ! dst
+    factorList(2) = 1.
+    factorIndexList(1,3) = 8  ! src
+    factorIndexList(2,3) = 1  ! dst
+    factorList(3) = 1.
+    factorIndexList(1,4) = 12 ! src
+    factorIndexList(2,4) = 1  ! dst
+    factorList(4) = 1.
+!EOC
+  endif
+  
+!BOE
+! Setting the {\tt srcTermProcessing} argument back to 0 puts the terms in 
+! PET order, and canonical order for each PET bundle.
+!
+!     d(1) = s(1)[0] + s(2)[3] + s(8)[3] + s(12)[3] = 0.5 + 0.2 + 0.1 + 0.1
+!
+! The bfb identical result for this sum was calculated and stored in variable
+! {\tt sumC} above.
+!EOE
+
+!BOC
+  ! forced srcTermProcessing
+  srcTermProcessing=0
+  
+  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
+    factorList=factorList, routehandle=rh, &
+    srcTermProcessing=srcTermProcessing, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+!BOC
+  call ESMF_ArraySMM(srcArray, dstArray, routehandle=rh, &
+    termorderflag=ESMF_TERMORDER_SRCPET, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+!BOC
+  if (localPet == 0) then
+    print *, "result #8 = ", farrayPtr(1), " expect: ", sumC
+    if (farrayPtr(1) /= sumC) &
+      finalrc = ESMF_FAILURE
+  endif
+!EOC
+  
+  call ESMF_ArraySMMRelease(rh, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! ---------------------------------------------------------------------------
+
+!BOE
+! Setting the {\tt srcTermProcessing} argument to 2 results in the following
+! source term grouping:
+!
+!     d(1) = s(1)[0] + ( s(2)[3] + s(8)[3] ) + s(12)[3]
+!          = 0.5 + ( 0.2 + 0.1 ) + 0.1,
+!
+! where the (0.2 + 0.1) partial sum is carried out on source PET 3, and
+! then sent to the destination PET (PET 0), together with the unmodified data 
+! from source element 8 (0.1). The final sum is performed on PET 0. The
+! result is identical to the precomputed value stored in {\tt sumD}. The 
+! numbers work out in a way where this result is bfb identical to the
+! previous result, i.e. {\tt sumC}. However, this match is purely conincidental.
+!EOE
+
+    !
+    ! Next with srcTermProcessing set to 2, changing the term order, but no
+    ! bfb difference here.
+    !
+    ! -> factors into dst element 1 on PET 0
+    ! * sum with 4 addends (order by src seq. index): 0.5 + 0.2 + 0.1 + 0.1
+    ! * addend 1 is on PET 0
+    ! * addend 2 is on PET 3
+    ! * addend 3 is on PET 3
+    ! * addend 4 is on PET 3
+    ! The "SRCPET" order of the three addends is given by the cyclic scheme
+    ! src PET scheme, starting at dstPet, going to dstPet-petCount, modulo
+    ! petCount. With that the sum order is this:
+    ! (1,1)*s[1]Pet0 + ( (2,1)*s[2]Pet3 + (8,1)*s[8]Pet3 ) + (12,1)*s[12]Pet3 = 
+    !       0.5      + (       0.2      +       0.1      ) +        0.1
+  
+!BOC
+  ! forced srcTermProcessing
+  srcTermProcessing=2
+  
+  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
+    factorList=factorList, routehandle=rh, &
+    srcTermProcessing=srcTermProcessing, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+!BOC
+  call ESMF_ArraySMM(srcArray, dstArray, routehandle=rh, &
+    termorderflag=ESMF_TERMORDER_SRCPET, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+!BOC
+  if (localPet == 0) then
+    print *, "result #9 = ", farrayPtr(1), " expect: ", sumD
+    if (farrayPtr(1) /= sumD) &
+      finalrc = ESMF_FAILURE
+  endif
+!EOC
+  
+  call ESMF_ArraySMMRelease(rh, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! ---------------------------------------------------------------------------
+
+!BOE
+! Increasing the {\tt srcTermProcessing} argument up to 3 results in a three
+! term partial sum on PET 3:
+!
+!     d(1) = s(1)[0] + ( s(2)[3] + s(8)[3] + s(12)[3] )
+!          = 0.5 + ( 0.2 + 0.1 + 0.1 ).
+!
+! Again the final sum is performed on PET 0. The result is bfb identical to
+! the number stored in {\tt sumE}, which, for the chose numbers, works out to
+! have a bfb difference compared to {\tt sumC} and {\tt sumD}.
+!EOE
+
+    !
+    ! Next with srcTermProcessing set to 3, changing the term order, this time
+    ! with bfb effect.
+    !
+    ! -> factors into dst element 1 on PET 0
+    ! * sum with 4 addends (order by src seq. index): 0.5 + 0.2 + 0.1 + 0.1
+    ! * addend 1 is on PET 0
+    ! * addend 2 is on PET 3
+    ! * addend 3 is on PET 3
+    ! * addend 4 is on PET 3
+    ! The "SRCPET" order of the three addends is given by the cyclic scheme
+    ! src PET scheme, starting at dstPet, going to dstPet-petCount, modulo
+    ! petCount. With that the sum order is this:
+    ! (1,1)*s[1]Pet0 + ( (2,1)*s[2]Pet3 + (8,1)*s[8]Pet3 + (12,1)*s[12]Pet3 ) = 
+    !       0.5      + (       0.2      +       0.1      +        0.1       )
+  
+!BOC
+  ! forced srcTermProcessing
+  srcTermProcessing=3
+  
+  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
+    factorList=factorList, routehandle=rh, &
+    srcTermProcessing=srcTermProcessing, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+!BOC
+  call ESMF_ArraySMM(srcArray, dstArray, routehandle=rh, &
+    termorderflag=ESMF_TERMORDER_SRCPET, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+!BOC
+  if (localPet == 0) then
+    print *, "result #10 = ", farrayPtr(1), " expect: ", sumE
+    if (farrayPtr(1) /= sumE) &
+      finalrc = ESMF_FAILURE
+  endif
+!EOC
+  
+  call ESMF_ArraySMMRelease(rh, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! ---------------------------------------------------------------------------
+
+!BOE
+! This covers the basics of term order and bit-for-bit (bfb) issues as they
+! relate to the ESMF sparse matrix multiplication (SMM) implementation. The
+! take-way points are: 1)
+! if bfb reproducibilty is desired between consecutive execution of the
+! same RouteHandle object, then the {\tt ESMF\_TERMORDER\_SRCPET} execution-time
+! option should be chosen; 2) if bfb reproducibilty is required
+! {\em between} RouteHandles, e.g. the same RouteHandle that is precomputed
+! each time the application starts, then, in addition, it must be ensured that
+! the same value is specified for the {\tt srcTermProcessing} argument during
+! store-time. Under these conditions the ESMF SMM 
+! implementation guarantees bfb identical results between runs, as long as the
+! number of PETs does not change.
+!
+! The term order in a SMM operation does not only affect the bfb
+! reproducibility of the result, but also affects the SMM {\em performance}. 
+! However, the precise performance implications of a specific term order are
+! complicated and strongly depend on the exact problem structure, as well as
+! on the details of the compute hardware. ESMF implements an auto-tuning 
+! mechanism that can be used to conveniently determine a close to optimal set
+! of SMM performance parameters.
+!
+! There are two SMM performance parameters in ESMF that are encoded into a
+! RouteHandle during store-time: {\tt srcTermProcessing} and
+! {\tt pipelineDepth}. The first one affects the term order in the SMM sums, 
+! as was discussed in detail above. The second parameter, {\tt pipelineDepth},
+! determines how many in- and out-bound messages may be outstanding on each
+! PET. It has no affect on the term order and does not lead to bfb differences
+! in the SMM results. However, for performance reproducibilty it may still be
+! desirable to use a fixed value when precomputing RouteHandles.
+! 
+! Store calls that take the {\tt srcTermProcessing} and/or {\tt pipelineDepth}
+! argument specify them as {\tt optional} with {\tt intent(inout)}. Omitting the
+! argument when calling, or passing a variable that is set to a negative
+! number, indicates that the respective parameter needs to be determined by
+! the library. If a variable with a negative value was passed in, then the
+! variable will be overwritten by they auto-tuned value on return. It is through
+! this mechanism that a user can leverage the auto-tuning feature to obtain
+! the best possible performance, while still ensuring bfb and performance
+! reproducibility between runs. The following example shows code that first
+! checks if previously stored SMM performance parameters are available on disk,
+! and then either reads and uses them, or else uses auto-tuning to determine 
+! the parameters before writing them to file. For simplicity the same sparse
+! matrix as in the previous example is used.
+!
+!EOE
+
+!BOC
+  ! precondition the arguments for auto-tuning and overwriting
+  srcTermProcessing = -1  ! init negative value
+  pipelineDepth     = -1  ! init negative value
+
+  ! get a free Fortran i/o unit
+  call ESMF_UtilIOUnitGet(unit=iounit, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  ! try to open the file that holds the SMM paramters
+  open(unit=iounit, file="smmParameters.dat", status="old", action="read", &
+    iostat=iostat)
+  
+  if (iostat == 0) then
+    ! the file was present -> read from it and close it again
+    read(unit=iounit, iostat=iostat, fmt=*) srcTermProcessing, pipelineDepth, &
+      sumCompare
+    close(unit=iounit)
+  endif
+  
+  if (iostat == 0) then
+    print *, "SMM parameters successfully read from file"
+  endif
+
+  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
+    factorList=factorList, routehandle=rh, &
+    srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+  call ESMF_ArraySMM(srcArray, dstArray, routehandle=rh, &
+    termorderflag=ESMF_TERMORDER_SRCPET, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOC
+  if ((localPet==0) .and. (iostat /= 0)) then
+    print *, "SMM parameters determined via auto-tuning -> dump to file"
+    open(unit=iounit, file="smmParameters.dat", status="unknown", &
+      action="write")
+    write(unit=iounit, fmt=*) srcTermProcessing, pipelineDepth, farrayPtr(1)
+    close(unit=iounit)
+  endif
+  
+  if (localPet == 0) then
+    if (iostat /= 0) then
+      ! cannot do bfb comparison of the result without reference
+      print *, "result #11 = ", farrayPtr(1)
+    else
+      ! do bfb comparison of the result against reference
+      print *, "result #11 = ", farrayPtr(1), " expect: ", sumCompare
+      if (farrayPtr(1) /= sumCompare) &
+        finalrc = ESMF_FAILURE
+    endif
+  endif
+!EOC
+
+
+  call ESMF_ArraySMMRelease(rh, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! Running this example for the first time exercises the auto-tuning branch. The
+! auto-tuned {\tt srcTermProcessing} and {\tt pipelineDepth} parameters are
+! then used in the SMM execution, as well as written to file. The SMM result
+! variable is also written to the same file for test purposes.
+! Any subsequent execution of the example branches into the code that reads the
+! previously determined SMM execution parameters from file, re-using them 
+! during store-time. This ensures bfb reproducibility of the SMM result, which
+! is being tested in this example by comparing to the previously stored value.
+!EOE
+
+  ! ---------------------------------------------------------------------------
+
+  deallocate(factorIndexList, factorList)
 
 10 continue
 

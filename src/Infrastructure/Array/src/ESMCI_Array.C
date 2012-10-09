@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.167 2012/10/03 18:28:58 gold2718 Exp $
+// $Id: ESMCI_Array.C,v 1.168 2012/10/09 00:52:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.167 2012/10/03 18:28:58 gold2718 Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.168 2012/10/09 00:52:14 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -10381,7 +10381,7 @@ int Array::sparseMatMul(
                                         //          -> zero out target points
                                         //         ESMC_REGION_EMPTY:
                                         //          -> don't zero out any points
-  ESMC_TermOrder_Flag termorderflag,    // in    - ESMC_TERMORDER_STRICT:
+  ESMC_TermOrder_Flag termorderflag,    // in    - ESMC_TERMORDER_SRCSEQ:
                                         //          -> strict srcSeqInd order
                                         //         ESMC_TERMORDER_SRCPET:
                                         //          -> order by src PET & seqInd
