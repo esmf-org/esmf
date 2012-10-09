@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.359 2012/10/03 22:19:58 theurich Exp $
+#  $Id: common.mk,v 1.360 2012/10/09 22:43:20 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2890,8 +2890,12 @@ alldoc: doc
 
 localdoc:
 	$(MAKE) $(TEXFILES_TO_MAKE)
-	$(MAKE) $(DVIFILES)
-	$(MAKE) $(PDFFILES)
+	@if [ "$(DVIFILES)"foo != foo ] ; then \
+          $(MAKE) $(DVIFILES);\
+	fi;
+	@if [ "$(PDFFILES)"foo != foo ] ; then \
+          $(MAKE) $(PDFFILES);\
+	fi;         
         
 onedoc: chkdir_doc include tex
 	@echo "========================================="
