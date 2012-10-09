@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.h,v 1.42 2012/04/12 18:33:30 oehmke Exp $
+// $Id: ESMC_Mesh.h,v 1.43 2012/10/09 00:21:12 jcjacob Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -227,6 +227,69 @@ ESMC_Mesh ESMC_MeshCreate(
 //   but it can't be smaller. 
 //  \item[rc]
 //  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_MeshCreateFromFile - Create a Mesh from a NetCDF grid file \label{sec:mesh:capi:meshcreatefromfile}
+//
+// !INTERFACE:
+ESMC_Mesh ESMC_MeshCreateFromFile(
+				  char *filename,     // in (required)
+				  int fileTypeFlag,   // in (required)
+				  int *convert3D,     // in (optional)
+				  int *convertToDual, // in (optional)
+				  int *addUserArea,   // in (optional)
+				  char *meshname,     // in (optional)
+				  int *addMask,       // in (optional)
+				  char *varname,      // in (optional)
+				  int *rc             // out
+);
+// !RETURN VALUE:
+//  type(ESMC_Mesh)         :: ESMC_MeshCreateFromFile
+//
+// !DESCRIPTION:
+//
+// Method to create a Mesh object from a NetCDF file in either SCRIP, UGRID,
+// or ESMF file formats. 
+//
+//  The required arguments are:
+//  \begin{description}
+//   \item [filename]
+//         The name of the grid file
+//   \item[filetypeflag] 
+//         The file type of the grid file to be read, please see Section~\ref{const:mesh:fileformat}
+//         for a list of valid options. 
+//   \item[{[convert3D]}] 
+//         if 1, the node coordinates will be converted into 3D Cartisian, which
+//         is required for a global grid. If not specified, defaults to 0.
+//   \item[{[convertToDual]}] 
+//         if 1, the mesh will be converted to its dual. If not specified,
+//         defaults to 1. Converting to dual is only supported with
+//         file type {\tt ESMF\_FILEFORMAT\_SCRIP}.
+//   \item[{[addUserArea]}] 
+//         if 1, the cell area will be read in from the GRID file.  This feature is
+//         only supported when the grid file is in the SCRIP or ESMF format. If not specified, 
+//         defaults to 0.
+//   \item[{[meshname]}]
+//         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
+//         is {\tt ESMF\_FILEFORMAT\_UGRID}.  If not specified, defaults to empty string.
+//   \item[{[addMask]}]
+//         If 1, generate the mask using the missing\_value attribute defined in 'varname'
+//         This flag is only supported when the grid file is in the UGRID format.
+//         If not specified, defaults to 0.  
+//   \item[{[varname]}]
+//         If addMask is 1, provide a variable name stored in the UGRID file and
+//         the mask will be generated using the missing value of the data value of
+//         this variable.  The first two dimensions of the variable has to be the
+//         the longitude and the latitude dimension and the mask is derived from the
+//         first 2D values of this variable even if this data is 3D, or 4D array. If not 
+//         specified, defaults to empty string.
+//   \item [{[rc]}]
+//         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //  \end{description}
 //
 //EOP
