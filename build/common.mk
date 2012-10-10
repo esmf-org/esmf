@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.360 2012/10/09 22:43:20 theurich Exp $
+#  $Id: common.mk,v 1.361 2012/10/10 15:39:42 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -2896,6 +2896,9 @@ localdoc:
 	@if [ "$(PDFFILES)"foo != foo ] ; then \
           $(MAKE) $(PDFFILES);\
 	fi;         
+	@if [ "$(HTMLFILES)"foo != foo ] ; then \
+          $(MAKE) $(HTMLFILES);\
+	fi;         
         
 onedoc: chkdir_doc include tex
 	@echo "========================================="
@@ -3384,7 +3387,14 @@ export TEXINPUTS_VALUE
 
 $(ESMF_DOCDIR)/%.pdf: %.dvi
 	@echo "========================================="
-	@echo "_%pdf from %.dvi rule from common.mk"
+	@echo "ESMF_DOCDIR %pdf from %.dvi rule from common.mk"
+	@echo "========================================="
+	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
+	dvipdf $< $@
+
+%.pdf: %.dvi
+	@echo "========================================="
+	@echo "%pdf from %.dvi rule from common.mk"
 	@echo "========================================="
 	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	dvipdf $< $@
@@ -3395,7 +3405,7 @@ $(ESMF_DOCDIR)/%.pdf: %.dvi
 
 $(ESMF_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
 	@echo "========================================="
-	@echo "_refdoc hyml rule from common.mk"
+	@echo "ESMF_DOCDIR _refdoc html rule from common.mk"
 	@echo "========================================="
 	@if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
@@ -3406,7 +3416,7 @@ $(ESMF_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
 
 $(ESMF_DOCDIR)/%_crefdoc: %_crefdoc.ctex $(REFDOC_DEP_FILES)
 	@echo "========================================="
-	@echo "_crefdoc html rule from common.mk"
+	@echo "ESMF_DOCDIR _crefdoc html rule from common.mk"
 	@echo "========================================="
 	@if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
 	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
@@ -3414,6 +3424,26 @@ $(ESMF_DOCDIR)/%_crefdoc: %_crefdoc.ctex $(REFDOC_DEP_FILES)
 	$(DO_L2H) $* cref
 	$(ESMF_RM) .latex2html-init
 	$(ESMF_MV) $(@F) $(ESMF_DOCDIR)
+
+%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
+	@echo "========================================="
+	@echo "_refdoc html rule from common.mk"
+	@echo "========================================="
+	@if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
+	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
+	fi;
+	$(DO_L2H) $* ref
+	$(ESMF_RM) .latex2html-init
+
+%_crefdoc: %_crefdoc.ctex $(REFDOC_DEP_FILES)
+	@echo "========================================="
+	@echo "_crefdoc html rule from common.mk"
+	@echo "========================================="
+	@if [ $(TEXINPUTS_VALUE)foo != foo ] ; then \
+	  echo '$$TEXINPUTS = $(TEXINPUTS_VALUE)' > .latex2html-init ;\
+	fi;
+	$(DO_L2H) $* cref
+	$(ESMF_RM) .latex2html-init
 
 #-------------------------------------------------------------------------------
 #  These rules are for compiling the test examples.
