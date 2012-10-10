@@ -1,4 +1,4 @@
-! $Id: ESMF_SciComp.F90,v 1.4 2012/10/10 12:53:19 ksaint Exp $
+! $Id: ESMF_SciComp.F90,v 1.5 2012/10/10 20:35:53 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_SciCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_SciComp.F90,v 1.4 2012/10/10 12:53:19 ksaint Exp $'
+    '$Id: ESMF_SciComp.F90,v 1.5 2012/10/10 20:35:53 ksaint Exp $'
 
 !==============================================================================
 !
@@ -93,11 +93,6 @@ module ESMF_SciCompMod
 ! !ARGUMENTS:
 !   type(ESMF_SciComp) :: scicomp1
 !   type(ESMF_SciComp) :: scicomp2
-!
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Assign scicomp1 as an alias to the same ESMF SciComp object in memory
@@ -378,14 +373,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_SciCompDestroy - Release resources associated with a SciComp
 !
 ! !INTERFACE:
-  subroutine ESMF_SciCompDestroy(scicomp, keywordEnforcer, &
-    timeout, timeoutFlag, rc)
+  subroutine ESMF_SciCompDestroy(scicomp, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_SciComp), intent(inout)           :: scicomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,             intent(in),   optional :: timeout
-    logical,             intent(out),  optional :: timeoutFlag
     integer,             intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
@@ -398,17 +390,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Release all resources associated with this {\tt ESMF\_SciComp}
 !   and mark the object as invalid.  It is an error to pass this
 !   object into any other routines after being destroyed.
-! \item[{[timeout]}]
-!   The maximum period in seconds that this call will wait in communications
-!   with the actual component, before returning with a timeout condition. 
-!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
-!   supported for connected dual components.
-! \item[{[timeoutFlag]}]
-!   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
-!   If {\tt timeoutFlag} was {\em not} provided, a timeout condition will lead
-!   to a return code of {\tt rc \textbackslash = ESMF\_SUCCESS}. Otherwise the
-!   return value of {\tt timeoutFlag} is the sole indicator of a timeout
-!   condition.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -430,18 +411,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcTOReturn=rc)) return
     endif
 
-    ! check consistency between timeout argument and component argument
-    if (present(timeout).and. &
-      .not.ESMF_CompIsDualConnected(scicomp%compp, rc=localrc)) then
-      call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
-        msg="'timeout' argument is only allowed for connected dual components",&
-        ESMF_CONTEXT, rcTOReturn=rc)
-      return
-    endif
-
     ! call Comp method
-    call ESMF_CompDestruct(scicomp%compp, timeout=timeout, &
-      timeoutFlag=timeoutFlag, rc=localrc)
+    call ESMF_CompDestruct(scicomp%compp, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcTOReturn=rc)) return
@@ -469,12 +440,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_SciCompGet - Get SciComp information
 !
 ! !INTERFACE:
-  subroutine ESMF_SciCompGet(scicomp, keywordEnforcer, comptype, name, rc)
+  subroutine ESMF_SciCompGet(scicomp, keywordEnforcer, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_SciComp),       intent(in)            :: scicomp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_CompType_Flag), intent(out), optional :: comptype
     character(len=*),         intent(out), optional :: name
     integer,                  intent(out), optional :: rc
 !
@@ -485,9 +455,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[scicomp]
 !   The {\tt ESMF\_SciComp} object being queried.
-! \item[{[comptype]}]
-!   Return the Component type: {\tt ESMF\_COMPTYPE\_GRID}, 
-!   {\tt ESMF\_COMPTYPE\_CPL} or {\tt ESMF\_COMPTYPE\_SCI}.
 ! \item[{[name]}]
 !   Return the name of the {\tt ESMF\_SciComp}.
 ! \item[{[rc]}]
@@ -506,8 +473,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_SciCompGetInit,scicomp,rc)
 
     ! call Comp method
-    call ESMF_CompGet(scicomp%compp, name=name, &
-      comptype=comptype, compStatus=compStatus, rc=localrc)
+    call ESMF_CompGet(scicomp%compp, name=name, compStatus=compStatus, &
+       rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
