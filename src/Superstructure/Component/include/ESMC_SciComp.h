@@ -1,4 +1,4 @@
-// $Id: ESMC_SciComp.h,v 1.3 2012/10/02 02:25:36 ksaint Exp $
+// $Id: ESMC_SciComp.h,v 1.4 2012/10/10 19:43:40 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -62,10 +62,7 @@ ESMC_SciComp ESMC_SciCompCreate(
 //
 // !DESCRIPTION:
 //
-//  This interface creates an {\tt ESMC\_SciComp} object. By default, a
-//  separate VM context will be created for each component.  This implies
-//  creating a new MPI communicator and allocating additional memory to
-//  manage the VM resources.
+//  This interface creates an {\tt ESMC\_SciComp} object. 
 //
 //  The arguments are:
 //  \begin{description}
