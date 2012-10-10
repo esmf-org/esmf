@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.201 2012/09/21 22:08:50 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.202 2012/10/10 21:52:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@ module ESMF_GridCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_GridComp.F90,v 1.201 2012/09/21 22:08:50 theurich Exp $'
+    '$Id: ESMF_GridComp.F90,v 1.202 2012/10/10 21:52:39 theurich Exp $'
 
 !==============================================================================
 !
@@ -897,8 +897,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[currentPhase]}]
 !   Return the current {\tt phase} of the {\tt ESMF\_GridComp} execution.
 ! \item[{[comptype]}]
-!   Return the Component type: {\tt ESMF\_COMPTYPE\_GRID} or 
-!   {\tt ESMF\_COMPTYPE\_CPL}.
+!   Return the Component type.
+!   See section \ref{const:comptype} for a complete list of valid flags.
 ! \item[{[vmIsPresent]}]
 !   {\tt .true.} if {\tt vm} was set in GridComp object,
 !   {\tt .false.} otherwise.
