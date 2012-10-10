@@ -1,4 +1,4 @@
-!  $Id: ESMF_Mesh_C.F90,v 1.13 2012/10/10 16:42:51 jcjacob Exp $
+!  $Id: ESMF_Mesh_C.F90,v 1.14 2012/10/10 16:53:46 jcjacob Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh_C.F90,v 1.13 2012/10/10 16:42:51 jcjacob Exp $'
+!      '$Id: ESMF_Mesh_C.F90,v 1.14 2012/10/10 16:53:46 jcjacob Exp $'
 !==============================================================================
 
 #undef  ESMF_METHOD
@@ -51,7 +51,7 @@
    logical                        :: convert3D
    integer                        :: c3dpresent, ctodpresent
    integer                        :: auapresent, mnpresent
-   integer                        :: ampresent, vnpresent, rcpresent
+   integer                        :: ampresent, vnpresent
    logical                        :: convertToDual
    logical                        :: addUserArea
    character(len=*)               :: meshname
@@ -136,14 +136,12 @@
    endif
 
 
-   if (c3dpresent == 0 .and. ctodpresent == 0 .and. &
-       auapresent == 0 .and. mnpresent == 0 .and. ampresent == 0 .and. &
-       vnpresent == 0 .and. rcpresent == 0) then
-       mesh = ESMF_MeshCreate(filename, fileTypeFlag)
+   if (c3dpresent == 0 .and. ctodpresent == 0 .and. auapresent == 0 .and. &
+       mnpresent == 0 .and. ampresent == 0 .and. vnpresent == 0) then
+       mesh = ESMF_MeshCreate(filename, fileTypeFlag, rc=rc)
    else if (c3dpresent == 1 .and. ctodpresent == 1 .and. &
             auapresent == 1 .and. mnpresent == 1 .and. &
-            ampresent == 1 .and. vnpresent == 1 .and. &
-            rcpresent == 1) then
+            ampresent == 1 .and. vnpresent == 1) then
        mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
                               convert3D=convert3D, &
                               convertToDual=convertToDual, &
