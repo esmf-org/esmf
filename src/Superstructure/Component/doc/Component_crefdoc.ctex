@@ -1,4 +1,4 @@
-% $Id: Component_crefdoc.ctex,v 1.25 2012/09/21 22:08:49 theurich Exp $
+% $Id: Component_crefdoc.ctex,v 1.26 2012/10/10 12:53:14 ksaint Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -128,6 +128,46 @@
 \input{ESMC_CplComp_chapi} 
 #elif defined(CONSTITUENT)
 \input{../Superstructure/Component/doc/ESMC_CplComp_chapi}
+#endif
+
+%%%%%%%%%%%%% Science Component Class %%%%%%%%%
+\section{SciComp Class}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{SciComp_cdesc}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/Component/doc/SciComp_cdesc}
+#endif
+
+%\subsection{SciComp Options}
+%#ifdef STANDALONE
+%\input{SciComp_options}
+%#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/SciComp_options}
+%#endif
+
+%\subsection{Use and Examples}
+#ifdef STANDALONE
+%\input{SciComp_usage}
+%\input{ESMF_SCompEx_fapi}
+#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/SciComp_usage}
+%\input{../Superstructure/Component/doc/ESMF_SCompEx_fapi}
+#endif
+
+%\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+%\input{SciComp_rest}
+#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/SciComp_rest}
+#endif
+
+\subsection{Class API}
+#ifdef STANDALONE
+\input{ESMC_SciComp_chapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/Component/doc/ESMC_SciComp_chapi}
 #endif
 
 %%%%%%% end class sections %%%%%%%%

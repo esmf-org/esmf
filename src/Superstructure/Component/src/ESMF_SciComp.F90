@@ -1,4 +1,4 @@
-! $Id: ESMF_SciComp.F90,v 1.3 2012/10/02 02:25:39 ksaint Exp $
+! $Id: ESMF_SciComp.F90,v 1.4 2012/10/10 12:53:19 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_SciCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_SciComp.F90,v 1.3 2012/10/02 02:25:39 ksaint Exp $'
+    '$Id: ESMF_SciComp.F90,v 1.4 2012/10/10 12:53:19 ksaint Exp $'
 
 !==============================================================================
 !
@@ -81,6 +81,39 @@ module ESMF_SciCompMod
 !===============================================================================
 ! SciCompOperator() interfaces
 !===============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_SciCompAssignment(=) - SciComp assignment
+!
+! !INTERFACE:
+!   interface assignment(=)
+!   scicomp1 = scicomp2
+!
+! !ARGUMENTS:
+!   type(ESMF_SciComp) :: scicomp1
+!   type(ESMF_SciComp) :: scicomp2
+!
+! !STATUS:
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
+!
+! !DESCRIPTION:
+!   Assign scicomp1 as an alias to the same ESMF SciComp object in memory
+!   as scicomp2. If scicomp2 is invalid, then scicomp1 will be equally 
+!   invalid after the assignment.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[scicomp1]
+!     The {\tt ESMF\_SciComp} object on the left hand side of the assignment.
+!   \item[scicomp2]
+!     The {\tt ESMF\_SciComp} object on the right hand side of the assignment.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
 
 
 ! -------------------------- ESMF-public method -------------------------------
@@ -281,16 +314,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
-! This interface creates an {\tt ESMF\_SciComp} object. By default, a
-! separate VM context will be created for each component.  This implies
-! creating a new MPI communicator and allocating additional memory to
-! manage the VM resources. When running on a large number of processors,
-! creating a separate VM for each component could be both time and memory
-! inefficient.  If the application is sequential, i.e., each component is
-! running on all the PETs of the global VM, it will be more efficient to use
-! the global VM instead of creating a new one.  This can be done by setting
-! {\tt contextflag} to ESMF\_CONTEXT\_PARENT\_VM.
-!
+! This interface creates an {\tt ESMF\_SciComp} object. 
 ! The return value is the new {\tt ESMF\_SciComp}.
 !   
 ! The arguments are:
