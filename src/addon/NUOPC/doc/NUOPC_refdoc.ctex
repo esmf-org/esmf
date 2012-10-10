@@ -1,4 +1,4 @@
-% $Id: NUOPC_refdoc.ctex,v 1.12 2012/10/05 05:59:17 theurich Exp $ 
+% $Id: NUOPC_refdoc.ctex,v 1.13 2012/10/10 15:54:30 theurich Exp $ 
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -49,23 +49,21 @@
 % NUOPC Layer
 %============================================================================
 
-\section{NUOPC Layer}
-
-\subsection{Description}
+\section{Description}
 #ifdef STANDALONE
 \input{NUOPC_desc}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_desc}
 #endif
 
-\subsection{Design and Implementation Notes}
+\section{Design and Implementation Notes}
 #ifdef STANDALONE
 \input{NUOPC_implnotes}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_implnotes}
 #endif
 
-\subsection{NUOPC Field Dictionary}
+\section{NUOPC Field Dictionary}
 #ifdef STANDALONE
 \input{NUOPC_FieldDictionaryDef_fapi}
 #elif defined(CONSTITUENT)
@@ -74,21 +72,21 @@
 
 \newpage
 
-\subsection{NUOPC Model Component Metadata}
+\section{NUOPC Model Component Metadata}
 #ifdef STANDALONE
 \input{NUOPC_ModelComponent_metadata}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_ModelComponent_metadata}
 #endif
 
-\subsection{NUOPC Connector Component Metadata}
+\section{NUOPC Connector Component Metadata}
 #ifdef STANDALONE
 \input{NUOPC_ConnectorComponent_metadata}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_ConnectorComponent_metadata}
 #endif
 
-\subsection{NUOPC Field Metadata}
+\section{NUOPC Field Metadata}
 #ifdef STANDALONE
 \input{NUOPC_Field_metadata}
 #elif defined(CONSTITUENT)
@@ -97,49 +95,51 @@
 
 \newpage
 
-\subsection{Generic Component API: NUOPC\_Driver}
+\section{API}
+
+\subsection{Generic Component: NUOPC\_Driver}
 #ifdef STANDALONE
 \input{NUOPC_Driver_manual_fapi}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_Driver_manual_fapi}
 #endif
 
-\subsection{Generic Component API: NUOPC\_DriverAtmOcn}
+\subsection{Generic Component: NUOPC\_DriverAtmOcn}
 #ifdef STANDALONE
 %\input{NUOPC_DriverAtmOcn_fapi}
 #elif defined(CONSTITUENT)
 %\input{../addon/NUOPC/doc/NUOPC_DriverAtmOcn_fapi}
 #endif
 
-\subsection{Generic Component API: NUOPC\_DriverAtmOcnMed}
+\subsection{Generic Component: NUOPC\_DriverAtmOcnMed}
 #ifdef STANDALONE
 %\input{NUOPC_DriverAtmOcnMed_fapi}
 #elif defined(CONSTITUENT)
 %\input{../addon/NUOPC/doc/NUOPC_DriverAtmOcnMed_fapi}
 #endif
 
-\subsection{Generic Component API: NUOPC\_ModelBase}
+\subsection{Generic Component: NUOPC\_ModelBase}
 #ifdef STANDALONE
 \input{NUOPC_ModelBase_manual_fapi}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_ModelBase_manual_fapi}
 #endif
 
-\subsection{Generic Component API: NUOPC\_Model}
+\subsection{Generic Component: NUOPC\_Model}
 #ifdef STANDALONE
 \input{NUOPC_Model_manual_fapi}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_Model_manual_fapi}
 #endif
 
-\subsection{Generic Component API: NUOPC\_Mediator}
+\subsection{Generic Component: NUOPC\_Mediator}
 #ifdef STANDALONE
 %\input{NUOPC_Mediator_manual_fapi}
 #elif defined(CONSTITUENT)
 %\input{../addon/NUOPC/doc/NUOPC_Mediator_manual_fapi}
 #endif
 
-\subsection{Generic Component API: NUOPC\_Connector}
+\subsection{Generic Component: NUOPC\_Connector}
 #ifdef STANDALONE
 \input{NUOPC_Connector_manual_fapi}
 #elif defined(CONSTITUENT)
@@ -148,7 +148,7 @@
 
 \newpage
 
-\subsection{Utility Class API: NUOPC\_RunSequence}
+\subsection{Utility Class: NUOPC\_RunSequence}
 
 The {\tt NUOPC\_RunSequence} class provides a unified data structure that allows simple as well as complex time loops to be encoded and executed. There are entry points that allow different run phases to be mapped against distinctly different time loops. 
 
@@ -169,7 +169,7 @@ Figure \ref{fig:NUOPCRunSequence} depicts the data structures surrounding the {\
 
 \newpage
 
-\subsection{Utility API}
+\subsection{Utility Routines}
 #ifdef STANDALONE
 \input{NUOPC_Base_fapi}
 #elif defined(CONSTITUENT)
