@@ -1,13 +1,25 @@
-% $Id: IOUtil_desc.tex,v 1.6 2011/01/19 02:13:18 svasquez Exp $
+% $Id: IOUtil_desc.tex,v 1.7 2012/10/10 17:57:15 w6ws Exp $
 
 \label{sec:IOUtil}
 
 \begin{sloppypar}
-The ESMF Fortran I/O utilities provide portable methods to access
-capabilities which are often implemented in different
-ways amongst different environments.  Currently, two utility
-methods are implemented: {\tt ESMF\_IOUnitGet()}, to find an unopened
-unit number within the range of unit numbers that ESMF
-is allowed to use, and {\tt ESMF\_IOUnitFlush()} to flush the
+The ESMF Fortran I/O and System utilities provide portable methods to
+access capabilities which are often implemented in different
+ways amongst different environments.  These utility methods are
+divided into three groups: command line access, Fortran I/O, and
+sorting.
+
+Command line arguments may be accessed using three methods:
+{\tt ESMF\_UtilGetArg()} returns a given command line argument,
+{\tt ESMF\_UtilGetArgC()} returns a count of the number of command line
+arguments available.  Finally, the {\tt ESMF\_UtilGetArgIndex()} method
+returns the index of a desired argument value, given its keyword name.
+
+Two I/O methods are implemented: {\tt ESMF\_IOUnitGet()},
+to obtain an unopened Fortran unit number within the range of unit numbers that
+ESMF is allowed to use, and {\tt ESMF\_IOUnitFlush()} to flush the
 I/O buffer associated with a specific Fortran unit.
+
+Finally, the {\tt ESMF\_UtilSort()} method sorts integer, floating point,
+and character string data types in either ascending or descending order.
 \end{sloppypar}
