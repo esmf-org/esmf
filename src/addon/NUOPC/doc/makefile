@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.4 2012/09/18 15:49:31 theurich Exp $
+# $Id: makefile,v 1.5 2012/10/10 15:41:59 theurich Exp $
 
 All: onedoc
 
 LOCDIR    = src/addon/NUOPC/doc
 
 DVIFILES  = NUOPC_refdoc.dvi
-PDFFILES  = $(ESMC_DOCDIR)/NUOPC_refdoc.pdf
-HTMLFILES = $(ESMC_DOCDIR)/NUOPC_refdoc
+PDFFILES  = NUOPC_refdoc.pdf
+HTMLFILES = NUOPC_refdoc
 
 #
 # Tex Files to make
