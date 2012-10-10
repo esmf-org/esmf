@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.162 2012/04/05 04:30:57 w6ws Exp $
+! $Id: ESMF_VM.F90,v 1.163 2012/10/10 03:21:00 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -189,7 +189,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      "$Id: ESMF_VM.F90,v 1.162 2012/04/05 04:30:57 w6ws Exp $"
+      "$Id: ESMF_VM.F90,v 1.163 2012/10/10 03:21:00 w6ws Exp $"
 
 !==============================================================================
 
@@ -7130,7 +7130,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[mpiCommunicator]}] 
 !        MPI communicator defining the group of processes on which the
 !        ESMF application is running.
-!        If not sepcified, defaults to {\tt ESMF\_COMM\_WORLD}
+!        If not sepcified, defaults to {\tt MPI\_COMM\_WORLD}
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
