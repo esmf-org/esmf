@@ -1,4 +1,4 @@
-! $Id: ESMF_SciCompCreateUTest.F90,v 1.5 2012/10/02 02:25:42 ksaint Exp $
+! $Id: ESMF_SciCompCreateUTest.F90,v 1.6 2012/10/11 15:53:49 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -201,7 +201,7 @@
     !EX_UTest
 !   ! Verifing that a SciCompDestroy for a regular component catches timeout
     
-    call ESMF_SciCompDestroy(comp1, timeout=10, rc=rc)
+    call ESMF_SciCompDestroy(comp1, rc=rc)
     
     write(failMsg, *) "Did return ESMF_SUCCESS"
     write(name, *) "Destroying a Science Component - with timeout"
