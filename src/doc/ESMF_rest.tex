@@ -1,10 +1,14 @@
-% $Id: ESMF_rest.tex,v 1.1 2012/10/11 04:02:03 theurich Exp $
+% $Id: ESMF_rest.tex,v 1.2 2012/10/11 18:05:31 w6ws Exp $
 
 \section{Overall Restrictions and Future Work}
 \label{sec:overallrest}
 
 \begin{enumerate}
 
-\item 32-bit integer limitation.... Walter going to complete description here.
+\item[32-bit integer limitations] In general, Fortran array bounds should
+be limited to 2**31-1 elements or less.  This is due to the Fortran-95
+limitation of returning default sized (e.g., 32 bit) integers for array bound
+and size inquiries, and consequent ESMF use of default sized integers for
+holding these values.
 
 \end{enumerate}
