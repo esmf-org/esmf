@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeWrite.C,v 1.5 2012/09/26 19:49:59 rokuingh Exp $
+// $Id: ESMCI_AttributeWrite.C,v 1.6 2012/10/11 21:55:25 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.5 2012/09/26 19:49:59 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.6 2012/10/11 21:55:25 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -789,13 +789,13 @@ namespace ESMCI {
     // write the ESMF XML footer
 // RLO: this was replaced when prototyping the GridSpec CIM definition
 //    localrc = io_xml->writeEndElement("model_component", 1);
-    localrc = io_xml->writeElement("documentID", "some generated GUID", 1, 0);
+    localrc = io_xml->writeElement("documentID", "abcdefgh-1234-4321-4242-zyxwvutsrqpo", 1, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeElement("documentVersion", 
-      "any string of numbers, optionally including \".\" (ie: 1.2.3)", 1, 0);
+      "1.2.3", 1, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeElement("documentCreationDate", 
-      "the current date, formatted like 2012-09-25T09:54:30", 1, 0);
+      "2012-09-25T09:54:30", 1, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = io_xml->writeEndElement("gridSpec", 1);
