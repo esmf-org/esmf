@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.115 2012/10/03 18:15:25 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.116 2012/10/11 05:29:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.115 2012/10/03 18:15:25 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.116 2012/10/11 05:29:18 theurich Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -2099,7 +2099,7 @@ contains
 !     See Section~\ref{sec:AttPacks} for a description of Attribute packages
 !     and their conventions, purposes, and object types.  The Attribute can
 !     also be set to be a pointer to internal class information.  See Section
-!     \ref(sec:InternalInfo) for a description of this capability.
+!     \ref{sec:InternalInfo} for a description of this capability.
 !
 !     Supported values for <object> are:
 !     \begin{description}
