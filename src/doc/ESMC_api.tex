@@ -1,4 +1,4 @@
-% $Id: ESMC_api.tex,v 1.18 2012/07/12 19:38:58 rokuingh Exp $
+% $Id: ESMC_api.tex,v 1.19 2012/10/11 04:02:03 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -283,94 +283,6 @@ FieldBundles, States, and other classes.
 as a consistent way of setting configuration parameters.
 \end{itemize}
 
-\section{Overall Rules and Behavior}
-
-\subsection{Local and Global Views and Associated Conventions}
-
-ESMF data objects such as Fields are distributed over
-DEs, with each DE getting a portion of the data.  Depending
-on the task, a local or global view of the object may be
-preferable.  In a local view, data indices start with the first
-element on the DE and end with the last element on the same DE.
-In a global view, there is an assumed or specified order to
-the set of DEs over which the object is distributed.  Data
-indices start with the first element on the first DE, and
-continue across all the elements in the sequence of DEs.
-The last data index represents the number of elements in the
-entire object.  The DistGrid provides the mapping between
-local and global data indices.
-
-The convention in ESMF is that entities with a global view
-have no prefix.  Entities with a DE-local (and in some cases,
-PET-local) view have the prefix ``local.''
-
-Just as data is distributed over DEs, DEs themselves can be
-distributed over PETs.  This is an advanced feature for users
-who would like to create multiple local chunks of data, for
-algorithmic or performance reasons.
-Local DEs are those DEs that are located on the local PET.
-Local DE labeling always starts at 0 and goes to localDeCount-1,
-where localDeCount is the number of DEs on the local PET.
-Global DE numbers also start at 0 and go to deCount-1.
-The DELayout class provides the mapping between local
-and global DE numbers. 
-
-\subsection{Allocation Rules}
-
-The basic rule of allocation and deallocation for the ESMF is:
-whoever allocates it is responsible for deallocating it.
-
-ESMF methods that allocate their own space for data will
-deallocate that space when the object is destroyed. 
-Methods which accept a user-allocated buffer, for example
-{\tt ESMC\_FieldCreate()} with the {\tt ESMF\_DATACOPY\_REFERENCE} flag,
-will not deallocate that buffer at the time the object is
-destroyed.  The user must deallocate the buffer
-when all use of it is complete.
-
-Classes such as Fields, FieldBundles, and States may have Arrays, 
-Fields, Grids and FieldBundles created externally and associated with
-them.  These associated items are not destroyed along with the rest  
-of the data object since it is possible for the items to be added 
-to more than one data object at a time (e.g. the same Grid could 
-be part of many Fields).  It is the user's responsibility to delete 
-these items when the last use of them is done.
-
-\subsection{Assignment, Equality, Copying and Comparing Objects}
-
-The equal sign assignment has not been overloaded in ESMF, thus resulting in
-the standard C behavior. This behavior has been documented as the first
-entry in the API documentation section for each ESMF class. For deep ESMF
-objects the assignment results in setting an alias the the same ESMF object
-in memory. For shallow ESMF objects the assignment is essentially a equivalent
-to a copy of the object. For deep classes the equality operators have been
-overloaded to test for the alias condition as a counter part to the assignment
-behavior. This and the not equal operator are documented following the
-assignemnt in the class API documentation sections. 
-
-Deep object copies are implemented as a special variant of the
-{\tt ESMC\_<Class>Create()} methods. It takes an existing deep object as
-on of the required arguments. At this point not all deep classes have
-{\tt ESMC\_<Class>Create()} methods that allow object copy.
-
-Due to the complexity of deep classes there are many aspects when comparing two
-objects of the same class. ESMF provide {\tt ESMC\_<Class>Match()} methods,
-which are functions that return a class specific match flag. At this point not
-all deep classes have {\tt ESMC\_<Class>Match()} methods that allow deep object
-comparison.
-
-%\subsection{Attributes}
-%
-%Attributes are (name, value) pairs, where
-%the name is a character string and the value can be either a single
-%value or list of {\tt int}, {\tt double}, or {\tt char *} values.
-%Attributes can be associated with Fields, FieldBundles, and States. 
-%Mixed types are not allowed in a single attribute, and all attribute
-%names must be unique within a single object.    Attributes are set
-%by name, and can be retrieved either directly by name or by querying
-%for a count of attributes and retrieving names and values
-%by index number.
-
 \section{Integrating ESMF into Applications}
 
 Depending on the requirements of the application, the user may 
@@ -473,12 +385,91 @@ ESMF_<CONSTANT_NAME>_<VALUE3>
 A master list of all available constants can be found in section 
 \ref{const:cmaster}.
 
+\section{Overall Rules and Behavior}
 
+\subsection{Local and Global Views and Associated Conventions}
 
+ESMF data objects such as Fields are distributed over
+DEs, with each DE getting a portion of the data.  Depending
+on the task, a local or global view of the object may be
+preferable.  In a local view, data indices start with the first
+element on the DE and end with the last element on the same DE.
+In a global view, there is an assumed or specified order to
+the set of DEs over which the object is distributed.  Data
+indices start with the first element on the first DE, and
+continue across all the elements in the sequence of DEs.
+The last data index represents the number of elements in the
+entire object.  The DistGrid provides the mapping between
+local and global data indices.
 
+The convention in ESMF is that entities with a global view
+have no prefix.  Entities with a DE-local (and in some cases,
+PET-local) view have the prefix ``local.''
 
+Just as data is distributed over DEs, DEs themselves can be
+distributed over PETs.  This is an advanced feature for users
+who would like to create multiple local chunks of data, for
+algorithmic or performance reasons.
+Local DEs are those DEs that are located on the local PET.
+Local DE labeling always starts at 0 and goes to localDeCount-1,
+where localDeCount is the number of DEs on the local PET.
+Global DE numbers also start at 0 and go to deCount-1.
+The DELayout class provides the mapping between local
+and global DE numbers. 
 
+\subsection{Allocation Rules}
 
+The basic rule of allocation and deallocation for the ESMF is:
+whoever allocates it is responsible for deallocating it.
 
+ESMF methods that allocate their own space for data will
+deallocate that space when the object is destroyed. 
+Methods which accept a user-allocated buffer, for example
+{\tt ESMC\_FieldCreate()} with the {\tt ESMF\_DATACOPY\_REFERENCE} flag,
+will not deallocate that buffer at the time the object is
+destroyed.  The user must deallocate the buffer
+when all use of it is complete.
 
+Classes such as Fields, FieldBundles, and States may have Arrays, 
+Fields, Grids and FieldBundles created externally and associated with
+them.  These associated items are not destroyed along with the rest  
+of the data object since it is possible for the items to be added 
+to more than one data object at a time (e.g. the same Grid could 
+be part of many Fields).  It is the user's responsibility to delete 
+these items when the last use of them is done.
+
+\subsection{Assignment, Equality, Copying and Comparing Objects}
+
+The equal sign assignment has not been overloaded in ESMF, thus resulting in
+the standard C behavior. This behavior has been documented as the first
+entry in the API documentation section for each ESMF class. For deep ESMF
+objects the assignment results in setting an alias the the same ESMF object
+in memory. For shallow ESMF objects the assignment is essentially a equivalent
+to a copy of the object. For deep classes the equality operators have been
+overloaded to test for the alias condition as a counter part to the assignment
+behavior. This and the not equal operator are documented following the
+assignemnt in the class API documentation sections. 
+
+Deep object copies are implemented as a special variant of the
+{\tt ESMC\_<Class>Create()} methods. It takes an existing deep object as
+on of the required arguments. At this point not all deep classes have
+{\tt ESMC\_<Class>Create()} methods that allow object copy.
+
+Due to the complexity of deep classes there are many aspects when comparing two
+objects of the same class. ESMF provide {\tt ESMC\_<Class>Match()} methods,
+which are functions that return a class specific match flag. At this point not
+all deep classes have {\tt ESMC\_<Class>Match()} methods that allow deep object
+comparison.
+
+%\subsection{Attributes}
+%
+%Attributes are (name, value) pairs, where
+%the name is a character string and the value can be either a single
+%value or list of {\tt int}, {\tt double}, or {\tt char *} values.
+%Attributes can be associated with Fields, FieldBundles, and States. 
+%Mixed types are not allowed in a single attribute, and all attribute
+%names must be unique within a single object.    Attributes are set
+%by name, and can be retrieved either directly by name or by querying
+%for a count of attributes and retrieving names and values
+%by index number.
 

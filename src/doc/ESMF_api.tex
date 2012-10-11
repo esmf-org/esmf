@@ -1,4 +1,4 @@
-% $Id: ESMF_api.tex,v 1.58 2012/07/12 19:38:58 rokuingh Exp $
+% $Id: ESMF_api.tex,v 1.59 2012/10/11 04:02:03 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -288,6 +288,85 @@ FieldBundles, States, and other classes.
 as a consistent way of setting configuration parameters.
 \end{itemize}
 
+\section{Integrating ESMF into Applications}
+
+Depending on the requirements of the application, the user may 
+want to begin integrating ESMF in either a top-down or bottom-up 
+manner.  In the top-down approach, tools at the superstructure 
+level are used to help reorganize and structure the interactions
+among large-scale components in the application.  It is appropriate
+when interoperability is a primary concern; for example, when 
+several different versions or implementations of components are going 
+to be swapped in, or a particular component is going to be used 
+in multiple contexts.  Another reason for deciding on a top-down 
+approach is that the application contains legacy code that for 
+some reason (e.g., intertwined functions, very large,
+highly performance-tuned, resource limitations) there is little 
+motivation to fully restructure.  The superstructure can usually be 
+incorporated into such applications in a way that is non-intrusive.
+
+In the bottom-up approach, the user selects desired utilities 
+(data communications, calendar management, performance profiling,
+logging and error handling, etc.) from the ESMF infrastructure 
+and either writes new code using them, introduces them into 
+existing code, or replaces the functionality in existing code 
+with them.  This makes sense when maximizing code reuse and 
+minimizing maintenance costs is a goal.  There may be a specific
+need for functionality or the component writer may be starting
+from scratch.  The calendar management utility is a popular
+place to start.
+
+\subsection{Using the ESMF Superstructure}
+
+The following is a typical set of steps involved in adopting
+the ESMF superstructure.  The first two tasks, which occur 
+before an ESMF call is ever made, have the potential to be 
+the most difficult and time-consuming.  They are the work 
+of splitting an application into components and ensuring that
+each component has well-defined stages of execution.  ESMF
+aside, this sort of code structure helps to promote application
+clarity and maintainability, and the effort put into it is likely
+to be a good investment.
+
+\begin{enumerate}
+
+\item Decide how to organize the application as discrete Gridded 
+and Coupler Components.  This might involve reorganizing code
+so that individual components are cleanly separated and their 
+interactions consist of a minimal number of data exchanges.
+
+\item Divide the code for each component into initialize, run, and
+finalize methods.  These methods can be multi-phase, e.g., 
+{\tt init\_1, init\_2}.
+
+\item Pack any data that will be transferred between components
+into ESMF Import and Export State data structures.  This is done
+by first wrapping model data in either ESMF Arrays or Fields.
+Arrays are simpler to create and use than Fields, but carry less
+information and have a more limited range of operations.
+These Arrays and Fields are then added to Import and
+Export States.  They may be packed into ArrayBundles or
+FieldBundles first, for more efficient communications.
+Metadata describing the model data can also be added.
+At the end of this step, the data to be transferred between
+components will be in a compact and largely self-describing
+form.
+
+\item Pack time information into ESMF time management data 
+structures.
+
+\item Using code templates provided in the ESMF distribution, create
+ESMF Gridded and Coupler Components to represent each component
+in the user code.
+
+\item Write a set services routine that sets ESMF entry 
+points for each user component's initialize, run, and finalize 
+methods.
+
+\item Run the application using an ESMF Application Driver.
+
+\end{enumerate} 
+
 \section{Overall Rules and Behavior}
 
 \subsection{Local and Global Views and Associated Conventions}
@@ -402,94 +481,3 @@ ESMF_<CONSTANT_NAME>_<VALUE3>
 
 A master list of all available constants can be found in section 
 \ref{const:master}.
-
-
-\section{Integrating ESMF into Applications}
-
-Depending on the requirements of the application, the user may 
-want to begin integrating ESMF in either a top-down or bottom-up 
-manner.  In the top-down approach, tools at the superstructure 
-level are used to help reorganize and structure the interactions
-among large-scale components in the application.  It is appropriate
-when interoperability is a primary concern; for example, when 
-several different versions or implementations of components are going 
-to be swapped in, or a particular component is going to be used 
-in multiple contexts.  Another reason for deciding on a top-down 
-approach is that the application contains legacy code that for 
-some reason (e.g., intertwined functions, very large,
-highly performance-tuned, resource limitations) there is little 
-motivation to fully restructure.  The superstructure can usually be 
-incorporated into such applications in a way that is non-intrusive.
-
-In the bottom-up approach, the user selects desired utilities 
-(data communications, calendar management, performance profiling,
-logging and error handling, etc.) from the ESMF infrastructure 
-and either writes new code using them, introduces them into 
-existing code, or replaces the functionality in existing code 
-with them.  This makes sense when maximizing code reuse and 
-minimizing maintenance costs is a goal.  There may be a specific
-need for functionality or the component writer may be starting
-from scratch.  The calendar management utility is a popular
-place to start.
-
-\subsection{Using the ESMF Superstructure}
-
-The following is a typical set of steps involved in adopting
-the ESMF superstructure.  The first two tasks, which occur 
-before an ESMF call is ever made, have the potential to be 
-the most difficult and time-consuming.  They are the work 
-of splitting an application into components and ensuring that
-each component has well-defined stages of execution.  ESMF
-aside, this sort of code structure helps to promote application
-clarity and maintainability, and the effort put into it is likely
-to be a good investment.
-
-\begin{enumerate}
-
-\item Decide how to organize the application as discrete Gridded 
-and Coupler Components.  This might involve reorganizing code
-so that individual components are cleanly separated and their 
-interactions consist of a minimal number of data exchanges.
-
-\item Divide the code for each component into initialize, run, and
-finalize methods.  These methods can be multi-phase, e.g., 
-{\tt init\_1, init\_2}.
-
-\item Pack any data that will be transferred between components
-into ESMF Import and Export State data structures.  This is done
-by first wrapping model data in either ESMF Arrays or Fields.
-Arrays are simpler to create and use than Fields, but carry less
-information and have a more limited range of operations.
-These Arrays and Fields are then added to Import and
-Export States.  They may be packed into ArrayBundles or
-FieldBundles first, for more efficient communications.
-Metadata describing the model data can also be added.
-At the end of this step, the data to be transferred between
-components will be in a compact and largely self-describing
-form.
-
-\item Pack time information into ESMF time management data 
-structures.
-
-\item Using code templates provided in the ESMF distribution, create
-ESMF Gridded and Coupler Components to represent each component
-in the user code.
-
-\item Write a set services routine that sets ESMF entry 
-points for each user component's initialize, run, and finalize 
-methods.
-
-\item Run the application using an ESMF Application Driver.
-
-\end{enumerate} 
-
-
-
-
-
-
-
-
-
-
-

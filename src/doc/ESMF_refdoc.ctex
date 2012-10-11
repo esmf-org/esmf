@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.120 2012/10/03 03:41:32 oehmke Exp $
+% $Id: ESMF_refdoc.ctex,v 1.121 2012/10/11 04:02:03 theurich Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -107,6 +107,9 @@
 
 %\subsection{Overall Design and Implementation Notes}
 \input{ESMF_implnotes}
+
+%\subsection{Overall Restrictions and Future Work}
+\input{ESMF_rest}
 
 \newpage
 \begin{htmlonly}
