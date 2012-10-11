@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.35 2012/10/11 14:54:37 w6ws Exp $
+// $Id: ESMC_Init.h,v 1.36 2012/10/11 17:02:21 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -99,17 +99,17 @@ extern "C" {
 //  \item [{[rc]}]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //    {\tt NULL} may be passed when the return code is not desired.
-//  \item [{[ESMC_InitArgDefaultCalKindFlag(ARG)]}]
+//  \item [{[ESMC\_InitArgDefaultCalKindFlag(ARG)]}]
 //    Macro specifying the default calendar kind for the entire
 //    application.  This flag is documented in section \ref{const:calkindflag_c}
 //    If not specified, defaults to {\tt ESMC\_CALKIND\_NOCALENDAR}.
-//  \item [{[ESMC_InitArgDefaultConfigFilename(ARG)]}]
+//  \item [{[ESMC\_InitArgDefaultConfigFilename(ARG)]}]
 //    Macro specifying the name of the default configuration file for the
 //    Config class.  If not specified, no default file is used.
-//  \item [{[ESMC_InitArgLogFilename(ARG)]}]
+//  \item [{[ESMC\_InitArgLogFilename(ARG)]}]
 //    Macro specifying the name used as part of the default log file name for
 //    the default log.  If not specified, defaults to {\tt ESMF\_LogFile}.
-//  \item [{[ESMC_InitArgLogKindFlag(ARG)]}]
+//  \item [{[ESMC\_InitArgLogKindFlag(ARG)]}]
 //    Macro specifying the default Log kind to be used by ESMF Log Manager.
 //    This flag is documented in section \ref{const:clogkindflag}.
 //    If not specified, defaults to {\tt ESMC\_LOGKIND\_MULTI}.
