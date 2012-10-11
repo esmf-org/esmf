@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.36 2012/10/11 17:02:21 w6ws Exp $
+// $Id: ESMC_Init.h,v 1.37 2012/10/11 18:30:20 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@ enum {
   ESMCI_InitArgLogKindFlagID             = ESMCI_ArgBaseID + 3
 };
 
-#define ESMC_InitArgDefaultCalKindFlag(ARG)  \
+#define ESMC_InitArgDefaultCalKind(ARG)  \
 ESMCI_Arg(ESMCI_InitArgDefaultCalKindID,ARG)
 #define ESMC_InitArgDefaultConfigFilename(ARG)  \
 ESMCI_Arg(ESMCI_InitArgDefaultConfigFilenameID,ARG)
@@ -59,7 +59,7 @@ extern "C" {
 // !INTERFACE:
   int ESMC_Initialize(
     int *rc,        // return code
-    ...);           // optional arguments
+    ...);           // optional arguments (see below)
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -99,9 +99,10 @@ extern "C" {
 //  \item [{[rc]}]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //    {\tt NULL} may be passed when the return code is not desired.
-//  \item [{[ESMC\_InitArgDefaultCalKindFlag(ARG)]}]
+//  \item [{[ESMC\_InitArgDefaultCalKind(ARG)]}]
 //    Macro specifying the default calendar kind for the entire
-//    application.  This flag is documented in section \ref{const:calkindflag_c}
+//    application.  Valid values for {\tt ARG} are documented in section
+//    \ref{const:calkindflag_c}.
 //    If not specified, defaults to {\tt ESMC\_CALKIND\_NOCALENDAR}.
 //  \item [{[ESMC\_InitArgDefaultConfigFilename(ARG)]}]
 //    Macro specifying the name of the default configuration file for the
@@ -111,7 +112,8 @@ extern "C" {
 //    the default log.  If not specified, defaults to {\tt ESMF\_LogFile}.
 //  \item [{[ESMC\_InitArgLogKindFlag(ARG)]}]
 //    Macro specifying the default Log kind to be used by ESMF Log Manager.
-//    This flag is documented in section \ref{const:clogkindflag}.
+//    Valid values for {\tt ARG} are  documented in section
+//    \ref{const:clogkindflag}.
 //    If not specified, defaults to {\tt ESMC\_LOGKIND\_MULTI}.
 //  \item [ESMC\_ArgLast]
 //    Macro indicating the end of the optional argument list.  This must be
