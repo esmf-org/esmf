@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.C,v 1.22 2012/09/20 16:46:43 w6ws Exp $
+// $Id: ESMC_Init.C,v 1.23 2012/10/11 14:54:43 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@ extern "C" {
     ESMCI_ArgStart(argPtr, rc);
     while ( (argID=ESMCI_ArgGetID(argPtr)) != ESMCI_ArgLastID ) {
       switch ( argID ) {
-        case ESMCI_InitArgDefaultCalendarID:
+        case ESMCI_InitArgDefaultCalKindID:
           ESMCI_ArgGetInt(argPtr);
           break;
         case ESMCI_InitArgDefaultConfigFilenameID:
@@ -90,7 +90,7 @@ extern "C" {
     ESMCI_ArgStart(argPtr, rc);
     while ( (argID=ESMCI_ArgGetID(argPtr)) != ESMCI_ArgLastID ) {
       switch ( argID ) {
-        case ESMCI_InitArgDefaultCalendarID:
+        case ESMCI_InitArgDefaultCalKindID:
           defaultCalendar = (ESMC_CalKind_Flag)ESMCI_ArgGetInt(argPtr);
           break;
         case ESMCI_InitArgDefaultConfigFilenameID:

@@ -1,4 +1,4 @@
-// $Id: ESMC_Init.h,v 1.34 2012/09/21 15:43:49 w6ws Exp $
+// $Id: ESMC_Init.h,v 1.35 2012/10/11 14:54:37 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -32,11 +32,20 @@
 
 // identifier list for optional ESMC arguments
 enum {
-  ESMCI_InitArgDefaultCalendarID         = ESMCI_ArgBaseID,
+  ESMCI_InitArgDefaultCalKindID          = ESMCI_ArgBaseID,
   ESMCI_InitArgDefaultConfigFilenameID   = ESMCI_ArgBaseID + 1,
   ESMCI_InitArgLogFilenameID             = ESMCI_ArgBaseID + 2,
   ESMCI_InitArgLogKindFlagID             = ESMCI_ArgBaseID + 3
 };
+
+#define ESMC_InitArgDefaultCalKindFlag(ARG)  \
+ESMCI_Arg(ESMCI_InitArgDefaultCalKindID,ARG)
+#define ESMC_InitArgDefaultConfigFilename(ARG)  \
+ESMCI_Arg(ESMCI_InitArgDefaultConfigFilenameID,ARG)
+#define ESMC_InitArgLogFilename(ARG)  \
+ESMCI_Arg(ESMCI_InitArgLogFilenameID,ARG)
+#define ESMC_InitArgLogKindFlag(ARG)  \
+ESMCI_Arg(ESMCI_InitArgLogKindFlagID,ARG)
 
 // prototypes for C routines
 
@@ -51,14 +60,6 @@ extern "C" {
   int ESMC_Initialize(
     int *rc,        // return code
     ...);           // optional arguments
-#define ESMC_InitArgDefaultCalendarFlag(ARG)  \
-ESMCI_Arg(ESMCI_InitArgDefaultCalendarID,ARG)
-#define ESMC_InitArgDefaultConfigFilename(ARG)  \
-ESMCI_Arg(ESMCI_InitArgDefaultConfigFilenameID,ARG)
-#define ESMC_InitArgLogFilename(ARG)  \
-ESMCI_Arg(ESMCI_InitArgLogFilenameID,ARG)
-#define ESMC_InitArgLogKindFlag(ARG)  \
-ESMCI_Arg(ESMCI_InitArgLogKindFlagID,ARG)
 
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
@@ -80,7 +81,7 @@ ESMCI_Arg(ESMCI_InitArgLogKindFlagID,ARG)
 //
 //  Optional arguments are recognised.  To indicate the end of the optional
 //  argument list, {\tt ESMC\_ArgLast} must be used.  A minimal call to
-//  {\tt ESMC\_initialize()} would be:
+//  {\tt ESMC\_Initialize()} would be:
 // \begin{verbatim}
 //    ESMC_Initialize (NULL, ESMC_ArgLast);\end{verbatim}
 //  The optional arguments are specified using the {\tt ESMC\_InitArg} macros.
@@ -98,24 +99,23 @@ ESMCI_Arg(ESMCI_InitArgLogKindFlagID,ARG)
 //  \item [{[rc]}]
 //    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 //    {\tt NULL} may be passed when the return code is not desired.
-//  \item [{[defaultCalendar]}]
-//    Name of the default calendar for the entire application.
-//    This flag is documented in section \ref{const:calkindflag_c}
+//  \item [{[ESMC_InitArgDefaultCalKindFlag(ARG)]}]
+//    Macro specifying the default calendar kind for the entire
+//    application.  This flag is documented in section \ref{const:calkindflag_c}
 //    If not specified, defaults to {\tt ESMC\_CALKIND\_NOCALENDAR}.
-//  \item [{[defaultConfigFilename]}]
-//    Name of the default configuration file for the Config class.
-//    If not specified, no default file is used.
-//  \item [{[defaultLogFilename]}]
-//    Name used as part of the default log file name for the default log.
-//    If not specified, defaults to {\tt ESMF\_LogFile}.
-//  \item [{[LogKindFlag]}]
-//    Sets the default Log kind to be used by ESMF Log Manager.
+//  \item [{[ESMC_InitArgDefaultConfigFilename(ARG)]}]
+//    Macro specifying the name of the default configuration file for the
+//    Config class.  If not specified, no default file is used.
+//  \item [{[ESMC_InitArgLogFilename(ARG)]}]
+//    Macro specifying the name used as part of the default log file name for
+//    the default log.  If not specified, defaults to {\tt ESMF\_LogFile}.
+//  \item [{[ESMC_InitArgLogKindFlag(ARG)]}]
+//    Macro specifying the default Log kind to be used by ESMF Log Manager.
 //    This flag is documented in section \ref{const:clogkindflag}.
 //    If not specified, defaults to {\tt ESMC\_LOGKIND\_MULTI}.
 //  \item [ESMC\_ArgLast]
-//    The {\tt ESMC\_ArgLast} macro is always required as a final argument
-//    to indicate the end of the optional argument list.  This must be provided
-//    even when there are no optional arguments.
+//    Macro indicating the end of the optional argument list.  This must be
+//    provided even when there are no optional arguments.
 //  \end{description}
 //EOP
 //-----------------------------------------------------------------------------
