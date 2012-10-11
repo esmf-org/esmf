@@ -1,4 +1,4 @@
-% $Id: Mesh_crefdoc.ctex,v 1.9 2012/01/06 20:17:43 svasquez Exp $
+% $Id: Mesh_crefdoc.ctex,v 1.10 2012/10/11 00:19:04 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -21,8 +21,17 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{\Large {\bf Mesh Reference}}
-\newcommand{\myauthors}{\large {\it David Neckels}}
+\newcommand{\mytitle}{\Large {\bf Mesh C Reference}}
+\newcommand{\myauthors}{\large {\it David Neckels and Bob Oehmke}}
+% set a standard paragraph style
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+% these are temporary patches until something more
+% permanent is done to the protex script.
+\newlength{\oldparskip}
+\newlength{\oldparindent}
+\newlength{\oldbaselineskip}
 #endif
 
 #ifdef STANDALONE
@@ -39,6 +48,8 @@
 \tableofcontents
 
 \newpage
+\setlength{\parskip}{1.5ex}
+
 #endif
 
 

@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.5 2007/11/17 00:33:14 theurich Exp $
+# $Id: makefile,v 1.6 2012/10/11 00:18:59 theurich Exp $
 
 All: onedoc
 
-LOCDIR = src/Infrastructure/LocalArray/doc
+LOCDIR    = src/Infrastructure/LocalArray/doc
 
-DVIFILES = LocalArray_refdoc.dvi
-PDFFILES  = $(ESMC_DOCDIR)/LocalArray_refdoc.pdf
-HTMLFILES = $(ESMC_DOCDIR)/LocalArray_refdoc
+DVIFILES  = LocalArray_refdoc.dvi
+PDFFILES  = LocalArray_refdoc.pdf
+HTMLFILES = LocalArray_refdoc
 
 #
 # Tex Files to make

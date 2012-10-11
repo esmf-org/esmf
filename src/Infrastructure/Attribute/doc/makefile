@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.3 2012/10/03 22:20:05 theurich Exp $
+# $Id: makefile,v 1.4 2012/10/11 00:18:42 theurich Exp $
 
-ALL: onedoc
+All: onedoc
 
-LOCDIR = src/Infrastructure/Attribute/doc
+LOCDIR    = src/Infrastructure/Attribute/doc
 
 DVIFILES  = Attribute_refdoc.dvi
-PDFFILES  = ${ESMC_DOCDIR}/Attribute_refdoc.pdf
-HTMLFILES = ${ESMC_DOCDIR}/Attribute_refdoc
+PDFFILES  = Attribute_refdoc.pdf
+HTMLFILES = Attribute_refdoc
 
 #
 # Tex Files to make
@@ -17,12 +17,14 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.F90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.cppF90))))
 
 TEXFILES_TO_MAKE += $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../interface/*.C))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.F))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.F90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.f90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.cppF90))))
 
 TEXFILES_TO_MAKE += $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../examples/*.C))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.F))))
@@ -38,12 +40,14 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXF
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/src/*.F90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/src/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/src/*.f90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/src/*.cppF90))))
 
 TEXFILES_TO_MAKE += $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/interface/*.C))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/interface/*.F))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/interface/*.F90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/interface/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/interface/*.f90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/interface/*.cppF90))))
 
 TEXFILES_TO_MAKE += $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/examples/*.C))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard $(TEXFILES_TO_MAKE_XDIR)/examples/*.F))))

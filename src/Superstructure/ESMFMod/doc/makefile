@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.6 2008/09/26 05:18:12 cdeluca Exp $ 
+# $Id: makefile,v 1.7 2012/10/11 00:19:22 theurich Exp $ 
 
 ALL: onedoc
 
 LOCDIR	  = src/Superstructure/ESMFMod/doc
 
-DVIFILES  =     ESMFMod_refdoc.dvi
-PDFFILES  =     $(ESMC_DOCDIR)/ESMFMod_refdoc.pdf
-HTMLFILES =     $(ESMC_DOCDIR)/ESMFMod_refdoc
+DVIFILES  = 
+PDFFILES  = 
+HTMLFILES = 
 
 #
 # Tex Files to make
@@ -17,9 +17,11 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.F90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.cppF90))))
 
 TEXFILES_TO_MAKE += $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../interface/*.C))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.F90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.cppF90))))
 
 TEXFILES_TO_MAKE += $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../examples/*.C))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.F))))

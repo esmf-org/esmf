@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.12 2012/09/24 23:24:19 theurich Exp $
+# $Id: makefile,v 1.13 2012/10/11 00:19:10 theurich Exp $
 
 All: onedoc
 
 LOCDIR    = src/Infrastructure/Route/doc
 
 DVIFILES  = RHandle_refdoc.dvi RHandle_crefdoc.dvi
-PDFFILES  = $(ESMC_DOCDIR)/RHandle_refdoc.pdf $(ESMC_DOCDIR)/RHandle_crefdoc.pdf
-HTMLFILES = $(ESMC_DOCDIR)/RHandle_refdoc $(ESMC_DOCDIR)/RHandle_crefdoc
+PDFFILES  = RHandle_refdoc.pdf RHandle_crefdoc.pdf
+HTMLFILES = RHandle_refdoc RHandle_crefdoc
 
 #
 # Tex Files to make

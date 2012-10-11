@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.5 2007/09/27 17:52:32 theurich Exp $
+# $Id: makefile,v 1.6 2012/10/11 00:18:46 theurich Exp $
 
-ALL: onedoc
+All: onedoc
 
-LOCDIR = src/Infrastructure/Config/doc
+LOCDIR    = src/Infrastructure/Config/doc
 
-DVIFILES  =	Config_refdoc.dvi
-PDFFILES  =     ${ESMC_DOCDIR}/Config_refdoc.pdf
-HTMLFILES =	${ESMC_DOCDIR}/Config_refdoc
+DVIFILES  = Config_refdoc.dvi
+PDFFILES  = Config_refdoc.pdf
+HTMLFILES = Config_refdoc
 
 #
 # Tex Files to make
@@ -17,6 +17,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.F90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.cppF90))))
 
 TEXFILES_TO_MAKE += $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../examples/*.C))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.F))))

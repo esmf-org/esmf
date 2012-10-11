@@ -1,4 +1,4 @@
-% $Id: Mesh_refdoc.ctex,v 1.7 2011/06/30 15:34:28 rokuingh Exp $
+% $Id: Mesh_refdoc.ctex,v 1.8 2012/10/11 00:19:04 theurich Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -13,8 +13,17 @@
 \textwidth 6.5in
 \textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
-\newcommand{\mytitle}{Mesh Design}
-\newcommand{\myauthors}{David Neckels}
+\newcommand{\mytitle}{Mesh Fortran Reference}
+\newcommand{\myauthors}{David Neckels and Bob Oehmke}
+% set a standard paragraph style
+\setlength{\parskip}{0pt}
+\setlength{\parindent}{0pt}
+\setlength{\baselineskip}{11pt}
+% these are temporary patches until something more
+% permanent is done to the protex script.
+\newlength{\oldparskip}
+\newlength{\oldparindent}
+\newlength{\oldbaselineskip}
 #endif
 
 #ifdef STANDALONE
@@ -31,6 +40,8 @@
 \tableofcontents
 
 \newpage
+\setlength{\parskip}{1.5ex}
+
 #endif
 
 \section{Mesh Class}

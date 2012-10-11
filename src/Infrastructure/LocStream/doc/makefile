@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.3 2008/09/26 04:17:23 cdeluca Exp $ 
+# $Id: makefile,v 1.4 2012/10/11 00:18:58 theurich Exp $ 
 
-ALL: onedoc
+All: onedoc
 
 LOCDIR	  = src/Infrastructure/LocStream/doc
 
-DVIFILES  =	LocStream_refdoc.dvi
-PDFFILES  =     $(ESMC_DOCDIR)/LocStream_refdoc.pdf
-HTMLFILES =	$(ESMC_DOCDIR)/LocStream_refdoc
+DVIFILES  = LocStream_refdoc.dvi LocStream_crefdoc.dvi
+PDFFILES  = LocStream_refdoc.pdf LocStream_crefdoc.pdf
+HTMLFILES = LocStream_refdoc LocStream_crefdoc
 
 #
 # Tex Files to make
@@ -17,6 +17,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.F90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.cppF90))))
 
 TEXFILES_TO_MAKE += $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../examples/*.C))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.F))))
@@ -28,6 +29,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../int
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.F90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.f90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.cppF90))))
 
 #
 # Files that a doc depends on.  Do not list the the ctex file !  

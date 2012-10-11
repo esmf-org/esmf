@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.11 2011/04/05 15:10:31 theurich Exp $ 
+# $Id: makefile,v 1.12 2012/10/11 00:19:24 theurich Exp $ 
 
 ALL: onedoc
 
 LOCDIR	  = src/Superstructure/State/doc
 
 DVIFILES  = State_refdoc.dvi State_crefdoc.dvi
-PDFFILES  = $(ESMC_DOCDIR)/State_refdoc.pdf $(ESMC_DOCDIR)/State_crefdoc.pdf
-HTMLFILES = $(ESMC_DOCDIR)/State_refdoc $(ESMC_DOCDIR)/State_crefdoc
+PDFFILES  = State_refdoc.pdf State_crefdoc.pdf
+HTMLFILES = State_refdoc State_crefdoc
 
 #
 # Tex Files to make

@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.21 2008/09/26 04:17:29 cdeluca Exp $
+# $Id: makefile,v 1.22 2012/10/11 00:19:12 theurich Exp $
 
-ALL: onedoc
+All: onedoc
 
 LOCDIR	  = src/Infrastructure/TimeMgr/doc
 
-DVIFILES  =	TimeMgr_refdoc.dvi
-PDFFILES  =     ${ESMC_DOCDIR}/TimeMgr_refdoc.pdf
-HTMLFILES = 	${ESMC_DOCDIR}/TimeMgr_refdoc
+DVIFILES  = TimeMgr_refdoc.dvi TimeMgr_crefdoc.dvi
+PDFFILES  = TimeMgr_refdoc.pdf TimeMgr_crefdoc.pdf
+HTMLFILES = TimeMgr_refdoc TimeMgr_crefdoc
 
 # 
 # Tex files to make

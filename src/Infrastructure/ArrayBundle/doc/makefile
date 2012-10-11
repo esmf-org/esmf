@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.2 2008/05/08 02:27:12 theurich Exp $
+# $Id: makefile,v 1.3 2012/10/11 00:18:38 theurich Exp $
 
 All: onedoc
 
 LOCDIR = src/Infrastructure/ArrayBundle/doc
 
-DVIFILES = ArrayBundle_refdoc.dvi
-PDFFILES  = $(ESMC_DOCDIR)/ArrayBundle_refdoc.pdf
-HTMLFILES = $(ESMC_DOCDIR)/ArrayBundle_refdoc
+DVIFILES  = ArrayBundle_refdoc.dvi
+PDFFILES  = ArrayBundle_refdoc.pdf
+HTMLFILES = ArrayBundle_refdoc
 
 #
 # Tex Files to make

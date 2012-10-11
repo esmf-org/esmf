@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.1 2011/04/18 18:05:31 theurich Exp $ 
+# $Id: makefile,v 1.2 2012/10/11 00:19:26 theurich Exp $ 
 
 ALL: onedoc
 
 LOCDIR	  = src/Superstructure/WebServices/doc
 
 DVIFILES  = WebServices_refdoc.dvi
-PDFFILES  = $(ESMC_DOCDIR)/WebServices_refdoc.pdf
-HTMLFILES = $(ESMC_DOCDIR)/WebServices_refdoc
+PDFFILES  = WebServices_refdoc.pdf
+HTMLFILES = WebServices_refdoc
 
 #
 # Tex Files to make

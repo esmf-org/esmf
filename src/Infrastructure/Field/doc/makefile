@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.17 2010/10/14 23:20:07 theurich Exp $ 
+# $Id: makefile,v 1.18 2012/10/11 00:18:51 theurich Exp $ 
 
 All: onedoc
 
 LOCDIR    = src/Infrastructure/Field/doc
 
 DVIFILES  = Field_refdoc.dvi Field_crefdoc.dvi
-PDFFILES  = $(ESMC_DOCDIR)/Field_refdoc.pdf $(ESMC_DOCDIR)/Field_crefdoc.pdf
-HTMLFILES = $(ESMC_DOCDIR)/Field_refdoc $(ESMC_DOCDIR)/Field_crefdoc
+PDFFILES  = Field_refdoc.pdf Field_crefdoc.pdf
+HTMLFILES = Field_refdoc Field_crefdoc
 
 #
 # Tex Files to make

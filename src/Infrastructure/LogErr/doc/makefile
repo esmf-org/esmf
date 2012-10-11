@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.13 2010/10/15 17:34:29 theurich Exp $
+# $Id: makefile,v 1.14 2012/10/11 00:19:01 theurich Exp $
 
-ALL: onedoc
+All: onedoc
 
 LOCDIR	  = src/Infrastructure/LogErr/doc
 
 DVIFILES  = LogErr_refdoc.dvi LogErr_crefdoc.dvi
-PDFFILES  = ${ESMC_DOCDIR}/LogErr_refdoc.pdf ${ESMC_DOCDIR}/LogErr_crefdoc.pdf
-HTMLFILES = ${ESMC_DOCDIR}/LogErr_refdoc ${ESMC_DOCDIR}/LogErr_crefdoc
+PDFFILES  = LogErr_refdoc.pdf LogErr_crefdoc.pdf
+HTMLFILES = LogErr_refdoc LogErr_crefdoc
 
 #
 # Tex Files to make
@@ -17,6 +17,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.F90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.cppF90))))
 
 TEXFILES_TO_MAKE += $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../examples/*.C))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.F))))
@@ -29,6 +30,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../int
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.F90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.f90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../interface/*.cppF90))))
 
 #
 # Files that a doc depends on.  Do not list the the ctex file !  

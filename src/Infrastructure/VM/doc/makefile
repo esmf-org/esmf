@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.8 2010/09/16 04:33:44 theurich Exp $
+# $Id: makefile,v 1.9 2012/10/11 00:19:15 theurich Exp $
 
-ALL: onedoc
+All: onedoc
 
 LOCDIR    = src/Infrastructure/VM/doc
 
 DVIFILES  = VM_refdoc.dvi VM_crefdoc.dvi
-PDFFILES  = $(ESMC_DOCDIR)/VM_refdoc.pdf $(ESMC_DOCDIR)/VM_crefdoc.pdf
-HTMLFILES = $(ESMC_DOCDIR)/VM_refdoc $(ESMC_DOCDIR)/VM_crefdoc
+PDFFILES  = VM_refdoc.pdf VM_crefdoc.pdf
+HTMLFILES = VM_refdoc VM_crefdoc
 
 #
 # Tex Files to make

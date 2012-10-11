@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.1 2011/04/05 15:10:25 theurich Exp $ 
+# $Id: makefile,v 1.2 2012/10/11 00:19:18 theurich Exp $ 
 
 ALL: onedoc
 
 LOCDIR	  = src/Superstructure/AttachMethods/doc
 
 DVIFILES  = AttachMethods_refdoc.dvi
-PDFFILES  = $(ESMC_DOCDIR)/AttachMethods_refdoc.pdf
-HTMLFILES = $(ESMC_DOCDIR)/AttachMethods_refdoc
+PDFFILES  = AttachMethods_refdoc.pdf
+HTMLFILES = AttachMethods_refdoc
 
 #
 # Tex Files to make

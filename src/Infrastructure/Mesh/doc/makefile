@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.3 2010/09/24 22:56:57 theurich Exp $ 
+# $Id: makefile,v 1.4 2012/10/11 00:19:04 theurich Exp $ 
 
 All: onedoc
 
 LOCDIR    = src/Infrastructure/Mesh/doc
 
 DVIFILES  = Mesh_refdoc.dvi Mesh_crefdoc.dvi
-PDFFILES  = $(ESMC_DOCDIR)/Mesh_refdoc.pdf $(ESMC_DOCDIR)/Mesh_crefdoc.pdf
-HTMLFILES = $(ESMC_DOCDIR)/Mesh_refdoc $(ESMC_DOCDIR)/Mesh_crefdoc
+PDFFILES  = Mesh_refdoc.pdf Mesh_crefdoc.pdf
+HTMLFILES = Mesh_refdoc Mesh_crefdoc
 
 #
 # Tex Files to make

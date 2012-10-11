@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.18 2008/09/26 21:11:38 cdeluca Exp $ 
+# $Id: makefile,v 1.19 2012/10/11 00:19:07 theurich Exp $ 
 
-ALL: onedoc
+All: onedoc
 
 LOCDIR	  = src/Infrastructure/Regrid/doc
 

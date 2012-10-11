@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.17 2011/06/03 05:18:31 theurich Exp $
+# $Id: makefile,v 1.18 2012/10/11 00:18:50 theurich Exp $
 
 All: onedoc
 
 LOCDIR    = src/Infrastructure/DistGrid/doc
 
 DVIFILES  = DistGrid_refdoc.dvi DistGrid_crefdoc.dvi
-PDFFILES  = $(ESMC_DOCDIR)/DistGrid_refdoc.pdf $(ESMC_DOCDIR)/DistGrid_crefdoc.pdf
-HTMLFILES = $(ESMC_DOCDIR)/DistGrid_refdoc $(ESMC_DOCDIR)/DistGrid_crefdoc
+PDFFILES  = DistGrid_refdoc.pdf DistGrid_crefdoc.pdf
+HTMLFILES = DistGrid_refdoc DistGrid_crefdoc
 
 #
 # Tex Files to make

@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.7 2006/11/16 23:55:55 cdeluca Exp $
+# $Id: makefile,v 1.8 2012/10/11 00:18:48 theurich Exp $
 
-ALL: onedoc
+All: onedoc
 
-LOCDIR = src/Infrastructure/DELayout/doc
+LOCDIR    = src/Infrastructure/DELayout/doc
 
-DVIFILES = DELayout_refdoc.dvi
-PDFFILES  = $(ESMC_DOCDIR)/DELayout_refdoc.pdf
-HTMLFILES = $(ESMC_DOCDIR)/DELayout_refdoc
+DVIFILES  = DELayout_refdoc.dvi DELayout_crefdoc.dvi
+PDFFILES  = DELayout_refdoc.pdf DELayout_crefdoc.pdf
+HTMLFILES = DELayout_refdoc DELayout_crefdoc
 
 #
 # Tex Files to make

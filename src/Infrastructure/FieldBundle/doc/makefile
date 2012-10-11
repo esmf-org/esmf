@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.3 2008/09/26 04:16:49 cdeluca Exp $ 
+# $Id: makefile,v 1.4 2012/10/11 00:18:53 theurich Exp $ 
 
-ALL: onedoc 
+All: onedoc 
 
 LOCDIR	  = src/Infrastructure/FieldBundle/doc
 
-DVIFILES  = 	FieldBundle_refdoc.dvi
-PDFFILES  =	${ESMC_DOCDIR}/FieldBundle_refdoc.pdf
-HTMLFILES = 	${ESMC_DOCDIR}/FieldBundle_refdoc
+DVIFILES  = FieldBundle_refdoc.dvi FieldBundle_crefdoc.dvi
+PDFFILES  = FieldBundle_refdoc.pdf FieldBundle_crefdoc.pdf
+HTMLFILES = FieldBundle_refdoc FieldBundle_crefdoc
 
 #
 # Tex Files to make

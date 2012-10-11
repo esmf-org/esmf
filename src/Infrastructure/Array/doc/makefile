@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.12 2010/09/16 04:33:44 theurich Exp $
+# $Id: makefile,v 1.13 2012/10/11 00:18:36 theurich Exp $
 
 All: onedoc
 
 LOCDIR    = src/Infrastructure/Array/doc
 
 DVIFILES  = Array_refdoc.dvi Array_crefdoc.dvi
-PDFFILES  = $(ESMC_DOCDIR)/Array_refdoc.pdf $(ESMC_DOCDIR)/Array_crefdoc.pdf
-HTMLFILES = $(ESMC_DOCDIR)/Array_refdoc $(ESMC_DOCDIR)/Array_crefdoc
+PDFFILES  = Array_refdoc.pdf Array_crefdoc.pdf
+HTMLFILES = Array_refdoc Array_crefdoc
 
 #
 # Tex Files to make

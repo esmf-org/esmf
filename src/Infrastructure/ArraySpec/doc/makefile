@@ -1,12 +1,12 @@
-# $Id: makefile,v 1.8 2010/09/16 04:33:44 theurich Exp $ 
+# $Id: makefile,v 1.9 2012/10/11 00:18:40 theurich Exp $ 
 
-ALL: onedoc
+All: onedoc
 
 LOCDIR	  = src/Infrastructure/ArraySpec/doc
 
 DVIFILES  = ArraySpec_refdoc.dvi ArraySpec_crefdoc.dvi 
-PDFFILES  = ${ESMC_DOCDIR}/ArraySpec_refdoc.pdf ${ESMC_DOCDIR}/ArraySpec_crefdoc.pdf
-HTMLFILES = ${ESMC_DOCDIR}/ArraySpec_refdoc ${ESMC_DOCDIR}/ArraySpec_crefdoc 
+PDFFILES  = ArraySpec_refdoc.pdf ArraySpec_crefdoc.pdf
+HTMLFILES = ArraySpec_refdoc ArraySpec_crefdoc 
 
 #
 # Tex Files to make
@@ -17,6 +17,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.F90))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.cppF90))))
 
 TEXFILES_TO_MAKE += $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../examples/*.C))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.F))))
