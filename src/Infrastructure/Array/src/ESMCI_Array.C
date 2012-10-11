@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.168 2012/10/09 00:52:14 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.169 2012/10/11 00:23:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.168 2012/10/09 00:52:14 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.169 2012/10/11 00:23:58 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -10505,8 +10505,8 @@ int Array::sparseMatMul(
     }else if (termorderflag == ESMC_TERMORDER_FREE){
       filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
       filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
-      ESMC_LogDefault.ESMC_LogWrite("setting up free-order",
-        ESMC_LOGMSG_INFO);
+//      ESMC_LogDefault.ESMC_LogWrite("setting up free-order",
+//        ESMC_LOGMSG_INFO);
     }else{
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL, 
         "- not a supported choice for termorderflag under ESMF_COMM_BLOCKING",
@@ -10608,8 +10608,8 @@ int Array::sparseMatMul(
   while (commflag==ESMF_COMM_BLOCKING && !(*finishedflag)){
     // blocking free-order loop
     
-    ESMC_LogDefault.ESMC_LogWrite("...within free-order while",
-      ESMC_LOGMSG_INFO);
+//    ESMC_LogDefault.ESMC_LogWrite("...within free-order while",
+//      ESMC_LOGMSG_INFO);
     
     filterBitField = 0x0; // init. to execute _all_ operations in XXE stream
     // same as non-blocking test and finish
