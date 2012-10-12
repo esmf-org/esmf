@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.13 2012/10/12 18:49:48 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.14 2012/10/12 23:29:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -69,42 +69,42 @@ contains
 !
 ! !INTERFACE:
 subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
-     	         polemethod, regridPoleNPnts, ignoreUnmappedFlag, srcFileType, dstFileType, &
-                 srcRegionalFlag, dstRegionalFlag, srcMeshname, dstMeshname,  &
-		 srcMissingvalueFlag, srcMissingvalueVar, &
-		 dstMissingvalueFlag, dstMissingvalueVar, &
-		 useSrcCoordFlag, srcCoordinateVars, &
-                 useDstCoordFlag, dstCoordinateVars, &
-		 useUserAreaFlag,  largefileFlag, verboseFlag, rc)
+    polemethod, regridPoleNPnts, ignoreUnmappedFlag, srcFileType, dstFileType, &
+    srcRegionalFlag, dstRegionalFlag, srcMeshname, dstMeshname,  &
+    srcMissingvalueFlag, srcMissingvalueVar, &
+    dstMissingvalueFlag, dstMissingvalueVar, &
+    useSrcCoordFlag, srcCoordinateVars, &
+    useDstCoordFlag, dstCoordinateVars, &
+    useUserAreaFlag,  largefileFlag, verboseFlag, rc)
 
 ! !ARGUMENTS:
 
-	character(len=*),  intent(in)         :: srcFile
-	character(len=*),  intent(in)         :: dstFile
-	character(len=*),  intent(in)         :: weightFile
+  character(len=*),             intent(in)            :: srcFile
+  character(len=*),             intent(in)            :: dstFile
+  character(len=*),             intent(in)            :: weightFile
 
-	type(ESMF_RegridMethod_Flag),  intent(in), optional :: regridmethod
-	type(ESMF_PoleMethod_Flag),  intent(in), optional :: polemethod
-	integer,   intent(in), optional       :: regridPoleNPnts
-	logical,     intent(in), optional     :: ignoreUnmappedFlag
-	type(ESMF_FileFormat_Flag), intent(in), optional :: srcFileType
-	type(ESMF_FileFormat_Flag), intent(in), optional :: dstFileType
-	logical,     intent(in), optional     :: srcRegionalFlag
-	logical,     intent(in), optional     :: dstRegionalFlag
-	character(len=*), intent(in), optional :: srcMeshname 
-	character(len=*), intent(in), optional :: dstMeshname 
-	logical,     intent(in), optional      :: srcMissingValueFlag
-	character(len=*), intent(in), optional :: srcMissingvalueVar
-	logical,     intent(in), optional      :: dstMissingValueFlag
-	character(len=*), intent(in), optional :: dstMissingvalueVar
-	logical,     intent(in), optional      :: useSrcCoordFlag
-	character(len=*), intent(in), optional :: srcCoordinateVars(:)
-	logical, intent(in), optional          :: useDstCoordFlag
-	character(len=*), intent(in), optional :: dstCoordinateVars(:)
-	logical, intent(in), optional          :: useUserAreaFlag
-	logical, intent(in), optional          :: largefileFlag
-	logical, intent(in), optional          :: verboseFlag
-	integer, intent(out), optional         :: rc
+  type(ESMF_RegridMethod_Flag), intent(in),  optional :: regridmethod
+  type(ESMF_PoleMethod_Flag),   intent(in),  optional :: polemethod
+  integer,                      intent(in),  optional :: regridPoleNPnts
+  logical,                      intent(in),  optional :: ignoreUnmappedFlag
+  type(ESMF_FileFormat_Flag),   intent(in),  optional :: srcFileType
+  type(ESMF_FileFormat_Flag),   intent(in),  optional :: dstFileType
+  logical,                      intent(in),  optional :: srcRegionalFlag
+  logical,                      intent(in),  optional :: dstRegionalFlag
+  character(len=*),             intent(in),  optional :: srcMeshname 
+  character(len=*),             intent(in),  optional :: dstMeshname 
+  logical,                      intent(in),  optional :: srcMissingValueFlag
+  character(len=*),             intent(in),  optional :: srcMissingvalueVar
+  logical,                      intent(in),  optional :: dstMissingValueFlag
+  character(len=*),             intent(in),  optional :: dstMissingvalueVar
+  logical,                      intent(in),  optional :: useSrcCoordFlag
+  character(len=*),             intent(in),  optional :: srcCoordinateVars(:)
+  logical,                      intent(in),  optional :: useDstCoordFlag
+  character(len=*),             intent(in),  optional :: dstCoordinateVars(:)
+  logical,                      intent(in),  optional :: useUserAreaFlag
+  logical,                      intent(in),  optional :: largefileFlag
+  logical,                      intent(in),  optional :: verboseFlag
+  integer,                      intent(out), optional :: rc
 
 ! !DESCRIPTION:
 ! This subroutine provides the same function as the {\tt ESMF\_RegridWeightGen} application
@@ -125,9 +125,9 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
 ! such as which pole option to use,
 ! whether to use user-specified area in the conservative regridding, or whether ESMF should generate masks using a given 
 ! variable's missing value.  There are also optional arguments specfic to a certain type of the grid file.  
-! All the option arguments are similar to the command line arguments for the {\tt ESMF\_RegridWeightGen} application~(\ref{sec:regridusage}).
-! The acceptable values and the default value for the optional arguments are listed below.
-
+! All the optional arguments are similar to the command line arguments for the {\tt ESMF\_RegridWeightGen}
+! application~(\ref{sec:regridusage}). The acceptable values and the default value for the optional arguments
+! are listed below.
 ! 
 ! The arguments are:
 !   \begin{description}
