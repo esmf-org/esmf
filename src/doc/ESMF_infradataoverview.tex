@@ -1,4 +1,4 @@
-% $Id: ESMF_infradataoverview.tex,v 1.26 2012/10/09 22:46:22 theurich Exp $
+% $Id: ESMF_infradataoverview.tex,v 1.27 2012/10/12 17:32:52 peggyli Exp $
 
 \section{Overview}
 
@@ -253,7 +253,7 @@ problems with periodicity and with the pole singularity. This library
  the unmasked source Field. 
 
 
-\subsubsection{Interpolation methods: bilinear}
+\subsubsection{Interpolation methods: bilinear}\label{sec:interpolation:bilinear}
  Bilinear interpolation calculates the value for the 
  destination point as a combination of multiple linear interpolations, one for each dimension of the Grid. Note that for ease of 
  use, the term bilinear interpolation is used for 3D interpolation in ESMF as well, although it should more properly be referred 
@@ -280,7 +280,7 @@ problems with periodicity and with the pole singularity. This library
  To use the bilinear method the user may created their Fields on any stagger location for Grids or the node location ({\tt ESMF\_MESHLOC\_NODE}) for Meshes.
  For Grids, the stagger location upon which the Field was built must contain coordinates. 
 
-\subsubsection{Interpolation methods: higher-order patch}
+\subsubsection{Interpolation methods: higher-order patch}\label{sec:interpolation:patch}
 
  Patch (or higher-order) interpolation is the ESMF version of a technique called ``patch recovery'' commonly
  used in finite element modeling~\cite{PatchInterp1}~\cite{PatchInterp2}. It typically results in better approximations to 
@@ -313,7 +313,7 @@ problems with periodicity and with the pole singularity. This library
  For Grids, the stagger location upon which the Field was built must contain coordinates. 
 
 
-\subsubsection{Interpolation methods: first-order conservative}
+\subsubsection{Interpolation methods: first-order conservative}\label{sec:interpolation:conserve}
  First-order conservative interpolation~\cite{ConservativeOrder1} is also available as a regridding method. This method 
  will typically have  
  a larger local interpolation error than the previous two methods, but will do a much better job of preserving the value
