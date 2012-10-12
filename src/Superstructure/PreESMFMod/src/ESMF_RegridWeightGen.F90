@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.12 2012/10/12 17:35:35 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.13 2012/10/12 18:49:48 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -110,22 +110,22 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
 ! This subroutine provides the same function as the {\tt ESMF\_RegridWeightGen} application
 ! described in Section~\ref{sec:ESMF_RegridWeightGen}.  It takes two grid files in NetCDF format and writes out an 
 ! interpolation weight file also in NetCDF format.  The interpolation weights can be generated with the
-! bilinear(~\ref{sec:interpolation:bilinear}), higher-order patch (~\ref{sec:interpolation:patch}),
-! or first order conservative (~\ref{sec:interpolation:conserve}) methods.  The grid files can be in 
+! bilinear~(\ref{sec:interpolation:bilinear}), higher-order patch~(\ref{sec:interpolation:patch}),
+! or first order conservative~(\ref{sec:interpolation:conserve}) methods.  The grid files can be in 
 ! one of the following four formats:
 ! \begin{itemize}
-! \item The SCRIP format (~\ref{sec:fileformat:scrip})
-! \itme The native ESMF format for an unstructured grid (~\ref{sec:fileformat:esmf})
-! \item The GRIDSPEC Tile grid file following the CF metadata convention (~\ref{sec:fileformat:gridspec})
-! \item The proposed CF Unstructured grid (UGRID) format (~\ref{sec:fileformat:ugrid}).  
+! \item The SCRIP format~(\ref{sec:fileformat:scrip})
+! \item The native ESMF format for an unstructured grid~(\ref{sec:fileformat:esmf})
+! \item The GRIDSPEC Tile grid file following the CF metadata convention~(\ref{sec:fileformat:gridspec})
+! \item The proposed CF Unstructured grid (UGRID) format~(\ref{sec:fileformat:ugrid}).  
 ! \end{itemize}
 ! \smallskip
-! The weight file is the same format as is output by SCRIP (~\ref{sec:weightfileformat}).  
-!
-! The optional arguments allow users to specify various options while doing the regrid, such as which pole option to use,
-! whether to use user-specified area in the conservative regridding, or should ESMF generate masks using a given 
+! The weight file is the same format as is output by SCRIP~(\ref{sec:weightfileformat}).  
+! The optional arguments allow users to specify various options to control the regrid operation, 
+! such as which pole option to use,
+! whether to use user-specified area in the conservative regridding, or whether ESMF should generate masks using a given 
 ! variable's missing value.  There are also optional arguments specfic to a certain type of the grid file.  
-! All the option arguments are similar to the command line arguments for the {\tt ESMF\_RegridWeightGen} application~\ref{sec:regridusage}.
+! All the option arguments are similar to the command line arguments for the {\tt ESMF\_RegridWeightGen} application~(\ref{sec:regridusage}).
 ! The acceptable values and the default value for the optional arguments are listed below.
 
 ! 
