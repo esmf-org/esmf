@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.11 2012/10/11 22:03:27 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.12 2012/10/12 17:35:35 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -65,11 +65,11 @@ contains
 #define ESMF_METHOD "ESMF_RegridWeightGen"
 
 !BOP
-! !IROUTINE: ESMF_RegridWeightGen - Generate regrid weights from grid files
+! !IROUTINE: ESMF_RegridWeightGen - Generate regrid weight file from grid files
 !
 ! !INTERFACE:
-subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
-     	         poleMethod, poleNPnts, ignoreUnmappedFlag, srcFileType, dstFileType, &
+subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
+     	         polemethod, regridPoleNPnts, ignoreUnmappedFlag, srcFileType, dstFileType, &
                  srcRegionalFlag, dstRegionalFlag, srcMeshname, dstMeshname,  &
 		 srcMissingvalueFlag, srcMissingvalueVar, &
 		 dstMissingvalueFlag, dstMissingvalueVar, &
@@ -83,9 +83,9 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 	character(len=*),  intent(in)         :: dstFile
 	character(len=*),  intent(in)         :: weightFile
 
-	type(ESMF_RegridMethod_Flag),  intent(in), optional :: regridMethod
-	type(ESMF_PoleMethod_Flag),  intent(in), optional :: poleMethod
-	integer,   intent(in), optional       :: poleNPnts
+	type(ESMF_RegridMethod_Flag),  intent(in), optional :: regridmethod
+	type(ESMF_PoleMethod_Flag),  intent(in), optional :: polemethod
+	integer,   intent(in), optional       :: regridPoleNPnts
 	logical,     intent(in), optional     :: ignoreUnmappedFlag
 	type(ESMF_FileFormat_Flag), intent(in), optional :: srcFileType
 	type(ESMF_FileFormat_Flag), intent(in), optional :: dstFileType
@@ -110,10 +110,17 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 ! This subroutine provides the same function as the {\tt ESMF\_RegridWeightGen} application
 ! described in Section~\ref{sec:ESMF_RegridWeightGen}.  It takes two grid files in NetCDF format and writes out an 
 ! interpolation weight file also in NetCDF format.  The interpolation weights can be generated with the
-! bilinar, patch, or first order conservative methods.  The grid files can be in the SCRIP format~\ref{sec:fileformat:scrip}, the native
-! ESMF format for an unstructured grid~\ref{sec:fileformat:esmf}, the GRIDSPEC Tile grid file following the CF metadata
-! convention~\ref{sec:fileformat:gridspec}, or the proposed CF Unstructured grid (UGRID) format~\ref{sec:fileformat:ugrid}.  
-! The weight file is the same format as is output by SCRIP~\ref{sec:weightfileformat}.  
+! bilinear(~\ref{sec:interpolation:bilinear}), higher-order patch (~\ref{sec:interpolation:patch}),
+! or first order conservative (~\ref{sec:interpolation:conserve}) methods.  The grid files can be in 
+! one of the following four formats:
+! \begin{itemize}
+! \item The SCRIP format (~\ref{sec:fileformat:scrip})
+! \itme The native ESMF format for an unstructured grid (~\ref{sec:fileformat:esmf})
+! \item The GRIDSPEC Tile grid file following the CF metadata convention (~\ref{sec:fileformat:gridspec})
+! \item The proposed CF Unstructured grid (UGRID) format (~\ref{sec:fileformat:ugrid}).  
+! \end{itemize}
+! \smallskip
+! The weight file is the same format as is output by SCRIP (~\ref{sec:weightfileformat}).  
 !
 ! The optional arguments allow users to specify various options while doing the regrid, such as which pole option to use,
 ! whether to use user-specified area in the conservative regridding, or should ESMF generate masks using a given 
@@ -130,27 +137,27 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
 !     The destination grid file name.
 !   \item [weightFile]
 !     The interpolation weight file name.
-!   \item [{[regridMethod]}]
-!     The value is one of {\tt ESMF\_REGRIDMETHOD\_BILINEAR}, {\tt ESMF\_REGRIDMETHOD\_PATCH}, or
-!     {\tt ESMF\_REGRIDMETHOD\_CONSERVE}.  The default value is {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
-!   \item [{[poleMethod]}]
-!     A flag to indicate what to do with the pole.  The value is one of {\tt ESMF\_POLEMETHOD\_ALLAVG},
-!     {\tt ESMF\_POLEMETHOD\_NONE}, {\tt ESMF\_POLEMETHOD\_NPNTAVG} or {\tt ESMF\_POLEMETHOD\_TEETH}.
+!   \item [{[regridmethod]}]
+!     The type of interpolation. Please see Section~\ref{opt:regridmethod} 
+!     for a list of valid options. If not specified, defaults to 
+!     {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
+!   \item [{[polemethod]}]
+!     A flag to indicate which type of artificial pole
+!     to construct on the source Grid for regridding. Please see 
+!     Section~\ref{const:polemethod} for a list of valid options.
 !     The default value varies depending on the regridding method and the grid type and foramt.  
-!   \item [{[poleNPnts]}]
-!     If {\tt poleMethod} is set to {\tt ESMF\_POLEMETHOD\_NPNTAVG}, this argument is required to 
-!     specify how many points are used to represent the pole.
+!   \item [{[regridPoleNPnts]}]
+!     If {\tt polemethod} is set to {\tt ESMF\_POLEMETHOD\_NPNTAVG}, this argument is required to 
+!     specify how many points should be averaged over at the pole.
 !   \item [{[ignoreUnmappedFlag]}]
 !     If .TRUE., the unmapped destination points will be ignored.  If not 
 !     specified, the default is to stop the regrid with an error.
 !   \item [{[srcFileType]}]
-!     The file format of the source grid.  The value is one of
-!     {\tt ESMF\_FILEFORMAT\_SCRIP}, {\tt ESMF\_FILEFORMAT\_ESMFMESH}, {\tt ESMF\_FILEFORMAT\_UGRID},
-!     or {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
+!     The file format of the source grid. Please see Section~\ref{const:grid:fileformat} and
+!     Section~\ref{const:mesh:fileformat} for a list of valid options.
 !   \item [{[dstFileType]}]
-!     The file format of the destination grid.  The value is one of
-!     {\tt ESMF\_FILEFORMAT\_SCRIP}, {\tt ESMF\_FILEFORMAT\_ESMFMESH}, {\tt ESMF\_FILEFORMAT\_UGRID},
-!     or {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
+!     The file format of the destination grid.  Please see Section~\ref{const:grid:fileformat} and
+!     Section~\ref{const:mesh:fileformat} for a list of valid options.
 !   \item [{[srcRegionalFlag]}]
 !     If .TRUE., the source grid is a regional grid, otherwise,
 !     it is a global grid.  The default value is .FALSE.
@@ -310,11 +317,11 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridMethod, &
       endif
 
       if (localPoleMethod == ESMF_POLEMETHOD_NPNTAVG) then
-        if (present(poleNPnts)) then
-  	  localPoleNPnts = poleNPnts
+        if (present(regridPoleNPnts)) then
+  	  localPoleNPnts = regridPoleNPnts
         else 
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	    msg ="poleNPnts argument is missing for ESMF_POLEMETHOD_NPNTAVG", &
+	    msg ="regridPoleNPnts argument is missing for ESMF_POLEMETHOD_NPNTAVG", &
             ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
