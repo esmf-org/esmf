@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilSort.cppF90,v 1.6 2012/10/04 00:41:57 w6ws Exp $
+! $Id: ESMF_UtilSort.cppF90,v 1.7 2012/10/12 04:57:43 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@ module ESMF_UtilSortMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_UtilSort.cppF90,v 1.6 2012/10/04 00:41:57 w6ws Exp $'
+    '$Id: ESMF_UtilSort.cppF90,v 1.7 2012/10/12 04:57:43 w6ws Exp $'
 
 !----------------------------------------------------------------------------
 
@@ -85,7 +85,7 @@ contains
 ! \end{description}
 ! @\
 !  Use Quick Sort, reverting to Insertion sort on lists of @\
-!  size <= 20. Internally, the size of the array is limited to about 2**32. @\
+!  size <= 20. @\
 ! @\
 !     The arguments are: @\
 !     \begin{description} @\
@@ -99,10 +99,8 @@ contains
 !       Return code; equals {\tt ESMF\_SUCCESS} if the sorting is successful. @\
 !     \end{description} @\
 ! @\
-!  This is an ESMFized version of SLASRT from LAPACK version 3.1. @\
-! @\
-!  Univ. of Tennessee, Univ. of California Berkeley and NAG Ltd. @\
-! @\
+!  This is an ESMFized version of SLASRT from LAPACK version 3.1. \\ @\
+!  Univ. of Tennessee, Univ. of California Berkeley and NAG Ltd. \\ @\
 !  November 2006 @\
 ! @\
 !EOP @\
@@ -167,10 +165,14 @@ contains
 !     Test the input paramters. @\
  @\
     n = size (list) @\
-    if (n < 1) then @\
+    select case (n) @\
+    case(:-1) @\
+      if (present (rc)) rc = ESMF_RC_ARG_SIZE @\
+      return @\
+    case(0) @\
       if (present (rc)) rc = ESMF_SUCCESS @\
       return @\
-    end if @\
+    end select @\
 ! @\
 ! @\
     STKPNT = 1 @\
