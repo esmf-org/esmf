@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.74 2012/09/11 20:13:22 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.75 2012/10/14 05:05:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -566,8 +566,8 @@ program ESMF_RegridWeightGenApp
         methodflag = ESMF_REGRIDMETHOD_PATCH
      endif	 
     
-     call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridMethod=methodflag, &
-          poleMethod = pole, poleNPnts = poleptrs, ignoreUnmappedFlag = ignoreunmapped, &
+     call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
+          polemethod = pole, regridPoleNPnts = poleptrs, ignoreUnmappedFlag = ignoreunmapped, &
 	  srcFileType = srcFileType, dstFileType = dstFileType, &
 	  srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
 	  srcMeshname = srcMeshname, dstMeshname = dstMeshname, &
