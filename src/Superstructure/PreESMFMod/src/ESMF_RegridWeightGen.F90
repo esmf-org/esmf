@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.14 2012/10/12 23:29:34 theurich Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.15 2012/10/16 15:31:52 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -275,7 +275,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
       !------------------------------------------------------------------------
       ! get global vm information
       !
-      call ESMF_VMGetGlobal(vm, rc=localrc)
+      call ESMF_VMGetCurrent(vm, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                              ESMF_ERR_PASSTHRU, &
                              ESMF_CONTEXT, rcToReturn=rc)) return
