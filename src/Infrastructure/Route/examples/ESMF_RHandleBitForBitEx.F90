@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandleBitForBitEx.F90,v 1.2 2012/10/09 00:52:16 theurich Exp $
+! $Id: ESMF_RHandleBitForBitEx.F90,v 1.3 2012/10/16 17:40:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -77,8 +77,8 @@ program ESMF_RHandleBitForBitEx
 ! binary diff tools.
 !
 ! While bfb reproducibility is desirable (and often required) for regression
-! testing, it does, at the same, limit the performance optimization
-! optimizations. Especially in highly parallelized code best performance is 
+! testing, it does, at the same, limit the available performance optimization
+! opportunities. Especially in highly parallelized code, best performance is 
 ! often achieved by allowing operations to occur in a flexible order. Under
 ! some conditions, however, a change in the order of numerical operations
 ! leads to small numerical differences in the results, breaking bfb
@@ -115,17 +115,17 @@ program ESMF_RHandleBitForBitEx
 !BOE
 ! These differences result from the fact that many decimals (even very simple
 ! ones like 0.1 or 0.2) lead to periodic binary floating point numbers.
-! Periodic floating point numbers must be truncated to be represented by a
+! Periodic floating point numbers must be truncated when represented by a
 ! finite number of bits, leading to small rounding errors. Further truncation
 ! occurs when the radix point of two numbers must be aligned during
-! floating point arithmetic, resulting in a shift of bits of one of the
-! numbers. This truncation depends on the precise numbers that need to be 
-! aligned. Hence, executing the "same" sum in a different order may lead to 
-! different trunctation steps and consequently in restults that are not
-! bit-for-bit identical.
+! floating point arithmetic, resulting in a bit shifts of one of the
+! numbers. The resulting truncation error depends on the precise numbers that
+! need alignment. As a result, executing the "same" sum in a different order
+! can lead to different truncation steps and consequently in results that are
+! not bit-for-bit identical.
 !
-! ESMF provides control over the term order in sparse matrix multiplications in
-! order to help users implement their bfb requirement, while at the same time
+! In order to help users implement their bfb requirement, ESMF provides control
+! over the term order in sparse matrix multiplications, while at the same time
 ! offering performance optimization options. For the purpose of demonstration, a 
 ! one-dimensional, arbitrarily distributed source Array is constructed. There
 ! are three Array elements on each of the four PETs. Their local storage index,
@@ -304,42 +304,42 @@ program ESMF_RHandleBitForBitEx
     ! (1,1)*s[1]Pet0 + (6,1)*s[6]Pet0 + (9,1)*s[9]Pet0  = 
     !       0.5      +       0.1      +       0.1
 !BOC
-    factorIndexList(1,1) = 1  ! src
-    factorIndexList(2,1) = 1  ! dst
+    factorIndexList(1,1) = 1  ! src seq index
+    factorIndexList(2,1) = 1  ! dst seq index
     factorList(1) = 1.
-    factorIndexList(1,2) = 6  ! src
-    factorIndexList(2,2) = 1  ! dst
+    factorIndexList(1,2) = 6  ! src seq index
+    factorIndexList(2,2) = 1  ! dst seq index
     factorList(2) = 1.
-    factorIndexList(1,3) = 9  ! src
-    factorIndexList(2,3) = 1  ! dst
+    factorIndexList(1,3) = 9  ! src seq index
+    factorIndexList(2,3) = 1  ! dst seq index
     factorList(3) = 1.
 !EOC
   endif
   
 !BOE
-! For all bfb considerations, the order in which the sparse matrix entries are
-! specified in {\tt factorIndexList} and {\tt factorList} is completely 
-! irrelevant. Further, it is of no consequence on which PET a sparse 
-! matrix entry is provided.
+! In ESMF, the order in which the sparse matrix entries are specified in 
+! {\tt factorIndexList} and {\tt factorList}, or on which PET they
+! are provided, is completely irrelevant. The term order in the resulting
+! sparse matrix sums is not affected by it.
 !
-! There is one aspect of the sparse matrix format that is relevant to the
-! bfb considerations: When multiple entries for the same (src, dst) pair are
-! present in a sparse matrix definition, the entries are combined into a
-! single (src, dst) entry. In other words, the {\tt factorList} entries are
-! summed up into a single entry. Therefore, even if there had been multiple
+! There is one aspect of the sparse matrix format, however, that is relevant
+! to the bfb considerations: When multiple entries for the same (src, dst)
+! pair are present in a sparse matrix definition, the entries are summed
+! into a single (src, dst) entry. Therefore, even if there had been multiple
 ! sparse matrix entries for the same (src, dst) pair, there will only be a
-! single term for this (src, dst) pair in the resulting expression.
+! single term for it in the resulting expression.
 !
-! Going back to the sparse matrix definition above, the {\em canonical} term
-! order is defined by the source sequence indices in ascending order. With
-! {\tt (src,dst)} denoting the sparse matrix factors, and {\tt s(src)} and
-! {\tt d(dst)} denoting source and destination Array elements, respectively,
-! for {\tt src} and {\tt dst} sequence indices, the sum in canonical order is:
+! Going back to the three term sparse matrix definition above, the 
+! {\em canonical} term order is defined by the source sequence indices in 
+! ascending order. With {\tt (src,dst)} denoting the sparse matrix factors,
+! and {\tt s(src)} and {\tt d(dst)} denoting source and destination Array
+! elements, respectively, for {\tt src} and {\tt dst} sequence indices, the
+! sum in canonical order is:
 !
 !     d(1) = (1,1)*s(1) + (6,1)*s(6) + (9,1)*s(9)
 !
 ! For simplicity, the factors in all of the examples are set to 1, allowing us
-! to drop them in the expressions. This helps focus on the cricital issue -- 
+! to drop them in the expressions. This helps focus on the critical issue -- 
 ! term order:
 !
 !     d(1) = s(1) + s(6) + s(9)
@@ -347,30 +347,35 @@ program ESMF_RHandleBitForBitEx
 ! There are two parameters that affect term order, and therefore bfb
 ! reproducibility of the ESMF sparse matrix multiplication (SMM). First there
 ! is the {\tt srcTermProcessing} parameter, which controls grouping of source
-! terms. Grouping is a decision that is made during RouteHandle store-time.
+! terms located on the same PET. Source term grouping is a decision that is
+! made during RouteHandle store-time.
 !
-! The second parameter comes into play at execution-time of the precomputed 
+! The second parameter comes into play at execution-time of a precomputed 
 ! RouteHandle. It is accessible via the {\tt termorderflag} argument; a typed 
 ! flag with the following values:
 ! \begin{itemize}
 !   \item {\tt ESMF\_TERMORDER\_SRCSEQ} -- Strictly enforces the canonical order
-!      of the source terms according to the source sequence index. Terms that
-!      are grouped in the RouteHandle at store-time are treated as single 
-!      entities with the sequence index equal to the lowest original sequence
-!      index in the group. 
+!      of the source terms according to the source sequence index. However, 
+!      terms that are grouped in the RouteHandle at store-time are treated as
+!      single entities with the sequence index equal to the lowest original
+!      sequence index in the group. 
 !   \item {\tt ESMF\_TERMORDER\_SRCPET} -- The source terms in the sum are 
 !      first arranged according to the relative position of the PET on which 
 !      they reside with respect to the destination PET. Second, the terms
 !      coming from a single PET are sorted in canonical sequence index order.
+!      Again, 
+!      terms that are grouped in the RouteHandle at store-time are treated as
+!      single entities with the sequence index equal to the lowest original
+!      sequence index in the group. 
 !   \item {\tt ESMF\_TERMORDER\_FREE} -- There are no restrictions on the term
-!      order. Terms can be summed in any order, and the order may change between
-!      executions of the same RouteHandle.
+!      order. Terms can be summed in any order, and the order may change each
+!      time the RouteHandle is executed.
 ! \end{itemize}
 !
 ! The {\tt ESMF\_TERMORDER\_FREE} setting grants greatest flexibility
 ! to the RouteHandle execution implementation. It is available for all the 
-! methods that take the {\tt termorderflag} argument. However, since there is
-! no guaranteed source term order, the {\tt ESMF\_TERMORDER\_FREE} option is
+! methods that take the {\tt termorderflag} argument. However, without a
+! guaranteed source term order, the {\tt ESMF\_TERMORDER\_FREE} option is
 ! not suitable for situations that require bfb reproducibility. 
 ! 
 ! The {\tt ESMF\_TERMORDER\_SRCPET} and {\tt ESMF\_TERMORDER\_SRCSEQ} options
@@ -378,13 +383,13 @@ program ESMF_RHandleBitForBitEx
 ! reproducibility. The difference is that {\tt ESMF\_TERMORDER\_SRCPET} 
 ! ensures a fixed execution-time term order only as long as the number of PETs
 ! is not changed. If bfb reproducibility is required even for changing
-! numbers of PETs, then {\tt ESMF\_TERMORDER\_SRCSEQ} is required to enfore
-! a strict canonical term order. However, bfb reproducibility for different 
+! numbers of PETs, then {\tt ESMF\_TERMORDER\_SRCSEQ} is required to enforce
+! a strict canonical term order. Note that bfb reproducibility for different 
 ! petCounts further requires that the {\tt srcTermProcessing} argument is set
 ! to 0 during store-time to prevent petCount dependent term grouping. The 
 ! {\tt ESMF\_TERMORDER\_SRCSEQ} option is not generally implemented yet, but
-! will be added if/when bfb reproducibility for different petCounts becomes
-! a requested feature of ESMF.
+! will be added if/when bfb reproducibility between different petCounts becomes
+! a requested ESMF feature.
 !
 ! In the following examples the {\tt termorderflag} is consistently set to
 ! {\tt ESMF\_TERMORDER\_SRCPET} in order to ensure execution-time
@@ -418,7 +423,7 @@ program ESMF_RHandleBitForBitEx
 !BOE
 ! Here all of the source elements originate from the same PET (PET 0). This
 ! fact, together with the {\tt ESMF\_TERMORDER\_SRCPET} execution-time option,
-! results in the canoncial term order:
+! results in the following canonical term order:
 !
 !     d(1) = s(1) + s(6) + s(9) = 0.5 + 0.1 + 0.1
 !
@@ -465,21 +470,21 @@ program ESMF_RHandleBitForBitEx
     ! (5,1)*s[5]Pet2 + (7,1)*s[7]Pet2 + (11,1)*s[11]Pet2  = 
     !       0.1      +       0.1      +        0.5
 !BOC
-    factorIndexList(1,1) = 11 ! src
-    factorIndexList(2,1) = 1  ! dst
+    factorIndexList(1,1) = 11 ! src seq index
+    factorIndexList(2,1) = 1  ! dst seq index
     factorList(1) = 1.
-    factorIndexList(1,2) = 5  ! src
-    factorIndexList(2,2) = 1  ! dst
+    factorIndexList(1,2) = 5  ! src seq index
+    factorIndexList(2,2) = 1  ! dst seq index
     factorList(2) = 1.
-    factorIndexList(1,3) = 7  ! src
-    factorIndexList(2,3) = 1  ! dst
+    factorIndexList(1,3) = 7  ! src seq index
+    factorIndexList(2,3) = 1  ! dst seq index
     factorList(3) = 1.
 !EOC
   endif
   
 !BOE
 ! This time the source term order in memory is not the same
-! as their sequence index order. Specifically, the squence indices of the
+! as their sequence index order. Specifically, the sequence indices of the
 ! source terms, in the order they are stored in memory, is 11, 7, 5 (see the
 ! source Array diagram above for reference). 
 ! Further, as mentioned already, the order of entries in the sparse matrix
@@ -539,11 +544,13 @@ program ESMF_RHandleBitForBitEx
 !BOE
 ! When the source terms are distributed across multiple PETs, the 
 ! {\tt ESMF\_TERMORDER\_SRCPET} option first bundles the terms according to
-! the PET that they are located on. These source term bundles are then arranged
-! in an order that depends on the destination PET: starting with the local PET
-! of the destination, the source term bundles are in descending order of
-! source PET, modulo petCount. The source terms within a source term bundle are
-! in canonical order according to their sequence index.
+! the PET on which they are stored. These source term "bundles" are then 
+! arranged in an order that depends on the source PET position relative to the
+! destination PET: starting with the bundle for which the source PET is the
+! same as the destination PET, the source term bundles are placed in descending
+! order with respect to their source PET, modulo petCount. The terms within
+! each source term bundle are further sorted in the canonical order according
+! to their sequence index.
 !
 ! The following sparse matrix demonstrates the effect of the
 ! {\tt ESMF\_TERMORDER\_SRCPET} option.
@@ -564,14 +571,14 @@ program ESMF_RHandleBitForBitEx
     ! (1,1)*s[1]Pet0 + (7,1)*s[7]Pet2 + (3,1)*s[3]Pet1  = 
     !       0.5      +       0.1      +       0.1       
 !BOC
-    factorIndexList(1,1) = 1  ! src
-    factorIndexList(2,1) = 1  ! dst
+    factorIndexList(1,1) = 1  ! src seq index
+    factorIndexList(2,1) = 1  ! dst seq index
     factorList(1) = 1.
-    factorIndexList(1,2) = 3  ! src
-    factorIndexList(2,2) = 1  ! dst
+    factorIndexList(1,2) = 3  ! src seq index
+    factorIndexList(2,2) = 1  ! dst seq index
     factorList(2) = 1.
-    factorIndexList(1,3) = 7  ! src
-    factorIndexList(2,3) = 1  ! dst
+    factorIndexList(1,3) = 7  ! src seq index
+    factorIndexList(2,3) = 1  ! dst seq index
     factorList(3) = 1.
 !EOC
   endif
@@ -627,11 +634,11 @@ program ESMF_RHandleBitForBitEx
 
 !BOE
 ! In the above example, the fact that the terms were ordered by source PET
-! first, lead to no numerical bfb differences compared to the canoncial source 
-! term order. However, this was purely coincidental in the way the numbers
-! worked out. The following case looks
-! at a situation where the source PET order does lead to a result that shows
-! bfb differences compared to the canonical term order.
+! first, did not lead to numerical bfb differences compared to the canonical 
+! source term order. However, this was purely coincidental in the way the
+! numbers worked out for this example. The following case looks at a situation
+! where the source PET order {\em does} lead to a result that shows bfb
+! differences compared to the canonical term order.
 !EOE
 
   if (localPet == 0) then
@@ -650,27 +657,27 @@ program ESMF_RHandleBitForBitEx
     ! (12,1)*s[12]Pet3 + (5,1)*s[5]Pet2 + (4,1)*s[4]Pet1  = 
     !       0.1        +       0.1      +       0.5      
 !BOC 
-    factorIndexList(1,1) = 4  ! src
-    factorIndexList(2,1) = 1  ! dst
+    factorIndexList(1,1) = 4  ! src seq index
+    factorIndexList(2,1) = 1  ! dst seq index
     factorList(1) = 1.
-    factorIndexList(1,2) = 5  ! src
-    factorIndexList(2,2) = 1  ! dst
+    factorIndexList(1,2) = 5  ! src seq index
+    factorIndexList(2,2) = 1  ! dst seq index
     factorList(2) = 1.
-    factorIndexList(1,3) = 12 ! src
-    factorIndexList(2,3) = 1  ! dst
+    factorIndexList(1,3) = 12 ! src seq index
+    factorIndexList(2,3) = 1  ! dst seq index
     factorList(3) = 1.
 !EOC
   endif
   
 !BOE
 ! The canonical source term order of this SMM sum, determined by the source
-! squence indices alone, is:
+! sequence indices alone, is:
 !
 !     d(1) = s(4) + s(5) + s(12) = 0.5 + 0.1 + 0.1,
 !
 ! which again would lead to a result that is bfb identical to {\tt sumA}. 
 ! However, this is not the term order resulting from the
-! {\tt ESMF\_TERMORDER\_SRCPET} option. Under this option the order is given by
+! {\tt ESMF\_TERMORDER\_SRCPET} option. The actual order for this option is:
 !
 !     d(1) = s(12)[3] + s(5)[2] + s(4)[1] = 0.1 + 0.1 + 0.5,
 !
@@ -719,8 +726,8 @@ program ESMF_RHandleBitForBitEx
 ! So far the {\tt srcTermProcessing} argument was kept at 0, and therefore
 ! source term grouping had not to be considered. Source term grouping is only
 ! possible for terms that originate from the same PET. In preparation
-! for a closer look at source term grouping, consider a sparse matrix 
-! where two source terms are located on the same PET.
+! for a closer look at the bfb effects of source term grouping, consider a 
+! sparse matrix where two of the source terms are located on the same PET.
 !EOE
 
   ! start looking into srcTermProcessing
@@ -741,14 +748,14 @@ program ESMF_RHandleBitForBitEx
     ! (1,1)*s[1]Pet0 + (5,1)*s[5]Pet2 + (7,1)*s[7]Pet2  = 
     !       0.5      +       0.1      +       0.1       
 !BOC
-    factorIndexList(1,1) = 1  ! src
-    factorIndexList(2,1) = 1  ! dst
+    factorIndexList(1,1) = 1  ! src seq index
+    factorIndexList(2,1) = 1  ! dst seq index
     factorList(1) = 1.
-    factorIndexList(1,2) = 5  ! src
-    factorIndexList(2,2) = 1  ! dst
+    factorIndexList(1,2) = 5  ! src seq index
+    factorIndexList(2,2) = 1  ! dst seq index
     factorList(2) = 1.
-    factorIndexList(1,3) = 7  ! src
-    factorIndexList(2,3) = 1  ! dst
+    factorIndexList(1,3) = 7  ! src seq index
+    factorIndexList(2,3) = 1  ! dst seq index
     factorList(3) = 1.
 !EOC
   endif
@@ -804,14 +811,12 @@ program ESMF_RHandleBitForBitEx
   ! ---------------------------------------------------------------------------
 
 !BOE
-! The same result is also expected with {\tt srcTermProcessing} set to 1. The
-! reason for this is that a value of 1 only allows source term groups up to a
-! size of 1, essentially resulting in the exact same sum as before. However, 
-! setting {\tt srcTermProcessing} to 1 does mean that the multiplication of the
-! source term with the sparse matrix factor is carried out on the source side
-! before sending the product to the destination PET. Nevertheless, peforming
-! this multipliation on the source PET, versus doing it on the destination PET,
-! has no bfb effect on the result. 
+! The same result is also expected with {\tt srcTermProcessing} set to 1. A
+! value of 1 indicates that the multiplication of the source term with its
+! sparse matrix factor is carried out on the source side before being sent to 
+! the destination PET. The final sum is still carried out in the same order on
+! the destination PET, essentially resulting in the exact same bfb identical
+! sum as for {\tt srcTermProcessing} set to 0.
 !EOE
 
 !BOC
@@ -853,14 +858,15 @@ program ESMF_RHandleBitForBitEx
   ! ---------------------------------------------------------------------------
 
 !BOE
-! Increasing the {\tt srcTermProcessing} argument to 2 (or above) results in 
-! source term grouping of the terms that are on the same source PET.
+! Increasing the {\tt srcTermProcessing} argument to 2 (or higher) results in 
+! source term grouping of the terms (up to the number specified in 
+! {\tt srcTermProcessing}) that are on the same source PET.
 !
 !     d(1) = s(1)[0] + ( s(5)[2] + s(7)[2] ) = 0.5 + (0.1 + 0.1)
 !
 ! This result is bfb identical to first adding 0.1 and 0.1 into a partial sum,
-! and then adding this sum to 0.5. However, this is the exact grouping of
-! terms that was used to obtain the result {\tt sumB} above.
+! and then adding this sum to 0.5. This is the exact grouping of
+! terms that was used to obtain the result stored in {\tt sumB} from above.
 !EOE
 
 !BOC
@@ -913,7 +919,7 @@ program ESMF_RHandleBitForBitEx
 
 !BOE
 ! In order to explore the effects of the {\tt srcTermProcessing} argument
-! further, more terms are needed in the SMM sum that have the same source PET.
+! further, more terms on the same source PET are needed in the SMM sum.
 ! The following sparse matrix has four entries, three of which originate from
 ! the same PET (PET 3).
 !EOE
@@ -934,17 +940,17 @@ program ESMF_RHandleBitForBitEx
     ! (1,1)*s[1]Pet0 +  (2,1)*s[2]Pet3 + (8,1)*s[8]Pet3 + (12,1)*s[12]Pet3 = 
     !       0.5      +        0.2      +       0.1      +        0.1
 !BOC
-    factorIndexList(1,1) = 1  ! src
-    factorIndexList(2,1) = 1  ! dst
+    factorIndexList(1,1) = 1  ! src seq index
+    factorIndexList(2,1) = 1  ! dst seq index
     factorList(1) = 1.
-    factorIndexList(1,2) = 2  ! src
-    factorIndexList(2,2) = 1  ! dst
+    factorIndexList(1,2) = 2  ! src seq index
+    factorIndexList(2,2) = 1  ! dst seq index
     factorList(2) = 1.
-    factorIndexList(1,3) = 8  ! src
-    factorIndexList(2,3) = 1  ! dst
+    factorIndexList(1,3) = 8  ! src seq index
+    factorIndexList(2,3) = 1  ! dst seq index
     factorList(3) = 1.
-    factorIndexList(1,4) = 12 ! src
-    factorIndexList(2,4) = 1  ! dst
+    factorIndexList(1,4) = 12 ! src seq index
+    factorIndexList(2,4) = 1  ! dst seq index
     factorList(4) = 1.
 !EOC
   endif
@@ -998,8 +1004,8 @@ program ESMF_RHandleBitForBitEx
   ! ---------------------------------------------------------------------------
 
 !BOE
-! Setting the {\tt srcTermProcessing} argument to 2 results in the following
-! source term grouping:
+! Setting the {\tt srcTermProcessing} argument to a value of 2 results in the 
+! following source term grouping:
 !
 !     d(1) = s(1)[0] + ( s(2)[3] + s(8)[3] ) + s(12)[3]
 !          = 0.5 + ( 0.2 + 0.1 ) + 0.1,
@@ -1009,7 +1015,8 @@ program ESMF_RHandleBitForBitEx
 ! from source element 8 (0.1). The final sum is performed on PET 0. The
 ! result is identical to the precomputed value stored in {\tt sumD}. The 
 ! numbers work out in a way where this result is bfb identical to the
-! previous result, i.e. {\tt sumC}. However, this match is purely conincidental.
+! previous result, i.e. {\tt sumC}. However, this bfb match is purely 
+! coincidental.
 !EOE
 
     !
@@ -1135,20 +1142,19 @@ program ESMF_RHandleBitForBitEx
 !BOE
 ! This covers the basics of term order and bit-for-bit (bfb) issues as they
 ! relate to the ESMF sparse matrix multiplication (SMM) implementation. The
-! take-way points are: 1)
-! if bfb reproducibilty is desired between consecutive execution of the
-! same RouteHandle object, then the {\tt ESMF\_TERMORDER\_SRCPET} execution-time
-! option should be chosen; 2) if bfb reproducibilty is required
-! {\em between} RouteHandles, e.g. the same RouteHandle that is precomputed
-! each time the application starts, then, in addition, it must be ensured that
-! the same value is specified for the {\tt srcTermProcessing} argument during
-! store-time. Under these conditions the ESMF SMM 
+! take-way points are: 1) if bfb reproducibility is desired between consecutive
+! execution of the same RouteHandle object, then the 
+! {\tt ESMF\_TERMORDER\_SRCPET} execution-time option should be chosen; 
+! 2) if bfb reproducibility is required between {\em different} RouteHandles, 
+! e.g. a RouteHandle that is precomputed each time the application starts, 
+! then it must be further ensured that the same value of {\tt srcTermProcessing}
+! is specified during each store call. Under these conditions the ESMF SMM 
 ! implementation guarantees bfb identical results between runs, as long as the
 ! number of PETs does not change.
 !
 ! The term order in a SMM operation does not only affect the bfb
 ! reproducibility of the result, but also affects the SMM {\em performance}. 
-! However, the precise performance implications of a specific term order are
+! The precise performance implications of a specific term order are
 ! complicated and strongly depend on the exact problem structure, as well as
 ! on the details of the compute hardware. ESMF implements an auto-tuning 
 ! mechanism that can be used to conveniently determine a close to optimal set
@@ -1156,12 +1162,13 @@ program ESMF_RHandleBitForBitEx
 !
 ! There are two SMM performance parameters in ESMF that are encoded into a
 ! RouteHandle during store-time: {\tt srcTermProcessing} and
-! {\tt pipelineDepth}. The first one affects the term order in the SMM sums, 
-! as was discussed in detail above. The second parameter, {\tt pipelineDepth},
+! {\tt pipelineDepth}. The first one affects the term order in the SMM sums and 
+! was discussed in detail above. The second parameter, {\tt pipelineDepth},
 ! determines how many in- and out-bound messages may be outstanding on each
 ! PET. It has no affect on the term order and does not lead to bfb differences
-! in the SMM results. However, for performance reproducibilty it may still be
-! desirable to use a fixed value when precomputing RouteHandles.
+! in the SMM results. However, in order to achieve good performance
+! reproducibility it may still be good to also use a fixed value of the
+! {\tt pipelineDepth} argument when precomputing RouteHandles.
 ! 
 ! Store calls that take the {\tt srcTermProcessing} and/or {\tt pipelineDepth}
 ! argument specify them as {\tt optional} with {\tt intent(inout)}. Omitting the
@@ -1258,10 +1265,10 @@ program ESMF_RHandleBitForBitEx
 ! auto-tuned {\tt srcTermProcessing} and {\tt pipelineDepth} parameters are
 ! then used in the SMM execution, as well as written to file. The SMM result
 ! variable is also written to the same file for test purposes.
-! Any subsequent execution of the example branches into the code that reads the
-! previously determined SMM execution parameters from file, re-using them 
-! during store-time. This ensures bfb reproducibility of the SMM result, which
-! is being tested in this example by comparing to the previously stored value.
+! Any subsequent execution of the same example branches into the code that
+! reads the previously determined SMM execution parameters from file, re-using
+! them during store-time. This ensures bfb reproducibility of the SMM result, 
+! which is tested in this example by comparing to the previously stored value.
 !EOE
 
   ! ---------------------------------------------------------------------------
