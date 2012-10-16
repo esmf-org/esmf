@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeABundleUTest.F90,v 1.37 2012/09/18 23:34:48 rokuingh Exp $
+! $Id: ESMF_AttributeABundleUTest.F90,v 1.38 2012/10/16 17:31:03 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeABundleUTest.F90,v 1.37 2012/09/18 23:34:48 rokuingh Exp $'
+      '$Id: ESMF_AttributeABundleUTest.F90,v 1.38 2012/10/16 17:31:03 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -392,7 +392,7 @@ program ESMF_AttributeArrayBundleUTest
       ! expect fail because this will default to I4
       call ESMF_AttributeGet(arraybundle, name="ConstantI8", value=outConstantI8, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE"
-      write(name, *) "Getting a constant I8 Attribute from an ArrayBundle Test - expect FAIL"
+      write(name, *) "Getting a constant I8 Attribute from an ArrayBundle Test"
       call ESMF_Test((rc==ESMC_RC_ATTR_WRONGTYPE), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -457,7 +457,7 @@ program ESMF_AttributeArrayBundleUTest
       call ESMF_AttributeGet(arraybundle, name="ConstantI8l", &
         valueList=outConstantI8l, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE"
-      write(name, *) "Getting a constant I8 list Attribute from an ArrayBundle Test - expect FAIL"
+      write(name, *) "Getting a constant I8 list Attribute from an ArrayBundle Test"
       call ESMF_Test((rc==ESMC_RC_ATTR_WRONGTYPE), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -644,7 +644,7 @@ program ESMF_AttributeArrayBundleUTest
       ! expect fail because this will default to R4
       call ESMF_AttributeGet(arraybundle, name="ConstantR8", value=outConstantR8, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE"
-      write(name, *) "Getting a constant R8 Attribute from an ArrayBundle Test - expect FAIL"
+      write(name, *) "Getting a constant R8 Attribute from an ArrayBundle Test"
       call ESMF_Test((rc==ESMC_RC_ATTR_WRONGTYPE), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------

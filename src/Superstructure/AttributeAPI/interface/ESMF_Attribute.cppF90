@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.116 2012/10/11 05:29:18 theurich Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.117 2012/10/16 17:30:05 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.116 2012/10/11 05:29:18 theurich Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.117 2012/10/16 17:30:05 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -6446,6 +6446,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         litemCount =  lens_size @\
       else @\
         valuestring_size = len(value) @\
+        ! this is required for bluefire, it does not function well with 0 size allocations @\
+        if (len(value) == 0) then @\
+          valuestring_size = 1 @\
+        endif @\
         lens_size = 1 @\
         ! set the size of the new valueList @\
         litemCount = 1 @\
@@ -6463,9 +6467,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return @\
       endif @\
  @\
-      ! also for internal Attributes, must append inputList to the Attribute value @\
-      lens(1) = len_trim(value) @\
-      valueString(1:lens(1)) = ESMF_String2Array(value) @\
+      ! this is required for bluefire, this block of code will not work with empty @\
+      ! attribute values, but that case should not happen with inputLists.. @\
+      if (len_trim(value) > 0) then @\
+        ! also for internal Attributes, must append inputList to the Attribute value @\
+        lens(1) = len_trim(value) @\
+        valueString(1:lens(1)) = ESMF_String2Array(trim(value)) @\
+      endif @\
       if (present(inputList)) then @\
         j = lens(1) + 1 @\
         do i=2,litemCount @\
@@ -6474,7 +6482,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             lens(i) = len_trim(inputList(i-1))+tag_size @\
             valueString(j:(j+tag_size-1)) = ESMF_String2Array("Input:") @\
             j = j + tag_size @\
-            valueString(j:(j+lens(i)-tag_size-1)) = ESMF_String2Array(trim(inputList(i-1))) @\
+            valueString(j:(j+lens(i)-tag_size-1)) =  & @\
+              ESMF_String2Array(trim(inputList(i-1))) @\
             j = j + lens(i) @\
           endif @\
         enddo @\

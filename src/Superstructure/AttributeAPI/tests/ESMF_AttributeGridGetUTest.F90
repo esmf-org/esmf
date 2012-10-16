@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridGetUTest.F90,v 1.12 2012/10/09 21:34:38 rokuingh Exp $
+! $Id: ESMF_AttributeGridGetUTest.F90,v 1.13 2012/10/16 17:31:03 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridGetUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.12 2012/10/09 21:34:38 rokuingh Exp $'
+  '$Id: ESMF_AttributeGridGetUTest.F90,v 1.13 2012/10/16 17:31:03 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -172,8 +172,8 @@ program ESMF_AttributeGridGetUTest
 
     ! get and fill first coord array
     call ESMF_GridGetCoord(gridR4, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
-                           computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXR4, &
-                           rc=rc)           
+                           computationalLBound=clbnd, computationalUBound=cubnd, &
+                           farrayPtr=farrayPtrXR4, rc=rc)           
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! get and fill second coord array
