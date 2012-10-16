@@ -23,7 +23,6 @@ module ESMFPIO_iompi_mod
 
     implicit none
     private
-    save
 
 #ifdef NO_MPIMOD  
     include 'mpif.h'        ! _EXTERNAL
