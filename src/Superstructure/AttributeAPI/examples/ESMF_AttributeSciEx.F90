@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeSciEx.F90,v 1.3 2012/09/19 20:36:50 ksaint Exp $
+! $Id: ESMF_AttributeSciEx.F90,v 1.4 2012/10/17 03:28:34 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -17,18 +17,16 @@ program ESMF_AttributeSciEx
 !==============================================================================
 
 !BOE
-! \subsubsection{CIM Attribute packages}
-! \label{sec:attribute:usage:cimAttPack}
+! \subsubsection{CIM Attribute packages using Science Component}
+! \label{sec:attribute:usage:sciAttPack}
 !
 !\begin{sloppypar}
 ! This example illustrates the use of the Metafor CIM Attribute packages,
 ! supplied by ESMF, to create an Attribute hierarchy on an ESMF object tree.
-! A gridded Component is used together with a State and a realistic Field
-! to create a simple ESMF object tree.  CIM Attributes packages are created
-! on the Component and Field, and then the individual Attributes within the
-! packages are populated with values.  Finally, all the Attributes are written
-! to a CIM-formatted XML file.  For a more comprehensive example, see the
-! ESMF\_AttributeCIM system test.
+! This is essentially the same example provided in the CIM Attribute packages
+! \ref{sec:attribute:usage:cimAttPack}, except that a Science Component is
+! used instead of a Gridded Component.  Also, since States and Fields are not
+! supported with Science Components, these sections are removed.
 !\end{sloppypar}
 !EOE
 
@@ -96,10 +94,7 @@ program ESMF_AttributeSciEx
 
 !BOE
 !\begin{sloppypar}
-!    Create the ESMF objects that will hold the CIM Attributes.
-!    These objects include a Science Component, a State, and a Field.
-!    In this example we are constructing empty Fields without an
-!    underlying Grid.
+!    Create the ESMF Science Component that will hold the CIM Attributes.
 !\end{sloppypar}
 !EOE
 
@@ -111,23 +106,10 @@ program ESMF_AttributeSciEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
-      ! Create State
-!!      exportState = ESMF_StateCreate(name="exportState",  &
-!!        stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
-!EOC
-!!      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-
-
-      ! Create Field
-!!      ozone = ESMF_FieldEmptyCreate(name='ozone', rc=rc)
-!EOC
-!!      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
 
 !BOE
 !\begin{sloppypar}
-!    Now add CIM Attribute packages to the Component and Field.  Also, add
+!    Now add CIM Attribute packages to the Component.  Also, add
 !    a CIM Component Properties package, to contain two custom attributes.
 !\end{sloppypar}
 !EOE
@@ -162,13 +144,6 @@ program ESMF_AttributeSciEx
 !BOC
 
       
-      ! Add CIM Attribute package to the Field
-!!      call ESMF_AttributeAdd(ozone, convention=convCIM, purpose=purpField, &
-!!        rc=rc)
-!EOC  
-!!      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-
 !BOE
 !\begin{sloppypar}
 !     The standard Attribute package supplied by ESMF for a CIM Component
@@ -453,110 +428,7 @@ program ESMF_AttributeSciEx
 
 !BOE
 !\begin{sloppypar}
-!     The standard Attribute package currently supplied by ESMF for 
-!     CIM Fields contains a standard CF-Extended package nested within it.
-!\end{sloppypar}
-!EOE
-
-!BOC
-      ! ozone CF-Extended Attributes
-!!      call ESMF_AttributeSet(ozone, 'ShortName', 'Global_O3_mon', &
-!!       convention=convCIM, purpose=purpField, rc=rc)
-!!      call ESMF_AttributeSet(ozone, 'StandardName', 'ozone', &
-!!       convention=convCIM, purpose=purpField, rc=rc)
-!!      call ESMF_AttributeSet(ozone, 'LongName', 'ozone', &
-!!       convention=convCIM, purpose=purpField, rc=rc)
-!!      call ESMF_AttributeSet(ozone, 'Units', 'unknown', &
-!!       convention=convCIM, purpose=purpField, rc=rc)
-!EOC
-!!      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-
-
-      ! ozone CIM Attributes
-!!      call ESMF_AttributeSet(ozone, 'CouplingPurpose', 'Boundary', &
-!!       convention=convCIM, purpose=purpField, rc=rc)
-!EOC
-!!      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-
-!!      call ESMF_AttributeSet(ozone, 'CouplingSource', 'EarthSys_Atmos', &
-!!       convention=convCIM, purpose=purpField, rc=rc)
-!EOC
-!!      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-
-!!      call ESMF_AttributeSet(ozone, 'CouplingTarget', &
-!!       'EarthSys_AtmosDynCore', convention=convCIM, &
-!!        purpose=purpField, rc=rc)
-!EOC
-!!      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-
-!!      call ESMF_AttributeSet(ozone, 'Description', &
-!!                                    'Global Ozone concentration ' // &
-!!                                    'monitoring in the atmosphere.', &
-!!       convention=convCIM, purpose=purpField, rc=rc)
-!EOC
-!!      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-
-!!      call ESMF_AttributeSet(ozone, 'SpatialRegriddingMethod', &
-!!                                    'Conservative-First-Order', &
-!!       convention=convCIM, purpose=purpField, rc=rc)
-!EOC
-!!      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-
-!!      call ESMF_AttributeSet(ozone, 'SpatialRegriddingDimension', '3D', &
-!!       convention=convCIM, purpose=purpField, rc=rc)
-!EOC
-!!      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-
-!!      call ESMF_AttributeSet(ozone, 'Frequency', '15 Minutes', &
-!!       convention=convCIM, purpose=purpField, rc=rc)
-!EOC
-!!      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-
-!!      call ESMF_AttributeSet(ozone, 'TimeTransformationType', &
-!!                                    'TimeInterpolation', &
-!!       convention=convCIM, purpose=purpField, rc=rc)
-
-!EOC
-!!      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-!BOE
-!\begin{sloppypar}
-!     Adding the Field to the State will automatically link the 
-!     Attribute hierarchies from the State to the Field
-!\end{sloppypar}
-!EOE
-
-!BOC
-      ! Add the Field directly to the State
-!!      call ESMF_StateAdd(exportState, fieldList=(/ozone/), rc=rc)
-
-!EOC
-!!      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-!BOE
-!\begin{sloppypar}
-!     The Attribute link between a Component and a State must be set manually.
-!\end{sloppypar}
-!EOE
-
-!BOC
-      ! Link the State to the gridded Component
-!!      call ESMF_AttributeLink(scicomp, exportState, rc=rc)
-
-!EOC
-!!      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-!BOE
-!\begin{sloppypar}
-!     Write the entire CIM Attribute hierarchy, beginning at the gridded
+!     Write the entire CIM Attribute hierarchy, beginning at the Science
 !     Component (the top), to an XML file formatted to conform to CIM
 !     specifications.  The CIM output tree structure differs from the
 !     internal Attribute hierarchy in that it has all the attributes of
@@ -572,18 +444,9 @@ program ESMF_AttributeSciEx
         call ESMF_AttributeWrite(scicomp, convCIM, purpComp, &
           attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
 !EOC
-        if (rc/=ESMF_SUCCESS .and. rc/=ESMF_RC_LIB_NOT_PRESENT) goto 10
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
 
-      ! Clean-up
-!!      call ESMF_FieldDestroy(field=ozone, rc=rc)
-!EOC
-!!      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-
-!!      call ESMF_StateDestroy(exportState, rc=rc)
-!EOC
-!!      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_SciCompDestroy(scicomp, rc=rc)
@@ -603,14 +466,8 @@ program ESMF_AttributeSciEx
       call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
 
-!BOC
-
       call ESMF_Finalize(rc=rc)
 
-10    continue
-      if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
-      call ESMF_Finalize(rc=rc)
-  
       if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
       if (finalrc==ESMF_SUCCESS) then
         print *, "PASS: ESMF_AttributeSciEx.F90"
