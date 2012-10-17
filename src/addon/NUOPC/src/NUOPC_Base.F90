@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.6 2012/08/29 15:16:17 theurich Exp $
+! $Id: NUOPC_Base.F90,v 1.7 2012/10/17 05:01:04 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -1454,6 +1454,7 @@ module NUOPC_Base
     type(ESMF_Time)         :: fieldTime
     integer                 :: i, valueList(9)
     logical                 :: isMatch
+    character(ESMF_MAXSTR)  :: iString, msgString
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1471,9 +1472,12 @@ module NUOPC_Base
     
     if (associated(stdItemNameList)) then
       do i=1, size(stdItemNameList)
+        write (iString, *) i
+        write (msgString, *) "Failure in NUOPC_StateIsAtTime() for item "// &
+          trim(adjustl(iString))//": "//trim(stdItemNameList(i))
         call ESMF_StateGet(state, field=field, itemName=stdItemNameList(i), &
           rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=msgString, &
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
@@ -1481,7 +1485,7 @@ module NUOPC_Base
           name="TimeStamp", valueList=valueList, &
           convention="NUOPC", purpose="General", &
           rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=msgString, &
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
@@ -1490,7 +1494,7 @@ module NUOPC_Base
            h=valueList(4),  m=ValueList(5),  s=ValueList(6), &
           ms=valueList(7), us=ValueList(8), ns=ValueList(9), &
           rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=msgString, &
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
@@ -1661,6 +1665,8 @@ module NUOPC_Base
     integer                 :: i, localPet, valueList(9)
     type(ESMF_VM)           :: vm
     
+!gjtdebug    character(ESMF_MAXSTR)  :: tempString1, msgString
+
     if (present(rc)) rc = ESMF_SUCCESS
     
     nullify(stdAttrNameList)
@@ -1725,7 +1731,13 @@ module NUOPC_Base
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
-        
+
+!gjtdebug call ESMF_FieldGet(field, name=tempString1)        
+!gjtdebug write (msgString, *) "updating to broadcasted TimeStamp:", trim(tempString1), field%ftypep%base
+!gjtdebug call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+!gjtdebug write (msgString, *) valueList
+!gjtdebug call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+
         endif
         
       enddo
@@ -1752,6 +1764,9 @@ module NUOPC_Base
     ! local variables
     type(ESMF_Field)        :: srcField, dstField
     integer                 :: i, valueList(9), srcCount, dstCount
+    
+!gjtdebug    character(ESMF_MAXSTR)  :: tempString1, tempString2
+!gjtdebug    character(5*ESMF_MAXSTR):: msgString
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1792,6 +1807,14 @@ module NUOPC_Base
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
+        
+!gjtdebug call ESMF_FieldGet(srcField, name=tempString1)        
+!gjtdebug call ESMF_FieldGet(dstField, name=tempString2)        
+!gjtdebug write (msgString, *) "updating TimeStamp:", trim(tempString1), " -> ", trim(tempString2), srcField%ftypep%base
+!gjtdebug call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+!gjtdebug write (msgString, *) valueList
+!gjtdebug call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        
       call ESMF_AttributeSet(dstField, &
         name="TimeStamp", valueList=valueList, &
         convention="NUOPC", purpose="General", &
