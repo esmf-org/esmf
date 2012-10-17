@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.55 2012/10/02 04:44:17 theurich Exp $
+% $Id: Component_refdoc.ctex,v 1.56 2012/10/17 19:30:22 ksaint Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -149,10 +149,10 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{SciComp_usage}
-%\input{ESMF_SCompEx_fapi}
+\input{ESMF_SCompEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/Component/doc/SciComp_usage}
-%\input{../Superstructure/Component/doc/ESMF_SCompEx_fapi}
+\input{../Superstructure/Component/doc/ESMF_SCompEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
