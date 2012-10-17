@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile2.F90,v 1.25 2012/10/17 05:43:29 theurich Exp $
+! $Id: ESMF_StateReconcile2.F90,v 1.26 2012/10/17 05:49:01 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ module ESMF_StateReconcile2Mod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-  '$Id: ESMF_StateReconcile2.F90,v 1.25 2012/10/17 05:43:29 theurich Exp $'
+  '$Id: ESMF_StateReconcile2.F90,v 1.26 2012/10/17 05:49:01 theurich Exp $'
 !==============================================================================
 
 ! !PRIVATE TYPES:
@@ -2602,7 +2602,7 @@ contains
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-            call ESMF_StateRemove (state, itemName=thisname, rc=localrc)
+            call ESMF_StateRemove (state, itemNameList=(/thisname/), rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
