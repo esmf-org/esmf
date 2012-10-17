@@ -1,4 +1,4 @@
-! $Id: ESMF_StateItem.F90,v 1.13 2012/02/23 19:21:31 w6ws Exp $
+! $Id: ESMF_StateItem.F90,v 1.14 2012/10/17 05:14:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -224,6 +224,7 @@
         type(ESMF_Base) :: base
         type(ESMF_MethodTable) :: methodTable
         type(ESMF_StateIntent_Flag) :: st
+        type(ESMF_StateItemWrap), pointer :: zapList(:)
 #if 0
         type(ESMF_NeededFlag) :: needed_default
         type(ESMF_ReadyFlag) :: ready_default

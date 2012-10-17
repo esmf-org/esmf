@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.110 2012/03/21 18:03:57 w6ws Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.111 2012/10/17 05:14:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,6 +47,7 @@
       use ESMF_ArrayMod
       use ESMF_ArrayBundleMod
       use ESMF_FieldMod
+      use ESMF_FieldGetMod
       use ESMF_FieldBundleMod
       use ESMF_StateTypesMod
       use ESMF_StateMod
@@ -117,7 +118,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.110 2012/03/21 18:03:57 w6ws Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.111 2012/10/17 05:14:09 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -264,6 +265,11 @@
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
+    call ESMF_ReconcileZappedProxies(state, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+	ESMF_ERR_PASSTHRU, &
+	ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Only clear the reconcileneeded flag at this State level.
     ! Otherwise, there would be a problem with nested States that
@@ -1332,14 +1338,107 @@ itemloop:  do k=attreconstart, si%theircount
 	        ESMF_CONTEXT, rcToReturn=rc)) return
 	  end if
 	end do
-	deallocate(itemList, stat=memstat)
-	if (ESMF_LogFoundDeallocError(memstat, &
-	    ESMF_ERR_PASSTHRU, &
-	    ESMF_CONTEXT, rcToReturn=rc)) return
+!	deallocate(itemList, stat=memstat)
+!	if (ESMF_LogFoundDeallocError(memstat, &
+!	    ESMF_ERR_PASSTHRU, &
+!	    ESMF_CONTEXT, rcToReturn=rc)) return
       endif
+
+      stypep%zapList => itemList ! hang on for ESMF_ReconcileZappedProxies()
 
       if (present(rc)) rc = ESMF_SUCCESS
     end subroutine ESMF_StateZapProxies
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ReconcileZappedProxies"
+!BOPI
+! !IROUTINE: ESMF_ReconcileZappedProxies -- Conditionally restore zapped proxies
+!
+! !INTERFACE:
+  subroutine ESMF_ReconcileZappedProxies(state, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout)         :: state
+      integer,          intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[state]
+!       {\tt ESMF\_State}
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+    integer :: localrc, i, k
+    integer :: memstat
+    type(ESMF_StateClass),    pointer :: stypep
+    type(ESMF_StateItemWrap), pointer :: itemList(:)
+    type(ESMF_StateItemWrap), pointer :: zapList(:)
+    character(len=ESMF_MAXSTR)  :: thisname
+    character(len=ESMF_MAXSTR)  :: name
+    type(ESMF_Field)            :: tempField
+
+    ! Initialize return code; assume routine not implemented
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    stypep => state%statep
+    zapList => stypep%zapList
+    
+    itemList => null ()
+    call ESMF_ContainerGet(container=stypep%stateContainer, itemList=itemList, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+!print *, "ESMF_ReconcileZappedProxies() looking"
+
+    if (associated(itemList).and.associated(zapList)) then
+      do i=1, size(itemList)
+        if (itemList(i)%si%proxyFlag .and. &
+          itemList(i)%si%otype==ESMF_STATEITEM_FIELD) then
+          call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          
+          do k=1, size(zapList)
+            if (zapList(k)%si%otype==ESMF_STATEITEM_FIELD) then
+              call ESMF_FieldGet(zapList(k)%si%datap%fp, name=name, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) &
+                return
+!print *, "ESMF_ReconcileZappedProxies() checking: ", trim(name)
+              if (trim(name) == trim(thisname)) then
+!print *, "ESMF_ReconcileZappedProxies() found: ", trim(name)
+                ! Bend pointers and copy contents to result in the desired
+                ! behavior for re-reconcile. From a user perspective of
+                ! Reconcile() proxies should persist when a State is 
+                ! re-reconciled, and the same proxies are needed. Basically
+                ! a user should be able to hang on to a proxy.
+                tempField%ftypep => itemList(i)%si%datap%fp%ftypep
+                zapList(k)%si%datap%fp%ftypep = itemList(i)%si%datap%fp%ftypep
+                itemList(i)%si%datap%fp%ftypep => zapList(k)%si%datap%fp%ftypep
+                zapList(k)%si%datap%fp%ftypep => tempField%ftypep
+              endif
+            endif
+          enddo
+        end if
+      end do
+      deallocate(itemList, stat=memstat)
+      if (ESMF_LogFoundDeallocError(memstat, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine ESMF_ReconcileZappedProxies
 
 end module ESMF_StateReconcileMod
 
