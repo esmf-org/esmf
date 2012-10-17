@@ -1,4 +1,4 @@
-! $Id: ESMF_SciCompCreateUTest.F90,v 1.6 2012/10/11 15:53:49 ksaint Exp $
+! $Id: ESMF_SciCompCreateUTest.F90,v 1.7 2012/10/17 16:38:23 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -195,17 +195,6 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Printing a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-!-------------------------------------------------------------------------
-!   !
-    !EX_UTest
-!   ! Verifing that a SciCompDestroy for a regular component catches timeout
-    
-    call ESMF_SciCompDestroy(comp1, rc=rc)
-    
-    write(failMsg, *) "Did return ESMF_SUCCESS"
-    write(name, *) "Destroying a Science Component - with timeout"
-    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
