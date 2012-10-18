@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.53.4.2 2012/10/18 03:39:43 ksaint Exp $
+% $Id: Attribute_pack.tex,v 1.53.4.3 2012/10/18 06:48:27 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@ There are many attributes that are used to describe components. There are curren
      {\tt SimulationRationale} & The reason for performing a simulation. & N/A  & activity:Activity:rationale \\
      {\tt SimulationShortName} & The name of the simulation. & N/A & activity:NumericalActivity:shortName \\
      {\tt SimulationStartDate*} & The date in simulated time of the start of a model simulation. & N/A & activity:SimulationRun:dateRange \\ 
-     {\tt URL} & A URL associated with a model component. & N/A & shared:CI_OnlineResource:linkage \\
+     {\tt URL} & A URL associated with a model component. & N/A & shared:CI\_OnlineResource:linkage \\
      {\tt Version} & Version number of the component. & N/A  & appended to software:SoftwareComponent:shortName \\
      \hline\hline
 \end{tabular}
@@ -197,12 +197,12 @@ There are many attributes that are used to describe components. There are curren
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
      {\tt Abbreviation} & The abbreviation of an individual or organization associated with a model component or simulation. & N/A & shared:ResponsibleParty:abbreviation \\
-     {\tt EmailAddress} & The email address that others can use to ask questions about a model component. & N/A & shared:CI_Address:electronicMailAddress \\
-     {\tt Name} & The name of an author, contact, funder, centre, or principal investigator. & N/A & shared:CI_ResponsibleParty:individualName, shared:CI_ResponsibleParty:organisationName, shared:CI_ResponsibleParty:positionName (depending on NameType value) \\
+     {\tt EmailAddress} & The email address that others can use to ask questions about a model component. & N/A & shared:CI\_Address:electronicMailAddress \\
+     {\tt Name} & The name of an author, contact, funder, centre, or principal investigator. & N/A & shared:CI\_ResponsibleParty:individualName, shared:CI\_ResponsibleParty:organisationName, shared:CI\_ResponsibleParty:positionName (depending on NameType value) \\
      {\tt NameType} & The type of entity that Name references. & Individual, Organization, Position & Not part of CIM; used to determine which CIM field to use for Name \\
-     {\tt PhysicalAddress} & The address of the person designated to provide information about a model component. & N/A & shared:CI_Address:deliveryPoint \\
-     {\tt ResponsiblePartyRole*} & A flag to define the role of the Responsible Party. & Author, PI, Contact, Center, Funder & shared:CI_ResponsibleParty:role \\
-     {\tt URL} & A URL of an individual or organization. & N/A & shared:CI_OnlineResource:linkage \\
+     {\tt PhysicalAddress} & The address of the person designated to provide information about a model component. & N/A & shared:CI\_Address:deliveryPoint \\
+     {\tt ResponsiblePartyRole*} & A flag to define the role of the Responsible Party. & Author, PI, Contact, Center, Funder & shared:CI\_ResponsibleParty:role \\
+     {\tt URL} & A URL of an individual or organization. & N/A & shared:CI\_OnlineResource:linkage \\
      \hline\hline
 \end{tabular}
 \linebreak
@@ -226,12 +226,12 @@ There are many attributes that are used to describe components. There are curren
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
-     {\tt Date*} & The date of the citation. & N/A & shared:CI_Citation:Date \\
-     {\tt DOI} & The assigned Digital Object Identifier (DOI) of the citation. & N/A & shared:CI_Citation:otherCitationDetails \\
-     {\tt LongTitle} & The text of the citation or pointer (e.g. URL) that further describes a model component or simulation. & N/A & shared:CI_Citation:collectiveTitle \\
-     {\tt PresentationForm} & A description of the type of citation. & documentDigital, documentHardcopy, imageDigital, imageHardcopy, mapDigital, mapHardcopy, modelDigital, modelHardcopy, profileDigital, profileHardcopy, tableDigital, tableHardcopy, videoDigital, videoHardcopy & shared:CI_Citation:presentationForm \\
-     {\tt ShortTitle*} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & N/A & shared:CI_Citation:title \\
-     {\tt URL} & Website associated with the citation. & N/A & appended to shared:CI_Citation:collectiveTitle \\
+     {\tt Date*} & The date of the citation. & N/A & shared:CI\_Citation:Date \\
+     {\tt DOI} & The assigned Digital Object Identifier (DOI) of the citation. & N/A & shared:CI\_Citation:otherCitationDetails \\
+     {\tt LongTitle} & The text of the citation or pointer (e.g. URL) that further describes a model component or simulation. & N/A & shared:CI\_Citation:collectiveTitle \\
+     {\tt PresentationForm} & A description of the type of citation. & documentDigital, documentHardcopy, imageDigital, imageHardcopy, mapDigital, mapHardcopy, modelDigital, modelHardcopy, profileDigital, profileHardcopy, tableDigital, tableHardcopy, videoDigital, videoHardcopy & shared:CI\_Citation:presentationForm \\
+     {\tt ShortTitle*} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & N/A & shared:CI\_Citation:title \\
+     {\tt URL} & Website associated with the citation. & N/A & appended to shared:CI\_Citation:collectiveTitle \\
      \hline\hline
 \end{tabular}
 \linebreak
