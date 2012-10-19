@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandleBitForBitEx.F90,v 1.3 2012/10/16 17:40:02 theurich Exp $
+! $Id: ESMF_RHandleBitForBitEx.F90,v 1.4 2012/10/19 20:04:59 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -720,6 +720,35 @@ program ESMF_RHandleBitForBitEx
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!--------- start extra stuff for now ---------
+  srcTermProcessing = 0
+  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
+    factorList=factorList, routehandle=rh, &
+    srcTermProcessing=srcTermProcessing, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_ArraySMM(srcArray, dstArray, routehandle=rh, &
+    termorderflag=ESMF_TERMORDER_SRCSEQ, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (localPet == 0) then
+    print *, "result #4a= ", farrayPtr(1), " expect: ", sumA
+    if (farrayPtr(1) /= sumA) &
+      finalrc = ESMF_FAILURE
+  endif
+
+  call ESMF_ArraySMMRelease(rh, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!--------- end extra stuff for now ---------
+
   ! ---------------------------------------------------------------------------
 
 !BOE
@@ -1253,7 +1282,6 @@ program ESMF_RHandleBitForBitEx
   endif
 !EOC
 
-
   call ESMF_ArraySMMRelease(rh, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -1272,6 +1300,35 @@ program ESMF_RHandleBitForBitEx
 !EOE
 
   ! ---------------------------------------------------------------------------
+
+!--------- start extra stuff for now ---------
+  srcTermProcessing = 0
+  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
+    factorList=factorList, routehandle=rh, &
+    srcTermProcessing=srcTermProcessing, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_ArraySMM(srcArray, dstArray, routehandle=rh, &
+    termorderflag=ESMF_TERMORDER_SRCSEQ, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (localPet == 0) then
+    print *, "result #12 = ", farrayPtr(1), " expect: ", sumC
+    if (farrayPtr(1) /= sumC) &
+      finalrc = ESMF_FAILURE
+  endif
+
+  call ESMF_ArraySMMRelease(rh, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!--------- end extra stuff for now ---------
 
   deallocate(factorIndexList, factorList)
 
