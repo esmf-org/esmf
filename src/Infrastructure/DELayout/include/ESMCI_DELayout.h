@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.41 2012/07/25 22:35:06 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.42 2012/10/19 16:48:36 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -30,6 +30,8 @@
 //
 //EOPI
 //-------------------------------------------------------------------------
+
+#include <vector>
 
 #include "ESMCI_Base.h"       // Base is superclass to DELayout
 #include "ESMCI_VM.h"
@@ -228,6 +230,7 @@ class XXE{
       productSumScalar, productSumScalarRRA,
       sumSuperScalarDstRRA,
       productSumSuperScalarDstRRA,
+      productSumSuperScalarListDstRRA,
       productSumSuperScalarSrcRRA,
       productSumSuperScalarContigRRA,
       // -- zero
@@ -265,6 +268,7 @@ class XXE{
     static int const filterBitNbTestFinish      = 0x8;  // non-block test&finish
     static int const filterBitNbWaitFinish      = 0x10; // non-block wait&finish
     static int const filterBitCancel            = 0x20; // cancel
+    static int const filterBitNbWaitFinishSingleSum = 0x40; // single sum
 
     struct BufferInfo{
       // The BufferInfo provides an extra level of indirection to XXE managed
@@ -469,6 +473,11 @@ class XXE{
     int appendProductSumSuperScalarDstRRA(int predicateBitField, TKId elementTK,
       TKId valueTK, TKId factorTK, int rraIndex, int termCount, void *valueBase,
       bool vectorFlag=false, bool indirectionFlag=false);
+    int appendProductSumSuperScalarListDstRRA(int predicateBitField, 
+      TKId elementTK, TKId valueTK, TKId factorTK,
+      std::vector<int> rraIndexList, int termCount,
+      std::vector<void *>valueBaseList, bool vectorFlag=false, 
+      bool indirectionFlag=false);
     int appendProductSumSuperScalarSrcRRA(int predicateBitField, TKId elementTK,
       TKId valueTK, TKId factorTK, int rraIndex, int termCount,
       void *elementBase, bool vectorFlag=false, bool indirectionFlag=false);
@@ -498,6 +507,11 @@ class XXE{
     template<typename T, typename U, typename V>
     static void psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       U **factorList, TKId factorTK, V *valueBase, int *valueOffsetList,
+      TKId valueTK, int termCount, int vectorLength, int resolved);
+    template<typename T, typename U, typename V>
+    static void pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
+      int *rraOffsetList, U **factorList, TKId factorTK, V **valueBaseList,
+      int *valueOffsetList, int *baseListIndexList,
       TKId valueTK, int termCount, int vectorLength, int resolved);
     template<typename T, typename U, typename V>
     static void psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
@@ -780,6 +794,25 @@ class XXE{
       bool indirectionFlag;
       int *valueOffsetList;
     }ProductSumSuperScalarDstRRAInfo;
+
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      TKId elementTK;
+      TKId factorTK;
+      TKId valueTK;
+      int *rraOffsetList;
+      void **factorList;
+      void **valueBaseList;
+      void **valueBaseListResolve;
+      int valueBaseListSize;
+      int *rraIndexList;
+      int termCount;
+      bool vectorFlag;
+      bool indirectionFlag;
+      int *valueOffsetList;
+      int *baseListIndexList;
+    }ProductSumSuperScalarListDstRRAInfo;
 
     typedef struct{
       OpId opId;
