@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.169 2012/10/11 00:23:58 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.170 2012/10/19 17:01:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.169 2012/10/11 00:23:58 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.170 2012/10/19 17:01:43 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -5047,6 +5047,18 @@ namespace ArrayHelper{
       return (a.seqIndex.decompSeqIndex < b.seqIndex.decompSeqIndex);
   }
 
+  struct DstInfoSrcSeqSort{
+    vector<DstInfo>::iterator pp;
+    int recvnbVectorIndex;
+    DstInfoSrcSeqSort(vector<DstInfo>::iterator pp_, int recvnbVectorIndex_){
+      pp=pp_;
+      recvnbVectorIndex=recvnbVectorIndex_;
+    }
+  };
+  bool operator<(DstInfoSrcSeqSort a, DstInfoSrcSeqSort b){
+    return (a.pp->partnerSeqIndex < b.pp->partnerSeqIndex);
+  }
+  
   struct SrcInfo{
     int linIndex;               // if vector element then this is start
     int vectorLength;           // ==1 single element, > 1 vector element
@@ -5104,6 +5116,11 @@ namespace ArrayHelper{
       int srcLocalDeCount, XXE::TKId elementTK, XXE::TKId valueTK,
       XXE::TKId factorTK, int dataSizeDst, int dataSizeSrc, int dataSizeFactors,
       char **rraList, int rraCount);
+    static int appendSingleProductSum(XXE *xxe,
+      int predicateBitField, int srcTermProcessing,  int srcLocalDeCount,
+      XXE::TKId elementTK, XXE::TKId valueTK, XXE::TKId factorTK, 
+      int dataSizeDst, int dataSizeSrc, int dataSizeFactors, char **rraList,
+      int rraCount, vector<RecvnbElement> recvnbVector);
     int appendTestWaitProductSum(XXE *xxe, int predicateBitField,
       int srcTermProcessing, int srcLocalDeCount, XXE::TKId elementTK,
       XXE::TKId valueTK, XXE::TKId factorTK, int dataSizeDst, int dataSizeSrc,
@@ -5553,6 +5570,83 @@ namespace ArrayHelper{
       ESMCI_ERR_PASSTHRU, &rc)) return rc;
     delete [] tempString;
 #endif
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+  int RecvnbElement::appendSingleProductSum(XXE *xxe,
+    int predicateBitField, int srcTermProcessing,  int srcLocalDeCount,
+    XXE::TKId elementTK, XXE::TKId valueTK, XXE::TKId factorTK, 
+    int dataSizeDst, int dataSizeSrc, int dataSizeFactors, char **rraList,
+    int rraCount, vector<RecvnbElement> recvnbVector){
+    int localrc = ESMC_RC_NOT_IMPL;         // local return code
+    int rc = ESMC_RC_NOT_IMPL;              // final return code
+    if (recvnbVector.size() < 1){
+      // bail out successfully
+      rc = ESMF_SUCCESS;
+      return rc;
+    }
+    // use first element in recvnbVector to access info that is the same for
+    // all elements
+    int vectorLength =
+      recvnbVector[0].dstInfoTable.begin()->vectorLength;  // store time vLen
+    bool vectorFlag = recvnbVector[0].vectorFlag;
+    if (srcTermProcessing==0){
+      // do all the processing on the dst side
+      // use super-scalar "+=*" operation containing all terms
+      // this single productSum operation supports multiple receive buffers:
+      // -> construct the necessary helper variables
+      int termCount = 0;
+      vector<void *>bufferInfoList;
+      vector<int> rraIndexList;
+      for (int i=0; i<recvnbVector.size(); i++){
+        termCount += recvnbVector[i].dstInfoTable.size();
+        bufferInfoList.push_back(recvnbVector[i].bufferInfo);
+        rraIndexList.push_back(srcLocalDeCount + recvnbVector[i].dstLocalDe);
+      }
+      int xxeIndex = xxe->count;  // need this beyond the increment
+      localrc = xxe->appendProductSumSuperScalarListDstRRA(predicateBitField,
+        elementTK, valueTK, factorTK, rraIndexList, termCount, bufferInfoList,
+        vectorFlag, true);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        ESMCI_ERR_PASSTHRU, &rc)) return rc;
+      
+      XXE::ProductSumSuperScalarListDstRRAInfo
+        *xxeProductSumSuperScalarListDstRRAInfo =
+        (XXE::ProductSumSuperScalarListDstRRAInfo *)&(xxe->stream[xxeIndex]);
+      int *rraOffsetList =
+        xxeProductSumSuperScalarListDstRRAInfo->rraOffsetList;
+      void **factorList = xxeProductSumSuperScalarListDstRRAInfo->factorList;
+      int *valueOffsetList =
+        xxeProductSumSuperScalarListDstRRAInfo->valueOffsetList;
+      int *baseListIndexList =
+        xxeProductSumSuperScalarListDstRRAInfo->baseListIndexList;
+      // set up a temporary vector for sorting for TERMORDER_SRCSEQ
+      vector<DstInfoSrcSeqSort> dstInfoSort;
+      vector<ArrayHelper::DstInfo>::iterator pp;
+      for (int i=0; i<recvnbVector.size(); i++){
+        // append terms from buffer "i"
+        for (pp=recvnbVector[i].dstInfoTable.begin();
+          pp!=recvnbVector[i].dstInfoTable.end(); ++pp){
+          dstInfoSort.push_back(DstInfoSrcSeqSort(pp, i));
+        }
+      }
+      // do the actual sort
+      sort(dstInfoSort.begin(), dstInfoSort.end());
+      // fill in rraOffsetList, factorList, valueOffsetList, baseListIndexList
+      for (int i=0; i<dstInfoSort.size(); i++){
+        rraOffsetList[i] = dstInfoSort[i].pp->linIndex/vectorLength;
+        factorList[i] = (void *)(dstInfoSort[i].pp->factor);
+        valueOffsetList[i] = dstInfoSort[i].pp->bufferIndex;
+        baseListIndexList[i] = dstInfoSort[i].recvnbVectorIndex;
+      }
+    }else{
+      // do some processing on the src side
+      // use super-scalar "+=" operation containing all terms
+      
+      //TODO: need to implement based on appendSumSuperScalarListDstRRA
+      
+    }
     // return successfully
     rc = ESMF_SUCCESS;
     return rc;
@@ -8905,6 +8999,7 @@ int sparseMatMulStoreEncodeXXE(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+#define SMMSTOREENCODEXXEINFO
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -9659,9 +9754,11 @@ ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
     srcTermProcessingOpt = *srcTermProcessingArg;
   }else{
     // optimize srcTermProcessing
+#ifdef SMMSTOREENCODEXXEINFO
     char msg[160];
     sprintf(msg, "srcTermProcessingArg was NOT provided -> tuning...");
     ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
+#endif
     int pipelineDepth = petCount/2; // tricky to pick a good value here for all
                                     // cases (different interconnects!!!)
                                     // therefore need a concurrent opt scheme!!
@@ -9698,7 +9795,7 @@ ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
         vm->wtime(&dtStart);
         localrc = xxe->exec(rraCount, rraList, &vectorLength,
           0x0|XXE::filterBitRegionTotalZero|XXE::filterBitNbTestFinish
-          |XXE::filterBitCancel);
+          |XXE::filterBitCancel|XXE::filterBitNbWaitFinishSingleSum);
         if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &rc)) return rc;
         vm->barrier();
@@ -9791,9 +9888,11 @@ ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
     pipelineDepthOpt = *pipelineDepthArg;
   }else{
     // optimize pipeline depth
+#ifdef SMMSTOREENCODEXXEINFO
     char msg[160];
     sprintf(msg, "pipelineDepthArg was NOT provided -> tuning...");
     ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
+#endif
     for (int pipelineDepth=1; pipelineDepth<=petCount; pipelineDepth*=2){
       // start writing a fresh XXE stream
       xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
@@ -9824,7 +9923,7 @@ ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
         vm->wtime(&dtStart);
           localrc = xxe->exec(rraCount, rraList, &vectorLength,
             0x0|XXE::filterBitRegionTotalZero|XXE::filterBitNbTestFinish
-            |XXE::filterBitCancel);
+            |XXE::filterBitCancel|XXE::filterBitNbWaitFinishSingleSum);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &rc)) return rc;
         vm->barrier();
@@ -9926,7 +10025,7 @@ ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
   vm->barrier();  // ensure all PETs are present before profile run
   localrc = xxe->exec(rraCount, rraList, &vectorLength, 
     0x0|XXE::filterBitRegionTotalZero|XXE::filterBitNbTestFinish
-    |XXE::filterBitCancel);
+    |XXE::filterBitCancel|XXE::filterBitNbWaitFinishSingleSum);
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
     return rc;
   
@@ -10145,10 +10244,16 @@ int sparseMatMulStoreEncodeXXEStream(
         if (recvnbStage < sendnbStage){
           // wait will not cause deadlock in the staggered Pet pattern
           int k = pRecvWait-recvnbVector.begin();
+          // append test and wait calls that trigger productSum
           localrc = pRecvWait->appendTestWaitProductSum(xxe,
             0x0, srcTermProcessing,
             srcLocalDeCount, elementTK, valueTK, factorTK, dataSizeDst,
             dataSizeSrc, dataSizeFactors, rraList, rraCount, k);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+            ESMCI_ERR_PASSTHRU, &rc)) return rc;
+          // append simple wait if summing to be done in a single sum at the end
+          localrc = xxe->appendWaitOnIndex(
+            0x0|XXE::filterBitNbWaitFinishSingleSum, pRecvWait->recvnbIndex);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, &rc)) return rc;
           ++pRecvWait;
@@ -10208,10 +10313,16 @@ int sparseMatMulStoreEncodeXXEStream(
         if (recvnbStage < sendnbStage){
           // wait will not cause deadlock in the staggered Pet pattern
           int k = pRecvWait-recvnbVector.begin();
+          // append test and wait calls that trigger productSum
           localrc = pRecvWait->appendTestWaitProductSum(xxe,
             0x0, srcTermProcessing, srcLocalDeCount,
             elementTK, valueTK, factorTK, dataSizeDst, dataSizeSrc,
             dataSizeFactors, rraList, rraCount, k);
+          if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+            ESMCI_ERR_PASSTHRU, &rc)) return rc;
+          // append simple wait if summing to be done in a single sum at the end
+          localrc = xxe->appendWaitOnIndex(
+            0x0|XXE::filterBitNbWaitFinishSingleSum, pRecvWait->recvnbIndex);
           if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
             ESMCI_ERR_PASSTHRU, &rc)) return rc;
           ++pRecvWait;
@@ -10251,11 +10362,22 @@ int sparseMatMulStoreEncodeXXEStream(
         }
       }
     }
-    // post all XXE::waitOnAllSendnb at the end
+    // alternatively could post all XXE::waitOnAllSendnb at the end
+    // -> not sure what gives better performance.
     //  localrc = xxe->appendWaitOnAllSendnb(0x0);
     //  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
     //    ESMCI_ERR_PASSTHRU, &rc)) return rc;
-  
+    
+    // append a single productSum operation that considers _all_ of the 
+    // incoming elements and orders them accroding the strict canonical 
+    // TERMORDER_SRCSEQ order
+    localrc = ArrayHelper::RecvnbElement::appendSingleProductSum(xxe,
+      0x0|XXE::filterBitNbWaitFinishSingleSum, srcTermProcessing,
+      srcLocalDeCount, elementTK, valueTK, factorTK, dataSizeDst,
+      dataSizeSrc, dataSizeFactors, rraList, rraCount, recvnbVector);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+      ESMCI_ERR_PASSTHRU, &rc)) return rc;
+    
 #else
     
     // use BLOCKING comms instead!!!!!!!!
@@ -10314,7 +10436,6 @@ int sparseMatMulStoreEncodeXXEStream(
     // here all blk. comms are done ... -> simple ProductSum() elements follow.
     
     while (pRecvWait!=recvnbVector.end()){
-      int k = pRecvWait-recvnbVector.begin();
       localrc = pRecvWait->appendProductSum(xxe,
         0x0, srcTermProcessing, srcLocalDeCount,
         elementTK, valueTK, factorTK, dataSizeDst, dataSizeSrc,
@@ -10397,6 +10518,7 @@ int Array::sparseMatMul(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+#define SMMINFO
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -10499,14 +10621,30 @@ int Array::sparseMatMul(
   
   if (commflag==ESMF_COMM_BLOCKING){
     // blocking mode
-    if (termorderflag == ESMC_TERMORDER_SRCPET){
+    if (termorderflag == ESMC_TERMORDER_SRCSEQ){
+      filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
       filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
       filterBitField |= XXE::filterBitCancel;       // set Cancel filter
+#ifdef SMMINFO
+      ESMC_LogDefault.ESMC_LogWrite("SMM exec: blocking ESMC_TERMORDER_SRCSEQ",
+        ESMC_LOGMSG_INFO);
+#endif
+    }else if (termorderflag == ESMC_TERMORDER_SRCPET){
+      filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
+      filterBitField |= XXE::filterBitCancel;       // set Cancel filter
+      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+#ifdef SMMINFO
+      ESMC_LogDefault.ESMC_LogWrite("SMM exec: blocking ESMC_TERMORDER_SRCPET",
+        ESMC_LOGMSG_INFO);
+#endif
     }else if (termorderflag == ESMC_TERMORDER_FREE){
       filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
       filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
-//      ESMC_LogDefault.ESMC_LogWrite("setting up free-order",
-//        ESMC_LOGMSG_INFO);
+      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+#ifdef SMMINFO
+      ESMC_LogDefault.ESMC_LogWrite("SMM exec: blocking ESMC_TERMORDER_FREE",
+        ESMC_LOGMSG_INFO);
+#endif
     }else{
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL, 
         "- not a supported choice for termorderflag under ESMF_COMM_BLOCKING",
@@ -10518,21 +10656,41 @@ int Array::sparseMatMul(
     filterBitField |= XXE::filterBitNbWaitFinish;     // set NbWaitFinish filter
     filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
     filterBitField |= XXE::filterBitCancel;           // set Cancel filter
+    filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+#ifdef SMMINFO
+    ESMC_LogDefault.ESMC_LogWrite("SMM exec: nbstart ESMC_TERMORDER_FREE",
+      ESMC_LOGMSG_INFO);
+#endif
   }else if(commflag==ESMF_COMM_NBTESTFINISH){
     // non-blocking test and finish
     filterBitField |= XXE::filterBitNbStart;          // set NbStart filter
     filterBitField |= XXE::filterBitNbWaitFinish;     // set NbWaitFinish filter
     filterBitField |= XXE::filterBitCancel;           // set Cancel filter
+    filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+#ifdef SMMINFO
+    ESMC_LogDefault.ESMC_LogWrite("SMM exec: nbtestfinish ESMC_TERMORDER_FREE",
+      ESMC_LOGMSG_INFO);
+#endif
   }else if(commflag==ESMF_COMM_NBWAITFINISH){
     // non-blocking wait and finish
     filterBitField |= XXE::filterBitNbStart;          // set NbStart filter
     filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
     filterBitField |= XXE::filterBitCancel;           // set Cancel filter
+    filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+#ifdef SMMINFO
+    ESMC_LogDefault.ESMC_LogWrite("SMM exec: nbwaitfinish ESMC_TERMORDER_FREE",
+      ESMC_LOGMSG_INFO);
+#endif
   }else if(commflag==ESMF_COMM_CANCEL){
     // cancel
     filterBitField |= XXE::filterBitNbStart;          // set NbStart filter
     filterBitField |= XXE::filterBitNbWaitFinish;     // set NbWaitFinish filter
     filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
+    filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+#ifdef SMMINFO
+    ESMC_LogDefault.ESMC_LogWrite("SMM exec: nbcancel ESMC_TERMORDER_FREE",
+      ESMC_LOGMSG_INFO);
+#endif
   }
   
   if (zeroflag!=ESMC_REGION_TOTAL)
@@ -10608,14 +10766,19 @@ int Array::sparseMatMul(
   while (commflag==ESMF_COMM_BLOCKING && !(*finishedflag)){
     // blocking free-order loop
     
-//    ESMC_LogDefault.ESMC_LogWrite("...within free-order while",
-//      ESMC_LOGMSG_INFO);
-    
+#ifdef SMMINFO
+    ESMC_LogDefault.ESMC_LogWrite("...within free-order while",
+      ESMC_LOGMSG_INFO);
+#endif
+        
     filterBitField = 0x0; // init. to execute _all_ operations in XXE stream
     // same as non-blocking test and finish
+    filterBitField |= XXE::filterBitRegionTotalZero;  // filter reg. total zero
+    filterBitField |= XXE::filterBitRegionSelectZero; // filter reg. select zero
     filterBitField |= XXE::filterBitNbStart;          // set NbStart filter
     filterBitField |= XXE::filterBitNbWaitFinish;     // set NbWaitFinish filter
     filterBitField |= XXE::filterBitCancel;           // set Cancel filter
+    filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
     localrc = xxe->exec(rraCount, rraList, &vectorLength, filterBitField,
       finishedflag, cancelledflag);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
