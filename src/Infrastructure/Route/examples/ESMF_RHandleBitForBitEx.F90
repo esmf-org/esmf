@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandleBitForBitEx.F90,v 1.4 2012/10/19 20:04:59 theurich Exp $
+! $Id: ESMF_RHandleBitForBitEx.F90,v 1.5 2012/10/19 20:49:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -84,6 +84,27 @@ program ESMF_RHandleBitForBitEx
 ! leads to small numerical differences in the results, breaking bfb
 ! reproducibility.
 !
+! ESMF provides the following three levels of bfb reproducibility 
+! support, with the associated performance optimization implications:
+!
+! \begin{itemize}
+!
+! \item Strict bit-for-bit reproducibility: Results are guaranteed to be 
+! bit-for-bit identical even when executing across different numbers of PETs. 
+! The optimization options are limited to memory layout and message aggregation.
+!
+! \item Relaxed bit-for-bit reproducibility: Results are only guaranteed to be
+! bit-for-bit identical when running across an unchanged number of PETs. The 
+! optimization options include partial sums, allowing computational load to 
+! be balanced between source and destination PETs, and message sizes to be 
+! reduced.
+!
+! \item No guarantee for bit-for-bit reproducibility: Results may differ by 
+! numerical round-off. The optimization options include dynamic out-of-order
+! summation of partial sums.
+!
+! \end{itemize}
+!
 ! The following discussion uses very simple numerical examples to demonstrate
 ! how the order of terms in a sum can lead to results that are not
 ! bit-for-bit identical. The examples use single precision,
@@ -118,7 +139,7 @@ program ESMF_RHandleBitForBitEx
 ! Periodic floating point numbers must be truncated when represented by a
 ! finite number of bits, leading to small rounding errors. Further truncation
 ! occurs when the radix point of two numbers must be aligned during
-! floating point arithmetic, resulting in a bit shifts of one of the
+! floating point arithmetic, resulting in bit shifts for one of the
 ! numbers. The resulting truncation error depends on the precise numbers that
 ! need alignment. As a result, executing the "same" sum in a different order
 ! can lead to different truncation steps and consequently in results that are
