@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.52 2012/10/03 18:29:03 gold2718 Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.53 2012/10/19 21:48:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.52 2012/10/03 18:29:03 gold2718 Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.53 2012/10/19 21:48:50 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1318,6 +1318,7 @@ int ArrayBundle::sparseMatMul(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+#define SMMINFO
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -1459,17 +1460,17 @@ int ArrayBundle::sparseMatMul(
       int rraCount = rraList.size();
       // set filterBitField  
       int filterBitField = 0x0; // init. to execute _all_ operations in XXE
-  
-      //TODO: determine XXE filterBitField for XXE exec(),
-      //TODO: considering src vs. dst, DE, phase of nb-call...
-      
-//!!!!!!!! This looks like I should set the filterBitField here to take out
-//!!!!!!!! the non-blocking testing stuff -> strange this isn't causing trouble!
-
+      filterBitField |= XXE::filterBitNbTestFinish; // set NbWaitFinish filter
+      filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
+      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+#ifdef SMMINFO
+      ESMC_LogDefault.ESMC_LogWrite("AB/SMM exec: blocking ESMC_TERMORDER_SRCPET",
+        ESMC_LOGMSG_INFO);
+#endif
       if (zeroflag!=ESMC_REGION_TOTAL)
-        filterBitField |= 1;  // filter the region_total zero operations
+        filterBitField |= XXE::filterBitRegionTotalZero;  // filter reg. total zero
       if (zeroflag!=ESMC_REGION_SELECT)
-        filterBitField |= 2;  // filter the region_select zero operations
+        filterBitField |= XXE::filterBitRegionSelectZero; // filter reg. select zero
       // get a handle on the XXE stored in routehandle
       XXE *xxe = (XXE *)(*routehandle)->getStorage();
       // execute XXE stream
