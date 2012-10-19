@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.15 2012/10/16 15:31:52 feiliu Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.16 2012/10/19 23:16:34 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -66,7 +66,7 @@ contains
 
 !BOP
 ! !IROUTINE: ESMF_RegridWeightGen - Generate regrid weight file from grid files
-!
+! \label{api:esmf_regridweightgen}
 ! !INTERFACE:
 subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
     polemethod, regridPoleNPnts, ignoreUnmappedFlag, srcFileType, dstFileType, &

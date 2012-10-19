@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.145 2012/10/03 18:29:07 gold2718 Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.146 2012/10/19 23:16:33 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.145 2012/10/03 18:29:07 gold2718 Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.146 2012/10/19 23:16:33 oehmke Exp $'
 
 !==============================================================================
 ! 
@@ -3106,7 +3106,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "ESMF_FieldBundleRegridStore()"
 !BOP
 ! !IROUTINE: ESMF_FieldBundleRegridStore - Precompute a FieldBundle regrid operation
-!
+! \label{api:esmf_fieldbundleregridstore}
 ! !INTERFACE:
     subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, &
                                            srcMaskValues, dstMaskValues, &
