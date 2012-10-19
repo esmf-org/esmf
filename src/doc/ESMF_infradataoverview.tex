@@ -1,4 +1,4 @@
-% $Id: ESMF_infradataoverview.tex,v 1.30 2012/10/19 20:49:23 theurich Exp $
+% $Id: ESMF_infradataoverview.tex,v 1.31 2012/10/19 20:57:56 theurich Exp $
 
 \section{Overview of Data Classes}
 
@@ -143,11 +143,11 @@ the ESMF sparse matrix implementation provides three levels of bit-for-bit
 support. The strictest level ensures that the numerical results are
 bit-for-bit identical, even when executing across different numbers of
 PETs. In the relaxed level, bit-for-bit reproducibility is guaranteed when
-running across an unchanged number of PETs, while the lowest level makes no
-guarantees about bit-for-bit reproducibility. However, it provides the
+running across an unchanged number of PETs. The lowest level makes no
+guarantees about bit-for-bit reproducibility, however, it provides the
 greatest performance potential for those cases where numerical round-off
 differences are acceptable. An in-depth discussion of bit-for-bit
-reproducibility and the performance aspects of route-based communication
+reproducibility, and the performance aspects of route-based communication
 methods, such the sparse matrix multiplication, is given in section
 \ref{RH:bfb}.
 
