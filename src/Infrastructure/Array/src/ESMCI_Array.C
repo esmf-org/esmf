@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.170 2012/10/19 17:01:43 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.171 2012/10/22 21:49:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.170 2012/10/19 17:01:43 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.171 2012/10/22 21:49:35 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -5643,9 +5643,53 @@ namespace ArrayHelper{
     }else{
       // do some processing on the src side
       // use super-scalar "+=" operation containing all terms
+      // this single productSum operation supports multiple receive buffers:
+      // -> construct the necessary helper variables
+
+      //TODO: need to fix this implementation to work with srcTermProcessing > 1
       
-      //TODO: need to implement based on appendSumSuperScalarListDstRRA
+      int termCount = 0;
+      vector<void *>bufferInfoList;
+      vector<int> rraIndexList;
+      for (int i=0; i<recvnbVector.size(); i++){
+        termCount += recvnbVector[i].dstInfoTable.size();
+        bufferInfoList.push_back(recvnbVector[i].bufferInfo);
+        rraIndexList.push_back(srcLocalDeCount + recvnbVector[i].dstLocalDe);
+      }
+      int xxeIndex = xxe->count;  // need this beyond the increment
+      localrc = xxe->appendSumSuperScalarListDstRRA(predicateBitField,
+        elementTK, valueTK, rraIndexList, termCount, bufferInfoList,
+        vectorFlag, true);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
+        ESMCI_ERR_PASSTHRU, &rc)) return rc;
       
+      XXE::SumSuperScalarListDstRRAInfo
+        *xxeSumSuperScalarListDstRRAInfo =
+        (XXE::SumSuperScalarListDstRRAInfo *)&(xxe->stream[xxeIndex]);
+      int *rraOffsetList =
+        xxeSumSuperScalarListDstRRAInfo->rraOffsetList;
+      int *valueOffsetList =
+        xxeSumSuperScalarListDstRRAInfo->valueOffsetList;
+      int *baseListIndexList =
+        xxeSumSuperScalarListDstRRAInfo->baseListIndexList;
+      // set up a temporary vector for sorting for TERMORDER_SRCSEQ
+      vector<DstInfoSrcSeqSort> dstInfoSort;
+      vector<ArrayHelper::DstInfo>::iterator pp;
+      for (int i=0; i<recvnbVector.size(); i++){
+        // append terms from buffer "i"
+        for (pp=recvnbVector[i].dstInfoTable.begin();
+          pp!=recvnbVector[i].dstInfoTable.end(); ++pp){
+          dstInfoSort.push_back(DstInfoSrcSeqSort(pp, i));
+        }
+      }
+      // do the actual sort
+      sort(dstInfoSort.begin(), dstInfoSort.end());
+      // fill in rraOffsetList, valueOffsetList, baseListIndexList
+      for (int i=0; i<dstInfoSort.size(); i++){
+        rraOffsetList[i] = dstInfoSort[i].pp->linIndex/vectorLength;
+        valueOffsetList[i] = dstInfoSort[i].pp->bufferIndex;
+        baseListIndexList[i] = dstInfoSort[i].recvnbVectorIndex;
+      }
     }
     // return successfully
     rc = ESMF_SUCCESS;

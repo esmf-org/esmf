@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandleBitForBitEx.F90,v 1.5 2012/10/19 20:49:21 theurich Exp $
+! $Id: ESMF_RHandleBitForBitEx.F90,v 1.6 2012/10/22 21:49:40 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -742,7 +742,7 @@ program ESMF_RHandleBitForBitEx
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !--------- start extra stuff for now ---------
-  srcTermProcessing = 0
+  srcTermProcessing = 1
   call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
     factorList=factorList, routehandle=rh, &
     srcTermProcessing=srcTermProcessing, rc=rc)
