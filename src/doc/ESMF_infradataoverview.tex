@@ -1,4 +1,4 @@
-% $Id: ESMF_infradataoverview.tex,v 1.32 2012/10/19 23:16:39 oehmke Exp $
+% $Id: ESMF_infradataoverview.tex,v 1.33 2012/10/22 19:49:52 oehmke Exp $
 
 \section{Overview of Data Classes}
 
@@ -171,11 +171,11 @@ methods, such the sparse matrix multiplication, is given in section
  Please see Section~\ref{sec:ESMF_RegridWeightGen} for a description of the offline regridding application and the options it supports. For user convenience, there
  is also a method interface to the offline regrid application functionality which is described in Section~\ref{api:esmf_regridweightgen}.
  In constrast to offline regridding, integrated regridding is a process whereby interpolation weights are generated via subroutine calls during the
- execution of the user's code. The integrated regridding can also perform the parallel sparse 
- matrix multiply. In other words, ESMF integrated regridding allows a user to perform the whole process of interpolation within their code. 
+ execution of the user's code. In addition to generating the weights, integrated regridding can also produce a {\bf RouteHandle} (described in Section~\ref{sec:RHandle}) which allows the user to perform the parallel sparse 
+ matrix multiply using ESMF methods. In other words, ESMF integrated regridding allows a user to perform the whole process of interpolation within their code. 
 
- To see what types of grids and other options are supported in the two types of regridding and their testing status, please see the \htmladdnormallink{ESMF Regridding Status}{http://earthsystemmodeling.org/esmf_releases/non_public/ESMF_5_3_0/esmf_5_3_0_regridding_status.html} webpage for this version of ESMF.
- Figure~\ref{Regrid Options} shows a comparison of different regrid methods and where they can be found in the documentation. 
+ To see what types of grids and other options are supported in the two types of regridding and their testing status, please see the \htmladdnormallink{ESMF Regridding Status}{http://earthsystemmodeling.org/esmf_releases/non_public/ESMF_6_1_0/esmf_6_1_0_regridding_status.html} webpage for this version of ESMF.
+ Figure~\ref{Regrid Interfaces} shows a comparison of different regrid interfaces and where they can be found in the documentation. 
 
  The rest of this section further describes various options available in ESMF regridding. It starts with a description of the three interpolation methods available in regridding.
  Next, it describes how to remove (mask) pieces of a grid from the regridding. Following that, it describes options if a destination point can't be regridding. After that, is a section
@@ -198,8 +198,8 @@ ESMF\_RegridWeightGen() & Subroutine call & Grid files & yes  & no & Section~\re
 ESMF\_RegridWeightGen & Application & Grid files & yes  & no & Section~\ref{sec:ESMF_RegridWeightGen} \\
 \hline
 \end{tabular}
-\label{Regrid Options}
-\caption{Regrid Options}
+\label{Regrid Interfaces}
+\caption{Regrid Interfaces}
 \end{table}
 
 
