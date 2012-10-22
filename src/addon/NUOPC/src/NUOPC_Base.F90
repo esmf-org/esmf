@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.7 2012/10/17 05:01:04 theurich Exp $
+! $Id: NUOPC_Base.F90,v 1.8 2012/10/22 23:43:18 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -26,36 +26,37 @@ module NUOPC_Base
   public NUOPC_FieldDictionary
 
   ! public module interfaces
-  public NUOPC_FieldDictionarySetup
-  public NUOPC_FieldDictionaryAddEntry  
-  public NUOPC_FieldAttributeAdd
-  public NUOPC_FieldAttributeGet
+  public NUOPC_ClockCheckSetClock
+  public NUOPC_ClockInitialize
+  public NUOPC_ClockPrintCurrTime
+  public NUOPC_ClockPrintStartTime
+  public NUOPC_ClockPrintStopTime
   public NUOPC_CplCompAreServicesSet
   public NUOPC_CplCompAttributeAdd
   public NUOPC_CplCompAttributeGet
   public NUOPC_CplCompAttributeSet
+  public NUOPC_FieldAttributeAdd
+  public NUOPC_FieldAttributeGet
+  public NUOPC_FieldBundleUpdateTime
+  public NUOPC_FieldDictionaryAddEntry  
+  public NUOPC_FieldDictionarySetup
+  public NUOPC_FillCplList
   public NUOPC_GridCompAttributeAdd
-  public NUOPC_TimePrint
-  public NUOPC_ClockCheckSetClock
-  public NUOPC_ClockPrintCurrTime
-  public NUOPC_ClockPrintStartTime
-  public NUOPC_ClockPrintStopTime
-  public NUOPC_ClockInitialize
   public NUOPC_GridCompAreServicesSet  
-  public NUOPC_GridCompSetClock
   public NUOPC_GridCompCheckSetClock
+  public NUOPC_GridCompSetClock
+  public NUOPC_GridCreateSimpleXY
+  public NUOPC_IsCreated
   public NUOPC_StateAdvertiseField
   public NUOPC_StateBuildStdList
   public NUOPC_StateIsAllConnected
-  public NUOPC_StateIsFieldConnected
   public NUOPC_StateIsAtTime
+  public NUOPC_StateIsFieldConnected
   public NUOPC_StateRealizeField
   public NUOPC_StateSetTimestamp
   public NUOPC_StateUpdateTimestamp
-  public NUOPC_FieldBundleUpdateTime
-  public NUOPC_GridCreateSimpleXY
+  public NUOPC_TimePrint
   
-  public NUOPC_IsCreated
 
 !==============================================================================
 ! 
@@ -63,21 +64,10 @@ module NUOPC_Base
 !
 !==============================================================================
 
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_IsCreated - Check whether an ESMF object is in created status
-! !INTERFACE:
   interface NUOPC_IsCreated
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
     module procedure NUOPC_ClockIsCreated
-
-! !DESCRIPTION: 
-!   Returns {\tt .true.} if an ESMF object is in the created status, 
-!   {\tt .false.} otherwise.
-!EOP
   end interface
+  
   !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
@@ -86,72 +76,421 @@ module NUOPC_Base
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_FieldDictionarySetup - Setup the NUOPC Field dictionary
+! !IROUTINE: NUOPC_ClockCheckSetClock - Check a Clock for compatibility
 ! !INTERFACE:
-  subroutine NUOPC_FieldDictionarySetup(rc)
+  subroutine NUOPC_ClockCheckSetClock(setClock, checkClock, rc)
 ! !ARGUMENTS:
-    integer,      intent(out), optional   :: rc
+    type(ESMF_Clock),        intent(inout)         :: setClock
+    type(ESMF_Clock),        intent(in)            :: checkClock
+    integer,                 intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Setup the NUOPC Field dictionary.
+!   Compares setClock to checkClock to make sure they match in their current
+!   Time. Further ensures that checkClock's timeStep is a multiple of setClock's
+!   timeStep. If both these condition are satisfied then the stopTime of the
+!   setClock is set to be reachable in one timeStep of the checkClock, taking
+!   into account the direction of the Clock.
 !EOP
   !-----------------------------------------------------------------------------
+    ! local variables    
+    type(ESMF_Time)         :: checkCurrTime, currTime, stopTime
+    type(ESMF_TimeInterval) :: checkTimeStep, timeStep
+    type(ESMF_Direction_Flag)    :: direction
+
     if (present(rc)) rc = ESMF_SUCCESS
-
-    if (.not.NUOPC_FieldDictionaryIsSetup) then
     
-      NUOPC_FieldDictionary = ESMF_ContainerCreate(rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_ClockGet(checkClock, currTime=checkCurrTime, &
+      timeStep=checkTimeStep, direction=direction, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
     
-      call ESMF_ContainerGarbageOn(NUOPC_FieldDictionary, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-
-      call NUOPC_FieldDictionaryDefinition(NUOPC_FieldDictionary, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-      
-      NUOPC_FieldDictionaryIsSetup = .true.
-      
+    call ESMF_ClockGet(setClock, currTime=currTime, timeStep=timeStep, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    ! ensure the current times match between checkClock and setClock
+    if (currTime /= checkCurrTime) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="setClock and checkClock do not match in current time!", &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
     endif
-
+    
+    ! ensure that the check timestep is a multiple of the internal one
+    if (ceiling(checkTimeStep/timeStep) /= floor(checkTimeStep/timeStep))&
+      then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="checkClock timestep is not multiple of setClock timestep!", &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    
+    ! set the new stopTime of the setClock
+    if (direction==ESMF_DIRECTION_FORWARD) then
+      stopTime = currTime + checkTimeStep
+    else
+      stopTime = currTime - checkTimeStep
+    endif
+    call ESMF_ClockSet(setClock, stopTime=stopTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
   end subroutine
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_FieldDictionaryAddEntry - Add an entry to the NUOPC Field dictionary
+! !IROUTINE: NUOPC_ClockInitialize - Initialize a new Clock from Clock and stabilityTimeStep
 ! !INTERFACE:
-  subroutine NUOPC_FieldDictionaryAddEntry(standardName, canonicalUnits, &
-    defaultLongName, defaultShortName, rc)
+  function NUOPC_ClockInitialize(externalClock, stabilityTimeStep, rc)
 ! !ARGUMENTS:
-    character(*),                     intent(in)            :: standardName
-    character(*),                     intent(in)            :: canonicalUnits
-    character(*),                     intent(in),  optional :: defaultLongName
-    character(*),                     intent(in),  optional :: defaultShortName
-    integer,                          intent(out), optional :: rc
+    type(ESMF_Clock) :: NUOPC_ClockInitialize
+    type(ESMF_Clock)                               :: externalClock
+    type(ESMF_TimeInterval), intent(in),  optional :: stabilityTimeStep
+    integer,                 intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Add an entry to the NUOPC Field dictionary. If necessary the dictionary is
-!   first set up.
+!   Returns a new Clock instance that is a copy of the incoming Clock, but
+!   potentially with a smaller timestep. The timestep is chosen so that the
+!   timestep of the incoming Clock ({\tt externalClock}) is a multiple of the
+!   new Clock's timestep, and at the same time the new timestep is <= 
+!   the {\tt stabilityTimeStep}.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Clock)        :: internalClock
+    type(ESMF_TimeInterval) :: externalTimeStep
+    type(ESMF_TimeInterval) :: actualTimeStep
+    integer                 :: internalStepCount
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+      ! make a copy of the external externalClock
+    internalClock = ESMF_ClockCreate(externalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
+    if (present(stabilityTimeStep)) then
+    
+      ! determine the internal timeStep
+      ! The external (parent) timeStep must be a multiple of the internal
+      ! timeStep. At the same time there is typically a physical/stability limit
+      ! for the internal timeStep. The following procedure finds an internal
+      ! timeStep that is as close as possible to the provided stability limit, 
+      ! while <= that limit. At the same time the external timeStep is a multiple
+      ! of the internal timeStep.
+      call ESMF_ClockGet(externalClock, timeStep=externalTimeStep, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    
+      internalStepCount = ceiling(externalTimeStep / stabilityTimeStep)
+      actualTimeStep = externalTimeStep / internalStepCount
+    
+      call ESMF_ClockSet(internalClock, timeStep=actualTimeStep, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
+      
+    NUOPC_ClockInitialize = internalClock
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_ClockPrintCurrTime - Formatted print ot current time
+! !INTERFACE:
+  subroutine NUOPC_ClockPrintCurrTime(clock, string, unit, rc)
+! !ARGUMENTS:
+    type(ESMF_Clock), intent(in)            :: clock
+    character(*),     intent(in),  optional :: string
+    character(*),     intent(out), optional :: unit
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Writes the formatted current time of {\tt clock} to {\tt unit}. Prepends 
+!   {\tt string} if provided. If {\tt unit} is present it must be an internal
+!   unit, i.e. a string variable. If {\tt unit} is not present then the output
+!   is written to the default external unit (typically that would be stdout).
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Time)         :: currTime
+    if (present(rc)) rc = ESMF_SUCCESS
+  
+    call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    call NUOPC_TimePrint(currTime, string, unit, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_ClockPrintStartTime - Formatted print ot start time
+! !INTERFACE:
+  subroutine NUOPC_ClockPrintStartTime(clock, string, unit, rc)
+! !ARGUMENTS:
+    type(ESMF_Clock), intent(in)            :: clock
+    character(*),     intent(in),  optional :: string
+    character(*),     intent(out), optional :: unit
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Writes the formatted start time of {\tt clock} to {\tt unit}. Prepends 
+!   {\tt string} if provided. If {\tt unit} is present it must be an internal
+!   unit, i.e. a string variable. If {\tt unit} is not present then the output
+!   is written to the default external unit (typically that would be stdout).
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Time)         :: startTime
+    if (present(rc)) rc = ESMF_SUCCESS
+  
+    call ESMF_ClockGet(clock, startTime=startTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    call NUOPC_TimePrint(startTime, string, unit, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_ClockPrintStopTime - Formatted print ot stop time
+! !INTERFACE:
+  subroutine NUOPC_ClockPrintStopTime(clock, string, unit, rc)
+! !ARGUMENTS:
+    type(ESMF_Clock), intent(in)            :: clock
+    character(*),     intent(in),  optional :: string
+    character(*),     intent(out), optional :: unit
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Writes the formatted stop time of {\tt clock} to {\tt unit}. Prepends 
+!   {\tt string} if provided. If {\tt unit} is present it must be an internal
+!   unit, i.e. a string variable. If {\tt unit} is not present then the output
+!   is written to the default external unit (typically that would be stdout).
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Time)         :: stopTime
+    if (present(rc)) rc = ESMF_SUCCESS
+  
+    call ESMF_ClockGet(clock, stopTime=stopTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    call NUOPC_TimePrint(stopTime, string, unit, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CplCompAreServicesSet - Check if SetServices was called
+! !INTERFACE:
+  function NUOPC_CplCompAreServicesSet(comp, rc)
+! !ARGUMENTS:
+    logical :: NUOPC_CplCompAreServicesSet
+    type(ESMF_CplComp), intent(in)            :: comp
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if SetServices has been called for {\tt comp}.
+!   Otherwise returns {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Pointer)      :: vm_info
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! make a copy of the external externalClock
+    call ESMF_CompGet(comp%compp, vm_info=vm_info, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
+    if (vm_info == ESMF_NULL_POINTER) then
+      NUOPC_CplCompAreServicesSet = .false.
+    else
+      NUOPC_CplCompAreServicesSet = .true.
+    endif
+      
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CplCompAttributeAdd - Add the NUOPC CplComp Attributes
+! !INTERFACE:
+  subroutine NUOPC_CplCompAttributeAdd(comp, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp), intent(inout)         :: comp
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Adds standard NUOPC Attributes to a Coupler Component. Checks the provided
+!   importState and exportState arguments for matching Fields and adds the list
+!   as "CplList" Attribute.
+!
+!   This adds the standard NUOPC Coupler Attribute package: convention="NUOPC", 
+!   purpose="General" to the Field. The NUOPC Coupler Attribute package extends
+!   the ESG Component Attribute package: convention="ESG", purpose="General".
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[comp]
+!     The {\tt ESMF\_CplComp} object to which the Attributes are added.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)  :: attrList(1)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! Set up a customized list of Attributes to be added to the CplComp
+    attrList(1) = "CplList"
+    
+    ! add Attribute packages
+    call ESMF_AttributeAdd(comp, convention="ESG", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
+      attrList=attrList, nestConvention="ESG", nestPurpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+          
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CplCompAttributeGet - Get a NUOPC CplComp Attribute
+! !INTERFACE:
+  subroutine NUOPC_CplCompAttributeGet(comp, cplList, cplListSize, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp)                    :: comp
+    character(*), intent(out),   optional :: cplList(:)
+    integer,      intent(out),   optional :: cplListSize
+    integer,      intent(out),   optional :: rc
+! !DESCRIPTION:
+!   Accesses the "CplList" Attribute inside of {\tt comp} using the
+!   convention {\tt NUOPC} and purpose {\tt General}. Returns with error if
+!   the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
 
-    call NUOPC_FieldDictionarySetup(rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+    if (present(cplList)) then
+      call ESMF_AttributeGet(comp, name="CplList", valueList=cplList, &
+        itemCount=cplListSize, convention="NUOPC", purpose="General", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else
+      call ESMF_AttributeGet(comp, name="CplList", &
+        itemCount=cplListSize, convention="NUOPC", purpose="General", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CplCompAttributeSet - Set the NUOPC CplComp Attributes
+! !INTERFACE:
+  subroutine NUOPC_CplCompAttributeSet(comp, importState, exportState, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp), intent(inout)         :: comp
+    type(ESMF_State),   intent(in)            :: importState
+    type(ESMF_State),   intent(in)            :: exportState
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Checks the provided importState and exportState arguments for matching Fields
+!   and sets the coupling list as "CplList" Attribute in {\tt comp}.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[comp]
+!     The {\tt ESMF\_CplComp} object to which the Attributes are set.
+!   \item[importState]
+!     Import State.
+!   \item[exportState]
+!     Export State.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer, parameter      :: maxCount=10
+    character(ESMF_MAXSTR)  :: cplListValues(maxCount)
+    integer                 :: count
 
-    call NUOPC_FieldDictionaryAddEntryI(NUOPC_FieldDictionary, &
-      standardName = standardName, canonicalUnits = canonicalUnits, &
-      defaultLongName = defaultLongName, defaultShortName = defaultShortName, &
-      rc = rc)
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! find cplListValues
+    call NUOPC_FillCplList(importState, exportState, cplList=cplListValues, &
+      count=count, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    
+    ! set Attributes
+    call ESMF_AttributeSet(comp, &
+      name="ComponentLongName", value="NUOPC Generic Connector Component", &
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    if (count>0) then
+      call ESMF_AttributeSet(comp, &
+        name="CplList", valueList=cplListValues(1:count), &
+        convention="NUOPC", purpose="General", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+      
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -170,7 +509,7 @@ module NUOPC_Base
     character(*), intent(in),  optional   :: Connected
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
-!   Add standard NUOPC Attributes to a Field object. Check the provided
+!   Adds standard NUOPC Attributes to a Field object. Checks the provided
 !   arguments against the NUOPC Field Dictionary. Omitted optional
 !   information is filled in using defaults out of the NUOPC Field Dictionary.
 !
@@ -363,8 +702,8 @@ module NUOPC_Base
     character(*), intent(out)             :: value
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
-!   Access the Attribute {\tt name} inside of {\tt field} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
+!   Accesses the Attribute {\tt name} inside of {\tt field} using the
+!   convention {\tt NUOPC} and purpose {\tt General}. Returns with error if
 !   the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
@@ -403,237 +742,156 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CplCompAreServicesSet - Check if SetServices was called
+! !IROUTINE: NUOPC_FieldBundleUpdateTime - Update the time stamp on all Fields in a FieldBundle
 ! !INTERFACE:
-  function NUOPC_CplCompAreServicesSet(comp, rc)
+  subroutine NUOPC_FieldBundleUpdateTime(srcFields, dstFields, rc)
 ! !ARGUMENTS:
-    logical :: NUOPC_CplCompAreServicesSet
-    type(ESMF_CplComp), intent(in)            :: comp
-    integer,            intent(out), optional :: rc
+    type(ESMF_FieldBundle), intent(inout)         :: srcFields
+    type(ESMF_FieldBundle), intent(inout)         :: dstFields
+    integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Returns {\tt .true.} if SetServices was called. Otherwise {\tt .false.}.
+!   Updates the time stamp on all Fields in the {\tt srcFields} and
+!   {\tt dstFields} FieldBundles.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    type(ESMF_Pointer)      :: vm_info
+    type(ESMF_Field)        :: srcField, dstField
+    integer                 :: i, valueList(9), srcCount, dstCount
+    
+!gjtdebug    character(ESMF_MAXSTR)  :: tempString1, tempString2
+!gjtdebug    character(5*ESMF_MAXSTR):: msgString
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ! make a copy of the external externalClock
-    call ESMF_CompGet(comp%compp, vm_info=vm_info, rc=rc)
+    call ESMF_FieldBundleGet(srcFields, fieldCount=srcCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-      
-    if (vm_info == ESMF_NULL_POINTER) then
-      NUOPC_CplCompAreServicesSet = .false.
-    else
-      NUOPC_CplCompAreServicesSet = .true.
+    call ESMF_FieldBundleGet(dstFields, fieldCount=dstCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (srcCount /= dstCount) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="count mismatch",&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
     endif
-      
-  end function
-  !-----------------------------------------------------------------------------
 
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_CplCompAttributeAdd - Add the NUOPC CplComp Attributes
-! !INTERFACE:
-  subroutine NUOPC_CplCompAttributeAdd(comp, rc)
-! !ARGUMENTS:
-    type(ESMF_CplComp), intent(inout)         :: comp
-    integer,            intent(out), optional :: rc
-! !DESCRIPTION:
-!   Add standard NUOPC Attributes to a Coupler Component. Check the provided
-!   importState and exportState arguments for matching Fields and add the list
-!   as "CplList" Attribute.
-!
-!   This adds the standard NUOPC Coupler Attribute package: convention="NUOPC", 
-!   purpose="General" to the Field. The NUOPC Coupler Attribute package extends
-!   the ESG Component Attribute package: convention="ESG", purpose="General".
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[comp]
-!     The {\tt ESMF\_CplComp} object to which the Attributes are added.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    character(ESMF_MAXSTR)  :: attrList(1)
-
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    ! Set up a customized list of Attributes to be added to the CplComp
-    attrList(1) = "CplList"
-    
-    ! add Attribute packages
-    call ESMF_AttributeAdd(comp, convention="ESG", purpose="General", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
-      attrList=attrList, nestConvention="ESG", nestPurpose="General", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-          
-  end subroutine
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_CplCompAttributeGet - Get a NUOPC CplComp Attribute
-! !INTERFACE:
-  subroutine NUOPC_CplCompAttributeGet(comp, cplList, cplListSize, rc)
-! !ARGUMENTS:
-    type(ESMF_CplComp)                    :: comp
-    character(*), intent(out),   optional :: cplList(:)
-    integer,      intent(out),   optional :: cplListSize
-    integer,      intent(out),   optional :: rc
-! !DESCRIPTION:
-!   Access the "CplList" Attribute inside of {\tt comp} using the
-!   convention {\tt NUOPC} and purpose {\tt General}. Return with error if
-!   the Attribute is not present or not set.
-!EOP
-  !-----------------------------------------------------------------------------
-    if (present(rc)) rc = ESMF_SUCCESS
-
-    if (present(cplList)) then
-      call ESMF_AttributeGet(comp, name="CplList", valueList=cplList, &
-        itemCount=cplListSize, convention="NUOPC", purpose="General", rc=rc)
+    do i=1, srcCount    
+      call ESMF_FieldBundleGet(srcFields, fieldIndex=i, field=srcField, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
-    else
-      call ESMF_AttributeGet(comp, name="CplList", &
-        itemCount=cplListSize, convention="NUOPC", purpose="General", rc=rc)
+      call ESMF_FieldBundleGet(dstFields, fieldIndex=i, field=dstField, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
-    endif
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
-  
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_CplCompAttributeSet - Set the NUOPC CplComp Attributes
-! !INTERFACE:
-  subroutine NUOPC_CplCompAttributeSet(comp, importState, exportState, rc)
-! !ARGUMENTS:
-    type(ESMF_CplComp), intent(inout)         :: comp
-    type(ESMF_State),   intent(in)            :: importState
-    type(ESMF_State),   intent(in)            :: exportState
-    integer,            intent(out), optional :: rc
-! !DESCRIPTION:
-!   Check the provided importState and exportState arguments for matching Fields
-!   and set the coupling list as "CplList" Attribute.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[comp]
-!     The {\tt ESMF\_CplComp} object to which the Attributes are set.
-!   \item[importState]
-!     Import State.
-!   \item[exportState]
-!     Export State.
-!   \item[{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    integer, parameter      :: maxCount=10
-    character(ESMF_MAXSTR)  :: cplListValues(maxCount)
-    integer                 :: count
-
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    ! find cplListValues
-    call NUOPC_FillCplList(importState, exportState, cplList=cplListValues, &
-      count=count, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    
-    ! set Attributes
-    call ESMF_AttributeSet(comp, &
-      name="ComponentLongName", value="NUOPC Generic Connector Component", &
-      convention="NUOPC", purpose="General", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    if (count>0) then
-      call ESMF_AttributeSet(comp, &
-        name="CplList", valueList=cplListValues(1:count), &
+      call ESMF_AttributeGet(srcField, &
+        name="TimeStamp", valueList=valueList, &
         convention="NUOPC", purpose="General", &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-    endif
-      
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
+!gjtdebug call ESMF_FieldGet(srcField, name=tempString1)        
+!gjtdebug call ESMF_FieldGet(dstField, name=tempString2)        
+!gjtdebug write (msgString, *) "updating TimeStamp:", trim(tempString1), " -> ", trim(tempString2), srcField%ftypep%base
+!gjtdebug call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+!gjtdebug write (msgString, *) valueList
+!gjtdebug call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        
+      call ESMF_AttributeSet(dstField, &
+        name="TimeStamp", valueList=valueList, &
+        convention="NUOPC", purpose="General", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    enddo
+    
   end subroutine
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_GridCompAttributeAdd - Add the NUOPC GridComp Attributes
+! !IROUTINE: NUOPC_FieldDictionaryAddEntry - Add an entry to the NUOPC Field dictionary
 ! !INTERFACE:
-  subroutine NUOPC_GridCompAttributeAdd(comp, rc)
+  subroutine NUOPC_FieldDictionaryAddEntry(standardName, canonicalUnits, &
+    defaultLongName, defaultShortName, rc)
 ! !ARGUMENTS:
-    type(ESMF_GridComp)                   :: comp
-    integer,      intent(out), optional   :: rc
+    character(*),                     intent(in)            :: standardName
+    character(*),                     intent(in)            :: canonicalUnits
+    character(*),                     intent(in),  optional :: defaultLongName
+    character(*),                     intent(in),  optional :: defaultShortName
+    integer,                          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Add standard NUOPC Attributes to a Gridded Component.
-!
-!   This adds the standard NUOPC GridComp Attribute package: convention="NUOPC",
-!   purpose="General" to the Gridded Component. The NUOPC GridComp Attribute
-!   package extends the CIM Component Attribute package: convention="CIM",
-!   purpose="Model Component Simulation Description".
-!
+!   Adds an entry to the NUOPC Field dictionary. If necessary the dictionary is
+!   first set up.
 !EOP
   !-----------------------------------------------------------------------------
-    ! local variables
-    character(ESMF_MAXSTR)            :: attrList(2)
-    
     if (present(rc)) rc = ESMF_SUCCESS
 
-    ! Set up a customized list of Attributes to be added to the Fields
-    attrList(1) = "NestingGeneration" ! values: integer starting 0 for parent
-    attrList(2) = "Nestling"  ! values: integer starting 0 for first nestling
-    
-    ! add Attribute packages
-    call ESMF_AttributeAdd(comp, convention="CIM", &
-      purpose="Model Component Simulation Description", rc=rc)
+    call NUOPC_FieldDictionarySetup(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
-      attrList=attrList, nestConvention="CIM", &
-      nestPurpose="Model Component Simulation Description", rc=rc)
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call NUOPC_FieldDictionaryAddEntryI(NUOPC_FieldDictionary, &
+      standardName = standardName, canonicalUnits = canonicalUnits, &
+      defaultLongName = defaultLongName, defaultShortName = defaultShortName, &
+      rc = rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
-    ! set Attributes
-    call ESMF_AttributeSet(comp, &
-      name="NestingGeneration", value=0, &        ! default to parent level
-      convention="NUOPC", purpose="General", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_AttributeSet(comp, &
-      name="Nestling", value=0, &                 ! default to first nestling
-      convention="NUOPC", purpose="General", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
   end subroutine
   !-----------------------------------------------------------------------------
-  
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_FieldDictionarySetup - Setup the NUOPC Field dictionary
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionarySetup(rc)
+! !ARGUMENTS:
+    integer,      intent(out), optional   :: rc
+! !DESCRIPTION:
+!   Setup the NUOPC Field dictionary.
+!EOP
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    if (.not.NUOPC_FieldDictionaryIsSetup) then
+    
+      NUOPC_FieldDictionary = ESMF_ContainerCreate(rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+    
+      call ESMF_ContainerGarbageOn(NUOPC_FieldDictionary, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+
+      call NUOPC_FieldDictionaryDefinition(NUOPC_FieldDictionary, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      
+      NUOPC_FieldDictionaryIsSetup = .true.
+      
+    endif
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_FillCplList - Fill the cplList according to matching Fields
@@ -646,6 +904,8 @@ module NUOPC_Base
     integer,                intent(out)           :: count
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
+!   Constructs a list of matching StandardNames of Fields in the 
+!   {\tt importState} and {\tt exportState}. Returns this list in {\tt cplList}.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -704,216 +964,59 @@ module NUOPC_Base
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_TimePrint - Formatted print ot time information
+! !IROUTINE: NUOPC_GridCompAttributeAdd - Add the NUOPC GridComp Attributes
 ! !INTERFACE:
-  subroutine NUOPC_TimePrint(time, string, unit, rc)
+  subroutine NUOPC_GridCompAttributeAdd(comp, rc)
 ! !ARGUMENTS:
-    type(ESMF_Time), intent(in)            :: time
-    character(*),    intent(in),  optional :: string
-    character(*),    intent(out), optional :: unit
-    integer,         intent(out), optional :: rc
+    type(ESMF_GridComp)                   :: comp
+    integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
-!   Write a formated time with or without {\tt string}
-!   to {\tt unit}. If {\tt unit} is present it must be an internal unit, i.e. a 
-!   string variable. If {\tt unit} is not present then the output is written to
-!   the default external unit (typically that would be stdout).
+!   Adds standard NUOPC Attributes to a Gridded Component.
+!
+!   This adds the standard NUOPC GridComp Attribute package: convention="NUOPC",
+!   purpose="General" to the Gridded Component. The NUOPC GridComp Attribute
+!   package extends the CIM Component Attribute package: convention="CIM",
+!   purpose="Model Component Simulation Description".
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                 :: yy, mm, dd, h, m, s, ms
+    character(ESMF_MAXSTR)            :: attrList(2)
     
     if (present(rc)) rc = ESMF_SUCCESS
-    
-    call ESMF_TimeGet(time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, ms=ms, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-  
-    if (present(unit)) then
-      if (present(string)) then
-        write (unit, "(A, I4, I3, I3, I3, I3, I3, I4)") string, &
-          yy, mm, dd, h, m, s, ms
-      else
-        write (unit, "(I4, I3, I3, I3, I3, I3, I4)") &
-          yy, mm, dd, h, m, s, ms
-      endif
-    else
-      if (present(string)) then
-        write (*, "(A, I4, I3, I3, I3, I3, I3, I4)") string, &
-          yy, mm, dd, h, m, s, ms
-      else
-        write (*, "(I4, I3, I3, I3, I3, I3, I4)") &
-          yy, mm, dd, h, m, s, ms
-      endif
-    endif
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
 
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_ClockPrintCurrTime - Formatted print ot current time
-! !INTERFACE:
-  subroutine NUOPC_ClockPrintCurrTime(clock, string, unit, rc)
-! !ARGUMENTS:
-    type(ESMF_Clock), intent(in)            :: clock
-    character(*),     intent(in),  optional :: string
-    character(*),     intent(out), optional :: unit
-    integer,          intent(out), optional :: rc
-! !DESCRIPTION:
-!   Write the formated current time of {\tt clock} with or without {\tt string}
-!   to {\tt unit}. If {\tt unit} is present it must be an internal unit, i.e. a 
-!   string variable. If {\tt unit} is not present then the output is written to
-!   the default external unit (typically that would be stdout).
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    type(ESMF_Time)         :: currTime
-    if (present(rc)) rc = ESMF_SUCCESS
-  
-    call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+    ! Set up a customized list of Attributes to be added to the Fields
+    attrList(1) = "NestingGeneration" ! values: integer starting 0 for parent
+    attrList(2) = "Nestling"  ! values: integer starting 0 for first nestling
     
-    call NUOPC_TimePrint(currTime, string, unit, rc=rc)
+    ! add Attribute packages
+    call ESMF_AttributeAdd(comp, convention="CIM", &
+      purpose="Model Component Simulation Description", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-  end subroutine
-
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_ClockPrintStartTime - Formatted print ot start time
-! !INTERFACE:
-  subroutine NUOPC_ClockPrintStartTime(clock, string, unit, rc)
-! !ARGUMENTS:
-    type(ESMF_Clock), intent(in)            :: clock
-    character(*),     intent(in),  optional :: string
-    character(*),     intent(out), optional :: unit
-    integer,          intent(out), optional :: rc
-! !DESCRIPTION:
-!   Write the formated start time of {\tt clock} with or without {\tt string}
-!   to {\tt unit}. If {\tt unit} is present it must be an internal unit, i.e. a 
-!   string variable. If {\tt unit} is not present then the output is written to
-!   the default external unit (typically that would be stdout).
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    type(ESMF_Time)         :: startTime
-    if (present(rc)) rc = ESMF_SUCCESS
-  
-    call ESMF_ClockGet(clock, startTime=startTime, rc=rc)
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
+      attrList=attrList, nestConvention="CIM", &
+      nestPurpose="Model Component Simulation Description", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    
-    call NUOPC_TimePrint(startTime, string, unit, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-  end subroutine
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_ClockPrintStopTime - Formatted print ot stop time
-! !INTERFACE:
-  subroutine NUOPC_ClockPrintStopTime(clock, string, unit, rc)
-! !ARGUMENTS:
-    type(ESMF_Clock), intent(in)            :: clock
-    character(*),     intent(in),  optional :: string
-    character(*),     intent(out), optional :: unit
-    integer,          intent(out), optional :: rc
-! !DESCRIPTION:
-!   Write the formated stop time of {\tt clock} with or without {\tt string}
-!   to {\tt unit}. If {\tt unit} is present it must be an internal unit, i.e. a 
-!   string variable. If {\tt unit} is not present then the output is written to
-!   the default external unit (typically that would be stdout).
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    type(ESMF_Time)         :: stopTime
-    if (present(rc)) rc = ESMF_SUCCESS
-  
-    call ESMF_ClockGet(clock, stopTime=stopTime, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    
-    call NUOPC_TimePrint(stopTime, string, unit, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-  end subroutine
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_ClockInitialize - Initialize a clock from clock with stabilityTimeStep
-! !INTERFACE:
-  function NUOPC_ClockInitialize(externalClock, stabilityTimeStep, rc)
-! !ARGUMENTS:
-    type(ESMF_Clock) :: NUOPC_ClockInitialize
-    type(ESMF_Clock)                               :: externalClock
-    type(ESMF_TimeInterval), intent(in),  optional :: stabilityTimeStep
-    integer,                 intent(out), optional :: rc
-! !DESCRIPTION:
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    type(ESMF_Clock)        :: internalClock
-    type(ESMF_TimeInterval) :: externalTimeStep
-    type(ESMF_TimeInterval) :: actualTimeStep
-    integer                 :: internalStepCount
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-      ! make a copy of the external externalClock
-    internalClock = ESMF_ClockCreate(externalClock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=FILENAME)) return  ! bail out
       
-    if (present(stabilityTimeStep)) then
-    
-      ! determine the internal timeStep
-      ! The external (parent) timeStep must be a multiple of the internal
-      ! timeStep. At the same time there is typically a physical/stability limit
-      ! for the internal timeStep. The following procedure finds an internal
-      ! timeStep that is as close as possible to the provided stability limit, 
-      ! while <= that limit. At the same time the external timeStep is a multiple
-      ! of the internal timeStep.
-      call ESMF_ClockGet(externalClock, timeStep=externalTimeStep, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-    
-      internalStepCount = ceiling(externalTimeStep / stabilityTimeStep)
-      actualTimeStep = externalTimeStep / internalStepCount
-    
-      call ESMF_ClockSet(internalClock, timeStep=actualTimeStep, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-    endif
+    ! set Attributes
+    call ESMF_AttributeSet(comp, &
+      name="NestingGeneration", value=0, &        ! default to parent level
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeSet(comp, &
+      name="Nestling", value=0, &                 ! default to first nestling
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
       
-    NUOPC_ClockInitialize = internalClock
-  end function
+  end subroutine
   !-----------------------------------------------------------------------------
-
+  
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_GridCompAreServicesSet - Check if SetServices was called
@@ -924,7 +1027,8 @@ module NUOPC_Base
     type(ESMF_GridComp), intent(in)            :: comp
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Returns {\tt .true.} if SetServices was called. Otherwise {\tt .false.}.
+!   Returns {\tt .true.} if SetServices has been called for {\tt comp}. 
+!   Otherwise returns {\tt .false.}.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -950,46 +1054,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_GridCompSetClock - Set initialized a clock in GridComp
-! !INTERFACE:
-  subroutine NUOPC_GridCompSetClock(comp, externalClock, stabilityTimeStep, rc)
-! !ARGUMENTS:
-    type(ESMF_GridComp),     intent(inout)         :: comp
-    type(ESMF_Clock),        intent(in)            :: externalClock
-    type(ESMF_TimeInterval), intent(in),  optional :: stabilityTimeStep
-    integer,                 intent(out), optional :: rc
-! !DESCRIPTION:
-!   Set the Component internal Clock as a copy of the externalClock, but
-!   with a timeStep that is less than or equal to the stabilityTimeStep.
-!   At the same time ensure that the timeStep of the externalClock is
-!   a multiple of the internal Clock's timeStep. If the stabilityTimeStep
-!   argument is not provided then the internal Clock will simply be set
-!   as a copy of the externalClock.
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    type(ESMF_Clock)        :: internalClock
-
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    internalClock = NUOPC_ClockInitialize(externalClock, stabilityTimeStep, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    call ESMF_GridCompSet(comp, clock=internalClock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-  end subroutine
-  !-----------------------------------------------------------------------------
-  
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_GridCompCheckSetClock - Check clock compatibility
+! !IROUTINE: NUOPC_GridCompCheckSetClock - Check Clock compatibility and set stopTime
 ! !INTERFACE:
   subroutine NUOPC_GridCompCheckSetClock(comp, externalClock, rc)
 ! !ARGUMENTS:
@@ -997,8 +1062,8 @@ module NUOPC_Base
     type(ESMF_Clock),        intent(in)            :: externalClock
     integer,                 intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Compare the externalClock to the Component internal Clock to make sure
-!   they match in their current Time. Further ensure that the externalClock's
+!   Compares {\tt externalClock} to the Component internal Clock to make sure
+!   they match in their current Time. Further ensures that the external Clock's
 !   timeStep is a multiple of the internal Clock's timeStep. If both
 !   these condition are satisfied then the stopTime of the internal Clock is
 !   set to be reachable in one timeStep of the external Clock, taking into
@@ -1028,78 +1093,140 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_ClockCheckSetClock - Check clock compatibility
+! !IROUTINE: NUOPC_GridCompSetClock - Initialize and set the internal Clock of a GridComp
 ! !INTERFACE:
-  subroutine NUOPC_ClockCheckSetClock(setClock, checkClock, rc)
+  subroutine NUOPC_GridCompSetClock(comp, externalClock, stabilityTimeStep, rc)
 ! !ARGUMENTS:
-    type(ESMF_Clock),        intent(inout)         :: setClock
-    type(ESMF_Clock),        intent(in)            :: checkClock
+    type(ESMF_GridComp),     intent(inout)         :: comp
+    type(ESMF_Clock),        intent(in)            :: externalClock
+    type(ESMF_TimeInterval), intent(in),  optional :: stabilityTimeStep
     integer,                 intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Compare setClock to checkClock to make sure they match in their current
-!   Time. Further ensure that checkClock's timeStep is a multiple of setClock's
-!   timeStep. If both these condition are satisfied then the stopTime of the
-!   setClock is set to be reachable in one timeStep of the checkClock, taking
-!   into account the direction of the Clock.
+!   Sets the Component internal Clock as a copy of {\tt externalClock}, but
+!   with a timeStep that is less than or equal to the stabilityTimeStep.
+!   At the same time ensures that the timeStep of the external Clock is
+!   a multiple of the internal Clock's timeStep. If the stabilityTimeStep
+!   argument is not provided then the internal Clock will simply be set
+!   as a copy of the externalClock.
 !EOP
   !-----------------------------------------------------------------------------
-    ! local variables    
-    type(ESMF_Time)         :: checkCurrTime, currTime, stopTime
-    type(ESMF_TimeInterval) :: checkTimeStep, timeStep
-    type(ESMF_Direction_Flag)    :: direction
+    ! local variables
+    type(ESMF_Clock)        :: internalClock
 
     if (present(rc)) rc = ESMF_SUCCESS
     
-    call ESMF_ClockGet(checkClock, currTime=checkCurrTime, &
-      timeStep=checkTimeStep, direction=direction, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    
-    call ESMF_ClockGet(setClock, currTime=currTime, timeStep=timeStep, &
+    internalClock = NUOPC_ClockInitialize(externalClock, stabilityTimeStep, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    
-    ! ensure the current times match between checkClock and setClock
-    if (currTime /= checkCurrTime) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="setClock and checkClock do not match in current time!", &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
-    endif
-    
-    ! ensure that the check timestep is a multiple of the internal one
-    if (ceiling(checkTimeStep/timeStep) /= floor(checkTimeStep/timeStep))&
-      then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="checkClock timestep is not multiple of setClock timestep!", &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
-    endif
-    
-    ! set the new stopTime of the setClock
-    if (direction==ESMF_DIRECTION_FORWARD) then
-      stopTime = currTime + checkTimeStep
-    else
-      stopTime = currTime - checkTimeStep
-    endif
-    call ESMF_ClockSet(setClock, stopTime=stopTime, rc=rc)
+
+    call ESMF_GridCompSet(comp, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
   end subroutine
   !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_GridCreateSimpleXY - Create a simple XY cartesian Grid
+! !INTERFACE:
+  function NUOPC_GridCreateSimpleXY(x_min, y_min, x_max, y_max, &
+    i_count, j_count, rc)
+! !ARGUMENTS:
+    type(ESMF_Grid):: NUOPC_GridCreateSimpleXY
+    real(ESMF_KIND_R8), intent(in)            :: x_min, x_max, y_min, y_max
+    integer,            intent(in)            :: i_count, j_count
+    integer,            intent(out), optional :: rc
+! !DESCRIPTION:
+!   Creates and returns a very simple XY cartesian Grid.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer :: i, j, imin_t, imax_t, jmin_t, jmax_t
+    real(ESMF_KIND_R8), pointer :: CoordX(:), CoordY(:)
+    real(ESMF_KIND_R8):: dx, dy
+    type(ESMF_Grid):: grid
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    dx = (x_max-x_min)/i_count
+    dy = (y_max-y_min)/j_count
+
+    grid = ESMF_GridCreateNoPeriDim(maxIndex=(/i_count,j_count/), &
+      coordDep1=(/1/), coordDep2=(/2/), &
+      gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+      indexflag=ESMF_INDEX_GLOBAL, name="SimpleXY", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    ! add center stagger
+    call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    call ESMF_GridGetCoord(grid, localDE=0, &
+      staggerLoc=ESMF_STAGGERLOC_CENTER, &
+      coordDim=1, farrayPtr=coordX, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    call ESMF_GridGetCoord(grid, localDE=0, &
+      staggerLoc=ESMF_STAGGERLOC_CENTER, &
+      coordDim=2, farrayPtr=coordY, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    ! compute center stagger coordinate values
+    imin_t = lbound(CoordX,1)
+    imax_t = ubound(CoordX,1)
+    jmin_t = lbound(CoordY,1)
+    jmax_t = ubound(CoordY,1)
+      
+    coordX(imin_t) = (imin_t-1)*dx + 0.5*dx
+    do i = imin_t+1, imax_t
+      coordX(i) = coordX(i-1) + dx
+    enddo
+    coordY(jmin_t) = (jmin_t-1)*dy + 0.5*dy
+    do j = jmin_t+1, jmax_t
+      coordY(j) = coordY(j-1) + dy
+    enddo
+    
+    NUOPC_GridCreateSimpleXY = grid
+    
+  end function
+  !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_IsCreated - Check whether an ESMF object has been created
+! !INTERFACE:
+  ! call using generic interface: NUOPC_IsCreated
+  function NUOPC_ClockIsCreated(clock)
+    logical           :: NUOPC_ClockIsCreated
+! !ARGUMENTS:
+    type(ESMF_Clock)  :: clock
+! !DESCRIPTION:
+!   Returns {\tt .true.} if the ESMF object (here {\tt clock}) is in the
+!   created state, {\tt .false.} otherwise.
+!EOP
+  !-----------------------------------------------------------------------------    
+    NUOPC_ClockIsCreated = .false.  ! default assumption
+    if (ESMF_ClockGetInit(clock)==ESMF_INIT_CREATED) &
+      NUOPC_ClockIsCreated = .true.
+  end function
+  !-----------------------------------------------------------------------------
+  
+   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_StateAdvertiseField - Advertise a Field in a State
 ! !INTERFACE:
@@ -1114,7 +1241,7 @@ module NUOPC_Base
     character(*),     intent(in),  optional :: name
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Advertise a potential Field in a State. This call checks the provided
+!   Advertises a Field in a State. This call checks the provided
 !   information against the NUOPC Field Dictionary. Omitted optional
 !   information is filled in using defaults out of the NUOPC Field Dictionary.
 !
@@ -1203,7 +1330,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_StateBuildStdList - Build a Field list from State according to standardName attribute
+! !IROUTINE: NUOPC_StateBuildStdList - Build lists of Field information from a State
 ! !INTERFACE:
   subroutine NUOPC_StateBuildStdList(state, stdAttrNameList, stdItemNameList, &
     stdConnectedList, rc)
@@ -1214,6 +1341,9 @@ module NUOPC_Base
     character(ESMF_MAXSTR), pointer, optional     :: stdConnectedList(:)
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
+!   Constructs lists containing the StandardName, Field name, and connected 
+!   status of the Fields in the {\tt state}. Returns this information in the
+!   list arguments.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1341,7 +1471,7 @@ module NUOPC_Base
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_StateIsAllConnected - Test if all Fields in a State are connected
+! !IROUTINE: NUOPC_StateIsAllConnected - Check if all the Fields in a State are connected
 ! !INTERFACE:
   function NUOPC_StateIsAllConnected(state, rc)
 ! !ARGUMENTS:
@@ -1349,8 +1479,8 @@ module NUOPC_Base
     type(ESMF_State), intent(in)            :: state
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Returns {\tt .true.} if all Fields in {\tt state} are connected. Otherwise 
-!   returns {\tt .false.}.
+!   Returns {\tt .true.} if all the Fields in {\tt state} are connected.
+!   Otherwise returns {\tt .false.}.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1391,50 +1521,7 @@ module NUOPC_Base
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_StateIsFieldConnected - Test if Field in a State is connected
-! !INTERFACE:
-  function NUOPC_StateIsFieldConnected(state, fieldName, rc)
-! !ARGUMENTS:
-    logical :: NUOPC_StateIsFieldConnected
-    type(ESMF_State), intent(in)            :: state
-    character(*),     intent(in)            :: fieldName
-    integer,          intent(out), optional :: rc
-! !DESCRIPTION:
-!   Returns {\tt .true.} if Fields with name {\tt fieldName} contained in 
-!   {\tt state} is connected. Otherwise returns {\tt .false.}.
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    type(ESMF_Field)        :: field
-    character(ESMF_MAXSTR)  :: connectedValue
-
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    NUOPC_StateIsFieldConnected = .false. ! initialize
-
-    call ESMF_StateGet(state, itemName=fieldName, field=field, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    call NUOPC_FieldAttributeGet(field, name="Connected", &
-      value=connectedValue, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    if (connectedValue=="true") then
-      NUOPC_StateIsFieldConnected = .true.
-    endif
-
-  end function
-  !-----------------------------------------------------------------------------
-  
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_StateIsAtTime - Check if all fields in the state are at the given time
+! !IROUTINE: NUOPC_StateIsAtTime - Check if all the Fields in a State are at the given Time
 ! !INTERFACE:
   function NUOPC_StateIsAtTime(state, time, rc)
 ! !ARGUMENTS:
@@ -1443,8 +1530,8 @@ module NUOPC_Base
     type(ESMF_Time),  intent(in)            :: time
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Returns {\tt .true.} if all Fields in {\tt state} have a timestamp that
-!   matches {\tt time}. Otherwise returns {\tt .false.}.
+!   Returns {\tt .true.} if all the Fields in {\tt state} have a timestamp 
+!   that matches {\tt time}. Otherwise returns {\tt .false.}.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1515,7 +1602,50 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_StateRealizeField - Realize a previously advertised Field in State
+! !IROUTINE: NUOPC_StateIsFieldConnected - Test if Field in a State is connected
+! !INTERFACE:
+  function NUOPC_StateIsFieldConnected(state, fieldName, rc)
+! !ARGUMENTS:
+    logical :: NUOPC_StateIsFieldConnected
+    type(ESMF_State), intent(in)            :: state
+    character(*),     intent(in)            :: fieldName
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if Fields with name {\tt fieldName} contained in 
+!   {\tt state} is connected. Otherwise returns {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Field)        :: field
+    character(ESMF_MAXSTR)  :: connectedValue
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    NUOPC_StateIsFieldConnected = .false. ! initialize
+
+    call ESMF_StateGet(state, itemName=fieldName, field=field, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call NUOPC_FieldAttributeGet(field, name="Connected", &
+      value=connectedValue, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    if (connectedValue=="true") then
+      NUOPC_StateIsFieldConnected = .true.
+    endif
+
+  end function
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_StateRealizeField - Realize a previously advertised Field in a State
 ! !INTERFACE:
   subroutine NUOPC_StateRealizeField(state, field, rc)
 ! !ARGUMENTS:
@@ -1523,6 +1653,7 @@ module NUOPC_Base
     type(ESMF_Field), intent(in)            :: field
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
+!   Realizes a previously advertised Field in {\tt state}.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1577,7 +1708,7 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_StateSetTimestamp - Set timestamp on all Fields in a State
+! !IROUTINE: NUOPC_StateSetTimestamp - Set a time stamp on all Fields in a State
 ! !INTERFACE:
   subroutine NUOPC_StateSetTimestamp(state, clock, rc)
 ! !ARGUMENTS:
@@ -1585,6 +1716,8 @@ module NUOPC_Base
     type(ESMF_Clock), intent(in)            :: clock
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
+!   Sets the TimeStamp Attribute according to {\tt clock} on all the Fields in 
+!   {\tt state}.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1646,7 +1779,7 @@ module NUOPC_Base
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_StateUpdateTimestamp - Update the timestamp on all fields in state to that on rootPet
+! !IROUTINE: NUOPC_StateUpdateTimestamp - Update the timestamp on all the Fields in a State
 ! !INTERFACE:
   subroutine NUOPC_StateUpdateTimestamp(state, rootPet, rc)
 ! !ARGUMENTS:
@@ -1654,8 +1787,9 @@ module NUOPC_Base
     integer,          intent(in)            :: rootPet
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Updates the NUOPC timestamp attribute on the State object on all PETs of
-!   the current VM to that held by the {\tt rootPet}.
+!   Updates the TimeStamp Attribute for all the Fields on all the PETs in the
+!   current VM to the TimeStamp Attribute held by the Field instance on the 
+!   {\tt rootPet}.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1749,168 +1883,53 @@ module NUOPC_Base
   end subroutine
   !-----------------------------------------------------------------------------
 
-  !-----------------------------------------------------------------------------
+ !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_FieldBundleUpdateTime - Update the time stamp on all fiels in fieldbundle
+! !IROUTINE: NUOPC_TimePrint - Formatted print ot time information
 ! !INTERFACE:
-  subroutine NUOPC_FieldBundleUpdateTime(srcFields, dstFields, rc)
+  subroutine NUOPC_TimePrint(time, string, unit, rc)
 ! !ARGUMENTS:
-    type(ESMF_FieldBundle), intent(inout)         :: srcFields
-    type(ESMF_FieldBundle), intent(inout)         :: dstFields
-    integer,                intent(out), optional :: rc
+    type(ESMF_Time), intent(in)            :: time
+    character(*),    intent(in),  optional :: string
+    character(*),    intent(out), optional :: unit
+    integer,         intent(out), optional :: rc
 ! !DESCRIPTION:
+!   Write a formatted time with or without {\tt string}
+!   to {\tt unit}. If {\tt unit} is present it must be an internal unit, i.e. a 
+!   string variable. If {\tt unit} is not present then the output is written to
+!   the default external unit (typically that would be stdout).
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    type(ESMF_Field)        :: srcField, dstField
-    integer                 :: i, valueList(9), srcCount, dstCount
-    
-!gjtdebug    character(ESMF_MAXSTR)  :: tempString1, tempString2
-!gjtdebug    character(5*ESMF_MAXSTR):: msgString
+    integer                 :: yy, mm, dd, h, m, s, ms
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    call ESMF_FieldBundleGet(srcFields, fieldCount=srcCount, rc=rc)
+    call ESMF_TimeGet(time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, ms=ms, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    call ESMF_FieldBundleGet(dstFields, fieldCount=dstCount, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    if (srcCount /= dstCount) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="count mismatch",&
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
+  
+    if (present(unit)) then
+      if (present(string)) then
+        write (unit, "(A, I4, I3, I3, I3, I3, I3, I4)") string, &
+          yy, mm, dd, h, m, s, ms
+      else
+        write (unit, "(I4, I3, I3, I3, I3, I3, I4)") &
+          yy, mm, dd, h, m, s, ms
+      endif
+    else
+      if (present(string)) then
+        write (*, "(A, I4, I3, I3, I3, I3, I3, I4)") string, &
+          yy, mm, dd, h, m, s, ms
+      else
+        write (*, "(I4, I3, I3, I3, I3, I3, I4)") &
+          yy, mm, dd, h, m, s, ms
+      endif
     endif
-
-    do i=1, srcCount    
-      call ESMF_FieldBundleGet(srcFields, fieldIndex=i, field=srcField, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-      call ESMF_FieldBundleGet(dstFields, fieldIndex=i, field=dstField, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-      call ESMF_AttributeGet(srcField, &
-        name="TimeStamp", valueList=valueList, &
-        convention="NUOPC", purpose="General", &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-        
-!gjtdebug call ESMF_FieldGet(srcField, name=tempString1)        
-!gjtdebug call ESMF_FieldGet(dstField, name=tempString2)        
-!gjtdebug write (msgString, *) "updating TimeStamp:", trim(tempString1), " -> ", trim(tempString2), srcField%ftypep%base
-!gjtdebug call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-!gjtdebug write (msgString, *) valueList
-!gjtdebug call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-        
-      call ESMF_AttributeSet(dstField, &
-        name="TimeStamp", valueList=valueList, &
-        convention="NUOPC", purpose="General", &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-    enddo
     
   end subroutine
   !-----------------------------------------------------------------------------
 
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_GridCreateSimpleXY - Create a simple XY cartesian grid
-! !INTERFACE:
-  function NUOPC_GridCreateSimpleXY(x_min, y_min, x_max, y_max, &
-    i_count, j_count, rc)
-! !ARGUMENTS:
-    type(ESMF_Grid):: NUOPC_GridCreateSimpleXY
-    real(ESMF_KIND_R8), intent(in)            :: x_min, x_max, y_min, y_max
-    integer,            intent(in)            :: i_count, j_count
-    integer,            intent(out), optional :: rc
-! !DESCRIPTION:
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    integer :: i, j, imin_t, imax_t, jmin_t, jmax_t
-    real(ESMF_KIND_R8), pointer :: CoordX(:), CoordY(:)
-    real(ESMF_KIND_R8):: dx, dy
-    type(ESMF_Grid):: grid
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-
-    dx = (x_max-x_min)/i_count
-    dy = (y_max-y_min)/j_count
-
-    grid = ESMF_GridCreateNoPeriDim(maxIndex=(/i_count,j_count/), &
-      coordDep1=(/1/), coordDep2=(/2/), &
-      gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
-      indexflag=ESMF_INDEX_GLOBAL, name="SimpleXY", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    ! add center stagger
-    call ESMF_GridAddCoord(grid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    call ESMF_GridGetCoord(grid, localDE=0, &
-      staggerLoc=ESMF_STAGGERLOC_CENTER, &
-      coordDim=1, farrayPtr=coordX, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    call ESMF_GridGetCoord(grid, localDE=0, &
-      staggerLoc=ESMF_STAGGERLOC_CENTER, &
-      coordDim=2, farrayPtr=coordY, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    ! compute center stagger coordinate values
-    imin_t = lbound(CoordX,1)
-    imax_t = ubound(CoordX,1)
-    jmin_t = lbound(CoordY,1)
-    jmax_t = ubound(CoordY,1)
-      
-    coordX(imin_t) = (imin_t-1)*dx + 0.5*dx
-    do i = imin_t+1, imax_t
-      coordX(i) = coordX(i-1) + dx
-    enddo
-    coordY(jmin_t) = (jmin_t-1)*dy + 0.5*dy
-    do j = jmin_t+1, jmax_t
-      coordY(j) = coordY(j-1) + dy
-    enddo
-    
-    NUOPC_GridCreateSimpleXY = grid
-    
-  end function
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-  function NUOPC_ClockIsCreated(clock)
-    logical           :: NUOPC_ClockIsCreated
-    type(ESMF_Clock)  :: clock
-    NUOPC_ClockIsCreated = .false.  ! default assumption
-    if (ESMF_ClockGetInit(clock)==ESMF_INIT_CREATED) &
-      NUOPC_ClockIsCreated = .true.
-  end function
-  !-----------------------------------------------------------------------------
-  
 end module
