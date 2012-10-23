@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.C,v 1.53 2012/10/19 21:48:50 theurich Exp $
+// $Id: ESMCI_ArrayBundle.C,v 1.54 2012/10/23 21:35:20 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.53 2012/10/19 21:48:50 theurich Exp $";
+static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.54 2012/10/23 21:35:20 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1464,7 +1464,7 @@ int ArrayBundle::sparseMatMul(
       filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
       filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
 #ifdef SMMINFO
-      ESMC_LogDefault.ESMC_LogWrite("AB/SMM exec: blocking ESMC_TERMORDER_SRCPET",
+      ESMC_LogDefault.ESMC_LogWrite("AB/SMM exec: TERMORDER_SRCPET",
         ESMC_LOGMSG_INFO);
 #endif
       if (zeroflag!=ESMC_REGION_TOTAL)
