@@ -1,4 +1,4 @@
-% $Id: NUOPC_refdoc.ctex,v 1.13 2012/10/10 15:54:30 theurich Exp $ 
+% $Id: NUOPC_refdoc.ctex,v 1.14 2012/10/23 23:17:23 theurich Exp $ 
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -57,36 +57,40 @@
 #endif
 
 \section{Design and Implementation Notes}
+
+\subsection{Generic Components}
 #ifdef STANDALONE
 \input{NUOPC_implnotes}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_implnotes}
 #endif
 
-\section{NUOPC Field Dictionary}
+\subsection{Field Dictionary}
 #ifdef STANDALONE
+\input{NUOPC_FieldDictionary}
 \input{NUOPC_FieldDictionaryDef_fapi}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_FieldDictionaryDef_fapi}
+\input{../addon/NUOPC/doc/NUOPC_FieldDictionary}
 #endif
 
-\newpage
+\subsection{Metadata}
 
-\section{NUOPC Model Component Metadata}
+\subsubsection{Model Component Metadata}
 #ifdef STANDALONE
 \input{NUOPC_ModelComponent_metadata}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_ModelComponent_metadata}
 #endif
 
-\section{NUOPC Connector Component Metadata}
+\subsubsection{Connector Component Metadata}
 #ifdef STANDALONE
 \input{NUOPC_ConnectorComponent_metadata}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_ConnectorComponent_metadata}
 #endif
 
-\section{NUOPC Field Metadata}
+\subsubsection{Field Metadata}
 #ifdef STANDALONE
 \input{NUOPC_Field_metadata}
 #elif defined(CONSTITUENT)

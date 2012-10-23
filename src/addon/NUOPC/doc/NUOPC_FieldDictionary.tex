@@ -1,0 +1,5 @@
+% $Id: NUOPC_FieldDictionary.tex,v 1.1 2012/10/23 23:17:23 theurich Exp $
+%
+The NUOPC Layer uses standard metadata on Fields to implement the decision making in the generic code. Specifically the generic {\tt NUOPC\_Connector} component uses the {\tt StandardName} Attribute to construct a list of matching Fields between the import and export States. The NUOPC Field Dictionary provides a software implementation of a controlled vocabulary for the {\tt StandardName} Attribute. It also associates each registered {\tt StandardName} with {\tt CanonicalUnits}, {\tt LongName}, and {\tt ShortName}.
+
+Besides the {\tt StandardName} Attribute, the NUOPC Layer currently only uses the {\tt CanonicalUnits} entry to verify that Fields are given in their canonical units. The plan is to extend this to support unit conversion in the future. The {\tt LongName} and {\tt ShortName} associations are provided as a convenience to the implementor of NUOPC compliant components.
