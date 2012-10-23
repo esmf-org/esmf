@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.172 2012/10/23 05:50:54 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.173 2012/10/23 21:37:03 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.172 2012/10/23 05:50:54 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.173 2012/10/23 21:37:03 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -10712,7 +10712,7 @@ int Array::sparseMatMul(
       filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
       filterBitField |= XXE::filterBitCancel;       // set Cancel filter
 #ifdef SMMINFO
-      ESMC_LogDefault.ESMC_LogWrite("SMM exec: blocking ESMC_TERMORDER_SRCSEQ",
+      ESMC_LogDefault.ESMC_LogWrite("SMM exec: COMM_BLOCKING, TERMORDER_SRCSEQ",
         ESMC_LOGMSG_INFO);
 #endif
     }else if (termorderflag == ESMC_TERMORDER_SRCPET){
@@ -10720,7 +10720,7 @@ int Array::sparseMatMul(
       filterBitField |= XXE::filterBitCancel;       // set Cancel filter
       filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
 #ifdef SMMINFO
-      ESMC_LogDefault.ESMC_LogWrite("SMM exec: blocking ESMC_TERMORDER_SRCPET",
+      ESMC_LogDefault.ESMC_LogWrite("SMM exec: COMM_BLOCKING, TERMORDER_SRCPET",
         ESMC_LOGMSG_INFO);
 #endif
     }else if (termorderflag == ESMC_TERMORDER_FREE){
@@ -10728,45 +10728,58 @@ int Array::sparseMatMul(
       filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
       filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
 #ifdef SMMINFO
-      ESMC_LogDefault.ESMC_LogWrite("SMM exec: blocking ESMC_TERMORDER_FREE",
+      ESMC_LogDefault.ESMC_LogWrite("SMM exec: COMM_BLOCKING, TERMORDER_FREE",
         ESMC_LOGMSG_INFO);
 #endif
     }else{
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL, 
-        "- not a supported choice for termorderflag under ESMF_COMM_BLOCKING",
-        &rc);
-      return rc;
+        "- termorderflag choice not supported under COMM_BLOCKING", &rc);
+      return rc;  // bail out
     }
   }else if (commflag==ESMF_COMM_NBSTART){
-    // non-blocking start
+    // non-blocking start -> independent of termorderflag
     filterBitField |= XXE::filterBitNbWaitFinish;     // set NbWaitFinish filter
     filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
     filterBitField |= XXE::filterBitCancel;           // set Cancel filter
     filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
 #ifdef SMMINFO
-    ESMC_LogDefault.ESMC_LogWrite("SMM exec: nbstart ESMC_TERMORDER_FREE",
+    ESMC_LogDefault.ESMC_LogWrite("SMM exec: COMM_NBSTART",
       ESMC_LOGMSG_INFO);
 #endif
   }else if(commflag==ESMF_COMM_NBTESTFINISH){
     // non-blocking test and finish
-    filterBitField |= XXE::filterBitNbStart;          // set NbStart filter
-    filterBitField |= XXE::filterBitNbWaitFinish;     // set NbWaitFinish filter
-    filterBitField |= XXE::filterBitCancel;           // set Cancel filter
-    filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+    //TODO: implement the other TERMORDER options
+    if (termorderflag == ESMC_TERMORDER_FREE){
+      filterBitField |= XXE::filterBitNbStart;          // set NbStart filter
+      filterBitField |= XXE::filterBitNbWaitFinish;     // set NbWaitFinish filter
+      filterBitField |= XXE::filterBitCancel;           // set Cancel filter
+      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
 #ifdef SMMINFO
-    ESMC_LogDefault.ESMC_LogWrite("SMM exec: nbtestfinish ESMC_TERMORDER_FREE",
-      ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.ESMC_LogWrite("SMM exec: COMM_NBTESTFINISH, TERMORDER_FREE",
+        ESMC_LOGMSG_INFO);
 #endif
+    }else{
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL, 
+        "- termorderflag choice not supported under COMM_NBTESTFINISH", &rc);
+      return rc;  // bail out
+    }
   }else if(commflag==ESMF_COMM_NBWAITFINISH){
     // non-blocking wait and finish
-    filterBitField |= XXE::filterBitNbStart;          // set NbStart filter
-    filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
-    filterBitField |= XXE::filterBitCancel;           // set Cancel filter
-    filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+    //TODO: implement the other TERMORDER options
+    if (termorderflag == ESMC_TERMORDER_FREE){
+      filterBitField |= XXE::filterBitNbStart;          // set NbStart filter
+      filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
+      filterBitField |= XXE::filterBitCancel;           // set Cancel filter
+      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
 #ifdef SMMINFO
-    ESMC_LogDefault.ESMC_LogWrite("SMM exec: nbwaitfinish ESMC_TERMORDER_FREE",
-      ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.ESMC_LogWrite("SMM exec: COMM_NBWAITFINISH TERMORDER_FREE",
+        ESMC_LOGMSG_INFO);
 #endif
+    }else{
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL, 
+        "- termorderflag choice not supported under COMM_NBWAITFINISH", &rc);
+      return rc;  // bail out
+    }
   }else if(commflag==ESMF_COMM_CANCEL){
     // cancel
     filterBitField |= XXE::filterBitNbStart;          // set NbStart filter
@@ -10774,7 +10787,7 @@ int Array::sparseMatMul(
     filterBitField |= XXE::filterBitNbTestFinish;     // set NbTestFinish filter
     filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
 #ifdef SMMINFO
-    ESMC_LogDefault.ESMC_LogWrite("SMM exec: nbcancel ESMC_TERMORDER_FREE",
+    ESMC_LogDefault.ESMC_LogWrite("SMM exec: COMM_CANCEL",
       ESMC_LOGMSG_INFO);
 #endif
   }
@@ -10850,13 +10863,11 @@ int Array::sparseMatMul(
     return rc;
 
   while (commflag==ESMF_COMM_BLOCKING && !(*finishedflag)){
-    // blocking free-order loop
-    
+    // must be a blocking call with TERMORDER_FREE -> free-order while
 #ifdef SMMINFO
     ESMC_LogDefault.ESMC_LogWrite("...within free-order while",
       ESMC_LOGMSG_INFO);
 #endif
-        
     filterBitField = 0x0; // init. to execute _all_ operations in XXE stream
     // same as non-blocking test and finish
     filterBitField |= XXE::filterBitRegionTotalZero;  // filter reg. total zero
@@ -10870,7 +10881,6 @@ int Array::sparseMatMul(
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return rc;
   }
-  
   
 #ifdef ASMMTIMING
   VMK::wtime(&t6);      //gjt - profile
