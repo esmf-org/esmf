@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.8 2012/10/22 23:43:18 theurich Exp $
+! $Id: NUOPC_Base.F90,v 1.9 2012/10/23 00:14:47 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -39,6 +39,7 @@ module NUOPC_Base
   public NUOPC_FieldAttributeGet
   public NUOPC_FieldBundleUpdateTime
   public NUOPC_FieldDictionaryAddEntry  
+  public NUOPC_FieldDictionaryGetEntry  
   public NUOPC_FieldDictionarySetup
   public NUOPC_FillCplList
   public NUOPC_GridCompAttributeAdd
@@ -847,6 +848,43 @@ module NUOPC_Base
       return  ! bail out
 
     call NUOPC_FieldDictionaryAddEntryI(NUOPC_FieldDictionary, &
+      standardName = standardName, canonicalUnits = canonicalUnits, &
+      defaultLongName = defaultLongName, defaultShortName = defaultShortName, &
+      rc = rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_FieldDictionaryGetEntry - Get information about a NUOPC Field dictionary entry
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionaryGetEntry(standardName, canonicalUnits, &
+    defaultLongName, defaultShortName, rc)
+! !ARGUMENTS:
+    character(*),                     intent(in)            :: standardName
+    character(*),                     intent(out), optional :: canonicalUnits
+    character(*),                     intent(out), optional :: defaultLongName
+    character(*),                     intent(out), optional :: defaultShortName
+    integer,                          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns the canonical units, the default LongName and the default ShortName
+!   that the NUOPC Field dictionary associates with a StandardName.
+!EOP
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call NUOPC_FieldDictionarySetup(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call NUOPC_FieldDictionaryGetEntryI(NUOPC_FieldDictionary, &
       standardName = standardName, canonicalUnits = canonicalUnits, &
       defaultLongName = defaultLongName, defaultShortName = defaultShortName, &
       rc = rc)

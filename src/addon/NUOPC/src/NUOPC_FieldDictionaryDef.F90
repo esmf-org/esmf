@@ -1,4 +1,4 @@
-! $Id: NUOPC_FieldDictionaryDef.F90,v 1.7 2011/09/26 03:40:04 theurich Exp $
+! $Id: NUOPC_FieldDictionaryDef.F90,v 1.8 2012/10/23 00:14:47 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_FieldDictionaryDef.F90"
 
@@ -29,6 +29,7 @@ module NUOPC_FieldDictionaryDef
 
   ! public module interfaces
   public NUOPC_FieldDictionaryAddEntryI
+  public NUOPC_FieldDictionaryGetEntryI
   public NUOPC_FieldDictionaryDefinition
 
   !-----------------------------------------------------------------------------
@@ -88,6 +89,43 @@ module NUOPC_FieldDictionaryDef
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_FieldDictionaryGetEntryI - Get information about a NUOPC Field dictionary entry
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionaryGetEntryI(fieldDictionary, &
+    standardName, canonicalUnits, defaultLongName, defaultShortName, rc)
+! !ARGUMENTS:
+    type(ESMF_Container),             intent(inout)         :: fieldDictionary
+    character(*),                     intent(in)            :: standardName
+    character(*),                     intent(out), optional :: canonicalUnits
+    character(*),                     intent(out), optional :: defaultLongName
+    character(*),                     intent(out), optional :: defaultShortName
+    integer,                          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Query an entry in the NUOPC Field dictionary.
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(NUOPC_FieldDictionaryEntry)  :: fdEntry
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call ESMF_ContainerGetUDT(fieldDictionary, trim(StandardName), &
+      fdEntry, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    if (present(canonicalUnits)) &
+      canonicalUnits = trim(fdEntry%wrap%canonicalUnits)
+    if (present(defaultLongName)) &
+      defaultLongName = trim(fdEntry%wrap%defaultLongName)
+    if (present(defaultShortName)) &
+      defaultShortName = trim(fdEntry%wrap%defaultShortName)
+
   end subroutine
   !-----------------------------------------------------------------------------
 
