@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.171 2012/10/22 21:49:35 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.172 2012/10/23 05:50:54 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.171 2012/10/22 21:49:35 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.172 2012/10/23 05:50:54 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -5138,6 +5138,8 @@ namespace ArrayHelper{
       return (aSrcPet < bSrcPet);
   }
   int RecvnbElement::appendRecvnb(XXE *xxe, int predicateBitField,
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayHelper::RecvnbElement::appendRecvnb()"
     int srcTermProcessing, int dataSizeSrc, int k){
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
     int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -5190,6 +5192,8 @@ namespace ArrayHelper{
     return rc;
   }
   int RecvnbElement::appendRecv(XXE *xxe, int predicateBitField,
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayHelper::RecvnbElement::appendRecv()"
     int srcTermProcessing, int dataSizeSrc, int k){
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
     int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -5242,6 +5246,8 @@ namespace ArrayHelper{
     return rc;
   }
   int RecvnbElement::appendZeroSuperScalar(XXE *xxe, int predicateBitField,
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayHelper::RecvnbElement::appendZeroSuperScalar()"
     int srcLocalDeCount, XXE::TKId elementTK){
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
     int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -5281,6 +5287,8 @@ namespace ArrayHelper{
     return rc;
   }
   int RecvnbElement::appendProductSum(XXE *xxe, int predicateBitField,
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayHelper::RecvnbElement::appendProductSum()"
     int srcTermProcessing,  int srcLocalDeCount, XXE::TKId elementTK,
     XXE::TKId valueTK, XXE::TKId factorTK, int dataSizeDst, int dataSizeSrc,
     int dataSizeFactors, char **rraList, int rraCount){
@@ -5516,6 +5524,8 @@ namespace ArrayHelper{
     return rc;
   }
   int RecvnbElement::appendTestWaitProductSum(XXE *xxe, int predicateBitField,
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayHelper::RecvnbElement::appendTestWaitProductSum()"
     int srcTermProcessing, int srcLocalDeCount, XXE::TKId elementTK,
     XXE::TKId valueTK, XXE::TKId factorTK, int dataSizeDst, int dataSizeSrc,
     int dataSizeFactors, char **rraList, int rraCount, int k){
@@ -5575,6 +5585,8 @@ namespace ArrayHelper{
     return rc;
   }
   int RecvnbElement::appendSingleProductSum(XXE *xxe,
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayHelper::RecvnbElement::appendSingleProductSum()"
     int predicateBitField, int srcTermProcessing,  int srcLocalDeCount,
     XXE::TKId elementTK, XXE::TKId valueTK, XXE::TKId factorTK, 
     int dataSizeDst, int dataSizeSrc, int dataSizeFactors, char **rraList,
@@ -5648,17 +5660,27 @@ namespace ArrayHelper{
 
       //TODO: need to fix this implementation to work with srcTermProcessing > 1
       
-      int termCount = 0;
+      int bufferItemCount = 0;
       vector<void *>bufferInfoList;
       vector<int> rraIndexList;
+      vector<ArrayHelper::DstInfo>::iterator pp;
       for (int i=0; i<recvnbVector.size(); i++){
-        termCount += recvnbVector[i].dstInfoTable.size();
+        pp = recvnbVector[i].dstInfoTable.begin();
+        while (pp != recvnbVector[i].dstInfoTable.end()){
+          SeqIndex seqIndex = pp->seqIndex;
+          for (int term=0; term<srcTermProcessing; term++){
+            ++pp;
+            if ((pp == recvnbVector[i].dstInfoTable.end()) 
+            || !(seqIndex == pp->seqIndex)) break;
+          } // for srcTermProcessing
+          ++bufferItemCount;
+        }
         bufferInfoList.push_back(recvnbVector[i].bufferInfo);
         rraIndexList.push_back(srcLocalDeCount + recvnbVector[i].dstLocalDe);
       }
       int xxeIndex = xxe->count;  // need this beyond the increment
       localrc = xxe->appendSumSuperScalarListDstRRA(predicateBitField,
-        elementTK, valueTK, rraIndexList, termCount, bufferInfoList,
+        elementTK, valueTK, rraIndexList, bufferItemCount, bufferInfoList,
         vectorFlag, true);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, 
         ESMCI_ERR_PASSTHRU, &rc)) return rc;
@@ -5674,13 +5696,27 @@ namespace ArrayHelper{
         xxeSumSuperScalarListDstRRAInfo->baseListIndexList;
       // set up a temporary vector for sorting for TERMORDER_SRCSEQ
       vector<DstInfoSrcSeqSort> dstInfoSort;
-      vector<ArrayHelper::DstInfo>::iterator pp;
       for (int i=0; i<recvnbVector.size(); i++){
         // append terms from buffer "i"
-        for (pp=recvnbVector[i].dstInfoTable.begin();
-          pp!=recvnbVector[i].dstInfoTable.end(); ++pp){
+        int bufferItem = 0; // reset
+        pp = recvnbVector[i].dstInfoTable.begin();
+        while (pp != recvnbVector[i].dstInfoTable.end()){
           dstInfoSort.push_back(DstInfoSrcSeqSort(pp, i));
+          pp->bufferIndex = bufferItem; // adjust to modified buffer structure
+          SeqIndex seqIndex = pp->seqIndex;
+          for (int term=0; term<srcTermProcessing; term++){
+            ++pp;
+            if ((pp == recvnbVector[i].dstInfoTable.end()) 
+            || !(seqIndex == pp->seqIndex)) break;
+          } // for srcTermProcessing
+          ++bufferItem;
         }
+      }
+      // sanity check to ensure srcTermProcessing was correctly considered
+      if (bufferItemCount != dstInfoSort.size()) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_INCONS,
+          "- inconsistent number of buffer elements", &rc);
+        return rc;  // bail out
       }
       // do the actual sort
       sort(dstInfoSort.begin(), dstInfoSort.end());
@@ -5740,6 +5776,8 @@ namespace ArrayHelper{
       return (aDstPet < bDstPet);
   }
   int SendnbElement::appendSendnb(XXE *xxe, int predicateBitField,
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayHelper::SendnbElement::appendSendnb()"
     int srcTermProcessing, XXE::TKId elementTK, XXE::TKId valueTK,
     XXE::TKId factorTK, int dataSizeSrc, char **rraList, int rraCount, int k){
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -5957,6 +5995,8 @@ namespace ArrayHelper{
   }
       
   int SendnbElement::appendSend(XXE *xxe, int predicateBitField,
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayHelper::SendnbElement::appendSend()"
     int srcTermProcessing, XXE::TKId elementTK, XXE::TKId valueTK,
     XXE::TKId factorTK, int dataSizeSrc, char **rraList, int rraCount, int k){
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -6174,6 +6214,8 @@ namespace ArrayHelper{
   }
       
   int SendnbElement::appendSendRecv(XXE *xxe, int predicateBitField,
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::ArrayHelper::SendnbElement::appendSendRecv()"
     int srcTermProcessing, XXE::TKId elementTK, XXE::TKId valueTK,
     XXE::TKId factorTK, int dataSizeSrc, char **rraList, int rraCount,
     int kSend, vector<RecvnbElement>::iterator pRecv, int kRecv){

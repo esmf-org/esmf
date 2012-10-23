@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.C,v 1.56 2012/10/22 21:49:39 theurich Exp $
+// $Id: ESMCI_DELayout.C,v 1.57 2012/10/23 05:50:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_DELayout.C,v 1.56 2012/10/22 21:49:39 theurich Exp $";
+static const char *const version = "$Id: ESMCI_DELayout.C,v 1.57 2012/10/23 05:50:56 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -2573,6 +2573,11 @@ int XXE::exec(
       bufferInfoList[i]->buffer = buffer;
       bufferInfoList[i]->size = currentSize;
     }
+#define EXECBUFFERSET____disable
+#ifdef EXECBUFFERSET
+    // Turn this ON only for DEBUG to help identify buffer access issues!!!
+    memset(bufferInfoList[i]->buffer, 0xff, bufferInfoList[i]->size);
+#endif
   }
   
 #define EXECWITHPRINT____disable
