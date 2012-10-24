@@ -1,4 +1,4 @@
-! $Id: ESMF_SCompEx.F90,v 1.1 2012/10/17 03:27:38 ksaint Exp $
+! $Id: ESMF_SCompEx.F90,v 1.2 2012/10/24 02:19:14 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -105,11 +105,11 @@ program ESMF_SCompEx
       ! Create top-level Coupler Component
       cplcomp = ESMF_CplCompCreate(name="coupler_component", rc=rc)
 
-      ! Create Gridded Component for atmosphere
-      atmcomp = ESMF_GridCompCreate(name="atmosphere", rc=rc)
+      ! Create Gridded Component for Atmosphere
+      atmcomp = ESMF_GridCompCreate(name="Atmosphere", rc=rc)
 
-      ! Create Gridded Component for ocean
-      ocncomp = ESMF_GridCompCreate(name="ocean", rc=rc)
+      ! Create Gridded Component for Ocean
+      ocncomp = ESMF_GridCompCreate(name="Ocean", rc=rc)
 
       ! Link the attributes for the parent and child components
       call ESMF_AttributeLink(cplcomp, atmcomp, rc=rc)
@@ -147,7 +147,7 @@ program ESMF_SCompEx
       
 !BOE
 !\begin{sloppypar}
-!     Now, add some CIM Component attributes to the atmosphere Grid Component.
+!     Now, add some CIM Component attributes to the Atmosphere Grid Component.
 !\end{sloppypar}
 !EOE
 
@@ -205,10 +205,10 @@ program ESMF_SCompEx
 
 !BOE
 !\begin{sloppypar}
-!    Now create a set of Science Components as a children of the atmosphere 
+!    Now create a set of Science Components as a children of the Atmosphere 
 !    Gridded Component. The hierarchy is as follows:
 !    \begin{itemize}
-!       \item atmosphere
+!       \item Atmosphere
 !       \begin{itemize}
 !          \item AtmosDynamicalCore
 !          \begin{itemize}

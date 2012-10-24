@@ -1,4 +1,4 @@
-! $Id: ESMF_SciCompCreateUTest.F90,v 1.7 2012/10/17 16:38:23 theurich Exp $
+! $Id: ESMF_SciCompCreateUTest.F90,v 1.8 2012/10/24 02:19:17 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -112,7 +112,6 @@
     call ESMF_SciCompDestroy(scicompAlias, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef ESMF_TESTEXHAUSTIVE
 
 !-------------------------------------------------------------------------
 !   !
@@ -183,6 +182,8 @@
 
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Verifying the correct Component name was returned Test"
+print *, "cname = ", cname
+print *, "bname = ", bname
     call ESMF_Test((bname.eq.cname), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
@@ -207,7 +208,6 @@
     write(name, *) "Destroying a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-#endif
 
     call ESMF_TestEnd(ESMF_SRCLINE)
 

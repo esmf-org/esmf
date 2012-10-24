@@ -1,4 +1,4 @@
-! $Id: ESMF_SciComp.F90,v 1.5 2012/10/10 20:35:53 ksaint Exp $
+! $Id: ESMF_SciComp.F90,v 1.6 2012/10/24 02:19:16 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@ module ESMF_SciCompMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_SciComp.F90,v 1.5 2012/10/10 20:35:53 ksaint Exp $'
+    '$Id: ESMF_SciComp.F90,v 1.6 2012/10/24 02:19:16 ksaint Exp $'
 
 !==============================================================================
 !
@@ -470,19 +470,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
-    ESMF_INIT_CHECK_DEEP(ESMF_SciCompGetInit,scicomp,rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_SciCompGetInit,scicomp,localrc)
 
     ! call Comp method
     call ESMF_CompGet(scicomp%compp, name=name, compStatus=compStatus, &
        rc=localrc)
+print *, "Name: ", name
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=localrc)) return
 
     ! call Comp method
     call ESMF_CompStatusGet(compStatus, rc = localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=localrc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
