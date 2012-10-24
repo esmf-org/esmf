@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2012/09/07 18:40:50 ksaint Exp $
+# $Id: makefile,v 1.17 2012/10/24 02:27:11 ksaint Exp $
 
 ALL:      build_examples
 run:      run_examples
@@ -12,7 +12,6 @@ EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_AttributeEx \
 		    $(ESMF_EXDIR)/ESMF_AttributeCustPackEx \
 		    $(ESMF_EXDIR)/ESMF_AttributeUpdateEx \
 		    $(ESMF_EXDIR)/ESMF_AttributeCIMEx \
-		    $(ESMF_EXDIR)/ESMF_AttributeSciEx \
 		    $(ESMF_EXDIR)/ESMF_AttributeInternalInfoEx \
 		    $(ESMF_EXDIR)/ESMF_AttReadCustCplCompEx \
 		    $(ESMF_EXDIR)/ESMF_AttReadGridCompEx \
@@ -26,7 +25,6 @@ EXAMPLES_RUN      = run_ESMF_AttributeEx \
 		    run_ESMF_AttributeCustPackEx \
 		    run_ESMF_AttributeUpdateEx \
 		    run_ESMF_AttributeCIMEx \
-		    run_ESMF_AttributeSciEx \
 		    run_ESMF_AttributeInternalInfoEx \
 		    run_ESMF_AttReadCustCplCompEx \
 		    run_ESMF_AttReadGridCompEx \
@@ -37,7 +35,6 @@ EXAMPLES_RUN_UNI  = run_ESMF_AttributeEx_uni \
 		    run_ESMF_AttributePackageEx_uni \
 		    run_ESMF_AttributeCustPackEx_uni \
 		    run_ESMF_AttributeCIMEx_uni \
-		    run_ESMF_AttributeSciEx_uni \
 		    run_ESMF_AttributeInternalInfoEx_uni \
 		    run_ESMF_AttReadCustCplCompEx_uni \
 		    run_ESMF_AttReadGridCompEx_uni \
@@ -94,14 +91,6 @@ run_ESMF_AttributeCIMEx:
 
 run_ESMF_AttributeCIMEx_uni:
 	$(MAKE) EXNAME=AttributeCIM NP=1 exfrun
-
-# --- ESMF_AttributeSciEx
-
-run_ESMF_AttributeSciEx:
-	$(MAKE) EXNAME=AttributeSci NP=4 exfrun
-
-run_ESMF_AttributeSciEx_uni:
-	$(MAKE) EXNAME=AttributeSci NP=1 exfrun
 
 # --- ESMF_AttributeInternalInfoEx
 
