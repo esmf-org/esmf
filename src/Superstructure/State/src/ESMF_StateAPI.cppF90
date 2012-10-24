@@ -1,4 +1,4 @@
-! $Id: ESMF_StateAPI.cppF90,v 1.35 2012/09/28 23:47:57 w6ws Exp $
+! $Id: ESMF_StateAPI.cppF90,v 1.36 2012/10/24 21:24:24 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ module ESMF_StateAPIMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateAPI.cppF90,v 1.35 2012/09/28 23:47:57 w6ws Exp $'
+      '$Id: ESMF_StateAPI.cppF90,v 1.36 2012/10/24 21:24:24 w6ws Exp $'
 
 !==============================================================================
 ! 
@@ -1149,7 +1149,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
       subroutine ESMF_StateGetInfo(state,  &
-            keywordEnforcer, itemSearch, itemOrderFlag, nestedFlag,  &
+            keywordEnforcer, itemSearch, itemorderflag, nestedFlag,  &
             stateintent, itemCount, itemNameList, itemTypeList, name, rc)
 !
 ! !ARGUMENTS:
@@ -1169,6 +1169,12 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.1.0] Added argument {\tt itemorderflag}.
+!              The new argument gives the user control over the order in which
+!              the items are returned.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1176,6 +1182,13 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !     The optional {\tt itemSearch} argument may specify the name of
 !     an individual item to search for.  When used in conjunction with
 !     the {\tt nestedFlag}, nested States will also be searched.
+!
+!     Typically, an {\tt ESMF\_StateGet()} information request will be performed
+!     twice.  The first time, the {\tt itemCount} argument will be used to
+!     query the size of arrays that are needed.  Arrays can then be allocated
+!     to the correct size for {\tt itemNameList} and {\tt itemtypeList}
+!     as needed.  A second call to {\tt ESMF\_StateGet()} will then fill in the
+!     values.
 !
 !     The arguments are:
 !     \begin{description}     
@@ -1222,13 +1235,6 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!
-!     Typically, an {\tt ESMF\_StateGet()} information request will be performed
-!     twice.  The first time, the {\tt itemCount} argument will be used to
-!     query the size of arrays that are needed.  Arrays can then be allocated
-!     to the correct size for {\tt itemNameList} and {\tt itemtypeList}
-!     as needed.  A second call to {\tt ESMF\_StateGet()} will then fill in the
-!     values.
 !
 !EOP
       integer :: ilpos
