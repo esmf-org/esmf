@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.23 2012/05/15 05:29:17 w6ws Exp $
+! $Id: ESMF_Test.F90,v 1.24 2012/10/24 19:56:18 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,6 +35,7 @@
       use ESMF_LogErrMod
       use ESMF_VMMod
       use ESMF_InitMod
+      use ESMF_IOUtilMod
       implicit none
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -42,6 +43,7 @@
       public ESMF_STest
       public ESMF_TestGlobal
       public ESMF_TestEnd
+      public ESMF_TestFileCompare
       public ESMF_TestNumPETs
       public ESMF_TestMinPETs
       public ESMF_TestMaxPETs
@@ -52,7 +54,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.23 2012/05/15 05:29:17 w6ws Exp $'
+      '$Id: ESMF_Test.F90,v 1.24 2012/10/24 19:56:18 w6ws Exp $'
 
 !==============================================================================
 
@@ -245,6 +247,101 @@
       endif
 
       end subroutine ESMF_TestEnd
+
+
+#undef ESMF_METHOD
+#define ESMF_METHOD 'ESMF_TestFileCompare'
+!------------------------------------------------------------------------------
+!BOP
+!
+! !IROUTINE:  ESMF_TestFileCompare - Compare two text files for equivalence
+!
+! !INTERFACE:
+      function ESMF_TestFileCompare(file1, file2)
+
+! !RETURN VALUE:
+      logical :: ESMF_TestFileCompare
+
+! !ARGUMENTS:
+      character(*), intent(in) :: file1     ! test file name
+      character(*), intent(in) :: file2     ! test file name
+
+! !DESCRIPTION:
+!     Compares two files to see if they are identical.
+!
+!     Restrictions:
+!     1.) Only text files are supported
+!     2.) On systems which do not support recursive I/O, this function
+!     should not be called from the I/O list of an I/O statement.
+!
+!EOP
+!-------------------------------------------------------------------------------
+
+      character(1024) :: string1, string2
+      integer :: unit1, unit2
+      integer :: ioerr1, ioerr2
+      integer :: localrc
+
+      ESMF_TestFileCompare = .false.
+
+      call ESMF_UtilIOUnitGet (unit=unit1, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+            ': Can not obtain IO unit number'
+        return
+      end if        
+
+      open (unit1, file=file1,  &
+        form='formatted', status='old', action='read',  &
+        iostat=ioerr1)
+      if (ioerr1 /= 0) then
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+            ': Can not open file: ', trim (file1)
+        return
+      end if        
+
+      call ESMF_UtilIOUnitGet (unit=unit2, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+            ': Can not obtain IO unit number'
+        close (unit1)
+        return
+      end if
+
+      open (unit2, file=file2,  &
+        form='formatted', status='old', action='read',  &
+        iostat=ioerr2)
+      if (ioerr2 /= 0) then
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+            ': Can not open file: ', trim (file2)
+        close (unit1)
+        return
+      end if        
+
+      do
+        read (unit1, '(a)', iostat=ioerr1) string1
+        read (unit2, '(a)', iostat=ioerr2) string2
+        if (ioerr1 /= ioerr2) exit
+
+        select case (ioerr1)
+        case (:-1)
+          ESMF_TestFileCompare = .true.
+          exit
+
+        case (0)
+          if (string1 /= string2) exit
+
+        case (1:)
+          exit
+        end select
+
+      end do
+
+      close (unit2)
+      close (unit1)
+
+
+      end function ESMF_TestFileCompare
 
 !------------------------------------------------------------------------------
 !BOP
