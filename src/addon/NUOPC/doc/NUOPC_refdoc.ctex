@@ -1,4 +1,4 @@
-% $Id: NUOPC_refdoc.ctex,v 1.15 2012/10/24 15:51:00 theurich Exp $ 
+% $Id: NUOPC_refdoc.ctex,v 1.16 2012/10/24 15:58:36 theurich Exp $ 
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -57,12 +57,17 @@
 #endif
 
 \section{Design and Implementation Notes}
-
-\subsection{Generic Components}
 #ifdef STANDALONE
 \input{NUOPC_implnotes}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_implnotes}
+#endif
+
+\subsection{Generic Components}
+#ifdef STANDALONE
+\input{NUOPC_GenericComponents}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_GenericComponents}
 #endif
 
 \subsection{Field Dictionary}
