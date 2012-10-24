@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.147 2012/10/24 21:03:06 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.148 2012/10/24 21:12:57 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.147 2012/10/24 21:03:06 feiliu Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.148 2012/10/24 21:12:57 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1338,12 +1338,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
     ! Private name; call using ESMF_FieldBundleGet()   
     subroutine ESMF_FieldBundleGetListAll(fieldbundle, keywordEnforcer, &
-      geomtype, grid, locstream, mesh, xgrid, &
-      fieldCount, fieldList, fieldNameList, itemorderflag, name, rc)
+      itemorderflag, geomtype, grid, locstream, mesh, xgrid, &
+      fieldCount, fieldList, fieldNameList, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),  intent(in)            :: fieldbundle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_ItemOrder_Flag), intent(in),optional :: itemorderflag
     type(ESMF_GeomType_Flag),intent(out), optional :: geomtype
     type(ESMF_Grid),         intent(out), optional :: grid
     type(ESMF_LocStream),    intent(out), optional :: locstream
@@ -1352,7 +1353,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(out), optional :: fieldCount
     type(ESMF_Field),        intent(out), optional :: fieldList(:)
     character(len=*),        intent(out), optional :: fieldNameList(:)
-    type(ESMF_ItemOrder_Flag), intent(in),optional :: itemorderflag
     character(len=*),        intent(out), optional :: name
     integer,                 intent(out), optional :: rc
 !
@@ -1373,6 +1373,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [fieldbundle]
 !         {\tt ESMF\_FieldBundle} to be queried.
+!   \item [{[itemorderflag]}]
+!         Specifies the order of the returned items in the {\tt fieldList} or the
+!         {\tt fieldNameList}.
+!         The default is {\tt ESMF\_ITEMORDER\_ABC}.
+!         See \ref{const:itemorderflag} for a full list of options.
 !   \item[{[geomtype]}]
 !      Flag that indicates what type of geometry this FieldBundle object holds. 
 !      Can be {\tt ESMF\_GEOMTYPE\_GRID}, {\tt ESMF\_GEOMTYPE\_MESH}, {\tt ESMF\_GEOMTYPE\_LOCSTREAM},
@@ -1394,11 +1399,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         Upon return holds a list of the names of the fields bundled in 
 !         {\tt ESMF\_FieldBundle}. The argument must be allocated to be at least of
 !         size {\tt fieldCount}.
-!   \item [{[itemorderflag]}]
-!         Specifies the order of the returned items in the {\tt fieldList} or the
-!         {\tt fieldNameList}.
-!         The default is {\tt ESMF\_ITEMORDER\_ABC}.
-!         See \ref{const:itemorderflag} for a full list of options.
 !   \item [{[name]}]
 !         Name of the fieldbundle object.
 !   \item [{[rc]}]
