@@ -40,7 +40,7 @@
 \end{verbatim}
 
 \bigskip{\sf DESCRIPTION:\\}
-Driver component that drives model and connector components. The default is to use explicit time stepping. Each time step the same sequence of model and connector components' {\tt Run} methods are called. The run sequence is fully customizable.
+Driver component that drives model and connector components. The default is to use explicit time stepping. Each driver time step, the same sequence of model and connector components' {\tt Run} methods are called. The run sequence is fully customizable.
 
 \bigskip{\sf SUPER:}
 \begin{verbatim}  ESMF_GridComp
@@ -64,13 +64,13 @@ Driver component that drives model and connector components. The default is to u
   \item Set default internal clock to be a copy of the incoming clock.
   \item {\it Required specialization} to set number of model components, {\tt modelCount}, in the internal state: {\tt label\_SetModelCount}.
   \item Allocate internal storage according to {\tt modelCount}.
-  \item {\it Optional specialization} to provide model and connector {\tt petList} members in the internal state: {\tt label\_SetModelPetList}.
+  \item {\it Optional specialization} to provide Model and Connector {\tt petList} members in the internal state: {\tt label\_SetModelPetList}.
   \item Create Model components with their import and export States.
   \item Attach standard NUOPC Model Component metadata.
   \item Create Connector components.
   \item Attach standard NUOPC Connector Component metadata.
   \item Initialize the default run sequence.
-  \item {\it Required specialization} to set model component services: {\tt label\_SetModelServices}. 
+  \item {\it Required specialization} to set component services: {\tt label\_SetModelServices}. 
   \begin{itemize}
     \item Call into SetServices() for all Model and Connector components.
     \item Optionally replace the default clock. 

@@ -1,4 +1,4 @@
-% $Id: NUOPC_refdoc.ctex,v 1.17 2012/10/24 21:30:53 theurich Exp $ 
+% $Id: NUOPC_refdoc.ctex,v 1.18 2012/10/24 21:50:18 theurich Exp $ 
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -122,9 +122,9 @@
 
 \subsection{Generic Component: NUOPC\_DriverAtmOcnMed}
 #ifdef STANDALONE
-%\input{NUOPC_DriverAtmOcnMed_fapi}
+\input{NUOPC_DriverAtmOcnMed_manual_fapi}
 #elif defined(CONSTITUENT)
-%\input{../addon/NUOPC/doc/NUOPC_DriverAtmOcnMed_fapi}
+\input{../addon/NUOPC/doc/NUOPC_DriverAtmOcnMed_manual_fapi}
 #endif
 
 \subsection{Generic Component: NUOPC\_ModelBase}
