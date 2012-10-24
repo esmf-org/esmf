@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.88 2012/10/03 18:29:01 gold2718 Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.89 2012/10/24 21:02:34 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.88 2012/10/03 18:29:01 gold2718 Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.89 2012/10/24 21:02:34 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -1034,7 +1034,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [arraybundle]
 !     {\tt ESMF\_ArrayBundle} to be queried.
 !   \item[{[itemorderflag]}]
-!     Specifies the order of the returned items in the {\tt arrayList}.
+!     Specifies the order of the returned items in the {\tt arrayList} and
+!     {\tt arrayNameList}.
 !     The default is {\tt ESMF\_ITEMORDER\_ABC}.
 !     See \ref{const:itemorderflag} for a full list of options.
 !   \item [{[arrayCount]}]
@@ -1043,7 +1044,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Upon return holds a list of Arrays bundled in {\tt arraybundle}. The
 !     argument must be allocated to be at least of size {\tt arrayCount}.
 !   \item [{[arrayNameList]}]
-!     Upon return holds a list of the names of the Array bundled in 
+!     Upon return holds a list of the names of the Arrays bundled in 
 !     {\tt arraybundle}. The argument must be allocated to be at least of
 !     size {\tt arrayCount}.
 !   \item [{[name]}]
