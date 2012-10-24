@@ -1,4 +1,4 @@
-% $Id: Attribute_refdoc.ctex,v 1.38 2012/10/03 22:20:04 theurich Exp $ 
+% $Id: Attribute_refdoc.ctex,v 1.39 2012/10/24 02:28:46 ksaint Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -112,7 +112,6 @@
 \input{ESMF_AttributeUpdateMod_fapi}
 \input{ESMF_AttributeInternalInfoEx_fapi}
 \input{ESMF_AttributeCIMEx_fapi}
-\input{ESMF_AttributeSciEx_fapi}
 \input{ESMF_AttReadGridCompEx_fapi}
 \input{ESMF_AttReadFieldEx_fapi}
 \input{ESMF_AttReadGridEx_fapi}
@@ -126,7 +125,6 @@
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeUpdateMod_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeInternalInfoEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttributeCIMEx_fapi}
-\input{../Superstructure/AttributeAPI/doc/ESMF_AttributeSciEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttReadGridCompEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttReadFieldEx_fapi}
 \input{../Superstructure/AttributeAPI/doc/ESMF_AttReadGridEx_fapi}
