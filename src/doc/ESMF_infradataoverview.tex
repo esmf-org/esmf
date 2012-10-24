@@ -1,4 +1,4 @@
-% $Id: ESMF_infradataoverview.tex,v 1.33 2012/10/22 19:49:52 oehmke Exp $
+% $Id: ESMF_infradataoverview.tex,v 1.34 2012/10/24 22:44:07 theurich Exp $
 
 \section{Overview of Data Classes}
 
@@ -495,3 +495,10 @@ problems with periodicity and with the pole singularity. This library
 
 \subsection{File-based Regrid API}~\label{sec:filebasedregrid}
 \input{../Superstructure/PreESMFMod/doc/ESMF_RegridWeightGen_fapi}
+
+\subsection{Restrictions and Future Work}
+\begin{enumerate}
+
+\item {\bf 32-bit sequence index limitation:} Currently all ESMF interfaces that handle sequence indices for sparse matrix multiplication (SMM) are implemented with default Fortran integer variables, corresponding to a 32-bit signed integer number on all modern architectures. This limits the global data (across PETs) stored in Fields and Arrays, and accessible to SMM, to $2^{31}-1$ elements. This limitation will be removed in future versions of ESMF by allowing 64-bit sequence indices.
+
+\end{enumerate}
