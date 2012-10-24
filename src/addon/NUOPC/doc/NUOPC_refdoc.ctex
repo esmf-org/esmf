@@ -1,4 +1,4 @@
-% $Id: NUOPC_refdoc.ctex,v 1.14 2012/10/23 23:17:23 theurich Exp $ 
+% $Id: NUOPC_refdoc.ctex,v 1.15 2012/10/24 15:51:00 theurich Exp $ 
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -138,9 +138,9 @@
 
 \subsection{Generic Component: NUOPC\_Mediator}
 #ifdef STANDALONE
-%\input{NUOPC_Mediator_manual_fapi}
+\input{NUOPC_Mediator_manual_fapi}
 #elif defined(CONSTITUENT)
-%\input{../addon/NUOPC/doc/NUOPC_Mediator_manual_fapi}
+\input{../addon/NUOPC/doc/NUOPC_Mediator_manual_fapi}
 #endif
 
 \subsection{Generic Component: NUOPC\_Connector}
