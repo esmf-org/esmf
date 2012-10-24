@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.146 2012/10/19 23:16:33 oehmke Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.147 2012/10/24 21:03:06 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.146 2012/10/19 23:16:33 oehmke Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.147 2012/10/24 21:03:06 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -1236,16 +1236,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       keywordEnforcer, itemorderflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_FieldBundle), intent(in)            :: fieldbundle
-    character(len=*),       intent(in)            :: fieldName
-    type(ESMF_Field),       intent(out)           :: fieldList(:)
+    type(ESMF_FieldBundle), intent(in)              :: fieldbundle
+    character(len=*),       intent(in)              :: fieldName
+    type(ESMF_Field),       intent(out)             :: fieldList(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ItemOrder_Flag), intent(in), optional :: itemorderflag
-    integer,                intent(out), optional :: rc
+    integer,                intent(out), optional   :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.1.0] Added argument {\tt itemorderflag}.
+!              The new argument gives the user control over the order in which
+!              the items are returned.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1256,7 +1262,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     {\tt ESMF\_FieldBundle} to be queried.
 !   \item [fieldName]
 !     Specified name.
-!   \item [{[fieldList]}]
+!   \item [fieldList]
 !     List of Fields in {\tt ESMF\_FieldBundle} that match {\tt fieldName}. The
 !     argument must be allocated to be at least of size {\tt fieldCount}
 !     returned for this {\tt fieldName}.
@@ -1353,6 +1359,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.1.0] Added argument {\tt itemorderflag}.
+!              The new argument gives the user control over the order in which
+!              the items are returned.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1379,11 +1391,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         Upon return holds a list of Fields bundled in {\tt ESMF\_FieldBundle}. The
 !         argument must be allocated to be at least of size {\tt fieldCount}.
 !   \item [{[fieldNameList]}]
-!         Upon return holds a list of the names of the field bundled in 
+!         Upon return holds a list of the names of the fields bundled in 
 !         {\tt ESMF\_FieldBundle}. The argument must be allocated to be at least of
 !         size {\tt fieldCount}.
 !   \item [{[itemorderflag]}]
-!         Specifies the order of the returned items in the {\tt fieldList}.
+!         Specifies the order of the returned items in the {\tt fieldList} or the
+!         {\tt fieldNameList}.
 !         The default is {\tt ESMF\_ITEMORDER\_ABC}.
 !         See \ref{const:itemorderflag} for a full list of options.
 !   \item [{[name]}]
