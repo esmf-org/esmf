@@ -1,4 +1,4 @@
-! $Id: ESMF_TestUTest.F90,v 1.12 2012/05/14 20:46:36 svasquez Exp $
+! $Id: ESMF_TestUTest.F90,v 1.13 2012/10/25 21:45:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -32,6 +32,15 @@ program ESMF_TestUTest
 
   character(ESMF_MAXSTR) :: name
   character(ESMF_MAXSTR) :: failMsg
+
+  character(ESMF_MAXSTR) :: string
+
+  integer :: i, i_block1
+  integer :: iounit, ioerr
+  character(16), parameter :: filenames(3) =  &
+      (/ 'testfile_base', 'testfile_same', 'testfile_diff' /)
+  logical :: same
+
   integer :: result = 0
   integer :: rc
 
@@ -46,6 +55,71 @@ program ESMF_TestUTest
   write(failMsg, *) "Dummy fail message"
   call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+! Test file comparison
+
+  ! file_base and file_same are identical, file_diff differs
+block1:  &
+  do, i_block1=1, 1
+    do, i=1, size (filenames)
+      call ESMF_UtilIOUnitGet (iounit, rc=rc)
+      if (rc /= ESMF_SUCCESS) exit block1
+      open (iounit, file=filenames(i),  &
+          form='formatted', action='write', iostat=ioerr)
+      if (ioerr /= 0) then
+        rc = ESMF_FAILURE
+        exit block1
+      end if
+
+      string = 'line 1'
+      write (iounit, '(a)') string
+
+      if (i /= 3) then
+        string = 'line 2'
+      else
+        string = 'different line 2 Version'
+      end if
+      write (iounit, '(a)') string
+
+      string = 'line 3'
+      write (iounit, '(a)') string
+
+      close (iounit, status='keep')
+    end do
+  end do block1
+  if (rc /= ESMF_SUCCESS) then
+    print *, '*** Could not create data files ***'
+  end if
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Compare identical files"
+  write(failMsg, *) "Files did not compare"
+  same = ESMF_TestFileCompare ('testfile_base', 'testfile_same')
+  call ESMF_Test(same, name, failMsg, result, ESMF_SRCLINE)
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Compare non-identical files"
+  write(failMsg, *) "Files compared erroneously"
+  same = ESMF_TestFileCompare ('testfile_base', 'testfile_diff')
+  call ESMF_Test(.not. same, name, failMsg, result, ESMF_SRCLINE)
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Compare non-identical files with exception list (non-match)"
+  write(failMsg, *) "Files compared erroneously"
+  same = ESMF_TestFileCompare ('testfile_base', 'testfile_diff',  &
+      (/ 'exception1', 'exception2' /) )
+  call ESMF_Test(.not. same, name, failMsg, result, ESMF_SRCLINE)
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Compare non-identical files with exception list (matching)"
+  write(failMsg, *) "Files did not compare with exception"
+  same = ESMF_TestFileCompare ('testfile_base', 'testfile_diff',  &
+      (/ 'exception1', 'exception2', 'Version   ' /) )
+  call ESMF_Test(.not. same, name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)
