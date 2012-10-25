@@ -1,4 +1,4 @@
-! $Id: NUOPC_FieldDictionaryDef.F90,v 1.8 2012/10/23 00:14:47 theurich Exp $
+! $Id: NUOPC_FieldDictionaryDef.F90,v 1.9 2012/10/25 19:48:22 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_FieldDictionaryDef.F90"
 
@@ -143,11 +143,16 @@ module NUOPC_FieldDictionaryDef
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
 
-!BOT l l l l
+
+!BOLT l l l l
 ! "{\bf StandardName}"
-! "{\bf CanonicalUnits}"
+! "{\bf Units}"
 ! "{\bf LongName}"
-! "{\bf ShortName}"
+! "{\bf ShortName} \\"
+! ""
+! "(canonical)"
+! "(default)"
+! "(default)"
 !BOTL
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "air_pressure_at_sea_level", &
@@ -558,7 +563,7 @@ module NUOPC_FieldDictionaryDef
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
-!EOT
+!EOLT
   end subroutine
   !-----------------------------------------------------------------------------
 

@@ -1,14 +1,16 @@
-% $Id: NUOPC_refdoc.ctex,v 1.18 2012/10/24 21:50:18 theurich Exp $ 
+% $Id: NUOPC_refdoc.ctex,v 1.19 2012/10/25 19:48:21 theurich Exp $ 
 
 #ifdef STANDALONE
-\documentclass[]{article}
+\documentclass[english]{article}
 
-\usepackage{epsf}
+\usepackage{babel}
+\usepackage{longtable}
 \usepackage{html}
 \usepackage{times}
-\usepackage{alltt}
+%\usepackage{subsections}
+\usepackage{graphicx}
+\usepackage{hyperref}
 \usepackage[T1]{fontenc}
-\usepackage[dvips]{graphics,color}
 
 \textwidth 6.5in
 \textheight 8.5in
@@ -24,6 +26,8 @@
 \newlength{\oldparskip}
 \newlength{\oldparindent}
 \newlength{\oldbaselineskip}
+
+\setlongtables
 #endif
 
 #ifdef STANDALONE
