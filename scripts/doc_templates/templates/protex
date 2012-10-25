@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  $Id: protex,v 1.22 2012/09/21 22:08:45 theurich Exp $
+#  $Id: protex,v 1.23 2012/10/25 19:46:09 theurich Exp $
 #
 #BOP
 #
@@ -208,6 +208,8 @@ ARG:
         $eoe_string = '!EOE';
         $bot_string = '!BOT';
         $eot_string = '!EOT';
+        $bolt_string = '!BOLT';
+        $eolt_string = '!EOLT';
         $botl_string = '!BOTL';
         $eotl_string = '!EOTL';
 #}#   end if
@@ -387,6 +389,20 @@ LINE:
            next LINE;
 }#      end if
 
+#       Beginning of latex longtable
+#       ---------------------
+        if ($Fld[1] eq $bolt_string) {
+           print " ";
+           print "%/////////////////////////////////////////////////////////////";
+           shift @Fld;
+           $_ = join('|', @Fld);
+           print "\\begin{longtable}{|$_|}";
+           $table = 1;
+           $tableline = 0;
+           $tableelement = 0;
+           next LINE;
+}#      end if
+
 #       Beginning of latex table line
 #       ---------------------
         if ($Fld[1] eq $botl_string) {
@@ -410,6 +426,17 @@ LINE:
         if ($Fld[1] eq $eot_string) {
            print "\\hline";
            print "\\end{tabular}";
+           print "%/////////////////////////////////////////////////////////////";
+           print " ";
+           $table = 0;
+           next LINE;
+}#      end if
+
+#       End of latex longtable
+#       -------------------
+        if ($Fld[1] eq $eolt_string) {
+           print "\\hline";
+           print "\\end{longtable}";
            print "%/////////////////////////////////////////////////////////////";
            print " ";
            $table = 0;
