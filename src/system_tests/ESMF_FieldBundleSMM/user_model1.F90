@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.15 2011/07/02 05:54:27 oehmke Exp $
+! $Id: user_model1.F90,v 1.16 2012/10/25 20:42:03 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -190,7 +190,7 @@ module user_model1
         ! Fill source FieldBundle with data
         do j = compLBnd(2), compUbnd(2)
           do i = compLBnd(1), compUBnd(1)
-            farrayPtr(i,j) = 10.0d0 &
+            farrayPtr(i,j) = real(k,ESMF_KIND_R8) * 10.0d0 &
               + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
               + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi)
           enddo

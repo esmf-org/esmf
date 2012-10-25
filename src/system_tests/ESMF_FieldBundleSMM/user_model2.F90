@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.15 2011/07/02 05:54:27 oehmke Exp $
+! $Id: user_model2.F90,v 1.16 2012/10/25 20:42:03 theurich Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -120,12 +120,23 @@ module user_model2
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
+#if 0
     do i = 1, 3
         field(i) = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
         if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
     enddo
-
+#else
+    field(1) = ESMF_FieldCreate(grid, name="Z", arrayspec=arrayspec, &
+          staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+    field(2) = ESMF_FieldCreate(grid, name="Y", arrayspec=arrayspec, &
+          staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+    field(3) = ESMF_FieldCreate(grid, name="X", arrayspec=arrayspec, &
+          staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
+    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+#endif
     fieldbundle = ESMF_FieldBundleCreate(fieldList=field, &
         name="fieldbundle data", rc=rc)
     if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -190,7 +201,7 @@ module user_model2
         ! Test FieldBundle in import state against exact solution
         do j = compLBnd(2), compUBnd(2)
           do i = compLBnd(1), compUbnd(1)
-            if (abs(farrayPtr(i,j) - (10.0d0 &
+            if (abs(farrayPtr(i,j) - (real(k,ESMF_KIND_R8) * 10.0d0 &
               + 5.0d0 * sin(real(i,ESMF_KIND_R8)/100.d0*pi) &
               + 2.0d0 * sin(real(j,ESMF_KIND_R8)/150.d0*pi))) > 1.d-8) then
               rc=ESMF_FAILURE
