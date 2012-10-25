@@ -1,4 +1,4 @@
-! $Id: ESMF_TestUTest.F90,v 1.13 2012/10/25 21:45:36 w6ws Exp $
+! $Id: ESMF_TestUTest.F90,v 1.14 2012/10/25 22:47:36 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -120,6 +120,12 @@ block1:  &
   same = ESMF_TestFileCompare ('testfile_base', 'testfile_diff',  &
       (/ 'exception1', 'exception2', 'Version   ' /) )
   call ESMF_Test(.not. same, name, failMsg, result, ESMF_SRCLINE)
+
+  call ESMF_UtilIOUnitGet (iounit, rc=rc)
+  do, i=1, size (filenames)
+    open (iounit, file=filenames(i), form='formatted', status='old')
+    close (iounit, status='delete')
+  end do
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)
