@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.24 2012/10/24 19:56:18 w6ws Exp $
+! $Id: ESMF_Test.F90,v 1.25 2012/10/25 19:54:25 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -54,7 +54,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.24 2012/10/24 19:56:18 w6ws Exp $'
+      '$Id: ESMF_Test.F90,v 1.25 2012/10/25 19:54:25 w6ws Exp $'
 
 !==============================================================================
 
@@ -257,7 +257,7 @@
 ! !IROUTINE:  ESMF_TestFileCompare - Compare two text files for equivalence
 !
 ! !INTERFACE:
-      function ESMF_TestFileCompare(file1, file2)
+      function ESMF_TestFileCompare(file1, file2, exclusionList)
 
 ! !RETURN VALUE:
       logical :: ESMF_TestFileCompare
@@ -265,6 +265,7 @@
 ! !ARGUMENTS:
       character(*), intent(in) :: file1     ! test file name
       character(*), intent(in) :: file2     ! test file name
+      character(*), intent(in), optional :: exclusionList(:)
 
 ! !DESCRIPTION:
 !     Compares two files to see if they are identical.
@@ -274,15 +275,30 @@
 !     2.) On systems which do not support recursive I/O, this function
 !     should not be called from the I/O list of an I/O statement.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item [file1]
+!       First of two files to be compared.
+!     \item [file2]
+!        Second of two files to be compared.
+!     \item [{[exclusionList]}]
+!       Character strings which, if any are present in text records being
+!       compared, will cause a comparison error to be bypassed.  This is
+!       useful for records which might legitimately differ between the two
+!       files - such as a date or version string.
+!     \end{description}
 !EOP
 !-------------------------------------------------------------------------------
 
-      character(1024) :: string1, string2
-      integer :: unit1, unit2
+      logical :: exclusions
+      integer :: i
       integer :: ioerr1, ioerr2
       integer :: localrc
+      character(1024) :: string1, string2
+      integer :: unit1, unit2
 
       ESMF_TestFileCompare = .false.
+      exclusions = present (exclusionList)
 
       call ESMF_UtilIOUnitGet (unit=unit1, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
@@ -318,6 +334,7 @@
         return
       end if        
 
+read_loop:  &
       do
         read (unit1, '(a)', iostat=ioerr1) string1
         read (unit2, '(a)', iostat=ioerr2) string2
@@ -329,13 +346,26 @@
           exit
 
         case (0)
-          if (string1 /= string2) exit
+          if (string1 /= string2) then
+            if (exclusions) then
+exclusion_loop:  &
+              do, i=1, size (exclusionList)
+                if (index (string1, trim (exclusionList(i))) /= 0 .and.  &
+                    index (string2, trim (exclusionList(i))) /= 0) then
+                  exit exclusion_loop
+                end if
+              end do exclusion_loop
+              if (i > size (exclusionList)) exit read_loop
+            else
+              exit read_loop
+            end if
+          end if
 
         case (1:)
           exit
         end select
 
-      end do
+      end do read_loop
 
       close (unit2)
       close (unit1)
