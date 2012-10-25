@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.173 2012/10/23 21:37:03 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.174 2012/10/25 21:43:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.173 2012/10/23 21:37:03 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.174 2012/10/25 21:43:52 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -9085,7 +9085,7 @@ int sparseMatMulStoreEncodeXXE(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-#define SMMSTOREENCODEXXEINFO
+#define SMMSTOREENCODEXXEINFO____disable
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -9939,10 +9939,11 @@ ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
       // new high vote found
       srcTermProcessingOpt = srcTermProcessingOptList[petCount-1];
     }
+#ifdef SMMSTOREENCODEXXEINFO
     sprintf(msg, "... finished tuning, found srcTermProcessingOpt = %d",
       srcTermProcessingOpt);
     ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
-    
+#endif
     if (srcTermProcessingArg) *srcTermProcessingArg = srcTermProcessingOpt;
   
   } // finished finding srcTermProcessingOpt
@@ -10066,10 +10067,11 @@ ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
       // new high vote found
       pipelineDepthOpt = pipelineDepthOptList[petCount-1];
     }
+#ifdef SMMSTOREENCODEXXEINFO
     sprintf(msg, "... finished tuning, found pipelineDepthOpt = %d",
       pipelineDepthOpt);
     ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
-  
+#endif  
     if (pipelineDepthArg) *pipelineDepthArg = pipelineDepthOpt;
   
   } // finished finding pipelineDepthOpt
@@ -10604,7 +10606,7 @@ int Array::sparseMatMul(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-#define SMMINFO
+#define SMMINFO____disable
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
