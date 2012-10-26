@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridEx.F90,v 1.71 2012/10/19 23:16:29 oehmke Exp $
+! $Id: ESMF_FieldRegridEx.F90,v 1.72 2012/10/26 16:08:53 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_FieldRegridEx
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldRegridEx.F90,v 1.71 2012/10/19 23:16:29 oehmke Exp $'
+    '$Id: ESMF_FieldRegridEx.F90,v 1.72 2012/10/26 16:08:53 oehmke Exp $'
 !------------------------------------------------------------------------------
     
 
@@ -280,11 +280,22 @@ program ESMF_FieldRegridEx
 ! So if the coordinates at the stagger location in the grid objects change, a new call to {\tt ESMF\_FieldRegridStore()}                                         
 ! is necessary to compute the interpolation between that new set of coordinates. When finished with the {\tt routeHandle} 
 ! {\tt ESMF\_FieldRegridRelease()} should be used to 
-! free the associated memory. The following example demonstrates doing a regrid operation on Fields.
+! free the associated memory. 
+!
+! The following example demonstrates doing a regrid operation between two Fields.
 !
 !EOE
 
 !BOC
+
+  ! (Create source Grid or Mesh.)
+  ! (Create srcField on this Grid or Mesh)
+
+  ! (Create destination Grid or Mesh.)
+  ! (Create dstField on this Grid or Mesh)
+  
+  ! Create the routeHandle which encodes the communication and
+  ! information necessary for the regrid sparse matrix multiply.
   call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
                   routeHandle=routeHandle, &
                   regridmethod=ESMF_REGRIDMETHOD_BILINEAR, rc=localrc)
@@ -293,11 +304,28 @@ program ESMF_FieldRegridEx
 !BOB
 
 !BOC
-  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
+ 
+  ! Can loop here regridding from srcField to dstField as long as 
+  ! source and destination Grid or Mesh don't change.
+  ! do i=1,....
+
+       ! (Put data into srcField)
+
+       ! Use the routeHandle to regrid data from srcField to dstField.
+       ! As described above, the same routeHandle can be used to 
+       ! regrid any source and destination Fields which are weakly
+       ! congruent to the original srcField and dstField. 
+       call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
 !EOC
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
+  !    (Use data in dstField)
+
+  ! enddo 
+
+
+  ! Free the buffers and data associated with the routeHandle. 
   call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
 
 !EOC
