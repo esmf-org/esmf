@@ -58,12 +58,16 @@ Connector component that uses a default bilinear regrid method during {\tt Run} 
 
 \bigskip{\sf INITIALIZE:}
 \begin{itemize}
-\item phase 0: {\sc Provided:} 
+\item phase 0: {\sc Provided:}
+  \begin{itemize}
+  \item Optionally overwrite the provided NOOP with model initialization code.
+  \end{itemize}  
+\item phase 1: {\sc Provided:} 
   \begin{itemize}
   \item Construct a list of matching Field pairs between import and export State based on the {\tt StandardName} Field metadata. 
   \item Store this list of {\tt StandardName} entries in the {\tt CplList} attribute of the Connector Component metadata.
   \end{itemize}
-\item phase 1: {\sc Provided:}
+\item phase 2: {\sc Provided:}
   \begin{itemize}
   \item Initialize the internal state.
   \item Use the {\tt CplList} attribute to construct {\tt srcFields} and {\tt dstFields} FieldBundles in the internal state that hold matched Field pairs.

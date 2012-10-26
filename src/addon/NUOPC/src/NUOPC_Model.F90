@@ -1,4 +1,4 @@
-! $Id: NUOPC_Model.F90,v 1.2 2012/04/19 05:25:45 theurich Exp $
+! $Id: NUOPC_Model.F90,v 1.3 2012/10/26 22:32:05 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Model.F90"
 
@@ -63,17 +63,17 @@ module NUOPC_Model
       file=FILENAME)) &
       return  ! bail out
 
-    ! Override InitP2 -> compatibility checking
+    ! Override InitP3 -> compatibility checking
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=InitializeP2, phase=2, rc=rc)
+      userRoutine=InitializeP3, phase=3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     
-    ! Override InitP3 -> data initialize callback + initial time stamping
+    ! Override InitP4 -> data initialize callback + initial time stamping
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=InitializeP3, phase=3, rc=rc)
+      userRoutine=InitializeP4, phase=4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -91,7 +91,7 @@ module NUOPC_Model
 
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP2(gcomp, importState, exportState, clock, rc)
+  subroutine InitializeP3(gcomp, importState, exportState, clock, rc)
     type(ESMF_GridComp)   :: gcomp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
@@ -151,7 +151,7 @@ module NUOPC_Model
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP3(gcomp, importState, exportState, clock, rc)
+  subroutine InitializeP4(gcomp, importState, exportState, clock, rc)
     type(ESMF_GridComp)   :: gcomp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock

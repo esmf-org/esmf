@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelBase.F90,v 1.3 2012/10/26 21:14:57 theurich Exp $
+! $Id: NUOPC_ModelBase.F90,v 1.4 2012/10/26 22:32:05 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelBase.F90"
 
@@ -62,7 +62,7 @@ module NUOPC_ModelBase
     ! set default entry points
     
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=Noop, phase=2, rc=rc)
+      userRoutine=Noop, phase=0, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -70,6 +70,13 @@ module NUOPC_ModelBase
     
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=Noop, phase=3, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
+      userRoutine=Noop, phase=4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &

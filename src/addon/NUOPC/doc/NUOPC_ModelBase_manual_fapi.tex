@@ -58,19 +58,23 @@ Model component with a default {\em explicit} time dependency. Each time the {\t
 
 \bigskip{\sf INITIALIZE:}
 \begin{itemize}
-\item phase 0: {\sc Required:} 
-  \begin{itemize}
-  \item Advertise Fields in import and export States.
-  \end{itemize}
-\item phase 1: {\sc Required:}
-  \begin{itemize}
-  \item Realize advertised Fields in import and export States by providing actual Fields.
-  \end{itemize}  
-\item phase 2: {\sc Provided:}
+\item phase 0. {\sc Provided:}
   \begin{itemize}
   \item Optionally overwrite the provided NOOP with model initialization code.
   \end{itemize}  
-\item phase 3. {\sc Provided:}
+\item phase 1: {\sc Required:} 
+  \begin{itemize}
+  \item Advertise Fields in import and export States.
+  \end{itemize}
+\item phase 2: {\sc Required:}
+  \begin{itemize}
+  \item Realize advertised Fields in import and export States by providing actual Fields.
+  \end{itemize}  
+\item phase 3: {\sc Provided:}
+  \begin{itemize}
+  \item Optionally overwrite the provided NOOP with model initialization code.
+  \end{itemize}  
+\item phase 4. {\sc Provided:}
   \begin{itemize}
   \item Optionally overwrite the provided NOOP with model initialization code.
   \end{itemize}  

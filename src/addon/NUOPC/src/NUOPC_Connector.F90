@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.20 2012/10/26 21:14:57 theurich Exp $
+! $Id: NUOPC_Connector.F90,v 1.21 2012/10/26 22:32:05 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -52,7 +52,7 @@ module NUOPC_Connector
     rc = ESMF_SUCCESS
     
     call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=InitializeP0, phase=0, rc=rc)
+      userRoutine=Noop, phase=0, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -60,6 +60,13 @@ module NUOPC_Connector
     
     call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP1, phase=1, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
+      userRoutine=InitializeP2, phase=2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -82,7 +89,19 @@ module NUOPC_Connector
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP0(cplcomp, importState, exportState, clock, rc)
+  subroutine Noop(cplcomp, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: cplcomp
+    type(ESMF_State)     :: importState, exportState
+    type(ESMF_Clock)     :: clock
+    integer, intent(out) :: rc
+    
+    rc = ESMF_SUCCESS
+
+  end subroutine
+  
+  !-----------------------------------------------------------------------------
+
+  subroutine InitializeP1(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -137,7 +156,7 @@ module NUOPC_Connector
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP1(cplcomp, importState, exportState, clock, rc)
+  subroutine InitializeP2(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
