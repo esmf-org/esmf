@@ -5,7 +5,7 @@ The Model Component metadata is implemented as an ESMF Attribute Package:
     \item Purpose: General
     \item Includes:
     \begin{itemize}
-        \item CIM Model Component Simulation Description 
+      \item CIM Model Component Simulation Description (see for example the \htmladdnormallink{Component Attribute packages}{http://www.earthsystemmodeling.org/esmf\_releases/public/ESMF\_5\_2\_0rp2/ESMF\_refdoc/node6.html\#SECTION06022100000000000000} section in the ESMF v5.2.0rp2 documentation)
     \end{itemize} 
     \item Description: Model component description and nesting metadata. 
 \end{itemize}
@@ -14,6 +14,8 @@ The Model Component metadata is implemented as an ESMF Attribute Package:
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
      \hline\hline
+     {\tt Verbosity} & String value controlling the verbosity of INFO messages.& high, low\\
+     {\tt InitializePhaseMap} & List of string values, mapping the logical NUOPC initialize phases, of a specific initialize revision, to the actual ESMF initialize phase number under which the entry point is registered.& InitializePhaseVxx\_y=z, where xx = two-digit revision number, e.g. 01, y = logical NUOPC phase number, z = actual ESMF phase number, with y, z > 0 and y, z < 10 \\
      {\tt NestingGeneration} & Integer value enumerating nesting level.& 0, 1, 2, ...\\
      {\tt Nestling} & Integer value enumerating siblings within the same generation.& 0, 1, 2, ...\\
      \hline\hline

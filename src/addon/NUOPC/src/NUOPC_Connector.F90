@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.19 2012/08/28 23:04:37 theurich Exp $
+! $Id: NUOPC_Connector.F90,v 1.20 2012/10/26 21:14:57 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -394,9 +394,26 @@ module NUOPC_Connector
     integer                   :: localrc
     logical                   :: existflag
     integer                   :: rootPet, rootVas, vas, petCount
+    character(ESMF_MAXSTR)    :: compName, msgString, valueString
+    integer                   :: phase
+    logical                   :: verbose
  
     rc = ESMF_SUCCESS
     
+    ! determine verbosity
+    verbose = .false. ! initialize
+    call ESMF_AttributeGet(cplcomp, name="Verbosity", value=valueString, &
+      convention="NUOPC", purpose="General", rc=rc)
+    if (trim(valueString)=="high") &
+      verbose = .true.
+    
+    ! get the compName and currentPhase
+    call ESMF_CplCompGet(cplcomp, name=compName, currentPhase=phase, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
     ! query Component for its internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
@@ -408,6 +425,14 @@ module NUOPC_Connector
     !TODO: here may be the place to ensure incoming States are consistent
     !TODO: with the Fields held in the FieldBundle inside the internal State?
       
+    ! conditionally output diagnostic to Log file
+    if (verbose) then
+      write(msgString,"(A)") ">>>"//trim(compName)//" entered Run"
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
+    
     ! SPECIALIZE by calling into attached method to execute routehandle
     call ESMF_MethodExecute(cplcomp, label=label_ExecuteRouteHandle, &
       existflag=existflag, userRc=localrc, rc=rc)
@@ -473,6 +498,14 @@ module NUOPC_Connector
       file=FILENAME)) &
       return  ! bail out
 
+    ! conditionally output diagnostic to Log file
+    if (verbose) then
+      write(msgString,"(A)") "<<<"//trim(compName)//" leaving Run"
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
+    
   end subroutine
   
   !-----------------------------------------------------------------------------

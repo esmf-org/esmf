@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelBase.F90,v 1.2 2012/07/13 20:40:50 theurich Exp $
+! $Id: NUOPC_ModelBase.F90,v 1.3 2012/10/26 21:14:57 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelBase.F90"
 
@@ -134,10 +134,18 @@ module NUOPC_ModelBase
     type(ESMF_Clock)          :: internalClock
     logical                   :: allCurrent
     logical                   :: existflag
-    character(ESMF_MAXSTR)    :: modelName, msgString
+    character(ESMF_MAXSTR)    :: modelName, msgString, valueString
     integer                   :: phase
+    logical                   :: verbose
 
     rc = ESMF_SUCCESS
+    
+    ! determine verbosity
+    verbose = .false. ! initialize
+    call ESMF_AttributeGet(gcomp, name="Verbosity", value=valueString, &
+      convention="NUOPC", purpose="General", rc=rc)
+    if (trim(valueString)=="high") &
+      verbose = .true.
     
     ! get the modelName and currentPhase
     call ESMF_GridCompGet(gcomp, name=modelName, currentPhase=phase, rc=rc)
@@ -193,14 +201,16 @@ module NUOPC_ModelBase
       file=FILENAME)) &
       return  ! bail out
 
-    ! output diagnostic to Log file
-    call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
-      trim(modelName)//" entered Run with current time: ", msgString, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    ! conditionally output diagnostic to Log file
+    if (verbose) then
+      call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
+        trim(modelName)//" entered Run with current time: ", msgString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
     
     ! SPECIALIZE optionally: label_CheckImport
     ! -> first check for the label with phase index
@@ -277,13 +287,17 @@ module NUOPC_ModelBase
         file=FILENAME)) &
         return  ! bail out
     
-      call NUOPC_ClockPrintCurrTime(internalClock, &
-        trim(modelName)//" time stepping loop, current time: ", msgString, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      ! conditionally output diagnostic to Log file
+      if (verbose) then
+        call NUOPC_ClockPrintCurrTime(internalClock, &
+          trim(modelName)//" time stepping loop, current time: ", &
+          msgString, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
         
     enddo ! end of time stepping loop
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -291,13 +305,16 @@ module NUOPC_ModelBase
       file=FILENAME)) &
       return  ! bail out
       
-    call NUOPC_ClockPrintCurrTime(internalClock, "<<<"// &
-      trim(modelName)//" leaving Run with current time: ", msgString, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    ! conditionally output diagnostic to Log file
+    if (verbose) then
+      call NUOPC_ClockPrintCurrTime(internalClock, "<<<"// &
+        trim(modelName)//" leaving Run with current time: ", msgString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
     
     ! SPECIALIZE optionally: label_TimestampExport
     call ESMF_MethodExecute(gcomp, label=label_TimestampExport, &

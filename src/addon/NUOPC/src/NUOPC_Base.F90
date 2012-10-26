@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.9 2012/10/23 00:14:47 theurich Exp $
+! $Id: NUOPC_Base.F90,v 1.10 2012/10/26 21:14:57 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -379,12 +379,14 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)  :: attrList(1)
+    character(ESMF_MAXSTR)  :: attrList(3)
 
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! Set up a customized list of Attributes to be added to the CplComp
-    attrList(1) = "CplList"
+    attrList(1) = "Verbosity"           ! control verbosity
+    attrList(2) = "InitializePhaseMap"  ! list of strings to map str to phase #
+    attrList(3) = "CplList"
     
     ! add Attribute packages
     call ESMF_AttributeAdd(comp, convention="ESG", purpose="General", rc=rc)
@@ -395,6 +397,14 @@ module NUOPC_Base
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
           
+    ! set Attributes to defaults
+    call ESMF_AttributeSet(comp, &
+      name="Verbosity", value="low", &
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -1019,13 +1029,15 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(2)
+    character(ESMF_MAXSTR)            :: attrList(4)
     
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! Set up a customized list of Attributes to be added to the Fields
-    attrList(1) = "NestingGeneration" ! values: integer starting 0 for parent
-    attrList(2) = "Nestling"  ! values: integer starting 0 for first nestling
+    attrList(1) = "Verbosity"           ! control verbosity
+    attrList(2) = "InitializePhaseMap"  ! list of strings to map str to phase #
+    attrList(3) = "NestingGeneration" ! values: integer starting 0 for parent
+    attrList(4) = "Nestling"  ! values: integer starting 0 for first nestling
     
     ! add Attribute packages
     call ESMF_AttributeAdd(comp, convention="CIM", &
@@ -1038,7 +1050,13 @@ module NUOPC_Base
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
       
-    ! set Attributes
+    ! set Attributes to defaults
+    call ESMF_AttributeSet(comp, &
+      name="Verbosity", value="low", &
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
     call ESMF_AttributeSet(comp, &
       name="NestingGeneration", value=0, &        ! default to parent level
       convention="NUOPC", purpose="General", &
