@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.79 2012/10/09 23:37:56 rokuingh Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.80 2012/10/26 17:30:19 svasquez Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -349,13 +349,14 @@ where
 			 application will terminate with an error mesasge when 
 			 multiple coordinate variables are found in the file.
 
-    --dst_coordinates - an optional argument that defines the longitude and latitude
-                         variable names in the destination grid file if the file type is 
-			 GRIDSPEC.  The variable names are separated by comma.  This
-			 argument is required in case there are multiple sets of
-			 coordinate variables defined in the file.  Without this
-			 argument, the offline regrid application will terminate
-			 with an error mesasge when multiple coordinate variables
+    --dst_coordinates - an optional argument that defines the longitude and 
+			 latitude variable names in the destination grid file 
+			 if the file type is GRIDSPEC.  The variable names are 
+			 separated by comma.  This argument is required in case 
+			 there are multiple sets of coordinate variables defined 
+			 in the file.  Without this argument, the offline regrid 
+			 application will terminate with an error mesasge when 
+			 multiple coordinate variables
 			 are found in the file.
 
     --user_areas      - an optional argument specifying that the conservation
