@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.279 2012/10/09 22:45:39 peggyli Exp $
+! $Id: ESMF_Grid.F90,v 1.280 2012/10/26 19:22:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -308,7 +308,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.279 2012/10/09 22:45:39 peggyli Exp $'
+      '$Id: ESMF_Grid.F90,v 1.280 2012/10/26 19:22:11 svasquez Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -13427,23 +13427,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        totalLBound, totalUBound, totalCount, rc)
 ! 
 ! !ARGUMENTS:
-!     type(ESMF_Grid),       intent(in)                :: grid
-!     integer,               intent(in)                :: coordDim
+!     type(ESMF_Grid),       intent(in)              :: grid
+!     integer,               intent(in)              :: coordDim
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     type (ESMF_StaggerLoc) intent(in),    optional   :: staggerloc
-!     integer,               intent(in),    optional   :: localDE
-!     <type> (ESMF_KIND_<kind>), pointer               :: farrayPtr(<rank>)
-!     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag
-!     integer,               intent(out),   optional   :: exclusiveLBound(:)
-!     integer,               intent(out),   optional   :: exclusiveUBound(:)
-!     integer,               intent(out),   optional   :: exclusiveCount(:)
-!     integer,               intent(out),   optional   :: computationalLBound(:)
-!     integer,               intent(out),   optional   :: computationalUBound(:)
-!     integer,               intent(out),   optional   :: computationalCount(:)
-!     integer,               intent(out),   optional   :: totalLBound(:)
-!     integer,               intent(out),   optional   :: totalUBound(:)
-!     integer,               intent(out),   optional   :: totalCount(:)
-!     integer,               intent(out),   optional   :: rc
+!     type (ESMF_StaggerLoc) intent(in),    optional :: staggerloc
+!     integer,               intent(in),    optional :: localDE
+!     <type> (ESMF_KIND_<kind>), pointer             :: farrayPtr(<rank>)
+!     type(ESMF_DataCopy_Flag), intent(in), optional :: datacopyflag
+!     integer,               intent(out),   optional :: exclusiveLBound(:)
+!     integer,               intent(out),   optional :: exclusiveUBound(:)
+!     integer,               intent(out),   optional :: exclusiveCount(:)
+!     integer,               intent(out),   optional :: computationalLBound(:)
+!     integer,               intent(out),   optional :: computationalUBound(:)
+!     integer,               intent(out),   optional :: computationalCount(:)
+!     integer,               intent(out),   optional :: totalLBound(:)
+!     integer,               intent(out),   optional :: totalUBound(:)
+!     integer,               intent(out),   optional :: totalCount(:)
+!     integer,               intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
