@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayHa.F90,v 1.47 2012/10/03 18:28:56 gold2718 Exp $
+! $Id: ESMF_ArrayHa.F90,v 1.48 2012/10/26 19:01:25 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_ArrayHaMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayHa.F90,v 1.47 2012/10/03 18:28:56 gold2718 Exp $'
+    '$Id: ESMF_ArrayHa.F90,v 1.48 2012/10/26 19:01:25 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -837,14 +837,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   pipelineDepth, rc)
 !
 ! !ARGUMENTS:
-!   type(ESMF_Array),         intent(in)              :: srcArray
-!   type(ESMF_Array),         intent(inout)           :: dstArray
-!   type(ESMF_RouteHandle),   intent(inout)           :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)              :: factor
+!   type(ESMF_Array),       intent(in)             :: srcArray
+!   type(ESMF_Array),       intent(inout)          :: dstArray
+!   type(ESMF_RouteHandle), intent(inout)          :: routehandle
+!   <type>(ESMF_KIND_<kind>),intent(in)            :: factor
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                  intent(in),    optional :: srcToDstTransposeMap(:)
-!   integer,                  intent(inout), optional :: pipelineDepth
-!   integer,                  intent(out),   optional :: rc
+!   integer,               intent(in),    optional :: srcToDstTransposeMap(:)
+!   integer,               intent(inout), optional :: pipelineDepth
+!   integer,               intent(out),   optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
