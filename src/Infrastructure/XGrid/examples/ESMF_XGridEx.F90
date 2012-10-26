@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridEx.F90,v 1.48 2012/09/28 19:58:20 feiliu Exp $
+! $Id: ESMF_XGridEx.F90,v 1.49 2012/10/26 19:36:46 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -147,8 +147,8 @@
 !EOC
 
 !BOC
-    ! SideA second grid spans (14.3-24.3, 14.2-24.2) with 0.5x1.0 degree resolution
-    ! X corner
+    ! SideA second grid spans (14.3-24.3, 14.2-24.2) with 0.5x1.0 degree 
+    ! resolution X corner
     call ESMF_GridGetCoord(sideA(2), localDE=0, &
         staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
         farrayPtr=coordX, rc=localrc)
