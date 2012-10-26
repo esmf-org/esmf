@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandleBitForBitEx.F90,v 1.7 2012/10/23 05:50:58 theurich Exp $
+! $Id: ESMF_RHandleBitForBitEx.F90,v 1.8 2012/10/26 19:53:14 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -423,9 +423,9 @@ program ESMF_RHandleBitForBitEx
   ! forced srcTermProcessing
   srcTermProcessing=0
   
-  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
-    factorList=factorList, routehandle=rh, &
-    srcTermProcessing=srcTermProcessing, rc=rc)
+  call ESMF_ArraySMMStore(srcArray, dstArray, &
+    factorIndexList=factorIndexList, factorList=factorList, &
+    routehandle=rh, srcTermProcessing=srcTermProcessing, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -528,9 +528,9 @@ program ESMF_RHandleBitForBitEx
   ! forced srcTermProcessing
   srcTermProcessing=0
   
-  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
-    factorList=factorList, routehandle=rh, &
-    srcTermProcessing=srcTermProcessing, rc=rc)
+  call ESMF_ArraySMMStore(srcArray, dstArray, &
+    factorIndexList=factorIndexList, factorList=factorList, &
+    routehandle=rh, srcTermProcessing=srcTermProcessing, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -619,9 +619,9 @@ program ESMF_RHandleBitForBitEx
   ! forced srcTermProcessing
   srcTermProcessing=0
     
-  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
-    factorList=factorList, routehandle=rh, &
-    srcTermProcessing=srcTermProcessing, rc=rc)
+  call ESMF_ArraySMMStore(srcArray, dstArray, &
+    factorIndexList=factorIndexList, factorList=factorList, &
+    routehandle=rh, srcTermProcessing=srcTermProcessing, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -709,9 +709,9 @@ program ESMF_RHandleBitForBitEx
   ! forced srcTermProcessing
   srcTermProcessing=0
   
-  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
-    factorList=factorList, routehandle=rh, &
-    srcTermProcessing=srcTermProcessing, rc=rc)
+  call ESMF_ArraySMMStore(srcArray, dstArray, &
+    factorIndexList=factorIndexList, factorList=factorList, &
+    routehandle=rh, srcTermProcessing=srcTermProcessing, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -743,9 +743,9 @@ program ESMF_RHandleBitForBitEx
 
 !--------- start extra stuff for now ---------
   srcTermProcessing = 1
-  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
-    factorList=factorList, routehandle=rh, &
-    srcTermProcessing=srcTermProcessing, rc=rc)
+  call ESMF_ArraySMMStore(srcArray, dstArray, &
+    factorIndexList=factorIndexList, factorList=factorList, &
+    routehandle=rh, srcTermProcessing=srcTermProcessing, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
@@ -826,9 +826,9 @@ program ESMF_RHandleBitForBitEx
   ! forced srcTermProcessing
   srcTermProcessing=0
   
-  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
-    factorList=factorList, routehandle=rh, &
-    srcTermProcessing=srcTermProcessing, rc=rc)
+  call ESMF_ArraySMMStore(srcArray, dstArray, &
+    factorIndexList=factorIndexList, factorList=factorList, &
+    routehandle=rh, srcTermProcessing=srcTermProcessing, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -873,9 +873,9 @@ program ESMF_RHandleBitForBitEx
   ! forced srcTermProcessing
   srcTermProcessing=1
   
-  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
-    factorList=factorList, routehandle=rh, &
-    srcTermProcessing=srcTermProcessing, rc=rc)
+  call ESMF_ArraySMMStore(srcArray, dstArray, &
+    factorIndexList=factorIndexList, factorList=factorList, &
+    routehandle=rh, srcTermProcessing=srcTermProcessing, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -923,9 +923,9 @@ program ESMF_RHandleBitForBitEx
   ! forced srcTermProcessing
   srcTermProcessing=2
   
-  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
-    factorList=factorList, routehandle=rh, &
-    srcTermProcessing=srcTermProcessing, rc=rc)
+  call ESMF_ArraySMMStore(srcArray, dstArray, &
+    factorIndexList=factorIndexList, factorList=factorList, &
+    routehandle=rh, srcTermProcessing=srcTermProcessing, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -1019,9 +1019,9 @@ program ESMF_RHandleBitForBitEx
   ! forced srcTermProcessing
   srcTermProcessing=0
   
-  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
-    factorList=factorList, routehandle=rh, &
-    srcTermProcessing=srcTermProcessing, rc=rc)
+  call ESMF_ArraySMMStore(srcArray, dstArray, &
+    factorIndexList=factorIndexList, factorList=factorList, &
+    routehandle=rh, srcTermProcessing=srcTermProcessing, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -1089,9 +1089,9 @@ program ESMF_RHandleBitForBitEx
   ! forced srcTermProcessing
   srcTermProcessing=2
   
-  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
-    factorList=factorList, routehandle=rh, &
-    srcTermProcessing=srcTermProcessing, rc=rc)
+  call ESMF_ArraySMMStore(srcArray, dstArray, &
+    factorIndexList=factorIndexList, factorList=factorList, &
+    routehandle=rh, srcTermProcessing=srcTermProcessing, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -1155,9 +1155,9 @@ program ESMF_RHandleBitForBitEx
   ! forced srcTermProcessing
   srcTermProcessing=3
   
-  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
-    factorList=factorList, routehandle=rh, &
-    srcTermProcessing=srcTermProcessing, rc=rc)
+  call ESMF_ArraySMMStore(srcArray, dstArray, &
+    factorIndexList=factorIndexList, factorList=factorList, &
+    routehandle=rh, srcTermProcessing=srcTermProcessing, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -1264,9 +1264,10 @@ program ESMF_RHandleBitForBitEx
     print *, "SMM parameters successfully read from file"
   endif
 
-  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
-    factorList=factorList, routehandle=rh, &
-    srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, rc=rc)
+  call ESMF_ArraySMMStore(srcArray, dstArray, &
+    factorIndexList=factorIndexList, factorList=factorList, &
+    routehandle=rh, srcTermProcessing=srcTermProcessing, &
+    pipelineDepth=pipelineDepth, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -1324,9 +1325,9 @@ program ESMF_RHandleBitForBitEx
 
 !--------- start extra stuff for now ---------
   srcTermProcessing = 2
-  call ESMF_ArraySMMStore(srcArray, dstArray, factorIndexList=factorIndexList, &
-    factorList=factorList, routehandle=rh, &
-    srcTermProcessing=srcTermProcessing, rc=rc)
+  call ESMF_ArraySMMStore(srcArray, dstArray, &
+    factorIndexList=factorIndexList, factorList=factorList, &
+    routehandle=rh, srcTermProcessing=srcTermProcessing, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
