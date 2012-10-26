@@ -1,4 +1,4 @@
-! $Id: NUOPC_Driver.F90,v 1.6 2012/08/28 23:04:37 theurich Exp $
+! $Id: NUOPC_Driver.F90,v 1.7 2012/10/26 21:53:43 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Driver.F90"
 
@@ -369,140 +369,46 @@ module NUOPC_Driver
       return  ! bail out
       
     ! InitP0: modelComps
-    do i=1, is%wrap%modelCount
-      write (iString, *) i
-      if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
-        call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
-          importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
-          clock=internalClock, phase=0, userRc=localrc, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase 0 "// &
-          "Initialize for modelComp "//trim(adjustl(iString))//": "// &
-          trim(compName), &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase 0 "// &
-          "Initialize for modelComp "//trim(adjustl(iString))//": "// &
-          trim(compName)//" did not return ESMF_SUCCESS", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      endif
-    enddo
-    
+    call loopModelComps(phase=0, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
     ! InitP0: connectorComps
-    do i=1, is%wrap%modelCount
-      write (iString, *) i
-      do j=1, is%wrap%modelCount
-        write (jString, *) j
-        if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
-          call ESMF_CplCompGet(is%wrap%connectorComp(i,j), name=compName, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-          call ESMF_CplCompInitialize(is%wrap%connectorComp(i,j), &
-            importState=is%wrap%modelES(i), exportState=is%wrap%modelIS(j), &
-            clock=internalClock, phase=0, userRc=localrc, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase 0 "// &
-            "Initialize for connectorComp "// &
-            trim(adjustl(iString))//" -> "//trim(adjustl(jString))//": "// &
-            trim(compName), &
-            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase 0 "// &
-            "Initialize for connectorComp "// &
-            trim(adjustl(iString))//" -> "//trim(adjustl(jString))//": "// &
-            trim(compName)//" did not return ESMF_SUCCESS", &
-            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        endif
-      enddo
-    enddo
+    call loopConnectorComps(phase=0, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
 
     ! InitP1: modelComps
-    do i=1, is%wrap%modelCount
-      write (iString, *) i
-      if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
-        call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
-          importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
-          clock=internalClock, phase=1, userRc=localrc, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase 1 "// &
-          "Initialize for modelComp "//trim(adjustl(iString))//": "// &
-          trim(compName), &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase 1 "// &
-          "Initialize for modelComp "//trim(adjustl(iString))//": "// &
-          trim(compName)//" did not return ESMF_SUCCESS", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      endif
-    enddo
+    call loopModelComps(phase=1, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
     
     ! InitP1: connectorComps
-    do i=1, is%wrap%modelCount
-      write (iString, *) i
-      do j=1, is%wrap%modelCount
-        write (jString, *) j
-        if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
-          call ESMF_CplCompGet(is%wrap%connectorComp(i,j), name=compName, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-          call ESMF_CplCompInitialize(is%wrap%connectorComp(i,j), &
-            importState=is%wrap%modelES(i), exportState=is%wrap%modelIS(j), &
-            clock=internalClock, phase=1, userRc=localrc, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase 1 "// &
-            "Initialize for connectorComp "// &
-            trim(adjustl(iString))//" -> "//trim(adjustl(jString))//": "// &
-            trim(compName), &
-            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase 1 "// &
-            "Initialize for connectorComp "// &
-            trim(adjustl(iString))//" -> "//trim(adjustl(jString))//": "// &
-            trim(compName)//" did not return ESMF_SUCCESS", &
-            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        endif
-      enddo
-    enddo
+    call loopConnectorComps(phase=1, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
 
     ! InitP2: modelComps
-    do i=1, is%wrap%modelCount
-      write (iString, *) i
-      if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
-        call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
-          importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
-          clock=internalClock, phase=2, userRc=localrc, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase 2 "// &
-          "Initialize for modelComp "//trim(adjustl(iString))//": "// &
-          trim(compName), &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase 2 "// &
-          "Initialize for modelComp "//trim(adjustl(iString))//": "// &
-          trim(compName)//" did not return ESMF_SUCCESS", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      endif
-    enddo
+    call loopModelComps(phase=2, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
     
     ! InitP3: modelComps
-    do i=1, is%wrap%modelCount
-      write (iString, *) i
-      if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
-        call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
-          importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
-          clock=internalClock, phase=3, userRc=localrc, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase 3 "// &
-          "Initialize for modelComp "//trim(adjustl(iString))//": "// &
-          trim(compName), &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase 3 "// &
-          "Initialize for modelComp "//trim(adjustl(iString))//": "// &
-          trim(compName)//" did not return ESMF_SUCCESS", &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      endif
-    enddo
+    call loopModelComps(phase=3, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
         
 #define DEBUGPRINT____disable
 #ifdef DEBUGPRINT
@@ -511,6 +417,68 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 #endif
+
+    contains
+    
+      subroutine loopModelComps(phase, rc)
+        integer, intent(in)     :: phase
+        integer, intent(out)    :: rc
+        integer                 :: i
+        character(ESMF_MAXSTR)  :: iString, pString
+        write (pString, *) phase
+        do i=1, is%wrap%modelCount
+          write (iString, *) i
+          if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
+            call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+            call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
+              importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
+              clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase "// &
+              trim(adjustl(pString))//"Initialize for modelComp "// &
+              trim(adjustl(iString))//": "//trim(compName), &
+              line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase "// &
+              trim(adjustl(pString))//"Initialize for modelComp "// &
+              trim(adjustl(iString))//": "//trim(compName)// &
+              " did not return ESMF_SUCCESS", &
+              line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          endif
+        enddo
+      end subroutine
+
+      subroutine loopConnectorComps(phase, rc)
+        integer, intent(in)     :: phase
+        integer, intent(out)    :: rc
+        integer                 :: i, j
+        character(ESMF_MAXSTR)  :: iString, jString, pString
+        write (pString, *) phase
+        do i=1, is%wrap%modelCount
+          write (iString, *) i
+          do j=1, is%wrap%modelCount
+            write (jString, *) j
+            if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
+              call ESMF_CplCompGet(is%wrap%connectorComp(i,j), name=compName, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+              call ESMF_CplCompInitialize(is%wrap%connectorComp(i,j), &
+                importState=is%wrap%modelES(i), exportState=is%wrap%modelIS(j), &
+                clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase "// &
+                trim(adjustl(pString))//"Initialize for connectorComp "// &
+                trim(adjustl(iString))//" -> "//trim(adjustl(jString))//": "// &
+                trim(compName), &
+                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+              if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase "// &
+                trim(adjustl(pString))//"Initialize for connectorComp "// &
+                trim(adjustl(iString))//" -> "//trim(adjustl(jString))//": "// &
+                trim(compName)//" did not return ESMF_SUCCESS", &
+                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+            endif
+          enddo
+        enddo
+      end subroutine
 
   end subroutine
   
