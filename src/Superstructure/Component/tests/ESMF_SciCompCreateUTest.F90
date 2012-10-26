@@ -1,4 +1,4 @@
-! $Id: ESMF_SciCompCreateUTest.F90,v 1.8 2012/10/24 02:19:17 ksaint Exp $
+! $Id: ESMF_SciCompCreateUTest.F90,v 1.9 2012/10/26 15:47:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -114,6 +114,7 @@
 
 
 !-------------------------------------------------------------------------
+#ifdef ESMF_TESTEXHAUSTIVE
 !   !
     !EX_UTest
 !   !  Test get a Component name from a destroyed component
@@ -208,6 +209,7 @@ print *, "bname = ", bname
     write(name, *) "Destroying a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#endif
 
     call ESMF_TestEnd(ESMF_SRCLINE)
 
