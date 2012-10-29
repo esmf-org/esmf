@@ -58,9 +58,19 @@ Connector component that uses a default bilinear regrid method during {\tt Run} 
 
 \bigskip{\sf INITIALIZE:}
 \begin{itemize}
-\item phase 0: {\sc Provided:}
+\item phase 0. {\sc Provided:}
   \begin{itemize}
-  \item Optionally overwrite the provided NOOP with model initialization code.
+  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00, with the following mapping:
+    \begin{itemize}
+    \item IPDv00p1 = phase 1: {\sc Required:} 
+      \begin{itemize}
+      \item Construct the {\tt CplList} Attribute.
+      \end{itemize}
+    \item IPDv00p2 = phase 2: {\sc Required:}
+      \begin{itemize}
+      \item Set the {\tt Connected} Attributes on the Fields in the import and export State.
+      \end{itemize}  
+    \end{itemize}  
   \end{itemize}  
 \item phase 1: {\sc Provided:} 
   \begin{itemize}

@@ -58,10 +58,20 @@ Driver component that drives a coupled Atmosphere-Ocean-Mediator model. The defa
 
 \bigskip{\sf INITIALIZE:}
 \begin{itemize}
+\item phase 0. {\sc Provided:}
+  \begin{itemize}
+  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00, with the following mapping:
+    \begin{itemize}
+    \item IPDv00p1 = phase 1: {\sc Provided:} 
+      \begin{itemize}
+      \item Complete self initialization and driving children's initialization sequence.
+      \end{itemize}
+    \end{itemize}  
+  \end{itemize}  
 \item phase 1: {\sc Provided:}
   \begin{itemize}
   \item Initialize the internal state.
-  \item Set default internal clock to be a copy of the incoming clock.
+  \item If the internal clock is not yet set, set the default internal clock to be a copy of the incoming clock, if the incoming clock is valid.
   \item Set the number of model components to 3.
   \item Allocate internal storage according to {\tt modelCount = 3}.
   \item {\it Optional specialization} to provide Model and Connector {\tt petList} members in the internal state: {\tt label\_SetModelPetList}.

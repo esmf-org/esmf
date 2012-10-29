@@ -1,4 +1,4 @@
-! $Id: NUOPC_RunSequenceDef.F90,v 1.7 2012/08/29 15:16:17 theurich Exp $
+! $Id: NUOPC_RunSequenceDef.F90,v 1.8 2012/10/29 18:40:45 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_RunSequenceDef.F90"
 
@@ -421,7 +421,7 @@ module NUOPC_RunSequenceDef
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=FILENAME)) return  ! bail out
             ! advance to next time step
-print *, "silly time loop"
+!print *, "silly time loop"
             call ESMF_ClockAdvance(clock, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out

@@ -1,4 +1,4 @@
-! $Id: NUOPC_Driver.F90,v 1.9 2012/10/29 16:51:56 theurich Exp $
+! $Id: NUOPC_Driver.F90,v 1.10 2012/10/29 18:40:45 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Driver.F90"
 
@@ -71,7 +71,12 @@ module NUOPC_Driver
     rc = ESMF_SUCCESS
     
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=Initialize, rc=rc)
+      userRoutine=InitializeP0, phase=0, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    
+    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
+      userRoutine=InitializeP1, phase=1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
@@ -88,7 +93,30 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
 
-  recursive subroutine Initialize(gcomp, importState, exportState, clock, rc)
+  subroutine InitializeP0(gcomp, importState, exportState, clock, rc)
+    type(ESMF_GridComp)   :: gcomp
+    type(ESMF_State)      :: importState, exportState
+    type(ESMF_Clock)      :: clock
+    integer, intent(out)  :: rc
+    
+    ! local variables    
+    character(len=NUOPC_PhaseMapStringLength) :: initPhases(1)
+    
+    rc = ESMF_SUCCESS
+
+    initPhases(1) = "IPDv00p1=1"
+    
+    call ESMF_AttributeSet(gcomp, &
+      name="InitializePhaseMap", valueList=initPhases, &
+      convention="NUOPC", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    
+  end subroutine
+  
+  !-----------------------------------------------------------------------------
+
+  recursive subroutine InitializeP1(gcomp, importState, exportState, clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -380,7 +408,7 @@ module NUOPC_Driver
     
     ! SPECIALIZE by calling into attached method to SetServices for modelComps
     call ESMF_MethodExecute(gcomp, label=label_SetModelServices, &
-      userRc=localrc, rc=rc)
+      existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -538,7 +566,7 @@ module NUOPC_Driver
             call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
               importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
               clock=internalClock, phase=phase, userRc=localrc, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase "// &
+            if (ESMF_LogFoundError(rcToCheck=rc, msg="NUOPC Incompatible: Failed calling phase "// &
               trim(adjustl(pString))//" Initialize for modelComp "// &
               trim(adjustl(iString))//": "//trim(compName), &
               line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
