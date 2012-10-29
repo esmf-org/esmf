@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.10 2012/10/26 21:14:57 theurich Exp $
+! $Id: NUOPC_Base.F90,v 1.11 2012/10/29 16:51:56 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -22,8 +22,10 @@ module NUOPC_Base
   logical, save :: NUOPC_FieldDictionaryIsSetup = .false.
   
   ! public module variables
-  type(ESMF_Container), save :: NUOPC_FieldDictionary
+  type(ESMF_Container), save  :: NUOPC_FieldDictionary
   public NUOPC_FieldDictionary
+  integer, parameter          :: NUOPC_PhaseMapStringLength = 30
+  public NUOPC_PhaseMapStringLength
 
   ! public module interfaces
   public NUOPC_ClockCheckSetClock

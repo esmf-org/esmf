@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelBase.F90,v 1.4 2012/10/26 22:32:05 theurich Exp $
+! $Id: NUOPC_ModelBase.F90,v 1.5 2012/10/29 16:51:56 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelBase.F90"
 
@@ -62,21 +62,7 @@ module NUOPC_ModelBase
     ! set default entry points
     
     call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=Noop, phase=0, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=Noop, phase=3, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    
-    call ESMF_GridCompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=Noop, phase=4, rc=rc)
+      userRoutine=InitializeP0, phase=0, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -125,6 +111,32 @@ module NUOPC_ModelBase
     
     rc = ESMF_SUCCESS
 
+  end subroutine
+  
+  !-----------------------------------------------------------------------------
+
+  subroutine InitializeP0(gcomp, importState, exportState, clock, rc)
+    type(ESMF_GridComp)   :: gcomp
+    type(ESMF_State)      :: importState, exportState
+    type(ESMF_Clock)      :: clock
+    integer, intent(out)  :: rc
+    
+    ! local variables    
+    character(len=NUOPC_PhaseMapStringLength) :: initPhases(4)
+    
+    rc = ESMF_SUCCESS
+
+    initPhases(1) = "IPDv00p1=1"
+    initPhases(2) = "IPDv00p2=2"
+    initPhases(3) = "IPDv00p3=3"
+    initPhases(4) = "IPDv00p4=4"
+    
+    call ESMF_AttributeSet(gcomp, &
+      name="InitializePhaseMap", valueList=initPhases, &
+      convention="NUOPC", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    
   end subroutine
   
   !-----------------------------------------------------------------------------

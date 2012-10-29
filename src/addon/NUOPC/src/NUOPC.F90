@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.30 2012/10/23 00:14:47 theurich Exp $
+! $Id: NUOPC.F90,v 1.31 2012/10/29 16:51:56 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -21,7 +21,8 @@ module NUOPC
 
   ! public module variables  
   public NUOPC_FieldDictionary
-
+  public NUOPC_PhaseMapStringLength
+  
   ! public module interfaces
   public NUOPC_ClockCheckSetClock
   public NUOPC_ClockInitialize

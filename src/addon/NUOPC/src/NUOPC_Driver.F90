@@ -1,4 +1,4 @@
-! $Id: NUOPC_Driver.F90,v 1.8 2012/10/26 22:32:05 theurich Exp $
+! $Id: NUOPC_Driver.F90,v 1.9 2012/10/29 16:51:56 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Driver.F90"
 
@@ -53,6 +53,13 @@ module NUOPC_Driver
     integer, pointer :: petList(:)  ! lists that are set here transfer ownership
   end type
   
+  type PhaseMapParser
+    integer                                            :: phaseCount
+    integer, pointer                                   :: phaseValue(:)
+    character(len=NUOPC_PhaseMapStringLength), pointer :: phases(:)
+    character(len=NUOPC_PhaseMapStringLength), pointer :: phaseKey(:)
+  end type
+  
   !-----------------------------------------------------------------------------
   contains
   !-----------------------------------------------------------------------------
@@ -81,7 +88,7 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
 
-  subroutine Initialize(gcomp, importState, exportState, clock, rc)
+  recursive subroutine Initialize(gcomp, importState, exportState, clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -99,6 +106,8 @@ module NUOPC_Driver
     logical                   :: existflag
     integer                   :: rootPet, rootVas
     type(ESMF_VM)             :: vm
+    type(PhaseMapParser), allocatable ::  modelPhaseMap(:)
+    type(PhaseMapParser), allocatable ::  connectorPhaseMap(:,:)
 
     rc = ESMF_SUCCESS
     
@@ -150,6 +159,14 @@ module NUOPC_Driver
         nullify(is%wrap%connectorPetLists(j,i)%petList)
       enddo
     enddo
+    
+    ! allocate PhaseMaps
+    allocate(modelPhaseMap(is%wrap%modelCount), &
+      connectorPhaseMap(is%wrap%modelCount, is%wrap%modelCount), &
+      stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of temporary data structure.", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     ! SPECIALIZE by calling into optional attached method to set petLists
     call ESMF_MethodExecute(gcomp, label=label_SetModelPetLists, &
@@ -233,7 +250,7 @@ module NUOPC_Driver
       call NUOPC_GridCompAttributeAdd(is%wrap%modelComp(i), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
+        
       ! create connectorComps
       do j=1, is%wrap%modelCount
         write (jString, *) j
@@ -323,7 +340,15 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         
+        ! initialize the modelPhaseMap pointer members
+        nullify(connectorPhaseMap(i,j)%phaseValue)
+        nullify(connectorPhaseMap(i,j)%phases)
+        nullify(connectorPhaseMap(i,j)%phaseKey)
       enddo
+      ! initialize the modelPhaseMap pointer members
+      nullify(modelPhaseMap(i)%phaseValue)
+      nullify(modelPhaseMap(i)%phases)
+      nullify(modelPhaseMap(i)%phaseKey)
     enddo
 
     ! initialize the default Run Sequence: grouped connectors before models
@@ -368,13 +393,16 @@ module NUOPC_Driver
       file=FILENAME)) &
       return  ! bail out
       
+    ! -> NUOPC Initialize Sequence requires presence of InitP0 for every 
+    ! -> Model and Connector component, where they must set the
+    ! -> "InitializePhaseMap" metadata.
+      
     ! InitP0: modelComps
     call loopModelComps(phase=0, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-
     ! InitP0: connectorComps
     call loopConnectorComps(phase=0, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -382,48 +410,88 @@ module NUOPC_Driver
       file=FILENAME)) &
       return  ! bail out
 
+
+#if 1
+    ! -> Now encode the NUOPC Initialize Sequence version 00:
+      
+    ! InitP1: modelComps
+    call loopModelCompsS(phaseString="IPDv00p1", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    ! InitP1: connectorComps
+    call loopConnectorCompsS(phaseString="IPDv00p1", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    ! InitP2: modelComps
+    call loopModelCompsS(phaseString="IPDv00p2", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    ! InitP2: connectorComps
+    call loopConnectorCompsS(phaseString="IPDv00p2", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    ! InitP3: modelComps
+    call loopModelCompsS(phaseString="IPDv00p3", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    ! InitP4: modelComps
+    call loopModelCompsS(phaseString="IPDv00p4", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+#else
+
     ! InitP1: modelComps
     call loopModelComps(phase=1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    
     ! InitP1: connectorComps
     call loopConnectorComps(phase=1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-
     ! InitP2: modelComps
     call loopModelComps(phase=2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    
     ! InitP2: connectorComps
     call loopConnectorComps(phase=2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-
     ! InitP3: modelComps
     call loopModelComps(phase=3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    
     ! InitP4: modelComps
     call loopModelComps(phase=4, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-        
+
+      
+#endif
+
 #define DEBUGPRINT____disable
 #ifdef DEBUGPRINT
     ! print the entire runSeq structure
@@ -432,13 +500,34 @@ module NUOPC_Driver
       line=__LINE__, file=FILENAME)) return  ! bail out
 #endif
 
+    ! local garbage collection -> PhaseMap pointer members
+    do i=1, is%wrap%modelCount
+      do j=1, is%wrap%modelCount
+        if (j==i) cycle ! skip
+        if (associated(connectorPhaseMap(i,j)%phaseValue)) &
+          deallocate(connectorPhaseMap(i,j)%phaseValue)
+        if (associated(connectorPhaseMap(i,j)%phases)) &
+          deallocate(connectorPhaseMap(i,j)%phases)
+        if (associated(connectorPhaseMap(i,j)%phaseKey)) &
+          deallocate(connectorPhaseMap(i,j)%phaseKey)
+      enddo
+      if (associated(modelPhaseMap(i)%phaseValue)) &
+        deallocate(modelPhaseMap(i)%phaseValue)
+      if (associated(modelPhaseMap(i)%phases)) &
+        deallocate(modelPhaseMap(i)%phases)
+      if (associated(modelPhaseMap(i)%phaseKey)) &
+        deallocate(modelPhaseMap(i)%phaseKey)
+    enddo
+
     contains !----------------------------------------------------------------
     
-      subroutine loopModelComps(phase, rc)
+      recursive subroutine loopModelComps(phase, rc)
+        ! only to be used for phase=0 anymore!!
         integer, intent(in)     :: phase
         integer, intent(out)    :: rc
         integer                 :: i
         character(ESMF_MAXSTR)  :: iString, pString
+        rc = ESMF_SUCCESS
         write (pString, *) phase
         do i=1, is%wrap%modelCount
           write (iString, *) i
@@ -458,15 +547,23 @@ module NUOPC_Driver
               trim(adjustl(iString))//": "//trim(compName)// &
               " did not return ESMF_SUCCESS", &
               line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+            if (phase == 0) then
+              ! setup modelPhaseMap
+              call setupModelPhaseMap(i=i, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+            endif
           endif
         enddo
       end subroutine
 
-      subroutine loopConnectorComps(phase, rc)
+      recursive subroutine loopConnectorComps(phase, rc)
+        ! only to be used for phase=0 anymore!!
         integer, intent(in)     :: phase
         integer, intent(out)    :: rc
         integer                 :: i, j
         character(ESMF_MAXSTR)  :: iString, jString, pString
+        rc = ESMF_SUCCESS
         write (pString, *) phase
         do i=1, is%wrap%modelCount
           write (iString, *) i
@@ -489,6 +586,192 @@ module NUOPC_Driver
                 trim(adjustl(iString))//" -> "//trim(adjustl(jString))//": "// &
                 trim(compName)//" did not return ESMF_SUCCESS", &
                 line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+              if (phase == 0) then
+                ! setup modelPhaseMap
+                call setupConnectorPhaseMap(i=i, j=j, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+              endif
+            endif
+          enddo
+        enddo
+      end subroutine
+
+      recursive subroutine setupModelPhaseMap(i, rc)
+        integer, intent(in)     :: i
+        integer, intent(out)    :: rc
+        integer                 :: k, phaseCount, stat, ind
+        character(len=NUOPC_PhaseMapStringLength) :: tempString
+        rc = ESMF_SUCCESS
+        ! obtain number of initPhases from the Model Attributes
+        call ESMF_AttributeGet(is%wrap%modelComp(i), &
+          name="InitializePhaseMap", &
+          itemCount=phaseCount, &
+          convention="NUOPC", purpose="General", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+        ! allocate pointer variables
+        modelPhaseMap(i)%phaseCount = phaseCount
+        allocate(modelPhaseMap(i)%phases(phaseCount), &
+          modelPhaseMap(i)%phaseValue(phaseCount), &
+          modelPhaseMap(i)%phaseKey(phaseCount), &
+          stat=stat)
+        if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+          msg="Allocation of temporary data structure.", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        ! obtain initPhases list from the Model Attributes
+        call ESMF_AttributeGet(is%wrap%modelComp(i), &
+          name="InitializePhaseMap", &
+          valueList=modelPhaseMap(i)%phases, &
+          convention="NUOPC", purpose="General", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+        ! disect the phase string into Key and Value
+        do k=1, modelPhaseMap(i)%phaseCount
+          tempString = modelPhaseMap(i)%phases(k)
+          ind = index (trim(tempString), "=")
+          modelPhaseMap(i)%phaseKey(k) = tempString(1:ind-1)
+          read (tempString(ind+1:ind+2), "(i1)") modelPhaseMap(i)%phaseValue(k)
+!print *, "setupModelPhaseMap", k, ":", trim(tempString), " ", &
+!  trim(modelPhaseMap(i)%phaseKey(k)), modelPhaseMap(i)%phaseValue(k)
+        enddo
+      end subroutine
+
+      recursive subroutine setupConnectorPhaseMap(i, j, rc)
+        integer, intent(in)     :: i, j
+        integer, intent(out)    :: rc
+        integer                 :: k, phaseCount, stat, ind
+        character(len=NUOPC_PhaseMapStringLength) :: tempString
+        rc = ESMF_SUCCESS
+        ! obtain number of initPhases from the Model Attributes
+        call ESMF_AttributeGet(is%wrap%connectorComp(i,j), &
+          name="InitializePhaseMap", &
+          itemCount=phaseCount, &
+          convention="NUOPC", purpose="General", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+        ! allocate pointer variables
+        connectorPhaseMap(i,j)%phaseCount = phaseCount
+        allocate(connectorPhaseMap(i,j)%phases(phaseCount), &
+          connectorPhaseMap(i,j)%phaseValue(phaseCount), &
+          connectorPhaseMap(i,j)%phaseKey(phaseCount), &
+          stat=stat)
+        if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+          msg="Allocation of temporary data structure.", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        ! obtain initPhases list from the Model Attributes
+        call ESMF_AttributeGet(is%wrap%connectorComp(i,j), &
+          name="InitializePhaseMap", &
+          valueList=connectorPhaseMap(i,j)%phases, &
+          convention="NUOPC", purpose="General", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+        ! disect the phase string into Key and Value
+        do k=1, connectorPhaseMap(i,j)%phaseCount
+          tempString = connectorPhaseMap(i,j)%phases(k)
+          ind = index (trim(tempString), "=")
+          connectorPhaseMap(i,j)%phaseKey(k) = tempString(1:ind-1)
+          read (tempString(ind+1:ind+2), "(i1)") connectorPhaseMap(i,j)%phaseValue(k)
+!print *, "setupConnectorPhaseMap", k, ":", trim(tempString), " ", &
+!  trim(connectorPhaseMap(i,j)%phaseKey(k)), connectorPhaseMap(i,j)%phaseValue(k)
+        enddo
+      end subroutine
+
+      recursive subroutine loopModelCompsS(phaseString, rc)
+        ! only to be used for phase=0 anymore!!
+        character(*), intent(in):: phaseString
+        integer, intent(out)    :: rc
+        integer                 :: phase, i
+        character(ESMF_MAXSTR)  :: iString, pString
+        rc = ESMF_SUCCESS
+        do i=1, is%wrap%modelCount
+          write (iString, *) i
+          if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
+            ! translate NUOPC logical phase to ESMF actual phase
+            phase = 0 ! zero is reserved, use it here to see if need to skip
+            do k=1, modelPhaseMap(i)%phaseCount
+              if (trim(modelPhaseMap(i)%phaseKey(k)) == trim(phaseString)) &
+                phase = modelPhaseMap(i)%phaseValue(k)
+            enddo
+            if (phase == 0) cycle ! skip to next i
+            write (pString, *) phase
+            ! attempt to make the actual call to initialize
+            call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+            call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
+              importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
+              clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase "// &
+              trim(adjustl(pString))//" Initialize for modelComp "// &
+              trim(adjustl(iString))//": "//trim(compName), &
+              line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase "// &
+              trim(adjustl(pString))//" Initialize for modelComp "// &
+              trim(adjustl(iString))//": "//trim(compName)// &
+              " did not return ESMF_SUCCESS", &
+              line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+            if (phase == 0) then
+              ! setup modelPhaseMap
+              call setupModelPhaseMap(i=i, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+            endif
+          endif
+        enddo
+      end subroutine
+
+      recursive subroutine loopConnectorCompsS(phaseString, rc)
+        ! only to be used for phase=0 anymore!!
+        character(*), intent(in):: phaseString
+        integer, intent(out)    :: rc
+        integer                 :: phase, i, j
+        character(ESMF_MAXSTR)  :: iString, jString, pString
+        rc = ESMF_SUCCESS
+        do i=1, is%wrap%modelCount
+          write (iString, *) i
+          do j=1, is%wrap%modelCount
+            write (jString, *) j
+            if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
+              ! translate NUOPC logical phase to ESMF actual phase
+              phase = 0 ! zero is reserved, use it here to see if need to skip
+              do k=1, connectorPhaseMap(i,j)%phaseCount
+                if (trim(connectorPhaseMap(i,j)%phaseKey(k)) == trim(phaseString)) &
+                  phase = connectorPhaseMap(i,j)%phaseValue(k)
+              enddo
+              if (phase == 0) cycle ! skip to next j
+              write (pString, *) phase
+              ! attempt to make the actual call to initialize
+              call ESMF_CplCompGet(is%wrap%connectorComp(i,j), name=compName, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+              call ESMF_CplCompInitialize(is%wrap%connectorComp(i,j), &
+                importState=is%wrap%modelES(i), exportState=is%wrap%modelIS(j), &
+                clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase "// &
+                trim(adjustl(pString))//" Initialize for connectorComp "// &
+                trim(adjustl(iString))//" -> "//trim(adjustl(jString))//": "// &
+                trim(compName), &
+                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+              if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase "// &
+                trim(adjustl(pString))//" Initialize for connectorComp "// &
+                trim(adjustl(iString))//" -> "//trim(adjustl(jString))//": "// &
+                trim(compName)//" did not return ESMF_SUCCESS", &
+                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+              if (phase == 0) then
+                ! setup modelPhaseMap
+                call setupConnectorPhaseMap(i=i, j=j, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+              endif
             endif
           enddo
         enddo
@@ -498,7 +781,7 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
 
-  subroutine Run(gcomp, importState, exportState, clock, rc)
+  recursive subroutine Run(gcomp, importState, exportState, clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -623,7 +906,7 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
 
-  subroutine Finalize(gcomp, importState, exportState, clock, rc)
+  recursive subroutine Finalize(gcomp, importState, exportState, clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock

@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.21 2012/10/26 22:32:05 theurich Exp $
+! $Id: NUOPC_Connector.F90,v 1.22 2012/10/29 16:51:56 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -52,7 +52,7 @@ module NUOPC_Connector
     rc = ESMF_SUCCESS
     
     call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
-      userRoutine=Noop, phase=0, rc=rc)
+      userRoutine=InitializeP0, phase=0, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -89,14 +89,26 @@ module NUOPC_Connector
   
   !-----------------------------------------------------------------------------
 
-  subroutine Noop(cplcomp, importState, exportState, clock, rc)
+  subroutine InitializeP0(cplcomp, importState, exportState, clock, rc)
     type(ESMF_CplComp)   :: cplcomp
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
     
+    ! local variables    
+    character(len=NUOPC_PhaseMapStringLength) :: initPhases(2)
+    
     rc = ESMF_SUCCESS
 
+    initPhases(1) = "IPDv00p1=1"
+    initPhases(2) = "IPDv00p2=2"
+    
+    call ESMF_AttributeSet(cplcomp, &
+      name="InitializePhaseMap", valueList=initPhases, &
+      convention="NUOPC", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    
   end subroutine
   
   !-----------------------------------------------------------------------------
