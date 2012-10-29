@@ -1,4 +1,4 @@
-! $Id: NUOPC_Driver.F90,v 1.12 2012/10/29 22:13:49 theurich Exp $
+! $Id: NUOPC_Driver.F90,v 1.13 2012/10/29 22:59:28 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Driver.F90"
 
@@ -171,7 +171,7 @@ module NUOPC_Driver
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     ! allocate lists inside the internal state according to modelCount
-    allocate(is%wrap%modelPetLists(is%wrap%modelCount), &
+    allocate(is%wrap%modelPetLists(0:is%wrap%modelCount), &
       is%wrap%connectorPetLists(0:is%wrap%modelCount,0:is%wrap%modelCount), &
       is%wrap%modelComp(is%wrap%modelCount), &
       is%wrap%modelIS(is%wrap%modelCount), is%wrap%modelES(is%wrap%modelCount),&
@@ -183,8 +183,7 @@ module NUOPC_Driver
       
     ! nullify all of the petLists
     do i=0, is%wrap%modelCount
-      if (i>0) &
-        nullify(is%wrap%modelPetLists(i)%petList)
+      nullify(is%wrap%modelPetLists(i)%petList)
       do j=0, is%wrap%modelCount
         nullify(is%wrap%connectorPetLists(i,j)%petList)
       enddo
@@ -210,9 +209,10 @@ module NUOPC_Driver
     do i=0, is%wrap%modelCount
       write (iString, *) i
       
+      i_petList => is%wrap%modelPetLists(i)%petList
+      
       if (i>0) then
       
-        i_petList => is%wrap%modelPetLists(i)%petList
         if (associated(i_petList)) then
           write (msgString, *) "Creating model component #"// &
             trim(adjustl(iString))//" with petList of size ",size(i_petList)," :"
@@ -399,8 +399,8 @@ module NUOPC_Driver
     is%wrap%runPhaseToRunSeqMap(1) = 1
     
     ! add run elements to the one run sequence element
-    do i=1, is%wrap%modelCount
-      do j=1, is%wrap%modelCount
+    do i=0, is%wrap%modelCount
+      do j=0, is%wrap%modelCount
         if (j==i) cycle ! skip self connection
         call NUOPC_RunElementAdd(is%wrap%runSeq(1), i=i, j=j, phase=1, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -408,7 +408,7 @@ module NUOPC_Driver
       enddo
     enddo
     do i=1, is%wrap%modelCount
-      call NUOPC_RunElementAdd(is%wrap%runSeq(1), i=i, j=0, phase=1, rc=rc)
+      call NUOPC_RunElementAdd(is%wrap%runSeq(1), i=i, j=-1, phase=1, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     enddo

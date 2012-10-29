@@ -1,4 +1,4 @@
-! $Id: NUOPC_RunSequenceDef.F90,v 1.9 2012/10/29 22:13:49 theurich Exp $
+! $Id: NUOPC_RunSequenceDef.F90,v 1.10 2012/10/29 22:59:28 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_RunSequenceDef.F90"
 
@@ -160,7 +160,7 @@ module NUOPC_RunSequenceDef
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       ! initialize the new run element to be "ENDDO"
       runElement%i = -i
-      runElement%j = 0
+      runElement%j = -1
       runElement%phase = 0
       nullify(runElement%next)  ! terminal element
       ! hook up runElement to runSeqNew
