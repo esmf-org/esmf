@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.46 2012/10/29 16:50:04 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.47 2012/10/29 19:13:55 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -108,6 +108,13 @@ module ESMF_ComplianceICMod
         return  ! bail out
       call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZEIC, &
         userRoutine=ic_init, phase=0, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else
+      call ESMF_LogWrite(trim(prefix)//" ==> NUOPC requires Initialize phase Zero!", &
+        ESMF_LOGMSG_WARNING, rc=rc)
       if (ESMF_LogFoundError(rc, &
         line=__LINE__, &
         file=FILENAME)) &
