@@ -60,15 +60,19 @@ Connector component that uses a default bilinear regrid method during {\tt Run} 
 \begin{itemize}
 \item phase 0. {\sc Provided:}
   \begin{itemize}
-  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00, with the following mapping:
+  \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 01, with the following mapping:
     \begin{itemize}
-    \item IPDv00p1 = phase 1: {\sc Required:} 
+    \item IPDv01p1 = phase 1: {\sc Provided:} 
       \begin{itemize}
       \item Construct the {\tt CplList} Attribute.
       \end{itemize}
-    \item IPDv00p2 = phase 2: {\sc Required:}
+    \item IPDv01p2 = phase 2: {\sc Provided:}
       \begin{itemize}
       \item Set the {\tt Connected} Attributes on the Fields in the import and export State.
+      \end{itemize}  
+    \item IPDv01p3 = phase 3: {\sc Provided:}
+      \begin{itemize}
+      \item Precompute a bilinear Regrid operation.
       \end{itemize}  
     \end{itemize}  
   \end{itemize}  
@@ -80,6 +84,11 @@ Connector component that uses a default bilinear regrid method during {\tt Run} 
 \item phase 2: {\sc Provided:}
   \begin{itemize}
   \item Initialize the internal state.
+  \item Use the {\tt CplList} attribute to construct {\tt srcFields} and {\tt dstFields} FieldBundles in the internal state that hold matched Field pairs.
+  \item Set the {\tt Connected} attribute to {\tt true} in the Field metadata for each Field that is added to the {\tt srcFields} and {\tt dstFields} FieldBundles.
+  \end{itemize}  
+\item phase 3: {\sc Provided:}
+  \begin{itemize}
   \item Use the {\tt CplList} attribute to construct {\tt srcFields} and {\tt dstFields} FieldBundles in the internal state that hold matched Field pairs.
   \item Set the {\tt Connected} attribute to {\tt true} in the Field metadata for each Field that is added to the {\tt srcFields} and {\tt dstFields} FieldBundles.
   \item {\it Optional specialization} to precompute a Connector operation: {\tt label\_ComputeRouteHandle}. Simple custom implementations store the precomputed communication RouteHandle in the {\tt rh} member of the internal state. More complex implementations use the {\tt state} member in the internal state to store auxiliary Fields, FieldBundles, and RouteHandles.
