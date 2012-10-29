@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.45 2012/10/17 04:51:04 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.46 2012/10/29 16:50:04 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -1077,6 +1077,24 @@ module ESMF_ComplianceICMod
         file=FILENAME)) &
         return  ! bail out
         
+      attributeName = "Verbosity"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
+      attributeName = "InitializePhaseMap"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
       attributeName = "NestingGeneration"
       call checkComponentAttribute(prefix, comp=comp, &
         attributeName=attributeName, convention=convention, purpose=purpose, &
@@ -1110,6 +1128,24 @@ module ESMF_ComplianceICMod
         return  ! bail out
 
       attributeName = "ComponentLongName"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
+      attributeName = "Verbosity"
+      call checkComponentAttribute(prefix, comp=comp, &
+        attributeName=attributeName, convention=convention, purpose=purpose, &
+        rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+        
+      attributeName = "InitializePhaseMap"
       call checkComponentAttribute(prefix, comp=comp, &
         attributeName=attributeName, convention=convention, purpose=purpose, &
         rc=rc)
