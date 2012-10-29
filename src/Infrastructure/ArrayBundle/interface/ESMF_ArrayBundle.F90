@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.89 2012/10/24 21:02:34 theurich Exp $
+! $Id: ESMF_ArrayBundle.F90,v 1.90 2012/10/29 03:58:29 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.89 2012/10/24 21:02:34 theurich Exp $'
+    '$Id: ESMF_ArrayBundle.F90,v 1.90 2012/10/29 03:58:29 gold2718 Exp $'
 
 !==============================================================================
 ! 
@@ -3138,9 +3138,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     [file\_name]002, [file\_name]003,...
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
-!      Logical: if .true., existing field data may be overwritten. The
-!      behavior of this flag depends on the value of {\tt iofmt} as
-!      shown below:
+!      A logical flag, the default is .false., i.e., existing field data may
+!      {\em not} be overwritten. If .true., the overwrite behavior depends
+!      on the value of {\tt iofmt} as shown below:
 !    \begin{description}
 !    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
 !      be overwritten with each field's data.
@@ -3151,7 +3151,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Note that it is always an error to attempt to overwrite a NetCDF
 !      variable with data which has a different shape.
 !    \end{description}
-!    default is .false.
 !    \end{sloppypar}
 !   \item[{[status]}]
 !    \begin{sloppypar}

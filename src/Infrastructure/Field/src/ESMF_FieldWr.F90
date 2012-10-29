@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldWr.F90,v 1.22 2012/10/03 18:29:04 gold2718 Exp $
+! $Id: ESMF_FieldWr.F90,v 1.23 2012/10/29 03:58:30 gold2718 Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -112,9 +112,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    (such as binary format), ESMF will return an error code.
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
-!      Logical: if .true., existing field data may be overwritten. The
-!      behavior of this flag depends on the value of {\tt iofmt} as
-!      shown below:
+!      A logical flag, the default is .false., i.e., existing field data may
+!      {\em not} be overwritten. If .true., the overwrite behavior depends
+!      on the value of {\tt iofmt} as shown below:
 !    \begin{description}
 !    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
 !      be overwritten with each field's data.
@@ -125,7 +125,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Note that it is always an error to attempt to overwrite a NetCDF
 !      variable with data which has a different shape.
 !    \end{description}
-!    default is .false.
 !    \end{sloppypar}
 !   \item[{[status]}]
 !    \begin{sloppypar}
