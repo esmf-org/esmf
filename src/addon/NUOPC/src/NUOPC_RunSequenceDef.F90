@@ -1,4 +1,4 @@
-! $Id: NUOPC_RunSequenceDef.F90,v 1.8 2012/10/29 18:40:45 theurich Exp $
+! $Id: NUOPC_RunSequenceDef.F90,v 1.9 2012/10/29 22:13:49 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_RunSequenceDef.F90"
 
@@ -26,9 +26,8 @@ module NUOPC_RunSequenceDef
   
   type NUOPC_RunElement
     integer :: i  ! model component index, or src model index if connector
-    integer :: j  ! j > 0   -> connector component: i->j
-                  ! j == 0  -> model component: i
-                  ! j < 0   -> NUOPC_RunSequence: i
+    integer :: j  ! j >= 0  -> connector component: i->j
+                  ! j <  0  -> model component: i
     integer :: phase  ! run phase
     type(NUOPC_RunSequence), pointer:: runSeq ! point back to RunSequence
     type(NUOPC_RunElement), pointer :: next   ! next RunElement in linked list
@@ -481,7 +480,7 @@ module NUOPC_RunSequenceDef
     endif
     
     ! deal with simple cases
-    if (runElement%i > 0 ) then
+    if (runElement%i >= 0 ) then
       if (associated(runElement%next)) then
         ! simple component element
         NUOPC_RunSequenceCtrlResult = .true.
@@ -493,14 +492,8 @@ module NUOPC_RunSequenceDef
         return
       endif
     endif
-    if (runElement%i == 0 ) then
-      ! invalid element
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="invalid runElement",&
-        line=__LINE__, file=FILENAME, rcToReturn=rc)
-      return
-    endif
     
-    ! remaining cases are control elements (runElement%i <= 0)
+    ! remaining cases are control elements (runElement%i < 0)
     
     i = -(runElement%i)
     if (i > size(runSeq)) then

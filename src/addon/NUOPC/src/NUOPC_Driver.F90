@@ -1,4 +1,4 @@
-! $Id: NUOPC_Driver.F90,v 1.11 2012/10/29 19:28:12 theurich Exp $
+! $Id: NUOPC_Driver.F90,v 1.12 2012/10/29 22:13:49 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Driver.F90"
 
@@ -172,25 +172,27 @@ module NUOPC_Driver
 
     ! allocate lists inside the internal state according to modelCount
     allocate(is%wrap%modelPetLists(is%wrap%modelCount), &
-      is%wrap%connectorPetLists(is%wrap%modelCount,is%wrap%modelCount), &
+      is%wrap%connectorPetLists(0:is%wrap%modelCount,0:is%wrap%modelCount), &
       is%wrap%modelComp(is%wrap%modelCount), &
       is%wrap%modelIS(is%wrap%modelCount), is%wrap%modelES(is%wrap%modelCount),&
-      is%wrap%connectorComp(is%wrap%modelCount,is%wrap%modelCount), stat=stat)
+      is%wrap%connectorComp(0:is%wrap%modelCount,0:is%wrap%modelCount), &
+      stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of internal state memory failed.", &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
     ! nullify all of the petLists
-    do i=1, is%wrap%modelCount
-      nullify(is%wrap%modelPetLists(i)%petList)
-      do j=1, is%wrap%modelCount
-        nullify(is%wrap%connectorPetLists(j,i)%petList)
+    do i=0, is%wrap%modelCount
+      if (i>0) &
+        nullify(is%wrap%modelPetLists(i)%petList)
+      do j=0, is%wrap%modelCount
+        nullify(is%wrap%connectorPetLists(i,j)%petList)
       enddo
     enddo
     
     ! allocate PhaseMaps
     allocate(modelPhaseMap(is%wrap%modelCount), &
-      connectorPhaseMap(is%wrap%modelCount, is%wrap%modelCount), &
+      connectorPhaseMap(0:is%wrap%modelCount, 0:is%wrap%modelCount), &
       stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of temporary data structure.", &
@@ -205,82 +207,91 @@ module NUOPC_Driver
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     ! create modelComps and their import and export States + connectorComps
-    do i=1, is%wrap%modelCount
+    do i=0, is%wrap%modelCount
       write (iString, *) i
       
-      i_petList => is%wrap%modelPetLists(i)%petList
-      if (associated(i_petList)) then
-        write (msgString, *) "Creating model component #"// &
-          trim(adjustl(iString))//" with petList of size ",size(i_petList)," :"
-        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        
-        if (size(i_petList) <= 1000) then
-          ! have the resources to print the entire petList
-          write (petListBuffer, "(10I7)") i_petList
-          do k=1, size(i_petList)/10 + 1
-            call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-          enddo
-        endif
+      if (i>0) then
+      
+        i_petList => is%wrap%modelPetLists(i)%petList
+        if (associated(i_petList)) then
+          write (msgString, *) "Creating model component #"// &
+            trim(adjustl(iString))//" with petList of size ",size(i_petList)," :"
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
           
-        is%wrap%modelComp(i) = ESMF_GridCompCreate(name="modelComp "// &
-          trim(adjustl(iString)), petList=i_petList, rc=rc)
+          if (size(i_petList) <= 1000) then
+            ! have the resources to print the entire petList
+            write (petListBuffer, "(10I7)") i_petList
+            do k=1, size(i_petList)/10 + 1
+              call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+            enddo
+          endif
+            
+          is%wrap%modelComp(i) = ESMF_GridCompCreate(name="modelComp "// &
+            trim(adjustl(iString)), petList=i_petList, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        else
+          write (msgString, *) "Creating model component #"// &
+            trim(adjustl(iString))//" without petList."
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          is%wrap%modelComp(i) = ESMF_GridCompCreate(name="modelComp "// &
+            trim(adjustl(iString)), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        endif
+        
+        is%wrap%modelIS(i) = ESMF_StateCreate(name="modelComp "// &
+          trim(adjustl(iString))//" Import State", &
+          stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      else
-        write (msgString, *) "Creating model component #"// &
-          trim(adjustl(iString))//" without petList."
-        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          
+        is%wrap%modelES(i) = ESMF_StateCreate(name="modelComp "// &
+          trim(adjustl(iString))//" Export State", &
+          stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        is%wrap%modelComp(i) = ESMF_GridCompCreate(name="modelComp "// &
-          trim(adjustl(iString)), rc=rc)
+          
+        ! set rootVas Attribute on the States to help during AttributeUpdate
+        rootPet = 0   ! initialize
+        if (associated(i_petList)) rootPet = i_petList(1)
+        ! need to translate rootPet->rootVas because connector petList may
+        ! scamble PETs across VASs
+        call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        call ESMF_VMGet(vm, rootPet, vas=rootVas, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        call ESMF_AttributeSet(is%wrap%modelIS(i), name="rootVas", &
+          value=rootVas, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        call ESMF_AttributeSet(is%wrap%modelES(i), name="rootVas", &
+          value=rootVas, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          
+        ! add standard NUOPC GridComp Attribute Package to the modelComp
+        call NUOPC_GridCompAttributeAdd(is%wrap%modelComp(i), rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          
+        ! initialize the modelPhaseMap pointer members
+        nullify(modelPhaseMap(i)%phaseValue)
+        nullify(modelPhaseMap(i)%phases)
+        nullify(modelPhaseMap(i)%phaseKey)
+        
       endif
       
-      is%wrap%modelIS(i) = ESMF_StateCreate(name="modelComp "// &
-        trim(adjustl(iString))//" Import State", &
-        stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        
-      is%wrap%modelES(i) = ESMF_StateCreate(name="modelComp "// &
-        trim(adjustl(iString))//" Export State", &
-        stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        
-      ! set rootVas Attribute on the States to help during AttributeUpdate
-      rootPet = 0   ! initialize
-      if (associated(i_petList)) rootPet = i_petList(1)
-      ! need to translate rootPet->rootVas because connector petList may
-      ! scamble PETs across VASs
-      call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      call ESMF_VMGet(vm, rootPet, vas=rootVas, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      call ESMF_AttributeSet(is%wrap%modelIS(i), name="rootVas", &
-        value=rootVas, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      call ESMF_AttributeSet(is%wrap%modelES(i), name="rootVas", &
-        value=rootVas, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        
-      ! add standard NUOPC GridComp Attribute Package to the modelComp
-      call NUOPC_GridCompAttributeAdd(is%wrap%modelComp(i), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        
       ! create connectorComps
-      do j=1, is%wrap%modelCount
+      do j=0, is%wrap%modelCount
         write (jString, *) j
         
         c_petList => is%wrap%connectorPetLists(i,j)%petList
@@ -373,10 +384,6 @@ module NUOPC_Driver
         nullify(connectorPhaseMap(i,j)%phases)
         nullify(connectorPhaseMap(i,j)%phaseKey)
       enddo
-      ! initialize the modelPhaseMap pointer members
-      nullify(modelPhaseMap(i)%phaseValue)
-      nullify(modelPhaseMap(i)%phases)
-      nullify(modelPhaseMap(i)%phaseKey)
     enddo
 
     ! initialize the default Run Sequence: grouped connectors before models
@@ -571,8 +578,8 @@ module NUOPC_Driver
 #endif
 
     ! local garbage collection -> PhaseMap pointer members
-    do i=1, is%wrap%modelCount
-      do j=1, is%wrap%modelCount
+    do i=0, is%wrap%modelCount
+      do j=0, is%wrap%modelCount
         if (j==i) cycle ! skip
         if (associated(connectorPhaseMap(i,j)%phaseValue)) &
           deallocate(connectorPhaseMap(i,j)%phaseValue)
@@ -581,12 +588,14 @@ module NUOPC_Driver
         if (associated(connectorPhaseMap(i,j)%phaseKey)) &
           deallocate(connectorPhaseMap(i,j)%phaseKey)
       enddo
-      if (associated(modelPhaseMap(i)%phaseValue)) &
-        deallocate(modelPhaseMap(i)%phaseValue)
-      if (associated(modelPhaseMap(i)%phases)) &
-        deallocate(modelPhaseMap(i)%phases)
-      if (associated(modelPhaseMap(i)%phaseKey)) &
-        deallocate(modelPhaseMap(i)%phaseKey)
+      if (i>0) then
+        if (associated(modelPhaseMap(i)%phaseValue)) &
+          deallocate(modelPhaseMap(i)%phaseValue)
+        if (associated(modelPhaseMap(i)%phases)) &
+          deallocate(modelPhaseMap(i)%phases)
+        if (associated(modelPhaseMap(i)%phaseKey)) &
+          deallocate(modelPhaseMap(i)%phaseKey)
+      endif
     enddo
 
     contains !----------------------------------------------------------------
@@ -635,9 +644,9 @@ module NUOPC_Driver
         character(ESMF_MAXSTR)  :: iString, jString, pString
         rc = ESMF_SUCCESS
         write (pString, *) phase
-        do i=1, is%wrap%modelCount
+        do i=0, is%wrap%modelCount
           write (iString, *) i
-          do j=1, is%wrap%modelCount
+          do j=0, is%wrap%modelCount
             write (jString, *) j
             if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
               call ESMF_CplCompGet(is%wrap%connectorComp(i,j), name=compName, rc=rc)
@@ -806,9 +815,9 @@ module NUOPC_Driver
         integer                 :: phase, i, j
         character(ESMF_MAXSTR)  :: iString, jString, pString
         rc = ESMF_SUCCESS
-        do i=1, is%wrap%modelCount
+        do i=0, is%wrap%modelCount
           write (iString, *) i
-          do j=1, is%wrap%modelCount
+          do j=0, is%wrap%modelCount
             write (jString, *) j
             if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
               ! translate NUOPC logical phase to ESMF actual phase
@@ -920,7 +929,7 @@ module NUOPC_Driver
       i = runElement%i
       phase = runElement%phase
       internalClock = runElement%runSeq%clock
-      if (runElement%j > 0) then
+      if (runElement%j >= 0) then
         ! connector component
         j = runElement%j
         if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
@@ -1012,9 +1021,9 @@ module NUOPC_Driver
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
     ! Finalize: connectorComps
-    do i=1, is%wrap%modelCount
+    do i=0, is%wrap%modelCount
       write (iString, *) i
-      do j=1, is%wrap%modelCount
+      do j=0, is%wrap%modelCount
         write (jString, *) j
         if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
           call ESMF_CplCompFinalize(is%wrap%connectorComp(i,j), &
