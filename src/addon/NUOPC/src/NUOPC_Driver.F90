@@ -1,4 +1,4 @@
-! $Id: NUOPC_Driver.F90,v 1.13 2012/10/29 22:59:28 theurich Exp $
+! $Id: NUOPC_Driver.F90,v 1.14 2012/10/29 23:52:34 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Driver.F90"
 
@@ -21,6 +21,7 @@ module NUOPC_Driver
   public label_InternalState
   public label_SetModelCount, label_SetModelPetLists
   public label_SetModelServices, label_Finalize
+  public label_SetRunClock
   
   character(*), parameter :: &
     label_InternalState = "Driver_InternalState"
@@ -32,7 +33,9 @@ module NUOPC_Driver
     label_SetModelServices = "Driver_SetModelServices"
   character(*), parameter :: &
     label_Finalize = "Driver_Finalize"
-    
+  character(*), parameter :: &
+    label_SetRunClock = "Driver_SetRunClock"
+
   type type_InternalStateStruct
     integer                           :: modelCount
     type(type_PetList),  pointer      :: modelPetLists(:)
@@ -43,6 +46,7 @@ module NUOPC_Driver
     type(ESMF_CplComp),  pointer      :: connectorComp(:,:)
     type(NUOPC_RunSequence), pointer  :: runSeq(:)  ! size may increase dynamic.
     integer                           :: runPhaseToRunSeqMap(10)
+    type(ESMF_Clock)                  :: driverClock  ! clock of the parent
   end type
 
   type type_InternalState
@@ -89,6 +93,12 @@ module NUOPC_Driver
       userRoutine=Finalize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      
+    call ESMF_MethodAdd(gcomp, label=label_SetRunClock, &
+      userRoutine=SetRunClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -870,13 +880,28 @@ module NUOPC_Driver
     integer                         :: localrc
     type(type_InternalState)        :: is
     type(ESMF_Clock)                :: internalClock
+    logical                         :: existflag
     integer                         :: i, j, phase, runPhase, runSeqIndex
-    character(ESMF_MAXSTR)          :: iString, jString, pString, msgString
+    character(ESMF_MAXSTR)          :: iString, jString, pString
+    character(ESMF_MAXSTR)          :: msgString, valueString
     type(NUOPC_RunElement), pointer :: runElement
     character(ESMF_MAXSTR)          :: modelName
+    logical                         :: verbose
+    character(ESMF_MAXSTR)          :: defaultvalue
 
     rc = ESMF_SUCCESS
     
+    ! determine verbosity
+    defaultvalue = "high"
+    call ESMF_AttributeGet(gcomp, name="Verbosity", value=valueString, &
+      defaultvalue=defaultvalue, convention="NUOPC", purpose="General", rc=rc)
+    if (trim(valueString)=="high") then
+      verbose = .true.
+    else
+      verbose = .false.
+    endif
+    
+    ! get the modelName and currentPhase
     call ESMF_GridCompGet(gcomp, name=modelName, currentPhase=runPhase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -894,14 +919,48 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
-    call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
-      trim(modelName)//" entered Run with current time: ", msgString, rc=rc)
+    ! conditionally output diagnostic to Log file
+    if (verbose) then
+      call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
+        trim(modelName)//" entered Run with current time: ", msgString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    endif  
+#if 1
+    ! set the driverClock member in the internal state
+    is%wrap%driverClock = clock
+    
+    ! SPECIALIZE required: label_SetRunClock
+    ! -> first check for the label with phase index
+    call ESMF_MethodExecute(gcomp, label=label_SetRunClock, index=phase, &
+      existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    if (.not.existflag) then
+      ! -> next check for the label without phase index
+      call ESMF_MethodExecute(gcomp, label=label_SetRunClock, &
+        userRc=localrc, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+    endif
+#endif
     ! determine the correct run sequence index for the current runPhase    
     runSeqIndex = is%wrap%runPhaseToRunSeqMap(runPhase)
     
@@ -973,16 +1032,52 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
-    call NUOPC_ClockPrintCurrTime(internalClock, "<<<"// &
-      trim(modelName)//" leaving Run with current time: ", msgString, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    ! conditionally output diagnostic to Log file
+    if (verbose) then
+      call NUOPC_ClockPrintCurrTime(internalClock, "<<<"// &
+        trim(modelName)//" leaving Run with current time: ", msgString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    endif
     
   end subroutine
   
+  !-----------------------------------------------------------------------------
+  
+  recursive subroutine SetRunClock(gcomp, rc)
+    type(ESMF_GridComp)   :: gcomp
+    integer, intent(out)  :: rc
+    
+    ! Set the internal clock according to the incoming driver clock.
+    ! Implement the default explicit timekeeping rules.
+    
+    ! local variables
+    type(type_InternalState)  :: is
+
+    rc = ESMF_SUCCESS
+
+    ! query component for its internal state
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    if (NUOPC_IsCreated(is%wrap%driverClock)) then
+      ! check and set the model clock against the driver clock
+      call NUOPC_GridCompCheckSetClock(gcomp, is%wrap%driverClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
+          
+  end subroutine
+    
   !-----------------------------------------------------------------------------
 
   recursive subroutine Finalize(gcomp, importState, exportState, clock, rc)

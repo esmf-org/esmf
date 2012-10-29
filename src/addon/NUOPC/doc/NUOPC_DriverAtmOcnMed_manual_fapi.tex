@@ -126,6 +126,7 @@ Driver component that drives a coupled Atmosphere-Ocean-Mediator model. The defa
 \begin{itemize}
 \item phase 1: {\sc Provided:}
   \begin{itemize}
+  \item If the incoming clock is valid, set the internal stop time to one time step interval on the incoming clock.
   \item Time stepping loop, from current time to stop time, incrementing by time step.
   \item For each time step iteration, the Run() methods for {\tt atm}, {\tt ocn}, {\tt med}, {\tt atm2ocn}, {atm2med}, {\tt ocn2atm}, {\tt ocn2atm}, {\tt med2atm}, and {\tt med2ocn} are being called according to the run sequence.
   \end{itemize}    

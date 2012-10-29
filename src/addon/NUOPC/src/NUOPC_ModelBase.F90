@@ -1,4 +1,4 @@
-! $Id: NUOPC_ModelBase.F90,v 1.5 2012/10/29 16:51:56 theurich Exp $
+! $Id: NUOPC_ModelBase.F90,v 1.6 2012/10/29 23:52:34 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_ModelBase.F90"
 
@@ -156,15 +156,19 @@ module NUOPC_ModelBase
     character(ESMF_MAXSTR)    :: modelName, msgString, valueString
     integer                   :: phase
     logical                   :: verbose
+    character(ESMF_MAXSTR)    :: defaultvalue
 
     rc = ESMF_SUCCESS
     
     ! determine verbosity
-    verbose = .false. ! initialize
+    defaultvalue = "low"
     call ESMF_AttributeGet(gcomp, name="Verbosity", value=valueString, &
-      convention="NUOPC", purpose="General", rc=rc)
-    if (trim(valueString)=="high") &
+      defaultvalue=defaultvalue, convention="NUOPC", purpose="General", rc=rc)
+    if (trim(valueString)=="high") then
       verbose = .true.
+    else
+      verbose = .false.
+    endif
     
     ! get the modelName and currentPhase
     call ESMF_GridCompGet(gcomp, name=modelName, currentPhase=phase, rc=rc)

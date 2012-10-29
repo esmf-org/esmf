@@ -101,6 +101,7 @@ Driver component that drives model and connector components. The default is to u
 \begin{itemize}
 \item phase 1: {\sc Provided:}
   \begin{itemize}
+  \item If the incoming clock is valid, set the internal stop time to one time step interval on the incoming clock.
   \item Time stepping loop, from current time to stop time, incrementing by time step.
   \item For each time step iteration, the Model and Connector components Run() methods are being called according to the run sequence.
   \end{itemize}    
@@ -137,6 +138,7 @@ Driver component that drives model and connector components. The default is to u
     type(ESMF_CplComp),  pointer      :: connectorComp(:,:)
     type(NUOPC_RunSequence), pointer  :: runSeq(:)  ! size may increase dynamic.
     integer                           :: runPhaseToRunSeqMap(10)
+    type(ESMF_Clock)                  :: driverClock  ! clock of the parent
   end type
 
   type type_PetList
