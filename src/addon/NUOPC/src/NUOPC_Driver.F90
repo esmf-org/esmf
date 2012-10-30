@@ -1,4 +1,4 @@
-! $Id: NUOPC_Driver.F90,v 1.14 2012/10/29 23:52:34 theurich Exp $
+! $Id: NUOPC_Driver.F90,v 1.15 2012/10/30 03:56:25 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Driver.F90"
 
@@ -455,8 +455,6 @@ module NUOPC_Driver
       file=FILENAME)) &
       return  ! bail out
 
-
-#if 1
     ! -> Now encode the NUOPC Initialize Sequence version 00 and 01:
       
     ! modelComps
@@ -537,47 +535,6 @@ module NUOPC_Driver
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-#else
-
-    ! InitP1: modelComps
-    call loopModelComps(phase=1, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    ! InitP1: connectorComps
-    call loopConnectorComps(phase=1, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    ! InitP2: modelComps
-    call loopModelComps(phase=2, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    ! InitP2: connectorComps
-    call loopConnectorComps(phase=2, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    ! InitP3: modelComps
-    call loopModelComps(phase=3, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    ! InitP4: modelComps
-    call loopModelComps(phase=4, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-      
-#endif
 
 #define DEBUGPRINT____disable
 #ifdef DEBUGPRINT
@@ -652,6 +609,7 @@ module NUOPC_Driver
         integer, intent(out)    :: rc
         integer                 :: i, j
         character(ESMF_MAXSTR)  :: iString, jString, pString
+        type(ESMF_State)        :: imState, exState
         rc = ESMF_SUCCESS
         write (pString, *) phase
         do i=0, is%wrap%modelCount
@@ -659,11 +617,23 @@ module NUOPC_Driver
           do j=0, is%wrap%modelCount
             write (jString, *) j
             if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
+              if (i==0) then
+                ! connect to the drivers import State
+                imState=importState
+              else
+                imState=is%wrap%modelES(i)
+              endif
+              if (j==0) then
+                ! connect to the drivers export State
+                exState=exportState
+              else
+                exState=is%wrap%modelIS(j)
+              endif
               call ESMF_CplCompGet(is%wrap%connectorComp(i,j), name=compName, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
               call ESMF_CplCompInitialize(is%wrap%connectorComp(i,j), &
-                importState=is%wrap%modelES(i), exportState=is%wrap%modelIS(j), &
+                importState=imState, exportState=exState, &
                 clock=internalClock, phase=phase, userRc=localrc, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase "// &
                 trim(adjustl(pString))//" Initialize for connectorComp "// &
@@ -824,6 +794,7 @@ module NUOPC_Driver
         integer, intent(out)    :: rc
         integer                 :: phase, i, j
         character(ESMF_MAXSTR)  :: iString, jString, pString
+        type(ESMF_State)        :: imState, exState
         rc = ESMF_SUCCESS
         do i=0, is%wrap%modelCount
           write (iString, *) i
@@ -838,12 +809,24 @@ module NUOPC_Driver
               enddo
               if (phase == 0) cycle ! skip to next j
               write (pString, *) phase
+              if (i==0) then
+                ! connect to the drivers import State
+                imState=importState
+              else
+                imState=is%wrap%modelES(i)
+              endif
+              if (j==0) then
+                ! connect to the drivers export State
+                exState=exportState
+              else
+                exState=is%wrap%modelIS(j)
+              endif
               ! attempt to make the actual call to initialize
               call ESMF_CplCompGet(is%wrap%connectorComp(i,j), name=compName, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
               call ESMF_CplCompInitialize(is%wrap%connectorComp(i,j), &
-                importState=is%wrap%modelES(i), exportState=is%wrap%modelIS(j), &
+                importState=imState, exportState=exState, &
                 clock=internalClock, phase=phase, userRc=localrc, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase "// &
                 trim(adjustl(pString))//" Initialize for connectorComp "// &
@@ -885,6 +868,7 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)          :: iString, jString, pString
     character(ESMF_MAXSTR)          :: msgString, valueString
     type(NUOPC_RunElement), pointer :: runElement
+    type(ESMF_State)                :: imState, exState
     character(ESMF_MAXSTR)          :: modelName
     logical                         :: verbose
     character(ESMF_MAXSTR)          :: defaultvalue
@@ -929,7 +913,7 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     endif  
-#if 1
+    
     ! set the driverClock member in the internal state
     is%wrap%driverClock = clock
     
@@ -960,7 +944,7 @@ module NUOPC_Driver
         rcToReturn=rc)) &
         return  ! bail out
     endif
-#endif
+    
     ! determine the correct run sequence index for the current runPhase    
     runSeqIndex = is%wrap%runPhaseToRunSeqMap(runPhase)
     
@@ -995,8 +979,20 @@ module NUOPC_Driver
           write (iString, *) i
           write (jString, *) j
           write (pString, *) phase
+          if (i==0) then
+            ! connect to the drivers import State
+            imState=importState
+          else
+            imState=is%wrap%modelES(i)
+          endif
+          if (j==0) then
+            ! connect to the drivers export State
+            exState=exportState
+          else
+            exState=is%wrap%modelIS(j)
+          endif
           call ESMF_CplCompRun(is%wrap%connectorComp(i,j), &
-            importState=is%wrap%modelES(i), exportState=is%wrap%modelIS(j), &
+            importState=imState, exportState=exState, &
             clock=internalClock, phase=phase, userRc=localrc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, &
             msg="Failed calling phase "//trim(adjustl(pString))// &
