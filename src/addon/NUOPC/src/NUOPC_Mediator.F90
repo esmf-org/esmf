@@ -1,4 +1,4 @@
-! $Id: NUOPC_Mediator.F90,v 1.3 2012/10/26 22:32:05 theurich Exp $
+! $Id: NUOPC_Mediator.F90,v 1.4 2012/10/30 20:51:02 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Mediator.F90"
 
@@ -13,6 +13,9 @@ module NUOPC_Mediator
   use NUOPC_ModelBase, only: &
     ModelBase_routine_SS            => routine_SetServices, &
     routine_Run                     => routine_Run, &
+    type_InternalState              => type_InternalState, &
+    type_InternalStateStruct        => type_InternalStateStruct, &
+    label_InternalState             => label_InternalState, &
     label_CheckImport               => label_CheckImport, &
     label_Advance                   => label_Advance
 
@@ -25,6 +28,11 @@ module NUOPC_Mediator
     routine_SetServices
     
   public &
+    type_InternalState, &
+    type_InternalStateStruct
+    
+  public &
+    label_InternalState, &
     label_Advance, &
     label_CheckImport, &
     label_DataInitialize

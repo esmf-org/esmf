@@ -103,6 +103,16 @@ Model component with a default {\em explicit} time dependency. Each time the {\t
 \end{itemize}
 
 \bigskip{\sf INTERNALSTATE:}
-{\sc None.}
+\begin{verbatim}  label_InternalState
+
+  type type_InternalState
+    type(type_InternalStateStruct), pointer :: wrap
+  end type
+
+  type type_InternalStateStruct
+    type(ESMF_Clock)      :: driverClock
+  end type
+
+\end{verbatim}
 %...............................................................
 
