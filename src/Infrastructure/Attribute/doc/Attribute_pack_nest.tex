@@ -1,4 +1,4 @@
-% $Id: Attribute_pack_nest.tex,v 1.7 2012/01/06 20:15:45 svasquez Exp $
+% $Id: Attribute_pack_nest.tex,v 1.7.4.1 2012/10/30 20:33:04 ksaint Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -44,4 +44,4 @@ ESMF General -- Grid package -- is a nest with one child package:
    \item GridSpec General
 \end{enumerate}
 
-An explanation of the Attribute packages specifiers is in order at this point.  The purpose specifier is really just meant as an additional means, beyond the use of "convention", to specify Attribute packages.  One could imagine that the CF convention would want to be able to have Attribute packages divided up in some fashion, which ESMF could then keep track of with the purpose specifier.  It was added with the intention of allowing Attributes, and packages, maximum flexibility.  Take the Field's ESMF standard Attribute package for example.  This package is made up of three nested Attribute packages.  The lowest one is made up of three Attributes with convention=CF and purpose=General.  The next level contains one Attribute with convention=CF but purpose=Extended.  On top of this is the convention=ESG package, also with purpose=General.
+An explanation of the Attribute packages convention and purpose is in order at this point.  The purpose specifier is really just meant as an additional means, beyond the use of "convention", to specify Attribute packages.  One could imagine that the CF convention would want to be able to have Attribute packages divided up in some fashion, which ESMF could then keep track of with the purpose specifier.  It was added with the intention of allowing Attributes, and packages, maximum flexibility.  Take the Field's ESMF standard Attribute package for example.  This package is made up of three nested Attribute packages.  The lowest one is made up of three Attributes with convention=CF and purpose=General.  The next level contains one Attribute with convention=CF but purpose=Extended.  On top of this is the convention=ESG package, also with purpose=General.

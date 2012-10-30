@@ -1,4 +1,4 @@
-% $Id: Attribute_desc.tex,v 1.54.4.1 2012/10/09 16:13:50 ksaint Exp $
+% $Id: Attribute_desc.tex,v 1.54.4.2 2012/10/30 20:33:04 ksaint Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -29,8 +29,7 @@ nested inside each other to make larger organized packages, distributed across
 processors and updated at runtime, and expanded to suit specific needs.  The
 ESMF-supplied  
 Attribute packages are designed around accepted metadata conventions, such as: 
-climate and forecast (CF) \cite{ref:cf}, ISO standards \cite{ref:iso}, and the METAFOR 
-Common Information Model (CIM) \cite{ref:cim}.
+climate and forecast (CF) \cite{ref:cf}, ISO standards \cite{ref:iso}, and the METAFOR Common Information Model (CIM) \cite{ref:cim} \cite{ref:esdoccim}.
 
 Most of the ESMF deep objects can host Attributes, and   
 every object that can hold individual Attributes can also hold
@@ -55,9 +54,94 @@ information models, including the Common Information Model (CIM), these two
 pieces are managed and versioned separately.
 
 ESMF implements the appropriate schema internally; it translates the Attributes
-as specified in the Attribute Packages into the correct format based on the
-Convention and Purpose specified.  The Controlled Vocabularies, or Attribute
-values, however, are not controlled or validated within ESMF.
+as specified in the Attribute packages into the correct format based on the
+convention and purpose as specified in arguments to most Attribute functions.  
+The controlled vocabularies, or Attribute values, however, are not controlled 
+or validated within ESMF.
+
+\subsubsection{The Common Information Model (CIM)}
+
+The CIM is a formal model of the climate modeling process being developed by 
+the European Union's \htmladdnormallink{METAFOR}{http://metaforclimate.eu/} 
+project.  The \htmladdnormallink{Earth System - Documentation (ES-DOC)}{http://earthsystemcog.org/projects/es-doc-models/} project 
+is an evolution of the METAFOR project, and they provide a detailed 
+description of the CIM \htmladdnormallink{here}{http://earthsystemcog.org/projects/es-doc-models/cim}.
+
+ESMF is currently implementing only a subset of the CIM, though this representation is expected to grow. 
+
+{\bf Mapping Attributes to the CIM}
+
+The ESMF Attribute packages provide a structure for the Attributes that 
+are useful for climate modelers.  When the {\tt ESMF\_AttributeWrite()}
+function is 
+called with "CIM" XML specified as the target, ESMF translates these package 
+structures into a format defined by the CIM schema.  The package descriptions 
+in the following sections provide a mapping from the ESMF Attribute name 
+to the CIM schema field.  
+		
+For example, in the CIM Main Attribute Package, the Attribute named 
+"LongName" is mapped to the CIM schema field, 
+"software:SoftwareComponent:longName":  
+
+\begin{tabular}{|p{7cm}|p{5cm}|p{15mm}|p{15mm}|}
+     \hline\hline
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
+     \hline\hline
+     {\tt LongName} & A version of the component name with all acronyms spelled out. & N/A & software:SoftwareComponent:longName \\
+     \hline\hline
+\end{tabular}
+\linebreak
+
+There are 3 parts to this mapping: 
+
+\begin{itemize}
+  \item {\bf <CIM section>} = "software"
+  \item {\bf <Entity>} = "SoftwareComponent"
+  \item {\bf <Field>} = "longName"
+\end{itemize}
+		
+The CIM section refers to the categories, or subsections, of the CIM 
+mentioned above.  In this example, the CIM section is "software".  To find 
+this section in the CIM schema repository, go to the 
+\htmladdnormallink{CIM repository}{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}
+and then select the "software" drop down (see Figure \ref{fig:CIMRepository} ).
+		
+\begin{figure}[h]
+\centering
+\includegraphics{CIMRepository}
+\caption{The software section of the CIM repository}
+\label{fig:CIMRepository}
+\end{figure}
+\clearpage
+
+You can view the schema graphically in a UML diagram by selecting the 
+software.png file and then visually search the picture for the 
+SoftwareComponent entity (see Figure \ref{fig:SoftwareComponentUML} ).
+		
+\begin{figure}[h]
+\centering
+\includegraphics{SoftwareComponentUML}
+\caption{The SoftwareComponent Entity in the CIM UML Diagram}
+\label{fig:SoftwareComponentUML}
+\end{figure}
+\clearpage
+		
+However, this view does not provide field details, such as type and 
+description.  Alternatively, you can select the software.xsd file, and 
+then search the XML for the entity, "SoftwareComponent," and the field,
+"longName," which will provide the details for this field (see Figure \ref{fig:LongNameXSD} ).
+		
+\begin{figure}[h]
+\centering
+\includegraphics{LongNameXSD}
+\caption{The longName Field in the CIM software XSD file}
+\label{fig:LongNameXSD}
+\end{figure}
+\clearpage
+
+As the ES-DOC team continues its work, more tools will be provided to support
+CIM implementations.  Currently, a more user-friendly way to view the CIM 
+schema is available \htmladdnormallink{here}{http://es-doc.org/site/public/ontology}.
 
 \subsubsection{The ESMF approach to Attributes}
 
