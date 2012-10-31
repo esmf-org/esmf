@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.12 2012/10/30 23:03:54 theurich Exp $
+! $Id: NUOPC_Base.F90,v 1.13 2012/10/31 00:07:34 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -1721,7 +1721,6 @@ module NUOPC_Base
     character(ESMF_MAXSTR)  :: Units
     character(ESMF_MAXSTR)  :: LongName
     character(ESMF_MAXSTR)  :: ShortName
-    character(ESMF_MAXSTR)  :: Connected
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1753,14 +1752,8 @@ module NUOPC_Base
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
       
-    call NUOPC_FieldAttributeGet(advertisedField, name="Connected", &
-      value=Connected, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-      
     call NUOPC_FieldAttributeAdd(field, StandardName=StandardName,&
-      Units=Units, LongName=LongName, ShortName=ShortName, &
-      Connected=Connected, rc=rc)
+      Units=Units, LongName=LongName, ShortName=ShortName, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
       
