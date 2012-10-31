@@ -152,12 +152,12 @@ subroutine pio_cpp_finalize(iosystem_handle, ierr) bind(c)
   !  get the iosystem_desc_t for this connection
   call get_pio_iosys_handle(iosystem_handle, iosystem_desc_p)
 
-  call MPI_Barrier(iosystem_desc_p%comp_comm, ierror);
+!  call MPI_Barrier(iosystem_desc_p%comp_comm, ierror);
   !  call the Fortran procedure
   call pio_finalize(iosystem_desc_p, ierror)
 
   ! Delete the iosystem descriptor
-  call MPI_Barrier(iosystem_desc_p%comp_comm, ierror);
+!  call MPI_Barrier(iosystem_desc_p%comp_comm, ierror);
   call delete_pio_iosys_handle(iosystem_handle)
 
   !  convert the arguments back to C
