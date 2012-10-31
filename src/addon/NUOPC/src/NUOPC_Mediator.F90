@@ -1,4 +1,4 @@
-! $Id: NUOPC_Mediator.F90,v 1.4 2012/10/30 20:51:02 theurich Exp $
+! $Id: NUOPC_Mediator.F90,v 1.5 2012/10/31 00:04:42 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Mediator.F90"
 
@@ -84,9 +84,23 @@ module NUOPC_Mediator
     integer, intent(out)  :: rc
     
     ! local variables    
+    character(ESMF_MAXSTR):: name
     logical               :: allConnected
-        
+    integer               :: i
+    character(ESMF_MAXSTR), pointer :: impStdNameList(:)
+    character(ESMF_MAXSTR), pointer :: impItemNameList(:)
+    character(ESMF_MAXSTR), pointer :: impConnectedList(:)
+    
     rc = ESMF_SUCCESS
+
+    nullify(impStdNameList)
+    nullify(impItemNameList)
+    nullify(impConnectedList)
+
+    ! get the Component name
+    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
 
     ! set the internal clock to the parent clock
     call NUOPC_GridCompSetClock(gcomp, clock, rc=rc)
@@ -94,24 +108,37 @@ module NUOPC_Mediator
       line=__LINE__, file=FILENAME)) return  ! bail out
 
     ! query if all import Fields are connected
-    allConnected = NUOPC_StateIsAllConnected(importState, rc=rc)
+    call NUOPC_StateBuildStdList(importState, stdAttrNameList=impStdNameList, &
+      stdItemNameList=impItemNameList, stdConnectedList=impConnectedList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-      
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    allConnected = .true.  ! initialize
+    if (associated(impConnectedList)) then
+      do i=1, size(impConnectedList)
+        if (impConnectedList(i) /= "true") then
+          allConnected = .false.
+          call ESMF_LogWrite(trim(name)//": Import Field not connected: "// &
+            trim(impStdNameList(i)), ESMF_LOGMSG_WARNING, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME)) return  ! bail out
+        endif
+      enddo
+    endif
+    
     ! compatibility check
     if (.not.allConnected) then
       !TODO: introduce and use INCOMPATIBILITY return codes!!!!
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="NUOPC INCOMPATIBILITY DETECTED: Import Fields not all connected", &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
+        line=__LINE__, file=FILENAME, rcToReturn=rc)
       return  ! bail out
     endif
     
     !TODO: remove Fields that aren't connected from import and export State
+    
+    if (associated(impStdNameList)) deallocate(impStdNameList)
+    if (associated(impItemNameList)) deallocate(impItemNameList)
+    if (associated(impConnectedList)) deallocate(impConnectedList)
     
   end subroutine
   
