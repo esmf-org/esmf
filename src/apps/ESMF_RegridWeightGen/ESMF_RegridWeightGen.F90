@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.75 2012/10/14 05:05:53 theurich Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.76 2012/10/31 22:08:56 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -36,6 +36,7 @@ program ESMF_RegridWeightGenApp
       integer            :: ind, pos
       logical            :: largeFileFlag
       logical 		 :: ignoreUnmapped, userAreaFlag
+      type(ESMF_UnmappedAction_Flag) :: unmappedaction
       logical            :: srcMissingValue, dstMissingValue
       logical            :: srcIsRegional, dstIsRegional, typeSetFlag
       logical            :: useSrcCoordVar, useDstCoordVar
@@ -566,8 +567,13 @@ program ESMF_RegridWeightGenApp
         methodflag = ESMF_REGRIDMETHOD_PATCH
      endif	 
     
+     if (ignoreunmapped) then
+         unmappedaction = ESMF_UNMAPPEDACTION_IGNORE
+     else
+         unmappedaction = ESMF_UNMAPPEDACTION_ERROR
+     endif
      call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
-          polemethod = pole, regridPoleNPnts = poleptrs, ignoreUnmappedFlag = ignoreunmapped, &
+          polemethod = pole, regridPoleNPnts = poleptrs, unmappedaction = unmappedaction, &
 	  srcFileType = srcFileType, dstFileType = dstFileType, &
 	  srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
 	  srcMeshname = srcMeshname, dstMeshname = dstMeshname, &
