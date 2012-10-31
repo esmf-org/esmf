@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.50 2012/04/27 18:21:15 svasquez Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.51 2012/10/31 03:33:46 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -53,11 +53,14 @@ program ESMF_AttributeCIMEx
       type(ESMF_VM)           :: vm
       type(ESMF_Field)        :: ozone
       type(ESMF_State)        :: exportState
+      type(ESMF_CplComp)      :: cplcomp
       type(ESMF_GridComp)     :: gridcomp
-      character(ESMF_MAXSTR)  :: convCIM, purpComp, purpProp
+      type(ESMF_SciComp)      :: scicomp
+      character(ESMF_MAXSTR)  :: convCIM, purpComp, purpProp, purpSci
       character(ESMF_MAXSTR)  :: purpField, purpPlatform
       character(ESMF_MAXSTR)  :: convISO, purpRP, purpCitation
       character(ESMF_MAXSTR), dimension(2)  :: compPropAtt
+      character(ESMF_MAXSTR), dimension(2)  :: rad_sciPropAtt
       character(ESMF_MAXSTR)  :: testname
       character(ESMF_MAXSTR)  :: failMsg
 !EOC
@@ -104,9 +107,28 @@ program ESMF_AttributeCIMEx
 !EOE
 
 !BOC
-      ! Create Component
+      ! Create top-level Coupler Component
+      cplcomp = ESMF_CplCompCreate(name="coupler_component", &
+        petList=(/0/), rc=rc)
+
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
+      ! Create Gridded Component as a child of the Coupler Component
       gridcomp = ESMF_GridCompCreate(name="gridded_component", &
         petList=(/0/), rc=rc)
+
+      call ESMF_AttributeLink(cplcomp, gridcomp, rc=rc)
+
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
+      ! Create Science Component as a child of the Gridded Component
+      scicomp = ESMF_SciCompCreate(name="science_component", rc=rc)
+
+      call ESMF_AttributeLink(gridcomp, scicomp, rc=rc)
 
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -137,6 +159,7 @@ program ESMF_AttributeCIMEx
       convCIM = 'CIM'
       purpComp = 'Model Component Simulation Description'
       purpProp = 'General Component Properties Description'
+      purpSci = 'Scientific Properties Description'
       purpField = 'Inputs Description'
       purpPlatform = 'Platform Description'
 
@@ -454,6 +477,50 @@ program ESMF_AttributeCIMEx
 
 !BOE
 !\begin{sloppypar}
+!     Add Component attributes to the Science Component and then add
+!     scientific properties to it.
+!\end{sloppypar}
+!EOE
+
+!BOC
+      call ESMF_AttributeAdd(scicomp,  &
+                             convention=convCIM, purpose=purpComp, rc=rc)
+
+      call ESMF_AttributeSet(scicomp, "ShortName", "AtmosRadiation", &
+                             convention=convCIM, purpose=purpComp, rc=rc)
+      call ESMF_AttributeSet(scicomp, "LongName", &
+                             "Atmosphere Radiation", &
+                             convention=convCIM, purpose=purpComp, rc=rc)
+      call ESMF_AttributeSet(scicomp, "ModelType", &
+                             "radiation", &
+                             convention=convCIM, purpose=purpComp, rc=rc)
+!EOC
+
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOC
+      rad_sciPropAtt(1) = 'LongwaveSchemeType'
+      rad_sciPropAtt(2) = 'LongwaveSchemeMethod'
+
+      call ESMF_AttributeAdd(scicomp,  &
+                             convention=convCIM, purpose=purpSci, &
+                             attrList=rad_sciPropAtt, rc=rc)
+
+      call ESMF_AttributeSet(scicomp, &
+                             'LongwaveSchemeType', &
+                             'wide-band model', &
+                             convention=convCIM, purpose=purpSci, rc=rc)
+      call ESMF_AttributeSet(scicomp, &
+                             'LongwaveSchemeMethod', &
+                             'two-stream', &
+                             convention=convCIM, purpose=purpSci, rc=rc)
+!EOC
+
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+
+!BOE
+!\begin{sloppypar}
 !     The standard Attribute package currently supplied by ESMF for 
 !     CIM Fields contains a standard CF-Extended package nested within it.
 !\end{sloppypar}
@@ -587,7 +654,9 @@ program ESMF_AttributeCIMEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
+      call ESMF_SciCompDestroy(scicomp, rc=rc)
       call ESMF_GridCompDestroy(gridcomp, rc=rc)
+      call ESMF_CplCompDestroy(cplcomp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
