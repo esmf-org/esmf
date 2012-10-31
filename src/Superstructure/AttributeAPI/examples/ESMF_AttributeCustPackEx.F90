@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCustPackEx.F90,v 1.6 2012/02/16 22:59:11 svasquez Exp $
+! $Id: ESMF_AttributeCustPackEx.F90,v 1.7 2012/10/31 21:10:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -137,14 +137,12 @@ program ESMF_AttributeCustPackEx
 !EOE
 
 
-      if (localPet==0) then
 !BOC
       call ESMF_AttributeWrite(gridcomp,customConv,customPurp, &
         attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
 
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      endif
 
     ! Destroy
     call ESMF_GridCompDestroy(gridcomp, rc=rc)

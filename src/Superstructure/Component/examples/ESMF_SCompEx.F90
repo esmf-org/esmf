@@ -1,4 +1,4 @@
-! $Id: ESMF_SCompEx.F90,v 1.2 2012/10/24 02:19:14 ksaint Exp $
+! $Id: ESMF_SCompEx.F90,v 1.3 2012/10/31 21:11:14 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -365,13 +365,11 @@ program ESMF_SCompEx
 !\end{sloppypar}
 !EOE
 
-      if (localPet==0) then
 !BOC
         call ESMF_AttributeWrite(cplcomp, convCIM, purpComp, &
           attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
 !EOC
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      endif
 
 !BOE
 !\begin{sloppypar}

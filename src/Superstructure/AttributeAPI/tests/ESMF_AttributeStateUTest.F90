@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeStateUTest.F90,v 1.49 2012/10/16 17:31:03 rokuingh Exp $
+! $Id: ESMF_AttributeStateUTest.F90,v 1.50 2012/10/31 21:11:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeStateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeStateUTest.F90,v 1.49 2012/10/16 17:31:03 rokuingh Exp $'
+      '$Id: ESMF_AttributeStateUTest.F90,v 1.50 2012/10/31 21:11:02 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -106,6 +106,8 @@ program ESMF_AttributeStateUTest
                                                attpackDfltList2
       character(ESMF_MAXSTR), dimension(12) :: attpackListTNames
 
+      logical :: rc_logical
+      character(ESMF_MAXSTR), dimension(1) :: exclusions
 #endif
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -130,7 +132,7 @@ program ESMF_AttributeStateUTest
       fbfs = ESMF_FieldBundleCreate(name="fieldbundleforstate", rc=rc)
       
       ! states
-      state = ESMF_StateCreate(name="original state",  &
+      state = ESMF_StateCreate(name="state",  &
                                stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
       sfs   = ESMF_StateCreate(name="stateforstatelink", &
                                stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
@@ -1443,12 +1445,32 @@ program ESMF_AttributeStateUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
+      ! compare the output file to the baseline file
+      exclusions(1) = "ESMF Version"
+      rc_logical = ESMF_TestFileCompare('state.xml', &
+        'baseline_state.xml', exclusionList=exclusions)
+      write(failMsg, *) "Did not return True"
+      write(name, *) "Compare the XML output file to the baseline file"
+      call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
       ! Write the Attribute package to .stdout from a State Test
       call ESMF_AttributeWrite(state, convention=conv, purpose=purp, &
         attwriteflag=ESMF_ATTWRITE_TAB, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Writing an Attribute package to .stdout from a State Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! compare the output file to the baseline file
+      exclusions(1) = "Name:"
+      rc_logical = ESMF_TestFileCompare('state.stdout', &
+        'baseline_state.stdout', exclusionList=exclusions)
+      write(failMsg, *) "Did not return True"
+      write(name, *) "Compare the stdout output file to the baseline file"
+      call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------

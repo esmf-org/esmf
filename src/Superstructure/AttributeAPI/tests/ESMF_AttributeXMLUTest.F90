@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.33 2012/05/16 21:56:52 svasquez Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.34 2012/10/31 21:11:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.33 2012/05/16 21:56:52 svasquez Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.34 2012/10/31 21:11:02 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -61,6 +61,9 @@ program ESMF_AttributeXMLUTest
       
       character(ESMF_MAXSTR),dimension(3)   :: nestConv, nestPurp
       character(ESMF_MAXSTR),dimension(3)   :: attrList         
+
+      logical :: rc_logical
+      character(ESMF_MAXSTR), dimension(4) :: exclusions
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -511,6 +514,17 @@ program ESMF_AttributeXMLUTest
     write(name, *) "Write out custom RP XML file test"
     call ESMF_Test((rc==ESMF_SUCCESS .or. rc==ESMF_RC_LIB_NOT_PRESENT), &
                     name, failMsg, result, ESMF_SRCLINE)
+print *, "!!!!!!!!!! BING 1111111 !!!!!!!!!!!!!!!!!!!! "
+    !EX_UTest
+    ! compare the output file to the baseline file
+    exclusions(1) = "ESMF Version"
+    rc_logical = ESMF_TestFileCompare('gridded_comp_cust_rp.xml', &
+      'baseline_gridded_comp_cust_rp.xml', exclusionList=exclusions)
+    write(failMsg, *) "Did not return True"
+    write(name, *) "Compare the XML output file to the baseline file"
+    call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+print *, "!!!!!!!!!! BING 2222222 !!!!!!!!!!!!!!!!!!!! "
 
   !-------------------------------------------------------------------------
   !   Multiple Attribute Packages of the same (conv,purp) tests. Uses built-in,
@@ -730,6 +744,19 @@ program ESMF_AttributeXMLUTest
     write(name, *) "Write out CIM RP XML file test"
     call ESMF_Test((rc==ESMF_SUCCESS .or. rc==ESMF_RC_LIB_NOT_PRESENT), &
                     name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! compare the output file to the baseline file
+    exclusions(1) = "ESMF Version"
+    exclusions(2) = "documentID"
+    exclusions(3) = "documentCreationDate"
+    rc_logical = ESMF_TestFileCompare('gridded_comp_cim_rp.xml', &
+      'baseline_gridded_comp_cim_rp.xml', exclusionList=exclusions)
+    write(failMsg, *) "Did not return True"
+    write(name, *) "Compare the XML output file to the baseline file"
+    call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+
 
   !-------------------------------------------------------------------------
   !   <CIMDocument> attribute representation and output test for
@@ -1396,6 +1423,19 @@ program ESMF_AttributeXMLUTest
     write(name, *) "Write out CIM XML file test"
     call ESMF_Test((rc==ESMF_SUCCESS .or. rc==ESMF_RC_LIB_NOT_PRESENT), &
                     name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! compare the output file to the baseline file
+    exclusions(1) = "ESMF Version"
+    exclusions(2) = "documentID"
+    exclusions(3) = "documentCreationDate"
+    exclusions(4) = "<id>"
+    rc_logical = ESMF_TestFileCompare('gridded_comp_cim.xml', &
+      'baseline_gridded_comp_cim.xml', exclusionList=exclusions)
+    write(failMsg, *) "Did not return True"
+    write(name, *) "Compare the XML output file to the baseline file"
+    call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
 
 
     !------------------------------------------------------------------------

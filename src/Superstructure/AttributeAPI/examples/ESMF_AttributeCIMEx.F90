@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.51 2012/10/31 03:33:46 ksaint Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.52 2012/10/31 21:10:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -635,13 +635,11 @@ program ESMF_AttributeCIMEx
 !\end{sloppypar}
 !EOE
 
-      if (localPet==0) then
 !BOC
       call ESMF_AttributeWrite(gridcomp, convCIM, purpComp, &
         attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
 !EOC
         if (rc/=ESMF_SUCCESS .and. rc/=ESMF_RC_LIB_NOT_PRESENT) goto 10
-      endif
 
       ! Clean-up
       call ESMF_FieldDestroy(field=ozone, rc=rc)

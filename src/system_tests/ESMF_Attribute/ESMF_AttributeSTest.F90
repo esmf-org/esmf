@@ -284,7 +284,6 @@ program ESMF_AttributeSTest
   conv = 'ESMF'
   purp = 'General'
   ! AttributeUpdate is not called so we are only printing from PET0 for now
-  if (localPet .eq. 0) then
 !    call ESMF_AttributeWrite(comp1,conv,purp,rc=rc)
 !    call ESMF_AttributeWrite(comp2,conv,purp,rc=rc)
 !    call ESMF_AttributeWrite(comp1,conv,purp,attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
@@ -292,7 +291,6 @@ program ESMF_AttributeSTest
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
       call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  endif
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Finalize section

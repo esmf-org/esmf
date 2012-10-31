@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCplCompUTest.F90,v 1.48 2012/10/16 17:31:03 rokuingh Exp $
+! $Id: ESMF_AttributeCplCompUTest.F90,v 1.49 2012/10/31 21:11:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeCplCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.48 2012/10/16 17:31:03 rokuingh Exp $'
+      '$Id: ESMF_AttributeCplCompUTest.F90,v 1.49 2012/10/31 21:11:02 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -106,7 +106,8 @@ program ESMF_AttributeCplCompUTest
                                                attpackDfltList2
       character(ESMF_MAXSTR), dimension(12) :: attpackListTNames
 
-
+      logical :: rc_logical
+      character(ESMF_MAXSTR), dimension(1) :: exclusions
 
 #endif
 
@@ -1457,12 +1458,31 @@ program ESMF_AttributeCplCompUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
+      ! compare the output file to the baseline file
+      exclusions(1) = "ESMF Version"
+      rc_logical = ESMF_TestFileCompare('cplcomp.xml', &
+        'baseline_cplcomp.xml', exclusionList=exclusions)
+      write(failMsg, *) "Did not return True"
+      write(name, *) "Compare the XML output file to the baseline file"
+      call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
       ! Write the Attribute package to .stdout from a CplComp Test
       call ESMF_AttributeWrite(cplcomp, convention=conv, purpose=purp, &
         attwriteflag=ESMF_ATTWRITE_TAB, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Writing an Attribute package to .stdout from a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! compare the output file to the baseline file
+      rc_logical = ESMF_TestFileCompare('cplcomp.stdout', &
+        'baseline_cplcomp.stdout')
+      write(failMsg, *) "Did not return True"
+      write(name, *) "Compare the stdout output file to the baseline file"
+      call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------

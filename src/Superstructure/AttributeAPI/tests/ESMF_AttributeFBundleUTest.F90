@@ -1,4 +1,4 @@
-!  $Id: ESMF_AttributeFBundleUTest.F90,v 1.41 2012/10/16 17:31:03 rokuingh Exp $
+!  $Id: ESMF_AttributeFBundleUTest.F90,v 1.42 2012/10/31 21:11:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFBundleUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.41 2012/10/16 17:31:03 rokuingh Exp $'
+      '$Id: ESMF_AttributeFBundleUTest.F90,v 1.42 2012/10/31 21:11:02 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -105,7 +105,8 @@ program ESMF_AttributeFBundleUTest
                                                attpackDfltList2
       character(ESMF_MAXSTR), dimension(12) :: attpackListTNames, attpackListTNames2
 
-
+      logical :: rc_logical
+      character(ESMF_MAXSTR), dimension(1) :: exclusions
 
 #endif
 !-------------------------------------------------------------------------------
@@ -128,7 +129,7 @@ program ESMF_AttributeFBundleUTest
       ffb = ESMF_FieldEmptyCreate(name="fieldforbundle", rc=rc)
       
       ! field bundles
-      fieldbundle = ESMF_FieldBundleCreate(name="original field bundle", rc=rc)
+      fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=rc)
       
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -1439,12 +1440,32 @@ program ESMF_AttributeFBundleUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
+      ! compare the output file to the baseline file
+      exclusions(1) = "ESMF Version"
+      rc_logical = ESMF_TestFileCompare('fieldbundle.xml', &
+        'baseline_fieldbundle.xml', exclusionList=exclusions)
+      write(failMsg, *) "Did not return True"
+      write(name, *) "Compare the XML output file to the baseline file"
+      call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
       ! Write the Attribute package to .stdout from a FieldBundle Test
       call ESMF_AttributeWrite(fieldbundle, convention=conv, purpose=purp, &
         attwriteflag=ESMF_ATTWRITE_TAB, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Writing an Attribute package to .stdout from a FieldBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! compare the output file to the baseline file
+      exclusions(1) = "Name:"
+      rc_logical = ESMF_TestFileCompare('fieldbundle.stdout', &
+        'baseline_fieldbundle.stdout', exclusionList=exclusions)
+      write(failMsg, *) "Did not return True"
+      write(name, *) "Compare the stdout output file to the baseline file"
+      call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.8 2012/10/04 20:52:37 rokuingh Exp $
+! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.9 2012/10/31 21:11:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_AttributeWriteIntrnalUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.8 2012/10/04 20:52:37 rokuingh Exp $'
+  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.9 2012/10/31 21:11:02 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -66,7 +66,7 @@ program ESMF_AttributeWriteIntrnalUTest
   type(ESMF_FieldBundle)  :: fieldBundle
   type(ESMF_State)        :: importState
   character(ESMF_MAXSTR)  :: conv, purp
-  
+   
   character(ESMF_MAXSTR),dimension(11)   :: attrList         
   character(ESMF_MAXSTR),dimension(3)   :: inputList 
   character(ESMF_MAXSTR),dimension(4)   :: outValList
@@ -74,6 +74,9 @@ program ESMF_AttributeWriteIntrnalUTest
   integer(ESMF_KIND_I4), dimension(2) :: exclusiveCount
   real(ESMF_KIND_R8), pointer :: farrayPtr(:)
   integer :: coorddim = 1
+
+  logical :: rc_logical
+  character(ESMF_MAXSTR), dimension(1) :: exclusions
 
 #if 0
   ! for code to prove that internal info can be retrieved from a Grid
@@ -156,7 +159,7 @@ program ESMF_AttributeWriteIntrnalUTest
     !EX_UTest
     ! Construct a gridded component ESMF object that will be decorated with
     ! Attributes to output <CIMDocument>s
-    gridcomp = ESMF_GridCompCreate(name="gridded_comp_cim", petList=(/0/), &
+    gridcomp = ESMF_GridCompCreate(name="gridcomp_gridspec", petList=(/0/), &
                  rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a gridded component to decorate with Attributes test"
@@ -464,6 +467,18 @@ program ESMF_AttributeWriteIntrnalUTest
     write(name, *) "Write out CIM XML file test"
     call ESMF_Test((rc==ESMF_SUCCESS .or. rc==ESMF_RC_LIB_NOT_PRESENT), &
                     name, failMsg, result, ESMF_SRCLINE)
+
+#if 0
+    !EX_disable_UTest
+    ! compare the output file to the baseline file
+    exclusions(1) = "ESMF Version"
+    rc_logical = ESMF_TestFileCompare('gridcomp_gridspec.xml', &
+      'baseline_gridcomp_gridspec.xml', exclusionList=exclusions)
+    write(failMsg, *) "Did not return True"
+    write(name, *) "Compare the XML output file to the baseline file"
+    call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE)
+    !------------------------------------------------------------------------
+#endif
 
   !------------------------------------------------------------------------
   ! clean up

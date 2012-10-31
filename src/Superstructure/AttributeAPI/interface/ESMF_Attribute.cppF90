@@ -1,4 +1,4 @@
-! $Id: ESMF_Attribute.cppF90,v 1.117 2012/10/16 17:30:05 rokuingh Exp $
+! $Id: ESMF_Attribute.cppF90,v 1.118 2012/10/31 21:11:00 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@ module ESMF_AttributeMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Attribute.cppF90,v 1.117 2012/10/16 17:30:05 rokuingh Exp $'
+               '$Id: ESMF_Attribute.cppF90,v 1.118 2012/10/31 21:11:00 rokuingh Exp $'
 !------------------------------------------------------------------------------
 !==============================================================================
 !
@@ -2283,6 +2283,8 @@ contains
 !     Currently, only ESMF/ESG/CF Field Attribute packages can be written in
 !     tab-delimited format.  See Section~\ref{sec:AttPacks} for a description
 !     of Attribute packages and their conventions, purposes, and object types.
+!
+!     This call is collective across the current VM.
 !
 !     Writing Attribute XML files is performed with the standard C++ output 
 !     file stream facility.
@@ -6742,6 +6744,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The Attribute package defines the convention, purpose, and object type  @\
 !     of the associated Attributes. @\
 ! @\
+! This call is collective across the current VM. @\
+! @\
 !     The arguments are: @\
 !     \begin{description} @\
 !     \item [state] @\
@@ -6764,6 +6768,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), parameter :: ftarobj=#mthistar @\
       type(ESMF_AttWriteFlag) :: writeflag @\
       type(ESMF_Logical) :: attpack @\
+      type(ESMF_VM) :: vm @\
  @\
       ! Initialize return code; assume failure until success is certain @\
       attpack = ESMF_FALSE @\
@@ -6800,6 +6805,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+      call ESMF_VMGetCurrent(vm, rc=rc) @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+      call ESMF_VMBarrier(vm, rc=rc) @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\      
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\

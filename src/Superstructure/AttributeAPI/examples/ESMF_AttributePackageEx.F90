@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.38 2012/03/15 23:06:58 svasquez Exp $
+! $Id: ESMF_AttributePackageEx.F90,v 1.39 2012/10/31 21:10:58 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -705,7 +705,6 @@ program ESMF_AttributePackageEx
 !EOE
 
 
-      if (localPet==0) then
 !BOC
       call ESMF_AttributeWrite(gridcomp,convESMF,purpGen, &
         attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
@@ -716,7 +715,6 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeWrite(gridcomp,convESMF,purpGen,rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      endif
 
     ! Destroy
     call ESMF_FieldDestroy(field=DPEDT, rc=rc)

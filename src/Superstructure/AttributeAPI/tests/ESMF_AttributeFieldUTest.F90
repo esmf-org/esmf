@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeFieldUTest.F90,v 1.53 2012/10/16 17:31:03 rokuingh Exp $
+! $Id: ESMF_AttributeFieldUTest.F90,v 1.54 2012/10/31 21:11:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeFieldUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeFieldUTest.F90,v 1.53 2012/10/16 17:31:03 rokuingh Exp $'
+      '$Id: ESMF_AttributeFieldUTest.F90,v 1.54 2012/10/31 21:11:02 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -108,7 +108,8 @@ program ESMF_AttributeFieldUTest
                                                attpackListOut3, attpackListOut4
       character(ESMF_MAXSTR), dimension(12) :: attpackListTNames
 
-
+      logical :: rc_logical
+      character(ESMF_MAXSTR), dimension(2) :: exclusions
 
 #endif
 !-------------------------------------------------------------------------------
@@ -128,7 +129,7 @@ program ESMF_AttributeFieldUTest
       !------------------------------------------------------------------------
       ! preparations
       ! fields
-      field = ESMF_FieldEmptyCreate(name="original field", rc=rc)
+      field = ESMF_FieldEmptyCreate(name="field", rc=rc)
 
       grid = ESMF_GridEmptyCreate(rc=rc)
 
@@ -1726,12 +1727,33 @@ program ESMF_AttributeFieldUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
+      ! compare the output file to the baseline file
+      exclusions(1) = "ESMF Version"
+      rc_logical = ESMF_TestFileCompare('field.xml', &
+        'baseline_field.xml', exclusionList=exclusions)
+      write(failMsg, *) "Did not return True"
+      write(name, *) "Compare the XML output file to the baseline file"
+      call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
       ! Write the Attribute package to .stdout from a Field Test
       call ESMF_AttributeWrite(field, convention=conv, purpose=purp, &
         attwriteflag=ESMF_ATTWRITE_TAB, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Writing an Attribute package to .stdout from a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! compare the output file to the baseline file
+      exclusions(1) = "Name:"
+      exclusions(2) = "Export" ! the spacing changed at some point in Field internals
+      rc_logical = ESMF_TestFileCompare('field.stdout', &
+        'baseline_field.stdout', exclusionList=exclusions)
+      write(failMsg, *) "Did not return True"
+      write(name, *) "Compare the stdout output file to the baseline file"
+      call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
 #endif

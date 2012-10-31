@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridCompUTest.F90,v 1.47 2012/10/16 17:31:03 rokuingh Exp $
+! $Id: ESMF_AttributeGridCompUTest.F90,v 1.48 2012/10/31 21:11:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.47 2012/10/16 17:31:03 rokuingh Exp $'
+      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.48 2012/10/31 21:11:02 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -105,6 +105,8 @@ program ESMF_AttributeGridCompUTest
                                                attpackDfltList2
       character(ESMF_MAXSTR), dimension(12) :: attpackListTNames
 
+      logical :: rc_logical
+      character(ESMF_MAXSTR), dimension(1) :: exclusions
 #endif
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -1446,12 +1448,31 @@ program ESMF_AttributeGridCompUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
+      ! compare the output file to the baseline file
+      exclusions(1) = "ESMF Version"
+      rc_logical = ESMF_TestFileCompare('gridcomp.xml', &
+        'baseline_gridcomp.xml', exclusionList=exclusions)
+      write(failMsg, *) "Did not return True"
+      write(name, *) "Compare the XML output file to the baseline file"
+      call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
       ! Write the Attribute package to .stdout from a GridComp Test
       call ESMF_AttributeWrite(gridcomp, convention=conv, purpose=purp, &
         attwriteflag=ESMF_ATTWRITE_TAB, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Writing an Attribute package to .stdout from a GridComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! compare the output file to the baseline file
+      rc_logical = ESMF_TestFileCompare('gridcomp.stdout', &
+        'baseline_gridcomp.stdout')
+      write(failMsg, *) "Did not return True"
+      write(name, *) "Compare the stdout output file to the baseline file"
+      call ESMF_Test(rc_logical.eqv..true., name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
     !-------------------------------------------------------------------------

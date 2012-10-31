@@ -462,10 +462,8 @@ program ESMF_AttributeCIMSTest
 
   conv = 'CIM'
   purp = 'Model Component Simulation Description'
-#if 1
   ! write the Attribute info in CIM XML format for the Coupler, both Components,
   ! and their Fields
-  if (localPet .eq. 0) then
     call ESMF_AttributeWrite(cplcomp, conv, purp, &
                              attwriteflag=ESMF_ATTWRITE_XML, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -474,8 +472,7 @@ program ESMF_AttributeCIMSTest
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif
     endif
-  endif
-#endif
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 ! Run section

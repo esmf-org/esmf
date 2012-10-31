@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with ESMF Version 5.3.0, http://www.earthsystemmodeling.org -->
+<CIMDocumentSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns="http://www.purl.org/org/esmetadata/cim/1.7/schemas" xsi:schemaLocation="http://www.purl.org/org/esmetadata/cim/1.7/schemas/cim.xsd">
+  <modelComponent>
+    <shortName>EarthSys_Atmos</shortName>
+      <!-- from ESMF: CIM/Main, 'ShortName'+'Version'. -->
+      <!--    to ESG: 1) Component name, left-side navigator bar. -->
+      <!--    to ESG: 2) "Simulation Metadata:", top of display, 1st line; 'SimulationShortName' appended. -->
+    <longName>Earth System High Resolution Global Model</longName>
+      <!-- from ESMF: CIM/Main, 'LongName'. -->
+      <!--    to ESG: "Full Name:", top of display, 2nd line; 'SimulationLongName' appended. -->
+    <description>EarthSys brings together expertise from the global community in a concerted effort to develop coupled climate models with increased horizontal resolutions.  Increasing the horizontal resolution of coupled climate models will allow us to capture climate processes and weather systems in much greater detail.</description>
+      <!-- from ESMF: CIM/Main, 'Description'. -->
+      <!--    to ESG: "Description:" in top box. -->
+    <componentProperties>
+      <componentProperty represented="true">
+        <shortName>DMS_emi</shortName>
+          <!-- from ESMF: CIM/Inputs, 'ShortName'. -->
+          <!--    to ESG: Ingested below from [simulationRun][input][connection][connectionTarget][dataSource][reference][name]. -->
+      </componentProperty>
+    </componentProperties>
+    <responsibleParty>
+      <gmd:individualName>
+        <gco:CharacterString>John Doe</gco:CharacterString>
+          <!-- from ESMF: CIM/ResponsibleParty, 'Name'. -->
+          <!--    to ESG: Ingested and stored for role code "author", but not displayed yet. -->
+      </gmd:individualName>
+      <gmd:contactInfo>
+        <gmd:CI_Contact>
+          <gmd:address>
+            <gmd:CI_Address>
+              <gmd:deliveryPoint>
+                <gco:CharacterString>Department of Meteorology, University of ABC</gco:CharacterString>
+                  <!-- from ESMF: CIM/ResponsibleParty, 'PhysicalAddress'. -->
+                  <!--    to ESG: Not ingested yet. -->
+              </gmd:deliveryPoint>
+              <gmd:electronicMailAddress>
+                <gco:CharacterString>john.doe@earthsys.org</gco:CharacterString>
+                  <!-- from ESMF: CIM/ResponsibleParty, 'EmailAddress'. -->
+                  <!--    to ESG: Ingested and stored for role code "author", but not displayed yet. -->
+              </gmd:electronicMailAddress>
+            </gmd:CI_Address>
+          </gmd:address>
+        </gmd:CI_Contact>
+      </gmd:contactInfo>
+      <gmd:role>
+        <gmd:CI_RoleCode codeList="" codeListValue="author"></gmd:CI_RoleCode>
+          <!-- from ESMF: CIM/ResponsibleParty, 'ResponsiblePartyRole'. -->
+          <!--    to ESG: Ingested, but only used to control display. -->
+      </gmd:role>
+      <abbreviation>JD</abbreviation>
+        <!-- from ESMF: CIM/ResponsibleParty, abbreviation (initials) of 'Name'. -->
+        <!--    to ESG: Not ingested yet. -->
+    </responsibleParty>
+    <releaseDate>2009-02-15T01:02:03Z</releaseDate>
+      <!-- from ESMF: CIM/Main, 'ReleaseDate'. -->
+      <!--    to ESG: "Release Date" under tabs "Properties/Basic" -->
+    <citation>
+      <gmd:title>
+        <gco:CharacterString>Doe_2009</gco:CharacterString>
+          <!-- from ESMF: CIM/Citation, 'ShortTitle'. -->
+          <!--    to ESG: Not ingested yet. -->
+      </gmd:title>
+      <gmd:date>
+        <gmd:CI_Date>
+          <gmd:date>
+            <gco:Date>2009-04-20</gco:Date>
+              <!-- from ESMF: CIM/Citation, 'Date'. -->
+              <!--    to ESG: Not ingested yet. -->
+          </gmd:date>
+          <gmd:dateType>
+            <gmd:CI_DateTypeCode codeList="" codeListValue=""></gmd:CI_DateTypeCode>
+          </gmd:dateType>
+        </gmd:CI_Date>
+      </gmd:date>
+      <gmd:presentationForm>
+        <gmd:CI_PresentationFormCode codeList="" codeListValue="">Online Refereed</gmd:CI_PresentationFormCode>
+          <!-- from ESMF: CIM/Citation, 'PresentationForm'. -->
+          <!--    to ESG: Not ingested yet. -->
+      </gmd:presentationForm>
+      <gmd:otherCitationDetails>
+        <gco:CharacterString>doi:17.1035/2009JCLI4508.1</gco:CharacterString>
+          <!-- from ESMF: CIM/Citation, 'DOI'. -->
+          <!--    to ESG: "Reference" under tab "References", appended to 'LongTitle'. -->
+      </gmd:otherCitationDetails>
+      <gmd:collectiveTitle>
+        <gco:CharacterString>Doe, J.A.; Norton, A.B.; Clark, G.H.; Davies, I.J.. 2009 EarthSys: The Earth System High Resolution Global Atmosphere Model - Model description and basic evaluation. Journal of Climate, 15 (2). 1261-1296.</gco:CharacterString>
+          <!-- from ESMF: CIM/Citation, 'LongTitle' + 'URL'. -->
+          <!--    to ESG: "Reference" under tab "References", 'DOI' appended. -->
+      </gmd:collectiveTitle>
+    </citation>
+    <type open="true" value="aerosol">
+      <!-- from ESMF: CIM/Main, 'ModelType'. -->
+      <!--    to ESG: "Realm:", expanded under component name, left-side navigator bar. -->
+      <controlledVocabulary>
+        <name>DRS_CMIP5_componentType</name>
+        <server>http://proj.badc.rl.ac.uk/svn/metafor/cmip5q/trunk</server>
+      </controlledVocabulary>
+    </type>
+    <documentID>0990a595-02db-3436-b8b0-24e666852ea1</documentID>
+    <documentVersion>1.0</documentVersion>
+    <documentAuthor>
+      <gmd:individualName>
+        <gco:CharacterString>ESMF Version 5.3.0</gco:CharacterString>
+      </gmd:individualName>
+      <gmd:role>
+        <gmd:CI_RoleCode codeList="" codeListValue="documentAuthor"></gmd:CI_RoleCode>
+      </gmd:role>
+    </documentAuthor>
+    <documentCreationDate>2012-10-24T15:06:19</documentCreationDate>
+    <documentGenealogy>
+      <relationship>
+        <documentRelationship direction="toTarget" type="previousVersionOf">
+          <description>Horizontal resolution increased to 1.20 x 0.80 degrees; Timestep reduced from 30 minutes to 15 minutes.</description>
+            <!-- from ESMF: CIM/Main, 'PreviousVersionDescription'. -->
+            <!--    to ESG: Not ingested yet. -->
+          <target>
+            <reference>
+              <name>EarthSys1 Atmosphere</name>
+                <!-- from ESMF: CIM/Main, 'PreviousVersion'. -->
+                <!--    to ESG: Not ingested yet. -->
+            </reference>
+          </target>
+        </documentRelationship>
+      </relationship>
+    </documentGenealogy>
+  </modelComponent>
+  <simulationRun>
+    <rationale>EarthSys simulation run in repsect to CMIP5 core experiment 1.1 (Decadal)</rationale>
+      <!-- from ESMF: CIM/Main, 'SimulationRationale'. -->
+      <!--    to ESG: Not ingested yet. -->
+    <shortName>1.1_EarthSys_Sim</shortName>
+      <!-- from ESMF: CIM/Main, 'SimulationShortName'. -->
+      <!--    to ESG: 1) "Simulation Metadata:", top of display, 1st line; appended to 'ShortName' and 'Version' of top-level component. -->
+      <!--    to ESG: 2) Appears as 2nd part of simulation name when Curator website is searched for Simulations/Realm/Earth System. -->
+    <longName>EarthSys Simulation for Experiment 1.1</longName>
+      <!-- from ESMF: CIM/Main, 'SimulationLongName'. -->
+      <!--    to ESG: "Full Name:", top of display, 2nd line under title, appended to 'LongName'. -->
+    <supports>
+      <reference></reference>
+    </supports>
+    <calendar>
+      <realCalendar></realCalendar>
+    </calendar>
+    <input fullySpecified="true" purpose="boundaryCondition">
+      <!-- from ESMF: CIM/Inputs, 'CouplingPurpose' ("Ancillary"="ancillaryFile", "Boundary"="boundaryCondition", "Initial"="initialCondition") -->
+      <!--    to ESG: Title of expandable bar under tab "Inputs". -->
+      <type open="true" value="Shared Memory">
+        <controlledVocabulary>
+          <name>CouplingType</name>
+          <server>http://proj.badc.rl.ac.uk/svn/metafor/cmip5q/trunk</server>
+        </controlledVocabulary>
+      </type>
+      <timeProfile units="minutes" variableRate="false">
+        <rate>15</rate>
+          <!-- from ESMF: CIM/Inputs, 'Frequency'. -->
+          <!--    to ESG: "Input Frequency" under tab "Inputs", under field name. -->
+      </timeProfile>
+      <spatialRegridding spatialRegriddingDimension="2D">
+        <!-- from ESMF: CIM/Inputs, 'SpatialRegriddingDimension'. -->
+        <!--    to ESG: Not ingested yet. -->
+        <spatialRegriddingStandardMethod>conservative-first-order</spatialRegriddingStandardMethod>
+          <!-- from ESMF: CIM/Inputs, 'SpatialRegriddingMethod'. -->
+          <!--    to ESG: "Input Spatial Regridding Method" under tab "Inputs", under field name. -->
+      </spatialRegridding>
+      <timeTransformation>
+        <mappingType open="true" value="TimeAverage"></mappingType>
+          <!-- from ESMF: CIM/Inputs, 'TimeTransformationType'. -->
+          <!--    to ESG: "Input Time Transformation Type" under tab "Inputs", under field name. -->
+      </timeTransformation>
+      <couplingSource>
+        <dataSource>
+          <reference>
+            <id>0990a595-02db-3436-b8b0-24e666852ea1</id>
+            <name>EarthSys_Atmos</name>
+              <!-- from ESMF: CIM/Inputs, 'CouplingSource'. -->
+              <!--    to ESG: "Input Source Component" under tab "Inputs", under field name. -->
+            <type>modelComponent</type>
+          </reference>
+        </dataSource>
+      </couplingSource>
+      <couplingTarget>
+        <dataSource>
+          <reference>
+            <name>EarthSys_AtmosDynCore</name>
+              <!-- from ESMF: CIM/Inputs, 'CouplingTarget'. -->
+              <!--    to ESG: "Input Target Component" under tab "Inputs", under field name. -->
+            <type>modelComponent</type>
+          </reference>
+        </dataSource>
+      </couplingTarget>
+      <connection>
+        <connectionTarget>
+          <dataSource>
+            <reference>
+              <name>DMS_emi</name>
+                <!-- from ESMF: CIM/Inputs, 'ShortName'. -->
+                <!--    to ESG: Field name under tab "Inputs". -->
+              <type>componentProperty</type>
+            </reference>
+          </dataSource>
+        </connectionTarget>
+      </connection>
+    </input>
+    <dateRange>
+      <closedDateRange>
+        <duration>P10Y</duration>
+          <!-- from ESMF: CIM/Main, 'SimulationDuration'. -->
+          <!--    to ESG: "Simulation Duration" under tabs "Properties/Basic". -->
+        <startDate>1960-01-01T00:00:00Z</startDate>
+          <!-- from ESMF: CIM/Main, 'SimulationStartDate'. -->
+          <!--    to ESG: "Simulation Start Date" under tabs "Properties/Basic". -->
+      </closedDateRange>
+    </dateRange>
+    <model>
+      <reference></reference>
+    </model>
+    <documentID>559865c1-27b7-38ec-ad34-027fba34de1a</documentID>
+    <documentVersion>1.0</documentVersion>
+    <documentCreationDate>2012-10-24T15:06:19</documentCreationDate>
+  </simulationRun>
+  <platform>
+    <shortName>HECToR_Pathscale</shortName>
+    <longName>Machine HECToR and compiler Pathscale</longName>
+      <!-- from ESMF: CIM/Platform, 'MachineName' and 'CompilerName'. -->
+      <!--    to ESG: Ingested below from [platform][unit][machine][machineName] and [platform][unit][compiler][compilerName]. -->
+    <description>HECToR (Phase 2a) is currently an integrated system known as Rainier, which includes a scalar MPP XT4 system, a vector system known as BlackWidow, and storage systems.</description>
+      <!-- from ESMF: CIM/Platform, 'MachineDescription'. -->
+      <!--    to ESG: Not ingested yet. -->
+    <unit>
+      <machine>
+        <machineName>HECToR</machineName>
+          <!-- from ESMF: CIM/Platform, 'MachineName'. -->
+          <!--    to ESG: "Machine Name" under tabs "Properties/Technical". -->
+        <machineSystem>Parallel</machineSystem>
+          <!-- from ESMF: CIM/Platform, 'MachineSystem'. -->
+          <!--    to ESG: "Hardware Type" under tabs "Properties/Technical". -->
+        <machineOperatingSystem open="true" value="Unicos"></machineOperatingSystem>
+          <!-- from ESMF: CIM/Platform, 'MachineOperatingSystem'. -->
+          <!--    to ESG: "Operating System" under tabs "Properties/Technical". -->
+        <machineVendor open="true" value="Cray Inc"></machineVendor>
+          <!-- from ESMF: CIM/Platform, 'MachineVendor'. -->
+          <!--    to ESG: Ingested, but only used to classify platform. -->
+        <machineInterconnect open="true" value="Cray Interconnect"></machineInterconnect>
+          <!-- from ESMF: CIM/Platform, 'MachineInterconnectType'. -->
+          <!--    to ESG: "Interconnect Type" under tabs "Properties/Technical". -->
+        <machineMaximumProcessors>22656</machineMaximumProcessors>
+          <!-- from ESMF: CIM/Platform, 'MachineMaximumProcessors'. -->
+          <!--    to ESG: "Maximum Processors" under tabs "Properties/Technical". -->
+        <machineCoresPerProcessor>4</machineCoresPerProcessor>
+          <!-- from ESMF: CIM/Platform, 'MachineCoresPerProcessor'. -->
+          <!--    to ESG: "Number of Cores per Processor" under tabs "Properties/Technical". -->
+        <machineProcessorType open="true" value="AMD X86_64"></machineProcessorType>
+          <!-- from ESMF: CIM/Platform, 'MachineProcessorType'. -->
+          <!--    to ESG: "Processor" under tabs "Properties/Technical". -->
+      </machine>
+      <compiler>
+        <compilerName>Pathscale</compilerName>
+          <!-- from ESMF: CIM/Platform, 'CompilerName'. -->
+          <!--    to ESG: "Compiler" under tabs "Properties/Technical", 'CompilerVersion' appended. -->
+        <compilerVersion>3.0</compilerVersion>
+          <!-- from ESMF: CIM/Platform, 'CompilerVersion'. -->
+          <!--    to ESG: "Compiler" under tabs "Properties/Technical", appended to 'CompilerName'. -->
+      </compiler>
+    </unit>
+    <documentID>36f9c47c-d81e-dd68-0c61-461dd39d8dce</documentID>
+    <documentVersion>1.0</documentVersion>
+    <documentCreationDate>2012-10-24T15:06:19</documentCreationDate>
+  </platform>
+</CIMDocumentSet>

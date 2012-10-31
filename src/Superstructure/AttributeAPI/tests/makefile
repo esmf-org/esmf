@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2012/09/19 22:09:42 w6ws Exp $ 
+# $Id: makefile,v 1.21 2012/10/31 21:11:02 rokuingh Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -80,25 +80,37 @@ CLOBBERDIRS =
 # --- Array
 
 RUN_ESMF_AttributeArrayUTest:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_Array002.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_Array002.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeArray NP=4 ftest
 
 RUN_ESMF_AttributeArrayUTestUNI:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_Array002.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_Array002.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeArray NP=1 ftest
 
 # --- ArrayBundle
 
 RUN_ESMF_AttributeABundleUTest:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_MyArrayBundle.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_MyArrayBundle.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeABundle NP=4 ftest
 
 RUN_ESMF_AttributeABundleUTestUNI:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_MyArrayBundle.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_MyArrayBundle.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeABundle NP=1 ftest
 
 # --- CplComp
 
 RUN_ESMF_AttributeCplCompUTest:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_cplcomp.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_cplcomp.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeCplComp NP=4 ftest
 
 RUN_ESMF_AttributeCplCompUTestUNI:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_cplcomp.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_cplcomp.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeCplComp NP=1 ftest
 
 RUN_ESMF_AttReadCplCompUTest:
@@ -119,12 +131,28 @@ RUN_ESMF_AttributeDistGridUTest:
 RUN_ESMF_AttributeDistGridUTestUNI:
 	$(MAKE) TNAME=AttributeDistGrid NP=1 ftest
 
+# --- FBundle
+
+RUN_ESMF_AttributeFBundleUTest:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_fieldbundle.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_fieldbundle.stdout $(ESMF_TESTDIR)
+	$(MAKE) TNAME=AttributeFBundle NP=4 ftest
+
+RUN_ESMF_AttributeFBundleUTestUNI:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_fieldbundle.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_fieldbundle.stdout $(ESMF_TESTDIR)
+	$(MAKE) TNAME=AttributeFBundle NP=1 ftest
+
 # --- Field
 
 RUN_ESMF_AttributeFieldUTest:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_field.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_field.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeField NP=4 ftest
 
 RUN_ESMF_AttributeFieldUTestUNI:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_field.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_field.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeField NP=1 ftest
 
 RUN_ESMF_AttReadFieldUTest:
@@ -137,21 +165,16 @@ RUN_ESMF_AttReadFieldUTestUNI:
 	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadField NP=1 ftest
 
-
-# --- FBundle
-
-RUN_ESMF_AttributeFBundleUTest:
-	$(MAKE) TNAME=AttributeFBundle NP=4 ftest
-
-RUN_ESMF_AttributeFBundleUTestUNI:
-	$(MAKE) TNAME=AttributeFBundle NP=1 ftest
-
 # --- GridComp
 
 RUN_ESMF_AttributeGridCompUTest:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridcomp.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridcomp.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeGridComp NP=4 ftest
 
 RUN_ESMF_AttributeGridCompUTestUNI:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridcomp.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridcomp.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeGridComp NP=1 ftest
 
 RUN_ESMF_AttReadGridCompUTest:
@@ -164,39 +187,6 @@ RUN_ESMF_AttReadGridCompUTestUNI:
 	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttReadGridComp NP=1 ftest
 
-# --- Update
-
-RUN_ESMF_AttributeUpdateUTest:
-	$(MAKE) TNAME=AttributeUpdate NP=4 ftest
-
-RUN_ESMF_AttributeUpdateRemoveOnlyUTest:
-	$(MAKE) TNAME=AttributeUpdateRemoveOnly NP=4 ftest
-
-RUN_ESMF_AttributeUpdate2UTest:
-	$(MAKE) TNAME=AttributeUpdate2 NP=6 ftest
-
-# --- XML
-
-RUN_ESMF_AttributeXMLUTest:
-	$(MAKE) TNAME=AttributeXML NP=4 ftest
-
-RUN_ESMF_AttributeXMLUTestUNI:
-	$(MAKE) TNAME=AttributeXML NP=1 ftest
-
-# --- WriteInternal
-
-RUN_ESMF_AttributeWriteInternalUTest:
-	$(MAKE) TNAME=AttributeWriteInternal NP=1 ftest
-
-RUN_ESMF_AttributeWriteInternalUTestUNI:
-	$(MAKE) TNAME=AttributeWriteInternal NP=1 ftest
-
-RUN_ESMF_AttributeGridGetUTest:
-	$(MAKE) TNAME=AttributeGridGet NP=4 ftest
-
-RUN_ESMF_AttributeGridGetUTestUNI:
-	$(MAKE) TNAME=AttributeGridGet NP=1 ftest
-
 # --- Grid
 
 RUN_ESMF_AttributeGridUTest:
@@ -208,9 +198,13 @@ RUN_ESMF_AttributeGridUTestUNI:
 # --- SciComp
 
 RUN_ESMF_AttributeSciCompUTest:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_scicomp.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_scicomp.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeSciComp NP=4 ftest
 
 RUN_ESMF_AttributeSciCompUTestUNI:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_scicomp.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_scicomp.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeSciComp NP=1 ftest
 
 RUN_ESMF_AttReadSciCompUTest:
@@ -226,7 +220,51 @@ RUN_ESMF_AttReadSciCompUTestUNI:
 # --- State
 
 RUN_ESMF_AttributeStateUTest:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_state.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_state.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeState NP=4 ftest
 
 RUN_ESMF_AttributeStateUTestUNI:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_state.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_state.stdout $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeState NP=1 ftest
+
+# --- Update
+
+RUN_ESMF_AttributeUpdateUTest:
+	$(MAKE) TNAME=AttributeUpdate NP=4 ftest
+
+RUN_ESMF_AttributeUpdateRemoveOnlyUTest:
+	$(MAKE) TNAME=AttributeUpdateRemoveOnly NP=4 ftest
+
+RUN_ESMF_AttributeUpdate2UTest:
+	$(MAKE) TNAME=AttributeUpdate2 NP=6 ftest
+
+# --- WriteInternal
+
+RUN_ESMF_AttributeWriteInternalUTest:
+	$(MAKE) TNAME=AttributeWriteInternal NP=1 ftest
+
+RUN_ESMF_AttributeWriteInternalUTestUNI:
+	$(MAKE) TNAME=AttributeWriteInternal NP=1 ftest
+
+RUN_ESMF_AttributeGridGetUTest:
+	$(MAKE) TNAME=AttributeGridGet NP=4 ftest
+
+RUN_ESMF_AttributeGridGetUTestUNI:
+	$(MAKE) TNAME=AttributeGridGet NP=1 ftest
+
+# --- XML
+
+RUN_ESMF_AttributeXMLUTest:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridded_comp_cim.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridded_comp_cim_rp.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridded_comp_cust_rp.xml $(ESMF_TESTDIR)
+	$(MAKE) TNAME=AttributeXML NP=4 ftest
+
+RUN_ESMF_AttributeXMLUTestUNI:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridded_comp_cim.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridded_comp_cim_rp.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridded_comp_cust_rp.xml $(ESMF_TESTDIR)
+	$(MAKE) TNAME=AttributeXML NP=1 ftest
+

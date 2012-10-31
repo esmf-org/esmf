@@ -1,0 +1,3 @@
+Name: Array002	  Convention: customconvention	  Purpose: custompurpose	
+
+ESMF_I4name	ESMF_I4namelist	ESMF_I8name	ESMF_I8namelist	ESMF_R4name	ESMF_R4namelist	ESMF_R8name	ESMF_R8namelist	Logical_name	Logical_namelist	Character_name	Character_namelist	

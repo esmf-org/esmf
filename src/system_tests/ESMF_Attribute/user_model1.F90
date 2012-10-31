@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.67 2011/07/02 05:54:21 oehmke Exp $
+! $Id: user_model1.F90,v 1.68 2012/10/31 21:11:18 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -357,12 +357,10 @@ module user_model1
 
 #if 0
     ! write out the Attributes
-    if (localPet .eq. 0) then
-      call ESMF_AttributeWrite(comp, conv, purp, rc=rc)
-      call ESMF_AttributeWrite(comp, conv, purp, &
-                               attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) return
-    endif
+    call ESMF_AttributeWrite(comp, conv, purp, rc=rc)
+    call ESMF_AttributeWrite(comp, conv, purp, &
+                             attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) return
 #endif
 
   end subroutine user_init
