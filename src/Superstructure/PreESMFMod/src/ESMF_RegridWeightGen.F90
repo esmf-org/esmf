@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.16 2012/10/19 23:16:34 oehmke Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.17 2012/10/31 22:07:17 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -68,8 +68,9 @@ contains
 ! !IROUTINE: ESMF_RegridWeightGen - Generate regrid weight file from grid files
 ! \label{api:esmf_regridweightgen}
 ! !INTERFACE:
-subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
-    polemethod, regridPoleNPnts, ignoreUnmappedFlag, srcFileType, dstFileType, &
+subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, keywordEnforcer, &
+    regridmethod, polemethod, regridPoleNPnts, &
+    unmappedaction, srcFileType, dstFileType, &
     srcRegionalFlag, dstRegionalFlag, srcMeshname, dstMeshname,  &
     srcMissingvalueFlag, srcMissingvalueVar, &
     dstMissingvalueFlag, dstMissingvalueVar, &
@@ -82,11 +83,11 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
   character(len=*),             intent(in)            :: srcFile
   character(len=*),             intent(in)            :: dstFile
   character(len=*),             intent(in)            :: weightFile
-
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_RegridMethod_Flag), intent(in),  optional :: regridmethod
   type(ESMF_PoleMethod_Flag),   intent(in),  optional :: polemethod
   integer,                      intent(in),  optional :: regridPoleNPnts
-  logical,                      intent(in),  optional :: ignoreUnmappedFlag
+  type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
   type(ESMF_FileFormat_Flag),   intent(in),  optional :: srcFileType
   type(ESMF_FileFormat_Flag),   intent(in),  optional :: dstFileType
   logical,                      intent(in),  optional :: srcRegionalFlag
@@ -94,9 +95,9 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
   character(len=*),             intent(in),  optional :: srcMeshname 
   character(len=*),             intent(in),  optional :: dstMeshname 
   logical,                      intent(in),  optional :: srcMissingValueFlag
-  character(len=*),             intent(in),  optional :: srcMissingvalueVar
+  character(len=*),             intent(in),  optional :: srcMissingValueVar
   logical,                      intent(in),  optional :: dstMissingValueFlag
-  character(len=*),             intent(in),  optional :: dstMissingvalueVar
+  character(len=*),             intent(in),  optional :: dstMissingValueVar
   logical,                      intent(in),  optional :: useSrcCoordFlag
   character(len=*),             intent(in),  optional :: srcCoordinateVars(:)
   logical,                      intent(in),  optional :: useDstCoordFlag
@@ -124,7 +125,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
 ! The optional arguments allow users to specify various options to control the regrid operation, 
 ! such as which pole option to use,
 ! whether to use user-specified area in the conservative regridding, or whether ESMF should generate masks using a given 
-! variable's missing value.  There are also optional arguments specfic to a certain type of the grid file.  
+! variable's missing value.  There are also optional arguments specific to a certain type of the grid file.  
 ! All the optional arguments are similar to the command line arguments for the {\tt ESMF\_RegridWeightGen}
 ! application~(\ref{sec:regridusage}). The acceptable values and the default value for the optional arguments
 ! are listed below.
@@ -149,9 +150,12 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
 !   \item [{[regridPoleNPnts]}]
 !     If {\tt polemethod} is set to {\tt ESMF\_POLEMETHOD\_NPNTAVG}, this argument is required to 
 !     specify how many points should be averaged over at the pole.
-!   \item [{[ignoreUnmappedFlag]}]
-!     If .TRUE., the unmapped destination points will be ignored.  If not 
-!     specified, the default is to stop the regrid with an error.
+!   \item [{[unmappedaction]}]
+!     specify what should happen if there are destination points that
+!     can't be mapped to a source cell. Options are 
+!     {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
+!     {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
+!     to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !   \item [{[srcFileType]}]
 !     The file format of the source grid. Please see Section~\ref{const:grid:fileformat} and
 !     Section~\ref{const:mesh:fileformat} for a list of valid options.
@@ -177,7 +181,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
 !     values of the variable defined in {\tt srcMissingValueVar}. This flag is
 !     only used for the grid defined in  the GRIDSPEC or the UGRID file formats.
 !     The default value is .FALSE..
-!   \item [{[srcMissingvalueVar]}]
+!   \item [{[srcMissingValueVar]}]
 !     If {\tt srcMissingValueFlag} is .TRUE., the argument is required to define
 !     the variable name whose missing values will be used to construct the grid 
 !     mask.  It is only used for the grid defined in  the GRIDSPEC or the UGRID 
@@ -187,7 +191,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
 !     values of the variable defined in {\tt dstMissingValueVar}. This flag is
 !     only used for the grid defined in  the GRIDSPEC or the UGRID file formats.
 !     The default value is .FALSE..
-!   \item [{[dstMissingvalueVar]}]
+!   \item [{[dstMissingValueVar]}]
 !     If {\tt dstMissingValueFlag} is .TRUE., the argument is required to define
 !     the variable name whose missing values will be used to construct the grid 
 !     mask.  It is only used for the grid defined in  the GRIDSPEC or the UGRID 
@@ -263,8 +267,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
       logical            :: wasCompacted
       integer(ESMF_KIND_I4), pointer:: compactedFactorIndexList(:,:)
       real(ESMF_KIND_R8), pointer :: compactedFactorList(:)
-      logical 		 :: ignoreUnmapped
-      type(ESMF_UnmappedAction_Flag) :: unmappedaction
+      type(ESMF_UnmappedAction_Flag) :: localUnmappedaction
       logical            :: srcMissingValue, dstMissingValue
       character(len=256) :: argStr
       logical            :: useSrcCoordVar, useDstCoordVar
@@ -297,7 +300,6 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
       dstIsRegional = .false.
       srcMissingValue = .false.
       dstMissingValue = .false.
-      ignoreUnmapped= .false.
       localLargeFileFlag = .false.
       localUserAreaflag = .false.
       useSrcCoordVar = .false.
@@ -431,8 +433,10 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
           return
       endif
 
-      if (present(ignoreUnmappedFlag)) then
-         ignoreUnmapped = ignoreUnmappedFlag
+      if (present(unmappedaction)) then
+        localUnmappedaction = unmappedaction
+      else
+        localUnmappedaction = ESMF_UNMAPPEDACTION_ERROR
       endif
 
       if (present(srcRegionalFlag)) then
@@ -710,7 +714,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
 	  else
 	     print *, "  Pole option: ", localPoleNPnts
           endif
-          if (ignoreUnmapped) then
+          if (localUnmappedaction .eq. ESMF_UNMAPPEDACTION_IGNORE) then
 	     print *, "  Ignore unmapped destination points"
           endif
 	  if (localLargeFileFlag) then
@@ -751,13 +755,6 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
         regridScheme = ESMF_REGRID_SCHEME_FULL3D
         srcIsSphere=.true.
         dstIsSphere=.true.
-     endif
-
-     ! Set unmapped flag
-     if (ignoreUnmapped) then
-        unmappedaction=ESMF_UNMAPPEDACTION_IGNORE
-     else
-        unmappedaction=ESMF_UNMAPPEDACTION_ERROR
      endif
 
      ! Create a decomposition such that each PET will contain at least 2 column and 2 row of data
@@ -1065,7 +1062,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
       if (useSrcMask .and. useDstMask) then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
-	    unmappedaction=unmappedaction, &
+	    unmappedaction=localUnmappedaction, &
 	    factorIndexList=factorIndexList, factorList=factorList, &
             srcFracField=srcFracField, dstFracField=dstFracField, &
             regridmethod = localRegridMethod, &
@@ -1077,7 +1074,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
        else if (useSrcMask) then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    srcMaskValues = maskvals, &
-	    unmappedaction=unmappedaction, &
+	    unmappedaction=localUnmappedaction, &
 	    factorIndexList=factorIndexList, factorList=factorList, &
             srcFracField=srcFracField, dstFracField=dstFracField, &
             regridmethod = localRegridMethod, &
@@ -1089,7 +1086,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
        else if (useDstMask) then
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
 	    dstMaskValues = maskvals, &
-	    unmappedaction=unmappedaction, &
+	    unmappedaction=localUnmappedaction, &
 	    factorIndexList=factorIndexList, factorList=factorList, &
             srcFracField=srcFracField, dstFracField=dstFracField, &
             regridmethod = localRegridMethod, &
@@ -1100,7 +1097,7 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, regridmethod, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
        else	
           call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
-	    unmappedaction=unmappedaction, &
+	    unmappedaction=localUnmappedaction, &
 	    factorIndexList=factorIndexList, factorList=factorList, &
             srcFracField=srcFracField, dstFracField=dstFracField, &
             regridmethod = localRegridMethod, &
