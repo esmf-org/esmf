@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.71 2012/10/15 16:59:18 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.72 2012/11/05 19:22:18 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.71 2012/10/15 16:59:18 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.72 2012/11/05 19:22:18 feiliu Exp $'
 
 !==============================================================================
 !
@@ -290,16 +290,16 @@ function ESMF_XGridCreate(keywordEnforcer, &
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [sideAGrid]
+!     \item [{[sideAGrid]}]
 !           Parametric 2D Grids on side A, for example, 
 !           these Grids can be either Cartesian 2D or Spherical.
-!     \item [sideAMesh]
+!     \item [{[sideAMesh]}]
 !           Parametric 2D Meshes on side A, for example, 
 !           these Meshes can be either Cartesian 2D or Spherical.
-!     \item [sideBGrid]
+!     \item [{[sideBGrid]}]
 !           Parametric 2D Grids on side B, for example, 
 !           these Grids can be either Cartesian 2D or Spherical.
-!     \item [sideBMesh]
+!     \item [{[sideBMesh]}]
 !           Parametric 2D Meshes on side B, for example, 
 !           these Meshes can be either Cartesian 2D or Spherical.
 !     \item [{[sideAGridPriority]}]
@@ -573,7 +573,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
     
     allocate(xgtype%sideA(ngrid_a), xgtype%sideB(ngrid_b), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
-        msg="- Allocating xgtype%grids ", &
+        msg="- Allocating xgtype%sideA or xgtype%sideB ", &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Need to initialize xgtype%sideA based on sideAGrid and/or sideAMesh
@@ -1157,7 +1157,11 @@ end function ESMF_XGridCreate
 
 ! !INTERFACE:
 
-function ESMF_XGridCreateFromSparseMat(sideA, sideB, keywordEnforcer, &
+function ESMF_XGridCreateFromSparseMat(keywordEnforcer, &
+    sideAGrid,              sideAMesh, &
+    sideBGrid,              sideBMesh, &
+    sideAGridPriority,      sideAMeshPriority, &
+    sideBGridPriority,      sideBMeshPriority, &
     sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, &
     area, centroid, &
     name, &
@@ -1168,16 +1172,23 @@ function ESMF_XGridCreateFromSparseMat(sideA, sideB, keywordEnforcer, &
     type(ESMF_XGrid) :: ESMF_XGridCreateFromSparseMat
 !
 ! !ARGUMENTS:
-type(ESMF_Grid), intent(in)                :: sideA(:), sideB(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_Grid),      intent(in), optional :: sideAGrid(:)
+type(ESMF_Mesh),      intent(in), optional :: sideAMesh(:)
+type(ESMF_Grid),      intent(in), optional :: sideBGrid(:)
+type(ESMF_Mesh),      intent(in), optional :: sideBMesh(:)
+integer,              intent(in), optional :: sideAGridPriority(:)
+integer,              intent(in), optional :: sideAMeshPriority(:)
+integer,              intent(in), optional :: sideBGridPriority(:)
+integer,              intent(in), optional :: sideBMeshPriority(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatA2X(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2A(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatB2X(:)
 type(ESMF_XGridSpec), intent(in), optional :: sparseMatX2B(:)
-real(ESMF_KIND_R8), intent(in), optional   :: area(:)
-real(ESMF_KIND_R8), intent(in), optional   :: centroid(:,:)
-character (len=*), intent(in), optional    :: name
-integer, intent(out), optional             :: rc 
+real(ESMF_KIND_R8),   intent(in), optional :: area(:)
+real(ESMF_KIND_R8),   intent(in), optional :: centroid(:,:)
+character (len=*),    intent(in), optional :: name
+integer,              intent(out),optional :: rc 
 
 !
 ! !DESCRIPTION:
@@ -1188,10 +1199,38 @@ integer, intent(out), optional             :: rc
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [sideA]
-!           2D Grids on side A.
-!     \item [sideB]
-!           2D Grids on side B.
+!     \item [{[sideAGrid]}]
+!           Parametric 2D Grids on side A, for example, 
+!           these Grids can be either Cartesian 2D or Spherical.
+!     \item [{[sideAMesh]}]
+!           Parametric 2D Meshes on side A, for example, 
+!           these Meshes can be either Cartesian 2D or Spherical.
+!     \item [{[sideBGrid]}]
+!           Parametric 2D Grids on side B, for example, 
+!           these Grids can be either Cartesian 2D or Spherical.
+!     \item [{[sideBMesh]}]
+!           Parametric 2D Meshes on side B, for example, 
+!           these Meshes can be either Cartesian 2D or Spherical.
+!     \item [{[sideAGridPriority]}]
+!           Priority array of Grids on {\tt sideA} during overlay generation.
+!           The priority arrays describe the priorities of Grids at the overlapping region.
+!           Flux contributions at the overlapping region are computed in the order from the Grid of the
+!           highest priority to the lowest priority.
+!     \item [{[sideAMeshPriority]}]
+!           Priority array of Meshes on {\tt sideA} during overlay generation.
+!           The priority arrays describe the priorities of Meshes at the overlapping region.
+!           Flux contributions at the overlapping region are computed in the order from the Mesh of the
+!           highest priority to the lowest priority.
+!     \item [{[sideBGridPriority]}]
+!           Priority of Grids on {\tt sideB} during overlay generation
+!           The priority arrays describe the priorities of Grids at the overlapping region.
+!           Flux contributions at the overlapping region are computed in the order from the Grid of the
+!           highest priority to the lowest priority.
+!     \item [{[sideBMeshPriority]}]
+!           Priority array of Meshes on {\tt sideB} during overlay generation.
+!           The priority arrays describe the priorities of Meshes at the overlapping region.
+!           Flux contributions at the overlapping region are computed in the order from the Mesh of the
+!           highest priority to the lowest priority.
 !     \item [{[sparseMatA2X]}]
 !           indexlist from a Grid index space on side A to xgrid index space;
 !           indexFactorlist from a Grid index space on side A to xgrid index space.
@@ -1218,12 +1257,8 @@ integer, intent(out), optional             :: rc
 !EOP
 
     integer :: localrc, ngrid_a, ngrid_b
-    integer :: i, ncells, ndim
+    integer :: i, j, ncells, ndim
     type(ESMF_XGridType), pointer :: xgtype
-
-    ! clearly, srcIdxList should be 1D, but what about distgridM_idxlist??
-    !integer, allocatable :: srcIdxList(:), distgridM_idxlist(:)
-
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -1231,21 +1266,188 @@ integer, intent(out), optional             :: rc
     ! Initialize return code   
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! check init status of input Grids
-    ngrid_a = size(sideA, 1)
-    ngrid_b = size(sideB, 1)
-    if(ngrid_a .le. 0 .or. ngrid_b .le. 0) then
+    ! check there are enough input to create the XGrid
+    if(.not. present(sideAGrid) .and. .not. present(sideAMesh)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="- Either Grid or Mesh must be provided on sideA", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+    if(.not. present(sideBGrid) .and. .not. present(sideBMesh)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="- Either Grid or Mesh must be provided on sideB", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+
+    if(present(sideAGrid) .and. present(sideAMesh)) then
+      if(size(sideAGrid, 1)+size(sideAMesh, 1) .le. 0) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-           msg="- number of Grids are invalid on one side of the XGrid", &
+           msg="- Either Grid or Mesh must be provided on sideA", &
            ESMF_CONTEXT, rcToReturn=rc) 
         return
+      endif
     endif
-    do i = 1, ngrid_a
-        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,sideA(i),rc)
-    enddo
-    do i = 1, ngrid_b
-        ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,sideB(i),rc)
-    enddo
+
+    if(present(sideBGrid) .and. present(sideBMesh)) then
+      if(size(sideBGrid, 1)+size(sideBMesh, 1) .le. 0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+           msg="- Either Grid or Mesh must be provided on sideB", &
+           ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif
+    endif
+
+    ! check init status of input Grids
+    if(present(sideAGrid)) then
+      ngrid_a = size(sideAGrid, 1)
+      do i = 1, ngrid_a
+          ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,sideAGrid(i),rc)
+      enddo
+
+      ! No need to check grid for offline xgrid creation, assume user know what they are doing!
+      !do i = 1, ngrid_a
+      !  call checkGrid(sideAGrid(i), ESMF_STAGGERLOC_CORNER, rc=localrc)
+      !  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      !      ESMF_CONTEXT, rcToReturn=rc)) return
+      !enddo
+
+      if(present(sideAGridPriority)) then
+        if(size(sideAGridPriority, 1) /= ngrid_a) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+             msg="- Size of sideAGridPriority does not match size of sideAGrid", &
+             ESMF_CONTEXT, rcToReturn=rc) 
+          return
+        endif
+      endif
+    endif
+
+    if(present(sideBGrid)) then
+      ngrid_b = size(sideBGrid, 1)
+      do i = 1, ngrid_b
+          ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,sideBGrid(i),rc)
+      enddo
+      ! No need to check grid for offline xgrid creation, assume user know what they are doing!
+      !do i = 1, ngrid_b
+      !  call checkGrid(sideBGrid(i), ESMF_STAGGERLOC_CORNER, rc=localrc)
+      !  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      !      ESMF_CONTEXT, rcToReturn=rc)) return
+      !enddo
+      if(present(sideBGridPriority)) then
+        if(size(sideBGridPriority, 1) /= ngrid_a) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+             msg="- Size of sideBGridPriority does not match size of sideBGrid", &
+             ESMF_CONTEXT, rcToReturn=rc) 
+          return
+        endif
+      endif
+    endif
+
+    !TODO: need to check Meshes too.
+    if(present(sideAMesh)) then
+      ngrid_a = size(sideAMesh, 1)
+      if(present(sideAMeshPriority)) then
+        if(size(sideAMeshPriority, 1) /= ngrid_a) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+             msg="- Size of sideAMeshPriority does not match size of sideAMesh", &
+             ESMF_CONTEXT, rcToReturn=rc) 
+          return
+        endif
+      endif
+    endif
+    if(present(sideBMesh)) then
+      ngrid_b = size(sideBMesh, 1)
+      if(present(sideBMeshPriority)) then
+        if(size(sideBMeshPriority, 1) /= ngrid_b) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+             msg="- Size of sideBMeshPriority does not match size of sideBMesh", &
+             ESMF_CONTEXT, rcToReturn=rc) 
+          return
+        endif
+      endif
+    endif
+
+    ! Priority for Grid and Mesh must all be present simultaneously
+    if( (present(sideAGridPriority) .and. .not. present(sideAGrid)) .or. &
+         present(sideAMeshPriority) .and. .not. present(sideAMesh)  .or. &
+         present(sideBGridPriority) .and. .not. present(sideBGrid)  .or. &
+         present(sideBMeshPriority) .and. .not. present(sideBMesh)) then
+
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+         msg="- Cannot specify Grid or Mesh Priority without actual list of Grids or Meshes", &
+         ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+
+    ! At this point the inputs are consistently sized.
+    ! Take care of ordering
+    ngrid_a = 0
+    if(present(sideAGrid)) ngrid_a = size(sideAGrid, 1)
+    if(present(sideAMesh)) ngrid_a = ngrid_a + size(sideAMesh, 1)
+    ngrid_b = 0
+    if(present(sideBGrid)) ngrid_b = size(sideBGrid, 1)
+    if(present(sideBMesh)) ngrid_b = ngrid_b + size(sideBMesh, 1)
+
+    ! do some range checking on priority lists
+    if(present(sideAGridPriority) .and. present(sideAMeshPriority)) then
+      do i = 1, size(sideAGridPriority, 1)
+        if(sideAGridPriority(i) .le. 0 .or. sideAGridPriority(i) .gt. ngrid_a) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+             msg="- sideAGridPriority value out of range", &
+             ESMF_CONTEXT, rcToReturn=rc) 
+          return
+        endif
+      enddo
+      do i = 1, size(sideAMeshPriority, 1)
+        if(sideAMeshPriority(i) .le. 0 .or. sideAMeshPriority(i) .gt. ngrid_a) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+             msg="- sideAMeshPriority value out of range", &
+             ESMF_CONTEXT, rcToReturn=rc) 
+          return
+        endif
+      enddo
+
+      do i = 1, size(sideAGridPriority, 1)
+        do j = 1, size(sideAMeshPriority, 1)
+          if(sideAGridPriority(i) == sideAMeshPriority(j)) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- sideAGridPriority and sideAMeshPriority cannot have duplicate entry", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+        enddo
+      enddo
+    endif
+
+    if(present(sideBGridPriority) .and. present(sideBMeshPriority)) then
+      do i = 1, size(sideBGridPriority, 1)
+        if(sideBGridPriority(i) .le. 0 .or. sideBGridPriority(i) .gt. ngrid_b) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+             msg="- sideBGridPriority value out of range", &
+             ESMF_CONTEXT, rcToReturn=rc) 
+          return
+        endif
+      enddo
+      do i = 1, size(sideBMeshPriority, 1)
+        if(sideBMeshPriority(i) .le. 0 .or. sideBMeshPriority(i) .gt. ngrid_b) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+             msg="- sideBMeshPriority value out of range", &
+             ESMF_CONTEXT, rcToReturn=rc) 
+          return
+        endif
+      enddo
+
+      do i = 1, size(sideBGridPriority, 1)
+        do j = 1, size(sideBMeshPriority, 1)
+          if(sideBGridPriority(i) == sideBMeshPriority(j)) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+               msg="- sideBGridPriority and sideBMeshPriority cannot have duplicate entry", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+          endif
+        enddo
+      enddo
+    endif
 
     if(.not. present(sparseMatA2X) .and. &
       (.not. present(sparseMatX2A)).and. &
@@ -1267,20 +1469,130 @@ integer, intent(out), optional             :: rc
 
     allocate(xgtype%sideA(ngrid_a), xgtype%sideB(ngrid_b), stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, &
-        msg="- Allocating xgtype%grids ", &
+        msg="- Allocating xgtype%sideA or xgtype%sideB ", &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    do i = 1, ngrid_a
-      xgtype%sideA(i) = ESMF_XGridGeomBaseCreate(sideA(i), ESMF_STAGGERLOC_CENTER, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-    enddo
-    do i = 1, ngrid_b
-      xgtype%sideB(i) = ESMF_XGridGeomBaseCreate(sideB(i), ESMF_STAGGERLOC_CENTER, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-    enddo
+
+    ! Need to initialize xgtype%sideA based on sideAGrid and/or sideAMesh
+    if(present(sideAGrid)) then
+      if(present(sideAGridPriority)) then
+        do i = 1, size(sideAGrid, 1)
+          xgtype%sideA(sideAGridPriority(i)) = ESMF_XGridGeomBaseCreate(sideAGrid(i), &
+            ESMF_STAGGERLOC_CENTER, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+      else
+        do i = 1, size(sideAGrid, 1)
+          xgtype%sideA(i) = ESMF_XGridGeomBaseCreate(sideAGrid(i), &
+            ESMF_STAGGERLOC_CENTER, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+      endif
+
+      if(present(sideAMesh)) then
+        if(present(sideAMeshPriority)) then
+          do i = 1, size(sideAMesh, 1)
+            xgtype%sideA(sideAMeshPriority(i)) = ESMF_XGridGeomBaseCreate(sideAMesh(i), &
+              ESMF_MESHLOC_ELEMENT, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+        else
+          do i = 1, size(sideAMesh, 1)
+            xgtype%sideA(i+size(sideAGrid, 1)) = ESMF_XGridGeomBaseCreate(sideAMesh(i), &
+              ESMF_MESHLOC_ELEMENT, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+        endif
+      endif
+    else ! .not. present(sideAGrid)
+      if(present(sideAMesh)) then
+        if(present(sideAMeshPriority)) then
+          do i = 1, size(sideAMesh, 1)
+            xgtype%sideA(sideAMeshPriority(i)) = ESMF_XGridGeomBaseCreate(sideAMesh(i), &
+              ESMF_MESHLOC_ELEMENT, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+        else
+          do i = 1, size(sideAMesh, 1)
+            xgtype%sideA(i) = ESMF_XGridGeomBaseCreate(sideAMesh(i), &
+              ESMF_MESHLOC_ELEMENT, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+        endif
+      endif
+    endif
+
+    ! Need to initialize xgtype%sideB based on sideBGrid and/or sideBMesh
+    if(present(sideBGrid)) then
+      if(present(sideBGridPriority)) then
+        do i = 1, size(sideBGrid, 1)
+          xgtype%sideB(sideBGridPriority(i)) = ESMF_XGridGeomBaseCreate(sideBGrid(i), &
+            ESMF_STAGGERLOC_CENTER, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+      else
+        do i = 1, size(sideBGrid, 1)
+          xgtype%sideB(i) = ESMF_XGridGeomBaseCreate(sideBGrid(i), &
+            ESMF_STAGGERLOC_CENTER, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+        enddo
+      endif
+
+      if(present(sideBMesh)) then
+        if(present(sideBMeshPriority)) then
+          do i = 1, size(sideBMesh, 1)
+            xgtype%sideB(sideBMeshPriority(i)) = ESMF_XGridGeomBaseCreate(sideBMesh(i), &
+              ESMF_MESHLOC_ELEMENT, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+        else
+          do i = 1, size(sideBMesh, 1)
+            xgtype%sideB(i+size(sideBGrid, 1)) = ESMF_XGridGeomBaseCreate(sideBMesh(i), &
+              ESMF_MESHLOC_ELEMENT, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+        endif
+      endif
+    else ! .not. present(sideBGrid)
+      if(present(sideBMesh)) then
+        if(present(sideBMeshPriority)) then
+          do i = 1, size(sideBMesh, 1)
+            xgtype%sideB(sideBMeshPriority(i)) = ESMF_XGridGeomBaseCreate(sideBMesh(i), &
+              ESMF_MESHLOC_ELEMENT, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+        else
+          do i = 1, size(sideBMesh, 1)
+            xgtype%sideB(i) = ESMF_XGridGeomBaseCreate(sideBMesh(i), &
+              ESMF_MESHLOC_ELEMENT, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+        endif
+      endif
+    endif
 
     if(present(area)) then
       ncells = size(area, 1)
