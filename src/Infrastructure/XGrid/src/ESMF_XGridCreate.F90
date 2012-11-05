@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridCreate.F90,v 1.72 2012/11/05 19:22:18 feiliu Exp $
+! $Id: ESMF_XGridCreate.F90,v 1.73 2012/11/05 19:39:11 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@ module ESMF_XGridCreateMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_XGridCreate.F90,v 1.72 2012/11/05 19:22:18 feiliu Exp $'
+    '$Id: ESMF_XGridCreate.F90,v 1.73 2012/11/05 19:39:11 feiliu Exp $'
 
 !==============================================================================
 !
@@ -226,7 +226,6 @@ contains
 ! !IROUTINE:  ESMF_XGridCreate - Create an XGrid from lists of Grids and Meshes
 
 ! !INTERFACE:
-! ! Private name; call using ESMF_XGridCreate()
 
 function ESMF_XGridCreate(keywordEnforcer, &
     sideAGrid,              sideAMesh, &
