@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.C,v 1.15 2012/09/07 20:21:02 feiliu Exp $
+// $Id: ESMCI_Util.C,v 1.16 2012/11/05 17:34:58 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Util.C,v 1.15 2012/09/07 20:21:02 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_Util.C,v 1.16 2012/11/05 17:34:58 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 // Note:  any changes made to this C++ list must also be made to
@@ -638,13 +638,7 @@ extern "C" {
   // initialize/reset the seed for the random number generator using 
   //  the current time
   unsigned int seed = (unsigned int) time((time_t *)NULL);
-  if (seed >= 0) {
-    srand(seed);  // reset random number sequence with seed
-  } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                "system call time() failed.", &rc);
-    return rc;
-  }
+  srand(seed);  // reset random number sequence with seed
 
   // return ok. 
   rc = ESMF_SUCCESS;
