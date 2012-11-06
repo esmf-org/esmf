@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridSparseMatEx.F90,v 1.7 2012/09/28 19:58:20 feiliu Exp $
+! $Id: ESMF_XGridSparseMatEx.F90,v 1.8 2012/11/06 16:19:57 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -360,7 +360,7 @@
 ! Create an XGrid based on the user supplied regridding parameters:
 !EOE
 !BOC
-    xgrid = ESMF_XGridCreateFromSparseMat(sideA, sideB, area=xgrid_area, &
+    xgrid = ESMF_XGridCreateFromSparseMat(sideAGrid=sideA, sideBGrid=sideB, area=xgrid_area, &
         centroid=centroid, sparseMatA2X=sparseMatA2X, &
         sparseMatX2B=sparseMatX2B, rc=localrc)
 !EOC
