@@ -1,4 +1,4 @@
-! $Id: NUOPC_RunSequenceDef.F90,v 1.10 2012/10/29 22:59:28 theurich Exp $
+! $Id: NUOPC_RunSequenceDef.F90,v 1.11 2012/11/06 03:38:36 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_RunSequenceDef.F90"
 
@@ -25,9 +25,10 @@ module NUOPC_RunSequenceDef
 !==============================================================================
   
   type NUOPC_RunElement
-    integer :: i  ! model component index, or src model index if connector
-    integer :: j  ! j >= 0  -> connector component: i->j
-                  ! j <  0  -> model component: i
+    integer :: i  ! i >= 0 -> model comp. index, or src model index if connector
+                  ! i <  0 -> link or enddo element (depend on runSeq)
+    integer :: j  ! j >= 0 -> connector component: i->j
+                  ! j <  0 -> model component: i
     integer :: phase  ! run phase
     type(NUOPC_RunSequence), pointer:: runSeq ! point back to RunSequence
     type(NUOPC_RunElement), pointer :: next   ! next RunElement in linked list
