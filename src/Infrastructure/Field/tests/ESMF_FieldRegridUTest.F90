@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.50 2012/11/06 17:48:37 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.51 2012/11/06 21:58:10 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -53,7 +53,6 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
 #ifdef ESMF_TESTEXHAUSTIVE
-#if 1
      !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
@@ -259,6 +258,8 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+
+#if 0
       !------------------------------------------------------------------------
 
       !EX_OFF_UTest
@@ -274,8 +275,9 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
       !------------------------------------------------------------------------
+#endif
+
 
       !EX_UTest
       ! Test regrid with masks
@@ -428,9 +430,6 @@
       !------------------------------------------------------------------------
 
 
-#endif
-
-
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid matrix
@@ -466,7 +465,6 @@
       !------------------------------------------------------------------------
 
 
-#if 0
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid matrix
@@ -482,7 +480,6 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-#endif
 #endif
     call ESMF_TestEnd(ESMF_SRCLINE)
 
