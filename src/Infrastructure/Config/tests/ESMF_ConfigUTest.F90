@@ -1,4 +1,4 @@
-! $Id: ESMF_ConfigUTest.F90,v 1.46 2012/05/16 22:24:40 svasquez Exp $
+! $Id: ESMF_ConfigUTest.F90,v 1.47 2012/11/06 01:21:08 w6ws Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -112,7 +112,7 @@ module config_subrs
            print *,' ESMF_ConfigLoadFile: Out of memory: exceeded NBUF_MAX'
         endif
         if ( rc /= ESMF_RC_DUP_NAME ) then      
-           print *,' ESMF_ConfigLoadFile:  loaded file ', fname, &
+           print *,' ESMF_ConfigLoadFile:  loaded file ', trim (fname), &
                 ' catastrophic error, rc = ', rc
            return
         else
@@ -1396,7 +1396,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.46 2012/05/16 22:24:40 svasquez Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.47 2012/11/06 01:21:08 w6ws Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0
