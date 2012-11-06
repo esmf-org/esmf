@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.83 2012/11/06 01:19:54 w6ws Exp $
+! $Id: ESMF_Config.F90,v 1.84 2012/11/06 01:54:46 w6ws Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -811,7 +811,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
       subroutine ESMF_ConfigGetString(config, value, &
-        keywordEnforcer, label, default, rc)
+        keywordEnforcer, label, default, eolFlag, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)       :: config     
@@ -819,6 +819,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), intent(in), optional :: label 
       character(len=*), intent(in), optional :: default 
+      logical, intent(out), optional         :: eolFlag
       integer, intent(out), optional         :: rc     
 !
 ! !DESCRIPTION: Gets a sequence of characters. It will be 
@@ -834,6 +835,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Identifing label. 
 !   \item [{[default]}]
 !     Default value if {\tt label} is not found in {\tt config} object. 
+!   \item [{[eolFlag]}]
+!     Returns {\tt .true.} when end of line is encountered.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -857,6 +860,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else
          value = BLK
       endif
+
+      if (present (eolFlag)) then
+        eolFlag = .false.
+      end if
 
 ! Processing
       if(present( label )) then
@@ -895,7 +902,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if ( present ( default )) then
            value = default
          endif
-         localrc = -1
+         if (present (eolFlag)) then
+           eolFlag = .true.
+           localrc = ESMF_SUCCESS
+         else
+           localrc = ESMF_RC_NOT_FOUND
+         end if
          if ( present (rc )) then
            rc = localrc
          endif
@@ -2143,7 +2155,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=LSZ) :: string
       integer :: localrc
       integer :: count 
-      logical :: found
+      logical :: eol, found
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2170,11 +2182,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       do
-         call ESMF_ConfigGetString( config, string, rc = localrc )
+         call ESMF_ConfigGetString( config, string, eolFlag=eol, rc = localrc )
+         if (eol) exit            
          if ( localrc == ESMF_SUCCESS ) then
             count = count + 1
          else
-            if (localrc == -1) localrc = ESMF_SUCCESS  ! end of the line
             exit
          endif
       enddo
