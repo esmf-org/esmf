@@ -1,4 +1,4 @@
-// $Id: ESMCI_OTree.h,v 1.10 2012/11/06 17:48:38 oehmke Exp $
+// $Id: ESMCI_OTree.h,v 1.11 2012/11/06 21:38:54 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -98,10 +98,8 @@ class OTree {    // inherits from ESMC_Base class
 
  int runon(double [], double [], int (*func)(void *,void *),void *);
 
-
-int runon_mm_chng(double init_min[], double init_max[],
-	       int (*func)(void *data,void *func_data, double *min, double *max),
-                  void *func_data);
+ int runon_mm_chng(double [], double [],
+        int (*func)(void *, void *, double *, double *),void *);
    
 };  // end class ESMC_OTree
 
