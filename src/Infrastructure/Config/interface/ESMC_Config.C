@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.C,v 1.27 2012/07/18 22:21:18 rokuingh Exp $
+// $Id: ESMC_Config.C,v 1.28 2012/11/06 20:06:04 w6ws Exp $
 //
 // Earth System Modeling Framework
 // copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char* const version = "$Id: ESMC_Config.C,v 1.27 2012/07/18 22:21:18 rokuingh Exp $";
+static const char* const version = "$Id: ESMC_Config.C,v 1.28 2012/11/06 20:06:04 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 // class declaration type -> this should be moved into ESMCI namespace
@@ -335,7 +335,6 @@ int ESMC_ConfigLoadFile(
   ESMCI_ArgID argID;          // optional argument list id
   int  unique;                // optional unique argument
   int* uniquep = NULL;        // pointer to unique
-  int nlen;
   char* fName = NULL;
 
   // Initialize return code; assume routine not implemented
@@ -385,7 +384,7 @@ int ESMC_ConfigLoadFile(
   ESMCI_ArgEnd(argPtr);
 
   // convert file name to fortran string
-  nlen = strlen(name);
+  size_t nlen = strlen(name);
   fName = new char[nlen];
   // debug!  localrc = ESMC_CtoF90string(name, fName, ESMF_MAXSTR);
   localrc = ESMC_CtoF90string(name, fName, nlen);
@@ -456,7 +455,6 @@ int ESMC_ConfigFindLabel(
   // local vars
   int rc;                     // return code
   int localrc;                // local return code
-  int llen;
   char* fLabel = NULL;
 
   // Initialize return code; assume routine not implemented
@@ -474,7 +472,7 @@ int ESMC_ConfigFindLabel(
   ESMCI_Config *configp = (ESMCI_Config*)(config.ptr);
 
   // convert label to fortran string
-  llen = strlen(label);
+  size_t llen = strlen(label);
   fLabel = new char[llen];
   localrc = ESMC_CtoF90string(label, fLabel, llen);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
@@ -745,7 +743,6 @@ int ESMC_ConfigNextLine(
   ESMCI_ArgID argID;          // optional argument list id
   char* label = NULL;         // optional label argument
   char* fLabel = NULL;
-  int llen = 0;
 
   // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
@@ -791,7 +788,7 @@ int ESMC_ConfigNextLine(
 
   // convert label to fortran string
   if (label != NULL) {
-    llen = strlen(label);
+    size_t llen = strlen(label);
     fLabel = new char[llen];
     localrc = ESMC_CtoF90string(label, fLabel, llen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
@@ -874,7 +871,6 @@ int ESMC_ConfigNextLine(
   ESMCI_ArgID argID;          // optional argument list id
   char* label = NULL;         // optional label argument
   char* fLabel = NULL;
-  int llen = 0;
 
   // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
@@ -920,7 +916,7 @@ int ESMC_ConfigNextLine(
 
   // convert label to fortran string
   if (label != NULL) {
-    llen = strlen(label);
+    size_t llen = strlen(label);
     fLabel = new char[llen];
     localrc = ESMC_CtoF90string(label, fLabel, llen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
@@ -1005,7 +1001,6 @@ int ESMC_ConfigValidate(
   ESMCI_ArgID argID;          // optional argument list id
   char* options = NULL;       // optional options argument
   char* foptions = NULL;
-  int olen = 0;
 
   // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
@@ -1051,7 +1046,7 @@ int ESMC_ConfigValidate(
 
   // convert options to fortran string
   if (options != NULL) {
-    olen = strlen(options);
+    size_t olen = strlen(options);
     foptions = new char[olen];
     localrc = ESMC_CtoF90string(options, foptions, olen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
