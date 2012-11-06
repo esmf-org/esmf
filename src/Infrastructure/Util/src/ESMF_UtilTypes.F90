@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.158 2012/10/09 00:52:19 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.159 2012/11/06 17:48:52 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -618,7 +618,9 @@
       type(ESMF_RegridMethod_Flag), parameter :: &
            ESMF_REGRIDMETHOD_BILINEAR    = ESMF_RegridMethod_Flag(0), &
            ESMF_REGRIDMETHOD_PATCH       = ESMF_RegridMethod_Flag(1), &
-           ESMF_REGRIDMETHOD_CONSERVE    = ESMF_RegridMethod_Flag(2)
+           ESMF_REGRIDMETHOD_CONSERVE    = ESMF_RegridMethod_Flag(2), &
+           ESMF_REGRIDMETHOD_NEAREST     = ESMF_RegridMethod_Flag(3)
+
 
 !------------------------------------------------------------------------------
 
@@ -790,7 +792,8 @@
 
        public ESMF_RegridMethod_Flag,   ESMF_REGRIDMETHOD_BILINEAR, &
                                    ESMF_REGRIDMETHOD_PATCH, &
-                                   ESMF_REGRIDMETHOD_CONSERVE
+                                   ESMF_REGRIDMETHOD_CONSERVE, &
+                                   ESMF_REGRIDMETHOD_NEAREST
 
        public ESMF_PoleMethod_Flag,  ESMF_POLEMETHOD_NONE, &
                                 ESMF_POLEMETHOD_ALLAVG, &

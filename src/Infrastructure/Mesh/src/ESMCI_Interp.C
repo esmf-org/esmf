@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.47 2012/09/14 16:29:29 feiliu Exp $
+// $Id: ESMCI_Interp.C,v 1.48 2012/11/06 17:48:45 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.47 2012/09/14 16:29:29 feiliu Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.48 2012/11/06 17:48:45 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -630,171 +630,6 @@ Par::Out() << std::endl;
   } // for searchresult
 }
 
-#if 0
-void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, SearchResult &sres, IWeights &iw, IWeights &src_frac, struct Zoltan_Struct * zz) {
-  Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
-    
-  // Get src coord field
-  MEField<> *src_cfield = srcmesh.GetCoordField();
-
-  // Get dst coord field
-  MEField<> *dst_cfield = dstmesh.GetCoordField();
-
-  // Get dst mask field
-  MEField<> *dst_mask_field = dstmesh.GetField("elem_mask");
-
-  // Get src mask field
-  MEField<> *src_mask_field = srcmesh.GetField("elem_mask");
-
-  // src and dst frac2 fields
-  MEField<> * src_frac2_field = srcmesh.GetField("elem_frac2");
-  MEField<> * dst_frac2_field = dstmesh.GetField("elem_frac2");
-
-  // store all the intersections
-  std::vector<sintd_node *> sintd_nodes;
-  std::vector<sintd_cell *> sintd_cells;
-
-  // Loop through search results
-  SearchResult::iterator sb = sres.begin(), se = sres.end();
-  for (; sb != se; sb++) {
-    
-    // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
-    Search_result &sr = **sb;
-
-    // If there are no associated dst elements then skip it
-    if (sr.elems.size() == 0) continue;
-
-    // If this source element is masked then skip it
-    if (src_mask_field) {
-        const MeshObj &src_elem = *sr.elem;
-        double *msk=src_mask_field->data(src_elem);
-        if (*msk>0.5) {
-          continue; // if this is masked, then go to next search result
-          // TODO: put code in ESMCI_Search.C, so the masked source elements, don't get here
-        }
-    }
-
-    // If this source element is creeped out during merging then skip it
-    double src_frac2=1.0;
-    if(src_frac2_field){
-      const MeshObj &src_elem = *sr.elem;
-      src_frac2=*(double *)(src_frac2_field->data(src_elem));
-      if (src_frac2 == 0.0) {
-        continue; 
-      }
-    }
-
-    // Declare src_elem_area
-    double src_elem_area;
-
-    // Declare weight vector
-    // TODO: Move these out of the loop, to save the time of allocating them
-    std::vector<int> valid;
-    std::vector<double> wgts;
-    std::vector<double> areas;
-
-    // Allocate space for weight calc output arrays
-    valid.resize(sr.elems.size(),0);
-    wgts.resize(sr.elems.size(),0.0);
-    areas.resize(sr.elems.size(),0.0);
-
-    // Calculate weights
-    std::vector<sintd_node *> tmp_nodes;  
-    std::vector<sintd_cell *> tmp_cells;  
-    calc_1st_order_weights_2D_2D_cart(sr.elem,src_cfield,sr.elems,dst_cfield,
-                                     &src_elem_area, &valid, &wgts, &areas, 
-                                     midmesh, &tmp_nodes, &tmp_cells, zz);
-
-    // Invalidate masked destination elements
-    if (dst_mask_field) {
-      for (int i=0; i<sr.elems.size(); i++) {
-        const MeshObj &dst_elem = *sr.elems[i];
-        double *msk=dst_mask_field->data(dst_elem);
-        if (*msk>0.5) {
-          valid[i]=0;
-        }
-      }
-    }
-    // Invalidate creeped out dst element
-    if(dst_frac2_field){
-      for (int i=0; i<sr.elems.size(); i++) {
-        const MeshObj &dst_elem = *sr.elems[i];
-        double *dst_frac2=dst_frac2_field->data(dst_elem);
-        if (*dst_frac2 == 0.0) {
-          valid[i] = 0;
-          continue; 
-        }
-      }
-    }
-
-    // Count number of valid weights
-    int num_valid=0;
-    for (int i=0; i<sr.elems.size(); i++) {
-      if (valid[i]==1) num_valid++;
-    }
-
-
-    // If none valid, then don't add weights
-    if (num_valid < 1) continue;
-
-    // Append only valid nodes/cells
-    std::copy(tmp_nodes.begin(), tmp_nodes.end(), std::back_inserter(sintd_nodes));
-    std::copy(tmp_cells.begin(), tmp_cells.end(), std::back_inserter(sintd_cells));
-    
-
-    // Temporary empty col with negatives so unset values
-    // can be detected if they sneak through
-    IWeights::Entry col_empty(-1, 0, -1.0, 0);
-
-    // Insert fracs into src_frac
-    {
-      // Allocate column of empty entries
-      std::vector<IWeights::Entry> col;
-      col.resize(num_valid,col_empty);
-      
-      // Put weights into column
-      int j=0;
-      for (int i=0; i<sr.elems.size(); i++) {
-        if (valid[i]==1) {
-          col[j].id=sr.elems[i]->get_id();
-          col[j].value=areas[i]/src_elem_area;
-          j++;
-        }
-      }
-      
-      // Set row info
-      IWeights::Entry row(sr.elem->get_id(), 0, 0.0, 0);
-      
-      // Put weights into weight matrix
-      src_frac.InsertRowMerge(row, col);       
-    }
-
-    
-    // Put weights into row column and then add
-    for (int i=0; i<sr.elems.size(); i++) {
-      if (valid[i]==1) {
-
-	// Allocate column of empty entries
-	std::vector<IWeights::Entry> col;
-	col.resize(1,col_empty);
-
-	col[0].id=sr.elem->get_id();
-	col[0].value=src_frac2*wgts[i];
-
-	// Set row info
-	IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
-
-	// Put weights into weight matrix
-	iw.InsertRowMerge(row, col);       
-      }
-    }
-
-  } // for searchresult
-
-  if(midmesh != 0)
-    compute_midmesh(sintd_nodes, sintd_cells, 2, 2, midmesh);
-}
-#endif
 
 
 void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, SearchResult &sres, IWeights &iw, IWeights &src_frac, IWeights &dst_frac, 
@@ -1231,142 +1066,6 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
 }
 
 
-#if 0
-void calc_conserve_mat_serial_3D_3D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, SearchResult &sres, IWeights &iw, IWeights &src_frac, struct Zoltan_Struct * zz) {
-  Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
-    
-  // Get src coord field
-  MEField<> *src_cfield = srcmesh.GetCoordField();
-
-  // Get dst coord field
-  MEField<> *dst_cfield = dstmesh.GetCoordField();
-
-  // Get dst mask field
-  MEField<> *dst_mask_field = dstmesh.GetField("elem_mask");
-
-  // Get src mask field
-  MEField<> *src_mask_field = srcmesh.GetField("elem_mask");
-
-  // store all the intersections
-  std::vector<sintd_node *> sintd_nodes;
-  std::vector<sintd_cell *> sintd_cells;
-
-  // Loop through search results
-  SearchResult::iterator sb = sres.begin(), se = sres.end();
-  for (; sb != se; sb++) {
-    
-    // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
-    Search_result &sr = **sb;
-
-    // If there are no associated dst elements then skip it
-    if (sr.elems.size() == 0) continue;
-
-    // If this source element is masked then skip it
-    if (src_mask_field) {
-        const MeshObj &src_elem = *sr.elem;
-        double *msk=src_mask_field->data(src_elem);
-        if (*msk>0.5) {
-          continue; // if this is masked, then go to next search result
-          // TODO: put code in ESMCI_Search.C, so the masked source elements, don't get here
-        }
-    }
-
-    // Declare src_elem_area
-    double src_elem_area;
-
-    // Declare weight vector
-    // TODO: Move these out of the loop, to save the time of allocating them
-    std::vector<int> valid;
-    std::vector<double> wgts;
-    std::vector<double> areas;
-
-    // Allocate space for weight calc output arrays
-    valid.resize(sr.elems.size(),0);
-    wgts.resize(sr.elems.size(),0.0);
-    areas.resize(sr.elems.size(),0.0);
-
-    // Calculate weights
-    calc_1st_order_weights_3D_3D_cart(sr.elem,src_cfield,sr.elems,dst_cfield,
-                                     &src_elem_area, &valid, &wgts, &areas,
-                                     midmesh, &sintd_nodes, &sintd_cells, zz);
-
-    // Invalidate masked destination elements
-    if (dst_mask_field) {
-      for (int i=0; i<sr.elems.size(); i++) {
-        const MeshObj &dst_elem = *sr.elems[i];
-        double *msk=dst_mask_field->data(dst_elem);
-        if (*msk>0.5) {
-          valid[i]=0;
-        }
-      }
-    }
-
-    // Count number of valid weights
-    int num_valid=0;
-    for (int i=0; i<sr.elems.size(); i++) {
-      if (valid[i]==1) num_valid++;
-    }
-
-    // If none valid, then don't add weights
-    if (num_valid < 1) continue;
-
-    // Temporary empty col with negatives so unset values
-    // can be detected if they sneak through
-    IWeights::Entry col_empty(-1, 0, -1.0, 0);
-
-    // Insert fracs into src_frac
-    {
-      // Allocate column of empty entries
-      std::vector<IWeights::Entry> col;
-      col.resize(num_valid,col_empty);
-      
-      // Put weights into column
-      int j=0;
-      for (int i=0; i<sr.elems.size(); i++) {
-        if (valid[i]==1) {
-          col[j].id=sr.elems[i]->get_id();
-          col[j].value=areas[i]/src_elem_area;
-          j++;
-        }
-      }
-      
-      // Set row info
-      IWeights::Entry row(sr.elem->get_id(), 0, 0.0, 0);
-      
-      // Put weights into weight matrix
-      src_frac.InsertRowMerge(row, col);       
-    }
-
-    
-    // Put weights into row column and then add
-    for (int i=0; i<sr.elems.size(); i++) {
-      if (valid[i]==1) {
-
-	// Allocate column of empty entries
-	std::vector<IWeights::Entry> col;
-	col.resize(1,col_empty);
-
-	col[0].id=sr.elem->get_id();
-	col[0].value=wgts[i];
-
-	// Set row info
-	IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
-
-	// Put weights into weight matrix
-	iw.InsertRowMerge(row, col);       
-      }
-    }
-
-  } // for searchresult
-
-#if 0
-  if(midmesh != 0)
-    compute_midmesh(sintd_nodes, sintd_cells, 2, 3, midmesh);
-#endif
-
-}
-#endif
-
 
 void calc_conserve_mat_serial_3D_3D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, SearchResult &sres, 
                                         IWeights &iw, IWeights &src_frac, IWeights &dst_frac, 
@@ -1622,6 +1321,53 @@ void calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, Searc
 }
 
 
+
+void calc_nearest_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw) {
+  Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
+
+  // both meshes have to have the same dimensions
+  if (srcmesh.parametric_dim() != dstmesh.parametric_dim()) {
+    Throw() << "src and dst mesh must have the same parametric dimension for conservative regridding";
+  }
+
+  if (srcmesh.spatial_dim() != dstmesh.spatial_dim()) {
+    Throw() << "src and dst mesh must have the same spatial dimension for conservative regridding";
+  }
+
+
+  // Loop through search results
+  SearchResult::iterator sb = sres.begin(), se = sres.end();
+  for (; sb != se; sb++) {
+    Search_result &sr = **sb;
+
+
+    // Temporary empty col with negatives so unset values
+    // can be detected if they sneak through
+    IWeights::Entry col_empty(-1, 0, -1.0, 0);
+
+
+    // Because this is NEAREST We are only associating one weight 
+    // with each dest node, so only make vector of length 1
+    std::vector<IWeights::Entry> col;
+    col.resize(1,col_empty);
+
+    
+    // Add a weight entry with source id and weight 1.0
+    col[0].id=sr.src_gid;
+    col[0].value=1.0;
+
+
+    // Set row info (i.e. the destination id associated with the above weight)
+    IWeights::Entry row(sr.dst_gid, 0, 0.0, 0);
+
+
+    // Put weights into weight matrix
+    iw.InsertRow(row, col);       
+    
+  } // for searchresult
+
+}
+
  
  /* Matrix version of point serial transfer */
  void mat_point_serial_transfer(MEField<> &sfield, _field &dfield, SearchResult &sres, IWeights &iw) {
@@ -1772,6 +1518,7 @@ dstF(),
 has_std(false),
 has_patch(false),
 has_cnsrv(false),
+has_nearest(false),
 srcmesh(src),
 dstmesh(dest),
 midmesh(midmesh),
@@ -1792,6 +1539,16 @@ zz(0)
     dstf.push_back(fpairs[i].second->is_nodal() ? fpairs[i].second->GetNodalfield() : fpairs[i].second->GetInterp());
     iflag.push_back(fpairs[i].idata);
   }
+
+
+  // Update interpolation flags
+  for (UInt j = 0; j < fpairs.size(); j++) {
+    if (fpairs[j].idata == Interp::INTERP_STD) has_std = true;
+    if (fpairs[j].idata == Interp::INTERP_PATCH) has_patch = true;
+    if (fpairs[j].idata == Interp::INTERP_CONSERVE) has_cnsrv = true;
+   if (fpairs[j].idata == Interp::INTERP_NEAREST) has_nearest = true;
+  }
+
   
   if (is_parallel) {
    
@@ -1800,16 +1557,20 @@ zz(0)
        //std::cout << "Building rendezvous..." << std::endl;
     grend.Build(srcF.size(), &srcF[0], dstF.size(), &dstF[0], &zz, midmesh==0? true:false);
     
-    if (search_obj_type == MeshObj::NODE) {
-      OctSearch(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), unmappedaction, sres, 1e-8);
-    } else if (search_obj_type == MeshObj::ELEMENT) {
-      //      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
-      if(freeze_src_)
-        OctSearchElems(src, ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
-      else
-        OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+    if (has_nearest) {
+      ParSearchNearest(grend.GetSrcRend(), grend.GetDstRend(), unmappedaction, sres);
+    } else {
+      if (search_obj_type == MeshObj::NODE) {
+        OctSearch(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), unmappedaction, sres, 1e-8);
+      } else if (search_obj_type == MeshObj::ELEMENT) {
+        //      OctSearchElems(grend.GetDstRend(), unmappedaction, grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
+        if(freeze_src_)
+          OctSearchElems(src, ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+        else
+          OctSearchElems(grend.GetSrcRend(), ESMCI_UNMAPPEDACTION_IGNORE, grend.GetDstRend(), unmappedaction, 1e-8, sres);
+      }
     }
-
+    
     /*
     Par::Out() << "SrcRend **************" << std::endl;
     //grend.GetSrcRend().Print(Par::Out());
@@ -1820,23 +1581,19 @@ zz(0)
     // Serial track.  Meshes already in geometric rendezvous.  (Perhaps get
     // the subset of the mesh for interpolating??)
 
-    if (search_obj_type == MeshObj::NODE) {
-      OctSearch(src, dest, search_obj_type, unmappedaction, sres, 1e-8);
-    } else if (search_obj_type == MeshObj::ELEMENT) {
-      //      OctSearchElems(dest, unmappedaction, src, ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
-      OctSearchElems(src, ESMCI_UNMAPPEDACTION_IGNORE, dest, unmappedaction, 1e-8, sres);
+    if (has_nearest) {
+        SearchNearest(src, dest, unmappedaction, sres);
+    } else {
+      if (search_obj_type == MeshObj::NODE) {
+        OctSearch(src, dest, search_obj_type, unmappedaction, sres, 1e-8);
+      } else if (search_obj_type == MeshObj::ELEMENT) {
+        OctSearchElems(src, ESMCI_UNMAPPEDACTION_IGNORE, dest, unmappedaction, 1e-8, sres);
+      }
     }
-
 
      //PrintSearchResult(sres);
   }
   
-  // Update has_[std/patch] flags
-  for (UInt j = 0; j < fpairs.size(); j++) {
-    if (fpairs[j].idata == Interp::INTERP_STD) has_std = true;
-    if (fpairs[j].idata == Interp::INTERP_PATCH) has_patch = true;
-    if (fpairs[j].idata == Interp::INTERP_CONSERVE) has_cnsrv = true;
-  }
   
 }
   
@@ -1864,6 +1621,25 @@ void Interp::operator()(int fpair_num, IWeights &iw) {
                               // eventually make a dedicated class for migrating values associated with mesh
 
   if (is_parallel) mat_transfer_parallel(fpair_num, iw, src_frac, dst_frac); else mat_transfer_serial(fpair_num, iw, src_frac, dst_frac);
+
+#if 0
+  {
+  WMat::WeightMap::iterator wi = iw.begin_row(), we = iw.end_row();
+  for (; wi != we; ++wi) {
+    const WMat::Entry &w = wi->first;
+    
+    std::vector<WMat::Entry> &wcol = wi->second;
+    
+    // Construct factor index list
+    for (UInt j = 0; j < wcol.size(); ++j) {
+      const WMat::Entry &wc = wcol[j];
+      
+      printf("#%d in () d_id=%d  s_id=%d w=%f \n",Par::Rank(),w.id,wc.id,wc.value);
+      
+    } // for j
+  } // for wi
+  }
+#endif
 
   // Migrate weights back to row decomposition 
   // (use node or elem migration depending on interpolation)
@@ -2095,6 +1871,7 @@ void Interp::mat_transfer_serial(int fpair_num, IWeights &iw, IWeights &src_frac
   if (fpair.idata == INTERP_STD) mat_point_serial_transfer(*fpair.first, *fpair.second->GetNodalfield(), sres, iw);
   else if (fpair.idata == INTERP_PATCH) mat_patch_serial_transfer(*srcmesh.GetCoordField(), *fpair.first, *fpair.second->GetNodalfield(), sres, srcmesh, iw);
   else if (fpair.idata == INTERP_CONSERVE) calc_conserve_mat_serial(srcmesh, dstmesh, midmesh, sres, iw, src_frac, dst_frac, zz);
+  else if (fpair.idata == INTERP_NEAREST) calc_nearest_mat_serial(srcmesh, dstmesh, sres, iw);
     
 }
 
@@ -2103,7 +1880,12 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
   // By all rights, here we don't HAVE to actually perform the interpolation.
   // However, we actually do it as a cross check.
     
-  if (fpairs[fpair_num].idata != INTERP_CONSERVE) {
+  if (fpairs[fpair_num].idata == INTERP_CONSERVE) {
+    calc_conserve_mat_serial(grend.GetSrcRend(),grend.GetDstRend(),
+ midmesh, sres, iw, src_frac, dst_frac, zz);
+  } else if (fpairs[fpair_num].idata == INTERP_NEAREST) {
+    calc_nearest_mat_serial(grend.GetSrcRend(),grend.GetDstRend(), sres, iw);
+  } else {
     // Send source data to rendezvous decomp
     const std::vector<MEField<> *> &src_rend_Fields = grend.GetSrcRendFields();
     
@@ -2126,8 +1908,7 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
     
     // Send the data back (comm has been transposed in GeomRend::Build)
     dst_node_rel.send_fields(1, &dfR, &df);
-  } else calc_conserve_mat_serial(grend.GetSrcRend(),grend.GetDstRend(), midmesh, sres, iw, src_frac, dst_frac, zz);
-
+  }
 }
 
 /*

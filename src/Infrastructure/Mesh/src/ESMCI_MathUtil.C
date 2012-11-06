@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.21 2012/04/06 22:23:23 oehmke Exp $
+// $Id: ESMCI_MathUtil.C,v 1.22 2012/11/06 17:48:45 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.21 2012/04/06 22:23:23 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.22 2012/11/06 17:48:45 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -983,6 +983,8 @@ template int triangulate_poly<GEOM_SPH2D3D>(int num_p, double *p, double *td, in
 
 
 // calculates spherical coords in radians
+// lon -> (-pi to +pi)
+// lat -> (0   to +pi)
 void convert_cart_to_sph(double x, double y, double z,
                          double *lon, double *lat, double *r) {
 
@@ -998,6 +1000,8 @@ void convert_cart_to_sph(double x, double y, double z,
 
 
 // calculates spherical coords in degs
+// lon -> (-180 to 180)
+// lat -> (-90  to 90)
 void convert_cart_to_sph_deg(double x, double y, double z,
                              double *lon, double *lat, double *r) {
 

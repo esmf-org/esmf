@@ -1,4 +1,4 @@
-// $Id: ESMCI_OTree.C,v 1.7 2012/01/06 20:17:51 svasquez Exp $
+// $Id: ESMCI_OTree.C,v 1.8 2012/11/06 17:48:45 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -25,15 +25,18 @@
 //-----------------------------------------------------------------------------
 
 // include associated header file
-#include <Mesh/include/ESMCI_OTree.h>
-#include "stdlib.h"
+// For ESMF
+//#include <Mesh/include/ESMCI_OTree.h>
+// For testing
+#include "ESMCI_OTree.h"
 
+#include "stdlib.h"
 #include <algorithm>
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_OTree.C,v 1.7 2012/01/06 20:17:51 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_OTree.C,v 1.8 2012/11/06 17:48:45 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -387,6 +390,107 @@ int OTree::runon(
 
 }
 //-----------------------------------------------------------------------------
+
+  typedef struct {
+    double min[3];
+    double max[3];
+    int (*func)(void *data,void *func_data, double *, double *);
+    void *func_data;
+  } RUNON_INFO_MM_CHNG;
+
+
+  // do intersection search on a node (and recurse down children if necessary)
+  int _runon_onode_mm_chng(ONode *node, RUNON_INFO_MM_CHNG *ri) {
+    //  BECAUSE THERE IS NO THROW IN THIS FUNC, COMMENT THIS OUT FOR EFFICIENCY
+    //  Trace __trace("OTree::_runon_onode()");
+
+    // Calculate our search code based on search min-max and node min-max
+    int search_code_2D=CALC_SEARCH_CODE_2D(ri->min,ri->max,node->min,node->max);
+    int search_code_1D=CALC_SEARCH_CODE_1D(ri->min[2],ri->max[2],node->min[2],node->max[2]);
+    
+    // if this node intersects, run function on data
+    if (search_code_2D==INTERSECTION_SEARCH_CODE_2D &&
+	search_code_1D==INTERSECTION_SEARCH_CODE_1D) {
+      int rc=ri->func(node->data,ri->func_data,ri->min,ri->max);
+      if (rc) return rc;  // if return code is non-zero then return
+    }
+
+    
+    // Loop through children, searching them if necessary
+    for (ONode *chn=node->children; chn!=NULL; chn=chn->next) {
+
+      // Calculate our search code based on search min-max and node min-max
+      int search_code_2D=CALC_SEARCH_CODE_2D(ri->min,ri->max,node->min,node->max);
+      int search_code_1D=CALC_SEARCH_CODE_1D(ri->min[2],ri->max[2],node->min[2],node->max[2]);
+      
+      // Get the search itype list based on the search code
+      unsigned int it_list_2D=search_code_to_itype_list_2D[search_code_2D];
+      unsigned int it_list_1D=search_code_to_itype_list_1D[search_code_1D];
+
+      if ((chn->itype&it_list_2D) && (chn->itype&it_list_1D)) {
+	int rc=_runon_onode_mm_chng(chn, ri);
+	if (rc) return rc; // if return code is non-zero then return
+      }
+    }    
+    
+    return 0;
+  }
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::OTree::runon_mm_chng()"
+//BOP
+// !IROUTINE:  runon_mm_chng
+//
+// !INTERFACE:
+int OTree::runon_mm_chng(
+
+//
+// !RETURN VALUE:
+//  user func return
+//
+// !ARGUMENTS:
+//
+	       double init_min[3],
+	       double init_max[3],
+	       int (*func)(void *data,void *func_data, double *min, double *max),
+	       void *func_data
+  ) {
+//
+// !DESCRIPTION:
+// Run func on each object in the tree whose min-max box overlaps the min-max.
+// The min-max can change over the run, as output from func.  The initial min-max
+// used to find the first node is init_min, init_max. 
+// If func returns anything but 0, then the process stops and runon returns what func returned. 
+//EOP
+//-----------------------------------------------------------------------------
+  Trace __trace("OTree::runon()");
+
+  RUNON_INFO_MM_CHNG ri;
+
+  // Make sure that this has been committed
+  if (!is_committed) Throw() << "Search tree hasn't been committed, so can't do runon()";
+
+  // if tree empty return
+  if (root==NULL) return 0;
+ 
+  // Load search info
+  ri.min[0]=init_min[0];
+  ri.min[1]=init_min[1];
+  ri.min[2]=init_min[2];
+  ri.max[0]=init_max[0];
+  ri.max[1]=init_max[1];
+  ri.max[2]=init_max[2];
+  ri.func=func;
+  ri.func_data=func_data;
+
+  // Start search with root
+  return _runon_onode_mm_chng(root, &ri);
+
+}
+//-----------------------------------------------------------------------------
+
 
 
 

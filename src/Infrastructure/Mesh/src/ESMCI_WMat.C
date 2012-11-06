@@ -1,4 +1,4 @@
-// $Id: ESMCI_WMat.C,v 1.17 2012/01/06 20:17:51 svasquez Exp $
+// $Id: ESMCI_WMat.C,v 1.18 2012/11/06 17:48:45 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -19,7 +19,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WMat.C,v 1.17 2012/01/06 20:17:51 svasquez Exp $";
+static const char *const version = "$Id: ESMCI_WMat.C,v 1.18 2012/11/06 17:48:45 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -177,7 +177,15 @@ void WMat::Migrate(Mesh &mesh) {
   {
     std::vector<UInt> mesh_dist, iw_dist;
     
-    Context c; c.set(Attr::ACTIVE_ID);
+    // BOB - Switch to Owned_ID to only migrate weights to 
+    //       mesh points which are actually owned, not for example
+    //       halo points. The extra points used to be removed
+    //       in Prune() but it's more efficient to not send them
+    //       in the first place. If we start regridding to halos,
+    //       then this will have to be changed. 
+    //
+    //     Context c; c.set(Attr::ACTIVE_ID);
+    Context c; c.set(Attr::OWNED_ID);
     Attr a(MeshObj::NODE, c);
     getMeshGIDS(mesh, a, mesh_dist);
     GetRowGIDS(iw_dist);

@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.28 2012/03/02 01:56:48 feiliu Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.29 2012/11/06 17:48:45 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.28 2012/03/02 01:56:48 feiliu Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.29 2012/11/06 17:48:45 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -145,7 +145,10 @@ int online_regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
       // This prune won't work for conserve
       // because wghts not on nodes, earlier mask code shouldn't allow weights
       // at this point anyways. 
-      if(*regridMethod != ESMC_REGRID_METHOD_CONSERVE) wts.Prune(dstmesh, 0);
+      if ((*regridMethod != ESMC_REGRID_METHOD_CONSERVE) &&
+          (*regridMethod != ESMC_REGRID_METHOD_NEAREST)) {
+        wts.Prune(dstmesh, 0);
+      }
 
     } break;
 
@@ -281,26 +284,25 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, IWeights &wts,
 
    // See if it could have a pole
   bool maybe_pole=false;
-  if ((srcmesh.parametric_dim()==2) && 
-      (srcmesh.spatial_dim()==3)) maybe_pole=true; 
-
+    if ((srcmesh.parametric_dim()==2) && 
+        (srcmesh.spatial_dim()==3) &&
+        (*regridMethod != ESMC_REGRID_METHOD_CONSERVE) &&
+        (*regridMethod != ESMC_REGRID_METHOD_NEAREST)) maybe_pole=true; 
+  
 
     // Pole constraints
     IWeights pole_constraints, stw;
     UInt constraint_id = srcmesh.DefineContext("pole_constraints");
-
-    if (*regridMethod != ESMC_REGRID_METHOD_CONSERVE) { // No poles if conservative
-      if (maybe_pole) {
-	if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
-	  for (UInt i = 1; i <= 7; ++i)
-	    MeshAddPole(srcmesh, i, constraint_id, pole_constraints);
-	} else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
-	  for (UInt i = 1; i <= 7; ++i)
-	    MeshAddPoleNPnts(srcmesh, *regridPoleNPnts, i, constraint_id, pole_constraints);
-	} else if (*regridPoleType == ESMC_REGRID_POLETYPE_TEETH) {
-	  for (UInt i = 1; i <= 7; ++i)
-	    MeshAddPoleTeeth(srcmesh, i, constraint_id, pole_constraints);
-	}
+    if (maybe_pole) {
+      if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
+        for (UInt i = 1; i <= 7; ++i)
+          MeshAddPole(srcmesh, i, constraint_id, pole_constraints);
+      } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
+        for (UInt i = 1; i <= 7; ++i)
+          MeshAddPoleNPnts(srcmesh, *regridPoleNPnts, i, constraint_id, pole_constraints);
+      } else if (*regridPoleType == ESMC_REGRID_POLETYPE_TEETH) {
+        for (UInt i = 1; i <= 7; ++i)
+          MeshAddPoleTeeth(srcmesh, i, constraint_id, pole_constraints);
       }
     }
 
@@ -340,6 +342,8 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, IWeights &wts,
       fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_PATCH));
     else if (*regridMethod == ESMC_REGRID_METHOD_CONSERVE)
       fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_CONSERVE));
+    else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST)
+      fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_NEAREST));
 
 
      // Build the rendezvous grids
@@ -352,15 +356,15 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, IWeights &wts,
      if(midmesh) interp.release_zz();
 
      // Factor out poles if they exist
-      if (maybe_pole) {
-        if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
-          wts.GatherToCol(pole_constraints);
-          wts.AssimilateConstraints(pole_constraints);
-        } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
-          wts.GatherToRowSrc(pole_constraints);
-          wts.AssimilateConstraintsNPnts(pole_constraints);
-        }
-    }
+     if (maybe_pole) {
+       if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
+         wts.GatherToCol(pole_constraints);
+         wts.AssimilateConstraints(pole_constraints);
+       } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
+         wts.GatherToRowSrc(pole_constraints);
+         wts.AssimilateConstraintsNPnts(pole_constraints);
+       }
+     }
 
     return 1;
   }

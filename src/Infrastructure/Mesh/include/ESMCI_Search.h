@@ -1,4 +1,4 @@
-// $Id: ESMCI_Search.h,v 1.11 2012/01/06 20:17:47 svasquez Exp $
+// $Id: ESMCI_Search.h,v 1.12 2012/11/06 17:48:38 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,6 +39,10 @@ struct Search_result {
   std::vector<Search_node_result> nodes;
   std::vector<const MeshObj *> elems;
 
+  UInt dst_gid;
+  UInt src_gid;
+
+
   // AN IDEA would be to do some kind of inheritence instead of having nodes and elems in the same struct
 
   bool operator<(const Search_result &rhs) const {
@@ -59,6 +63,11 @@ typedef std::vector<Search_result*> SearchResult;
 
 void OctSearch(const Mesh &src, const Mesh &dest, UInt dst_obj_type, int unmappedaction, SearchResult &result,
             double stol = 1e-8, std::vector<const MeshObj*> *to_investigate = NULL, OTree *box = NULL);
+
+
+void SearchNearest(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
+
+void ParSearchNearest(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
 
 void PrintSearchResult(const SearchResult &result);
 

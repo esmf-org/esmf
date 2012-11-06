@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.114 2012/10/19 23:16:31 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.115 2012/11/06 17:48:34 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.114 2012/10/19 23:16:31 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.115 2012/11/06 17:48:34 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -306,7 +306,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     routehandle, &
                     factorList, factorIndexList, & 
                     weights, indices, &  ! DEPRECATED ARGUMENTS
-                    srcFracField, dstFracField, rc)
+                    srcFracField, dstFracField, unmappedDstList, rc)
 !      
 ! !ARGUMENTS:
       type(ESMF_Field),            intent(in)             :: srcField
@@ -325,6 +325,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4), pointer,optional::indices(:,:) !DEPRECATED ARG 
       type(ESMF_Field),            intent(inout),optional :: srcFracField
       type(ESMF_Field),            intent(inout),optional :: dstFracField
+      integer(ESMF_KIND_I4),       pointer, optional      :: unmappedDstList(:)
       integer,                     intent(out),  optional :: rc 
 !
 ! !STATUS:
@@ -442,6 +443,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           grid which only partially overlaps the source grid the destination field which is output from the 
 !           regrid operation should be divided by the corresponding destination fraction to yield the 
 !           true interpolated values for cells which are only partially covered by the source grid. 
+!     \item [{[unmappedDstList]}] 
+!           The list of the sequence indices for locations in {\tt dstField} which couldn't be mapped the {\tt srcField}. 
+!           The list on each PET only contains the unmapped locations for the piece of the {\tt dstField} on that PET. 
+!           If a destination point is masked, it won't be put in this list. 
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -804,7 +809,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 localpolemethod, localRegridPoleNPnts, &
                 lregridScheme, &
                 unmappedaction, routehandle, &
-                tmp_indices, tmp_weights, localrc)
+                tmp_indices, tmp_weights, unmappedDstList, localrc)
            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -824,6 +829,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 localpolemethod, localRegridPoleNPnts, &
                 lregridScheme, &
                 unmappedaction, routehandle, &
+                unmappedDstList=unmappedDstList, &
                 rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &

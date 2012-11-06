@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.h,v 1.21 2012/04/11 22:29:20 oehmke Exp $
+// $Id: ESMCI_Interp.h,v 1.22 2012/11/06 17:48:38 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -131,7 +131,7 @@ void IWeights::GatherTangentVectors(const Mesh &mesh, TVECT tv, bool transpose) 
 class Interp {
 public:
 
-  enum {INTERP_STD = 0, INTERP_PATCH, INTERP_CONSERVE};
+  enum {INTERP_STD = 0, INTERP_PATCH, INTERP_CONSERVE, INTERP_NEAREST};
   
   struct FieldPair {
   FieldPair(MEField<> *_sF, MEField<> *_dF, UChar _idata=INTERP_STD, UChar _patch_order=2) :
@@ -191,6 +191,7 @@ public:
   bool has_std; // true if a standard interpolation exists
   bool has_patch; // true if a patch interp exists
   bool has_cnsrv; // true if a conserve interp exists
+  bool has_nearest; // true if a nearest interp exists
   Mesh &srcmesh;
   Mesh &dstmesh;
   Mesh *midmesh;

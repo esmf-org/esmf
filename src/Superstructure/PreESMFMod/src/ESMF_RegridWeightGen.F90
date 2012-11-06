@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.17 2012/10/31 22:07:17 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.18 2012/11/06 17:48:54 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -839,9 +839,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
 
-          ! call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CORNER, filename="srcGrid", isSphere=.false., &
-          !       isLatLonDeg=.true., rc=localrc)
-          ! if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+           call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, filename="srcGrid", &
+                 rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+
 
 	   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
            if (ESMF_LogFoundError(localrc, &

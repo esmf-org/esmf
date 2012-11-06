@@ -1,4 +1,4 @@
-// $Id: ESMCI_OTree.h,v 1.9 2012/01/06 20:17:47 svasquez Exp $
+// $Id: ESMCI_OTree.h,v 1.10 2012/11/06 17:48:38 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -19,7 +19,11 @@
 #ifndef ESMCI_OTree_H
 #define ESMCI_OTree_H
 
+// FOR ESMF
 #include <Mesh/include/ESMCI_Exception.h>
+
+// OUTSIDE ESMF
+//#include "ESMCI_Exception.h"
 
 //-------------------------------------------------------------------------
 //BOP
@@ -93,6 +97,11 @@ class OTree {    // inherits from ESMC_Base class
  void commit();
 
  int runon(double [], double [], int (*func)(void *,void *),void *);
+
+
+int runon_mm_chng(double init_min[], double init_max[],
+	       int (*func)(void *data,void *func_data, double *min, double *max),
+                  void *func_data);
    
 };  // end class ESMC_OTree
 

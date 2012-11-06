@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.169 2012/09/05 20:50:37 peggyli Exp $
+! $Id: ESMF_Regrid.F90,v 1.170 2012/11/06 17:48:48 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -61,6 +61,11 @@
         type(ESMF_Pointer) :: this
       end type
 
+      type ESMF_TempUDL 
+      sequence
+        type(ESMF_Pointer) :: this
+      end type
+
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 !
@@ -91,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.169 2012/09/05 20:50:37 peggyli Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.170 2012/11/06 17:48:48 oehmke Exp $'
 
 !==============================================================================
 !
@@ -144,6 +149,7 @@ end function my_xor
                  regridScheme, &
                  unmappedaction, routehandle, &
                  indices, weights, &
+                 unmappedDstList, &
                  rc)
 !
 ! !ARGUMENTS:
@@ -159,6 +165,7 @@ end function my_xor
       type(ESMF_RouteHandle),  intent(inout), optional :: routehandle
       integer(ESMF_KIND_I4), pointer, optional         :: indices(:,:)
       real(ESMF_KIND_R8), pointer, optional            :: weights(:)
+      integer(ESMF_KIND_I4),       pointer, optional   :: unmappedDstList(:)
       integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -190,6 +197,10 @@ end function my_xor
 !           to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
 !     \item[routeHandle]
 !          Handle to store the resulting sparseMatrix
+!     \item [{[unmappedDstList]}] 
+!           The list of the sequence indices for locations in {\tt dstField} which couldn't be mapped the {\tt srcField}. 
+!           The list on each PET only contains the unmapped locations for the piece of the {\tt dstField} on that PET. 
+!           If a destination point is masked, it won't be put in this list. 
 !     \item[{rc}]
 !          Return code.
 !     \end{description}
@@ -198,6 +209,8 @@ end function my_xor
        type(ESMF_VM)        :: vm
        integer :: has_rh, has_iw, nentries
        type(ESMF_TempWeights) :: tweights
+       integer :: has_udl, num_udl
+       type(ESMF_TempUDL) :: tudl
        type(ESMF_RegridConserve) :: localregridConserve
        type(ESMF_UnmappedAction_Flag) :: localunmappedaction
        logical :: isMemFreed
@@ -232,8 +245,10 @@ end function my_xor
 
        has_rh = 0
        has_iw = 0
+       has_udl=0
        if (present(routehandle)) has_rh = 1
        if (present(indices)) has_iw = 1
+       if (present(unmappedDstList)) has_udl = 1
 
        if (present(unmappedaction)) then
           localunmappedaction=unmappedaction
@@ -274,6 +289,7 @@ end function my_xor
                    regridScheme, localunmappedaction%unmappedaction, &
                    routehandle, has_rh, has_iw, &
                    nentries, tweights, &
+                   has_udl, num_udl, tudl, &
                    localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -286,6 +302,12 @@ end function my_xor
          if (nentries > 0)  then
             call c_ESMC_Copy_TempWeights(tweights, indices(1,1), weights(1))
          endif
+       endif
+
+       ! If unmappedDstList is present then we must allocate the F90 pointers and copy 
+       if (present(unmappedDstList)) then
+         allocate(unmappedDstList(num_udl))
+         call c_ESMC_Copy_TempUDL(num_udl, tudl, unmappedDstList(1))
        endif
 
        ! Mark route handle created

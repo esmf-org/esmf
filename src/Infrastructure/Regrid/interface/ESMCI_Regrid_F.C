@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.77 2012/07/18 22:21:45 rokuingh Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.78 2012/11/06 17:48:46 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -35,6 +35,7 @@
 #include "Mesh/include/ESMCI_MathUtil.h"
 
 #include <iostream>
+#include <vector>
 
 //------------------------------------------------------------------------------
 //BOP
@@ -47,11 +48,17 @@
 
 using namespace ESMCI;
 
+
 namespace ESMCI {
   struct TempWeights {
     int nentries;
     int *iientries;
     double *factors;
+  };
+
+
+  struct TempUDL {
+    int *udl;
   };
 }
 
@@ -60,6 +67,9 @@ namespace ESMCI {
 bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts);
 bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts);
 void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate);
+void get_mesh_node_ids_not_in_wmat(Mesh &mesh, WMat &wts, std::vector<int> *missing_ids);
+void get_mesh_elem_ids_not_in_wmat(Mesh &mesh, WMat &wts, std::vector<int> *missing_ids);
+
 
 // external C functions
 extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
@@ -76,6 +86,7 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                    int *regridScheme, int *unmappedaction,
                    ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
                    int *nentries, ESMCI::TempWeights **tweights,
+                   int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
                    int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()" 
@@ -95,7 +106,6 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
   try {
 
-#if 1
     //// Precheck Meshes for errors
     bool concave=false;
     bool clockwise=false;
@@ -112,6 +122,7 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
       noncnsrv_check_for_mesh_errors(srcmesh, true, &concave, &clockwise, &degenerate);
 #endif     
     }
+
 
     // Concave
     if (concave) {
@@ -161,7 +172,7 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
         "- Dst contains a cell which has corners close enough that the cell collapses to a line or point", &localrc)) throw localrc;
       }
     }
-#endif
+
 
     // Compute Weights matrix
     IWeights wts;
@@ -173,6 +184,18 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                       regridPoleType, regridPoleNPnts, 
                       regridScheme, &temp_unmappedaction))
       Throw() << "Online regridding error" << std::endl;
+
+
+    // If requested get list of unmapped destination points
+    std::vector<int> unmappedDstList;
+    if (*has_udl) {
+      if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
+        get_mesh_elem_ids_not_in_wmat(dstmesh, wts, &unmappedDstList);
+      } else { // Non-conservative
+        get_mesh_node_ids_not_in_wmat(dstmesh, wts, &unmappedDstList);
+      }
+    }
+
 
     // If user is worried about unmapped points then check that
     // here, because we have all the dest objects and weights
@@ -223,6 +246,8 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 	iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
 	factors[i] = wc.value;
 
+        // printf("d_id=%d  s_id=%d w=%f \n",w.id,wc.id,wc.value);
+
 	i++;
       } // for j
     } // for wi
@@ -245,6 +270,7 @@ wts.Print(Par::Out());
 	throw localrc;  // bail out with exception
     }
 
+
     *nentries = num_entries;
     // Clean up.  If has_iw, then we will use the arrays to
     // fill out the users pointers.  These will be deleted following a copy.
@@ -266,6 +292,30 @@ wts.Print(Par::Out());
 	*tweights = NULL;
       }
     }
+
+
+    // Setup structure to transfer unmappedDstList 
+    *_num_udl=0;
+    *_tudl=NULL;
+    if (*has_udl) {
+      ESMCI::TempUDL *tudl = new ESMCI::TempUDL;
+
+      // Get number of unmapped points
+      int num_udl=unmappedDstList.size();
+ 
+      // Allocate and fill udl list in struct
+      tudl->udl = NULL;
+       if (num_udl > 0) {
+         tudl->udl = new int[num_udl];         
+         for (int i=0; i<num_udl; i++) {
+           tudl->udl[i]=unmappedDstList[i];
+         }
+       }
+
+       // Output information
+       *_num_udl=num_udl;      
+       *_tudl=tudl;
+    }
     
   } catch(std::exception &x) {
     // catch Mesh exception return code 
@@ -274,7 +324,7 @@ wts.Print(Par::Out());
    					  x.what(), rc);
     } else {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+       					  "UNKNOWN", rc);
     }
 
     return;
@@ -468,8 +518,123 @@ extern "C" void FTN_X(c_esmc_copy_tempweights)(ESMCI::TempWeights **_tw, int *ii
 
 }
 
-bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
 
+// Copy the weights stored in the temporary tw into the fortran arrays.  Also,
+// delete the temp weights.
+extern "C" void FTN_X(c_esmc_copy_tempudl)(int *_num_udl, ESMCI::TempUDL **_tudl, int *unmappedDstList) {
+
+  // See if the TempUDL structure is allocated, if not then just leave
+  if (*_tudl==NULL) return;
+
+
+  // Get number of points
+  int num_udl = *_num_udl;
+
+  // Copy Weights
+  ESMCI::TempUDL &tudl = (**_tudl);
+
+  for (int i = 0; i<num_udl; ++i) {
+    unmappedDstList[i] = tudl.udl[i];
+  }
+
+  if (tudl.udl != NULL) delete [] tudl.udl;
+
+  delete *_tudl;
+}
+
+
+// Get the list of ids in the mesh, but not in the wts 
+// (i.e. if mesh is the dest. mesh, the unmapped points)
+void get_mesh_node_ids_not_in_wmat(Mesh &mesh, WMat &wts, std::vector<int> *missing_ids) {
+
+  // Get mask Field
+  MEField<> *mptr = mesh.GetField("mask");
+
+  // Get weight iterators
+  WMat::WeightMap::iterator wi =wts.begin_row(),we = wts.end_row();
+
+  // Get mesh node iterator that goes through in order of id
+  Mesh::MeshObjIDMap::const_iterator ni=mesh.map_begin(MeshObj::NODE), ne=mesh.map_end(MeshObj::NODE);
+
+  // Loop checking that all nodes have weights
+  for (; ni != ne; ++ni) {
+    const MeshObj &node=*ni;
+
+    // Skip non local nodes
+    if (!GetAttr(node).is_locally_owned()) continue;
+
+    // Skip masked elements
+    if (mptr != NULL) {
+      double *m=mptr->data(node);
+      if (*m > 0.5) continue;
+    }
+
+    // get node id
+    int node_id=node.get_id();
+
+    // get weight id
+    int wt_id=wi->first.id;
+
+    // Advance weights until not less than node id
+    while ((wi != we) && (wi->first.id <node_id)) {
+      wi++;
+    }
+
+    // If teh current weight is not equal to the node id, then we must have passed it, so add it to the list
+    if (wi->first.id != node_id) {
+      missing_ids->push_back(node_id);
+    }
+  }
+}
+
+
+
+// Get the list of ids in the mesh, but not in the wts 
+// (i.e. if mesh is the dest. mesh, the unmapped points)
+void get_mesh_elem_ids_not_in_wmat(Mesh &mesh, WMat &wts, std::vector<int> *missing_ids) {
+
+  // Get mask Field
+  MEField<> *mptr = mesh.GetField("elem_mask");
+
+  // Get weight iterators
+  WMat::WeightMap::iterator wi =wts.begin_row(),we = wts.end_row();
+
+  // Get mesh node iterator that goes through in order of id
+  Mesh::MeshObjIDMap::const_iterator ei=mesh.map_begin(MeshObj::ELEMENT), ee=mesh.map_end(MeshObj::ELEMENT);
+
+  // Loop checking that all nodes have weights
+  for (; ei != ee; ++ei) {
+    const MeshObj &elem=*ei;
+
+    // Skip non local nodes
+    if (!GetAttr(elem).is_locally_owned()) continue;
+
+    // Skip masked elements
+    if (mptr != NULL) {
+      double *m=mptr->data(elem);
+      if (*m > 0.5) continue;
+    }
+
+    // get node id
+    int elem_id=elem.get_id();
+
+    // get weight id
+    int wt_id=wi->first.id;
+
+    // Advance weights until not less than node id
+    while ((wi != we) && (wi->first.id <elem_id)) {
+      wi++;
+    }
+
+    // If teh current weight is not equal to the node id, then we must have passed it, so add it to the list
+    if (wi->first.id != elem_id) {
+      missing_ids->push_back(elem_id);
+    }
+  }
+}
+
+ 
+bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
 
   // Get mask Field
   MEField<> *mptr = mesh.GetField("mask");
@@ -569,7 +734,8 @@ bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts) {
   return true;
 }
 
-
+#undef  ESMC_METHOD
+#define ESMC_METHOD "cnsrv_check_for_mesh_errors()" 
 void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate) {
   
   // Declare polygon information
@@ -578,6 +744,9 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
 #define  MAX_NUM_POLY_NODES_3D  20  // MAX_NUM_POLY_COORDS/3
   int num_poly_nodes;
   double poly_coords[MAX_NUM_POLY_COORDS];
+
+  int num_poly_nodes_orig;
+  double poly_coords_orig[MAX_NUM_POLY_COORDS];
   
   // Init variables
   *concave=false;
@@ -613,6 +782,10 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
         
         // Get the coords
         get_elem_coords(&elem, cfield, 2, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
+
+        // Save original coords
+        std::copy(poly_coords,poly_coords+2*num_poly_nodes,poly_coords_orig);
+        num_poly_nodes_orig=num_poly_nodes;
         
         // Get rid of 0 len edges
         remove_0len_edges2D(&num_poly_nodes, poly_coords);
@@ -622,6 +795,21 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
           if (ignore_degenerate) {
             continue;
           } else {
+            char msg[1024];
+            ESMC_LogDefault.ESMC_LogWrite("~~~~~~~~~~~~~~~~~ Degenerate Element Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            sprintf(msg,"  degenerate elem. id=%d",elem.get_id());
+            ESMC_LogDefault.ESMC_LogWrite(msg,ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.ESMC_LogWrite("  ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.ESMC_LogWrite("  degenerate elem. coords ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.ESMC_LogWrite("  --------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
+            for(int i=0; i< num_poly_nodes_orig; i++) {
+              double *pnt=poly_coords_orig+2*i;
+              
+              sprintf(msg,"    %d  (%f,  %f) ",i,pnt[0],pnt[1]);
+              ESMC_LogDefault.ESMC_LogWrite(msg,ESMC_LOGMSG_ERROR);
+            }
+            ESMC_LogDefault.ESMC_LogWrite("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+
             *degenerate=true;
             return;
           }
@@ -635,14 +823,24 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
         // Look for errors
         if (right_turn) {
           if (left_turn) { 
+            char msg[1024];
+            ESMC_LogDefault.ESMC_LogWrite("~~~~~~~~~~~~~~~~~ Concave Element Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            sprintf(msg,"  concave elem. id=%d",elem.get_id());
+            ESMC_LogDefault.ESMC_LogWrite(msg,ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.ESMC_LogWrite("  ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.ESMC_LogWrite("  concave elem. coords ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.ESMC_LogWrite("  --------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
+            for(int i=0; i< num_poly_nodes_orig; i++) {
+              double *pnt=poly_coords_orig+2*i;
+              
+              sprintf(msg,"    %d  (%f,  %f) ",i,pnt[0],pnt[1]);
+              ESMC_LogDefault.ESMC_LogWrite(msg,ESMC_LOGMSG_ERROR);
+            }
+            ESMC_LogDefault.ESMC_LogWrite("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+
             *concave=true;
             return;
           }
-          // Get rid of clockwise check, because we handle clockwise elements now
-          // else {
-          // *clockwise=true;
-          // return;
-          // }
         }
       }
     } else if (sdim==3) {
@@ -663,6 +861,11 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
         // Get the coords
         get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
 
+        // Save original coords
+        std::copy(poly_coords,poly_coords+3*num_poly_nodes,poly_coords_orig);
+        num_poly_nodes_orig=num_poly_nodes;
+
+
         // Get rid of 0 len edges
         remove_0len_edges3D(&num_poly_nodes, poly_coords);
 
@@ -671,48 +874,64 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
           if (ignore_degenerate) {
             continue;
           } else {
-            *degenerate=true;
-            return;
-          }
-        } 
-       
-        // Get elem rotation
-        bool left_turn;
-        bool right_turn;
-        rot_2D_3D_sph(num_poly_nodes, poly_coords, &left_turn, &right_turn);
-        
-        // Look for errors
-        if (right_turn) {
-          if (left_turn) { 
-#if 0
-            printf("--- Error: Concave Element!! ---\n");
-            printf(" concave element id=%d\n",elem.get_id());
-            printf("\n");
-            printf("Concave polygon coords (lon, lat) in degrees\n");
-            printf("--------------------------------------------\n");
-            for(int i=0; i< num_poly_nodes; i++) {
-              double *pnt=poly_coords+3*i;
+            char msg[1024];
+            ESMC_LogDefault.ESMC_LogWrite("~~~~~~~~~~~~~~~~~~~~ Degenerate Element Detected ~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            sprintf(msg,"  degenerate elem. id=%d",elem.get_id());
+            ESMC_LogDefault.ESMC_LogWrite(msg,ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.ESMC_LogWrite("  ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.ESMC_LogWrite("  degenerate elem. coords (lon [-180 to 180], lat [-90 to 90]) (x,y,z)",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.ESMC_LogWrite("  ----------------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
+            for(int i=0; i< num_poly_nodes_orig; i++) {
+              double *pnt=poly_coords_orig+3*i;
               
               double lon, lat, r;
               convert_cart_to_sph_deg(pnt[0], pnt[1], pnt[2],
                                       &lon, &lat, &r);
 
-              printf("%d  (%f,  %f) \n",i,lon,lat);
-
+              sprintf(msg,"    %d  (%f,  %f)  (%f, %f, %f)",i,lon,lat,pnt[0],pnt[1],pnt[2]);
+              ESMC_LogDefault.ESMC_LogWrite(msg,ESMC_LOGMSG_ERROR);
             }
+            ESMC_LogDefault.ESMC_LogWrite("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+
+            *degenerate=true;
+            return;
+          }
+        } 
+
+        // Get elem rotation
+        bool left_turn;
+        bool right_turn;
+        rot_2D_3D_sph(num_poly_nodes, poly_coords, &left_turn, &right_turn);
+       
+        // Look for errors
+        if (right_turn) {
+          if (left_turn) { 
+            char msg[1024];
+            ESMC_LogDefault.ESMC_LogWrite("~~~~~~~~~~~~~~~~~~~~ Concave Element Detected ~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            sprintf(msg,"  concave elem. id=%d",elem.get_id());
+            ESMC_LogDefault.ESMC_LogWrite(msg,ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.ESMC_LogWrite("  ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.ESMC_LogWrite("  concave elem. coords (lon [-180 to 180], lat [-90 to 90]) (x,y,z)",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.ESMC_LogWrite("  ----------------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
+            for(int i=0; i< num_poly_nodes_orig; i++) {
+              double *pnt=poly_coords_orig+3*i;
+              
+              double lon, lat, r;
+              convert_cart_to_sph_deg(pnt[0], pnt[1], pnt[2],
+                                      &lon, &lat, &r);
+
+              sprintf(msg,"    %d  (%f,  %f)  (%f, %f, %f)",i,lon,lat,pnt[0],pnt[1],pnt[2]);
+              ESMC_LogDefault.ESMC_LogWrite(msg,ESMC_LOGMSG_ERROR);
+            }
+            ESMC_LogDefault.ESMC_LogWrite("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+
+#if 0
+            write_3D_poly_woid_to_vtk("concave", num_poly_nodes, poly_coords); 
 #endif
-            //  write_3D_poly_woid_to_vtk("concave", num_poly_nodes, poly_coords); 
+
             *concave=true;
             return;
           } 
-          // Get rid of clockwise check, because we handle clockwise elements now
-          //else {
-          //*clockwise=true;
-          //printf(" clockwise element=%d\n",elem.get_id());
-          //printf(" num nodes=%d\n",num_poly_nodes);
-          //write_3D_poly_woid_to_vtk("clockwise", num_poly_nodes, poly_coords); 
-          // return;
-          //}
         }
       }
     }
@@ -855,6 +1074,10 @@ void noncnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *co
   // TODO: Check to see if 3D elements are in correct order.
 
 }
+
+
+
+
 
 #endif
 
