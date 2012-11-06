@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeWrite.C,v 1.7 2012/10/25 18:32:46 rokuingh Exp $
+// $Id: ESMCI_AttributeWrite.C,v 1.8 2012/11/06 20:14:54 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.7 2012/10/25 18:32:46 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.8 2012/11/06 20:14:54 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -417,61 +417,6 @@ namespace ESMCI {
 
  } // end AttributeWriteTabBuffer
 
-#if 0
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeWriteXML"
-//BOPI
-// !IROUTINE:  AttributeWriteXML - Write contents of an {\tt Attribute} package
-//
-// !INTERFACE:
-      int Attribute::AttributeWriteXML(
-//
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-//
-// !ARGUMENTS:
-      const string &convention,        //  in - convention
-      const string &purpose,           //  in - purpose
-      const string &object,            //  in - object
-      const string &varobj,            //  in - variable object
-      const string &basename) {   //  in - basename
-//
-// !DESCRIPTION:
-//    Print the contents of an {\tt Attribute}.  Expected to be
-//    called internally.
-//
-//EOPI
-
-  int localrc = ESMC_RC_NOT_IMPL;
-  int rc = ESMF_SUCCESS;
-
-  // instantiate IO object; initialize with pointer to this Attribute node, to
-  // write from
-  IO_XML *io_xml = ESMCI_IO_XMLCreate(0, NULL, 0, NULL, 
-                                      (ESMCI::Attribute*)this, &localrc);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-  if (localrc != ESMF_SUCCESS) rc = localrc;
-
-  // write the XML file, from this Attribute node
-  // TODO:  single call to IO_XML::write(); assumes centralized attribute tree
-  //        traversal method, used from IO_XML::write().
-  localrc = io_xml->write(fileNameLen, fileName);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-  if (localrc != ESMF_SUCCESS) rc = localrc;
-
-  localrc = ESMCI_IO_XMLDestroy(&io_xml);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-  if (localrc != ESMF_SUCCESS) rc = localrc;
-
-  return rc;
-
- } // end AttributeWriteXML
-#endif
-
-#if 0
-// this code is removed to revert to an old version of two function to reproduce
-// the AttributeWriteXML functionality from before the GridSpec integration
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeWriteXML"
@@ -698,13 +643,24 @@ namespace ESMCI {
     localrc = io_xml->writeStartElement("timeSeries", "", 1, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
+  } else if (convention.compare("CF")==0 &&
+             purpose.compare("GridSpec")==0) {
+
+    // Write the ESMF XML file header
+    localrc = io_xml->writeStartElement("gridSpec", "", 1, 6,
+           "\n      xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance",
+           "\n      xmlns:xlink", "http://www.w3.org/1999/xlink",
+           "\n      xmlns:gco", "http://www.isotc211.org/2005/gco",
+           "\n      xmlns:gmd", "http://www.isotc211.org/2005/gmd",
+           "\n      xmlns", "http://www.purl.org/org/esmetadata/cim/1.5/schemas",
+           "\n      xsi:schemaLocation", "http://www.purl.org/org/esmetadata/cim/1.5/schemas file:/home/likewise-open/WX/allyn.treshansky/WORK/METAFOR/working_copies/cim_1.5/cim.xsd");
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+
   } else if (!(object.compare("comp")==0 &&
                convention.compare("CIM")==0 &&
                purpose.compare("Model Component Simulation Description")==0)) {
 
     // Write the ESMF XML file header
-// RLO: this was replaced when prototyping the GridSpec CIM definition
-#if 0
     localrc = io_xml->writeStartElement("model_component", "", 1, 9,
            "name", modelcompname.c_str(),
            "full_name", fullname.c_str(),
@@ -715,15 +671,6 @@ namespace ESMCI {
            "\n      xmlns:gmd", "http://www.isotc211.org/2005/gmd",
            "\n      xmlns", "http://www.earthsystemmodeling.org",
            "\n      xsi:schemaLocation", "http://www.earthsystemmodeling.org file:/esmf_model_component.xsd");
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-#endif
-    localrc = io_xml->writeStartElement("gridSpec", "", 1, 6,
-           "\n      xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance",
-           "\n      xmlns:xlink", "http://www.w3.org/1999/xlink",
-           "\n      xmlns:gco", "http://www.isotc211.org/2005/gco",
-           "\n      xmlns:gmd", "http://www.isotc211.org/2005/gmd",
-           "\n      xmlns", "http://www.purl.org/org/esmetadata/cim/1.5/schemas",
-           "\n      xsi:schemaLocation", "http://www.purl.org/org/esmetadata/cim/1.5/schemas file:/home/likewise-open/WX/allyn.treshansky/WORK/METAFOR/working_copies/cim_1.5/cim.xsd");
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 #if 0
     // TODO:  write as separate elements instead of atts ?
@@ -759,6 +706,10 @@ namespace ESMCI {
       convention.compare("CIM")==0 &&
       purpose.compare("Model Component Simulation Description")==0) {
     localrc = AttributeWriteCIM(io_xml);
+  } else if (convention.compare("CF")==0 &&
+             purpose.compare("GridSpec")==0) {
+    localrc = AttributeWriteXMLtraverseGridSpec(io_xml,convention,purpose,columns,
+      fielddone,griddone,compdone);
   } else {
     // TODO: split out WaterML, ESMF
     //   (AttributeWriteWaterML(), AttributeWriteESMF(),
@@ -785,13 +736,9 @@ namespace ESMCI {
     localrc = io_xml->writeEndElement("timeSeriesResponse", 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
-  } else if (!(object.compare("comp")==0 &&
-               convention.compare("CIM")==0 &&
-               purpose.compare("Model Component Simulation Description")==0)) {
+  } else if (convention.compare("CF")==0 &&
+             purpose.compare("GridSpec")==0) {
 
-    // write the ESMF XML footer
-// RLO: this was replaced when prototyping the GridSpec CIM definition
-//    localrc = io_xml->writeEndElement("model_component", 1);
     localrc = io_xml->writeElement("documentID", "abcdefgh-1234-4321-4242-zyxwvutsrqpo", 1, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeElement("documentVersion", 
@@ -802,537 +749,6 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = io_xml->writeEndElement("gridSpec", 1);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-  }
-  
-  // destroy the io_xml object, which closes the file
-  localrc = ESMCI_IO_XMLDestroy(&io_xml);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-  return localrc;
-
- } // end AttributeWriteXML
- 
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeWriteXMLtraverse"
-//BOPI
-// !IROUTINE:  AttributeWriteXMLtraverse - {\tt Attribute} hierarchy traversal write
-//
-// !INTERFACE:
-      int Attribute::AttributeWriteXMLtraverse(
-//
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-//
-// !ARGUMENTS:
-      IO_XML *io_xml,                  //  in - io pointer to write
-      const string &convention,        //  in - convention
-      const string &purpose,           //  in - purpose
-      const int &columns,              //  in - columns
-      bool &fielddone,                 //  in - bool for field
-      bool &griddone,                  //  in - bool for grid
-      bool &compdone) const{           //  in - bool for comp
-//
-// !DESCRIPTION:
-//    Write the contents of an {\tt Attribute}.  Expected to be
-//    called internally.
-//
-//EOPI
-
-  char msgbuf[4*ESMF_MAXSTR];
-  int localrc;
-  int index;
-  unsigned int i;
-  Attribute *attpack;
-  
-  index = 0;
-  attpack = NULL;
-  
-  // Initialize local return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-
-  // do component write
-  if (!compdone) {
-// TODO: implement attPackInstanceName search, if possible to have multiple
-//       instances of attpack parents?
-    string attPackInstanceName;
-//printf("XMLtraverse(): looking for 1st attpack\n");
-    attpack = AttPackGet(convention, purpose, "comp", attPackInstanceName);
-    if (attpack != NULL) {
-//    while (attpack != NULL) {
-//printf("XMLtraverse(): found attPackInstanceName %s match\n",
-//       attPackInstanceName);
-      localrc = attpack->AttributeWriteXMLbuffer(io_xml);
-      if (localrc != ESMF_SUCCESS) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-          "AttributeWriteXMLtraverse failed AttributeWriteXMLbuffer", &localrc);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-      return ESMF_FAILURE;
-      }
-      // get next occurence of this attpack, if any
-//      ordinal++;
-//      attpack = AttPackGet(convention, purpose, "comp", &ordinal);
-    }
-//printf("XMLtraverse(): here3\n");
-    compdone = true;
-  }
-
-  // do field write
-  if (!fielddone) {
-#if 0
- // RLO: this was removed when prototyping the GridSpec CIM definition
-   // TODO: replace this prototype for WaterML TimeSeries
-    if (!(convention.compare("WaterML")==0 && 
-          purpose.compare("TimeSeries")==0)) {
-      // write the field header
-      localrc = io_xml->writeStartElement("variable_set", "", 2, 0);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    }
-#endif
-    // call the field write buffer method
-    localrc = AttributeWriteXMLbufferfield(io_xml, convention, purpose, index, columns);
-    if (localrc != ESMF_SUCCESS) {
-      sprintf(msgbuf, "AttributeWriteXMLtraverse failed AttributeWriteXMLbufferfield");
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-      return ESMF_FAILURE;
-    }
-#if 0
-// RLO: this was removed when prototyping the GridSpec CIM definition
-    if (!(convention.compare("WaterML")==0 &&
-          purpose.compare("TimeSeries")==0)) {
-      // write the field footer
-      localrc = io_xml->writeEndElement("variable_set", 2);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    }
-#endif
-    // done with field
-    fielddone = true;
-  }
-  
-  // do grid write
-  if (!griddone) {
-    string attPackInstanceName;
-    attpack = AttPackGet(convention, purpose, "grid", attPackInstanceName);
-    if (attpack) {
-      // write the grid header
-// RLO: this was removed when prototyping the GridSpec CIM definition
-#if 0 
-      localrc = io_xml->writeStartElement("GridSpec", "", 0, 1, "name", attpack->attrBase->ESMC_BaseGetName());
-      localrc = io_xml->writeStartElement("Mosaic", "", 1, 1, "name", attpack->attrBase->ESMC_BaseGetName());
-#endif
-
-      // start the esmModelGrid
-      localrc = io_xml->writeStartElement("esmModelGrid", "", 2, 4, 
-          "id", attpack->AttributeGetInternalGridString("ESMF:name").c_str(),
-          "isLeaf", attpack->AttributeGetInternalGridString("isLeaf").c_str(),
-          "gridType", attpack->AttributeGetInternalGridString("gridType").c_str(),
-          "numTiles", attpack->AttributeGetInternalGridInt("ESMF:tileCount").c_str());
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-      // write the shortname and longname
-      localrc = io_xml->writeElement("shortName", 
-        (attpack->AttributeGetInternalGridString("ESMF:name")).c_str(), 2, 0);
-      localrc = io_xml->writeElement("longName", 
-        (attpack->AttributeGetInternalGridString("longName")).c_str(), 2, 0);
-
-      // start the gridTile
-      localrc = io_xml->writeStartElement("gridTile", "", 3, 3, 
-          // TODO: This information is retrieved incorrectly right now because
-          // there is no way to get grid tile numbers yet because multi-tile
-          // grids are not yet supported.  This could be done by asking the 
-          // DistGrid for the deToTileMap, from which you can get a tile number
-          // but we will wait for proper multi-tile support anyway.
-          "id", attpack->AttributeGetInternalGridInt("ESMF:tileCount").c_str(),
-          "discretizationType", attpack->AttributeGetInternalGridString("discretizationType").c_str(),
-          "geometryType", attpack->AttributeGetInternalGridString("geometryType").c_str());
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-      // start the simpleGridGeom
-      localrc = io_xml->writeStartElement("simpleGridGeom", "", 4, 1, 
-          "numDims", attpack->AttributeGetInternalGridInt("ESMF:dimCount").c_str());
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-      // write coords
-      for (int i=0;  i<attpack->attrList.size(); ++i) { 
-        string value = attpack->attrList.at(i)->vcpp.at(0); 
-        // if this is internal info, retrieve the correct Attribute
-        if (attpack->attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER && 
-          strcmp(value.c_str(), "ESMF:farrayPtr") == 0) {
-          // this is coordinate information, call internal routine and continue
-          int nest_level = 5;
-          AttributeWriteInternalInfoGrid(io_xml, nest_level, attpack->attrList.at(i));
-        }
-      }
-
-      // end the simpleGridGeom
-      localrc = io_xml->writeEndElement("simpleGridGeom", 4);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-      // end the gridTile
-      localrc = io_xml->writeEndElement("gridTile", 3);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-#if 0
-      //localrc = attpack->AttributeWriteXMLbuffergrid(io_xml);
-      if (localrc != ESMF_SUCCESS) {
-        sprintf(msgbuf, "AttributeWriteXMLtraverse failed AttributeWriteXMLbuffergrid");
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        return ESMF_FAILURE;
-      }
-#endif
-
-      // write the grid footer
-// RLO: this was removed when prototyping the GridSpec CIM definition
-#if 0 
-      localrc = io_xml->writeEndElement("Mosaic", 1);
-      localrc = io_xml->writeEndElement("GridSpec", 0);
-#endif
-
-      // end the esmModelGrid
-      localrc = io_xml->writeEndElement("esmModelGrid", 2);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-      griddone = true;
-      return ESMF_SUCCESS;
-    }
-  }
-
-#if 0
-      // start the esmModelGrid
-      localrc = io_xml->writeStartElement("esmModelGrid", "", 1, 4, 
-          "id", attpack->AttributeGetInternalGridString("ESMF:name").c_str(),
-          "isLeaf", attpack->AttributeGetInternalGridString("isLeaf").c_str(),
-          "gridType", attpack->AttributeGetInternalGridString("gridType").c_str(),
-          "numTiles", attpack->AttributeGetInternalGridInt("ESMF:gridTile").c_str(),
-          "name", attpack->attrBase->ESMC_BaseGetName());
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-#endif
-
-      // write the grid footer
-// RLO: this was removed when prototyping the GridSpec CIM definition
-#if 0 
-      localrc = io_xml->writeEndElement("Mosaic", 1);
-      localrc = io_xml->writeEndElement("GridSpec", 0);
-#endif
-#if 0
-      // end the esmModelGrid
-      localrc = io_xml->writeEndElement("esmModelGrid", 1);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-#endif
-  
-  // recurse across all linked ESMF objects (e.g. child components, states,
-  // fieldBundles, fields, grids, arrays)
-  for(i=0; i<linkList.size(); i++)
-    localrc = linkList.at(i)->AttributeWriteXMLtraverse(io_xml,convention,purpose,columns,
-      fielddone,griddone,compdone);
-
-  return ESMF_SUCCESS;
-
- } // end AttributeWriteXMLtraverse
-#endif
-
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeWriteXML"
-//BOPI
-// !IROUTINE:  AttributeWriteXML - Write contents of an {\tt Attribute} package
-//
-// !INTERFACE:
-      int Attribute::AttributeWriteXML(
-//
-// !RETURN VALUE:
-//    {\tt ESMF\_SUCCESS} or error code on failure.
-//
-// !ARGUMENTS:
-      const string &convention,        //  in - convention
-      const string &purpose,           //  in - purpose
-      const string &object,            //  in - object
-      const string &varobj,            //  in - variable object
-      const string &basename) const {  //  in - basename
-//
-// !DESCRIPTION:
-//    Print the contents of an {\tt Attribute}.  Expected to be
-//    called internally.
-//
-//EOPI
-
-// TODO:  Rewrite this method (non-recursive) to be just a switcher to other
-//        methods (recursive) based on file standard type (separate methods
-//        for ESMF, CIM, WaterML, etc).  Each file type requires its own logic
-//        for how to traverse the attribute tree (possibly multiple times) and
-//        output the file (a form of serialization).
-
-  char msgbuf[4*ESMF_MAXSTR];
-  string modelcompname, fullname, version;
-  Attribute *attr, *attpack;
-  int localrc, rows, columns, fldcount;
-  bool fielddone, griddone, compdone;
-  ESMC_Logical presentflag;
-
-//printf("in AttributeWriteXML()\n"); fflush(stdout);
-
-  fielddone = false; griddone = false; compdone = false;
-  rows = 0; fldcount = 0; columns = 0;
-  attr = NULL; attpack = NULL;
-  
-  // Initialize local return code; assume routine not implemented
-  localrc = ESMC_RC_NOT_IMPL;
-
-  // Instantiate IO object to do the actual writing
-  string fileName = basename + ".xml";
-  IO_XML *io_xml = ESMCI_IO_XMLCreate(0, NULL, fileName.size(),fileName.c_str(),
-                                      (ESMCI::Attribute*)this, &localrc);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-  // Write ESMF header
-  string comment = "Generated with ESMF Version ";
-  comment += ESMF_VERSION_STRING;
-  comment += ", http://www.earthsystemmodeling.org";
-  localrc = io_xml->writeComment(comment);
-  if (localrc == ESMF_RC_LIB_NOT_PRESENT) {
-    sprintf(msgbuf, "Xerces C++ library (>= v3.1.0) not present");
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, msgbuf, &localrc);
-    localrc = ESMCI_IO_XMLDestroy(&io_xml);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    return ESMF_RC_LIB_NOT_PRESENT;
-  }
-
-  //
-  // determine modelcompname, fullname, version for header
-  //
-  if (object.compare("comp")==0) {
-    // get value of attribute 0 or set to N/A if not present
-    string attPackInstanceName;
-    localrc = AttPackIsPresent("ComponentShortName",convention,purpose,object,
-                               attPackInstanceName, &presentflag);
-    if (localrc != ESMF_SUCCESS) {
-      sprintf(msgbuf, "failed finding an attribute");
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-      localrc = ESMCI_IO_XMLDestroy(&io_xml);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-      return ESMF_FAILURE;
-    }
-    if (presentflag == ESMF_TRUE) {
-      string attPackInstanceName;
-      attr = (AttPackGet(convention, purpose, object,attPackInstanceName)->AttPackGetAttribute("ComponentShortName"));
-      if (attr != NULL) {
-        if (attr->vcpp.empty()) modelcompname = "N/A";
-        else modelcompname = attr->vcpp.at(0);
-      } else {
-        sprintf(msgbuf, "failed getting attribute value");
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-        localrc = ESMCI_IO_XMLDestroy(&io_xml);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        return ESMF_FAILURE;
-      }
-    }
-    else {
-      modelcompname="N/A";
-    }
-  
-    // get value of attribute 1 or set to N/A if not present
-    localrc = AttPackIsPresent("ComponentLongName",convention,purpose,object,
-                               attPackInstanceName, &presentflag);
-    if (localrc != ESMF_SUCCESS) {
-      sprintf(msgbuf, "failed finding an attribute");
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-      localrc = ESMCI_IO_XMLDestroy(&io_xml);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-      return ESMF_FAILURE;
-    }
-    if (presentflag == ESMF_TRUE) {
-      string attPackInstanceName;
-      attr = (AttPackGet(convention,purpose,object,attPackInstanceName)->AttPackGetAttribute("ComponentLongName"));
-      if (attr != NULL) {
-        if (attr->vcpp.empty()) fullname = "N/A";
-        else fullname = attr->vcpp.at(0);
-      } else {
-        sprintf(msgbuf, "failed getting attribute value");
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-        localrc = ESMCI_IO_XMLDestroy(&io_xml);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        return ESMF_FAILURE;
-      }
-    }
-    else {
-      fullname="N/A";
-    }
-  
-    // get value of attribute 2 or set to N/A if not present
-    localrc = AttPackIsPresent("Version",convention,purpose,object,
-                               attPackInstanceName, &presentflag);
-    if (localrc != ESMF_SUCCESS) {
-      sprintf(msgbuf, "failed finding an attribute");
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-      localrc = ESMCI_IO_XMLDestroy(&io_xml);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-      return ESMF_FAILURE;
-    }
-    if (presentflag == ESMF_TRUE) {
-      string attPackInstanceName;
-      attr = (AttPackGet(convention,purpose,object,attPackInstanceName)->AttPackGetAttribute("Version"));
-      if (attr != NULL) {
-        if (attr->vcpp.empty()) version = "N/A";
-        else version = attr->vcpp.at(0);
-      } else {
-        sprintf(msgbuf, "failed getting attribute value");
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-        localrc = ESMCI_IO_XMLDestroy(&io_xml);
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        return ESMF_FAILURE;
-      }
-    }
-    else {
-      version="N/A";
-    }
-  
-  } else if (object.compare("state")==0 ||
-             object.compare("fieldbundle")==0 ||
-             object.compare("field")==0 || 
-             object.compare("arraybundle")==0 ||
-             object.compare("array")==0 ||
-             object.compare("grid")==0) {
-    modelcompname="N/A";
-    fullname="N/A";
-    version="N/A";
-  }
-  else {
-    sprintf(msgbuf, "AttributeWrite called from an invalid ESMF object");
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-    return ESMF_FAILURE;
-  }
-  
-  // TODO: replace this prototype for WaterML TimeSeries
-  if (convention.compare("WaterML")==0 &&
-      purpose.compare("TimeSeries")==0) {
-
-    // Write the WaterML XML file header
-    localrc = io_xml->writeStartElement("timeSeriesResponse", "", 0, 6,
-           "xmlns:gml", "http://www.opengis.net/gml",
-           "\n  xmlns:xlink", "http://www.w3.org/1999/xlink",
-           " xmlns:xsd", "http://www.w3.org/2001/XMLSchema",
-           "\n  xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance",
-           " xmlns:wtr", "http://www.cuahsi.org/waterML/",
-           "\n  xmlns", "http://www.cuahsi.org/waterML/1.0/");
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    localrc = io_xml->writeStartElement("queryInfo", "", 1, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-  
-    localrc = io_xml->writeElement("creationTime",
-                                   "2009-01-08T15:52:17.8495Z", 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    localrc = io_xml->writeStartElement("criteria", "", 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    localrc = io_xml->writeElement("locationParam",
-                                   "LittleBearRiver:USU-LBR-Paradise", 3, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    localrc = io_xml->writeElement("variableParam", "LBR:USU39", 3, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    localrc = io_xml->writeStartElement("timeParam", "", 3, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    localrc = io_xml->writeElement("beginDateTime", "2008-04-14T13:00:00", 4, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    localrc = io_xml->writeElement("endDateTime", "2008-04-15T12:00:00", 4, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    localrc = io_xml->writeEndElement("timeParam", 3);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    localrc = io_xml->writeEndElement("criteria", 2);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    localrc = io_xml->writeElement("note", "OD Web Service", 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    localrc = io_xml->writeEndElement("queryInfo", 1);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    localrc = io_xml->writeStartElement("timeSeries", "", 1, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-  } else if (!(object.compare("comp")==0 &&
-               convention.compare("CIM")==0 &&
-               purpose.compare("Model Component Simulation Description")==0)) {
-
-    // Write the ESMF XML file header
-    localrc = io_xml->writeStartElement("model_component", "", 1, 9,
-           "name", modelcompname.c_str(),
-           "full_name", fullname.c_str(),
-           "version", version.c_str(),
-           "\n      xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance",
-           "\n      xmlns:xlink", "http://www.w3.org/1999/xlink",
-           "\n      xmlns:gco", "http://www.isotc211.org/2005/gco",
-           "\n      xmlns:gmd", "http://www.isotc211.org/2005/gmd",
-           "\n      xmlns", "http://www.earthsystemmodeling.org",
-           "\n      xsi:schemaLocation", "http://www.earthsystemmodeling.org file:/esmf_model_component.xsd");
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-#if 0
-    // TODO:  write as separate elements instead of atts ?
-    localrc = io_xml->writeStartElement("model_component", "", 1, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    localrc = io_xml->writeElement("name", modelcompname, 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    localrc = io_xml->writeElement("full_name", fullname, 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    localrc = io_xml->writeElement("version", version, 2, 0);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-#endif
-
-  }
-
-  // determine the number of fields to write
-  localrc = AttributeCountTree(convention, purpose, varobj, rows, columns);
-  if (localrc != ESMF_SUCCESS) {
-    sprintf(msgbuf, "Attribute failed counting fields");
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-    localrc = ESMCI_IO_XMLDestroy(&io_xml);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    return ESMF_FAILURE;
-  }
- 
-  // if not called from component, won't need to print that stuff
-  if (object.compare("comp")!=0) {
-    compdone = true;
-  }
- 
-  // recurse the Attribute hierarchy
-  if (object.compare("comp")==0 &&
-      convention.compare("CIM")==0 &&
-      purpose.compare("Model Component Simulation Description")==0) {
-    localrc = AttributeWriteCIM(io_xml);
-  } else {
-    // TODO: split out WaterML, ESMF
-    //   (AttributeWriteWaterML(), AttributeWriteESMF(),
-    //    deprecate AttributeXML()? )
-    localrc = AttributeWriteXMLtraverse(io_xml,convention,purpose,columns,
-      fielddone,griddone,compdone);
-  }
-  if (localrc != ESMF_SUCCESS) {
-    sprintf(msgbuf, "Attribute failed recursing in WriteXML");
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-    localrc = ESMCI_IO_XMLDestroy(&io_xml);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-    return ESMF_FAILURE;
-  }
-
-  // TODO: replace this prototype for WaterML TimeSeries
-  if (convention.compare("WaterML")==0 && 
-      purpose.compare("TimeSeries")==0) {
-
-    // write the WaterML footer
-    localrc = io_xml->writeEndElement("timeSeries", 1);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-
-    localrc = io_xml->writeEndElement("timeSeriesResponse", 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   } else if (!(object.compare("comp")==0 &&
@@ -1479,6 +895,151 @@ namespace ESMCI {
 
  } // end AttributeWriteXMLtraverse
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "AttributeWriteXMLtraverseGridSpec"
+//BOPI
+// !IROUTINE:  AttributeWriteXMLtraverseGridSpec - {\tt Attribute} hierarchy traversal write
+//
+// !INTERFACE:
+      int Attribute::AttributeWriteXMLtraverseGridSpec(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      IO_XML *io_xml,                  //  in - io pointer to write
+      const string &convention,        //  in - convention
+      const string &purpose,           //  in - purpose
+      const int &columns,              //  in - columns
+      bool &fielddone,                 //  in - bool for field
+      bool &griddone,                  //  in - bool for grid
+      bool &compdone) const{           //  in - bool for comp
+//
+// !DESCRIPTION:
+//    Write the contents of an {\tt Attribute}.  Expected to be
+//    called internally.
+//
+//EOPI
+
+  char msgbuf[4*ESMF_MAXSTR];
+  int localrc;
+  int index;
+  unsigned int i;
+  Attribute *attpack;
+  
+  index = 0;
+  attpack = NULL;
+  
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
+
+  // do component write
+  if (!compdone) {
+    string attPackInstanceName;
+    attpack = AttPackGet(convention, purpose, "comp", attPackInstanceName);
+    if (attpack != NULL) {
+      localrc = attpack->AttributeWriteXMLbuffer(io_xml);
+      if (localrc != ESMF_SUCCESS) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+          "AttributeWriteXMLtraverse failed AttributeWriteXMLbuffer", &localrc);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      return ESMF_FAILURE;
+      }
+    }
+    compdone = true;
+  }
+
+  // do field write
+  if (!fielddone) {
+    // call the field write buffer method
+    localrc = AttributeWriteXMLbufferfield(io_xml, convention, purpose, index, columns);
+    if (localrc != ESMF_SUCCESS) {
+      sprintf(msgbuf, "AttributeWriteXMLtraverse failed AttributeWriteXMLbufferfield");
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      return ESMF_FAILURE;
+    }
+    // done with field
+    fielddone = true;
+  }
+  
+  // do grid write
+  if (!griddone) {
+    string attPackInstanceName;
+    attpack = AttPackGet(convention, purpose, "grid", attPackInstanceName);
+    if (attpack) {
+      // write the grid header
+      // start the esmModelGrid
+      localrc = io_xml->writeStartElement("esmModelGrid", "", 2, 4, 
+          "id", attpack->AttributeGetInternalGridString("ESMF:name").c_str(),
+          "isLeaf", attpack->AttributeGetInternalGridString("isLeaf").c_str(),
+          "gridType", attpack->AttributeGetInternalGridString("gridType").c_str(),
+          "numTiles", attpack->AttributeGetInternalGridInt("ESMF:tileCount").c_str());
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+
+      // write the shortname and longname
+      localrc = io_xml->writeElement("shortName", 
+        (attpack->AttributeGetInternalGridString("ESMF:name")).c_str(), 2, 0);
+      localrc = io_xml->writeElement("longName", 
+        (attpack->AttributeGetInternalGridString("longName")).c_str(), 2, 0);
+
+      // start the gridTile
+      localrc = io_xml->writeStartElement("gridTile", "", 3, 3, 
+          // TODO: This information is retrieved incorrectly right now because
+          // there is no way to get grid tile numbers yet because multi-tile
+          // grids are not yet supported.  This could be done by asking the 
+          // DistGrid for the deToTileMap, from which you can get a tile number
+          // but we will wait for proper multi-tile support anyway.
+          "id", attpack->AttributeGetInternalGridInt("ESMF:tileCount").c_str(),
+          "discretizationType", attpack->AttributeGetInternalGridString("discretizationType").c_str(),
+          "geometryType", attpack->AttributeGetInternalGridString("geometryType").c_str());
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+
+      // start the simpleGridGeom
+      localrc = io_xml->writeStartElement("simpleGridGeom", "", 4, 1, 
+          "numDims", attpack->AttributeGetInternalGridInt("ESMF:dimCount").c_str());
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+
+      // write coords
+      for (int i=0;  i<attpack->attrList.size(); ++i) { 
+        string value = attpack->attrList.at(i)->vcpp.at(0); 
+        // if this is internal info, retrieve the correct Attribute
+        if (attpack->attrList.at(i)->tk == ESMC_TYPEKIND_CHARACTER && 
+          strcmp(value.c_str(), "ESMF:farrayPtr") == 0) {
+          // this is coordinate information, call internal routine and continue
+          int nest_level = 5;
+          AttributeWriteInternalInfoGrid(io_xml, nest_level, attpack->attrList.at(i));
+        }
+      }
+
+      // end the simpleGridGeom
+      localrc = io_xml->writeEndElement("simpleGridGeom", 4);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+
+      // end the gridTile
+      localrc = io_xml->writeEndElement("gridTile", 3);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+
+      // write the grid footer
+      // end the esmModelGrid
+      localrc = io_xml->writeEndElement("esmModelGrid", 2);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      griddone = true;
+      return ESMF_SUCCESS;
+    }
+  }
+  
+  // recurse across all linked ESMF objects (e.g. child components, states,
+  // fieldBundles, fields, grids, arrays)
+  for(i=0; i<linkList.size(); i++)
+    localrc = linkList.at(i)->AttributeWriteXMLtraverseGridSpec(io_xml,convention,purpose,columns,
+      fielddone,griddone,compdone);
+
+  return ESMF_SUCCESS;
+
+ } // end AttributeWriteXMLtraverseGridSpec
 
 //-----------------------------------------------------------------------------
 

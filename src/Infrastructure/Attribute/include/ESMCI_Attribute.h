@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.63 2012/09/13 21:57:31 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.64 2012/11/06 20:14:47 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -317,6 +317,9 @@ class Attribute
       const std::string &object, const std::string &varobj, const std::string &basename) const;
 
     int AttributeWriteXMLtraverse(IO_XML *io_xml, const std::string &convention,
+      const std::string &purpose,
+      const int &columns,bool &fielddone,bool &griddone,bool &compdone) const;
+    int AttributeWriteXMLtraverseGridSpec(IO_XML *io_xml, const std::string &convention,
       const std::string &purpose,
       const int &columns,bool &fielddone,bool &griddone,bool &compdone) const;
     int AttributeWriteXMLbuffer(IO_XML *io_xml) const;

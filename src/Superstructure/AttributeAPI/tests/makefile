@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2012/10/31 21:11:02 rokuingh Exp $ 
+# $Id: makefile,v 1.22 2012/11/06 20:14:55 rokuingh Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -189,6 +189,12 @@ RUN_ESMF_AttReadGridCompUTestUNI:
 
 # --- Grid
 
+RUN_ESMF_AttributeGridGetUTest:
+	$(MAKE) TNAME=AttributeGridGet NP=4 ftest
+
+RUN_ESMF_AttributeGridGetUTestUNI:
+	$(MAKE) TNAME=AttributeGridGet NP=1 ftest
+
 RUN_ESMF_AttributeGridUTest:
 	$(MAKE) TNAME=AttributeGrid NP=4 ftest
 
@@ -231,28 +237,24 @@ RUN_ESMF_AttributeStateUTestUNI:
 
 # --- Update
 
-RUN_ESMF_AttributeUpdateUTest:
-	$(MAKE) TNAME=AttributeUpdate NP=4 ftest
+RUN_ESMF_AttributeUpdate2UTest:
+	$(MAKE) TNAME=AttributeUpdate2 NP=6 ftest
 
 RUN_ESMF_AttributeUpdateRemoveOnlyUTest:
 	$(MAKE) TNAME=AttributeUpdateRemoveOnly NP=4 ftest
 
-RUN_ESMF_AttributeUpdate2UTest:
-	$(MAKE) TNAME=AttributeUpdate2 NP=6 ftest
+RUN_ESMF_AttributeUpdateUTest:
+	$(MAKE) TNAME=AttributeUpdate NP=4 ftest
 
 # --- WriteInternal
 
 RUN_ESMF_AttributeWriteInternalUTest:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridcomp_gridspec.xml $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeWriteInternal NP=1 ftest
 
 RUN_ESMF_AttributeWriteInternalUTestUNI:
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridcomp_gridspec.xml $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeWriteInternal NP=1 ftest
-
-RUN_ESMF_AttributeGridGetUTest:
-	$(MAKE) TNAME=AttributeGridGet NP=4 ftest
-
-RUN_ESMF_AttributeGridGetUTestUNI:
-	$(MAKE) TNAME=AttributeGridGet NP=1 ftest
 
 # --- XML
 

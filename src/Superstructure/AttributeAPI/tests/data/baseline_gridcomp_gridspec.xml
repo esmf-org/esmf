@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with ESMF Version 6.1.0 beta snapshot, http://www.earthsystemmodeling.org -->
+  <gridSpec 
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+      xmlns:xlink="http://www.w3.org/1999/xlink" 
+      xmlns:gco="http://www.isotc211.org/2005/gco" 
+      xmlns:gmd="http://www.isotc211.org/2005/gmd" 
+      xmlns="http://www.purl.org/org/esmetadata/cim/1.5/schemas" 
+      xsi:schemaLocation="http://www.purl.org/org/esmetadata/cim/1.5/schemas file:/home/likewise-open/WX/allyn.treshansky/WORK/METAFOR/working_copies/cim_1.5/cim.xsd">
+    <esmModelGrid id="Grid002" isLeaf="true" gridType="regular_lat_lon" numTiles="1">
+    <shortName>Grid002</shortName>
+    <longName>ESMF Grid CF definition to prototype ESMF internal Attributes</longName>
+      <gridTile id="1" discretizationType="logically_rectangular" geometryType="sphere">
+        <simpleGridGeom numDims="2">
+          <xcoords>0 0 0 0 0 0 0 0 0 0 36 36 36 36 36 36 36 36 36 36 72 72 72 72 72 72 72 72 72 72 108 108 108 108 108 108 108 108 108 108 144 144 144 144 144 144 144 144 144 144 180 180 180 180 180 180 180 180 180 180 216 216 216 216 216 216 216 216 216 216 252 252 252 252 252 252 252 252 252 252 288 288 288 288 288 288 288 288 288 288 324 324 324 324 324 324 324 324 324 324 </xcoords>
+          <ycoords>-81 -63 -45 -27 -9 9 27 45 63 81 -81 -63 -45 -27 -9 9 27 45 63 81 -81 -63 -45 -27 -9 9 27 45 63 81 -81 -63 -45 -27 -9 9 27 45 63 81 -81 -63 -45 -27 -9 9 27 45 63 81 -81 -63 -45 -27 -9 9 27 45 63 81 -81 -63 -45 -27 -9 9 27 45 63 81 -81 -63 -45 -27 -9 9 27 45 63 81 -81 -63 -45 -27 -9 9 27 45 63 81 -81 -63 -45 -27 -9 9 27 45 63 81 </ycoords>
+        </simpleGridGeom>
+      </gridTile>
+    </esmModelGrid>
+  <documentID>abcdefgh-1234-4321-4242-zyxwvutsrqpo</documentID>
+  <documentVersion>1.2.3</documentVersion>
+  <documentCreationDate>2012-09-25T09:54:30</documentCreationDate>
+  </gridSpec>
