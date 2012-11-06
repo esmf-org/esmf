@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.82 2012/01/06 20:16:06 svasquez Exp $
+! $Id: ESMF_Config.F90,v 1.83 2012/11/06 01:19:54 w6ws Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -603,12 +603,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ConfigFindLabel - Find a label
 !
 ! !INTERFACE:
-    subroutine ESMF_ConfigFindLabel(config, label, keywordEnforcer, rc)
+    subroutine ESMF_ConfigFindLabel(config, label, keywordEnforcer, foundFlag, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)           :: config 
       character(len=*),  intent(in)              :: label
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      logical,           intent(out),  optional  :: foundFlag
       integer,           intent(out),  optional  :: rc 
 
 !
@@ -632,10 +633,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Already created {\tt ESMF\_Config} object.
 !   \item [label]
 !     Identifying label. 
+!   \item [{[foundFlag]}]
+!     Set to {\tt .true.} if the item is found.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     Equals -1 if buffer could not be loaded, -2 if label not found,
-!     and -3 if invalid operation with index.
+!     If the label is not found, and the {\tt foundFlag} argument is
+!     not present, an error is returned.
 !   \end{description}
 !
 !EOP -------------------------------------------------------------------
@@ -648,12 +651,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
+      if (present (foundFlag)) then
+        foundFlag = .false.
+      end if
+
 !     Determine whether label exists
 !     ------------------------------    
 
       i = index_ ( config%cptr%buffer(1:config%cptr%nbuf), EOL//label ) + 1
       if ( i .eq. 1 ) then
          config%cptr%this_line = BLK // EOL
+         if (present (foundFlag)) then
+           if (present (rc)) rc = ESMF_SUCCESS
+           return
+         end if
          if (ESMF_LogFoundError(ESMF_RC_NOT_FOUND, &
                                 msg="label not found", &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
@@ -661,6 +672,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
                                 msg="invalid operation with index_", &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
+      end if
+
+      if (present (foundFlag)) then
+        foundFlag = .true.
       end if
 
 !     Save current attribute label without colon,
@@ -826,7 +841,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI ------------------------------------------------------------------
       character(len=1) :: ch
       integer :: ib, ie, localrc
-      
+      logical :: found
+
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -844,10 +860,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! Processing
       if(present( label )) then
-         call ESMF_ConfigFindLabel( config, label=label, rc=localrc)
-         if ( localrc /= ESMF_SUCCESS ) then
+         call ESMF_ConfigFindLabel( config, label=label,  &
+             foundFlag=found, rc=localrc)
+         if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+         if (.not. found) then
             if (present(default)) then
                localrc = ESMF_SUCCESS
+            else
+               localrc = ESMF_RC_NOT_FOUND
             end if
             if ( present (rc )) then
               rc = localrc
@@ -1129,6 +1151,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc
       integer :: localcount
       integer :: i 
+      logical :: found
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1161,7 +1184,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 ! Processing
       if (present( label )) then
-         call ESMF_ConfigFindLabel( config, label=label, rc=localrc)
+         call ESMF_ConfigFindLabel( config, label=label,  &
+             foundFlag=found, rc=localrc)
+         if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+         if (.not. found)  &
+             localrc = ESMF_RC_NOT_FOUND
       end if
 
       do i = 1, localcount
@@ -1224,6 +1252,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc
       integer :: localcount
       integer :: i 
+      logical :: found
       
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1256,7 +1285,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! Processing
       if (present( label )) then
-         call ESMF_ConfigFindLabel( config, label=label, rc=localrc)
+         call ESMF_ConfigFindLabel( config, label=label,  &
+             foundFlag=found, rc=localrc)
+         if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+         if (.not. found)  &
+             localrc = ESMF_RC_NOT_FOUND
       end if
 
       do i = 1, localcount
@@ -1516,6 +1550,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc
       integer :: localcount
       integer :: i 
+      logical :: found
       
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1548,7 +1583,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! Processing 
       if (present( label )) then
-         call ESMF_ConfigFindLabel( config, label=label, rc=localrc)
+         call ESMF_ConfigFindLabel( config, label=label,  &
+             foundFlag=found, rc=localrc)
+         if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+         if (.not. found)  &
+             localrc = ESMF_RC_NOT_FOUND
       end if
 
       do i = 1, localcount
@@ -1613,6 +1653,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc
       integer :: localcount
       integer :: i 
+      logical :: found
       
       localrc = ESMF_SUCCESS
       !check variables
@@ -1642,7 +1683,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! Processing 
       if (present( label )) then
-         call ESMF_ConfigFindLabel( config, label=label, rc=localrc)
+         call ESMF_ConfigFindLabel( config, label=label,  &
+             foundFlag=found, rc=localrc)
+         if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+         if (.not. found)  &
+             localrc = ESMF_RC_NOT_FOUND
       end if
 
       do i = 1, localcount
@@ -1817,6 +1863,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc
       integer :: localcount
       integer :: i 
+      logical :: found
       
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1849,7 +1896,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Processing 
       if (present( label )) then
-         call ESMF_ConfigFindLabel( config, label=label, rc=localrc)
+         call ESMF_ConfigFindLabel( config, label=label,  &
+             foundFlag=found, rc=localrc)
+         if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+         if (.not. found)  &
+             localrc = ESMF_RC_NOT_FOUND
       end if
 
       do i = 1, localcount
@@ -1996,6 +2048,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
       integer :: localrc
       integer :: n
+      logical :: found
       logical :: tend
 
       ! Initialize return code; assume routine not implemented
@@ -2009,8 +2062,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       if ( present(label) ) then
-        call ESMF_ConfigFindLabel(config, label=label, rc=localrc)
-        if ( localrc /= ESMF_SUCCESS ) then
+        call ESMF_ConfigFindLabel(config, label=label,  &
+            foundFlag=found, rc=localrc)
+        if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        if (.not. found) then
+           localrc = ESMF_RC_NOT_FOUND
            if ( present( rc )) then
              rc = localrc
            endif
@@ -2086,6 +2143,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=LSZ) :: string
       integer :: localrc
       integer :: count 
+      logical :: found
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2098,8 +2156,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
       if( present( label )) then
-         call ESMF_ConfigFindLabel(config, label=label, rc=localrc)
-         if( localrc /= 0) then
+         call ESMF_ConfigFindLabel(config, label=label,  &
+             foundFlag=found, rc=localrc)
+         if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+         if (.not. found) then
+            localrc = ESMF_RC_NOT_FOUND
             if (present( rc )) then
               rc = localrc
             endif
