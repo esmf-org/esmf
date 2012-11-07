@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.84 2012/11/06 01:54:46 w6ws Exp $
+! $Id: ESMF_Config.F90,v 1.85 2012/11/07 19:05:21 w6ws Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -616,6 +616,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{6.1.0} Added the {\tt foundFlag} argument.
+! This allows detection of an end-of-line condition to be separate from the
+! {\tt rc}.
 ! \end{itemize}
 !
 ! !DESCRIPTION: Finds the {\tt label} (key) string in the {\tt config} object. 
