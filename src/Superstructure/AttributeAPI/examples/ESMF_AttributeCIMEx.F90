@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.54 2012/11/07 18:44:12 ksaint Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.55 2012/11/07 20:54:39 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@ program ESMF_AttributeCIMEx
 !\begin{sloppypar}
 ! This example illustrates the use of the Metafor CIM Attribute packages,
 ! supplied by ESMF, to create an Attribute hierarchy on an ESMF object tree.
-! A gridded, coupler and science Components are used together with a State 
+! Gridded, coupler and science Components are used together with a State 
 ! and a realistic Field
 ! to create a simple ESMF object tree.  CIM Attributes packages are created
 ! on the Components and Field, and then the individual Attributes within the
