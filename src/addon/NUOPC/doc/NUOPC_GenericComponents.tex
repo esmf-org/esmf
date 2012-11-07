@@ -1,6 +1,18 @@
-% $Id: NUOPC_GenericComponents.tex,v 1.1 2012/10/24 15:58:36 theurich Exp $
+% $Id: NUOPC_GenericComponents.tex,v 1.2 2012/11/07 17:31:25 theurich Exp $
 
-The NUOPC generic components are implemented as a {\em collection} of Fortran modules. Each module implements a single, well specified set of standard {\tt ESMF\_GridComp} or {\tt ESMF\_CplComp} methods. The nomenclature of the generic component modules starts with the {\tt NUOPC\_} prefix, then continues with {\tt Driver}, {\tt Model}, {\tt Mediator}, or {\tt Connector} followed optionally by a string of descriptive terms.
+The NUOPC generic components are implemented as a {\em collection} of Fortran modules. Each module implements a single, well specified set of standard {\tt ESMF\_GridComp} or {\tt ESMF\_CplComp} methods. The nomenclature of the generic component modules starts with the {\tt NUOPC\_} prefix and continues with the flavor: {\tt Driver}, {\tt Model}, {\tt Mediator}, or {\tt Connector}. This is optionally followed by a string of additional descriptive terms. The four flavors of generic components implemented by the NUOPC Layer are:
+
+\begin{itemize}
+
+\item {\tt NUOPC\_Driver} - A generic driver component. It implements a child component harness, made of State and Component objects, that follows the NUOPC Common Model Architecture. It is specialized by plugging {\tt Model}, {\tt Mediator}, and {\tt Connector} components into the harness. {\tt Driver} components can be plugged into the harness to construct component hierarchies. The generic {\tt Driver} initializes its child components according to a standard Initialization Phase Definition, and drives their Run() methods according a customizable run sequence.
+
+\item {\tt NUOPC\_Model} - A generic model component that wraps a model code so it is suitable to be plugged into a generic {\tt Driver} component.
+
+\item {\tt NUOPC\_Mediator} - A generic mediator component that wraps custom coupling code (flux calculations, averaging, etc.) so it is suitable to be plugged into a generic {\tt Driver} component.
+
+\item {\tt NUOPC\_Connector} - A generic component that implements Field matching based on metadata and executes simple transforms (Regrid and Redist). It can be plugged into a generic {\tt Driver} component.
+
+\end{itemize}
 
 The user code accesses the desired generic component(s) by including a {\tt use} line for each one. Each generic component defines a small set of public names that are made available to the user code through the {\tt use} statement. At a minimum the {\tt SetServices} method is made public. Some generic components also define a public internal state type by the standard name {\tt InternalState}. It is recommended that the following syntax is used when accessing a generic component (here with internal state):
 
@@ -28,7 +40,7 @@ There are three mechanisms through which user code specializes generic component
 \begin{center}
 \scalebox{0.6}{\includegraphics{NUOPC_GC}}
 \end{center}
-\caption{The NUOPC Generic Component inheritance structure. One tree is rooted in {\tt ESMF\_GridComp}, while the other is rooted in {\tt ESMF\_CplComp}.}
+\caption{The NUOPC Generic Component inheritance structure. The upper tree is rooted in {\tt ESMF\_GridComp}, while the lower tree is rooted in {\tt ESMF\_CplComp}. The ESMF data types are shown in green. The four main NUOPC Generic Component flavors are shown in dark blue boxes. Light blue boxes contain generic components that specialize for common cases, while the yellow box shows a parent class in the inheritance tree.}
 \label{fig:NUOPCGenericComp}
 \end{figure}
 
