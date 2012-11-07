@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.138 2012/10/02 04:32:30 theurich Exp $
+// $Id: ESMCI_Attribute.C,v 1.139 2012/11/07 06:53:25 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.138 2012/10/02 04:32:30 theurich Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.139 2012/11/07 06:53:25 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -65,6 +65,23 @@ Attribute *Attribute::writeRoot = ESMC_NULL_POINTER;
 //      -- but circular dependency exists
 //         with 'root' in ESMC_Base
 int Attribute::count = 0;
+
+// initialize static convention and purpose strings
+const std::string Attribute::CF_CONV      = "CF";
+const std::string Attribute::ESG_CONV     = "ESG";
+const std::string Attribute::ESMF_CONV    = "ESMF";
+const std::string Attribute::CIM_1_5_CONV = "CIM";
+
+const std::string Attribute::GENERAL_PURP    = "General";
+const std::string Attribute::EXTENDED_PURP   = "Extended";
+const std::string Attribute::INPUTS_PURP     = "Inputs";
+const std::string Attribute::MODEL_COMP_PURP = "ModelComp";
+const std::string Attribute::PLATFORM_PURP   = "Platform";
+const std::string Attribute::RESP_PARTY_PURP = "RespParty";
+const std::string Attribute::CITATION_PURP   = "Citation";
+const std::string Attribute::SCI_PROP_PURP   = "SciProp";
+const std::string Attribute::COMP_PROP_PURP  = "CompProp";
+
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -297,170 +314,170 @@ int Attribute::count = 0;
   // Grid standard Attribute package
   if (object.compare("grid")==0) {
     if ((convention.compare("GridSpec")==0 ||
-         convention.compare("ESMF")==0) && purpose.compare("General")==0) {
-      localrc = AttPackCreateCustom("GridSpec", "General", object);
+         convention.compare(ESMF_CONV)==0) && purpose.compare(GENERAL_PURP)==0) {
+      localrc = AttPackCreateCustom("GridSpec", GENERAL_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       // TODO: CongruentTiles & GridType will be at the mosaic level,
       //       others at the tile level
-      localrc = AttPackAddAttribute("CongruentTiles", "GridSpec", "General", object);
-      localrc = AttPackAddAttribute("DimensionOrder", "GridSpec", "General", object);
+      localrc = AttPackAddAttribute("CongruentTiles", "GridSpec", GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("DimensionOrder", "GridSpec", GENERAL_PURP, object);
 
       // TODO: Area & Coordinatepoles await further spec from Sylvia Murphy & Co.
-      //localrc = AttPackAddAttribute("Area", "GridSpec", "General", object);
-      //localrc = AttPackAddAttribute("CoordinatePoles", "GridSpec", "General", object);
+      //localrc = AttPackAddAttribute("Area", "GridSpec", GENERAL_PURP, object);
+      //localrc = AttPackAddAttribute("CoordinatePoles", "GridSpec", GENERAL_PURP, object);
 
-      localrc = AttPackAddAttribute("DiscretizationType", "GridSpec", "General", object);
-      localrc = AttPackAddAttribute("GeometryType", "GridSpec", "General", object);
-      localrc = AttPackAddAttribute("GridType", "GridSpec", "General", object);
-      localrc = AttPackAddAttribute("HorizontalResolution", "GridSpec", "General", object);
-      localrc = AttPackAddAttribute("IsConformal", "GridSpec", "General", object);
-      localrc = AttPackAddAttribute("IsRegular", "GridSpec", "General", object);
-      localrc = AttPackAddAttribute("IsUniform", "GridSpec", "General", object);
-      localrc = AttPackAddAttribute("NorthPoleLocation", "GridSpec", "General", object);
-      localrc = AttPackAddAttribute("NumberOfCells", "GridSpec", "General", object);
-      localrc = AttPackAddAttribute("NumberOfGridTiles", "GridSpec", "General", object);
-      localrc = AttPackAddAttribute("NX", "GridSpec", "General", object);
-      localrc = AttPackAddAttribute("NY", "GridSpec", "General", object);
+      localrc = AttPackAddAttribute("DiscretizationType", "GridSpec", GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("GeometryType", "GridSpec", GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("GridType", "GridSpec", GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("HorizontalResolution", "GridSpec", GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("IsConformal", "GridSpec", GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("IsRegular", "GridSpec", GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("IsUniform", "GridSpec", GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("NorthPoleLocation", "GridSpec", GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("NumberOfCells", "GridSpec", GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("NumberOfGridTiles", "GridSpec", GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("NX", "GridSpec", GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("NY", "GridSpec", GENERAL_PURP, object);
     }
-    if (convention.compare("ESMF")==0 && purpose.compare("General")==0) {
-      localrc = AttPackNest("ESMF", "General", object, "GridSpec", "General");
+    if (convention.compare(ESMF_CONV)==0 && purpose.compare(GENERAL_PURP)==0) {
+      localrc = AttPackNest(ESMF_CONV, GENERAL_PURP, object, "GridSpec", GENERAL_PURP);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
-      localrc = AttPackAddAttribute("RegDecompX", "ESMF", "General", object);
-      localrc = AttPackAddAttribute("RegDecompY", "ESMF", "General", object);
+      localrc = AttPackAddAttribute("RegDecompX", ESMF_CONV, GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("RegDecompY", ESMF_CONV, GENERAL_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
 
   } else if (object.compare("field")==0 || object.compare("array")==0) {
   // Field standard Attribute package
-    if (((convention.compare("CF")==0  ||
-          convention.compare("ESG")==0 ||
-          convention.compare("ESMF")==0) && purpose.compare("General")==0) ||
-         (convention.compare("CF")==0 && purpose.compare("Extended")==0) ||
-         (convention.compare("CIM")==0 && purpose.compare("Inputs Description")==0))
+    if (((convention.compare(CF_CONV)==0  ||
+          convention.compare(ESG_CONV)==0 ||
+          convention.compare(ESMF_CONV)==0) && purpose.compare(GENERAL_PURP)==0) ||
+         (convention.compare(CF_CONV)==0 && purpose.compare(EXTENDED_PURP)==0) ||
+         (convention.compare(CIM_1_5_CONV)==0 && purpose.compare(INPUTS_PURP)==0))
     {
-      localrc = AttPackCreateCustom("CF", "General", object);
+      localrc = AttPackCreateCustom(CF_CONV, GENERAL_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
-      localrc = AttPackAddAttribute("LongName", "CF", "General",object);
-      localrc = AttPackAddAttribute("ShortName", "CF", "General", object);
-      localrc = AttPackAddAttribute("Units", "CF", "General", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            &localrc)) return localrc;
-    }
-    if (((convention.compare("ESG")==0 ||
-          convention.compare("ESMF")==0) && purpose.compare("General")==0) ||
-         (convention.compare("CF")==0    && purpose.compare("Extended")==0) ||
-         (convention.compare("CIM")==0 && purpose.compare("Inputs Description")==0)) {
-      localrc = AttPackNest("CF", "Extended", object, "CF", "General");
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            &localrc)) return localrc;
-      localrc = AttPackAddAttribute("StandardName", "CF", "Extended", object);
+      localrc = AttPackAddAttribute("LongName", CF_CONV, GENERAL_PURP,object);
+      localrc = AttPackAddAttribute("ShortName", CF_CONV, GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("Units", CF_CONV, GENERAL_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
-    if (((convention.compare("ESG")==0 ||
-          convention.compare("ESMF")==0) && purpose.compare("General")==0) ||
-         (convention.compare("CIM")==0 && purpose.compare("Inputs Description")==0)) {
-      localrc = AttPackNest("ESG", "General", object, "CF", "Extended");
+    if (((convention.compare(ESG_CONV)==0 ||
+          convention.compare(ESMF_CONV)==0) && purpose.compare(GENERAL_PURP)==0) ||
+         (convention.compare(CF_CONV)==0    && purpose.compare(EXTENDED_PURP)==0) ||
+         (convention.compare(CIM_1_5_CONV)==0 && purpose.compare(INPUTS_PURP)==0)) {
+      localrc = AttPackNest(CF_CONV, EXTENDED_PURP, object, CF_CONV, GENERAL_PURP);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
-      localrc = AttPackAddAttribute("Intent", "ESG", "General", object);
+      localrc = AttPackAddAttribute("StandardName", CF_CONV, EXTENDED_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
-    if ((convention.compare("ESMF")==0 && purpose.compare("General")==0) ||
-        (convention.compare("CIM")==0 && purpose.compare("Inputs Description")==0)) {
-      localrc = AttPackNest("ESMF", "General", object, "ESG", "General");
+    if (((convention.compare(ESG_CONV)==0 ||
+          convention.compare(ESMF_CONV)==0) && purpose.compare(GENERAL_PURP)==0) ||
+         (convention.compare(CIM_1_5_CONV)==0 && purpose.compare(INPUTS_PURP)==0)) {
+      localrc = AttPackNest(ESG_CONV, GENERAL_PURP, object, CF_CONV, EXTENDED_PURP);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            &localrc)) return localrc;
+      localrc = AttPackAddAttribute("Intent", ESG_CONV, GENERAL_PURP, object);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            &localrc)) return localrc;
+    }
+    if ((convention.compare(ESMF_CONV)==0 && purpose.compare(GENERAL_PURP)==0) ||
+        (convention.compare(CIM_1_5_CONV)==0 && purpose.compare(INPUTS_PURP)==0)) {
+      localrc = AttPackNest(ESMF_CONV, GENERAL_PURP, object, ESG_CONV, GENERAL_PURP);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
     // CIM inherits (ESMF, General)
-    if (convention.compare("CIM")==0 &&
-        purpose.compare("Inputs Description")==0) {
-      localrc = AttPackNest("CIM", "Inputs Description", object,
-                            "ESMF", "General");
+    if (convention.compare(CIM_1_5_CONV)==0 &&
+        purpose.compare(INPUTS_PURP)==0) {
+      localrc = AttPackNest(CIM_1_5_CONV, INPUTS_PURP, object,
+                            ESMF_CONV, GENERAL_PURP);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
-      localrc = AttPackAddAttribute("CouplingPurpose", "CIM",
-                            "Inputs Description", object);
-      localrc = AttPackAddAttribute("CouplingSource", "CIM",
-                            "Inputs Description", object);
-      localrc = AttPackAddAttribute("CouplingTarget", "CIM",
-                            "Inputs Description", object);
-      localrc = AttPackAddAttribute("Description", "CIM",
-                            "Inputs Description", object);
-      localrc = AttPackAddAttribute("Frequency", "CIM",
-                            "Inputs Description", object);
-      localrc = AttPackAddAttribute("SpatialRegriddingMethod", "CIM",
-                            "Inputs Description", object);
-      localrc = AttPackAddAttribute("SpatialRegriddingDimension", "CIM",
-                            "Inputs Description", object);
-      localrc = AttPackAddAttribute("Technique", "CIM",
-                            "Inputs Description", object);
-      localrc = AttPackAddAttribute("TimeTransformationType", "CIM",
-                            "Inputs Description", object);
+      localrc = AttPackAddAttribute("CouplingPurpose", CIM_1_5_CONV,
+                            INPUTS_PURP, object);
+      localrc = AttPackAddAttribute("CouplingSource", CIM_1_5_CONV,
+                            INPUTS_PURP, object);
+      localrc = AttPackAddAttribute("CouplingTarget", CIM_1_5_CONV,
+                            INPUTS_PURP, object);
+      localrc = AttPackAddAttribute("Description", CIM_1_5_CONV,
+                            INPUTS_PURP, object);
+      localrc = AttPackAddAttribute("Frequency", CIM_1_5_CONV,
+                            INPUTS_PURP, object);
+      localrc = AttPackAddAttribute("SpatialRegriddingMethod", CIM_1_5_CONV,
+                            INPUTS_PURP, object);
+      localrc = AttPackAddAttribute("SpatialRegriddingDimension", CIM_1_5_CONV,
+                            INPUTS_PURP, object);
+      localrc = AttPackAddAttribute("Technique", CIM_1_5_CONV,
+                            INPUTS_PURP, object);
+      localrc = AttPackAddAttribute("TimeTransformationType", CIM_1_5_CONV,
+                            INPUTS_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
     
   } else if (object.compare("state")==0) {
   // State standard Attribute package
-    localrc = AttPackCreateCustom("ESMF", "General", object);
+    localrc = AttPackCreateCustom(ESMF_CONV, GENERAL_PURP, object);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
-    localrc = AttPackAddAttribute("Intent", "ESMF", "General", object);
+    localrc = AttPackAddAttribute("Intent", ESMF_CONV, GENERAL_PURP, object);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
 
   } else if (object.compare("comp")==0) {
   // Component standard Attribute packages
-    if ((convention.compare("ESG")==0 ||
-         convention.compare("ESMF")==0) && purpose.compare("General")==0) {
-      localrc = AttPackCreateCustom("ESG", "General", object);
+    if ((convention.compare(ESG_CONV)==0 ||
+         convention.compare(ESMF_CONV)==0) && purpose.compare(GENERAL_PURP)==0) {
+      localrc = AttPackCreateCustom(ESG_CONV, GENERAL_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
-      localrc = AttPackAddAttribute("Agency", "ESG", "General", object);
-      localrc = AttPackAddAttribute("Author", "ESG", "General", object);
-      localrc = AttPackAddAttribute("CodingLanguage", "ESG", "General", object);
-      localrc = AttPackAddAttribute("ComponentLongName", "ESG", "General", object);
-      localrc = AttPackAddAttribute("ComponentShortName", "ESG", "General", object);
-      localrc = AttPackAddAttribute("Discipline", "ESG", "General", object);
-      localrc = AttPackAddAttribute("Institution", "ESG", "General", object);
-      localrc = AttPackAddAttribute("ModelComponentFramework", "ESG", "General", object);
-      localrc = AttPackAddAttribute("PhysicalDomain", "ESG", "General", object);
-      localrc = AttPackAddAttribute("Version", "ESG", "General", object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            &localrc)) return localrc;
-    }
-    if (convention.compare("ESMF")==0 && purpose.compare("General")==0) {
-      localrc = AttPackNest("ESMF", "General", object, "ESG", "General");
+      localrc = AttPackAddAttribute("Agency", ESG_CONV, GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("Author", ESG_CONV, GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("CodingLanguage", ESG_CONV, GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("ComponentLongName", ESG_CONV, GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("ComponentShortName", ESG_CONV, GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("Discipline", ESG_CONV, GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("Institution", ESG_CONV, GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("ModelComponentFramework", ESG_CONV, GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("PhysicalDomain", ESG_CONV, GENERAL_PURP, object);
+      localrc = AttPackAddAttribute("Version", ESG_CONV, GENERAL_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
-    if (convention.compare("CIM")==0 &&
-        purpose.compare("Model Component Simulation Description")==0) {
+    if (convention.compare(ESMF_CONV)==0 && purpose.compare(GENERAL_PURP)==0) {
+      localrc = AttPackNest(ESMF_CONV, GENERAL_PURP, object, ESG_CONV, GENERAL_PURP);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            &localrc)) return localrc;
+    }
+    if (convention.compare(CIM_1_5_CONV)==0 &&
+        purpose.compare(MODEL_COMP_PURP)==0) {
 
       // TODO: uncomment and expand when we have better definition from CIM
-      //localrc = AttPackCreateCustom("CIM",
+      //localrc = AttPackCreateCustom(CIM_1_5_CONV,
       //                              "Scientific Property Description", object);
       //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       //      &localrc)) return localrc;
 
-      localrc = AttPackCreateCustom("CIM",
-                                    "Platform Description", object);
+      localrc = AttPackCreateCustom(CIM_1_5_CONV,
+                                    PLATFORM_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       localrc = AttPackCreateCustom("ISO 19115",
-                                    "Citation Description", object);
+                                    CITATION_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       localrc = AttPackCreateCustom("ISO 19115",
-                                    "Responsible Party Description", object);
+                                    RESP_PARTY_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
@@ -469,17 +486,17 @@ int Attribute::count = 0;
       nestconv.reserve(nestcount);
       nestpurp.reserve(nestcount);
       // TODO: uncomment and expand when we have better definition from CIM
-      //nestconv.push_back("CIM");
+      //nestconv.push_back(CIM_1_5_CONV);
       //nestpurp.push_back("Scientific Property Description");
-      nestconv.push_back("CIM");
-      nestpurp.push_back("Platform Description");
+      nestconv.push_back(CIM_1_5_CONV);
+      nestpurp.push_back(PLATFORM_PURP);
       nestconv.push_back("ISO 19115");
-      nestpurp.push_back("Citation Description");
+      nestpurp.push_back(CITATION_PURP);
       nestconv.push_back("ISO 19115");
-      nestpurp.push_back("Responsible Party Description");
+      nestpurp.push_back(RESP_PARTY_PURP);
 
-      localrc = AttPackNest("CIM",
-                            "Model Component Simulation Description", object,
+      localrc = AttPackNest(CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object,
                             nestcount, nestconv, nestpurp);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
@@ -489,22 +506,22 @@ int Attribute::count = 0;
       //  1 <modelComponent> in separate CIM document node, also
       //    1 within each <childComponent>
       //
-      localrc = AttPackAddAttribute("Description", "CIM",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("LongName", "CIM",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("MetadataVersion", "CIM",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("ModelType", "CIM",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("ReleaseDate", "CIM",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("ShortName", "CIM",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("URL", "CIM",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("Version", "CIM",
-                            "Model Component Simulation Description", object);
+      localrc = AttPackAddAttribute("Description", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
+      localrc = AttPackAddAttribute("LongName", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
+      localrc = AttPackAddAttribute("MetadataVersion", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
+      localrc = AttPackAddAttribute("ModelType", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
+      localrc = AttPackAddAttribute("ReleaseDate", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
+      localrc = AttPackAddAttribute("ShortName", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
+      localrc = AttPackAddAttribute("URL", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
+      localrc = AttPackAddAttribute("Version", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
@@ -512,25 +529,25 @@ int Attribute::count = 0;
       // Simulation Run attributes
       //  1 <simulationRun> in separate CIM document node
       //
-      localrc = AttPackAddAttribute("SimulationDuration", "CIM",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("SimulationEndDate", "CIM",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("SimulationEnsembleID", "CIM",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("SimulationLongName", "CIM",
-                            "Model Component Simulation Description", object);
+      localrc = AttPackAddAttribute("SimulationDuration", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
+      localrc = AttPackAddAttribute("SimulationEndDate", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
+      localrc = AttPackAddAttribute("SimulationEnsembleID", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
+      localrc = AttPackAddAttribute("SimulationLongName", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
       localrc = AttPackAddAttribute("SimulationNumberOfProcessingElements",
-                                                          "CIM",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("SimulationProjectName", "CIM",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("SimulationRationale", "CIM",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("SimulationShortName", "CIM",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("SimulationStartDate", "CIM",
-                            "Model Component Simulation Description", object);
+                                                          CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
+      localrc = AttPackAddAttribute("SimulationProjectName", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
+      localrc = AttPackAddAttribute("SimulationRationale", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
+      localrc = AttPackAddAttribute("SimulationShortName", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
+      localrc = AttPackAddAttribute("SimulationStartDate", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
@@ -538,10 +555,10 @@ int Attribute::count = 0;
       // Document Relationship attributes
       //  1 <documentGenealogy> at end of <modelComponent>
       //
-      localrc = AttPackAddAttribute("PreviousVersion", "CIM",
-                            "Model Component Simulation Description", object);
-      localrc = AttPackAddAttribute("PreviousVersionDescription", "CIM",
-                            "Model Component Simulation Description", object);
+      localrc = AttPackAddAttribute("PreviousVersion", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
+      localrc = AttPackAddAttribute("PreviousVersionDescription", CIM_1_5_CONV,
+                            MODEL_COMP_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
@@ -551,11 +568,11 @@ int Attribute::count = 0;
       //    <modelComponent>
       //
       // TODO: uncomment and expand when we have better definition from CIM
-      //localrc = AttPackAddAttribute("ScientificPropertyLongName", "CIM",
+      //localrc = AttPackAddAttribute("ScientificPropertyLongName", CIM_1_5_CONV,
       //                      "Scientific Property Description", object);
-      //localrc = AttPackAddAttribute("ScientificPropertyShortName", "CIM",
+      //localrc = AttPackAddAttribute("ScientificPropertyShortName", CIM_1_5_CONV,
       //                      "Scientific Property Description", object);
-      //localrc = AttPackAddAttribute("ScientificPropertyValue", "CIM",
+      //localrc = AttPackAddAttribute("ScientificPropertyValue", CIM_1_5_CONV,
       //                      "Scientific Property Description", object);
       //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       //      &localrc)) return localrc;
@@ -565,28 +582,28 @@ int Attribute::count = 0;
       //  1 <platform> in separate CIM document node
       //    also 1 within <deployment> within <simulationRun> CIM document node
       //
-      localrc = AttPackAddAttribute("CompilerName", "CIM",
-                            "Platform Description", object);
-      localrc = AttPackAddAttribute("CompilerVersion", "CIM",
-                            "Platform Description", object);
-      localrc = AttPackAddAttribute("MachineCoresPerProcessor", "CIM",
-                            "Platform Description", object);
-      localrc = AttPackAddAttribute("MachineDescription", "CIM",
-                            "Platform Description", object);
-      localrc = AttPackAddAttribute("MachineInterconnectType", "CIM",
-                            "Platform Description", object);
-      localrc = AttPackAddAttribute("MachineMaximumProcessors", "CIM",
-                            "Platform Description", object);
-      localrc = AttPackAddAttribute("MachineName", "CIM",
-                            "Platform Description", object);
-      localrc = AttPackAddAttribute("MachineOperatingSystem", "CIM",
-                            "Platform Description", object);
-      localrc = AttPackAddAttribute("MachineProcessorType", "CIM",
-                            "Platform Description", object);
-      localrc = AttPackAddAttribute("MachineSystem", "CIM",
-                            "Platform Description", object);
-      localrc = AttPackAddAttribute("MachineVendor", "CIM",
-                            "Platform Description", object);
+      localrc = AttPackAddAttribute("CompilerName", CIM_1_5_CONV,
+                            PLATFORM_PURP, object);
+      localrc = AttPackAddAttribute("CompilerVersion", CIM_1_5_CONV,
+                            PLATFORM_PURP, object);
+      localrc = AttPackAddAttribute("MachineCoresPerProcessor", CIM_1_5_CONV,
+                            PLATFORM_PURP, object);
+      localrc = AttPackAddAttribute("MachineDescription", CIM_1_5_CONV,
+                            PLATFORM_PURP, object);
+      localrc = AttPackAddAttribute("MachineInterconnectType", CIM_1_5_CONV,
+                            PLATFORM_PURP, object);
+      localrc = AttPackAddAttribute("MachineMaximumProcessors", CIM_1_5_CONV,
+                            PLATFORM_PURP, object);
+      localrc = AttPackAddAttribute("MachineName", CIM_1_5_CONV,
+                            PLATFORM_PURP, object);
+      localrc = AttPackAddAttribute("MachineOperatingSystem", CIM_1_5_CONV,
+                            PLATFORM_PURP, object);
+      localrc = AttPackAddAttribute("MachineProcessorType", CIM_1_5_CONV,
+                            PLATFORM_PURP, object);
+      localrc = AttPackAddAttribute("MachineSystem", CIM_1_5_CONV,
+                            PLATFORM_PURP, object);
+      localrc = AttPackAddAttribute("MachineVendor", CIM_1_5_CONV,
+                            PLATFORM_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       //
@@ -594,22 +611,22 @@ int Attribute::count = 0;
       //  n <citation>s in <modelComponent>
       //
       localrc = AttPackAddAttribute("Date", "ISO 19115",
-                            "Citation Description", object);
+                            CITATION_PURP, object);
 
       localrc = AttPackAddAttribute("DOI", "ISO 19115",
-                            "Citation Description", object);
+                            CITATION_PURP, object);
 
       localrc = AttPackAddAttribute("LongTitle", "ISO 19115",
-                            "Citation Description", object);
+                            CITATION_PURP, object);
 
       localrc = AttPackAddAttribute("PresentationForm", "ISO 19115",
-                            "Citation Description", object);
+                            CITATION_PURP, object);
 
       localrc = AttPackAddAttribute("ShortTitle", "ISO 19115",
-                            "Citation Description", object);
+                            CITATION_PURP, object);
 
       localrc = AttPackAddAttribute("URL", "ISO 19115",
-                            "Citation Description", object);
+                            CITATION_PURP, object);
 
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
@@ -620,25 +637,25 @@ int Attribute::count = 0;
       //
       string attPackInstanceName;
       localrc = AttPackAddAttribute("Abbreviation", "ISO 19115",
-                                      "Responsible Party Description", object);
+                                      RESP_PARTY_PURP, object);
 
       localrc = AttPackAddAttribute("EmailAddress", "ISO 19115",
-                                      "Responsible Party Description", object);
+                                      RESP_PARTY_PURP, object);
 
       localrc = AttPackAddAttribute("Name", "ISO 19115",
-                                      "Responsible Party Description", object);
+                                      RESP_PARTY_PURP, object);
 
       localrc = AttPackAddAttribute("NameType", "ISO 19115",
-                                      "Responsible Party Description", object);
+                                      RESP_PARTY_PURP, object);
 
       localrc = AttPackAddAttribute("PhysicalAddress", "ISO 19115",
-                                      "Responsible Party Description", object);
+                                      RESP_PARTY_PURP, object);
 
       localrc = AttPackAddAttribute("ResponsiblePartyRole", "ISO 19115",
-                                      "Responsible Party Description", object);
+                                      RESP_PARTY_PURP, object);
 
       localrc = AttPackAddAttribute("URL", "ISO 19115",
-                                      "Responsible Party Description", object);
+                                      RESP_PARTY_PURP, object);
 
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
@@ -685,8 +702,8 @@ int Attribute::count = 0;
   unsigned int i,j;
   Attribute *stdParent, *stdChild;
 
-  if (convention.compare("CIM")!=0 ||
-      purpose.compare("Model Component Simulation Description")!=0) {
+  if (convention.compare(CIM_1_5_CONV)!=0 ||
+      purpose.compare(MODEL_COMP_PURP)!=0) {
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
           "non-standard attpack type", &localrc);
         return localrc;
@@ -756,7 +773,7 @@ int Attribute::count = 0;
   // create child standard attpacks, attach to parent attpack
 
   // create one Platform child attpack
-  stdChild = new Attribute("CIM", "Platform Description", object);
+  stdChild = new Attribute(CIM_1_5_CONV, PLATFORM_PURP, object);
   if(!stdChild) {
     // TODO:  more detailed error message including conv,purp,object 
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
@@ -790,8 +807,8 @@ int Attribute::count = 0;
   nestAttPackInstanceNameCount = 0;
   for(i=0; i<nestCount; i++) {
     if (nestConvention[i].compare("ISO 19115") != 0 ||
-        (nestPurpose[i].compare("Citation Description") != 0 &&
-         nestPurpose[i].compare("Responsible Party Description") != 0)) {
+        (nestPurpose[i].compare(CITATION_PURP) != 0 &&
+         nestPurpose[i].compare(RESP_PARTY_PURP) != 0)) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
         "attpack not a standard child of parent", &localrc);
       return localrc;
@@ -821,7 +838,7 @@ int Attribute::count = 0;
       //  n <citation>s in <modelComponent>
       //
       if (nestConvention[i].compare("ISO 19115") == 0 &&
-          nestPurpose[i].compare("Citation Description") == 0) {
+          nestPurpose[i].compare(CITATION_PURP) == 0) {
         localrc = stdChild->AttPackAddAttribute("Date");
         localrc = stdChild->AttPackAddAttribute("DOI");
         localrc = stdChild->AttPackAddAttribute("LongTitle");
@@ -837,7 +854,7 @@ int Attribute::count = 0;
       //  n <responsibleParty>s in <modelComponent>
       //
       if (nestConvention[i].compare("ISO 19115") == 0 &&
-          nestPurpose[i].compare("Responsible Party Description") == 0) {
+          nestPurpose[i].compare(RESP_PARTY_PURP) == 0) {
         localrc = stdChild->AttPackAddAttribute("Abbreviation");
         localrc = stdChild->AttPackAddAttribute("EmailAddress");
         localrc = stdChild->AttPackAddAttribute("Name");

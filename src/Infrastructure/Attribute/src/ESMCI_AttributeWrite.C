@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeWrite.C,v 1.8 2012/11/06 20:14:54 rokuingh Exp $
+// $Id: ESMCI_AttributeWrite.C,v 1.9 2012/11/07 06:53:25 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.8 2012/11/06 20:14:54 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.9 2012/11/07 06:53:25 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -657,8 +657,8 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   } else if (!(object.compare("comp")==0 &&
-               convention.compare("CIM")==0 &&
-               purpose.compare("Model Component Simulation Description")==0)) {
+               convention.compare(CIM_1_5_CONV)==0 &&
+               purpose.compare(MODEL_COMP_PURP)==0)) {
 
     // Write the ESMF XML file header
     localrc = io_xml->writeStartElement("model_component", "", 1, 9,
@@ -703,8 +703,8 @@ namespace ESMCI {
  
   // recurse the Attribute hierarchy
   if (object.compare("comp")==0 &&
-      convention.compare("CIM")==0 &&
-      purpose.compare("Model Component Simulation Description")==0) {
+      convention.compare(CIM_1_5_CONV)==0 &&
+      purpose.compare(MODEL_COMP_PURP)==0) {
     localrc = AttributeWriteCIM(io_xml);
   } else if (convention.compare("CF")==0 &&
              purpose.compare("GridSpec")==0) {
@@ -752,8 +752,8 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   } else if (!(object.compare("comp")==0 &&
-               convention.compare("CIM")==0 &&
-               purpose.compare("Model Component Simulation Description")==0)) {
+               convention.compare(CIM_1_5_CONV)==0 &&
+               purpose.compare(MODEL_COMP_PURP)==0)) {
 
     // write the ESMF XML footer
     localrc = io_xml->writeEndElement("model_component", 1);
@@ -1760,7 +1760,7 @@ namespace ESMCI {
   callCount++;
 
   string attPackInstanceName;
-  attpack = AttPackGet("CIM", "Model Component Simulation Description",
+  attpack = AttPackGet(CIM_1_5_CONV, MODEL_COMP_PURP,
                        "comp", attPackInstanceName);
   if (attpack == NULL) return ESMF_SUCCESS;  // if package not found, return 
 
@@ -1801,7 +1801,7 @@ namespace ESMCI {
     }
   } else {
     ESMC_LogDefault.Write("Attribute ShortName in standard attribute package "
-      "(convention='CIM', purpose='Model Component Simulation Description')"
+      "(convention='CIM', purpose='ModelComp')"
       " required to be set, to produce valid CIM XML output.",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
@@ -1838,19 +1838,19 @@ namespace ESMCI {
   }
 
   // <componentProperties><componentProperty> nodes
-  bool CPgeneral = AttPackIsSet("CIM", 
-                     "General Component Properties Description", "comp",
+  bool CPgeneral = AttPackIsSet(CIM_1_5_CONV, 
+                     COMP_PROP_PURP, "comp",
                      inObjectTree=false, // only look at this comp, not children
                      inThisCompTreeOnly=true, 
                      inNestedAttPacks=false);
 
-  bool CPscientific = AttPackIsSet("CIM", 
-                     "Scientific Properties Description", "comp",
+  bool CPscientific = AttPackIsSet(CIM_1_5_CONV, 
+                     SCI_PROP_PURP, "comp",
                      inObjectTree=false, // only look at this comp, not children
                      inThisCompTreeOnly=true, 
                      inNestedAttPacks=false);
 
-  bool CPfield   = AttPackIsSet("ESMF", "General", "field",
+  bool CPfield   = AttPackIsSet(ESMF_CONV, GENERAL_PURP, "field",
                      inObjectTree=true, inThisCompTreeOnly=true, 
                      inNestedAttPacks=true); // only look for CF/Extended
                                              // atts nested within ESMF/General,
@@ -1864,12 +1864,12 @@ namespace ESMCI {
 
     if (CPgeneral) {
       localrc = AttributeWriteCIMCP(io_xml, 
-                 "General Component Properties Description", indent);
+                 COMP_PROP_PURP, indent);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     if (CPscientific) {
       localrc = AttributeWriteCIMCP(io_xml,
-                 "Scientific Properties Description", indent);
+                 SCI_PROP_PURP, indent);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     }
     if (CPfield) {
@@ -1934,7 +1934,7 @@ namespace ESMCI {
   // <composition><coupling> (all CIM fields within all child components, 
   // written only in top-level component (e.g. coupler))
   if (callCount == 1) { // for top-level component only
-    if (AttPackIsSet("CIM", "Inputs Description", "field", 
+    if (AttPackIsSet(CIM_1_5_CONV, INPUTS_PURP, "field", 
                      inObjectTree=true, 
                      inThisCompTreeOnly=false,  // look at all child comps
                      inNestedAttPacks=false)) { // only look at CIM/Inputs atts,
@@ -1957,8 +1957,8 @@ namespace ESMCI {
     Attribute *ap;
     for(int j=0; j<linkList.at(i)->packList.size(); j++) {
       ap = linkList.at(i)->packList.at(j);
-      if (!(ap->attrConvention.compare("CIM")==0 &&
-       ap->attrPurpose.compare("Model Component Simulation Description")==0 &&
+      if (!(ap->attrConvention.compare(CIM_1_5_CONV)==0 &&
+       ap->attrPurpose.compare(MODEL_COMP_PURP)==0 &&
        ap->attrObject.compare("comp")==0)) {
         continue; // skip non-CIM components
       } else {
@@ -2026,7 +2026,7 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   } else {
     ESMC_LogDefault.Write("Attribute ModelType in standard attribute package "
-      "(convention='CIM', purpose='Model Component Simulation Description')"
+      "(convention='CIM', purpose='ModelComp')"
       " required to be set, to produce valid CIM XML output.",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
@@ -2134,7 +2134,7 @@ namespace ESMCI {
     } else {
       ESMC_LogDefault.Write("Attribute PreviousVersion in standard attribute "
         "package (convention='CIM', "
-        "purpose='Model Component Simulation Description') "
+        "purpose='ModelComp') "
         "required to be set, when attribute PreviousVersionDescription is also "
         "set, to produce valid CIM XML output.",
         ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -2185,7 +2185,7 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
 
   string attPackInstanceName;
-  attpack = AttPackGet("CIM", "Model Component Simulation Description",
+  attpack = AttPackGet(CIM_1_5_CONV, MODEL_COMP_PURP,
                        "comp", attPackInstanceName);
   if (attpack == NULL) return ESMF_SUCCESS;
 
@@ -2250,7 +2250,7 @@ namespace ESMCI {
   } else {
     ESMC_LogDefault.Write("Attribute SimulationShortName in standard attribute "
       "package (convention='CIM', "
-      "purpose='Model Component Simulation Description') "
+      "purpose='ModelComp') "
       "required to be set, to produce valid CIM XML output.",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
@@ -2272,7 +2272,7 @@ namespace ESMCI {
   } else {
     ESMC_LogDefault.Write("Attribute SimulationLongName in standard attribute "
       "package (convention='CIM', "
-      "purpose='Model Component Simulation Description') "
+      "purpose='ModelComp') "
       "required to be set, to produce valid CIM XML output.",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
@@ -2288,7 +2288,7 @@ namespace ESMCI {
 
   // <input> -- for all CIM fields within all child components, 
   // written only here in the one top-level <simulationRun> document)
-  if (AttPackIsSet("CIM", "Inputs Description", "field", 
+  if (AttPackIsSet(CIM_1_5_CONV, INPUTS_PURP, "field", 
                    inObjectTree=true, 
                    inThisCompTreeOnly=false,  // look at all child comps
                    inNestedAttPacks=false)) { // only look at CIM/Inputs atts,
@@ -2345,7 +2345,7 @@ namespace ESMCI {
   } else {
     ESMC_LogDefault.Write("Attribute SimulationStartDate in standard attribute "
       "package (convention='CIM', "
-      "purpose='Model Component Simulation Description') "
+      "purpose='ModelComp') "
       "required to be set, to produce valid CIM XML output.",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
@@ -2449,7 +2449,7 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
 
   string attPackInstanceName;
-  attpack = AttPackGet("CIM", "Platform Description", "comp",
+  attpack = AttPackGet(CIM_1_5_CONV, PLATFORM_PURP, "comp",
                        attPackInstanceName);
   if (attpack == NULL) return ESMF_SUCCESS;
 
@@ -2466,7 +2466,7 @@ namespace ESMCI {
   } else {
     ESMC_LogDefault.Write("Attribute MachineName in "
       "standard attribute package (convention='CIM', "
-      "purpose='Platform Description') "
+      "purpose='Platform') "
       "required to be set, to produce valid CIM XML output.",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
@@ -2676,7 +2676,7 @@ namespace ESMCI {
     } else {
       ESMC_LogDefault.Write("Attribute CompilerName in "
        "standard attribute package (convention='CIM', "
-       "purpose='Platform Description') "
+       "purpose='Platform') "
        "required to be set, when attribute CompilerVersion is also set, "
        "to produce valid CIM XML output.",
         ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -2699,7 +2699,7 @@ namespace ESMCI {
     } else {
       ESMC_LogDefault.Write("Attribute CompilerVersion in "
        "standard attribute package (convention='CIM', "
-       "purpose='Platform Description') "
+       "purpose='Platform') "
        "required to be set, when attribute CompilerName is also set, "
        "to produce valid CIM XML output.",
         ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -2725,7 +2725,7 @@ namespace ESMCI {
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   // get CIM/Main package to retrieve MetadataVersion
-  attpackMain = AttPackGet("CIM", "Model Component Simulation Description",
+  attpackMain = AttPackGet(CIM_1_5_CONV, MODEL_COMP_PURP,
                            "comp", attPackInstanceName);
   if (attpackMain == NULL) return ESMF_SUCCESS;  // if package not found, return 
   if (attpackMain->AttributeIsSet("MetadataVersion")) {
@@ -2797,7 +2797,7 @@ namespace ESMCI {
   for(int i=0; i<packList.size(); i++) {
     attpack = packList.at(i);
     if (!(attpack->attrConvention.compare("ISO 19115")==0 &&
-          attpack->attrPurpose.compare("Responsible Party Description")==0))
+          attpack->attrPurpose.compare(RESP_PARTY_PURP)==0))
       continue; // skip non-RPs
 
     // if no attributes set in this attpack instance, skip it ...
@@ -2829,7 +2829,7 @@ namespace ESMCI {
         } else {
           ESMC_LogDefault.Write("Attribute NameType in "
             "standard attribute package (convention='ISO 19115', "
-            "purpose='Responsible Party Description' should be one of "
+            "purpose='RespParty' should be one of "
             "{Individual, Organization, Position}.",
             ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         }
@@ -3034,7 +3034,7 @@ namespace ESMCI {
     } else {
       ESMC_LogDefault.Write("Attribute ResponsiblePartyRole in "
         "standard attribute package (convention='ISO 19115', "
-        "purpose='Responsible Party Description') "
+        "purpose='RespParty') "
         "required to be set, when other attributes in this package are set, "
         "to produce valid CIM XML output.",
         ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -3125,7 +3125,7 @@ namespace ESMCI {
 
   // Get the General or Scientific attpack, as specified by arg purpose
   string attPackInstanceName;
-  attpack = AttPackGet("CIM", purpose, "comp", attPackInstanceName);
+  attpack = AttPackGet(CIM_1_5_CONV, purpose, "comp", attPackInstanceName);
   if(!attpack) {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Cannot find the specified Attribute package\n", &localrc);
@@ -3140,7 +3140,7 @@ namespace ESMCI {
       localrc = ap->parent->AttributeGet(name, &valuevector);
 
       // Custom, user-defined general component properties
-      if (purpose.compare("General Component Properties Description") == 0) { 
+      if (purpose.compare(COMP_PROP_PURP) == 0) { 
         localrc = io_xml->writeStartElement("componentProperty", "", indent+1,
                                  2, "type", "custom", "represented", "true");
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
@@ -3161,7 +3161,7 @@ namespace ESMCI {
         localrc = io_xml->writeEndElement("componentProperty", indent+1);
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       // Scientific properties
-      } else {  // purpose = "Scientific Properties Description"
+      } else {  // purpose = SCI_PROP_PURP
         localrc = io_xml->writeStartElement("componentProperty", "", indent+1,
                                  1, "represented", "true");
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
@@ -3232,8 +3232,8 @@ namespace ESMCI {
     // found field object, now look for CIM/Inputs package
     for(int j=0; j<linkList.at(i)->packList.size(); j++) {
       attpack = linkList.at(i)->packList.at(j);
-      if (!(attpack->attrConvention.compare("CIM")==0 &&
-            attpack->attrPurpose.compare("Inputs Description")==0 &&
+      if (!(attpack->attrConvention.compare(CIM_1_5_CONV)==0 &&
+            attpack->attrPurpose.compare(INPUTS_PURP)==0 &&
             attpack->attrObject.compare("field")==0)) {
         continue; // skip non-CIM fields and others
       } 
@@ -3274,7 +3274,7 @@ namespace ESMCI {
         } else {
           ESMC_LogDefault.Write("Attribute Intent in "
             "standard attribute package (convention='CIM', "
-            "purpose='Inputs Description') must be one of "
+            "purpose='Inputs') must be one of "
             "{Export, Import} to produce valid CIM XML output.",
             ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         }
@@ -3315,7 +3315,7 @@ namespace ESMCI {
       } else {
         ESMC_LogDefault.Write("Attribute ShortName in attpack "
           "CF/General, nested within std attpack (conv='CIM', "
-          "purp='Inputs Description'), required to be set, if other "
+          "purp='Inputs'), required to be set, if other "
           "attributes are set in nested packages CF/General, "
           "CF/Extended, or ESMF/General, to produce valid CIM XML output.",
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -3429,7 +3429,7 @@ namespace ESMCI {
   for(int i=0; i<packList.size(); i++) {
     attpack = packList.at(i);
     if (!(attpack->attrConvention.compare("ISO 19115")==0 &&
-          attpack->attrPurpose.compare("Citation Description")==0))
+          attpack->attrPurpose.compare(CITATION_PURP)==0))
       continue; // skip non-Citations
 
     // if no attributes set in this attpack instance, skip it ...
@@ -3463,7 +3463,7 @@ namespace ESMCI {
     } else {
       ESMC_LogDefault.Write("Attribute ShortTitle in "
         "standard attribute package (convention='ISO 19115', "
-        "purpose='Citation Description') "
+        "purpose='Citation') "
         "required to be set, when other attributes in this package are set, "
         "to produce valid CIM XML output.",
         ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -3507,7 +3507,7 @@ namespace ESMCI {
     } else {
       ESMC_LogDefault.Write("Attribute Date in "
         "standard attribute package (convention='ISO 19115', "
-        "purpose='Citation Description') "
+        "purpose='Citation') "
         "required to be set, when other attributes in this package are set, "
         "to produce valid CIM XML output.",
         ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -3641,8 +3641,8 @@ namespace ESMCI {
   for(int i=0; i<linkList.size(); i++) {
     for(int j=0; j<linkList.at(i)->packList.size(); j++) {
       attpack = linkList.at(i)->packList.at(j);
-      if (!(attpack->attrConvention.compare("CIM")==0 &&
-            attpack->attrPurpose.compare("Inputs Description")==0 &&
+      if (!(attpack->attrConvention.compare(CIM_1_5_CONV)==0 &&
+            attpack->attrPurpose.compare(INPUTS_PURP)==0 &&
             attpack->attrObject.compare("field")==0))
         continue; // skip non-CIM fields
 
@@ -3670,7 +3670,7 @@ namespace ESMCI {
         } else {
           ESMC_LogDefault.Write("Attribute CouplingPurpose in "
             "standard attribute package (convention='CIM', "
-            "purpose='Inputs Description') must be one of "
+            "purpose='Inputs') must be one of "
             "{Ancillary, Boundary, Initial} "
             "to produce valid CIM XML output.",
             ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -3690,7 +3690,7 @@ namespace ESMCI {
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         ESMC_LogDefault.Write("Attribute CouplingPurpose in "
           "standard attribute package (convention='CIM', "
-          "purpose='Inputs Description') "
+          "purpose='Inputs') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -3750,7 +3750,7 @@ namespace ESMCI {
           transform(value.begin(), value.end(), value.begin(), ::toupper);
           if (value != "1D" && value != "2D" && value != "3D") {
             ESMC_LogDefault.Write("Attribute SpatialRegriddingDimension, in "
-              "CIM/Inputs Description standard attribute package, must "
+              "CIM/Inputs standard attribute package, must "
               "be one of {1D, 2D, 3D} to produce valid CIM XML output.",
               ESMC_LOGMSG_WARN, ESMC_CONTEXT);
           }
@@ -3780,7 +3780,7 @@ namespace ESMCI {
               value2 != "conservative-second-order" && 
               value2 != "conservative" && value2 != "non-conservative") {
             ESMC_LogDefault.Write("Attribute SpatialRegriddingMethod, in "
-              "CIM/Inputs Description standard attribute package, must be "
+              "CIM/Inputs standard attribute package, must be "
               "one of {Linear, Near-Neighbor, Cubic, "
               "Conservative-First-Order, Conservative-Second-Order, "
               "Conservative, Non-Conservative} to produce valid CIM "
@@ -3825,7 +3825,7 @@ namespace ESMCI {
       } else {
         ESMC_LogDefault.Write("Attribute CouplingSource in "
           "standard attribute package (convention='CIM', "
-          "purpose='Inputs Description') "
+          "purpose='Inputs') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -3848,7 +3848,7 @@ namespace ESMCI {
       } else {
         ESMC_LogDefault.Write("Attribute CouplingTarget in "
           "standard attribute package (convention='CIM', "
-          "purpose='Inputs Description') "
+          "purpose='Inputs') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -3917,8 +3917,8 @@ namespace ESMCI {
   for(int i=0; i<linkList.size(); i++) {
     for(int j=0; j<linkList.at(i)->packList.size(); j++) {
       attpack = linkList.at(i)->packList.at(j);
-      if (!(attpack->attrConvention.compare("CIM")==0 &&
-            attpack->attrPurpose.compare("Inputs Description")==0 &&
+      if (!(attpack->attrConvention.compare(CIM_1_5_CONV)==0 &&
+            attpack->attrPurpose.compare(INPUTS_PURP)==0 &&
             attpack->attrObject.compare("field")==0))
         continue; // skip non-CIM fields
 
@@ -3946,7 +3946,7 @@ namespace ESMCI {
         } else {
           ESMC_LogDefault.Write("Attribute CouplingPurpose in "
             "standard attribute package (convention='CIM', "
-            "purpose='Inputs Description') must be one of "
+            "purpose='Inputs') must be one of "
             "{Ancillary, Boundary, Initial} "
             "to produce valid CIM XML output.",
             ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -3976,7 +3976,7 @@ namespace ESMCI {
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         ESMC_LogDefault.Write("Attribute CouplingPurpose in "
           "standard attribute package (convention='CIM', "
-          "purpose='Inputs Description') "
+          "purpose='Inputs') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -4073,7 +4073,7 @@ namespace ESMCI {
           transform(value.begin(), value.end(), value.begin(), ::toupper);
           if (value != "1D" && value != "2D" && value != "3D") {
             ESMC_LogDefault.Write("Attribute SpatialRegriddingDimension, in "
-              "CIM/Inputs Description standard attribute package, must "
+              "CIM/Inputs standard attribute package, must "
               "be one of {1D, 2D, 3D} to produce valid CIM XML output.",
               ESMC_LOGMSG_WARN, ESMC_CONTEXT);
           }
@@ -4111,7 +4111,7 @@ namespace ESMCI {
               value2 != "conservative-second-order" && 
               value2 != "conservative" && value2 != "non-conservative") {
             ESMC_LogDefault.Write("Attribute SpatialRegriddingMethod, in "
-              "CIM/Inputs Description standard attribute package, must be "
+              "CIM/Inputs standard attribute package, must be "
               "one of {Linear, Near-Neighbor, Cubic, "
               "Conservative-First-Order, Conservative-Second-Order, "
               "Conservative, Non-Conservative} to produce valid CIM "
@@ -4171,8 +4171,8 @@ namespace ESMCI {
         // recursively search from top-level component for a
         //   component attpack that has a ShortName value that matches the
         // CouplingSource value, then output that component's GUID
-        ap = writeRoot->AttPackGet("CIM", 
-                "Model Component Simulation Description", "comp", 
+        ap = writeRoot->AttPackGet(CIM_1_5_CONV, 
+                MODEL_COMP_PURP, "comp", 
                 "ShortName", value);
         if (ap != NULL) {
           localrc = io_xml->writeElement("id", ap->attrGUID, 6, 0);
@@ -4180,11 +4180,11 @@ namespace ESMCI {
           // TODO:  output value of CouplingSource
           ESMC_LogDefault.Write("The value of attribute CouplingSource in "
             "standard attribute package (convention='CIM', "
-            "purpose='Inputs Description') "
+            "purpose='Inputs') "
             "does not correspond to the value of any ShortName "
             "attribute within a component attribute package "
             "(convention='CIM', "
-            "purpose='Model Component Simulation Description'). "
+            "purpose='ModelComp'). "
             "Skipping output of <couplingSource>...<id>.",
             ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         }
@@ -4214,7 +4214,7 @@ namespace ESMCI {
       } else {
         ESMC_LogDefault.Write("Attribute CouplingSource in "
           "standard attribute package (convention='CIM', "
-          "purpose='Inputs Description') "
+          "purpose='Inputs') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -4233,8 +4233,8 @@ namespace ESMCI {
         // recursively search from top-level component for a
         //   component attpack that has a ShortName value that matches the
         // CouplingTarget value, then output that component's GUID
-        ap = writeRoot->AttPackGet("CIM", 
-                "Model Component Simulation Description", "comp", 
+        ap = writeRoot->AttPackGet(CIM_1_5_CONV, 
+                MODEL_COMP_PURP, "comp", 
                 "ShortName", value);
         if (ap != NULL) {
           localrc = io_xml->writeElement("id", ap->attrGUID, 6, 0);
@@ -4242,11 +4242,11 @@ namespace ESMCI {
           // TODO:  output value of CouplingTarget
           ESMC_LogDefault.Write("The value of attribute CouplingTarget in "
             "standard attribute package (convention='CIM', "
-            "purpose='Inputs Description') "
+            "purpose='Inputs') "
             "does not correspond to the value of any ShortName "
             "attribute within a component attribute package "
             "(convention='CIM', "
-            "purpose='Model Component Simulation Description'). "
+            "purpose='ModelComp'). "
             "Skipping output of <couplingSource>...<id>.",
             ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         }
@@ -4272,7 +4272,7 @@ namespace ESMCI {
       } else {
         ESMC_LogDefault.Write("Attribute CouplingTarget in "
           "standard attribute package (convention='CIM', "
-          "purpose='Inputs Description') "
+          "purpose='Inputs') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -4353,7 +4353,7 @@ namespace ESMCI {
   localrc = ESMC_RC_NOT_IMPL;
 
   int ordinal=1;
-  attpack = AttPackGet("CIM", "Model Component Simulation Description",
+  attpack = AttPackGet(CIM_1_5_CONV, MODEL_COMP_PURP,
                        "comp", &ordinal);
   while (attpack != NULL) {
     localrc = attpack->AttributeWriteCIMbuffer(io_xml, cimDocType);
@@ -4366,7 +4366,7 @@ namespace ESMCI {
 
     // get next occurence of this attpack, if any, on this component
     ordinal++;
-    attpack = AttPackGet("CIM", "Model Component Simulation Description",
+    attpack = AttPackGet(CIM_1_5_CONV, MODEL_COMP_PURP,
                          "comp", &ordinal);
   }
 
