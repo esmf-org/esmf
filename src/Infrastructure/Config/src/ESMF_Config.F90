@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.85 2012/11/07 19:05:21 w6ws Exp $
+! $Id: ESMF_Config.F90,v 1.86 2012/11/07 21:58:41 w6ws Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -603,22 +603,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_ConfigFindLabel - Find a label
 !
 ! !INTERFACE:
-    subroutine ESMF_ConfigFindLabel(config, label, keywordEnforcer, foundFlag, rc)
+    subroutine ESMF_ConfigFindLabel(config, label, keywordEnforcer, isPresent, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout)           :: config 
       character(len=*),  intent(in)              :: label
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      logical,           intent(out),  optional  :: foundFlag
+      logical,           intent(out),  optional  :: isPresent
       integer,           intent(out),  optional  :: rc 
 
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
-! \item\apiStatusModifiedSinceVersion{6.1.0} Added the {\tt foundFlag} argument.
-! This allows detection of an end-of-line condition to be separate from the
-! {\tt rc}.
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.1.0] Added the {\tt isPresent} argument.  Allows detection of
+!  end-of-line condition to be separate from the {\tt rc}.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION: Finds the {\tt label} (key) string in the {\tt config} object. 
@@ -636,11 +638,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Already created {\tt ESMF\_Config} object.
 !   \item [label]
 !     Identifying label. 
-!   \item [{[foundFlag]}]
+!   \item [{[isPresent]}]
 !     Set to {\tt .true.} if the item is found.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     If the label is not found, and the {\tt foundFlag} argument is
+!     If the label is not found, and the {\tt isPresent} argument is
 !     not present, an error is returned.
 !   \end{description}
 !
@@ -654,8 +656,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       !check variables
       ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
 
-      if (present (foundFlag)) then
-        foundFlag = .false.
+      if (present (isPresent)) then
+        isPresent = .false.
       end if
 
 !     Determine whether label exists
@@ -664,7 +666,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       i = index_ ( config%cptr%buffer(1:config%cptr%nbuf), EOL//label ) + 1
       if ( i .eq. 1 ) then
          config%cptr%this_line = BLK // EOL
-         if (present (foundFlag)) then
+         if (present (isPresent)) then
            if (present (rc)) rc = ESMF_SUCCESS
            return
          end if
@@ -677,8 +679,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  ESMF_CONTEXT, rcToReturn=rc)) return
       end if
 
-      if (present (foundFlag)) then
-        foundFlag = .true.
+      if (present (isPresent)) then
+        isPresent = .true.
       end if
 
 !     Save current attribute label without colon,
@@ -871,7 +873,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Processing
       if(present( label )) then
          call ESMF_ConfigFindLabel( config, label=label,  &
-             foundFlag=found, rc=localrc)
+             isPresent=found, rc=localrc)
          if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
              ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1200,7 +1202,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Processing
       if (present( label )) then
          call ESMF_ConfigFindLabel( config, label=label,  &
-             foundFlag=found, rc=localrc)
+             isPresent=found, rc=localrc)
          if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
              ESMF_CONTEXT, rcToReturn=rc)) return
          if (.not. found)  &
@@ -1301,7 +1303,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Processing
       if (present( label )) then
          call ESMF_ConfigFindLabel( config, label=label,  &
-             foundFlag=found, rc=localrc)
+             isPresent=found, rc=localrc)
          if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
              ESMF_CONTEXT, rcToReturn=rc)) return
          if (.not. found)  &
@@ -1599,7 +1601,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Processing 
       if (present( label )) then
          call ESMF_ConfigFindLabel( config, label=label,  &
-             foundFlag=found, rc=localrc)
+             isPresent=found, rc=localrc)
          if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
              ESMF_CONTEXT, rcToReturn=rc)) return
          if (.not. found)  &
@@ -1699,7 +1701,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Processing 
       if (present( label )) then
          call ESMF_ConfigFindLabel( config, label=label,  &
-             foundFlag=found, rc=localrc)
+             isPresent=found, rc=localrc)
          if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
              ESMF_CONTEXT, rcToReturn=rc)) return
          if (.not. found)  &
@@ -1912,7 +1914,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Processing 
       if (present( label )) then
          call ESMF_ConfigFindLabel( config, label=label,  &
-             foundFlag=found, rc=localrc)
+             isPresent=found, rc=localrc)
          if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
              ESMF_CONTEXT, rcToReturn=rc)) return
          if (.not. found)  &
@@ -2078,7 +2080,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if ( present(label) ) then
         call ESMF_ConfigFindLabel(config, label=label,  &
-            foundFlag=found, rc=localrc)
+            isPresent=found, rc=localrc)
         if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
             ESMF_CONTEXT, rcToReturn=rc)) return
         if (.not. found) then
@@ -2172,7 +2174,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if( present( label )) then
          call ESMF_ConfigFindLabel(config, label=label,  &
-             foundFlag=found, rc=localrc)
+             isPresent=found, rc=localrc)
          if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
              ESMF_CONTEXT, rcToReturn=rc)) return
          if (.not. found) then
