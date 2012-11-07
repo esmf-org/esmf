@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.46 2012/09/24 21:57:26 peggyli Exp $
+! $Id: ESMF_IOScrip.F90,v 1.47 2012/11/07 17:55:54 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -645,7 +645,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       integer(ESMF_KIND_I4), pointer:: indexbuf(:), next(:)
       integer(ESMF_KIND_I4), pointer:: mask(:) 
       integer(ESMF_KIND_I4), pointer:: allCounts(:) 
-      character(len=256) :: titlelocal, norm, map_method, conventions
+      character(len=256) :: titlelocal, norm, map_method
+      character(len=256) :: esmf_regrid_method,conventions
       type(ESMF_RegridMethod_Flag) :: methodlocal
       character(len=80) :: srcunits, dstunits
       integer :: maxcount
@@ -730,11 +731,14 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	   methodlocal = method
 	   if (methodlocal%regridmethod == ESMF_REGRIDMETHOD_BILINEAR%regridmethod) then
               map_method = "Bilinear remapping"
+	      esmf_regrid_method = "Bilinear"
 	   elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_PATCH%regridmethod) then
 	      !scrip_test does not recognize patch remapping
               map_method = "Bilinear remapping"
+	      esmf_regrid_method = "Higher-order Patch"
 	   elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
               map_method = "Conservative remapping"
+	      esmf_regrid_method = "First-order Conservative"
 	   else
 	      !report error
               call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
@@ -766,6 +770,15 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 
          ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "map_method", trim(map_method))
          errmsg = "Attribute map_method in "//trim(wgtfile)
+         if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,&
+	   errmsg,&
+           rc)) return
+
+         ncStatus = nf90_put_att(ncid, NF90_GLOBAL, "ESMF_regrid_method", &
+			trim(esmf_regrid_method))
+         errmsg = "Attribute esmf_regrid_method in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,&
