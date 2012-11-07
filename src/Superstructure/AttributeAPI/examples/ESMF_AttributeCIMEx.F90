@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.53 2012/11/07 06:54:41 ksaint Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.54 2012/11/07 18:44:12 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -23,9 +23,10 @@ program ESMF_AttributeCIMEx
 !\begin{sloppypar}
 ! This example illustrates the use of the Metafor CIM Attribute packages,
 ! supplied by ESMF, to create an Attribute hierarchy on an ESMF object tree.
-! A gridded Component is used together with a State and a realistic Field
+! A gridded, coupler and science Components are used together with a State 
+! and a realistic Field
 ! to create a simple ESMF object tree.  CIM Attributes packages are created
-! on the Component and Field, and then the individual Attributes within the
+! on the Components and Field, and then the individual Attributes within the
 ! packages are populated with values.  Finally, all the Attributes are written
 ! to a CIM-formatted XML file.  For a more comprehensive example, see the
 ! ESMF\_AttributeCIM system test.
@@ -100,7 +101,8 @@ program ESMF_AttributeCIMEx
 !BOE
 !\begin{sloppypar}
 !    Create the ESMF objects that will hold the CIM Attributes.
-!    These objects include a gridded Component, a State, and a Field.
+!    These objects include all three Component types (coupler, gridded, 
+!    and science Components) as well as a State, and a Field.
 !    In this example we are constructing empty Fields without an
 !    underlying Grid.
 !\end{sloppypar}
