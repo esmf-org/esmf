@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdate2UTest.F90,v 1.12 2012/08/07 22:36:47 w6ws Exp $
+! $Id: ESMF_AttributeUpdate2UTest.F90,v 1.13 2012/11/07 06:54:53 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -198,11 +198,11 @@ module ESMF_AttributeUpdate2UTestMod
     !  CIM child component attributes, set on this comp, child of the coupler
     !
     convCIM = 'CIM'
-    purpComp = 'Model Component Simulation Description'
+    purpComp = 'ModelComp'
 
     convISO = 'ISO 19115'
-    purpRP = 'Responsible Party Description'
-    purpCitation = 'Citation Description'
+    purpRP = 'RespParty'
+    purpCitation = 'Citation'
 
     nestConv(1) = convISO
     nestPurp(1) = purpRP
@@ -314,7 +314,7 @@ module ESMF_AttributeUpdate2UTestMod
     integer attPackInstCount
 
     convCIM = 'CIM'
-    purpComp = 'Model Component Simulation Description'
+    purpComp = 'ModelComp'
     purpExt = 'Extended'
 
     attrList(1) = 'Coordinates'
@@ -323,7 +323,7 @@ module ESMF_AttributeUpdate2UTestMod
     valueList(2) = "Yes"
 
     convISO = 'ISO 19115'
-    purpRP = 'Responsible Party Description'
+    purpRP = 'RespParty'
 
     call ESMF_AttributeGet(comp, convention=convISO, purpose=purpRP, &
       attPackInstanceNameList=attPackInstNames, &
@@ -456,7 +456,7 @@ program ESMF_AttributeUpdate2UTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdate2UTest.F90,v 1.12 2012/08/07 22:36:47 w6ws Exp $'
+    '$Id: ESMF_AttributeUpdate2UTest.F90,v 1.13 2012/11/07 06:54:53 ksaint Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -552,7 +552,8 @@ program ESMF_AttributeUpdate2UTest
     purpExt = 'Extended'
 
     convISO = 'ISO 19115'
-    purpRP = 'Responsible Party Description'
+!    purpRP = 'Responsible Party Description'
+    purpRP = 'RespParty'
 
     !EX_UTest_Multi_Proc_Only
     call ESMF_AttributeGet(gridcomp1, convention=convISO, purpose=purpRP, &

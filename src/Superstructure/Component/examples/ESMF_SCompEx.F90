@@ -1,4 +1,4 @@
-! $Id: ESMF_SCompEx.F90,v 1.3 2012/10/31 21:11:14 rokuingh Exp $
+! $Id: ESMF_SCompEx.F90,v 1.4 2012/11/07 06:55:45 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -129,14 +129,14 @@ program ESMF_SCompEx
 
 !BOC 
       convCIM = 'CIM'
-      purpComp = 'Model Component Simulation Description'
-      purpProp = 'General Component Properties Description'
-      purpField = 'Inputs Description'
-      purpPlatform = 'Platform Description'
+      purpComp = 'ModelComp'
+      purpProp = 'CompProp'
+      purpField = 'Inputs'
+      purpPlatform = 'Platform'
 
       convISO = 'ISO 19115'
-      purpRP = 'Responsible Party Description'
-      purpCitation = 'Citation Description'
+      purpRP = 'RespParty'
+      purpCitation = 'Citation'
 
       ! Add CIM Attribute package to the Science Component
       call ESMF_AttributeAdd(atmcomp, convention=convCIM, &

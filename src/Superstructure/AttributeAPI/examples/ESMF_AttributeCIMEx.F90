@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.52 2012/10/31 21:10:58 rokuingh Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.53 2012/11/07 06:54:41 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -148,25 +148,83 @@ program ESMF_AttributeCIMEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
+!BOC 
+      convCIM = 'CIM'
+      purpComp = 'ModelComp'
+      purpProp = 'CompProp'
+      purpSci = 'SciProp'
+      purpField = 'Inputs'
+      purpPlatform = 'Platform'
+
+      convISO = 'ISO 19115'
+      purpRP = 'RespParty'
+      purpCitation = 'Citation'
+!EOC
+
 !BOE
 !\begin{sloppypar}
-!    Now add CIM Attribute packages to the Component and Field.  Also, add
-!    a CIM Component Properties package, to contain two custom attributes.
+!    Add CIM Component package and Attributes to the Coupler Component.  
 !\end{sloppypar}
 !EOE
 
-!BOC 
-      convCIM = 'CIM'
-      purpComp = 'Model Component Simulation Description'
-      purpProp = 'General Component Properties Description'
-      purpSci = 'Scientific Properties Description'
-      purpField = 'Inputs Description'
-      purpPlatform = 'Platform Description'
+!BOC
+      call ESMF_AttributeAdd(cplcomp,  &
+                             convention=convCIM, purpose=purpComp, rc=rc)
 
-      convISO = 'ISO 19115'
-      purpRP = 'Responsible Party Description'
-      purpCitation = 'Citation Description'
+      call ESMF_AttributeSet(cplcomp, "ShortName", "Driver", &
+                             convention=convCIM, purpose=purpComp, rc=rc)
+      call ESMF_AttributeSet(cplcomp, "LongName", &
+                             "Model Driver", &
+                             convention=convCIM, purpose=purpComp, rc=rc)
+      call ESMF_AttributeSet(cplcomp, "ModelType", &
+                             "climate", &
+                             convention=convCIM, purpose=purpComp, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
 
+
+      ! Simulation run attributes
+      call ESMF_AttributeSet(cplcomp, 'SimulationShortName', &
+                                      'SMS.f09_g16.X.hector', &
+        convention=convCIM, purpose=purpComp, rc=rc)
+
+      call ESMF_AttributeSet(cplcomp, 'SimulationLongName', &
+        'EarthSys - Earth System Modeling Framework Earth System Model 1.0', &
+        convention=convCIM, purpose=purpComp, rc=rc)
+
+      call ESMF_AttributeSet(cplcomp, 'SimulationRationale', &
+  'EarthSys-ESMF simulation run in repsect to CMIP5 core experiment 1.1 ()', &
+        convention=convCIM, purpose=purpComp, rc=rc)
+
+      call ESMF_AttributeSet(cplcomp, 'SimulationStartDate', &
+                                       '1960-01-01T00:00:00Z', &
+        convention=convCIM, purpose=purpComp, rc=rc)
+
+      call ESMF_AttributeSet(cplcomp, 'SimulationDuration', 'P10Y', &
+        convention=convCIM, purpose=purpComp, rc=rc)
+
+      call ESMF_AttributeSet(cplcomp, &
+         'SimulationNumberOfProcessingElements', '16', &
+          convention=convCIM, purpose=purpComp, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOC
+
+      call ESMF_AttributeSet(cplcomp, 'MachineName', 'HECToR', &
+        convention=convCIM, purpose=purpPlatform, rc=rc)
+!EOC
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+!\begin{sloppypar}
+!    Now add CIM Attribute packages and Attributes to the Gridded Component 
+!    and Field.  Also, add a CIM Component Properties package, to contain 
+!    two custom attributes.
+!\end{sloppypar}
+!EOE
+
+!BOC
       ! Add CIM Attribute package to the gridded Component
       call ESMF_AttributeAdd(gridcomp, convention=convCIM, &
         purpose=purpComp, rc=rc)
@@ -257,49 +315,6 @@ program ESMF_AttributeCIMEx
 
       call ESMF_AttributeSet(gridcomp, 'MetadataVersion', '1.1', &
         convention=convCIM, purpose=purpComp, rc=rc)
-!EOC
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-
-
-      ! Simulation run attributes
-      call ESMF_AttributeSet(gridcomp, 'SimulationShortName', &
-                                       'SMS.f09_g16.X.hector', &
-        convention=convCIM, purpose=purpComp, rc=rc)
-!EOC
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-
-      call ESMF_AttributeSet(gridcomp, 'SimulationLongName', &
-        'EarthSys - Earth System Modeling Framework Earth System Model 1.0', &
-        convention=convCIM, purpose=purpComp, rc=rc)
-!EOC
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-
-      call ESMF_AttributeSet(gridcomp, 'SimulationRationale', &
-  'EarthSys-ESMF simulation run in repsect to CMIP5 core experiment 1.1 ()', &
-        convention=convCIM, purpose=purpComp, rc=rc)
-!EOC
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-
-      call ESMF_AttributeSet(gridcomp, 'SimulationStartDate', &
-                                       '1960-01-01T00:00:00Z', &
-        convention=convCIM, purpose=purpComp, rc=rc)
-!EOC
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-
-      call ESMF_AttributeSet(gridcomp, 'SimulationDuration', 'P10Y', &
-        convention=convCIM, purpose=purpComp, rc=rc)
-!EOC
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!BOC
-
-      call ESMF_AttributeSet(gridcomp, &
-         'SimulationNumberOfProcessingElements', '16', &
-          convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -636,7 +651,7 @@ program ESMF_AttributeCIMEx
 !EOE
 
 !BOC
-      call ESMF_AttributeWrite(gridcomp, convCIM, purpComp, &
+      call ESMF_AttributeWrite(cplcomp, convCIM, purpComp, &
         attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
 !EOC
         if (rc/=ESMF_SUCCESS .and. rc/=ESMF_RC_LIB_NOT_PRESENT) goto 10
