@@ -58,34 +58,34 @@ Mediator component with a default {\em explicit} time dependency. Each time the 
 
 \bigskip{\sf INITIALIZE:}
 \begin{itemize}
-\item phase 0. {\sc Provided:}
+\item phase 0: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00, with the following mapping:
     \begin{itemize}
-    \item IPDv00p1 = phase 1: {\sc Required:} 
+    \item IPDv00p1 = phase 1: ({\sc Required, Implementor Provided})
       \begin{itemize}
       \item Advertise Fields in import and export States.
       \end{itemize}
-    \item IPDv00p2 = phase 2: {\sc Required:}
+    \item IPDv00p2 = phase 2: ({\sc Required, Implementor Provided})
       \begin{itemize}
       \item Realize advertised Fields in import and export States.
       \end{itemize}  
-    \item IPDv00p3 = phase 3: {\sc Provided:} 
+    \item IPDv00p3 = phase 3: ({\sc Required, NUOPC Provided})
       \begin{itemize}
       \item Additional initialization phase.
       \end{itemize}
-    \item IPDv00p4 = phase 4: {\sc Provided:} 
+    \item IPDv00p4 = phase 4: ({\sc Required, NUOPC Provided})
       \begin{itemize}
       \item Additional initialization phase.
       \end{itemize}
     \end{itemize}  
   \end{itemize}  
-\item phase 3: {\sc Provided:}
+\item phase 3: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item Set the Mediator internal clock as a copy of the incoming clock. 
   \item Check compatibility, ensuring all advertised import Fields are connected.
   \end{itemize}  
-\item phase 4. {\sc Provided:}
+\item phase 4: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item {\it Optional specialization} to initialize export Fields: {\tt label\_DataInitialize}
   \item Time stamp Fields in import and export States for compatibility checking.
@@ -94,7 +94,7 @@ Mediator component with a default {\em explicit} time dependency. Each time the 
 
 \bigskip{\sf RUN:}
 \begin{itemize}
-\item phase 1: {\sc Provided:}
+\item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item Check that internal clock and incoming clock agree on current time and that the time step of the incoming clock is a multiple of the internal clock time step (remember that the generic InitializePhase2 set the Mediator internal clock identical to the incoming clock). Under these conditions, set the internal stop time to one time step interval on the incoming clock. Otherwise exit with error, flagging incompatibility.
   \item Check import Fields against internal clock to make sure they all enter with a time stamp equal to the current time.
@@ -106,7 +106,7 @@ Mediator component with a default {\em explicit} time dependency. Each time the 
 
 \bigskip{\sf FINALIZE:}
 \begin{itemize}
-\item phase 1: {\sc Provided:}
+\item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item Optionally overwrite the provided NOOP with Mediator finalization code.
   \end{itemize}      

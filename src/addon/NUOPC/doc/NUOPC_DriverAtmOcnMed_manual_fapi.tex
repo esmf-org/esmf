@@ -40,7 +40,7 @@
 \end{verbatim}
 
 \bigskip{\sf DESCRIPTION:\\}
-Driver component that drives a coupled Atmosphere-Ocean-Mediator model. The default is to use explicit time stepping. Each driver time step, the same sequence of Atmosphere, Ocean, Mediator, and the connector {\tt Run} methods are called. The run sequence is fully customizable.
+This is a specialization of the {\tt NUOPC\_Driver} generic component, driving a coupled Atmosphere-Ocean-Mediator model. The default is to use explicit time stepping. Each driver time step, the same sequence of Atmosphere, Ocean, Mediator, and the connector {\tt Run} methods are called. The run sequence is fully customizable for cases where explicit time stepping is not suitable.
 
 \bigskip{\sf SUPER:}
 \begin{verbatim}  NUOPC_Driver
@@ -58,17 +58,17 @@ Driver component that drives a coupled Atmosphere-Ocean-Mediator model. The defa
 
 \bigskip{\sf INITIALIZE:}
 \begin{itemize}
-\item phase 0. {\sc Provided:}
+\item phase 0: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00, with the following mapping:
     \begin{itemize}
-    \item IPDv00p1 = phase 1: {\sc Provided:} 
+    \item IPDv00p1 = phase 1: ({\sc Required, NUOPC Provided})
       \begin{itemize}
       \item Complete self initialization and driving children's initialization sequence.
       \end{itemize}
     \end{itemize}  
   \end{itemize}  
-\item phase 1: {\sc Provided:}
+\item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item Initialize the internal state.
   \item If the internal clock is not yet set, set the default internal clock to be a copy of the incoming clock, if the incoming clock is valid.
@@ -124,7 +124,7 @@ Driver component that drives a coupled Atmosphere-Ocean-Mediator model. The defa
 
 \bigskip{\sf RUN:}
 \begin{itemize}
-\item phase 1: {\sc Provided:}
+\item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item If the incoming clock is valid, set the internal stop time to one time step interval on the incoming clock.
   \item Time stepping loop, from current time to stop time, incrementing by time step.
@@ -134,7 +134,7 @@ Driver component that drives a coupled Atmosphere-Ocean-Mediator model. The defa
 
 \bigskip{\sf FINALIZE:}
 \begin{itemize}
-\item phase 1: {\sc Provided:}
+\item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item {\it Optional specialization} to finalize driver component: {\tt label\_Finalize}.
   \item Execute Finalize() for {\tt atm2ocn}, {atm2med}, {\tt ocn2atm}, {\tt ocn2atm}, {\tt med2atm}, and {\tt med2ocn}.

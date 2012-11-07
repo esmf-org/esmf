@@ -58,37 +58,37 @@ Connector component that uses a default bilinear regrid method during {\tt Run} 
 
 \bigskip{\sf INITIALIZE:}
 \begin{itemize}
-\item phase 0. {\sc Provided:}
+\item phase 0: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 01, with the following mapping:
     \begin{itemize}
-    \item IPDv01p1 = phase 1: {\sc Provided:} 
+    \item IPDv01p1 = phase 1: ({\sc Required, NUOPC Provided})
       \begin{itemize}
       \item Construct the {\tt CplList} Attribute.
       \end{itemize}
-    \item IPDv01p2 = phase 2: {\sc Provided:}
+    \item IPDv01p2 = phase 2: ({\sc Required, NUOPC Provided})
       \begin{itemize}
       \item Set the {\tt Connected} Attributes on the Fields in the import and export State.
       \end{itemize}  
-    \item IPDv01p3 = phase 3: {\sc Provided:}
+    \item IPDv01p3 = phase 3: ({\sc Required, NUOPC Provided})
       \begin{itemize}
       \item Set the {\tt Connected} Attributes on the Fields in the import and export State.
       \item Precompute a bilinear Regrid operation.
       \end{itemize}  
     \end{itemize}  
   \end{itemize}  
-\item phase 1: {\sc Provided:} 
+\item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item Construct a list of matching Field pairs between import and export State based on the {\tt StandardName} Field metadata. 
   \item Store this list of {\tt StandardName} entries in the {\tt CplList} attribute of the Connector Component metadata.
   \end{itemize}
-\item phase 2: {\sc Provided:}
+\item phase 2: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item Initialize the internal state.
   \item Use the {\tt CplList} attribute to construct {\tt srcFields} and {\tt dstFields} FieldBundles in the internal state that hold matched Field pairs.
   \item Set the {\tt Connected} attribute to {\tt true} in the Field metadata for each Field that is added to the {\tt srcFields} and {\tt dstFields} FieldBundles.
   \end{itemize}  
-\item phase 3: {\sc Provided:}
+\item phase 3: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item Use the {\tt CplList} attribute to construct {\tt srcFields} and {\tt dstFields} FieldBundles in the internal state that hold matched Field pairs.
   \item Set the {\tt Connected} attribute to {\tt true} in the Field metadata for each Field that is added to the {\tt srcFields} and {\tt dstFields} FieldBundles.
@@ -99,7 +99,7 @@ Connector component that uses a default bilinear regrid method during {\tt Run} 
 
 \bigskip{\sf RUN:}
 \begin{itemize}
-\item phase 1: {\sc Provided:}
+\item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item {\it Optional specialization} to execute a Connector operation: {\tt label\_ExecuteRouteHandle}. Simple custom implementations access the {\tt srcFields}, {\tt dstFields}, and {\tt rh} members of the internal state to implement the required data transfers. More complex implementations access the {\tt state} member in the internal state, which holds the auxiliary Fields, FieldBundles, and RouteHandles that potentially were added during the optional {\tt label\_ComputeRouteHandle} method during initialize.
   \item By default (if {\tt label\_ExecuteRouteHandle} was {\em not} provided) execute the precomputed Connector RouteHandle between {\tt srcFields} and {\tt dstFields}.
@@ -109,7 +109,7 @@ Connector component that uses a default bilinear regrid method during {\tt Run} 
 
 \bigskip{\sf FINALIZE:}
 \begin{itemize}
-\item phase 1: {\sc Provided:}
+\item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item {\it Optional specialization} to release a Connector operation: {\tt label\_ReleaseRouteHandle}.
   \item By default (if {\tt label\_ReleaseRouteHandle} was {\em not} provided) release the precomputed Connector RouteHandle.
