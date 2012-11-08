@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.361 2012/10/10 15:39:42 theurich Exp $
+#  $Id: common.mk,v 1.362 2012/11/08 23:56:26 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -3171,6 +3171,9 @@ shared:
 	                $(ESMF_AREXTRACT) ../$$NEXTLIB.a ;\
                     echo $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) ;\
 		    $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) ;\
+		    echo Converting $$NEXTLIB.a to $$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) ;\
+                    echo $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) *.o $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) ;\
+		    $(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/$$NEXTLIB\_fullylinked.$(ESMF_SL_SUFFIX) *.o $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) ;\
 		    cd .. ;\
 		    $(ESMF_RM) -r tmp_$$NEXTLIB ;\
 		fi ;\

@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.3 2012/06/07 18:01:10 svasquez Exp $
+# $Id: build_rules.mk,v 1.4 2012/11/08 23:56:39 theurich Exp $
 #
 # Unicos.gfortran.default
 #
@@ -153,11 +153,9 @@ ESMF_F90LINKLIBS += -lrt -lstdc++ -ldl
 ESMF_CXXLINKLIBS += -lrt -lgfortran -ldl
 
 ############################################################
-############################################################
 # Shared library options
 #
 ESMF_SL_LIBOPTS  += -shared
-ESMF_SL_LIBLIBS  += -lrt -lgfortran -ldl
 
 ############################################################
 # Shared object options
@@ -168,8 +166,6 @@ ESMF_SO_F90LINKOPTSEXE  = -Wl,-export-dynamic
 ESMF_SO_CXXCOMPILEOPTS  = -fPIC
 ESMF_SO_CXXLINKOPTS     = -shared
 ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
-
-############################################################
 
 ############################################################
 # Disable WebService testing for now
