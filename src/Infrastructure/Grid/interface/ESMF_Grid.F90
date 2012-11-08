@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.280 2012/10/26 19:22:11 svasquez Exp $
+! $Id: ESMF_Grid.F90,v 1.281 2012/11/08 21:51:13 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -308,7 +308,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.280 2012/10/26 19:22:11 svasquez Exp $'
+      '$Id: ESMF_Grid.F90,v 1.281 2012/11/08 21:51:13 oehmke Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5414,7 +5414,7 @@ subroutine pack_and_send_int(vm, bufsize, recvPets, rootPet, buffer, &
   integer :: rootPet
   integer :: buffer(:)
   integer :: outbuffer(:,:)
-  integer :: dims(:)
+  integer :: dims(0:)
   
   integer :: xdim, start
   integer :: lbnd(2), ubnd(2)
@@ -6011,7 +6011,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! if there are more than 1 PET in the regdecomp(1)
       ! Get the xdim of the local array from all other PETS in the same row
 
-      allocate(dims(regdecomp(1)-1))
+      allocate(dims(0:regdecomp(1)-1))
       do i=1, regDecomp(1)-1
           call ESMF_VMRecv(vm, recv, 1, PetNo+i)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.78 2012/11/06 17:48:46 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.79 2012/11/08 21:51:36 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -671,10 +671,16 @@ bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
 
     // If we're at the end of the weights then exit saying we don't have 
     // all of them
-    if (wi==we) return false;
+    if (wi==we) { 
+      printf("1: missing node_id=%d \n",node_id);
+      return false;
+    }
 
     // If we're not equal to the node id then we must have passed it
-    if (wi->first.id != node_id) return false;
+    if (wi->first.id != node_id) { 
+      printf("2: missing node_id=%d \n",node_id);
+      return false;
+    }
 
   }
 

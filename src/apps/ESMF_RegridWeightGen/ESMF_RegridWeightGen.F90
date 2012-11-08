@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.76 2012/10/31 22:08:56 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.77 2012/11/08 21:51:45 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -114,8 +114,10 @@ program ESMF_RegridWeightGenApp
            method = 'bilinear'
          else
            call ESMF_UtilGetArg(ind+1, argvalue=method)
-	   if ((trim(method) .ne. 'bilinear') .and. (trim(method) .ne. 'conserve') &
-	      .and. (trim(method) .ne. 'patch')) then
+	   if ((trim(method) .ne. 'bilinear') .and. &
+               (trim(method) .ne. 'conserve') .and. &
+	       (trim(method) .ne. 'patch')    .and. &
+               (trim(method) .ne. 'nearest')) then
               write(*,*)
               print *, 'ERROR: The interpolation method "', trim(method), '" is not supported'
               print *, '  The supported methods are "bilinear", "patch", and "conserve"'
@@ -456,6 +458,7 @@ program ESMF_RegridWeightGenApp
         commandbuf2(2)=dstFileType%fileformat
         if (method .eq. 'patch') commandbuf2(3)=1
         if (method .eq. 'conserve') commandbuf2(3)=2
+        if (method .eq. 'nearest') commandbuf2(3)=3
         commandbuf2(4)=poleptrs
         if (srcIsRegional) commandbuf2(9) = 1
         if (dstIsRegional) commandbuf2(10) = 1
@@ -496,9 +499,11 @@ program ESMF_RegridWeightGenApp
 	   method = 'bilinear'
         else if (commandbuf2(3)==1) then
            method = 'patch'
-        else
+        else if (commandbuf2(3)==2) then
            method = 'conserve'
-        end if
+        else
+           method = 'nearest'
+        endif
         poleptrs = commandbuf2(4)
         if (poleptrs == -1) then 
 	   pole=ESMF_POLEMETHOD_ALLAVG
@@ -561,10 +566,12 @@ program ESMF_RegridWeightGenApp
 
      if (trim(method) .eq. 'bilinear') then
         methodflag = ESMF_REGRIDMETHOD_BILINEAR
-     elseif (trim(method) .eq. 'conserve') then
+     else if (trim(method) .eq. 'conserve') then
         methodflag = ESMF_REGRIDMETHOD_CONSERVE
-     elseif (trim(method) .eq. 'patch') then
+     else if (trim(method) .eq. 'patch') then
         methodflag = ESMF_REGRIDMETHOD_PATCH
+     else if (trim(method) .eq. 'nearest') then
+        methodflag = ESMF_REGRIDMETHOD_NEAREST
      endif	 
     
      if (ignoreunmapped) then
@@ -619,7 +626,7 @@ subroutine PrintUsage()
      print *, "Usage: ESMF_RegridWeightGen [--source|-s] src_grid_filename" 
      print *, "                	     [--destination|-d] dst_grid_filename"
      print *, "                      [--weight|-w] out_weight_file "
-     print *, "                      [--method|-m] [bilinear|patch|conserve]"
+     print *, "                      [--method|-m] [bilinear|patch|nearest|conserve]"
      print *, "                      [--pole|-p] [all|none|teeth|<N>]"
      print *, "                      [--ignore_unmapped|-i]"
      print *, "                      --src_type [SCRIP|ESMF|UGRID|GRIDSPEC]" 

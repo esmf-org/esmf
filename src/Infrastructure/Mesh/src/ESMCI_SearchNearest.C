@@ -1,4 +1,4 @@
-// $Id: ESMCI_SearchNearest.C,v 1.1 2012/11/06 18:46:03 oehmke Exp $
+// $Id: ESMCI_SearchNearest.C,v 1.2 2012/11/08 21:51:21 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_SearchNearest.C,v 1.1 2012/11/06 18:46:03 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_SearchNearest.C,v 1.2 2012/11/08 21:51:21 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -149,7 +149,7 @@ struct SearchData {
       double *m=src_mask->data(*ni);
       
       // Only put objects in if they're not masked
-      if (IS_MASKED(*m)) {
+      if (!IS_MASKED(*m)) {
         num_nodes_to_search++;
       }
     }
@@ -186,7 +186,7 @@ struct SearchData {
       double *m=src_mask->data(node);
       
       // Only put objects in if they're not masked
-      if (IS_MASKED(*m)) {
+      if (!IS_MASKED(*m)) {
 
         // Get coord value
         double *c=src_coord->data(node);
@@ -224,7 +224,7 @@ struct SearchData {
       double *m=dst_mask->data(node);
       
       // Only put objects in if they're not masked
-      if (IS_MASKED(*m)) {
+      if (!IS_MASKED(*m)) {
         dst_nlist.push_back(&node);
       }
     }
@@ -279,6 +279,7 @@ struct SearchData {
       sr->src_gid=sd.closest_src_node->get_id();
       result.push_back(sr);
     } else { // ...otherwise deal with the unmapped point
+
       if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
         Throw() << " Some destination points cannot be mapped to the source grid";
       } else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
@@ -343,7 +344,7 @@ struct CommData {
       double *m=src_mask->data(*ni);
       
       // Only put objects in if they're not masked
-      if (IS_MASKED(*m)) {
+      if (!IS_MASKED(*m)) {
         num_nodes_to_search++;
       }
     }
@@ -408,7 +409,7 @@ struct CommData {
       double *m=src_mask->data(node);
       
       // Only put objects in if they're not masked
-      if (IS_MASKED(*m)) {
+      if (!IS_MASKED(*m)) {
 
         // Get coord value
         double *c=src_coord->data(node);
@@ -459,7 +460,7 @@ struct CommData {
       double *m=dst_mask->data(node);
       
       // Only put objects in if they're not masked
-      if (IS_MASKED(*m)) {
+      if (!IS_MASKED(*m)) {
         dst_nlist.push_back(&node);
       }
     }
