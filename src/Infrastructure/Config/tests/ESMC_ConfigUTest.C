@@ -1,4 +1,4 @@
-// $Id: ESMC_ConfigUTest.C,v 1.18 2012/05/14 20:45:55 svasquez Exp $
+// $Id: ESMC_ConfigUTest.C,v 1.19 2012/11/08 18:21:47 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -117,10 +117,19 @@ int main(void){
   //NEX_UTest
   //Find a label in the loaded resource file
   const char* label="Number_of_Members:";
+  int present;
   strcpy(name, "ConfigFindLabel Unit test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_ConfigFindLabel(cf, label);
+  rc = ESMC_ConfigFindLabel(cf, label, &present);
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  //Presence of a label in the loaded resource file
+  strcpy(name, "ConfigFindLabel presence Unit test");
+  strcpy(failMsg, "Did not return present");
+  ESMC_Test(present, name, failMsg, &result, __FILE__, __LINE__,0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -143,6 +152,25 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_ConfigGetLen(cf, wordCountp, ESMC_ArgLast);
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  //Find a non-present label in the loaded resource file
+  const char* labelx="xyzzy";
+  int presentx;
+  strcpy(name, "ConfigFindLabel of non-present label Unit test");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_ConfigFindLabel(cf, labelx, &presentx);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__,0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  //Presence of a non-present label in the loaded resource file
+  strcpy(name, "ConfigFindLabel presence Unit test");
+  strcpy(failMsg, "Did not return present");
+  ESMC_Test(!presentx, name, failMsg, &result, __FILE__, __LINE__,0);
   //----------------------------------------------------------------------------
 
 

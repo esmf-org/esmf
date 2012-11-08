@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.C,v 1.28 2012/11/06 20:06:04 w6ws Exp $
+// $Id: ESMC_Config.C,v 1.29 2012/11/08 18:21:45 w6ws Exp $
 //
 // Earth System Modeling Framework
 // copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char* const version = "$Id: ESMC_Config.C,v 1.28 2012/11/06 20:06:04 w6ws Exp $";
+static const char* const version = "$Id: ESMC_Config.C,v 1.29 2012/11/08 18:21:45 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 // class declaration type -> this should be moved into ESMCI namespace
@@ -65,7 +65,8 @@ extern "C" {
   void FTN_X(f_esmf_configloadfile)(ESMCI_Config* config, char* fname,
     int* unique, int* rc, ESMCI_FortranStrLenArg flen);
 
-  void FTN_X(f_esmf_configfindlabel)(ESMCI_Config* config, char* label, int* rc,
+  void FTN_X(f_esmf_configfindlabel)(ESMCI_Config* config, const char* label,
+    ESMC_Logical *isPresent, int* rc,
     ESMCI_FortranStrLenArg llen);
 
   void FTN_X(f_esmf_confignextline)(ESMCI_Config* config, ESMC_Logical* tableEnd, int* rc);
@@ -425,12 +426,13 @@ int ESMC_ConfigFindLabel(
 // !RETURN VALUE:
 //  int error return code
 //  Equals {\tt ESMF\_SUCCESS} if there are no errors.
-//  Equals -1 if buffer could not be loaded, -2 if label not found,
-//  and -3 if invalid operation with index.
+//  If the {\tt isPresent} argument is set to {\tt NULL},
+//  and the label is not found, an error is returned.
 //
 // !ARGUMENTS: 
   ESMC_Config config,        // in  - ESMC_Config object
-  const char* label          // in  - label
+  const char* label,         // in  - label
+  int *isPresent             // out - label presence flag
   ) {
 //
 // !DESCRIPTION:
@@ -448,6 +450,9 @@ int ESMC_ConfigFindLabel(
 //     Already created {\tt ESMC\_Config} object.
 //   \item [label]
 //     Identifying label. 
+//   \item [isPresent]
+//     If non-NULL, the address specified is given a value of 1 if the
+//     label is found, and 0 when the label is not found.
 //   \end{description}
 //
 //EOP
@@ -455,7 +460,6 @@ int ESMC_ConfigFindLabel(
   // local vars
   int rc;                     // return code
   int localrc;                // local return code
-  char* fLabel = NULL;
 
   // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
@@ -471,24 +475,17 @@ int ESMC_ConfigFindLabel(
   // typecase into ESMCI type
   ESMCI_Config *configp = (ESMCI_Config*)(config.ptr);
 
-  // convert label to fortran string
-  size_t llen = strlen(label);
-  fLabel = new char[llen];
-  localrc = ESMC_CtoF90string(label, fLabel, llen);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    delete[] fLabel;
-    return rc;
-  }
-
   // call Fortran interface
-  FTN_X(f_esmf_configfindlabel)(configp, fLabel, &localrc, llen);
+  ESMC_Logical Fpresent;
+  FTN_X(f_esmf_configfindlabel)(configp, label,
+      &Fpresent, &localrc, strlen (label));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    delete[] fLabel;
+    if (isPresent != NULL)
+      *isPresent = 0;
     return rc;
   }
-
-  // clean up
-  delete[] fLabel;
+  if (isPresent != NULL)
+    *isPresent = Fpresent == ESMF_TRUE;
 
   // set return code for this branch
   rc = ESMF_SUCCESS;

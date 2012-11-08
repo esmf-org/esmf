@@ -1,4 +1,4 @@
-!  $Id: ESMF_Config_C.F90,v 1.19 2012/01/06 20:16:05 svasquez Exp $
+!  $Id: ESMF_Config_C.F90,v 1.20 2012/11/08 18:21:45 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Config_C.F90,v 1.19 2012/01/06 20:16:05 svasquez Exp $'
+!      '$Id: ESMF_Config_C.F90,v 1.20 2012/11/08 18:21:45 w6ws Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -99,7 +99,7 @@
 
 
 !------------------------------------------------------------------------------
-   subroutine f_esmf_configfindlabel(config, label, rc)
+   subroutine f_esmf_configfindlabel(config, label, isPresent, rc)
      use ESMF_UtilTypesMod    ! ESMF base class
      use ESMF_BaseMod    ! ESMF base class
      use ESMF_ConfigMod
@@ -107,13 +107,17 @@
      implicit none
 
      type(ESMF_Config)               :: config
-     character(len=*), intent(in)    :: label
-     integer, intent(out)            :: rc     
+     character(len=*),   intent(in)  :: label
+     type(ESMF_Logical), intent(out) :: isPresent
+     integer,            intent(out) :: rc
+
+     logical :: lisPresent
 
      ! Initialize return code; assume routine not implemented
      rc = ESMF_RC_NOT_IMPL
 
-     call ESMF_ConfigFindLabel(config, label, rc=rc)
+     call ESMF_ConfigFindLabel(config, label, isPresent=lisPresent, rc=rc)
+     isPresent = lisPresent
 
    end subroutine f_esmf_configfindlabel
 !------------------------------------------------------------------------------
