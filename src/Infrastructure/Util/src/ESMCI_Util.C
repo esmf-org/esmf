@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.C,v 1.16 2012/11/05 17:34:58 feiliu Exp $
+// $Id: ESMCI_Util.C,v 1.17 2012/11/08 18:07:31 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Util.C,v 1.16 2012/11/05 17:34:58 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_Util.C,v 1.17 2012/11/08 18:07:31 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 // Note:  any changes made to this C++ list must also be made to
@@ -230,6 +230,41 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_F90lentrim"
+//BOPI
+// !IROUTINE:  ESMC_F90lentrim - Returns the trimmed length of a F90 string
+//
+// !INTERFACE:
+    int ESMC_F90lentrim (
+//
+// !RETURN VALUE:
+//  Returns the length of a Fortran character string, minus trailing blanks.
+//  Analguous to the LEN_TRIM intrinsic.
+// 
+// !ARGUMENTS:
+    const char *src,                // in - Fortran character string
+    ESMCI_FortranStrLenArg slen) {   // in - length of the string
+//EOPI
+
+      if (slen > 0) {
+	ESMCI_FortranStrLenArg i = slen-1;
+
+	// the loop is written this way because ESMCI_FortranStrLenArg,
+	// which could be size_t on some systems, might be unsigned.
+	do {
+	  if (src[i] != ' ') break;
+	} while (i-- != 0);
+
+	return i+1;
+
+      } else
+	return 0;
+
+    }
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_F90toCstring"
 //BOPI
 // !IROUTINE:  ESMC_F90toCstring - Convert an F90 string into a C string
@@ -247,7 +282,6 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 //EOPI
 
     char *cp, *ctmp;
-    ESMCI_FortranStrLenArg clen;
 
     if (slen == 0) return NULL; // nothing to do, but not an error
     
@@ -258,11 +292,8 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
        return NULL;
     }
 
-    // count back from end of string to last non-blank character.
-    for (clen=slen; clen > 0; clen--)
-      if (src[clen-1] != ' ') break;
-
     // make new space and leave room for a null terminator
+    ESMCI_FortranStrLenArg clen = ESMC_F90lentrim (src, slen);
     ctmp = new char[clen+1];
     strncpy(ctmp, src, clen);
     ctmp[clen] = '\0';
@@ -292,7 +323,6 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 //EOPI
 
     char *cp;
-    ESMCI_FortranStrLenArg clen;
     int rc;
     char msgbuf[ESMF_MAXSTR];
 
@@ -308,8 +338,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
     }
 
     // count back from end of string to last non-blank character.
-    for (clen=slen; clen > 0; clen--)
-      if (src[clen-1] != ' ') break;
+    ESMCI_FortranStrLenArg clen = ESMC_F90lentrim (src, slen);
 
     // make sure dst space is long enough 
     if (clen >= dlen) {
@@ -410,7 +439,6 @@ extern "C" {
 //EOPI
 
     char *cp;
-    ESMCI_FortranStrLenArg clen;
     char msgbuf[ESMF_MAXSTR];
 
     // Initialize return code; assume routine not implemented
@@ -425,8 +453,7 @@ extern "C" {
     }
 
     // count back from end of string to last non-blank character.
-    for (clen=slen; clen > 0; clen--)
-      if (src[clen-1] != ' ') break;
+    ESMCI_FortranStrLenArg clen = ESMC_F90lentrim (src, slen);
 
     // make sure dst space is long enough 
     if (clen >= dlen) {

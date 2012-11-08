@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.58 2012/10/09 00:52:17 theurich Exp $
+// $Id: ESMCI_Util.h,v 1.59 2012/11/08 18:07:25 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -179,6 +179,7 @@ typedef struct ESMC_ObjectID {
 //  and copies the contents of the src to the dst, padding the remainder
 //  with spaces and no null terminator.
 //
+int ESMC_F90lentrim (const char *src, ESMCI_FortranStrLenArg slen);
 char *ESMC_F90toCstring(const char *src, ESMCI_FortranStrLenArg slen);
 int  ESMC_F90toCstring(const char *src, ESMCI_FortranStrLenArg slen, char *dst, ESMCI_FortranStrLenArg dlen);
 int  ESMC_CtoF90string(const char *src, char *dst, ESMCI_FortranStrLenArg dlen);
