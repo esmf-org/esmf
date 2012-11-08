@@ -84,7 +84,7 @@ Connector component that uses a default bilinear regrid method during {\tt Run} 
   \end{itemize}
 \item phase 2: ({\sc Required, NUOPC Provided})
   \begin{itemize}
-  \item Initialize the internal state.
+  \item Allocate and initialize the internal state.
   \item Use the {\tt CplList} attribute to construct {\tt srcFields} and {\tt dstFields} FieldBundles in the internal state that hold matched Field pairs.
   \item Set the {\tt Connected} attribute to {\tt true} in the Field metadata for each Field that is added to the {\tt srcFields} and {\tt dstFields} FieldBundles.
   \end{itemize}  

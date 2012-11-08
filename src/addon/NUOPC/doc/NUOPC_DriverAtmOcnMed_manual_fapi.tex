@@ -70,7 +70,7 @@ This is a specialization of the {\tt NUOPC\_Driver} generic component, driving a
   \end{itemize}  
 \item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
-  \item Initialize the internal state.
+  \item Allocate and initialize the internal state.
   \item If the internal clock is not yet set, set the default internal clock to be a copy of the incoming clock, if the incoming clock is valid.
   \item Set the number of model components to 3.
   \item Allocate internal storage according to {\tt modelCount = 3}.

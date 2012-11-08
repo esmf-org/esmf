@@ -86,11 +86,16 @@ Model component with a default {\em explicit} time dependency. Each time the {\t
 \begin{itemize}
 \item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
-  \item Check that internal clock and incoming clock agree on current time and that the time step of the incoming clock is a multiple of the internal clock time step. Under these conditions set the internal stop time to one time step interval on the incoming clock. Otherwise exit with error, flagging incompatibility.
+  \item Allocate internal state memory.
+  \item Assign the {\tt driverClock} member in the internal state as an alias to the incoming clock.
+  \item {\it Optional specialization} to check and set the internal clock against the incoming clock: {\tt label\_SetRunClock}.
+  \item Alternatively use the default specialization: check that internal clock and incoming clock agree on current time and that the time step of the incoming clock is a multiple of the internal clock time step. Under these conditions set the internal stop time to one time step interval on the incoming clock. Otherwise exit with error, flagging incompatibility.
   \item {\it Optional specialization} to check Fields in import State: {\tt label\_CheckImport}.
+  \item Alternatively use the default specialization: check that all import Fields are at the current time of the internal clock.
   \item Model time stepping loop, starting at current time, running to stop time on the internal clock using the internal Clock time step.
   \item {\it Required specialization} to advance the model each time step: {\tt label\_Advance}.
   \item {\it Optional specialization} to timestamp the Fields in the export State: {\tt label\_TimestampExport}.
+  \item Deallocate internal state memory.
   \end{itemize}    
 \end{itemize}
 

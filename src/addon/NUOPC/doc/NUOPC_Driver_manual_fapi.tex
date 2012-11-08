@@ -70,7 +70,7 @@ Driver component that drives model and connector components. The default is to u
   \end{itemize}  
 \item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
-  \item Initialize the internal state.
+  \item Allocate and initialize the internal state.
   \item If the internal clock is not yet set, set the default internal clock to be a copy of the incoming clock, if the incoming clock is valid.
   \item {\it Required specialization} to set number of model components, {\tt modelCount}, in the internal state: {\tt label\_SetModelCount}.
   \item Allocate internal storage according to {\tt modelCount}.
