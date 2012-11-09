@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.128 2012/05/16 22:40:00 svasquez Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.129 2012/11/09 01:17:30 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.128 2012/05/16 22:40:00 svasquez Exp $'
+    '$Id: ESMF_GridCreateUTest.F90,v 1.129 2012/11/09 01:17:30 rokuingh Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -2071,162 +2071,6 @@ program ESMF_GridCreateUTest
 
   ! report results
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
-  !-----------------------------------------------------------------------------
-
-
-  !-----------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Creating a 2D Regularly Distributed Rectilinear Grid from File"
-  write(failMsg, *) "Incorrect result"
-
-  ! initialize results
-  rc=ESMF_SUCCESS
-  correct=.true.
-  xercesNotPresent = .false.
-  
-  ! read XML attributes file and create grid
-  grid2=ESMF_GridCreate("esmf_grid_shape_tile.xml", rc=localrc)
-  if (localrc==ESMF_RC_LIB_NOT_PRESENT) xercesNotPresent = .true.
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  ! get info back from grid
-  call ESMF_GridGet(grid2, distgrid=distgrid2, &
-                    localDECount=localDECount, &
-                    rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_DistGridGet(distgrid2, dimCount=dimCount, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_GridGet(grid2, tile=1, minIndex=minIndex, maxIndex=maxIndex, &
-    staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-print *, "localPet = ", localPet
-print *, "petCount = ", petCount
-print *, "localDECount = ", localDECount
-print *, "dimCount = ", dimCount
-print *, "minIndex(1), minIndex(2) = ", minIndex(1), minIndex(2) 
-print *, "maxIndex(1), maxIndex(2) = ", maxIndex(1), maxIndex(2) 
-print *, " "
-
-  ! check that output is as expected
-  if (dimcount .ne. 2) correct=.false.
-  if (minIndex(1) .ne.  1 .or. minIndex(2) .ne. 1 .or. &
-      maxIndex(1) .ne. 10 .or. maxIndex(2) .ne. 20) correct=.false.
-
-  ! 4 processor test
-  if (petCount .eq. 4) then
-     if ((localPet .eq. 0 .and. localDECount .ne. 2) .or. &
-         (localPet .eq. 1 .and. localDECount .ne. 2) .or. &
-         (localPet .eq. 2 .and. localDECount .ne. 1) .or. &
-         (localPet .eq. 3 .and. localDECount .ne. 1)) correct=.false.
-
-  ! uniprocessor test
-  else if (petCount .eq. 1) then
-     if (localDECount .ne. 6) correct=.false.
-  endif
-  
-  do i=0,localDECount-1
-    call ESMF_GridGet(grid2, localDE=i, &
-                      staggerLoc=ESMF_STAGGERLOC_CENTER, &
-                      exclusiveLBound=exlbnd, exclusiveUBound=exubnd, &
-                      computationalLBound=clbnd, computationalUBound=cubnd, &
-                      rc=localrc)
-    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-print *, 'exlbnd,exubnd = ', exlbnd(1), ",", exlbnd(2), " ", exubnd(1), ", ", exubnd(2)
-print *, 'clbnd,cubnd = ', clbnd(1), ",", clbnd(2), " ", cubnd(1), ", ", cubnd(2)
-print *, ' '
-
-    ! 4 processor test
-    if (petCount .eq. 4) then
-
-      if (localPet .eq. 0) then
-        if (i.eq.0) then
-          if (exlbnd(1) .ne. 1 .or. exlbnd(2) .ne. 1 .or. &
-              exubnd(1) .ne. 5 .or. exubnd(2) .ne. 7 .or. &
-              clbnd(1)  .ne. 1 .or. clbnd(2)  .ne. 1 .or. &
-              cubnd(1)  .ne. 5 .or. cubnd(2)  .ne. 7) correct=.false.
-        else if (i.eq.1) then
-          if (exlbnd(1) .ne. 1 .or. exlbnd(2) .ne. 15  .or. &
-              exubnd(1) .ne. 5 .or. exubnd(2) .ne. 20  .or. &
-              clbnd(1)  .ne. 1 .or. clbnd(2)  .ne. 15  .or. &
-              cubnd(1)  .ne. 5 .or. cubnd(2)  .ne. 20) correct=.false.
-        endif
-
-      else if (localPet .eq. 1) then
-        if (i.eq.0) then
-          if (exlbnd(1) .ne. 6  .or. exlbnd(2) .ne. 1 .or. &
-              exubnd(1) .ne. 10 .or. exubnd(2) .ne. 7 .or. &
-              clbnd(1)  .ne. 6  .or. clbnd(2)  .ne. 1 .or. &
-              cubnd(1)  .ne. 10 .or. cubnd(2)  .ne. 7) correct=.false.
-        else if (i.eq.1) then
-          if (exlbnd(1) .ne. 6  .or. exlbnd(2) .ne. 15 .or. &
-              exubnd(1) .ne. 10 .or. exubnd(2) .ne. 20 .or. &
-              clbnd(1)  .ne. 6  .or. clbnd(2)  .ne. 15 .or. &
-              cubnd(1)  .ne. 10 .or. cubnd(2)  .ne. 20) correct=.false.
-        endif
-
-      else if (localPet .eq. 2) then
-        if (i.eq.0) then
-          if (exlbnd(1) .ne. 1 .or. exlbnd(2) .ne. 8  .or. &
-              exubnd(1) .ne. 5 .or. exubnd(2) .ne. 14 .or. &
-              clbnd(1)  .ne. 1 .or. clbnd(2)  .ne. 8  .or. &
-              cubnd(1)  .ne. 5 .or. cubnd(2)  .ne. 14) correct=.false.
-        endif
-
-      else if (localPet .eq. 3) then
-        if (i.eq.0) then
-          if (exlbnd(1) .ne. 6  .or. exlbnd(2) .ne. 8  .or.&
-              exubnd(1) .ne. 10 .or. exubnd(2) .ne. 14 .or.&
-              clbnd(1)  .ne. 6  .or. clbnd(2)  .ne. 8  .or.&
-              cubnd(1)  .ne. 10 .or. cubnd(2)  .ne. 14) correct=.false.
-        endif
-      endif
-
-    ! uniprocessor test
-    else if (petCount .eq. 1) then
-      if (i.eq.0) then
-        if (exlbnd(1) .ne. 1 .or. exlbnd(2) .ne. 1 .or. &
-            exubnd(1) .ne. 5 .or. exubnd(2) .ne. 7 .or. &
-            clbnd(1)  .ne. 1 .or. clbnd(2)  .ne. 1 .or. &
-            cubnd(1)  .ne. 5 .or. cubnd(2)  .ne. 7) correct=.false.
-      else if (i.eq.1) then
-        if (exlbnd(1) .ne. 6  .or. exlbnd(2) .ne. 1 .or. &
-            exubnd(1) .ne. 10 .or. exubnd(2) .ne. 7 .or. &
-            clbnd(1)  .ne. 6  .or. clbnd(2)  .ne. 1 .or. &
-            cubnd(1)  .ne. 10 .or. cubnd(2)  .ne. 7) correct=.false.
-      else if (i.eq.2) then
-        if (exlbnd(1) .ne. 1 .or. exlbnd(2) .ne. 8  .or. &
-            exubnd(1) .ne. 5 .or. exubnd(2) .ne. 14 .or. &
-            clbnd(1)  .ne. 1 .or. clbnd(2)  .ne. 8  .or. &
-            cubnd(1)  .ne. 5 .or. cubnd(2)  .ne. 14) correct=.false.
-      else if (i.eq.3) then
-        if (exlbnd(1) .ne. 6  .or. exlbnd(2) .ne. 8  .or. &
-            exubnd(1) .ne. 10 .or. exubnd(2) .ne. 14 .or. &
-            clbnd(1)  .ne. 6  .or. clbnd(2)  .ne. 8  .or. &
-            cubnd(1)  .ne. 10 .or. cubnd(2)  .ne. 14) correct=.false.
-      else if (i.eq.4) then
-        if (exlbnd(1) .ne. 1 .or. exlbnd(2) .ne. 15 .or. &
-            exubnd(1) .ne. 5 .or. exubnd(2) .ne. 20 .or. &
-            clbnd(1)  .ne. 1 .or. clbnd(2)  .ne. 15 .or. &
-            cubnd(1)  .ne. 5 .or. cubnd(2)  .ne. 20) correct=.false.
-      else if (i.eq.5) then
-        if (exlbnd(1) .ne. 6  .or. exlbnd(2) .ne. 15 .or. &
-            exubnd(1) .ne. 10 .or. exubnd(2) .ne. 20 .or. &
-            clbnd(1)  .ne. 6  .or. clbnd(2)  .ne. 15 .or. &
-            cubnd(1)  .ne. 10 .or. cubnd(2)  .ne. 20) correct=.false.
-      endif
-    endif
-  enddo
-
-  ! destroy grid
-  call ESMF_GridDestroy(grid2,rc=localrc)
-  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-  call ESMF_Test((((rc.eq.ESMF_SUCCESS).and.correct) .or. xercesNotPresent), &
-                    name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
 

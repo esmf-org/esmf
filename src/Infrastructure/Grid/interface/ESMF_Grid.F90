@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.281 2012/11/08 21:51:13 oehmke Exp $
+! $Id: ESMF_Grid.F90,v 1.282 2012/11/09 01:17:28 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -308,7 +308,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.281 2012/11/08 21:51:13 oehmke Exp $'
+      '$Id: ESMF_Grid.F90,v 1.282 2012/11/09 01:17:28 rokuingh Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -369,7 +369,6 @@ interface ESMF_GridCreate
       module procedure ESMF_GridCreateCopyFromNewDG
       module procedure ESMF_GridCreateFrmDistGrid
       module procedure ESMF_GridCreateFrmDistGridArb
-      module procedure ESMF_GridCreateFrmFile
       module procedure ESMF_GridCreateFrmNCFile
       module procedure ESMF_GridCreateEdgeConnR
       module procedure ESMF_GridCreateEdgeConnI
@@ -4758,225 +4757,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
     end function ESMF_GridCreateFrmDistGridArb
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateFrmFile"
-!BOP
-! !IROUTINE: ESMF_GridCreate - Create a Grid from a file
-
-! !INTERFACE:
-  ! Private name; call using ESMF_GridCreate()
-     function ESMF_GridCreateFrmFile(fileName, keywordEnforcer, &
-       convention, purpose, rc)
-!
-! !RETURN VALUE:
-     type(ESMF_Grid) :: ESMF_GridCreateFrmFile
-!
-! !ARGUMENTS:
-       character (len=*), intent(in)            :: fileName
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       character (len=*), intent(in),  optional :: convention
-       character (len=*), intent(in),  optional :: purpose
-       integer,           intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Create an {\tt ESMF\_Grid} object from specifications in a file 
-! containing an ESMF GridSpec Attribute package in XML format. Currently limited
-! to creating a 2D regularly distributed rectilinear Grid; in the future more
-! dimensions, grid types and distributions will be supported.
-! See Section~\ref{example:GridCrFromFile} for an example, as well as the
-! accompanying file
-! ESMF\_DIR/src/Infrastructure/Grid/etc/esmf\_grid\_shape\_tile.xml.
-!
-! Requires the third party Xerces C++ XML Parser library to be installed.
-! For more details, see the "ESMF Users Guide",
-! "Building and Installing the ESMF, Third Party Libraries, Xerces" and
-! the website http://xerces.apache.org/xerces-c.
-!
-! The arguments are:
-! \begin{description}
-! \item[fileName] 
-!      The name of the XML file to be read, containing ESMF GridSpec Attributes.
-! \item [{[convention]}] 
-!      The convention of a grid Attribute package. [CURRENTLY NOT IMPLEMENTED]
-! \item [{[purpose]}] 
-!      The purpose of a grid Attribute package.    [CURRENTLY NOT IMPLEMENTED]
-! \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!      Equals {\tt ESMF\_RC\_LIB\_NOT\_PRESENT} if Xerces is not present.
-! \end{description}
-!
-!EOP
-
-    type(ESMF_Grid) :: grid 
-    integer, dimension(1) :: lens
-    character(ESMF_MAXSTR) :: attrName, attrValue, attPackInstanceName
-    integer :: maxIndex(2), regDecomp(2)  ! TODO: allow more dimensions
-    integer :: fileNameLen, localrc, count
-    logical :: xercesPresent
-
-    ! Initialize return code; assume failure until success is certain 
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    localrc = ESMF_RC_NOT_IMPL
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following test when dummy argument actually used
-    if (present(convention)) then
-       if (convention==convention) continue;
-    endif
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following test when dummy argument actually used
-    if (present(purpose)) then
-    	if (purpose==purpose) continue;
-    endif
-
-    ! get length of given fileName for C++ validation
-    fileNameLen = len_trim(fileName)
-
-    ! assume Xerces XML C++ API library present until proven otherwise
-    xercesPresent = .true.
-
-    ! Initialize this grid object as invalid
-    grid%this = ESMF_NULL_POINTER
-
-    grid = ESMF_GridEmptyCreate(rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) then
-      call ESMF_GridDestroy(grid)
-      return
-    endif
-
-    ! Read the attribute file; place attributes onto grid base
-    ! TODO: use convention, purpose
-    ! use C call rather than F90, to circumvent mutually dependency
-    ! between Grid and Attribute
-    ! Do not pass a schema file; forces use of ESMF standard GridSpec schema
-    call c_ESMC_AttributeRead(grid, fileNameLen, fileName, 0, "", localrc)
-
-    if (localrc==ESMF_RC_LIB_NOT_PRESENT) xercesPresent = .false.
-    if (localrc /= ESMF_SUCCESS .and. xercesPresent) localrc = ESMF_FAILURE
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) then
-      call ESMF_GridDestroy(grid)
-      return
-    endif
-
-    ! Get the GridSpec "NX" and "NY" Attributes set from file
-    ! (required, for maxIndex in GriCreate())
-    ! use C calls rather than F90, to circumvent mutually dependency
-    ! between Grid and Attribute
-    attPackInstancename = ""  ! get the 1st AttPack of type (conv, purp) on 'grid'
-    attrName = "NX"
-    lens(1) = len(attrName)
-    count = 1
-    call c_ESMC_AttPackGetCharList(grid, attrName, ESMF_TYPEKIND_CHARACTER, count, lens, &
-                               attrValue, 'GridSpec', 'General', 'grid', &
-                               attPackInstanceName, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) then
-      call ESMF_GridDestroy(grid)
-      return
-    endif
-
-    ! convert from character to integer
-    read(attrValue, *, iostat=localrc) maxIndex(1)
-    if (localrc/=0) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)
-      call ESMF_GridDestroy(grid)
-      return
-    end if
-
-    attrName = "NY"
-    lens(1) = len(attrName)
-    call c_ESMC_AttPackGetCharList(grid, 'NY', ESMF_TYPEKIND_CHARACTER, count, lens, &
-                               attrValue, 'GridSpec', 'General', 'grid', &
-                               attPackInstanceName, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) then
-      call ESMF_GridDestroy(grid)
-      return
-    endif
-
-    ! convert from character to integer
-    read(attrValue, *, iostat=localrc) maxIndex(2)
-    if (localrc/=0) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)
-      call ESMF_GridDestroy(grid)
-      return
-    end if
-
-    ! Get the ESMF "RegDecompX" and "RegDecompY" Attributes set from file
-    ! TODO:  make optional
-    ! use C calls rather than F90, to circumvent mutually dependency
-    ! between Grid and Attribute
-    attrName = 'RegDecompX'
-    lens(1) = len(attrName)
-    call c_ESMC_AttributeGetCharList(grid, attrName, ESMF_TYPEKIND_CHARACTER, &
-            count, lens, attrValue, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) then
-      call ESMF_GridDestroy(grid)
-      return
-    endif
-
-    ! convert from character to integer
-    read(attrValue, *, iostat=localrc) regDecomp(1)
-    if (localrc/=0) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)
-      call ESMF_GridDestroy(grid)
-      return
-    end if
-
-    attrName = 'RegDecompY'
-    lens(1) = len(attrName)
-    call c_ESMC_AttributeGetCharList(grid, attrName, ESMF_TYPEKIND_CHARACTER, &
-            count, lens, attrValue, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) then
-      call ESMF_GridDestroy(grid)
-      return
-    endif
-
-    ! convert from character to integer
-    read(attrValue, *, iostat=localrc) regDecomp(2)
-    if (localrc/=0) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_VAL_WRONG, ESMF_ERR_PASSTHRU, &
-                               ESMF_CONTEXT, rcToReturn=rc)
-      call ESMF_GridDestroy(grid)
-      return
-    end if
-
-    ! Create single tile grid with global indices, and with specified 
-    ! regular distribution
-    ! TODO:  when RegDecompX,Y optional and not specified, don't pass regDecomp
-    call ESMF_GridEmptyComplete(grid, maxIndex=maxIndex, &
-         regDecomp=regDecomp, &
-         indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                              ESMF_CONTEXT, rcToReturn=rc)) then
-      call ESMF_GridDestroy(grid)
-      return
-    endif
-
-    ! TODO: Add coordinates
-    ! call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-
-    ! Set return value
-    ESMF_GridCreateFrmFile = grid
-
-    ! Set init status
-    ESMF_INIT_SET_CREATED(ESMF_GridCreateFrmFile)
-
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-
-    end function ESMF_GridCreateFrmFile
 
 !-------------------------------------------------------------------------------------------
 ! Internal subroutine to convert the 2D corner coordinate arrays which contain all the corners
