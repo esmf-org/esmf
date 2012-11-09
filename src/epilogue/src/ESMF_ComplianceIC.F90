@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.47 2012/10/29 19:13:55 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.48 2012/11/09 05:40:20 ksaint Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -382,8 +382,8 @@ module ESMF_ComplianceICMod
       return  ! bail out
     
     ! Component Attributes should be set up -> ready to output
-!    call ESMF_AttributeWrite(comp, convention='CIM', &
-!      purpose='Model Component Simulation Description', &
+!    call ESMF_AttributeWrite(comp, convention='CIM 1.5', &
+!      purpose='ModelComp', &
 !      attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
 !    if (ESMF_LogFoundError(rc, &
 !      line=__LINE__, &

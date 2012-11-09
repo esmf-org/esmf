@@ -460,8 +460,8 @@ program ESMF_AttributeCIMSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  conv = 'CIM'
-  purp = 'Model Component Simulation Description'
+  conv = 'CIM 1.5'
+  purp = 'ModelComp'
   ! write the Attribute info in CIM XML format for the Coupler, both Components,
   ! and their Fields
     call ESMF_AttributeWrite(cplcomp, conv, purp, &

@@ -1,4 +1,4 @@
-! $Id: user_model3.F90,v 1.14 2011/09/14 15:12:06 eschwab Exp $
+! $Id: user_model3.F90,v 1.15 2012/11/09 05:40:47 ksaint Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -115,8 +115,8 @@ module user_model3
     !
     !  CIM child component attributes, set on this comp, child of the coupler
     !
-    convCIM = 'CIM'
-    purpComp = 'Model Component Simulation Description'
+    convCIM = 'CIM 1.5'
+    purpComp = 'ModelComp'
     call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -159,7 +159,7 @@ module user_model3
 
     ! Responsible party attributes (for Contact)
     convISO = 'ISO 19115'
-    purpRP = 'Responsible Party Description'
+    purpRP = 'RespParty'
     call ESMF_AttributeSet(comp, 'Name', &
      'Jane Doe', &
       convention=convISO, purpose=purpRP, rc=rc)
@@ -187,7 +187,7 @@ module user_model3
 
     ! Citation attributes
     convISO = 'ISO 19115'
-    purpCitation = 'Citation Description'
+    purpCitation = 'Citation'
     call ESMF_AttributeSet(comp, 'ShortTitle', &
      'Doe_2006', &
       convention=convISO, purpose=purpCitation, rc=rc)
@@ -233,8 +233,8 @@ module user_model3
     !
     !  CIM child component scientific property attributes
     !
-    convCIM = 'CIM'
-    purpSci = 'Scientific Properties Description'
+    convCIM = 'CIM 1.5'
+    purpSci = 'SciProp'
     sciPropAtt(1) = 'AtmosphereAtmosDynamicalCoreListOfPrognosticVariables'
     sciPropAtt(2) = 'AtmosphereAtmosDynamicalCoreTopBoundaryCondition'
     call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpSci, &
@@ -265,8 +265,8 @@ module user_model3
     ! Create two Fields, and add CIM Attribute packages.
     ! The standard Attribute package currently supplied by ESMF for 
     ! CIM Fields contains a standard CF-Extended package nested within it.
-    convCIM = 'CIM'
-    purpField = 'Inputs Description'
+    convCIM = 'CIM 1.5'
+    purpField = 'Inputs'
 
     ! Ozone Field
     Ozone = ESMF_FieldEmptyCreate(name='Ozone', rc=rc)
@@ -436,8 +436,8 @@ module user_model3
 
     character(ESMF_MAXSTR)      :: convCIM, purpComp, attrVal
 
-    convCIM = 'CIM'
-    purpComp = 'Model Component Simulation Description'
+    convCIM = 'CIM 1.5'
+    purpComp = 'ModelComp'
 
     ! Initialize return code
     rc = ESMF_SUCCESS

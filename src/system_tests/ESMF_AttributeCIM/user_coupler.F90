@@ -120,14 +120,14 @@ module user_coupler
     !
     ! Top-level model component attributes, set on coupler
     !
-    convCIM = 'CIM'
-    purpComp = 'Model Component Simulation Description'
-    purpProp = 'General Component Properties Description'
+    convCIM = 'CIM 1.5'
+    purpComp = 'ModelComp'
+    purpProp = 'CompProp'
 
     convISO = 'ISO 19115'
-    purpRP = 'Responsible Party Description'
-    purpCitation = 'Citation Description'
-    purpPlatform = 'Platform Description'
+    purpRP = 'RespParty'
+    purpCitation = 'Citation'
+    purpPlatform = 'Platform'
 
     nestConv(1) = convISO
     nestPurp(1) = purpRP
@@ -137,12 +137,12 @@ module user_coupler
     ! Add CIM Attribute package to top-level coupler component, 
     !  containing a variable number of Responsible Party and 
     !  Citation sub-packages
-    !   convention = 'CIM'
-    !   purpose    = 'Model Component Simulation Description'
+    !   convention = 'CIM 1.5'
+    !   purpose    = 'ModelComp'
     !   nestConvention(1) = 'ISO 19115'
-    !   nestPurpose(1)    = 'Responsible Party Description'
+    !   nestPurpose(1)    = 'RespParty'
     !   nestConvention(2) = 'ISO 19115'
-    !   nestPurpose(2)    = 'Citation Description'
+    !   nestPurpose(2)    = 'Citation'
 
     ! Specify the top-level Coupler Component to have 3 Responsible Party
     !   sub-packages and 2 Citation sub-packages

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.29 2011/09/14 15:12:06 eschwab Exp $
+! $Id: user_model1.F90,v 1.30 2012/11/09 05:40:47 ksaint Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -113,8 +113,8 @@ module user_model1
     !
     !  CIM child component attributes, set on this comp, child of the coupler
     !
-    convCIM = 'CIM'
-    purpComp = 'Model Component Simulation Description'
+    convCIM = 'CIM 1.5'
+    purpComp = 'ModelComp'
     ! Specify the Gridded Components to have the default of 1 Responsible
     !   Party sub-package and 1 Citation sub-package
     call ESMF_AttributeAdd(comp, convention=convCIM, &
@@ -161,7 +161,7 @@ module user_model1
 
     ! Responsible party attributes (for Principal Investigator)
     convISO = 'ISO 19115'
-    purpRP = 'Responsible Party Description'
+    purpRP = 'RespParty'
     call ESMF_AttributeSet(comp, 'Name', &
      'John Doe', &
       convention=convISO, purpose=purpRP, rc=rc)
@@ -189,7 +189,7 @@ module user_model1
 
     ! Citation attributes
     convISO = 'ISO 19115'
-    purpCitation = 'Citation Description'
+    purpCitation = 'Citation'
     call ESMF_AttributeSet(comp, 'ShortTitle', &
      'Doe_2008', &
       convention=convISO, purpose=purpCitation, rc=rc)
@@ -236,8 +236,8 @@ module user_model1
     !
     !  CIM child component scientific property attributes
     !
-    convCIM = 'CIM'
-    purpSci = 'Scientific Properties Description'
+    convCIM = 'CIM 1.5'
+    purpSci = 'SciProp'
     sciPropAtt(1) = 'AtmosphereAtmosConvectTurbulCloudMicrophysicsProcesses'
     sciPropAtt(2) = 'AtmosphereAtmosConvectTurbulCloudAtmosCloudSchemeCloudSchemeAttributesSeparatedCloudTreatment'
     sciPropAtt(3) = 'AtmosphereAtmosConvectTurbulCloudCloudSimulatorInputsRadarRadarType'
@@ -274,8 +274,8 @@ module user_model1
     ! Create two Fields, and add CIM Attribute packages.
     ! The standard Attribute package currently supplied by ESMF for 
     ! CIM Fields contains a standard CF-Extended package nested within it.
-    convCIM = 'CIM'
-    purpField = 'Inputs Description'
+    convCIM = 'CIM 1.5'
+    purpField = 'Inputs'
 
 
     ! OH Field
@@ -469,8 +469,8 @@ module user_model1
 
     character(ESMF_MAXSTR)      :: convCIM, purpComp, attrVal
 
-    convCIM = 'CIM'
-    purpComp = 'Model Component Simulation Description'
+    convCIM = 'CIM 1.5'
+    purpComp = 'ModelComp'
 
     ! Initialize return code
     rc = ESMF_SUCCESS
