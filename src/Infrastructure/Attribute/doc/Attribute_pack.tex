@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.53 2012/01/06 20:15:45 svasquez Exp $
+% $Id: Attribute_pack.tex,v 1.54 2012/11/09 05:33:07 ksaint Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -11,7 +11,7 @@
 
 \label{sec:AttPacks}
 
-At this time, all ESMF objects which are enabled to contain Attributes can also contain Attribute packages, which are groupings of individual Attributes.  Every Attribute package is specified by a {\bf convention} and a {\bf purpose}, hereafter called {\bf specifiers}, such as "CF" and "General" (see below).  These specifiers are used to validate ESMF Attribute packages against existing metadata conventions.  The user can choose to use an ESMF pre-defined Attribute package, specify their own Attribute package, or add customized Attributes to any of the ESMF pre-defined Attribute packages. Currently, the creation and setting of Attribute packages is quite involved, but future development with IO will allow for a more automated approach to populating Attribute packages from a file.  This is already possible via {\tt ESMF\_AttributeRead()} for the ESMF/ESG/CF Attribute packages supplied by ESMF, as well as for custom individual Attributes not in a package.
+At this time, all ESMF objects which are enabled to contain Attributes can also contain Attribute packages, which are groupings of individual Attributes.  Every Attribute package is specified by a {\bf convention} and a {\bf purpose}, such as "CF" and "General" (see below), as arguments to many of the Attribute functions.  These are used to validate ESMF Attribute packages against existing metadata conventions.  The user can choose to use an ESMF pre-defined Attribute package, specify their own Attribute package, or add customized Attributes to any of the ESMF pre-defined Attribute packages. Currently, the creation and setting of Attribute packages is quite involved, but future development with IO will allow for a more automated approach to populating Attribute packages from a file.  This is already possible via {\tt ESMF\_AttributeRead()} for the ESMF/CF Attribute packages supplied by ESMF, as well as for custom individual Attributes not in a package.
 
 The standard Attribute packages supplied by ESMF exist for the following ESMF objects:
 
@@ -35,7 +35,7 @@ Some Attributes come with a controlled vocabulary. A controlled vocabulary is a 
 There are many attributes that are used to describe components. There are currently 4 predefined component-level Attribute packages, with sub-packages defined for the 2nd:
 
 \begin{enumerate}
-    \item Earth System Grid (ESG) Basic
+    \item Earth System Modeling Framework (ESMF) Basic
     \item Common Information Model (CIM) Main
     \begin{enumerate}
         \item Common Information Model (CIM) Platform
@@ -48,16 +48,19 @@ There are many attributes that are used to describe components. There are curren
 
 \vspace{.20in}
 
-{\bf 1. Earth System Grid (ESG) Basic Attribute Package}
+{\bf 1. Earth System Modeling Framework (ESMF) Basic Attribute Package}
 
 \begin{itemize}
-    \item Convention: ESG or ESMF
-    \item Purpose: General
+    \item Specify with:
+    \begin{itemize}
+        \item {\tt convention} = "ESMF"
+        \item {\tt purpose} = "General"
+    \end{itemize}
     \item Output Options:
     \begin{itemize}
         \item Simple XML
     \end{itemize} 
-    \item Description: This package contains several Attributes used to describe model components within the Earth System Grid (ESG) ontology. 
+    \item Description: This package contains several Attributes used to describe model components within the Earth System Moeling Framework (ESMF) ontology. 
 \end{itemize}
 
 
@@ -83,8 +86,13 @@ There are many attributes that are used to describe components. There are curren
 {\bf 2. Common Information Model (CIM) Main Attribute Package}
 
 \begin{itemize}
-    \item Convention: CIM
-    \item Purpose: Model Component Simulation Description
+    \item Specify with:
+    \begin{itemize}
+        \item {\tt convention} = "CIM 1.5"
+        \item {\tt purpose} = "ModelComp"
+    \end{itemize}
+    \item CIM Version: CIM 1.5
+    \item CIM URL: \htmladdnormallink{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}
     \item Includes:
     \begin{itemize}
        \item CIM Platform
@@ -95,41 +103,33 @@ There are many attributes that are used to describe components. There are curren
     \begin{itemize}
         \item CIM XML
     \end{itemize}  
-    \item Description: The CIM is a formal model of the climate modeling process being developed by the European Union's \htmladdnormallink{METAFOR}{http://metaforclimate.eu/} project. "It includes descriptions of the experiments being undertaken, the simulations being run in support of these experiments, the software models and tools being used to implement the simulations and the data generated by the software." The CIM divides up the climate modeling process into 6 sections, listed below. The CIM also contains other standards. It is the primary metadata representation for the fifth Climate Model Intercomparison Project (CMIP5). ESMF is currently implementing only a subset of the CIM. The representation is expected to grow. The CIM Main Package contains several standalone properties used to describe components. It also serves as the anchor to which other CIM packages are nested. Presently, these additional CIM packages (described further below) can only be created if the CIM Main Package is created. In the future, these packages will be decoupled, so that users may select subsections of the CIM to create and use. This package nests three of the packages below within it; this is described in Section \ref{sec:AttPackNesting}.
-    \begin{itemize}
-       \item Shared: Contains those elements that are used in many different packages. 
-       \item Quality: Contains elements used to express diverse quality metrics for CIM Metadata or for artifacts that the CIM metadata describes.
-       \item Grids: Provides a complete description of the horizontal and vertical discretization of modeling elements. This may refer to grids that output data is mapped onto, software adheres to, as well as activity constraints. 
-       \item Activity: Specifies the experimental design including the experimental requirements and description of how simulations conform to these requirements.
-       \item Software: Specifies all the modeling software components used within the experiment process. 
-       \item Data: Describes the data output from the climate modeling process as well as for input data. 
-    \end{itemize}
+    \item Description: The CIM Main Package contains several standalone properties used to describe components. It also serves as the anchor to which other CIM packages are nested. Presently, these additional CIM packages (described further below) can only be created if the CIM Main Package is created. In the future, these packages will be decoupled, so that users may select subsections of the CIM to create and use. This package nests three of the packages below within it; this is described in Section \ref{sec:AttPackNesting}.
 \end{itemize}
 
 
-\begin{tabular}{|p{7cm}|p{5cm}|p{15mm}|}
+\begin{tabular}{|p{7cm}|p{5cm}|p{15mm}|p{15mm}|}
      \hline\hline
-     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
-     {\tt Description} & A multi-line description of the component. & N/A \\
-     {\tt LongName} & A version of the component name with all acronyms spelled out. & N/A\\
-     {\tt MetadataVersion***} & The version number of the simulation metadata. & N/A \\ 
-     {\tt ModelType*} & A short string describing the discipline of a model component. & Advection, Aerosol3D-Sources etc.\\
-     {\tt PreviousVersion**} & Name of the previous version of a model or model component. & N/A\\ 
-     {\tt PreviousVersionDescription**} &  A short note about the previous version of the model or model component. & N/A \\ 
-     {\tt ReleaseDate} & The date a model component was issued. & N/A \\
-     {\tt ShortName*} & A version of the component name that contains acronyms. & N/A \\
-     {\tt SimulationDuration} & The length of time a simulation runs. & N/A \\
-     {\tt SimulationEndDate} & The date in simulated time of the end of a model simulation. & N/A\\ 
-     {\tt SimulationEnsembleID} & The reference name or number of the ensemble to which a simulation belongs. & N/A\\ 
-     {\tt SimulationLongName} & The name of the simulation with any acronyms spelled out. & N/A \\ 
-     {\tt SimulationNumberOfProcessingElements} & The number of PEs used in the simulation. & N/A \\ 
-     {\tt SimulationProjectName} & A campaign, such as a model intercomparison project, that may involve multiple groups and experiments. & N/A \\ 
-     {\tt SimulationRationale} & The reason for performing a simulation. & N/A\\
-     {\tt SimulationShortName} & The name of the simulation. & N/A \\
-     {\tt SimulationStartDate*} & The date in simulated time of the start of a model simulation. & N/A\\ 
-     {\tt URL} & A URL associated with a model component. & N/A \\
-     {\tt Version} & Version number of the component. & N/A \\
+     {\tt Description} & A multi-line description of the component. & N/A & software:SoftwareComponent:description \\
+     {\tt LongName} & A version of the component name with all acronyms spelled out. & N/A & software:SoftwareComponent:longName \\
+     {\tt MetadataVersion***} & The version number of the simulation metadata. & N/A & software:modelComponent:metadataVersion \\
+     {\tt ModelType*} & A short string describing the discipline of a model component. & Advection, Aerosol3D-Sources etc. & software:ModelComponent:type \\
+     {\tt PreviousVersion**} & Name of the previous version of a model or model component. & N/A & shared:Reference:name \\
+     {\tt PreviousVersionDescription**} &  A short note about the previous version of the model or model component. & N/A & shared:Relationship:description \\
+     {\tt ReleaseDate} & The date a model component was issued. & N/A & software:SoftwareComponent:releaseDate \\
+     {\tt ShortName*} & A version of the component name that contains acronyms. & N/A & software:SoftwareComponent:shortName \\
+     {\tt SimulationDuration} & The length of time a simulation runs. & N/A & activity:SimulationRun:dateRange \\
+     {\tt SimulationEndDate} & The date in simulated time of the end of a model simulation. & N/A & activity:SimulationRun:dateRange \\
+     {\tt SimulationEnsembleID} & The reference name or number of the ensemble to which a simulation belongs. & N/A & activity:EnsembleMember:ensembleMemberID \\
+     {\tt SimulationLongName} & The name of the simulation with any acronyms spelled out. & N/A & activity:NumericalActivity:longName \\
+     {\tt SimulationNumberOfProcessingElements} & The number of PEs used in the simulation. & N/A & software:Parallelization:processes \\
+     {\tt SimulationProjectName} & A campaign, such as a model intercomparison project, that may involve multiple groups and experiments. & N/A & activity:Activity:project \\
+     {\tt SimulationRationale} & The reason for performing a simulation. & N/A  & activity:Activity:rationale \\
+     {\tt SimulationShortName} & The name of the simulation. & N/A & activity:NumericalActivity:shortName \\
+     {\tt SimulationStartDate*} & The date in simulated time of the start of a model simulation. & N/A & activity:SimulationRun:dateRange \\
+     {\tt URL} & A URL associated with a model component. & N/A & shared:CI\_OnlineResource:linkage \\
+     {\tt Version} & Version number of the component. & N/A  & appended to software:SoftwareComponent:shortName \\
      \hline\hline
 \end{tabular}
 \linebreak
@@ -142,8 +142,13 @@ There are many attributes that are used to describe components. There are curren
 {\bf 2.1. CIM Platform Attribute Package}
 
 \begin{itemize}
-    \item Convention: CIM
-    \item Purpose: Platform Description
+    \item Specify with:
+    \begin{itemize}
+        \item {\tt convention} = "CIM 1.5"
+        \item {\tt purpose} = "Platform"
+    \end{itemize}
+    \item CIM Version: CIM 1.5
+    \item CIM URL: \htmladdnormallink{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}
     \item Output Options:
     \begin{itemize}
        \item CIM XML 
@@ -151,21 +156,21 @@ There are many attributes that are used to describe components. There are curren
     \item Description: This package describes the platform a particular simulation is run on. It must be created in conjunction with the CIM Main Package (see above). This package is nested within the CIM Main Package (above); see the description in Section \ref{sec:AttPackNesting}.
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|p{15mm}|}
      \hline\hline
-     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
-     {\tt CompilerName**} & The brand of the software that takes source code and turns it into an executable.& Absoft, Default, Intel, Lahey, NAG, Pathscale, PGI, PGIGCC, XLF, XLFGCC\\
-     {\tt CompilerVersion**} & The specific configuration value of the software used to take source code and turn it into executable code. & N/A \\
-     {\tt MachineCoresPerProcessor} & The number of sub-divided elements or mini-chips on a computer chip. &  N/A\\
-     {\tt MachineDescription} & A short note about the machine. & N/A \\
-     {\tt MachineInterconnectType} & The technology used to associate each node in a supercomputer with every other node. & Cray Interconnect, Fat Tree, Gigabit Ethernet, Infiniband, Mixed, Myrinet, Numalink, Quadrics, SP Switch\\
-     {\tt MachineMaximumProcessors} & The highest number of computer chips on a computer system. & N/A\\
-     {\tt MachineName*} & The name given to a computer by its system administrators. This is not the brand name of the system.& N/A \\
-     {\tt MachineOperatingSystem} & The software that is responsible for the management and coordination of activities and the sharing of resources of a computer. & Aix, Darwin, Irix64, Linux, SUNOS, Unicos\\
-     {\tt MachineProcessorType} & The type of computer chip used in a particular computer platform. & Altix, AMD x86-64, Bluegene, G4, G5, Intel EM64T, Intel IA-64, Itanium, NEC, Opteron, Origin3800, Pentium 3, Pentium 4, SP, SPARC, X1, Xeon, XT3-4, ZX6000\\
-     {\tt MachineSystem} & The type of computer system (e.g. vector, parallel, cluster, etc.).& Beowulf, Parallel, Vector \\
-     {\tt MachineVendor} & The brand name of a computer system. & ACS, Action, Appro International, Bull SA, Cray Inc, Dalco AG Switzerland, Dawning, Dell, Fujitsu, Hitachi, HP, IMB, Intel, Koi Computers, Lenovo, Mac, NEC, NEC SUN, NUDT, PC, Pyramid Computer, Raytheon-Aspen Systems, Self Made, SGI, Sun Microsystems, T-platorms\\
+     {\tt CompilerName**} & The brand of the software that takes source code and turns it into an executable.& Absoft, Default, Intel, Lahey, NAG, Pathscale, PGI, PGIGCC, XLF, XLFGCC & shared:Compiler:compilerName \\
+     {\tt CompilerVersion**} & The specific configuration value of the software used to take source code and turn it into executable code. & N/A & shared:Compiler:compilerVersion \\
+     {\tt MachineCoresPerProcessor} & The number of sub-divided elements or mini-chips on a computer chip. &  N/A & shared:Machine:machineCoresPerProcessor \\
+     {\tt MachineDescription} & A short note about the machine. & N/A & shared:Machine:machineDescription \\
+     {\tt MachineInterconnectType} & The technology used to associate each node in a supercomputer with every other node. & Cray Interconnect, Fat Tree, Gigabit Ethernet, Infiniband, Mixed, Myrinet, Numalink, Quadrics, SP Switch & shared:Machine:machineInterconnect \\
+     {\tt MachineMaximumProcessors} & The highest number of computer chips on a computer system. & N/A & shared:Machine:machineMaximumProcessors \\
+     {\tt MachineName*} & The name given to a computer by its system administrators. This is not the brand name of the system.& N/A & shared:Machine:machineName \\
+     {\tt MachineOperatingSystem} & The software that is responsible for the management and coordination of activities and the sharing of resources of a computer. & Aix, Darwin, Irix64, Linux, SUNOS, Unicos & shared:Machine:machineOperatingSystem \\
+     {\tt MachineProcessorType} & The type of computer chip used in a particular computer platform. & Altix, AMD x86-64, Bluegene, G4, G5, Intel EM64T, Intel IA-64, Itanium, NEC, Opteron, Origin3800, Pentium 3, Pentium 4, SP, SPARC, X1, Xeon, XT3-4, ZX6000 & shared:Machine:machineProcessorType \\
+     {\tt MachineSystem} & The type of computer system (e.g. vector, parallel, cluster, etc.).& Beowulf, Parallel, Vector & shared:Machine:machineSystem \\
+     {\tt MachineVendor} & The brand name of a computer system. & ACS, Action, Appro International, Bull SA, Cray Inc, Dalco AG Switzerland, Dawning, Dell, Fujitsu, Hitachi, HP, IBM, Intel, Koi Computers, Lenovo, Mac, NEC, NEC SUN, NUDT, PC, Pyramid Computer, Raytheon-Aspen Systems, Self Made, SGI, Sun Microsystems, T-platforms & shared:Machine:machineVendor \\
      \hline\hline
 \end{tabular}
 \linebreak
@@ -177,8 +182,11 @@ There are many attributes that are used to describe components. There are curren
 {\bf 2.2. ISO Responsible Party Attribute Package}
 
 \begin{itemize}
-    \item Convention: ISO 19115
-    \item Purpose: Responsible Party Description
+    \item Specify with:
+    \begin{itemize}
+        \item {\tt convention} = "ISO 19115"
+        \item {\tt purpose} = "RespParty"
+    \end{itemize}
     \item Output Options: 
     \begin{itemize}
         \item CIM XML 
@@ -188,17 +196,17 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{4cm}|p{15mm}|}
      \hline\hline
-     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
-     {\tt Abbreviation} & The abbreviation of an individual or organization associated with a model component or simulation. & N/A \\
-     {\tt EmailAddress} & The email address that others can use to ask questions about a model component. & N/A \\
-     {\tt Name} & The name of an author, contact, funder, centre, or principal investigator. & N/A \\
-     {\tt NameType} & The type of entity that Name references. & Individual, Organization, Position \\
-     {\tt PhysicalAddress} & The address of the person designated to provide information about a model component. & N/A \\
-     {\tt ResponsiblePartyRole*} & A flag to define the role of the Responsible Party. & Author, PI, Contact, Center, Funder \\
-     {\tt URL} & A URL of an individual or organization. & N/A \\
+     {\tt Abbreviation} & The abbreviation of an individual or organization associated with a model component or simulation. & N/A & shared:ResponsibleParty:abbreviation \\
+     {\tt EmailAddress} & The email address that others can use to ask questions about a model component. & N/A & shared:CI\_Address:electronicMailAddress \\
+     {\tt Name} & The name of an author, contact, funder, centre, or principal investigator. & N/A & shared:CI\_ResponsibleParty:individualName, shared:CI\_ResponsibleParty:organisationName, shared:CI\_ResponsibleParty:positionName (depending on NameType value) \\
+     {\tt NameType} & The type of entity that Name references. & Individual, Organization, Position & Not part of CIM; used to determine which CIM field to use for Name \\
+     {\tt PhysicalAddress} & The address of the person designated to provide information about a model component. & N/A & shared:CI\_Address:deliveryPoint \\
+     {\tt ResponsiblePartyRole*} & A flag to define the role of the Responsible Party. & Author, PI, Contact, Center, Funder & shared:CI\_ResponsibleParty:role \\
+     {\tt URL} & A URL of an individual or organization. & N/A & shared:CI\_OnlineResource:linkage \\
      \hline\hline
 \end{tabular}
 \linebreak
@@ -208,8 +216,11 @@ There are many attributes that are used to describe components. There are curren
 {\bf 2.3. ISO Citation Attribute Package}
 
 \begin{itemize}
-    \item Convention: ISO 19115
-    \item Purpose: Citation Description
+    \item Specify with:
+    \begin{itemize}
+        \item {\tt convention} = "ISO 19115"
+        \item {\tt purpose} = "Citation"
+    \end{itemize}
     \item Output Options: 
     \begin{itemize}
         \item CIM XML 
@@ -218,15 +229,16 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|p{15mm}|}
      \hline\hline
-     {\bf Name } & {\bf Definition} & {\bf Controlled Vocabulary} \\
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
-     {\tt Date*} & The date of the citation. & N/A\\
-     {\tt DOI} & The assigned Digital Object Identifier (DOI) of the citation. & N/A\\
-     {\tt LongTitle} & The text of the citation or pointer (e.g. URL) that further describes a model component or simulation. & N/A\\
-     {\tt PresentationForm} & A description of the type of citation. & documentDigital, documentHardcopy, imageDigital, imageHardcopy, mapDigital, mapHardcopy, modelDigital, modelHardcopy, profileDigital, profileHardcopy, tableDigital, tableHardcopy, videoDigital, videoHardcopy\\
-     {\tt ShortTitle*} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & N/A \\     {\tt URL} & Website associated with the citation. & N/A\\
+     {\tt Date*} & The date of the citation. & N/A & shared:CI\_Citation:Date \\
+     {\tt DOI} & The assigned Digital Object Identifier (DOI) of the citation. & N/A & shared:CI\_Citation:otherCitationDetails \\
+     {\tt LongTitle} & The text of the citation or pointer (e.g. URL) that further describes a model component or simulation. & N/A & shared:CI\_Citation:collectiveTitle \\
+     {\tt PresentationForm} & A description of the type of citation. & documentDigital, documentHardcopy, imageDigital, imageHardcopy, mapDigital, mapHardcopy, modelDigital, modelHardcopy, profileDigital, profileHardcopy, tableDigital, tableHardcopy, videoDigital, videoHardcopy & shared:CI\_Citation:presentationForm \\
+     {\tt ShortTitle*} & An abbreviation for the citation.  This could be the short scientific citation (e.g. Murphy, 2009) or the title of a web page. & N/A & shared:CI\_Citation:title \\
+     {\tt URL} & Website associated with the citation. & N/A & appended to shared:CI\_Citation:collectiveTitle \\
      \hline\hline
 \end{tabular}
 \linebreak
@@ -237,21 +249,27 @@ There are many attributes that are used to describe components. There are curren
 {\bf 3. Common Information Model (CIM) Scientific Properties Package}
 
 \begin{itemize}
-    \item Convention: CIM
-    \item Purpose: Scientific Properties Description
+    \item Specify with:
+    \begin{itemize}
+        \item {\tt convention} = "CIM 1.5"
+        \item {\tt purpose} = "SciProp"
+    \end{itemize}
+    \item CIM Version: CIM 1.5
+    \item CIM URL: \htmladdnormallink{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}
+    \item CV Version: 1.3
+    \item CV URL: \htmladdnormallink{http://metaforclimate.eu/trac/browser/cmip5q/tags/version-1.3/trunk/cmip5q/cmip5q/data/mindmaps}{http://metaforclimate.eu/trac/browser/cmip5q/tags/version-1.3/trunk/cmip5q/cmip5q/data/mindmaps}
     \item Output Options: 
     \begin{itemize}
         \item CIM XML
     \end{itemize}  
-    \item Description: This package is used to describe the scientific properties of a component.  The names and values of these properties are part of controlled vocabularies maintained by \htmladdnormallink{METAFOR}{http://metaforclimate.eu/}.  One or more values can be set (via an array) for a property name.
+    \item Description: This package is used to describe the scientific properties of a component.  The names and values of these properties are part of controlled vocabularies; the recommended version of the controlled vocabulary in the timeframe of this ESMF release is located in a set of mindmap files, located \htmladdnormallink{here}{http://metaforclimate.eu/trac/browser/cmip5q/tags/version-1.3/trunk/cmip5q/cmip5q/data/mindmaps}.  This is the controlled vocabulary that was used for the \htmladdnormallink{5th Coupled Model Intercomparison Project}{http://q.cmip5.ceda.ac.uk/}.  One or more values can be set (via an array) for a property name.
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|p{15mm}|}
      \hline\hline
-     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
-     {\tt <Scientific property name>} & <METAFOR definition>. & Names and values per METAFOR \\
-     {\tt ...} & ... & ... \\
+     {\tt <Scientific property name>} & <METAFOR definition>. & \htmladdnormallink{METAFOR mindmap files}{http://metaforclimate.eu/trac/browser/cmip5q/tags/version-1.3/trunk/cmip5q/cmip5q/data/mindmaps}.  & software:SoftwareComponent:scientificProperties \\
      \hline\hline
 \end{tabular}
 
@@ -260,8 +278,13 @@ There are many attributes that are used to describe components. There are curren
 {\bf 4. Common Information Model (CIM) Component Properties Package}
 
 \begin{itemize}
-    \item Convention: CIM
-    \item Purpose: General Component Properties Description
+    \item Specify with:
+    \begin{itemize}
+        \item {\tt convention} = "CIM 1.5"
+        \item {\tt purpose} = "CompProp"
+    \end{itemize}
+    \item CIM Version: CIM 1.5
+    \item CIM URL: \htmladdnormallink{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}
     \item Output Options: 
     \begin{itemize}
         \item CIM XML
@@ -269,12 +292,11 @@ There are many attributes that are used to describe components. There are curren
     \item Description: This package is used to specify any number of custom, user-defined attributes of a component and have them output in valid CIM XML format.  This differs from the scientific properties package above in that the names and values are custom, not part of any controlled vocabulary.  It also differs from a custom attribute package (see Section \ref{sec:CustomAttPacks}) in that this package has a standard convention and purpose, which is used to control the output of the user-defined attributes in standard CIM XML format.  One or more values can be set (via an array) for an attribute name.
 \end{itemize}
 
-\begin{tabular}{|p{7cm}|p{5cm}|p{15mm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|p{15mm}|}
      \hline\hline
-     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
+     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
-     {\tt <User-defined name>} & <User-defined definition>. & N/A \\
-     {\tt ...} & ... & N/A \\
+     {\tt <User-defined name>} & <User-defined definition>. & N/A & software:SoftwareComponent:componentProperties \\
      \hline\hline
 \end{tabular}
 
@@ -294,8 +316,11 @@ There is currently only 1 predefined State-level Attribute package:
 {\bf 1. ESMF Basic State Attribute Package}
 
 \begin{itemize}
-    \item Convention: ESMF
-    \item Purpose: General
+    \item Specify with:
+    \begin{itemize}
+        \item {\tt convention} = "ESMF"
+        \item {\tt purpose} = "General"
+    \end{itemize}
     \item Output Options:
     \begin{itemize}
         \item Tab-delimited
@@ -331,11 +356,16 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
 {\bf 1. Common Information Model (CIM) Inputs}
 
 \begin{itemize}
-    \item Convention: CIM
-    \item Purpose: Inputs Description
+    \item Specify with:
+    \begin{itemize}
+        \item {\tt convention} = "CIM 1.5"
+        \item {\tt purpose} = "Inputs"
+    \end{itemize}
+    \item CIM Version: CIM 1.5
+    \item CIM URL: \htmladdnormallink{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5/}
     \item Includes: 
     \begin{itemize}
-        \item ESG (or ESMF) General
+        \item ESMF General
         \item CF Extended
         \item CF General
     \end{itemize}
@@ -343,22 +373,24 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     \begin{itemize}
         \item CIM XML 
     \end{itemize}
-    \item Description: This package is used to describe a simulation and the input (initial and boundary) conditions used in that simulation. It is also used to describe any ancillary data sets that contain input condition variables. This package should not be used to describe the variables in an unconfigured model component. A pre-defined Attribute package for that case will be implemented in a future release of ESMF.  This package nests the ESG (or ESMF) General, CF Extended, and CF General Field packages (below) within it; this is described in Section \ref{sec:AttPackNesting}.  The attribute values within these ESG and CF nested packages currently appear in the Component Properties section of the CIM output file.  A separate Component Properties package may be developed for this purpose in a future ESMF release.
+    \item Description: This package is used to describe a simulation and the input (initial and boundary) conditions used in that simulation. It is also used to describe any ancillary data sets that contain input condition variables. This package should not be used to describe the variables in an unconfigured model component. A pre-defined Attribute package for that case will be implemented in a future release of ESMF.  This package nests the ESMF General, CF Extended, and CF General Field packages (below) within it; this is described in Section \ref{sec:AttPackNesting}.  The attribute values within these ESMF and CF nested packages currently appear in the Component Properties section of the CIM output file.  A separate Component Properties package may be developed for this purpose in a future ESMF release.
 \end{itemize}
 
-\begin{tabular}{|p{6cm}|p{5cm}|p{3cm}|}
+\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|p{15mm}|}
     \hline\hline
-    {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
+    {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
     \hline\hline
-    {\tt CouplingPurpose*} & The form of the input condition (e.g. initial condition or boundary condition). &  Ancillary, Boundary, Initial\\
-    {\tt CouplingSource*} & The component the input condition is coming from. & N/A \\ 
-    {\tt CouplingTarget*} & The component the input condition is going to. & N/A \\ 
-    {\tt Description} &  A multi-line description of the input. & N/A \\ 
-    {\tt Frequency} & The frequency (e.g. 2 months or 5 days) that a field from one component is input to another. & n Seconds, n Minutes, n Hours, n Days, n Months, n Years, n Decades, n Centuries\\ 
-    {\tt SpatialRegriddingMethod} & Method used to interpolate a field from one grid (source grid) to another (target grid). & Linear, Near-Neighbor, Cubic, Conservative-First-Order, Conservative-Second-Order, Conservative, Non-Conservative\\ 
-    {\tt SpatialRegriddingDimension} & Dimension of the regridding method. & 1D, 2D, 3D\\ 
-    {\tt Technique} & The software package or mechanism used to transfer and transform data between model components. & CCSM Flux Coupler, ESMF, Files, FMS, MCT, OASIS3, Shared\\ 
-    {\tt TimeTransformationType} & Temporal transformation performed on the input field before or after regridding onto the target grid.& Exact, None, Time Accumulation, Time Average, Time Interpolation\\ 
+    {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
+    \hline\hline
+    {\tt CouplingPurpose*} & The form of the input condition (e.g. initial condition or boundary condition). &  Ancillary, Boundary, Initial & software:Coupling:purpose \\
+    {\tt CouplingSource*} & The component the input condition is coming from. & N/A & software:Coupling:couplingSource \\
+    {\tt CouplingTarget*} & The component the input condition is going to. & N/A & software:Coupling:couplingTarget \\
+    {\tt Description} &  A multi-line description of the input. & N/A & software:Coupling:description \\
+    {\tt Frequency} & The frequency (e.g. 2 months or 5 days) that a field from one component is input to another. & n Seconds, n Minutes, n Hours, n Days, n Months, n Years, n Decades, n Centuries & software:Timing:rate \\
+    {\tt SpatialRegriddingMethod} & Method used to interpolate a field from one grid (source grid) to another (target grid). & Linear, Near-Neighbor, Cubic, Conservative-First-Order, Conservative-Second-Order, Conservative, Non-Conservative & software:SpatialRegridding:spatialRegriddingStandardMethod \\
+    {\tt SpatialRegriddingDimension} & Dimension of the regridding method. & 1D, 2D, 3D & software:SpatialRegridding:spatialRegriddingDimension \\
+    {\tt Technique} & The software package or mechanism used to transfer and transform data between model components. & CCSM Flux Coupler, ESMF, Files, FMS, MCT, OASIS3, Shared & N/A \\
+    {\tt TimeTransformationType} & Temporal transformation performed on the input field before or after regridding onto the target grid.& Exact, None, Time Accumulation, Time Average, Time Interpolation & software:TimeTransformation:mappingType \\
     \hline\hline
 \end{tabular}
 \linebreak
@@ -366,11 +398,14 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
 
 \vspace{.20in}
 
-{\bf 2. Earth System Grid (ESG) Field}
+{\bf 2. Earth System Modeling Framework (ESMF) Field}
 
 \begin{itemize}
-    \item Convention: ESG or ESMF
-    \item Purpose : General
+    \item Specify with:
+    \begin{itemize}
+        \item {\tt convention} = "ESMF"
+        \item {\tt purpose} = "General"
+    \end{itemize}
     \item Includes: 
     \begin{itemize}
         \item CF Extended
@@ -382,7 +417,7 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
         \item Simple XML
         \item CIM XML (when part of the CIM Inputs package)
     \end{itemize}
-    \item Description: ESG has the ability to list variables as either import or export variables. This should not be confused with the ESMF State Attribute Package, which has similiar attributes. This attribute is assigned to individual variables.   This package nests the CF Extended and CF General packages (below) within it; this is described in Section \ref{sec:AttPackNesting}.
+    \item Description: This package nests the CF Extended and CF General packages (below) within it; this is described in Section \ref{sec:AttPackNesting}.
 \end{itemize}
 
 \begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
@@ -398,8 +433,11 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
 {\bf 3. Climate Forecast (CF) Convention Extended}
 
 \begin{itemize}
-    \item Convention: CF
-    \item Purpose: Extended
+    \item Specify with:
+    \begin{itemize}
+        \item {\tt convention} = "CF"
+        \item {\tt purpose} = "Extended"
+    \end{itemize}
     \item Includes: 
     \begin{itemize}
         \item CF General
@@ -426,8 +464,11 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
 {\bf 4. Climate Forecast (CF) Convention General}
 
 \begin{itemize}
-    \item Convention: CF
-    \item Purpose: General
+    \item Specify with:
+    \begin{itemize}
+        \item {\tt convention} = "CF"
+        \item {\tt purpose} = "General"
+    \end{itemize}
     \item Output Options:
     \begin{itemize}
         \item Tab-delimited
@@ -476,8 +517,11 @@ There are 2 grid attribute packages in ESMF.
 \label{CIMGridAttributePackage}
 
 \begin{itemize}
-    \item Convention: GridSpec
-    \item Purpose: General
+    \item Specify with:
+    \begin{itemize}
+        \item {\tt convention} = "GridSpec"
+        \item {\tt purpose} = "General"
+    \end{itemize}
     \item Output Options:
     \begin{itemize}
         \item Simple XML
@@ -514,8 +558,11 @@ There are 2 grid attribute packages in ESMF.
 \label{ESMFGridAttributePackage}
 
 \begin{itemize}
-    \item Convention: ESMF
-    \item Purpose: General
+    \item Specify with:
+    \begin{itemize}
+        \item {\tt convention} = "ESMF"
+        \item {\tt purpose} = "General"
+    \end{itemize}
     \item Includes: 
     \begin{itemize}
         \item GridSpec General
@@ -550,8 +597,8 @@ The following is an alphabetical list of all the attributes implemented in ESMF,
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Attribute Package}\\
      \hline\hline
-     {\tt Agency} & An administrative unit of government.& ESG Basic Component\\
-     {\tt CodingLanguage} & The computer language in which a unit of software is written. & ESG Basic Component\\
+     {\tt Agency} & An administrative unit of government.& ESMF Basic Component\\
+     {\tt CodingLanguage} & The computer language in which a unit of software is written. & ESMF Basic Component\\
      {\tt CompilerName} & The brand of the software that takes source code and turns it into an executable.& CIM Platform\\
      {\tt CompilerVersion} & The specific configuration value of the software used to take source code and turn it into executable code. & CIM Platform\\
      {\tt CouplingPurpose} & The form of the input condition (e.g. initial condition or boundary condition). &  CIM Inputs \\
@@ -564,12 +611,12 @@ The following is an alphabetical list of all the attributes implemented in ESMF,
      {\tt DOI} & The assigned Digital Object Identifier (DOI) of the citation. & ISO Citation\\
      {\tt EmailAddress} & The email address that others can use to ask questions about a model component. & ISO Responsible Party\\
      {\tt Frequency} & The frequency (e.g. months, days) that a field from one component is input to another. & CIM Inputs\\ 
-     {\tt FullName} & The name of a model, model component, simulation, experiment, or dataset with all acronyms spelled out.& ESG Basic Component\\
+     {\tt FullName} & The name of a model, model component, simulation, experiment, or dataset with all acronyms spelled out.& ESMF Basic Component\\
      {\tt GeometryType} & Indicates the geometric figure used to approximate the shape of the Earth, e.g. "sphere". & Gridspec \\
      {\tt GridType} & A text description of the grid that uses common terminology. & Gridspec \\
      {\tt IsConformal} & Indicates if the grid tile is angle-preserving. If so, angles measured on the grid are equal to the equivalent angles on the Earth. & Gridspec\\ 
      {\tt IsRegular} & Indicates whether or not the horizontal coordinates of the grid can be defined using 1D arrays (vectors). This means that grid node locations are defined by the cartesian product of the X/Lon and Y/Lat coordinate vectors. It also means that grid cells are logically rectangular (they may also be physically rectangular in the case of projected coordinates). & Gridspec\\ 
-     {\tt Institution} & An organization associated with a model component, simulation, or dataset.& ESG Basic Component\\
+     {\tt Institution} & An organization associated with a model component, simulation, or dataset.& ESMF Basic Component\\
      {\tt Intent} & An indication of whether a field or state is imported into or exported from a particular model component. This refers to coupling, and not history output. & ESMF State, ESMF Field\\
      {\tt IsUniform} &Indicates whether or not the horizontal coordinates of a grid have fixed offsets in the X and Y directions. If the offset is the same in both directions then the grid is logically square, otherwise it is logically rectangular. & Gridspec \\
      {\tt LongName} & The name of an object with all acronyms spelled out. For fields, it is an ad-hoc long descriptive name which may, for example, be used for labeling plots. & CIM Main, CF General\\
@@ -584,7 +631,7 @@ The following is an alphabetical list of all the attributes implemented in ESMF,
      {\tt MachineSystem} & The type of computer system (e.g. vector, parallel, cluster, etc.).& CIM Platform\\
      {\tt MachineVendor} & The brand name of a computer system. & CIM Platform \\
      {\tt MetadataVersion} & The version number of the simulation metadata. & CIM Main\\ 
-     {\tt ModelComponentFramework} & The software package or mechanism used to transfer and transform data between model components.& ESG Basic Component \\
+     {\tt ModelComponentFramework} & The software package or mechanism used to transfer and transform data between model components.& ESMF Basic Component \\
      {\tt ModelType} & A short string describing the discipline of a model component. & CIM Main\\
      {\tt Name} & The name of an author, contact, funder, centre, or principal investigator. & ISO Responsible Party \\
      {\tt NameType} & The type of entity that Name references. & ISO Responsible Party \\
@@ -593,7 +640,7 @@ The following is an alphabetical list of all the attributes implemented in ESMF,
      {\tt NX} & Specifies the length of the X, or longitude, dimension of the grid tile. & Gridspec \\ 
      {\tt NY} & Specifies the length of the Y, or latitude, dimension of the grid tile. & Gridspec\\ 
      {\tt PhysicalAddress} & The address of the person designated to provide information about a model component. & ISO Responsible Party\\
-     {\tt PhysicalDomain} & A description of the geographic range being simulated. & ESG Basic Component\\
+     {\tt PhysicalDomain} & A description of the geographic range being simulated. & ESMF Basic Component\\
      {\tt PresentationForm} & A description of the type of citation. & ISO Citation\\
      {\tt PreviousVersion} & Name of the previous version of a model or model component. & CIM Main\\ 
      {\tt PreviousVersionDescription} &  A short note about the previous version of the model or model component. & CIM Main\\
@@ -619,7 +666,7 @@ The following is an alphabetical list of all the attributes implemented in ESMF,
      {\tt Technique} & The software package or mechanism used to transfer and transform data between model components. & CIM Inputs\\ 
      {\tt URL} & URL of the object being described. Exists in multple packages. & CIM Main, ISO Responsible Party, ISO Citation\\
      {\tt Units}  & The value of the units attribute is a string that can be recognized by UNIDATA's Udunits package. & CF General\\
-     {\tt Version} & A specific form or variation of an artifact i.e. a unit of software or metadata. & CIM Main, ESG Basic Component\\ 
+     {\tt Version} & A specific form or variation of an artifact i.e. a unit of software or metadata. & CIM Main, ESMF Basic Component\\ 
 \hline\hline
 \end{longtable}
 

@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.13 2012/10/31 00:07:34 theurich Exp $
+! $Id: NUOPC_Base.F90,v 1.14 2012/11/09 05:34:53 ksaint Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -1025,8 +1025,8 @@ module NUOPC_Base
 !
 !   This adds the standard NUOPC GridComp Attribute package: convention="NUOPC",
 !   purpose="General" to the Gridded Component. The NUOPC GridComp Attribute
-!   package extends the CIM Component Attribute package: convention="CIM",
-!   purpose="Model Component Simulation Description".
+!   package extends the CIM Component Attribute package: convention="CIM 1.5",
+!   purpose="ModelComp".
 !
 !EOP
   !-----------------------------------------------------------------------------
@@ -1042,13 +1042,13 @@ module NUOPC_Base
     attrList(4) = "Nestling"  ! values: integer starting 0 for first nestling
     
     ! add Attribute packages
-    call ESMF_AttributeAdd(comp, convention="CIM", &
-      purpose="Model Component Simulation Description", rc=rc)
+    call ESMF_AttributeAdd(comp, convention="CIM 1.5", &
+      purpose="ModelComp", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
-      attrList=attrList, nestConvention="CIM", &
-      nestPurpose="Model Component Simulation Description", rc=rc)
+      attrList=attrList, nestConvention="CIM 1.5", &
+      nestPurpose="ModelComp", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
       

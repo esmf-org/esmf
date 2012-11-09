@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeWrite.C,v 1.9 2012/11/07 06:53:25 ksaint Exp $
+// $Id: ESMCI_AttributeWrite.C,v 1.10 2012/11/09 05:33:12 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.9 2012/11/07 06:53:25 ksaint Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.10 2012/11/09 05:33:12 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -1801,7 +1801,7 @@ namespace ESMCI {
     }
   } else {
     ESMC_LogDefault.Write("Attribute ShortName in standard attribute package "
-      "(convention='CIM', purpose='ModelComp')"
+      "(convention='CIM 1.5', purpose='ModelComp')"
       " required to be set, to produce valid CIM XML output.",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
@@ -2026,7 +2026,7 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   } else {
     ESMC_LogDefault.Write("Attribute ModelType in standard attribute package "
-      "(convention='CIM', purpose='ModelComp')"
+      "(convention='CIM 1.5', purpose='ModelComp')"
       " required to be set, to produce valid CIM XML output.",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
@@ -2133,7 +2133,7 @@ namespace ESMCI {
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     } else {
       ESMC_LogDefault.Write("Attribute PreviousVersion in standard attribute "
-        "package (convention='CIM', "
+        "package (convention='CIM 1.5', "
         "purpose='ModelComp') "
         "required to be set, when attribute PreviousVersionDescription is also "
         "set, to produce valid CIM XML output.",
@@ -2249,7 +2249,7 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   } else {
     ESMC_LogDefault.Write("Attribute SimulationShortName in standard attribute "
-      "package (convention='CIM', "
+      "package (convention='CIM 1.5', "
       "purpose='ModelComp') "
       "required to be set, to produce valid CIM XML output.",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -2271,7 +2271,7 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   } else {
     ESMC_LogDefault.Write("Attribute SimulationLongName in standard attribute "
-      "package (convention='CIM', "
+      "package (convention='CIM 1.5', "
       "purpose='ModelComp') "
       "required to be set, to produce valid CIM XML output.",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -2344,7 +2344,7 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   } else {
     ESMC_LogDefault.Write("Attribute SimulationStartDate in standard attribute "
-      "package (convention='CIM', "
+      "package (convention='CIM 1.5', "
       "purpose='ModelComp') "
       "required to be set, to produce valid CIM XML output.",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -2465,7 +2465,7 @@ namespace ESMCI {
     machineName = valuevector.at(0);
   } else {
     ESMC_LogDefault.Write("Attribute MachineName in "
-      "standard attribute package (convention='CIM', "
+      "standard attribute package (convention='CIM 1.5', "
       "purpose='Platform') "
       "required to be set, to produce valid CIM XML output.",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -2675,7 +2675,7 @@ namespace ESMCI {
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     } else {
       ESMC_LogDefault.Write("Attribute CompilerName in "
-       "standard attribute package (convention='CIM', "
+       "standard attribute package (convention='CIM 1.5', "
        "purpose='Platform') "
        "required to be set, when attribute CompilerVersion is also set, "
        "to produce valid CIM XML output.",
@@ -2698,7 +2698,7 @@ namespace ESMCI {
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     } else {
       ESMC_LogDefault.Write("Attribute CompilerVersion in "
-       "standard attribute package (convention='CIM', "
+       "standard attribute package (convention='CIM 1.5', "
        "purpose='Platform') "
        "required to be set, when attribute CompilerName is also set, "
        "to produce valid CIM XML output.",
@@ -3273,7 +3273,7 @@ namespace ESMCI {
           value = "in";
         } else {
           ESMC_LogDefault.Write("Attribute Intent in "
-            "standard attribute package (convention='CIM', "
+            "standard attribute package (convention='CIM 1.5', "
             "purpose='Inputs') must be one of "
             "{Export, Import} to produce valid CIM XML output.",
             ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -3314,7 +3314,7 @@ namespace ESMCI {
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       } else {
         ESMC_LogDefault.Write("Attribute ShortName in attpack "
-          "CF/General, nested within std attpack (conv='CIM', "
+          "CF/General, nested within std attpack (conv='CIM 1.5', "
           "purp='Inputs'), required to be set, if other "
           "attributes are set in nested packages CF/General, "
           "CF/Extended, or ESMF/General, to produce valid CIM XML output.",
@@ -3669,7 +3669,7 @@ namespace ESMCI {
           value = "initialCondition";
         } else {
           ESMC_LogDefault.Write("Attribute CouplingPurpose in "
-            "standard attribute package (convention='CIM', "
+            "standard attribute package (convention='CIM 1.5', "
             "purpose='Inputs') must be one of "
             "{Ancillary, Boundary, Initial} "
             "to produce valid CIM XML output.",
@@ -3689,7 +3689,7 @@ namespace ESMCI {
                      "fullySpecified", "false", "purpose", "");
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         ESMC_LogDefault.Write("Attribute CouplingPurpose in "
-          "standard attribute package (convention='CIM', "
+          "standard attribute package (convention='CIM 1.5', "
           "purpose='Inputs') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
@@ -3824,7 +3824,7 @@ namespace ESMCI {
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       } else {
         ESMC_LogDefault.Write("Attribute CouplingSource in "
-          "standard attribute package (convention='CIM', "
+          "standard attribute package (convention='CIM 1.5', "
           "purpose='Inputs') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
@@ -3847,7 +3847,7 @@ namespace ESMCI {
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       } else {
         ESMC_LogDefault.Write("Attribute CouplingTarget in "
-          "standard attribute package (convention='CIM', "
+          "standard attribute package (convention='CIM 1.5', "
           "purpose='Inputs') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
@@ -3945,7 +3945,7 @@ namespace ESMCI {
           couplingPurpose = "initialCondition";
         } else {
           ESMC_LogDefault.Write("Attribute CouplingPurpose in "
-            "standard attribute package (convention='CIM', "
+            "standard attribute package (convention='CIM 1.5', "
             "purpose='Inputs') must be one of "
             "{Ancillary, Boundary, Initial} "
             "to produce valid CIM XML output.",
@@ -3975,7 +3975,7 @@ namespace ESMCI {
                      "fullySpecified", "true", "purpose", "");
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
         ESMC_LogDefault.Write("Attribute CouplingPurpose in "
-          "standard attribute package (convention='CIM', "
+          "standard attribute package (convention='CIM 1.5', "
           "purpose='Inputs') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
@@ -4179,11 +4179,11 @@ namespace ESMCI {
         } else {
           // TODO:  output value of CouplingSource
           ESMC_LogDefault.Write("The value of attribute CouplingSource in "
-            "standard attribute package (convention='CIM', "
+            "standard attribute package (convention='CIM 1.5', "
             "purpose='Inputs') "
             "does not correspond to the value of any ShortName "
             "attribute within a component attribute package "
-            "(convention='CIM', "
+            "(convention='CIM 1.5', "
             "purpose='ModelComp'). "
             "Skipping output of <couplingSource>...<id>.",
             ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -4213,7 +4213,7 @@ namespace ESMCI {
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       } else {
         ESMC_LogDefault.Write("Attribute CouplingSource in "
-          "standard attribute package (convention='CIM', "
+          "standard attribute package (convention='CIM 1.5', "
           "purpose='Inputs') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",
@@ -4241,11 +4241,11 @@ namespace ESMCI {
         } else {
           // TODO:  output value of CouplingTarget
           ESMC_LogDefault.Write("The value of attribute CouplingTarget in "
-            "standard attribute package (convention='CIM', "
+            "standard attribute package (convention='CIM 1.5', "
             "purpose='Inputs') "
             "does not correspond to the value of any ShortName "
             "attribute within a component attribute package "
-            "(convention='CIM', "
+            "(convention='CIM 1.5', "
             "purpose='ModelComp'). "
             "Skipping output of <couplingSource>...<id>.",
             ESMC_LOGMSG_WARN, ESMC_CONTEXT);
@@ -4271,7 +4271,7 @@ namespace ESMCI {
         ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
       } else {
         ESMC_LogDefault.Write("Attribute CouplingTarget in "
-          "standard attribute package (convention='CIM', "
+          "standard attribute package (convention='CIM 1.5', "
           "purpose='Inputs') "
           "required to be set, when other attributes in this package are set, "
           "to produce valid CIM XML output.",

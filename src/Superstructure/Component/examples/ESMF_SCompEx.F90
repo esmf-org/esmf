@@ -1,4 +1,4 @@
-! $Id: ESMF_SCompEx.F90,v 1.4 2012/11/07 06:55:45 ksaint Exp $
+! $Id: ESMF_SCompEx.F90,v 1.5 2012/11/09 05:34:18 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -128,7 +128,7 @@ program ESMF_SCompEx
 !EOE
 
 !BOC 
-      convCIM = 'CIM'
+      convCIM = 'CIM 1.5'
       purpComp = 'ModelComp'
       purpProp = 'CompProp'
       purpField = 'Inputs'
@@ -248,7 +248,7 @@ program ESMF_SCompEx
 !EOC
 
 !BOC
-    purpSci = 'Scientific Properties Description'
+    purpSci = 'SciProp'
 
     dc_sciPropAtt(1) = 'TopBoundaryCondition'
     dc_sciPropAtt(2) = 'HeatTreatmentAtTop'

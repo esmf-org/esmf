@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeXMLUTest.F90,v 1.35 2012/11/07 06:54:53 ksaint Exp $
+! $Id: ESMF_AttributeXMLUTest.F90,v 1.36 2012/11/09 05:34:16 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@ program ESMF_AttributeXMLUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeXMLUTest.F90,v 1.35 2012/11/07 06:54:53 ksaint Exp $'
+      '$Id: ESMF_AttributeXMLUTest.F90,v 1.36 2012/11/09 05:34:16 ksaint Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -147,7 +147,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     ! Setup the convention and purpose strings
     !-------------------------------------------------------------------------
-    convCIM = 'CIM'
+    convCIM = 'CIM 1.5'
     convISO = 'ISO 19115'
 
     purpComp = 'ModelComp'

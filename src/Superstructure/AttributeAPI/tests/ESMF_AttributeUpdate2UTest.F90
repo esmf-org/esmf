@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdate2UTest.F90,v 1.13 2012/11/07 06:54:53 ksaint Exp $
+! $Id: ESMF_AttributeUpdate2UTest.F90,v 1.14 2012/11/09 05:34:16 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -197,7 +197,7 @@ module ESMF_AttributeUpdate2UTestMod
     !
     !  CIM child component attributes, set on this comp, child of the coupler
     !
-    convCIM = 'CIM'
+    convCIM = 'CIM 1.5'
     purpComp = 'ModelComp'
 
     convISO = 'ISO 19115'
@@ -313,7 +313,7 @@ module ESMF_AttributeUpdate2UTestMod
     character(ESMF_MAXSTR),dimension(2) :: attrList, valueList, attPackInstNames
     integer attPackInstCount
 
-    convCIM = 'CIM'
+    convCIM = 'CIM 1.5'
     purpComp = 'ModelComp'
     purpExt = 'Extended'
 
@@ -456,7 +456,7 @@ program ESMF_AttributeUpdate2UTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdate2UTest.F90,v 1.13 2012/11/07 06:54:53 ksaint Exp $'
+    '$Id: ESMF_AttributeUpdate2UTest.F90,v 1.14 2012/11/09 05:34:16 ksaint Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -548,7 +548,7 @@ program ESMF_AttributeUpdate2UTest
       rootList=(/0,2,4,5/), rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    convCIM = 'CIM'
+    convCIM = 'CIM 1.5'
     purpExt = 'Extended'
 
     convISO = 'ISO 19115'

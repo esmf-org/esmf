@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.139 2012/11/07 06:53:25 ksaint Exp $
+// $Id: ESMCI_Attribute.C,v 1.140 2012/11/09 05:33:12 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.139 2012/11/07 06:53:25 ksaint Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.140 2012/11/09 05:33:12 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -70,7 +70,7 @@ int Attribute::count = 0;
 const std::string Attribute::CF_CONV      = "CF";
 const std::string Attribute::ESG_CONV     = "ESG";
 const std::string Attribute::ESMF_CONV    = "ESMF";
-const std::string Attribute::CIM_1_5_CONV = "CIM";
+const std::string Attribute::CIM_1_5_CONV = "CIM 1.5";
 
 const std::string Attribute::GENERAL_PURP    = "General";
 const std::string Attribute::EXTENDED_PURP   = "Extended";

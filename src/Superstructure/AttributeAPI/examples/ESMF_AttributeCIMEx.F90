@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeCIMEx.F90,v 1.55 2012/11/07 20:54:39 ksaint Exp $
+! $Id: ESMF_AttributeCIMEx.F90,v 1.56 2012/11/09 05:34:12 ksaint Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -151,7 +151,7 @@ program ESMF_AttributeCIMEx
 
 
 !BOC 
-      convCIM = 'CIM'
+      convCIM = 'CIM 1.5'
       purpComp = 'ModelComp'
       purpProp = 'CompProp'
       purpSci = 'SciProp'
@@ -691,6 +691,7 @@ program ESMF_AttributeCIMEx
 !BOC
 
       call ESMF_Finalize(rc=rc)
+!EOC
 
 10    continue
       if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
