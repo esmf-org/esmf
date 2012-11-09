@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.58 2012/11/09 05:33:10 ksaint Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.59 2012/11/09 13:25:01 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.58 2012/11/09 05:33:10 ksaint Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.59 2012/11/09 13:25:01 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -2051,15 +2051,8 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
   // Find the attpack
   attpack = (**base).root.AttPackGet(cconv, cpurp, cobj, capname);
   if(!attpack) {
-    string	errStr = "Cannot find package: ";
-    errStr.append(cconv);
-    errStr.append("/");
-    errStr.append(cpurp);
-/*
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
       "Cannot find the specified Attribute package", &status);
-*/
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, errStr.c_str(), &status);
     return;
   }
   
