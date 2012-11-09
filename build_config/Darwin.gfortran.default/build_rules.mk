@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.24 2012/11/08 23:56:35 theurich Exp $
+# $Id: build_rules.mk,v 1.25 2012/11/09 00:05:57 theurich Exp $
 #
 # Darwin.gfortran.default
 #
@@ -202,6 +202,7 @@ ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
 
 ############################################################
 # Blank out variables to prevent rpath encoding
+#
 ESMF_F90LINKRPATHS      =
 ESMF_CXXLINKRPATHS      =
 
