@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshOpUTest.F90,v 1.1 2012/11/09 17:49:33 feiliu Exp $
+! $Id: ESMF_MeshOpUTest.F90,v 1.2 2012/11/09 18:10:04 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -89,10 +89,10 @@ contains
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    call ESMF_MeshWrite(mesh, "meshdiff", rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    !call ESMF_MeshWrite(mesh, "meshdiff", rc=localrc)
+    !if (ESMF_LogFoundError(localrc, &
+    !  ESMF_ERR_PASSTHRU, &
+    !  ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine test3
 
