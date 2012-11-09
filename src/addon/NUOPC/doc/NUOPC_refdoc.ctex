@@ -1,4 +1,4 @@
-% $Id: NUOPC_refdoc.ctex,v 1.19 2012/10/25 19:48:21 theurich Exp $ 
+% $Id: NUOPC_refdoc.ctex,v 1.20 2012/11/09 22:13:12 theurich Exp $ 
 
 #ifdef STANDALONE
 \documentclass[english]{article}
@@ -104,6 +104,13 @@
 \input{NUOPC_Field_metadata}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_Field_metadata}
+#endif
+
+\subsection{Initialize Phase Definitions}
+#ifdef STANDALONE
+\input{NUOPC_IPD}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_IPD}
 #endif
 
 \newpage

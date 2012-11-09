@@ -86,14 +86,7 @@ Driver component that drives model and connector components. The default is to u
     \item Optionally replace the default clock. 
     \item Optionally replace the default run sequence.
   \end{itemize}
-  \item Execute Model components' Initialize() phase 0, in order.
-  \item Execute Connector components' Initialize() phase 0, in order.
-  \item Execute Model components' Initialize() phase 1, in order.
-  \item Execute Connector components' Initialize() phase 1, in order.
-  \item Execute Model components' Initialize() phase 2, in order.
-  \item Execute Connector components' Initialize() phase 2, in order.
-  \item Execute Model components' Initialize() phase 3, in order.
-  \item Execute Model components' Initialize() phase 4, in order.
+  \item Implement the initialize sequence for the child components, compatible with up to IPD version 01, as documented in section \ref{IPD}.
   \end{itemize}  
 \end{itemize}
 
