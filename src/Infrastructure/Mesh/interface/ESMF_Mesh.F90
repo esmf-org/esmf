@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.99 2012/09/06 20:08:13 feiliu Exp $
+! $Id: ESMF_Mesh.F90,v 1.100 2012/11/09 17:48:14 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.99 2012/09/06 20:08:13 feiliu Exp $'
+!      '$Id: ESMF_Mesh.F90,v 1.100 2012/11/09 17:48:14 feiliu Exp $'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -173,7 +173,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.99 2012/09/06 20:08:13 feiliu Exp $'
+    '$Id: ESMF_Mesh.F90,v 1.100 2012/11/09 17:48:14 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -187,6 +187,7 @@ module ESMF_MeshMod
      module procedure ESMF_MeshCreateFromPointer
      module procedure ESMF_MeshCreateFromFile
      module procedure ESMF_MeshCreateFromDG
+     module procedure ESMF_MeshCreateFromMeshes
    end interface
 
 !------------------------------------------------------------------------------
@@ -1114,6 +1115,219 @@ num_elems, &
     if (present(rc)) rc=ESMF_SUCCESS
     return
 end function ESMF_MeshCreateFromDG
+!------------------------------------------------------------------------------
+
+!!------------------------------------------------------------------------------
+!#undef  ESMF_METHOD
+!#define ESMF_METHOD "ESMF_MeshCreateFromMeshesR4()"
+!!BOPI
+!! !IROUTINE: ESMF_MeshCreate - Create a Mesh from two source Meshes with spatial operations
+!!
+!! !INTERFACE:
+!  ! Private name; call using ESMF_MeshCreate()
+!    function ESMF_MeshCreateFromMeshesR4(MeshA, MeshB, MeshOp, areaThreshold, rc)
+!!
+!!
+!! !RETURN VALUE:
+!    type(ESMF_Mesh)                                   :: ESMF_MeshCreateFromMeshesR4
+!! !ARGUMENTS:
+!    type(ESMF_Mesh),            intent(in)            :: MeshA
+!    type(ESMF_Mesh),            intent(in)            :: MeshB
+!    type(ESMF_MeshOp_Flag),     intent(in)            :: MeshOp
+!    real(ESMF_KIND_R4),         intent(in),  optional :: areaThreshold
+!    integer,                    intent(out), optional :: rc
+!! 
+!! !DESCRIPTION:
+!!   Create a Mesh from two source Meshes with spatial operations. These spatial operations
+!!   treat the points in the two Meshes as point sets. The returned Mesh is either intersection,
+!!   union, or difference of the point sets of two source Meshes. 
+!!
+!!   \begin{description}
+!!   \item [MeshA]
+!!         The first source Mesh containing the first point set.
+!!   \item [MeshB]
+!!         The second source Mesh containing the second point set.
+!!   \item [MeshOp]
+!!         Mesh spatial operation flag. Currently only ESMF_MESHOP_DIFFERENCE is supported.
+!!         Please refer to section {\ref const:meshop}
+!!   \item [areaThreshold]
+!!         Minimum cell area to be accepted to create the resulting Mesh. Cells with area
+!!         less than this threshold value are discarded. This is a user tunable parameter
+!!         to handle roundoff error when computing with floating point numbers. The default
+!!         value is 0.
+!!   \item [{[rc]}]
+!!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!!   \end{description}
+!!
+!!EOPI
+!!------------------------------------------------------------------------------
+!    integer                      :: localrc
+!    real(ESMF_KIND_R8)           :: l_threshold
+!
+!    l_threshold = 0.
+!    if(present(areaThreshold)) l_threshold = areaThreshold
+!
+!    call C_ESMC_MeshCreateFromMeshes(meshA, meshB, ESMF_MeshCreateFromMeshesR4, &
+!      MeshOp, l_threshold, localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!         ESMF_CONTEXT, rcToReturn=rc)) return
+!
+!    ! The C side has been created
+!    ESMF_MeshCreateFromMeshesR4%isCMeshFreed=.false.
+!
+!    ! Set as fully created 
+!    ESMF_MeshCreateFromMeshesR4%hasSplitElem=.false.
+!
+!    ESMF_MeshCreateFromMeshesR4%isFullyCreated=.true.
+!
+!    ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromMeshesR4)
+!
+!    if (present(rc)) rc=ESMF_SUCCESS
+!    return
+!
+!end function ESMF_MeshCreateFromMeshesR4
+!------------------------------------------------------------------------------
+
+!!------------------------------------------------------------------------------
+!#undef  ESMF_METHOD
+!#define ESMF_METHOD "ESMF_MeshCreateFromMeshesR8()"
+!!BOPI
+!! !IROUTINE: ESMF_MeshCreate - Create a Mesh from two source Meshes with spatial operations
+!!
+!! !INTERFACE:
+!  ! Private name; call using ESMF_MeshCreate()
+!    function ESMF_MeshCreateFromMeshesR8(MeshA, MeshB, MeshOp, areaThreshold, rc)
+!!
+!!
+!! !RETURN VALUE:
+!    type(ESMF_Mesh)                                   :: ESMF_MeshCreateFromMeshesR8
+!! !ARGUMENTS:
+!    type(ESMF_Mesh),            intent(in)            :: MeshA
+!    type(ESMF_Mesh),            intent(in)            :: MeshB
+!    type(ESMF_MeshOp_Flag),     intent(in)            :: MeshOp
+!    real(ESMF_KIND_R8),         intent(in),  optional :: areaThreshold
+!    integer,                    intent(out), optional :: rc
+!! 
+!! !DESCRIPTION:
+!!   Create a Mesh from two source Meshes with spatial operations. These spatial operations
+!!   treat the points in the two Meshes as point sets. The returned Mesh is either intersection,
+!!   union, or difference of the point sets of two source Meshes. 
+!!
+!!   \begin{description}
+!!   \item [MeshA]
+!!         The first source Mesh containing the first point set.
+!!   \item [MeshB]
+!!         The second source Mesh containing the second point set.
+!!   \item [MeshOp]
+!!         Mesh spatial operation flag. Currently only ESMF_MESHOP_DIFFERENCE is supported.
+!!         Please refer to section {\ref const:meshop}
+!!   \item [areaThreshold]
+!!         Minimum cell area to be accepted to create the resulting Mesh. Cells with area
+!!         less than this threshold value are discarded. This is a user tunable parameter
+!!         to handle roundoff error when computing with floating point numbers. The default
+!!         value is 0.
+!!   \item [{[rc]}]
+!!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!!   \end{description}
+!!
+!!EOPI
+!!------------------------------------------------------------------------------
+!    integer                      :: localrc
+!    real(ESMF_KIND_R8)           :: l_threshold
+!
+!    l_threshold = 0.
+!    if(present(areaThreshold)) l_threshold = areaThreshold
+!
+!    call C_ESMC_MeshCreateFromMeshes(meshA, meshB, ESMF_MeshCreateFromMeshesR8, &
+!      MeshOp, l_threshold, localrc)
+!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!         ESMF_CONTEXT, rcToReturn=rc)) return
+!
+!    ! The C side has been created
+!    ESMF_MeshCreateFromMeshesR8%isCMeshFreed=.false.
+!
+!    ! Set as fully created 
+!    ESMF_MeshCreateFromMeshesR8%hasSplitElem=.false.
+!
+!    ESMF_MeshCreateFromMeshesR8%isFullyCreated=.true.
+!
+!    ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromMeshesR8)
+!
+!    if (present(rc)) rc=ESMF_SUCCESS
+!    return
+!
+!end function ESMF_MeshCreateFromMeshesR8
+!!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateFromMeshes()"
+!BOPI
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh from two source Meshes with spatial operations
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MeshCreate()
+    function ESMF_MeshCreateFromMeshes(MeshA, MeshB, MeshOp, areaThreshold, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)                                   :: ESMF_MeshCreateFromMeshes
+! !ARGUMENTS:
+    type(ESMF_Mesh),            intent(in)            :: MeshA
+    type(ESMF_Mesh),            intent(in)            :: MeshB
+    type(ESMF_MeshOp_Flag),     intent(in)            :: MeshOp
+    real(ESMF_KIND_R8),         intent(in),  optional :: areaThreshold
+    integer,                    intent(out), optional :: rc
+! 
+! !DESCRIPTION:
+!   Create a Mesh from two source Meshes with spatial operations. These spatial operations
+!   treat the points in the two Meshes as point sets. The returned Mesh is either intersection,
+!   union, or difference of the point sets of two source Meshes. 
+!
+!   \begin{description}
+!   \item [MeshA]
+!         The first source Mesh containing the first point set.
+!   \item [MeshB]
+!         The second source Mesh containing the second point set.
+!   \item [MeshOp]
+!         Mesh spatial operation flag. Currently only ESMF_MESHOP_DIFFERENCE is supported.
+!         Please refer to section {\ref const:meshop}
+!   \item [areaThreshold]
+!         Minimum cell area to be accepted to create the resulting Mesh. Cells with area
+!         less than this threshold value are discarded. This is a user tunable parameter
+!         to handle roundoff error when computing with floating point numbers. The default
+!         value is 0.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                      :: localrc
+    real(ESMF_KIND_R8)           :: l_threshold
+
+    l_threshold = 0.
+    if(present(areaThreshold)) l_threshold = areaThreshold
+
+    call C_ESMC_MeshCreateFromMeshes(meshA, meshB, ESMF_MeshCreateFromMeshes, &
+      MeshOp, l_threshold, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! The C side has been created
+    ESMF_MeshCreateFromMeshes%isCMeshFreed=.false.
+
+    ! Set as fully created 
+    ESMF_MeshCreateFromMeshes%hasSplitElem=.false.
+
+    ESMF_MeshCreateFromMeshes%isFullyCreated=.true.
+
+    ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromMeshes)
+
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+
+end function ESMF_MeshCreateFromMeshes
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------

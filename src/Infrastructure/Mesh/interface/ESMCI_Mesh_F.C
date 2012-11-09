@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.63 2012/09/14 16:29:28 feiliu Exp $
+// $Id: ESMCI_Mesh_F.C,v 1.64 2012/11/09 17:48:14 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -37,12 +37,13 @@
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_Phedra.h"
 #include "Mesh/include/ESMCI_XGridUtil.h"
+#include "Mesh/include/ESMCI_MeshMerge.h"
 
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.63 2012/09/14 16:29:28 feiliu Exp $";
+ static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.64 2012/11/09 17:48:14 feiliu Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -2264,6 +2265,50 @@ extern "C" void FTN_X(c_esmc_get_polygon_area)(int *spatialdim, int *nedges,
   } else {
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
                                           "- Spatial dimension > 3", rc);
+    return;
+  }
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+////////////////
+
+
+extern "C" void FTN_X(c_esmc_meshcreatefrommeshes)(Mesh **meshapp, Mesh **meshbpp, Mesh **meshpp, 
+ESMC_MeshOp_Flag * meshop, double * threshold, int *rc) {
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+    Mesh &mesha = **meshapp;
+    Mesh &meshb = **meshbpp;
+    //it's meshb clips into mesha, need to revert order before this call
+    MeshCreateDiff(meshb, mesha, meshpp, *threshold);
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), rc);
+    } else {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "- Caught unknown exception", rc);
     return;
   }
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.159 2012/11/06 17:48:52 oehmke Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.160 2012/11/09 17:53:15 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -722,6 +722,17 @@
         ESMF_TERMORDER_FREE       = ESMF_TermOrder_Flag(2)
 
 !------------------------------------------------------------------------------
+!
+      type ESMF_MeshOp_Flag
+      sequence
+      private
+          integer :: flag
+      end type
+
+      type(ESMF_MeshOp_Flag), parameter ::  &
+        ESMF_MESHOP_DIFFERENCE    = ESMF_MeshOp_Flag(0)
+
+!------------------------------------------------------------------------------
 !BOPI
 !
 ! !PUBLIC TYPES:
@@ -865,6 +876,9 @@
       
       public ESMF_TermOrder_Flag
       public ESMF_TERMORDER_SRCSEQ, ESMF_TERMORDER_SRCPET, ESMF_TERMORDER_FREE
+
+      public ESMF_MeshOp_Flag
+      public ESMF_MESHOP_DIFFERENCE
 
       
 !  Overloaded = operator functions

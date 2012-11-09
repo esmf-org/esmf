@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.93 2012/10/29 04:00:06 gold2718 Exp $
+% $Id: ESMF_options.tex,v 1.94 2012/11/09 17:52:37 feiliu Exp $
 
 \section{Appendix A:  Master List of Constants}
 \label{const:master}
@@ -348,6 +348,22 @@ This flag is documented in section \ref{const:logmsgflag}.
 
 \subsection{ESMF\_MESHELEMTYPE}
 This flag is documented in section \ref{const:meshelemtype}.
+
+\subsection{ESMF\_MESHOP}
+\label{const:meshop}
+{\sf DESCRIPTION:\\}  
+Specifies the spatial operation with two source Meshes, treating the Meshes as point sets.
+
+The type of this flag is:
+
+{\tt type(ESMF\_MeshOp\_Flag)}
+
+The valid values are:
+\begin{description}
+
+\item [ESMF\_MESHOP\_DIFFERENCE]
+         Calculate the difference of the two point sets from the source Meshes.
+\end{description}
 
 \subsection{ESMF\_METHOD}
 \label{const:method}

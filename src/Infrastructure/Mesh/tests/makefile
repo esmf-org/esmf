@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2012/04/03 22:09:30 rokuingh Exp $ 
+# $Id: makefile,v 1.14 2012/11/09 17:48:21 feiliu Exp $ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests
@@ -9,6 +9,7 @@ LOCDIR    = src/Infrastructure/Mesh/tests
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
  		$(ESMF_TESTDIR)/ESMC_MeshUTest \
  		$(ESMF_TESTDIR)/ESMC_MeshVTKUTest \
+ 		$(ESMF_TESTDIR)/ESMF_MeshOpUTest \
  		$(ESMF_TESTDIR)/ESMF_MeshUTest 
 
 TESTS_OBJ = 
@@ -16,10 +17,12 @@ TESTS_OBJ =
 TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
  		RUN_ESMC_MeshUTest \
  		RUN_ESMC_MeshVTKUTest \
+ 		RUN_ESMF_MeshOpUTest \
  		RUN_ESMF_MeshUTest 
 
 TESTS_RUN_UNI = RUN_ESMCI_IntegrateUTestUNI \
  		RUN_ESMC_MeshUTestUNI \
+ 		RUN_ESMF_MeshOpUTestUNI \
 		RUN_ESMF_MeshUTestUNI
 
 
@@ -43,6 +46,12 @@ RUN_ESMCI_IntegrateUTest:
 
 RUN_ESMCI_IntegrateUTestUNI:
 	$(MAKE) TNAME=Integrate NP=1 citest
+
+RUN_ESMF_MeshOpUTest:
+	$(MAKE) TNAME=MeshOp NP=4 ftest
+
+RUN_ESMF_MeshOpUTestUNI:
+	$(MAKE) TNAME=MeshOp NP=1 ftest
 
 RUN_ESMF_MeshUTest:
 	$(MAKE) TNAME=Mesh NP=4 ftest

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util.h,v 1.59 2012/11/08 18:07:25 w6ws Exp $
+// $Id: ESMCI_Util.h,v 1.60 2012/11/09 17:53:13 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -139,6 +139,8 @@ enum ESMC_ItemOrder_Flag { ESMC_ITEMORDER_ABC=0,
 enum ESMC_TermOrder_Flag { ESMC_TERMORDER_SRCSEQ=0,
                            ESMC_TERMORDER_SRCPET,
                            ESMC_TERMORDER_FREE};
+// Mesh spatial operator
+enum ESMC_MeshOp_Flag { ESMC_MESHOP_DIFFERENCE=0 };
 
 // TODO: investigate why this is a macro instead of an enum
 #define ESMC_GRIDITEM_INVALID -2
