@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.21 2012/11/09 17:49:32 feiliu Exp $
+// $Id: ESMCI_XGridUtil.C,v 1.20 2012/11/09 17:48:19 feiliu Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -1059,7 +1059,7 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
     *frac2 = 1.0;
     double *area = elem_area->data(*(elem_list[i]));
     *area = sintd_cells[i]->get_area();
-    //std::cout << i << "th cell area: " << *area << "\n";
+    std::cout << i << "th cell area: " << *area << "\n";
     double *centroid = elem_centroid->data(*(elem_list[i]));
     sintd_cells[i]->get_centroid(centroid, sdim, pdim);
   }
