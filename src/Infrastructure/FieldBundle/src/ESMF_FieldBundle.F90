@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.149 2012/10/29 03:58:32 gold2718 Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.150 2012/11/09 18:09:24 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.149 2012/10/29 03:58:32 gold2718 Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.150 2012/11/09 18:09:24 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -3276,11 +3276,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundAllocError(localrc, msg= "allocating srcFieldList dstFieldList", &
           ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
 
-        call ESMF_FieldBundleGet(srcFieldBundle, fieldList=srcFieldList, rc=localrc)
+        call ESMF_FieldBundleGet(srcFieldBundle, fieldList=srcFieldList, &
+          itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_FieldBundleGet(dstFieldBundle, fieldList=dstFieldList, rc=localrc)
+        call ESMF_FieldBundleGet(dstFieldBundle, fieldList=dstFieldList, &
+          itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
