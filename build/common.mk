@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.362 2012/11/08 23:56:26 theurich Exp $
+#  $Id: common.mk,v 1.363 2012/11/09 00:41:08 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -3155,6 +3155,37 @@ endif
 
 #-------------------------------------------------------------------------------
 #  Build shared library from regular archive
+#
+#     On systems where we know how to build shared libraries we go and do it. On
+#     those systems where we do not know how to build shared libraries the
+#     ESMF_SL_LIBS_TO_MAKE must be blanked out in the platform specific 
+#     build_rules.mk file, which will essentially turn the "shared" target below
+#     into a noop.
+#
+#     We are building two shared ESMF libraries: 
+#       - libesmf.so
+#       - libesmf_fullylinked.so
+#
+#     The "libesmf.so" only links in the bare minimum. Its purpose is to be
+#     linked into an executable, i.e. there is one more linking step that will
+#     ensure that all symbols are satisfied in the final executable. Prelinking
+#     libesmf.so with only the minimum of libraries has these advantages:
+#       1) It does NOT require that all of the dependency libraries are
+#          available in position-independent-code (PIC) format.
+#       2) It allows maximum flexibility in the final linking step, e.g. 
+#          a backward compatible version of a library may be chosen by the
+#          executable.
+#       3) It leads to greater symmetry between linking an executable against
+#          the static library (or archive) version, libesmf.a, and libesmf.so.
+#
+#     The "libesmf_fullylinked.so" version links in everything that would be
+#     specified in the final link step when building an executable. This
+#     produces a fully self-contained shared library, which has the advantage
+#     of being suitable to be loaded e.g. by the Python layer on top of ESMF.
+#     However, it does require that ALL dependencies, including all of the 
+#     3rd party libraries that are specified, MUST be available as 
+#     position-independent-code (PIC). This can be difficult to ensure.
+#
 #-------------------------------------------------------------------------------
 shared:
 	@if [ "$(ESMF_SL_LIBS_TO_MAKE)" != "" ] ; then \
