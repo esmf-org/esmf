@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.14 2012/11/09 05:34:53 ksaint Exp $
+! $Id: NUOPC_Base.F90,v 1.15 2012/11/10 06:42:46 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -564,7 +564,7 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(2)
+    character(ESMF_MAXSTR)            :: attrList(4)
     character(ESMF_MAXSTR)            :: tempString
     logical                           :: accepted
     integer                           :: i
@@ -575,6 +575,8 @@ module NUOPC_Base
     ! Set up a customized list of Attributes to be added to the Fields
     attrList(1) = "Connected"  ! values: "true" or "false"
     attrList(2) = "TimeStamp"  ! values: list of 9 integers: yy,mm,dd,h,m,s,ms,us,ns
+    attrList(3) = "ProducerConnection"! values: "open", "targeted", "connected"
+    attrList(4) = "ConsumerConnection"! values: "open", "targeted", "connected"
     
     ! add Attribute packages
     call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=rc)
@@ -701,6 +703,23 @@ module NUOPC_Base
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    ! set ProducerConnection
+    call ESMF_AttributeSet(field, &
+      name="ProducerConnection", value="open", &
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    ! set ConsumerConnection
+    call ESMF_AttributeSet(field, &
+      name="ConsumerConnection", value="open", &
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
   end subroutine
   !-----------------------------------------------------------------------------
   
@@ -1031,17 +1050,19 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(4)
+    character(ESMF_MAXSTR)            :: attrList(5)
     
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! Set up a customized list of Attributes to be added to the Fields
     attrList(1) = "Verbosity"           ! control verbosity
     attrList(2) = "InitializePhaseMap"  ! list of strings to map str to phase #
-    attrList(3) = "NestingGeneration" ! values: integer starting 0 for parent
-    attrList(4) = "Nestling"  ! values: integer starting 0 for first nestling
+    attrList(3) = "InternalInitializePhaseMap"  ! list of strings to map str to phase #
+    attrList(4) = "NestingGeneration" ! values: integer starting 0 for parent
+    attrList(5) = "Nestling"  ! values: integer starting 0 for first nestling
     
     ! add Attribute packages
+#if (ESMF_VERSION_MAJOR >= 6)
     call ESMF_AttributeAdd(comp, convention="CIM 1.5", &
       purpose="ModelComp", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1051,7 +1072,21 @@ module NUOPC_Base
       nestPurpose="ModelComp", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-      
+#else
+! gjt: keep this branch for now because I have an old sandbox where most of
+! the ESMF is back in the MAJOR 5 because of I/O issues in MAJOR 6.
+! TODO: remove this else branch once the I/O issues in MAJOR 6 are fixed.
+    call ESMF_AttributeAdd(comp, convention="CIM", &
+      purpose="Model Component Simulation Description", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
+      attrList=attrList, nestConvention="CIM", &
+      nestPurpose="Model Component Simulation Description", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+#endif
+
     ! set Attributes to defaults
     call ESMF_AttributeSet(comp, &
       name="Verbosity", value="low", &

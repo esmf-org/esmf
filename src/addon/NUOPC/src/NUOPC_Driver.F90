@@ -1,4 +1,4 @@
-! $Id: NUOPC_Driver.F90,v 1.15 2012/10/30 03:56:25 theurich Exp $
+! $Id: NUOPC_Driver.F90,v 1.16 2012/11/10 06:42:46 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Driver.F90"
 
@@ -183,8 +183,9 @@ module NUOPC_Driver
     ! allocate lists inside the internal state according to modelCount
     allocate(is%wrap%modelPetLists(0:is%wrap%modelCount), &
       is%wrap%connectorPetLists(0:is%wrap%modelCount,0:is%wrap%modelCount), &
-      is%wrap%modelComp(is%wrap%modelCount), &
-      is%wrap%modelIS(is%wrap%modelCount), is%wrap%modelES(is%wrap%modelCount),&
+      is%wrap%modelComp(0:is%wrap%modelCount), &
+      is%wrap%modelIS(0:is%wrap%modelCount), &
+      is%wrap%modelES(0:is%wrap%modelCount), &
       is%wrap%connectorComp(0:is%wrap%modelCount,0:is%wrap%modelCount), &
       stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
@@ -200,7 +201,7 @@ module NUOPC_Driver
     enddo
     
     ! allocate PhaseMaps
-    allocate(modelPhaseMap(is%wrap%modelCount), &
+    allocate(modelPhaseMap(0:is%wrap%modelCount), &
       connectorPhaseMap(0:is%wrap%modelCount, 0:is%wrap%modelCount), &
       stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
@@ -221,7 +222,13 @@ module NUOPC_Driver
       
       i_petList => is%wrap%modelPetLists(i)%petList
       
-      if (i>0) then
+      if (i==0) then
+      
+        is%wrap%modelComp(0) = gcomp  ! driver itself is in slot 0
+        is%wrap%modelIS(0) = importState
+        is%wrap%modelES(0) = exportState
+        
+      else if (i>0) then
       
         if (associated(i_petList)) then
           write (msgString, *) "Creating model component #"// &
@@ -292,14 +299,13 @@ module NUOPC_Driver
         call NUOPC_GridCompAttributeAdd(is%wrap%modelComp(i), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-          
-        ! initialize the modelPhaseMap pointer members
-        nullify(modelPhaseMap(i)%phaseValue)
-        nullify(modelPhaseMap(i)%phases)
-        nullify(modelPhaseMap(i)%phaseKey)
-        
       endif
       
+      ! initialize the modelPhaseMap pointer members
+      nullify(modelPhaseMap(i)%phaseValue)
+      nullify(modelPhaseMap(i)%phases)
+      nullify(modelPhaseMap(i)%phaseKey)
+        
       ! create connectorComps
       do j=0, is%wrap%modelCount
         write (jString, *) j
@@ -389,7 +395,7 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         
-        ! initialize the modelPhaseMap pointer members
+        ! initialize the connectorPhaseMap pointer members
         nullify(connectorPhaseMap(i,j)%phaseValue)
         nullify(connectorPhaseMap(i,j)%phases)
         nullify(connectorPhaseMap(i,j)%phaseKey)
@@ -410,7 +416,7 @@ module NUOPC_Driver
     
     ! add run elements to the one run sequence element
     do i=0, is%wrap%modelCount
-      do j=0, is%wrap%modelCount
+      do j=1, is%wrap%modelCount
         if (j==i) cycle ! skip self connection
         call NUOPC_RunElementAdd(is%wrap%runSeq(1), i=i, j=j, phase=1, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -419,6 +425,12 @@ module NUOPC_Driver
     enddo
     do i=1, is%wrap%modelCount
       call NUOPC_RunElementAdd(is%wrap%runSeq(1), i=i, j=-1, phase=1, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+    enddo
+    do i=1, is%wrap%modelCount
+      j=0
+      call NUOPC_RunElementAdd(is%wrap%runSeq(1), i=i, j=j, phase=1, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     enddo
@@ -555,14 +567,12 @@ module NUOPC_Driver
         if (associated(connectorPhaseMap(i,j)%phaseKey)) &
           deallocate(connectorPhaseMap(i,j)%phaseKey)
       enddo
-      if (i>0) then
-        if (associated(modelPhaseMap(i)%phaseValue)) &
-          deallocate(modelPhaseMap(i)%phaseValue)
-        if (associated(modelPhaseMap(i)%phases)) &
-          deallocate(modelPhaseMap(i)%phases)
-        if (associated(modelPhaseMap(i)%phaseKey)) &
-          deallocate(modelPhaseMap(i)%phaseKey)
-      endif
+      if (associated(modelPhaseMap(i)%phaseValue)) &
+        deallocate(modelPhaseMap(i)%phaseValue)
+      if (associated(modelPhaseMap(i)%phases)) &
+        deallocate(modelPhaseMap(i)%phases)
+      if (associated(modelPhaseMap(i)%phaseKey)) &
+        deallocate(modelPhaseMap(i)%phaseKey)
     enddo
 
     contains !----------------------------------------------------------------
@@ -575,24 +585,26 @@ module NUOPC_Driver
         character(ESMF_MAXSTR)  :: iString, pString
         rc = ESMF_SUCCESS
         write (pString, *) phase
-        do i=1, is%wrap%modelCount
+        do i=0, is%wrap%modelCount
           write (iString, *) i
           if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
-            call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-            call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
-              importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
-              clock=internalClock, phase=phase, userRc=localrc, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg="NUOPC Incompatible: Failed calling phase "// &
-              trim(adjustl(pString))//" Initialize for modelComp "// &
-              trim(adjustl(iString))//": "//trim(compName), &
-              line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase "// &
-              trim(adjustl(pString))//" Initialize for modelComp "// &
-              trim(adjustl(iString))//": "//trim(compName)// &
-              " did not return ESMF_SUCCESS", &
-              line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+            if (i>0) then
+              call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+              call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
+                importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
+                clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg="NUOPC Incompatible: Failed calling phase "// &
+                trim(adjustl(pString))//" Initialize for modelComp "// &
+                trim(adjustl(iString))//": "//trim(compName), &
+                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+              if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase "// &
+                trim(adjustl(pString))//" Initialize for modelComp "// &
+                trim(adjustl(iString))//": "//trim(compName)// &
+                " did not return ESMF_SUCCESS", &
+                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+            endif
             if (phase == 0) then
               ! setup modelPhaseMap
               call setupModelPhaseMap(i=i, rc=rc)
@@ -661,10 +673,19 @@ module NUOPC_Driver
         integer, intent(out)    :: rc
         integer                 :: k, phaseCount, stat, ind
         character(len=NUOPC_PhaseMapStringLength) :: tempString
+        character(len=40)        :: attributeName
         rc = ESMF_SUCCESS
+        ! set the attributeName according to who this is for
+        if (i==0) then
+          ! for the driver itself
+          attributeName = "InternalInitializePhaseMap"
+        else
+          ! for the children of the driver
+          attributeName = "InitializePhaseMap"
+        endif
         ! obtain number of initPhases from the Model Attributes
         call ESMF_AttributeGet(is%wrap%modelComp(i), &
-          name="InitializePhaseMap", &
+          name=trim(attributeName), &
           itemCount=phaseCount, &
           convention="NUOPC", purpose="General", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -680,15 +701,17 @@ module NUOPC_Driver
         if (ESMF_LogFoundAllocError(statusToCheck=stat, &
           msg="Allocation of temporary data structure.", &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-        ! obtain initPhases list from the Model Attributes
-        call ESMF_AttributeGet(is%wrap%modelComp(i), &
-          name="InitializePhaseMap", &
-          valueList=modelPhaseMap(i)%phases, &
-          convention="NUOPC", purpose="General", rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+        ! conditionally obtain initPhases list from the Model Attributes
+        if (phaseCount > 0) then
+          call ESMF_AttributeGet(is%wrap%modelComp(i), &
+            name=trim(attributeName), &
+            valueList=modelPhaseMap(i)%phases, &
+            convention="NUOPC", purpose="General", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        endif
         ! disect the phase string into Key and Value
         do k=1, modelPhaseMap(i)%phaseCount
           tempString = modelPhaseMap(i)%phases(k)
@@ -751,7 +774,7 @@ module NUOPC_Driver
         integer                 :: phase, i
         character(ESMF_MAXSTR)  :: iString, pString
         rc = ESMF_SUCCESS
-        do i=1, is%wrap%modelCount
+        do i=0, is%wrap%modelCount
           write (iString, *) i
           if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
             ! translate NUOPC logical phase to ESMF actual phase
