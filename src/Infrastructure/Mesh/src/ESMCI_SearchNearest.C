@@ -1,4 +1,4 @@
-// $Id: ESMCI_SearchNearest.C,v 1.2 2012/11/08 21:51:21 oehmke Exp $
+// $Id: ESMCI_SearchNearest.C,v 1.3 2012/11/13 22:22:43 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_SearchNearest.C,v 1.2 2012/11/08 21:51:21 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_SearchNearest.C,v 1.3 2012/11/13 22:22:43 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -116,7 +116,7 @@ struct SearchData {
 }
 
 // The main routine
-  void SearchNearest(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result) {
+  void SearchNearestSrcToDst(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result) {
   Trace __trace("Search(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result)");
 
 
@@ -309,7 +309,7 @@ struct CommData {
   
 
 // The main routine
-  void ParSearchNearest(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result) {
+  void ParSearchNearestSrcToDst(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result) {
   Trace __trace("Search(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result)");
   //int FindPnts(const Mesh &mesh, int unmappedaction, int dim_pnts, int num_pnts, double *pnts, int *procs, int *gids) {
   //  Trace __trace("FindPnts()");

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Search.h,v 1.12 2012/11/06 17:48:38 oehmke Exp $
+// $Id: ESMCI_Search.h,v 1.13 2012/11/13 22:22:41 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -65,9 +65,13 @@ void OctSearch(const Mesh &src, const Mesh &dest, UInt dst_obj_type, int unmappe
             double stol = 1e-8, std::vector<const MeshObj*> *to_investigate = NULL, OTree *box = NULL);
 
 
-void SearchNearest(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
+void SearchNearestSrcToDst(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
 
-void ParSearchNearest(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
+void ParSearchNearestSrcToDst(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
+
+void SearchNearestDstToSrc(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
+
+void ParSearchNearestDstToSrc(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
 
 void PrintSearchResult(const SearchResult &result);
 

@@ -1,4 +1,4 @@
-// $Id: ESMCI_WMat.C,v 1.18 2012/11/06 17:48:45 oehmke Exp $
+// $Id: ESMCI_WMat.C,v 1.19 2012/11/13 22:22:43 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -19,7 +19,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WMat.C,v 1.18 2012/11/06 17:48:45 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_WMat.C,v 1.19 2012/11/13 22:22:43 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -184,8 +184,9 @@ void WMat::Migrate(Mesh &mesh) {
     //       in the first place. If we start regridding to halos,
     //       then this will have to be changed. 
     //
-    //     Context c; c.set(Attr::ACTIVE_ID);
-    Context c; c.set(Attr::OWNED_ID);
+       Context c; c.set(Attr::ACTIVE_ID);
+       // Switch back to original to see if that fixes things
+    // Context c; c.set(Attr::OWNED_ID);
     Attr a(MeshObj::NODE, c);
     getMeshGIDS(mesh, a, mesh_dist);
     GetRowGIDS(iw_dist);

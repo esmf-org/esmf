@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.48 2012/11/06 17:48:45 oehmke Exp $
+// $Id: ESMCI_Interp.C,v 1.49 2012/11/13 22:22:43 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.48 2012/11/06 17:48:45 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.49 2012/11/13 22:22:43 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1518,7 +1518,8 @@ dstF(),
 has_std(false),
 has_patch(false),
 has_cnsrv(false),
-has_nearest(false),
+has_nearest_src_to_dst(false),
+has_nearest_dst_to_src(false),
 srcmesh(src),
 dstmesh(dest),
 midmesh(midmesh),
@@ -1546,7 +1547,8 @@ zz(0)
     if (fpairs[j].idata == Interp::INTERP_STD) has_std = true;
     if (fpairs[j].idata == Interp::INTERP_PATCH) has_patch = true;
     if (fpairs[j].idata == Interp::INTERP_CONSERVE) has_cnsrv = true;
-   if (fpairs[j].idata == Interp::INTERP_NEAREST) has_nearest = true;
+   if (fpairs[j].idata == Interp::INTERP_NEAREST_SRC_TO_DST) has_nearest_src_to_dst = true;
+   if (fpairs[j].idata == Interp::INTERP_NEAREST_DST_TO_SRC) has_nearest_dst_to_src = true;
   }
 
   
@@ -1557,8 +1559,10 @@ zz(0)
        //std::cout << "Building rendezvous..." << std::endl;
     grend.Build(srcF.size(), &srcF[0], dstF.size(), &dstF[0], &zz, midmesh==0? true:false);
     
-    if (has_nearest) {
-      ParSearchNearest(grend.GetSrcRend(), grend.GetDstRend(), unmappedaction, sres);
+    if (has_nearest_dst_to_src) {
+      ParSearchNearestDstToSrc(grend.GetSrcRend(), grend.GetDstRend(), unmappedaction, sres);
+    } else if (has_nearest_src_to_dst) {
+      ParSearchNearestSrcToDst(grend.GetSrcRend(), grend.GetDstRend(), unmappedaction, sres);
     } else {
       if (search_obj_type == MeshObj::NODE) {
         OctSearch(grend.GetSrcRend(), grend.GetDstRend(), grend.GetDstObjType(), unmappedaction, sres, 1e-8);
@@ -1581,8 +1585,10 @@ zz(0)
     // Serial track.  Meshes already in geometric rendezvous.  (Perhaps get
     // the subset of the mesh for interpolating??)
 
-    if (has_nearest) {
-        SearchNearest(src, dest, unmappedaction, sres);
+    if (has_nearest_dst_to_src) {
+        SearchNearestDstToSrc(src, dest, unmappedaction, sres);
+    } else if (has_nearest_src_to_dst) {
+        SearchNearestSrcToDst(src, dest, unmappedaction, sres);
     } else {
       if (search_obj_type == MeshObj::NODE) {
         OctSearch(src, dest, search_obj_type, unmappedaction, sres, 1e-8);
@@ -1871,7 +1877,8 @@ void Interp::mat_transfer_serial(int fpair_num, IWeights &iw, IWeights &src_frac
   if (fpair.idata == INTERP_STD) mat_point_serial_transfer(*fpair.first, *fpair.second->GetNodalfield(), sres, iw);
   else if (fpair.idata == INTERP_PATCH) mat_patch_serial_transfer(*srcmesh.GetCoordField(), *fpair.first, *fpair.second->GetNodalfield(), sres, srcmesh, iw);
   else if (fpair.idata == INTERP_CONSERVE) calc_conserve_mat_serial(srcmesh, dstmesh, midmesh, sres, iw, src_frac, dst_frac, zz);
-  else if (fpair.idata == INTERP_NEAREST) calc_nearest_mat_serial(srcmesh, dstmesh, sres, iw);
+  else if (fpair.idata == INTERP_NEAREST_SRC_TO_DST) calc_nearest_mat_serial(srcmesh, dstmesh, sres, iw);
+  else if (fpair.idata == INTERP_NEAREST_DST_TO_SRC) calc_nearest_mat_serial(srcmesh, dstmesh, sres, iw);
     
 }
 
@@ -1883,7 +1890,9 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
   if (fpairs[fpair_num].idata == INTERP_CONSERVE) {
     calc_conserve_mat_serial(grend.GetSrcRend(),grend.GetDstRend(),
  midmesh, sres, iw, src_frac, dst_frac, zz);
-  } else if (fpairs[fpair_num].idata == INTERP_NEAREST) {
+  } else if (fpairs[fpair_num].idata == INTERP_NEAREST_SRC_TO_DST) {
+    calc_nearest_mat_serial(grend.GetSrcRend(),grend.GetDstRend(), sres, iw);
+  } else if (fpairs[fpair_num].idata == INTERP_NEAREST_DST_TO_SRC) {
     calc_nearest_mat_serial(grend.GetSrcRend(),grend.GetDstRend(), sres, iw);
   } else {
     // Send source data to rendezvous decomp

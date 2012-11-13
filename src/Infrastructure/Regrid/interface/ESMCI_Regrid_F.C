@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.79 2012/11/08 21:51:36 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.80 2012/11/13 22:22:45 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -83,7 +83,7 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                    Mesh **meshdstpp, ESMCI::Array **arraydstpp,
 		   int *regridMethod, 
                    int *regridPoleType, int *regridPoleNPnts,  
-                   int *regridScheme, int *unmappedaction,
+                   int *regridScheme, int *unmappedaction, int *_ignoreDegenerate,
                    ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
                    int *nentries, ESMCI::TempWeights **tweights,
                    int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
@@ -104,7 +104,14 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
   // Old Regrid conserve turned off for now
   int regridConserve=ESMC_REGRID_CONSERVE_OFF;
 
+  
   try {
+
+    // transalate ignoreDegenerate to C++ bool
+    bool ignoreDegenerate=false;
+    if (*_ignoreDegenerate) ignoreDegenerate=true;
+    else ignoreDegenerate=false;
+
 
     //// Precheck Meshes for errors
     bool concave=false;
@@ -114,12 +121,12 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     // Check source mesh elements 
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       // Check cells for conservative
-      cnsrv_check_for_mesh_errors(srcmesh, false, &concave, &clockwise, &degenerate);
+      cnsrv_check_for_mesh_errors(srcmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
     } else {
 #if 0
       // STILL NEED TO FINISH THIS
       // Check cell nodes for non-conservative
-      noncnsrv_check_for_mesh_errors(srcmesh, true, &concave, &clockwise, &degenerate);
+      noncnsrv_check_for_mesh_errors(srcmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
 #endif     
     }
 
@@ -149,7 +156,7 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     // matter what the cell looks like
     if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
       // Check mesh elements 
-      cnsrv_check_for_mesh_errors(dstmesh, false, &concave, &clockwise, &degenerate);
+      cnsrv_check_for_mesh_errors(dstmesh, ignoreDegenerate, &concave, &clockwise, &degenerate);
       
       // Concave
       if (concave) {

@@ -1,4 +1,4 @@
-// $Id: ESMCI_MeshRegrid.C,v 1.29 2012/11/06 17:48:45 oehmke Exp $
+// $Id: ESMCI_MeshRegrid.C,v 1.30 2012/11/13 22:22:43 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.29 2012/11/06 17:48:45 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_MeshRegrid.C,v 1.30 2012/11/13 22:22:43 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -145,8 +145,7 @@ int online_regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
       // This prune won't work for conserve
       // because wghts not on nodes, earlier mask code shouldn't allow weights
       // at this point anyways. 
-      if ((*regridMethod != ESMC_REGRID_METHOD_CONSERVE) &&
-          (*regridMethod != ESMC_REGRID_METHOD_NEAREST)) {
+      if (*regridMethod != ESMC_REGRID_METHOD_CONSERVE) {
         wts.Prune(dstmesh, 0);
       }
 
@@ -287,7 +286,8 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, IWeights &wts,
     if ((srcmesh.parametric_dim()==2) && 
         (srcmesh.spatial_dim()==3) &&
         (*regridMethod != ESMC_REGRID_METHOD_CONSERVE) &&
-        (*regridMethod != ESMC_REGRID_METHOD_NEAREST)) maybe_pole=true; 
+        (*regridMethod != ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST) &&
+        (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC)) maybe_pole=true; 
   
 
     // Pole constraints
@@ -342,8 +342,10 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, IWeights &wts,
       fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_PATCH));
     else if (*regridMethod == ESMC_REGRID_METHOD_CONSERVE)
       fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_CONSERVE));
-    else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST)
-      fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_NEAREST));
+    else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST)
+      fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_NEAREST_SRC_TO_DST));
+    else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC)
+      fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_NEAREST_DST_TO_SRC));
 
 
      // Build the rendezvous grids

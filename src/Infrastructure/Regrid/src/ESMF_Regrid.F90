@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.170 2012/11/06 17:48:48 oehmke Exp $
+! $Id: ESMF_Regrid.F90,v 1.171 2012/11/13 22:22:47 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -96,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.170 2012/11/06 17:48:48 oehmke Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.171 2012/11/13 22:22:47 oehmke Exp $'
 
 !==============================================================================
 !
@@ -147,7 +147,9 @@ end function my_xor
                  regridmethod, &
                  polemethod, regridPoleNPnts, &
                  regridScheme, &
-                 unmappedaction, routehandle, &
+                 unmappedaction, &
+                 ignoreDegenerate, &
+                 routehandle, &
                  indices, weights, &
                  unmappedDstList, &
                  rc)
@@ -162,6 +164,7 @@ end function my_xor
       integer, intent(in)                    :: regridPoleNPnts
       integer, intent(in)                    :: regridScheme
       type(ESMF_UnmappedAction_Flag), intent(in), optional :: unmappedaction
+      logical, intent(in)                              :: ignoreDegenerate
       type(ESMF_RouteHandle),  intent(inout), optional :: routehandle
       integer(ESMF_KIND_I4), pointer, optional         :: indices(:,:)
       real(ESMF_KIND_R8), pointer, optional            :: weights(:)
@@ -214,6 +217,7 @@ end function my_xor
        type(ESMF_RegridConserve) :: localregridConserve
        type(ESMF_UnmappedAction_Flag) :: localunmappedaction
        logical :: isMemFreed
+       integer :: localIgnoreDegenerate
 
        ! Logic to determine if valid optional args are passed.  
 
@@ -256,6 +260,12 @@ end function my_xor
           localunmappedaction=ESMF_UNMAPPEDACTION_ERROR
        endif
 
+       if (ignoreDegenerate) then
+          localIgnoreDegenerate=1
+       else
+          localIgnoreDegenerate=0
+       endif
+
 
        ! Make sure the srcMesh has its internal bits in place
        call ESMF_MeshGet(srcMesh, isMemFreed=isMemFreed, rc=localrc)
@@ -287,6 +297,7 @@ end function my_xor
                    regridmethod,  &
                    polemethod, regridPoleNPnts, &    
                    regridScheme, localunmappedaction%unmappedaction, &
+                   localIgnoreDegenerate, &
                    routehandle, has_rh, has_iw, &
                    nentries, tweights, &
                    has_udl, num_udl, tudl, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.115 2012/11/06 17:48:34 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.116 2012/11/13 22:22:25 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.115 2012/11/06 17:48:34 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.116 2012/11/13 22:22:25 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -303,6 +303,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     regridmethod, &
                     polemethod, regridPoleNPnts, & 
                     unmappedaction, &
+                    ignoreDegenerate, &
                     routehandle, &
                     factorList, factorIndexList, & 
                     weights, indices, &  ! DEPRECATED ARGUMENTS
@@ -318,6 +319,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_PoleMethod_Flag),  intent(in),   optional :: polemethod
       integer,                     intent(in),   optional :: regridPoleNPnts
       type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
+      logical,                     intent(in),   optional :: ignoreDegenerate
       type(ESMF_RouteHandle),      intent(inout),optional :: routehandle
       real(ESMF_KIND_R8),          pointer,      optional :: factorList(:)
       integer(ESMF_KIND_I4), pointer, optional :: factorIndexList(:,:)
@@ -402,6 +404,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
 !           {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
 !           to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!     \item [{[ignoreDegenerate]}]
+!           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to .true., then the 
+!           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error. 
 !     \item [{[routehandle]}]
 !           The communication handle that implements the regrid operation and that can be used later in 
 !           the {\tt ESMF\_FieldRegrid()} call. The {\tt routehandle} is optional so that if the 
@@ -478,6 +483,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         real(ESMF_KIND_R8), pointer :: fracFptr(:)
         integer(ESMF_KIND_I4),       pointer :: tmp_indices(:,:)
         real(ESMF_KIND_R8),          pointer :: tmp_weights(:)
+        logical :: localIgnoreDegenerate
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -585,6 +591,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         else     
            localRegridPoleNPnts=1
         endif
+
+        ! Set subject to the defaults error checked above
+        localIgnoreDegenerate=.false.
+        if (present(ignoreDegenerate)) then
+           localIgnoreDegenerate=ignoreDegenerate
+        endif
+
 
         ! Set interpretation of grid based on regridScheme
         if (lregridScheme .eq. ESMF_REGRID_SCHEME_FULL3D) then
@@ -808,7 +821,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 lregridmethod, &
                 localpolemethod, localRegridPoleNPnts, &
                 lregridScheme, &
-                unmappedaction, routehandle, &
+                unmappedaction, &
+                localIgnoreDegenerate, &
+                routehandle, &
                 tmp_indices, tmp_weights, unmappedDstList, localrc)
            if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
@@ -828,7 +843,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 lregridmethod, &
                 localpolemethod, localRegridPoleNPnts, &
                 lregridScheme, &
-                unmappedaction, routehandle, &
+                unmappedaction, &
+                localIgnoreDegenerate, &
+                routehandle, &
                 unmappedDstList=unmappedDstList, &
                 rc=localrc)
            if (ESMF_LogFoundError(localrc, &

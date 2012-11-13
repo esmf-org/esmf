@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.33 2012/11/06 17:48:45 oehmke Exp $
+# $Id: makefile,v 1.34 2012/11/13 22:22:43 oehmke Exp $
 
 # leave alone.
 ALL: build_here 
@@ -63,6 +63,7 @@ SOURCEC	  = \
            ESMCI_RefineTopo.C \
            ESMCI_Search.C \
            ESMCI_SearchNearest.C \
+           ESMCI_SearchNearestDToS.C \
            ESMCI_SFuncAdaptor.C \
            ESMCI_ShapeFunc.C \
            ESMCI_ShapeLagrange.C \
