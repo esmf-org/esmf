@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.282 2012/11/09 01:17:28 rokuingh Exp $
+! $Id: ESMF_Grid.F90,v 1.283 2012/11/13 23:21:31 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -308,7 +308,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.282 2012/11/09 01:17:28 rokuingh Exp $'
+      '$Id: ESMF_Grid.F90,v 1.283 2012/11/13 23:21:31 peggyli Exp $'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS
@@ -5164,9 +5164,11 @@ subroutine pack_and_send_float(vm, bufsize, recvPets, rootPet, buffer, &
      allocate(sendbuf(dims(1)*bufsize(2)))
      start=xdim
      do k = 1, recvPets-1
-       if (k>1 .and. dims(k) /= dims(k-1)) then
-         deallocate(sendbuf)
-         allocate(sendbuf(dims(k)*bufsize(2)))
+       if (k>1) then
+        if (dims(k) /= dims(k-1)) then
+          deallocate(sendbuf)
+          allocate(sendbuf(dims(k)*bufsize(2)))
+        endif
        endif
        ii = 1
        do j = 1, bufsize(2)
@@ -5194,7 +5196,7 @@ subroutine pack_and_send_int(vm, bufsize, recvPets, rootPet, buffer, &
   integer :: rootPet
   integer :: buffer(:)
   integer :: outbuffer(:,:)
-  integer :: dims(0:)
+  integer :: dims(:)
   
   integer :: xdim, start
   integer :: lbnd(2), ubnd(2)
@@ -5215,9 +5217,11 @@ subroutine pack_and_send_int(vm, bufsize, recvPets, rootPet, buffer, &
     allocate(sendbuf(dims(1)*bufsize(2)))
     start=xdim
     do k = 1, recvPets-1
-      if (k>1 .and. dims(k) /= dims(k-1)) then
-        deallocate(sendbuf)
-        allocate(sendbuf(dims(k)*bufsize(2)))
+      if (k>1) then
+       if (dims(k) /= dims(k-1)) then
+         deallocate(sendbuf)
+         allocate(sendbuf(dims(k)*bufsize(2)))
+       endif
       endif
       ii = 1
       do j = 1, bufsize(2)
@@ -5263,9 +5267,11 @@ subroutine pack_and_send_float2D(vm, bufsize, recvPets, rootPet, buffer, &
     allocate(sendbuf(dims(1)*bufsize(2)))
     start=xdim
     do k = 1, recvPets-1
-      if (k>1 .and. dims(k) /= dims(k-1)) then
-        deallocate(sendbuf)
-        allocate(sendbuf(dims(k)*bufsize(2)))
+      if (k>1) then
+       if (dims(k) /= dims(k-1)) then
+         deallocate(sendbuf)
+         allocate(sendbuf(dims(k)*bufsize(2)))
+       endif
       endif
       ii = 1
       do j = 1, bufsize(2)
@@ -5311,9 +5317,11 @@ subroutine pack_and_send_int2D(vm, bufsize, recvPets, rootPet, buffer, &
     allocate(sendbuf(dims(1)*bufsize(2)))
     start=xdim
     do k = 1, recvPets-1
-      if (k>1 .and. dims(k) /= dims(k-1)) then
-        deallocate(sendbuf)
-        allocate(sendbuf(dims(k)*bufsize(2)))
+      if (k>1) then
+       if (dims(k) /= dims(k-1)) then
+         deallocate(sendbuf)
+         allocate(sendbuf(dims(k)*bufsize(2)))
+       endif
       endif
       ii = 1
       do j = 1, bufsize(2)
@@ -5791,7 +5799,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! if there are more than 1 PET in the regdecomp(1)
       ! Get the xdim of the local array from all other PETS in the same row
 
-      allocate(dims(0:regdecomp(1)-1))
+      allocate(dims(regdecomp(1)-1))
       do i=1, regDecomp(1)-1
           call ESMF_VMRecv(vm, recv, 1, PetNo+i)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
