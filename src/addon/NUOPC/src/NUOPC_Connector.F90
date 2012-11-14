@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.23 2012/10/29 21:02:35 theurich Exp $
+! $Id: NUOPC_Connector.F90,v 1.24 2012/11/14 06:12:25 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -183,28 +183,29 @@ module NUOPC_Connector
     integer, intent(out) :: rc
     
     ! local variables
-    type(ESMF_StateIntent_Flag)           :: isType, esType
-    integer                               :: isItemCount, esItemCount
-    character(ESMF_MAXSTR), pointer       :: cplList(:)
-    integer                               :: cplListSize, i, j
-    character(ESMF_MAXSTR), pointer       :: importStdAttrNameList(:)
-    character(ESMF_MAXSTR), pointer       :: importStdItemNameList(:)
-    character(ESMF_MAXSTR), pointer       :: exportStdAttrNameList(:)
-    character(ESMF_MAXSTR), pointer       :: exportStdItemNameList(:)
-    integer                               :: iMatch, eMatch
-    type(ESMF_Field)                      :: iField, eField
-    integer                               :: stat
-    type(type_InternalState)              :: is
-    integer                               :: localrc
-    logical                               :: existflag
+    type(ESMF_StateIntent_Flag)     :: isType, esType
+    integer                         :: isItemCount, esItemCount
+    character(ESMF_MAXSTR), pointer :: cplList(:)
+    integer                         :: cplListSize, i, j
+    character(ESMF_MAXSTR), pointer :: importStdAttrNameList(:)
+    type(ESMF_Field),       pointer :: importFieldList(:)
+    character(ESMF_MAXSTR), pointer :: exportStdAttrNameList(:)
+    type(ESMF_Field),       pointer :: exportFieldList(:)
+    integer                         :: iMatch, eMatch
+    type(ESMF_Field)                :: iField, eField
+    integer                         :: stat
+    type(type_InternalState)        :: is
+    integer                         :: localrc
+    logical                         :: existflag
+    character(ESMF_MAXSTR)          :: consumerConnection
     
     rc = ESMF_SUCCESS
     
     ! prepare local pointer variables
     nullify(importStdAttrNameList)
-    nullify(importStdItemNameList)
+    nullify(importFieldList)
     nullify(exportStdAttrNameList)
-    nullify(exportStdItemNameList)
+    nullify(exportFieldList)
     
     ! allocate memory for the internal state and set it in the Component
     allocate(is%wrap, stat=stat)
@@ -277,14 +278,14 @@ module NUOPC_Connector
       return  ! bail out
     ! get the importState std lists
     call NUOPC_StateBuildStdList(importState, importStdAttrNameList, &
-      importStdItemNameList, rc=rc)
+      stdFieldList=importFieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     ! get the exportState std lists
     call NUOPC_StateBuildStdList(exportState, exportStdAttrNameList, &
-      exportStdItemNameList, rc=rc)
+      stdFieldList=exportFieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -301,34 +302,36 @@ module NUOPC_Connector
         endif
       enddo
       
-!if (iMatch > 0) &
-!print *, "found match for importStdItemNameList()=", importStdItemNameList(iMatch)
-
       eMatch = 0  ! reset
       do j=1, size(exportStdAttrNameList)
         if (exportStdAttrNameList(j) == cplList(i)) then
-          eMatch = j
-          exit
+          ! found a matching consumer side candidate
+          ! -> see if that candidate is already targeted
+          eField=exportFieldList(j)
+          call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
+            value=consumerConnection, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+          if (trim(consumerConnection)/="targeted") then
+            ! the consumer side was not yet targeted
+            call NUOPC_FieldAttributeSet(eField, name="ConsumerConnection", &
+              value="targeted", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+            eMatch = j
+            exit
+          endif
         endif
       enddo
       
-!if (eMatch > 0) &
-!print *, "found match for exportStdItemNameList()=", exportStdItemNameList(eMatch)
-
       if (iMatch>0 .and. eMatch>0) then
         ! there are matching Fields in the import and export States
-        call ESMF_StateGet(importState, field=iField, &
-          itemName=importStdItemNameList(iMatch), rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
-        call ESMF_StateGet(exportState, field=eField, &
-          itemName=exportStdItemNameList(eMatch), rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+        iField=importFieldList(iMatch)
+        eField=exportFieldList(eMatch)
         
         ! set the connected Attribute on import Field
         call ESMF_AttributeSet(iField, &
@@ -364,9 +367,9 @@ module NUOPC_Connector
     deallocate(cplList)
 
     if (associated(importStdAttrNameList)) deallocate(importStdAttrNameList)
-    if (associated(importStdItemNameList)) deallocate(importStdItemNameList)
+    if (associated(importFieldList)) deallocate(importFieldList)
     if (associated(exportStdAttrNameList)) deallocate(exportStdAttrNameList)
-    if (associated(exportStdItemNameList)) deallocate(exportStdItemNameList)
+    if (associated(exportFieldList)) deallocate(exportFieldList)
     
   end subroutine
   
@@ -379,28 +382,29 @@ module NUOPC_Connector
     integer, intent(out) :: rc
     
     ! local variables
-    type(ESMF_StateIntent_Flag)           :: isType, esType
-    integer                               :: isItemCount, esItemCount
-    character(ESMF_MAXSTR), pointer       :: cplList(:)
-    integer                               :: cplListSize, i, j
-    character(ESMF_MAXSTR), pointer       :: importStdAttrNameList(:)
-    character(ESMF_MAXSTR), pointer       :: importStdItemNameList(:)
-    character(ESMF_MAXSTR), pointer       :: exportStdAttrNameList(:)
-    character(ESMF_MAXSTR), pointer       :: exportStdItemNameList(:)
-    integer                               :: iMatch, eMatch
-    type(ESMF_Field)                      :: iField, eField
-    integer                               :: stat
-    type(type_InternalState)              :: is
-    integer                               :: localrc
-    logical                               :: existflag
+    type(ESMF_StateIntent_Flag)     :: isType, esType
+    integer                         :: isItemCount, esItemCount
+    character(ESMF_MAXSTR), pointer :: cplList(:)
+    integer                         :: cplListSize, i, j
+    character(ESMF_MAXSTR), pointer :: importStdAttrNameList(:)
+    type(ESMF_Field),       pointer :: importFieldList(:)
+    character(ESMF_MAXSTR), pointer :: exportStdAttrNameList(:)
+    type(ESMF_Field),       pointer :: exportFieldList(:)
+    integer                         :: iMatch, eMatch
+    type(ESMF_Field)                :: iField, eField
+    integer                         :: stat
+    type(type_InternalState)        :: is
+    integer                         :: localrc
+    logical                         :: existflag
+    character(ESMF_MAXSTR)          :: consumerConnection
     
     rc = ESMF_SUCCESS
     
     ! prepare local pointer variables
     nullify(importStdAttrNameList)
-    nullify(importStdItemNameList)
+    nullify(importFieldList)
     nullify(exportStdAttrNameList)
-    nullify(exportStdItemNameList)
+    nullify(exportFieldList)
     
     ! query Component for its internal State
     nullify(is%wrap)
@@ -467,14 +471,14 @@ module NUOPC_Connector
       return  ! bail out
     ! get the importState std lists
     call NUOPC_StateBuildStdList(importState, importStdAttrNameList, &
-      importStdItemNameList, rc=rc)
+      stdFieldList=importFieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
     ! get the exportState std lists
     call NUOPC_StateBuildStdList(exportState, exportStdAttrNameList, &
-      exportStdItemNameList, rc=rc)
+      stdFieldList=exportFieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -503,34 +507,36 @@ module NUOPC_Connector
         endif
       enddo
       
-!if (iMatch > 0) &
-!print *, "found match for importStdItemNameList()=", importStdItemNameList(iMatch)
-
       eMatch = 0  ! reset
       do j=1, size(exportStdAttrNameList)
         if (exportStdAttrNameList(j) == cplList(i)) then
-          eMatch = j
-          exit
+          ! found a matching consumer side candidate
+          ! -> see if that candidate is already targeted
+          eField=exportFieldList(j)
+          call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
+            value=consumerConnection, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+          if (trim(consumerConnection)/="connected") then
+            ! the consumer side was not yet targeted
+            call NUOPC_FieldAttributeSet(eField, name="ConsumerConnection", &
+              value="connected", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+            eMatch = j
+            exit
+          endif
         endif
       enddo
       
-!if (eMatch > 0) &
-!print *, "found match for exportStdItemNameList()=", exportStdItemNameList(eMatch)
-
       if (iMatch>0 .and. eMatch>0) then
         ! there are matching Fields in the import and export States
-        call ESMF_StateGet(importState, field=iField, &
-          itemName=importStdItemNameList(iMatch), rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
-        call ESMF_StateGet(exportState, field=eField, &
-          itemName=exportStdItemNameList(eMatch), rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+        iField=importFieldList(iMatch)
+        eField=exportFieldList(eMatch)
         
         ! add the import and export Fields to FieldBundles
         call ESMF_FieldBundleAdd(is%wrap%srcFields, (/iField/), rc=rc)
@@ -596,9 +602,9 @@ module NUOPC_Connector
     deallocate(cplList)
 
     if (associated(importStdAttrNameList)) deallocate(importStdAttrNameList)
-    if (associated(importStdItemNameList)) deallocate(importStdItemNameList)
+    if (associated(importFieldList)) deallocate(importFieldList)
     if (associated(exportStdAttrNameList)) deallocate(exportStdAttrNameList)
-    if (associated(exportStdItemNameList)) deallocate(exportStdItemNameList)
+    if (associated(exportFieldList)) deallocate(exportFieldList)
     
   end subroutine
     
