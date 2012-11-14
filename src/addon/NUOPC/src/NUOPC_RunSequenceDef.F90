@@ -1,4 +1,4 @@
-! $Id: NUOPC_RunSequenceDef.F90,v 1.11 2012/11/06 03:38:36 theurich Exp $
+! $Id: NUOPC_RunSequenceDef.F90,v 1.12 2012/11/14 23:16:40 svasquez Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_RunSequenceDef.F90"
 
@@ -360,7 +360,8 @@ module NUOPC_RunSequenceDef
 !BOP
 ! !IROUTINE: NUOPC_RunSequenceIterate - Iterate through a RunSequence
 ! !INTERFACE:
-  logical function NUOPC_RunSequenceIterate(runSeq, runSeqIndex, runElement, rc)
+  logical function NUOPC_RunSequenceIterate(runSeq, runSeqIndex, runElement, &
+                                            rc)
 ! !ARGUMENTS:
     type(NUOPC_RunSequence), pointer     :: runSeq(:)
     integer,                 intent(in)  :: runSeqIndex
