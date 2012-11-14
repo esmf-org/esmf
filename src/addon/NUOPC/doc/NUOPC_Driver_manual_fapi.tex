@@ -122,20 +122,20 @@ Driver component that drives model and connector components. The default is to u
   end type
 
   type type_InternalStateStruct
-    integer                           :: modelCount
-    type(type_PetList),  pointer      :: modelPetLists(:)
-    type(type_PetList),  pointer      :: connectorPetLists(:,:)
+    integer                          :: modelCount
+    type(type_PetList),  pointer     :: modelPetLists(:)
+    type(type_PetList),  pointer     :: connectorPetLists(:,:)
     !--- private members ----------------------------------------
-    type(ESMF_GridComp), pointer      :: modelComp(:)
-    type(ESMF_State),    pointer      :: modelIS(:), modelES(:)
-    type(ESMF_CplComp),  pointer      :: connectorComp(:,:)
-    type(NUOPC_RunSequence), pointer  :: runSeq(:)  ! size may increase dynamic.
-    integer                           :: runPhaseToRunSeqMap(10)
-    type(ESMF_Clock)                  :: driverClock  ! clock of the parent
+    type(ESMF_GridComp), pointer     :: modelComp(:)
+    type(ESMF_State),    pointer     :: modelIS(:), modelES(:)
+    type(ESMF_CplComp),  pointer     :: connectorComp(:,:)
+    type(NUOPC_RunSequence), pointer :: runSeq(:)! size may increase dynamic.
+    integer                          :: runPhaseToRunSeqMap(10)
+    type(ESMF_Clock)                 :: driverClock  ! clock of the parent
   end type
 
   type type_PetList
-    integer, pointer :: petList(:)  ! lists that are set here transfer ownership
+    integer, pointer :: petList(:) !lists that are set here transfer ownership
   end type
   
 \end{verbatim}
