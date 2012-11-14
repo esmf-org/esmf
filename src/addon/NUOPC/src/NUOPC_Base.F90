@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.16 2012/11/14 06:12:25 theurich Exp $
+! $Id: NUOPC_Base.F90,v 1.17 2012/11/14 23:05:43 svasquez Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -890,11 +890,11 @@ module NUOPC_Base
   subroutine NUOPC_FieldDictionaryAddEntry(standardName, canonicalUnits, &
     defaultLongName, defaultShortName, rc)
 ! !ARGUMENTS:
-    character(*),                     intent(in)            :: standardName
-    character(*),                     intent(in)            :: canonicalUnits
-    character(*),                     intent(in),  optional :: defaultLongName
-    character(*),                     intent(in),  optional :: defaultShortName
-    integer,                          intent(out), optional :: rc
+    character(*),                 intent(in)            :: standardName
+    character(*),                 intent(in)            :: canonicalUnits
+    character(*),                 intent(in),  optional :: defaultLongName
+    character(*),                 intent(in),  optional :: defaultShortName
+    integer,                      intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Adds an entry to the NUOPC Field dictionary. If necessary the dictionary is
 !   first set up.
@@ -927,11 +927,11 @@ module NUOPC_Base
   subroutine NUOPC_FieldDictionaryGetEntry(standardName, canonicalUnits, &
     defaultLongName, defaultShortName, rc)
 ! !ARGUMENTS:
-    character(*),                     intent(in)            :: standardName
-    character(*),                     intent(out), optional :: canonicalUnits
-    character(*),                     intent(out), optional :: defaultLongName
-    character(*),                     intent(out), optional :: defaultShortName
-    integer,                          intent(out), optional :: rc
+    character(*),                 intent(in)            :: standardName
+    character(*),                 intent(out), optional :: canonicalUnits
+    character(*),                 intent(out), optional :: defaultLongName
+    character(*),                 intent(out), optional :: defaultShortName
+    integer,                      intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Returns the canonical units, the default LongName and the default ShortName
 !   that the NUOPC Field dictionary associates with a StandardName.
@@ -1246,7 +1246,8 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_GridCompSetClock - Initialize and set the internal Clock of a GridComp
 ! !INTERFACE:
-  subroutine NUOPC_GridCompSetClock(comp, externalClock, stabilityTimeStep, rc)
+  subroutine NUOPC_GridCompSetClock(comp, externalClock, stabilityTimeStep, &
+                                     rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp),     intent(inout)         :: comp
     type(ESMF_Clock),        intent(in)            :: externalClock
