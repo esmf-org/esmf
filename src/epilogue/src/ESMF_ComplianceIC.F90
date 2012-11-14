@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.48 2012/11/09 05:40:20 ksaint Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.49 2012/11/14 06:11:40 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -740,6 +740,8 @@ module ESMF_ComplianceICMod
     type(ESMF_StateItem_Flag), allocatable :: stateitemtypeList(:)
     type(ESMF_Field)                      :: field
     type(ESMF_FieldBundle)                :: fieldbundle
+    type(ESMF_State)                      :: nestedState
+    character(ESMF_MAXSTR)                :: nestedPrefix
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -892,6 +894,20 @@ module ESMF_ComplianceICMod
                 file=FILENAME)) &
                 return  ! bail out
             enddo
+          else if (stateitemtypeList(item) == ESMF_STATEITEM_STATE) then
+            ! recursive call
+            call ESMF_StateGet(state, itemName=itemNameList(item), &
+              nestedState=nestedState, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+            nestedPrefix = trim(prefix)//trim(itemNameList(item))//":"
+            call checkState(nestedPrefix, referenceName, nestedState, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
           endif
           
         enddo
