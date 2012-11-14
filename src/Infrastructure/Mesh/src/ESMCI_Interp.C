@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.49 2012/11/13 22:22:43 oehmke Exp $
+// $Id: ESMCI_Interp.C,v 1.50 2012/11/14 21:59:08 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.49 2012/11/13 22:22:43 oehmke Exp $";
+ static const char *const version = "$Id: ESMCI_Interp.C,v 1.50 2012/11/14 21:59:08 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1362,7 +1362,8 @@ void calc_nearest_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, I
 
 
     // Put weights into weight matrix
-    iw.InsertRow(row, col);       
+    // Need merge version in nearest src to dest case where there may be more than 1 src,dst pair with the same dst.
+    iw.InsertRowMerge(row, col);       
     
   } // for searchresult
 
