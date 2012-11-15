@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.66 2012/11/15 13:47:12 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.67 2012/11/15 18:43:43 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@ class Attribute
     int items;                  // number of items (NOT byte count) for lists
 
     ESMC_Logical attrRoot;
-	ESMC_Logical attrUpdateDone; // hack for non-ordered containers
+	  ESMC_Logical attrUpdateDone; // hack for non-ordered containers
   
     std::string attrConvention;             // Convention of Attpack
     std::string attrPurpose;                // Purpose of Attpack
@@ -365,7 +365,8 @@ class Attribute
     int AttributeWriteInternalInfoGrid(IO_XML *io_xml, int nest_level, Attribute *attr) const;
     std::string AttributeGetInternalGridInt(std::string inputString) const;
     std::string AttributeGetInternalGridString(std::string inputString) const;
-
+    const char *  getTime() const; 
+    const char *  month2Num(std::string month) const;
 };
 } // namespace
 

@@ -1,4 +1,4 @@
-% $Id: Attribute_export.tex,v 1.11 2012/11/09 05:33:07 ksaint Exp $
+% $Id: Attribute_export.tex,v 1.12 2012/11/15 18:43:41 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -45,8 +45,8 @@ There is a deviation from the standard CIM in the ESMF code: if the top-level ob
 ** This is a prototype capability.
 
 When the ESMF object from which {\tt ESMF\_AttributeWrite()} is called is a Grid (or 
-it contains a Grid), and the Attribute package convention="CIM 1.5", and the 
-purpose="GridSpec", and {\tt ESMF\_AttWriteFlag} is set to {\tt ESMF\_ATTWRITE\_XML}, an XML file conforming to the CIM 1.5 GridSpec standard will be written.  The file will be named for the name of the ESMF Component object from which {\tt ESMF\_AttributeWrite()} is called, and the suffix will be .xml.
+it contains a Grid), and the Attribute package convention="CF 1.6", and the 
+purpose="GridSpec", and {\tt ESMF\_AttWriteFlag} is set to {\tt ESMF\_ATTWRITE\_XML}, an XML file conforming to the developing CF 1.6 GridSpec standard will be written.  The file will be named for the name of the ESMF Component object from which {\tt ESMF\_AttributeWrite()} is called, and the suffix will be .xml.
 
 This file is written by pulling internal information out of the Grid object.  It is 
 currently functional for one- and two-dimensional Grids which have coordinates defined 

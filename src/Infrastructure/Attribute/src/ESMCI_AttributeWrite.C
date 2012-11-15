@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeWrite.C,v 1.11 2012/11/15 13:47:20 rokuingh Exp $
+// $Id: ESMCI_AttributeWrite.C,v 1.12 2012/11/15 18:43:45 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -40,6 +40,7 @@
 #include <cstdlib>
 #include <vector>
 #include <algorithm>
+#include "time.h"
 
 using std::string;
 using std::vector;
@@ -49,7 +50,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.11 2012/11/15 13:47:20 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.12 2012/11/15 18:43:45 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -739,13 +740,13 @@ namespace ESMCI {
   } else if (convention.compare(CF_1_6_CONV)==0 &&
              purpose.compare(GRIDSPEC_PURP)==0) {
 
-    localrc = io_xml->writeElement("documentID", "abcdefgh-1234-4321-4242-zyxwvutsrqpo", 1, 0);
+    localrc = io_xml->writeElement("documentID", "abcdefgh-1234-4224-4321-zyxwvutsrqpo", 1, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeElement("documentVersion", 
-      "1.2.3", 1, 0);
+      "1.0.0", 1, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     localrc = io_xml->writeElement("documentCreationDate", 
-      "2012-09-25T09:54:30", 1, 0);
+      getTime(), 1, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     localrc = io_xml->writeEndElement("gridSpec", 1);
@@ -1115,7 +1116,7 @@ namespace ESMCI {
 } // end AttributeGetInternalGridInt
 //-----------------------------------------------------------------------------
 
-        // character string valued info
+// character string valued info
 #undef  ESMC_METHOD
 #define ESMC_METHOD "AttributeGetInternalGridString"
 //BOPI
@@ -1185,6 +1186,105 @@ namespace ESMCI {
 } // end AttributeGetInternalGridString
 //-----------------------------------------------------------------------------
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "getTime"
+//BOPI
+// !IROUTINE:  getTime - retrieve time in CF1.6 format
+//
+// !INTERFACE:
+      const char *  Attribute::getTime(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      ) const {
+//
+// !DESCRIPTION:
+//    
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+// Convert #1 to #2
+
+// #1: Thu Nov 15 08:19:14 2012
+// #2: 2012-09-25T09:54:30
+//     012345678901234567890123
+
+  string newstr;
+
+  time_t rawtime;
+  time(&rawtime);
+  char *timecstr = ctime (&rawtime);
+  string timestr (timecstr);
+
+  newstr.insert(0, timestr.substr(20,4));
+  newstr.insert(4, "-");
+  newstr.insert(5, month2Num(timestr.substr(4,3)));
+  newstr.insert(7, "-");
+  newstr.insert(8, timestr.substr(8,2));
+  newstr.insert(10, "T");
+  newstr.insert(11, timestr.substr(11,8));
+  newstr.resize(19);
+
+  return newstr.c_str();
+
+} // end getTime
+//-----------------------------------------------------------------------------
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "month2Num"
+//BOPI
+// !IROUTINE:  month2Num - return number associated with month
+//
+// !INTERFACE:
+      const char *  Attribute::month2Num(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      string month) const {
+//
+// !DESCRIPTION:
+//    
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  string monthnum;
+
+  printf("The month string is: %s\n", month.c_str());
+
+  if (strcmp(month.c_str(), "Jan") == 0)
+    monthnum = "01";
+  else if (strcmp(month.c_str(), "Feb") == 0)
+    monthnum = "02";
+  else if (strcmp(month.c_str(), "Mar") == 0)
+    monthnum = "03";
+  else if (strcmp(month.c_str(), "Apr") == 0)
+    monthnum = "04";
+  else if (strcmp(month.c_str(), "May") == 0)
+    monthnum = "05";
+  else if (strcmp(month.c_str(), "Jun") == 0)
+    monthnum = "06";
+  else if (strcmp(month.c_str(), "Jul") == 0)
+    monthnum = "07";
+  else if (strcmp(month.c_str(), "Aug") == 0)
+    monthnum = "08";
+  else if (strcmp(month.c_str(), "Sep") == 0)
+    monthnum = "09";
+  else if (strcmp(month.c_str(), "Oct") == 0)
+    monthnum = "10";
+  else if (strcmp(month.c_str(), "Nov") == 0)
+    monthnum = "11";
+  else if (strcmp(month.c_str(), "Dec") == 0)
+    monthnum = "12";
+
+  return monthnum.c_str();
+
+} // end month2Num
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

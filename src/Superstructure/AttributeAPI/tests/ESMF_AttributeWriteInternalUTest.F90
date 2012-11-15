@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.11 2012/11/15 13:47:32 rokuingh Exp $
+! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.12 2012/11/15 18:43:47 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_AttributeWriteIntrnalUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.11 2012/11/15 13:47:32 rokuingh Exp $'
+  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.12 2012/11/15 18:43:47 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -76,7 +76,7 @@ program ESMF_AttributeWriteIntrnalUTest
   integer :: coorddim = 1
 
   logical :: rc_logical
-  character(ESMF_MAXSTR), dimension(1) :: exclusions
+  character(ESMF_MAXSTR), dimension(4) :: exclusions
 
 #if 0
   ! for code to prove that internal info can be retrieved from a Grid
@@ -319,6 +319,9 @@ program ESMF_AttributeWriteIntrnalUTest
     !EX_UTest
     ! compare the output file to the baseline file
     exclusions(1) = "ESMF Version"
+    exclusions(2) = "documentID"
+    exclusions(3) = "documentVersion"
+    exclusions(4) = "documentCreationDate"
     rc_logical = ESMF_TestFileCompare('gridcomp_gridspec.xml', &
       'baseline_gridcomp_gridspec.xml', exclusionList=exclusions)
     write(failMsg, *) "Did not return True"
