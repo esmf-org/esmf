@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.83 2012/01/06 20:19:07 svasquez Exp $
+! $Id: ESMF_Init.F90,v 1.84 2012/11/15 20:29:35 w6ws Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -480,6 +480,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: status
       logical, save :: already_final = .false.    ! Static, maintains state.
 
+      logical, parameter :: trace = .false.
+
       ! Initialize return code
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -502,18 +504,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Delete any internal built-in time manager calendars
+      if (trace) print *, ESMF_METHOD,  &
+          ': Finalizing Calendar (if needed)'
       call ESMF_CalendarFinalize(rc=status)
       if (status .ne. ESMF_SUCCESS) then
           print *, "Error finalizing the time manager calendars"
           return
       endif
 
-      ! Shut down the log file
-      call ESMF_LogFinalize(status)
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "Error finalizing log file"
-          return
-      endif
+      ! Flush log to avoid lost messages
+      call ESMF_LogFlush (rc=status)
+      if (status /= ESMF_SUCCESS) then
+          print *, "Error flushing log file"
+      end if
 
       abortFlag = .false.
       keepMpiFlag = ESMF_FALSE
@@ -524,6 +527,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
       if (abortFlag) then
         ! Abort the VM
+      if (trace) print *, ESMF_METHOD,  &
+          ': calling ESMF_VMAbort'
         call ESMF_VMAbort(rc=status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Error aborting VM"
@@ -531,11 +536,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
       else
         ! Finalize the VM
+      if (trace) print *, ESMF_METHOD,  &
+          ': calling ESMF_VMFinalize'
         call ESMF_VMFinalize(keepMpiFlag=keepMpiFlag, rc=status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Error finalizing VM"
           return
         endif
+      endif
+
+      ! Shut down the log file
+      if (trace) print *, ESMF_METHOD,  &
+          ': Finalizing Log'
+      call ESMF_LogFinalize(status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error finalizing log file"
+          return
       endif
 
       already_final = .true.
