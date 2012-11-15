@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.80 2012/11/13 22:22:45 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.81 2012/11/15 20:50:45 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -793,6 +793,9 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
           if (*m > 0.5) continue;
         }
         
+        // Init. Degenerate
+        bool is_degenerate=false;
+
         // Get the coords
         get_elem_coords(&elem, cfield, 2, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
 
@@ -803,8 +806,14 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
         // Get rid of 0 len edges
         remove_0len_edges2D(&num_poly_nodes, poly_coords);
 
+        // If less than 3 nodes then is degenerate
+        if (num_poly_nodes <3) is_degenerate=true;
+
+        // If is smashed quad then is degenerate
+        if (is_smashed_quad2D(num_poly_nodes, poly_coords)) is_degenerate=true;
+
         // Check if degenerate
-        if (num_poly_nodes <3) {
+        if (is_degenerate) {
           if (ignore_degenerate) {
             continue;
           } else {
@@ -871,6 +880,10 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
           if (*m > 0.5) continue;
         }
 
+
+        // Init. Degenerate
+        bool is_degenerate=false;
+
         // Get the coords
         get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
 
@@ -882,8 +895,17 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
         // Get rid of 0 len edges
         remove_0len_edges3D(&num_poly_nodes, poly_coords);
 
+
+        // If less than 3 nodes then is degenerate
+        if (num_poly_nodes <3) is_degenerate=true;
+
+
+        // If is smashed quad then is degenerate
+        if (is_smashed_quad3D(num_poly_nodes, poly_coords)) is_degenerate=true;
+
+
         // Check if degenerate
-        if (num_poly_nodes <3) {
+        if (is_degenerate) {
           if (ignore_degenerate) {
             continue;
           } else {

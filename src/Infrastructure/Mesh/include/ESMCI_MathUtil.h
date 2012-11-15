@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.h,v 1.14 2012/04/25 22:32:38 w6ws Exp $
+// $Id: ESMCI_MathUtil.h,v 1.15 2012/11/15 20:50:42 oehmke Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -65,6 +65,12 @@ namespace ESMCI {
 
   void convert_cart_to_sph_deg(double x, double y, double z,
                                double *lon, double *lat, double *r);
+
+
+  bool is_smashed_quad2D(int num_p, double *p);
+
+  bool is_smashed_quad3D(int num_p, double *p);
+
   
 
   // STUFF FOR TRIANGULATION

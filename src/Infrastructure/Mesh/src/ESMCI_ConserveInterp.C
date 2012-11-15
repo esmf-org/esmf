@@ -1,4 +1,4 @@
-// $Id: ESMCI_ConserveInterp.C,v 1.18 2012/05/02 13:06:48 feiliu Exp $
+// $Id: ESMCI_ConserveInterp.C,v 1.19 2012/11/15 20:50:43 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.18 2012/05/02 13:06:48 feiliu Exp $";
+static const char *const version = "$Id: ESMCI_ConserveInterp.C,v 1.19 2012/11/15 20:50:43 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -292,6 +292,19 @@ namespace ESMCI {
       return;
     }
 
+    // If a smashed quad invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
+    if (is_smashed_quad2D(num_src_nodes, src_coords)) {
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*wgts)[i]=0.0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
+    }
+
     // calculate dst area
     double src_area=area_of_flat_2D_polygon(num_src_nodes, src_coords); 
 
@@ -347,8 +360,16 @@ namespace ESMCI {
       // Get rid of degenerate edges
       remove_0len_edges2D(&num_dst_nodes, dst_coords);
       
-      // if less than a triangle complain
+      // if less than a triangle skip
       if (num_dst_nodes<3) {
+        (*valid)[i]=0;
+        (*wgts)[i]=0.0;
+        sintd_areas[i]=0.0;
+        continue;
+      }
+
+      // if a smashed quad skip
+      if (is_smashed_quad2D(num_dst_nodes, dst_coords)) {
         (*valid)[i]=0;
         (*wgts)[i]=0.0;
         sintd_areas[i]=0.0;
@@ -842,6 +863,21 @@ void norm_poly3D(int num_p, double *p) {
       return;
     }
 
+
+    // If a smashed quad invalidate everything and leave because it won't results in weights
+    // Decision about returning error for degeneracy is made above this subroutine
+    if (is_smashed_quad3D(num_src_nodes, src_coords)) {
+      *src_elem_area=0.0;    
+      for (int i=0; i<dst_elems.size(); i++) {
+        (*valid)[i]=0;
+        (*wgts)[i]=0.0;
+        (*sintd_areas_out)[i]=0.0;
+        (*dst_areas_out)[i]=0.0;
+      }
+      return;
+    }
+
+
     // calculate dst area
     double src_area=great_circle_area(num_src_nodes, src_coords); 
 
@@ -899,6 +935,14 @@ void norm_poly3D(int num_p, double *p) {
       
       // if less than a triangle complain
       if (num_dst_nodes<3) {
+        (*valid)[i]=0;
+        (*wgts)[i]=0.0;
+        sintd_areas[i]=0.0;
+        continue;
+      }
+
+      // if a smashed quad skip
+      if (is_smashed_quad3D(num_dst_nodes, dst_coords)) {
         (*valid)[i]=0;
         (*wgts)[i]=0.0;
         sintd_areas[i]=0.0;

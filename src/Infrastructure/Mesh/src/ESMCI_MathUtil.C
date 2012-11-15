@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.C,v 1.22 2012/11/06 17:48:45 oehmke Exp $
+// $Id: ESMCI_MathUtil.C,v 1.23 2012/11/15 20:50:43 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.22 2012/11/06 17:48:45 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_MathUtil.C,v 1.23 2012/11/15 20:50:43 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -391,7 +391,16 @@ double great_circle_area(int n, double *pnts) {
     // Check if degenerate
     // (if there's less than 3 no notion of CCW or CW)
     if (num_tmp_nodes <3) {
-      Throw() << " Degenerate cell in conservative interpolation!\n";
+      int j=0;
+      for (int i=0; i<num_tmp_nodes; i++) {
+        coords[j]=tmp_coords[j];
+        j++;
+        coords[j]=tmp_coords[j];
+        j++;
+      }
+
+      *num_nodes=num_tmp_nodes;
+      return;
     }
     
     // Get elem rotation
@@ -442,7 +451,18 @@ double great_circle_area(int n, double *pnts) {
     // Check if degenerate
     // (if there's less than 3 no notion of CCW or CW)
     if (num_tmp_nodes <3) {
-      Throw() << " Degenerate cell in conservative interpolation!\n";
+      int j=0;
+      for (int i=0; i<num_tmp_nodes; i++) {
+        coords[j]=tmp_coords[j];
+        j++;
+        coords[j]=tmp_coords[j];
+        j++;
+        coords[j]=tmp_coords[j];
+        j++;
+      }
+      *num_nodes=num_tmp_nodes;
+
+      return;
     }
     
     // Get elem rotation
@@ -621,6 +641,61 @@ void remove_0len_edges2D(int *num_p, double *p) {
 #undef EQUAL_TOL
 #undef PNTS_EQUAL
 }
+
+
+
+  // Is this a smashed quad?
+  // (i.e. a quad with opposite corners equal)
+bool is_smashed_quad2D(int num_p, double *p) {
+
+#define EQUAL_TOL 1E-15
+#define PNTS_EQUAL(p1,p2) ((std::abs((p1)[0]-(p2)[0]) < EQUAL_TOL) &&	\
+                           (std::abs((p1)[1]-(p2)[1]) < EQUAL_TOL))
+      
+
+  // If not a quad, then leave
+  if (num_p != 4) return false;
+
+  // See if 1st point is equal to 3rd point
+  if (PNTS_EQUAL(p,p+4)) return true;
+
+  // See if 2nd point is equal to 4th point
+  if (PNTS_EQUAL(p+2,p+6)) return true;
+
+  // not a smashed quad
+  return false;
+
+#undef EQUAL_TOL
+#undef PNTS_EQUAL
+}
+
+
+  // Is this a smashed quad?
+  // (i.e. a quad with opposite corners equal)
+bool is_smashed_quad3D(int num_p, double *p) {
+
+#define EQUAL_TOL 1E-15
+#define PNTS_EQUAL(p1,p2) ((std::abs((p1)[0]-(p2)[0]) < EQUAL_TOL) &&	\
+                           (std::abs((p1)[1]-(p2)[1]) < EQUAL_TOL) &&	\
+                           (std::abs((p1)[2]-(p2)[2]) < EQUAL_TOL))
+      
+
+  // If not a quad, then leave
+  if (num_p != 4) return false;
+
+  // See if 1st point is equal to 3rd point
+  if (PNTS_EQUAL(p,p+6)) return true;
+
+  // See if 2nd point is equal to 4th point
+  if (PNTS_EQUAL(p+3,p+9)) return true;
+
+  // not a smashed quad
+  return false;
+
+#undef EQUAL_TOL
+#undef PNTS_EQUAL
+}
+
 
 
 

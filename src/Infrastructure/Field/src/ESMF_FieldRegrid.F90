@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.116 2012/11/13 22:22:25 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.117 2012/11/15 20:50:38 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.116 2012/11/13 22:22:25 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.117 2012/11/15 20:50:38 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -407,6 +407,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[ignoreDegenerate]}]
 !           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to .true., then the 
 !           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error. 
+!           This currently only applies to the {\tt ESMF\_REGRIDMETHOD\_CONSERVE} method, other regrid methods currently 
+!           always skip degenerate cells. 
 !     \item [{[routehandle]}]
 !           The communication handle that implements the regrid operation and that can be used later in 
 !           the {\tt ESMF\_FieldRegrid()} call. The {\tt routehandle} is optional so that if the 
