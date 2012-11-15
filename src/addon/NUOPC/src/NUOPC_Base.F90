@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.17 2012/11/14 23:05:43 svasquez Exp $
+! $Id: NUOPC_Base.F90,v 1.18 2012/11/15 22:13:38 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -1120,7 +1120,7 @@ module NUOPC_Base
     attrList(5) = "Nestling"  ! values: integer starting 0 for first nestling
     
     ! add Attribute packages
-#if (ESMF_VERSION_MAJOR >= 6)
+if (ESMF_VERSION_MAJOR >= 6) then
     call ESMF_AttributeAdd(comp, convention="CIM 1.5", &
       purpose="ModelComp", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1130,7 +1130,7 @@ module NUOPC_Base
       nestPurpose="ModelComp", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-#else
+else
 ! gjt: keep this branch for now because I have an old sandbox where most of
 ! the ESMF is back in the MAJOR 5 because of I/O issues in MAJOR 6.
 ! TODO: remove this else branch once the I/O issues in MAJOR 6 are fixed.
@@ -1143,7 +1143,7 @@ module NUOPC_Base
       nestPurpose="Model Component Simulation Description", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-#endif
+endif
 
     ! set Attributes to defaults
     call ESMF_AttributeSet(comp, &
