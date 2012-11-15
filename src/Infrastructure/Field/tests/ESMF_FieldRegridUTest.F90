@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.52 2012/11/13 22:22:34 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.53 2012/11/15 23:58:53 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -12249,7 +12249,7 @@ write(*,*) "LOCALRC=",localrc
      do i1=clbnd(1),cubnd(1)
      do i2=clbnd(2),cubnd(2)
 
-        ! Set source coordinates as 0 to 360
+        ! Set dst coordinates as 0 to 360
         farrayPtrXC(i1,i2) = REAL(i1-1)*dst_dx
         farrayPtrYC(i1,i2) = -90. + (REAL(i2-1)*dst_dy + 0.5*dst_dy)
 
@@ -12259,6 +12259,10 @@ write(*,*) "LOCALRC=",localrc
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(farrayPtrXC(i1,i2))
         phi = DEG2RAD*(90.-farrayPtrYC(i1,i2))
+
+        ! After calculating field shift coords slighlty to be close, but not exact
+        ! to make test more interesting
+        farrayPtrXC(i1,i2) = farrayPtrXC(i1,i2) + 2.0
 
         xdstPtr(i1,i2) = (2. + cos(theta)**2.*cos(2.*phi))
         ! xdstPtr(i1,i2) = 20.0
@@ -12649,6 +12653,10 @@ write(*,*) "LOCALRC=",localrc
        ! Set the source to be a function of the x,y,z coordinate
         theta = DEG2RAD*(farrayPtrXC(i1,i2))
         phi = DEG2RAD*(90.-farrayPtrYC(i1,i2))
+
+        ! After calculating field shift coords slighlty to be close, but not exact
+        ! to make test more interesting
+        farrayPtrXC(i1,i2) = farrayPtrXC(i1,i2) + 2.0
 
         xdstPtr(i1,i2) = (2. + cos(theta)**2.*cos(2.*phi))
         ! xdstPtr(i1,i2) = 20.0
