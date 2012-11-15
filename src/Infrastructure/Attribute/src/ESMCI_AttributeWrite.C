@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeWrite.C,v 1.10 2012/11/09 05:33:12 ksaint Exp $
+// $Id: ESMCI_AttributeWrite.C,v 1.11 2012/11/15 13:47:20 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.10 2012/11/09 05:33:12 ksaint Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.11 2012/11/15 13:47:20 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -643,8 +643,8 @@ namespace ESMCI {
     localrc = io_xml->writeStartElement("timeSeries", "", 1, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
-  } else if (convention.compare("CF")==0 &&
-             purpose.compare("GridSpec")==0) {
+  } else if (convention.compare(CF_1_6_CONV)==0 &&
+             purpose.compare(GRIDSPEC_PURP)==0) {
 
     // Write the ESMF XML file header
     localrc = io_xml->writeStartElement("gridSpec", "", 1, 6,
@@ -706,8 +706,8 @@ namespace ESMCI {
       convention.compare(CIM_1_5_CONV)==0 &&
       purpose.compare(MODEL_COMP_PURP)==0) {
     localrc = AttributeWriteCIM(io_xml);
-  } else if (convention.compare("CF")==0 &&
-             purpose.compare("GridSpec")==0) {
+  } else if (convention.compare(CF_1_6_CONV)==0 &&
+             purpose.compare(GRIDSPEC_PURP)==0) {
     localrc = AttributeWriteXMLtraverseGridSpec(io_xml,convention,purpose,columns,
       fielddone,griddone,compdone);
   } else {
@@ -736,8 +736,8 @@ namespace ESMCI {
     localrc = io_xml->writeEndElement("timeSeriesResponse", 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
-  } else if (convention.compare("CF")==0 &&
-             purpose.compare("GridSpec")==0) {
+  } else if (convention.compare(CF_1_6_CONV)==0 &&
+             purpose.compare(GRIDSPEC_PURP)==0) {
 
     localrc = io_xml->writeElement("documentID", "abcdefgh-1234-4321-4242-zyxwvutsrqpo", 1, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);

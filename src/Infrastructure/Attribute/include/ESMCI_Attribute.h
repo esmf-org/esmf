@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.65 2012/11/07 06:53:23 ksaint Exp $
+// $Id: ESMCI_Attribute.h,v 1.66 2012/11/15 13:47:12 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -115,7 +115,8 @@ class Attribute
 //-----------------------------------------------------------------------------
  public:
     // constant strings for conventions and purposes
-    static const std::string	CF_CONV;
+    static const std::string  CF_CONV;
+    static const std::string  CF_1_6_CONV;
     static const std::string	ESG_CONV;
     static const std::string	ESMF_CONV;
     static const std::string	CIM_1_5_CONV;
@@ -128,7 +129,8 @@ class Attribute
     static const std::string	RESP_PARTY_PURP;
     static const std::string	CITATION_PURP;
     static const std::string	SCI_PROP_PURP;
-    static const std::string	COMP_PROP_PURP;
+    static const std::string  COMP_PROP_PURP;
+    static const std::string  GRIDSPEC_PURP;
 
     // helper to set the Base address in attrBase
     void setBase(ESMC_Base *setBase){ attrBase = setBase; }

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.140 2012/11/09 05:33:12 ksaint Exp $
+// $Id: ESMCI_Attribute.C,v 1.141 2012/11/15 13:47:20 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.140 2012/11/09 05:33:12 ksaint Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.141 2012/11/15 13:47:20 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -68,6 +68,7 @@ int Attribute::count = 0;
 
 // initialize static convention and purpose strings
 const std::string Attribute::CF_CONV      = "CF";
+const std::string Attribute::CF_1_6_CONV  = "CF 1.6";
 const std::string Attribute::ESG_CONV     = "ESG";
 const std::string Attribute::ESMF_CONV    = "ESMF";
 const std::string Attribute::CIM_1_5_CONV = "CIM 1.5";
@@ -81,6 +82,7 @@ const std::string Attribute::RESP_PARTY_PURP = "RespParty";
 const std::string Attribute::CITATION_PURP   = "Citation";
 const std::string Attribute::SCI_PROP_PURP   = "SciProp";
 const std::string Attribute::COMP_PROP_PURP  = "CompProp";
+const std::string Attribute::GRIDSPEC_PURP   = "GridSpec";
 
 
 //-----------------------------------------------------------------------------
@@ -310,38 +312,87 @@ const std::string Attribute::COMP_PROP_PURP  = "CompProp";
   localrc = ESMC_RC_NOT_IMPL;
 
   Attribute *attr;
+  Attribute *attpack;
 
   // Grid standard Attribute package
   if (object.compare("grid")==0) {
-    if ((convention.compare("GridSpec")==0 ||
-         convention.compare(ESMF_CONV)==0) && purpose.compare(GENERAL_PURP)==0) {
-      localrc = AttPackCreateCustom("GridSpec", GENERAL_PURP, object);
+    if (convention.compare(CF_1_6_CONV)==0 && purpose.compare(GRIDSPEC_PURP)==0) {
+
+      // create an Attribute package for GridSpec which uses internal Grid info
+      localrc = AttPackCreateCustom(CF_1_6_CONV, GRIDSPEC_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
-      // TODO: CongruentTiles & GridType will be at the mosaic level,
-      //       others at the tile level
-      localrc = AttPackAddAttribute("CongruentTiles", "GridSpec", GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("DimensionOrder", "GridSpec", GENERAL_PURP, object);
 
-      // TODO: Area & Coordinatepoles await further spec from Sylvia Murphy & Co.
-      //localrc = AttPackAddAttribute("Area", "GridSpec", GENERAL_PURP, object);
-      //localrc = AttPackAddAttribute("CoordinatePoles", "GridSpec", GENERAL_PURP, object);
+      // add Attributes to the GridSpec Attribute package
+      // and set the Attributes in this Attpack to have links to internal info
+      string attPackInstanceName;
+      attpack = AttPackGet(CF_1_6_CONV, GRIDSPEC_PURP, object, attPackInstanceName);
+  
+      string name, value;
+      vector<string> vv;
 
-      localrc = AttPackAddAttribute("DiscretizationType", "GridSpec", GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("GeometryType", "GridSpec", GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("GridType", "GridSpec", GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("HorizontalResolution", "GridSpec", GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("IsConformal", "GridSpec", GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("IsRegular", "GridSpec", GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("IsUniform", "GridSpec", GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("NorthPoleLocation", "GridSpec", GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("NumberOfCells", "GridSpec", GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("NumberOfGridTiles", "GridSpec", GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("NX", "GridSpec", GENERAL_PURP, object);
-      localrc = AttPackAddAttribute("NY", "GridSpec", GENERAL_PURP, object);
+      name = "shortName";
+      value = "ESMF:name";
+      vv.clear();
+      vv.push_back(value);
+      localrc = attpack->AttributeSet(name, vv.size(), &vv);
+      name = "longName";
+      value = "ESMF Grid CF definition to prototype ESMF internal Attributes";
+      vv.clear();
+      vv.push_back(value);
+      localrc = attpack->AttributeSet(name, vv.size(), &vv);
+      name = "gridTile";
+      value = "ESMF:tileCount";
+      vv.clear();
+      vv.push_back(value);
+      localrc = attpack->AttributeSet(name, vv.size(), &vv);
+      name = "id";
+      value = "ESMF:name";
+      vv.clear();
+      vv.push_back(value);
+      localrc = attpack->AttributeSet(name, vv.size(), &vv);
+      name = "discretizationType";
+      value = "logically_rectangular";
+      vv.clear();
+      vv.push_back(value);
+      localrc = attpack->AttributeSet(name, vv.size(), &vv);
+      name = "geometryType";
+      value = "sphere";
+      vv.clear();
+      vv.push_back(value);
+      localrc = attpack->AttributeSet(name, vv.size(), &vv);
+      name = "numDims";
+      value = "ESMF:dimCount";
+      vv.clear();
+      vv.push_back(value);
+      localrc = attpack->AttributeSet(name, vv.size(), &vv);
+      name = "xcoords";
+      value = "ESMF:farrayPtr";
+      vv.clear();
+      vv.push_back(value);
+      value = "Input:coordDim=1";
+      vv.push_back(value);
+      localrc = attpack->AttributeSet(name, vv.size(), &vv);
+      name = "ycoords";
+      value = "ESMF:farrayPtr";
+      vv.clear();
+      vv.push_back(value);
+      value = "Input:coordDim=2";
+      vv.push_back(value);
+      localrc = attpack->AttributeSet(name, vv.size(), &vv);
+      name = "isLeaf";
+      value = "true";
+      vv.clear();
+      vv.push_back(value);
+      localrc = attpack->AttributeSet(name, vv.size(), &vv);
+      name = "gridType";
+      value = "regular_lat_lon";
+      vv.clear();
+      vv.push_back(value);
+      localrc = attpack->AttributeSet(name, vv.size(), &vv);
     }
     if (convention.compare(ESMF_CONV)==0 && purpose.compare(GENERAL_PURP)==0) {
-      localrc = AttPackNest(ESMF_CONV, GENERAL_PURP, object, "GridSpec", GENERAL_PURP);
+      localrc = AttPackCreateCustom(ESMF_CONV, GENERAL_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttPackAddAttribute("RegDecompX", ESMF_CONV, GENERAL_PURP, object);
@@ -1127,16 +1178,16 @@ const std::string Attribute::COMP_PROP_PURP  = "CompProp";
 //EOPI
 
   Attribute *attpack = NULL;
-  vector<string> valuevector;
+  vector<string> vv;
 
   // first check if given attpack is set on *this* esmf object's attribute tree
   string attPackInstanceName;
   attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
   if (attpack != NULL) {
     if (attpack->AttributeIsSet(name)) {
-      attpack->AttributeGet(name, &valuevector);
-      if (valuevector.size() == 1) {
-        if (value.compare(valuevector.at(0)) == 0) return attpack; // match !
+      attpack->AttributeGet(name, &vv);
+      if (vv.size() == 1) {
+        if (value.compare(vv.at(0)) == 0) return attpack; // match !
       }
     }
   }

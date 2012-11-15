@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateUTest.F90,v 1.26 2012/08/07 00:51:45 w6ws Exp $
+! $Id: ESMF_AttributeUpdateUTest.F90,v 1.27 2012/11/15 13:47:32 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -237,20 +237,8 @@ module ESMF_AttributeUpdateUTestMod
 
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'GridType','Cubed sphere',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'CongruentTiles',.true.,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'NumberOfGridTiles','1',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'DimensionOrder','YX',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'DiscretizationType','Logically Rectangular',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'GeometryType','Sphere',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'IsConformal',.false.,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'IsRegular',.false.,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'IsUniform',.false.,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'NorthPoleLocation','long: 0.0 lat: 90.0',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'NumberOfCells','53457',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'NX','96',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'NY','96',convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'HorizontalResolution','C48',convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'RegDecompX',96,convention=convESMF, purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(grid,'RegDecompY',84,convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
@@ -531,7 +519,7 @@ program ESMF_AttributeUpdateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.26 2012/08/07 00:51:45 w6ws Exp $'
+    '$Id: ESMF_AttributeUpdateUTest.F90,v 1.27 2012/11/15 13:47:32 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 

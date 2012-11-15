@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.68 2012/10/31 21:11:18 rokuingh Exp $
+! $Id: user_model1.F90,v 1.69 2012/11/15 13:47:34 rokuingh Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -286,20 +286,8 @@ module user_model1
 
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid,convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'GridType','Cubed sphere',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'CongruentTiles',.true.,convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'NumberOfGridTiles','1',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'DimensionOrder','YX',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'DiscretizationType','Logically rectangular',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'GeometryType','Sphere',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'IsConformal',.false.,convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'IsRegular',.false.,convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'IsUniform',.false.,convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'NorthPoleLocation','long: 0.0 lat: 90.0',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'NumberOfCells','53457',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'NX','96',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'NY','96',convention=conv, purpose=purp, rc=rc)
-    call ESMF_AttributeSet(grid,'HorizontalResolution','C48',convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(grid,'RegDecompX',96,convention=conv, purpose=purp, rc=rc)
+    call ESMF_AttributeSet(grid,'RegDecompY',84,convention=conv, purpose=purp, rc=rc)
 
     if (rc .ne. ESMF_SUCCESS) return
 

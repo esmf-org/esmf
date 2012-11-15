@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.10 2012/11/06 20:14:55 rokuingh Exp $
+! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.11 2012/11/15 13:47:32 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_AttributeWriteIntrnalUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.10 2012/11/06 20:14:55 rokuingh Exp $'
+  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.11 2012/11/15 13:47:32 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -228,30 +228,17 @@ program ESMF_AttributeWriteIntrnalUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Create standard CF attribute package on the grid
-    attrList(1) = 'shortName'
-    attrList(2) = 'longName'
-    attrList(3) = 'gridTile'
-    attrList(4) = 'id'
-    attrList(5) = 'discretizationType'
-    attrList(6) = 'geometryType'
-    attrList(7) = 'numDims'
-    attrList(8) = 'xcoords'
-    attrList(9) = 'ycoords'
-    attrList(10) = 'isLeaf'
-    attrList(11) = 'gridType'
     call ESMF_AttributeAdd(grid, &
-                           convention='CF', &
+                           convention='CF 1.6', &
                            purpose='GridSpec', &
-                           attrList=attrList, &  ! create a custom package
-                           count = 11, &
                            rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating custom Grid CF attribute package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
+#if 0
     !-------------------------------------------------------------------------
-    !EX_UTest
+    !EX_disable_UTest
     ! Create package nested inside the CF attribute package on the grid
     attrList(1) = 'nestPack1'
     attrList(2) = 'nestPack2'
@@ -269,7 +256,7 @@ program ESMF_AttributeWriteIntrnalUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !EX_UTest
+    !EX_disable_UTest
     ! Set an attribute value within the CF Grid package
     call ESMF_AttributeSet(grid, 'nestPack1', &
                            'nestPack1', &
@@ -281,7 +268,7 @@ program ESMF_AttributeWriteIntrnalUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !EX_UTest
+    !EX_disable_UTest
     ! Set an attribute value within the CF Grid package
     call ESMF_AttributeSet(grid, 'nestPack2', &
                            'nestPack2', &
@@ -293,7 +280,7 @@ program ESMF_AttributeWriteIntrnalUTest
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-------------------------------------------------------------------------
-    !EX_UTest
+    !EX_disable_UTest
     ! Set an attribute value within the CF Grid package
     call ESMF_AttributeSet(grid, 'nestPack3', &
                            'nestPack3', &
@@ -303,144 +290,7 @@ program ESMF_AttributeWriteIntrnalUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Set an attribute value in CF Grid package test"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !EX_UTest
-    ! Set an attribute value within the CF Grid package
-    call ESMF_AttributeSet(grid, 'isLeaf', &
-                           'true', &
-                           convention='CF', &
-                           purpose='GridSpec', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set an attribute value in CF Grid package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !EX_UTest
-    ! Set an attribute value within the CF Grid package
-    call ESMF_AttributeSet(grid, 'gridType', &
-                           'regular_lat_lon', &
-                           convention='CF', &
-                           purpose='GridSpec', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set an attribute value in CF Grid package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !EX_UTest
-    ! Set an attribute value within the CF Grid package
-    call ESMF_AttributeSet(grid, 'shortName', &
-                           'ESMF:name', &
-                           convention='CF', &
-                           purpose='GridSpec', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set an attribute value in CF Grid package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !EX_UTest
-    ! Set an attribute value within the CF Grid package
-    call ESMF_AttributeSet(grid, 'longName', &
-                           'ESMF Grid CF definition to prototype ESMF internal Attributes', &
-                           convention='CF', &
-                           purpose='GridSpec', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set an attribute value in CF Grid package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !EX_UTest
-    ! Set an attribute value within the CF Grid package
-    call ESMF_AttributeSet(grid, 'gridTile', &
-                           "ESMF:tileCount", &
-                           convention='CF', &
-                           purpose='GridSpec', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set an attribute value in CF Grid package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !EX_UTest
-    ! Set an attribute value within the CF Grid package
-    call ESMF_AttributeSet(grid, 'id', &
-                           'ESMF:name', &
-                           convention='CF', &
-                           purpose='GridSpec', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set an attribute value in CF Grid package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !EX_UTest
-    ! Set an attribute value within the CF Grid package
-    call ESMF_AttributeSet(grid, 'discretizationType', &
-                           'logically_rectangular', &
-                           convention='CF', &
-                           purpose='GridSpec', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set an attribute value in CF Grid package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !EX_UTest
-    ! Set an attribute value within the CF Grid package
-    call ESMF_AttributeSet(grid, 'geometryType', &
-                           'sphere', &
-                           convention='CF', &
-                           purpose='GridSpec', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set an attribute value in CF Grid package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !EX_UTest
-    ! Set an attribute value within the CF Grid package
-    call ESMF_AttributeSet(grid, 'numDims', &
-                           'ESMF:dimCount', &
-                           convention='CF', &
-                           purpose='GridSpec', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set an attribute value in CF Grid package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !EX_UTest
-    ! Set an attribute value within the CF Grid package
-    inputList(:) = ''
-    inputList(1) = 'coordDim=1'
-    call ESMF_AttributeSet(grid, 'xcoords', &
-                           'ESMF:farrayPtr', &
-                           inputList=inputList, &
-                           convention='CF', &
-                           purpose='GridSpec', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set an attribute value in CF Grid package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-    !-------------------------------------------------------------------------
-    !EX_UTest
-    ! Set an attribute value within the CF Grid package
-    inputList(:) = ''
-    inputList(1) = 'coordDim=2'
-    call ESMF_AttributeSet(grid, 'ycoords', &
-                           'ESMF:farrayPtr', &
-                           inputList=inputList, &
-                           convention='CF', &
-                           purpose='GridSpec', &
-                           rc=rc)
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Set an attribute value in CF Grid package test"
-    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
     !-------------------------------------------------------------------------
     !EX_UTest
@@ -458,7 +308,7 @@ program ESMF_AttributeWriteIntrnalUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Write out the attribute tree as a CF-formatted XML file
-    call ESMF_AttributeWrite(gridcomp, 'CF', &
+    call ESMF_AttributeWrite(gridcomp, 'CF 1.6', &
                                  'GridSpec', &
       attwriteflag=ESMF_ATTWRITE_XML,rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
