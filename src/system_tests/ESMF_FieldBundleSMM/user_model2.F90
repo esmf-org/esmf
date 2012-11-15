@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.16 2012/10/25 20:42:03 theurich Exp $
+! $Id: user_model2.F90,v 1.17 2012/11/15 20:25:11 feiliu Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -162,7 +162,7 @@ module user_model2
     ! Local variables
     real(ESMF_KIND_R8)    :: pi
     type(ESMF_FieldBundle):: fieldbundle
-    type(ESMF_Field)      :: field
+    type(ESMF_Field)      :: field, fields(3)
     type(ESMF_Array)      :: array
     type(ESMF_Grid)       :: grid
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
@@ -191,11 +191,12 @@ module user_model2
 
     do k = 1, 3
         ! Get the k-th field from the FieldBundle
-        call ESMF_FieldBundleGet(fieldbundle, fieldIndex=k, field=field, rc=rc)
+        call ESMF_FieldBundleGet(fieldbundle, fieldList=fields, &
+          itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
         if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
         ! Gain access to actual data via F90 array pointer
-        call ESMF_FieldGet(field, localDe=0, farrayPtr=farrayPtr, rc=rc)
+        call ESMF_FieldGet(fields(k), localDe=0, farrayPtr=farrayPtr, rc=rc)
         if (rc/=ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
           
         ! Test FieldBundle in import state against exact solution
