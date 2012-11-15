@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundle.F90,v 1.150 2012/11/09 18:09:24 feiliu Exp $
+! $Id: ESMF_FieldBundle.F90,v 1.151 2012/11/15 20:28:32 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@ module ESMF_FieldBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldBundle.F90,v 1.150 2012/11/09 18:09:24 feiliu Exp $'
+    '$Id: ESMF_FieldBundle.F90,v 1.151 2012/11/15 20:28:32 feiliu Exp $'
 
 !==============================================================================
 ! 
@@ -3229,6 +3229,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_GeomType_Flag) :: srcGeomtype        
         type(ESMF_GeomType_Flag) :: dstGeomtype        
         integer :: j
+        character(64) :: sfname, dfname
 
         ! Initialize return code; assume routine not implemented 
         localrc = ESMF_RC_NOT_IMPL 
@@ -3295,13 +3296,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           dstField = dstFieldList(i)
           
           ! If these are both Grids, then check for optimization
-          call ESMF_FieldGet(srcField, geomtype=srcGeomType, rc=localrc)
+          call ESMF_FieldGet(srcField, geomtype=srcGeomType, name=sfname, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                ESMF_CONTEXT, rcToReturn=rc)) return
+          !print *, 'src field name = ', sfname
 
-          call ESMF_FieldGet(dstField, geomtype=dstGeomType, rc=localrc)
+          call ESMF_FieldGet(dstField, geomtype=dstGeomType, name=dfname, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
                ESMF_CONTEXT, rcToReturn=rc)) return
+          !print *, 'dst field name = ', dfname
 
           isGridPair=.false.
           if ((srcGeomType==ESMF_GEOMTYPE_GRID) .and. (dstGeomType==ESMF_GEOMTYPE_GRID)) then
@@ -5554,7 +5557,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     if (ESMF_LogFoundAllocError(localrc, msg= "allocating flist", &
       ESMF_CONTEXT, rcToReturn=rc)) return ! bail out
 
-    call ESMF_FieldBundleGet(fieldbundle, fieldList=flist, rc=localrc)
+    call ESMF_FieldBundleGet(fieldbundle, fieldList=flist, &
+      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
