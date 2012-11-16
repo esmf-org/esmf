@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.32 2012/11/14 06:12:25 theurich Exp $
+! $Id: NUOPC.F90,v 1.33 2012/11/16 22:53:14 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -41,8 +41,8 @@ module NUOPC
   public NUOPC_FieldDictionaryGetEntry  
   public NUOPC_FieldDictionarySetup
   public NUOPC_FillCplList
-  public NUOPC_GridCompAttributeAdd
   public NUOPC_GridCompAreServicesSet  
+  public NUOPC_GridCompAttributeAdd
   public NUOPC_GridCompCheckSetClock
   public NUOPC_GridCompSetClock
   public NUOPC_GridCreateSimpleXY

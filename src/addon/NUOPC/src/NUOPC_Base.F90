@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.18 2012/11/15 22:13:38 theurich Exp $
+! $Id: NUOPC_Base.F90,v 1.19 2012/11/16 22:53:14 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -45,8 +45,8 @@ module NUOPC_Base
   public NUOPC_FieldDictionaryGetEntry  
   public NUOPC_FieldDictionarySetup
   public NUOPC_FillCplList
-  public NUOPC_GridCompAttributeAdd
   public NUOPC_GridCompAreServicesSet  
+  public NUOPC_GridCompAttributeAdd
   public NUOPC_GridCompCheckSetClock
   public NUOPC_GridCompSetClock
   public NUOPC_GridCreateSimpleXY
@@ -781,7 +781,7 @@ module NUOPC_Base
 ! !ARGUMENTS:
     type(ESMF_Field)                      :: field
     character(*), intent(in)              :: name
-    character(*), intent(in)             :: value
+    character(*), intent(in)              :: value
     integer,      intent(out), optional   :: rc
 ! !DESCRIPTION:
 !   Set the Attribute {\tt name} inside of {\tt field} using the
@@ -1363,16 +1363,18 @@ endif
 ! !IROUTINE: NUOPC_IsCreated - Check whether an ESMF object has been created
 ! !INTERFACE:
   ! call using generic interface: NUOPC_IsCreated
-  function NUOPC_ClockIsCreated(clock)
+  function NUOPC_ClockIsCreated(clock, rc)
     logical           :: NUOPC_ClockIsCreated
 ! !ARGUMENTS:
-    type(ESMF_Clock)  :: clock
+    type(ESMF_Clock)               :: clock
+    integer, intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Returns {\tt .true.} if the ESMF object (here {\tt clock}) is in the
 !   created state, {\tt .false.} otherwise.
 !EOP
   !-----------------------------------------------------------------------------    
     NUOPC_ClockIsCreated = .false.  ! default assumption
+    if (present(rc)) rc = ESMF_SUCCESS
     if (ESMF_ClockGetInit(clock)==ESMF_INIT_CREATED) &
       NUOPC_ClockIsCreated = .true.
   end function
