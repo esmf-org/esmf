@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.C,v 1.174 2012/10/25 21:43:52 theurich Exp $
+// $Id: ESMCI_Array.C,v 1.175 2012/11/16 21:26:13 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Array.C,v 1.174 2012/10/25 21:43:52 theurich Exp $";
+static const char *const version = "$Id: ESMCI_Array.C,v 1.175 2012/11/16 21:26:13 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -9833,10 +9833,12 @@ ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
 #endif
   
   if (srcTermProcessingArg && *srcTermProcessingArg >= 0){
+#ifdef SMMSTOREENCODEXXEINFO
     char msg[160];
     sprintf(msg, "srcTermProcessingArg = %d was provided -> do not tune",
       *srcTermProcessingArg);
     ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
+#endif
     srcTermProcessingOpt = *srcTermProcessingArg;
   }else{
     // optimize srcTermProcessing
@@ -9968,10 +9970,12 @@ ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
 #endif
 
   if (pipelineDepthArg && *pipelineDepthArg >= 0){
+#ifdef SMMSTOREENCODEXXEINFO
     char msg[160];
     sprintf(msg, "pipelineDepthArg = %d was provided -> do not tune",
       *pipelineDepthArg);
     ESMC_LogDefault.ESMC_LogWrite(msg, ESMC_LOGMSG_INFO);
+#endif
     pipelineDepthOpt = *pipelineDepthArg;
   }else{
     // optimize pipeline depth
