@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.117 2012/11/15 20:50:38 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.118 2012/11/16 20:25:37 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.117 2012/11/15 20:50:38 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.118 2012/11/16 20:25:37 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -104,7 +104,8 @@ contains
 !
 ! !INTERFACE:
       subroutine ESMF_FieldRegrid(srcField, dstField, &
-                   routehandle, keywordEnforcer, zeroregion, checkflag, rc)
+                   routehandle, keywordEnforcer, zeroregion, &
+                   termorderflag, checkflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field),       intent(in),    optional :: srcField
@@ -112,6 +113,7 @@ contains
       type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Region_Flag), intent(in),    optional :: zeroregion
+      type(ESMF_TermOrder_Flag), intent(in), optional :: termorderflag
       logical,                intent(in),    optional :: checkflag
       integer,                intent(out),   optional :: rc 
 !
@@ -177,6 +179,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     multiplication. See section \ref{const:region} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
+!   \item [{[termorderflag]}]
+!     Specifies the order of the source side terms in all of the destination
+!     sums. The {\tt termorderflag} only affects the order of terms during 
+!     the execution of the RouteHandle. See the \ref{RH:bfb} section for an
+!     in-depth discussion of {\em all} bit-for-bit reproducibility
+!     aspects related to route-based communication methods.
+!     See \ref{const:termorderflag} for a full list of options.
+!     The default is {\tt ESMF\_TERMORDER\_FREE}, allowing maximum flexibility
+!     in the order of terms for optimum performance.
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input Array pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
@@ -212,18 +223,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(srcField) .and. present(dstField)) then
           call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
-                 checkflag=checkflag, rc=localrc)
+                 termorderflag=termorderflag, checkflag=checkflag, rc=localrc)
 		else if (present(srcField) .and. .not. present(dstField)) then
           call ESMF_ArraySMM(srcArray=srcArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
-                 checkflag=checkflag, rc=localrc)
+                 termorderflag=termorderflag, checkflag=checkflag, rc=localrc)
 		else if (.not. present(srcField) .and. present(dstField)) then
           call ESMF_ArraySMM(dstArray=dstArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
-                 checkflag=checkflag, rc=localrc)
+                 termorderflag=termorderflag, checkflag=checkflag, rc=localrc)
         else if (.not. present(srcField) .and. .not. present(dstField)) then
           call ESMF_ArraySMM(routehandle=routehandle, zeroregion=zeroregion, &
-                 checkflag=checkflag, rc=localrc)
+                 termorderflag=termorderflag, checkflag=checkflag, rc=localrc)
         else
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
             msg="Supplied combination of optional Fields not supported", &
@@ -302,8 +313,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     srcMaskValues, dstMaskValues, &
                     regridmethod, &
                     polemethod, regridPoleNPnts, & 
-                    unmappedaction, &
-                    ignoreDegenerate, &
+                    unmappedaction, ignoreDegenerate, &
+                    srcTermProcessing, & 
+                    pipeLineDepth, &
                     routehandle, &
                     factorList, factorIndexList, & 
                     weights, indices, &  ! DEPRECATED ARGUMENTS
@@ -320,6 +332,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                     intent(in),   optional :: regridPoleNPnts
       type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
       logical,                     intent(in),   optional :: ignoreDegenerate
+      integer,                     intent(inout),optional :: srcTermProcessing
+      integer,                     intent(inout),optional :: pipeLineDepth
       type(ESMF_RouteHandle),      intent(inout),optional :: routehandle
       real(ESMF_KIND_R8),          pointer,      optional :: factorList(:)
       integer(ESMF_KIND_I4), pointer, optional :: factorIndexList(:,:)
@@ -409,6 +423,61 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error. 
 !           This currently only applies to the {\tt ESMF\_REGRIDMETHOD\_CONSERVE} method, other regrid methods currently 
 !           always skip degenerate cells. 
+!   \item [{[srcTermProcessing]}]
+!     The {\tt srcTermProcessing} parameter controls how many source terms,
+!     located on the same PET and summing into the same destination element,
+!     are summed into partial sums on the source PET before being transferred
+!     to the destination PET. A value of 0 indicates that the entire arithmatic
+!     is done on the destination PET; source elements are neither multiplied 
+!     by their factors nor added into partial sums before being sent off by the
+!     source PET. A value of 1 indicates that source elements are multiplied
+!     by their factors on the source side before being sent to the destination
+!     PET. Larger values of {\tt srcTermProcessing} indicate the maximum number
+!     of terms in the partial sums on the source side.
+!
+!     Note that partial sums may lead to bit-for-bit differences in the results.
+!     See section \ref{RH:bfb} for an in-depth discussion of {\em all}
+!     bit-for-bit reproducibility aspects related to route-based communication
+!     methods.
+!
+!     \begin{sloppypar}
+!     The {\tt ESMF\_FieldRegridStore()} method implements an auto-tuning scheme
+!     for the {\tt srcTermProcessing} parameter. The intent on the 
+!     {\tt srcTermProcessing} argument is "{\tt inout}" in order to 
+!     support both overriding and accessing the auto-tuning parameter.
+!     If an argument $>= 0$ is specified, it is used for the 
+!     {\tt srcTermProcessing} parameter, and the auto-tuning phase is skipped.
+!     In this case the {\tt srcTermProcessing} argument is not modified on
+!     return. If the provided argument is $< 0$, the {\tt srcTermProcessing}
+!     parameter is determined internally using the auto-tuning scheme. In this
+!     case the {\tt srcTermProcessing} argument is re-set to the internally
+!     determined value on return. Auto-tuning is also used if the optional 
+!     {\tt srcTermProcessing} argument is omitted.
+!     \end{sloppypar}
+!     
+!   \item [{[pipelineDepth]}]
+!     The {\tt pipelineDepth} parameter controls how many messages a PET
+!     may have outstanding during a sparse matrix exchange. Larger values
+!     of {\tt pipelineDepth} typically lead to better performance. However,
+!     on some systems too large a value may lead to performance degradation,
+!     or runtime errors.
+!
+!     Note that the pipeline depth has no affect on the bit-for-bit
+!     reproducibility of the restuls. However, it may affect the performance
+!     reproducibility of the exchange.
+!
+!     The {\tt ESMF\_FieldRegridStore()} method implements an auto-tuning scheme
+!     for the {\tt pipelineDepth} parameter. The intent on the 
+!     {\tt pipelineDepth} argument is "{\tt inout}" in order to 
+!     support both overriding and accessing the auto-tuning parameter.
+!     If an argument $>= 0$ is specified, it is used for the 
+!     {\tt pipelineDepth} parameter, and the auto-tuning phase is skipped.
+!     In this case the {\tt pipelineDepth} argument is not modified on
+!     return. If the provided argument is $< 0$, the {\tt pipelineDepth}
+!     parameter is determined internally using the auto-tuning scheme. In this
+!     case the {\tt pipelineDepth} argument is re-set to the internally
+!     determined value on return. Auto-tuning is also used if the optional 
+!     {\tt pipelineDepth} argument is omitted.
 !     \item [{[routehandle]}]
 !           The communication handle that implements the regrid operation and that can be used later in 
 !           the {\tt ESMF\_FieldRegrid()} call. The {\tt routehandle} is optional so that if the 
@@ -825,6 +894,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 lregridScheme, &
                 unmappedaction, &
                 localIgnoreDegenerate, &
+                srcTermProcessing, &
+                pipeLineDepth, &
                 routehandle, &
                 tmp_indices, tmp_weights, unmappedDstList, localrc)
            if (ESMF_LogFoundError(localrc, &
@@ -847,6 +918,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 lregridScheme, &
                 unmappedaction, &
                 localIgnoreDegenerate, &
+                srcTermProcessing, &
+                pipeLineDepth, &
                 routehandle, &
                 unmappedDstList=unmappedDstList, &
                 rc=localrc)

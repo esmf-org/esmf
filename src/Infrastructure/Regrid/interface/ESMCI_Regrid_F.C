@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.81 2012/11/15 20:50:45 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.82 2012/11/16 20:25:40 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -78,12 +78,15 @@ extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
     ESMCI::InterfaceInt **factorIndexList,
     int *srcTermProcessing, int *pipelineDepth, int *rc);
 
+
+
 extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
                    Mesh **meshsrcpp, ESMCI::Array **arraysrcpp,
                    Mesh **meshdstpp, ESMCI::Array **arraydstpp,
 		   int *regridMethod, 
                    int *regridPoleType, int *regridPoleNPnts,  
                    int *regridScheme, int *unmappedaction, int *_ignoreDegenerate,
+                   int *srcTermProcessing, int *pipelineDepth, 
                    ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
                    int *nentries, ESMCI::TempWeights **tweights,
                    int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
@@ -272,7 +275,7 @@ wts.Print(Par::Out());
       int localrc;
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
       FTN_X(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
-                 &num_entries, &iiptr, NULL, NULL, &localrc);
+            &num_entries, &iiptr, srcTermProcessing, pipelineDepth, &localrc);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
 	throw localrc;  // bail out with exception
     }

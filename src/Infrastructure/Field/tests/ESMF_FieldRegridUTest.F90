@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.53 2012/11/15 23:58:53 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.54 2012/11/16 20:25:39 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -496,6 +496,8 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+
+
 #endif
     call ESMF_TestEnd(ESMF_SRCLINE)
 
@@ -545,6 +547,9 @@ contains
 
   integer, pointer :: larrayList(:)
   integer :: localPet, petCount
+
+  integer :: srcTermProcessing, pipeLineDepth
+  
 
   ! result code
   integer :: finalrc
@@ -826,9 +831,14 @@ contains
 
   !!! Regrid forward from the 0 to 360 grid to the -180 to 180 grid
   ! Regrid store
+  ! make sure these work
+  srcTermProcessing=0
+  pipeLineDepth=localPet
   call ESMF_FieldRegridStore(srcField360, dstField=field180, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
+          srcTermProcessing=srcTermProcessing, &
+          pipeLineDepth=pipeLineDepth, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -837,7 +847,8 @@ contains
 
 
   ! Do regrid
-  call ESMF_FieldRegrid(srcField360, field180, routeHandle, rc=localrc)
+  call ESMF_FieldRegrid(srcField360, field180, routeHandle, &
+       termorderflag=ESMF_TERMORDER_FREE ,rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
       return
