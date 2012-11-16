@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.141 2012/11/15 13:47:20 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.142 2012/11/16 00:25:26 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.141 2012/11/15 13:47:20 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.142 2012/11/16 00:25:26 ksaint Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -67,22 +67,22 @@ Attribute *Attribute::writeRoot = ESMC_NULL_POINTER;
 int Attribute::count = 0;
 
 // initialize static convention and purpose strings
-const std::string Attribute::CF_CONV      = "CF";
-const std::string Attribute::CF_1_6_CONV  = "CF 1.6";
-const std::string Attribute::ESG_CONV     = "ESG";
-const std::string Attribute::ESMF_CONV    = "ESMF";
-const std::string Attribute::CIM_1_5_CONV = "CIM 1.5";
+const char Attribute::CF_CONV[]      = "CF";
+const char Attribute::CF_1_6_CONV[]  = "CF 1.6";
+const char Attribute::ESG_CONV[]     = "ESG";
+const char Attribute::ESMF_CONV[]    = "ESMF";
+const char Attribute::CIM_1_5_CONV[] = "CIM 1.5";
 
-const std::string Attribute::GENERAL_PURP    = "General";
-const std::string Attribute::EXTENDED_PURP   = "Extended";
-const std::string Attribute::INPUTS_PURP     = "Inputs";
-const std::string Attribute::MODEL_COMP_PURP = "ModelComp";
-const std::string Attribute::PLATFORM_PURP   = "Platform";
-const std::string Attribute::RESP_PARTY_PURP = "RespParty";
-const std::string Attribute::CITATION_PURP   = "Citation";
-const std::string Attribute::SCI_PROP_PURP   = "SciProp";
-const std::string Attribute::COMP_PROP_PURP  = "CompProp";
-const std::string Attribute::GRIDSPEC_PURP   = "GridSpec";
+const char Attribute::GENERAL_PURP[]    = "General";
+const char Attribute::EXTENDED_PURP[]   = "Extended";
+const char Attribute::INPUTS_PURP[]     = "Inputs";
+const char Attribute::MODEL_COMP_PURP[] = "ModelComp";
+const char Attribute::PLATFORM_PURP[]   = "Platform";
+const char Attribute::RESP_PARTY_PURP[] = "RespParty";
+const char Attribute::CITATION_PURP[]   = "Citation";
+const char Attribute::SCI_PROP_PURP[]   = "SciProp";
+const char Attribute::COMP_PROP_PURP[]  = "CompProp";
+const char Attribute::GRIDSPEC_PURP[]   = "GridSpec";
 
 
 //-----------------------------------------------------------------------------

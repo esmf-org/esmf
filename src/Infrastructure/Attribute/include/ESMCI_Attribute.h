@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.67 2012/11/15 18:43:43 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.68 2012/11/16 00:25:11 ksaint Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -115,22 +115,22 @@ class Attribute
 //-----------------------------------------------------------------------------
  public:
     // constant strings for conventions and purposes
-    static const std::string  CF_CONV;
-    static const std::string  CF_1_6_CONV;
-    static const std::string	ESG_CONV;
-    static const std::string	ESMF_CONV;
-    static const std::string	CIM_1_5_CONV;
+    static const char   CF_CONV[];
+    static const char   CF_1_6_CONV[];
+    static const char	ESG_CONV[];
+    static const char	ESMF_CONV[];
+    static const char	CIM_1_5_CONV[];
 
-    static const std::string	GENERAL_PURP;
-    static const std::string	EXTENDED_PURP;
-    static const std::string	INPUTS_PURP;
-    static const std::string	MODEL_COMP_PURP;
-    static const std::string	PLATFORM_PURP;
-    static const std::string	RESP_PARTY_PURP;
-    static const std::string	CITATION_PURP;
-    static const std::string	SCI_PROP_PURP;
-    static const std::string  COMP_PROP_PURP;
-    static const std::string  GRIDSPEC_PURP;
+    static const char	GENERAL_PURP[];
+    static const char	EXTENDED_PURP[];
+    static const char	INPUTS_PURP[];
+    static const char	MODEL_COMP_PURP[];
+    static const char	PLATFORM_PURP[];
+    static const char	RESP_PARTY_PURP[];
+    static const char	CITATION_PURP[];
+    static const char	SCI_PROP_PURP[];
+    static const char   COMP_PROP_PURP[];
+    static const char   GRIDSPEC_PURP[];
 
     // helper to set the Base address in attrBase
     void setBase(ESMC_Base *setBase){ attrBase = setBase; }
