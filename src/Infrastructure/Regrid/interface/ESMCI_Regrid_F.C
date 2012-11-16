@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.82 2012/11/16 20:25:40 oehmke Exp $
+// $Id: ESMCI_Regrid_F.C,v 1.83 2012/11/16 22:42:35 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -190,17 +190,30 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     // return false positives for multiproc cases, instead check below after gathering weights to a proc. 
     int temp_unmappedaction=ESMCI_UNMAPPEDACTION_IGNORE;
 
-    if(!online_regrid(srcmesh, dstmesh, wts, &regridConserve, regridMethod,
-                      regridPoleType, regridPoleNPnts, 
-                      regridScheme, &temp_unmappedaction))
-      Throw() << "Online regridding error" << std::endl;
-
+    // to do NEARESTDTOS just do NEARESTSTOD and invert results
+    if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
+      if(!online_regrid(srcmesh, dstmesh, wts, &regridConserve, regridMethod,
+                        regridPoleType, regridPoleNPnts, 
+                        regridScheme, &temp_unmappedaction))
+        Throw() << "Online regridding error" << std::endl;
+    } else {
+      int tempRegridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
+      if(!online_regrid(dstmesh, srcmesh, wts, &regridConserve, &tempRegridMethod,
+                        regridPoleType, regridPoleNPnts, 
+                        regridScheme, &temp_unmappedaction))
+        Throw() << "Online regridding error" << std::endl;
+    }
 
     // If requested get list of unmapped destination points
     std::vector<int> unmappedDstList;
     if (*has_udl) {
       if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
         get_mesh_elem_ids_not_in_wmat(dstmesh, wts, &unmappedDstList);
+      } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
+        // CURRENTLY DOESN'T WORK!!!
+#if 0
+        get_mesh_node_ids_not_in_wmat(srcmesh, wts, &unmappedDstList);
+#endif
       } else { // Non-conservative
         get_mesh_node_ids_not_in_wmat(dstmesh, wts, &unmappedDstList);
       }
@@ -217,6 +230,15 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
           "- There exist destination cells which don't overlap with any source cell", &localrc)) throw localrc;
         }
+      } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
+        // CURRENTLY DOESN'T WORK!!!
+#if 0
+        if (!all_mesh_node_ids_in_wmat(srcmesh, wts)) {
+          int localrc;
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                   "- There exist source points which can't be mapped to any destination point", &localrc)) throw localrc;
+        }
+#endif
       } else { // bilinear, patch, ...
         if (!all_mesh_node_ids_in_wmat(dstmesh, wts)) {
           int localrc;
@@ -239,29 +261,57 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
     double *factors = new double[iisize.first];
 
-    // Translate weights to sparse matrix representatio
-    UInt i = 0;
-    WMat::WeightMap::iterator wi = wts.begin_row(), we = wts.end_row();
-    for (; wi != we; ++wi) {
-      const WMat::Entry &w = wi->first;
+    // Translate weights to sparse matrix representation
+    if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
+      UInt i = 0;
+      WMat::WeightMap::iterator wi = wts.begin_row(), we = wts.end_row();
+      for (; wi != we; ++wi) {
+        const WMat::Entry &w = wi->first;
+        
+        std::vector<WMat::Entry> &wcol = wi->second;
+        
+        // Construct factor index list
+        for (UInt j = 0; j < wcol.size(); ++j) {
+          UInt twoi = 2*i;
+          const WMat::Entry &wc = wcol[j];
+          
+          // Construct factor list entry
+          iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
+          factors[i] = wc.value;
+          
+          // printf("d_id=%d  s_id=%d w=%f \n",w.id,wc.id,wc.value);
+          
+          i++;
+        } // for j
+      } // for wi
       
-      std::vector<WMat::Entry> &wcol = wi->second;
-      
-      // Construct factor index list
-      for (UInt j = 0; j < wcol.size(); ++j) {
-	UInt twoi = 2*i;
-	const WMat::Entry &wc = wcol[j];
-	
-	// Construct factor list entry
-	iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
-	factors[i] = wc.value;
+    } else {
+      UInt i = 0;
+      WMat::WeightMap::iterator wi = wts.begin_row(), we = wts.end_row();
+      for (; wi != we; ++wi) {
+        const WMat::Entry &w = wi->first;
+        
+        std::vector<WMat::Entry> &wcol = wi->second;
+        
+        // Construct factor index list
+        for (UInt j = 0; j < wcol.size(); ++j) {
+          UInt twoi = 2*i;
+          const WMat::Entry &wc = wcol[j];
+          
+          // Construct factor list entry
+          // INVERT SRC and DST ID 
+          iientries[twoi+1] = wc.id;  iientries[twoi] = w.id;
+          factors[i] = wc.value;
+          
+          // printf("d_id=%d  s_id=%d w=%f \n",w.id,wc.id,wc.value);
+          
+          i++;
+        } // for j
+      } // for wi
+    }
 
-        // printf("d_id=%d  s_id=%d w=%f \n",w.id,wc.id,wc.value);
 
-	i++;
-      } // for j
-    } // for wi
-    
+
 /*
 Par::Out() << "Matrix entries" << std::endl;
 for (UInt n = 0; n < num_entries; ++n) {
@@ -682,13 +732,13 @@ bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
     // If we're at the end of the weights then exit saying we don't have 
     // all of them
     if (wi==we) { 
-      printf("1: missing node_id=%d \n",node_id);
+      // printf("1: missing node_id=%d \n",node_id);
       return false;
     }
 
     // If we're not equal to the node id then we must have passed it
     if (wi->first.id != node_id) { 
-      printf("2: missing node_id=%d \n",node_id);
+      //      printf("2: missing node_id=%d \n",node_id);
       return false;
     }
 
