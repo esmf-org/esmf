@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.19 2012/11/16 22:53:14 theurich Exp $
+! $Id: NUOPC_Base.F90,v 1.20 2012/11/16 23:33:09 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -1091,6 +1091,41 @@ module NUOPC_Base
   
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_GridCompAreServicesSet - Check if SetServices was called
+! !INTERFACE:
+  function NUOPC_GridCompAreServicesSet(comp, rc)
+! !ARGUMENTS:
+    logical :: NUOPC_GridCompAreServicesSet
+    type(ESMF_GridComp), intent(in)            :: comp
+    integer,             intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if SetServices has been called for {\tt comp}. 
+!   Otherwise returns {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Pointer)      :: vm_info
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! make a copy of the external externalClock
+    call ESMF_CompGet(comp%compp, vm_info=vm_info, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
+    if (vm_info == ESMF_NULL_POINTER) then
+      NUOPC_GridCompAreServicesSet = .false.
+    else
+      NUOPC_GridCompAreServicesSet = .true.
+    endif
+      
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_GridCompAttributeAdd - Add the NUOPC GridComp Attributes
 ! !INTERFACE:
   subroutine NUOPC_GridCompAttributeAdd(comp, rc)
@@ -1168,41 +1203,6 @@ endif
   end subroutine
   !-----------------------------------------------------------------------------
   
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_GridCompAreServicesSet - Check if SetServices was called
-! !INTERFACE:
-  function NUOPC_GridCompAreServicesSet(comp, rc)
-! !ARGUMENTS:
-    logical :: NUOPC_GridCompAreServicesSet
-    type(ESMF_GridComp), intent(in)            :: comp
-    integer,             intent(out), optional :: rc
-! !DESCRIPTION:
-!   Returns {\tt .true.} if SetServices has been called for {\tt comp}. 
-!   Otherwise returns {\tt .false.}.
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    type(ESMF_Pointer)      :: vm_info
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    ! make a copy of the external externalClock
-    call ESMF_CompGet(comp%compp, vm_info=vm_info, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-      
-    if (vm_info == ESMF_NULL_POINTER) then
-      NUOPC_GridCompAreServicesSet = .false.
-    else
-      NUOPC_GridCompAreServicesSet = .true.
-    endif
-      
-  end function
-  !-----------------------------------------------------------------------------
-
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_GridCompCheckSetClock - Check Clock compatibility and set stopTime

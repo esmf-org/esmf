@@ -1,4 +1,4 @@
-! $Id: NUOPC_RunSequenceDef.F90,v 1.12 2012/11/14 23:16:40 svasquez Exp $
+! $Id: NUOPC_RunSequenceDef.F90,v 1.13 2012/11/16 23:33:09 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_RunSequenceDef.F90"
 
@@ -116,6 +116,31 @@ module NUOPC_RunSequenceDef
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_RunElementPrint - Print info about a RunElement object
+! !INTERFACE:
+  subroutine NUOPC_RunElementPrint(runElement, rc)
+! !ARGUMENTS:
+    type(NUOPC_RunElement),  intent(in)  :: runElement
+    integer, optional,       intent(out) :: rc
+! !DESCRIPTION:
+!   Write information about {\tt runElement} into the default log file.
+!EOP
+  !-----------------------------------------------------------------------------
+    character(ESMF_MAXSTR)    :: msgString
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    write (msgString, *) "runElementPrint: ", &
+      runElement%i, runElement%j, runElement%phase
+    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_RunSequenceAdd - Add more RunSequences to a RunSequence vector
 ! !INTERFACE:
   subroutine NUOPC_RunSequenceAdd(runSeq, addCount, rc)
@@ -183,149 +208,7 @@ module NUOPC_RunSequenceDef
   
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_RunElementPrint - Print info about a RunElement object
-! !INTERFACE:
-  subroutine NUOPC_RunElementPrint(runElement, rc)
-! !ARGUMENTS:
-    type(NUOPC_RunElement),  intent(in)  :: runElement
-    integer, optional,       intent(out) :: rc
-! !DESCRIPTION:
-!   Write information about {\tt runElement} into the default log file.
-!EOP
-  !-----------------------------------------------------------------------------
-    character(ESMF_MAXSTR)    :: msgString
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-
-    write (msgString, *) "runElementPrint: ", &
-      runElement%i, runElement%j, runElement%phase
-    call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
-  end subroutine
-  !-----------------------------------------------------------------------------
-  
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_RunSequencePrint - Print info about a single RunSequence object
-! !INTERFACE:
-  ! Private name; call using NUOPC_RunSequencePrint()
-  subroutine NUOPC_RunSequenceSinglePrint(runSeq, rc)
-! !ARGUMENTS:
-    type(NUOPC_RunSequence), intent(in)  :: runSeq
-    integer, optional,       intent(out) :: rc
-! !DESCRIPTION:
-!   Write information about {\tt runSeq} into the default log file.
-!EOP
-  !-----------------------------------------------------------------------------
-    type(NUOPC_RunElement), pointer :: searchElement
-    character(ESMF_MAXSTR)          :: msgString
-
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    if (.not.associated(runSeq%first)) then
-      write (msgString, *) "NUOPC_RunSequenceSinglePrint: no runElements"
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    else
-      write (msgString, *) "NUOPC_RunSequenceSinglePrint:"
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      searchElement => runSeq%first
-      do while (associated(searchElement%next))
-        call NUOPC_RunElementPrint(searchElement)
-        searchElement => searchElement%next
-      enddo
-      call NUOPC_RunElementPrint(searchElement)
-    endif
-
-  end subroutine
-  !-----------------------------------------------------------------------------
-  
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_RunSequencePrint - Print info about a RunSequence vector
-! !INTERFACE:
-  ! Private name; call using NUOPC_RunSequencePrint()
-  subroutine NUOPC_RunSequenceArrayPrint(runSeq, rc)
-! !ARGUMENTS:
-    type(NUOPC_RunSequence), pointer     :: runSeq(:)
-    integer, optional,       intent(out) :: rc
-! !DESCRIPTION:
-!   Write information about the whole {\tt runSeq} vector into the default log 
-!   file.
-!EOP
-  !-----------------------------------------------------------------------------
-    integer :: i
-    character(ESMF_MAXSTR)          :: msgString
-    
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    do i=1, size(runSeq)
-      write (msgString, *) "NUOPC_RunSequenceArrayPrint: element", i, &
-        " out of ", size(runSeq)
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      call NUOPC_RunSequenceSinglePrint(runSeq(i))
-    enddo
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
-  
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_RunSequenceSet - Set values inside a RunSequence object
-! !INTERFACE:
-  subroutine NUOPC_RunSequenceSet(runSeq, clock, rc)
-! !ARGUMENTS:
-    type(NUOPC_RunSequence), intent(inout) :: runSeq
-    type(ESMF_Clock),        intent(in)    :: clock
-    integer, optional,       intent(out)   :: rc
-! !DESCRIPTION:
-!   Set the Clock member in {\tt runSeq}.
-!EOP
-  !-----------------------------------------------------------------------------
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    runSeq%clock = clock  ! set the clock (is alias)
-
-  end subroutine
-  !-----------------------------------------------------------------------------
-  
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_RunSequenceSingleDeall - Deallocate a single RunSequence object
-! !INTERFACE:
-  ! Private name; call using NUOPC_RunSequenceDeallocate()
-  subroutine NUOPC_RunSequenceSingleDeall(runSeq, rc)
-! !ARGUMENTS:
-    type(NUOPC_RunSequence), intent(inout)  :: runSeq
-    integer, optional,       intent(out) :: rc
-! !DESCRIPTION:
-!   Deallocate all of the RunElements in the RunSequence defined by {\tt runSeq}.
-!EOP
-  !-----------------------------------------------------------------------------
-    type(NUOPC_RunElement), pointer :: searchElement
-
-    if (present(rc)) rc = ESMF_SUCCESS
-    
-    do while (associated(runSeq%first))
-      searchElement => runSeq%first
-      runSeq%first => searchElement%next
-      deallocate(searchElement)
-      nullify(searchElement)    ! ensure recognizable condition
-    enddo
-
-  end subroutine
-  !-----------------------------------------------------------------------------
-  
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_RunSequenceArrayDeall - Deallocate an entire RunSequence vector
+! !IROUTINE: NUOPC_RunSequenceDeallocate - Deallocate an entire RunSequence vector
 ! !INTERFACE:
   ! Private name; call using NUOPC_RunSequenceDeallocate()
   subroutine NUOPC_RunSequenceArrayDeall(runSeq, rc)
@@ -356,6 +239,33 @@ module NUOPC_RunSequenceDef
   end subroutine
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_RunSequenceDeallocate - Deallocate a single RunSequence object
+! !INTERFACE:
+  ! Private name; call using NUOPC_RunSequenceDeallocate()
+  subroutine NUOPC_RunSequenceSingleDeall(runSeq, rc)
+! !ARGUMENTS:
+    type(NUOPC_RunSequence), intent(inout)  :: runSeq
+    integer, optional,       intent(out) :: rc
+! !DESCRIPTION:
+!   Deallocate all of the RunElements in the RunSequence defined by {\tt runSeq}.
+!EOP
+  !-----------------------------------------------------------------------------
+    type(NUOPC_RunElement), pointer :: searchElement
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    do while (associated(runSeq%first))
+      searchElement => runSeq%first
+      runSeq%first => searchElement%next
+      deallocate(searchElement)
+      nullify(searchElement)    ! ensure recognizable condition
+    enddo
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_RunSequenceIterate - Iterate through a RunSequence
@@ -450,6 +360,96 @@ module NUOPC_RunSequenceDef
   end function
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_RunSequencePrint - Print info about a single RunSequence object
+! !INTERFACE:
+  ! Private name; call using NUOPC_RunSequencePrint()
+  subroutine NUOPC_RunSequenceSinglePrint(runSeq, rc)
+! !ARGUMENTS:
+    type(NUOPC_RunSequence), intent(in)  :: runSeq
+    integer, optional,       intent(out) :: rc
+! !DESCRIPTION:
+!   Write information about {\tt runSeq} into the default log file.
+!EOP
+  !-----------------------------------------------------------------------------
+    type(NUOPC_RunElement), pointer :: searchElement
+    character(ESMF_MAXSTR)          :: msgString
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    if (.not.associated(runSeq%first)) then
+      write (msgString, *) "NUOPC_RunSequenceSinglePrint: no runElements"
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    else
+      write (msgString, *) "NUOPC_RunSequenceSinglePrint:"
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      searchElement => runSeq%first
+      do while (associated(searchElement%next))
+        call NUOPC_RunElementPrint(searchElement)
+        searchElement => searchElement%next
+      enddo
+      call NUOPC_RunElementPrint(searchElement)
+    endif
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_RunSequencePrint - Print info about a RunSequence vector
+! !INTERFACE:
+  ! Private name; call using NUOPC_RunSequencePrint()
+  subroutine NUOPC_RunSequenceArrayPrint(runSeq, rc)
+! !ARGUMENTS:
+    type(NUOPC_RunSequence), pointer     :: runSeq(:)
+    integer, optional,       intent(out) :: rc
+! !DESCRIPTION:
+!   Write information about the whole {\tt runSeq} vector into the default log 
+!   file.
+!EOP
+  !-----------------------------------------------------------------------------
+    integer :: i
+    character(ESMF_MAXSTR)          :: msgString
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    do i=1, size(runSeq)
+      write (msgString, *) "NUOPC_RunSequenceArrayPrint: element", i, &
+        " out of ", size(runSeq)
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      call NUOPC_RunSequenceSinglePrint(runSeq(i))
+    enddo
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_RunSequenceSet - Set values inside a RunSequence object
+! !INTERFACE:
+  subroutine NUOPC_RunSequenceSet(runSeq, clock, rc)
+! !ARGUMENTS:
+    type(NUOPC_RunSequence), intent(inout) :: runSeq
+    type(ESMF_Clock),        intent(in)    :: clock
+    integer, optional,       intent(out)   :: rc
+! !DESCRIPTION:
+!   Set the Clock member in {\tt runSeq}.
+!EOP
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    runSeq%clock = clock  ! set the clock (is alias)
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
   !-----------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: NUOPC_RunSequenceCtrl - Recursive iterator through a RunSequence
