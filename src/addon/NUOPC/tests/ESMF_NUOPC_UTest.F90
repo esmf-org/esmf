@@ -1,4 +1,4 @@
-! $Id: ESMF_NUOPC_UTest.F90,v 1.1 2012/11/16 22:53:45 theurich Exp $
+! $Id: ESMF_NUOPC_UTest.F90,v 1.2 2012/11/16 23:33:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_NUOPC_UTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_NUOPC_UTest.F90,v 1.1 2012/11/16 22:53:45 theurich Exp $'
+    '$Id: ESMF_NUOPC_UTest.F90,v 1.2 2012/11/16 23:33:39 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -65,7 +65,10 @@ program ESMF_NUOPC_UTest
   character(ESMF_MAXSTR)  :: cplList(10)
   integer                 :: count
   type(ESMF_Grid)         :: grid
-  character(ESMF_MAXSTR), pointer :: stdAttrNameList(:)
+  character(ESMF_MAXSTR), pointer   :: stdAttrNameList(:)
+  type(NUOPC_RunSequence), pointer  :: runSeq(:)
+  type(NUOPC_RunElement),  pointer  :: runE
+  
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
 ! always run. When the environment variable, EXHAUSTIVE, is set to ON then
@@ -122,6 +125,10 @@ program ESMF_NUOPC_UTest
 
   fieldBundleB = ESMF_FieldBundleCreate(name="TestFieldBundle B", rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  ! -> NUOPC Utility methods
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -383,6 +390,83 @@ program ESMF_NUOPC_UTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------
+  ! -> NUOPC RunSequence methods
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_RunSequenceAdd() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_RunSequenceAdd(runSeq, 1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+ 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_RunElementAdd() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_RunElementAdd(runSeq(1), i=2, j=1, phase=1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+ 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_RunElementPrint() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_RunElementPrint(runSeq(1)%first, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+ 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_RunSequenceSet() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_RunSequenceSet(runSeq(1), clockA, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+ 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_RunSequenceIterate() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  nullify(runE)
+  flag = NUOPC_RunSequenceIterate(runSeq, runSeqIndex=1, runElement=runE, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+ 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_RunSequencePrint() single element Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_RunSequencePrint(runSeq(1), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+ 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_RunSequencePrint() entire vector Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_RunSequencePrint(runSeq, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+ 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_RunSequenceSingleDeall() single element Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_RunSequenceDeallocate(runSeq(1), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+ 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_RunSequenceSingleDeall() entire vector Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_RunSequenceDeallocate(runSeq, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+ 
 
 10 continue
   !------------------------------------------------------------------------
