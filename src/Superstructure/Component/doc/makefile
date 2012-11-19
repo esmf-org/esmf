@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2012/10/11 00:19:21 theurich Exp $ 
+# $Id: makefile,v 1.28 2012/11/19 22:34:02 theurich Exp $ 
 
 ALL: onedoc
 
@@ -35,7 +35,7 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 # These lists almost certainly will not be an exhastive list of 
 # all of the dependent files, but even a partial listing  will be helpfull.
 #
-REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE) Component_crefdoc.ctex Component_refdoc.ctex GridComp_cdesc.tex GridComp_desc.tex GridComp_rest.tex GridComp_usage.tex CplComp_cdesc.tex CplComp_desc.tex CplComp_rest.tex CplComp_usage.tex SciComp_cdesc.tex SciComp_desc.tex SciComp_rest.tex SciComp_usage.tex CompTunnel_desc.tex CompTunnel_rest.tex CompTunnel_usage.tex
 
 include $(ESMF_DIR)/makefile
 
