@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandleBitForBitEx.F90,v 1.9 2012/11/13 06:37:29 theurich Exp $
+! $Id: ESMF_RHandleBitForBitEx.F90,v 1.10 2012/11/19 21:46:57 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -444,6 +444,12 @@ program ESMF_RHandleBitForBitEx
       finalrc = ESMF_FAILURE
   endif
 !EOC
+
+  call ESMF_RouteHandlePrint(rh, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   call ESMF_ArraySMMRelease(rh, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
