@@ -1,4 +1,4 @@
-! $Id: ESMF_XGridUTest.F90,v 1.53 2012/11/05 19:22:33 feiliu Exp $
+! $Id: ESMF_XGridUTest.F90,v 1.54 2012/11/19 19:13:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -352,6 +352,10 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         field = ESMF_FieldCreate(xgrid, typekind=ESMF_TYPEKIND_R8, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_XGridGetFieldBounds(xgrid, totalLBound=xlb, totalUBound=xub, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
