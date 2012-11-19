@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeWrite.C,v 1.12 2012/11/15 18:43:45 rokuingh Exp $
+// $Id: ESMCI_AttributeWrite.C,v 1.13 2012/11/19 16:53:03 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -50,7 +50,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.12 2012/11/15 18:43:45 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.13 2012/11/19 16:53:03 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -1221,7 +1221,7 @@ namespace ESMCI {
 
   newstr.insert(0, timestr.substr(20,4));
   newstr.insert(4, "-");
-  newstr.insert(5, month2Num(timestr.substr(4,3)));
+  newstr.insert(5, month2Num(timestr.substr(4,3)).c_str());
   newstr.insert(7, "-");
   newstr.insert(8, timestr.substr(8,2));
   newstr.insert(10, "T");
@@ -1239,7 +1239,7 @@ namespace ESMCI {
 // !IROUTINE:  month2Num - return number associated with month
 //
 // !INTERFACE:
-      const char *  Attribute::month2Num(
+      string Attribute::month2Num(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1252,10 +1252,18 @@ namespace ESMCI {
 //
 //EOPI
 //-----------------------------------------------------------------------------
+  int localrc;
   string monthnum;
 
-  printf("The month string is: %s\n", month.c_str());
+  // Initialize local return code; assume routine not implemented
+  localrc = ESMC_RC_NOT_IMPL;
 
+#if 0
+  // initialize
+  monthnum = "00";
+#endif
+ 
+  // set monthnum to valid value
   if (strcmp(month.c_str(), "Jan") == 0)
     monthnum = "01";
   else if (strcmp(month.c_str(), "Feb") == 0)
@@ -1280,8 +1288,13 @@ namespace ESMCI {
     monthnum = "11";
   else if (strcmp(month.c_str(), "Dec") == 0)
     monthnum = "12";
+  else {
+    monthnum = "00";
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+      "month string does not match a valid value, ", &localrc);
+  }
 
-  return monthnum.c_str();
+  return monthnum;
 
 } // end month2Num
 //-----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.68 2012/11/16 00:25:11 ksaint Exp $
+// $Id: ESMCI_Attribute.h,v 1.69 2012/11/19 16:52:48 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -366,7 +366,7 @@ class Attribute
     std::string AttributeGetInternalGridInt(std::string inputString) const;
     std::string AttributeGetInternalGridString(std::string inputString) const;
     const char *  getTime() const; 
-    const char *  month2Num(std::string month) const;
+    std::string month2Num(std::string month) const;
 };
 } // namespace
 
