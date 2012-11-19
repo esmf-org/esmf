@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.49 2012/11/14 06:11:40 theurich Exp $
+! $Id: ESMF_ComplianceIC.F90,v 1.50 2012/11/19 18:49:32 theurich Exp $
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------
@@ -738,6 +738,7 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: tempString
     character(ESMF_MAXSTR), allocatable   :: itemNameList(:)
     type(ESMF_StateItem_Flag), allocatable :: stateitemtypeList(:)
+    type(ESMF_Field), allocatable         :: fields(:)
     type(ESMF_Field)                      :: field
     type(ESMF_FieldBundle)                :: fieldbundle
     type(ESMF_State)                      :: nestedState
@@ -870,13 +871,14 @@ module ESMF_ComplianceICMod
               line=__LINE__, &
               file=FILENAME)) &
               return  ! bail out
+            allocate(fields(fieldCount))
+            call ESMF_FieldBundleGet(fieldbundle, fieldList=fields, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
             do fitem=1, fieldCount
-              call ESMF_FieldBundleGet(fieldbundle, fieldIndex=fitem, &
-                field=field, rc=rc)
-              if (ESMF_LogFoundError(rc, &
-                line=__LINE__, &
-                file=FILENAME)) &
-                return  ! bail out
+              field = fields(fitem)
               call ESMF_FieldGet(field, name=name, rc=rc)
               if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -894,6 +896,7 @@ module ESMF_ComplianceICMod
                 file=FILENAME)) &
                 return  ! bail out
             enddo
+            deallocate(fields)
           else if (stateitemtypeList(item) == ESMF_STATEITEM_STATE) then
             ! recursive call
             call ESMF_StateGet(state, itemName=itemNameList(item), &

@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.20 2012/11/16 23:33:09 theurich Exp $
+! $Id: NUOPC_Base.F90,v 1.21 2012/11/19 18:49:26 theurich Exp $
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 
@@ -817,8 +817,10 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    type(ESMF_Field)        :: srcField, dstField
-    integer                 :: i, valueList(9), srcCount, dstCount
+    type(ESMF_Field)              :: srcField, dstField
+    type(ESMF_Field), allocatable :: srcFieldList(:)
+    type(ESMF_Field), allocatable :: dstFieldList(:)
+    integer                       :: i, valueList(9), srcCount, dstCount
     
 !gjtdebug    character(ESMF_MAXSTR)  :: tempString1, tempString2
 !gjtdebug    character(5*ESMF_MAXSTR):: msgString
@@ -842,18 +844,21 @@ module NUOPC_Base
         rcToReturn=rc)
       return  ! bail out
     endif
-
+    allocate(srcFieldList(srcCount))
+    call ESMF_FieldBundleGet(srcFields, fieldList=srcFieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    allocate(dstFieldList(srcCount))
+    call ESMF_FieldBundleGet(srcFields, fieldList=dstFieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
     do i=1, srcCount    
-      call ESMF_FieldBundleGet(srcFields, fieldIndex=i, field=srcField, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-      call ESMF_FieldBundleGet(dstFields, fieldIndex=i, field=dstField, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+      srcField = srcFieldList(i)
+      dstField = dstFieldList(i)
       call ESMF_AttributeGet(srcField, &
         name="TimeStamp", valueList=valueList, &
         convention="NUOPC", purpose="General", &
@@ -879,7 +884,8 @@ module NUOPC_Base
         file=FILENAME)) &
         return  ! bail out
     enddo
-    
+    deallocate(srcFieldList, dstFieldList)
+
   end subroutine
   !-----------------------------------------------------------------------------
 
