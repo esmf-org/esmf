@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridCompUTest.F90,v 1.48 2012/10/31 21:11:02 rokuingh Exp $
+! $Id: ESMF_AttributeGridCompUTest.F90,v 1.49 2012/11/19 17:26:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.48 2012/10/31 21:11:02 rokuingh Exp $'
+      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.49 2012/11/19 17:26:02 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -721,7 +721,7 @@ program ESMF_AttributeGridCompUTest
 
       !NEX_UTest
       ! Get a constant numerical Attribute from a GridComp Test
-      call ESMF_AttributeGet(gridcomp, name="ConstantI8l", &
+      call ESMF_AttributeGet(gridcomp, name="ConstantR8l", &
         valueList=outConstantR8l, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE"
       write(name, *) "Getting a constant R8 list Attribute from a GridComp Test"

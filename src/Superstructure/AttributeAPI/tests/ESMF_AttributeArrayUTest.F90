@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeArrayUTest.F90,v 1.47 2012/10/31 21:11:02 rokuingh Exp $
+! $Id: ESMF_AttributeArrayUTest.F90,v 1.48 2012/11/19 17:26:02 rokuingh Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeArrayUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeArrayUTest.F90,v 1.47 2012/10/31 21:11:02 rokuingh Exp $'
+      '$Id: ESMF_AttributeArrayUTest.F90,v 1.48 2012/11/19 17:26:02 rokuingh Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -715,7 +715,7 @@ program ESMF_AttributeArrayUTest
 
       !NEX_UTest
       ! Get a constant numerical Attribute from an Array Test
-      call ESMF_AttributeGet(array, name="ConstantI8l", &
+      call ESMF_AttributeGet(array, name="ConstantR8l", &
         valueList=outConstantR8l, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_ATTR_WRONGTYPE"
       write(name, *) "Getting a constant R8 list Attribute from an Array Test"
