@@ -6,10 +6,10 @@
       xmlns:gco="http://www.isotc211.org/2005/gco" 
       xmlns:gmd="http://www.isotc211.org/2005/gmd" 
       xmlns="http://www.purl.org/org/esmetadata/cim/1.5/schemas" 
-      xsi:schemaLocation="http://www.purl.org/org/esmetadata/cim/1.5/schemas file:/home/likewise-open/WX/allyn.treshansky/WORK/METAFOR/working_copies/cim_1.5/cim.xsd">
+      xsi:schemaLocation="http://www.purl.org/org/esmetadata/cim/1.5/schemas http://www.purl.org/org/esmetadata/cim/1.5/schemas">
     <esmModelGrid id="Grid002" isLeaf="true" gridType="regular_lat_lon" numTiles="1">
     <shortName>Grid002</shortName>
-    <longName>ESMF Grid CF definition to prototype ESMF internal Attributes</longName>
+    <longName>CF 1.6 formatted ESMF Grid definition</longName>
       <gridTile id="1" discretizationType="logically_rectangular" geometryType="sphere">
         <simpleGridGeom numDims="2">
           <xcoords>0 0 0 0 0 0 0 0 0 0 36 36 36 36 36 36 36 36 36 36 72 72 72 72 72 72 72 72 72 72 108 108 108 108 108 108 108 108 108 108 144 144 144 144 144 144 144 144 144 144 180 180 180 180 180 180 180 180 180 180 216 216 216 216 216 216 216 216 216 216 252 252 252 252 252 252 252 252 252 252 288 288 288 288 288 288 288 288 288 288 324 324 324 324 324 324 324 324 324 324 </xcoords>
@@ -17,7 +17,7 @@
         </simpleGridGeom>
       </gridTile>
     </esmModelGrid>
-  <documentID>abcdefgh-1234-4321-4242-zyxwvutsrqpo</documentID>
-  <documentVersion>1.2.3</documentVersion>
-  <documentCreationDate>2012-09-25T09:54:30</documentCreationDate>
+  <documentID>abcdefgh-1234-4224-4321-zyxwvutsrqpo</documentID>
+  <documentVersion>1.0.0</documentVersion>
+  <documentCreationDate>2012-11-20T09:07:35</documentCreationDate>
   </gridSpec>

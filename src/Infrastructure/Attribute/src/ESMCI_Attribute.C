@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.142 2012/11/16 00:25:26 ksaint Exp $
+// $Id: ESMCI_Attribute.C,v 1.143 2012/11/20 17:32:48 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.142 2012/11/16 00:25:26 ksaint Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.143 2012/11/20 17:32:48 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -337,7 +337,7 @@ const char Attribute::GRIDSPEC_PURP[]   = "GridSpec";
       vv.push_back(value);
       localrc = attpack->AttributeSet(name, vv.size(), &vv);
       name = "longName";
-      value = "ESMF Grid CF definition to prototype ESMF internal Attributes";
+      value = "CF 1.6 formatted ESMF Grid definition";
       vv.clear();
       vv.push_back(value);
       localrc = attpack->AttributeSet(name, vv.size(), &vv);

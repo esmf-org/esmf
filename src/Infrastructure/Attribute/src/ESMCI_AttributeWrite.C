@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeWrite.C,v 1.13 2012/11/19 16:53:03 rokuingh Exp $
+// $Id: ESMCI_AttributeWrite.C,v 1.14 2012/11/20 17:32:48 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -50,7 +50,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.13 2012/11/19 16:53:03 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.14 2012/11/20 17:32:48 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -654,7 +654,7 @@ namespace ESMCI {
            "\n      xmlns:gco", "http://www.isotc211.org/2005/gco",
            "\n      xmlns:gmd", "http://www.isotc211.org/2005/gmd",
            "\n      xmlns", "http://www.purl.org/org/esmetadata/cim/1.5/schemas",
-           "\n      xsi:schemaLocation", "http://www.purl.org/org/esmetadata/cim/1.5/schemas file:/home/likewise-open/WX/allyn.treshansky/WORK/METAFOR/working_copies/cim_1.5/cim.xsd");
+           "\n      xsi:schemaLocation", "http://www.purl.org/org/esmetadata/cim/1.5/schemas http://www.purl.org/org/esmetadata/cim/1.5/schemas");
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   } else if (!(object.compare("comp")==0 &&

@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.54 2012/11/09 05:33:07 ksaint Exp $
+% $Id: Attribute_pack.tex,v 1.55 2012/11/20 17:32:43 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -506,48 +506,50 @@ At this time the Array packages are the same as the Field packages.
 There are 2 grid attribute packages in ESMF. 
 
 \begin{enumerate}
-    \item GFDL Gridspec
+    \item CF 1.6 GridSpec
     \item ESMF Grid
 \end{enumerate}
 
 \vspace{.20in}
 
-{\bf 1. Gridspec}
+{\bf 1. GridSpec}
 
 \label{CIMGridAttributePackage}
 
 \begin{itemize}
     \item Specify with:
     \begin{itemize}
-        \item {\tt convention} = "GridSpec"
-        \item {\tt purpose} = "General"
+        \item {\tt convention} = "CF 1.6"
+        \item {\tt purpose} = "GridSpec"
     \end{itemize}
+    \item CF Version: CF 1.6
+    \item CF URL: \htmladdnormallink{http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.pdf}{http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.pdf}
+    \item CIM Version: CIM 1.5.1
+    \item CIM Schema URL: \htmladdnormallink{http://www.purl.org/org/esmetadata/cim/1.5/schemas}{http://www.purl.org/org/esmetadata/cim/1.5/schemas}
     \item Output Options:
     \begin{itemize}
         \item Simple XML
-        \item If combined with the ESMF Grid package, this package can be used to create a Grid object by reading in an XML file with these attributes. This is currently limited to 2D regularly distributed rectinlinear grids. See Section \ref{example:GridCrFromFile} for details. 
+        \item This package can be used to create a CIM 1.5.1 compliant CF 1.6 formatted GridSpec XML file.
     \end{itemize}
-    \item Description: This package contains the Attributes developed as part of GFDL's Gridspec standard.
+    \item Description: This package contains the the information necessary to create a CIM 1.5.1 compliant CF 1.6 formatted GridSpec XML file.  The Attributes in this package are populated entirely by internal ESMF Grid information, no user intervention beyond the addition of the package is needed to create this package.
 \end{itemize}
 
 \begin{longtable}{|p{5cm}|p{5cm}|p{35mm}|}
 \hline\hline
 {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} \\
 \hline\hline
-{\tt CongruentTiles} & Indicates whether or not all the tiles contained within a grid mosaic are of the same size and shape. & True, False \\
-{\tt DimensionOrder} & The order in which latitude and longitude appear within the two dimensional grid array. & N/A \\ 
-{\tt DiscretizationType} & Specifies the method by which a two-dimensional coordinate system is sampled to form a computational grid. &  Logically rectangular, Pixel-based catchment, Structured triangular, Unstructured triangular\\ 
-{\tt GeometryType} & Indicates the geometric figure used to approximate the shape of the Earth, e.g. "sphere".& Ellipsoid, Plane, Sphere\\ 
-{\tt GridType} & A text description of the grid that uses common terminology. & Gnomonic, Cubed Sphere, Displaced Pole, Icosahedral geodesic, Reduced gaussian, Regular lat lon, Spectral gaussian, Tripolar, Yin Yang\\ 
-{\tt HorizontalResolution} & The number of points within the horizontal domain of a model or grid. & N/A \\
-{\tt IsConformal} & Indicates if the grid tile is angle-preserving. If so, angles measured on the grid are equal to the equivalent angles on the Earth. & True, False\\ 
-{\tt IsRegular} & Indicates whether or not the horizontal coordinates of the grid can be defined using 1D arrays (vectors). This means that grid node locations are defined by the cartesian product of the X/Lon and Y/Lat coordinate vectors. It also means that grid cells are logically rectangular (they may also be physically rectangular in the case of projected coordinates). & True, False\\ 
-{\tt IsUniform} &Indicates whether or not the horizontal coordinates of a grid have fixed offsets in the X and Y directions. If the offset is the same in both directions then the grid is logically square, otherwise it is logically rectangular. & True, False\\ 
-{\tt NorthPoleLocation} & Defines the lat-long position of the 'north pole' used by the grid tile in the case of rotated/displaced pole grids.& N/A \\ 
-{\tt NumberOfCells} & The number of cells in an unstructured grid. & N/A\\ 
-{\tt NumberOfGridTiles} & The number of tiles in a mosaic. & N/A \\
-{\tt NX} & Specifies the length of the X, or longitude, dimension of the grid tile. & N/A \\ 
-{\tt NY} & Specifies the length of the Y, or latitude, dimension of the grid tile. & N/A \\ 
+{\tt id} & A unique name used to identify this Grid, this is taken from the internal name of the Grid object & N/A \\
+{\tt isLeaf} & A boolean value used to describe whether there are any nested mosaics inside of this mosaic & true, false \\ 
+{\tt gridType} & A text description of the the type of the grid & cubed\_sphere, displaced\_pole, icosahedral\_geodesic, reduced\_gaussian, regular\_lat\_lon, spectral\_gaussian, tripolar, yin\_yang, composite, other \\ 
+{\tt numTiles} & The number of tiles in this Grid & N/A \\ 
+{\tt shortName} & A short name to identify this Grid & N/A \\
+{\tt longName} & A long name describing this Grid in detail & N/A \\ 
+{\tt gridTile} & The specific number for this tile of the Grid & N/A \\ 
+{\tt discretizationType} & The type of discretization that is used in this Grid & logically\_rectangular, structured\_rectangular, unstructured\_rectangular, pixel\_based\_catchment, unstructured\_polygonal, spherical\_harmonics, other \\ 
+{\tt geometryType} & The type of geometry that best describes this Grid & ellipsoid, plane, sphere \\ 
+{\tt numDims} & The number of dimensions in this Grid & N/A \\
+{\tt xcoords} & The x (or longitude) coordinates of this Grid & N/A \\ 
+{\tt ycoords} & The y (or latitude) coordinates of the Grid & N/A \\ 
 \hline\hline
 \end{longtable}
 
@@ -563,16 +565,7 @@ There are 2 grid attribute packages in ESMF.
         \item {\tt convention} = "ESMF"
         \item {\tt purpose} = "General"
     \end{itemize}
-    \item Includes: 
-    \begin{itemize}
-        \item GridSpec General
-    \end{itemize}
-    \item Output Options:
-    \begin{itemize}
-        \item Simple XML
-        \item If combined with the Gridspec Package, this package can be used to create a Grid object by reading in an XML file with these attributes. This is currently limited to 2D regularly distributed logically-rectangular grids. See Section \ref{example:GridCrFromFile} for details. 
-    \end{itemize}
-    \item Description: This package contains two Attributes required by ESMF to generate grids from a file. They describe the decomposition of a grid across ESMF DEs.  This package nests the GridSpec General package (above) within it; this is described in Section \ref{sec:AttPackNesting}.
+    \item Description: This package is used by ESMF to track internal ESMF Grid information.
 \end{itemize}
 
 \begin{longtable}{|p{5cm}|p{5cm}|p{35mm}|}
@@ -606,19 +599,12 @@ The following is an alphabetical list of all the attributes implemented in ESMF,
      {\tt CouplingTarget} & The component the input condition is going to. & CIM Inputs\\ 
      {\tt Description} & A multi-line description of a component or input. & CIM Main, CIM Inputs \\
      {\tt Date} & The date of the citation. & ISO Citation\\
-     {\tt DimensionOrder} & The order in which latitude and longitude appear within the two dimensional grid array. & Gridspec\\ 
-     {\tt DiscretizationType} & Specifies the method by which a two-dimensional coordinate system is sampled to form a computational grid.& Gridspec \\
      {\tt DOI} & The assigned Digital Object Identifier (DOI) of the citation. & ISO Citation\\
      {\tt EmailAddress} & The email address that others can use to ask questions about a model component. & ISO Responsible Party\\
      {\tt Frequency} & The frequency (e.g. months, days) that a field from one component is input to another. & CIM Inputs\\ 
      {\tt FullName} & The name of a model, model component, simulation, experiment, or dataset with all acronyms spelled out.& ESMF Basic Component\\
-     {\tt GeometryType} & Indicates the geometric figure used to approximate the shape of the Earth, e.g. "sphere". & Gridspec \\
-     {\tt GridType} & A text description of the grid that uses common terminology. & Gridspec \\
-     {\tt IsConformal} & Indicates if the grid tile is angle-preserving. If so, angles measured on the grid are equal to the equivalent angles on the Earth. & Gridspec\\ 
-     {\tt IsRegular} & Indicates whether or not the horizontal coordinates of the grid can be defined using 1D arrays (vectors). This means that grid node locations are defined by the cartesian product of the X/Lon and Y/Lat coordinate vectors. It also means that grid cells are logically rectangular (they may also be physically rectangular in the case of projected coordinates). & Gridspec\\ 
      {\tt Institution} & An organization associated with a model component, simulation, or dataset.& ESMF Basic Component\\
      {\tt Intent} & An indication of whether a field or state is imported into or exported from a particular model component. This refers to coupling, and not history output. & ESMF State, ESMF Field\\
-     {\tt IsUniform} &Indicates whether or not the horizontal coordinates of a grid have fixed offsets in the X and Y directions. If the offset is the same in both directions then the grid is logically square, otherwise it is logically rectangular. & Gridspec \\
      {\tt LongName} & The name of an object with all acronyms spelled out. For fields, it is an ad-hoc long descriptive name which may, for example, be used for labeling plots. & CIM Main, CF General\\
      {\tt LongTitle} & The text of the citation or pointer (e.g. URL) that further describes a model component or simulation. & ISO Citation\\
      {\tt MachineCoresPerProcessor} & The number of sub-divided elements or mini-chips on a computer chip. &  CIM Platform\\
@@ -635,10 +621,6 @@ The following is an alphabetical list of all the attributes implemented in ESMF,
      {\tt ModelType} & A short string describing the discipline of a model component. & CIM Main\\
      {\tt Name} & The name of an author, contact, funder, centre, or principal investigator. & ISO Responsible Party \\
      {\tt NameType} & The type of entity that Name references. & ISO Responsible Party \\
-     {\tt NorthPoleLocation} & Defines the lat-long position of the 'north pole' used by the grid tile in the case of rotated/displaced pole grids.& Gridspec \\ 
-     {\tt NumberOfCells} & The number of cells in an unstructured grid. & Gridspec \\ 
-     {\tt NX} & Specifies the length of the X, or longitude, dimension of the grid tile. & Gridspec \\ 
-     {\tt NY} & Specifies the length of the Y, or latitude, dimension of the grid tile. & Gridspec\\ 
      {\tt PhysicalAddress} & The address of the person designated to provide information about a model component. & ISO Responsible Party\\
      {\tt PhysicalDomain} & A description of the geographic range being simulated. & ESMF Basic Component\\
      {\tt PresentationForm} & A description of the type of citation. & ISO Citation\\
