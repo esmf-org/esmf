@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.118 2012/11/16 20:25:37 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.119 2012/11/20 16:46:07 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.118 2012/11/16 20:25:37 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.119 2012/11/20 16:46:07 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -120,6 +120,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.1.0] Added argument {\tt termorderflag}.
+!              The new argument gives the user control over the order in which
+!              the src terms are summed up.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -353,6 +359,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !                 Started to deprecate arguments {\tt weights} and {\tt indices}.
 !                 This corrects an inconsistency of this interface with all 
 !                 other ESMF methods that take these same arguments.
+! \item[6.1.0] Added arguments {\tt ignoreDegenerate}, {\tt srcTermProcessing},
+!              {\tt pipelineDepth}, and {\tt unmappedDstList}.
+!              The argument {\tt ignoreDegenerate} allows the user to skip degenerate
+!              cells in the regridding instead of stopping with an error. 
+!              The two arguments {\tt srcTermProcessing} and {\tt pipelineDepth}
+!              provide access to the tuning parameters affecting the sparse matrix
+!              execution. The argument {\tt unmappedDstList} allows the user to 
+!              get a list of the destination items which the regridding couldn't 
+!              map to a source. 
 ! \end{description}
 ! \end{itemize}
 !
