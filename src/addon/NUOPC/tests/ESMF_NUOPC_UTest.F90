@@ -1,4 +1,4 @@
-! $Id: ESMF_NUOPC_UTest.F90,v 1.2 2012/11/16 23:33:39 theurich Exp $
+! $Id: ESMF_NUOPC_UTest.F90,v 1.3 2012/11/20 06:51:42 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_NUOPC_UTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_NUOPC_UTest.F90,v 1.2 2012/11/16 23:33:39 theurich Exp $'
+    '$Id: ESMF_NUOPC_UTest.F90,v 1.3 2012/11/20 06:51:42 theurich Exp $'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -330,8 +330,10 @@ program ESMF_NUOPC_UTest
   !NEX_UTest
   write(name, *) "NUOPC_StateBuildStdList() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
+  nullify(stdAttrNameList)  ! prepare for the following call
   call NUOPC_StateBuildStdList(stateA, stdAttrNameList, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  if (associated(stdAttrNameList)) deallocate(stdAttrNameList)  ! clean up
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -398,6 +400,7 @@ program ESMF_NUOPC_UTest
   !NEX_UTest
   write(name, *) "NUOPC_RunSequenceAdd() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
+  nullify(runSeq)
   call NUOPC_RunSequenceAdd(runSeq, 1, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
