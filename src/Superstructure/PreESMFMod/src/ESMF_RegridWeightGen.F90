@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.20 2012/11/13 22:22:50 oehmke Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.21 2012/11/20 15:52:42 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -48,7 +48,6 @@ module ESMF_RegridWeightGenMod
 
   
   implicit none
-
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
@@ -274,7 +273,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical            :: useSrcMask, useDstMask
       integer            :: commandbuf(6)
       !real(ESMF_KIND_R8) :: starttime, endtime
-     
+
+#ifdef ESMF_NETCDF     
       !------------------------------------------------------------------------
       ! get global vm information
       !
@@ -1327,6 +1327,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
       rc = ESMF_SUCCESS
       return 
+#else
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+      return
+#endif
 end subroutine ESMF_RegridWeightGen
 
 !------------------------------------------------------------------------------
