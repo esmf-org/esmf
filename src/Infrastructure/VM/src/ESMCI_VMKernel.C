@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.47 2012/11/20 19:19:59 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.48 2012/11/20 21:33:34 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -5330,7 +5330,7 @@ namespace ESMCI {
     //--------------------------------------------------------------------------
   ){
     
-    fprintf(stderr, "Hi there from socketClientInit()\n");
+    fprintf(stderr, "Hi there from socketClientInit() with timeout %g\n", timeout);
 
 #ifdef ESMF_NO_SOCKETS
     fprintf(stderr, "ESMF was built with ESMF_NO_SOCKETS\n");
@@ -5384,12 +5384,6 @@ namespace ESMCI {
           continue;         // next attempt
         }
 #endif
-        if (errno==EINVAL){
-          // on some systems, e.g. darwin, repeated call to connect may give this
-          perror("socketClientInit connect(), but continue");
-          VMK::wtime(&t1);  // update the endtime
-          continue;         // next attempt
-        }
         // check for unexpected error conditions and bail
         if (errno!=EINPROGRESS && errno!=EALREADY && errno!=EWOULDBLOCK
           && errno!=ECONNREFUSED){
@@ -5426,8 +5420,13 @@ namespace ESMCI {
             connected = true;
             break;
           }else if (error==0 && refusedFlag){
-            // this happens on IBM, where geetsockopt() doesn't return error
+            // this happens on IBM, where getsockopt() doesn't return error
             // but the sock variable has become invalid due to failed connect()
+            sock = socket(PF_INET, SOCK_STREAM, 0);
+          }else if (error==ECONNREFUSED){
+            // this happens on Darwin, and it requires that the sock variable
+            // is re-initialized (just as in the IBM case above) - not doing 
+            // this will lead to EINVAL in the next connect() attempt
             sock = socket(PF_INET, SOCK_STREAM, 0);
           }else if (error && error!=ECONNREFUSED){
             // bail if this wasn't just a straight refusal due to absent server
