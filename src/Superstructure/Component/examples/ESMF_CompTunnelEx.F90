@@ -1,4 +1,4 @@
-! $Id: ESMF_CompTunnelEx.F90,v 1.5 2012/11/20 00:22:10 theurich Exp $
+! $Id: ESMF_CompTunnelEx.F90,v 1.6 2012/11/20 06:30:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -229,12 +229,12 @@ program ESMF_CompTunnelEx
 ! implementation is chosen.
 !EOE
 !BOC
-  call ESMF_GridCompServiceLoop(actualComp, port=60000, timeout=20, rc=rc)
+  call ESMF_GridCompServiceLoop(actualComp, port=61010, timeout=20, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! This call opens the actual side of the Component Tunnel in form of a
-! socket-based server, listening on {\tt port} 60000. The {\tt timeout} argument
+! socket-based server, listening on {\tt port} 61010. The {\tt timeout} argument
 ! specifies how long the actual side will wait for the dual side
 ! to connect, before the actual side returns with a time out condition. The
 ! time out is set to 20 seconds.
@@ -248,7 +248,7 @@ program ESMF_CompTunnelEx
 ! blank line.
 !
 ! \begin{verbatim}
-! $ telnet localhost 60000
+! $ telnet localhost 61010
 ! Trying 127.0.0.1...
 ! Connected to localhost.
 ! Escape character is '^]'.
@@ -295,7 +295,7 @@ program ESMF_CompTunnelEx
   if (userRc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
-  call ESMF_CplCompServiceLoop(actualCplComp, port=50000, timeout=2, &
+  call ESMF_CplCompServiceLoop(actualCplComp, port=61011, timeout=2, &
     timeoutFlag=timeoutFlag, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -318,7 +318,7 @@ program ESMF_CompTunnelEx
 ! {\tt SetServices()} call is used to connect to the actual Component.
 !EOE
 !BOC
-  call ESMF_GridCompSetServices(dualComp, port=60000, server="localhost", &
+  call ESMF_GridCompSetServices(dualComp, port=61010, server="localhost", &
     timeout=10, timeoutFlag=timeoutFlag, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

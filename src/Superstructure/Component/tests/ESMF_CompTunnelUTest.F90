@@ -1,4 +1,4 @@
-! $Id: ESMF_CompTunnelUTest.F90,v 1.16 2012/05/16 21:55:58 svasquez Exp $
+! $Id: ESMF_CompTunnelUTest.F90,v 1.17 2012/11/20 06:30:18 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -237,7 +237,7 @@ program ESMF_CompTunnelUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_CompTunnelUTest.F90,v 1.16 2012/05/16 21:55:58 svasquez Exp $'
+    '$Id: ESMF_CompTunnelUTest.F90,v 1.17 2012/11/20 06:30:18 theurich Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -1127,7 +1127,7 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "ServiceLoop for the Actual Component D"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_GridCompServiceLoop(actualCompD, port=60000, rc=rc)
+  call ESMF_GridCompServiceLoop(actualCompD, port=61010, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -1135,7 +1135,7 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "SetServices for the Dual Component D - using default 'localhost'"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_GridCompSetServices(dualCompD, port=60000, rc=rc)
+  call ESMF_GridCompSetServices(dualCompD, port=61010, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -1345,7 +1345,7 @@ program ESMF_CompTunnelUTest
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "ServiceLoop for the Actual Component E - timeout"
-  call ESMF_GridCompServiceLoop(actualCompE, port=50001, timeout=timeout, rc=rc)
+  call ESMF_GridCompServiceLoop(actualCompE, port=61011, timeout=timeout, rc=rc)
   if (ESMF_GridCompIsPetLocal(actualCompE)) then
     write(failMsg, *) "Did return ESMF_SUCCESS" 
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1387,7 +1387,7 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "ServiceLoop for the Actual Component E - timeoutFlag"
   write(failMsg, *) "Did return ESMF_SUCCESS" 
-  call ESMF_GridCompServiceLoop(actualCompE, port=50001, timeout=timeout, &
+  call ESMF_GridCompServiceLoop(actualCompE, port=61011, timeout=timeout, &
     timeoutFlag=timeoutFlag, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1423,7 +1423,7 @@ program ESMF_CompTunnelUTest
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "SetServices for the Dual Component E - timeout"
-  call ESMF_GridCompSetServices(dualCompE, port=50002, timeout=timeout, rc=rc)
+  call ESMF_GridCompSetServices(dualCompE, port=61012, timeout=timeout, rc=rc)
   if (ESMF_GridCompIsPetLocal(dualCompE)) then
     write(failMsg, *) "Did return ESMF_SUCCESS" 
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1438,7 +1438,7 @@ program ESMF_CompTunnelUTest
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "SetServices for the Dual Component E - timeout with timeoutFlag"
-  call ESMF_GridCompSetServices(dualCompE, port=50002, timeout=timeout, &
+  call ESMF_GridCompSetServices(dualCompE, port=61012, timeout=timeout, &
     timeoutFlag=timeoutFlag, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1470,14 +1470,14 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "SetServices for the Dual Component E"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_GridCompSetServices(dualCompE, port=50003, rc=rc)
+  call ESMF_GridCompSetServices(dualCompE, port=61013, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "ServiceLoop for the Actual Component E - timeout after connect"
-  call ESMF_GridCompServiceLoop(actualCompE, port=50003, timeout=timeout, rc=rc)
+  call ESMF_GridCompServiceLoop(actualCompE, port=61013, timeout=timeout, rc=rc)
   if (ESMF_GridCompIsPetLocal(actualCompE)) then
     write(failMsg, *) "Did return ESMF_SUCCESS" 
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1566,14 +1566,14 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "SetServices for the Dual Component E"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_GridCompSetServices(dualCompE, port=50003, rc=rc)
+  call ESMF_GridCompSetServices(dualCompE, port=61013, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "ServiceLoop for the Actual Component E - timeout after connect"
-  call ESMF_GridCompServiceLoop(actualCompE, port=50003, timeout=timeout, rc=rc)
+  call ESMF_GridCompServiceLoop(actualCompE, port=61013, timeout=timeout, rc=rc)
   if (ESMF_GridCompIsPetLocal(actualCompE)) then
     write(failMsg, *) "Did return ESMF_SUCCESS" 
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1645,15 +1645,15 @@ program ESMF_CompTunnelUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "SetServices for the Dual Component E"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
-  call ESMF_GridCompSetServices(dualCompE, port=50003, rc=rc)
+  call ESMF_GridCompSetServices(dualCompE, port=61013, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "ServiceLoop for the Actual Component E - default timeout"
-  call ESMF_GridCompServiceLoop(actualCompE, port=50003, rc=rc)
-!  call ESMF_GridCompServiceLoop(actualCompE, port=50003, timeout=60, rc=rc)
+  call ESMF_GridCompServiceLoop(actualCompE, port=61013, rc=rc)
+!  call ESMF_GridCompServiceLoop(actualCompE, port=61013, timeout=60, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
