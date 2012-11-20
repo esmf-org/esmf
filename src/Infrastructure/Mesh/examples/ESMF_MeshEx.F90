@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshEx.F90,v 1.56 2012/06/04 20:06:00 rokuingh Exp $
+! $Id: ESMF_MeshEx.F90,v 1.57 2012/11/20 19:28:47 peggyli Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -700,8 +700,9 @@ program ESMF_MeshEx
 !\label{sec:example:UnstructFromFile}
 !
 ! ESMF supports the creation of a Mesh from a 2D unstructured grid defined in a SCRIP format
-! grid file~\cite{ref:SCRIP} or an ESMF format grid file.  Both the SCRIP grid file and the
-! ESMF grid file are in NetCDF format. Here is a sample header from a SCRIP unstructured
+! grid file~\ref{sec:fileformat:scrip}, an ESMF format grid file~\ref{sec:fileformat:esmf} or the
+! proposed CF unstructured grid UGRID file~\ref{sec:fileformat:ugrid}.  All three types of grid files
+! are in NetCDF format. Here is a sample header from a SCRIP unstructured
 ! grid file:
 !\begin{verbatim}
 !netcdf ne4np4-pentagons {
@@ -761,7 +762,7 @@ program ESMF_MeshEx
 #endif
 
 !BOE
-! In addition to the SCRIP format, ESMF also supports a more general unstructured grid file format for describing meshes.
+! The ESMF file format is a more general unstructured grid file format for describing meshes.
 ! In the ESMF file format, the node coordinates are defined in a separate array
 ! {\tt nodeCoords}. {\tt nodeCoords} is a two-dimensional array of dimension {\tt (nodeCount,coordDim)}.
 ! For a 2D Grid, {\tt coordDim} is 2. {\tt nodeCoords(:,1)} contains the longitude coordinates and
