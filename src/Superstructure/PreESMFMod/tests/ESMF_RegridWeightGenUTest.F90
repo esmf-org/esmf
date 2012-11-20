@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridWeightGenUTest.F90,v 1.2 2012/11/19 23:09:31 peggyli Exp $
+! $Id: ESMF_RegridWeightGenUTest.F90,v 1.3 2012/11/20 15:28:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -15,6 +15,7 @@ program ESMF_RegridWeightGenUTest
 !------------------------------------------------------------------------------
 
 #include "ESMF_Macros.inc"
+#include "ESMF.h"
 
 !==============================================================================
 !BOP
@@ -34,7 +35,7 @@ program ESMF_RegridWeightGenUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_RegridWeightGenUTest.F90,v 1.2 2012/11/19 23:09:31 peggyli Exp $'
+    '$Id: ESMF_RegridWeightGenUTest.F90,v 1.3 2012/11/20 15:28:09 theurich Exp $'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -81,16 +82,17 @@ program ESMF_RegridWeightGenUTest
   methodflag = ESMF_REGRIDMETHOD_BILINEAR
   unmappedaction = ESMF_UNMAPPEDACTION_ERROR
 
-#ifdef ESMF_NETCDF
   call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
        polemethod = pole, unmappedaction = unmappedaction, &
        srcFileType = srcFileType, dstFileType = dstFileType, &
        verboseFlag = .true., rc=rc)
-#else
-       print *, 'ESMF Library is not compiled with NetCDF library -- ignore the test'
-#endif
   
+#ifdef ESMF_NETCDF
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+#endif
 
   !----------------------------------------------------------------------------
   !NEX_UTest
@@ -100,15 +102,17 @@ program ESMF_RegridWeightGenUTest
   methodflag = ESMF_REGRIDMETHOD_PATCH
   wgtfile = 'data/T42_ll2.5_patch.nc'
 
-#ifdef ESMF_NETCDF
   call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
        polemethod = pole, unmappedaction = unmappedaction, &
        srcFileType = srcFileType, dstFileType = dstFileType, &
        verboseFlag = .true., rc=rc)
-#else
-       print *, 'ESMF Library is not compiled with NetCDF library -- ignore the test'
-#endif
+
+#ifdef ESMF_NETCDF
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+#endif
 
   !----------------------------------------------------------------------------
   !NEX_UTest
@@ -120,16 +124,17 @@ program ESMF_RegridWeightGenUTest
   unmappedaction = ESMF_UNMAPPEDACTION_IGNORE
   wgtfile = 'data/T42_ll2.5_conserve.nc'
 
-#ifdef ESMF_NETCDF
   call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
        polemethod = pole, unmappedaction = unmappedaction, &
        srcFileType = srcFileType, dstFileType = dstFileType, &
        verboseFlag = .true., rc=rc)
-#else
-       print *, 'ESMF Library is not compiled with NetCDF library -- ignore the test'
-#endif
 
+#ifdef ESMF_NETCDF
   call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+#endif
 
   !-----------------------------------------------------------------------------
 
