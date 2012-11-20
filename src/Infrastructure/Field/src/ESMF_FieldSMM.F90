@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSMM.F90,v 1.5 2012/01/06 20:16:40 svasquez Exp $
+! $Id: ESMF_FieldSMM.F90,v 1.6 2012/11/20 21:52:37 feiliu Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ module ESMF_FieldSMMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSMM.F90,v 1.5 2012/01/06 20:16:40 svasquez Exp $'
+      '$Id: ESMF_FieldSMM.F90,v 1.6 2012/11/20 21:52:37 feiliu Exp $'
 
 !------------------------------------------------------------------------------
     interface ESMF_FieldSMMStore
@@ -79,7 +79,7 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_FieldSMM(srcField, dstField, routehandle, keywordEnforcer, &
-             zeroregion, checkflag, rc)
+             zeroregion, termorderflag, checkflag, rc)
 !
 ! !ARGUMENTS:
         type(ESMF_Field),       intent(in),   optional  :: srcField
@@ -87,6 +87,7 @@ contains
         type(ESMF_RouteHandle), intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Region_Flag),  intent(in),   optional :: zeroregion
+        type(ESMF_TermOrder_Flag), intent(in), optional :: termorderflag
         logical,                intent(in),   optional  :: checkflag
         integer,                intent(out),  optional  :: rc
 !
@@ -94,6 +95,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \begin{description}
+! \item[6.1.0] Added argument {\tt termorderflag}.
+!              The new argument gives the user control over the order in which
+!              the src terms are summed up.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -154,6 +160,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     multiplication. See section \ref{const:region} for a complete list of
 !     valid settings.
 !     \end{sloppypar}
+!   \item [{[termorderflag]}]
+!     Specifies the order of the source side terms in all of the destination
+!     sums. The {\tt termorderflag} only affects the order of terms during
+!     the execution of the RouteHandle. See the \ref{RH:bfb} section for an
+!     in-depth discussion of {\em all} bit-for-bit reproducibility
+!     aspects related to route-based communication methods.
+!     See \ref{const:termorderflag} for a full list of options.
+!     The default is {\tt ESMF\_TERMORDER\_FREE}, allowing maximum flexibility
+!     in the order of terms for optimum performance.
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input Field pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
@@ -203,7 +218,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         
         ! perform Field sparse matrix multiplication through internal array
         call ESMF_ArraySMM(srcArray=l_srcArray, dstArray=l_dstArray, &
-          routehandle=routehandle, zeroregion=zeroregion, checkflag=checkflag, &
+          routehandle=routehandle, zeroregion=zeroregion, &
+          termorderflag=termorderflag, checkflag=checkflag, &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -273,7 +289,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldSMMStore() 
 ! subroutine ESMF_FieldSMMStore<type><kind>(srcField, dstField, & 
-!        routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
+!        routehandle, factorList, factorIndexList, keywordEnforcer, &
+!        srcTermProcessing, pipelineDepth, rc) 
 ! 
 ! !ARGUMENTS: 
 !   type(ESMF_Field),         intent(in)            :: srcField  
@@ -281,13 +298,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
 !   <type>(ESMF_KIND_<kind>), intent(in)            :: factorList(:) 
 !   integer,                  intent(in),           :: factorIndexList(:,:) 
-!    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!   integer,                  intent(inout),optional:: srcTermProcessing
+!   integer,                  intent(inout),optional:: pipeLineDepth
 !   integer,                  intent(out), optional :: rc 
 ! 
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.1.0] Added arguments {\tt srcTermProcessing}, {\tt pipelineDepth}
+!              The two arguments {\tt srcTermProcessing} and {\tt pipelineDepth}
+!              provide access to the tuning parameters affecting the sparse matrix
+!              execution. 
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION: 
@@ -387,6 +413,61 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     See section \ref{Array:SparseMatMul} for details on the definition of 
 !     Field {\em sequence indices} and {\em tensor sequence indices}.
+!   \item [{[srcTermProcessing]}]
+!     The {\tt srcTermProcessing} parameter controls how many source terms,
+!     located on the same PET and summing into the same destination element,
+!     are summed into partial sums on the source PET before being transferred
+!     to the destination PET. A value of 0 indicates that the entire arithmatic
+!     is done on the destination PET; source elements are neither multiplied
+!     by their factors nor added into partial sums before being sent off by the
+!     source PET. A value of 1 indicates that source elements are multiplied
+!     by their factors on the source side before being sent to the destination
+!     PET. Larger values of {\tt srcTermProcessing} indicate the maximum number
+!     of terms in the partial sums on the source side.
+!
+!     Note that partial sums may lead to bit-for-bit differences in the results.
+!     See section \ref{RH:bfb} for an in-depth discussion of {\em all}
+!     bit-for-bit reproducibility aspects related to route-based communication
+!     methods.
+!
+!     \begin{sloppypar}
+!     The {\tt ESMF\_FieldSMMStore()} method implements an auto-tuning scheme
+!     for the {\tt srcTermProcessing} parameter. The intent on the
+!     {\tt srcTermProcessing} argument is "{\tt inout}" in order to
+!     support both overriding and accessing the auto-tuning parameter.
+!     If an argument $>= 0$ is specified, it is used for the
+!     {\tt srcTermProcessing} parameter, and the auto-tuning phase is skipped.
+!     In this case the {\tt srcTermProcessing} argument is not modified on
+!     return. If the provided argument is $< 0$, the {\tt srcTermProcessing}
+!     parameter is determined internally using the auto-tuning scheme. In this
+!     case the {\tt srcTermProcessing} argument is re-set to the internally
+!     determined value on return. Auto-tuning is also used if the optional
+!     {\tt srcTermProcessing} argument is omitted.
+!     \end{sloppypar}
+!
+!   \item [{[pipelineDepth]}]
+!     The {\tt pipelineDepth} parameter controls how many messages a PET
+!     may have outstanding during a sparse matrix exchange. Larger values
+!     of {\tt pipelineDepth} typically lead to better performance. However,
+!     on some systems too large a value may lead to performance degradation,
+!     or runtime errors.
+!
+!     Note that the pipeline depth has no affect on the bit-for-bit
+!     reproducibility of the restuls. However, it may affect the performance
+!     reproducibility of the exchange.
+!
+!     The {\tt ESMF\_FieldSMMStore()} method implements an auto-tuning scheme
+!     for the {\tt pipelineDepth} parameter. The intent on the
+!     {\tt pipelineDepth} argument is "{\tt inout}" in order to
+!     support both overriding and accessing the auto-tuning parameter.
+!     If an argument $>= 0$ is specified, it is used for the
+!     {\tt pipelineDepth} parameter, and the auto-tuning phase is skipped.
+!     In this case the {\tt pipelineDepth} argument is not modified on
+!     return. If the provided argument is $< 0$, the {\tt pipelineDepth}
+!     parameter is determined internally using the auto-tuning scheme. In this
+!     case the {\tt pipelineDepth} argument is re-set to the internally
+!     determined value on return. Auto-tuning is also used if the optional
+!     {\tt pipelineDepth} argument is omitted.
 ! \item [{[rc]}]  
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -402,7 +483,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldSMMStore()
     subroutine ESMF_FieldSMMStoreI4(srcField, dstField, & 
-        routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
+        routehandle, factorList, factorIndexList, keywordEnforcer, &
+        srcTermProcessing, pipeLineDepth, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(in)            :: srcField  
@@ -411,6 +493,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer(ESMF_KIND_I4),  intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+        integer,                intent(inout),optional:: srcTermProcessing
+        integer,                intent(inout),optional:: pipeLineDepth
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -444,7 +528,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! Rely on ArraySMM to perform sanity checking of the other parameters 
         call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
           routehandle=routehandle, factorList=factorList, &
-          factorIndexList=factorIndexList, rc=localrc) 
+          factorIndexList=factorIndexList, &
+          srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
+          rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 
@@ -461,7 +547,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldSMMStore()
     subroutine ESMF_FieldSMMStoreI8(srcField, dstField, & 
-        routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
+        routehandle, factorList, factorIndexList, keywordEnforcer, &
+        srcTermProcessing, pipeLineDepth, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(in)            :: srcField  
@@ -470,6 +557,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer(ESMF_KIND_I8),  intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+        integer,                intent(inout),optional:: srcTermProcessing
+        integer,                intent(inout),optional:: pipeLineDepth
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -503,7 +592,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! Rely on ArraySMM to perform sanity checking of the other parameters 
         call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
           routehandle=routehandle, factorList=factorList, & 
-          factorIndexList=factorIndexList, rc=localrc) 
+          factorIndexList=factorIndexList, &
+          srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
+          rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 
@@ -520,7 +611,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldSMMStore()
     subroutine ESMF_FieldSMMStoreR4(srcField, dstField, & 
-        routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
+        routehandle, factorList, factorIndexList, keywordEnforcer, &
+        srcTermProcessing, pipeLineDepth, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(in)            :: srcField  
@@ -529,6 +621,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         real(ESMF_KIND_R4),     intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+        integer,                intent(inout),optional:: srcTermProcessing
+        integer,                intent(inout),optional:: pipeLineDepth
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -562,7 +656,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! Rely on ArraySMM to perform sanity checking of the other parameters 
         call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
           routehandle=routehandle, factorList=factorList, & 
-          factorIndexList=factorIndexList, rc=localrc) 
+          factorIndexList=factorIndexList, &
+          srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
+          rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 
@@ -579,7 +675,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldSMMStore()
     subroutine ESMF_FieldSMMStoreR8(srcField, dstField, & 
-        routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
+        routehandle, factorList, factorIndexList, keywordEnforcer, &
+        srcTermProcessing, pipeLineDepth, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(in)            :: srcField  
@@ -588,6 +685,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         real(ESMF_KIND_R8),     intent(in)            :: factorList(:)
         integer,                intent(in)            :: factorIndexList(:,:) 
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+        integer,                intent(inout),optional:: srcTermProcessing
+        integer,                intent(inout),optional:: pipeLineDepth
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -621,7 +720,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! Rely on ArraySMM to perform sanity checking of the other parameters 
         call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
           routehandle=routehandle, factorList=factorList, & 
-          factorIndexList=factorIndexList, rc=localrc) 
+          factorIndexList=factorIndexList, &
+          srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
+          rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 
@@ -636,19 +737,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: 
 ! ! Private name; call using ESMF_FieldSMMStore() 
 ! subroutine ESMF_FieldSMMStoreNF(srcField, dstField, & 
-!        routehandle, factorList, factorIndexList, keywordEnforcer, rc) 
+!        routehandle, factorList, factorIndexList, keywordEnforcer, &
+!        srcTermProcessing, pipelineDepth, rc)
 ! 
 ! !ARGUMENTS: 
 !   type(ESMF_Field),         intent(in)            :: srcField  
 !   type(ESMF_Field),         intent(inout)         :: dstField  
 !   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
-!    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!   integer,                  intent(inout),optional:: srcTermProcessing
+!   integer,                  intent(inout),optional:: pipeLineDepth
 !   integer,                  intent(out), optional :: rc 
 ! 
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \begin{description}
+! \item[6.1.0] Added arguments {\tt srcTermProcessing}, {\tt pipelineDepth}
+!              The two arguments {\tt srcTermProcessing} and {\tt pipelineDepth}
+!              provide access to the tuning parameters affecting the sparse matrix
+!              execution. 
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION: 
@@ -715,6 +825,61 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     destroyed by this call.
 ! \item [routehandle] 
 !       Handle to the precomputed Route. 
+!   \item [{[srcTermProcessing]}]
+!     The {\tt srcTermProcessing} parameter controls how many source terms,
+!     located on the same PET and summing into the same destination element,
+!     are summed into partial sums on the source PET before being transferred
+!     to the destination PET. A value of 0 indicates that the entire arithmatic
+!     is done on the destination PET; source elements are neither multiplied
+!     by their factors nor added into partial sums before being sent off by the
+!     source PET. A value of 1 indicates that source elements are multiplied
+!     by their factors on the source side before being sent to the destination
+!     PET. Larger values of {\tt srcTermProcessing} indicate the maximum number
+!     of terms in the partial sums on the source side.
+!
+!     Note that partial sums may lead to bit-for-bit differences in the results.
+!     See section \ref{RH:bfb} for an in-depth discussion of {\em all}
+!     bit-for-bit reproducibility aspects related to route-based communication
+!     methods.
+!
+!     \begin{sloppypar}
+!     The {\tt ESMF\_FieldSMMStore()} method implements an auto-tuning scheme
+!     for the {\tt srcTermProcessing} parameter. The intent on the
+!     {\tt srcTermProcessing} argument is "{\tt inout}" in order to
+!     support both overriding and accessing the auto-tuning parameter.
+!     If an argument $>= 0$ is specified, it is used for the
+!     {\tt srcTermProcessing} parameter, and the auto-tuning phase is skipped.
+!     In this case the {\tt srcTermProcessing} argument is not modified on
+!     return. If the provided argument is $< 0$, the {\tt srcTermProcessing}
+!     parameter is determined internally using the auto-tuning scheme. In this
+!     case the {\tt srcTermProcessing} argument is re-set to the internally
+!     determined value on return. Auto-tuning is also used if the optional
+!     {\tt srcTermProcessing} argument is omitted.
+!     \end{sloppypar}
+!
+!   \item [{[pipelineDepth]}]
+!     The {\tt pipelineDepth} parameter controls how many messages a PET
+!     may have outstanding during a sparse matrix exchange. Larger values
+!     of {\tt pipelineDepth} typically lead to better performance. However,
+!     on some systems too large a value may lead to performance degradation,
+!     or runtime errors.
+!
+!     Note that the pipeline depth has no affect on the bit-for-bit
+!     reproducibility of the restuls. However, it may affect the performance
+!     reproducibility of the exchange.
+!
+!     The {\tt ESMF\_FieldSMMStore()} method implements an auto-tuning scheme
+!     for the {\tt pipelineDepth} parameter. The intent on the
+!     {\tt pipelineDepth} argument is "{\tt inout}" in order to
+!     support both overriding and accessing the auto-tuning parameter.
+!     If an argument $>= 0$ is specified, it is used for the
+!     {\tt pipelineDepth} parameter, and the auto-tuning phase is skipped.
+!     In this case the {\tt pipelineDepth} argument is not modified on
+!     return. If the provided argument is $< 0$, the {\tt pipelineDepth}
+!     parameter is determined internally using the auto-tuning scheme. In this
+!     case the {\tt pipelineDepth} argument is re-set to the internally
+!     determined value on return. Auto-tuning is also used if the optional
+!     {\tt pipelineDepth} argument is omitted.
 ! \item [{[rc]}]  
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -730,13 +895,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldSMMStore()
     subroutine ESMF_FieldSMMStoreNF(srcField, dstField, & 
-        routehandle, keywordEnforcer, rc) 
+        routehandle, keywordEnforcer, srcTermProcessing, pipelineDepth, rc) 
 
         ! input arguments 
         type(ESMF_Field),       intent(in)            :: srcField  
         type(ESMF_Field),       intent(inout)         :: dstField  
         type(ESMF_RouteHandle), intent(inout)         :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+        integer,                intent(inout),optional:: srcTermProcessing
+        integer,                intent(inout),optional:: pipeLineDepth
         integer,                intent(out), optional :: rc 
 
 !EOPI
@@ -769,7 +936,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! For performance consideration: 
         ! Rely on ArraySMM to perform sanity checking of the other parameters 
         call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, &
-          routehandle=routehandle, rc=localrc) 
+          routehandle=routehandle, &
+          srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
+          rc=localrc) 
         if (ESMF_LogFoundError(localrc, & 
             ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return 
