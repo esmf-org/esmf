@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.25 2012/11/09 00:05:57 theurich Exp $
+# $Id: build_rules.mk,v 1.26 2012/11/20 21:48:42 theurich Exp $
 #
 # Darwin.gfortran.default
 #
@@ -219,3 +219,5 @@ ESMF_CXXLINKLIBS += -lgfortran
 ############################################################
 # Shared library options
 ESMF_SL_LIBOPTS  += -dynamiclib
+ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
+
