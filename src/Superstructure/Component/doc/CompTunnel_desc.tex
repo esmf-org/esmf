@@ -1,4 +1,4 @@
-% $Id: CompTunnel_desc.tex,v 1.2 2012/04/18 05:31:43 theurich Exp $
+% $Id: CompTunnel_desc.tex,v 1.3 2012/11/20 00:19:10 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -11,9 +11,9 @@
 %\subsection{Description}
 \label{sec:CompTunnel}
 
-In a large ensemble model, with many ensemble members, fault-tolerance becomes a critical issue. The meaning of {\em fault-tolerance} in this context is to allow the ensemble application to continue with normal execution, after one or more ensemble members experienced catastrophic conditions from which they cannot recover. In ESMF this sort of fault-tolerance is implemented on the Component level via the "timeout" paradigm: a timeout parameter is specified for all interactions that need to be fault-tolerant. When a connection to a component, that becomes inaccessible to the driver, times out, the driver application can act on this condition, e.g. by not further interacting with this component during the otherwise normal continuation of the model execution.
+For ensemble runs with many ensemble members, fault-tolerance becomes an issue of very critical practical impact. The meaning of {\em fault-tolerance} in this context refers to the ability of an ensemble application to continue with normal execution after one or more ensemble members have experienced catastrophic conditions, from which they cannot recover. ESMF implements this type of fault-tolerance on the Component level via a {\bf timeout} paradigm: A timeout parameter is specified for all interactions that need to be fault-tolerant. When a connection to a component times out, maybe because it has become inaccessible due to some catastrophic condition, the driver application can react to this condition, for example by not further interacting with the component during the otherwise normal continuation of the model execution.
 
-The fault-tolerant connection between a driver application and a Component is established through a "Component Tunnel". There are two sides to a Component Tunnel: the "actual" side is where the component is actually executing, and the "dual" side is the portal through which the Component becomes accessible on the driver side. Both actual and dual sides of the Component Tunnel are implemented in form of regular ESMF Gridded or Coupler Components.
+The fault-tolerant connection between a driver application and a Component is established through a {\bf Component Tunnel}. There are two sides to a Component Tunnel: the "actual" side is where the component is actually executing, and the "dual" side is the portal through which the Component becomes accessible on the driver side. Both the actual and the dual side of a Component Tunnel are implemented in form of a regular ESMF Gridded or Coupler Component.
 
-Component Tunnels between Components can be based on a number of low level implementations. The only implementation that currently provides fault-tolerance is {\em socket} based. In this case an actual Component typically runs as a separate executable, listening to a specific port for connections from the driver. The dual Component is created on the driver side. It connects to the actual Component during the SetServices() call.
+Component Tunnels between Components can be based on a number of low level implementations. The only implementation that currently provides fault-tolerance is {\em socket} based. In this case an actual Component typically runs as a separate executable, listening to a specific port for connections from the driver application. The dual Component is created on the driver side. It connects to the actual Component during the SetServices() call.
 

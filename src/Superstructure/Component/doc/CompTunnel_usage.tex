@@ -1,4 +1,4 @@
-% $Id: CompTunnel_usage.tex,v 1.1 2012/04/04 15:55:44 theurich Exp $
+% $Id: CompTunnel_usage.tex,v 1.2 2012/11/20 00:19:10 theurich Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -10,4 +10,4 @@
 
 %\subsection{Use and Examples}
 
-A Component Tunnel connects a {\em dual} Component to an {\em actual} Component. This connection can be based on a number of different low level implementations, e.g. VM-based or socket-based. VM-based Component Tunnels require that both dual and actual Components run within the same application (i.e. execute under the same MPI\_COMM\_WORLD). Socket-based Component Tunnels, on the other hand, support dual and actual Components running in separate applications, and therefore under different MPI\_COMM\_WORLD.
+A Component Tunnel connects a {\em dual} Component to an {\em actual} Component. This connection can be based on a number of different low level implementations, e.g. VM-based or socket-based. VM-based Component Tunnels require that both dual and actual Components run within the same application (i.e. execute under the same MPI\_COMM\_WORLD). Fault-tolerant Component Tunnels require that dual and actual Components run in separate applications, under different MPI\_COMM\_WORLD communicators. This mode is implemented in the socket-based Component Tunnels.

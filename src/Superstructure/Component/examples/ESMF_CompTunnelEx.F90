@@ -1,4 +1,4 @@
-! $Id: ESMF_CompTunnelEx.F90,v 1.4 2012/04/19 03:58:17 theurich Exp $
+! $Id: ESMF_CompTunnelEx.F90,v 1.5 2012/11/20 00:22:10 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -27,7 +27,7 @@ module ESMF_CompTunnelEx_mod
   
   private
   
-  public setservices
+  public setservices, setservicesCPL
 
   contains !--------------------------------------------------------------------
 
@@ -105,13 +105,21 @@ module ESMF_CompTunnelEx_mod
           
   end subroutine !--------------------------------------------------------------
 
+  recursive subroutine setservicesCPL(cplcomp, rc)
+    ! arguments
+    type(ESMF_CplComp):: cplcomp
+    integer, intent(out):: rc
+    
+    ! Initialize
+    rc = ESMF_SUCCESS
+
+  end subroutine !--------------------------------------------------------------
+  
 end module
 
-
 !-------------------------------------------------------------------------
-! Note - the program below is here only to make this an executable.
 !-------------------------------------------------------------------------
-
+!-------------------------------------------------------------------------
 
 program ESMF_CompTunnelEx
   
@@ -120,7 +128,7 @@ program ESMF_CompTunnelEx
   use ESMF_TestMod
   
   ! User supplied modules
-  use ESMF_CompTunnelEx_mod, only: setservices
+  use ESMF_CompTunnelEx_mod, only: setservices, setservicesCPL
   
   implicit none
   
@@ -130,6 +138,7 @@ program ESMF_CompTunnelEx
   integer                 :: localPet, petCount
   integer                 :: petList(3)
   type(ESMF_GridComp)     :: actualComp, dualComp
+  type(ESMF_CplComp)      :: actualCplComp
   logical                 :: timeoutFlag
   
   character(ESMF_MAXSTR)  :: testname
@@ -176,6 +185,9 @@ program ESMF_CompTunnelEx
   actualComp = ESMF_GridCompCreate(petList=petList, name="actual", rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  petList = (/3,4,5/)
+  actualCplComp = ESMF_CplCompCreate(petList=petList, name="actCplComp", rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !-----------------------------------------------------------------------------
 !BOE
@@ -221,11 +233,11 @@ program ESMF_CompTunnelEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! This call opens the actual side of the Component Tunnel, in form of a
+! This call opens the actual side of the Component Tunnel in form of a
 ! socket-based server, listening on {\tt port} 60000. The {\tt timeout} argument
 ! specifies how long the actual side will wait for the dual side
-! to communicate, before it returns with a time out condition. The time out
-! is set to 20 seconds.
+! to connect, before the actual side returns with a time out condition. The
+! time out is set to 20 seconds.
 !
 ! At this point, before a dual Component connects to the other side of the 
 ! Component Tunnel, it is
@@ -250,7 +262,8 @@ program ESMF_CompTunnelEx
 ! \end{verbatim}
 !
 ! If at any point the {\tt telnet} session is manually shut down, the 
-! {\tt ServiceLoop()} will return with an error condition. The clean way to
+! {\tt ServiceLoop()} on the actual side will return with an error condition. 
+! The clean way to
 ! disconnect the {\tt telnet} session, and to have the {\tt ServiceLoop()}
 ! wait for a new connection, e.g. from a dual Component, is to send the
 ! {\tt reconnect} command. This will automatically shut down the {\tt telnet}
@@ -265,6 +278,32 @@ program ESMF_CompTunnelEx
 !
 ! At this point the actual Component is back in listening mode, with a time out
 ! of 20 seconds, as specified during the ServiceLoop() call.
+!
+! \begin{sloppypar}
+! Before moving on to the dual side of the GridComp based Component Tunnel 
+! example, it should be pointed out that the exact same procedure is used to
+! set up the actual side of a {\em CplComp} based Component Tunnel. Assuming
+! that {\tt actualCplComp} is a CplComp object for which SetServices has already
+! been called, the actual side uses {\tt ESMF\_CplCompServiceLoop()} to start
+! listening for connections from the dual side.
+! \end{sloppypar}
+!EOE
+
+  call ESMF_CplCompSetServices(actualCplComp, userRoutine=setservicesCPL, &
+    userRc=userRc, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (userRc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOC
+  call ESMF_CplCompServiceLoop(actualCplComp, port=50000, timeout=2, &
+    timeoutFlag=timeoutFlag, rc=rc)
+!EOC
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!BOE
+! Here the {\tt timeoutFlag} is specified in order to prevent the expected
+! time-out condition to be indicated through the return code. Instead, when
+! {\tt timeoutFlag} is present, the return code is still {\tt ESMF\_SUCCESS}, 
+! but {\tt timeoutFlag} is set to {\tt .true.} when a time-out occurs.
 !EOE
 
 !-----------------------------------------------------------------------------
