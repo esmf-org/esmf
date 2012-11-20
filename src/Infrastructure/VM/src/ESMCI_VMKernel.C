@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.C,v 1.46 2012/08/16 18:50:50 theurich Exp $
+// $Id: ESMCI_VMKernel.C,v 1.47 2012/11/20 19:19:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -5384,10 +5384,16 @@ namespace ESMCI {
           continue;         // next attempt
         }
 #endif
+        if (errno==EINVAL){
+          // on some systems, e.g. darwin, repeated call to connect may give this
+          perror("socketClientInit connect(), but continue");
+          VMK::wtime(&t1);  // update the endtime
+          continue;         // next attempt
+        }
         // check for unexpected error conditions and bail
         if (errno!=EINPROGRESS && errno!=EALREADY && errno!=EWOULDBLOCK
           && errno!=ECONNREFUSED){
-          perror("socketClientInit: connect()");
+          perror("socketClientInit: connect(), bailing");
           return SOCKERR_UNSPEC;  // bail out
         }
         bool refusedFlag = false; // initialize
@@ -5399,7 +5405,7 @@ namespace ESMCI {
         FD_SET(sock, &sendfds);
         struct timeval timev = {1, 0};  // 1s wait time in select
         if (select(FD_SETSIZE, NULL, &sendfds, NULL, &timev) < 0){
-          perror("socketClientInit: select()");
+          perror("socketClientInit: select(), bailing");
           return SOCKERR_UNSPEC;  // bail out
         }
         if (FD_ISSET(sock, &sendfds)){
@@ -5409,7 +5415,7 @@ namespace ESMCI {
           socklen_t len = sizeof(error);
           if (getsockopt(sock, SOL_SOCKET, SO_ERROR, (value_ptr_t)&error, &len)
             < 0){
-            perror("socketClientInit: getsockopt()");
+            perror("socketClientInit: getsockopt(), bailing");
             return SOCKERR_UNSPEC;  // bail out
           }
           VMK::wtime(&t1);
