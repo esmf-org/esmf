@@ -1,4 +1,4 @@
-% $Id: Field_options.tex,v 1.16 2012/11/21 03:08:23 oehmke Exp $
+% $Id: Field_options.tex,v 1.17 2012/11/21 03:10:43 oehmke Exp $
 
 \subsubsection{ESMF\_FIELDSTATUS}
 \label{const:fieldstatus}
@@ -62,9 +62,9 @@ The valid values are:
 \item [ESMF\_REGRIDMETHOD\_PATCH]
       Higher-order patch recovery interpolation. Destination value is a weighted average of 2D polynomial patches constructed from cells surrounding the source cell which contains the destination point. This method typically results in better approximations to values and derivatives than bilinear. However, because of its larger stencil, it also results in a much larger interpolation matrix (and thus routeHandle) than the bilinear. 
 \item [ESMF\_REGRIDMETHOD\_NEAREST\_STOD]
-      Nearest neighbor interpolation. In this case each destination point is mapped to the closest source point. A given source point may go to multiple destination points, but no destination point will receive input from more than one source point. 
+      In this version of nearest neighbor interpolation each destination point is mapped to the closest source point. A given source point may go to multiple destination points, but no destination point will receive input from more than one source point. 
 \item [ESMF\_REGRIDMETHOD\_NEAREST\_DTOS]
-      Nearest neighbor interpolation. In this case each source point is mapped to the closest destination point. A given destination point may receive input from multiple source points, but no source point will go to more than one destination point. 
+      In this version of nearest neighbor interpolation each source point is mapped to the closest destination point. A given destination point may receive input from multiple source points, but no source point will go to more than one destination point. 
 \item [ESMF\_REGRIDMETHOD\_CONSERVE]
       First order conservative interpolation. Value of a destination cell is the weighted sum of the values of the source cells that it overlaps. The weights are determined by the amount the source cell overlaps the destination cell. Will typically give less accurate approximations to values than the other interpolation methods, however, will do a much better job preserving the integral of the value between the source and destination.  Needs corner coordinate values to be provided in the Grid. Currently only works for Fields created on the Grid center stagger (or the Mesh element location). 
 \end{description}
