@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeWrite.C,v 1.14 2012/11/20 17:32:48 rokuingh Exp $
+// $Id: ESMCI_AttributeWrite.C,v 1.15 2012/11/21 23:02:58 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -50,7 +50,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.14 2012/11/20 17:32:48 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.15 2012/11/21 23:02:58 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -644,8 +644,8 @@ namespace ESMCI {
     localrc = io_xml->writeStartElement("timeSeries", "", 1, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
-  } else if (convention.compare(CF_1_6_CONV)==0 &&
-             purpose.compare(GRIDSPEC_PURP)==0) {
+  } else if (convention.compare(CIM_1_5_1_CONV)==0 &&
+             purpose.compare(GRIDS_PURP)==0) {
 
     // Write the ESMF XML file header
     localrc = io_xml->writeStartElement("gridSpec", "", 1, 6,
@@ -707,9 +707,9 @@ namespace ESMCI {
       convention.compare(CIM_1_5_CONV)==0 &&
       purpose.compare(MODEL_COMP_PURP)==0) {
     localrc = AttributeWriteCIM(io_xml);
-  } else if (convention.compare(CF_1_6_CONV)==0 &&
-             purpose.compare(GRIDSPEC_PURP)==0) {
-    localrc = AttributeWriteXMLtraverseGridSpec(io_xml,convention,purpose,columns,
+  } else if (convention.compare(CIM_1_5_1_CONV)==0 &&
+             purpose.compare(GRIDS_PURP)==0) {
+    localrc = AttributeWriteXMLtraverseGrids(io_xml,convention,purpose,columns,
       fielddone,griddone,compdone);
   } else {
     // TODO: split out WaterML, ESMF
@@ -737,8 +737,8 @@ namespace ESMCI {
     localrc = io_xml->writeEndElement("timeSeriesResponse", 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
-  } else if (convention.compare(CF_1_6_CONV)==0 &&
-             purpose.compare(GRIDSPEC_PURP)==0) {
+  } else if (convention.compare(CIM_1_5_1_CONV)==0 &&
+             purpose.compare(GRIDS_PURP)==0) {
 
     localrc = io_xml->writeElement("documentID", "abcdefgh-1234-4224-4321-zyxwvutsrqpo", 1, 0);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
@@ -899,12 +899,12 @@ namespace ESMCI {
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "AttributeWriteXMLtraverseGridSpec"
+#define ESMC_METHOD "AttributeWriteXMLtraverseGrids"
 //BOPI
-// !IROUTINE:  AttributeWriteXMLtraverseGridSpec - {\tt Attribute} hierarchy traversal write
+// !IROUTINE:  AttributeWriteXMLtraverseGrids - {\tt Attribute} hierarchy traversal write
 //
 // !INTERFACE:
-      int Attribute::AttributeWriteXMLtraverseGridSpec(
+      int Attribute::AttributeWriteXMLtraverseGrids(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1035,12 +1035,12 @@ namespace ESMCI {
   // recurse across all linked ESMF objects (e.g. child components, states,
   // fieldBundles, fields, grids, arrays)
   for(i=0; i<linkList.size(); i++)
-    localrc = linkList.at(i)->AttributeWriteXMLtraverseGridSpec(io_xml,convention,purpose,columns,
+    localrc = linkList.at(i)->AttributeWriteXMLtraverseGrids(io_xml,convention,purpose,columns,
       fielddone,griddone,compdone);
 
   return ESMF_SUCCESS;
 
- } // end AttributeWriteXMLtraverseGridSpec
+ } // end AttributeWriteXMLtraverseGrids
 
 //-----------------------------------------------------------------------------
 

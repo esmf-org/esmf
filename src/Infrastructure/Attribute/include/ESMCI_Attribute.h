@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.69 2012/11/19 16:52:48 rokuingh Exp $
+// $Id: ESMCI_Attribute.h,v 1.70 2012/11/21 23:02:57 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -116,10 +116,11 @@ class Attribute
  public:
     // constant strings for conventions and purposes
     static const char   CF_CONV[];
-    static const char   CF_1_6_CONV[];
     static const char	ESG_CONV[];
     static const char	ESMF_CONV[];
     static const char	CIM_1_5_CONV[];
+    static const char CIM_1_5_1_CONV[];
+
 
     static const char	GENERAL_PURP[];
     static const char	EXTENDED_PURP[];
@@ -129,8 +130,8 @@ class Attribute
     static const char	RESP_PARTY_PURP[];
     static const char	CITATION_PURP[];
     static const char	SCI_PROP_PURP[];
-    static const char   COMP_PROP_PURP[];
-    static const char   GRIDSPEC_PURP[];
+    static const char COMP_PROP_PURP[];
+    static const char GRIDS_PURP[];
 
     // helper to set the Base address in attrBase
     void setBase(ESMC_Base *setBase){ attrBase = setBase; }
@@ -337,7 +338,7 @@ class Attribute
     int AttributeWriteXMLtraverse(IO_XML *io_xml, const std::string &convention,
       const std::string &purpose,
       const int &columns,bool &fielddone,bool &griddone,bool &compdone) const;
-    int AttributeWriteXMLtraverseGridSpec(IO_XML *io_xml, const std::string &convention,
+    int AttributeWriteXMLtraverseGrids(IO_XML *io_xml, const std::string &convention,
       const std::string &purpose,
       const int &columns,bool &fielddone,bool &griddone,bool &compdone) const;
     int AttributeWriteXMLbuffer(IO_XML *io_xml) const;

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.C,v 1.143 2012/11/20 17:32:48 rokuingh Exp $
+// $Id: ESMCI_Attribute.C,v 1.144 2012/11/21 23:02:58 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute.C,v 1.143 2012/11/20 17:32:48 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute.C,v 1.144 2012/11/21 23:02:58 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -68,10 +68,10 @@ int Attribute::count = 0;
 
 // initialize static convention and purpose strings
 const char Attribute::CF_CONV[]      = "CF";
-const char Attribute::CF_1_6_CONV[]  = "CF 1.6";
 const char Attribute::ESG_CONV[]     = "ESG";
 const char Attribute::ESMF_CONV[]    = "ESMF";
 const char Attribute::CIM_1_5_CONV[] = "CIM 1.5";
+const char Attribute::CIM_1_5_1_CONV[]  = "CIM 1.5.1";
 
 const char Attribute::GENERAL_PURP[]    = "General";
 const char Attribute::EXTENDED_PURP[]   = "Extended";
@@ -82,7 +82,7 @@ const char Attribute::RESP_PARTY_PURP[] = "RespParty";
 const char Attribute::CITATION_PURP[]   = "Citation";
 const char Attribute::SCI_PROP_PURP[]   = "SciProp";
 const char Attribute::COMP_PROP_PURP[]  = "CompProp";
-const char Attribute::GRIDSPEC_PURP[]   = "GridSpec";
+const char Attribute::GRIDS_PURP[]   = "grids";
 
 
 //-----------------------------------------------------------------------------
@@ -316,17 +316,17 @@ const char Attribute::GRIDSPEC_PURP[]   = "GridSpec";
 
   // Grid standard Attribute package
   if (object.compare("grid")==0) {
-    if (convention.compare(CF_1_6_CONV)==0 && purpose.compare(GRIDSPEC_PURP)==0) {
+    if (convention.compare(CIM_1_5_1_CONV)==0 && purpose.compare(GRIDS_PURP)==0) {
 
-      // create an Attribute package for GridSpec which uses internal Grid info
-      localrc = AttPackCreateCustom(CF_1_6_CONV, GRIDSPEC_PURP, object);
+      // create an Attribute package for grids which uses internal Grid info
+      localrc = AttPackCreateCustom(CIM_1_5_1_CONV, GRIDS_PURP, object);
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
-      // add Attributes to the GridSpec Attribute package
+      // add Attributes to the grids Attribute package
       // and set the Attributes in this Attpack to have links to internal info
       string attPackInstanceName;
-      attpack = AttPackGet(CF_1_6_CONV, GRIDSPEC_PURP, object, attPackInstanceName);
+      attpack = AttPackGet(CIM_1_5_1_CONV, GRIDS_PURP, object, attPackInstanceName);
   
       string name, value;
       vector<string> vv;

@@ -1,4 +1,4 @@
-% $Id: Attribute_pack.tex,v 1.55 2012/11/20 17:32:43 rokuingh Exp $
+% $Id: Attribute_pack.tex,v 1.56 2012/11/21 23:02:55 rokuingh Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -380,8 +380,6 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     \hline\hline
     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
     \hline\hline
-    {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
-    \hline\hline
     {\tt CouplingPurpose*} & The form of the input condition (e.g. initial condition or boundary condition). &  Ancillary, Boundary, Initial & software:Coupling:purpose \\
     {\tt CouplingSource*} & The component the input condition is coming from. & N/A & software:Coupling:couplingSource \\
     {\tt CouplingTarget*} & The component the input condition is going to. & N/A & software:Coupling:couplingTarget \\
@@ -506,32 +504,30 @@ At this time the Array packages are the same as the Field packages.
 There are 2 grid attribute packages in ESMF. 
 
 \begin{enumerate}
-    \item CF 1.6 GridSpec
+    \item CIM 1.5.1 grids
     \item ESMF Grid
 \end{enumerate}
 
 \vspace{.20in}
 
-{\bf 1. GridSpec}
+{\bf 1. grids}
 
 \label{CIMGridAttributePackage}
 
 \begin{itemize}
     \item Specify with:
     \begin{itemize}
-        \item {\tt convention} = "CF 1.6"
-        \item {\tt purpose} = "GridSpec"
+        \item {\tt convention} = "CIM 1.5.1"
+        \item {\tt purpose} = "grids"
     \end{itemize}
-    \item CF Version: CF 1.6
-    \item CF URL: \htmladdnormallink{http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.pdf}{http://cf-pcmdi.llnl.gov/documents/cf-conventions/1.6/cf-conventions.pdf}
     \item CIM Version: CIM 1.5.1
-    \item CIM Schema URL: \htmladdnormallink{http://www.purl.org/org/esmetadata/cim/1.5/schemas}{http://www.purl.org/org/esmetadata/cim/1.5/schemas}
+    \item CIM Schema URL: \htmladdnormallink{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5.1/}{http://metaforclimate.eu/trac/browser/CIM/tags/version-1.5.1/}
     \item Output Options:
     \begin{itemize}
         \item Simple XML
-        \item This package can be used to create a CIM 1.5.1 compliant CF 1.6 formatted GridSpec XML file.
+        \item This package can be used to create a CIM 1.5.1 compliant grids XML file.
     \end{itemize}
-    \item Description: This package contains the the information necessary to create a CIM 1.5.1 compliant CF 1.6 formatted GridSpec XML file.  The Attributes in this package are populated entirely by internal ESMF Grid information, no user intervention beyond the addition of the package is needed to create this package.
+    \item Description: This package contains the the information necessary to create a CIM 1.5.1 compliant grids XML file.  The Attributes in this package are populated entirely by internal ESMF Grid information, no user intervention beyond the addition of the package is needed to create this package.
 \end{itemize}
 
 \begin{longtable}{|p{5cm}|p{5cm}|p{35mm}|}

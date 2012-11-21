@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2012/11/06 20:14:55 rokuingh Exp $ 
+# $Id: makefile,v 1.23 2012/11/21 23:03:01 rokuingh Exp $ 
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -249,11 +249,11 @@ RUN_ESMF_AttributeUpdateUTest:
 # --- WriteInternal
 
 RUN_ESMF_AttributeWriteInternalUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridcomp_gridspec.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridcomp_cim151grids.xml $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeWriteInternal NP=1 ftest
 
 RUN_ESMF_AttributeWriteInternalUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridcomp_gridspec.xml $(ESMF_TESTDIR)
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_gridcomp_cim151grids.xml $(ESMF_TESTDIR)
 	$(MAKE) TNAME=AttributeWriteInternal NP=1 ftest
 
 # --- XML
