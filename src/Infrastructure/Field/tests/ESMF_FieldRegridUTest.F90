@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridUTest.F90,v 1.54 2012/11/16 20:25:39 oehmke Exp $
+! $Id: ESMF_FieldRegridUTest.F90,v 1.55 2012/11/21 00:17:59 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -434,7 +434,7 @@
       !EX_UTest
       ! Test regrid matrix
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Test regridding on a spherical grids with NEARESTSTOD regridding"
+      write(name, *) "Test regridding on a spherical grids with NEAREST_STOD regridding"
 
       ! initialize 
       rc=ESMF_SUCCESS
@@ -451,7 +451,7 @@
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Regrid from Mesh to Mesh with NEARESTSTOD interp."
+      write(name, *) "Regrid from Mesh to Mesh with NEAREST_STOD interp."
 
       ! initialize 
       rc=ESMF_SUCCESS
@@ -469,7 +469,7 @@
       !EX_UTest
       ! Test regrid matrix
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Test regridding on a spherical grids with NEARESTDTOS regridding"
+      write(name, *) "Test regridding on a spherical grids with NEAREST_DTOS regridding"
 
       ! initialize 
       rc=ESMF_SUCCESS
@@ -12307,7 +12307,7 @@ write(*,*) "LOCALRC=",localrc
 	  srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
-          regridmethod=ESMF_REGRIDMETHOD_NEARESTSTOD, &
+          regridmethod=ESMF_REGRIDMETHOD_NEAREST_STOD, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -12701,7 +12701,7 @@ write(*,*) "LOCALRC=",localrc
 	  srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
-          regridmethod=ESMF_REGRIDMETHOD_NEARESTDTOS, &
+          regridmethod=ESMF_REGRIDMETHOD_NEAREST_DTOS, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE
@@ -13881,7 +13881,7 @@ write(*,*) "LOCALRC=",localrc
 	  srcField, &
           dstField=dstField, &
           routeHandle=routeHandle, &
-          regridmethod=ESMF_REGRIDMETHOD_NEARESTSTOD, &
+          regridmethod=ESMF_REGRIDMETHOD_NEAREST_STOD, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
       rc=ESMF_FAILURE

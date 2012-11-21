@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.49 2012/11/13 22:22:37 oehmke Exp $
+! $Id: ESMF_IOScrip.F90,v 1.50 2012/11/21 00:18:01 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -739,10 +739,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	   elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
               map_method = "Conservative remapping"
 	      esmf_regrid_method = "First-order Conservative"
-	   elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_NEARESTSTOD%regridmethod) then
+	   elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod) then
               map_method = "Bilinear remapping"
 	      esmf_regrid_method = "Nearest source to destination"
-	   elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_NEARESTDTOS%regridmethod) then
+	   elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod) then
               map_method = "Bilinear remapping"
 	      esmf_regrid_method = "Nearest destination to source"
 	   else
@@ -871,8 +871,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           ! will be empty   
 	  if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod .or. & 
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod .or. & 
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEARESTSTOD%regridmethod .or. & 
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEARESTDTOS%regridmethod) then
+              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod .or. & 
+              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod) then
             call ESMF_EsmfInq(srcFile, nodeCount=srcDim,  &
 	        coordDim = srcCoordDim, elementCount=srcNodeDim, rc=status)
                 src_grid_corner =3
@@ -887,8 +887,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	else if (srcFileTypeLocal == ESMF_FILEFORMAT_UGRID) then 
 	  if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod .or. &
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEARESTSTOD%regridmethod .or. &
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEARESTDTOS%regridmethod) then
+              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod .or. &
+              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod) then
             call ESMF_UGridInq(srcFile, srcmeshname, nodeCount=srcDim,  &
 	        elementCount=srcNodeDim, units=srcunits, rc=status)
                 src_grid_corner =3
@@ -935,8 +935,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           ! will be empty   
 	  if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod .or. &
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEARESTSTOD%regridmethod .or. &
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEARESTDTOS%regridmethod) then
+              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod .or. &
+              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod) then
             call ESMF_EsmfInq(dstFile, nodeCount=dstDim,  &
 	        coordDim = dstCoordDim, elementCount=dstNodeDim, rc=status)
                 dst_grid_corner =3
@@ -951,8 +951,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 	else if (dstFileTypeLocal == ESMF_FILEFORMAT_UGRID) then 
 	  if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod .or. &
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEARESTSTOD%regridmethod .or. &
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEARESTDTOS%regridmethod) then
+              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod .or. &
+              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod) then
             call ESMF_UGridInq(dstFile, dstmeshname, nodeCount=dstDim,  &
 	        elementCount=dstNodeDim, units=dstunits, rc=status)
                 dst_grid_corner =3
@@ -1510,8 +1510,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              rc)) return
   	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod &
 		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod &
-		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEARESTSTOD%regridmethod &
-		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEARESTDTOS%regridmethod) then
+		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod &
+		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod) then
 	     ! check if centerCoords exit
              ncStatus=nf90_inq_varid(ncid1,"nodeCoords",VarId)
 	     varStr = "nodeCoords"
@@ -1867,8 +1867,8 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ! only write out xv_a and yv_a when the regrid method is conserve
   	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_BILINEAR%regridmethod &
 		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_PATCH%regridmethod &
-		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEARESTSTOD%regridmethod &
-		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEARESTDTOS%regridmethod) then
+		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod &
+		.or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod) then
 	     ! check if centerCoords exit
              ncStatus=nf90_inq_varid(ncid1,"nodeCoords",VarId)
 	     varStr = "nodeCoords"

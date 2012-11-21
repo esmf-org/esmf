@@ -1,4 +1,4 @@
-% $Id: ESMF_RegridWeightGen.tex,v 1.80 2012/10/26 17:30:19 svasquez Exp $
+% $Id: ESMF_RegridWeightGen.tex,v 1.81 2012/11/21 00:18:39 oehmke Exp $
 
 \section{ESMF\_RegridWeightGen}
 \label{sec:ESMF_RegridWeightGen}
@@ -80,7 +80,8 @@ surrounding that destination point. For the last pole option ("-p teeth") no art
 pole region is covered by connecting points across the top and bottom row of the source Grid into triangles. As 
 this makes the top and bottom of the source sphere flat, for a big enough difference between the size of
 the source and destination pole regions, this can still result in unmapped destination points.  
-Only pole option "none" is currently supported with the conservative interpolation method (i.e. "-m conserve"). 
+Only pole option "none" is currently supported with the conservative interpolation method ("-m conserve") and with the 
+nearest neighbor interpolation methods ("-m nearestdtos" and "-m neareststod").
 
 Masking is supported for both the logically rectangular grids and the unstructured grids. 
 If the grid file is in the SCRIP format, the variable "grid\_imask" is used as the mask.
@@ -93,7 +94,8 @@ The regridding application provides the argument "\verb+--+src\_missingvalue" or
 "\verb+--+dst\_missingvalue" for users to specify the variable name from where the mask can be
 constructed. 
 
-If a destination point can't be mapped because it falls outside the unmasked source grid, then the default behavior of the application is to stop with an error. By specifying "-i" or the equivalent "\verb+--+ignore\_unmapped" the user can cause the application to ignore unmapped destination points. In this case, the output matrix won't contain entries for the unmapped destination points. 
+If a destination point can't be mapped because it falls outside the unmasked source grid, then the default behavior of the application is to stop with an error. By specifying "-i" or the equivalent "\verb+--+ignore\_unmapped" the user can cause the application to ignore unmapped destination points. In this case, the output matrix won't contain entries for the unmapped destination points. Note, that the unmapped point detection doesn't
+currently work for nearest destination to source method ("-m nearestdtos"), so when using that method it is as if ``-i'' is always on.
 
  This regridding application can be used to generate bilinear, patch, or first-order conservative interpolation weights. The default interpolation method
 is bilinear. The algorithm used by this application to generate the bilinear weights is the standard one found in
@@ -128,6 +130,13 @@ than the bilinear matrix (e.g. for a quadrilateral grid the patch matrix is arou
 the bilinear matrix). This can be an issue when performing a regrid weight generation operation close to the memory
 limit on a machine. 
 
+The nearest neighbor interpolation options work by associating a point in one set with the closest point in another set. If two points are equally
+close then the point with the smallest index is arbitrarily used (i.e. the point with that would have the smallest index in the weight matrix). There are two
+versions of this type of interpolation available in the regrid weight generation application. One of these is the nearest source to destination 
+method ("-m neareststod"). In this method each destination point is mapped to the closest source point. The other of these is the
+nearest destination to source method ("-m nearestdtos"). In this method each source point is mapped to the closest destination point. Note, 
+that with this method the unmapped destination point detection doesn't work, so no error will be returned even if there destination points
+which don't map to any source point. 
 
 First-order conservative interpolation~\cite{ConservativeOrder1} is also available as a regridding method. This method will typically have  
 a larger local interpolation error than the previous two methods, but will do a much better job of preserving the value of the 
@@ -200,7 +209,7 @@ ESMF_RegridWeightGen  [--help]
                       [--source|-s] src_grid_filename 
                       [--destination|-d] dst_grid_filename 
                       [--weight|-w] out_weight_file 
-                      [--method|-m] [bilinear|patch|conserve] 
+                      [--method|-m] [bilinear|patch|nearestdtos|neareststod|conserve] 
                       [--pole|-p] [none|all|teeth|1|2|..] 
                       [--ignore_unmapped|-i]
                       --src_type [SCRIP|GRIDSPEC|ESMF|UGRID] 

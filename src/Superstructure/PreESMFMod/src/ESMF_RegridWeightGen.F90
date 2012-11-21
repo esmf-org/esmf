@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.21 2012/11/20 15:52:42 peggyli Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.22 2012/11/21 00:18:15 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -704,9 +704,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              print *, "  Regrid Method: conserve"
           elseif (localRegridMethod == ESMF_REGRIDMETHOD_PATCH) then
              print *, "  Regrid Method: patch"
-          elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEARESTSTOD) then
+          elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
              print *, "  Regrid Method: nearest source to destination"
-          elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEARESTDTOS) then
+          elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
              print *, "  Regrid Method: nearest destination to source"
 	  endif
           if (localPoleMethod .eq. ESMF_POLEMETHOD_NONE) then
@@ -1058,9 +1058,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             methodStr = "Bilinear remapping"
       else if (localRegridMethod == ESMF_REGRIDMETHOD_PATCH) then
             methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Patch
-      else if (localRegridMethod == ESMF_REGRIDMETHOD_NEARESTSTOD) then
+      else if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
             methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
-      else if (localRegridMethod == ESMF_REGRIDMETHOD_NEARESTDTOS) then
+      else if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
             methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
       else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
             methodStr = "Conservative remapping"

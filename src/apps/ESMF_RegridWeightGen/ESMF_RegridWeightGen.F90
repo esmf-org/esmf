@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.78 2012/11/13 22:22:52 oehmke Exp $
+! $Id: ESMF_RegridWeightGen.F90,v 1.79 2012/11/21 00:18:28 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -130,7 +130,9 @@ program ESMF_RegridWeightGenApp
          call ESMF_UtilGetArgIndex('-p', argindex=ind, rc=rc)
          if (ind == -1) call ESMF_UtilGetArgIndex('--pole', argindex=ind, rc=rc)
          if (ind == -1) then
-	   if (method .eq. 'conserve') then
+	   if ((trim(method) .eq. 'conserve') .or.    & 
+               (trim(method) .eq. 'nearestdtos') .or. &
+               (trim(method) .eq. 'neareststod')) then
              ! print *, 'Use default pole: None'
               pole = ESMF_POLEMETHOD_NONE
 	      poleptrs = 0
@@ -575,9 +577,9 @@ program ESMF_RegridWeightGenApp
      else if (trim(method) .eq. 'patch') then
         methodflag = ESMF_REGRIDMETHOD_PATCH
      else if (trim(method) .eq. 'neareststod') then
-        methodflag = ESMF_REGRIDMETHOD_NEARESTSTOD
+        methodflag = ESMF_REGRIDMETHOD_NEAREST_STOD
      else if (trim(method) .eq. 'nearestdtos') then
-        methodflag = ESMF_REGRIDMETHOD_NEARESTDTOS
+        methodflag = ESMF_REGRIDMETHOD_NEAREST_DTOS
      endif	 
     
      if (ignoreunmapped) then

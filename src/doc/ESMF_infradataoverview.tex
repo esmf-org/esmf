@@ -1,4 +1,4 @@
-% $Id: ESMF_infradataoverview.tex,v 1.34 2012/10/24 22:44:07 theurich Exp $
+% $Id: ESMF_infradataoverview.tex,v 1.35 2012/11/21 00:18:39 oehmke Exp $
 
 \section{Overview of Data Classes}
 
@@ -177,7 +177,7 @@ methods, such the sparse matrix multiplication, is given in section
  To see what types of grids and other options are supported in the two types of regridding and their testing status, please see the \htmladdnormallink{ESMF Regridding Status}{http://earthsystemmodeling.org/esmf_releases/non_public/ESMF_6_1_0/esmf_6_1_0_regridding_status.html} webpage for this version of ESMF.
  Figure~\ref{Regrid Interfaces} shows a comparison of different regrid interfaces and where they can be found in the documentation. 
 
- The rest of this section further describes various options available in ESMF regridding. It starts with a description of the three interpolation methods available in regridding.
+ The rest of this section further describes various options available in ESMF regridding. It starts with a description of the five interpolation methods available in regridding.
  Next, it describes how to remove (mask) pieces of a grid from the regridding. Following that, it describes options if a destination point can't be regridding. After that, is a section
  on spherical grids and controlling what happens at the pole. Finally, there is a section on troubleshooting regridding.  
 
@@ -260,6 +260,56 @@ ESMF\_RegridWeightGen & Application & Grid files & yes  & no & Section~\ref{sec:
 \smallskip
 
  To use the patch method the user may created their Fields on any stagger location for Grids or the node location ({\tt ESMF\_MESHLOC\_NODE}) for Meshes.
+ For Grids, the stagger location upon which the Field was built must contain coordinates. 
+
+
+\subsubsection{Interpolation methods: nearest source to destination}\label{sec:interpolation:neareststod}
+In nearest source to destination interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST\_STOD}) each destination point is mapped to the closest source point. A given source point may go to multiple destination points, but no destination point will receive input from more than one source point. If two points are equally close, then the point with the smallest sequence index is arbitrarily used (i.e. the point which would have the smallest index in the weight matrix). 
+
+\smallskip
+
+ In 2D, ESMF supports nearest source to destination regridding between any combination of the following:
+ \begin{itemize}
+ \item Structured Grids composed of a single logically rectangular patch
+ \item Unstructured Meshes composed of any combination of triangles and quadrilaterals (e.g. rectangles)
+ \end{itemize}
+
+\smallskip
+
+ In 3D, ESMF supports nearest source to destination regridding between any combination of the following:
+ \begin{itemize}
+ \item Structured Grids composed of a single logically rectangular patch
+ \item Unstructured Meshes composed of hexahedrons (e.g. cubes) and tetrahedras
+ \end{itemize}
+
+\smallskip
+
+ To use the nearest source to destination method the user may created their Fields on any stagger location for Grids or the node location ({\tt ESMF\_MESHLOC\_NODE}) for Meshes.
+ For Grids, the stagger location upon which the Field was built must contain coordinates. 
+
+
+\subsubsection{Interpolation methods: nearest destination to source}\label{sec:interpolation:nearestdtos}
+In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST\_DTOS}) each source point is mapped to the closest destination point. A given destination point may receive input from multiple source points, but no source point will go to more than one destination point. If two points are equally close, then the point with the smallest sequence index is arbitrarily used (i.e. the point which would have the smallest index in the weight matrix). Note, that with this method the unmapped destination point detection currently doesn't work, so no error will be returned even if there are destination points which don't map to any source point. 
+
+\smallskip
+
+ In 2D, ESMF supports nearest destination to source regridding between any combination of the following:
+ \begin{itemize}
+ \item Structured Grids composed of a single logically rectangular patch
+ \item Unstructured Meshes composed of any combination of triangles and quadrilaterals (e.g. rectangles)
+ \end{itemize}
+
+\smallskip
+
+ In 3D, ESMF supports nearest destination to source regridding between any combination of the following:
+ \begin{itemize}
+ \item Structured Grids composed of a single logically rectangular patch
+ \item Unstructured Meshes composed of hexahedrons (e.g. cubes) and tetrahedras
+ \end{itemize}
+
+\smallskip
+
+ To use the nearest destination to source method the user may created their Fields on any stagger location for Grids or the node location ({\tt ESMF\_MESHLOC\_NODE}) for Meshes.
  For Grids, the stagger location upon which the Field was built must contain coordinates. 
 
 
@@ -390,12 +440,13 @@ Further restrictions:
 
 \subsubsection{Unmapped destination points}
  If a destination point can't be mapped to a location in the source grid, the user has two options. The user may ignore those destination points
- that can't be mapped by setting the {\tt unmappedaction} argument to {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. (Ignored points won't be included in
- the sparse matrix or routeHandle output from the {\tt ESMF\_FieldRegridStore()} call.)   The user also has the option to return
+ that can't be mapped by setting the {\tt unmappedaction} argument to {\tt ESMF\_UNMAPPEDACTION\_IGNORE} (Ignored points won't be included in
+ the sparse matrix or routeHandle). If the user needs the unmapped points, the {\tt ESMF\_FieldRegridStore()} method has the capability to return
+ a list of them using the {\tt unmappedDstList} argument.  In addition to ignoring them, the user also has the option to return
  an error if unmapped destination points exist. This is the default behavior, so the user can either not set the {\tt unmappedaction} argument
  or the user can set it to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. At this point ESMF does not support extrapolation to destination points outside 
- the unmasked source Field. 
-
+ the unmasked source Field. Currently, the unmapped destination error detection doesn't work with the nearest destination to source regrid method
+({\tt ESMF\_REGRIDMETHOD\_NEAREST\_DTOS}), so with this method the regridding behaves as if {\tt ESMF\_UNMAPPEDACTION\_IGNORE} is always on. 
 
 \subsubsection{Spherical grids and poles}
 In the case that the Grid is on a sphere ({\tt coordSys=ESMF\_COORDSYS\_SPH\_DEG or ESMF\_COORDSYS\_SPH\_RAD})
@@ -426,7 +477,8 @@ problems with periodicity and with the pole singularity. This library
  this makes the top and bottom of the source sphere flat, for a big enough difference between the size of
  the source and destination pole regions, this can still result in unmapped destination points.  
  Only pole option {\tt ESMF\_POLEMETHOD\_NONE} is currently supported with the conservative interpolation method 
-(i.e. {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}). 
+ ({\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}) and with the nearest neighbor interpolation options ({\tt regridmethod=ESMF\_REGRIDMETHOD\_NEAREST\_STOD}
+ and {\tt regridmethod=ESMF\_REGRIDMETHOD\_NEAREST\_DTOS}).
 
 
 \subsubsection{Troubleshooting guide}

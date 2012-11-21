@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.119 2012/11/20 16:46:07 oehmke Exp $
+! $Id: ESMF_FieldRegrid.F90,v 1.120 2012/11/21 00:17:58 oehmke Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.119 2012/11/20 16:46:07 oehmke Exp $'
+    '$Id: ESMF_FieldRegrid.F90,v 1.120 2012/11/21 00:17:58 oehmke Exp $'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -433,6 +433,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
 !           {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
 !           to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!           The unmapped destination point error detection currently doesn't work with 
+!           the {\tt ESMF\_REGRIDMETHOD\_NEAREST\_DTOS} regrid method, so 
+!           with that regrid method this subroutine will behave as if
+!           {\tt ESMF\_UNMAPPEDACTION\_IGNORE} is always on. 
 !     \item [{[ignoreDegenerate]}]
 !           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to .true., then the 
 !           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error. 
@@ -537,7 +541,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[unmappedDstList]}] 
 !           The list of the sequence indices for locations in {\tt dstField} which couldn't be mapped the {\tt srcField}. 
 !           The list on each PET only contains the unmapped locations for the piece of the {\tt dstField} on that PET. 
-!           If a destination point is masked, it won't be put in this list. 
+!           If a destination point is masked, it won't be put in this list. This option currently doesn't work with 
+!           the {\tt ESMF\_REGRIDMETHOD\_NEAREST\_DTOS} regrid method.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
