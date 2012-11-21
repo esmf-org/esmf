@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandleBitForBitEx.F90,v 1.10 2012/11/19 21:46:57 theurich Exp $
+! $Id: ESMF_RHandleBitForBitEx.F90,v 1.11 2012/11/21 01:25:55 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -145,12 +145,17 @@ program ESMF_RHandleBitForBitEx
 ! can lead to different truncation steps and consequently in results that are
 ! not bit-for-bit identical.
 !
-! In order to help users implement their bfb requirement, ESMF provides control
-! over the term order in sparse matrix multiplications, while at the same time
-! offering performance optimization options. For the purpose of demonstration, a 
-! one-dimensional, arbitrarily distributed source Array is constructed. There
-! are three Array elements on each of the four PETs. Their local storage
-! indices, sequence indices, and data values are as follows:
+! In order to help users with the implementation of their bfb requirement, 
+! ESMF provides different levels of control over the term order in sparse 
+! matrix multiplications, while at the same time offering performance 
+! optimization options. In all there are {\em three} arguments that will be
+! introduced in the following paragraphs: {\tt srcTermProcessing}, 
+! {\tt termorderflag}, and {\tt pipelineDepth}.
+!
+! For the purpose of demonstration, a one-dimensional, arbitrarily distributed 
+! source Array is constructed. There are three Array elements on each of the
+! four PETs. Their local storage indices, sequence indices, and data values
+! are as follows:
 !
 ! \begin{verbatim}
 !
@@ -365,13 +370,25 @@ program ESMF_RHandleBitForBitEx
 !
 !     d(1) = s(1) + s(6) + s(9)
 !
-! There are two parameters that affect term order, and therefore bfb
-! reproducibility of the ESMF sparse matrix multiplication (SMM). First there
-! is the {\tt srcTermProcessing} parameter, which controls grouping of source
-! terms located on the same PET. Source term grouping is a decision that is
-! made during RouteHandle store-time.
+! \begin{sloppypar}
+! There are two parameters that affect term order in the ESMF sparse matrix
+! multiplication (SMM), and therefore must be considered in the context of bfb
+! reproducibility. First there is the {\tt srcTermProcessing} parameter which
+! controls grouping of source terms located on the same PET. The value of the
+! {\tt srcTermProcessing} parameter indicates the maximum number of terms that
+! may be grouped into partial sums on the source PET. Setting
+! {\tt srcTermProcessing} to 1 means that no partial sums are formed on the 
+! source side, however, the source terms are multiplied with their
+! respective sparse matrix factor before being sent to the destination PET. 
+! Setting {\tt srcTermProcessing} to 0 prevents these products from being carried
+! out on the source side, and the source Array elements are sent unmodified.
+! Depending on the distribution of the source Array, values greater than 1
+! for {\tt srcTermProcessing} can lead to partial sums and thus may have
+! impact on the bfb reproducibility of the SMM.
+! \end{sloppypar}
 !
-! The second parameter comes into play at execution-time of a precomputed 
+! The second parameter that may have bfb effects comes into play at 
+! execution-time of a precomputed 
 ! RouteHandle. It is accessible via the {\tt termorderflag} argument; a typed 
 ! flag with the following values:
 ! \begin{itemize}
@@ -382,7 +399,8 @@ program ESMF_RHandleBitForBitEx
 !      single entities with a sequence index equal to the lowest original
 !      sequence index in the group. Use {\tt ESMF\_TERMORDER\_SRCSEQ} together
 !      with {\tt srcTermProcessing=0} or {\tt srcTermProcessing=1} when strict
-!      bfb reproducibility is required for different number of PETs.
+!      bfb reproducibility is required independent of the source Array 
+!      distribution, e.g. for different number of PETs.
 !   \item {\tt ESMF\_TERMORDER\_SRCPET} -- The source terms in the sum are 
 !      first arranged according to the relative position of the PET on which 
 !      they reside with respect to the destination PET. Second, all the terms
@@ -548,6 +566,8 @@ program ESMF_RHandleBitForBitEx
 
 !BOE
 ! {\bf ESMF\_TERMORDER\_SRCPET}
+!
+! {\bf All source terms coming from the same PET}
 !
 ! In the following examples the {\tt srcTermProcessing} argument at store-time
 ! is first set to 0, forcing all of the source terms to be sent to the
@@ -731,6 +751,8 @@ program ESMF_RHandleBitForBitEx
   ! ---------------------------------------------------------------------------
 
 !BOE
+! {\bf Source terms coming from different PETs}
+!
 ! When the source terms are distributed across multiple PETs, the 
 ! {\tt ESMF\_TERMORDER\_SRCPET} option first bundles the terms according to
 ! the PET on which they are stored. These source term "bundles" are then 
@@ -912,6 +934,8 @@ program ESMF_RHandleBitForBitEx
   ! ---------------------------------------------------------------------------
 
 !BOE
+! {\bf Grouping of source terms coming from the same PET}
+!
 ! So far the {\tt srcTermProcessing} argument was kept at 0, and therefore
 ! source term grouping had not to be considered. Source term grouping is only
 ! possible for terms that originate from the same PET. In preparation
@@ -1375,8 +1399,8 @@ program ESMF_RHandleBitForBitEx
 ! argument when calling, or passing a variable that is set to a negative
 ! number, indicates that the respective parameter needs to be determined by
 ! the library. Further, if a variable with a negative value was passed in, then
-! the variable is overwritten by they auto-tuned value on return. Through this
-! mechanism a user can leverage the built-in auto-tuning feature of ESMF to
+! the variable is overwritten and replaced by the auto-tuned value on return. Through
+! this mechanism a user can leverage the built-in auto-tuning feature of ESMF to
 ! obtain the best possible performance for a specific problem on a particular
 ! compute hardware, while still ensuring bfb and performance
 ! reproducibility between runs. The following example shows code that first
