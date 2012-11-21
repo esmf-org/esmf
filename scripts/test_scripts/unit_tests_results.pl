@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: unit_tests_results.pl,v 1.22 2012/01/04 23:59:01 svasquez Exp $
+# $Id: unit_tests_results.pl,v 1.23 2012/11/21 00:15:42 theurich Exp $
 # This script runs at the end of the "run_unit_tests", "run_unit_tests_uni" and "check_results" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The results are either complete results or a summary.
@@ -137,7 +137,11 @@ use File::Find
         foreach ( @st_ut_files) {
                 s/\.\///; # Delete all the "./"
                 s/\///g; # Delete all the "/"
-                s/ESM/ ESM/;# Break it into 2 fields
+                s/ESMF_/ ESMF_/;# Break it into 2 fields
+                s/([^ ]*) ([^ ]*)/$2/; # Get rid of the 1st field
+                s/ESMC_/ ESMC_/;# Break it into 2 fields
+                s/([^ ]*) ([^ ]*)/$2/; # Get rid of the 1st field
+                s/ESMCI_/ ESMCI_/;# Break it into 2 fields
                 s/([^ ]*) ([^ ]*)/$2/; # Get rid of the 1st field
                 s/\./ /; # Break it into 2 fields
                 s/([^ ]*) ([^ ]*)/$1\n/; # Get rid of the 2nd field
@@ -195,7 +199,11 @@ use File::Find
 				$test_file = $file;
 				foreach ($test_file) {
                 			s/\///g; # Delete all the "/"
-                			s/ESM/ ESM/;# Break it into 2 fields
+                			s/ESMF_/ ESMF_/;# Break it into 2 fields
+                			s/([^ ]*) ([^ ]*)/$2/; # Get rid of the 1st field
+                			s/ESMC_/ ESMC_/;# Break it into 2 fields
+                			s/([^ ]*) ([^ ]*)/$2/; # Get rid of the 1st field
+                			s/ESMCI_/ ESMCI_/;# Break it into 2 fields
                 			s/([^ ]*) ([^ ]*)/$2/; # Get rid of the 1st field
                 			s/\./ /; # Break it into 2 fields
                 			s/([^ ]*) ([^ ]*)/$1.Log\n/; # Get rid of the 2nd field
