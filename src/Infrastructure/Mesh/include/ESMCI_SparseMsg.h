@@ -1,4 +1,4 @@
-// $Id: ESMCI_SparseMsg.h,v 1.8 2012/01/06 20:17:47 svasquez Exp $
+// $Id: ESMCI_SparseMsg.h,v 1.9 2012/11/24 23:17:57 theurich Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -118,6 +118,7 @@ public:
   // by processor number.
   std::vector<UInt>::iterator inProc_begin() {return inProcs.begin();}
   std::vector<UInt>::iterator inProc_end() {return inProcs.end();}
+  UInt inProc_size() {return inProcs.size();}
 
   // send bug Filled to send?
   bool filled();

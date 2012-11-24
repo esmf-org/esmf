@@ -1,4 +1,4 @@
-// $Id: ESMCI_SearchNearest.C,v 1.3 2012/11/13 22:22:43 oehmke Exp $
+// $Id: ESMCI_SearchNearest.C,v 1.4 2012/11/24 23:17:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_SearchNearest.C,v 1.3 2012/11/13 22:22:43 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_SearchNearest.C,v 1.4 2012/11/24 23:17:59 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -332,7 +332,6 @@ struct CommData {
     Throw() << "Meshes must have same spatial dim for search";
   }
   
-
   // Count unmasked source nodes
   int num_nodes_to_search=0;
   if (src_mask==NULL) {
@@ -436,7 +435,6 @@ struct CommData {
 
   // Commit tree
   tree->commit();
-
 
   // Create SpaceDir
   SpaceDir *spacedir=new SpaceDir(proc_min, proc_max, tree);
@@ -654,26 +652,29 @@ struct CommData {
   // Communicate point information
   comm.communicate();
 
-
   // Unpack point info and call function
   vector<int> rcv_pets;       
+  rcv_pets.resize(comm.inProc_size(),0);
+
+  vector<CommData> empty_vec; 
   vector< vector<CommData> > rcv_results; 
+  rcv_results.resize(comm.inProc_size(),empty_vec);
+
+  int ip=0;
   for (std::vector<UInt>::iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
     UInt proc = *p;
     SparseMsg::buffer *b = comm.getRecvBuffer(proc);
 
     // Add proc
-    rcv_pets.push_back(proc);
+    rcv_pets[ip]=proc;
     
-    //    printf("%d # From %d pnts=",Par::Rank(),proc);
-
     // Figure out how many messages we have
     int num_msgs=b->msg_size()/snd_size;
 
     // build temporary vector
     vector<CommData> tmp;
     tmp.reserve(num_msgs); // reserve to save allocation time
-   
+
     // Unpack everything from this processor
     while (!b->empty()) {
       double buf[4]; // 4 is biggest this should be (i.e. 3D+dist)
@@ -681,6 +682,7 @@ struct CommData {
  /* XMRKX */
       b->pop((UChar *)buf, (UInt)snd_size);
       //      printf(" [%f %f %f], ",pnt[0],pnt[1],pnt[2]);
+
 
       // Unpack buf
       double pnt[3]={0.0,0.0,0.0};
@@ -716,6 +718,7 @@ struct CommData {
       sd.closest_dist2=dist*dist;
       sd.src_coord=src_coord;
 
+
       // Find closest source node to this destination node
       tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
       
@@ -729,14 +732,19 @@ struct CommData {
         cd.closest_src_gid=-1;
       }
       cd.proc=Par::Rank();
-      
+
       // Put into temporary list
       tmp.push_back(cd);
+
     }
     //    printf(" \n ");
 
+
     // Put temporary list into long list
-    rcv_results.push_back(tmp);
+    //    rcv_results[ip].clear();
+    rcv_results[ip]=tmp;
+
+    ip++;
   }
 
   // Calculate size to send back to pnt's home proc
@@ -750,6 +758,7 @@ struct CommData {
   // Create communication structure spatial to home
   SparseMsg comm_to_home;
 
+
   // Setup pattern and sizes
   if (!rcv_pets.empty()) {
     comm_to_home.setPattern(rcv_pets.size(), (const UInt *)&(rcv_pets[0]));
@@ -758,6 +767,7 @@ struct CommData {
     comm_to_home.setPattern(0, (const UInt *)NULL);
     comm_to_home.setSizes((UInt *)NULL);
   }
+
 
   // Reset buffers
   comm_to_home.resetBuffers();
@@ -770,6 +780,7 @@ struct CommData {
     }
   }
 
+
   // Communicate point information
   comm_to_home.communicate();
 
@@ -781,12 +792,13 @@ struct CommData {
   init_cd.closest_src_gid=-2;
   init_cd.proc=-1;
   pnt_results.resize(dst_nlist.size(),init_cd); // allocate space for pnt_results and initialize
+
   for (std::vector<UInt>::iterator p = comm_to_home.inProc_begin(); p != comm_to_home.inProc_end(); ++p) {
     UInt proc = *p;
     SparseMsg::buffer *b = comm_to_home.getRecvBuffer(proc);
 
     // Figure out how many messages we have
-    int num_msgs=b->msg_size()/snd_size; // ??? IS THIS RIGHT ???
+    int num_msgs=b->msg_size()/sizeof(CommData); 
    
     // Unpack everything from this processor
     int j=0;
@@ -819,7 +831,6 @@ struct CommData {
       // next result
       j++;
     }
-    //    printf(" \n ");
 
   }
 
