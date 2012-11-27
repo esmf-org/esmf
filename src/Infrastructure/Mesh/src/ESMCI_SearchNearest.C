@@ -1,4 +1,4 @@
-// $Id: ESMCI_SearchNearest.C,v 1.5 2012/11/27 02:53:23 oehmke Exp $
+// $Id: ESMCI_SearchNearest.C,v 1.6 2012/11/27 04:13:03 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_SearchNearest.C,v 1.5 2012/11/27 02:53:23 oehmke Exp $";
+static const char *const version = "$Id: ESMCI_SearchNearest.C,v 1.6 2012/11/27 04:13:03 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -680,9 +680,16 @@ struct CommData {
     // Figure out how many messages we have
     int num_msgs=b->msg_size()/snd_size;
 
-    //rcv_results.push_back(vector <CommData>());
-    rcv_results_array[ip]=new CommData[num_msgs];
+    // Setup for results
     rcv_results_size[ip]=num_msgs;
+    rcv_results_array[ip]=NULL;
+
+    // Skip to next buffer if empty
+    if (num_msgs==0) continue;
+
+    // Allocate space for results
+    rcv_results_array[ip]=new CommData[num_msgs];
+
 
     // Unpack everything from this processor
     int jp=0;
@@ -795,12 +802,12 @@ struct CommData {
 
   // Get rid of rcv results
   if (num_rcv_pets>0) { 
-    delete [] rcv_pets;
-    delete [] rcv_results_size;
     for (int i=0; i<num_rcv_pets; i++) {
-      delete [] rcv_results_array[i];
+      if (rcv_results_array[i]!=NULL) delete [] rcv_results_array[i];
     }
-    delete [] rcv_results_array;
+    if (rcv_results_array!=NULL) delete [] rcv_results_array;
+    if (rcv_pets!=NULL) delete [] rcv_pets;
+    if (rcv_results_size!=NULL) delete [] rcv_results_size;
   }
 
   // Unpack CommData and generate results
