@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeWrite.C,v 1.15 2012/11/21 23:02:58 rokuingh Exp $
+// $Id: ESMCI_AttributeWrite.C,v 1.16 2012/11/27 18:02:00 rokuingh Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -50,7 +50,7 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.15 2012/11/21 23:02:58 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.16 2012/11/27 18:02:00 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -1689,7 +1689,11 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     // allocate space for the coordinates
-    //int num_coords = exclusiveCount[coordDim];
+    // TODO: cleanup this hardcoded initialization hack, the was needed because 
+    //       on AIX untouched bounds came back as 0 
+    if (exclusiveCount[0] == 0) exclusiveCount[0] = 1;
+    if (exclusiveCount[1] == 0) exclusiveCount[1] = 1;
+    if (exclusiveCount[2] == 0) exclusiveCount[2] = 1;
     int num_coords = exclusiveCount[0]*exclusiveCount[1]*exclusiveCount[2];
     if (cTK_string != "ESMF_TYPEKIND_R8") {
       sprintf(msgbuf,"coordinates are only available in ESMF_TYPEKIND_R8 right now..");
