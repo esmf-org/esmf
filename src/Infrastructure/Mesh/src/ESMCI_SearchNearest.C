@@ -1,4 +1,4 @@
-// $Id: ESMCI_SearchNearest.C,v 1.4 2012/11/24 23:17:59 theurich Exp $
+// $Id: ESMCI_SearchNearest.C,v 1.5 2012/11/27 02:53:23 oehmke Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_SearchNearest.C,v 1.4 2012/11/24 23:17:59 theurich Exp $";
+static const char *const version = "$Id: ESMCI_SearchNearest.C,v 1.5 2012/11/27 02:53:23 oehmke Exp $";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -652,13 +652,22 @@ struct CommData {
   // Communicate point information
   comm.communicate();
 
-  // Unpack point info and call function
-  vector<int> rcv_pets;       
-  rcv_pets.resize(comm.inProc_size(),0);
+  int num_rcv_pets=0;
+  for (std::vector<UInt>::iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
+    num_rcv_pets++;
+  }
 
-  vector<CommData> empty_vec; 
-  vector< vector<CommData> > rcv_results; 
-  rcv_results.resize(comm.inProc_size(),empty_vec);
+
+  // Hold rcv results  
+  int *rcv_pets=NULL;
+  int *rcv_results_size=NULL;
+  CommData **rcv_results_array=NULL;
+
+  if (num_rcv_pets>0) { 
+    rcv_pets=new int[num_rcv_pets];
+    rcv_results_size=new int[num_rcv_pets];
+    rcv_results_array=new CommData*[num_rcv_pets];
+  }
 
   int ip=0;
   for (std::vector<UInt>::iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
@@ -671,11 +680,12 @@ struct CommData {
     // Figure out how many messages we have
     int num_msgs=b->msg_size()/snd_size;
 
-    // build temporary vector
-    vector<CommData> tmp;
-    tmp.reserve(num_msgs); // reserve to save allocation time
+    //rcv_results.push_back(vector <CommData>());
+    rcv_results_array[ip]=new CommData[num_msgs];
+    rcv_results_size[ip]=num_msgs;
 
     // Unpack everything from this processor
+    int jp=0;
     while (!b->empty()) {
       double buf[4]; // 4 is biggest this should be (i.e. 3D+dist)
 
@@ -727,31 +737,29 @@ struct CommData {
       if (sd.closest_src_node != NULL) {
         cd.closest_dist=sqrt(sd.closest_dist2);
         cd.closest_src_gid=sd.closest_src_node->get_id();
+
+	//	printf("#%d c_s_g=%d \n", Par::Rank(),cd.closest_src_gid);
+
       } else {
         cd.closest_dist=std::numeric_limits<double>::max();;
         cd.closest_src_gid=-1;
       }
       cd.proc=Par::Rank();
 
-      // Put into temporary list
-      tmp.push_back(cd);
-
+      // Save results
+      rcv_results_array[ip][jp]=cd;
+      
+      jp++;
     }
-    //    printf(" \n ");
-
-
-    // Put temporary list into long list
-    //    rcv_results[ip].clear();
-    rcv_results[ip]=tmp;
-
+   
     ip++;
   }
 
   // Calculate size to send back to pnt's home proc
   vector<int> rcv_sizes;       
-  rcv_sizes.resize(rcv_pets.size(),0); // resize and init to 0
-  for (int i=0; i< rcv_pets.size(); i++) {
-    rcv_sizes[i]=sizeof(CommData)*rcv_results[i].size();
+  rcv_sizes.resize(num_rcv_pets,0); // resize and init to 0
+  for (int i=0; i< num_rcv_pets; i++) {
+    rcv_sizes[i]=sizeof(CommData)*rcv_results_size[i];
   }
 
 
@@ -760,8 +768,8 @@ struct CommData {
 
 
   // Setup pattern and sizes
-  if (!rcv_pets.empty()) {
-    comm_to_home.setPattern(rcv_pets.size(), (const UInt *)&(rcv_pets[0]));
+  if (num_rcv_pets>0) {
+    comm_to_home.setPattern(num_rcv_pets, (const UInt *)&(rcv_pets[0]));
     comm_to_home.setSizes((UInt *)&(rcv_sizes[0]));
   } else {
     comm_to_home.setPattern(0, (const UInt *)NULL);
@@ -773,10 +781,10 @@ struct CommData {
   comm_to_home.resetBuffers();
 
   // Pack points into buffers
-  for (int i=0; i< rcv_pets.size(); i++) {
+  for (int i=0; i< num_rcv_pets; i++) {
     SparseMsg:: buffer *b=comm_to_home.getSendBuffer(rcv_pets[i]);
-    for (int j=0; j<rcv_results[i].size(); j++) {
-      b->push((const UChar *)&(rcv_results[i][j]), (UInt)sizeof(CommData));
+    for (int j=0; j<rcv_results_size[i]; j++) {
+      b->push((const UChar *)&(rcv_results_array[i][j]), (UInt)sizeof(CommData));
     }
   }
 
@@ -784,6 +792,16 @@ struct CommData {
   // Communicate point information
   comm_to_home.communicate();
 
+
+  // Get rid of rcv results
+  if (num_rcv_pets>0) { 
+    delete [] rcv_pets;
+    delete [] rcv_results_size;
+    for (int i=0; i<num_rcv_pets; i++) {
+      delete [] rcv_results_array[i];
+    }
+    delete [] rcv_results_array;
+  }
 
   // Unpack CommData and generate results
   vector<CommData> pnt_results;  
@@ -815,6 +833,8 @@ struct CommData {
 
       // Compare and set
       if (cd.closest_src_gid > -1) {
+	//	printf("#%d LAST c_s_g=%d \n", Par::Rank(),cd.closest_src_gid);
+
         if (cd.closest_dist < closest_dist[pnt_ind]) {
           closest_dist[pnt_ind]=cd.closest_dist;
           closest_src_gid[pnt_ind]=cd.closest_src_gid;
@@ -841,7 +861,7 @@ struct CommData {
     if (closest_src_gid[i] > -1) {
       const MeshObj &dst_node = *dst_nlist[i];
 
-      //      printf("#%d dst id=%d %d closest src id=%d \n",Par::Rank(),dst_node.get_id(),GetAttr(dst_node).is_locally_owned(),closest_src_gid[i]);
+      //       printf("#%d dst id=%d %d closest src id=%d \n",Par::Rank(),dst_node.get_id(),GetAttr(dst_node).is_locally_owned(),closest_src_gid[i]);
 
       // We've found a nearest source point, so add to results list
       Search_result *sr=new Search_result();       
@@ -852,6 +872,8 @@ struct CommData {
       result.push_back(sr);
 
     } else {  
+
+      //      printf("#%d BAD \n",Par::Rank());
 
       //// check possible error condition
       if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
@@ -865,7 +887,7 @@ struct CommData {
   }
 
 #if 0
-  for (int i=0; i<rcv_pets.size(); i++) {
+  for (int i=0; i<num_rcv_pets; i++) {
     printf(" %d# to %d pnt # = ",Par::Rank(),rcv_pets[i]);
     for (int j=0; j<rcv_results[i].size(); j++) {
       printf(" %d ",rcv_results[i][j].elem_id);
