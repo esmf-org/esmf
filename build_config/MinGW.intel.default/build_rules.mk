@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.16 2011/11/28 22:05:17 theurich Exp $
+# $Id: build_rules.mk,v 1.17 2012/11/28 23:17:22 w6ws Exp $
 #
 # MinGW.intel.default
 #
@@ -17,6 +17,8 @@ ESMF_F90COMPILEOPTS    += -nologo
 ESMF_CXXCOMPILEOPTS    += -TP
 # Specify the c++ exception model
 ESMF_CXXCOMPILEOPTS    += -EHsc
+# Specify that C99 VLAs are ok
+ESMF_CXXCOMPILEOPTS    += -Qvla
 # Eliminate warnings about using _s variants of library functions
 ESMF_CXXCOMPILEOPTS    += -D_CRT_SECURE_NO_WARNINGS
 
