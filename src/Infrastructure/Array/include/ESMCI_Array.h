@@ -1,4 +1,4 @@
-// $Id: ESMCI_Array.h,v 1.81 2012/10/03 18:28:55 gold2718 Exp $
+// $Id: ESMCI_Array.h,v 1.82 2012/11/29 00:52:00 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -40,6 +40,9 @@
 #include "ESMCI_RHandle.h"
 
 #include <cstdio>
+#if defined (ESMF_OS_MinGW)
+#include <stdint.h>
+#endif
 
 //-------------------------------------------------------------------------
 
