@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute_F.C,v 1.59 2012/11/09 13:25:01 ksaint Exp $
+// $Id: ESMCI_Attribute_F.C,v 1.60 2012/12/03 19:30:50 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ using std::vector;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.59 2012/11/09 13:25:01 ksaint Exp $";
+ static const char *const version = "$Id: ESMCI_Attribute_F.C,v 1.60 2012/12/03 19:30:50 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -813,7 +813,7 @@ extern "C" {
     }
 
     nestAttPackInstanceNameLens[i] = cnapinamelist[i].length();
-    status = ESMC_CtoF90string(const_cast<char*>(cnapinamelist[i].c_str()), 
+    status = ESMC_CtoF90string(cnapinamelist[i].c_str(), 
                                &nestAttPackInstanceNameList[j], 
                                nestAttPackInstanceNameLens[i]);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
@@ -1295,7 +1295,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
   j = 0;
   for (i=0; i<lcount; i++) {
     // convert strings to F90 using F90 length
-    status = ESMC_CtoF90string(const_cast<char*> (lcvalue[i].c_str()), 
+    status = ESMC_CtoF90string(lcvalue[i].c_str(), 
       &valueList[j], lens[i]);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) {
@@ -1701,7 +1701,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
     }
 
     attPackInstanceNameLens[i] = capinamelist[i].length();
-    status = ESMC_CtoF90string(const_cast<char*>(capinamelist[i].c_str()), 
+    status = ESMC_CtoF90string(capinamelist[i].c_str(), 
                                &attPackInstanceNameList[j], 
                                attPackInstanceNameLens[i]);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
@@ -2510,7 +2510,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
 //printf("lens = %d\n", lens[i]);
 //printf("strlen = %d\n", strlen(cvalue[i].c_str()));
     // convert strings to F90 using F90 length
-    status = ESMC_CtoF90string(const_cast<char*> (cvalue[i].c_str()), &valueList[j], lens[i]);
+    status = ESMC_CtoF90string(cvalue[i].c_str(), &valueList[j], lens[i]);
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc))) {
     delete [] llens;
@@ -2984,7 +2984,7 @@ printf("!!!!!!!!!!!!!!!!!\n\n\ntypekind in = %d  -  typekind out = %d\n", *tk, a
       return;
   }
 
-  status = ESMC_CtoF90string(const_cast<char*> (cname.c_str()), name, nlen);
+  status = ESMC_CtoF90string(cname.c_str(), name, nlen);
   ESMC_LogDefault.ESMC_LogMsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_NOT_PRESENT_FILTER(rc));
 

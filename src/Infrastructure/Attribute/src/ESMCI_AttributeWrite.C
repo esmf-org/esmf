@@ -1,4 +1,4 @@
-// $Id: ESMCI_AttributeWrite.C,v 1.16 2012/11/27 18:02:00 rokuingh Exp $
+// $Id: ESMCI_AttributeWrite.C,v 1.17 2012/12/03 19:30:41 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -50,38 +50,37 @@ using std::transform;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.16 2012/11/27 18:02:00 rokuingh Exp $";
+ static const char *const version = "$Id: ESMCI_AttributeWrite.C,v 1.17 2012/12/03 19:30:41 w6ws Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
   // Prototypes of the Fortran interface functions.
+  // TODO: These should probably go in the Superstructure/AttributeAPI directory
 
-  void FTN_X(f_esmf_gridattgetinfoint)(ESMCI::Grid **grid, char *name,
-                                       int *value, //int *il_present,
-                                       //char *inputList, int *len1, int *rc,
-                                       int *rc,
-                                       ESMCI_FortranStrLenArg nlen);
-  void FTN_X(f_esmf_gridattgetinfochar)(ESMCI::Grid **grid, char *name,
-                                        char *value, int *rc,
-                                        ESMCI_FortranStrLenArg nlen,
-                                        ESMCI_FortranStrLenArg vlen);
-  void FTN_X(f_esmf_gridattgetinfointlist)(ESMCI::Grid **grid, char *name,
-                                           int *valueList, int *len1, 
-                                           int *il_present, char *inputList, 
-                                           int *lens, int *len2, int *rc, 
-                                           ESMCI_FortranStrLenArg nlen,
-                                           ESMCI_FortranStrLenArg slen);
-  void FTN_X(f_esmf_gridattgetinfor8list)(ESMCI::Grid **grid, char *name,
-                                          double *valueList, int *len1, 
-                                          int *il_present, char *inputList, 
-                                          int *lens, int *len2, int *rc, 
-                                          ESMCI_FortranStrLenArg nlen,
-                                          ESMCI_FortranStrLenArg slen);
-  void FTN_X(f_esmf_gridattgetinfologicallist)(ESMCI::Grid **grid, char *name,
-                                               bool *valueList, int *len1, 
-                                               int *il_present, char *inputList, 
-                                               int *len2, int *rc,
-                                               ESMCI_FortranStrLenArg nlen);
+  void FTN_X(f_esmf_gridattgetinfoint)(ESMCI::Grid **grid, const char *name,
+                                  int *value, int *rc,
+                                  ESMCI_FortranStrLenArg nlen);
+  void FTN_X(f_esmf_gridattgetinfochar)(ESMCI::Grid **grid, const char *name,
+                                  char *value, int *rc,
+                                  ESMCI_FortranStrLenArg nlen,
+                                  ESMCI_FortranStrLenArg vlen);
+  void FTN_X(f_esmf_gridattgetinfointlist)(ESMCI::Grid **grid, const char *name,
+                                  int *valueList, int *len1, 
+                                  int *il_present, const char *inputList, 
+                                  int *lens, int *len2, int *rc, 
+                                  ESMCI_FortranStrLenArg nlen,
+                                  ESMCI_FortranStrLenArg slen);
+  void FTN_X(f_esmf_gridattgetinfor8list)(ESMCI::Grid **grid, const char *name,
+                                  double *valueList, int *len1, 
+                                  int *il_present, const char *inputList, 
+                                  int *lens, int *len2, int *rc, 
+                                  ESMCI_FortranStrLenArg nlen,
+                                  ESMCI_FortranStrLenArg slen);
+  void FTN_X(f_esmf_gridattgetinfologicallist)(ESMCI::Grid **grid, const char *name,
+                                  bool *valueList, int *len1, 
+                                  int *il_present, const char *inputList, 
+                                  int *len2, int *rc,
+                                  ESMCI_FortranStrLenArg nlen);
 }
 
 namespace ESMCI {
@@ -1074,7 +1073,6 @@ namespace ESMCI {
   if (strncmp(inputString.c_str(), "ESMF:", 5) == 0) {
     // strip the 'ESMF:' off of the value and set as name of Attribute to be retrieved
     string mod_name = inputString.substr(5,inputString.length());
-    int nlen = strlen(mod_name.c_str());
 
     // cast the base back to a Grid ;)
     ESMCI::Grid *grid = reinterpret_cast<ESMCI::Grid *> (attrList.at(0)->attrBase);
@@ -1083,8 +1081,9 @@ namespace ESMCI {
     int int_value = 0;
     // call into the glue layer to Fortran Attribute layer
     FTN_X(f_esmf_gridattgetinfoint)(&grid, 
-          const_cast<char *> (mod_name.c_str()), &int_value, 
-          &localrc, nlen);
+          mod_name.c_str(), &int_value, 
+          &localrc,
+          mod_name.size());
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     
     // return the output value
@@ -1147,7 +1146,6 @@ namespace ESMCI {
   if (strncmp(inputString.c_str(), "ESMF:", 5) == 0) {
     // strip the 'ESMF:' off of the value and set as name of Attribute to be retrieved
     string mod_name = inputString.substr(5,inputString.length());
-    int nlen = strlen(mod_name.c_str());
 
     // cast the base back to a Grid ;)
     ESMCI::Grid *grid = reinterpret_cast<ESMCI::Grid *> (attrList.at(0)->attrBase);
@@ -1158,9 +1156,9 @@ namespace ESMCI {
     int vlen = ESMF_MAXSTR;
       // call into the glue layer to Fortran Attribute layer
     FTN_X(f_esmf_gridattgetinfochar)(&grid, 
-               const_cast<char *> (mod_name.c_str()), 
+               mod_name.c_str(), 
                char_value, 
-               &localrc, nlen, vlen);
+               &localrc, mod_name.size(), vlen);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     
     // TODO: related to fixed buffer, convert to string and resize to remove cruft
@@ -1549,7 +1547,6 @@ namespace ESMCI {
 
   // strip the 'ESMF:' off of the value and set as name of Attribute to be retrieved
   string mod_name = value.substr(5,value.length());
-  int nlen = strlen(mod_name.c_str());
    
   // cast the base back to a Grid ;)
   ESMCI::Grid *grid = reinterpret_cast<ESMCI::Grid *> (attr->attrBase);
@@ -1576,8 +1573,9 @@ namespace ESMCI {
     
     // call into the glue layer to Fortran Attribute layer
     FTN_X(f_esmf_gridattgetinfoint)(&grid, 
-               const_cast<char *> (mod_name.c_str()), &int_value, 
-               &localrc, nlen);
+               mod_name.c_str(), &int_value, 
+               &localrc,
+               mod_name.size());
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   
     // write the output value to the output stream and write to XML file
@@ -1597,9 +1595,9 @@ namespace ESMCI {
     
     // call into the glue layer to Fortran Attribute layer
     FTN_X(f_esmf_gridattgetinfochar)(&grid, 
-               const_cast<char *> (mod_name.c_str()), 
-               char_value, 
-               &localrc, nlen, vlen);
+               mod_name.c_str(), 
+               char_value, &localrc,
+               mod_name.size(), vlen);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     
     // TODO: related to fixed buffer, convert to string and resize to remove cruft
@@ -1643,25 +1641,19 @@ namespace ESMCI {
 
     // first retrieve the dimCount and typekind of the coordinates
     string dimCount_name = "dimCount";
-    nlen = 8;
-    char dimCount_fname[nlen];
-    localrc = ESMC_CtoF90string(const_cast<char *> (dimCount_name.c_str()), dimCount_fname, nlen);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     int dimCount = 0;
-    FTN_X(f_esmf_gridattgetinfoint)(&grid, dimCount_fname, 
-                                    &dimCount, &localrc, nlen);
+    FTN_X(f_esmf_gridattgetinfoint)(&grid, dimCount_name.c_str(), 
+                                    &dimCount, &localrc,
+                                    dimCount_name.size());
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     string cTK_name = "coordTypeKind";
-    nlen = 13;
-    char cTK_fname[nlen];
-    localrc = ESMC_CtoF90string(const_cast<char *> (cTK_name.c_str()), cTK_fname, nlen);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     // TODO: remove fixed length buffer
     char coordTypeKind[ESMF_MAXSTR];
     int vlen = ESMF_MAXSTR;
-    FTN_X(f_esmf_gridattgetinfochar)(&grid, cTK_fname, 
-                                     coordTypeKind, &localrc, nlen, vlen);
+    FTN_X(f_esmf_gridattgetinfochar)(&grid, cTK_name.c_str(), 
+                                     coordTypeKind, &localrc,
+                                     cTK_name.size(), vlen);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     // TODO: related to fixed buffer, convert to string and resize to remove cruft
@@ -1671,21 +1663,16 @@ namespace ESMCI {
     // next retrieve the exclusiveCount so that we can allocate space for coordinates
     int il_present = 0;
     string exclusiveCount_name = "exclusiveCount";
-    nlen = 14;
-    char exclusiveCount_fname[nlen];
-    localrc = ESMC_CtoF90string(const_cast<char *> (exclusiveCount_name.c_str()), 
-                                                    exclusiveCount_fname, nlen);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     int *exclusiveCount;
     exclusiveCount = new int[dimCount];
     exclusiveCount[0] = 1;
     exclusiveCount[1] = 1;
     exclusiveCount[2] = 1;
-    FTN_X(f_esmf_gridattgetinfointlist)(&grid, exclusiveCount_fname, 
+    FTN_X(f_esmf_gridattgetinfointlist)(&grid, exclusiveCount_name.c_str(), 
                exclusiveCount, &dimCount,
-               &il_present, const_cast<char *> (inputString.c_str()), 
-               lens, &lens_len,
-               &localrc, nlen, slen);
+               &il_present, inputString.c_str(), 
+               lens, &lens_len, &localrc,
+               exclusiveCount_name.size(), slen);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     // allocate space for the coordinates
@@ -1705,16 +1692,15 @@ namespace ESMCI {
 
     // now retrieve the coordinates
     il_present = 1;
-    nlen = strlen(mod_name.c_str());
     double *valueList;
     valueList = new double[num_coords];
 
     FTN_X(f_esmf_gridattgetinfor8list)(&grid, 
-               const_cast<char *> (mod_name.c_str()), 
+               mod_name.c_str(), 
                valueList, &num_coords,
                &il_present, const_cast<char *> (inputString.c_str()), 
-               lens, &lens_len,
-               &localrc, nlen, slen);
+               lens, &lens_len, &localrc,
+               mod_name.size(), slen);
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     
     // write the output values to the output stream and write to XML file
