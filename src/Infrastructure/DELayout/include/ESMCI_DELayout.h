@@ -1,4 +1,4 @@
-// $Id: ESMCI_DELayout.h,v 1.43 2012/10/22 21:49:37 theurich Exp $
+// $Id: ESMCI_DELayout.h,v 1.44 2012/12/03 19:33:52 w6ws Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2012, University Corporation for Atmospheric Research, 
@@ -423,7 +423,7 @@ class XXE{
     int storeXxeSub(XXE *xxeSub);
     int storeBufferInfo(char *buffer, int size, int vectorLengthMultiplier);
     char *getBufferInfoPtr(){
-      int i=bufferInfoList.size();
+      size_t i=bufferInfoList.size();
       if (i>0)
         return (char *)bufferInfoList[i-1];
       else
