@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.163 2012/11/27 05:11:47 theurich Exp $
+! $Id: ESMF_UtilTypes.F90,v 1.164 2012/12/03 16:02:48 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2012, University Corporation for Atmospheric Research,
@@ -81,13 +81,13 @@
 !EOPI
 
       integer, parameter :: ESMF_VERSION_MAJOR        = 6
-      integer, parameter :: ESMF_VERSION_MINOR        = 1
+      integer, parameter :: ESMF_VERSION_MINOR        = 2
       integer, parameter :: ESMF_VERSION_REVISION     = 0
       integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 0
       logical, parameter :: ESMF_VERSION_PUBLIC       = .false.
-      logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .false.
+      logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .true.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "6.1.0"
+      character(*), parameter :: ESMF_VERSION_STRING  = "6.2.0 beta snapshot"
 
 !------------------------------------------------------------------------------
 !
