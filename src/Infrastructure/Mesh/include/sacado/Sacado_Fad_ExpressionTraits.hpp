@@ -1,5 +1,4 @@
-// $Id: Sacado_Fad_ExpressionTraits.hpp,v 1.1 2007/08/07 20:45:57 dneckels Exp $ 
-// $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/Infrastructure/Mesh/include/sacado/Sacado_Fad_ExpressionTraits.hpp,v $ 
+// $Id: Sacado_Fad_ExpressionTraits.hpp,v 1.2 2012/12/12 19:42:03 theurich Exp $ 
 // @HEADER
 // ***********************************************************************
 // 

@@ -4,9 +4,7 @@
 # Runs Tex files through LaTex and latex2html to create Postscript
 # and *.html files that you can examine.
 #===============================================================================
-# CVS $Id: bld,v 1.4 2010/10/27 22:14:52 murphysj Exp $
-# CVS $Source: /mnt/twixshare/Storage/Archive-SF-Repos/ESMF_CVS_Repo/esmf/src/doc/dev_guide/bld,v $
-# CVS $Name:  $
+# CVS $Id: bld,v 1.5 2012/12/12 19:42:11 theurich Exp $
 #===============================================================================
 # Updates version of the ESMF Software Developer's Guide:
 #
@@ -15,7 +13,7 @@
 # - builds postscript file and compresses it
 # - copies postscript file to CGD ftp site.
 #
-# $Id: bld,v 1.4 2010/10/27 22:14:52 murphysj Exp $
+# $Id: bld,v 1.5 2012/12/12 19:42:11 theurich Exp $
 #
 # History:
 #    C. DeLuca 4/19/01
