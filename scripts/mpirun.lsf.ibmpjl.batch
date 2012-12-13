@@ -37,22 +37,14 @@ num_procs=$2
 
 shift 2
 
-prog=$*
+progWithArgs=$*
 
-echo executing: bsub $ESMF_MPIBATCHOPTIONS -n $num_procs -oo outfile  \"mpirun.lsf ${prog}\"
+echo executing: bsub $ESMF_MPIBATCHOPTIONS -n $num_procs -oo outfile  \"mpirun.lsf ${progWithArgs}\"
 
-bsub $ESMF_MPIBATCHOPTIONS  -n $num_procs -oo outfile "mpirun.lsf ${prog}" 
+bsub $ESMF_MPIBATCHOPTIONS  -n $num_procs -oo outfile "mpirun.lsf ${progWithArgs}" 
 
 # Wait for the outfile to be available.
 sleep 30
 
-mv -f outfile  ${prog}.stdout 
-
-
-
-
-
-
-
-
-
+cat ./PET* >  ./$1.Log
+mv -f outfile  $1.stdout 
