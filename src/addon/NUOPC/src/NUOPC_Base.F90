@@ -850,8 +850,8 @@ module NUOPC_Base
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    allocate(dstFieldList(srcCount))
-    call ESMF_FieldBundleGet(srcFields, fieldList=dstFieldList, rc=rc)
+    allocate(dstFieldList(dstCount))
+    call ESMF_FieldBundleGet(dstFields, fieldList=dstFieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
