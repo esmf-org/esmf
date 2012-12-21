@@ -174,7 +174,7 @@ ESMF_F90COMPILEFIXCPP    = -ffixed
 ############################################################
 # Determine where absoft f90's libraries are located
 #
-ESMF_CXXLINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.absoft $(ESMF_F90COMPILER)))
+ESMF_CXXLINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.absoft $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
@@ -184,7 +184,7 @@ ESMF_F90LINKLIBS += -lU77 -lstdc++
 ############################################################
 # Link against libesmf.a using the C++ linker front-end
 #
-ESMF_CXXLINKLIBS += -lU77 $(shell $(ESMF_DIR)/scripts/libs.absoft $(ESMF_F90COMPILER))
+ESMF_CXXLINKLIBS += -lU77 $(shell $(ESMF_DIR)/scripts/libs.absoft $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS))
 
 ############################################################
 # Blank out shared library options
