@@ -51,13 +51,13 @@
 
 
 #define ESMF_VERSION_MAJOR        6
-#define ESMF_VERSION_MINOR        2
-#define ESMF_VERSION_REVISION     0
+#define ESMF_VERSION_MINOR        1
+#define ESMF_VERSION_REVISION     1
 #define ESMF_VERSION_PATCHLEVEL   0
 #define ESMF_VERSION_PUBLIC       'F'
-#define ESMF_VERSION_BETASNAPSHOT 'T'
+#define ESMF_VERSION_BETASNAPSHOT 'F'
 
-#define ESMF_VERSION_STRING "6.2.0 beta snapshot"
+#define ESMF_VERSION_STRING "6.1.1"
 
 #endif   // ESMC_MACROS_H
 
