@@ -42,11 +42,8 @@ AllocError(ESMC_CONTEXT,rc)
 #define ESMC_LogMsgAllocError(msg,rc) \
 MsgAllocError(msg,ESMC_CONTEXT,rc)
 
-#define MsgFoundError(status,msg,rc) \
+#define ESMC_LogMsgFoundError(status,msg,rc) \
 MsgFoundError(status,msg,ESMC_CONTEXT,rc)
-
-#define ESMC_LogMsgFoundError \
-MsgFoundError
 
 #define ESMC_LogWrite(msg,logtype) \
 Write(msg,logtype,ESMC_CONTEXT)
