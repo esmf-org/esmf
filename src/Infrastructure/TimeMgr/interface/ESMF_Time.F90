@@ -247,10 +247,10 @@
 !
 ! !INTERFACE:
 !     interface operator(-)
-!     time3 = time1 - time2      
+!     timeinterval = time1 - time2      
 !
 ! !RETURN VALUE:
-!     type(ESMF_Time) :: time3
+!     type(ESMF_TimeInterval) :: timeinterval
 ! 
 ! !ARGUMENTS:
 !     type(ESMF_Time),         intent(in) :: time1
