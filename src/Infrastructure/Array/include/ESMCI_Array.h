@@ -40,9 +40,7 @@
 #include "ESMCI_RHandle.h"
 
 #include <cstdio>
-#if defined (ESMF_OS_MinGW)
 #include <stdint.h>
-#endif
 
 //-------------------------------------------------------------------------
 
