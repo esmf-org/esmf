@@ -340,6 +340,16 @@ read_loop:  &
         read (unit2, '(a)', iostat=ioerr2) string2
         if (ioerr1 /= ioerr2) exit
 
+#if defined (ESMF_OS_MinGW)
+        ! Ignore Windows carraige return character
+        do, i=1, len (string1)
+            string1(i:i) = merge (string1(i:i), ' ', string1(i:i) /= achar (13))
+        end do
+
+        do, i=1, len (string2)
+            string2(i:i) = merge (string2(i:i), ' ', string2(i:i) /= achar (13))
+        end do
+#endif
         select case (ioerr1)
         case (:-1)
           ESMF_TestFileCompare = .true.
@@ -366,6 +376,14 @@ exclusion_loop:  &
         end select
 
       end do read_loop
+
+#if 0
+      if (.not. ESMF_TestFileCompare) then
+        print *, 'ESMF_TestFileCompare: comparison error:'
+        print *, '  string1 = >', trim (string1), '<'
+        print *, '  string2 = >', trim (string2), '<'
+      end if
+#endif
 
       close (unit2)
       close (unit1)
