@@ -1525,18 +1525,18 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
     type(ESMF_Field) :: ESMF_FieldCreateGridTKR
 !
 ! !ARGUMENTS:
-    type(ESMF_Grid),       intent(in)            :: grid               
-    type(ESMF_TypeKind_Flag),   intent(in)            :: typekind
+    type(ESMF_Grid),         intent(in)            :: grid               
+    type(ESMF_TypeKind_Flag),intent(in)            :: typekind
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
-    type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc 
-    integer,               intent(in),  optional :: gridToFieldMap(:)    
-    integer,               intent(in),  optional :: ungriddedLBound(:)
-    integer,               intent(in),  optional :: ungriddedUBound(:)
-    integer,               intent(in),  optional :: totalLWidth(:)
-    integer,               intent(in),  optional :: totalUWidth(:)
-    character (len=*),     intent(in),  optional :: name 
-    integer,               intent(out), optional :: rc              
+    type(ESMF_Index_Flag),   intent(in),  optional :: indexflag
+    type(ESMF_StaggerLoc),   intent(in),  optional :: staggerloc 
+    integer,                 intent(in),  optional :: gridToFieldMap(:)    
+    integer,                 intent(in),  optional :: ungriddedLBound(:)
+    integer,                 intent(in),  optional :: ungriddedUBound(:)
+    integer,                 intent(in),  optional :: totalLWidth(:)
+    integer,                 intent(in),  optional :: totalUWidth(:)
+    character (len=*),       intent(in),  optional :: name 
+    integer,                 intent(out), optional :: rc              
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -1561,7 +1561,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
 !      aligned with the global index space, if a global index space is well
 !      defined by the associated Grid. See section \ref{const:indexflag}
-!      for a list of valid indexflag options.
+!      for a list of valid indexflag options. The default indexflag value is the 
+!      one stored in then {\tt ESMF\_Grid} object. Currently it's 
+!      erroneous to specify an indexflag
+!      different from the one stored in the {\tt ESMF\_Grid} object.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values see section \ref{const:staggerloc}.
@@ -1702,7 +1705,7 @@ end function ESMF_FieldCreateGridTKR
     type(ESMF_Grid),       intent(in)            :: grid               
     type(ESMF_ArraySpec),  intent(in)            :: arrayspec     
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Index_Flag),  intent(in),  optional :: indexflag
+    type(ESMF_Index_Flag), intent(in),  optional :: indexflag
     type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc 
     integer,               intent(in),  optional :: gridToFieldMap(:)    
     integer,               intent(in),  optional :: ungriddedLBound(:)
@@ -1735,7 +1738,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      i.e. (1, 1, ..., 1). Alternatively the DE-local index space can be
 !      aligned with the global index space, if a global index space is well
 !      defined by the associated Grid. See section \ref{const:indexflag}
-!      for a list of valid indexflag options.
+!      for a list of valid indexflag options. The default indexflag value is the 
+!      one stored in then {\tt ESMF\_Grid} object. Currently it's 
+!      erroneous to specify an indexflag 
+!      different from the one stored in the {\tt ESMF\_Grid} object.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values see section \ref{const:staggerloc}.
@@ -2140,6 +2146,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{const:indexflag} for a list of valid indexflag options. @\
+!       Currently it's erroneous to specify an indexflag @\
+!       different from the one stored in the {\tt ESMF\_Grid} object. @\
 ! \item [{[datacopyflag]}] @\
 !       Whether to copy the contents of the {\tt farray} or reference it directly. @\
 !       For valid values see \ref{const:datacopyflag}.  The default is @\
