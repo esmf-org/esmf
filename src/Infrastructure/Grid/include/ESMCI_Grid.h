@@ -433,9 +433,9 @@ template <class TYPE>
 
   // Grid Destruct
  private:
-  void destruct();
+  void destruct(bool followCreator=true);
  public:
-  ~Grid(){destruct();}
+  ~Grid(){destruct(false);}
 
   // get lower stagger offset for a particular localDe and staggerloc
   int getLDEStaggerUOffset(
