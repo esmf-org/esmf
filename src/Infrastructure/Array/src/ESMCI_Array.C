@@ -251,7 +251,8 @@ Array::Array(
 // !INTERFACE:
 void Array::destruct(bool followCreator){
 //
-// TODO: The followCreator flag is only needed until we have reference counting // TODO: For now followCreator, which by default is true, will be coming in as
+// TODO: The followCreator flag is only needed until we have reference counting
+// TODO: For now followCreator, which by default is true, will be coming in as
 // TODO: false when calling through the native destructor. This prevents
 // TODO: sequence problems during automatic garbage collection unitl reference
 // TODO: counting comes in to solve this problem in the final manner.
@@ -308,8 +309,6 @@ void Array::destruct(bool followCreator){
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
         throw localrc;  // bail out with exception
     }
-    
-    
   }
 }
 //-----------------------------------------------------------------------------
