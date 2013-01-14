@@ -2,7 +2,7 @@
 ! $Id: ESMF_RegridWeightGen.F90,v 1.79 2012/11/21 00:18:28 oehmke Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2012, University Corporation for Atmospheric Research,
+! Copyright 2002-2013, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -741,7 +741,7 @@ subroutine PrintVersionInfo()
        print *, ""
        print *, "Earth System Modeling Framework"
        print *, ""
-       print *, "Copyright (c) 2002-2012 University Corporation for Atmospheric Research,"
+       print *, "Copyright (c) 2002-2013 University Corporation for Atmospheric Research,"
        print *, "Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory,"
        print *, "University of Michigan, National Centers for Environmental Prediction,"
        print *, "Los Alamos National Laboratory, Argonne National Laboratory,"

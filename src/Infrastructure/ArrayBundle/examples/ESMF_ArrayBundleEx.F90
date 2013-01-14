@@ -1,7 +1,7 @@
 ! $Id: ESMF_ArrayBundleEx.F90,v 1.21 2012/09/21 15:12:07 theurich Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2012, University Corporation for Atmospheric Research,
+! Copyright 2002-2013, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
