@@ -90,14 +90,17 @@ program ESMF_MeshEx
 !
 ! This section describes the use of the ESMF Mesh class. It starts with an explanation and examples of 
 ! creating a Mesh and then goes through other Mesh methods. This set of sections covers the use of the 
-! Mesh class interfaces, for further detail which applies to using a Field specifically on created on a Mesh, please see 
+! Mesh class interfaces, for further detail which applies to creating a Field on a Mesh, please see 
 ! Section~\ref{sec:field:usage:create_mesh_arrayspec}.
 !
 !\subsubsection{Mesh creation}
 !\label{sec:mesh:usage:meshCreation}
 !
-! To create a Mesh we need to set some properties of the Mesh as a whole,  some properties of each node in the mesh and 
-! then some properties of each element which connects the nodes. 
+! To create a Mesh we need to set some properties of the Mesh as a whole, some properties of each node in the mesh and 
+! then some properties of each element which connects the nodes. Here a {\bf node}, also known as a vertex or corner, is a part of 
+! a Mesh which represents a single point. An {\bf element}, also known as a cell, is a part of a mesh which represents a small 
+! region of space. In 2D elements are 2D regions such as triangles. In 3D elements are 3D regions such as
+! tetrahedra. Elements are described in terms of a connected set of nodes which represent their corners. 
 !
 ! For the Mesh as a whole we set its parametric dimension ({\tt parametricDim}) and spatial dimension ({\tt spatialDim}). 
 ! The parametric dimension of a Mesh is the dimension of the topology of the Mesh, this can be thought of as the dimension of 
