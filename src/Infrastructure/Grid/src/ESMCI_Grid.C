@@ -1,7 +1,7 @@
 // $Id: ESMCI_Grid.C,v 1.140 2012/09/07 23:16:07 oehmke Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2012, University Corporation for Atmospheric Research, 
+// Copyright 2002-2013, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -4050,7 +4050,7 @@ Grid::Grid(
 // !IROUTINE:  ESMCI::Grid::destruct
 //
 // !INTERFACE:
-void Grid::destruct(void){
+void Grid::destruct(bool followCreator){
 //
 // !RETURN VALUE:
 //    none
@@ -4064,6 +4064,8 @@ void Grid::destruct(void){
 //EOPI
 //-----------------------------------------------------------------------------
  if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
+
+   if (followCreator){
 
    // Delete external class contents of Grid before deleting Grid
    //// Delete Arrays
@@ -4111,7 +4113,9 @@ void Grid::destruct(void){
      if (staggerDistgridList[i]!=ESMC_NULL_POINTER) {
        DistGrid::destroy(&staggerDistgridList[i]);
      }
-   }   
+   }
+   
+   }
 
    if (staggerDistgridList != ESMC_NULL_POINTER) delete[] staggerDistgridList;
 

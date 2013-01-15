@@ -1,7 +1,7 @@
 ! $Id: ESMF_IOUGrid.F90,v 1.8 2012/04/16 22:31:01 peggyli Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2012, University Corporation for Atmospheric Research,
+! Copyright 2002-2013, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

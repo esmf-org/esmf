@@ -224,9 +224,9 @@ module NUOPC_Driver
       
       if (i==0) then
       
-        is%wrap%modelComp(0) = gcomp  ! driver itself is in slot 0
-        is%wrap%modelIS(0) = importState
-        is%wrap%modelES(0) = exportState
+        is%wrap%modelComp(0) = gcomp      ! driver itself is in slot 0
+        is%wrap%modelIS(0) = importState  ! driver import State
+        is%wrap%modelES(0) = exportState  ! driver export State
         
       else if (i>0) then
       
@@ -402,7 +402,7 @@ module NUOPC_Driver
       enddo
     enddo
 
-    ! initialize the default Run Sequence: grouped connectors before models
+    ! initialize the default Run Sequence...
     nullify(is%wrap%runSeq) ! initialize
     is%wrap%runPhaseToRunSeqMap = 0 ! initialize
     
@@ -415,6 +415,8 @@ module NUOPC_Driver
     is%wrap%runPhaseToRunSeqMap(1) = 1
     
     ! add run elements to the one run sequence element
+    ! ... 1st block: connectors driver -> all of its model components
+    !                connectors between all of the model components
     do i=0, is%wrap%modelCount
       do j=1, is%wrap%modelCount
         if (j==i) cycle ! skip self connection
@@ -423,11 +425,13 @@ module NUOPC_Driver
           line=__LINE__, file=FILENAME)) return  ! bail out
       enddo
     enddo
+    ! ... 2nd block: model components
     do i=1, is%wrap%modelCount
       call NUOPC_RunElementAdd(is%wrap%runSeq(1), i=i, j=-1, phase=1, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     enddo
+    ! ... 2nd block: connectors all of model components -> driver
     do i=1, is%wrap%modelCount
       j=0
       call NUOPC_RunElementAdd(is%wrap%runSeq(1), i=i, j=j, phase=1, rc=rc)
