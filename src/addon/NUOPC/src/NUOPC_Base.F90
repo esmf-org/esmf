@@ -1350,11 +1350,11 @@ endif
     jmin_t = lbound(CoordY,1)
     jmax_t = ubound(CoordY,1)
       
-    coordX(imin_t) = (imin_t-1)*dx + 0.5*dx
+    coordX(imin_t) = x_min + (imin_t-1)*dx + 0.5*dx
     do i = imin_t+1, imax_t
       coordX(i) = coordX(i-1) + dx
     enddo
-    coordY(jmin_t) = (jmin_t-1)*dy + 0.5*dy
+    coordY(jmin_t) = y_min + (jmin_t-1)*dy + 0.5*dy
     do j = jmin_t+1, jmax_t
       coordY(j) = coordY(j-1) + dy
     enddo
