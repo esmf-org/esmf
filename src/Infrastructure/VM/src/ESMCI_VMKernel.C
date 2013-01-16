@@ -5192,10 +5192,12 @@ namespace ESMCI{
 #include <Winsock.h>
 typedef int socklen_t;
 typedef char* value_ptr_t;
+#define ECONNABORTED WSAECONNABORTED
 #define EALREADY WSAEALREADY
 #define ECONNREFUSED WSAECONNREFUSED
 #define EINPROGRESS WSAEINPROGRESS
 #define EWOULDBLOCK WSAEWOULDBLOCK
+#define errno WSAGetLastError()
 
 #else
 
@@ -5376,14 +5378,12 @@ namespace ESMCI {
       if (connect(sock, (struct sockaddr *) &name, sizeof(name)) < 0){
         // connection has not (yet) been established
         perror("socketClientInit connect(), not yet established... continue");
-#if !defined (ESMF_OS_MinGW)
         if (errno==ECONNABORTED){
           // on some systems, e.g. linux, repeated call to connect may give this
           perror("socketClientInit connect(), but continue");
           VMK::wtime(&t1);  // update the endtime
           continue;         // next attempt
         }
-#endif
         // check for unexpected error conditions and bail
         if (errno!=EINPROGRESS && errno!=EALREADY && errno!=EWOULDBLOCK
           && errno!=ECONNREFUSED){
