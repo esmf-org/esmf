@@ -2,6 +2,7 @@
 
 \documentclass[english]{article}
 \usepackage{babel}
+\usepackage{longtable}
 \usepackage{html}
 \usepackage{times}
 \usepackage{graphicx}
@@ -19,6 +20,8 @@
 {reqlist}
 {\begin{list} {} {} \rm \item[]}
 {\end{list}}
+
+\setlongtables
 
 %===============================================================================
 % User-defined commands
