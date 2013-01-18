@@ -97,19 +97,13 @@ program ESMF_MeshEx
 !\label{sec:mesh:usage:meshCreation}
 !
 ! To create a Mesh we need to set some properties of the Mesh as a whole, some properties of each node in the mesh and 
-! then some properties of each element which connects the nodes. Here a {\bf node}, also known as a vertex or corner, is a part of 
-! a Mesh which represents a single point. An {\bf element}, also known as a cell, is a part of a mesh which represents a small 
-! region of space. In 2D elements are 2D regions such as triangles. In 3D elements are 3D regions such as
-! tetrahedra. Elements are described in terms of a connected set of nodes which represent their corners. 
+! then some properties of each element which connects the nodes (for a definition of node and element please see 
+! Section~\ref{sec:meshrep}).
 !
 ! For the Mesh as a whole we set its parametric dimension ({\tt parametricDim}) and spatial dimension ({\tt spatialDim}). 
-! The parametric dimension of a Mesh is the dimension of the topology of the Mesh, this can be thought of as the dimension of 
-! the elements which make up the Mesh. For example, a Mesh composed of triangles would have a parametric dimension of 2, whereas
-! a Mesh composed of tetrahedra would have a parametric dimension of 3. A Mesh's spatial dimension, on the other hand, is the 
-! dimension of the space the Mesh is embedded in, in other words the number of coordinate dimensions needed to describe the 
-! location of the nodes making up the Mesh. For example, a Mesh constructed of squares on a plane would have a parametric 
-! dimension of 2 and a spatial dimension of 2, whereas if that same Mesh were used to represent the 2D surface of a sphere 
-! then the Mesh would still have a parametric dimension of 2, but now its spatial dimension would be 3. 
+! A Meshes' parametric dimension can  be thought of as the dimension of the elements which make up the Mesh. 
+! A Mesh's spatial dimension, on the other hand, is the is the number of coordinate dimensions needed to describe the location of 
+! the nodes making up the Mesh. (For a fuller definition of these terms please see Section~\ref{sec:meshrep}.)
 !
 ! The structure of the per node and element information used to create a Mesh is influenced by the Mesh distribution strategy. 
 ! The Mesh class is distributed by elements. This means that a node must be present on any PET that contains an element 
