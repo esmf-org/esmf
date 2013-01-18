@@ -14,13 +14,31 @@ source or destination or both of an interpolaton (i.e. an {\tt ESMF\_FieldRegrid
 which allows data to be moved between unstructured grids. This section describes the Mesh 
 and how to create and use them in ESMF. 
 
-\subsubsection{Mesh representation in ESMF}
+\subsubsection{Mesh representation in ESMF}\label{sec:meshrep}
 
-A Mesh in ESMF is described in terms of {\bf nodes} and {\bf elements}. A node is a point 
-in space which represents where the coordinate information in a Mesh is located. An element 
-is a higher dimensional shape constructed of nodes. Elements give a Mesh its shape and define 
-the relationship of the nodes to one another. Field data may be located on either the nodes
-or elements of a Mesh. 
+A Mesh in ESMF is constructed of {\bf nodes} and {\bf elements}.
+
+A {\bf node}, also known as a vertex or corner, is a part of a Mesh which represents a single point. Coordinate information is
+set in a node.
+
+An {\bf element}, also known as a cell, is a part of a mesh which represents a small 
+region of space. Elements are described in terms of a connected set of nodes which represent locations along their boundaries.
+
+Field data may be located on either the nodes or elements of a Mesh. 
+
+\medskip
+
+The dimension of a Mesh in ESMF is specified with two parameters the {\bf parametric dimension} and the {\bf spatial dimension}.
+
+The {\bf parametric dimension} of a Mesh is the dimension of the topology of the Mesh, this can be thought of as the dimension of 
+the elements which make up the Mesh. For example, a Mesh composed of triangles would have a parametric dimension of 2, whereas
+a Mesh composed of tetrahedra would have a parametric dimension of 3. 
+
+The {\bf spatial dimension} of a Mesh is the dimension of the space the Mesh is embedded in, in other words the number of coordinate dimensions needed to describe the location of the nodes making up the Mesh. 
+
+For example, a Mesh constructed of squares on a plane would have a parametric dimension of 2 and a spatial dimension of 2, 
+whereas if that same Mesh were used to represent the 2D surface of a sphere then the Mesh would still have a parametric dimension 
+of 2, but now its spatial dimension would be 3. 
 
 \subsubsection{Supported Meshes}
 
