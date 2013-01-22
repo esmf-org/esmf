@@ -191,23 +191,24 @@ extern "C" {
   ///////////////////////////////////////////////////////////////////////////////////
 
   void FTN_X(c_esmc_gridget)(ESMCI::Grid **_grid, 
-                           ESMC_TypeKind_Flag *_coordTypeKind,
-                           int *_dimCount, 
-			   int *_tileCount,
-			   ESMCI::DistGrid **_distgrid,
-                           int *_staggerLocCount, 
-			   ESMCI::InterfaceInt **_distgridToGridMap, 
-			   ESMCI::InterfaceInt **_coordDimCount,
-			   int *_arbDim,
-			   int *_rank,
-			   int *_arbDimCount,
-			   ESMCI::InterfaceInt **_coordDimMap,		  
-			   ESMCI::InterfaceInt **_gridEdgeLWidth, 	  
-			   ESMCI::InterfaceInt **_gridEdgeUWidth,   
-			   ESMCI::InterfaceInt **_gridAlign,		  
-			   ESMC_IndexFlag *_indexflag,
-                           int *_localDECount,
-			   int *_rc){
+                             ESMC_TypeKind_Flag *_coordTypeKind,
+                             int *_dimCount, 
+                             int *_tileCount,
+                             ESMCI::DistGrid **_distgrid,
+                             int *_staggerLocCount, 
+                             ESMCI::InterfaceInt **_distgridToGridMap, 
+                             int *_coordSys, 
+                             ESMCI::InterfaceInt **_coordDimCount,
+                             int *_arbDim,
+                             int *_rank,
+                             int *_arbDimCount,
+                             ESMCI::InterfaceInt **_coordDimMap,		  
+                             ESMCI::InterfaceInt **_gridEdgeLWidth, 	  
+                             ESMCI::InterfaceInt **_gridEdgeUWidth,   
+                             ESMCI::InterfaceInt **_gridAlign,		  
+                             ESMC_IndexFlag *_indexflag,
+                             int *_localDECount,
+                             int *_rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_gridget()"
 
@@ -242,7 +243,6 @@ extern "C" {
     distDimCount=grid->getDistDimCount();
     dimCount = grid->getDimCount();
 
-
     // coordTypeKind
     if (ESMC_NOT_PRESENT_FILTER(_coordTypeKind) != ESMC_NULL_POINTER)
       *_coordTypeKind = grid->getTypeKind();
@@ -266,6 +266,10 @@ extern "C" {
     // staggerLocCount
     if (ESMC_NOT_PRESENT_FILTER(_staggerLocCount) != ESMC_NULL_POINTER)
       *_staggerLocCount = grid->getStaggerLocCount();
+
+    // coordSys
+    if (ESMC_NOT_PRESENT_FILTER(_coordSys) != ESMC_NULL_POINTER)
+      *_coordSys = grid->getCoordSys();
 
     // get distgridToGridMap 
     if (*_distgridToGridMap != NULL){
