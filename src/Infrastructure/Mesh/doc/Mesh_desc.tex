@@ -28,16 +28,16 @@ Field data may be located on either the nodes or elements of a Mesh.
 
 \medskip
 
-The dimension of a Mesh in ESMF is specified with two parameters the {\bf parametric dimension} and the {\bf spatial dimension}.
+The dimension of a Mesh in ESMF is specified with two parameters: the {\bf parametric dimension} and the {\bf spatial dimension}.
 
-The {\bf parametric dimension} of a Mesh is the dimension of the topology of the Mesh, this can be thought of as the dimension of 
+The {\bf parametric dimension} of a Mesh is the dimension of the topology of the Mesh. This can be thought of as the dimension of 
 the elements which make up the Mesh. For example, a Mesh composed of triangles would have a parametric dimension of 2, whereas
 a Mesh composed of tetrahedra would have a parametric dimension of 3. 
 
-The {\bf spatial dimension} of a Mesh is the dimension of the space the Mesh is embedded in, in other words the number of coordinate dimensions needed to describe the location of the nodes making up the Mesh. 
+The {\bf spatial dimension} of a Mesh is the dimension of the space the Mesh is embedded in. In other words, it is the number of coordinate dimensions needed to describe the location of the nodes making up the Mesh. 
 
-For example, a Mesh constructed of squares on a plane would have a parametric dimension of 2 and a spatial dimension of 2, 
-whereas if that same Mesh were used to represent the 2D surface of a sphere then the Mesh would still have a parametric dimension 
+For example, a Mesh constructed of squares on a plane would have a parametric dimension of 2 and a spatial dimension of 2. 
+If that same Mesh were used to represent the 2D surface of a sphere, then the Mesh would still have a parametric dimension 
 of 2, but now its spatial dimension would be 3. 
 
 \subsubsection{Supported Meshes}
