@@ -76,6 +76,7 @@ program ESMF_GridCreateUTest
   type(ESMF_GridStatus_Flag) :: status
   ! test the AttributeGet for Grid info
   type(ESMF_TypeKind_Flag) :: attrValue
+  type(ESMF_CoordSys_Flag) :: coordSys
 
 
   !-----------------------------------------------------------------------------
@@ -341,7 +342,8 @@ program ESMF_GridCreateUTest
 
   ! get info from Grid
   call ESMF_GridGet(grid, dimCount=dimCount, coordTypeKind=typekind, &
-         distgridToGridMap=distgridToGridMap, coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
+         distgridToGridMap=distgridToGridMap, coordSys=coordSys, &
+         coordDimCount=coordDimCount, coordDimMap=coordDimMap, &
          indexflag=indexflag, &
          gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
          gridAlign=gridAlign, rc=localrc)
@@ -351,6 +353,7 @@ program ESMF_GridCreateUTest
   correct=.true.
   if (typekind .ne. ESMF_TYPEKIND_R8) correct=.false.
   if (dimCount .ne. 2) correct=.false.
+  if (coordSys .ne. ESMF_COORDSYS_CART) correct=.false.
   if ((distgridToGridMap(1) .ne. 1) .or. (distgridToGridMap(2) .ne. 2)) correct=.false.
   !TODO: what to do about undistLBound and undistUBound
   if ((coordDimCount(1) .ne. 2) .or. (coordDimCount(2) .ne. 2)) correct=.false.
@@ -429,6 +432,33 @@ program ESMF_GridCreateUTest
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Creating a Grid with non-default coordSys"
+  write(failMsg, *) "Incorrect result"
+
+  ! create grid with nondefault parameter
+  rc=ESMF_SUCCESS
+  grid=ESMF_GridCreate(distgrid=distgrid, coordSys=ESMF_COORDSYS_SPH_DEG,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! get info back from grid
+  call ESMF_GridGet(grid,coordSys=coordSys,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! check that output is as expected
+  correct=.true.
+  if (coordSys .ne. ESMF_COORDSYS_SPH_DEG) correct=.false.
+  
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
