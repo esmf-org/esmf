@@ -71,7 +71,6 @@ program ESMF_GridCreateUTest
   logical :: isLBound(2),isUBound(2)
   integer :: petMap2D(2,2,1)
   real(ESMF_KIND_R8), pointer :: fptr(:,:)
-!  integer :: lDE, localDECount
   logical:: gridBool
   type(ESMF_GridStatus_Flag) :: status
   ! test the AttributeGet for Grid info
@@ -248,14 +247,78 @@ program ESMF_GridCreateUTest
   call ESMF_GridGet(grid, name=grid_name, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+  ! Get local DE Count
+  call ESMF_GridGet(grid, localDECount=localDECount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Add center stagger
   call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+
+   ! Init coordinates to 0.0 (otherwise can have problem with NAN != NAN)
+  do lDE=0,localDECount-1  
+
+     ! get and fill 1st coord array
+     call ESMF_GridGetCoord(grid, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
+          farrayPtr=fptr2D, rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     fptr2D(:,:)=0.0
+
+     ! get and fill 2nd coord array
+     call ESMF_GridGetCoord(grid, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
+          farrayPtr=fptr2D, rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     fptr2D(:,:)=0.0
+  enddo
+
+  ! Add edge1 stagger
   call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_EDGE1, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+   ! Init coordinates to 0.0 (otherwise can have problem with NAN != NAN)
+  do lDE=0,localDECount-1  
+
+     ! get and fill 1st coord array
+     call ESMF_GridGetCoord(grid, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_EDGE1, coordDim=1, &
+          farrayPtr=fptr2D, rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     fptr2D(:,:)=0.0
+
+     ! get and fill 2nd coord array
+     call ESMF_GridGetCoord(grid, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_EDGE1, coordDim=2, &
+          farrayPtr=fptr2D, rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     fptr2D(:,:)=0.0
+  enddo
+
+  ! Add edge2 stagger
   call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_EDGE2, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+   ! Init coordinates to 0.0 (otherwise can have problem with NAN != NAN)
+  do lDE=0,localDECount-1  
+
+     ! get and fill 1st coord array
+     call ESMF_GridGetCoord(grid, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_EDGE2, coordDim=1, &
+          farrayPtr=fptr2D, rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     fptr2D(:,:)=0.0
+
+     ! get and fill 2nd coord array
+     call ESMF_GridGetCoord(grid, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_EDGE2, coordDim=2, &
+          farrayPtr=fptr2D, rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     fptr2D(:,:)=0.0
+  enddo
+
 
 
   ! Create Grid 2 from the original grid and distgrid
