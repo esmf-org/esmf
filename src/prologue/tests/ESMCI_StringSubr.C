@@ -25,6 +25,7 @@ using namespace std;
 #include <string.h>
 #include <ESMC_Macros.h>
 #include <ESMC_Conf.h>
+#include <ESMC_ReturnCodes.h>
 
 typedef void (*FUNC)(int *, int *, int *, int *, int *);
 typedef void (*FUNC2)(int *, int *, const char *, int *, int *, int *, ESMCI_FortranStrLenArg);
@@ -32,9 +33,9 @@ typedef void (*FUNC3)(int *, const char *, int *, const char *, int *, int *, in
 
 extern "C" {
 
-void FTN_X(c_strings)(FUNC f90cb, FUNC2 f90cb2, FUNC3 f90cb3, 
-                    int *i1, int *i2, char *fstr,
-                    int *i3, int *i4, int *rc, ESMCI_FortranStrLenArg slen) {
+  void FTN_X(c_strings)(FUNC f90cb, FUNC2 f90cb2, FUNC3 f90cb3, 
+    int *i1, int *i2, char *fstr,
+    int *i3, int *i4, int *rc, ESMCI_FortranStrLenArg slen) {
 
       int ni1, ni2, ni3, ni4;
       int clen, clen2;
@@ -97,7 +98,19 @@ void FTN_X(c_strings)(FUNC f90cb, FUNC2 f90cb2, FUNC3 f90cb3,
 
       cout << "\n\n-- leaving c_strings" << endl;
 
-}  // end of c_strings()
+  }  // end of c_strings()
+
+  void FTN_X(c_5strings)(char *str1, char *str2, char *str3, char *str4,
+    char *str5, int *rc, 
+    ESMCI_FortranStrLenArg l1, ESMCI_FortranStrLenArg l2, 
+    ESMCI_FortranStrLenArg l3, ESMCI_FortranStrLenArg l4, 
+    ESMCI_FortranStrLenArg l5) {
+    
+    if (l1==10 && l2==20 && l3==30 && l4==40 && l5==50)
+      *rc = ESMF_SUCCESS;
+    else
+      *rc = ESMC_RC_SYS;
+  }
 
 } // end of extern "C"
 

@@ -148,7 +148,7 @@ int main(int    argc,
 printf("Current State: %d\n", currentState);
 printf("Current State: %s\n", client.getStateStr(currentState));
 
-   ESMC_Test((rc != ESMF_FAILURE), 
+   ESMC_Test((currentState != ESMF_FAILURE), 
 		name, failMsg, &result, __FILE__, __LINE__, 0);
    //---------------------------------------------------------------------------
 

@@ -951,6 +951,40 @@ end interface
 !
 !EOPI
       end interface
+
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (==)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_CoordSysEqual
+
+! !DESCRIPTION:
+!     This interface overloads the equality operator for the specific
+!     ESMF CoordSys.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (/=)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_CoordSysNotEqual
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF CoordSys.  It is provided for easy comparisons of 
+!     these types with defined values.
+!
+!EOPI
+      end interface
+
+
 !
 !==============================================================================
 
@@ -12352,7 +12386,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_GridGet()
       subroutine ESMF_GridGetDefault(grid, keywordEnforcer, coordTypeKind, &
         dimCount, tileCount, staggerlocCount, localDECount, distgrid, &
-        distgridToGridMap, coordDimCount, coordDimMap, arbDim, &
+        distgridToGridMap, coordSys, coordDimCount, coordDimMap, arbDim, &
         rank, arbDimCount, gridEdgeLWidth, gridEdgeUWidth, gridAlign,  &
         indexFlag, status, name, rc)
 !
@@ -12366,6 +12400,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                   intent(out), optional :: localDECount
       type(ESMF_DistGrid),       intent(out), optional :: distgrid
       integer,       target,     intent(out), optional :: distgridToGridMap(:)
+      type(ESMF_CoordSys_Flag),  intent(out), optional :: coordSys
       integer,       target,     intent(out), optional :: coordDimCount(:)
       integer,       target,     intent(out), optional :: coordDimMap(:,:)
       integer,                   intent(out), optional :: arbDim
@@ -12407,6 +12442,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !\item[{[distgridToGridMap]}]
 !   List that has as many elements as the distgrid dimCount. This array describes
 !   mapping between the grids dimensions and the distgrid.
+! \item[{[coordSys]}] 
+!     The coordinate system of the grid coordinate data. 
 ! \item[{[coordDimCount]}]
 !   List that has as many elements as the grid dimCount (from arrayspec).
 !   Gives the dimension of each component (e.g. x) array. This is 
@@ -12492,6 +12529,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          present(distgridToGridMap) .or. &
          present(coordDimCount)     .or. &
          present(coordDimMap)       .or. &
+         present(coordSys)          .or. &
          present(arbDim)            .or. & 
          present(rank)              .or. & 
          present(arbDimCount)       .or. &
@@ -12531,7 +12569,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ! Call C++ Subroutine to do the get
        call c_ESMC_gridget(grid%this, &
             coordTypeKind, dimCount, tileCount, distgrid,  staggerlocCount, &
-            distgridToGridMapArg, coordDimCountArg, arbDim, &
+            distgridToGridMapArg, coordSys, coordDimCountArg, arbDim, &
             rank, arbDimCount, coordDimMapArg, &
             gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, &
             indexflag, localDECount, localrc)
@@ -24911,5 +24949,77 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       end subroutine ESMF_GridItemAssignment
 #undef  ESMF_METHOD
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CoordSysEqual"
+!BOPI
+! !IROUTINE: ESMF_CoordSysEqual - Equality of Coordinate Systems
+!
+! !INTERFACE:
+      function ESMF_CoordSysEqual(CoordSys1, CoordSys2)
+
+! !RETURN VALUE:
+      logical :: ESMF_CoordSysEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_CoordSys_Flag), intent(in) :: &
+         CoordSys1,      &! Two igrid statuses to compare for
+         CoordSys2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF CoordSys statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[CoordSys1, CoordSys2]
+!          Two igrid statuses to compare for equality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_CoordSysEqual = (CoordSys1%coordsys == &
+                              CoordSys2%coordsys)
+
+      end function ESMF_CoordSysEqual
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CoordSysNotEqual"
+!BOPI
+! !IROUTINE: ESMF_CoordSysNotEqual - Non-equality of CoordSys statuses
+!
+! !INTERFACE:
+      function ESMF_CoordSysNotEqual(CoordSys1, CoordSys2)
+
+! !RETURN VALUE:
+      logical :: ESMF_CoordSysNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_CoordSys_Flag), intent(in) :: &
+         CoordSys1,      &! Two CoordSys Statuses to compare for
+         CoordSys2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF CoordSys statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[CoordSys1, CoordSys2]
+!          Two statuses of CoordSyss to compare for inequality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_CoordSysNotEqual = (CoordSys1%coordsys /= &
+                                 CoordSys2%coordsys)
+
+      end function ESMF_CoordSysNotEqual
+
+
 
 end module ESMF_GridMod

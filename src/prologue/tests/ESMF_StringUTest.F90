@@ -26,6 +26,17 @@
     integer :: i1, i2, i3, i4
     external f90ints, f90string2, f90string3
 
+    character(len=*), parameter :: &
+      str1 = "1234567890"
+    character(len=*), parameter :: &
+      str2 = "12345678901234567890"
+    character(len=*), parameter :: &
+      str3 = "123456789012345678901234567890"
+    character(len=*), parameter :: &
+      str4 = "1234567890123456789012345678901234567890"
+    character(len=*), parameter :: &
+      str5 = "12345678901234567890123456789012345678901234567890"
+
 
 !------------------------------------------------------------------------
 ! test of passing ints and strings between F90 and C++
@@ -76,6 +87,13 @@
     write(failMsg,*) "Failure calling c_strings with fstr"
     write(name, *) "Calling c_strings with fstr"
     call c_strings(f90ints, f90string2, f90string3, i1, i2, fstr, i3, i4, rc)
+    call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) 
+
+    !------------------------------------------------------------------------
+    !NEX_UTest
+    write(failMsg,*) "Failure in c_5strings"
+    write(name, *) "Calling c_5strings"
+    call c_5strings(str1, str2, str3, str4, str5, rc)
     call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
