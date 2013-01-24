@@ -157,7 +157,7 @@ module NUOPC_Driver
     logical                   :: clockIsPresent
     type(ESMF_Clock)          :: internalClock
     integer                   :: i, j, k, l, cIndex
-    character(ESMF_MAXSTR)    :: iString, jString, compName, msgString
+    character(ESMF_MAXSTR)    :: iString, jString, lString, compName, msgString
     character(ESMF_MAXSTR)    :: petListBuffer(100)
     integer, pointer          :: i_petList(:), j_petList(:), c_petList(:)
     logical                   :: existflag
@@ -263,8 +263,10 @@ module NUOPC_Driver
       else if (i>0) then
       
         if (associated(i_petList)) then
-          write (msgString,"(A)") trim(name)//" - Creating model component #"// &
-            trim(adjustl(iString))//" with petList of size ",size(i_petList)," :"
+          write (lString, *) size(i_petList)
+          write (msgString,"(A)") trim(name)//&
+            " - Creating model component #"//trim(adjustl(iString))//&
+            " with petList of size "//trim(adjustl(lString))//" :"
           call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -287,7 +289,7 @@ module NUOPC_Driver
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
         else
-          write (msgString,"(A)") trim(name)//" - Creating model component #"// &
+          write (msgString,"(A)") trim(name)//" - Creating model component #"//&
             trim(adjustl(iString))//" without petList."
           call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -402,9 +404,11 @@ module NUOPC_Driver
         endif
 
         if (associated(c_petList)) then
-          write (msgString,"(A)") trim(name)//" - Creating connector component "//&
-            trim(adjustl(iString))//" -> "//trim(adjustl(jString))//&
-            " with petList of size ",size(c_petList)," :"
+          write (lString, *) size(c_petList)
+          write (msgString,"(A)") trim(name)//&
+            " - Creating connector component "//trim(adjustl(iString))//&
+            " -> "//trim(adjustl(jString))//" with petList of size "//&
+            trim(adjustl(lString))//" :"
           call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
