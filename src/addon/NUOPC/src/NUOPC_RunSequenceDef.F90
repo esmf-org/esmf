@@ -130,7 +130,7 @@ module NUOPC_RunSequenceDef
     
     if (present(rc)) rc = ESMF_SUCCESS
 
-    write (msgString, *) "runElementPrint: ", &
+    write (msgString,"(A)") "runElementPrint: ", &
       runElement%i, runElement%j, runElement%phase
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -379,12 +379,12 @@ module NUOPC_RunSequenceDef
     if (present(rc)) rc = ESMF_SUCCESS
     
     if (.not.associated(runSeq%first)) then
-      write (msgString, *) "NUOPC_RunSequenceSinglePrint: no runElements"
+      write (msgString,"(A)") "NUOPC_RunSequenceSinglePrint: no runElements"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     else
-      write (msgString, *) "NUOPC_RunSequenceSinglePrint:"
+      write (msgString,"(A)") "NUOPC_RunSequenceSinglePrint:"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
@@ -419,7 +419,7 @@ module NUOPC_RunSequenceDef
     if (present(rc)) rc = ESMF_SUCCESS
     
     do i=1, size(runSeq)
-      write (msgString, *) "NUOPC_RunSequenceArrayPrint: element", i, &
+      write (msgString,"(A)") "NUOPC_RunSequenceArrayPrint: element", i, &
         " out of ", size(runSeq)
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
