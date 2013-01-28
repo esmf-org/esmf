@@ -62,10 +62,9 @@ program ESMF_NUOPC_UTest
   type(ESMF_Field)        :: field
   character(ESMF_MAXSTR)  :: value
   type(ESMF_FieldBundle)  :: fieldBundleA, fieldBundleB
-  character(ESMF_MAXSTR)  :: cplList(10)
-  integer                 :: count
+  character(ESMF_MAXSTR),  pointer  :: cplList(:)
   type(ESMF_Grid)         :: grid
-  character(ESMF_MAXSTR), pointer   :: stdAttrNameList(:)
+  character(ESMF_MAXSTR),  pointer  :: stdAttrNameList(:)
   type(NUOPC_RunSequence), pointer  :: runSeq(:)
   type(NUOPC_RunElement),  pointer  :: runE
   
@@ -263,7 +262,8 @@ program ESMF_NUOPC_UTest
   !NEX_UTest
   write(name, *) "NUOPC_FillCplList() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_FillCplList(stateA, stateB, cplList, count, rc=rc)
+  nullify(cplList)
+  call NUOPC_FillCplList(stateA, stateB, cplList, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

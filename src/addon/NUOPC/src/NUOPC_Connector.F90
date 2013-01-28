@@ -589,7 +589,7 @@ module NUOPC_Connector
       
     ! conditionally output diagnostic to Log file
     if (verbose) then
-      write(msgString,"(A)") ">>>"//trim(compName)//" entered Run"
+      write (msgString,"(A)") ">>>"//trim(compName)//" entered Run"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -647,7 +647,7 @@ module NUOPC_Connector
 
     ! conditionally output diagnostic to Log file
     if (verbose) then
-      write(msgString,"(A)") "<<<"//trim(compName)//" leaving Run"
+      write (msgString,"(A)") "<<<"//trim(compName)//" leaving Run"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
