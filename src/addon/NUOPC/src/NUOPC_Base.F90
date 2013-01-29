@@ -1111,7 +1111,7 @@ module NUOPC_Base
       ! transfer info: l_cplList -> cplList
       allocate(cplList(count))
       do i=1, count
-        cplList = l_cplList
+        cplList(i) = l_cplList(i)
       enddo
       deallocate(l_cplList)
       
