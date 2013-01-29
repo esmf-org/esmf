@@ -164,7 +164,7 @@ contains
        case (PIO_MSG_READDARRAY)
           call ESMFPIO_readdarray_handler(ios)
        case (PIO_MSG_SETERRORHANDLING)
-          call ESMFPIO_seterrorhandling_handler(ios)
+          call ESMFPIO_seterrhandling_handler(ios)
        case (PIO_MSG_GETVAR1)
           call ESMFPIO_var1_handler(ios, msg)
        case (PIO_MSG_GETVAR_0d)

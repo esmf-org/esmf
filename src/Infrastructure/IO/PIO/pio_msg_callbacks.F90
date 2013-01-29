@@ -318,7 +318,7 @@ subroutine ESMFPIO_readdarray_handler(iosystem)
 
 end subroutine ESMFPIO_readdarray_handler
 
-subroutine ESMFPIO_seterrorhandling_handler(ios)
+subroutine ESMFPIO_seterrhandling_handler(ios)
   use esmfpio, only : iosystem_desc_t, pio_seterrorhandling
 #ifndef NO_MPIMOD
   use mpi !_EXTERNAL
@@ -334,7 +334,7 @@ subroutine ESMFPIO_seterrorhandling_handler(ios)
   
   call pio_seterrorhandling(ios, method)
 
-end subroutine ESMFPIO_seterrorhandling_handler
+end subroutine ESMFPIO_seterrhandling_handler
 
 subroutine ESMFPIO_string_handler_for_att(file, varid, name, strlen, msg)
   use esmfpio_msg_mod, only : pio_msg_getatt
