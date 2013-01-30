@@ -1813,6 +1813,7 @@ endif
     integer                 :: i, valueList(9)
     logical                 :: isMatch
     character(ESMF_MAXSTR)  :: iString, msgString
+    type(ESMF_CalKind_Flag) :: calkindflag
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1822,6 +1823,12 @@ endif
 
     call NUOPC_StateBuildStdList(state, stdAttrNameList=stdAttrNameList, &
       stdItemNameList=stdItemNameList, stdFieldList=stdFieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
+    call ESMF_TimeGet(time, calkindflag=calkindflag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -1847,7 +1854,7 @@ endif
           yy=valueList(1), mm=ValueList(2), dd=ValueList(3), &
            h=valueList(4),  m=ValueList(5),  s=ValueList(6), &
           ms=valueList(7), us=ValueList(8), ns=ValueList(9), &
-          rc=rc)
+          calkindflag=calkindflag, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=msgString, &
           line=__LINE__, &
           file=FILENAME)) &
