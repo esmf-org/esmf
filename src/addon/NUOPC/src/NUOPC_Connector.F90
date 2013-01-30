@@ -132,6 +132,7 @@ module NUOPC_Connector
     ! local variables
     type(ESMF_StateIntent_Flag)           :: isType, esType
     integer                               :: isItemCount, esItemCount
+    type(ESMF_Clock)                      :: internalClock
     character(ESMF_MAXSTR)                :: name
 
     rc = ESMF_SUCCESS
@@ -140,7 +141,21 @@ module NUOPC_Connector
     call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
+#if 0
+! There is currently no need to set the internal clock of a Connector. Also
+! there is no code yet to keep updating it during Run(). For now keep this code
+! inactive, but keep it here, maybe some day we will notice a need for it.
+
+    ! set the internal clock to be a copy of the parent clock
+    internalClock = ESMF_ClockCreate(clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_CplCompSet(cplcomp, clock=internalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+
     ! reconcile the States
     call ESMF_StateReconcile(importState, attreconflag=ESMF_ATTRECONCILE_ON, &
       rc=rc)

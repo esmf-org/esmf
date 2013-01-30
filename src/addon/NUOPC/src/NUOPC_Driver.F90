@@ -621,7 +621,7 @@ module NUOPC_Driver
     contains !----------------------------------------------------------------
     
       recursive subroutine loopModelComps(phase, rc)
-        ! only to be used for phase=0 anymore!!
+        ! only to be used for phase=0
         integer, intent(in)     :: phase
         integer, intent(out)    :: rc
         integer                 :: i
@@ -663,7 +663,7 @@ module NUOPC_Driver
       end subroutine
 
       recursive subroutine loopConnectorComps(phase, rc)
-        ! only to be used for phase=0 anymore!!
+        ! only to be used for phase=0
         integer, intent(in)     :: phase
         integer, intent(out)    :: rc
         integer                 :: i, j
@@ -817,7 +817,7 @@ module NUOPC_Driver
       end subroutine
 
       recursive subroutine loopModelCompsS(phaseString, rc)
-        ! only to be used for phase=0 anymore!!
+        ! only to be used for phase>0
         character(*), intent(in):: phaseString
         integer, intent(out)    :: rc
         integer                 :: phase, i
@@ -865,7 +865,7 @@ module NUOPC_Driver
       end subroutine
 
       recursive subroutine loopConnectorCompsS(phaseString, rc)
-        ! only to be used for phase=0 anymore!!
+        ! only to be used for phase>0
         character(*), intent(in):: phaseString
         integer, intent(out)    :: rc
         integer                 :: phase, i, j
