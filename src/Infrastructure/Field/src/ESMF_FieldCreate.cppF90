@@ -883,7 +883,7 @@ contains
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
     integer :: localrc                       !  Local error code
@@ -1512,7 +1512,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateGridTKR"
-!BOP
+!BOPI
 ! !IROUTINE:   ESMF_FieldCreate - Create a Field from Grid and typekind
 
 ! !INTERFACE:
@@ -1630,7 +1630,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
     type(ESMF_ArraySpec) :: arrayspec
@@ -1689,7 +1689,7 @@ end function ESMF_FieldCreateGridTKR
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateGridArraySpec"
-!BOP
+!BOPI
 ! !IROUTINE:   ESMF_FieldCreate - Create a Field from Grid and ArraySpec
 
 ! !INTERFACE:
@@ -1807,7 +1807,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
     type(ESMF_GeomBase) :: geombase
@@ -1900,7 +1900,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateGridArray"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldCreate - Create a Field from Grid and Array
 
 ! !INTERFACE:
@@ -2013,7 +2013,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                       !  Local error code
     type(ESMF_GeomBase) :: geombase
