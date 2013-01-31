@@ -1,7 +1,7 @@
 ! $Id: ESMF_FieldCreateGetUTest.F90,v 1.95 2012/09/11 12:54:35 feiliu Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2012, University Corporation for Atmospheric Research,
+! Copyright 2002-2013, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,

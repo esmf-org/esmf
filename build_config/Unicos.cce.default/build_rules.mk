@@ -87,6 +87,8 @@ ESMF_PTHREADS := OFF
 # XT compute nodes do not have support for OpenMP
 #
 ESMF_OPENMP := OFF
+ESMF_F90COMPILEOPTS += -h noomp
+ESMF_CXXCOMPILEOPTS += -h noomp
 
 ############################################################
 # How to specify module directories
@@ -106,6 +108,12 @@ ESMF_F90COMPILEFIXNOCPP  = -f fixed -N 132
 #
 ESMF_F90LINKRPATHS      =
 ESMF_CXXLINKRPATHS      =
+
+############################################################
+# Special libs to link against
+#
+ESMF_F90LINKLIBS += -lpgas-dmapp
+ESMF_CXXLINKLIBS += -lpgas-dmapp
 
 ############################################################
 # Blank out shared library options

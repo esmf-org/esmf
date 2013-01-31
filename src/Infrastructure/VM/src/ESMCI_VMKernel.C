@@ -1,7 +1,7 @@
 // $Id: ESMCI_VMKernel.C,v 1.48 2012/11/20 21:33:34 theurich Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2012, University Corporation for Atmospheric Research, 
+// Copyright 2002-2013, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -5192,10 +5192,12 @@ namespace ESMCI{
 #include <Winsock.h>
 typedef int socklen_t;
 typedef char* value_ptr_t;
+#define ECONNABORTED WSAECONNABORTED
 #define EALREADY WSAEALREADY
 #define ECONNREFUSED WSAECONNREFUSED
 #define EINPROGRESS WSAEINPROGRESS
 #define EWOULDBLOCK WSAEWOULDBLOCK
+#define errno WSAGetLastError()
 
 #else
 
@@ -5376,14 +5378,12 @@ namespace ESMCI {
       if (connect(sock, (struct sockaddr *) &name, sizeof(name)) < 0){
         // connection has not (yet) been established
         perror("socketClientInit connect(), not yet established... continue");
-#if !defined (ESMF_OS_MinGW)
         if (errno==ECONNABORTED){
           // on some systems, e.g. linux, repeated call to connect may give this
           perror("socketClientInit connect(), but continue");
           VMK::wtime(&t1);  // update the endtime
           continue;         // next attempt
         }
-#endif
         // check for unexpected error conditions and bail
         if (errno!=EINPROGRESS && errno!=EALREADY && errno!=EWOULDBLOCK
           && errno!=ECONNREFUSED){

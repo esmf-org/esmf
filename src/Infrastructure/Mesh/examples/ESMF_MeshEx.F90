@@ -1,7 +1,7 @@
 ! $Id: ESMF_MeshEx.F90,v 1.57 2012/11/20 19:28:47 peggyli Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2012, University Corporation for Atmospheric Research,
+! Copyright 2002-2013, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -90,23 +90,20 @@ program ESMF_MeshEx
 !
 ! This section describes the use of the ESMF Mesh class. It starts with an explanation and examples of 
 ! creating a Mesh and then goes through other Mesh methods. This set of sections covers the use of the 
-! Mesh class interfaces, for further detail which applies to using a Field specifically on created on a Mesh, please see 
+! Mesh class interfaces, for further detail which applies to creating a Field on a Mesh, please see 
 ! Section~\ref{sec:field:usage:create_mesh_arrayspec}.
 !
 !\subsubsection{Mesh creation}
 !\label{sec:mesh:usage:meshCreation}
 !
-! To create a Mesh we need to set some properties of the Mesh as a whole,  some properties of each node in the mesh and 
-! then some properties of each element which connects the nodes. 
+! To create a Mesh we need to set some properties of the Mesh as a whole, some properties of each node in the mesh and 
+! then some properties of each element which connects the nodes (for a definition of node and element please see 
+! Section~\ref{sec:meshrep}).
 !
 ! For the Mesh as a whole we set its parametric dimension ({\tt parametricDim}) and spatial dimension ({\tt spatialDim}). 
-! The parametric dimension of a Mesh is the dimension of the topology of the Mesh, this can be thought of as the dimension of 
-! the elements which make up the Mesh. For example, a Mesh composed of triangles would have a parametric dimension of 2, whereas
-! a Mesh composed of tetrahedra would have a parametric dimension of 3. A Mesh's spatial dimension, on the other hand, is the 
-! dimension of the space the Mesh is embedded in, in other words the number of coordinate dimensions needed to describe the 
-! location of the nodes making up the Mesh. For example, a Mesh constructed of squares on a plane would have a parametric 
-! dimension of 2 and a spatial dimension of 2, whereas if that same Mesh were used to represent the 2D surface of a sphere 
-! then the Mesh would still have a parametric dimension of 2, but now its spatial dimension would be 3. 
+! A Meshes' parametric dimension can  be thought of as the dimension of the elements which make up the Mesh. 
+! A Mesh's spatial dimension, on the other hand, is the is the number of coordinate dimensions needed to describe the location of 
+! the nodes making up the Mesh. (For a fuller definition of these terms please see Section~\ref{sec:meshrep}.)
 !
 ! The structure of the per node and element information used to create a Mesh is influenced by the Mesh distribution strategy. 
 ! The Mesh class is distributed by elements. This means that a node must be present on any PET that contains an element 
@@ -696,47 +693,18 @@ program ESMF_MeshEx
   endif 
 
 !BOE
-!\subsubsection{Create a Mesh from a SCRIP Grid file or an ESMF unstructured Grid file}
+!\subsubsection{Create a Mesh from an unstructured grid file}
 !\label{sec:example:UnstructFromFile}
 !
-! ESMF supports the creation of a Mesh from a 2D unstructured grid defined in a SCRIP format
-! grid file~\ref{sec:fileformat:scrip}, an ESMF format grid file~\ref{sec:fileformat:esmf} or the
-! proposed CF unstructured grid UGRID file~\ref{sec:fileformat:ugrid}.  All three types of grid files
-! are in NetCDF format. Here is a sample header from a SCRIP unstructured
-! grid file:
-!\begin{verbatim}
-!netcdf ne4np4-pentagons {
-!dimensions:
-!	grid_size = 866 ;
-!	grid_corners = 5 ;
-!	grid_rank = 1 ;
-!variables:
-!	double grid_center_lat(grid_size) ;
-!		grid_center_lat:units = "degrees" ;
-!	double grid_center_lon(grid_size) ;
-!		grid_center_lon:units = "degrees" ;
-!	double grid_corner_lon(grid_size, grid_corners) ;
-!		grid_corner_lon:units = "degrees" ;
-!		grid_corner_lon:_FillValue = -9999. ;
-!	double grid_corner_lat(grid_size, grid_corners) ;
-!		grid_corner_lat:units = "degrees" ;
-!		grid_corner_lat:_FillValue = -9999. ;
-!	int grid_imask(grid_size) ;
-!		grid_imask:_FillValue = -9999. ;
-!	double grid_area(grid_size) ;
-!		grid_area:units = "radians^2" ;
-!		grid_area:long_name = "area weights" ;
-!	int grid_dims(grid_rank) ;
-!}
-!\end{verbatim}
-!
-! The grid cells are organized as a one dimensional array ({\tt grid\_rank = 1}). The
-! cell connection is defined using {\tt grid\_corner\_lat} and {\tt grid\_corner\_lon} with
-! the maximum number of corners defined in {\tt grid\_corners}.
+! ESMF supports the creation of a Mesh from three grid file formats: the SCRIP format~\ref{sec:fileformat:scrip}, the 
+! ESMF format~\ref{sec:fileformat:esmf} or the
+! proposed CF unstructured grid UGRID format~\ref{sec:fileformat:ugrid}.  All three of these grid file formats
+! are NetCDF files. 
+! 
+! When creating a Mesh from a SCRIP format file, there are a number of options to control the output Mesh.
 ! The data is located at the center of the grid cell in a SCRIP grid; whereas
 ! the data is located at the corner of a cell in an ESMF Mesh object.  Therefore,
-! we create a Mesh object by default by constructing a "dual" mesh using {\tt grid\_center\_lat} and
-! {\tt grid\_center\_lon}.  
+! we create a Mesh object by default by constructing a "dual" mesh using the coordinates in the file. 
 ! If the user wishes to not construct the dual mesh, the optional argument {\tt convertToDual} may be 
 ! used to control this behavior. When {\tt comvertToDual} is 
 ! set to .false. the Mesh constructed from the file will not be the dual. This is necessary when using the 
@@ -762,51 +730,12 @@ program ESMF_MeshEx
 #endif
 
 !BOE
-! The ESMF file format is a more general unstructured grid file format for describing meshes.
-! In the ESMF file format, the node coordinates are defined in a separate array
-! {\tt nodeCoords}. {\tt nodeCoords} is a two-dimensional array of dimension {\tt (nodeCount,coordDim)}.
-! For a 2D Grid, {\tt coordDim} is 2. {\tt nodeCoords(:,1)} contains the longitude coordinates and
-! {\tt nodeCoords(:,2)} contains the latitude coordinates.  The same order applies to {\tt centerCoords}.
-!  The indices to the {\tt nodeCoords} array are used in the element
-! connectivity array {\tt elementConn}, and they are 1-based. 
-! While in the SCRIP format, the two are combined into 
-! {\tt grid\_corner\_lon} and {\tt grid\_corner\_lat} arrays.  
-!
-! The ESMF file format works
-! better with the methods used to create an ESMF Mesh object, so less conversion needs to be done to create a Mesh. 
+! As mentioned above ESMF also supports creating Meshes from the ESMF format.
+! The ESMF format works better with the methods used to create an ESMF Mesh object, so less conversion needs 
+! to be done to create a Mesh, and thus this format is more efficient than SCRIP to use within ESMF. 
 ! The ESMF format is also more general than the SCRIP format because it supports higher dimension coordinates and more general
 ! topologies.  Currently, ESMF\_MeshCreate() does not support conversion to a dual mesh for this format. All regrid methods
-! are supported on Meshes in this format.  The following is a sample header of a mesh described in the ESMF format.
-!  
-!\begin{verbatim}
-! netcdf ne4np4-esmf {
-! dimensions:	
-!	nodeCount = 866 ;
-!	elementCount = 936 ;
-!	maxNodePElement = 4 ;
-!	coordDim = 2 ;
-!variables:	
-!	double 	nodeCoords(nodeCount, coordDim);
-!		nodeCoords:units = "degrees" ;
-!	int elementConn(elementCount, maxNodePElement) ;
-!		elementConn:long_name = "Node Indices that define the element connectivity";
-!		elementConn:_FillValue = -1 ;	
-!	byte numElementConn(elementCount) ;
-!		numElementConn:long_name = "Number of nodes per element" ;
-!	double centerCoords(elementCount, coordDim) ;
-!		centerCoords:units = "degrees" ;
-!	double elementArea(elementCount) ;
-!		elementArea:units = "radians^2" ;
-!		elementArea:long_name = "area weights" ;
-!	int elementMask(elementCount) ;
-!		elementMask:_FillValue = -9999. ;
-!// global attributes:
-!		:gridType="unstructured";
-!		:version = "0.9" ;
-!		:inputFile = "ne4np4-pentagons.nc" ;
-!		:timeGenerated = "Fri Apr 16 16:05:24 2010" ;
-!}
-!\end{verbatim}
+! are supported on Meshes in this format. 
 !
 ! Here is an example of creating a Mesh from an ESMF unstructured grid file. Note that you have to set the filetypeflag to
 ! ESMF\_FILEFORMAT\_ESMFMESH.  As with the previous example, we set {\tt convert3D} to true because this is a

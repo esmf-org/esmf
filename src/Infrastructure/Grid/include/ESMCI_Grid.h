@@ -1,7 +1,7 @@
 // $Id: ESMCI_Grid.h,v 1.89 2012/09/07 23:16:03 oehmke Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2012, University Corporation for Atmospheric Research, 
+// Copyright 2002-2013, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -433,9 +433,9 @@ template <class TYPE>
 
   // Grid Destruct
  private:
-  void destruct();
+  void destruct(bool followCreator=true);
  public:
-  ~Grid(){destruct();}
+  ~Grid(){destruct(false);}
 
   // get lower stagger offset for a particular localDe and staggerloc
   int getLDEStaggerUOffset(

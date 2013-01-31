@@ -1,7 +1,7 @@
 // $Id: ESMCI_Array.C,v 1.175 2012/11/16 21:26:13 theurich Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2012, University Corporation for Atmospheric Research, 
+// Copyright 2002-2013, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -251,7 +251,8 @@ Array::Array(
 // !INTERFACE:
 void Array::destruct(bool followCreator){
 //
-// TODO: The followCreator flag is only needed until we have reference counting // TODO: For now followCreator, which by default is true, will be coming in as
+// TODO: The followCreator flag is only needed until we have reference counting
+// TODO: For now followCreator, which by default is true, will be coming in as
 // TODO: false when calling through the native destructor. This prevents
 // TODO: sequence problems during automatic garbage collection unitl reference
 // TODO: counting comes in to solve this problem in the final manner.
@@ -308,8 +309,6 @@ void Array::destruct(bool followCreator){
       if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
         throw localrc;  // bail out with exception
     }
-    
-    
   }
 }
 //-----------------------------------------------------------------------------

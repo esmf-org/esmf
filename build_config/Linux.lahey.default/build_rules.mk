@@ -119,6 +119,18 @@ ESMF_F90RPATHPREFIX         = -Wl,-rpath,
 ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
 
 ############################################################
+# Determine where gcc's libraries are located
+#
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.so)
+ifeq ($(ESMF_LIBSTDCXX),libstdc++.so)
+ESMF_LIBSTDCXX := $(shell $(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS) -print-file-name=libstdc++.a)
+endif
+ESMF_F90LINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_F90LINKRPATHS += $(ESMF_F90RPATHPREFIX)$(dir $(ESMF_LIBSTDCXX))
+ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBSTDCXX))
+ESMF_CXXLINKRPATHS += $(ESMF_CXXRPATHPREFIX)$(dir $(ESMF_LIBSTDCXX))
+
+############################################################
 # Determine where lf95's libraries are located
 #
 ESMF_CXXLINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.lf95 "$(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS)"))

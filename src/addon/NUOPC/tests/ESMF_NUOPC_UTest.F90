@@ -1,7 +1,7 @@
 ! $Id: ESMF_NUOPC_UTest.F90,v 1.3 2012/11/20 06:51:42 theurich Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2012, University Corporation for Atmospheric Research,
+! Copyright 2002-2013, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -62,10 +62,9 @@ program ESMF_NUOPC_UTest
   type(ESMF_Field)        :: field
   character(ESMF_MAXSTR)  :: value
   type(ESMF_FieldBundle)  :: fieldBundleA, fieldBundleB
-  character(ESMF_MAXSTR)  :: cplList(10)
-  integer                 :: count
+  character(ESMF_MAXSTR),  pointer  :: cplList(:)
   type(ESMF_Grid)         :: grid
-  character(ESMF_MAXSTR), pointer   :: stdAttrNameList(:)
+  character(ESMF_MAXSTR),  pointer  :: stdAttrNameList(:)
   type(NUOPC_RunSequence), pointer  :: runSeq(:)
   type(NUOPC_RunElement),  pointer  :: runE
   
@@ -263,7 +262,8 @@ program ESMF_NUOPC_UTest
   !NEX_UTest
   write(name, *) "NUOPC_FillCplList() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_FillCplList(stateA, stateB, cplList, count, rc=rc)
+  nullify(cplList)
+  call NUOPC_FillCplList(stateA, stateB, cplList, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

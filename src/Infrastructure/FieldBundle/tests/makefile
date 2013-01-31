@@ -1,7 +1,8 @@
 # $Id: makefile,v 1.11 2010/08/06 17:30:58 samsoncheung Exp $ 
 
-ALL:  build_unit_tests
-run:  run_unit_tests
+ALL:      build_unit_tests
+run:      run_unit_tests
+run_uni:  run_unit_tests_uni
 
 LOCDIR	  = src/Infrastructure/FieldBundle/tests
 

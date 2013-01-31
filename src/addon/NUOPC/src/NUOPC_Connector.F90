@@ -49,49 +49,45 @@ module NUOPC_Connector
     type(ESMF_CplComp)   :: cplcomp
     integer, intent(out) :: rc
     
+    ! local variables
+    character(ESMF_MAXSTR)    :: name
+
     rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP0, phase=0, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP1, phase=1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP2, phase=2, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP3, phase=3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_RUN, &
       userRoutine=Run, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
     call ESMF_CplCompSetEntryPoint(cplcomp, ESMF_METHOD_FINALIZE, &
       userRoutine=Finalize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -104,8 +100,14 @@ module NUOPC_Connector
     
     ! local variables    
     character(len=NUOPC_PhaseMapStringLength) :: initPhases(3)
-    
+    character(ESMF_MAXSTR)                    :: name
+
     rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     initPhases(1) = "IPDv01p1=1"
     initPhases(2) = "IPDv01p2=2"
@@ -115,7 +117,7 @@ module NUOPC_Connector
       name="InitializePhaseMap", valueList=initPhases, &
       convention="NUOPC", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
   end subroutine
   
@@ -130,36 +132,49 @@ module NUOPC_Connector
     ! local variables
     type(ESMF_StateIntent_Flag)           :: isType, esType
     integer                               :: isItemCount, esItemCount
-    
+    type(ESMF_Clock)                      :: internalClock
+    character(ESMF_MAXSTR)                :: name
+
     rc = ESMF_SUCCESS
-    
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+#if 0
+! There is currently no need to set the internal clock of a Connector. Also
+! there is no code yet to keep updating it during Run(). For now keep this code
+! inactive, but keep it here, maybe some day we will notice a need for it.
+
+    ! set the internal clock to be a copy of the parent clock
+    internalClock = ESMF_ClockCreate(clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_CplCompSet(cplcomp, clock=internalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+
     ! reconcile the States
     call ESMF_StateReconcile(importState, attreconflag=ESMF_ATTRECONCILE_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call ESMF_StateReconcile(exportState, attreconflag=ESMF_ATTRECONCILE_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! access the state types
     call ESMF_StateGet(importState, stateintent=isType, itemCount=isItemCount, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call ESMF_StateGet(exportState, stateintent=esType, itemCount=esItemCount, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     if (.not.((isType==ESMF_STATEINTENT_EXPORT).and.(esType==ESMF_STATEINTENT_IMPORT))) then
       ! not ES -> IS ==> should indicate problem???
@@ -168,9 +183,7 @@ module NUOPC_Connector
     ! look for matching Fields and set as "CplList" metadata
     call NUOPC_CplCompAttributeSet(cplcomp, importState, exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
   end subroutine
   
@@ -198,8 +211,14 @@ module NUOPC_Connector
     integer                         :: localrc
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: consumerConnection
-    
+    character(ESMF_MAXSTR)          :: name
+
     rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! prepare local pointer variables
     nullify(importStdAttrNameList)
@@ -211,44 +230,32 @@ module NUOPC_Connector
     allocate(is%wrap, stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of internal state memory failed.", &
-      line=__LINE__, &
-      file=FILENAME, &
-      rcToReturn=rc)) &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     call ESMF_UserCompSetInternalState(cplcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
     call ESMF_StateReconcile(importState, attreconflag=ESMF_ATTRECONCILE_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call ESMF_StateReconcile(exportState, attreconflag=ESMF_ATTRECONCILE_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! access the state types
     call ESMF_StateGet(importState, stateintent=isType, itemCount=isItemCount, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call ESMF_StateGet(exportState, stateintent=esType, itemCount=esItemCount, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     if (.not.((isType==ESMF_STATEINTENT_EXPORT).and.(esType==ESMF_STATEINTENT_IMPORT))) then
       ! not ES -> IS ==> should indicate problem???
@@ -257,39 +264,27 @@ module NUOPC_Connector
     ! get the cplList Attribute
     call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     allocate(cplList(cplListSize), stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of internal cplList() failed.", &
-      line=__LINE__, &
-      file=FILENAME, &
-      rcToReturn=rc)) &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! get the importState std lists
     call NUOPC_StateBuildStdList(importState, importStdAttrNameList, &
       stdFieldList=importFieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! get the exportState std lists
     call NUOPC_StateBuildStdList(exportState, exportStdAttrNameList, &
       stdFieldList=exportFieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
@@ -311,17 +306,13 @@ module NUOPC_Connector
           call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
             value=consumerConnection, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (trim(consumerConnection)/="targeted") then
             ! the consumer side was not yet targeted
             call NUOPC_FieldAttributeSet(eField, name="ConsumerConnection", &
               value="targeted", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             eMatch = j
             exit
           endif
@@ -339,18 +330,14 @@ module NUOPC_Connector
           convention="NUOPC", purpose="General", &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         ! set the connected Attribute on export Field
         call ESMF_AttributeSet(eField, &
           name="Connected", value="true", &
           convention="NUOPC", purpose="General", &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       else
         !TODO: Fields mentioned via stdname in Cpl metadata not found -> error?
       endif
@@ -360,9 +347,7 @@ module NUOPC_Connector
     ! create the State member    
     is%wrap%state = ESMF_StateCreate(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     deallocate(cplList)
 
@@ -397,8 +382,14 @@ module NUOPC_Connector
     integer                         :: localrc
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: consumerConnection
-    
+    character(ESMF_MAXSTR)          :: name
+
     rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! prepare local pointer variables
     nullify(importStdAttrNameList)
@@ -410,38 +401,28 @@ module NUOPC_Connector
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
     call ESMF_StateReconcile(importState, attreconflag=ESMF_ATTRECONCILE_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call ESMF_StateReconcile(exportState, attreconflag=ESMF_ATTRECONCILE_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! access the state types
     call ESMF_StateGet(importState, stateintent=isType, itemCount=isItemCount, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call ESMF_StateGet(exportState, stateintent=esType, itemCount=esItemCount, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     if (.not.((isType==ESMF_STATEINTENT_EXPORT).and.(esType==ESMF_STATEINTENT_IMPORT))) then
       ! not ES -> IS ==> should indicate problem???
@@ -450,51 +431,35 @@ module NUOPC_Connector
     ! get the cplList Attribute
     call NUOPC_CplCompAttributeGet(cplcomp, cplListSize=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     allocate(cplList(cplListSize), stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of internal cplList() failed.", &
-      line=__LINE__, &
-      file=FILENAME, &
-      rcToReturn=rc)) &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! get the importState std lists
     call NUOPC_StateBuildStdList(importState, importStdAttrNameList, &
       stdFieldList=importFieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! get the exportState std lists
     call NUOPC_StateBuildStdList(exportState, exportStdAttrNameList, &
       stdFieldList=exportFieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! prepare FieldBundles to store src and dst Fields
     is%wrap%srcFields = ESMF_FieldBundleCreate(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     is%wrap%dstFields = ESMF_FieldBundleCreate(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     do i=1, cplListSize
 !print *, "cplList(",i,")=", trim(cplList(i))
@@ -516,17 +481,13 @@ module NUOPC_Connector
           call NUOPC_FieldAttributeGet(eField, name="ConsumerConnection", &
             value=consumerConnection, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, &
-            file=FILENAME)) &
-            return  ! bail out
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (trim(consumerConnection)/="connected") then
             ! the consumer side was not yet targeted
             call NUOPC_FieldAttributeSet(eField, name="ConsumerConnection", &
               value="connected", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             eMatch = j
             exit
           endif
@@ -541,14 +502,10 @@ module NUOPC_Connector
         ! add the import and export Fields to FieldBundles
         call ESMF_FieldBundleAdd(is%wrap%srcFields, (/iField/), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         call ESMF_FieldBundleAdd(is%wrap%dstFields, (/eField/), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           
         ! set the connected Attribute on import Field
         call ESMF_AttributeSet(iField, &
@@ -556,18 +513,14 @@ module NUOPC_Connector
           convention="NUOPC", purpose="General", &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         ! set the connected Attribute on export Field
         call ESMF_AttributeSet(eField, &
           name="Connected", value="true", &
           convention="NUOPC", purpose="General", &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       else
         !TODO: Fields mentioned via stdname in Cpl metadata not found -> error?
       endif
@@ -578,13 +531,9 @@ module NUOPC_Connector
     call ESMF_MethodExecute(cplcomp, label=label_ComputeRouteHandle, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME, &
-      rcToReturn=rc)) &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
     if (.not.existflag) then
@@ -594,9 +543,7 @@ module NUOPC_Connector
         unmappedaction=ESMF_UNMAPPEDACTION_IGNORE, &
         routehandle=is%wrap%rh, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
 
     deallocate(cplList)
@@ -625,9 +572,15 @@ module NUOPC_Connector
     character(ESMF_MAXSTR)    :: compName, msgString, valueString
     integer                   :: phase
     logical                   :: verbose
- 
+    character(ESMF_MAXSTR)    :: name
+
     rc = ESMF_SUCCESS
-    
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        
     ! determine verbosity
     verbose = .false. ! initialize
     call ESMF_AttributeGet(cplcomp, name="Verbosity", value=valueString, &
@@ -638,40 +591,33 @@ module NUOPC_Connector
     ! get the compName and currentPhase
     call ESMF_CplCompGet(cplcomp, name=compName, currentPhase=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! query Component for its internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
     !TODO: here may be the place to ensure incoming States are consistent
     !TODO: with the Fields held in the FieldBundle inside the internal State?
       
     ! conditionally output diagnostic to Log file
     if (verbose) then
-      write(msgString,"(A)") ">>>"//trim(compName)//" entered Run"
+      write (msgString,"(A)") ">>>"//trim(compName)//" entered Run"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
     
     ! SPECIALIZE by calling into attached method to execute routehandle
     call ESMF_MethodExecute(cplcomp, label=label_ExecuteRouteHandle, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME, &
-      rcToReturn=rc)) &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
     if (.not.existflag) then
@@ -680,9 +626,7 @@ module NUOPC_Connector
       call ESMF_FieldBundleRegrid(is%wrap%srcFields, is%wrap%dstFields, &
         routehandle=is%wrap%rh, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     
     ! Next update the TimeStamp metadata on the export Fields....
@@ -690,22 +634,16 @@ module NUOPC_Connector
     ! get the rootPet attribute out of the importState
     call ESMF_AttributeGet(importState, name="rootVas", value=rootVas, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     call ESMF_CplCompGet(cplcomp, vm=vm, petCount=petCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     do rootPet=0, petCount-1
       call ESMF_VMGet(vm, rootPet, vas=vas, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (vas == rootVas) exit
     enddo
     
@@ -714,24 +652,21 @@ module NUOPC_Connector
     ! hand coded, specific AttributeUpdate
     call NUOPC_StateUpdateTimestamp(importState, rootPet=rootPet, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! update the timestamp on all of the dst fields to that on the src side
     call NUOPC_FieldBundleUpdateTime(srcFields=is%wrap%srcFields, &
       dstFields=is%wrap%dstFields, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! conditionally output diagnostic to Log file
     if (verbose) then
-      write(msgString,"(A)") "<<<"//trim(compName)//" leaving Run"
+      write (msgString,"(A)") "<<<"//trim(compName)//" leaving Run"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
     
   end subroutine
@@ -749,28 +684,28 @@ module NUOPC_Connector
     type(type_InternalState)  :: is
     integer                   :: localrc
     logical                   :: existflag
+    character(ESMF_MAXSTR)    :: name
 
     rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! query Component for its internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
     ! SPECIALIZE by calling into attached method to release routehandle
     call ESMF_MethodExecute(cplcomp, label=label_ReleaseRouteHandle, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME, &
-      rcToReturn=rc)) &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
     if (.not.existflag) then
@@ -778,35 +713,25 @@ module NUOPC_Connector
       ! release the regrid operation
       call ESMF_FieldBundleRegridRelease(is%wrap%rh, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
 
     ! deallocate remaining internal state memebers
     call ESMF_FieldBundleDestroy(is%wrap%srcFields, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call ESMF_FieldBundleDestroy(is%wrap%dstFields, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     call ESMF_StateDestroy(is%wrap%state, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
     ! deallocate internal state memory
     deallocate(is%wrap, stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Deallocation of internal state memory failed.", &
-      line=__LINE__, &
-      file=FILENAME, &
-      rcToReturn=rc)) &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
       
   end subroutine
