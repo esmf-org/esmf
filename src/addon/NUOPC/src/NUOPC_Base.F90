@@ -1132,8 +1132,9 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_GridCompAreServicesSet - Check if SetServices was called
 ! !INTERFACE:
   function NUOPC_GridCompAreServicesSet(comp, rc)
-! !ARGUMENTS:
+! !RETURN VALUE:
     logical :: NUOPC_GridCompAreServicesSet
+! !ARGUMENTS:
     type(ESMF_GridComp), intent(in)            :: comp
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
@@ -1326,8 +1327,9 @@ endif
 ! !INTERFACE:
   function NUOPC_GridCreateSimpleXY(x_min, y_min, x_max, y_max, &
     i_count, j_count, rc)
-! !ARGUMENTS:
+! !RETURN VALUE:
     type(ESMF_Grid):: NUOPC_GridCreateSimpleXY
+! !ARGUMENTS:
     real(ESMF_KIND_R8), intent(in)            :: x_min, x_max, y_min, y_max
     integer,            intent(in)            :: i_count, j_count
     integer,            intent(out), optional :: rc
@@ -1402,7 +1404,8 @@ endif
 ! !INTERFACE:
   ! call using generic interface: NUOPC_IsCreated
   function NUOPC_ClockIsCreated(clock, rc)
-    logical           :: NUOPC_ClockIsCreated
+! !RETURN VALUE:
+    logical :: NUOPC_ClockIsCreated
 ! !ARGUMENTS:
     type(ESMF_Clock)               :: clock
     integer, intent(out), optional :: rc
@@ -1746,8 +1749,9 @@ endif
 ! !IROUTINE: NUOPC_StateIsAllConnected - Check if all the Fields in a State are connected
 ! !INTERFACE:
   function NUOPC_StateIsAllConnected(state, rc)
-! !ARGUMENTS:
+! !RETURN VALUE:
     logical :: NUOPC_StateIsAllConnected
+! !ARGUMENTS:
     type(ESMF_State), intent(in)            :: state
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
@@ -1796,8 +1800,9 @@ endif
 ! !IROUTINE: NUOPC_StateIsAtTime - Check if all the Fields in a State are at the given Time
 ! !INTERFACE:
   function NUOPC_StateIsAtTime(state, time, rc)
-! !ARGUMENTS:
+! !RETURN VALUE:
     logical :: NUOPC_StateIsAtTime
+! !ARGUMENTS:
     type(ESMF_State), intent(in)            :: state
     type(ESMF_Time),  intent(in)            :: time
     integer,          intent(out), optional :: rc
@@ -1882,8 +1887,9 @@ endif
 ! !IROUTINE: NUOPC_StateIsFieldConnected - Test if Field in a State is connected
 ! !INTERFACE:
   function NUOPC_StateIsFieldConnected(state, fieldName, rc)
-! !ARGUMENTS:
+! !RETURN VALUE:
     logical :: NUOPC_StateIsFieldConnected
+! !ARGUMENTS:
     type(ESMF_State), intent(in)            :: state
     character(*),     intent(in)            :: fieldName
     integer,          intent(out), optional :: rc

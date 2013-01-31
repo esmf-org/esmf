@@ -270,8 +270,9 @@ module NUOPC_RunSequenceDef
 !BOP
 ! !IROUTINE: NUOPC_RunSequenceIterate - Iterate through a RunSequence
 ! !INTERFACE:
-  logical function NUOPC_RunSequenceIterate(runSeq, runSeqIndex, runElement, &
-                                            rc)
+  function NUOPC_RunSequenceIterate(runSeq, runSeqIndex, runElement, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_RunSequenceIterate
 ! !ARGUMENTS:
     type(NUOPC_RunSequence), pointer     :: runSeq(:)
     integer,                 intent(in)  :: runSeqIndex
