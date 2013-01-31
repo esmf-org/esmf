@@ -156,8 +156,9 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_ClockInitialize - Initialize a new Clock from Clock and stabilityTimeStep
 ! !INTERFACE:
   function NUOPC_ClockInitialize(externalClock, stabilityTimeStep, rc)
-! !ARGUMENTS:
+! !RETURN VALUE:
     type(ESMF_Clock) :: NUOPC_ClockInitialize
+! !ARGUMENTS:
     type(ESMF_Clock)                               :: externalClock
     type(ESMF_TimeInterval), intent(in),  optional :: stabilityTimeStep
     integer,                 intent(out), optional :: rc
