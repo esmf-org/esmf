@@ -324,8 +324,9 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_CplCompAreServicesSet - Check if SetServices was called
 ! !INTERFACE:
   function NUOPC_CplCompAreServicesSet(comp, rc)
-! !ARGUMENTS:
+! !RETURN VALUE:
     logical :: NUOPC_CplCompAreServicesSet
+! !ARGUMENTS:
     type(ESMF_CplComp), intent(in)            :: comp
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
