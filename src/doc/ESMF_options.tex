@@ -349,6 +349,27 @@ This flag is documented in section \ref{const:logmsgflag}.
 \subsection{ESMF\_MESHELEMTYPE}
 This flag is documented in section \ref{const:meshelemtype}.
 
+\subsection{ESMF\_MESHLOC}
+\label{const:meshloc}
+{\sf DESCRIPTION:\\}  
+Used to indicate a specific part of a Mesh. This is commonly used to specify the part of the Mesh to
+create a Field on. 
+
+The type of this flag is:
+
+{\tt type(ESMF\_MeshLoc)}
+
+The valid values are:
+\begin{description}
+
+\item [ESMF\_MESHLOC\_NODE]
+         The nodes (also known as corners or vertices) of a Mesh. 
+
+\item [ESMF\_MESHLOC\_ELEMENT]
+         The elements (also known as cells) of a Mesh. 
+\end{description}
+
+
 \subsection{ESMF\_MESHOP}
 \label{const:meshop}
 {\sf DESCRIPTION:\\}  

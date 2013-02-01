@@ -71,8 +71,8 @@ For a Mesh with parametric dimension of 3 the valid element types (illustrated a
 \begin{tabular}{|l|c|l|}
 \hline
 Element Type & Number of Nodes & Description \\
-\hline
-ESMF\_MESHELEMTYPE\_TETRA & 4 & A tetrahedron (CAN'T BE USED IN REGRID) \\
+\hline                                         
+ESMF\_MESHELEMTYPE\_TETRA & 4 & A tetrahedron (NOT VALID IN BILINEAR OR PATCH REGRID)\\
 ESMF\_MESHELEMTYPE\_HEX  & 8 & A hexahedron (e.g. a cube) \\
 \hline
 \end{tabular}
