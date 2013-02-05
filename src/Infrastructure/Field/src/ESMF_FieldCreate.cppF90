@@ -883,7 +883,7 @@ contains
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
     integer :: localrc                       !  Local error code
@@ -1512,7 +1512,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateGridTKR"
-!BOP
+!BOPI
 ! !IROUTINE:   ESMF_FieldCreate - Create a Field from Grid and typekind
 
 ! !INTERFACE:
@@ -1630,7 +1630,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
     type(ESMF_ArraySpec) :: arrayspec
@@ -1689,7 +1689,7 @@ end function ESMF_FieldCreateGridTKR
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateGridArraySpec"
-!BOP
+!BOPI
 ! !IROUTINE:   ESMF_FieldCreate - Create a Field from Grid and ArraySpec
 
 ! !INTERFACE:
@@ -1807,7 +1807,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
     type(ESMF_GeomBase) :: geombase
@@ -1900,7 +1900,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateGridArray"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldCreate - Create a Field from Grid and Array
 
 ! !INTERFACE:
@@ -2013,7 +2013,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                       !  Local error code
     type(ESMF_GeomBase) :: geombase
@@ -3240,9 +3240,9 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 !       The typekind of the Field.
 ! \item [{[meshloc]}]
 !       \begin{sloppypar}
-!       Which part of the mesh to build the Field on. Can be set to either
-!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, 
-!       defaults to {\tt ESMF\_MESHLOC\_NODE}.
+!       The part of the Mesh on which to build the Field. For valid
+!       predefined values see Section~\ref{const:meshloc}.
+!       If not set, defaults to {\tt ESMF\_MESHLOC\_NODE}.
 !       \end{sloppypar}
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
@@ -3378,9 +3378,9 @@ end function ESMF_FieldCreateMeshTKR
 !       Data type and kind specification. 
 ! \item [{[meshloc]}]
 !       \begin{sloppypar}
-!       Which part of the mesh to build the Field on. Can be set to either
-!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, 
-!       defaults to {\tt ESMF\_MESHLOC\_NODE}.
+!       The part of the Mesh on which to build the Field. For valid
+!       predefined values see Section~\ref{const:meshloc}.
+!       If not set, defaults to {\tt ESMF\_MESHLOC\_NODE}.
 !       \end{sloppypar}
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
@@ -3502,9 +3502,9 @@ end function ESMF_FieldCreateMeshTKR
 !       {\tt ESMF\_Array} object.
 ! \item [{[meshloc]}]
 !       \begin{sloppypar}
-!       Which part of the mesh to build the Field on. Can be set to either
-!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, 
-!       defaults to {\tt ESMF\_MESHLOC\_NODE}.
+!       The part of the Mesh on which to build the Field. For valid
+!       predefined values see Section~\ref{const:meshloc}.
+!       If not set, defaults to {\tt ESMF\_MESHLOC\_NODE}.
 !       \end{sloppypar}
 ! \item [{[datacopyflag]}]
 !       Indicates whether to copy the contents of the {\tt array} or reference it directly.
@@ -3630,9 +3630,9 @@ end function ESMF_FieldCreateMeshTKR
 !       for the {\tt farray}. @\
 ! \item [{[meshloc]}] @\
 !       \begin{sloppypar} @\
-!       Which part of the mesh to build the Field on. Can be set to either @\
-!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\
-!       defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
+!       The part of the Mesh on which to build the Field. For valid @\
+!       predefined values see Section~\ref{const:meshloc}. @\
+!       If not set, defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
 !       \end{sloppypar} @\
 ! \item[indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
@@ -3793,9 +3793,9 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 !       for the {\tt farrayPtr}. @\
 ! \item [{[meshloc]}] @\
 !       \begin{sloppypar} @\
-!       Which part of the mesh to build the Field on. Can be set to either @\
-!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\
-!       defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
+!       The part of the Mesh on which to build the Field. For valid @\
+!       predefined values see Section~\ref{const:meshloc}. @\
+!       If not set, defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
 !       \end{sloppypar} @\
 ! \item [{[datacopyflag]}] @\
 !       Whether to copy the contents of the {\tt farrayPtr} or reference it directly. @\

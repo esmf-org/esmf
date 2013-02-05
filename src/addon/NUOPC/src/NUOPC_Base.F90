@@ -156,8 +156,9 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_ClockInitialize - Initialize a new Clock from Clock and stabilityTimeStep
 ! !INTERFACE:
   function NUOPC_ClockInitialize(externalClock, stabilityTimeStep, rc)
-! !ARGUMENTS:
+! !RETURN VALUE:
     type(ESMF_Clock) :: NUOPC_ClockInitialize
+! !ARGUMENTS:
     type(ESMF_Clock)                               :: externalClock
     type(ESMF_TimeInterval), intent(in),  optional :: stabilityTimeStep
     integer,                 intent(out), optional :: rc
@@ -324,8 +325,9 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_CplCompAreServicesSet - Check if SetServices was called
 ! !INTERFACE:
   function NUOPC_CplCompAreServicesSet(comp, rc)
-! !ARGUMENTS:
+! !RETURN VALUE:
     logical :: NUOPC_CplCompAreServicesSet
+! !ARGUMENTS:
     type(ESMF_CplComp), intent(in)            :: comp
     integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
@@ -477,18 +479,17 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer, parameter      :: maxCount=10
-    character(ESMF_MAXSTR)  :: cplListValues(maxCount)
-    integer                 :: count
+    character(ESMF_MAXSTR), pointer :: cplList(:)
+    integer                         :: count
 
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ! find cplListValues
-    call NUOPC_FillCplList(importState, exportState, cplList=cplListValues, &
-      count=count, rc=rc)
+    ! find cplList
+    nullify(cplList)
+    call NUOPC_FillCplList(importState, exportState, cplList=cplList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    
+      
     ! set Attributes
     call ESMF_AttributeSet(comp, &
       name="ComponentLongName", value="NUOPC Generic Connector Component", &
@@ -496,13 +497,18 @@ module NUOPC_Base
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    if (count>0) then
-      call ESMF_AttributeSet(comp, &
-        name="CplList", valueList=cplListValues(1:count), &
-        convention="NUOPC", purpose="General", &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
+    
+    if (associated(cplList)) then
+      count = size(cplList)
+      if (count>0) then
+        call ESMF_AttributeSet(comp, &
+          name="CplList", valueList=cplList(1:count), &
+          convention="NUOPC", purpose="General", &
+          rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+      endif
+      deallocate(cplList)
     endif
       
   end subroutine
@@ -1001,20 +1007,24 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_FillCplList - Fill the cplList according to matching Fields
 ! !INTERFACE:
-  subroutine NUOPC_FillCplList(importState, exportState, cplList, count, rc)
+  subroutine NUOPC_FillCplList(importState, exportState, cplList, rc)
 ! !ARGUMENTS:
     type(ESMF_State),       intent(in)            :: importState
     type(ESMF_State),       intent(in)            :: exportState
-    character(ESMF_MAXSTR), intent(out)           :: cplList(:)
-    integer,                intent(out)           :: count
+    character(ESMF_MAXSTR), pointer               :: cplList(:)
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Constructs a list of matching StandardNames of Fields in the 
 !   {\tt importState} and {\tt exportState}. Returns this list in {\tt cplList}.
+!
+!   The pointer argument {\tt cplList} must enter this method unassociated. On
+!   return, the deallocation of the potentially associated pointer becomes the
+!   user responsibility.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                         :: maxCount, i, j
+    integer                         :: maxCount, count, i, j
+    character(ESMF_MAXSTR), pointer :: l_cplList(:)
     character(ESMF_MAXSTR), pointer :: importStandardNameList(:)
     character(ESMF_MAXSTR), pointer :: exportStandardNameList(:)
     type(ESMF_Field),       pointer :: importFieldList(:)
@@ -1023,10 +1033,18 @@ module NUOPC_Base
     character(ESMF_MAXSTR)          :: consumerConnection
     
     if (present(rc)) rc = ESMF_SUCCESS
-
-    maxCount = size(cplList)
-    count = 0 ! initialize
     
+    ! ensure cplList argument enters unassociated
+    if (associated(cplList)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="cplList must enter unassociated", &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+
+    ! nullify pointers to prepare for the following calls
     nullify(importStandardNameList)
     nullify(exportStandardNameList)
     nullify(importFieldList)
@@ -1047,9 +1065,16 @@ module NUOPC_Base
       file=FILENAME)) &
       return  ! bail out
     
+    ! associated pointers means that there are name lists
     if (associated(importStandardNameList) .and. &
       associated(exportStandardNameList)) then
       
+      ! the maximum number of matches is limited by the larger list, because
+      ! the same producer can be matched to multiple consumers
+      maxCount = max(size(importStandardNameList), size(exportStandardNameList))
+      allocate(l_cplList(maxCount)) ! temporary list
+
+      count = 0
       ! simple linear search of items that match between both lists
       do i=1, size(importStandardNameList)  ! producer side
         do j=1, size(exportStandardNameList)  ! consumer side
@@ -1074,19 +1099,26 @@ module NUOPC_Base
               count = count+1
               if (count > maxCount) then
                 call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-                  msg="Not enough space in cplList",&
+                  msg="Bad internal error - should never get here!",&
                   line=__LINE__, file=FILENAME, rcToReturn=rc)
                 return  ! bail out
               endif
-              cplList(count) = importStandardNameList(i)
+              l_cplList(count) = importStandardNameList(i)
               exit
             endif
           endif
         enddo
       enddo
       
-    endif
+      ! transfer info: l_cplList -> cplList
+      allocate(cplList(count))
+      do i=1, count
+        cplList(i) = l_cplList(i)
+      enddo
+      deallocate(l_cplList)
       
+    endif
+    
     if (associated(importStandardNameList)) deallocate(importStandardNameList)
     if (associated(exportStandardNameList)) deallocate(exportStandardNameList)
     if (associated(importFieldList)) deallocate(importFieldList)
@@ -1100,8 +1132,9 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_GridCompAreServicesSet - Check if SetServices was called
 ! !INTERFACE:
   function NUOPC_GridCompAreServicesSet(comp, rc)
-! !ARGUMENTS:
+! !RETURN VALUE:
     logical :: NUOPC_GridCompAreServicesSet
+! !ARGUMENTS:
     type(ESMF_GridComp), intent(in)            :: comp
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
@@ -1294,8 +1327,9 @@ endif
 ! !INTERFACE:
   function NUOPC_GridCreateSimpleXY(x_min, y_min, x_max, y_max, &
     i_count, j_count, rc)
-! !ARGUMENTS:
+! !RETURN VALUE:
     type(ESMF_Grid):: NUOPC_GridCreateSimpleXY
+! !ARGUMENTS:
     real(ESMF_KIND_R8), intent(in)            :: x_min, x_max, y_min, y_max
     integer,            intent(in)            :: i_count, j_count
     integer,            intent(out), optional :: rc
@@ -1370,7 +1404,8 @@ endif
 ! !INTERFACE:
   ! call using generic interface: NUOPC_IsCreated
   function NUOPC_ClockIsCreated(clock, rc)
-    logical           :: NUOPC_ClockIsCreated
+! !RETURN VALUE:
+    logical :: NUOPC_ClockIsCreated
 ! !ARGUMENTS:
     type(ESMF_Clock)               :: clock
     integer, intent(out), optional :: rc
@@ -1504,7 +1539,11 @@ endif
 ! !DESCRIPTION:
 !   Constructs lists containing the StandardName, Field name, and connected 
 !   status of the Fields in the {\tt state}. Returns this information in the
-!   list arguments. Recursively parses through nested States. 
+!   list arguments. Recursively parses through nested States.
+!
+!   All pointer arguments present must enter this method unassociated. On 
+!   return, the deallocation of an associated pointer becomes the user
+!   responsibility.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1562,14 +1601,12 @@ endif
       enddo
       
       if (associated(stdAttrNameList)) then
-        if (size(stdAttrNameList)<fieldCount) then
-          call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
-            msg="stdAttrNameList too small", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
-          return  ! bail out
-        endif
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="stdAttrNameList must enter unassociated", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
       else
         allocate(stdAttrNameList(fieldCount), stat=stat)
         if (ESMF_LogFoundAllocError(stat, msg="allocating stdAttrNameList", &
@@ -1580,14 +1617,12 @@ endif
 
       if (present(stdItemNameList)) then
         if (associated(stdItemNameList)) then
-          if (size(stdItemNameList)<fieldCount) then
-            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
-              msg="stdItemNameList too small", &
-              line=__LINE__, &
-              file=FILENAME, &
-              rcToReturn=rc)
-            return  ! bail out
-          endif
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="stdItemNameList must enter unassociated", &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)
+          return  ! bail out
         else
           allocate(stdItemNameList(fieldCount), stat=stat)
           if (ESMF_LogFoundAllocError(stat, msg="allocating stdItemNameList", &
@@ -1599,14 +1634,12 @@ endif
 
       if (present(stdConnectedList)) then
         if (associated(stdConnectedList)) then
-          if (size(stdConnectedList)<fieldCount) then
-            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
-              msg="stdConnectedList too small", &
-              line=__LINE__, &
-              file=FILENAME, &
-              rcToReturn=rc)
-            return  ! bail out
-          endif
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="stdConnectedList must enter unassociated", &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)
+          return  ! bail out
         else
           allocate(stdConnectedList(fieldCount), stat=stat)
           if (ESMF_LogFoundAllocError(stat, msg="allocating stdConnectedList", &
@@ -1618,14 +1651,12 @@ endif
 
       if (present(stdFieldList)) then
         if (associated(stdFieldList)) then
-          if (size(stdFieldList)<fieldCount) then
-            call ESMF_LogSetError(ESMF_RC_ARG_SIZE, &
-              msg="stdFieldList too small", &
-              line=__LINE__, &
-              file=FILENAME, &
-              rcToReturn=rc)
-            return  ! bail out
-          endif
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="stdFieldList must enter unassociated", &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)
+          return  ! bail out
         else
           allocate(stdFieldList(fieldCount), stat=stat)
           if (ESMF_LogFoundAllocError(stat, msg="allocating stdFieldList", &
@@ -1718,8 +1749,9 @@ endif
 ! !IROUTINE: NUOPC_StateIsAllConnected - Check if all the Fields in a State are connected
 ! !INTERFACE:
   function NUOPC_StateIsAllConnected(state, rc)
-! !ARGUMENTS:
+! !RETURN VALUE:
     logical :: NUOPC_StateIsAllConnected
+! !ARGUMENTS:
     type(ESMF_State), intent(in)            :: state
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
@@ -1768,8 +1800,9 @@ endif
 ! !IROUTINE: NUOPC_StateIsAtTime - Check if all the Fields in a State are at the given Time
 ! !INTERFACE:
   function NUOPC_StateIsAtTime(state, time, rc)
-! !ARGUMENTS:
+! !RETURN VALUE:
     logical :: NUOPC_StateIsAtTime
+! !ARGUMENTS:
     type(ESMF_State), intent(in)            :: state
     type(ESMF_Time),  intent(in)            :: time
     integer,          intent(out), optional :: rc
@@ -1787,6 +1820,7 @@ endif
     integer                 :: i, valueList(9)
     logical                 :: isMatch
     character(ESMF_MAXSTR)  :: iString, msgString
+    type(ESMF_CalKind_Flag) :: calkindflag
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1796,6 +1830,12 @@ endif
 
     call NUOPC_StateBuildStdList(state, stdAttrNameList=stdAttrNameList, &
       stdItemNameList=stdItemNameList, stdFieldList=stdFieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+      
+    call ESMF_TimeGet(time, calkindflag=calkindflag, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -1821,7 +1861,7 @@ endif
           yy=valueList(1), mm=ValueList(2), dd=ValueList(3), &
            h=valueList(4),  m=ValueList(5),  s=ValueList(6), &
           ms=valueList(7), us=ValueList(8), ns=ValueList(9), &
-          rc=rc)
+          calkindflag=calkindflag, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=msgString, &
           line=__LINE__, &
           file=FILENAME)) &
@@ -1847,8 +1887,9 @@ endif
 ! !IROUTINE: NUOPC_StateIsFieldConnected - Test if Field in a State is connected
 ! !INTERFACE:
   function NUOPC_StateIsFieldConnected(state, fieldName, rc)
-! !ARGUMENTS:
+! !RETURN VALUE:
     logical :: NUOPC_StateIsFieldConnected
+! !ARGUMENTS:
     type(ESMF_State), intent(in)            :: state
     character(*),     intent(in)            :: fieldName
     integer,          intent(out), optional :: rc
