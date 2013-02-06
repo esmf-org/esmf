@@ -536,7 +536,9 @@ contains
 !------------------------------------------------------------------------------ @\
       integer :: localrc, i @\
       integer :: localcount @\
+^if !defined (noattributesversion) @\
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2 @\
+^endif @\
       logical :: localrelaxed @\
       type(ESMF_Logical) :: linkChange @\
  @\

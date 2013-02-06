@@ -1306,7 +1306,6 @@ itemloop:  do k=attreconstart, si%theircount
 !
 !EOPI
       integer :: localrc, i
-      integer :: memstat
       type(ESMF_StateClass),    pointer :: stypep
       type(ESMF_StateItemWrap), pointer :: itemList(:)
       character(len=ESMF_MAXSTR) :: thisname

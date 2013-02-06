@@ -362,8 +362,6 @@ contains
 !-------------------------------------------------------------------------------
 
     ESMF_INIT_TYPE sinit1, sinit2
-    integer :: localrc1, localrc2
-    logical :: lval1, lval2
 
     ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
     ! init checks on both args, and in the case where both are uninitialized,
@@ -411,10 +409,6 @@ contains
 !
 !EOPI
 !-------------------------------------------------------------------------------
-
-    ESMF_INIT_TYPE sinit1, sinit2
-    integer :: localrc1, localrc2
-    logical :: lval1, lval2
 
     ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
     ! init checks on both args, and in the case where both are uninitialized,
@@ -557,7 +551,9 @@ contains
 !------------------------------------------------------------------------------ @\
       type(mtype) :: temp_list(1) @\
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2 @\
+^if !defined (noattributesversion) @\
       type(ESMF_Logical) :: linkChange @\
+^endif @\
       integer :: localrc @\
  @\
       ! check input variables @\
@@ -704,7 +700,9 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
       integer :: localcount @\
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2 @\
       logical :: localrelaxed @\
+^if !defined (noattributesversion) @\
       type(ESMF_Logical) :: linkChange @\
+^endif @\
  @\
       ! Initialize return code; assume routine not implemented @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -854,7 +852,9 @@ StateAddListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%stat
       integer :: localrc, i @\
       integer :: localcount @\
       character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2 @\
+^if !defined (noattributesversion) @\
       type(ESMF_Logical) :: linkChange @\
+^endif @\
  @\
       ! Initialize return code; assume routine not implemented @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -1389,7 +1389,6 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
           type(ESMF_StateItemWrap), pointer :: siwrap(:)
           type(ESMF_StateItem), pointer :: sip
           integer :: sipcount
-          integer :: memstat1
 
           siwrap => null ()
 	  call ESMF_ContainerGet (sp%stateContainer,  &
@@ -1617,7 +1616,7 @@ StateGetMacro(ESMF_State,State,nestedState,spp)
 !
 !
 !EOP
-      integer :: i, localrc
+      integer :: localrc
       type(ESMF_Container), pointer :: scp
       type(ESMF_StateItemWrap) :: siwrap
       logical :: foundflag

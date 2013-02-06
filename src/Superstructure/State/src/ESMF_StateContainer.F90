@@ -217,7 +217,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                     :: localrc      ! local return code
     type(ESMF_Logical)          :: multiflagArg
     type(ESMF_Logical)          :: relaxedflagArg
-    integer                     :: i, stat
+    integer                     :: i
     character(len=ESMF_MAXSTR)  :: name
     type(ESMF_StateItemWrap)    :: siw
 
@@ -300,7 +300,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                     :: localrc      ! local return code
-    integer                     :: i, stat
+    integer                     :: i
     character(len=ESMF_MAXSTR)  :: name
     type(ESMF_StateItemWrap)    :: siw
     
@@ -709,7 +709,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                     :: localrc      ! local return code
     type(ESMF_Logical)          :: multiflagArg
     type(ESMF_Logical)          :: relaxedflagArg
-    integer                     :: i, stat
+    integer                     :: i
     character(len=ESMF_MAXSTR)  :: name
     type(ESMF_StateItemWrap)    :: siw
 
