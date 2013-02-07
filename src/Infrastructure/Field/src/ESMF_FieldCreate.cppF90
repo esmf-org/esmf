@@ -1562,7 +1562,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      aligned with the global index space, if a global index space is well
 !      defined by the associated Grid. See section \ref{const:indexflag}
 !      for a list of valid indexflag options. The default indexflag value is the 
-!      one stored in then {\tt ESMF\_Grid} object. Currently it's 
+!      one stored in then {\tt ESMF\_Grid} object. Currently it is 
 !      erroneous to specify an indexflag
 !      different from the one stored in the {\tt ESMF\_Grid} object.
 ! \item [{[staggerloc]}]
@@ -1739,7 +1739,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      aligned with the global index space, if a global index space is well
 !      defined by the associated Grid. See section \ref{const:indexflag}
 !      for a list of valid indexflag options. The default indexflag value is the 
-!      one stored in then {\tt ESMF\_Grid} object. Currently it's 
+!      one stored in then {\tt ESMF\_Grid} object. Currently it is 
 !      erroneous to specify an indexflag 
 !      different from the one stored in the {\tt ESMF\_Grid} object.
 ! \item [{[staggerloc]}]
@@ -2146,7 +2146,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{const:indexflag} for a list of valid indexflag options. @\
-!       Currently it's erroneous to specify an indexflag @\
+!       Currently it is erroneous to specify an indexflag @\
 !       different from the one stored in the {\tt ESMF\_Grid} object. @\
 ! \item [{[datacopyflag]}] @\
 !       Whether to copy the contents of the {\tt farray} or reference it directly. @\
