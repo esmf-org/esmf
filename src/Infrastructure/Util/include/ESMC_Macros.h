@@ -49,9 +49,9 @@
 #define ESMF_MAJOR_VERSION 3
 #define ESMF_MINOR_VERSION 1
 #define ESMF_REVISION      0
-#define ESMF_PATCHLEVEL    5
+#define ESMF_PATCHLEVEL    6
 
-#define ESMF_VERSION_STRING "3.1.0rp5"
+#define ESMF_VERSION_STRING "3.1.0rp6 beta snapshot"
 
 #endif   // ESMC_MACROS_H
 
