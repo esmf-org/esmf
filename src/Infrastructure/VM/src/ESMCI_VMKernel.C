@@ -88,6 +88,11 @@ typedef DWORD pid_t;
 #define getpid GetCurrentProcessId
 #endif
 
+// Requested MPI thread level
+#ifndef VM_MPI_THREAD_LEVEL
+#define VM_MPI_THREAD_LEVEL MPI_THREAD_MULTIPLE
+#endif
+
 namespace ESMCI {
 
 // Definition of class static data members
@@ -296,10 +301,10 @@ void VMK::init(MPI_Comm mpiCommunicator){
     argc_mpich = argc;
     for (int k=0; k<100; k++)
       argv_mpich[k] = argv[k];
-    MPI_Init_thread(&argc_mpich, (char ***)&argv_mpich, MPI_THREAD_MULTIPLE,
+    MPI_Init_thread(&argc_mpich, (char ***)&argv_mpich, VM_MPI_THREAD_LEVEL,
       &mpi_thread_level);
 #else
-    MPI_Init_thread(NULL, NULL, MPI_THREAD_MULTIPLE, &mpi_thread_level);
+    MPI_Init_thread(NULL, NULL, VM_MPI_THREAD_LEVEL, &mpi_thread_level);
 #endif
   }
   // so now MPI is for sure initialized...
