@@ -562,7 +562,6 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandles(i),rc)
       integer :: i @\
       integer :: itemcount @\
       logical :: exists @\
-      integer :: memstat @\
  @\
       ! Initialize return code.  Assume failure until success assured. @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -767,11 +766,8 @@ StateClsAddListMacro(ESMF_State, State, states, spp, STATE)
 !EOPI
 
       integer :: localrc                  ! local error status
-      integer :: memstat                  ! Stat from allocate/deallocate
       logical :: itemfound
-      type(ESMF_StateClass), pointer  :: nested_sp
       type(ESMF_StateItemWrap) :: siwrap
-      character(len=ESMF_MAXSTR) :: errmsg
       logical :: usenested_lookup
 
       ! Initialize return code.  Assume failure until success assured.
@@ -918,7 +914,6 @@ StateClsAddListMacro(ESMF_State, State, states, spp, STATE)
           integer :: localrc1
           type(ESMF_StateItemWrap) :: siwrap
           type(ESMF_StateItem), pointer :: nextitem1
-          integer :: dcount1
 
           ! print *, 'find_pathed_item_worker: entered.'
           ! print *, '  lpath = ', trim (lpath)

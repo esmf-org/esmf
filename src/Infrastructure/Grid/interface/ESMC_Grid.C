@@ -231,6 +231,40 @@ void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim,
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GridGetCoordBounds()"
+int ESMC_GridGetCoordBounds(ESMC_Grid grid, 
+                      enum ESMC_StaggerLoc staggerloc, 
+                      int *exclusiveLBound,
+                      int *exclusiveUBound, int *rc){
+
+  // Initialize return code. Assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;
+
+  // convert the ESMC_Grid to an ESMCI::Grid
+  ESMCI::Grid *gridp = reinterpret_cast<ESMCI::Grid *>(grid.ptr);
+
+  // convert the staggerloc enum to an int
+  int stagger = static_cast<int>(staggerloc);
+
+  // get the bounds
+  if(exclusiveLBound && exclusiveUBound) {
+    int localDe = 0;
+    localrc = gridp->getExclusiveLBound(stagger, localDe, exclusiveLBound);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+      return localrc; // bail out
+    localrc = gridp->getExclusiveUBound(stagger, localDe, exclusiveUBound);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+      return localrc; // bail out
+  }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return *rc;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridAddItem()"
 int ESMC_GridAddItem(ESMC_Grid grid, enum ESMC_GridItem_Flag itemflag, 
                                       enum ESMC_StaggerLoc staggerloc){

@@ -330,7 +330,6 @@ contains
 !------------------------------------------------------------------------------
 
     ! local vars
-    integer :: localrc
     integer :: memstat
 
     ! Initialize return code; assume failure until success is certain

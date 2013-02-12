@@ -289,6 +289,45 @@ void * ESMC_GridGetCoord(
 
 //------------------------------------------------------------------------------
 //BOP
+// !IROUTINE: ESMC_GridGetCoordBounds - Get coordinate bounds from a Grid
+//
+// !INTERFACE:
+int ESMC_GridGetCoordBounds(
+  ESMC_Grid grid,                         // in
+  enum ESMC_StaggerLoc staggerloc,        // in
+  int *exclusiveLBound,                   // out
+  int *exclusiveUBound,                   // out
+  int *rc                                 // out
+);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//  Get coordinates bounds from the Grid.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[grid]
+//    Grid object from which to obtain the coordinates.
+//  \item[staggerloc]
+//    The stagger location to add.  If not present, defaults to 
+//    ESMC\_STAGGERLOC\_CENTER.
+//  \item[exclusiveLBound]
+//    Upon return this holds the lower bounds of the exclusive region. This bound
+//    must be allocated to be of size equal to the coord dimCount.  
+//  \item[exclusiveUBound]
+//    Upon return this holds the upper bounds of the exclusive region. This bound
+//    must be allocated to be of size equal to the coord dimCount.  
+//  \item[rc]
+//  Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+//BOP
 // !IROUTINE: ESMC_GridWrite - Write a Grid to a VTK file
 //
 // !INTERFACE:
