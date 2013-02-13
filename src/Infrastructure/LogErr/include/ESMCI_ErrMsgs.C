@@ -68,8 +68,8 @@ static const char *errMsg[] = {
   "Not valid " ,                                      //   42 = ESMF_RC_NOT_VALID
 
   "Internal error: List overflow ",                   //   43 = ESMF_RC_INTNRL_LIST
-  "Internal error: Inconsistent data ",               //   44 = ESMF_RC_INTNRL_INCONS
-  "Internal error: Unknown error ",                   //   45 = ESMF_RC_INTNRL_BAD
+  "Internal error: Inconsistency ",                   //   44 = ESMF_RC_INTNRL_INCONS
+  "Internal error: Bad condition ",                   //   45 = ESMF_RC_INTNRL_BAD
 
   "System call error ",                               //   46 = ESMF_RC_SYS
   "Resource is busy ",                                //   47 = ESMF_RC_BUSY
@@ -84,11 +84,15 @@ static const char *errMsg[] = {
   "Wrong data value ",                                //   54 = ESMF_RC_VAL_WRONG
   "Value inconsistent with error bound ",             //   55 = ESMF_RC_VAL_ERRBOUND
   "Value out of range ",                              //   56 = ESMF_RC_VAL_OUTOFRANGE
+
   "Attribute not set ",                               //   57 = ESMF_RC_ATTR_NOTSET
-  "Incorrect typekind ",                              //   58 = ESMF_RC_ATTR_WRONGTYPE
-  "Wrong number of items ",                           //   59 = ESMF_RC_ATTR_ITEMSOFF
+  "Attribute incorrect typekind ",                    //   58 = ESMF_RC_ATTR_WRONGTYPE
+  "Attribute wrong number of items ",                 //   59 = ESMF_RC_ATTR_ITEMSOFF
   "Attribute linking error ",                         //   60 = ESMF_RC_ATTR_LINK
-  "Attribute input buffer not long enough ",          //   61 = ESMF_RC_BUFFER_SHORT
+
+  "Input buffer not long enough ",                    //   61 = ESMF_RC_BUFFER_SHORT
+
+  "Timeout reached ",                                 //   62 = ESMF_RC_TIMEOUT
 
 // 62-499 reserved for future F90 symmetric return code definitions
                                                                           
@@ -165,8 +169,8 @@ static const char *errMsg[] = {
   "Not valid " ,                                      //  542 = ESMC_RC_NOT_VALID
 
   "Internal error: List overflow ",                   //  543 = ESMC_RC_INTNRL_LIST
-  "Internal error: Inconsistent data ",               //  544 = ESMC_RC_INTNRL_INCONS
-  "Internal error: Unknown error ",                   //  545 = ESMC_RC_INTNRL_BAD
+  "Internal error: Inconsistency ",                   //  544 = ESMC_RC_INTNRL_INCONS
+  "Internal error: Bad condition ",                   //  545 = ESMC_RC_INTNRL_BAD
 
   "System call error ",                               //  546 = ESMC_RC_SYS
   "Resource is busy ",                                //  547 = ESMC_RC_BUSY
@@ -183,11 +187,13 @@ static const char *errMsg[] = {
   "Value out of range ",                              //  556 = ESMC_RC_VAL_OUTOFRANGE
 
   "Attribute not set ",                               //  557 = ESMC_RC_ATTR_NOTSET
-  "Incorrect typekind ",                              //  558 = ESMC_RC_ATTR_WRONGTYPE
-  "Wrong number of items ",                           //  559 = ESMC_RC_ATTR_ITEMSOFF
+  "Attribute incorrect typekind ",                    //  558 = ESMC_RC_ATTR_WRONGTYPE
+  "Attribute wrong number of items ",                 //  559 = ESMC_RC_ATTR_ITEMSOFF
   "Attribute linking error ",                         //  560 = ESMC_RC_ATTR_LINK
 
-  "Attribute input buffer not long enough ",          //  561 = ESMF_RC_BUFFER_SHORT
+  "Input buffer not long enough ",                    //  561 = ESMC_RC_BUFFER_SHORT
+
+  "Timeout reached ",                                 //  562 = ESMC_RC_TIMEOUT
 
 // 562-999 reserved for future C++ symmetric return code definitions
                                                                          
