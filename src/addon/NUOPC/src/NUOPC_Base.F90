@@ -1904,10 +1904,11 @@ endif
     type(ESMF_Field),       pointer       :: stdFieldList(:)
     type(ESMF_Field)                      :: field
     integer                 :: i
-    logical                 :: isMatch
     character(ESMF_MAXSTR)  :: iString, msgString
     
     if (present(rc)) rc = ESMF_SUCCESS
+    
+    NUOPC_StateIsAtTime = .true.  ! initialize
     
     nullify(stdAttrNameList)
     nullify(stdItemNameList)
@@ -1926,20 +1927,18 @@ endif
         write (msgString, *) "Failure in NUOPC_StateIsAtTime() for item "// &
           trim(adjustl(iString))//": "//trim(stdItemNameList(i))
         field=stdFieldList(i)
-        isMatch = NUOPC_FieldIsAtTime(field, time, rc=rc)
+        NUOPC_StateIsAtTime = NUOPC_FieldIsAtTime(field, time, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=msgString, &
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
-        if (.not.isMatch) exit
+        if (.not.NUOPC_StateIsAtTime) exit
       enddo
     endif
     
     if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
     if (associated(stdItemNameList)) deallocate(stdItemNameList)
     if (associated(stdFieldList)) deallocate(stdFieldList)
-    
-    NUOPC_StateIsAtTime = isMatch
     
   end function
   !-----------------------------------------------------------------------------
