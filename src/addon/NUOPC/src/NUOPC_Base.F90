@@ -421,10 +421,10 @@ module NUOPC_Base
 ! !INTERFACE:
   subroutine NUOPC_CplCompAttributeGet(comp, cplList, cplListSize, rc)
 ! !ARGUMENTS:
-    type(ESMF_CplComp)                    :: comp
-    character(*), intent(out),   optional :: cplList(:)
-    integer,      intent(out),   optional :: cplListSize
-    integer,      intent(out),   optional :: rc
+    type(ESMF_CplComp), intent(in)            :: comp
+    character(*),       intent(out), optional :: cplList(:)
+    integer,            intent(out), optional :: cplListSize
+    integer,            intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Accesses the "CplList" Attribute inside of {\tt comp} using the
 !   convention {\tt NUOPC} and purpose {\tt General}. Returns with error if
@@ -747,10 +747,10 @@ module NUOPC_Base
 ! !INTERFACE:
   subroutine NUOPC_FieldAttributeGet(field, name, value, rc)
 ! !ARGUMENTS:
-    type(ESMF_Field)                      :: field
-    character(*), intent(in)              :: name
-    character(*), intent(out)             :: value
-    integer,      intent(out), optional   :: rc
+    type(ESMF_Field), intent(in)            :: field
+    character(*),     intent(in)            :: name
+    character(*),     intent(out)           :: value
+    integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Accesses the Attribute {\tt name} inside of {\tt field} using the
 !   convention {\tt NUOPC} and purpose {\tt General}. Returns with error if
@@ -825,12 +825,12 @@ module NUOPC_Base
 ! !INTERFACE:
   subroutine NUOPC_FieldBundleUpdateTime(srcFields, dstFields, rc)
 ! !ARGUMENTS:
-    type(ESMF_FieldBundle), intent(inout)         :: srcFields
+    type(ESMF_FieldBundle), intent(in)            :: srcFields
     type(ESMF_FieldBundle), intent(inout)         :: dstFields
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Updates the time stamp on all Fields in the {\tt srcFields} and
-!   {\tt dstFields} FieldBundles.
+!   Updates the time stamp on all Fields in the {\tt dstFields} FieldBundle to
+!   be the same as in the {\tt dstFields} FieldBundle.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -1022,7 +1022,7 @@ module NUOPC_Base
 ! !RETURN VALUE:
     logical :: NUOPC_FieldIsAtTime
 ! !ARGUMENTS:
-    type(ESMF_Field)                        :: field
+    type(ESMF_Field), intent(in)            :: field
     type(ESMF_Time),  intent(in)            :: time
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
