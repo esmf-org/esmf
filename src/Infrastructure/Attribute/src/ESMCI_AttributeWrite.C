@@ -1665,9 +1665,6 @@ namespace ESMCI {
     string exclusiveCount_name = "exclusiveCount";
     int *exclusiveCount;
     exclusiveCount = new int[dimCount];
-    exclusiveCount[0] = 1;
-    exclusiveCount[1] = 1;
-    exclusiveCount[2] = 1;
     FTN_X(f_esmf_gridattgetinfointlist)(&grid, exclusiveCount_name.c_str(), 
                exclusiveCount, &dimCount,
                &il_present, inputString.c_str(), 
@@ -1676,11 +1673,8 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     // allocate space for the coordinates
-    // TODO: cleanup this hardcoded initialization hack, the was needed because 
-    //       on AIX untouched bounds came back as 0 
-    if (exclusiveCount[0] == 0) exclusiveCount[0] = 1;
-    if (exclusiveCount[1] == 0) exclusiveCount[1] = 1;
-    if (exclusiveCount[2] == 0) exclusiveCount[2] = 1;
+    for (int i = 0; i < dimCount; ++i)
+      if (exclusiveCount[i] == 0) exclusiveCount[i] = 1;
     int num_coords = exclusiveCount[0]*exclusiveCount[1]*exclusiveCount[2];
     if (cTK_string != "ESMF_TYPEKIND_R8") {
       sprintf(msgbuf,"coordinates are only available in ESMF_TYPEKIND_R8 right now..");
