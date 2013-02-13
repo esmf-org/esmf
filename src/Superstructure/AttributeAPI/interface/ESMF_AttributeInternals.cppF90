@@ -118,7 +118,7 @@ contains
       subroutine ESMF_GridAttGetInfoI4(grid, name, value, inputList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(inout) :: grid
+      type(ESMF_Grid), intent(in) :: grid
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I4), intent(out) :: value
       character(len=*), intent(in), optional :: inputList(:)
@@ -227,7 +227,7 @@ contains
       subroutine ESMF_GridAttGetInfoChar(grid, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(inout) :: grid
+      type(ESMF_Grid), intent(in) :: grid
       character (len = *), intent(in) :: name
       character (len = *), intent(out) :: value
       integer, intent(out), optional :: rc
@@ -308,7 +308,7 @@ contains
                                             inputList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(inout) :: grid
+      type(ESMF_Grid), intent(in) :: grid
       character(len=*), intent(in) :: name
       integer(ESMF_KIND_I4), intent(out) :: valueList(:)
       character(len=*), intent(in), optional :: inputList(:)
@@ -576,7 +576,7 @@ contains
                                             inputList, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-      type(ESMF_Grid), intent(inout) :: grid @\
+      type(ESMF_Grid), intent(in) :: grid @\
       character(len=*), intent(in) :: name @\
       real(ESMF_KIND_##mtypekind), intent(out) :: valueList(:) @\
       character(len=*), intent(in), optional :: inputList(:) @\
@@ -684,7 +684,7 @@ contains
                                                 inputList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(inout) :: grid
+      type(ESMF_Grid), intent(in) :: grid
       character (len = *), intent(in) :: name
       logical, intent(out) :: valueList(:)
       character(len=*), intent(in), optional :: inputList(:)

@@ -2932,7 +2932,7 @@ contains
       subroutine mclass1##AttCopy(mthis1, mthis2, copyflag, atttreeflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-      type(mclass1), intent(inout) :: mthis1   @\
+      type(mclass1), intent(in) :: mthis1   @\
       type(mclass2), intent(inout) :: mthis2 @\
       type(ESMF_Copy_Flag), intent(in) :: copyflag @\
       type(ESMF_AttTreeFlag), intent(in) :: atttreeflag @\
@@ -3002,7 +3002,7 @@ contains
         defaultvalue, inputList, convention, purpose, & @\
         attPackInstanceName, isPresent, rc) @\
  @\
-      type(mclass), intent(inout) :: mthis   @\
+      type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), intent(out) :: value @\
       mtype(ESMF_KIND_##mtypekind), intent(in), optional :: defaultvalue @\
@@ -3153,7 +3153,7 @@ contains
         defaultvalueList, inputList, convention, purpose, attPackInstanceName, & @\
         itemCount, isPresent, rc) @\
  @\
-      type(mclass), intent(inout) :: mthis   @\
+      type(mclass), intent(in) :: mthis   @\
       character (len=*), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(out) :: valueList @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in), optional :: defaultvalueList @\
@@ -3332,7 +3332,7 @@ contains
         convention, purpose, attPackInstanceName, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-      type(mclass), intent(inout) :: mthis   @\
+      type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
       logical, intent(out) :: value @\
       logical, intent(in), optional :: defaultvalue @\
@@ -3461,7 +3461,7 @@ contains
         attPackInstanceName, itemCount, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-      type(mclass), intent(inout) :: mthis   @\
+      type(mclass), intent(in) :: mthis   @\
       character (len=*), intent(in) :: name @\
       logical, dimension(:), intent(out) :: valueList @\
       logical, dimension(:), intent(in), optional :: defaultvalueList @\
@@ -3641,7 +3641,7 @@ contains
         convention, purpose, attPackInstanceName, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-      type(mclass), intent(inout) :: mthis   @\
+      type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
       character (len = *), intent(out) :: value @\
       character (len = *), intent(in), optional :: defaultvalue @\
@@ -3786,7 +3786,7 @@ contains
         itemCount, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-      type(mclass), intent(inout) :: mthis   @\
+      type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
       character (len=*), dimension(:), intent(out) :: valueList @\
       character (len=*), dimension(:), intent(in), optional :: defaultvalueList @\
@@ -3957,7 +3957,7 @@ contains
       subroutine mclass##AttGet##mtypekind(mthis, name, value, & @\
         defaultvalue, convention, purpose, attPackInstanceName, isPresent, rc) @\
  @\
-      type(mclass), intent(inout) :: mthis   @\
+      type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), intent(out) :: value @\
       mtype(ESMF_KIND_##mtypekind), intent(in), optional :: defaultvalue @\
@@ -4084,7 +4084,7 @@ contains
         defaultvalueList, convention, purpose, attPackInstanceName, & @\
         itemCount, isPresent, rc) @\
  @\
-      type(mclass), intent(inout) :: mthis   @\
+      type(mclass), intent(in) :: mthis   @\
       character (len=*), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(out) :: valueList @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in), optional :: defaultvalueList @\
@@ -4240,7 +4240,7 @@ contains
         convention, purpose, attPackInstanceName, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-      type(mclass), intent(inout) :: mthis   @\
+      type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
       logical, intent(out) :: value @\
       logical, intent(in), optional :: defaultvalue @\
@@ -4369,7 +4369,7 @@ contains
         itemCount, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-      type(mclass), intent(inout) :: mthis   @\
+      type(mclass), intent(in) :: mthis   @\
       character (len=*), intent(in) :: name @\
       logical, dimension(:), intent(out) :: valueList @\
       logical, dimension(:), intent(in), optional :: defaultvalueList @\
@@ -4526,7 +4526,7 @@ contains
         convention, purpose, attPackInstanceName, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-      type(mclass), intent(inout) :: mthis   @\
+      type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
       character (len = *), intent(out) :: value @\
       character (len = *), intent(in), optional :: defaultvalue @\
@@ -4651,7 +4651,7 @@ contains
         itemCount, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-      type(mclass), intent(inout) :: mthis   @\
+      type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
       character (len=*), dimension(:), intent(out) :: valueList @\
       character (len=*), dimension(:), intent(in), optional :: defaultvalueList @\
@@ -4821,7 +4821,7 @@ contains
       subroutine mclass##AttGetCount(mthis, count, attcountflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-      type(mclass), intent(inout) :: mthis   @\
+      type(mclass), intent(in) :: mthis   @\
       integer, intent(out) :: count    @\
       type(ESMF_AttGetCountFlag), intent(in), optional :: attcountflag @\
       integer, intent(out), optional :: rc    @\
@@ -4884,7 +4884,7 @@ contains
                              typekind, itemCount, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-      type(mclass), intent(inout) :: mthis   @\
+      type(mclass), intent(in) :: mthis   @\
       character(len=*), intent(in) :: name @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       character (len=*), intent(in), optional :: convention @\
@@ -5011,7 +5011,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         typekind, itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-      type(mclass), intent(inout) :: mthis   @\
+      type(mclass), intent(in) :: mthis   @\
       integer, intent(in) :: attributeIndex @\
       character(len=*), intent(out) :: name @\
       type(ESMF_TypeKind_Flag), intent(out), optional :: typekind @\
@@ -5083,7 +5083,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         attPackInstanceNameList, attPackInstanceNameCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-      type(mclass), intent(inout) :: mthis @\
+      type(mclass), intent(in) :: mthis @\
       character (len = *), intent(in) :: convention @\
       character (len = *), intent(in) :: purpose @\
       character (len = *), dimension(:), intent(out) :: attPackInstanceNameList @\
@@ -5166,7 +5166,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !ARGUMENTS: @\
       type(mclass1), intent(inout) :: mthis1 @\
-      type(mclass2), intent(inout)  :: mthis2 @\
+      type(mclass2), intent(in)  :: mthis2 @\
       integer, intent(out), optional  :: rc    @\
  @\
 ! @\
@@ -5221,7 +5221,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !ARGUMENTS: @\
       type(mclass1), intent(inout) :: mthis1 @\
-      type(mclass2), intent(inout)  :: mthis2 @\
+      type(mclass2), intent(in)  :: mthis2 @\
       integer, intent(out), optional  :: rc    @\
  @\
 ! @\
@@ -5276,7 +5276,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !ARGUMENTS: @\
       type(ESMF_State), intent(inout) :: mthis1 @\
-      type(mclass), intent(inout)  :: mthis2 @\
+      type(mclass), intent(in)  :: mthis2 @\
       integer, intent(out), optional  :: rc    @\
  @\
 ! @\
@@ -5354,7 +5354,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !ARGUMENTS: @\
       type(mclass1), intent(inout) :: mthis1 @\
-      type(mclass2), intent(inout)  :: mthis2 @\
+      type(mclass2), intent(in)  :: mthis2 @\
       integer, intent(out), optional  :: rc    @\
  @\
 ! @\
@@ -5409,7 +5409,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !ARGUMENTS: @\
       type(mclass1), intent(inout) :: mthis1 @\
-      type(mclass2), intent(inout)  :: mthis2 @\
+      type(mclass2), intent(in)  :: mthis2 @\
       integer, intent(out), optional  :: rc    @\
  @\
 ! @\
@@ -6732,7 +6732,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       subroutine mclass##AttWrite(mthis, convention, purpose, attwriteflag, rc) @\
  @\
 ! !ARGUMENTS: @\
-      type(mclass), intent(inout) :: mthis   @\
+      type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
       type(ESMF_AttWriteFlag), intent(in), optional :: attwriteflag @\
