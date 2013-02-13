@@ -84,6 +84,7 @@ module ESMF_LogPublicMod
   integer, parameter:: esmf_rc_ATTR_ITEMSOFF    = ESMF_RC_ATTR_ITEMSOFF    
   integer, parameter:: esmf_rc_ATTR_LINK        = ESMF_RC_ATTR_LINK        
   integer, parameter:: esmf_rc_BUFFER_SHORT     = ESMF_RC_BUFFER_SHORT     
+  integer, parameter:: esmf_rc_TIMEOUT          = ESMF_RC_TIMEOUT
 
   
 end module ESMF_LogPublicMod
