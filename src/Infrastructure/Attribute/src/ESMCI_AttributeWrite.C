@@ -1673,9 +1673,10 @@ namespace ESMCI {
     ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
     // allocate space for the coordinates
+    int num_coords = 1;
     for (int i = 0; i < dimCount; ++i)
-      if (exclusiveCount[i] == 0) exclusiveCount[i] = 1;
-    int num_coords = exclusiveCount[0]*exclusiveCount[1]*exclusiveCount[2];
+      num_coords *= exclusiveCount[i];
+    
     if (cTK_string != "ESMF_TYPEKIND_R8") {
       sprintf(msgbuf,"coordinates are only available in ESMF_TYPEKIND_R8 right now..");
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
