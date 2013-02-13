@@ -44,6 +44,7 @@ module NUOPC_Base
   public NUOPC_FieldDictionaryAddEntry  
   public NUOPC_FieldDictionaryGetEntry  
   public NUOPC_FieldDictionarySetup
+  public NUOPC_FieldIsAtTime
   public NUOPC_FillCplList
   public NUOPC_GridCompAreServicesSet  
   public NUOPC_GridCompAttributeAdd
@@ -56,6 +57,7 @@ module NUOPC_Base
   public NUOPC_StateIsAllConnected
   public NUOPC_StateIsAtTime
   public NUOPC_StateIsFieldConnected
+  public NUOPC_StateIsUpdated
   public NUOPC_StateRealizeField
   public NUOPC_StateSetTimestamp
   public NUOPC_StateUpdateTimestamp
@@ -571,7 +573,7 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(4)
+    character(ESMF_MAXSTR)            :: attrList(5)
     character(ESMF_MAXSTR)            :: tempString
     logical                           :: accepted
     integer                           :: i
@@ -584,6 +586,7 @@ module NUOPC_Base
     attrList(2) = "TimeStamp"  ! values: list of 9 integers: yy,mm,dd,h,m,s,ms,us,ns
     attrList(3) = "ProducerConnection"! values: "open", "targeted", "connected"
     attrList(4) = "ConsumerConnection"! values: "open", "targeted", "connected"
+    attrList(5) = "Updated" ! values: "true" or "false"
     
     ! add Attribute packages
     call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=rc)
@@ -722,6 +725,14 @@ module NUOPC_Base
     ! set ConsumerConnection
     call ESMF_AttributeSet(field, &
       name="ConsumerConnection", value="open", &
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    ! set Updated
+    call ESMF_AttributeSet(field, &
+      name="Updated", value="false", &
       convention="NUOPC", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1005,6 +1016,68 @@ module NUOPC_Base
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_FieldIsAtTime - Check if the Field is at the given Time
+! !INTERFACE:
+  function NUOPC_FieldIsAtTime(field, time, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_FieldIsAtTime
+! !ARGUMENTS:
+    type(ESMF_Field)                        :: field
+    type(ESMF_Time),  intent(in)            :: time
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if the Field has a timestamp 
+!   that matches {\tt time}. Otherwise returns {\tt .false.}.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Time)         :: fieldTime
+    integer                 :: i, valueList(9)
+    type(ESMF_CalKind_Flag) :: calkindflag
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    NUOPC_FieldIsAtTime = .true. ! initialize
+    
+    call ESMF_TimeGet(time, calkindflag=calkindflag, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    call ESMF_AttributeGet(field, &
+      name="TimeStamp", valueList=valueList, &
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (ValueList(2)==0) then
+      ! month value of 0 is indicative of an uninitialized time stamp
+      NUOPC_FieldIsAtTime = .false.
+      return
+    else
+      call ESMF_TimeSet(fieldTime, &
+        yy=valueList(1), mm=ValueList(2), dd=ValueList(3), &
+         h=valueList(4),  m=ValueList(5),  s=ValueList(6), &
+        ms=valueList(7), us=ValueList(8), ns=ValueList(9), &
+        calkindflag=calkindflag, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      if (fieldTime /= time) then
+        NUOPC_FieldIsAtTime = .false.
+        return
+      endif
+    endif
+
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_FillCplList - Fill the cplList according to matching Fields
 ! !INTERFACE:
   subroutine NUOPC_FillCplList(importState, exportState, cplList, rc)
@@ -1182,7 +1255,7 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(5)
+    character(ESMF_MAXSTR)            :: attrList(7)
     
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1192,6 +1265,8 @@ module NUOPC_Base
     attrList(3) = "InternalInitializePhaseMap"  ! list of strings to map str to phase #
     attrList(4) = "NestingGeneration" ! values: integer starting 0 for parent
     attrList(5) = "Nestling"  ! values: integer starting 0 for first nestling
+    attrList(6) = "InitializeDataComplete"  ! values: strings "false"/"true"
+    attrList(7) = "InitializeDataProgress"  ! values: strings "false"/"true"
     
     ! add Attribute packages
 if (ESMF_VERSION_MAJOR >= 6) then
@@ -1234,6 +1309,18 @@ endif
       line=__LINE__, file=FILENAME)) return  ! bail out
     call ESMF_AttributeSet(comp, &
       name="Nestling", value=0, &                 ! default to first nestling
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeSet(comp, &
+      name="InitializeDataComplete", value="false", &
+      convention="NUOPC", purpose="General", &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_AttributeSet(comp, &
+      name="InitializeDataProgress", value="false", &
       convention="NUOPC", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1816,11 +1903,9 @@ endif
     character(ESMF_MAXSTR), pointer       :: stdItemNameList(:)
     type(ESMF_Field),       pointer       :: stdFieldList(:)
     type(ESMF_Field)                      :: field
-    type(ESMF_Time)         :: fieldTime
-    integer                 :: i, valueList(9)
+    integer                 :: i
     logical                 :: isMatch
     character(ESMF_MAXSTR)  :: iString, msgString
-    type(ESMF_CalKind_Flag) :: calkindflag
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1835,41 +1920,18 @@ endif
       file=FILENAME)) &
       return  ! bail out
       
-    call ESMF_TimeGet(time, calkindflag=calkindflag, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-      
-    isMatch = .true. ! initialize
-    
     if (associated(stdItemNameList)) then
       do i=1, size(stdItemNameList)
         write (iString, *) i
         write (msgString, *) "Failure in NUOPC_StateIsAtTime() for item "// &
           trim(adjustl(iString))//": "//trim(stdItemNameList(i))
         field=stdFieldList(i)
-        call ESMF_AttributeGet(field, &
-          name="TimeStamp", valueList=valueList, &
-          convention="NUOPC", purpose="General", &
-          rc=rc)
+        isMatch = NUOPC_FieldIsAtTime(field, time, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=msgString, &
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
-        call ESMF_TimeSet(fieldTime, &
-          yy=valueList(1), mm=ValueList(2), dd=ValueList(3), &
-           h=valueList(4),  m=ValueList(5),  s=ValueList(6), &
-          ms=valueList(7), us=ValueList(8), ns=ValueList(9), &
-          calkindflag=calkindflag, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=msgString, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
-        if (fieldTime /= time) then
-          isMatch = .false.
-          exit
-        endif
+        if (.not.isMatch) exit
       enddo
     endif
     
@@ -1926,6 +1988,74 @@ endif
   end function
   !-----------------------------------------------------------------------------
   
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_StateIsUpdated - Check if all the Fields in a State are marked as updated
+! !INTERFACE:
+  function NUOPC_StateIsUpdated(state, count, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_StateIsUpdated
+! !ARGUMENTS:
+    type(ESMF_State), intent(in)            :: state
+    integer,          intent(out), optional :: count
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if all the Fields in {\tt state} have their "Updated"
+!   Attribute set to "true". Otherwise returns {\tt .false.}. The {\tt count}
+!   argument returns how many of the FIelds have the Updated" Attribtue set to
+!   "true".
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR), pointer       :: stdAttrNameList(:)
+    character(ESMF_MAXSTR), pointer       :: stdItemNameList(:)
+    type(ESMF_Field),       pointer       :: stdFieldList(:)
+    type(ESMF_Field)                      :: field
+    character(ESMF_MAXSTR)                :: value
+    integer                 :: i
+    character(ESMF_MAXSTR)  :: iString, msgString
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    nullify(stdAttrNameList)
+    nullify(stdItemNameList)
+    nullify(stdFieldList)
+    
+    if (present(count)) count = 0 ! reset
+    
+    NUOPC_StateIsUpdated = .true. ! initialize 
+
+    call NUOPC_StateBuildStdList(state, stdAttrNameList=stdAttrNameList, &
+      stdItemNameList=stdItemNameList, stdFieldList=stdFieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    if (associated(stdItemNameList)) then
+      do i=1, size(stdItemNameList)
+        write (iString, *) i
+        write (msgString, *) "Failure in NUOPC_StateIsUpdated() for item "// &
+          trim(adjustl(iString))//": "//trim(stdItemNameList(i))
+        field=stdFieldList(i)
+        call ESMF_AttributeGet(field, name="Updated", value=value, &
+          convention="NUOPC", purpose="General", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        if (present(count) .and. trim(value)=="true") then
+          count = count + 1
+        else if (trim(value)=="false") then
+          NUOPC_StateIsUpdated = .false. ! toggle
+          if (.not.present(count)) exit ! no need to continue looking
+        endif
+      enddo
+    endif
+    
+    if (associated(stdAttrNameList)) deallocate(stdAttrNameList)
+    if (associated(stdItemNameList)) deallocate(stdItemNameList)
+    if (associated(stdFieldList)) deallocate(stdFieldList)
+    
+  end function
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_StateRealizeField - Realize a previously advertised Field in a State
@@ -1993,10 +2123,11 @@ endif
 !BOP
 ! !IROUTINE: NUOPC_StateSetTimestamp - Set a time stamp on all Fields in a State
 ! !INTERFACE:
-  subroutine NUOPC_StateSetTimestamp(state, clock, rc)
+  subroutine NUOPC_StateSetTimestamp(state, clock, selective, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
     type(ESMF_Clock), intent(in)            :: clock
+    logical,          intent(in),  optional :: selective
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Sets the TimeStamp Attribute according to {\tt clock} on all the Fields in 
@@ -2006,10 +2137,12 @@ endif
     ! local variables
     character(ESMF_MAXSTR), pointer       :: stdAttrNameList(:)
     character(ESMF_MAXSTR), pointer       :: stdItemNameList(:)
+    character(ESMF_MAXSTR)                :: value
     type(ESMF_Field)                      :: field
     type(ESMF_Time)         :: time
     integer                 :: yy, mm, dd, h, m, s, ms, us, ns
     integer                 :: i
+    logical                 :: selected
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -2043,14 +2176,37 @@ endif
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
-        call ESMF_AttributeSet(field, &
-          name="TimeStamp", valueList=(/yy,mm,dd,h,m,s,ms,us,ns/), &
-          convention="NUOPC", purpose="General", &
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+        if (present(selective)) then
+          if (selective) then
+            call ESMF_AttributeGet(field, &
+              name="Updated", value=value, &
+              convention="NUOPC", purpose="General", &
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+            if (trim(value)=="true") then
+              selected=.true.
+            else
+              selected = .false.
+            endif
+          else
+            selected=.true.
+          endif
+        else
+          selected=.true.
+        endif
+        if (selected) then
+          call ESMF_AttributeSet(field, &
+            name="TimeStamp", valueList=(/yy,mm,dd,h,m,s,ms,us,ns/), &
+            convention="NUOPC", purpose="General", &
+            rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        endif
       enddo
     endif
     

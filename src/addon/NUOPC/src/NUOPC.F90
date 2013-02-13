@@ -40,6 +40,7 @@ module NUOPC
   public NUOPC_FieldDictionaryAddEntry  
   public NUOPC_FieldDictionaryGetEntry  
   public NUOPC_FieldDictionarySetup
+  public NUOPC_FieldIsAtTime
   public NUOPC_FillCplList
   public NUOPC_GridCompAreServicesSet  
   public NUOPC_GridCompAttributeAdd
@@ -52,6 +53,7 @@ module NUOPC
   public NUOPC_StateIsAllConnected
   public NUOPC_StateIsAtTime
   public NUOPC_StateIsFieldConnected
+  public NUOPC_StateIsUpdated
   public NUOPC_StateRealizeField
   public NUOPC_StateSetTimestamp
   public NUOPC_StateUpdateTimestamp
