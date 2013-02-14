@@ -335,6 +335,12 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: InitializeEpilogue
     
+    call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
     write(output,*) ">START InitializeEpilogue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
@@ -505,6 +511,12 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: RunEpilogue
     
+    call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
     write(output,*) ">START RunEpilogue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
@@ -650,6 +662,12 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: FinalizeEpilogue
     
+    call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
     write(output,*) ">START FinalizeEpilogue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
@@ -703,14 +721,21 @@ module ESMF_ComplianceICMod
 ! IC HELPER ROUTINES:
 !-------------------------------------------------------------------------
 
-  recursive subroutine prefixString(comp, prefix, rc)
+  recursive subroutine prefixString(comp, prefix, forward, rc)
     type(ESMF_GridComp)                       :: comp
     character(*),       intent(inout)         :: prefix
+    logical,            intent(in),  optional :: forward
     integer,            intent(out), optional :: rc
 
-    character(ESMF_MAXSTR) :: compName
+    character(ESMF_MAXSTR)  :: compName
+    character(len=3)        :: arrow
     
     if (present(rc)) rc = ESMF_SUCCESS
+    
+    arrow = "|->" ! default direction
+    if (present(forward)) then
+      if (.not.forward) arrow = "|<-"
+    endif
     
     call ESMF_GridCompGet(comp, name=compName, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -718,7 +743,8 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     
-    prefix = "COMPLIANCECHECKER:"//repeat("|->", ccfDepth)//":"//trim(compName)//":"
+    prefix = "COMPLIANCECHECKER:"//repeat(arrow, ccfDepth)//&
+      ":"//trim(compName)//":"
 
   end subroutine    
 
