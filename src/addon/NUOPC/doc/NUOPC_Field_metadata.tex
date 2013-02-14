@@ -14,7 +14,10 @@ The Field metadata is implemented as an ESMF Attribute Package:
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary}\\
      \hline\hline
-     {\tt Connected} & Connected status.& "true", "false"\\
+     {\tt Connected} & Connected status.& false, true\\
      {\tt TimeStamp} & Nine integer values representing ESMF Time object.& N/A\\
+     {\tt ProducerConnection} & String value indicating connection details.& open, targeted, connected\\
+     {\tt ConsumerConnection} & String value indicating connection details.& open, targeted, connected\\
+     {\tt Updated} & String value indicating updated status during initialization.& false, true\\
      \hline\hline
 \end{tabular}

@@ -525,7 +525,7 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
-    ! -> Now encode the NUOPC Initialize Sequence version 00 and 01:
+    ! -> Now encode the NUOPC IPDv00, IPDv01, IPDv02:
       
     ! modelComps
     call loopModelCompsS(phaseString="IPDv00p1", execFlag=execFlag, rc=rc)
@@ -677,9 +677,10 @@ module NUOPC_Driver
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
               call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
-                importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
+                importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i),&
                 clock=internalClock, phase=phase, userRc=localrc, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg="NUOPC Incompatible: Failed calling phase "// &
+              if (ESMF_LogFoundError(rcToCheck=rc, msg="NUOPC Incompatible: "//&
+                "Failed calling phase "// &
                 trim(adjustl(pString))//" Initialize for modelComp "// &
                 trim(adjustl(iString))//": "//trim(compName), &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &

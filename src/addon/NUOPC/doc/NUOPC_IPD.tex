@@ -5,31 +5,29 @@
 
 The interaction between NUOPC compliant components during the initialization process is regulated by the {\bf Initialize Phase Definition} or {\bf IPD}. The IPDs are versioned, with a higher version number indicating backward compatibility with all previous versions.
 
-\begin{table}[h]
-\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
+There are two perspectives of looking at the IPD. From the driver perspective the IPD regulates the sequence in which it must call the different phases of the Initialize() routines of its child components. To this end the generic {\tt NUOPC\_Driver} component implements support for IPDs up to a version specified in the API documenation.
+
+The other angle of looking at the IPD is from the driver's child components. From this perspective the IPD assigns specific meaning to each initialize phase. The child components of a driver can be divided into two groups with respect to the meaning the IPD assigns to each initialize phase. In one group are the model, mediator, and driver components, and in the other group are the connector components. The following tables document the meaning of each initialization phase for the two different child component groups for the different IPD versions. The phases are listed in the prescribed sequence used by the driver.
+\newline
+
+\vspace*{2ex}
+\begin{tabular}[h]{|p{35mm}|p{4cm}|p{6cm}|}
      \hline\hline
-     {\bf IPD label} & {\bf Child Group} & {\bf Meaning}\\
+     {\bf IPDv00 label} & {\bf Child Group} & {\bf Meaning}\\
      \hline\hline
      {\tt IPDv00p1} & model, mediator, driver & Advertise the import and export Fields.\\ \hline
      {\tt IPDv00p1} & connector               & Construct the {\tt CplList} Attribute on the connector.\\ \hline
      {\tt IPDv00p2} & model, mediator, driver & Realize the import and export Fields.\\ \hline
      {\tt IPDv00p2} & connector               & Set the {\tt Connected} Attribute on each import and export Field. Precompute the RouteHandle.\\ \hline
      {\tt IPDv00p3} & model, mediator, driver & Check compatibility of the Fields' {\tt Connected} status.\\ \hline
-     {\tt IPDv00p4} & model, mediator, driver & Timestamp the export Fields.\\
+     {\tt IPDv00p4} & model, mediator, driver & Handle Field data initialization. Time stamp the export Fields.\\
      \hline\hline
-\end{tabular}
-\caption{IPD version 00}
-\label{table:IPDv00}
-\end{table}
+\end{tabular}\newline
 
-There are two perspectives of looking at the IPD. From the driver perspective the IPD regulates the sequence in which it must call the different phases of the Initialize() routines of its child components. To this end the generic {\tt NUOPC\_Driver} component implements support for IPDs up to a version specified in the API documenation.
-
-The other angle of looking at the IPD is from the driver's child components. From this perspective the IPD assigns specific meaning to each initialize phase. The child components of a driver can be divided into two groups with respect to the meaning the IPD assigns to each initialize phase. In one group are the model, mediator, and driver components, and in the other group are the connector components. Tables \ref{table:IPDv00} and \ref{table:IPDv01} document the meaning of each initialization phase for the two different child component groups for the different IPD versions. The phases are listed in the prescribed sequence used by the driver.
-
-\begin{table}[h]
-\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
+\vspace*{3ex}
+\begin{tabular}[h]{|p{35mm}|p{4cm}|p{6cm}|}
      \hline\hline
-     {\bf IPD label} & {\bf Child Group} & {\bf Meaning}\\
+     {\bf IPDv01 label} & {\bf Child Group} & {\bf Meaning}\\
      \hline\hline
      {\tt IPDv01p1} & model, mediator, driver & Advertise the import and export Fields.\\ \hline
      {\tt IPDv01p1} & connector               & Construct the {\tt CplList} Attribute on the connector.\\ \hline
@@ -38,9 +36,27 @@ The other angle of looking at the IPD is from the driver's child components. Fro
      {\tt IPDv01p3} & model, mediator, driver & Realize the import and export Fields.\\ \hline
      {\tt IPDv01p3} & connector               & Precompute the RouteHandle.\\ \hline
      {\tt IPDv01p4} & model, mediator, driver & Check compatibility of the Fields' {\tt Connected} status.\\ \hline
-     {\tt IPDv01p5} & model, mediator, driver & Timestamp the export Fields.\\
+     {\tt IPDv01p5} & model, mediator, driver & Handle Field data initialization. Time stamp the export Fields.\\
      \hline\hline
-\end{tabular}
-\caption{IPD version 01}
-\label{table:IPDv01}
-\end{table}
+\end{tabular}\newline
+
+\vspace*{3ex}
+\begin{tabular}[h]{|p{35mm}|p{4cm}|p{6cm}|}
+     \hline\hline
+     {\bf IPDv02 label} & {\bf Child Group} & {\bf Meaning}\\
+     \hline\hline
+     {\tt IPDv02p1} & model, mediator, driver & Advertise the import and export Fields.\\ \hline
+     {\tt IPDv02p1} & connector               & Construct the {\tt CplList} Attribute on the connector.\\ \hline
+     {\tt IPDv02p2} & model, mediator, driver & {\em unspecified}\\ \hline
+     {\tt IPDv02p2} & connector               & Set the {\tt Connected} Attribute on each import and export Field.\\ \hline
+     {\tt IPDv02p3} & model, mediator, driver & Realize the import and export Fields.\\ \hline
+     {\tt IPDv02p3} & connector               & Precompute the RouteHandle.\\ \hline
+     {\tt IPDv02p4} & model, mediator, driver & Check compatibility of the Fields' {\tt Connected} status.\\ \hline
+     {\tt IPDv02p5} & model, mediator, driver & Handle Field data initialization. Timestamp the export Fields.\\ \hline
+     \multicolumn{3}{|l|}{\it A loop is entered over all those model, mediator, driver Components that have unsatisfied}\\
+     \multicolumn{3}{|l|}{\it data dependencies, repeating the following two steps. This continues until all data}\\
+     \multicolumn{3}{|l|}{\it dependencies have been statisfied, or a dead-lock situation is detected.}\\ \hline
+     {\tt Run()}    & connector               & Loop over all Connectors that connect {\it to} the Component that is currently indexed by the outer loop.\\ \hline
+     {\tt IPDv02p5} & model, mediator, driver & Handle Field data initialization. Time stamp the export Fields.\\
+     \hline\hline
+\end{tabular}\newline

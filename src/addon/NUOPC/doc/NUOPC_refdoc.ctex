@@ -74,6 +74,8 @@
 \input{../addon/NUOPC/doc/NUOPC_GenericComponents}
 #endif
 
+\newpage
+
 \subsection{Field Dictionary}
 #ifdef STANDALONE
 \input{NUOPC_FieldDictionary}
@@ -82,6 +84,8 @@
 \input{../addon/NUOPC/doc/NUOPC_FieldDictionaryDef_fapi}
 \input{../addon/NUOPC/doc/NUOPC_FieldDictionary}
 #endif
+
+\newpage
 
 \subsection{Metadata}
 
@@ -105,6 +109,8 @@
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_Field_metadata}
 #endif
+
+\newpage
 
 \subsection{Initialize Phase Definitions}
 #ifdef STANDALONE
