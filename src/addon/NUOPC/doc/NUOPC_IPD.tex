@@ -53,10 +53,11 @@ The other angle of looking at the IPD is from the driver's child components. Fro
      {\tt IPDv02p3} & connector               & Precompute the RouteHandle.\\ \hline
      {\tt IPDv02p4} & model, mediator, driver & Check compatibility of the Fields' {\tt Connected} status.\\ \hline
      {\tt IPDv02p5} & model, mediator, driver & Handle Field data initialization. Timestamp the export Fields.\\ \hline
-     \multicolumn{3}{|l|}{\it A loop is entered over all those model, mediator, driver Components that have unsatisfied}\\
-     \multicolumn{3}{|l|}{\it data dependencies, repeating the following two steps. This continues until all data}\\
-     \multicolumn{3}{|l|}{\it dependencies have been statisfied, or a dead-lock situation is detected.}\\ \hline
+     \multicolumn{3}{|p{13.5cm}|}{\it A loop is entered over all those model, mediator, driver Components that use IPDv02 and have
+     unsatisfied data dependencies, repeating the following two steps:}\\ \hline
      {\tt Run()}    & connector               & Loop over all Connectors that connect {\it to} the Component that is currently indexed by the outer loop.\\ \hline
-     {\tt IPDv02p5} & model, mediator, driver & Handle Field data initialization. Time stamp the export Fields.\\
+     {\tt IPDv02p5} & model, mediator, driver & Handle Field data initialization. Time stamp the export Fields.\\ \hline
+     \multicolumn{3}{|p{13.5cm}|}{\it Repeate these two steps until all data
+     dependencies have been statisfied, or a dead-lock situation is detected.}\\ 
      \hline\hline
 \end{tabular}\newline
