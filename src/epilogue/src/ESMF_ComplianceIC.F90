@@ -1902,6 +1902,13 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)  :: output
     
     if (present(rc)) rc = ESMF_SUCCESS
+    
+    call ESMF_LogWrite(trim(prefix)//" ESMF garbage collection information"// &
+      "for this Component: ", ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
 
     call ESMF_VMGetCurrentGarbageInfo(fobjCount, objCount, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -1911,8 +1918,8 @@ module ESMF_ComplianceICMod
     
     write (output, *) fobjCount
   
-    call ESMF_LogWrite(trim(prefix)//" Number of ESMF Fortran objects the "// &
-      "ESMF garbage collection holds for this Component: "// &
+    call ESMF_LogWrite(trim(prefix)//"   ESMF Fortran objects referenced "// &
+      "by the ESMF garbage collection: "// &
       trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -1920,8 +1927,8 @@ module ESMF_ComplianceICMod
       return  ! bail out
         
     write (output, *) objCount
-    call ESMF_LogWrite(trim(prefix)//" Total number of ESMF objects "// &
-      "(F & C++) the ESMF garbage collection holds for this Component: "// &
+    call ESMF_LogWrite(trim(prefix)//"   ESMF objects (F & C++) referenced "// &
+      "by the ESMF garbage collection: "// &
       trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
