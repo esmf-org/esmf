@@ -311,6 +311,13 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+      
+    ! check objects known by ESMF garbage collection for this Component context
+    call checkComponentGarbage(prefix, comp=comp, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
 
     write(output,*) ">STOP InitializePrologue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
@@ -324,6 +331,7 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ccfDepth = ccfDepth + 1
 
+    ! Call the actual Initialize routine
     call ESMF_GridCompInitializeAct(comp, importState, exportState, clock, &
       phase=phase, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -349,6 +357,13 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
       
+    ! check objects known by ESMF garbage collection for this Component context
+    call checkComponentGarbage(prefix, comp=comp, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
     ! compliance check Component metadata
     call checkComponentMetadata(prefix, comp=comp, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -488,6 +503,13 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     
+    ! check objects known by ESMF garbage collection for this Component context
+    call checkComponentGarbage(prefix, comp=comp, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
     write(output,*) ">STOP RunPrologue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
@@ -500,6 +522,7 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ccfDepth = ccfDepth + 1
 
+    ! Call the actual Run routine
     call ESMF_GridCompRunAct(comp, importState, exportState, clock, &
       phase=phase, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -525,6 +548,13 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     
+    ! check objects known by ESMF garbage collection for this Component context
+    call checkComponentGarbage(prefix, comp=comp, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
     ! compliance check importState
     call checkState(prefix, referenceName="importState", state=importState, &
       rc=rc)
@@ -639,6 +669,13 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
 
+    ! check objects known by ESMF garbage collection for this Component context
+    call checkComponentGarbage(prefix, comp=comp, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
     write(output,*) ">STOP FinalizePrologue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
       ESMF_LOGMSG_INFO, rc=rc)
@@ -651,6 +688,7 @@ module ESMF_ComplianceICMod
     !---------------------------------------------------------------------------
     ccfDepth = ccfDepth + 1
 
+    ! Call the actual Finalize routine
     call ESMF_GridCompFinalizeAct(comp, importState, exportState, clock, &
       phase=phase, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -676,6 +714,13 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     
+    ! check objects known by ESMF garbage collection for this Component context
+    call checkComponentGarbage(prefix, comp=comp, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
     ! compliance check importState
     call checkState(prefix, referenceName="importState", state=importState, &
       rc=rc)
@@ -954,7 +999,7 @@ module ESMF_ComplianceICMod
     type(ESMF_GridComp)                   :: comp
     integer,      intent(out), optional   :: rc
     
-    type(ESMF_CompType_Flag)                   :: comptype
+    type(ESMF_CompType_Flag)              :: comptype
     character(ESMF_MAXSTR)                :: attributeName
     character(ESMF_MAXSTR)                :: convention
     character(ESMF_MAXSTR)                :: purpose
@@ -1848,6 +1893,45 @@ module ESMF_ComplianceICMod
 
 !-------------------------------------------------------------------------
 
+  recursive subroutine checkComponentGarbage(prefix, comp, rc)
+    character(*), intent(in)              :: prefix
+    type(ESMF_GridComp)                   :: comp
+    integer,      intent(out), optional   :: rc
+  
+    integer                 :: fobjCount, objCount
+    character(ESMF_MAXSTR)  :: output
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call ESMF_VMGetCurrentGarbageInfo(fobjCount, objCount, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    write (output, *) fobjCount
+  
+    call ESMF_LogWrite(trim(prefix)//" Number of ESMF Fortran objects the "// &
+      "ESMF garbage collection holds for this Component: "// &
+      trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+        
+    write (output, *) objCount
+    call ESMF_LogWrite(trim(prefix)//" Total number of ESMF objects "// &
+      "(F & C++) the ESMF garbage collection holds for this Component: "// &
+      trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+  end subroutine
+    
+!-------------------------------------------------------------------------
+
   recursive function zeroTerminatedString(string)
     logical :: zeroTerminatedString
     character(len=*), intent(in)        :: string
@@ -1862,7 +1946,7 @@ module ESMF_ComplianceICMod
     
   end function
  
- !-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
 
 
 end module ESMF_ComplianceICMod

@@ -1489,6 +1489,59 @@ VMId *VM::getCurrentID(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::getCurrentGarbageInfo()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::getCurrentGarbageInfo - Get garbage info for Current VM
+//
+// !INTERFACE:
+int VM::getCurrentGarbageInfo(
+//
+// !RETURN VALUE:
+//    return code
+//
+// !ARGUMENTS:
+//
+  int *fobjCount,     // number of Fortran objects registered
+  int *objCount){     // total number of objects registered (Fortran + C++)
+//
+// !DESCRIPTION:
+//   Get the {\tt ESMC\_VM} object of the current context.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  esmf_pthread_t mytid;
+#ifndef ESMF_NO_PTHREADS
+  mytid = pthread_self();
+#else
+  mytid = 0;
+#endif
+  int i = matchTableIndex;
+  if (matchTable_tid[i] != mytid){
+    for (i=0; i<matchTableBound; i++)
+      if (matchTable_tid[i] == mytid) break;
+    if (i == matchTableBound){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "- Could not determine current VM", &rc);
+      return rc;
+    }
+  }
+  // found a match
+  
+  *fobjCount = matchTable_FObjects[i].size();
+  *objCount = matchTable_Objects[i].size();
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VM::getBaseIDAndInc()"
 //BOPI
 // !IROUTINE:  ESMCI::VM::getBaseIDAndInc - Get BaseID and increment counter

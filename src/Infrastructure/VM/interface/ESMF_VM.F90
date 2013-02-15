@@ -139,6 +139,7 @@ module ESMF_VMMod
   public ESMF_VMGetGlobal
   public ESMF_VMGetCurrent
   public ESMF_VMGetCurrentID
+  public ESMF_VMGetCurrentGarbageInfo
   public ESMF_VMGetVMId
   public ESMF_VMPrint
   public ESMF_VMRecv
@@ -803,18 +804,15 @@ contains
 !   array of <type><kind> across the {\tt ESMF\_VM} object 
 !   into a single value of the same <type><kind>. The result is
 !   returned on all PETs. Different reduction operations can be specified.
-!   \newline
 !
 !   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
-!   \newline
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
 !   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
 !   logged.
-!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -1060,14 +1058,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   from all PETs of an {\tt ESMF\_VM} object into an array on all PETs.
-!   \newline
 !
 !   This method is overloaded for: 
-!   \newline
 !   {\tt ESMF\_TYPEKIND\_I4},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}.
-!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -1410,18 +1405,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   from all PETs of an {\tt ESMF\_VM} object into an array on all PETs.
-!   \newline
 !
 !   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}. 
-!   \newline
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
 !   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
 !   logged.
-!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -1795,17 +1787,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   array across the {\tt ESMF\_VM} object into a contiguous data array of the
 !   same <type><kind>. The result array is returned on all PETs. 
 !   Different reduction operations can be specified.
-!   \newline
 !
 !   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}. 
-!   \newline
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
 !   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
+!   logged.
 !
 !   The arguments are:
 !   \begin{description}
@@ -2112,17 +2102,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Collective {\tt ESMF\_VM} communication call that performs a total exchange
 !   operation, sending pieces of the contiguous data buffer {\tt semdData} to
 !   all other PETs while receiving data into the contiguous data buffer
-!   {\tt recvData} from all other PETs.\newline
+!   {\tt recvData} from all other PETs.
 !
 !   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}. 
-!   \newline
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
 !   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
+!   logged.
 !
 !   The arguments are:
 !   \begin{description}
@@ -2368,18 +2357,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Collective {\tt ESMF\_VM} communication call that performs a total exchange
 !   operation, sending pieces of the contiguous data buffer {\tt semdData} to
 !   all other PETs while receiving data into the contiguous data buffer
-!   {\tt recvData} from all other PETs.\newline
+!   {\tt recvData} from all other PETs.
 !
 !   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, and logical
 !   data types. 
-!   \newline
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
 !   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
+!   logged.
 !
 !   The arguments are:
 !   \begin{description}
@@ -2760,7 +2748,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that blocks calling PET until
-!   all PETs of the VM context have issued the call.\newline
+!   all PETs of the VM context have issued the call.
 !
 !   The arguments are:
 !   \begin{description}
@@ -2820,16 +2808,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Collective {\tt ESMF\_VM} communication call that broadcasts a contiguous 
 !   data array from {\tt rootPet} to all other PETs of the {\tt ESMF\_VM}
 !   object.
-!   \newline
 !
 !   This method is overloaded for: 
-!   \newline
 !   {\tt ESMF\_TYPEKIND\_I4},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}, 
-!   \newline
 !   {\tt ESMF\_TYPEKIND\_CHARACTER}.
-!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -3387,7 +3371,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Wait for non-blocking VM communication specified by the {\tt commhandle} to
-!   complete.\newline
+!   complete.
 !
 !   The arguments are:
 !   \begin{description}
@@ -3445,7 +3429,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Wait for {\em all} pending non-blocking VM communication within the 
-!   specified VM context to complete.\newline
+!   specified VM context to complete.
 !
 !   The arguments are:
 !   \begin{description}
@@ -3506,14 +3490,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   from all PETs of an {\tt ESMF\_VM} object (including {\tt rootPet}) into an
 !   array on {\tt rootPet}.
-!   \newline
 !
 !   This method is overloaded for: 
-!   \newline
 !   {\tt ESMF\_TYPEKIND\_I4},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}, 
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}.
-!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -3932,17 +3913,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that gathers contiguous data 
 !   from all PETs of an {\tt ESMF\_VM} object into an array on rootPet.
-!   \newline
 !
 !   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
-!   \newline
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
 !   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
+!   logged.
 !
 !   The arguments are:
 !   \begin{description}
@@ -4139,7 +4118,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Get internal information about the specified {\tt ESMF\_VM} object.\newline
+!   Get internal information about the specified {\tt ESMF\_VM} object.
 !
 !   The arguments are:
 !   \begin{description}
@@ -4236,7 +4215,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Get internal information about a specific PET within an {\tt ESMF\_VM} 
-!   object.\newline
+!   object.
 !
 !   The arguments are:
 !   \begin{description}
@@ -4321,7 +4300,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   strongly discouraged. ESMF Components should only access their own VM
 !   objects through Component methods. Global information, if required by
 !   the Component user code, should be passed down to the Component from the 
-!   driver through the Component calling interface.\newline
+!   driver through the Component calling interface.
 !
 !   The arguments are:
 !   \begin{description}
@@ -4390,7 +4369,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   Outside of a Component context, i.e. within the driver context, the call
 !   to {\tt ESMF\_VMGetCurrent()} is identical to {\tt ESMF\_VMGetGlobal()}.
-!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -4436,7 +4414,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,         intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Get the {\tt ESMF\_VMId} of the current execution context.\newline
+!   Get the {\tt ESMF\_VMId} of the current execution context.
 !
 !   The arguments are:
 !   \begin{description}
@@ -4468,6 +4446,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-internal method -----------------------------
 !BOPI
+! !IROUTINE: ESMF_VMGetCurrentGarbageInfo - Get Current VMId
+
+! !INTERFACE:
+  subroutine ESMF_VMGetCurrentGarbageInfo(fobjCount, objCount, rc)
+!
+! !ARGUMENTS:
+    integer, intent(in)             :: fobjCount
+    integer, intent(in)             :: objCount
+    integer, intent(out), optional  :: rc           
+!
+! !DESCRIPTION:
+!   Get garbage collection information of the current execution context.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[fobjCount] 
+!     Upon return this holds the number of Fortran objects held by the
+!     ESMF garbage collection for the current context.
+!   \item[objCount] 
+!     Upon return this holds the number of total objects (Fortran and C++)
+!     held by the ESMF garbage collection for the current context.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface.
+    call c_esmc_vmgetcurrentgarbageinfo(fobjCount, objCount, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMGetCurrentGarbageInfo
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+!BOPI
 ! !IROUTINE: ESMF_VMGetVMId - Get VMId
 
 ! !INTERFACE:
@@ -4479,7 +4504,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,         intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Get the {\tt ESMF\_VMId} of the {\tt ESMF\_VM} object.\newline
+!   Get the {\tt ESMF\_VMId} of the {\tt ESMF\_VM} object.
 !
 !   The arguments are:
 !   \begin{description}
@@ -4599,16 +4624,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   Receive contiguous data from {\tt srcPet} within the same {\tt ESMF\_VM} 
 !   object.
-!   \newline
 !
 !   This method is overloaded for: 
-!   \newline
 !   {\tt ESMF\_TYPEKIND\_I4},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8},
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}, 
-!   \newline
 !   {\tt ESMF\_TYPEKIND\_CHARACTER}.
-!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5102,17 +5123,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   array across the {\tt ESMF\_VM} object into a contiguous data array of 
 !   the same <type><kind>. The result array is returned on {\tt rootPet}. 
 !   Different reduction operations can be specified.
-!   \newline
 !
 !   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
-!   \newline
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
 !   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
-!   logged.\newline
+!   logged.
 !
 !   The arguments are:
 !   \begin{description}
@@ -5366,14 +5385,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
 !   from the {\tt rootPet} to all PETs across the {\tt ESMF\_VM} object
 !   (including {\tt rootPet}).
-!   \newline
 !
 !   This method is overloaded for: 
-!   \newline
 !   {\tt ESMF\_TYPEKIND\_I4},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8},
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}.
-!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5722,11 +5738,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Collective {\tt ESMF\_VM} communication call that scatters contiguous data 
 !   from the {\tt rootPet} to all PETs across the {\tt ESMF\_VM} object
 !   (including {\tt rootPet}).
-!   \newline
 !
 !   This method is overloaded for: {\tt ESMF\_TYPEKIND\_I4},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
-!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -5920,7 +5934,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Send contiguous data to {\tt dstPet} within the same {\tt ESMF\_VM} object.
-!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -6413,16 +6426,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Send contiguous data to {\tt dstPet} within the same {\tt ESMF\_VM} object
 !   while receiving contiguous data from {\tt srcPet} within the same 
 !   {\tt ESMF\_VM} object. The {\tt sendData} and {\tt recvData} arrays must be
-!   disjoint!\newline
+!   disjoint!
 !
 !   This method is overloaded for: 
-!   \newline
 !   {\tt ESMF\_TYPEKIND\_I4},
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8},
 !   {\tt ESMF\_TYPEKIND\_LOGICAL}, 
-!   \newline
 !   {\tt ESMF\_TYPEKIND\_CHARACTER}.
-!   \newline
 !
 !   The arguments are:
 !   \begin{description}
@@ -6857,7 +6867,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   Partially collective {\tt ESMF\_VM} communication call that blocks calling
 !   PET until all of the PETs that are running under the same POSIX process have
-!   issued the call.\newline
+!   issued the call.
 !
 !   The arguments are:
 !   \begin{description}
@@ -6965,7 +6975,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Get floating-point number of seconds of elapsed wall-clock time since some
-!   time in the past.\newline
+!   time in the past.
 !
 !   The arguments are:
 !   \begin{description}
@@ -7015,7 +7025,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Delay execution for amount of seconds.\newline
+!   Delay execution for amount of seconds.
 !
 !   The arguments are:
 !   \begin{description}
@@ -7069,7 +7079,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   of seconds. This is a relatively expensive call since the timer precision
 !   is measured several times before the maximum is returned as the estimate.
 !   The returned value is PET-specific and may differ across the VM 
-!   context.\newline
+!   context.
 !
 !   The arguments are:
 !   \begin{description}
@@ -7123,7 +7133,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Initialize the Global VM.\newline
+!   Initialize the Global VM.
 !
 !   The arguments are:
 !   \begin{description}
@@ -7175,7 +7185,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional            :: rc
 !
 ! !DESCRIPTION:
-!   Finalize Global VM.\newline
+!   Finalize Global VM.
 !
 !   The arguments are:
 !   \begin{description}
@@ -7224,7 +7234,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Abort Global VM.\newline
+!   Abort Global VM.
 !
 !   The arguments are:
 !   \begin{description}
@@ -7271,7 +7281,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Shutdown a VM.\newline
+!   Shutdown a VM.
 !
 !   The arguments are:
 !   \begin{description}
@@ -7493,7 +7503,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Construct a default plan.\newline
+!   Construct a default plan.
 !
 !   The arguments are:
 !   \begin{description}
@@ -7550,7 +7560,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional    :: rc           
 !
 ! !DESCRIPTION:
-!   Destruct a vmplan.\newline
+!   Destruct a vmplan.
 !
 !   The arguments are:
 !   \begin{description}
@@ -7733,7 +7743,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Set up a MaxPEs vmplan.\newline
+!   Set up a MaxPEs vmplan.
 !
 !   The arguments are:
 !   \begin{description}
@@ -7805,7 +7815,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Set up a MaxThreads vmplan.\newline
+!   Set up a MaxThreads vmplan.
 !
 !   The arguments are:
 !   \begin{description}
@@ -7877,7 +7887,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Set up a MinThreads vmplan.\newline
+!   Set up a MinThreads vmplan.
 !
 !   The arguments are:
 !   \begin{description}
@@ -7950,7 +7960,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Compare two ESMF_VMId objects.\newline
+!   Compare two ESMF_VMId objects.
 !
 !   The arguments are:
 !   \begin{description}
@@ -8057,7 +8067,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Print an ESMF_VMId object.\newline
+!   Print an ESMF_VMId object.
 !
 !   The arguments are:
 !   \begin{description}
@@ -8106,7 +8116,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Create an ESMF_VMId object. This allocates memory on the C side.\newline
+!   Create an ESMF_VMId object. This allocates memory on the C side.
 !
 !   The arguments are:
 !   \begin{description}
@@ -8150,7 +8160,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Create an ESMF_VMId object. This allocates memory on the C side.\newline
+!   Create an ESMF_VMId object. This allocates memory on the C side.
 !
 !   The arguments are:
 !   \begin{description}
@@ -8197,7 +8207,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Destroy an ESMF_VMId object. This frees memory on the C side.\newline
+!   Destroy an ESMF_VMId object. This frees memory on the C side.
 !
 !   The arguments are:
 !   \begin{description}
@@ -8241,7 +8251,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   Destroy an ESMF_VMId object. This frees memory on the C side.\newline
+!   Destroy an ESMF_VMId object. This frees memory on the C side.
 !
 !   The arguments are:
 !   \begin{description}
@@ -8419,7 +8429,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Receive {\tt ESMF\_VMId}.\newline
+!   Receive {\tt ESMF\_VMId}.
 !
 !   The arguments are:
 !   \begin{description}
@@ -8469,7 +8479,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Receive {\tt ESMF\_VMId}.\newline
+!   Receive {\tt ESMF\_VMId}.
 !
 !   The arguments are:
 !   \begin{description}

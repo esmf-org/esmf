@@ -104,6 +104,7 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static VM *getGlobal(int *rc=NULL);      // global VM
     static VM *getCurrent(int *rc=NULL);     // current VM
     static VMId *getCurrentID(int *rc=NULL); // VMId of current VM
+    static int getCurrentGarbageInfo(int *, int *); // garbage info current VM
     static int getBaseIDAndInc(VMId *vmID);
     static void addObject(ESMC_Base *, VMId *vmID);
     static void addFObject(void **fobject, int objectID, VMId *vmID);
