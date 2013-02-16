@@ -2228,7 +2228,7 @@ contains
 
     integer :: buffer_offset
     integer :: needs_count
-    integer :: item, nitems
+    integer :: item, nitems, nitems_needed
     integer :: lbufsize
     integer :: pass
 
@@ -2576,6 +2576,7 @@ contains
 !
 !EOPI
       integer :: localrc, i
+      integer :: memstat
       type(ESMF_StateClass),    pointer :: stypep
       type(ESMF_StateItemWrap), pointer :: itemList(:)
       character(len=ESMF_MAXSTR) :: thisname
