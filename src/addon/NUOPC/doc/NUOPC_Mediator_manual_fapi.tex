@@ -101,9 +101,9 @@ Mediator component with a default {\em explicit} time dependency. Each time the 
   \item Check that internal clock and incoming clock agree on current time and that the time step of the incoming clock is a multiple of the internal clock time step (remember that the generic InitializePhase2 set the Mediator internal clock identical to the incoming clock). Under these conditions, set the internal stop time to one time step interval on the incoming clock. Otherwise exit with error, flagging incompatibility.
   \item {\it Optional specialization} to check Fields in import State: {\tt label\_CheckImport}.
   \item Alternatively use the default specialization: check that all import Fields are at the current time of the internal clock.
-  \item Mediator time step forward on the internal Clock, which is the same time step as on the incoming Clock.
+  \item Timestamp all export Fields at the current time of the internal clock, i.e. the current time of the incoming clock.
+  \item Mediator time step forward on the internal Clock, which is the same time step as on the incoming Clock. This prepares the internal clock for the next iteration.
   \item {\it Required specialization} to mediate the Fields: {\tt label\_Advance}.
-  \item Timestamp all export Fields at the current time of the internal clock.
   \item Deallocate internal state memory.
   \end{itemize}    
 \end{itemize}
