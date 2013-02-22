@@ -140,6 +140,7 @@ module ESMF_VMMod
   public ESMF_VMGetCurrent
   public ESMF_VMGetCurrentID
   public ESMF_VMGetCurrentGarbageInfo
+  public ESMF_VMGetMemInfo
   public ESMF_VMGetVMId
   public ESMF_VMPrint
   public ESMF_VMRecv
@@ -4488,6 +4489,51 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_VMGetCurrentGarbageInfo
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+!BOPI
+! !IROUTINE: ESMF_VMGetMemInfo - Get memory info for this PET
+
+! !INTERFACE:
+  subroutine ESMF_VMGetMemInfo(virtMemPet, physMemPet, rc)
+!
+! !ARGUMENTS:
+    integer, intent(in)             :: virtMemPet
+    integer, intent(in)             :: physMemPet
+    integer, intent(out), optional  :: rc           
+!
+! !DESCRIPTION:
+!   Get memory info from the system for this PET.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[virtMemPet] 
+!     Virtual memory currently used by this PET.
+!   \item[physMemPet] 
+!     Physical memory currently used by this PET.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into the C++ interface.
+    call c_esmc_vmgetmeminfo(virtMemPet, physMemPet, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMGetMemInfo
 !------------------------------------------------------------------------------
 
 

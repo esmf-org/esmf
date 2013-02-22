@@ -131,6 +131,16 @@ static bool VMKeyCompare(char *vmKey1, char *vmKey2){
   return false;
 }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::procParseLine()"
+int procParseLine(char* line){
+  int i = strlen(line);
+  while (*line < '0' || *line > '9') line++;
+  line[i-3] = '\0';
+  i = atoi(line);
+  return i;
+}
+
 
 //-----------------------------------------------------------------------------
 //
@@ -1494,10 +1504,7 @@ VMId *VM::getCurrentID(
 // !IROUTINE:  ESMCI::VM::getCurrentGarbageInfo - Get garbage info for Current VM
 //
 // !INTERFACE:
-int VM::getCurrentGarbageInfo(
-//
-// !RETURN VALUE:
-//    return code
+void VM::getCurrentGarbageInfo(
 //
 // !ARGUMENTS:
 //
@@ -1505,7 +1512,7 @@ int VM::getCurrentGarbageInfo(
   int *objCount){     // total number of objects registered (Fortran + C++)
 //
 // !DESCRIPTION:
-//   Get the {\tt ESMC\_VM} object of the current context.
+//   Get the garbage info of the current context.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1525,17 +1532,61 @@ int VM::getCurrentGarbageInfo(
     if (i == matchTableBound){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
         "- Could not determine current VM", &rc);
-      return rc;
+      throw rc;
     }
   }
   // found a match
   
   *fobjCount = matchTable_FObjects[i].size();
   *objCount = matchTable_Objects[i].size();
+ 
+  // return successfully
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::getMemInfo()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::getMemInfo - Get memory info
+//
+// !INTERFACE:
+void VM::getMemInfo(
+//
+// !ARGUMENTS:
+//
+  int *virtMemPet,    // virtual memory used by this PET in KB
+  int *physMemPet     // physical memory used by this PET in KB
+  ){
+//
+// !DESCRIPTION:
+//   Get the {\tt ESMC\_VM} object of the current context.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  *virtMemPet = *physMemPet = -1; // initialize
+  
+#ifdef ESMF_OS_Linux
+  FILE* file = fopen("/proc/self/status", "r");
+  char line[128];
+  while (fgets(line, 128, file) != NULL){
+    if (strncmp(line, "VmSize:", 7) == 0){
+      *virtMemPet = procParseLine(line);
+      if (*physMemPet!=-1) break;
+    }
+    if (strncmp(line, "VmRSS:", 6) == 0){
+      *physMemPet = procParseLine(line);
+      if (*virtMemPet!=-1) break;
+    }
+  }
+  fclose(file);
+#endif
   
   // return successfully
-  rc = ESMF_SUCCESS;
-  return rc;
 }
 //-----------------------------------------------------------------------------
 

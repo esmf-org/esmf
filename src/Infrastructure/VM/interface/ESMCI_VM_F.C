@@ -1350,10 +1350,47 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmgetcurrentgarbageinfo()"
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    int localrc = ESMC_RC_NOT_IMPL;
-    localrc = ESMCI::VM::getCurrentGarbageInfo(fobjCount, objCount);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+    try{
+      // query the C++ layer
+      ESMCI::VM::getCurrentGarbageInfo(fobjCount, objCount);
+    }catch(int localrc){
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+        return; // bail out
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), rc);
       return; // bail out
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception", 
+        rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+    
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // Fortran entry point to PET specific memory info
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  void FTN_X(c_esmc_vmgetmeminfo)(int *virtMemPet, int *physMemPet,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmgetmeminfo()"
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    try{
+      // query the C++ layer
+      ESMCI::VM::getMemInfo(virtMemPet, physMemPet);
+    }catch(int localrc){
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+        return; // bail out
+    }catch(std::exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), rc);
+      return; // bail out
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception", 
+        rc);
+      return;
+    }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }

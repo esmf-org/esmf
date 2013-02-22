@@ -312,8 +312,8 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
       
-    ! check objects known by ESMF garbage collection for this Component context
-    call checkComponentGarbage(prefix, comp=comp, rc=rc)
+    ! check Component statistics
+    call checkComponentStatistics(prefix, comp=comp, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -357,8 +357,8 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
       
-    ! check objects known by ESMF garbage collection for this Component context
-    call checkComponentGarbage(prefix, comp=comp, rc=rc)
+    ! check Component statistics
+    call checkComponentStatistics(prefix, comp=comp, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -503,8 +503,8 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     
-    ! check objects known by ESMF garbage collection for this Component context
-    call checkComponentGarbage(prefix, comp=comp, rc=rc)
+    ! check Component statistics
+    call checkComponentStatistics(prefix, comp=comp, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -548,8 +548,8 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     
-    ! check objects known by ESMF garbage collection for this Component context
-    call checkComponentGarbage(prefix, comp=comp, rc=rc)
+    ! check Component statistics
+    call checkComponentStatistics(prefix, comp=comp, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -669,8 +669,8 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
 
-    ! check objects known by ESMF garbage collection for this Component context
-    call checkComponentGarbage(prefix, comp=comp, rc=rc)
+    ! check Component statistics
+    call checkComponentStatistics(prefix, comp=comp, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -714,8 +714,8 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     
-    ! check objects known by ESMF garbage collection for this Component context
-    call checkComponentGarbage(prefix, comp=comp, rc=rc)
+    ! check Component statistics
+    call checkComponentStatistics(prefix, comp=comp, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -1893,23 +1893,43 @@ module ESMF_ComplianceICMod
 
 !-------------------------------------------------------------------------
 
-  recursive subroutine checkComponentGarbage(prefix, comp, rc)
+  recursive subroutine checkComponentStatistics(prefix, comp, rc)
     character(*), intent(in)              :: prefix
     type(ESMF_GridComp)                   :: comp
     integer,      intent(out), optional   :: rc
   
     integer                 :: fobjCount, objCount
+    integer                 :: virtMemPet, physMemPet
     character(ESMF_MAXSTR)  :: output
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    call ESMF_LogWrite(trim(prefix)//" ESMF garbage collection information"// &
-      "for this Component: ", ESMF_LOGMSG_INFO, rc=rc)
+    ! memory statistics for this PET
+    call ESMF_VMGetMemInfo(virtMemPet, physMemPet, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-
+    
+    write (output, *) virtMemPet
+    call ESMF_LogWrite(trim(prefix)//"ESMF Stats: "//&
+      "the virtual memory used by this PET (in KB): "// &
+      trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+        
+    write (output, *) physMemPet
+    call ESMF_LogWrite(trim(prefix)//"ESMF Stats: "//&
+    "the physical memory used by this PET (in KB): "// &
+      trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+        
+    ! objects tracked by the ESMF garbage collection
     call ESMF_VMGetCurrentGarbageInfo(fobjCount, objCount, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -1917,9 +1937,8 @@ module ESMF_ComplianceICMod
       return  ! bail out
     
     write (output, *) fobjCount
-  
-    call ESMF_LogWrite(trim(prefix)//"   ESMF Fortran objects referenced "// &
-      "by the ESMF garbage collection: "// &
+    call ESMF_LogWrite(trim(prefix)//"ESMF Stats: "//&
+    "ESMF Fortran objects referenced by the ESMF garbage collection: "// &
       trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -1927,8 +1946,8 @@ module ESMF_ComplianceICMod
       return  ! bail out
         
     write (output, *) objCount
-    call ESMF_LogWrite(trim(prefix)//"   ESMF objects (F & C++) referenced "// &
-      "by the ESMF garbage collection: "// &
+    call ESMF_LogWrite(trim(prefix)//"ESMF Stats: "//&
+    "ESMF objects (F & C++) referenced by the ESMF garbage collection: "// &
       trim(adjustl(output)), ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &

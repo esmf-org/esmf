@@ -101,10 +101,11 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
       int *petMatchList, int len_petMatchList);
     VMId *getVMId(int *rc) const;   // Return VMId of the VM context.
     static void getArgs(int *argc, char ***argv, int *rc);  // command line args
-    static VM *getGlobal(int *rc=NULL);      // global VM
-    static VM *getCurrent(int *rc=NULL);     // current VM
-    static VMId *getCurrentID(int *rc=NULL); // VMId of current VM
-    static int getCurrentGarbageInfo(int *, int *); // garbage info current VM
+    static VM *getGlobal(int *rc=NULL);       // global VM
+    static VM *getCurrent(int *rc=NULL);      // current VM
+    static VMId *getCurrentID(int *rc=NULL);  // VMId of current VM
+    static void getCurrentGarbageInfo(int *, int *); // garbage info current VM
+    static void getMemInfo(int *virtMemPet, int *physMemPet);   // memory info
     static int getBaseIDAndInc(VMId *vmID);
     static void addObject(ESMC_Base *, VMId *vmID);
     static void addFObject(void **fobject, int objectID, VMId *vmID);
