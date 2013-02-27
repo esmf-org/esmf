@@ -539,7 +539,7 @@ problems with periodicity and with the pole singularity. This library
 
  {\bf Solution:} Define the Grid so that it doesn't contain the overlap point. This typically means simply making
  the Grid one point smaller in the periodic dimension.  If a Field 
- constructuted on the Grid needs to contain these overlap points then the user can use the
+ constructed on the Grid needs to contain these overlap points then the user can use the
  {\tt totalWidth} arguments to include this extra padding in the Field. Note, however, 
  that the regrid won't update these extra points, so the user will have to do a copy to fill the points
  in the overlap region in the Field.  
