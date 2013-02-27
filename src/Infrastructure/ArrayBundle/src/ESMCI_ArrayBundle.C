@@ -53,9 +53,9 @@ static const char *const version = "$Id: ESMCI_ArrayBundle.C,v 1.55 2012/10/25 2
 
 namespace ESMCI {
 
-  //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 //
-// constructor and destructor
+// constructor and destruct()
 //
 //-----------------------------------------------------------------------------
 
@@ -146,6 +146,11 @@ int ArrayBundle::destruct(bool followCreator){
       for (int i=0; i<getCount(); i++)
         Array::destroy(&arrayVector[i]);
     }
+    // swap() trick with an empty temporary to free container's memory
+    //TODO: Activate the swap trick below if there is ever suspicion that the
+    //TODO: container member inside of a destroyed ArrayBundle is holding on
+    //TODO: memory its memory.
+    //Container<std::string, Array *>().swap(arrayContainer);
   }
   
   // return successfully
