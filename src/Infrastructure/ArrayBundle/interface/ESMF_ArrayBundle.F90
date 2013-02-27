@@ -127,9 +127,9 @@ module ESMF_ArrayBundleMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
+    module procedure ESMF_ArrayBundleGetListAll
     module procedure ESMF_ArrayBundleGetItem
     module procedure ESMF_ArrayBundleGetList
-    module procedure ESMF_ArrayBundleGetListAll
 !EOPI
 
   end interface
@@ -801,9 +801,151 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ArrayBundleGetListAll()"
+!BOP
+! !IROUTINE: ESMF_ArrayBundleGet - Get object-wide information from an ArrayBundle
+!
+! !INTERFACE:
+    ! Private name; call using ESMF_ArrayBundleGet()   
+    subroutine ESMF_ArrayBundleGetListAll(arraybundle, keywordEnforcer, &
+      itemorderflag, arrayCount, arrayList, arrayNameList, name, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_ArrayBundle),    intent(in)            :: arraybundle
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_ItemOrder_Flag), intent(in),  optional :: itemorderflag
+    integer,                   intent(out), optional :: arrayCount
+    type(ESMF_Array),          intent(out), optional :: arrayList(:)
+    character(len=*),          intent(out), optional :: arrayNameList(:)
+    character(len=*),          intent(out), optional :: name
+    integer,                   intent(out), optional :: rc
+!
+! !STATUS:
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.1.0] Added argument {\tt itemorderflag}.
+!              The new argument gives the user control over the order in which
+!              the items are returned.
+! \end{description}
+! \end{itemize}
+!
+! !DESCRIPTION:
+!   Get general, i.e. not Array name specific information from the ArrayBundle.
+!
+!   \begin{description}
+!   \item [arraybundle]
+!     {\tt ESMF\_ArrayBundle} to be queried.
+!   \item[{[itemorderflag]}]
+!     Specifies the order of the returned items in the {\tt arrayList} and
+!     {\tt arrayNameList}.
+!     The default is {\tt ESMF\_ITEMORDER\_ABC}.
+!     See \ref{const:itemorderflag} for a full list of options.
+!   \item [{[arrayCount]}]
+!     Upon return holds the number of Arrays bundled in the ArrayBundle.
+!   \item [{[arrayList]}]
+!     Upon return holds a list of Arrays bundled in {\tt arraybundle}. The
+!     argument must be allocated to be at least of size {\tt arrayCount}.
+!   \item [{[arrayNameList]}]
+!     Upon return holds a list of the names of the Arrays bundled in 
+!     {\tt arraybundle}. The argument must be allocated to be at least of
+!     size {\tt arrayCount}.
+!   \item [{[name]}]
+!     Name of the ArrayBundle object.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                       :: localrc      ! local return code
+    integer                       :: opt_arrayCount         ! helper variable
+    type(ESMF_Pointer), pointer   :: opt_arrayPtrList(:)    ! helper variable
+    integer                       :: len_arrayPtrList       ! helper variable
+    integer                       :: i                      ! helper variable
+    type(ESMF_ItemOrder_Flag)     :: itemorderflagArg
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
+    
+    ! Deal with optional itemorderflag argument
+    itemorderflagArg = ESMF_ITEMORDER_ABC ! default
+    if (present(itemorderflag)) &
+      itemorderflagArg = itemorderflag
+    
+    ! Deal with (optional) array arguments
+    len_arrayPtrList = 0
+    if (present(arrayList)) then
+      len_arrayPtrList = size(arrayList)
+    endif
+    if (present(arrayNameList)) then
+      len_arrayPtrList = max(len_arrayPtrList, size(arrayNameList))
+    endif
+    if (present(arrayList).or.present(arrayNameList)) then
+      allocate(opt_arrayPtrList(len_arrayPtrList))
+    else
+      allocate(opt_arrayPtrList(1))
+    endif
+
+    ! Call into the C++ interface layer
+    call c_ESMC_ArrayBundleGetListAll(arraybundle, opt_arrayCount, &
+      opt_arrayPtrList, len_arrayPtrList, itemorderflagArg, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! fill in arrayCount output variable
+    if (present(arrayCount)) then
+      arrayCount = opt_arrayCount
+    endif
+
+    ! Set init code for deep C++ objects
+    if (present(arrayList)) then
+      do i=1, min(size(arrayList), opt_arrayCount)
+        call ESMF_ArraySetThis(arrayList(i), opt_arrayPtrList(i), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_ArraySetInitCreated(arrayList(i), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      enddo
+    endif
+    
+    ! Fill arrayNameList
+    if (present(arrayNameList)) then
+      do i=1, min(size(arrayNameList), opt_arrayCount)
+        call c_ESMC_GetName(opt_arrayPtrList(i), arrayNameList(i), localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      enddo
+    endif
+    
+    ! Garbage collection
+    deallocate(opt_arrayPtrList)
+
+    ! Special call to get name out of Base class
+    if (present(name)) then
+      call c_ESMC_GetName(arraybundle, name, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  
+  end subroutine ESMF_ArrayBundleGetListAll
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayBundleGetItem()"
 !BOP
-! !IROUTINE: ESMF_ArrayBundleGet - Get information about an Array by name
+! !IROUTINE: ESMF_ArrayBundleGet - Get information about an Array by name and optionally return an Array
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_ArrayBundleGet()   
@@ -992,148 +1134,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
   
   end subroutine ESMF_ArrayBundleGetList
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_ArrayBundleGetListAll()"
-!BOP
-! !IROUTINE: ESMF_ArrayBundleGet - Get object-wide (not Array name specific) information from an ArrayBundle
-!
-! !INTERFACE:
-    ! Private name; call using ESMF_ArrayBundleGet()   
-    subroutine ESMF_ArrayBundleGetListAll(arraybundle, keywordEnforcer, &
-      itemorderflag, arrayCount, arrayList, arrayNameList, name, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_ArrayBundle),    intent(in)            :: arraybundle
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_ItemOrder_Flag), intent(in),  optional :: itemorderflag
-    integer,                   intent(out), optional :: arrayCount
-    type(ESMF_Array),          intent(out), optional :: arrayList(:)
-    character(len=*),          intent(out), optional :: arrayNameList(:)
-    character(len=*),          intent(out), optional :: name
-    integer,                   intent(out), optional :: rc
-!
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \item\apiStatusModifiedSinceVersion{5.2.0r}
-! \begin{description}
-! \item[6.1.0] Added argument {\tt itemorderflag}.
-!              The new argument gives the user control over the order in which
-!              the items are returned.
-! \end{description}
-! \end{itemize}
-!
-! !DESCRIPTION:
-!   Get general, i.e. not Array name specific information from the ArrayBundle.
-!
-!   \begin{description}
-!   \item [arraybundle]
-!     {\tt ESMF\_ArrayBundle} to be queried.
-!   \item[{[itemorderflag]}]
-!     Specifies the order of the returned items in the {\tt arrayList} and
-!     {\tt arrayNameList}.
-!     The default is {\tt ESMF\_ITEMORDER\_ABC}.
-!     See \ref{const:itemorderflag} for a full list of options.
-!   \item [{[arrayCount]}]
-!     Upon return holds the number of Arrays bundled in the ArrayBundle.
-!   \item [{[arrayList]}]
-!     Upon return holds a list of Arrays bundled in {\tt arraybundle}. The
-!     argument must be allocated to be at least of size {\tt arrayCount}.
-!   \item [{[arrayNameList]}]
-!     Upon return holds a list of the names of the Arrays bundled in 
-!     {\tt arraybundle}. The argument must be allocated to be at least of
-!     size {\tt arrayCount}.
-!   \item [{[name]}]
-!     Name of the ArrayBundle object.
-!   \item [{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer                       :: localrc      ! local return code
-    integer                       :: opt_arrayCount         ! helper variable
-    type(ESMF_Pointer), pointer   :: opt_arrayPtrList(:)    ! helper variable
-    integer                       :: len_arrayPtrList       ! helper variable
-    integer                       :: i                      ! helper variable
-    type(ESMF_ItemOrder_Flag)     :: itemorderflagArg
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
-    
-    ! Deal with optional itemorderflag argument
-    itemorderflagArg = ESMF_ITEMORDER_ABC ! default
-    if (present(itemorderflag)) &
-      itemorderflagArg = itemorderflag
-    
-    ! Deal with (optional) array arguments
-    len_arrayPtrList = 0
-    if (present(arrayList)) then
-      len_arrayPtrList = size(arrayList)
-    endif
-    if (present(arrayNameList)) then
-      len_arrayPtrList = max(len_arrayPtrList, size(arrayNameList))
-    endif
-    if (present(arrayList).or.present(arrayNameList)) then
-      allocate(opt_arrayPtrList(len_arrayPtrList))
-    else
-      allocate(opt_arrayPtrList(1))
-    endif
-
-    ! Call into the C++ interface layer
-    call c_ESMC_ArrayBundleGetListAll(arraybundle, opt_arrayCount, &
-      opt_arrayPtrList, len_arrayPtrList, itemorderflagArg, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! fill in arrayCount output variable
-    if (present(arrayCount)) then
-      arrayCount = opt_arrayCount
-    endif
-
-    ! Set init code for deep C++ objects
-    if (present(arrayList)) then
-      do i=1, min(size(arrayList), opt_arrayCount)
-        call ESMF_ArraySetThis(arrayList(i), opt_arrayPtrList(i), rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArraySetInitCreated(arrayList(i), rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      enddo
-    endif
-    
-    ! Fill arrayNameList
-    if (present(arrayNameList)) then
-      do i=1, min(size(arrayNameList), opt_arrayCount)
-        call c_ESMC_GetName(opt_arrayPtrList(i), arrayNameList(i), localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-      enddo
-    endif
-    
-    ! Garbage collection
-    deallocate(opt_arrayPtrList)
-
-    ! Special call to get name out of Base class
-    if (present(name)) then
-      call c_ESMC_GetName(arraybundle, name, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-    
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-  
-  end subroutine ESMF_ArrayBundleGetListAll
 !------------------------------------------------------------------------------
 
 

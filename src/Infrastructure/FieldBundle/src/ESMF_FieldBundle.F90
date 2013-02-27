@@ -188,9 +188,9 @@ module ESMF_FieldBundleMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
+    module procedure ESMF_FieldBundleGetListAll
     module procedure ESMF_FieldBundleGetItem
     module procedure ESMF_FieldBundleGetList
-    module procedure ESMF_FieldBundleGetListAll
     module procedure ESMF_FieldBundleGetIndex
 !EOPI
 
@@ -1130,210 +1130,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleGetItem()"
-!BOP
-! !IROUTINE: ESMF_FieldBundleGet - Get information about a Field by name
-!
-! !INTERFACE:
-    ! Private name; call using ESMF_FieldBundleGet()   
-    subroutine ESMF_FieldBundleGetItem(fieldbundle, fieldName, &
-      keywordEnforcer, field, fieldCount, isPresent, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_FieldBundle), intent(in)            :: fieldbundle
-    character(len=*),       intent(in)            :: fieldName
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Field),       intent(out), optional :: field
-    integer,                intent(out), optional :: fieldCount
-    logical,                intent(out), optional :: isPresent
-    integer,                intent(out), optional :: rc
-!
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \end{itemize}
-!
-! !DESCRIPTION:
-!   Get information about items that match {\tt fieldName} in FieldBundle.
-!
-!   \begin{description}
-!   \item [fieldbundle]
-!     {\tt ESMF\_FieldBundle} to be queried.
-!   \item [fieldName]
-!     Specified name.
-!   \item [{[field]}]
-!     Upon return holds the requested field item. It is an error if this
-!     argument was specified and there is not exactly one field item in 
-!     {\tt ESMF\_FieldBundle} that matches {\tt fieldName}.
-!   \item [{[fieldCount]}]
-!     Number of Fields with {\tt fieldName} in {\tt ESMF\_FieldBundle}.
-!   \item [{[isPresent]}]
-!     Upon return indicates whether field(s) with {\tt fieldName} exist
-!     in {\tt ESMF\_FieldBundle}.
-!   \item [{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer                       :: localrc      ! local return code
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
-    
-    if (present(fieldCount)) then
-      call ESMF_ContainerGet(fieldbundle%this%container, itemName=trim(fieldName), &
-        itemCount=fieldCount, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    if (present(isPresent)) then
-      call ESMF_ContainerGet(fieldbundle%this%container, itemName=trim(fieldName), &
-        isPresent=isPresent, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    if(present(fieldCount)) then
-      if(fieldCount .gt. 1) then
-        if(present(field)) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-            msg = " - field argument cannot be specified when fieldCount is greater than 1", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-        endif
-      endif
-    endif
-
-    if (present(field)) then
-      call ESMF_ContainerGet(fieldbundle%this%container, itemName=trim(fieldName), &
-        item=field, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
-
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-  
-  end subroutine ESMF_FieldBundleGetItem
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldBundleGetList()"
-!BOP
-! !IROUTINE: ESMF_FieldBundleGet - Get a list of Fields by name
-!
-! !INTERFACE:
-    ! Private name; call using ESMF_FieldBundleGet()   
-    subroutine ESMF_FieldBundleGetList(fieldbundle, fieldName, fieldList, &
-      keywordEnforcer, itemorderflag, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_FieldBundle), intent(in)              :: fieldbundle
-    character(len=*),       intent(in)              :: fieldName
-    type(ESMF_Field),       intent(out)             :: fieldList(:)
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_ItemOrder_Flag), intent(in), optional :: itemorderflag
-    integer,                intent(out), optional   :: rc
-!
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \item\apiStatusModifiedSinceVersion{5.2.0r}
-! \begin{description}
-! \item[6.1.0] Added argument {\tt itemorderflag}.
-!              The new argument gives the user control over the order in which
-!              the items are returned.
-! \end{description}
-! \end{itemize}
-!
-! !DESCRIPTION:
-!   Get the list of Fields from fieldbundle that match fieldName.
-!
-!   \begin{description}
-!   \item [fieldbundle]
-!     {\tt ESMF\_FieldBundle} to be queried.
-!   \item [fieldName]
-!     Specified name.
-!   \item [fieldList]
-!     List of Fields in {\tt ESMF\_FieldBundle} that match {\tt fieldName}. The
-!     argument must be allocated to be at least of size {\tt fieldCount}
-!     returned for this {\tt fieldName}.
-!   \item [{[itemorderflag]}]
-!     Specifies the order of the returned items in the {\tt fieldList}.
-!     The default is {\tt ESMF\_ITEMORDER\_ABC}.
-!     See \ref{const:itemorderflag} for a full list of options.
-!   \item [{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-    integer                       :: localrc      ! local return code
-    integer                       :: fieldCount
-    type(ESMF_Field), pointer     :: l_fieldList(:)
-    type(ESMF_ItemOrder_Flag)     :: l_itemorderflag
-
-    ! initialize return code; assume routine not implemented
-    localrc = ESMF_RC_NOT_IMPL
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-    l_itemorderflag = ESMF_ITEMORDER_ABC
-    if(present(itemorderflag)) l_itemorderflag = itemorderflag
-
-    ! Check init status of arguments
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
-    
-    nullify(l_fieldList)
-    ! Check size
-    call ESMF_ContainerGet(fieldbundle%this%container, trim(fieldName), &
-      itemCount=fieldCount, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if(size(fieldList) .lt. fieldCount) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
-      msg=" - Input argument fieldList size is too small", &
-      ESMF_CONTEXT, rcToReturn=rc) 
-      return
-    endif
-
-    allocate(l_fieldList(fieldCount), stat=localrc)
-    if(localrc /= ESMF_SUCCESS) then
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
-        msg = " - cannot allocate l_fieldList internally", &
-        ESMF_CONTEXT, rcToReturn=rc)
-      return
-    endif
-
-    call ESMF_ContainerGet(fieldbundle%this%container, trim(fieldName), &
-      l_fieldList, itemorderflag=l_itemorderflag, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    fieldList(1:fieldCount) = l_fieldList(1:fieldCount)
-
-    deallocate(l_fieldList)
-
-    ! Return successfully
-    if (present(rc)) rc = ESMF_SUCCESS
-  
-  end subroutine ESMF_FieldBundleGetList
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleGetListAll()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleGet - Get object-wide information from the FieldBundle
+! !IROUTINE: ESMF_FieldBundleGet - Get object-wide information from a FieldBundle
 !
 ! !INTERFACE:
     ! Private name; call using ESMF_FieldBundleGet()   
@@ -1556,6 +1355,204 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end subroutine ESMF_FieldBundleGetListAll
 !------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleGetItem()"
+!BOP
+! !IROUTINE: ESMF_FieldBundleGet - Get information about a Field by name and optionally return a Field
+!
+! !INTERFACE:
+    ! Private name; call using ESMF_FieldBundleGet()   
+    subroutine ESMF_FieldBundleGetItem(fieldbundle, fieldName, &
+      keywordEnforcer, field, fieldCount, isPresent, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_FieldBundle), intent(in)            :: fieldbundle
+    character(len=*),       intent(in)            :: fieldName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_Field),       intent(out), optional :: field
+    integer,                intent(out), optional :: fieldCount
+    logical,                intent(out), optional :: isPresent
+    integer,                intent(out), optional :: rc
+!
+! !STATUS:
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
+!
+! !DESCRIPTION:
+!   Get information about items that match {\tt fieldName} in FieldBundle.
+!
+!   \begin{description}
+!   \item [fieldbundle]
+!     {\tt ESMF\_FieldBundle} to be queried.
+!   \item [fieldName]
+!     Specified name.
+!   \item [{[field]}]
+!     Upon return holds the requested field item. It is an error if this
+!     argument was specified and there is not exactly one field item in 
+!     {\tt ESMF\_FieldBundle} that matches {\tt fieldName}.
+!   \item [{[fieldCount]}]
+!     Number of Fields with {\tt fieldName} in {\tt ESMF\_FieldBundle}.
+!   \item [{[isPresent]}]
+!     Upon return indicates whether field(s) with {\tt fieldName} exist
+!     in {\tt ESMF\_FieldBundle}.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                       :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
+    
+    if (present(fieldCount)) then
+      call ESMF_ContainerGet(fieldbundle%this%container, itemName=trim(fieldName), &
+        itemCount=fieldCount, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(isPresent)) then
+      call ESMF_ContainerGet(fieldbundle%this%container, itemName=trim(fieldName), &
+        isPresent=isPresent, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if(present(fieldCount)) then
+      if(fieldCount .gt. 1) then
+        if(present(field)) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+            msg = " - field argument cannot be specified when fieldCount is greater than 1", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return
+        endif
+      endif
+    endif
+
+    if (present(field)) then
+      call ESMF_ContainerGet(fieldbundle%this%container, itemName=trim(fieldName), &
+        item=field, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  
+  end subroutine ESMF_FieldBundleGetItem
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldBundleGetList()"
+!BOP
+! !IROUTINE: ESMF_FieldBundleGet - Get a list of Fields by name
+!
+! !INTERFACE:
+    ! Private name; call using ESMF_FieldBundleGet()   
+    subroutine ESMF_FieldBundleGetList(fieldbundle, fieldName, fieldList, &
+      keywordEnforcer, itemorderflag, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_FieldBundle), intent(in)              :: fieldbundle
+    character(len=*),       intent(in)              :: fieldName
+    type(ESMF_Field),       intent(out)             :: fieldList(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_ItemOrder_Flag), intent(in), optional :: itemorderflag
+    integer,                intent(out), optional   :: rc
+!
+! !STATUS:
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.1.0] Added argument {\tt itemorderflag}.
+!              The new argument gives the user control over the order in which
+!              the items are returned.
+! \end{description}
+! \end{itemize}
+!
+! !DESCRIPTION:
+!   Get the list of Fields from fieldbundle that match fieldName.
+!
+!   \begin{description}
+!   \item [fieldbundle]
+!     {\tt ESMF\_FieldBundle} to be queried.
+!   \item [fieldName]
+!     Specified name.
+!   \item [fieldList]
+!     List of Fields in {\tt ESMF\_FieldBundle} that match {\tt fieldName}. The
+!     argument must be allocated to be at least of size {\tt fieldCount}
+!     returned for this {\tt fieldName}.
+!   \item [{[itemorderflag]}]
+!     Specifies the order of the returned items in the {\tt fieldList}.
+!     The default is {\tt ESMF\_ITEMORDER\_ABC}.
+!     See \ref{const:itemorderflag} for a full list of options.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                       :: localrc      ! local return code
+    integer                       :: fieldCount
+    type(ESMF_Field), pointer     :: l_fieldList(:)
+    type(ESMF_ItemOrder_Flag)     :: l_itemorderflag
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    l_itemorderflag = ESMF_ITEMORDER_ABC
+    if(present(itemorderflag)) l_itemorderflag = itemorderflag
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_FieldBundleGetInit, fieldbundle, rc)
+    
+    nullify(l_fieldList)
+    ! Check size
+    call ESMF_ContainerGet(fieldbundle%this%container, trim(fieldName), &
+      itemCount=fieldCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if(size(fieldList) .lt. fieldCount) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, &
+      msg=" - Input argument fieldList size is too small", &
+      ESMF_CONTEXT, rcToReturn=rc) 
+      return
+    endif
+
+    allocate(l_fieldList(fieldCount), stat=localrc)
+    if(localrc /= ESMF_SUCCESS) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
+        msg = " - cannot allocate l_fieldList internally", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+
+    call ESMF_ContainerGet(fieldbundle%this%container, trim(fieldName), &
+      l_fieldList, itemorderflag=l_itemorderflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    fieldList(1:fieldCount) = l_fieldList(1:fieldCount)
+
+    deallocate(l_fieldList)
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+  
+  end subroutine ESMF_FieldBundleGetList
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1574,6 +1571,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Field),       intent(inout)         :: field
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
+!
+! TODO: This method is DEPRECATED starting at 5.2.0r (was not part of the 5.2.0r
+!       reference manual.
+! TODO: We should put a deprecation message into the Log file when this message
+!       is being called!
 !
 ! !DESCRIPTION:
 !   Get the fieldIndex-th Field in FieldBundle. The order of the Field in FieldBundle
