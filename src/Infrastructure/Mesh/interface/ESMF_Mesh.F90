@@ -1564,14 +1564,23 @@ end function ESMF_MeshCreateFromFile
     integer(ESMF_KIND_I4)               :: localSplitElems(1)
     integer(ESMF_KIND_I4)               :: globalSplitElems(1)
     logical                             :: existSplitElems
-    integer, parameter                  :: maxNumPoly=20
     integer                             :: numPoly
+#if 0
+    integer, parameter                  :: maxNumPoly=20
     real(ESMF_KIND_R8)                  :: polyCoords(3*maxNumPoly)
     real(ESMF_KIND_R8)                  :: polyDblBuf(3*maxNumPoly)
     real(ESMF_KIND_R8)                  :: area(maxNumPoly)
-    real(ESMF_KIND_R8)                  :: totalarea
     integer                             :: polyIntBuf(maxNumPoly)
     integer                             :: triInd(3*(maxNumPoly-2))
+#else 
+    integer                             :: maxNumPoly
+    real(ESMF_KIND_R8),allocatable      :: polyCoords(:)
+    real(ESMF_KIND_R8),allocatable      :: polyDblBuf(:)
+    real(ESMF_KIND_R8),allocatable      :: area(:)
+    integer,allocatable                 :: polyIntBuf(:)
+    integer,allocatable                 :: triInd(:)
+#endif
+    real(ESMF_KIND_R8)                  :: totalarea
     integer                             :: spatialDim
     integer                             :: parametricDim
     integer                             :: lni,ti,tk
@@ -1749,6 +1758,7 @@ end function ESMF_MeshCreateFromFile
     ! if elmtNum == 3 or 4, no change, if elmtNum > 4, break it into elmtNum-2 triangles
     totalElements = ElemCnt
     totalConnects = 0
+    maxNumPoly=0
     if (parametricDim .eq. 2) then
        do ElemNo =1, ElemCnt
           do i=1,elmtNum(ElemNo)	
@@ -1760,6 +1770,9 @@ end function ESMF_MeshCreateFromFile
           else
              TotalConnects = TotalConnects+3*(elmtNum(ElemNo)-2)
           end if
+          if (elmtNum(ElemNo) > maxNumPoly) then
+             maxNumPoly=elmtNum(ElemNo)
+          endif
        end do
     else ! If not parametricDim==2, assuming parmetricDim==3
        do ElemNo =1, ElemCnt
@@ -1769,6 +1782,8 @@ end function ESMF_MeshCreateFromFile
           TotalConnects = TotalConnects+elmtNum(ElemNo)
        end do       
     endif
+
+   ! write(*,*) "maxNumPoly=",maxNumPoly
 
     ! Do a global reduce to find out the lowest PET No that owns each node, the result is in
     ! NodeOwners1(:) 
@@ -1907,6 +1922,14 @@ end function ESMF_MeshCreateFromFile
     ElemNo = 1
     ConnNo = 0
     if (parametricDim .eq. 2) then
+       ! Allocate variables for triangulation
+       allocate(polyCoords(3*maxNumPoly))
+       allocate(polyDblBuf(3*maxNumPoly))
+       allocate(area(maxNumPoly))
+       allocate(polyIntBuf(maxNumPoly))
+       allocate(triInd(3*(maxNumPoly-2)))
+
+       ! Loop through creating Mesh appropriate elements
        do j = 1, ElemCnt
           if (elmtNum(j)==3) then        
              ElemId(ElemNo) = myStartElmt+ElemNo
@@ -2021,6 +2044,13 @@ end function ESMF_MeshCreateFromFile
               endif
           end if
        end do
+
+       ! deallocate after triangulation
+       deallocate(polyCoords)
+       deallocate(polyDblBuf)
+       deallocate(area)
+       deallocate(polyIntBuf)
+       deallocate(triInd)
     else ! If not parametricDim==2, assuming parmetricDim==3
        do j = 1, ElemCnt
           if (elmtNum(j)==4) then        
