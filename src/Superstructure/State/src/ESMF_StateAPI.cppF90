@@ -1144,7 +1144,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_StateGetInfo"
 !BOP
-! !IROUTINE: ESMF_StateGet - Get information about a State
+! !IROUTINE: ESMF_StateGet - Get object-wide information from a State
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateGet()   
@@ -1428,8 +1428,99 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
     end subroutine ESMF_StateGetInfo
 
 !------------------------------------------------------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_StateGetItemInfo"
 !BOP
-! !IROUTINE: ESMF_StateGet - Retrieve an item from a State
+! !IROUTINE: ESMF_StateGet - Get information about an item in a State by item name
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateGet()   
+      subroutine ESMF_StateGetItemInfo(state, itemName, itemType, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State),         intent(in)  :: state
+      character (len=*),        intent(in)  :: itemName
+      type(ESMF_StateItem_Flag), intent(out) :: itemType
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer,                  intent(out), optional :: rc             
+
+!
+! !STATUS:
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{5.2.0r}
+! \end{itemize}
+!
+! !DESCRIPTION:
+!     Returns the type for the item named
+!     {\tt name} in this {\tt ESMF\_State}.  If no item with this name
+!     exists, the value {\tt ESMF\_STATEITEM\_NOTFOUND} will be returned
+!     and the error code will not be set to an error.  Thus this routine
+!     can be used to safely query for the existance of items by name 
+!     whether or not they are expected to be there.   The error code will
+!     be set in case of other errors, for example if the {\tt ESMF\_State}
+!     itself is invalid.
+!
+!     The arguments are:
+!     \begin{description}     
+!     \item[state]
+!        {\tt ESMF\_State} to be queried.
+!      \item[itemName]
+!        Name of the item to return information about.
+!      \item[itemType]
+!        Returned item types for the item with the given name, including 
+!        placeholder names.  Options are
+!        listed in Section~\ref{const:stateitem}.  If no item with the
+!        given name is found, {\tt ESMF\_STATEITEM\_NOTFOUND} will be returned
+!        and {\tt rc} will {\bf not} be set to an error.
+!      \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       \end{description}
+!
+!
+!EOP
+      integer :: localrc
+      type(ESMF_Container), pointer :: scp
+      type(ESMF_StateItemWrap) :: siwrap
+      logical :: foundflag
+
+        ! check input variables
+        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      localrc = ESMF_RC_NOT_IMPL
+
+      call ESMF_StateValidate(state, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+      scp => state%statep%stateContainer
+
+      ! Find the object which matches this name
+      call ESMF_ContainerGet (scp, itemname=itemName, &
+          isPresent=foundflag, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      if (foundflag) then
+	call ESMF_ContainerGet (scp, itemName=itemName,  &
+            item=siwrap, rc=localrc)
+	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+        itemtype = siwrap%si%otype
+      else
+        itemtype = ESMF_STATEITEM_NOTFOUND
+      end if
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+    end subroutine ESMF_StateGetItemInfo
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateGet - Get an item from a State by item name
 !
 ! !INTERFACE:
 !      subroutine ESMF_StateGet(state, itemName, <item>, rc)
@@ -1449,7 +1540,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !
 ! !DESCRIPTION:
 !      \begin{sloppypar}
-!      Returns an <item> from an {\tt ESMF\_State} by name.  
+!      Returns an <item> from an {\tt ESMF\_State} by item name.  
 !      If the {\tt ESMF\_State} contains the <item> directly, only
 !      {\tt itemName} is required.
 !      \end{sloppypar}
@@ -1564,97 +1655,6 @@ StateGetMacro(ESMF_RouteHandle,RouteHandle,routehandle,rp)
 ^define stateversion
 StateGetMacro(ESMF_State,State,nestedState,spp)
 ^undef  stateversion
-
-!------------------------------------------------------------------------------
-^undef  ESMF_METHOD
-^define ESMF_METHOD "ESMF_StateGetItemInfo"
-!BOP
-! !IROUTINE: ESMF_StateGet - Get information about an item in a State
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateGet()   
-      subroutine ESMF_StateGetItemInfo(state, itemName, itemType, keywordEnforcer, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State),         intent(in)  :: state
-      character (len=*),        intent(in)  :: itemName
-      type(ESMF_StateItem_Flag), intent(out) :: itemType
-    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,                  intent(out), optional :: rc             
-
-!
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \end{itemize}
-!
-! !DESCRIPTION:
-!     Returns the type for the item named
-!     {\tt name} in this {\tt ESMF\_State}.  If no item with this name
-!     exists, the value {\tt ESMF\_STATEITEM\_NOTFOUND} will be returned
-!     and the error code will not be set to an error.  Thus this routine
-!     can be used to safely query for the existance of items by name 
-!     whether or not they are expected to be there.   The error code will
-!     be set in case of other errors, for example if the {\tt ESMF\_State}
-!     itself is invalid.
-!
-!     The arguments are:
-!     \begin{description}     
-!     \item[state]
-!        {\tt ESMF\_State} to be queried.
-!      \item[itemName]
-!        Name of the item to return information about.
-!      \item[itemType]
-!        Returned item types for the item with the given name, including 
-!        placeholder names.  Options are
-!        listed in Section~\ref{const:stateitem}.  If no item with the
-!        given name is found, {\tt ESMF\_STATEITEM\_NOTFOUND} will be returned
-!        and {\tt rc} will {\bf not} be set to an error.
-!      \item[{[rc]}]
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
-!
-!
-!EOP
-      integer :: localrc
-      type(ESMF_Container), pointer :: scp
-      type(ESMF_StateItemWrap) :: siwrap
-      logical :: foundflag
-
-        ! check input variables
-        ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
-
-      ! Initialize return code; assume routine not implemented
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      localrc = ESMF_RC_NOT_IMPL
-
-      call ESMF_StateValidate(state, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-      scp => state%statep%stateContainer
-
-      ! Find the object which matches this name
-      call ESMF_ContainerGet (scp, itemname=itemName, &
-          isPresent=foundflag, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-      if (foundflag) then
-	call ESMF_ContainerGet (scp, itemName=itemName,  &
-            item=siwrap, rc=localrc)
-	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-        itemtype = siwrap%si%otype
-      else
-        itemtype = ESMF_STATEITEM_NOTFOUND
-      end if
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-    end subroutine ESMF_StateGetItemInfo
 
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
