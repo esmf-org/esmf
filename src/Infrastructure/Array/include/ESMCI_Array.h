@@ -310,9 +310,9 @@ namespace ESMCI {
     int setName(const char *name){return ESMC_BaseSetName(name, "Array");}
     // misc.
     static bool match(Array const *array1, Array const *array2, int *rc=NULL);
-    int read(char *file, char *variableName,
+    int read(const char *file, const char *variableName,
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
-    int write(char *file, char *variableName,
+    int write(const char *file, const char *variableName,
          bool *overwrite, ESMC_FileStatus_Flag *status,
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
     int print() const;

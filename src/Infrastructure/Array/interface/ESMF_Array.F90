@@ -1562,7 +1562,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     ! Local vars
     integer                    :: localrc           ! local return code
-    integer                    :: len_fileName      ! helper variable
     integer                    :: len_varName       ! helper variable
     type(ESMF_Logical)         :: opt_overwriteflag ! helper variable
     type(ESMF_FileStatus_Flag) :: opt_status        ! helper variable
@@ -1588,15 +1587,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if ( present(iofmt)) opt_iofmt = iofmt
 
     ! Get string lengths
-    len_fileName = len(trim(file))
     if (present(variableName)) then
-      len_varName = len(trim(variableName))
+      len_varName = len_trim (variableName)
     else
       len_varName = 0
     endif
 
     ! Call into the C++ interface, which will call IO object
-    call c_esmc_arraywrite(array, file, len_fileName,          &
+    call c_esmc_arraywrite(array, file,                        &
         variableName, len_varName, opt_overwriteflag,          &
         opt_status, timeslice, opt_iofmt, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,         &

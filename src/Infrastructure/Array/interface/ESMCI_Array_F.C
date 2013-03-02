@@ -599,12 +599,14 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_arraywrite)(ESMCI::Array **array,
-                                char *file, int *len_file,
+                                char *file,
                                 char *variableName, int *len_variableName,
                                 ESMC_Logical *opt_overwriteflag,
                                 ESMC_FileStatus_Flag *status,
                                 int *timeslice, ESMC_IOFmt_Flag *iofmt,
-                                int *rc) {
+                                int *rc,
+                                ESMCI_FortranStrLenArg file_l,
+                                ESMCI_FortranStrLenArg varname_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arraywrite()"
     bool overwriteflag;
@@ -614,58 +616,32 @@ extern "C" {
     }
     int localrc = ESMC_RC_NOT_IMPL;
     // The Fortran interface always sets the flags and optional variables
-    // except for timeslice. For character variables, create NULL-terminated
-    // C strings.
-    // helper variable
-    char fileName[ESMF_MAXSTR + 1];
-    int len_fileName = *len_file;
-    if (len_fileName > ESMF_MAXSTR) {
-      ESMC_LogDefault.Write("File name length > ESMF_MAXSTR",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_fileName = ESMF_MAXSTR;
-    } else if (len_fileName < 0) {
-      ESMC_LogDefault.Write("Negative file name length",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_fileName = 0;
-    }
-    if (len_fileName > 0) {
-      strncpy(fileName, file, len_fileName);
-      fileName[len_fileName] = '\0';
-    } else {
-      fileName[0] = '\0';
-    }
-    char varName[ESMF_MAXSTR + 1];
-    int len_varName = *len_variableName;
-    if (len_varName > ESMF_MAXSTR) {
-      ESMC_LogDefault.Write("Variable name length > ESMF_MAXSTR",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_varName = ESMF_MAXSTR;
-    } else if (len_varName < 0) {
-      ESMC_LogDefault.Write("Negative variable name length",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_varName = 0;
-    }
-    if (len_varName > 0) {
-      // The user passed in the optional variable name
-      strncpy(varName, variableName, len_varName);
-      varName[len_varName] = '\0';
-    } else {
-      varName[0] = '\0';
-    }
+    // except for timeslice. For character variables, create c++ string copies.
+
+std::cerr << ESMC_METHOD << ": converting strings" << endl;
+    string fileName (file, 0, ESMC_F90lentrim (file, file_l));
+
+    string varName;
+    if (*len_variableName > 0)
+      varName = string (variableName, 0,
+        ESMC_F90lentrim (variableName, *len_variableName));
 
     overwriteflag = (*opt_overwriteflag == ESMF_TRUE);
     // Call into the actual C++ method wrapped inside LogErr handling
-    localrc = (*array)->write(fileName, varName,
+std::cerr << ESMC_METHOD << ": calling write method" << endl;
+    localrc = (*array)->write(fileName.c_str(), varName.c_str(),
                               &overwriteflag, status, timeslice, iofmt);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN_X(c_esmc_arrayread)(ESMCI::Array **array,
-                               char *file, int *len_file,
+                               char *file,
                                char *variableName, int *len_variableName,
                                int *timeslice,
-                               ESMC_IOFmt_Flag *iofmt, int *rc) {
+                               ESMC_IOFmt_Flag *iofmt, int *rc,
+                               ESMCI_FortranStrLenArg file_l,
+                               ESMCI_FortranStrLenArg varname_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayread()"
     // Initialize return code; assume routine not implemented
@@ -674,45 +650,17 @@ extern "C" {
       *rc = ESMC_RC_NOT_IMPL;
     }
 
-    // Create NULL-terminated C strings for string inputs
-    // helper variable
-    char fileName[ESMF_MAXSTR + 1];
-    int len_fileName = *len_file;
-    if (len_fileName > ESMF_MAXSTR) {
-      ESMC_LogDefault.Write("File name length > ESMF_MAXSTR",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_fileName = ESMF_MAXSTR;
-    } else if (len_fileName < 0) {
-      ESMC_LogDefault.Write("Negative file name length",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_fileName = 0;
-    }
-    if (len_fileName > 0) {
-      strncpy(fileName, file, len_fileName);
-      fileName[len_fileName] = '\0';
-    } else {
-      fileName[0] = '\0';
-    }
-    char varName[ESMF_MAXSTR + 1];
-    int len_varName = *len_variableName;
-    if (len_varName > ESMF_MAXSTR) {
-      ESMC_LogDefault.Write("Variable name length > ESMF_MAXSTR",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_varName = ESMF_MAXSTR;
-    } else if (len_varName < 0) {
-      ESMC_LogDefault.Write("Negative variable name length",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_varName = 0;
-    }
-    if (len_varName > 0) {
-      // The user passed in the optional variable name
-      strncpy(varName, variableName, len_varName);
-      varName[len_varName] = '\0';
-    } else {
-      varName[0] = '\0';
-    }
+    //  For character variables, create c++ string copies.
+
+    string fileName (file, 0, ESMC_F90lentrim (file, file_l));
+
+    string varName;
+    if (*len_variableName > 0)
+      varName = string (variableName, 0,
+        ESMC_F90lentrim (variableName, *len_variableName));
+
     // Call into the actual C++ method wrapped inside LogErr handling
-    localrc = (*array)->read(fileName, varName, timeslice, iofmt);
+    localrc = (*array)->read(fileName.c_str(), varName.c_str(), timeslice, iofmt);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));
   }

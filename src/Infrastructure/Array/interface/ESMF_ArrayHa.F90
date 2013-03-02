@@ -580,7 +580,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     ! Local vars
     integer              :: localrc              ! local return code
-    integer              :: len_fileName         ! helper variable
     integer              :: len_varName          ! helper variable
 
     ! Initialize return code; assume routine not implemented
@@ -592,16 +591,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
 
-    ! Get string lengths
-    len_fileName = len(trim(file))
+    ! Get string length
     if (present(variableName)) then
-      len_varName = len(trim(variableName))
+      len_varName = len_trim (variableName)
     else
       len_varName = 0
     endif
 
     ! Call into the C++ interface, which will call IO object
-    call c_esmc_arrayread(array, file, len_fileName,          &
+    call c_esmc_arrayread(array, file,                        &
         variableName, len_varName, timeslice, iofmt, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,        &
       ESMF_CONTEXT, rcToReturn=rc)) return

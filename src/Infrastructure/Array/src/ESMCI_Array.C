@@ -2580,8 +2580,8 @@ int Array::read(
 //
 // !ARGUMENTS:
 //
-  char  *file,                    // in    - name of file being read
-  char  *variableName,            // in    - optional variable name
+  const char  *file,              // in    - name of file being read
+  const char  *variableName,      // in    - optional variable name
   int   *timeslice,               // in    - timeslice option
   ESMC_IOFmt_Flag *iofmt          // in    - IO format flag
   ){
@@ -2650,8 +2650,8 @@ int Array::write(
 //
 // !ARGUMENTS:
 //
-  char  *file,                    // in    - name of file being written
-  char  *variableName,            // in    - optional variable name
+  const char  *file,              // in    - name of file being written
+  const char  *variableName,      // in    - optional variable name
   bool  *overwrite,               // in    - OK to overwrite file data
   ESMC_FileStatus_Flag *status,   // in    - file status flag
   int   *timeslice,               // in    - timeslice option
