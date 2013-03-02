@@ -181,7 +181,7 @@ typedef struct ESMC_ObjectID {
 //  and copies the contents of the src to the dst, padding the remainder
 //  with spaces and no null terminator.
 //
-int ESMC_F90lentrim (const char *src, ESMCI_FortranStrLenArg slen);
+size_t ESMC_F90lentrim (const char *src, ESMCI_FortranStrLenArg slen);
 char *ESMC_F90toCstring(const char *src, ESMCI_FortranStrLenArg slen);
 int  ESMC_F90toCstring(const char *src, ESMCI_FortranStrLenArg slen, char *dst, ESMCI_FortranStrLenArg dlen);
 int  ESMC_CtoF90string(const char *src, char *dst, ESMCI_FortranStrLenArg dlen);

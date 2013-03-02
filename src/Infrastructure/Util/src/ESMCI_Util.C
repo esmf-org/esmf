@@ -235,31 +235,31 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 // !IROUTINE:  ESMC_F90lentrim - Returns the trimmed length of a F90 string
 //
 // !INTERFACE:
-    int ESMC_F90lentrim (
+    size_t ESMC_F90lentrim (
 //
 // !RETURN VALUE:
 //  Returns the length of a Fortran character string, minus trailing blanks.
-//  Analguous to the LEN_TRIM intrinsic.
+//  Analguous to the Fortran LEN_TRIM intrinsic.  Return type is size_t for
+//  compatibility with the C++ string constructor and other places where
+//  string lengths are needed.
 // 
 // !ARGUMENTS:
     const char *src,                // in - Fortran character string
     ESMCI_FortranStrLenArg slen) {   // in - length of the string
 //EOPI
 
-      if (slen > 0) {
-	ESMCI_FortranStrLenArg i = slen-1;
+      if (slen == 0) return 0;
+      if (src == NULL) return 0;
 
-	// the loop is written this way because ESMCI_FortranStrLenArg,
-	// which could be size_t on some systems, might be unsigned.
-	do {
-	  if (src[i] != ' ') break;
-	} while (i-- != 0);
+      ESMCI_FortranStrLenArg i = slen-1;
 
-	return i+1;
+      // the loop is written this way because ESMCI_FortranStrLenArg,
+      // which could be size_t on some systems, might be unsigned.
+      do {
+	if (src[i] != ' ') break;
+      } while (i-- != 0);
 
-      } else
-	return 0;
-
+      return i+1;
     }
 
 //-----------------------------------------------------------------------------
