@@ -618,7 +618,6 @@ extern "C" {
     // The Fortran interface always sets the flags and optional variables
     // except for timeslice. For character variables, create c++ string copies.
 
-std::cerr << ESMC_METHOD << ": converting strings" << endl;
     string fileName (file, 0, ESMC_F90lentrim (file, file_l));
 
     string varName;
@@ -628,7 +627,6 @@ std::cerr << ESMC_METHOD << ": converting strings" << endl;
 
     overwriteflag = (*opt_overwriteflag == ESMF_TRUE);
     // Call into the actual C++ method wrapped inside LogErr handling
-std::cerr << ESMC_METHOD << ": calling write method" << endl;
     localrc = (*array)->write(fileName.c_str(), varName.c_str(),
                               &overwriteflag, status, timeslice, iofmt);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
