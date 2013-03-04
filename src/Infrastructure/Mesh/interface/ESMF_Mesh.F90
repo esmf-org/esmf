@@ -1587,6 +1587,7 @@ end function ESMF_MeshCreateFromFile
     type(ESMF_FileFormat_Flag)          :: filetypelocal
     integer                             :: coordDim
     logical                             :: convertToDeg
+    logical                             :: haveUserMask
     logical                             :: haveMask
     logical 				:: localAddUserArea
     logical				:: localAddMask
@@ -1637,7 +1638,7 @@ end function ESMF_MeshCreateFromFile
  
     if (filetypelocal == ESMF_FILEFORMAT_ESMFMESH) then
        ! Get coordDim
-       call ESMF_EsmfInq(filename,coordDim=coordDim, haveMask=haveMask, rc=localrc)
+       call ESMF_EsmfInq(filename,coordDim=coordDim, haveMask=haveUserMask, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1649,7 +1650,7 @@ end function ESMF_MeshCreateFromFile
        endif
 
        ! Get information from file
-       if (haveMask) then
+       if (haveUserMask) then
 	if (localAddUserArea) then
            call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, elementArea=elementArea, &
@@ -1675,7 +1676,7 @@ end function ESMF_MeshCreateFromFile
     elseif (filetypelocal == ESMF_FILEFORMAT_UGRID) then
        ! For now assume that we're 2D
        coordDim=2
-       haveMask = .false.       
+       haveUserMask = .false.       
        ! Get information from file
        call ESMF_GetMeshFromUGridFile(filename, meshname, nodeCoords, elementConn, &
                                    elmtNum, startElmt, convertToDeg=.true., rc=localrc)
@@ -1698,7 +1699,7 @@ end function ESMF_MeshCreateFromFile
 	  do i=1,ElemCnt
 	    if (varbuffer(i) == missingvalue) elementMask(i)=0
           enddo
-          haveMask = .true.
+          haveUserMask = .true.
 	  deallocate(varbuffer)
 	endif 
     else
@@ -1884,8 +1885,14 @@ end function ESMF_MeshCreateFromFile
     allocate (ElemId(TotalElements))
     allocate (ElemType(TotalElements))
     allocate (ElemConn(TotalConnects))
-    if (haveMask) allocate (ElemMask(TotalElements))
     if (localAddUserArea) allocate(ElemArea(TotalElements))
+
+    ! Allocate mask if the user wants one
+    haveMask=.false.
+    if (haveUserMask) then 
+       allocate (ElemMask(TotalElements))
+       haveMask=.true.
+    endif
 
     ! figure out if there are split elements globally
     !! Fake logical allreduce .or. with MAX
@@ -1913,8 +1920,15 @@ end function ESMF_MeshCreateFromFile
        Mesh%origElemStart=startElmt  ! position of first element
        Mesh%origElemCount=ElemCnt
     endif
-    
-    
+
+    ! Allocate a mask even if the user doesn't want one, if we have split elements 
+    if (existSplitElems .and. .not. haveUserMask) then
+       allocate (ElemMask(TotalElements))
+       haveMask=.true.
+       ElemMask(:)=1  ! default to nothing masked out
+    endif    
+
+
     ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
     ! element IDs will be from startElmt to startElmt+ElemCnt-1
     ! The ElemConn() contains the four corner node IDs for each element and it is organized
@@ -1938,7 +1952,7 @@ end function ESMF_MeshCreateFromFile
                 ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
              end do
              if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
-	     if (haveMask) ElemMask(ElemNo) = elementMask(j)
+	     if (haveUserMask) ElemMask(ElemNo) = elementMask(j)
 	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
              ElemNo=ElemNo+1
              ConnNo=ConnNo+3
@@ -1949,7 +1963,7 @@ end function ESMF_MeshCreateFromFile
                 ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
              end do
              if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
-	     if (haveMask) ElemMask(ElemNo) = elementMask(j)
+	     if (haveUserMask) ElemMask(ElemNo) = elementMask(j)
 	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
              ElemNo=ElemNo+1
              ConnNo=ConnNo+4
@@ -2002,9 +2016,10 @@ end function ESMF_MeshCreateFromFile
                 ElemConn (ConnNo+2) = NodeUsed(elementConn(triInd(ti+2)+1,j))
                 ElemConn (ConnNo+3) = NodeUsed(elementConn(triInd(ti+3)+1,j))
                 if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
- 	        if (haveMask) ElemMask(ElemNo) = elementMask(j)
-              !!!!!! Need to calculate the portion of the area for the split triangle !!!!!!
-  	        if (localAddUserArea) then 
+ 	        if (haveUserMask) ElemMask(ElemNo) = elementMask(j)
+                
+                ! Calculate area of sub-triangle
+  	        !if (localAddUserArea) then 
                    if (spatialDim==2) then
 		     tk=0
 		     do i=1,3
@@ -2027,7 +2042,13 @@ end function ESMF_MeshCreateFromFile
                    call c_ESMC_get_polygon_area(spatialDim, nEdges, polyCoords, area(k), localrc) 
 	           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         	          ESMF_CONTEXT, rcToReturn=rc)) return
-	        endif
+                ! endif
+
+                ! If the area of the subtriangle is 0.0 mask it out
+                if (area(k)==0.0) then
+                   ElemMask(ElemNo)=0
+                endif
+
                 ElemNo=ElemNo+1
                 ConnNo=ConnNo+3
                 ti=ti+3
@@ -2068,7 +2089,7 @@ end function ESMF_MeshCreateFromFile
              ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
           end do
           ElemId(ElemNo) = myStartElmt+ElemNo
-          if (haveMask) ElemMask(ElemNo) = elementMask(j)
+          if (haveUserMask) ElemMask(ElemNo) = elementMask(j)
           if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
           ElemNo=ElemNo+1
           ConnNo=ConnNo+elmtNum(j)
@@ -2108,7 +2129,9 @@ end function ESMF_MeshCreateFromFile
 
     deallocate(NodeUsed, NodeId, NodeCoords1D, NodeOwners, NodeOwners1)
     deallocate(ElemId, ElemType, ElemConn)
-    if (haveMask) deallocate(elementMask, ElemMask) 
+    if (haveUserMask) deallocate(elementMask) 
+    if (haveMask) deallocate(ElemMask) 
+     
     if (localAddUserArea) deallocate(elementArea, ElemArea)
     ESMF_MeshCreateFromUnstruct = Mesh
 

@@ -864,7 +864,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
-           ! call ESMF_MeshWrite(srcMesh, "srcMesh", rc)
+           !call ESMF_MeshWrite(srcMesh, "srcMesh", rc)
            call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
            srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
            if (ESMF_LogFoundError(localrc, &
@@ -881,6 +881,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, convert3D=.true., &
                     meshname = trim(srcMeshName), rc=localrc)
 	endif
+        !call ESMF_MeshWrite(srcMesh, "srcMesh", rc)
         if (ESMF_LogFoundError(localrc, &
                                ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rcToReturn=rc)) return
