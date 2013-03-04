@@ -17,7 +17,7 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <cstring>
+#include <string>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_VM.h"
@@ -28,6 +28,8 @@
 
 #include "ESMCI_LogErr.h"                  // for LogErr
 #include "ESMCI_LogMacros.inc"
+
+using namespace std;
 
 //------------------------------------------------------------------------------
 //BOP
@@ -91,7 +93,8 @@ extern "C" {
 
   void FTN_X(c_esmc_ioaddarray)(ESMCI::IO **ptr, ESMCI::Array **array,
                                 char *opt_variableName, int *len_variableName,
-                                int *rc) {
+                                int *rc,
+                                ESMCI_FortranStrLenArg varname_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_ioaddarray()"
     // Initialize return code; assume routine not implemented
@@ -100,26 +103,11 @@ extern "C" {
     }
     int localrc = ESMC_RC_NOT_IMPL;
     // helper variable
-    char varName[ESMF_MAXSTR + 1];
-    int len_varName = *len_variableName;
-    if (len_varName > ESMF_MAXSTR) {
-      ESMC_LogDefault.Write("Variable name length > ESMF_MAXSTR",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_varName = ESMF_MAXSTR;
-    } else if (len_varName < 0) {
-      ESMC_LogDefault.Write("Negative variable name length",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_varName = 0;
-    }
-    if (len_varName > 0) {
-      // The user passed in the optional variable name
-      strncpy(varName, opt_variableName, len_varName);
-      varName[len_varName] = '\0';
-    } else {
-      varName[0] = '\0';
-    }
+    string varName;
+    if (*len_variableName > 0)
+       varName = string (opt_variableName, 0, *len_variableName);
     // call into C++
-    localrc = (*ptr)->addArray(*array, varName);
+    localrc = (*ptr)->addArray(*array, varName.c_str());
     ESMC_LogDefault.MsgFoundError(localrc,
                                   ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));
@@ -134,7 +122,9 @@ extern "C" {
                              ESMC_Logical *opt_overwrite,
                              ESMC_FileStatus_Flag *opt_status,
                              int *timeslice,
-                             char *schema, int *len_schema, int *rc) {
+                             char *schema, int *len_schema, int *rc,
+                             ESMCI_FortranStrLenArg file_l,
+                             ESMCI_FortranStrLenArg schema_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_iowrite()"
     // Initialize return code; assume routine not implemented
@@ -143,28 +133,12 @@ extern "C" {
     }
     int localrc = ESMC_RC_NOT_IMPL;
     // helper variable
-    char fileName[ESMF_MAXSTR + 1];
-    int len_fileName = *len_file;
+    string fileName (file, 0, *len_file);
+
     ESMC_IOFmt_Flag iofmt = ESMF_IOFMT_NETCDF;             // default
     bool overwrite = false;                                // default
     ESMC_FileStatus_Flag status = ESMC_FILESTATUS_UNKNOWN; // default
 
-    if (len_fileName > ESMF_MAXSTR) {
-      ESMC_LogDefault.Write("File name length > ESMF_MAXSTR",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_fileName = ESMF_MAXSTR;
-    } else if (len_fileName < 0) {
-      ESMC_LogDefault.Write("Negative file name length",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_fileName = 0;
-    }
-    if (len_fileName > 0) {
-      // The user passed in the optional variable name
-      strncpy(fileName, file, len_fileName);
-      fileName[len_fileName] = '\0';
-    } else {
-      fileName[0] = '\0';
-    }
     if (ESMC_NOT_PRESENT_FILTER(opt_iofmt) != ESMC_NULL_POINTER) {
       iofmt = *opt_iofmt;
     }
@@ -183,7 +157,7 @@ extern "C" {
     }
 
     // Call into the actual C++ method
-    localrc = (*ptr)->write(fileName, iofmt, overwrite, status, timeslice);
+    localrc = (*ptr)->write(fileName.c_str(), iofmt, overwrite, status, timeslice);
     ESMC_LogDefault.MsgFoundError(localrc,
                                   ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));
@@ -193,7 +167,9 @@ extern "C" {
                             char *file, int *len_file,
                             ESMC_IOFmt_Flag *opt_iofmt,
                             int *opt_timeslice,
-                            char *schema, int *len_schema, int *rc) {
+                            char *schema, int *len_schema, int *rc,
+                            ESMCI_FortranStrLenArg file_l,
+                            ESMCI_FortranStrLenArg schema_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_ioread()"
     // Initialize return code; assume routine not implemented
@@ -202,27 +178,11 @@ extern "C" {
     }
     int localrc = ESMC_RC_NOT_IMPL;
     // helper variables
-    char fileName[ESMF_MAXSTR + 1];
+    string fileName (file, 0, *len_file);
     ESMC_IOFmt_Flag iofmt = ESMF_IOFMT_NETCDF; // default
     int timeslice = 0; // default
 
-    // Create NULL-terminated C strings for string inputs
-    int len_fileName = *len_file;
-    if (len_fileName > ESMF_MAXSTR) {
-      ESMC_LogDefault.Write("File name length > ESMF_MAXSTR",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_fileName = ESMF_MAXSTR;
-    } else if (len_fileName < 0) {
-      ESMC_LogDefault.Write("Negative file name length",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_fileName = 0;
-    }
-    if (len_fileName > 0) {
-      strncpy(fileName, file, len_fileName);
-      fileName[len_fileName] = '\0';
-    } else {
-      fileName[0] = '\0';
-    }
+
     if (ESMC_NOT_PRESENT_FILTER(opt_iofmt) != ESMC_NULL_POINTER) {
       iofmt = *opt_iofmt;
     }
@@ -236,7 +196,7 @@ extern "C" {
     }
 
     // Call into the actual C++ method
-    localrc = (*ptr)->read(fileName, iofmt, &timeslice);
+    localrc = (*ptr)->read(fileName.c_str(), iofmt, &timeslice);
     ESMC_LogDefault.MsgFoundError(localrc,
                                   ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));

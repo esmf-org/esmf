@@ -295,7 +295,7 @@ contains
 
     !   invoke C to C++ entry point
     if (present(variableName)) then
-      len_varName = len(trim(variableName))
+      len_varName = len_trim(variableName)
     else
       len_varName = 0
     endif
@@ -368,7 +368,7 @@ contains
 
     ! Grab the schema string length for the C++ level
     if (present(schema)) then
-      len_schema = len(trim(schema))
+      len_schema = len_trim(schema)
     else
       len_schema = 0
     endif
@@ -486,11 +486,11 @@ contains
     if ( present(iofmt)) opt_iofmt = iofmt
 
     ! Grab the filename length for the C++ level
-    len_fileName = len(trim(fileName))
+    len_fileName = len_trim(fileName)
 
     ! Grab the schema string length for the C++ level
     if (present(schema)) then
-      len_schema = len(trim(schema))
+      len_schema = len_trim(schema)
     else
       len_schema = 0
     endif
