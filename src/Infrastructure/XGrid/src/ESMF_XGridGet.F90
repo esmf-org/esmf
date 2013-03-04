@@ -482,7 +482,7 @@ integer, intent(out), optional              :: rc
     endif
     
     if (present(name)) then
-        call c_ESMC_GetName(xgtypep%base, name, localrc)
+        call ESMF_GetName(xgtypep%base, name, localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return

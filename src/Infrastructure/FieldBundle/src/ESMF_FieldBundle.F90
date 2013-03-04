@@ -1343,7 +1343,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     deallocate(l_fieldList)
 
     if (present(name)) then
-        call c_ESMC_GetName(fieldbundle%this%base, name, localrc)
+        call ESMF_GetName(fieldbundle%this%base, name, localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return

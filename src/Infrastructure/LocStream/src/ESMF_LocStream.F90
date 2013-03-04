@@ -2107,7 +2107,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(name)) then
-        call c_ESMC_GetName(lstypep%base, name, localrc)
+        call ESMF_GetName(lstypep%base, name, localrc)
         if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3273,7 +3273,7 @@ end subroutine ESMF_LocStreamGetBounds
         ! print option is not implemented, but it has to pass to c_ESMC_BasePrint()
         defaultopts = "brief"
 
-        call c_ESMC_GetName(lstypep%base, name, localrc)
+        call ESMF_GetName(lstypep%base, name, localrc)
         if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return

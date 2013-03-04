@@ -159,7 +159,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
 
-    call c_ESMC_GetName(fp%base, name, localrc)
+    call ESMF_GetName(fp%base, name, localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -296,7 +296,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
       fp => field%ftypep
 
-      call c_ESMC_GetName(fp%base, name, localrc)
+      call ESMF_GetName(fp%base, name, localrc)
       if (ESMF_LogFoundError(localrc, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return

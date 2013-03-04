@@ -536,7 +536,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     if (present(name)) then
-        call c_ESMC_GetName(ftype%base, name, localrc)
+        call ESMF_GetName(ftype%base, name, localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
