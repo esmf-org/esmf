@@ -35,6 +35,7 @@ program ESMF_RegridWeightGenApp
       integer            :: commandbuf2(14)
       integer            :: ind, pos
       logical            :: largeFileFlag
+      logical            :: netcdf4FileFlag
       logical 		 :: ignoreUnmapped, userAreaFlag
       type(ESMF_UnmappedAction_Flag) :: unmappedaction
       logical            :: srcMissingValue, dstMissingValue
@@ -360,6 +361,14 @@ program ESMF_RegridWeightGenApp
 	   largeFileFlag = .false.
         end if
 
+	! --netcdf4 for weight file format
+ 	call ESMF_UtilGetArgIndex('--netcdf4', argindex=ind, rc=rc)
+	if (ind /= -1) then
+	   netcdf4FileFlag = .true.
+	else
+	   netcdf4FileFlag = .false.
+        end if
+
         ! --user_area - to use user-defined area for the cells
  	call ESMF_UtilGetArgIndex('--user_areas', argindex=ind, rc=rc)
 	if (ind /= -1) then
@@ -475,6 +484,7 @@ program ESMF_RegridWeightGenApp
         if (useSrcCoordVar) commandbuf2(11) = 1
         if (useDstCoordVar) commandbuf2(12) = 1
         if (largeFileFlag) commandbuf2(13) = 1
+        if (netcdf4FileFlag) commandbuf2(14) = 1
         
         call ESMF_VMBroadcast(vm, commandbuf2, 14, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
@@ -568,6 +578,11 @@ program ESMF_RegridWeightGenApp
         else
            largeFileFlag = .false.
         end if
+        if (commandbuf2(14)==1) then
+           netcdf4FileFlag = .true.
+        else
+           netcdf4FileFlag = .false.
+        end if
      endif
 
      if (trim(method) .eq. 'bilinear') then
@@ -597,6 +612,7 @@ program ESMF_RegridWeightGenApp
           useSrcCoordFlag = useSrcCoordVar, useDstCoordFlag = useDstCoordVar, &
 	  srcCoordinateVars = srcCoordNames, dstCoordinateVars = dstCoordNames, &
 	  useUserAreaFlag = userAreaFlag, largefileFlag = largeFileFlag, &
+	  netcdf4FileFlag = netcdf4FileFlag, &
 	  verboseFlag = .true., rc = rc)
 
       if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
@@ -644,6 +660,7 @@ subroutine PrintUsage()
      print *, "                      -- src_regional"
      print *, "                      -- dst_regional"
      print *, "                      --64bit_offset"
+     print *, "                      --netcdf4"
      print *, "                      --src_meshname src_mesh_variable"
      print *, "                      --dst_meshname dst_mesh_variable"
      print *, "                      --src_missingvalue src_var_name"
@@ -689,6 +706,9 @@ subroutine PrintUsage()
      print *, "--64bit_offset  - an optional argument specifying the output weight file is in"
      print *, "             NetCDF 64-bit offset format.  This option only works with NetCDF library"
      print *, "             version 3.6 and above"
+     print *, "--netcdf4  - an optional argument specifying the output weight file is in"
+     print *, "             the NetCDF4 offset format. This option only works with NetCDF library"
+     print *, "             version 4.1 and above"
      print *, "--src_meshname  - required if the source grid type is UGRID. It defines the dummy"
      print *, "             variable name that has all the topology information stored in its"
      print *, "             attributes."

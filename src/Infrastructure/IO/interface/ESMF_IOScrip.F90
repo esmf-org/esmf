@@ -596,7 +596,7 @@ end subroutine ESMF_ScripGetVar
 subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 				      srcFile, dstFile, srcFileType, dstFileType,&
 				      title, method, srcArea, dstArea, &
-				      srcFrac, dstFrac, largeFileFlag, &
+				      srcFrac, dstFrac, largeFileFlag, netcdf4FileFlag, &
 				      srcmeshname, dstmeshname, & 
 			              srcMissingValue, dstMissingValue, &
 				      srcvarname, dstvarname, &
@@ -614,7 +614,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       type(ESMF_RegridMethod_Flag), optional, intent(in) :: method
       real(ESMF_KIND_R8),optional, intent(in) :: srcArea(:),dstArea(:)
       real(ESMF_KIND_R8),optional, intent(in) :: srcFrac(:), dstFrac(:)
-      logical, optional, intent(in) :: largeFileFlag
+      logical, optional, intent(in) :: largeFileFlag, netcdf4FileFlag
       character(len=*), optional, intent(in) :: srcmeshname, dstmeshname
       logical, optional, intent(in) :: srcMissingValue, dstMissingValue
       character(len=*), optional, intent(in) :: srcvarname, dstvarname
@@ -656,6 +656,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       character(len=256) :: errmsg
       character(len=20) :: varStr
       type(ESMF_Logical) :: largeFileFlaglocal
+      type(ESMF_Logical) :: netcdf4FileFlaglocal
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
@@ -673,14 +674,20 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       else 
 	dstFileTypeLocal = ESMF_FILEFORMAT_SCRIP
       endif	
-
+ 
       if (present(largeFileFlag)) then
 	largeFileFlaglocal = largeFileFlag
       else
         largeFileFlaglocal = .false.
       endif
 
-      call ESMF_VMGetCurrent(vm, rc=rc)
+      if (present(netcdf4FileFlag)) then
+	netcdf4FileFlaglocal = netcdf4FileFlag
+      else
+        netcdf4FileFlaglocal = .false.
+      endif
+
+     call ESMF_VMGetCurrent(vm, rc=rc)
       if (rc /= ESMF_SUCCESS) return
 
       ! set up local pet info
@@ -716,7 +723,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
          endif
          ! Create output file and create dimensions and variables
 	 call c_nc_create(wgtFile, NF90_CLOBBER, &
-		largeFileFlaglocal, ncid, status)
+		largeFileFlaglocal, netcdf4FileFlaglocal, ncid, status)
 	 if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
 		ESMF_CONTEXT, rcToReturn=rc)) return
          

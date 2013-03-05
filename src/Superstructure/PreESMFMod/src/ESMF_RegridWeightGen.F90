@@ -75,7 +75,8 @@ subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, keywordEnforcer, &
     dstMissingvalueFlag, dstMissingvalueVar, &
     useSrcCoordFlag, srcCoordinateVars, &
     useDstCoordFlag, dstCoordinateVars, &
-    useUserAreaFlag,  largefileFlag, verboseFlag, rc)
+    useUserAreaFlag, largefileFlag, &
+    netcdf4fileFlag, verboseFlag, rc)
 
 ! !ARGUMENTS:
 
@@ -103,6 +104,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   character(len=*),             intent(in),  optional :: dstCoordinateVars(:)
   logical,                      intent(in),  optional :: useUserAreaFlag
   logical,                      intent(in),  optional :: largefileFlag
+  logical,                      intent(in),  optional :: netcdf4fileFlag
   logical,                      intent(in),  optional :: verboseFlag
   integer,                      intent(out), optional :: rc
 
@@ -220,6 +222,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[largefileFlag]}]
 !     If .TRUE., the output weight file is in NetCDF 64bit offset format. 
 !     The default is .FALSE.
+!   \item [{[netcdf4fileFlag]}]
+!     If .TRUE., the output weight file is in NetCDF4 file format. 
+!     The default is .FALSE.
 !   \item [{[verboseFlag]}]
 !     If .TRUE., it will print summary information about the regrid parameters,
 !     default to .FALSE.
@@ -236,6 +241,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer            :: localPoleNPnts
       logical            :: localUserAreaFlag
       logical            :: localLargefileFlag
+      logical            :: localNetcdf4fileFlag
       logical            :: localVerboseFlag
       integer            :: localrc
       type(ESMF_VM)      :: vm
@@ -301,6 +307,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       srcMissingValue = .false.
       dstMissingValue = .false.
       localLargeFileFlag = .false.
+      localNetcdf4FileFlag = .false.
       localUserAreaflag = .false.
       useSrcCoordVar = .false.
       useDstCoordVar = .false.
@@ -455,6 +462,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (present(largefileFlag)) then
 	   localLargeFileFlag = largefileFlag
+      endif
+
+      if (present(netcdf4fileFlag)) then
+	   localNetcdf4FileFlag = netcdf4fileFlag
       endif
 
       if (present(useUserAreaFlag)) then
@@ -723,6 +734,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
 	  if (localLargeFileFlag) then
 	     print *, "  Output weight file in 64bit offset NetCDF file format"
+          endif
+	  if (localNetcdf4FileFlag) then
+	     print *, "  Output weight file in NetCDF4 file format"
           endif
 	  if (localUserAreaFlag) then
 	     print *, "  Use user defined cell area for both the source and destination grids"
@@ -1230,6 +1244,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	           dstFileType=localDstFileType, method = localRegridMethod, &
                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
 		   dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+		   netcdf4FileFlag = localNetcdf4FileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
@@ -1240,6 +1255,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	           dstFileType=localDstFileType, method = localRegridMethod, &
                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
 		   dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+		   netcdf4FileFlag = localNetcdf4FileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
@@ -1250,6 +1266,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	           dstFileType=localDstFileType, method = localRegridMethod, &
                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
 		   dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+		   netcdf4FileFlag = localNetcdf4FileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
@@ -1260,6 +1277,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	           dstFileType=localDstFileType, method = localRegridMethod, &
                    srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
 		   dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+		   netcdf4FileFlag = localNetcdf4FileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)
@@ -1273,6 +1291,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
 	           dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
 		   largeFileFlag=localLargeFileFlag, &
+		   netcdf4FileFlag = localNetcdf4FileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
@@ -1282,6 +1301,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
 	           dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
 		   largeFileFlag=localLargeFileFlag, &
+		   netcdf4FileFlag = localNetcdf4FileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
@@ -1291,6 +1311,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
 	           dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
 		   largeFileFlag=localLargeFileFlag, &
+		   netcdf4FileFlag = localNetcdf4FileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, &
@@ -1300,6 +1321,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	           srcFile=srcfile, dstFile=dstfile, srcFileType=localSrcFileType,&
 	           dstFileType=localDstFileType, method = localRegridMethod, dstFrac=dstFrac, &
 		   largeFileFlag=localLargeFileFlag, &
+		   netcdf4FileFlag = localNetcdf4FileFlag, &
 		   srcmeshname = srcMeshName, dstmeshname = dstMeshName, &
 		   srcMissingValue = srcMissingValue, dstMissingValue=dstMissingValue, &
 	           srcvarname = srcMissingvalueVar, dstvarname=dstMissingvalueVar, rc=localrc)

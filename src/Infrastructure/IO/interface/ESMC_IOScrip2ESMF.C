@@ -332,11 +332,13 @@ extern "C" {
 			  char *infile,
 			  int *mode,
 			  ESMC_Logical *largefileflag,
+			  ESMC_Logical *netcdf4fileflag,
 			  int *ncid,
 			  int *rc,
 			  ESMCI_FortranStrLenArg infileLen)
   {
     bool oldversion = false;
+    bool nc3version = false;
     int status;
     int id;
     char *c_infile;
@@ -346,6 +348,11 @@ extern "C" {
 #ifndef NC_64BIT_OFFSET
     oldversion = true;
 #define NC_64BIT_OFFSET 0
+#endif
+
+#ifndef NC_NETCDF4
+    nc3version = true;
+#define NC_NETCDF4 0
 #endif
 
     *rc = 1;
@@ -358,6 +365,11 @@ extern "C" {
       return; // bail out
     }
 
+    if (*netcdf4fileflag == ESMF_TRUE && nc3version) {
+      fprintf(stderr, "ERROR: NetCDF 4 file format is not supported in this version of NetCDF library\n");
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB,"ERROR: NetCDF 4 file format is not supported in this version of NetCDF library",rc);
+      return; //bail out
+    }
     if (*largefileflag == ESMF_TRUE && oldversion) {
       fprintf(stderr, "ERROR: 64 bit file format is not supported in this version of NetCDF library\n");
       ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB,"ERROR: 64 bit file format is not supported in this version of NetCDF library",rc);
@@ -366,8 +378,8 @@ extern "C" {
     if (*largefileflag == ESMF_TRUE) {
       status = nc_create(c_infile, *mode | NC_64BIT_OFFSET, &id);
       if (handle_error(status)) return; //bail out
-    } else {
-      status = nc_create(c_infile, *mode, &id);
+    } else if (*netcdf4fileflag == ESMF_TRUE) {
+      status = nc_create(c_infile, *mode | NC_NETCDF4, &id);
       if (handle_error(status)) return; //bail out
     }
     *rc = 0;
@@ -621,7 +633,7 @@ void FTN_X(c_convertscrip)(
 
   if (*dualflag == 0) {
     // create the output netcdf file
-    status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
+    status = nc_create(c_outfile, NC_CLOBBER|NC_NETCDF4, &ncid2);
     if (handle_error(status)) return; // bail out;
 
     // define the dimensions
@@ -904,7 +916,7 @@ void FTN_X(c_convertscrip)(
   // now write out the dual mesh in a netcdf file
   // create the output netcdf file
 
-  status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
+  status = nc_create(c_outfile, NC_CLOBBER|NC_NETCDF4, &ncid2);
   if (handle_error(status)) return; // bail out;
 
   // define the dimensions
