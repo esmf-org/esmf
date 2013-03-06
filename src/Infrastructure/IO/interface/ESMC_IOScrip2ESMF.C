@@ -381,6 +381,9 @@ extern "C" {
     } else if (*netcdf4fileflag == ESMF_TRUE) {
       status = nc_create(c_infile, *mode | NC_NETCDF4, &id);
       if (handle_error(status)) return; //bail out
+    } else {
+      status = nc_create(c_infile, *mode, &id);
+      if (handle_error(status)) return; //bail out
     }
     *rc = 0;
     *ncid = id;
