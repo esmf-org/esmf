@@ -365,21 +365,21 @@ extern "C" {
       return; // bail out
     }
 
-    if (*netcdf4fileflag == ESMF_TRUE && nc3version) {
-      fprintf(stderr, "ERROR: NetCDF 4 file format is not supported in this version of NetCDF library\n");
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB,"ERROR: NetCDF 4 file format is not supported in this version of NetCDF library",rc);
-      return; //bail out
-    }
-    if (*largefileflag == ESMF_TRUE && oldversion) {
-      fprintf(stderr, "ERROR: 64 bit file format is not supported in this version of NetCDF library\n");
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB,"ERROR: 64 bit file format is not supported in this version of NetCDF library",rc);
-      return; //bail out
-    }
     if (*largefileflag == ESMF_TRUE) {
       status = nc_create(c_infile, *mode | NC_64BIT_OFFSET, &id);
+      if (status == NC_ENOTNC) {
+	fprintf(stderr, "ERROR: 64 bit file format is not supported in this version of NetCDF library\n");
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB,"ERROR: 64 bit file format is not supported in this version of NetCDF library",rc);
+	return; //bail out
+      }
       if (handle_error(status)) return; //bail out
     } else if (*netcdf4fileflag == ESMF_TRUE) {
       status = nc_create(c_infile, *mode | NC_NETCDF4, &id);
+      if (status == NC_ENOTNC) {
+	fprintf(stderr, "ERROR: NetCDF4 file format is not supported in this version of NetCDF library\n");
+	ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB,"ERROR: NetCDF4 file format is not supported in this version of NetCDF library",rc);
+	return; //bail out
+      }
       if (handle_error(status)) return; //bail out
     } else {
       status = nc_create(c_infile, *mode, &id);
@@ -637,6 +637,9 @@ void FTN_X(c_convertscrip)(
   if (*dualflag == 0) {
     // create the output netcdf file
     status = nc_create(c_outfile, NC_CLOBBER|NC_NETCDF4, &ncid2);
+    if (status == NC_ENOTNC) {
+      status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
+    } 
     if (handle_error(status)) return; // bail out;
 
     // define the dimensions
@@ -920,6 +923,9 @@ void FTN_X(c_convertscrip)(
   // create the output netcdf file
 
   status = nc_create(c_outfile, NC_CLOBBER|NC_NETCDF4, &ncid2);
+  if (status == NC_ENOTNC) {
+    status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
+  }
   if (handle_error(status)) return; // bail out;
 
   // define the dimensions
