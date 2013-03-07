@@ -63,12 +63,9 @@ Driver component that drives model and connector components. The default is to u
   \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00 (see section \ref{IPD} for a precise definition), with the following mapping:
     \begin{itemize}
     \item IPDv00p1 = phase 1: ({\sc Required, NUOPC Provided})
-      \begin{itemize}
-      \item Complete self initialization and driving children's initialization sequence.
-      \end{itemize}
     \end{itemize}  
   \end{itemize}  
-\item phase 1: ({\sc Required, NUOPC Provided})
+\item phase 1: ({\sc NUOPC Provided}, suitable for: IPDv00p1)
   \begin{itemize}
   \item Allocate and initialize the internal state.
   \item If the internal clock is not yet set, set the default internal clock to be a copy of the incoming clock, if the incoming clock is valid.

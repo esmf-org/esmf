@@ -63,33 +63,27 @@ Model component with a default {\em explicit} time dependency. Each time the {\t
   \item Initialize the {\tt InitializePhaseMap} Attribute according to the NUOPC Initialize Phase Definition (IPD) version 00 (see section \ref{IPD} for a precise definition), with the following mapping:
     \begin{itemize}
     \item IPDv00p1 = phase 1: ({\sc Required, Implementor Provided})
-      \begin{itemize}
-      \item Advertise Fields in import and export States.
-      \end{itemize}
     \item IPDv00p2 = phase 2: ({\sc Required, Implementor Provided})
-      \begin{itemize}
-      \item Realize advertised Fields in import and export States.
-      \end{itemize}  
     \item IPDv00p3 = phase 3: ({\sc Required, NUOPC Provided})
-      \begin{itemize}
-      \item Additional initialization phase.
-      \end{itemize}
     \item IPDv00p4 = phase 4: ({\sc Required, NUOPC Provided})
-      \begin{itemize}
-      \item Additional initialization phase.
-      \end{itemize}
     \end{itemize}  
   \end{itemize}  
-\item phase 3: ({\sc Required, NUOPC Provided})
+\item phase 3: ({\sc NUOPC Provided}, suitable for: IPDv00p3, IPDv01p4, IPDv02p4)
   \begin{itemize}
   \item If the model internal clock is found to be not set, then set the model internal clock as a copy of the incoming clock. 
   \item {\it Optional specialization} to set the internal clock and/or alarms: {\tt label\_SetClock}.
   \item Check compatibility, ensuring all advertised import Fields are connected.
   \end{itemize}  
-\item phase 4: ({\sc Required, NUOPC Provided})
+\item phase 4: ({\sc NUOPC Provided}, suitable for: IPDv00p4, IPDv01p5)
   \begin{itemize}
   \item {\it Optional specialization} to initialize export Fields: {\tt label\_DataInitialize}
-  \item Time stamp Fields in import and export States for compatibility checking.
+  \item Time stamp Fields in export State for compatibility checking.
+  \end{itemize}    
+\item phase 5: ({\sc NUOPC Provided}, suitable for: IPDv02p5)
+  \begin{itemize}
+  \item {\it Optional specialization} to initialize export Fields: {\tt label\_DataInitialize}
+  \item Time stamp Fields in export State for compatibility checking.
+  \item Set Component metadata used to resolve initialize data dependencies.
   \end{itemize}    
 \end{itemize}
 
