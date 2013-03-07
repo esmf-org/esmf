@@ -556,12 +556,54 @@ void hex_shape_func::shape_grads(unsigned int npts, const ScalarT pcoord[], Scal
   }  // for j
 }
 
+#if 1
+bool hex_shape_func::is_in(const double pcoord[], double *dist) {
+  const double in_tol = 1e-10;
+  bool in=true;
+  double max_out[3]={0.0,0.0,0.0};
+
+  if (pcoord[0] < -1.0-in_tol) {
+    max_out[0]=-1.0 - pcoord[0];
+    in= false;
+  } else if (pcoord[0] > 1.0+in_tol) {
+    max_out[0]=pcoord[0] - 1.0;
+    in= false;
+  }
+
+  if (pcoord[1] < -1.0-in_tol) {
+    max_out[1]=-1.0 - pcoord[1];
+    in= false;
+  } else if (pcoord[1] > 1.0+in_tol) {
+    max_out[1]=pcoord[1] - 1.0;
+    in= false;
+  }
+
+  if (pcoord[2] < -1.0-in_tol) {
+    max_out[2]=-1.0 - pcoord[2];
+    in= false;
+  } else if (pcoord[2] > 1.0+in_tol) {
+    max_out[2]=pcoord[2] - 1.0;
+    in= false;
+  }
+
+  // Compute point distance from hex
+  if (dist) *dist=std::sqrt(max_out[0]*max_out[0]+max_out[1]*max_out[1]+max_out[2]*max_out[2]);
+
+  return in;
+}
+
+#else
+
 bool hex_shape_func::is_in(const double pcoord[], double *dist) {
   const double in_tol = 1e-10;
   if (pcoord[0] < -1.0-in_tol || pcoord[0] > 1.0+in_tol || pcoord[1] < -1.0-in_tol || pcoord[1] > 1.0+in_tol
    || pcoord[2] < -1.0-in_tol || pcoord[2] > 1.0+in_tol) return false;
   return true;
 }
+
+#endif
+
+
 
 const double hex_shape_func::ipoints[ndofs*pdim] = {
 -1,  -1,  -1,
