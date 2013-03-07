@@ -639,8 +639,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! fieldBundle. But for attribute hierarchy, we actually assume that all fields in
       ! the fieldBundle should be built on the same geombase object.
       !
+      ! 3/7/13
+      ! New behavior for geombase:
+      ! 1. FieldBundleSet() can always change the geombase object in a FieldBundle
+      ! 2. Add/AddReplace/Replace can  change the geombase object in a FieldBundle if it's not set
+      ! 3. Add/AddReplace/Replace can NOT change  geombase object in a FieldBundle after its set
+      !
       ! Attribute link
-      if(size(fieldList) .ge. 1) then
+      if(size(fieldList) .ge. 1 .and. (fieldbundle%this%status /= ESMF_FBSTATUS_GRIDSET) ) then
         ! setgeom links grid geombase automatically
         call ESMF_FieldBundleSetGeom(fieldbundle, fieldList(1), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -810,7 +816,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Attribute link
-    if(size(fieldList) .ge. 1) then
+    if(size(fieldList) .ge. 1 .and. (fieldbundle%this%status /= ESMF_FBSTATUS_GRIDSET) ) then
       ! setgeom links grid geombase automatically
       call ESMF_FieldBundleSetGeom(fieldbundle, fieldList(1), rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3627,7 +3633,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Attribute link
     fieldCount = size(fieldList)
-    if(fieldCount .ge. 1) then
+    if(fieldCount .ge. 1 .and. (fieldbundle%this%status /= ESMF_FBSTATUS_GRIDSET) ) then
       ! setgeom links grid geombase automatically
       call ESMF_FieldBundleSetGeom(fieldbundle, fieldList(1), rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3660,7 +3666,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleSetGrid"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldBundleSet - Associate a Grid with an empty FieldBundle
 ! 
 ! !INTERFACE:
@@ -3693,7 +3699,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !
-!EOPI
+!EOP
 
 
       integer :: status                           ! Error status
@@ -3742,7 +3748,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleSetMesh"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldBundleSet - Associate a Mesh with an empty FieldBundle
 ! 
 ! !INTERFACE:
@@ -3775,7 +3781,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !
-!EOPI
+!EOP
 
 
       integer :: status                           ! Error status
@@ -3817,7 +3823,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleSetLS"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldBundleSet - Associate a LocStream with an empty FieldBundle
 ! 
 ! !INTERFACE:
@@ -3849,7 +3855,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !
-!EOPI
+!EOP
 
 
       integer :: status                           ! Error status
@@ -3890,7 +3896,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldBundleSetXGrid"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldBundleSet - Associate a XGrid with an empty FieldBundle
 ! 
 ! !INTERFACE:
@@ -3922,7 +3928,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !
-!EOPI
+!EOP
 
       integer :: status                                ! Error status
       type(ESMF_FieldBundleType), pointer :: btype     ! internal data
