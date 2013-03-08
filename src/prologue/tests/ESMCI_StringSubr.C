@@ -46,7 +46,7 @@ extern "C" {
       int local_rc;
 
 
-      cout << "\n\n-- entering c_strings" << endl;
+      cout << "\n\n-- entering c_strings, slen = " << slen << endl;
 
       strncpy(tbuf, fstr, slen);
       tbuf[slen] = '\0';
