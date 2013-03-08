@@ -24,8 +24,7 @@ Licensed under the University of Illinois-NCSA License.
 #if defined (__cplusplus)
 // Typedef to match the data type of the 'hidden' string length
 // argument that Fortran uses when passing CHARACTER strings.
-// Absoft changes between 32-bit and 64-bit ABIs, so use 'long'.
-typedef long ESMCI_FortranStrLenArg;
+typedef int ESMCI_FortranStrLenArg;
 #endif
 
 #define ESMC_PRESENT(arg) ( (arg) != 0 )
