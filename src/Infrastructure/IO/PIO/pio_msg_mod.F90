@@ -281,7 +281,7 @@ contains
 
     list_item=> top_iodesc
 
-    if(debugasync) print *,__FILE__,__LINE__,list_item%index
+    if(debugasync) print *, __PIO_FILE__, __LINE__,list_item%index
     index=top_iodesc%index
     id = 0
     if(associated(list_item%iodesc)) then
@@ -400,12 +400,12 @@ contains
 
 
     list_item=> top_iodesc
-    if(debugasync) print *,__FILE__,__LINE__,list_item%index,async_id
+    if(debugasync) print *, __PIO_FILE__, __LINE__,list_item%index,async_id
     
     do while(associated(list_item%iodesc) )
        if(abs(list_item%iodesc%async_id) == async_id) then
           iodesc => list_item%iodesc
-          if(debugasync) print *,__FILE__,__LINE__,async_id,list_item%index
+          if(debugasync) print *, __PIO_FILE__, __LINE__,async_id,list_item%index
           exit
        end if
        list_item=>list_item%next

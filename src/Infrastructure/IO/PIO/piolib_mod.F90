@@ -1053,7 +1053,9 @@ contains
        
     iodesc%start=0
     iodesc%count=0
-    if(Debug) print*,__PIO_FILE__,__LINE__, iosystem%num_tasks, iosystem%num_iotasks, iosystem%io_rank, iosystem%io_comm, iosystem%ioranks
+    if(Debug)  &
+      print*,__PIO_FILE__,__LINE__,  &
+        iosystem%num_tasks, iosystem%num_iotasks, iosystem%io_rank, iosystem%io_comm, iosystem%ioranks
 
     if (iosystem%ioproc) then
        if(present(iostart) .and. present(iocount)) then
@@ -2091,7 +2093,9 @@ contains
     call t_startf("PIO_createfile")
 #endif
 
-    if(debug.or.debugasync) print *,'createfile: {comp,io}_rank:',iosystem%comp_rank,iosystem%io_rank,'io proc: ',iosystem%ioproc, iosystem%async_interface, iotype
+    if(debug.or.debugasync)  &
+      print *,'createfile: {comp,io}_rank:',iosystem%comp_rank,iosystem%io_rank, &
+          'io proc: ',iosystem%ioproc, iosystem%async_interface, iotype
     ierr=PIO_noerr
     
 
@@ -2109,7 +2113,8 @@ contains
        call mpi_bcast(file%iotype, 1, MPI_INTEGER, 0, iosystem%comp_comm, ierr)
 
        if(len(fname) > char_len) then
-          print *,'Length of filename exceeds compile time max, increase char_len in esmfpio_kinds and recompile', len(fname), char_len
+          print *,'Length of filename exceeds compile time max, ',  &
+            'increase char_len in esmfpio_kinds and recompile', len(fname), char_len
           call piodie( __PIO_FILE__,__LINE__)
        end if
 
@@ -2242,7 +2247,8 @@ contains
 
 
 
-    if(Debug .or. Debugasync) print *,'PIO_openfile: {comp,io}_rank:',iosystem%comp_rank,iosystem%io_rank,'io proc: ',iosystem%ioproc
+    if(Debug .or. Debugasync)  &
+      print *,'PIO_openfile: {comp,io}_rank:',iosystem%comp_rank,iosystem%io_rank,'io proc: ',iosystem%ioproc
     ierr=PIO_noerr
 
     file%iosystem => iosystem
