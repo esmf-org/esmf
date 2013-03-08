@@ -4,7 +4,30 @@
 !===================================================
 module esmfpionfwrite_mod
   use esmfpio_kinds, only : r4, r8, i4, pio_offset
-  implicit none
+    use ESMFPIO_nf_mod
+    use esmfpio_types, only : io_desc_t, var_desc_t, file_desc_t, iosystem_desc_t, pio_noerr, &
+        pio_iotype_netcdf, pio_iotype_pnetcdf, pio_iotype_netcdf4p, pio_iotype_netcdf4c, pio_max_var_dims
+    use esmfpio_utils, only : check_netcdf, bad_iotype
+    use esmfpio_alloc_mod, only: alloc_check
+    use esmfpio_support, only : Debug, DebugIO, piodie, checkmpireturn
+
+#ifdef _NETCDF
+    use netcdf, only : nf90_put_var, nf90_inquire_variable  !_EXTERNAL
+#endif
+#ifdef TIMING
+    use perf_mod, only : t_startf, t_stopf  !_EXTERNAL
+#endif
+#ifndef NO_MPIMOD
+    use mpi !_EXTERNAL
+#endif
+    implicit none
+#ifdef NO_MPIMOD
+    include 'mpif.h'   !_EXTERNAL
+#endif
+#ifdef _PNETCDF
+#   include <pnetcdf.inc>   /* _EXTERNAL */
+#endif
+
   private
 !>
 !! @private
@@ -34,29 +57,6 @@ contains
 !<
 # 25 "pionfwrite_mod.F90.in"
   integer function write_nfdarray_real (File,IOBUF,varDesc,iodesc,start,count, request) result(ierr)
-    use ESMFPIO_nf_mod
-    use esmfpio_types, only : io_desc_t, var_desc_t, file_desc_t, iosystem_desc_t, pio_noerr, &
-	pio_iotype_netcdf, pio_iotype_pnetcdf, pio_iotype_netcdf4p, pio_iotype_netcdf4c, pio_max_var_dims
-    use esmfpio_utils, only : check_netcdf, bad_iotype
-    use esmfpio_alloc_mod, only: alloc_check
-    use esmfpio_support, only : Debug, DebugIO, piodie, checkmpireturn 
-
-#ifdef _NETCDF
-    use netcdf, only : nf90_put_var, nf90_inquire_variable  !_EXTERNAL
-#endif
-#ifdef TIMING
-    use perf_mod, only : t_startf, t_stopf  !_EXTERNAL
-#endif
-#ifndef NO_MPIMOD
-    use mpi !_EXTERNAL
-#endif
-    implicit none
-#ifdef NO_MPIMOD
-    include 'mpif.h'   !_EXTERNAL
-#endif
-#ifdef _PNETCDF
-#   include <pnetcdf.inc>   /* _EXTERNAL */
-#endif
 
     type (File_desc_t), intent(inout) :: File
     real(r4) , intent(in), target      :: IOBUF(:)
@@ -253,29 +253,6 @@ contains
 !<
 # 25 "pionfwrite_mod.F90.in"
   integer function write_nfdarray_int (File,IOBUF,varDesc,iodesc,start,count, request) result(ierr)
-    use ESMFPIO_nf_mod
-    use esmfpio_types, only : io_desc_t, var_desc_t, file_desc_t, iosystem_desc_t, pio_noerr, &
-	pio_iotype_netcdf, pio_iotype_pnetcdf, pio_iotype_netcdf4p, pio_iotype_netcdf4c, pio_max_var_dims
-    use esmfpio_utils, only : check_netcdf, bad_iotype
-    use esmfpio_alloc_mod, only: alloc_check
-    use esmfpio_support, only : Debug, DebugIO, piodie, checkmpireturn 
-
-#ifdef _NETCDF
-    use netcdf, only : nf90_put_var, nf90_inquire_variable  !_EXTERNAL
-#endif
-#ifdef TIMING
-    use perf_mod, only : t_startf, t_stopf  !_EXTERNAL
-#endif
-#ifndef NO_MPIMOD
-    use mpi !_EXTERNAL
-#endif
-    implicit none
-#ifdef NO_MPIMOD
-    include 'mpif.h'   !_EXTERNAL
-#endif
-#ifdef _PNETCDF
-#   include <pnetcdf.inc>   /* _EXTERNAL */
-#endif
 
     type (File_desc_t), intent(inout) :: File
     integer(i4) , intent(in), target      :: IOBUF(:)
@@ -472,29 +449,6 @@ contains
 !<
 # 25 "pionfwrite_mod.F90.in"
   integer function write_nfdarray_double (File,IOBUF,varDesc,iodesc,start,count, request) result(ierr)
-    use ESMFPIO_nf_mod
-    use esmfpio_types, only : io_desc_t, var_desc_t, file_desc_t, iosystem_desc_t, pio_noerr, &
-	pio_iotype_netcdf, pio_iotype_pnetcdf, pio_iotype_netcdf4p, pio_iotype_netcdf4c, pio_max_var_dims
-    use esmfpio_utils, only : check_netcdf, bad_iotype
-    use esmfpio_alloc_mod, only: alloc_check
-    use esmfpio_support, only : Debug, DebugIO, piodie, checkmpireturn 
-
-#ifdef _NETCDF
-    use netcdf, only : nf90_put_var, nf90_inquire_variable  !_EXTERNAL
-#endif
-#ifdef TIMING
-    use perf_mod, only : t_startf, t_stopf  !_EXTERNAL
-#endif
-#ifndef NO_MPIMOD
-    use mpi !_EXTERNAL
-#endif
-    implicit none
-#ifdef NO_MPIMOD
-    include 'mpif.h'   !_EXTERNAL
-#endif
-#ifdef _PNETCDF
-#   include <pnetcdf.inc>   /* _EXTERNAL */
-#endif
 
     type (File_desc_t), intent(inout) :: File
     real(r8) , intent(in), target      :: IOBUF(:)

@@ -5,7 +5,29 @@
 #define __PIO_FILE__ "pionfread_mod.F90.in"
 module esmfpionfread_mod
 
-  implicit none
+    use esmfpio_types, only : file_desc_t, var_desc_t, io_desc_t, pio_real, pio_double, pio_int, &
+        pio_noerr, pio_iotype_netcdf4p, pio_iotype_netcdf4c, pio_iotype_pnetcdf, pio_iotype_netcdf, &
+        pio_max_var_dims
+    use esmfpio_kinds, only : pio_offset, i4, r4, r8
+    use esmfpio_utils, only : check_netcdf, bad_iotype 
+    use esmfpio_support, only : Debug, DebugIO, piodie, checkmpireturn
+    use esmfpio_alloc_mod, only: alloc_check
+#ifdef _NETCDF 
+    use netcdf, only : nf90_get_var  !_EXTERNAL
+#endif
+#ifdef TIMING
+    use perf_mod, only : t_startf, t_stopf  !_EXTERNAL
+#endif
+#ifndef NO_MPIMOD
+    use mpi   !_EXTERNAL
+#endif
+    implicit none
+#ifdef NO_MPIMOD
+    include 'mpif.h'   !_EXTERNAL
+#endif
+#ifdef _PNETCDF
+#include <pnetcdf.inc>   /* _EXTERNAL */
+#endif
 
   private
 !> 
@@ -33,29 +55,6 @@ contains
 !<
 # 24 "pionfread_mod.F90.in"
   integer function read_nfdarray_real (File,IOBUF,varDesc,IODesc, start,count) result(ierr)
-    use esmfpio_types, only : file_desc_t, var_desc_t, io_desc_t, pio_real, pio_double, pio_int, &
-	pio_noerr, pio_iotype_netcdf4p, pio_iotype_netcdf4c, pio_iotype_pnetcdf, pio_iotype_netcdf, &
-	pio_max_var_dims
-    use esmfpio_kinds, only : pio_offset, i4, r4, r8
-    use esmfpio_utils, only : check_netcdf, bad_iotype 
-    use esmfpio_support, only : Debug, DebugIO, piodie, checkmpireturn
-    use esmfpio_alloc_mod, only: alloc_check
-#ifdef _NETCDF
-    use netcdf, only : nf90_get_var  !_EXTERNAL
-#endif
-#ifdef TIMING
-    use perf_mod, only : t_startf, t_stopf  !_EXTERNAL
-#endif
-#ifndef NO_MPIMOD
-    use mpi   !_EXTERNAL
-#endif
-    implicit none
-#ifdef NO_MPIMOD
-    include 'mpif.h'   !_EXTERNAL
-#endif
-#ifdef _PNETCDF
-#include <pnetcdf.inc>   /* _EXTERNAL */
-#endif
 
     type (File_desc_t), intent(inout) :: File
     real(r4), intent(inout)           :: IOBUF(:)
@@ -211,29 +210,6 @@ contains
 !<
 # 24 "pionfread_mod.F90.in"
   integer function read_nfdarray_double (File,IOBUF,varDesc,IODesc, start,count) result(ierr)
-    use esmfpio_types, only : file_desc_t, var_desc_t, io_desc_t, pio_real, pio_double, pio_int, &
-	pio_noerr, pio_iotype_netcdf4p, pio_iotype_netcdf4c, pio_iotype_pnetcdf, pio_iotype_netcdf, &
-	pio_max_var_dims
-    use esmfpio_kinds, only : pio_offset, i4, r4, r8
-    use esmfpio_utils, only : check_netcdf, bad_iotype 
-    use esmfpio_support, only : Debug, DebugIO, piodie, checkmpireturn
-    use esmfpio_alloc_mod, only: alloc_check
-#ifdef _NETCDF
-    use netcdf, only : nf90_get_var  !_EXTERNAL
-#endif
-#ifdef TIMING
-    use perf_mod, only : t_startf, t_stopf  !_EXTERNAL
-#endif
-#ifndef NO_MPIMOD
-    use mpi   !_EXTERNAL
-#endif
-    implicit none
-#ifdef NO_MPIMOD
-    include 'mpif.h'   !_EXTERNAL
-#endif
-#ifdef _PNETCDF
-#include <pnetcdf.inc>   /* _EXTERNAL */
-#endif
 
     type (File_desc_t), intent(inout) :: File
     real(r8), intent(inout)           :: IOBUF(:)
@@ -382,43 +358,18 @@ contains
 #endif
 
   end function read_nfdarray_double
-
   ! TYPE real,double,int
 !>
 !! @private
 !<
 # 24 "pionfread_mod.F90.in"
   integer function read_nfdarray_int (File,IOBUF,varDesc,IODesc, start,count) result(ierr)
-    use esmfpio_types, only : file_desc_t, var_desc_t, io_desc_t, pio_real, pio_double, pio_int, &
-	pio_noerr, pio_iotype_netcdf4p, pio_iotype_netcdf4c, pio_iotype_pnetcdf, pio_iotype_netcdf, &
-	pio_max_var_dims
-    use esmfpio_kinds, only : pio_offset, i4, r4, r8
-    use esmfpio_utils, only : check_netcdf, bad_iotype 
-    use esmfpio_support, only : Debug, DebugIO, piodie, checkmpireturn
-    use esmfpio_alloc_mod, only: alloc_check
-#ifdef _NETCDF
-    use netcdf, only : nf90_get_var  !_EXTERNAL
-#endif
-#ifdef TIMING
-    use perf_mod, only : t_startf, t_stopf  !_EXTERNAL
-#endif
-#ifndef NO_MPIMOD
-    use mpi   !_EXTERNAL
-#endif
-    implicit none
-#ifdef NO_MPIMOD
-    include 'mpif.h'   !_EXTERNAL
-#endif
-#ifdef _PNETCDF
-#include <pnetcdf.inc>   /* _EXTERNAL */
-#endif
 
     type (File_desc_t), intent(inout) :: File
     integer(i4), intent(inout)           :: IOBUF(:)
     type (Var_desc_t), intent(in) :: varDesc
     type (IO_desc_t), intent(in) :: IODesc
     integer(kind=pio_offset), intent(in) :: start(:), count(:)
-
 
     character(len=*), parameter :: subName=modName//'::read_nfdarray_int'
     integer(kind=i4) :: iotype
