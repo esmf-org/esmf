@@ -95,7 +95,7 @@ program ESMF_MeshUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
+#if 0
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test creating a small 2x2 2D QUAD Mesh in 3 steps on 1 proc"
@@ -1051,6 +1051,160 @@ endif
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
+#endif
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test Mesh Create Redist"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Test mesh
+  call createTestMesh1(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Setup lists
+if (localPet .eq. 0) then
+  allocate(elemIds(1))
+  elemIds(1)=4
+
+else if (localPet .eq. 1) then
+  allocate(elemIds(1))
+  elemIds(1)=3
+
+else if (localPet .eq. 2) then
+  allocate(elemIds(1))
+  elemIds(1)=2
+else if (localPet .eq. 3) then
+  allocate(elemIds(1))
+  elemIds(1)=1
+endif
+
+ ! XMRKX
+
+  ! Get points
+  mesh2=ESMF_MeshCreate(mesh, elemIds, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Deallocate
+  deallocate(elemIds)
+
+
+  ! Check Output mesh
+  call ESMF_MeshGet(mesh2, parametricDim=parametricDim, &
+                    spatialDim=spatialDim, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  write(*,*) "spatialDim=",spatialDim
+  write(*,*) "parametricDim=",parametricDim
+
+
+  call ESMF_MeshWrite(mesh2, filename="mesh2", rc=rc)
+
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
+
+#if 0
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test Mesh Create Redist"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Test mesh
+  call createTestMesh1(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+#if 0
+  ! Setup lists
+if (localPet .eq. 0) then
+  allocate(nodeIds(9))
+  nodeIds(1)=1
+  nodeIds(2)=2
+  nodeIds(3)=3
+  nodeIds(4)=4
+  nodeIds(5)=5
+  nodeIds(6)=6
+  nodeIds(7)=7
+  nodeIds(8)=8
+  nodeIds(9)=9
+else if (localPet .eq. 1) then
+  allocate(nodeIds(0))
+
+else if (localPet .eq. 2) then
+  allocate(nodeIds(0))
+
+else if (localPet .eq. 3) then
+  allocate(nodeIds(0))
+endif
+#else
+  ! Setup lists
+if (localPet .eq. 0) then
+  allocate(nodeIds(2))
+  nodeIds(1)=8
+  nodeIds(2)=9
+else if (localPet .eq. 1) then
+  allocate(nodeIds(2))
+  nodeIds(1)=6
+  nodeIds(2)=7
+
+else if (localPet .eq. 2) then
+  allocate(nodeIds(2))
+  nodeIds(1)=4
+  nodeIds(2)=5
+
+else if (localPet .eq. 3) then
+  allocate(nodeIds(3))
+  nodeIds(1)=1
+  nodeIds(2)=2
+  nodeIds(3)=3
+endif
+#endif
+
+ ! XMRKX
+
+  ! Get points
+  mesh2=ESMF_MeshCreate(mesh, nodeIds, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Deallocate
+  deallocate(nodeIds)
+
+
+  ! Check Output mesh
+  call ESMF_MeshGet(mesh2, parametricDim=parametricDim, &
+                    spatialDim=spatialDim, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  write(*,*) "spatialDim=",spatialDim
+  write(*,*) "parametricDim=",parametricDim
+
+
+!  call ESMF_MeshWrite(mesh2, filename="mesh2", rc=rc)
+
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+#endif
 
   !------------------------------------------------------------------------
   ! TODO: "Activate once the mesh is fully created. ESMF_MeshWrite is not meant
