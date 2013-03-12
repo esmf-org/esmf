@@ -1674,8 +1674,6 @@ end function ESMF_MeshCreateFromFile
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (filetypelocal == ESMF_FILEFORMAT_UGRID) then
-       ! For now assume that we're 2D
-       coordDim=2
        haveUserMask = .false.       
        ! Get information from file
        call ESMF_GetMeshFromUGridFile(filename, meshname, nodeCoords, elementConn, &
@@ -1683,7 +1681,10 @@ end function ESMF_MeshCreateFromFile
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
 
-       if (localAddMask) then
+       ! Chenk if the grid is 3D or 2D
+       coordDim = size(nodeCoords,1)
+
+       if (coordDim == 2 .and. localAddMask) then
 	  !Get the variable and the missing value attribute from file
 	  ! Total number of local elements
           ElemCnt = ubound (elementConn, 2)
@@ -1701,7 +1702,7 @@ end function ESMF_MeshCreateFromFile
           enddo
           haveUserMask = .true.
 	  deallocate(varbuffer)
-	endif 
+       endif 
     else
        call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
                              msg="- unrecognized filetype", & 
