@@ -137,13 +137,13 @@ namespace ESMCI {
 
   // instantiate IO object; initialize with pointer to this Attribute node, to
   // place file-read attributes into.
-  IO_XML *io_xml = ESMCI_IO_XMLCreate(0, NULL, 0, NULL, 
+  IO_XML *io_xml = ESMCI_IO_XMLCreate("", "", 
                                       (ESMCI::Attribute*)this, &localrc);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   if (localrc != ESMF_SUCCESS) rc = localrc;
 
   // read the XML file, placing contents into this Attribute node
-  localrc = io_xml->read(fileNameLen, fileName, schemaFileNameLen, schemaFileName);
+  localrc = io_xml->read(string(fileName,fileNameLen), string(schemaFileName, schemaFileNameLen));
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
   if (localrc != ESMF_SUCCESS) rc = localrc;
 
@@ -466,7 +466,7 @@ namespace ESMCI {
 
   // Instantiate IO object to do the actual writing
   string fileName = basename + ".xml";
-  IO_XML *io_xml = ESMCI_IO_XMLCreate(0, NULL, fileName.size(),fileName.c_str(),
+  IO_XML *io_xml = ESMCI_IO_XMLCreate("", fileName,
                                       (ESMCI::Attribute*)this, &localrc);
   ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 

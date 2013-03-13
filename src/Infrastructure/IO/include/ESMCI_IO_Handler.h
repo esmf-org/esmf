@@ -41,6 +41,7 @@
 #include "ESMCI_Util.h"
 
 #include <cstdio>
+#include <string>
 #include <vector>
 
 //-------------------------------------------------------------------------
@@ -65,7 +66,7 @@ namespace ESMCI {
     int             localPet;
     ESMC_IndexFlag  indexflag;
     ESMC_IOFmt_Flag iofmtFlag;
-    char            filename[ESMF_MAXSTR + 1];// The filename for this object
+    std::string     filename;                 // The filename for this object
     ESMC_FileStatus_Flag fileStatusFlag;      // Store file status
     bool            overwrite;                // OK to overwrite fields if true
   protected:
@@ -77,7 +78,7 @@ namespace ESMCI {
     // create() and destroy()
   public:
     static IO_Handler *create(ESMC_IOFmt_Flag iofmt, int *rc = NULL);
-    static IO_Handler *create(char const * const file,
+    static IO_Handler *create(const std::string& file,
                               ESMC_IOFmt_Flag iofmt, int *rc = NULL);
     static int destroy(IO_Handler **io);
     static void finalize(int *rc = NULL);
@@ -103,7 +104,7 @@ namespace ESMCI {
       return (((ESMC_IOFmt_Flag *)NULL != newIofmt) &&
               (*newIofmt == iofmtFlag));
     }
-    const char *getFilename(void) const { return filename; }
+    const char *getFilename(void) const { return filename.c_str(); }
     bool overwriteFields(void) { return overwrite; }
     ESMC_FileStatus_Flag getFileStatusFlag(void) { return fileStatusFlag; }
   protected:
@@ -112,11 +113,11 @@ namespace ESMCI {
         iofmtFlag = *newIofmt;
       }
     }
-    int setFilename(const char * const name);
+    int setFilename(const std::string& name);
   public:
 
     // file exists is needed to implement status codes
-    static bool fileExists(const char * const filename, bool needWrite);
+    static bool fileExists(const std::string& filename, bool needWrite);
     // match()
     static bool match(IO_Handler const * const ioh1,
                       IO_Handler const * const ioh2,

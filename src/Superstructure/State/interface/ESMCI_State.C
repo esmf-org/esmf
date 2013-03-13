@@ -146,7 +146,7 @@ namespace ESMCI {
       return ESMC_NULL_POINTER;
     }
 
-    // Invoque the fortran interface through the F90-C++ "glue" code
+    // Invoke the fortran interface through the F90-C++ "glue" code
     FTN_X(f_esmf_statecreate)(state, name, &localrc, strlen (name));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
       return ESMC_NULL_POINTER;
@@ -185,7 +185,7 @@ namespace ESMCI {
      localrc = ESMF_RC_NOT_IMPL;
   
       
-    // Invoque the fortran interface through the F90-C++ "glue" code
+    // Invoke the fortran interface through the F90-C++ "glue" code
      FTN_X(f_esmf_stateaddarray)(this, &array, &localrc);
      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
        return localrc;
@@ -224,7 +224,7 @@ namespace ESMCI {
      localrc = ESMF_RC_NOT_IMPL;
   
       
-    // Invoque the fortran interface through the F90-C++ "glue" code
+    // Invoke the fortran interface through the F90-C++ "glue" code
      FTN_X(f_esmf_stateaddfield)(this, field, &localrc);
      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
        return localrc;
@@ -263,7 +263,7 @@ namespace ESMCI {
     rc = ESMF_RC_NOT_IMPL;
     localrc = ESMF_RC_NOT_IMPL;
 
-    // Invoque the fortran interface through the F90-C++ "glue" code
+    // Invoke the fortran interface through the F90-C++ "glue" code
     FTN_X(f_esmf_stategetarray)(this, name, array, &localrc, strlen (name));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return localrc;
@@ -305,7 +305,7 @@ namespace ESMCI {
     Field *fieldMem = new Field;
     *field = fieldMem;  // point to this new allocation
 
-    // Invoque the fortran interface through the F90-C++ "glue" code
+    // Invoke the fortran interface through the F90-C++ "glue" code
     FTN_X(f_esmf_stategetfield)(this, name, fieldMem, &localrc, strlen (name));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return localrc;
@@ -336,7 +336,7 @@ namespace ESMCI {
     // Local data
     int rc, localrc;
 
-    // Invoque the fortran interface through the F90-C++ "glue" code
+    // Invoke the fortran interface through the F90-C++ "glue" code
     FTN_X(f_esmf_stateprint)(this, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return localrc;
@@ -378,7 +378,7 @@ namespace ESMCI {
     rc = ESMC_RC_NOT_IMPL;
     localrc = ESMC_RC_NOT_IMPL;
 
-    // Invoque the fortran interface through the F90-C++ "glue" code
+    // Invoke the fortran interface through the F90-C++ "glue" code
     FTN_X(f_esmf_statedestroy)(state, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
       return localrc;
@@ -973,7 +973,7 @@ namespace ESMCI {
 
       // instantiate IO object; initialize with pointer to this State's
       // base, to place file-read attributes into.
-      IO_NetCDF *io_netcdf = ESMCI_IO_NetCDFCreate(0, NULL, base, &localrc);
+      IO_NetCDF *io_netcdf = ESMCI_IO_NetCDFCreate("", base, &localrc);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                             &localrc);
       if (localrc != ESMF_SUCCESS) rc = localrc;
@@ -983,7 +983,7 @@ namespace ESMCI {
 
       // read the NetCDF file, placing contents into this State object, with
       // Attributes placed on the State's base node
-      localrc = io_netcdf->read(fileNameLen, fileName);
+      localrc = io_netcdf->read(string(fileName, fileNameLen));
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                             &localrc);
       if (localrc != ESMF_SUCCESS) rc = localrc;
@@ -1031,7 +1031,7 @@ namespace ESMCI {
 
       // instantiate IO object; initialize with pointer to this State's
       // base, to write attributes from.
-      IO_NetCDF *io_netcdf = ESMCI_IO_NetCDFCreate(0, NULL, base, &localrc);
+      IO_NetCDF *io_netcdf = ESMCI_IO_NetCDFCreate("", base, &localrc);
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                             &localrc);
       if (localrc != ESMF_SUCCESS) rc = localrc;
@@ -1041,7 +1041,7 @@ namespace ESMCI {
 
       // write the NetCDF file, taking contents from this State object, with
       // Attributes taken from the State's base node
-      localrc = io_netcdf->write(fileNameLen, fileName);
+      localrc = io_netcdf->write(string(fileName, fileNameLen));
       ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                             &localrc);
       if (localrc != ESMF_SUCCESS) rc = localrc;

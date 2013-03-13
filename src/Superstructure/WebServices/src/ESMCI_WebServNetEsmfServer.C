@@ -780,14 +780,11 @@ int  ESMCI_WebServNetEsmfServer::processInit(
 		//***
 		if (1) // change this to if (hasExportFile) when ready
 		{
-			char		localFilename[256];
-
-			sprintf(localFilename, "/usr/local/share/hyrax/data/nc/%s", 
-                             	  filename);
+			string localFilename("/usr/local/share/hyrax/data/nc/");
+                        localFilename.append(filename);
 	
 			int			rc = 0;
 			IO_NetCDF*	netCdfFile = ESMCI_IO_NetCDFCreate(
-												strlen(localFilename),
 												localFilename,
 												ESMC_NULL_POINTER,
 												&rc);
@@ -803,7 +800,7 @@ int  ESMCI_WebServNetEsmfServer::processInit(
    		}
 
 			//printf("Reading file: %s\n", localFilename);
-			netCdfFile->read(strlen(localFilename), localFilename);
+			netCdfFile->read(localFilename);
 
 			//***
 			// Ideally, I'd just say theImportState = netCdfFile->getState()...

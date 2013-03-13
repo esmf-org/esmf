@@ -59,8 +59,8 @@ namespace ESMCI{
  class IO_XML : public ESMC_Base { // inherit from ESMC_Base class
   private:   // corresponds to F90 module 'type ESMF_IO_XML' members
     Attribute *attr;    // root node of associated object's attributes
-    char       fileName[ESMF_MAXSTR];
-    char       schemaFileName[ESMF_MAXSTR];
+    std::string  fileName;
+    std::string  schemaFileName;
 #ifdef ESMF_XERCES
     SAX2WriteHandler* writeHandler;   // to file; a future use could be to 
                                       // write to a network protocol rather
@@ -77,8 +77,8 @@ namespace ESMCI{
     // accessor methods
 
     // Read/Write (via SAX2 API)
-    int read(int fileNameLen, const char* fileName,
-             int schemaFileNameLen, const char* schemaFileName);
+    int read(const std::string& fileName,
+             const std::string& schemaFileName);
 
     // maps to SAX2 startElement() & characters(), but not endElement();
     //   use to open a nested tag section
@@ -103,7 +103,7 @@ namespace ESMCI{
     // write an XML comment
     int writeComment(const std::string& comment, const int indentLevel=0);
 
-    int write(int fileNameLen, const char* fileName,
+    int write(const std::string& fileName,
               const char* outChars, int flag);
 
     // internal validation
@@ -139,7 +139,8 @@ namespace ESMCI{
     int replaceXMLEntities(std::string& str);
 
     // friend function to allocate and initialize IO_XML object from heap
-    friend IO_XML *ESMCI_IO_XMLCreate(int, const char*, int, const char*,
+    friend IO_XML *ESMCI_IO_XMLCreate(const std::string& name,
+                                      const std::string& fileName,
                                       Attribute*, int*);
 
     // friend function to copy an io_xml  TODO ?
@@ -160,8 +161,8 @@ namespace ESMCI{
     // These also establish defaults to match F90 optional args.  TODO ?
 
     // friend function to allocate and initialize io from heap
-    IO_XML *ESMCI_IO_XMLCreate(int nameLen, const char* name=0,
-                               int fileNameLen=0, const char* fileName=0,
+    IO_XML *ESMCI_IO_XMLCreate(const std::string&  name="",
+                               const std::string&  fileName="",
                                Attribute* attr=0, int* rc=0);
 
     // friend function to copy an io_xml  TODO ?
@@ -171,8 +172,7 @@ namespace ESMCI{
     int ESMCI_IO_XMLDestroy(IO_XML **io_xml);
 
     // friend to restore state  TODO ?
-    //IO *ESMCI_IO_XMLReadRestart(int nameLen,
-                                   //const char*  name=0,
+    //IO *ESMCI_IO_XMLReadRestart(const std::string&  name=0,
                                    //int*         rc=0);
 
 }   // namespace ESMCI
