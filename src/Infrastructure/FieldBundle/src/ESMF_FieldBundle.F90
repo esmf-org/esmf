@@ -3681,10 +3681,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
-!   Sets the {\tt grid} for a {\tt fieldbundle} that contains no {\tt ESMF\_Field}s. 
-!   All {\tt ESMF\_Field}s added to this {\tt fieldbundle} must be
-!   associated with the same {\tt ESMF\_Grid}.  Returns an error if 
-!   there is already an {\tt ESMF\_GeomBase} object associated with the {\tt fieldbundle}.
+!   Sets the {\tt grid} for a {\tt fieldbundle}.
 !   \end{sloppypar}
 !
 !   The arguments are:
@@ -3763,10 +3760,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
-!   Sets the {\tt mesh} for a {\tt fieldbundle} that contains no {\tt ESMF\_Field}s. 
-!   All {\tt ESMF\_Field}s added to this {\tt fieldbundle} must be
-!   associated with the same {\tt ESMF\_Mesh}.  Returns an error if 
-!   there is already an {\tt ESMF\_Geombase} associated with the {\tt fieldbundle}.
+!   Sets the {\tt mesh} for a {\tt fieldbundle}.
 !   \end{sloppypar}
 !
 !   The arguments are:
@@ -3838,10 +3832,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Sets the {\tt locstream} for a {\tt fieldbundle} that contains no {\tt ESMF\_Field}s. 
-!   All {\tt ESMF\_Field}s added to this {\tt fieldbundle} must be
-!   associated with the same {\tt ESMF\_LocStream}.  Returns an error if 
-!   there is already an {\tt ESMF\_Geombase} associated with the {\tt fieldbundle}.
+!   \begin{sloppypar}
+!   Sets the {\tt locstream} for a {\tt fieldbundle}.
+!   \end{sloppypar}
 !
 !   The arguments are:
 !   \begin{description}
@@ -3911,10 +3904,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Sets the {\tt locstream} for a {\tt fieldbundle} that contains no {\tt ESMF\_Field}s. 
-!   All {\tt ESMF\_Field}s added to this {\tt fieldbundle} must be
-!   associated with the same {\tt ESMF\_LocStream}.  Returns an error if 
-!   there is already an {\tt ESMF\_Geombase} associated with the {\tt fieldbundle}.
+!   \begin{sloppypar}
+!   Sets the {\tt xgrid} for a {\tt fieldbundle}
+!   \end{sloppypar}
 !
 !   The arguments are:
 !   \begin{description}
