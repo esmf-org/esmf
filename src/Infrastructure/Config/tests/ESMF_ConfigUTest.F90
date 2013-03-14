@@ -95,7 +95,7 @@ module config_subrs
         cf = ESMF_ConfigCreate(rc=rc)
 	call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
-        if ( rc /= 0 ) then 
+        if ( rc /= ESMF_SUCCESS ) then 
            print *,'ESMF_ConfigCreate: catastrophic error, rc =', rc
            return
         endif
@@ -108,7 +108,7 @@ module config_subrs
         call ESMF_ConfigLoadFile( cf, fname, unique = .true., rc = rc)
 	call ESMF_Test((rc.eq.ESMF_RC_DUP_NAME), name, failMsg, result, ESMF_SRCLINE)
 
-        if (rc == -99) then 
+        if (rc == ESMF_RC_MEM) then 
            print *,' ESMF_ConfigLoadFile: Out of memory: exceeded NBUF_MAX'
         endif
         if ( rc /= ESMF_RC_DUP_NAME ) then      
@@ -163,7 +163,7 @@ module config_subrs
 !''''''''''''''''''''''''''''
       
       counter_total =counter_total + 1
-      if ( rc /= 0 ) then      
+      if ( rc /= ESMF_SUCCESS ) then      
          print *,'ESMF_ConfigGetAttribute(int) got nDE =', nDE,' rc =', rc
       else
          if (nDE == nDE_0) then
@@ -198,7 +198,7 @@ module config_subrs
 !''''''''''''''''''''''''''''
    
       counter_total =counter_total + 1
-      if ( rc /= 0 ) then      
+      if ( rc /= ESMF_SUCCESS ) then      
          print *,'ESMF_ConfigGetAttribute(float) got tau =', tau,' rc =', rc
       else
          if (tau == tau_0) then
@@ -241,7 +241,7 @@ module config_subrs
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if ( rc /= 0 ) then      
+      if ( rc /= ESMF_SUCCESS ) then      
          print *,'ESMF_ConfigGetAttribute(char) got answer =', &
                  answer,' rc =', rc
       else
@@ -276,7 +276,7 @@ module config_subrs
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if ( rc /= 0 ) then      
+      if ( rc /= ESMF_SUCCESS ) then      
          print *,'ESMF_ConfigGetAttribute(string) got =', &
                   restart_file,' rc =', rc
       else
@@ -308,7 +308,7 @@ module config_subrs
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if ( rc /= 0 ) then      
+      if ( rc /= ESMF_SUCCESS ) then      
          print *,'ESMF_ConfigGetAttribute(logical) got optimize = ', &
                  optimize,' rc =', rc
       else
@@ -358,7 +358,7 @@ module config_subrs
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc == 0) then
+      if (rc == ESMF_SUCCESS) then
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigFindLabel failed, label = u-wind_error:, rc =', rc 
@@ -376,7 +376,7 @@ module config_subrs
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetAttribute(string) failed, rc =', rc
          return
       endif
@@ -408,7 +408,7 @@ module config_subrs
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetAttribute(int) failed, rc =', rc
          return
       endif
@@ -441,7 +441,7 @@ module config_subrs
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetAttribute(floats) failed, rc =', rc
          return
       endif
@@ -488,7 +488,7 @@ subroutine MultPar_SingleLine_V
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc == 0) then
+      if (rc == ESMF_SUCCESS) then
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigFindLabel failed, label = v-wind_error:, rc =', rc
@@ -506,7 +506,7 @@ subroutine MultPar_SingleLine_V
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetAttribute(string) failed, rc =', rc
          return
       endif
@@ -538,7 +538,7 @@ subroutine MultPar_SingleLine_V
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetAttribute(int) failed, rc =', rc
          return
       endif
@@ -570,7 +570,7 @@ subroutine MultPar_SingleLine_V
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetAttribute(floats) failed, rc =', rc
          return
       endif
@@ -625,7 +625,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc == 0) then
+      if (rc == ESMF_SUCCESS) then
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigFindLabel failed, label = v-wind_flag:, rc =', rc
@@ -643,7 +643,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetAttribute(string) failed, rc =', rc
          return
       endif
@@ -675,7 +675,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetAttribute(int) failed, rc =', rc
          return
       endif
@@ -707,7 +707,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetAttribute(logicals) failed, rc =', rc
          return
       endif
@@ -759,7 +759,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc == 0) then
+      if (rc == ESMF_SUCCESS) then
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigFindLabel failed, label = ObsErr*QSCAT::, rc =', rc 
@@ -778,7 +778,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc == 0) then
+      if (rc == ESMF_SUCCESS) then
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigNextLine failed, rc =', rc 
@@ -797,7 +797,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetAttribute(string) failed, rc =', rc
          return
       endif
@@ -829,7 +829,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetAttribute(int) failed, rc =', rc
          return
       endif
@@ -854,7 +854,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
 
      counter_total =counter_total + 1
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetAttribute(floats) failed, rc =', rc
          return
       endif
@@ -888,7 +888,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc == 0) then
+      if (rc == ESMF_SUCCESS) then
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigNextLine failed, rc =', rc 
@@ -907,7 +907,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetAttribute(string) failed, rc =', rc
          return
       endif
@@ -938,7 +938,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetAttribute(int) failed, rc =', rc
          return
       endif
@@ -970,7 +970,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
 
      counter_total =counter_total + 1
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetAttribute(floats) failed, rc =', rc
          return
       endif
@@ -1005,6 +1005,8 @@ subroutine MultPar_SingleLine_Vf
 !!!      real(ESMF_KIND_R4) :: vCorr_aux(121)
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
+      integer :: memstat
+
       integer :: result = 0
      
       vCorr_0 = RESHAPE (  (/ &
@@ -1038,7 +1040,7 @@ subroutine MultPar_SingleLine_Vf
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
       counter_total =counter_total + 1
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetDim failed, rc =', rc
          return
       endif
@@ -1070,7 +1072,7 @@ subroutine MultPar_SingleLine_Vf
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
       counter_total =counter_total + 1
-      if (rc == 0) then
+      if (rc == ESMF_SUCCESS) then
          counter_success =counter_success + 1
       else
           print *,'ESMF_ConfigFindLabel failed, label ObsErr*vCor_HH-7::, = rc =', rc 
@@ -1078,10 +1080,11 @@ subroutine MultPar_SingleLine_Vf
       endif
 
 !''''''''''''''''''''''''''''     
-         allocate(ncol(1:nlines), STAT= rc)
+         allocate(ncol(1:nlines), STAT= memstat)
 !''''''''''''''''''''''''''''
-      if (rc /= 0) then
-         print *,'array allocation failed, rc =', rc
+      if (memstat /= 0) then
+         print *,'array allocation failed, stat =', memstat
+         rc = ESMF_RC_MEM
          return
       endif
       
@@ -1091,14 +1094,14 @@ subroutine MultPar_SingleLine_Vf
 
       call ESMF_ConfigNextLine(cf, rc = rc)
 !''''''''''''''''''''''''''''
-         if (rc /= 0) then
+         if (rc /= ESMF_SUCCESS) then
             print *,'ESMF_ConfigNextLine failed, rc =', rc 
             exit        
          endif
 !''''''''''''''''''''''''''''    
       ncol(line) = ESMF_ConfigGetLen(cf, rc = rc) - 1
 !''''''''''''''''''''''''''''  
-      if (rc /= 0) then
+      if (rc /= ESMF_SUCCESS) then
          print *,'ESMF_ConfigGetLen failed, rc =', rc
          exit
       endif
@@ -1135,7 +1138,7 @@ subroutine MultPar_SingleLine_Vf
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
       counter_total =counter_total + 1
-      if (rc == 0) then
+      if (rc == ESMF_SUCCESS) then
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigFindLabel failed, label = ObsErr*vCor_HH-7::, rc =', rc 
@@ -1148,7 +1151,7 @@ subroutine MultPar_SingleLine_Vf
          call ESMF_ConfigNextLine( cf, tableEnd=end, rc=rc)
 !''''''''''''''''''''''''''''
 
-         if (rc /= 0) then
+         if (rc /= ESMF_SUCCESS) then
             print *,'ESMF_ConfigNextLine failed, rc =', rc 
             exit        
          endif
@@ -1159,7 +1162,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
             call ESMF_ConfigGetAttribute( cf, plev(line), rc=rc )
 !''''''''''''''''''''''''''''
-         if (rc /= 0) then
+         if (rc /= ESMF_SUCCESS) then
             print *,'ESMF_ConfigAttribute failed, rc =', rc 
             exit
          endif
@@ -1178,12 +1181,12 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
          do col =1, ncol(line)
             call ESMF_ConfigGetAttribute( cf, temp, rc=rc)
-            if (rc == 0) then 
+            if (rc == ESMF_SUCCESS) then 
                vCorr(line,col) = temp 
             end if
          end do
 !''''''''''''''''''''''''''''
-         if (rc /= 0) then
+         if (rc /= ESMF_SUCCESS) then
             print *,'ESMF_ConfigGetAttribute(float) failed, rc =', rc 
             exit        
          endif
@@ -1203,10 +1206,11 @@ subroutine MultPar_SingleLine_Vf
       end do
 !''''''''''''''''''''''''''''
 !''''''''''''''''''''''''''''     
-      deallocate(ncol, STAT= rc)
+      deallocate(ncol, STAT= memstat)
 !''''''''''''''''''''''''''''
-      if (rc /= 0) then
-         print *,'array deallocation failed, rc =', rc
+      if (memstat /= 0) then
+         print *,'array deallocation failed, stat =', memstat
+         rc = ESMF_RC_MEM
       endif
 
 
@@ -1239,7 +1243,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
       
       counter_total =counter_total + 1
-      if ( rc /= 0 ) then      
+      if ( rc /= ESMF_SUCCESS ) then      
          print *,'ESMF_ConfigSetAttribute(intI4) got Member_Num =', memberNum, &
                  ' rc =', rc
       else
@@ -1265,7 +1269,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
       
       counter_total =counter_total + 1
-      if ( rc /= 0 ) then      
+      if ( rc /= ESMF_SUCCESS ) then      
          print *,'ESMF_ConfigSetAttribute(intI4) got numMembers=', numMembers, &
                  ' rc =', rc
       else
@@ -1293,7 +1297,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
       
       counter_total =counter_total + 1
-      if ( rc /= 0 ) then      
+      if ( rc /= ESMF_SUCCESS ) then      
          print *,'ESMF_ConfigSetAttribute(intI4) got numConstituents=', &
                   numConstituents, ' rc =', rc
       else
@@ -1321,7 +1325,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
       
       counter_total =counter_total + 1
-      if ( rc /= 0 ) then      
+      if ( rc /= ESMF_SUCCESS ) then      
          print *, 'ESMF_ConfigSetAttribute(intI4) got numDelegates=', &
                    numDelegates, ' rc =', rc
       else
@@ -1371,7 +1375,7 @@ subroutine MultPar_SingleLine_Vf
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
-      if (rc == 0) then
+      if (rc == ESMF_SUCCESS) then
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigDestroy failed, rc =', rc 

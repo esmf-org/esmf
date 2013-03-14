@@ -628,8 +628,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Since the search is done by looking for a string, possibly multi-worded,
 !   in the whole {\tt Config} object, it is important to use special 
 !   conventions to distinguish {\tt labels} from other words. This is done 
-!   in the Resource File by using the DAO convention to finish 
-!   line labels with a (:) and table labels with a double colon (::).
+!   in the Resource File by using the NASA/DAO convention to finish
+!   line labels with a colon (:) and table labels with a double colon (::).
 !
 !
 !   The arguments are:
@@ -2297,7 +2297,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION: Resource file filename is loaded into memory
 !
 !EOPI -------------------------------------------------------------------
-      integer :: lu, ios, loop, ls, ptr
+      integer :: lu, loop, ls, ptr
       character(len=LSZ) :: line
       integer :: localrc
 
@@ -2316,13 +2316,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! A open through an interface to avoid portability problems.
       ! (J.G.)
 
-      call opntext(lu,filename,'old',rc=localrc)
-
-      if ( localrc /= ESMF_SUCCESS ) then
-         if (ESMF_LogFoundError(localrc, &
-                              msg="error opening text file: " // trim (filename), &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-      end if
+      call opntext(lu, filename, 'old', rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          msg="error opening text file: " // trim (filename), &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
 !     Read to end of file
 !     -------------------
@@ -2341,11 +2338,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          ls = index_(line,'#' ) - 1    ! line length
          if ( ls .gt. 0 ) then
             if ( (ptr+ls) .gt. NBUF_MAX ) then
-               localrc = ESMF_RC_MEM
-               if ( present (rc )) then
-                 rc = localrc
-               endif
-               return
+               if (ESMF_LogFoundError(ESMF_RC_MEM, msg="exceeded NBUF_MAX size", &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
             end if
             config%cptr%buffer(ptr:ptr+ls) = line(1:ls) // EOL
             ptr = ptr + ls + 1
