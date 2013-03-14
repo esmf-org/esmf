@@ -31,7 +31,6 @@ class classNoDestructor{
 };
 
 void classNoDestructorThrow(){
-  classNoDestructor x;
   throw 2;
 }
 
@@ -42,7 +41,6 @@ class classWithDestructor{
 };
 
 void classWithDestructorThrow(){
-  classWithDestructor x;
   throw 3;
 }
 
