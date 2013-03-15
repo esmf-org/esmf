@@ -73,7 +73,7 @@ module ESMF_AttributeMod
   use ESMF_StateMod
   use ESMF_UtilMod
   use ESMF_VMMod
-	use ESMF_AttributeInternalsMod
+  use ESMF_AttributeInternalsMod
 
   implicit none
 
