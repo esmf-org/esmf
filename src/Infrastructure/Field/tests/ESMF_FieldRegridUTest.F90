@@ -14425,6 +14425,14 @@ write(*,*) "LOCALRC=",localrc
 #endif
 
 ! LEAVE HERE AND JUST WRITE OUT THE GRIDS AS A TEST FOR NOW
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
 return 
 
 
