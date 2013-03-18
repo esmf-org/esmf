@@ -39,6 +39,8 @@
 #include "ESMCI_Base.h"           // inherited Base class
 #include "ESMCI_State.h"
 
+#include <string>
+
 #ifdef ESMF_NETCDF
 #include <netcdfcpp.h>
 #include <ncvalues.h>
@@ -56,7 +58,7 @@ namespace ESMCI
  class IO_NetCDF : public ESMC_Base { // inherit ESMC_Base class
   private:   // corresponds to F90 module 'type ESMF_IO_NetCDF' members
     ESMC_Base   *base;    // associated object's base
-    char         fileName[ESMF_MAXSTR];
+    std::string  fileName;
     State*       theState;
 
 // !PUBLIC MEMBER FUNCTIONS:
@@ -69,8 +71,8 @@ namespace ESMCI
     void  setState(State*  newState)  { theState = newState; }
 
     // Read/Write to support the F90 optional arguments interface
-    int read(int fileNameLen, const char* fileName);
-    int write(int fileNameLen, const char* fileName);
+    int read(const std::string& fileName);
+    int write(const std::string& fileName);
 
     // internal validation
     int validate(const char *options=0) const;
@@ -87,7 +89,7 @@ namespace ESMCI
    
    public:
     // friend function to allocate and initialize IO_NetCDF object from heap
-    friend IO_NetCDF *ESMCI_IO_NetCDFCreate(int, const char*, ESMC_Base*, int*);
+    friend IO_NetCDF *ESMCI_IO_NetCDFCreate(const std::string&, ESMC_Base*, int*);
 
     // friend function to copy an io_netcdf  TODO ?
     //friend IO_NetCDF *ESMCI_IO_NetCDF(IO_NetCDF*, int*);
@@ -125,7 +127,7 @@ namespace ESMCI
     // These also establish defaults to match F90 optional args.  TODO ?
 
     // friend function to allocate and initialize io from heap
-    IO_NetCDF *ESMCI_IO_NetCDFCreate(int nameLen, const char* name=0,
+    IO_NetCDF *ESMCI_IO_NetCDFCreate(const std::string& name=0,
                        ESMC_Base* base=0, int* rc=0);
 
     // friend function to copy an io_netcdf  TODO ?
@@ -135,8 +137,7 @@ namespace ESMCI
     int ESMCI_IO_NetCDFDestroy(IO_NetCDF **io_netcdf);
 
     // friend to restore state  TODO ?
-    //Clock *ESMCI_IO_NetCDFReadRestart(int nameLen,
-                                   //const char*  name=0,
+    //Clock *ESMCI_IO_NetCDFReadRestart(const std::string& name=0,
                                    //int*         rc=0);
 
 }   // namespace ESMCI

@@ -57,9 +57,8 @@ int main(void)
   //NEX_UTest
   strcpy(name, "Create ESMCI_IO_NetCDF object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  nctestIO = ESMCI_IO_NetCDFCreate(strlen(dummy_nc_filename),
-                                          dummy_nc_filename,
-				          ESMC_NULL_POINTER, &rc);
+  nctestIO = ESMCI_IO_NetCDFCreate(dummy_nc_filename,
+				   ESMC_NULL_POINTER, &rc);
   Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -78,7 +77,7 @@ int main(void)
   //NEX_UTest
   strcpy(name, "read netcdf data into ESMCI_IO_NetCDF object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = nctestIO->read(strlen(input_nc_filename), input_nc_filename);
+  rc = nctestIO->read(input_nc_filename);
   if (rc==ESMF_RC_LIB_NOT_PRESENT) netcdfNotPresent = true;
   Test((rc==ESMF_SUCCESS || netcdfNotPresent), name, failMsg,
              &result, __FILE__, __LINE__, 0);
@@ -88,7 +87,7 @@ int main(void)
   //NEX_UTest
   strcpy(name, "write netcdf data from ESMCI_IO_NetCDF object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = nctestIO->write(strlen(output_nc_filename), output_nc_filename);
+  rc = nctestIO->write(output_nc_filename);
   Test((rc==ESMF_SUCCESS || netcdfNotPresent), name, failMsg,
              &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

@@ -360,7 +360,7 @@ contains
      localrc = ESMF_RC_NOT_IMPL
 
     ! Grab the filename length for the C++ level
-    len_fileName = len(trim(fileName))
+    len_fileName = len_trim(fileName)
 
     ! Set default flags
     opt_iofmt = ESMF_IOFMT_NETCDF;

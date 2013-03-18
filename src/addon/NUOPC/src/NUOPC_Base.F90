@@ -84,10 +84,12 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_ClockCheckSetClock - Check a Clock for compatibility
 ! !INTERFACE:
-  subroutine NUOPC_ClockCheckSetClock(setClock, checkClock, rc)
+  subroutine NUOPC_ClockCheckSetClock(setClock, checkClock, &
+    setStartTimeToCurrent, rc)
 ! !ARGUMENTS:
     type(ESMF_Clock),        intent(inout)         :: setClock
     type(ESMF_Clock),        intent(in)            :: checkClock
+    logical,                 intent(in),  optional :: setStartTimeToCurrent
     integer,                 intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Compares setClock to checkClock to make sure they match in their current
@@ -95,12 +97,18 @@ module NUOPC_Base
 !   timeStep. If both these condition are satisfied then the stopTime of the
 !   setClock is set to be reachable in one timeStep of the checkClock, taking
 !   into account the direction of the Clock.
+!
+!   By default the startTime of the "setClock" is set to the startTime of
+!   "checkClock" (if the consistency checking was successful). However for
+!   setStartTimeToCurrent=.true. the startTime of "setClock" is set to the
+!   currentTime of "checkClock".
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables    
-    type(ESMF_Time)         :: checkCurrTime, currTime, stopTime
+    type(ESMF_Time)         :: checkCurrTime, currTime, stopTime, startTime
     type(ESMF_TimeInterval) :: checkTimeStep, timeStep
     type(ESMF_Direction_Flag)    :: direction
+    type(ESMF_Time)         :: setTime
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -150,6 +158,29 @@ module NUOPC_Base
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+    
+    call ESMF_ClockGet(checkClock, startTime=setTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (present(setStartTimeToCurrent)) then
+      if (setStartTimeToCurrent) then
+        call ESMF_ClockGet(checkClock, currTime=setTime, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      endif
+    endif
+    
+    ! set startTime in setClock
+    call ESMF_ClockSet(setClock, startTime=setTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
   end subroutine
   !-----------------------------------------------------------------------------
 

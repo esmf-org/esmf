@@ -1578,7 +1578,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set default flags
     opt_overwriteflag = ESMF_FALSE
-    if (present(overwrite) .and. overwrite) opt_overwriteflag = ESMF_TRUE
+    if (present(overwrite)) opt_overwriteflag = overwrite
 
     opt_status = ESMF_FILESTATUS_UNKNOWN
     if (present(status)) opt_status = status

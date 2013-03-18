@@ -94,13 +94,13 @@ class ESMC_Base
     // accessors to base name
     int   ESMC_BaseSetName(const char *name, const char *classname);
     char *ESMC_BaseGetName(void) const;
-    int   ESMC_BaseSetF90Name(char *name, int nlen);
+    int   ESMC_BaseSetF90Name(const char *name, int nlen);
     char *ESMC_BaseGetF90Name(void) const;
 
     // accessors to class name
-    int   ESMC_BaseSetClassName(char *classname);
+    int   ESMC_BaseSetClassName(const char *classname);
     char *ESMC_BaseGetClassName(void) const;
-    int   ESMC_BaseSetF90ClassName(char *name, int nlen);
+    int   ESMC_BaseSetF90ClassName(const char *name, int nlen);
     int   ESMC_BaseGetF90ClassName(char *name, int nlen) const;
 
     // flatten an object into a byte stream, and reconstitute it again

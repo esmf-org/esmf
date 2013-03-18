@@ -68,8 +68,7 @@ namespace ESMCI
 //     pointer to newly allocated IO_NetCDF
 //
 // !ARGUMENTS:
-      int                nameLen,          // in
-      const char        *name,             // in
+      const std::string& name,             // in
       ESMC_Base         *base,             // in
       int               *rc) {             // out - return code
 
@@ -99,9 +98,9 @@ namespace ESMCI
       return(ESMC_NULL_POINTER);
     }
 
-    if (name != ESMC_NULL_POINTER) {
+    if (!name.empty()) {
       // use given name
-      returnCode = io_netcdf->ESMC_BaseSetF90Name((char*) name, nameLen);
+      returnCode = io_netcdf->ESMC_BaseSetF90Name(name.c_str(), name.length());
     } else {
       // create default name "IO_NetCDF<ID>"
       returnCode = io_netcdf->ESMC_BaseSetName((const char*) ESMC_NULL_POINTER,
@@ -178,8 +177,7 @@ namespace ESMCI
 //     int error return code
 //
 // !ARGUMENTS:
-      int                fileNameLen,         // in
-      const char        *fileName) {          // in
+      const std::string& fileName) {          // in
 
 // !DESCRIPTION:
 //      Reads an {\tt ESMC\_IO\_NetCDF} object from file
@@ -219,29 +217,11 @@ namespace ESMCI
     if (mypet != 0) return ESMF_RC_LIB_NOT_PRESENT;
 #endif
 
-    if (fileName != ESMC_NULL_POINTER) 
+    if (!fileName.empty()) 
     {
       // TODO: only use local of fileName this one time;
       //   don't change set IO_NetCDF member fileName
-      if (fileNameLen < ESMF_MAXSTR) 
-      {
-        strncpy(this->fileName, fileName, fileNameLen);
-        this->fileName[fileNameLen] = '\0';  // null terminate
-      } 
-      else 
-      {
-        // truncate
-        strncpy(this->fileName, fileName, ESMF_MAXSTR-1);
-        this->fileName[ESMF_MAXSTR-1] = '\0';  // null terminate
-
-        char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg,
-                "io_netcdf fileName %s, length >= ESMF_MAXSTR; truncated.",
-                fileName);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-        // TODO: return ESMF_WARNING when defined
-        // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
-      }
+      this->fileName = fileName;
     } 
     else 
     {
@@ -249,7 +229,7 @@ namespace ESMCI
     }
 
 #ifdef ESMF_NETCDF
-    NcFile* netCdfFile = new NcFile(this->fileName, NcFile::ReadOnly);
+    NcFile* netCdfFile = new NcFile(this->fileName.c_str(), NcFile::ReadOnly);
 
     if (!(netCdfFile->is_valid()))
     {
@@ -266,7 +246,7 @@ namespace ESMCI
     //***
 #if 0
     int stateRc = 0;
-    theState = State::create(this->fileName, &stateRc);
+    theState = State::create(this->fileName.c_str(), &stateRc);
     //printf("*** State RC: %d\n", stateRc);
     if (stateRc != ESMF_SUCCESS)
     {
@@ -378,8 +358,7 @@ namespace ESMCI
 //     int error return code
 //
 // !ARGUMENTS:
-      int                fileNameLen,         // in
-      const char        *fileName) {          // in
+      const std::string& fileName) {          // in
 
 // !DESCRIPTION:
 //      Writes an {\tt ESMC\_IO_NetCDF} object to file
@@ -429,29 +408,11 @@ namespace ESMCI
     }
 #endif
 
-    if (fileName != ESMC_NULL_POINTER) 
+    if (!fileName.empty()) 
     {
       // TODO: only use local of fileName this one time;
       //   don't change set IO_NetCDF member fileName
-      if (fileNameLen < ESMF_MAXSTR) 
-      {
-        strncpy(this->fileName, fileName, fileNameLen);
-        this->fileName[fileNameLen] = '\0';  // null terminate
-      } 
-      else 
-      {
-        // truncate
-        strncpy(this->fileName, fileName, ESMF_MAXSTR-1);
-        this->fileName[ESMF_MAXSTR-1] = '\0';  // null terminate
-
-        char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg,
-                "io_netcdf fileName %s, length >= ESMF_MAXSTR; truncated.",
-                fileName);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-        // TODO: return ESMF_WARNING when defined
-        // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
-      }
+      this->fileName = fileName;
     } 
     else 
     {
@@ -459,7 +420,7 @@ namespace ESMCI
     }
 
 #ifdef ESMF_NETCDF
-        NcFile*	netCdfFile = new NcFile(this->fileName, NcFile::Replace);
+        NcFile*	netCdfFile = new NcFile(this->fileName.c_str(), NcFile::Replace);
 
         if (!(netCdfFile->is_valid()))
         {

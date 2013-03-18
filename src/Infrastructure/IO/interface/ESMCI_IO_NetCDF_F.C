@@ -44,13 +44,12 @@ extern "C"
 
 //--------------------------------------------------------------------
 void FTN_X(c_esmc_io_netcdfcreate)(IO_NetCDF**  ptr,
-                                 int*         nameLen,
                                  const char*  name,
                                  ESMC_Base**  base,
-                                 int*         status) 
+                                 int*         status,
+                                 ESMCI_FortranStrLenArg name_l) 
 {
-   *ptr = ESMCI_IO_NetCDFCreate(*nameLen,
-                                ESMC_NOT_PRESENT_FILTER(name),
+   *ptr = ESMCI_IO_NetCDFCreate(std::string(name, name_l),
                                 *base,
                                 ESMC_NOT_PRESENT_FILTER(status));
 }
@@ -122,14 +121,13 @@ void FTN_X(c_esmc_io_netcdfgetstate)(IO_NetCDF**  ptr,
 
 //--------------------------------------------------------------------
 void FTN_X(c_esmc_io_netcdfread)(IO_NetCDF**  ptr,
-                               int*         fileNameLen,
                                const char*  fileName,
-                               int*         status) 
+                               int*         status,
+                               ESMCI_FortranStrLenArg fileName_l) 
 {
    ESMF_CHECK_POINTER(*ptr, status)
 
-   int rc = (*ptr)->IO_NetCDF::read(*fileNameLen,
-                                    ESMC_NOT_PRESENT_FILTER(fileName));
+   int rc = (*ptr)->IO_NetCDF::read(std::string(fileName, fileName_l));
 
    if (ESMC_PRESENT(status)) 
    {
@@ -139,14 +137,13 @@ void FTN_X(c_esmc_io_netcdfread)(IO_NetCDF**  ptr,
 
 //--------------------------------------------------------------------
 void FTN_X(c_esmc_io_netcdfwrite)(IO_NetCDF**  ptr,
-                                int*         fileNameLen,
                                 const char*  fileName,
-                                int*         status) 
+                                int*         status,
+                                ESMCI_FortranStrLenArg fileName_l) 
 {
    ESMF_CHECK_POINTER(*ptr, status)
 
-   int rc = (*ptr)->IO_NetCDF::write(*fileNameLen,
-                                     ESMC_NOT_PRESENT_FILTER(fileName));
+   int rc = (*ptr)->IO_NetCDF::write(std::string(fileName, fileName_l));
 
    if (ESMC_PRESENT(status)) 
    {

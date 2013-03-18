@@ -19,6 +19,9 @@
 //------------------------------------------------------------------------------
 #include <ESMCI_F90Interface.h>
 #include <ESMCI_IO_XML.h>
+
+#include <string>
+
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -38,21 +41,15 @@ extern "C" {
 
        //--------------------------------------------------------------------
        void FTN_X(c_esmc_io_xmlcreate)(IO_XML **ptr,
-                                    int *nameLen,
                                     const char *name,
-                                    int *fileNameLen,
                                     const char *fileName,
                                     ESMC_Base **base,
                                     int *status,
-                                    ESMCI_FortranStrLenArg name_l) {
+                                    ESMCI_FortranStrLenArg name_l,
+                                    ESMCI_FortranStrLenArg filename_l) {
           ESMF_CHECK_POINTER(*base, status)
-          *ptr = ESMCI_IO_XMLCreate(
-                                           *nameLen,   // always present 
-                                                       //   internal argument.
-                    ESMC_NOT_PRESENT_FILTER(name),
-                                           *fileNameLen,   // always present 
-                                                       //   internal argument.
-                    ESMC_NOT_PRESENT_FILTER(fileName),
+          *ptr = ESMCI_IO_XMLCreate(std::string(name, name_l),
+                                    std::string(fileName, filename_l),
                                          &((*base)->root),  // attributes
                     ESMC_NOT_PRESENT_FILTER(status) );
        }
@@ -65,20 +62,14 @@ extern "C" {
 
        //--------------------------------------------------------------------
        void FTN_X(c_esmc_io_xmlread)(IO_XML **ptr,
-                                  int *fileNameLen,
                                   const char *fileName,
-                                  int *schemaFileNameLen,
                                   const char *schemaFileName,
                                   int *status,
-                                  ESMCI_FortranStrLenArg fileName_l) {
+                                  ESMCI_FortranStrLenArg fileName_l,
+                                  ESMCI_FortranStrLenArg schemaFileName_l) {
           ESMF_CHECK_POINTER(*ptr, status)
-          int rc = (*ptr)->IO_XML::read(
-                                        *fileNameLen,      // always present 
-                                                           // internal argument.
-                 ESMC_NOT_PRESENT_FILTER(fileName),   
-                                        *schemaFileNameLen, // always present 
-                                                           // internal argument.
-                    ESMC_NOT_PRESENT_FILTER(schemaFileName) );
+          int rc = (*ptr)->IO_XML::read(std::string(fileName,fileName_l),
+                                        std::string(schemaFileName, schemaFileName_l) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
 

@@ -82,10 +82,8 @@ namespace ESMCI{
 //     pointer to newly allocated IO_XML
 //
 // !ARGUMENTS:
-      int                nameLen,          // in
-      const char        *name,             // in
-      int                fileNameLen,      // in
-      const char        *fileName,         // in
+      const string      &name,             // in
+      const string      &fileName,         // in
       Attribute         *attr,             // in
       int               *rc) {             // out - return code
 
@@ -113,9 +111,9 @@ namespace ESMCI{
       return(ESMC_NULL_POINTER);
     }
 
-    if (name != ESMC_NULL_POINTER) {
+    if (!name.empty()) {
       // use given name
-      returnCode = io_xml->ESMC_BaseSetF90Name((char*) name, nameLen);
+      returnCode = io_xml->ESMC_BaseSetF90Name(name.c_str(), name.length());
     } else {
       // create default name "IO_XML<ID>"
       returnCode = io_xml->ESMC_BaseSetName((const char*) ESMC_NULL_POINTER,
@@ -123,23 +121,8 @@ namespace ESMCI{
     }
     ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc);
 
-    if (fileName != ESMC_NULL_POINTER) {
-      if (fileNameLen < ESMF_MAXSTR) {
-        strncpy(io_xml->fileName, fileName, fileNameLen);
-        io_xml->fileName[fileNameLen] = '\0';  // null terminate
-      } else {
-        // truncate
-        strncpy(io_xml->fileName, fileName, ESMF_MAXSTR-1);
-        io_xml->fileName[ESMF_MAXSTR-1] = '\0';  // null terminate
-
-        char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg, "io_xml fileName %s, length >= ESMF_MAXSTR; truncated.",
-                fileName);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-        // TODO: return ESMF_WARNING when defined
-        // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
-      }
-    }
+    if (!fileName.empty())
+      io_xml->fileName = fileName;
 
     if (attr != ESMC_NULL_POINTER) io_xml->attr = attr;
 
@@ -232,10 +215,8 @@ namespace ESMCI{
 //     int error return code
 //
 // !ARGUMENTS:
-      int                fileNameLen,         // in
-      const char        *fileName,            // in
-      int                schemaFileNameLen,   // in
-      const char        *schemaFileName) {    // in
+      const std::string& fileName,            // in
+      const std::string& schemaFileName) {    // in
 
 // !DESCRIPTION:
 //      Reads an {\tt ESMC\_IO\_XML} object from file
@@ -254,48 +235,19 @@ namespace ESMCI{
       return(rc);
     }
 
-    if (fileName != ESMC_NULL_POINTER) {
+    if (!fileName.empty()) {
       // TODO: only use local of fileName this one time;
       //   don't change set IO_XML member fileName
-      if (fileNameLen < ESMF_MAXSTR) {
-        strncpy(this->fileName, fileName, fileNameLen);
-        this->fileName[fileNameLen] = '\0';  // null terminate
-      } else {
-        // truncate
-        strncpy(this->fileName, fileName, ESMF_MAXSTR-1);
-        this->fileName[ESMF_MAXSTR-1] = '\0';  // null terminate
-
-        char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg, "io_xml fileName %s, length >= ESMF_MAXSTR; truncated.",
-                fileName);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-        // TODO: return ESMF_WARNING when defined
-        // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
-      }
+      this->fileName = fileName;
     } else {
       // TODO use existing IO_XML fileName member
     }
 
     // check if we need to use a user-supplied XSD file
-    if (schemaFileName != ESMC_NULL_POINTER) {
+    if (!schemaFileName.empty())
       // TODO: only use local of schemaFileName this one time;
       //   don't change set IO_XML member schemaFileName
-      if (schemaFileNameLen < ESMF_MAXSTR) {
-        strncpy(this->schemaFileName, schemaFileName, schemaFileNameLen);
-        this->schemaFileName[schemaFileNameLen] = '\0';  // null terminate
-      } else {
-        // truncate
-        strncpy(this->schemaFileName, schemaFileName, ESMF_MAXSTR-1);
-        this->schemaFileName[ESMF_MAXSTR-1] = '\0';  // null terminate
-
-        char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg, "io_xml schemaFileName %s, length >= ESMF_MAXSTR; truncated.",
-                schemaFileName);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-        // TODO: return ESMF_WARNING when defined
-        // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
-      }
-    }
+      this->schemaFileName = schemaFileName;
 
 #ifdef ESMF_XERCES
     // TODO:  move parser & readHandler instantiation to Create()/construct(),
@@ -380,12 +332,12 @@ namespace ESMCI{
 
     // load user-supplied schema, if present 
     // TODO:  check if already loaded
-    if (strlen(this->schemaFileName) > 0) {
-      if (!parser->loadGrammar (this->schemaFileName,
+    if (!this->schemaFileName.empty()) {
+      if (!parser->loadGrammar (this->schemaFileName.c_str(),
                                 Grammar::SchemaGrammarType, true))
       {
         char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg, "Unable to load file %s\n", this->schemaFileName);
+        sprintf(logMsg, "Unable to load file %s\n", this->schemaFileName.c_str());
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
         ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
         return rc;
@@ -406,7 +358,7 @@ namespace ESMCI{
         //   SAX2ReadHandler::startElement(),
         //   SAX2ReadHandler::characters(), and
         //   SAX2ReadHandler::endElement() for each XML element
-        parser->parse(this->fileName); 
+        parser->parse(this->fileName.c_str()); 
     }
     catch (const XMLException& toCatch) {
         char logMsg[ESMF_MAXSTR];
@@ -489,7 +441,7 @@ namespace ESMCI{
     // Also, a future use could be to write to a network protocol rather
     // than a file.
     if (writeHandler == ESMC_NULL_POINTER) {
-      writeHandler = new SAX2WriteHandler(this->fileName, "UTF-8",
+      writeHandler = new SAX2WriteHandler(this->fileName.c_str(), "UTF-8",
                                           XMLFormatter::UnRep_CharRef, false);
     }
 
@@ -557,11 +509,11 @@ namespace ESMCI{
     // Also, a future use could be to write to a network protocol rather
     // than a file.
     if(!writeFile.is_open()) {
-      writeFile.open(this->fileName);
+      writeFile.open(this->fileName.c_str());
       if (writeFile) {
         writeFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
       } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, this->fileName, &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, this->fileName.c_str(), &rc);
         return(rc);
       }
     }
@@ -768,7 +720,7 @@ namespace ESMCI{
     // Also, a future use could be to write to a network protocol rather
     // than a file.
     if (writeHandler == ESMC_NULL_POINTER) {
-      writeHandler = new SAX2WriteHandler(this->fileName, "UTF-8",
+      writeHandler = new SAX2WriteHandler(this->fileName.c_str(), "UTF-8",
                                           XMLFormatter::UnRep_CharRef, false);
     }
 
@@ -798,11 +750,11 @@ namespace ESMCI{
     //      create "r,w,rw" flags in Create(), as well as move
     //      readHandler/parser instantiation to Create()/construct().  ?
     if(!writeFile.is_open()) {
-      writeFile.open(this->fileName);
+      writeFile.open(this->fileName.c_str());
       if (writeFile) {
         writeFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
       } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, this->fileName, &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, this->fileName.c_str(), &rc);
         return(rc);
       }
     }
@@ -859,7 +811,7 @@ namespace ESMCI{
     // Also, a future use could be to write to a network protocol rather
     // than a file.
     if (writeHandler == ESMC_NULL_POINTER) {
-      writeHandler = new SAX2WriteHandler(this->fileName, "UTF-8",
+      writeHandler = new SAX2WriteHandler(this->fileName.c_str(), "UTF-8",
                                           XMLFormatter::UnRep_CharRef, false);
     }
 
@@ -888,11 +840,11 @@ namespace ESMCI{
     //      create "r,w,rw" flags in Create(), as well as move
     //      readHandler/parser instantiation to Create()/construct().  ?
     if(!writeFile.is_open()) {
-      writeFile.open(this->fileName);
+      writeFile.open(this->fileName.c_str());
       if (writeFile) {
         writeFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
       } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, this->fileName, &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, this->fileName.c_str(), &rc);
         return(rc);
       }
     }
@@ -940,8 +892,7 @@ namespace ESMCI{
 //     int error return code
 //
 // !ARGUMENTS:
-      int                fileNameLen,         // in
-      const char        *fileName,
+      const std::string& fileName,
       const char        *outChars,
       int                flag) {          // in
 
@@ -967,24 +918,10 @@ namespace ESMCI{
       return(rc);
     }
 
-    if (fileName != ESMC_NULL_POINTER) {
+    if (!fileName.empty()) {
       // TODO: only use local of fileName this one time;
       //   don't change set IO_XML member fileName
-      if (fileNameLen < ESMF_MAXSTR) {
-        strncpy(this->fileName, fileName, fileNameLen);
-        this->fileName[fileNameLen] = '\0';  // null terminate
-      } else {
-        // truncate
-        strncpy(this->fileName, fileName, ESMF_MAXSTR-1);
-        this->fileName[ESMF_MAXSTR-1] = '\0';  // null terminate
-
-        char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg, "io_xml fileName %s, length >= ESMF_MAXSTR; truncated.",
-                fileName);
-        ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN,ESMC_CONTEXT);
-        // TODO: return ESMF_WARNING when defined
-        // if (rc != ESMC_NULL_POINTER) *rc = ESMF_WARNING;
-      }
+      this->fileName = fileName;
     } else {
       // TODO use existing IO_XML fileName member
     }
@@ -997,7 +934,7 @@ namespace ESMCI{
     // Also, a future use could be to write to a network protocol rather
     // than a file.
     if (writeHandler == ESMC_NULL_POINTER) {
-      writeHandler = new SAX2WriteHandler(this->fileName, "UTF-8",
+      writeHandler = new SAX2WriteHandler(this->fileName.c_str(), "UTF-8",
                                           XMLFormatter::UnRep_CharRef, false);
     }
 

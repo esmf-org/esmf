@@ -319,7 +319,7 @@ static const char *const version = "$Id: ESMCI_Base.C,v 1.8 2012/09/20 21:19:31 
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      char *classname) {    // in - context in which name should be unique
+      const char *classname) { // in - context in which name should be unique
 // 
 // !DESCRIPTION:
 //    Accessor method to set base class name.
@@ -361,7 +361,7 @@ static const char *const version = "$Id: ESMCI_Base.C,v 1.8 2012/09/20 21:19:31 
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      char *name,      // in - contains name to set in fortran format
+      const char *name,// in - contains name to set in fortran format
       int nlen) {      // in - length of the input name buffer
 // 
 // !DESCRIPTION:
@@ -491,8 +491,8 @@ static const char *const version = "$Id: ESMCI_Base.C,v 1.8 2012/09/20 21:19:31 
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      char *name,     // in - class name to set, in fortran format
-      int nlen) {     // in - length of class name buffer
+      const char *name,// in - class name to set, in fortran format
+      int nlen) {      // in - length of class name buffer
 // 
 // !DESCRIPTION:
 //     Accessor method to set base class name.

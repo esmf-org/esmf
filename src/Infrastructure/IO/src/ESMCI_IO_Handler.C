@@ -203,7 +203,7 @@ IO_Handler *IO_Handler::create (
 //    IO_Handler * to newly allocated IO_Handler
 //
 // !ARGUMENTS:
-      char const * const file,             // (in) A file for Handler
+      const std::string& file,             // (in) A file for Handler
       ESMC_IOFmt_Flag iofmt,               // (in) the desired I/O format
 //
   int *rc                                  // (out) return code
@@ -222,11 +222,8 @@ IO_Handler *IO_Handler::create (
 
   IO_Handler *iohandler = IO_Handler::create(iofmt, &localrc);
 
-  if (ESMC_NULL_POINTER != iohandler) {
-    strncpy(iohandler->filename, file, ESMF_MAXSTR);
-    // Ensure termination
-    iohandler->filename[ESMF_MAXSTR] = '\0';
-  }
+  if (ESMC_NULL_POINTER != iohandler)
+    iohandler->filename = file;
 
   // return successfully
   if (rc != NULL) {
@@ -375,7 +372,7 @@ int IO_Handler::setFilename(
 //    int error or success return code
 //
 // !ARGUMENTS:
-  const char * const name             // (in) - The new filename
+  const std::string& name             // (in) - The new filename
 ) {
 //
 // !DESCRIPTION:
@@ -400,17 +397,10 @@ int IO_Handler::setFilename(
   }
 
   // clear name for NULL pointer
-  if (name == ESMC_NULL_POINTER){
-    strcpy(filename, "");
-  } else if (strlen(name) > ESMF_MAXSTR) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_LONG_NAME,
-                                          "- Cannot change name, file open",
-                                          &rc);
-    return rc;
-  } else {
-    // Just set the name
-    strcpy(filename, name);
-  }
+  if (name.empty())
+    filename = "";
+  else
+    filename = name;
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -432,7 +422,7 @@ bool IO_Handler::fileExists(
 //    bool true if file exists and meets the input requirements
 //
 // !ARGUMENTS:
-  const char * const name,            // (in) - filename to test
+  const std::string& name,            // (in) - filename to test
   bool needWrite                      // (in) - true if file write is required
 ) {
 //
@@ -463,7 +453,7 @@ bool IO_Handler::fileExists(
     localPet = vm->getLocalPet();
     if (ROOT_PET == localPet) {
       // Get the file status and broadcast to all PETs
-      std::fstream filestr (name, iomode);
+      std::fstream filestr (name.c_str(), iomode);
       fileOK = (filestr.good());
       // filestr will automatically close when function exits
       localrc = vm->broadcast(&fileOK, sizeof(bool), ROOT_PET);
@@ -473,7 +463,7 @@ bool IO_Handler::fileExists(
     }
     if (ESMF_SUCCESS != localrc) {
       char errmsg[ESMF_MAXSTR + 64];
-      sprintf(errmsg, "Error finding file status for \"%s\"", name);
+      sprintf(errmsg, "Error finding file status for \"%s\"", name.c_str());
       ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
     }
   } else {
@@ -481,7 +471,7 @@ bool IO_Handler::fileExists(
     // Log a warning anyway
     ESMC_LogDefault.Write("Unable to obtain a VM",
                           ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-    std::fstream filestr (name, iomode);
+    std::fstream filestr (name.c_str(), iomode);
     fileOK = (filestr.good());
     // filestr will automatically close when function exits
   }
