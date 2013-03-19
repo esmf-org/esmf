@@ -261,30 +261,30 @@ website and from the main ESMF SourceForge site.
 The backup strategy for each entity of the ESMF project is as follows:
 
 \begin{itemize}
-\item {\bf ESMF CVS source}
+\item {\bf ESMF CVS source}\newline
 Run rsync daily on the ESMF cvs repository and roll a tarball.
 On Sundays roll a tarball with a date stamp and move it to the Pluto archive directory.
 
-\item {\bf ESMF GIT source}
+\item {\bf ESMF GIT source}\newline
 Run rsync daily on the ESMF git repository and roll a tarball.
 On Sundays roll a tarball with a date stamp and move it to the Pluto archive directory.
 
-\item {\bf ESMFCONTRIB CVS source}
+\item {\bf ESMFCONTRIB CVS source}\newline
 Run rsync daily on the ESMFCONTRIB cvs repository and roll a tarball.
 On Sundays roll a tarball with a date stamp and move it to the Pluto archive directory.
 
-\item {\bf ESMF website}
+\item {\bf ESMF website}\newline
 On Sundays make a tarball with a date stamp of the ESMF website and move it to the pluto archive directory.
 \end{itemize}
 
 To conserve memory only the backup files for the current year and the prior year will be retained. For years beyond the prior year, retain only 6 month backup files i.e. for 2010 to 2012 of the ESMF cvs files we would have:
 
-20100103.esmf-cvsroot.tar.gz
-20100606.esmf-cvsroot.tar.gz
-20110102.esmf-cvsroot.tar.gz
-20110605.esmf-cvsroot.tar.gz
-20120101.esmf-cvsroot.tar.gz
-All of 1012 and 1013
+20100103.esmf-cvsroot.tar.gz\newline
+20100606.esmf-cvsroot.tar.gz\newline
+20110102.esmf-cvsroot.tar.gz\newline
+20110605.esmf-cvsroot.tar.gz\newline
+20120101.esmf-cvsroot.tar.gz\newline
+All of 1012 and 1013\newline
 
 Once a year in January the back of files of the year before the prior year will be cleaned up. For example, In January 2014 all of backup files of 2012 and 2013 would be archived, so the 2012 backup files will be cleaned up and only 6 month backup files will be retained.
 
