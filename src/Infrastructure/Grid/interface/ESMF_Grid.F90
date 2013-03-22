@@ -5053,7 +5053,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Create Grid based on the input distgrid
     grid = ESMF_GridCreate(distgrid=distgrid, &
-		gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), &
+                coordSys=ESMF_COORDSYS_SPH_DEG, &
 		indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
