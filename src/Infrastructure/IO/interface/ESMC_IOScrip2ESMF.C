@@ -12,6 +12,9 @@
 // convert a cubed sphere grid file in SCRIP format NetCDF file into a ESMF 
 // data format in NetCDF and generate a dual mesh NetCDF file using the center
 // coordiates.
+
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -22,7 +25,6 @@
 #include "ESMC_Conf.h"
 #include "ESMCI_Util.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
 
 #ifdef ESMF_NETCDF
 #include <netcdf.h>

@@ -23,9 +23,7 @@
 //
 //-----------------------------------------------------------------------------
 
-// LogErr headers
-#include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 
 // include associated header file
 #include "ESMCI_Comp.h"
@@ -36,6 +34,7 @@
 
 // include ESMF headers
 #include "ESMCI_FTable.h"
+#include "ESMCI_LogErr.h"
 
 
 //-----------------------------------------------------------------------------

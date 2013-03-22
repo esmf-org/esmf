@@ -23,13 +23,14 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 // include associated header file
 #include "ESMC_DistGrid.h"
 
 // include ESMF headers
 #include "ESMCI_Arg.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_DistGrid.h"
 
 //-----------------------------------------------------------------------------

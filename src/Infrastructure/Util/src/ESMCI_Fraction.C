@@ -21,6 +21,8 @@
 #define ESMC_FILENAME "ESMCI_Fraction.C"
 //==============================================================================
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 // associated class definition file
 #include "ESMCI_Fraction.h"
  
@@ -33,7 +35,6 @@
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
 
 
 // TODO: resolve ambiguity between C and C++ versions of llabs() function,

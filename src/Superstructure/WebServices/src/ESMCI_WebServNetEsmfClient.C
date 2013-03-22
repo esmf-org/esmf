@@ -25,6 +25,8 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 #include "ESMCI_WebServNetEsmfClient.h"
 
 #include <string.h>
@@ -32,8 +34,6 @@
 #include "ESMCI_WebServSocketUtils.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
-
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -208,7 +208,7 @@ int  ESMCI_WebServNetEsmfClient::sendRequest(
 
 	if (strcmp(requestStr, "UNKN") == 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_ARG_VALUE,
          "Invalid request id.",
          &localrc);
@@ -218,7 +218,7 @@ int  ESMCI_WebServNetEsmfClient::sendRequest(
 
 	if (theSocket.send(requestStr) <= 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error writing request id to socket.",
          &localrc);
@@ -233,7 +233,7 @@ int  ESMCI_WebServNetEsmfClient::sendRequest(
 	{
 		if ((bytesWritten = theSocket.write(length, data)) != length)
 		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.ESMCI_LogMsgFoundError(
          	ESMC_RC_FILE_WRITE,
          	"Error writing request data to socket.",
          	&localrc);
@@ -280,7 +280,7 @@ int  ESMCI_WebServNetEsmfClient::sendData(
 	{
 		if ((bytesWritten = theSocket.write(length, data)) != length)
 		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.ESMCI_LogMsgFoundError(
          	ESMC_RC_FILE_WRITE,
          	"Error writing data to socket.",
          	&localrc);
@@ -324,7 +324,7 @@ int  ESMCI_WebServNetEsmfClient::sendString(
 
 	if ((bytesWritten = theSocket.send(data)) <= 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error writing string to socket.",
          &localrc);
@@ -368,7 +368,7 @@ int  ESMCI_WebServNetEsmfClient::getResponse(
 	length = 0;
 	if (theSocket.read(length, data) <= 0)
 	{
-     	ESMC_LogDefault.ESMC_LogMsgFoundError(
+     	ESMC_LogDefault.ESMCI_LogMsgFoundError(
         	ESMC_RC_FILE_WRITE,
         	"Error reading request response from socket.",
         	&localrc);

@@ -33,6 +33,8 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 // include associated header file
 #include "ESMCI_VM.h"
 
@@ -48,10 +50,7 @@
 #include "ESMCI_Base.h" 
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_Util.h"
-
-// LogErr
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
 
 using std::string;
 using std::vector;

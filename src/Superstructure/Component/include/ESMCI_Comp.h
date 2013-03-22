@@ -29,9 +29,9 @@
 //EOPI
 //-----------------------------------------------------------------------------
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
 
 #include "ESMCI_State.h"
 #include "ESMCI_Clock.h"

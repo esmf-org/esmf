@@ -36,16 +36,16 @@
  TODO: Remove dependencies on the following macros and remove them! *gjt*
 #endif
 
-#define ESMC_LogAllocError(rc) \
+#define ESMCI_LogAllocError(rc) \
 AllocError(ESMC_CONTEXT,rc)
 
-#define ESMC_LogMsgAllocError(msg,rc) \
+#define ESMCI_LogMsgAllocError(msg,rc) \
 MsgAllocError(msg,ESMC_CONTEXT,rc)
 
-#define ESMC_LogMsgFoundError(status,msg,rc) \
+#define ESMCI_LogMsgFoundError(status,msg,rc) \
 MsgFoundError(status,msg,ESMC_CONTEXT,rc)
 
-#define ESMC_LogWrite(msg,logtype) \
+#define ESMCI_LogWrite(msg,logtype) \
 Write(msg,logtype,ESMC_CONTEXT)
 
 #endif

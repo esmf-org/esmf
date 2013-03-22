@@ -22,6 +22,8 @@
 //
 #define ESMC_FILENAME "ESMCI_SAX2WriteHandler.C"
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 #include<iostream>
 using namespace std;
 
@@ -30,7 +32,6 @@ using namespace std;
 #endif
 
 #include <ESMCI_LogErr.h>
-#include <ESMF_LogMacros.inc>
 
 // associated class definition file
 #include <ESMCI_SAX2WriteHandler.h>

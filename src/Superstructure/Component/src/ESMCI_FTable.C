@@ -23,6 +23,8 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 // include associated header file
 #include "ESMCI_FTable.h"
 
@@ -35,13 +37,10 @@
 #include <dlfcn.h>
 #endif
 
-// LogErr
-#include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
-
 // include ESMF headers
 #include "ESMCI_Comp.h"
 #include "ESMCI_CompTunnel.h"
+#include "ESMCI_LogErr.h"
 
 using std::string;
 

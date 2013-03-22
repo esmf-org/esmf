@@ -26,6 +26,7 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 
 #include "ESMCI_WebServSocketUtils.h"
 
@@ -42,7 +43,6 @@
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
 #include "ESMCI_WebServNetEsmf.h"
 
 //-----------------------------------------------------------------------------
@@ -285,7 +285,7 @@ int  ESMCI_WebServSend(
 		}
 		else if (bytesWritten < 0)
 		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.ESMCI_LogMsgFoundError(
          	ESMC_RC_FILE_WRITE,
          	"Error while writing to socket.",
          	&localrc);
@@ -355,7 +355,7 @@ int  ESMCI_WebServRecv(
 		}
       else if (bytesRead < 0)
 		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.ESMCI_LogMsgFoundError(
          	ESMC_RC_FILE_READ,
          	"Error while reading from socket.",
          	&localrc);

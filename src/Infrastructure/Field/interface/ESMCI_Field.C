@@ -1,4 +1,3 @@
-
 //$1.10 2007/04/26 16:13:59 rosalind Exp $
 //
 // Earth System Modeling Framework
@@ -24,7 +23,8 @@
 // actual code which is implemented in F90.
 //
 //-----------------------------------------------------------------------------
-//
+
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 
 // associated header file
 #include "ESMCI_Field.h"
@@ -36,7 +36,6 @@
 
 // LogErr headers
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
 
 //-----------------------------------------------------------------------------
 //BOP

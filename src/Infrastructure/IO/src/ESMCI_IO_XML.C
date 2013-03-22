@@ -19,45 +19,46 @@
 //
 //-------------------------------------------------------------------------
 //
- #define ESMC_FILENAME "ESMCI_IO_XML.C"
+#define ESMC_FILENAME "ESMCI_IO_XML.C"
 
- // higher level, 3rd party or system includes here
- #include <fstream>
- #include <string>
- #include <cstdio>
- #include <cstdarg>
- #include <cstring>
- #include <memory> // std::auto_ptr
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
+// higher level, 3rd party or system includes here
+#include <fstream>
+#include <string>
+#include <cstdio>
+#include <cstdarg>
+#include <cstring>
+#include <memory> // std::auto_ptr
 
 #ifdef ESMF_XERCES
- #include <xercesc/sax2/SAX2XMLReader.hpp>
- #include <xercesc/sax2/XMLReaderFactory.hpp>
- #include <xercesc/internal/VecAttributesImpl.hpp>
- #include <xercesc/util/RefVectorOf.hpp>
- #include <xercesc/validators/common/Grammar.hpp>
- #include <xercesc/framework/XMLGrammarPoolImpl.hpp>
+#include <xercesc/sax2/SAX2XMLReader.hpp>
+#include <xercesc/sax2/XMLReaderFactory.hpp>
+#include <xercesc/internal/VecAttributesImpl.hpp>
+#include <xercesc/util/RefVectorOf.hpp>
+#include <xercesc/validators/common/Grammar.hpp>
+#include <xercesc/framework/XMLGrammarPoolImpl.hpp>
 #endif
  
- #include <ESMCI_LogErr.h>
- #include <ESMF_LogMacros.inc>
+#include <ESMCI_LogErr.h>
 
- // associated class definition files
- #include <ESMCI_IO_XML.h>
- #include <ESMCI_SAX2ReadHandler.h>
- #include <ESMCI_SAX2WriteHandler.h>
- #include <ESMCI_Util.h>
+// associated class definition files
+#include <ESMCI_IO_XML.h>
+#include <ESMCI_SAX2ReadHandler.h>
+#include <ESMCI_SAX2WriteHandler.h>
+#include <ESMCI_Util.h>
 
- using std::string;
- using std::endl;
+using std::string;
+using std::endl;
 
 #ifdef ESMF_XERCES
- using std::auto_ptr;
+using std::auto_ptr;
 #endif
 
 //-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.24 2012/09/20 21:19:44 w6ws Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_IO_XML.C,v 1.24 2012/09/20 21:19:44 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 
@@ -174,7 +175,7 @@ namespace ESMCI{
 
   // return with errors for NULL pointer
   if (io_xml == ESMC_NULL_POINTER || *io_xml == ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to io_xml", &rc);
     return rc;
   }
@@ -186,10 +187,10 @@ namespace ESMCI{
     (*io_xml)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
     return rc;
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
     return rc;
   }
@@ -596,7 +597,7 @@ namespace ESMCI{
 
     // write start of tag & any attrs
     rc = writeElementCore(name, value, indentLevel, nPairs, args);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
 
 #ifdef ESMF_XERCES
     // write end-of-line
@@ -655,7 +656,7 @@ namespace ESMCI{
 
     // write start of tag & any attrs
     rc = writeElementCore(name, value, indentLevel, nPairs, args);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
 
 #ifdef ESMF_XERCES
     // write the end of the XML element </name>

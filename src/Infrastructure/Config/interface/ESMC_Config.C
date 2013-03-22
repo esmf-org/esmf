@@ -23,6 +23,8 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 // include associated header file
 #include "ESMC_Config.h"
 
@@ -35,7 +37,6 @@
 #include "ESMCI_Arg.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string

@@ -24,15 +24,17 @@
 // in the companion file ESMCI_Attribute.h
 //
 //-----------------------------------------------------------------------------
-//
- // associated class definition file and others
-#include "ESMCI_Macros.h"
+
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
+// associated class definition file and others
 #include "ESMCI_Attribute.h"
+
+#include "ESMCI_Macros.h"
 #include "ESMCI_IO_XML.h"
 #include "ESMCI_Base.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Time.h"
-#include "ESMF_LogMacros.inc"
 #include "ESMCI_Grid.h"
 
 #include <sstream>
@@ -159,7 +161,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   string attPackInstanceName;
   attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
   if(!attpack) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
         "Cannot find the specified Attribute package\n", &localrc);
       return localrc;
   }
@@ -167,7 +169,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // make an Attribute in the new attpack
   attr = new Attribute(name, convention, purpose, object);  
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
       "failed initialized an attpack Attribute", &localrc);
     return localrc;
   }
@@ -175,7 +177,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // add the new Attribute to the new attpack
   localrc = attpack->AttributeSet(attr);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_NOTSET,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ATTR_NOTSET,
       "failed adding an attpack Attribute", &localrc);
     return localrc;
   }
@@ -212,7 +214,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   localrc = ESMC_RC_NOT_IMPL;
 
   if (!attrPackHead) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_BAD,
       "cannot add attpack attribute to non-attpack", &localrc);
     return localrc;
   }
@@ -220,7 +222,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // make an Attribute in the new attpack
   attr = new Attribute(name, attrConvention, attrPurpose, attrObject);  
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
       "failed initialized an attpack Attribute", &localrc);
     return localrc;
   }
@@ -228,7 +230,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // add the new Attribute to this attPack
   localrc = AttributeSet(attr);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_NOTSET,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ATTR_NOTSET,
       "failed adding an attpack Attribute", &localrc);
     return localrc;
   }
@@ -269,14 +271,14 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // name the attribute package using convention, purpose, and object
   attpack = new Attribute(convention, purpose, object);
   if (!attpack) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
       "failed initializing an attpack", &localrc);
     return localrc;
   }
 
   localrc = AttPackSet(attpack);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_NOTSET,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ATTR_NOTSET,
       "failed adding an attpack to an Attribute", &localrc);
     return localrc;
   }
@@ -320,7 +322,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
       // create an Attribute package for grids which uses internal Grid info
       localrc = AttPackCreateCustom(CIM_1_5_1_CONV, GRIDS_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       // add Attributes to the grids Attribute package
@@ -393,11 +395,11 @@ const char Attribute::GRIDS_PURP[]   = "grids";
     }
     if (convention.compare(ESMF_CONV)==0 && purpose.compare(GENERAL_PURP)==0) {
       localrc = AttPackCreateCustom(ESMF_CONV, GENERAL_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttPackAddAttribute("RegDecompX", ESMF_CONV, GENERAL_PURP, object);
       localrc = AttPackAddAttribute("RegDecompY", ESMF_CONV, GENERAL_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
 
@@ -410,12 +412,12 @@ const char Attribute::GRIDS_PURP[]   = "grids";
          (convention.compare(CIM_1_5_CONV)==0 && purpose.compare(INPUTS_PURP)==0))
     {
       localrc = AttPackCreateCustom(CF_CONV, GENERAL_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttPackAddAttribute("LongName", CF_CONV, GENERAL_PURP,object);
       localrc = AttPackAddAttribute("ShortName", CF_CONV, GENERAL_PURP, object);
       localrc = AttPackAddAttribute("Units", CF_CONV, GENERAL_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
     if (((convention.compare(ESG_CONV)==0 ||
@@ -423,26 +425,26 @@ const char Attribute::GRIDS_PURP[]   = "grids";
          (convention.compare(CF_CONV)==0    && purpose.compare(EXTENDED_PURP)==0) ||
          (convention.compare(CIM_1_5_CONV)==0 && purpose.compare(INPUTS_PURP)==0)) {
       localrc = AttPackNest(CF_CONV, EXTENDED_PURP, object, CF_CONV, GENERAL_PURP);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttPackAddAttribute("StandardName", CF_CONV, EXTENDED_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
     if (((convention.compare(ESG_CONV)==0 ||
           convention.compare(ESMF_CONV)==0) && purpose.compare(GENERAL_PURP)==0) ||
          (convention.compare(CIM_1_5_CONV)==0 && purpose.compare(INPUTS_PURP)==0)) {
       localrc = AttPackNest(ESG_CONV, GENERAL_PURP, object, CF_CONV, EXTENDED_PURP);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttPackAddAttribute("Intent", ESG_CONV, GENERAL_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
     if ((convention.compare(ESMF_CONV)==0 && purpose.compare(GENERAL_PURP)==0) ||
         (convention.compare(CIM_1_5_CONV)==0 && purpose.compare(INPUTS_PURP)==0)) {
       localrc = AttPackNest(ESMF_CONV, GENERAL_PURP, object, ESG_CONV, GENERAL_PURP);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
     // CIM inherits (ESMF, General)
@@ -450,7 +452,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
         purpose.compare(INPUTS_PURP)==0) {
       localrc = AttPackNest(CIM_1_5_CONV, INPUTS_PURP, object,
                             ESMF_CONV, GENERAL_PURP);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttPackAddAttribute("CouplingPurpose", CIM_1_5_CONV,
                             INPUTS_PURP, object);
@@ -470,17 +472,17 @@ const char Attribute::GRIDS_PURP[]   = "grids";
                             INPUTS_PURP, object);
       localrc = AttPackAddAttribute("TimeTransformationType", CIM_1_5_CONV,
                             INPUTS_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
     
   } else if (object.compare("state")==0) {
   // State standard Attribute package
     localrc = AttPackCreateCustom(ESMF_CONV, GENERAL_PURP, object);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     localrc = AttPackAddAttribute("Intent", ESMF_CONV, GENERAL_PURP, object);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
 
   } else if (object.compare("comp")==0) {
@@ -488,7 +490,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
     if ((convention.compare(ESG_CONV)==0 ||
          convention.compare(ESMF_CONV)==0) && purpose.compare(GENERAL_PURP)==0) {
       localrc = AttPackCreateCustom(ESG_CONV, GENERAL_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttPackAddAttribute("Agency", ESG_CONV, GENERAL_PURP, object);
       localrc = AttPackAddAttribute("Author", ESG_CONV, GENERAL_PURP, object);
@@ -500,12 +502,12 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       localrc = AttPackAddAttribute("ModelComponentFramework", ESG_CONV, GENERAL_PURP, object);
       localrc = AttPackAddAttribute("PhysicalDomain", ESG_CONV, GENERAL_PURP, object);
       localrc = AttPackAddAttribute("Version", ESG_CONV, GENERAL_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
     if (convention.compare(ESMF_CONV)==0 && purpose.compare(GENERAL_PURP)==0) {
       localrc = AttPackNest(ESMF_CONV, GENERAL_PURP, object, ESG_CONV, GENERAL_PURP);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
     if (convention.compare(CIM_1_5_CONV)==0 &&
@@ -514,22 +516,22 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       // TODO: uncomment and expand when we have better definition from CIM
       //localrc = AttPackCreateCustom(CIM_1_5_CONV,
       //                              "Scientific Property Description", object);
-      //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      //if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       //      &localrc)) return localrc;
 
       localrc = AttPackCreateCustom(CIM_1_5_CONV,
                                     PLATFORM_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       localrc = AttPackCreateCustom("ISO 19115",
                                     CITATION_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       localrc = AttPackCreateCustom("ISO 19115",
                                     RESP_PARTY_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       vector<string> nestconv, nestpurp;
@@ -549,7 +551,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       localrc = AttPackNest(CIM_1_5_CONV,
                             MODEL_COMP_PURP, object,
                             nestcount, nestconv, nestpurp);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
  
       //
@@ -573,7 +575,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
                             MODEL_COMP_PURP, object);
       localrc = AttPackAddAttribute("Version", CIM_1_5_CONV,
                             MODEL_COMP_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       //
@@ -599,7 +601,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
                             MODEL_COMP_PURP, object);
       localrc = AttPackAddAttribute("SimulationStartDate", CIM_1_5_CONV,
                             MODEL_COMP_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       //
@@ -610,7 +612,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
                             MODEL_COMP_PURP, object);
       localrc = AttPackAddAttribute("PreviousVersionDescription", CIM_1_5_CONV,
                             MODEL_COMP_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       //
@@ -625,7 +627,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       //                      "Scientific Property Description", object);
       //localrc = AttPackAddAttribute("ScientificPropertyValue", CIM_1_5_CONV,
       //                      "Scientific Property Description", object);
-      //if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      //if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       //      &localrc)) return localrc;
 
       //
@@ -655,7 +657,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
                             PLATFORM_PURP, object);
       localrc = AttPackAddAttribute("MachineVendor", CIM_1_5_CONV,
                             PLATFORM_PURP, object);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       //
       // Citation attributes
@@ -679,7 +681,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       localrc = AttPackAddAttribute("URL", "ISO 19115",
                             CITATION_PURP, object);
 
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       //
@@ -708,7 +710,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       localrc = AttPackAddAttribute("URL", "ISO 19115",
                                       RESP_PARTY_PURP, object);
 
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
   }
@@ -755,7 +757,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   if (convention.compare(CIM_1_5_CONV)!=0 ||
       purpose.compare(MODEL_COMP_PURP)!=0) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_BAD,
           "non-standard attpack type", &localrc);
         return localrc;
   }
@@ -764,13 +766,13 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   stdParent = new Attribute(convention, purpose, object);
   if(!stdParent) {
     // TODO:  more detailed error message including conv,purp,object 
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
       "could not make the attpack", &localrc);
     return localrc;
   }
   // ... and attach to *this* attribute node
   localrc = AttPackSet(stdParent);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   // populate parent attpack with standard attributes
@@ -788,7 +790,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   localrc = stdParent->AttPackAddAttribute("ShortName");
   localrc = stdParent->AttPackAddAttribute("URL");
   localrc = stdParent->AttPackAddAttribute("Version");
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   //
@@ -804,7 +806,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   localrc = stdParent->AttPackAddAttribute("SimulationRationale");
   localrc = stdParent->AttPackAddAttribute("SimulationShortName");
   localrc = stdParent->AttPackAddAttribute("SimulationStartDate");
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   //
@@ -813,7 +815,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   //
   localrc = stdParent->AttPackAddAttribute("PreviousVersion");
   localrc = stdParent->AttPackAddAttribute("PreviousVersionDescription");
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   // TODO:  Scientific Property attributes
@@ -827,12 +829,12 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   stdChild = new Attribute(CIM_1_5_CONV, PLATFORM_PURP, object);
   if(!stdChild) {
     // TODO:  more detailed error message including conv,purp,object 
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
       "could not make the attpack", &localrc);
     return localrc;
   }
   localrc = stdParent->AttPackSet(stdChild);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   //
@@ -851,7 +853,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   localrc = stdChild->AttPackAddAttribute("MachineProcessorType");
   localrc = stdChild->AttPackAddAttribute("MachineSystem");
   localrc = stdChild->AttPackAddAttribute("MachineVendor");
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   // for each standard nested attpack type ...
@@ -860,7 +862,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
     if (nestConvention[i].compare("ISO 19115") != 0 ||
         (nestPurpose[i].compare(CITATION_PURP) != 0 &&
          nestPurpose[i].compare(RESP_PARTY_PURP) != 0)) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_BAD,
         "attpack not a standard child of parent", &localrc);
       return localrc;
     }
@@ -869,12 +871,12 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       stdChild = new Attribute(nestConvention[i], nestPurpose[i], object);
       if(!stdChild) {
         // TODO:  more detailed error message including conv,purp,object 
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
+        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
           "could not make the attpack", &localrc);
         return localrc;
       }
       localrc = stdParent->AttPackSet(stdChild);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
 
       // return the child's unique name (out)
@@ -896,7 +898,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
         localrc = stdChild->AttPackAddAttribute("PresentationForm");
         localrc = stdChild->AttPackAddAttribute("ShortTitle");
         localrc = stdChild->AttPackAddAttribute("URL");
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       }
 
@@ -913,7 +915,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
         localrc = stdChild->AttPackAddAttribute("PhysicalAddress");
         localrc = stdChild->AttPackAddAttribute("ResponsiblePartyRole");
         localrc = stdChild->AttPackAddAttribute("URL");
-        if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       }
     }
@@ -960,7 +962,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   // ... and then use the multi-item vector interface
   localrc = AttPackNest(convention, purpose, object, 1, cnconv, cnpurp);
-  ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
 
   return localrc;
 
@@ -1021,7 +1023,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
                              attPackInstanceName);
     if(!nestpack[i]) {
       // TODO:  more detailed error message including conv,purp,object
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND,
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_NOT_FOUND,
         "could not find the attpack", &localrc);
       delete [] nestpack;
       return localrc;
@@ -1030,7 +1032,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
       localParent = nestpack[0]->parent;
     } else {
       if (nestpack[i]->parent != localParent) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_BAD,
           "parents of nested attpacks not one and the same", &localrc);
         delete [] nestpack;
         return localrc;
@@ -1042,7 +1044,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   attpack = new Attribute(convention, purpose, object);
   if(!attpack) {
     // TODO:  more detailed error message including conv,purp,object 
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED,
       "could not make the attpack", &localrc);
     delete [] nestpack;
     return localrc;
@@ -1050,7 +1052,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   
   // Put the attpack onto nestPack's parent
   localrc = localParent->AttPackSet(attpack);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) {delete [] nestpack; return localrc;}
 
   // Now remove nestpacks from their parent
@@ -1073,13 +1075,13 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // Put nestpacks onto attpack as child nodes
   for (i=0; i<nestCount; i++) {
     localrc = attpack->AttPackSet(nestpack[i]);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) {delete [] nestpack; return localrc;}
   }
   
   if (!done) {
     // TODO:  more detailed error message including conv,purp,object 
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_DELETED,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_DELETED,
       "AttPackNest() failed removing the nested Attribute packages", &localrc);
     delete [] nestpack;
     return localrc;
@@ -1491,7 +1493,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // get the attpack
   attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
   if(!attpack) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
       "Cannot find the Attribute package", &localrc);
     return localrc;
   }
@@ -1509,7 +1511,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   }
   
   if (!done) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_DELETED,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_DELETED,
       "AttPackRemove could not locate the Attribute package", &localrc);
     return localrc;
   }
@@ -1556,21 +1558,21 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // get the attpack
   attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
   if(!attpack) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
       "Cannot find the specified Attribute package", &localrc);
     return localrc;
   }
   
   attr = attpack->AttPackGetAttribute(name);
   if(!attr) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
       "Cannot find the Attribute in this Attribute Package", &localrc);
     return localrc;
   }
     
   attrparent = attr->parent;
   localrc = attrparent->AttributeRemove(name);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
   
   return ESMF_SUCCESS;
@@ -1616,7 +1618,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // Find the attpack
   attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
   if(!attpack) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
       "Cannot find the specified Attribute package", &localrc);
     return localrc;
   }
@@ -1627,13 +1629,13 @@ const char Attribute::GRIDS_PURP[]   = "grids";
     sprintf(msgbuf, 
       "This Attribute package does not have an Attribute named %s\n",
        name.c_str());
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, msgbuf, &localrc);
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_NOT_FOUND, msgbuf, &localrc);
     return localrc;
   }
 
   // Set the Attribute
   localrc = attr->AttrModifyValue(tk, count, value);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
   
   // return
@@ -1672,7 +1674,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   // simple sanity checks
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_BAD, 
       "bad Attribute object", &localrc);
     return localrc;
   }
@@ -1714,7 +1716,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 /*
 if (attrRoot == ESMF_TRUE) {
 	printf("BIG PROBLEM - setting attrPack on a root Attribute");
-	ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD, 
+	ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_BAD, 
         "BIG PROBLEM - setting attrPack on a root Attribute", &localrc);
 	return localrc;
 }
@@ -1833,7 +1835,7 @@ if (attrRoot == ESMF_TRUE) {
 
   // call local copy on this Attribute 
   localrc = AttributeCopy(source);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   // copy Attributes and Attribute packages by reference
@@ -1841,7 +1843,7 @@ if (attrRoot == ESMF_TRUE) {
     attr = NULL;
     attr = new Attribute(ESMF_FALSE);
     if (!attr) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
         "Failed allocating an Attribute", &localrc);
       return localrc;
     }
@@ -1849,10 +1851,10 @@ if (attrRoot == ESMF_TRUE) {
     (attr->attrBase) = (this->attrBase); 
     (attr->parent) = this;
     localrc = attr->AttributeCopyValue(*(source.attrList.at(i)));
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     localrc = AttributeSet(attr);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
   // copy Attribute packages by reference
@@ -1860,7 +1862,7 @@ if (attrRoot == ESMF_TRUE) {
     attr = NULL;
     attr = new Attribute(ESMF_FALSE);
     if (!attr) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
         "Failed allocating an Attribute", &localrc);
       return localrc;
     }
@@ -1868,10 +1870,10 @@ if (attrRoot == ESMF_TRUE) {
     (attr->attrBase) = (this->attrBase);
     (attr->parent) = this;
     localrc = attr->AttributeCopyValue(*(source.packList.at(i)));
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     localrc = AttPackSet(attr);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
   // copy Attribute links by value
@@ -1879,7 +1881,7 @@ if (attrRoot == ESMF_TRUE) {
     attr = source.linkList.at(i);
     ESMC_Logical temp_linkChange = ESMF_TRUE;
     localrc = AttributeLink(attr, &temp_linkChange);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
 
@@ -1917,7 +1919,7 @@ if (attrRoot == ESMF_TRUE) {
 
   // call local copy on source
   localrc = AttributeCopy(source);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   // copy base level Attributes by value
@@ -1925,7 +1927,7 @@ if (attrRoot == ESMF_TRUE) {
     attr = NULL;
     attr = new Attribute(ESMF_FALSE);
     if (!attr) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
         "Failed allocating an Attribute", &localrc);
       return localrc;
     }
@@ -1933,11 +1935,11 @@ if (attrRoot == ESMF_TRUE) {
     (attr->attrBase) = (this->attrBase);
     (attr->parent) = this;
     localrc = attr->AttributeCopyValue(*(source.attrList.at(i)));
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     // add newly initialized attr to destination
     localrc = AttributeSet(attr);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
   // copy base level Attributes by value
@@ -1945,7 +1947,7 @@ if (attrRoot == ESMF_TRUE) {
     attr = NULL;
     attr = new Attribute(ESMF_FALSE);
     if (!attr) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
         "Failed allocating an Attribute", &localrc);
       return localrc;
     }
@@ -1953,11 +1955,11 @@ if (attrRoot == ESMF_TRUE) {
     (attr->attrBase) = (this->attrBase);
     (attr->parent) = this;
     localrc = attr->AttributeCopyValue(*(source.packList.at(i)));
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     // add newly initialized attr to destination
     localrc = AttPackSet(attr);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
 
@@ -1995,14 +1997,14 @@ if (attrRoot == ESMF_TRUE) {
 
   // call local copy on source
   localrc = AttributeCopy(*source);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   // copy base level Attributes by value
   for (i=0; i<source->attrList.size(); i++) {
     // add each attr to destination
     localrc = AttributeSet(source->attrList.at(0));
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     // now remove this Attribute from source, this is a swap
     source->attrList.erase(source->attrList.begin());
@@ -2011,7 +2013,7 @@ if (attrRoot == ESMF_TRUE) {
   for (i=0; i<source->packList.size(); i++) {
     // add each attr to destination
     localrc = AttPackSet(source->packList.at(0));
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     // now remove this Attribute from source, this is a swap
     source->packList.erase(source->packList.begin());
@@ -2021,11 +2023,11 @@ if (attrRoot == ESMF_TRUE) {
   for (i=0; i<source->linkList.size(); i++) {
     // set the links
     localrc = AttributeLink(source->linkList.at(0));
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     // now remove the link from source, this is a swap
     localrc = source->AttributeLinkRemove(source->linkList.at(0));
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
 */
@@ -2072,7 +2074,7 @@ if (attrRoot == ESMF_TRUE) {
     numattrs = 0;
     objcount++;
     localrc = attpack->AttributeCountTreeAttpack(objcount, numattrs);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
 
@@ -2080,7 +2082,7 @@ if (attrRoot == ESMF_TRUE) {
   for (i=0; i<linkList.size(); i++) {
     localrc = linkList.at(i)->AttributeCountTree(convention, purpose, object, 
       objcount, numattrs);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     }
 
@@ -2119,7 +2121,7 @@ if (attrRoot == ESMF_TRUE) {
   // Recurse the hierarchy
   for (i=0; i<packList.size(); i++) {
     localrc = packList.at(i)->AttributeCountTreeAttpack(objcount,numattrs);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     }
 
@@ -2165,14 +2167,14 @@ if (attrRoot == ESMF_TRUE) {
   if (attpack) {
     index = 0;
     localrc = attpack->AttributeCountTreeLensAttpack(index, attrLens, attrNames);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
 
   // Recurse the hierarchy
   for (i=0; i<linkList.size(); ++i) {
     localrc = linkList.at(i)->AttributeCountTreeLens(convention, purpose, object, attrLens, attrNames);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     }
 
@@ -2214,12 +2216,12 @@ if (attrRoot == ESMF_TRUE) {
     else if (attrLens[index] > 0) {
       // this should fail
       if (attrNames[index].compare(attrList.at(i)->attrName)) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_WRONG, 
+        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_WRONG, 
           "Attribute package name out of order", &localrc);
         return localrc;
       }
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_BAD, 
         "Length < 0 = no good", &localrc);
       return localrc;
     }
@@ -2269,7 +2271,7 @@ if (attrRoot == ESMF_TRUE) {
   // Recurse the hierarchy
   for (i=0; i<packList.size(); i++) {
     localrc = packList.at(i)->AttributeCountTreeLensAttpack(index, attrLens, attrNames);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     }
 
@@ -2316,7 +2318,7 @@ if (attrRoot == ESMF_TRUE) {
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_I4) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
         "Attribute not typekind I4", &localrc);
       return localrc;
     }
@@ -2371,7 +2373,7 @@ if (attrRoot == ESMF_TRUE) {
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_I8) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
         "Attribute not typekind I8", &localrc);
       return localrc;
     }
@@ -2426,7 +2428,7 @@ if (attrRoot == ESMF_TRUE) {
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_R4) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
         "Attribute not typekind R4", &localrc);
       return localrc;
     }
@@ -2481,7 +2483,7 @@ if (attrRoot == ESMF_TRUE) {
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_R8) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
         "Attribute not typekind R8", &localrc);
       return localrc;
     }
@@ -2536,7 +2538,7 @@ if (attrRoot == ESMF_TRUE) {
   else {
     // simple sanity checks
     if (attr->tk != ESMC_TYPEKIND_LOGICAL) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
         "Attribute not typekind LOGICAL", &localrc);
       return localrc;
     }
@@ -2595,7 +2597,7 @@ if (attrRoot == ESMF_TRUE) {
         "Attribute not set, will return empty vector", ESMC_LOGMSG_INFO);
     }
     else if (attr->tk != ESMC_TYPEKIND_CHARACTER) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
         "Attribute not typekind CHARACTER", &localrc);
       return localrc;
     }
@@ -2687,7 +2689,7 @@ if (attrRoot == ESMF_TRUE) {
 
   // simple sanity checks
   if (num < 0) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_BAD, 
       "Attribute index must be >0", &localrc);
     return localrc;
   }
@@ -2767,7 +2769,7 @@ if (attrRoot == ESMF_TRUE) {
 
   // simple sanity check
   if ((number < 0) || (number >= attrList.size())) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
       "Invalid index for AttributeGet(index)", NULL);
     return NULL;
   }
@@ -2829,7 +2831,7 @@ if (attrRoot == ESMF_TRUE) {
   // look for the Attribute
   attr = AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
       "Could not locate the Attribute", &localrc);
     return localrc;
   }
@@ -2844,14 +2846,14 @@ if (attrRoot == ESMF_TRUE) {
   
   // check that this is a char Attribute
   if (attr->tk != ESMC_TYPEKIND_CHARACTER) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
       "Attribute is not typekind CHARACTER", &localrc);
     return localrc;
   }
   
   // check that the count is correct
   if (count < 0 || (count > attr->items)) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ATTR_ITEMSOFF, 
       "Count argument is incorrect", &localrc);
     return localrc;
   }
@@ -2985,7 +2987,7 @@ if (attrRoot == ESMF_TRUE) {
 
   attr = AttributeGet(name);
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
       "Attribute not found", &localrc);
     return localrc;
   }
@@ -3094,7 +3096,7 @@ if (attrRoot == ESMF_TRUE) {
       linkList.at(i)->attrBase->ESMC_BaseGetID()) &&
       ESMCI::VMIdCompare(destination->attrBase->ESMC_BaseGetVMId(),
       linkList.at(i)->attrBase->ESMC_BaseGetVMId())) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_LINK, 
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ATTR_LINK, 
         "AttributeLink tried to double set a link", &localrc);
       return localrc;
     }
@@ -3154,7 +3156,7 @@ if (attrRoot == ESMF_TRUE) {
   
   // link wasn't found
   if (!done) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
       "AttributeLink could not find the link to remove", &localrc);
     return localrc;
   }
@@ -3201,7 +3203,7 @@ if (attrRoot == ESMF_TRUE) {
   }
   
   if (!done) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_NOT_FOUND, 
       "Could not locate the Attribute to remove", &localrc);
     return localrc;
   }
@@ -3240,7 +3242,7 @@ if (attrRoot == ESMF_TRUE) {
 
   // simple sanity checks
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_BAD, 
       "Bad Attribute object", &localrc);
     return localrc;
   }
@@ -3311,13 +3313,13 @@ if (attrRoot == ESMF_TRUE) {
 
   attr = new Attribute(name, ESMC_TYPEKIND_I4, count, value);  
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
     return localrc;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3355,13 +3357,13 @@ if (attrRoot == ESMF_TRUE) {
 
   attr = new Attribute(name, ESMC_TYPEKIND_I8, count, value);  
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
     return localrc;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3399,13 +3401,13 @@ if (attrRoot == ESMF_TRUE) {
 
   attr = new Attribute(name, ESMC_TYPEKIND_R4, count, value);  
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
     return localrc;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3443,13 +3445,13 @@ if (attrRoot == ESMF_TRUE) {
 
   attr = new Attribute(name, ESMC_TYPEKIND_R8, count, value);  
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
     return localrc;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3487,13 +3489,13 @@ if (attrRoot == ESMF_TRUE) {
 
   attr = new Attribute(name, ESMC_TYPEKIND_LOGICAL, count, value);  
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
     return localrc;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3531,13 +3533,13 @@ if (attrRoot == ESMF_TRUE) {
 
   attr = new Attribute(name, ESMC_TYPEKIND_CHARACTER, count, value);  
   if (!attr) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
       "Bad Attribute object", &localrc);
     return localrc;
   }
  
   localrc = AttributeSet(attr);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) return localrc;
 
   return ESMF_SUCCESS;
@@ -3578,7 +3580,7 @@ if (attrRoot == ESMF_TRUE) {
   if (object.compare(attrList.at(i)->attrObject) == 0 && 
       name.compare(attrList.at(i)->attrName) == 0) {
     localrc = attrList.at(i)->AttrModifyValue(tk, count, value);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }
   }
@@ -3586,14 +3588,14 @@ if (attrRoot == ESMF_TRUE) {
   // Recurse the hierarchy
   for (i=0; i<packList.size(); i++) {
     localrc = packList.at(i)->AttributeSetObjsInTree(object,name,tk,count,value);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }  
 
   // Recurse the hierarchy
   for (i=0; i<linkList.size(); i++) {
     localrc = linkList.at(i)->AttributeSetObjsInTree(object,name,tk,count,value);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
   }  
 
@@ -3661,7 +3663,7 @@ if (attrRoot == ESMF_TRUE) {
                  sprintf(msgbuf, "%s\n", attrList.at(i)->vcpp.at(0).c_str());
              else{ 
                  sprintf(msgbuf, "unknown value");
-                 ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, msgbuf, &localrc);
+                 ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, msgbuf, &localrc);
                  return localrc;
              }
       printf("%s",msgbuf);
@@ -3688,7 +3690,7 @@ if (attrRoot == ESMF_TRUE) {
                     sprintf(msgbuf, "          \t item %d: %s\n", j, attrList.at(i)->vcpp[j].c_str());
                 } else{
                     sprintf(msgbuf, "          \t unknown value");
-                    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+                    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
                     return localrc;
                 }
       printf("%s",msgbuf);
@@ -4154,7 +4156,7 @@ if (attrRoot == ESMF_TRUE) {
   localrc = ESMC_RC_NOT_IMPL;
 
   localrc = AttributeCopyValue(source);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         &localrc)) delete this;
 
   return (*this);
@@ -4334,10 +4336,10 @@ if (attrRoot == ESMF_TRUE) {
       attr->setBase(attrBase);
       attr->parent = this;
       localrc = attr->ESMC_Deserialize(buffer,&loffset);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttributeSet(attr);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
       
@@ -4349,10 +4351,10 @@ if (attrRoot == ESMF_TRUE) {
       attr->setBase(attrBase);
       attr->parent = this;
       localrc = attr->ESMC_Deserialize(buffer,&loffset);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
       localrc = AttPackSet(attr);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     }
       
@@ -4401,12 +4403,12 @@ if (attrRoot == ESMF_TRUE) {
     localrc = ESMC_RC_NOT_IMPL;
     cc = false;
     localrc = ESMC_SerializeCC(buffer,length,loffset,cc,inquireflag);
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           &localrc)) return localrc;
     if (inquireflag != ESMF_INQUIREONLY) {
       cc = true;
       localrc = ESMC_SerializeCC(buffer,length,*offset,cc,inquireflag);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
             &localrc)) return localrc;
     } else
       *offset = loffset;
@@ -4525,7 +4527,7 @@ if (attrRoot == ESMF_TRUE) {
       // check if buffer has enough free memory, expand?
       if (inquireflag != ESMF_INQUIREONLY) {
         if (*length < offset){
-          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_MEM_ALLOCATE, 
+          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_MEM_ALLOCATE, 
             "Buffer too short to add an Attribute hierarchy", &localrc);
           return localrc;
         }

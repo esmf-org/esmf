@@ -107,7 +107,7 @@ void FTN_X(c_esmc_componentsvcloop)(
                                        *phase, 
                                        *blockingFlag) != ESMF_SUCCESS)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Error during request loop setup.",
          &localrc);
@@ -171,7 +171,7 @@ printf("Component Server Request Loop\n");
                                               *phase, 
                                               *blockingFlag) != ESMF_SUCCESS)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Error during request loop setup.",
          &localrc);
@@ -267,7 +267,7 @@ void FTN_X(c_esmc_registercomponent)(
                           descString.c_str(), 
                           hostStr) == ESMF_FAILURE)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_UNEXPECTED,
          "Error registering component service.",
          &localrc);
@@ -329,7 +329,7 @@ void FTN_X(c_esmc_unregistercomponent)(
 	if (client.setStatus(clientIdString.c_str(), 
                         client.getStateStr(NET_ESMF_STAT_DONE)) == ESMF_FAILURE)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_UNEXPECTED,
          "Error unregistering component service.",
          &localrc);

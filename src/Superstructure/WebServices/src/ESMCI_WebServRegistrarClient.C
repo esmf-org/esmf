@@ -24,6 +24,8 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 #include "ESMCI_WebServRegistrarClient.h"
 
 #include <string.h>
@@ -31,7 +33,6 @@
 #include "ESMCI_WebServSocketUtils.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -135,7 +136,7 @@ int  ESMCI_WebServRegistrarClient::registerComp(
 	//***
 	if (connect() == ESMF_FAILURE)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Error connecting to Registrar.",
          &localrc);
@@ -149,7 +150,7 @@ int  ESMCI_WebServRegistrarClient::registerComp(
 	int	dataLen = strlen("register") + 1;
 	if (sendData(dataLen, (void*)"register") != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending register request to socket.",
          &localrc);
@@ -163,7 +164,7 @@ int  ESMCI_WebServRegistrarClient::registerComp(
 	dataLen = strlen(clientId) + 1;
 	if (sendData(dataLen, (void*)clientId) != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending clientId to socket.",
          &localrc);
@@ -177,7 +178,7 @@ int  ESMCI_WebServRegistrarClient::registerComp(
 	dataLen = strlen(hostName) + 1;
 	if (sendData(dataLen, (void*)hostName) != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending service host name to socket.",
          &localrc);
@@ -191,7 +192,7 @@ int  ESMCI_WebServRegistrarClient::registerComp(
 	dataLen = strlen(portNum) + 1;
 	if (sendData(dataLen, (void*)portNum) != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending service port number to socket.",
          &localrc);
@@ -207,7 +208,7 @@ int  ESMCI_WebServRegistrarClient::registerComp(
 
 	if (getResponse(0, length, retValue) <= 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_READ,
          "Error reading register response from socket.",
          &localrc);
@@ -261,7 +262,7 @@ int  ESMCI_WebServRegistrarClient::compSubmitted(
 	//***
 	if (connect() == ESMF_FAILURE)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Error connecting to Registrar.",
          &localrc);
@@ -275,7 +276,7 @@ int  ESMCI_WebServRegistrarClient::compSubmitted(
 	int	dataLen = strlen("submitted") + 1;
 	if (sendData(dataLen, (void*)"submitted") != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending started request to socket.",
          &localrc);
@@ -289,7 +290,7 @@ int  ESMCI_WebServRegistrarClient::compSubmitted(
 	dataLen = strlen(clientId) + 1;
 	if (sendData(dataLen, (void*)clientId) != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending clientId to socket.",
          &localrc);
@@ -303,7 +304,7 @@ int  ESMCI_WebServRegistrarClient::compSubmitted(
 	dataLen = strlen(jobId) + 1;
 	if (sendData(dataLen, (void*)jobId) != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending job id to socket.",
          &localrc);
@@ -319,7 +320,7 @@ int  ESMCI_WebServRegistrarClient::compSubmitted(
 
 	if (getResponse(0, length, retValue) <= 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_READ,
          "Error reading register response from socket.",
          &localrc);
@@ -374,7 +375,7 @@ int  ESMCI_WebServRegistrarClient::compStarted(
 	//***
 	if (connect() == ESMF_FAILURE)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Error connecting to Registrar.",
          &localrc);
@@ -388,7 +389,7 @@ int  ESMCI_WebServRegistrarClient::compStarted(
 	int	dataLen = strlen("started") + 1;
 	if (sendData(dataLen, (void*)"started") != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending started request to socket.",
          &localrc);
@@ -404,7 +405,7 @@ printf("Client ID Len: %d\n", strlen(clientId));
 	dataLen = strlen(clientId) + 1;
 	if (sendData(dataLen, (void*)clientId) != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending clientId to socket.",
          &localrc);
@@ -418,7 +419,7 @@ printf("Client ID Len: %d\n", strlen(clientId));
 	dataLen = strlen(compName) + 1;
 	if (sendData(dataLen, (void*)compName) != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending component name to socket.",
          &localrc);
@@ -432,7 +433,7 @@ printf("Client ID Len: %d\n", strlen(clientId));
 	dataLen = strlen(compDesc) + 1;
 	if (sendData(dataLen, (void*)compDesc) != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending component description to socket.",
          &localrc);
@@ -446,7 +447,7 @@ printf("Client ID Len: %d\n", strlen(clientId));
 	dataLen = strlen(physHostName) + 1;
 	if (sendData(dataLen, (void*)physHostName) != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending physical host name to socket.",
          &localrc);
@@ -462,7 +463,7 @@ printf("Client ID Len: %d\n", strlen(clientId));
 
 	if (getResponse(0, length, retValue) <= 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_READ,
          "Error reading register response from socket.",
          &localrc);
@@ -518,7 +519,7 @@ int  ESMCI_WebServRegistrarClient::getComponent(
 	//***
 	if (compSvrInfo == NULL)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_ARG_BAD,
          "Invalid CompSvrInfo structure.",
          &localrc);
@@ -531,7 +532,7 @@ int  ESMCI_WebServRegistrarClient::getComponent(
 	//***
 	if (connect() == ESMF_FAILURE)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Error connecting to Registrar.",
          &localrc);
@@ -545,7 +546,7 @@ int  ESMCI_WebServRegistrarClient::getComponent(
 	int	dataLen = strlen("get") + 1;
 	if (sendData(dataLen, (void*)"get") != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending started request to socket.",
          &localrc);
@@ -559,7 +560,7 @@ int  ESMCI_WebServRegistrarClient::getComponent(
 	dataLen = strlen(clientId) + 1;
 	if (sendData(dataLen, (void*)clientId) != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending clientId to socket.",
          &localrc);
@@ -576,7 +577,7 @@ int  ESMCI_WebServRegistrarClient::getComponent(
 
 	if (getResponse(0, length, numCompFound) <= 0)
    {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Unable to read client ID from socket.",
             &localrc);
@@ -588,7 +589,7 @@ int  ESMCI_WebServRegistrarClient::getComponent(
 
 	if (strcmp(numCompFound, "1") != 0)
    {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Unable to find client with id in Registrar.",
             &localrc);
@@ -604,7 +605,7 @@ int  ESMCI_WebServRegistrarClient::getComponent(
 
 	if (getResponse(0, length, retClientId) <= 0)
    {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Unable to read client ID from socket.",
             &localrc);
@@ -623,7 +624,7 @@ int  ESMCI_WebServRegistrarClient::getComponent(
 
 	if (getResponse(0, length, retJobId) <= 0)
    {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Unable to read job ID from socket.",
             &localrc);
@@ -642,7 +643,7 @@ int  ESMCI_WebServRegistrarClient::getComponent(
 
 	if (getResponse(0, length, retHostName) <= 0)
    {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Unable to read host name from socket.",
             &localrc);
@@ -661,7 +662,7 @@ int  ESMCI_WebServRegistrarClient::getComponent(
 
 	if (getResponse(0, length, retPortNum) <= 0)
    {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Unable to read port number from socket.",
             &localrc);
@@ -680,7 +681,7 @@ int  ESMCI_WebServRegistrarClient::getComponent(
 
 	if (getResponse(0, length, retCompName) <= 0)
    {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Unable to read component name from socket.",
             &localrc);
@@ -699,7 +700,7 @@ int  ESMCI_WebServRegistrarClient::getComponent(
 
 	if (getResponse(0, length, retCompDesc) <= 0)
    {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Unable to read component description from socket.",
             &localrc);
@@ -718,7 +719,7 @@ int  ESMCI_WebServRegistrarClient::getComponent(
 
 	if (getResponse(0, length, retPhysHostName) <= 0)
    {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Unable to read physical host name from socket.",
             &localrc);
@@ -737,7 +738,7 @@ int  ESMCI_WebServRegistrarClient::getComponent(
 
 	if (getResponse(0, length, retStatus) <= 0)
    {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Unable to read status from socket.",
             &localrc);
@@ -791,7 +792,7 @@ int  ESMCI_WebServRegistrarClient::getStatus(
 	//***
 	if (connect() == ESMF_FAILURE)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Error connecting to Registrar.",
          &localrc);
@@ -805,7 +806,7 @@ int  ESMCI_WebServRegistrarClient::getStatus(
 	int	dataLen = strlen("getstatus") + 1;
 	if (sendData(dataLen, (void*)"getstatus") != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending started request to socket.",
          &localrc);
@@ -819,7 +820,7 @@ int  ESMCI_WebServRegistrarClient::getStatus(
 	dataLen = strlen(clientId) + 1;
 	if (sendData(dataLen, (void*)clientId) != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending clientId to socket.",
          &localrc);
@@ -835,7 +836,7 @@ int  ESMCI_WebServRegistrarClient::getStatus(
 
 	if (getResponse(0, length, retStatus) <= 0)
    {
-   	ESMC_LogDefault.ESMC_LogMsgFoundError(
+   	ESMC_LogDefault.ESMCI_LogMsgFoundError(
            ESMC_RC_FILE_READ,
            "Unable to read status from socket.",
            &localrc);
@@ -890,7 +891,7 @@ int  ESMCI_WebServRegistrarClient::setStatus(
 	int	stateValue;
 	if ((stateValue = getStateValue(status)) == ESMF_FAILURE)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_ARG_BAD,
          "Invalid state string.",
          &localrc);
@@ -903,7 +904,7 @@ int  ESMCI_WebServRegistrarClient::setStatus(
 	//***
 	if (connect() == ESMF_FAILURE)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Error connecting to Registrar.",
          &localrc);
@@ -917,7 +918,7 @@ int  ESMCI_WebServRegistrarClient::setStatus(
 	int	dataLen = strlen("setstatus") + 1;
 	if (sendData(dataLen, (void*)"setstatus") != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending unregister request to socket.",
          &localrc);
@@ -931,7 +932,7 @@ int  ESMCI_WebServRegistrarClient::setStatus(
 	dataLen = strlen(clientId) + 1;
 	if (sendData(dataLen, (void*)clientId) != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending client ID to socket.",
          &localrc);
@@ -945,7 +946,7 @@ int  ESMCI_WebServRegistrarClient::setStatus(
 	dataLen = strlen(status) + 1;
 	if (sendData(dataLen, (void*)status) != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending status to socket.",
          &localrc);
@@ -961,7 +962,7 @@ int  ESMCI_WebServRegistrarClient::setStatus(
 
 	if (getResponse(0, length, retValue) <= 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_READ,
          "Error reading unregister response from socket.",
          &localrc);
@@ -1014,7 +1015,7 @@ int  ESMCI_WebServRegistrarClient::unregisterComp(
 	//***
 	if (connect() == ESMF_FAILURE)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Error connecting to Registrar.",
          &localrc);
@@ -1028,7 +1029,7 @@ int  ESMCI_WebServRegistrarClient::unregisterComp(
 	int	dataLen = strlen("unregister") + 1;
 	if (sendData(dataLen, (void*)"unregister") != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending unregister request to socket.",
          &localrc);
@@ -1042,7 +1043,7 @@ int  ESMCI_WebServRegistrarClient::unregisterComp(
 	dataLen = strlen(clientId) + 1;
 	if (sendData(dataLen, (void*)clientId) != dataLen)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending client ID to socket.",
          &localrc);
@@ -1056,7 +1057,7 @@ int  ESMCI_WebServRegistrarClient::unregisterComp(
 	int	length = 0;
 	if (getResponse(0, length, retValue) <= 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_READ,
          "Error reading unregister response from socket.",
          &localrc);

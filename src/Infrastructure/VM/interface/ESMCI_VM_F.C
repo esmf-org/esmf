@@ -17,12 +17,13 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_VM.h"
 
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMCI_LogErr.h"
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:

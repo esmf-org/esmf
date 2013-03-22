@@ -22,9 +22,10 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 #include "ESMCI_ParEnv.h"
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMCI_LogErr.h"
 #include "ESMCI_MeshCXX.h"
 #include "ESMC_Mesh.h"
 #include "ESMCI_VM.h"

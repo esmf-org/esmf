@@ -24,7 +24,9 @@
 // in the companion file ESMCI_Util.h
 //
 //-----------------------------------------------------------------------------
-//
+
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 // associated class definition file and others
 #include "ESMCI_Util.h"
 
@@ -35,7 +37,6 @@
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
 
 using namespace std;
 

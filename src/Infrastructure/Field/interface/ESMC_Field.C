@@ -22,13 +22,13 @@
 //EOP
 //------------------------------------------------------------------------------
 // INCLUDES
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 #include "ESMC_Field.h"
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_Field.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_Grid.h"
 
 using namespace ESMCI;

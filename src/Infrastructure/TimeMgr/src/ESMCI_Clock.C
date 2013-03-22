@@ -18,24 +18,24 @@
 // in the companion file {\tt ESMCI\_Clock.h}
 //
 //-------------------------------------------------------------------------
-//
- #define ESMC_FILENAME "ESMCI_Clock.C"
+#define ESMC_FILENAME "ESMCI_Clock.C"
 
- // higher level, 3rd party or system includes here
- #include <stdio.h>
- #include <string.h>
- #include <ctype.h>
- #include <ESMCI_LogErr.h>
- #include <ESMF_LogMacros.inc>
- #include <ESMCI_Alarm.h>
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 
- // associated class definition file
- #include <ESMCI_Clock.h>
+// higher level, 3rd party or system includes here
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <ESMCI_LogErr.h>
+#include <ESMCI_Alarm.h>
+
+// associated class definition file
+#include <ESMCI_Clock.h>
 
 //-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.27 2012/09/20 21:19:50 w6ws Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_Clock.C,v 1.27 2012/09/20 21:19:50 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{

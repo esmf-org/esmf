@@ -30,6 +30,9 @@
 
 #include <cstdio>
 
+//TODO: in the long run the following may be ESMF_LogMacros.inc *gjt*
+#include "ESMCI_LogMacros.inc"
+
 #include "ESMC_LogErr.h"
 #include "ESMCI_Util.h"
 

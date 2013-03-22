@@ -25,6 +25,8 @@
 //-----------------------------------------------------------------------------
 //
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 // associated header file
 #include "ESMCI_State.h"
 #include "ESMCI_IO_NetCDF.h"
@@ -32,9 +34,7 @@
 //insert any higher level, 3rd party or system includes here
 #include <string.h>         // strlen()
 
-// LogErr headers
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
 
 using std::vector;
 using std::string;
@@ -974,7 +974,7 @@ namespace ESMCI {
       // instantiate IO object; initialize with pointer to this State's
       // base, to place file-read attributes into.
       IO_NetCDF *io_netcdf = ESMCI_IO_NetCDFCreate("", base, &localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                             &localrc);
       if (localrc != ESMF_SUCCESS) rc = localrc;
 
@@ -984,13 +984,13 @@ namespace ESMCI {
       // read the NetCDF file, placing contents into this State object, with
       // Attributes placed on the State's base node
       localrc = io_netcdf->read(string(fileName, fileNameLen));
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                             &localrc);
       if (localrc != ESMF_SUCCESS) rc = localrc;
 
       // done with io_netcdf object
       localrc = ESMCI_IO_NetCDFDestroy(&io_netcdf);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                             &localrc);
       if (localrc != ESMF_SUCCESS) rc = localrc;
 
@@ -1032,7 +1032,7 @@ namespace ESMCI {
       // instantiate IO object; initialize with pointer to this State's
       // base, to write attributes from.
       IO_NetCDF *io_netcdf = ESMCI_IO_NetCDFCreate("", base, &localrc);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                             &localrc);
       if (localrc != ESMF_SUCCESS) rc = localrc;
 
@@ -1042,13 +1042,13 @@ namespace ESMCI {
       // write the NetCDF file, taking contents from this State object, with
       // Attributes taken from the State's base node
       localrc = io_netcdf->write(string(fileName, fileNameLen));
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                             &localrc);
       if (localrc != ESMF_SUCCESS) rc = localrc;
 
       // done with io_netcdf object
       localrc = ESMCI_IO_NetCDFDestroy(&io_netcdf);
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                             &localrc);
       if (localrc != ESMF_SUCCESS) rc = localrc;
 

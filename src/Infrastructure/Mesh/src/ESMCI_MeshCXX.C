@@ -12,9 +12,10 @@
 //------------------------------------------------------------------------------
 // INCLUDES    
 //------------------------------------------------------------------------------
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 #include "ESMCI_Macros.h"
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMCI_LogErr.h"
 #include "ESMCI_F90Interface.h"
 
 #include "ESMCI_Exception.h"
@@ -230,7 +231,7 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
     int localrc;
 
     if (meshpp==NULL || *meshpp == NULL) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to Mesh", &localrc);
       return localrc;
     }
@@ -352,7 +353,7 @@ int MeshCXX::addElements(int numElems, int *elemId,
       int seq = ni->get_data_index();
 
       if (seq >= num_nodes){
-       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+       ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
           "- seq is larger or equal to num_nodes", &localrc);
       return localrc;
     }

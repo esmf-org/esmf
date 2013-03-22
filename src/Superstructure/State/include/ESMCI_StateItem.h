@@ -19,10 +19,10 @@
 #define ESMCI_StateItem_H
 
 // !USES:
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 #include "ESMCI_F90Interface.h"
 #include "ESMC_Interface.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

@@ -21,11 +21,12 @@
 //EOP
 //------------------------------------------------------------------------------
 // INCLUDES
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 #include "ESMC_Grid.h"
 
 #include "ESMCI_Grid.h"
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
 #include "ESMC_Array.h"
 

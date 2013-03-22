@@ -18,30 +18,30 @@
 // declared in the companion file {\tt ESMC\_Calendar.h}
 //
 //-------------------------------------------------------------------------
-//
- #define ESMC_FILENAME "ESMCI_Calendar.C"
+#define ESMC_FILENAME "ESMCI_Calendar.C"
 
- // higher level, 3rd party or system includes
- #include <stdio.h>
- #include <limits.h>
- #include <string.h>
- #include <ctype.h>
- #include <math.h>
- #include <stdlib.h>
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 
- #include <ESMCI_LogErr.h>
- #include <ESMF_LogMacros.inc>
+// higher level, 3rd party or system includes
+#include <stdio.h>
+#include <limits.h>
+#include <string.h>
+#include <ctype.h>
+#include <math.h>
+#include <stdlib.h>
 
- #include <ESMCI_Time.h>
- #include <ESMCI_TimeInterval.h>
+#include <ESMCI_LogErr.h>
 
- // associated class definition file
- #include <ESMCI_Calendar.h>
+#include <ESMCI_Time.h>
+#include <ESMCI_TimeInterval.h>
+
+// associated class definition file
+#include <ESMCI_Calendar.h>
 
 //-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Calendar.C,v 1.20 2012/09/20 21:19:50 w6ws Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_Calendar.C,v 1.20 2012/09/20 21:19:50 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{

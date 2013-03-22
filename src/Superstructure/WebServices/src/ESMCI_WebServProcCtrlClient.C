@@ -28,6 +28,8 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 #include "ESMCI_WebServProcCtrlClient.h"
 
 #if !defined (__mips)
@@ -49,8 +51,6 @@ typedef uint64_t u_int64_t;
 #include "ESMCI_WebServSocketUtils.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
-
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -187,7 +187,7 @@ int  ESMCI_WebServProcCtrlClient::newClient(
    //***
 	if (connect() < 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Unable to connect to Process Controller socket.",
          &localrc);
@@ -203,7 +203,7 @@ int  ESMCI_WebServProcCtrlClient::newClient(
 
 	if ((bytesSent = sendRequest(NET_ESMF_NEW, 0, NULL)) != 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending new client request to socket.",
          &localrc);
@@ -213,7 +213,7 @@ int  ESMCI_WebServProcCtrlClient::newClient(
 
 	if ((bytesSent = sendString(theUserName)) != (strlen(theUserName) + 1))
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending client user name to socket.",
          &localrc);
@@ -223,7 +223,7 @@ int  ESMCI_WebServProcCtrlClient::newClient(
 
 	if ((bytesSent = sendString(thePassword)) != (strlen(thePassword) + 1))
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending client password to socket.",
          &localrc);
@@ -236,7 +236,7 @@ int  ESMCI_WebServProcCtrlClient::newClient(
    //***
    if (getResponse(NET_ESMF_NEW, bufSize, buf) <= 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_READ,
          "Error reading init response from socket.",
          &localrc);
@@ -294,7 +294,7 @@ int  ESMCI_WebServProcCtrlClient::init(
    //***
 	if (connect() < 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Unable to connect to server socket.",
          &localrc);
@@ -310,7 +310,7 @@ int  ESMCI_WebServProcCtrlClient::init(
 
 	if ((bytesSent = sendRequest(NET_ESMF_INIT, 4, &netClientId)) != 4)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending init request to socket.",
          &localrc);
@@ -325,7 +325,7 @@ int  ESMCI_WebServProcCtrlClient::init(
       //***
 		if (getResponse(NET_ESMF_INIT, bufSize, buf) <= 0)
       {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Error reading init response from socket.",
             &localrc);
@@ -384,7 +384,7 @@ int  ESMCI_WebServProcCtrlClient::run(
    //***
 	if (connect() < 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Unable to connect to server socket.",
          &localrc);
@@ -400,7 +400,7 @@ int  ESMCI_WebServProcCtrlClient::run(
 
 	if ((bytesSent = sendRequest(NET_ESMF_RUN, 4, &netClientId)) != 4)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending run request to socket.",
          &localrc);
@@ -415,7 +415,7 @@ int  ESMCI_WebServProcCtrlClient::run(
       //***
 		if (getResponse(NET_ESMF_RUN, bufSize, buf) <= 0)
       {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Error reading run response from socket.",
             &localrc);
@@ -475,7 +475,7 @@ int  ESMCI_WebServProcCtrlClient::timestep(
    //***
 	if (connect() < 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Unable to connect to server socket.",
          &localrc);
@@ -491,7 +491,7 @@ int  ESMCI_WebServProcCtrlClient::timestep(
 
 	if ((bytesSent = sendRequest(NET_ESMF_TIMESTEP, 4, &netClientId)) != 4)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending run request to socket.",
          &localrc);
@@ -507,7 +507,7 @@ int  ESMCI_WebServProcCtrlClient::timestep(
 
    if ((bytesSent = sendData(4, &netNumTimesteps)) != 4)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending num timesteps to socket.",
          &localrc);
@@ -522,7 +522,7 @@ int  ESMCI_WebServProcCtrlClient::timestep(
       //***
 		if (getResponse(NET_ESMF_RUN, bufSize, buf) <= 0)
       {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Error reading timestep response from socket.",
             &localrc);
@@ -581,7 +581,7 @@ int  ESMCI_WebServProcCtrlClient::final(
    //***
 	if (connect() < 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Unable to connect to server socket.",
          &localrc);
@@ -597,7 +597,7 @@ int  ESMCI_WebServProcCtrlClient::final(
 
 	if ((bytesSent = sendRequest(NET_ESMF_FINAL, 4, &netClientId)) != 4)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending finalize request to socket.",
          &localrc);
@@ -612,7 +612,7 @@ int  ESMCI_WebServProcCtrlClient::final(
       //***
 		if (getResponse(NET_ESMF_FINAL, bufSize, buf) <= 0)
       {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Error reading finalize response from socket.",
             &localrc);
@@ -671,7 +671,7 @@ ESMCI_WebServDataDesc*  ESMCI_WebServProcCtrlClient::dataDesc(
    //***
 	if (connect() < 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Unable to connect to server socket.",
          &localrc);
@@ -687,7 +687,7 @@ ESMCI_WebServDataDesc*  ESMCI_WebServProcCtrlClient::dataDesc(
 
 	if ((bytesSent = sendRequest(NET_ESMF_DATA_DESC, 4, &netClientId)) != 4)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending run request to socket.",
          &localrc);
@@ -718,7 +718,7 @@ ESMCI_WebServDataDesc*  ESMCI_WebServProcCtrlClient::dataDesc(
    //***
    if (getResponse(NET_ESMF_DATA_DESC, bufSize, buf) <= 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_READ,
          "Error reading get files response - number of vars from socket.",
          &localrc);
@@ -739,7 +739,7 @@ ESMCI_WebServDataDesc*  ESMCI_WebServProcCtrlClient::dataDesc(
       {
          if (getResponse(NET_ESMF_DATA_DESC, bufSize, buf) <= 0)
          {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_LogDefault.ESMCI_LogMsgFoundError(
                ESMC_RC_FILE_READ,
                "Error reading get description - var name from socket.",
                &localrc);
@@ -759,7 +759,7 @@ ESMCI_WebServDataDesc*  ESMCI_WebServProcCtrlClient::dataDesc(
    //***
    if (getResponse(NET_ESMF_DATA_DESC, bufSize, buf) <= 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_READ,
          "Error reading get files response - number of lats from socket.",
          &localrc);
@@ -782,7 +782,7 @@ ESMCI_WebServDataDesc*  ESMCI_WebServProcCtrlClient::dataDesc(
 
          if (getResponse(NET_ESMF_DATA_DESC, bufSize, buf) != bufSize)
          {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_LogDefault.ESMCI_LogMsgFoundError(
                ESMC_RC_FILE_READ,
                "Error reading get description - lat values from socket.",
                &localrc);
@@ -807,7 +807,7 @@ ESMCI_WebServDataDesc*  ESMCI_WebServProcCtrlClient::dataDesc(
    //***
    if (getResponse(NET_ESMF_DATA_DESC, bufSize, buf) <= 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_READ,
          "Error reading get files response - number of lons from socket.",
          &localrc);
@@ -830,7 +830,7 @@ ESMCI_WebServDataDesc*  ESMCI_WebServProcCtrlClient::dataDesc(
 
          if (getResponse(NET_ESMF_DATA_DESC, bufSize, buf) != bufSize)
          {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_LogDefault.ESMCI_LogMsgFoundError(
                ESMC_RC_FILE_READ,
                "Error reading get description - lon values from socket.",
                &localrc);
@@ -862,7 +862,7 @@ ESMCI_WebServDataDesc*  ESMCI_WebServProcCtrlClient::dataDesc(
    //***
 	if (getResponse(NET_ESMF_RUN, bufSize, buf) <= 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_READ,
          "Error reading timestep response from socket.",
           &localrc);
@@ -921,7 +921,7 @@ ESMCI_WebServDataContent*  ESMCI_WebServProcCtrlClient::outputData(
    //***
 	if (connect() < 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Unable to connect to server socket.",
          &localrc);
@@ -937,7 +937,7 @@ ESMCI_WebServDataContent*  ESMCI_WebServProcCtrlClient::outputData(
 
 	if ((bytesSent = sendRequest(NET_ESMF_DATA, 4, &netClientId)) != 4)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending run request to socket.",
          &localrc);
@@ -954,7 +954,7 @@ ESMCI_WebServDataContent*  ESMCI_WebServProcCtrlClient::outputData(
 
    if ((bytesSent = sendData(8, (unsigned char*)(&netTimestamp))) != 8)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending timestamp to socket.",
          &localrc);
@@ -967,7 +967,7 @@ ESMCI_WebServDataContent*  ESMCI_WebServProcCtrlClient::outputData(
    //***
    if (getResponse(NET_ESMF_DATA, bufSize, buf) != 4)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_READ,
          "Error reading get data - number of vars from socket.",
          &localrc);
@@ -988,7 +988,7 @@ ESMCI_WebServDataContent*  ESMCI_WebServProcCtrlClient::outputData(
    {
       if (getResponse(NET_ESMF_DATA_DESC, bufSize, buf) <= 0)
       {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Error reading get data - var name from socket.",
             &localrc);
@@ -1006,7 +1006,7 @@ ESMCI_WebServDataContent*  ESMCI_WebServProcCtrlClient::outputData(
    //***
    if (getResponse(NET_ESMF_DATA, bufSize, buf) != 4)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_READ,
          "Error reading get data - number of lats from socket.",
          &localrc);
@@ -1022,7 +1022,7 @@ ESMCI_WebServDataContent*  ESMCI_WebServProcCtrlClient::outputData(
    //***
    if (getResponse(NET_ESMF_DATA, bufSize, buf) != 4)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_READ,
          "Error reading get data - number of lons from socket.",
          &localrc);
@@ -1049,7 +1049,7 @@ printf("Data Size: %d\n", dataSize);
 
          if ((bytesRead = getResponse(NET_ESMF_DATA, bufSize, buf)) != bufSize)
          {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(
+            ESMC_LogDefault.ESMCI_LogMsgFoundError(
                   ESMC_RC_FILE_READ,
                   "Error reading get output data - data values from socket.",
                   &localrc);
@@ -1074,7 +1074,7 @@ printf("Data Size: %d\n", dataSize);
    //***
 	if (getResponse(NET_ESMF_DATA, bufSize, buf) <= 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_READ,
          "Error reading timestep response from socket.",
           &localrc);
@@ -1132,7 +1132,7 @@ int  ESMCI_WebServProcCtrlClient::state(
    //***
 	if (connect() < 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Unable to connect to server socket.",
          &localrc);
@@ -1148,7 +1148,7 @@ int  ESMCI_WebServProcCtrlClient::state(
 
 	if ((bytesSent = sendRequest(NET_ESMF_STATE, 4, &netClientId)) != 4)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending get state request to socket.",
          &localrc);
@@ -1163,7 +1163,7 @@ int  ESMCI_WebServProcCtrlClient::state(
       //***
 		if (getResponse(NET_ESMF_STATE, bufSize, buf) <= 0)
       {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Error reading get status response from socket.",
             &localrc);
@@ -1222,7 +1222,7 @@ int  ESMCI_WebServProcCtrlClient::end(
    //***
 	if (connect() < 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Unable to connect to server socket.",
          &localrc);
@@ -1238,7 +1238,7 @@ int  ESMCI_WebServProcCtrlClient::end(
 
 	if ((bytesSent = sendRequest(NET_ESMF_END, 4, &netClientId)) != 4)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending end client request to socket.",
          &localrc);
@@ -1253,7 +1253,7 @@ int  ESMCI_WebServProcCtrlClient::end(
       //***
 		if (getResponse(NET_ESMF_END, bufSize, buf) <= 0)
       {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.ESMCI_LogMsgFoundError(
             ESMC_RC_FILE_READ,
             "Error reading end client response from socket.",
             &localrc);
@@ -1311,7 +1311,7 @@ int  ESMCI_WebServProcCtrlClient::killServer(
    //***
 	if (connect() < 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Unable to connect to server socket.",
          &localrc);
@@ -1327,7 +1327,7 @@ int  ESMCI_WebServProcCtrlClient::killServer(
 
 	if ((bytesSent = sendRequest(NET_ESMF_EXIT, 4, &netClientId)) != 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.ESMCI_LogMsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error sending exit client request to socket.",
          &localrc);

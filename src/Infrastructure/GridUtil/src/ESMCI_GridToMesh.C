@@ -20,12 +20,13 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 #include "ESMCI_GridToMesh.h"
 #include "ESMCI_Grid.h"
 #include "ESMCI_VM.h"
 
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMCI_LogErr.h"
 
 #include "ESMCI_Ptypes.h"
 #include "Mesh/include/ESMCI_Mesh.h"
@@ -94,7 +95,7 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
 
   // Initialize the parallel environment for mesh (if not already done)
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+ if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
    throw localrc;  // bail out with exception
 
   Grid &grid = const_cast<Grid&>(grid_);
@@ -178,7 +179,7 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
  
  // Set the id of this processor here (me)
  int me = VM::getCurrent(&localrc)->getLocalPet();
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+ if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
    throw localrc;  // bail out with exception
 
    // Keep track of locally owned, shared and shared, not-locally-owned
@@ -758,7 +759,7 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
   // Initialize the parallel environment for mesh (if not already done)
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+ if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
    throw localrc;  // bail out with exception
 
  bool is_sphere = grid.isSphere();
@@ -809,7 +810,7 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
   // Initialize the parallel environment for mesh (if not already done)
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+ if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
    throw localrc;  // bail out with exception
 
 
@@ -871,7 +872,7 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
     // Initialize the parallel environment for mesh (if not already done)
     ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
       throw localrc;  // bail out with exception
 
 

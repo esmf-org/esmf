@@ -26,6 +26,7 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 
 #include "ESMCI_WebServSecureUtils.h"
 
@@ -38,7 +39,6 @@
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -108,7 +108,7 @@ int  ESMCI_WebServSecureSend(
 		}
 		else if (bytesWritten < 0)
 		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.ESMCI_LogMsgFoundError(
          	ESMC_RC_FILE_WRITE,
          	"Error while writing to socket.",
          	&localrc);
@@ -176,7 +176,7 @@ int  ESMCI_WebServSecureRecv(
 		}
       else if (bytesRead < 0)
 		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.ESMCI_LogMsgFoundError(
          	ESMC_RC_FILE_READ,
          	"Error while reading from socket.",
          	&localrc);

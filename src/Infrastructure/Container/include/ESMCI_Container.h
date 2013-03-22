@@ -16,6 +16,8 @@
 #ifndef ESMCI_Container_H
 #define ESMCI_Container_H
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 #include <utility>
 #include <map>
 #include <vector>
@@ -23,8 +25,7 @@
 #include <iostream>
 
 // LogErr headers
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMCI_LogErr.h"
 
 
 namespace ESMCI {

@@ -18,32 +18,32 @@
 // declared in the companion file {\tt ESMCI\_BaseTime.h}
 //
 //-------------------------------------------------------------------------
-//
- #define ESMC_FILENAME "ESMCI_BaseTime.C"
+#define ESMC_FILENAME "ESMCI_BaseTime.C"
 
- #include <stdio.h>
- #include <stdlib.h>
- #include <limits.h>
- #include <math.h>    // modf()
- /*
- #include <iostream>
- #include <stdlib>
- using std::cout;
- using std::endl;
- */
- #include <ESMCI_LogErr.h>
- #include <ESMF_LogMacros.inc>
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 
- // associated class definition file
- #include "ESMCI_BaseTime.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <math.h>    // modf()
+/*
+#include <iostream>
+#include <stdlib>
+using std::cout;
+using std::endl;
+*/
+#include <ESMCI_LogErr.h>
+
+// associated class definition file
+#include "ESMCI_BaseTime.h"
 
 //-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.15 2012/09/20 21:19:50 w6ws Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.15 2012/09/20 21:19:50 w6ws Exp $";
 //-------------------------------------------------------------------------
 
-  namespace ESMCI{
+namespace ESMCI{
 
 //
 //-------------------------------------------------------------------------

@@ -23,6 +23,8 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 // include associated header file
 #include "ESMCI_DistGrid.h"
 
@@ -36,9 +38,7 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_DELayout.h"
 
-// LogErr headers
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
 
 using namespace std;
 
@@ -510,14 +510,14 @@ DistGrid *DistGrid::create(
   
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
     return NULL;
   }catch(exception &x){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       x.what(), rc);
     return NULL;
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", rc);
     return NULL;
   }

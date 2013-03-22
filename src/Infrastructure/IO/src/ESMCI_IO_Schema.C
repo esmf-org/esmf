@@ -142,17 +142,17 @@ IO_Schema::IO_Schema(
       }
     }
     // See if we got this far OK (inputs check out)
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
+    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc,
                                               ESMCI_ERR_PASSTHRU, rc)) {
       return;
     }
     localrc = parseFile(filename);
   } catch (int lrc) {
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(lrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(lrc, ESMCI_ERR_PASSTHRU, rc);
     return;
   } catch (...) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
                                           "- Caught exception", rc);
     return;
   }
@@ -240,10 +240,10 @@ int IO_Schema::parseFile(
 
   } catch (int lrc) {
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(lrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(lrc, ESMCI_ERR_PASSTHRU, rc);
     return;
   } catch (...) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
                                           "- Caught exception", rc);
     return;
   }

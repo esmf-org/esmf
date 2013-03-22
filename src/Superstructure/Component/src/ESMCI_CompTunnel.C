@@ -23,6 +23,8 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 // include associated header file
 #include "ESMCI_CompTunnel.h"
 
@@ -47,10 +49,7 @@
 // include ESMF headers
 #include "ESMCI_Macros.h"
 #include "ESMCI_VMKernel.h"
-
-// LogErr
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
 
 //==============================================================================
 //==============================================================================

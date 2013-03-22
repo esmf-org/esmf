@@ -19,31 +19,32 @@
 //
 //-------------------------------------------------------------------------
 //
- #define ESMC_FILENAME "ESMCI_IO_NetCDF.C"
+#define ESMC_FILENAME "ESMCI_IO_NetCDF.C"
 
- // higher level, 3rd party or system includes here
- #include <stdio.h>
- #include <ctype.h>
- #include <iostream>
- #include <string>
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 
- #include <ESMC_Util.h>
- #include <ESMCI_LogErr.h>
- #include <ESMF_LogMacros.inc>
- #include <ESMCI_VM.h>
- #include <ESMCI_ArraySpec.h>
- #include <ESMCI_LocalArray.h>
- #include <ESMCI_Array.h>
+// higher level, 3rd party or system includes here
+#include <stdio.h>
+#include <ctype.h>
+#include <iostream>
+#include <string>
 
- // associated class definition file
- #include <ESMCI_IO_NetCDF.h>
+#include <ESMC_Util.h>
+#include <ESMCI_LogErr.h>
+#include <ESMCI_VM.h>
+#include <ESMCI_ArraySpec.h>
+#include <ESMCI_LocalArray.h>
+#include <ESMCI_Array.h>
 
- using namespace std; 
+// associated class definition file
+#include <ESMCI_IO_NetCDF.h>
+
+using namespace std; 
 
 //-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.24 2012/09/20 21:19:44 w6ws Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_IO_NetCDF.C,v 1.24 2012/09/20 21:19:44 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -141,7 +142,7 @@ namespace ESMCI
 
   // return with errors for NULL pointer
   if (io_netcdf == ESMC_NULL_POINTER || *io_netcdf == ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid pointer to io_netcdf", &rc);
     return rc;
   }
@@ -153,10 +154,10 @@ namespace ESMCI
     (*io_netcdf)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
     return rc;
   }catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
       "- Caught exception", &rc);
     return rc;
   }
@@ -862,7 +863,7 @@ void IO_NetCDF::destruct(void) {
             attVal = attValVector.at(0);
             thisVar->add_att(attName.c_str(), attVal.c_str());
           } else {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+            ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
               "Write items > 1 - Not yet implemented", &rc);
             return ESMF_FAILURE;}
           //printf("      att name[%d]: %s\n", i, attName.c_str());
@@ -879,7 +880,7 @@ void IO_NetCDF::destruct(void) {
             attVal = attValVector.at(0);
           thisVar->add_att(attName.c_str(), attVal);
           } else {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+            ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
               "Write items > 1 - Not yet implemented", &rc);
             return ESMF_FAILURE;}
           //printf("      att name[%d]: %s\n", i, attName.c_str());
@@ -896,7 +897,7 @@ void IO_NetCDF::destruct(void) {
             attVal = attValVector.at(0);
           thisVar->add_att(attName.c_str(), attVal);
           } else {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+            ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
               "Write items > 1 - Not yet implemented", &rc);
             return ESMF_FAILURE;}
           //printf("      att name[%d]: %s\n", i, attName.c_str());
@@ -913,7 +914,7 @@ void IO_NetCDF::destruct(void) {
             attVal = attValVector.at(0);
           thisVar->add_att(attName.c_str(), attVal);
           } else {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+            ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
               "Write items > 1 - Not yet implemented", &rc);
             return ESMF_FAILURE;}
           //printf("      att name[%d]: %s\n", i, attName.c_str());

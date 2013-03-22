@@ -9,6 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 #include "ESMCI_Macros.h"
 #include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/ESMCI_MeshField.h>
@@ -18,10 +19,7 @@
 #include <Mesh/include/ESMCI_SparseMsg.h>
 #include <Mesh/include/ESMCI_ParEnv.h>
 #include <Mesh/include/ESMCI_GlobalIds.h>
-
-// LogErr headers
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMCI_LogErr.h"
 
 #include <bitset>
 #include <cstdio>

@@ -21,6 +21,8 @@
 //
 #define ESMC_FILENAME "ESMCI_IO_Handler.C"
 
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+
 // include associated header file
 #include "ESMCI_IO_Handler.h"
 
@@ -36,7 +38,6 @@
 #include "ESMCI_Macros.h"
 #include "ESMCI_Container.h"
 #include <ESMCI_LogErr.h>
-#include <ESMF_LogMacros.inc>
 #include <ESMCI_ArrayBundle.h>
 #include "ESMCI_PIO_Handler.h"
 
@@ -261,7 +262,7 @@ int IO_Handler::destroy (
 
   // return with errors for NULL pointer
   if (ioclass == ESMC_NULL_POINTER || *ioclass == ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_PTR_NULL,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMF_RC_PTR_NULL,
                                           "- Not a valid pointer to ioclass",
                                           &rc);
     return rc;
@@ -274,10 +275,10 @@ int IO_Handler::destroy (
     localrc = ESMF_SUCCESS;
   } catch(int localrc) {
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
     return rc;
   } catch(...) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
                                           "- Caught exception", &rc);
     return rc;
   }
@@ -341,11 +342,11 @@ void IO_Handler::finalize (
   } catch(int localrc) {
     // catch standard ESMF return code
     PRINTMSG("caught passthru, localrc = " << localrc);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
     return;
   } catch(...) {
     PRINTMSG("caught unknown error");
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
                                           "- Caught exception", rc);
     return;
   }
@@ -390,7 +391,7 @@ int IO_Handler::setFilename(
 
   // It is an error if we already have an open file
   if (isOpen() != ESMF_FALSE) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_FILE_ACTIVE,
+    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMF_RC_FILE_ACTIVE,
                                           "- Cannot change name, file open",
                                           &rc);
     return rc;

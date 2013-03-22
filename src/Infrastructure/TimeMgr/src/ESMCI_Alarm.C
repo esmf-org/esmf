@@ -18,25 +18,25 @@
 // in the companion file {\tt ESMC\_Alarm.h)
 //
 //-------------------------------------------------------------------------
-//
- #define ESMC_FILENAME "ESMCI::Alarm.C"
+#define ESMC_FILENAME "ESMCI::Alarm.C"
 
- // insert any higher level, 3rd party or system includes here
- #include <stdio.h>
- #include <string.h>
- #include <ctype.h>
+#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 
- #include <ESMCI_LogErr.h>
- #include <ESMF_LogMacros.inc>
- #include "ESMCI_Clock.h"
+// insert any higher level, 3rd party or system includes here
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
- // associated class definition file
- #include <ESMCI_Alarm.h>
+#include <ESMCI_LogErr.h>
+#include "ESMCI_Clock.h"
+
+// associated class definition file
+#include <ESMCI_Alarm.h>
 
 //-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Alarm.C,v 1.23 2012/09/20 21:19:50 w6ws Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_Alarm.C,v 1.23 2012/09/20 21:19:50 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -1133,7 +1133,7 @@ int Alarm::count=0;
                clock->currAdvanceTimeStep < zeroTimeStep) ||
               (ringInterval < zeroTimeStep &&
                clock->currAdvanceTimeStep > zeroTimeStep) ) {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_VAL_WRONG,
+            ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_VAL_WRONG,
                "; user changed alarm ringInterval, which is not same sign as clock timeStep.", rc);
             return(false);
           }
@@ -1142,7 +1142,7 @@ int Alarm::count=0;
           // check that user's new ringTime is within ringable range
           if (positive ? clock->currTime > ringTime :
                          clock->currTime < ringTime) {
-            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
+            ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_VAL_OUTOFRANGE,
                "; user changed alarm ringTime, which is not within clock ringable range", rc);
             return(false);
           }
