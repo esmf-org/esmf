@@ -71,7 +71,7 @@ int ESMC_LogWrite(const char msg[], int msgtype){
   int localrc = ESMC_RC_NOT_IMPL;
 
   // Call into ESMCI method
-  localrc = ESMC_LogDefault.Write(msg, msgtype);
+  localrc = ESMC_LogDefault.Write(msg, msgtype, ESMC_CONTEXT);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                     ESMC_CONTEXT, &rc))
     return rc;  // bail out

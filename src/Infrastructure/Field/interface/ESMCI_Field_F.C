@@ -56,6 +56,8 @@ void FTN_X(c_esmc_fieldserialize)(
                 ESMC_InquireFlag *inquireflag, int *localrc,
                 ESMCI_FortranStrLenArg buf_l){
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_fieldserialize()"
     ESMC_InquireFlag linquireflag = *inquireflag;
     int i;
  
@@ -69,7 +71,7 @@ void FTN_X(c_esmc_fieldserialize)(
     if ((*inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                            "Buffer too short to add a Field object", localrc);
+          "Buffer too short to add a Field object", ESMC_CONTEXT, localrc);
          return;
  
         //buffer = (char *)realloc((void *)buffer,
@@ -130,6 +132,8 @@ void FTN_X(c_esmc_fielddeserialize)(
 		char *buffer, int *offset, int *localrc,
                 ESMCI_FortranStrLenArg buffer_l){
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_fielddeserialize()"
     int i;
 
     // Initialize return code; assume routine not implemented

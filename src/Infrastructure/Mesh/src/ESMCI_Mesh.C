@@ -104,9 +104,8 @@ Mesh *Mesh::createfromfile(char *filename, int fileTypeFlag,
 
     if (rc) *rc = localrc;
 
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
-      return ESMC_NULL_POINTER;
-    }
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return ESMC_NULL_POINTER;
   
     return mesh;
 }

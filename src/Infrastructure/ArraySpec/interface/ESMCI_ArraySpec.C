@@ -57,8 +57,8 @@ int ArraySpec::set(int rank, ESMC_TypeKind_Flag typekind){
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   FTN_X(f_esmf_arrayspecset)(this, &rank, &typekind, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -72,8 +72,8 @@ int ArraySpec::getRank(int *rc){
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   int rank;
   FTN_X(f_esmf_arrayspecgetrank)(this, &rank, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return -1;  // bail out with invalid rank
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return -1;  // bail out with invalid rank
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return rank;
@@ -87,8 +87,8 @@ ESMC_TypeKind_Flag ArraySpec::getTypeKind(int *rc){
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   ESMC_TypeKind_Flag typekind;
   FTN_X(f_esmf_arrayspecgettypekind)(this, &typekind, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return ESMF_NOKIND;  // bail out with invalid typekind
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return ESMF_NOKIND;  // bail out with invalid typekind
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return typekind;

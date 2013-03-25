@@ -80,19 +80,21 @@ RouteHandle *RouteHandle::create(
     routehandle = new RouteHandle;
 
     localrc = routehandle->construct();
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)){
       routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return NULL;
     }
     
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc);
     routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }catch(...){
     // allocation error
-    ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", rc);  
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", ESMC_CONTEXT, rc);  
     routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }
@@ -131,14 +133,14 @@ int RouteHandle::destroy(
   // return with errors for NULL pointer
   if (routehandle == ESMC_NULL_POINTER){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to RouteHandle", &rc);
+      "- Not a valid pointer to RouteHandle", ESMC_CONTEXT, &rc);
     return rc;
   }
   
   // destruct RouteHandle object
   localrc = routehandle->destruct();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   // mark as invalid object
   routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
@@ -276,14 +278,15 @@ int RouteHandle::print(
     XXE *xxe = (XXE *)getStorage();
     
     if (xxe == NULL){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, ESMCI_ERR_PASSTHRU, &rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc);
       return rc;
     }
   
     // write XXE stream profile to file
     VM *vm = VM::getCurrent(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
     int localPet = vm->getLocalPet();
     int petCount = vm->getPetCount();
     char file[160];
@@ -296,8 +299,8 @@ int RouteHandle::print(
     for (int pet=0; pet<petCount; pet++){
       if (pet==localPet){
         localrc = xxe->printProfile(fp);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-          return rc;
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, &rc)) return rc;
       }
       vm->barrier();
     }
@@ -316,7 +319,8 @@ int RouteHandle::print(
       || commMatrixDstDataCount == NULL
       || commMatrixSrcPet == NULL
       || commMatrixSrcDataCount == NULL){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, ESMCI_ERR_PASSTHRU, &rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc);
       return rc;
     }
   
@@ -334,18 +338,18 @@ int RouteHandle::print(
     DELayout *delayout = NULL;
     DistGrid *dg = DistGrid::create(minIndex, maxIndex, NULL, NULL, 0, NULL,
       NULL, NULL, NULL, NULL, delayout, NULL, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
     Array *commArrayPETMap = Array::create(&as, dg,
       NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
       &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
     Array *commArrayDataCount = Array::create(&as, dg,
       NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
       &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
     
     LocalArray **localarrayList;
     int *entry;
@@ -360,8 +364,8 @@ int RouteHandle::print(
       ++entry[pet];
     }
     localrc = commArrayPETMap->setName("src-to-dst-PET-mapping");
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     // fill the Array with comm matrix values
     localarrayList = commArrayDataCount->getLocalarrayList();
@@ -373,20 +377,20 @@ int RouteHandle::print(
       entry[pet] += (*commMatrixDstDataCount)[i];
     }
     localrc = commArrayDataCount->setName("dataCount");
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
     
 #if 1
     // finally write the Arrays to file -- using Array::write()
     bool overwrite = true;
     localrc = commArrayPETMap->write("commMatrix.nc",
       NULL, &overwrite, NULL, NULL, NULL);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
     localrc = commArrayDataCount->write("commMatrix.nc",
       NULL, &overwrite, NULL, NULL, NULL);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
     
 #else
     // finally write the Arrays to file -- using ArrayBundle::write()
@@ -398,18 +402,19 @@ int RouteHandle::print(
     bool overwrite = true;
     localrc = ab->write("commMatrix.nc", &singleFile, &overwrite, NULL, NULL,
       NULL);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 #endif
 #endif
   
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
     return rc;
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", &rc);
+      "- Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -446,7 +451,8 @@ int RouteHandle::optimize(
 
   try{
     
-    ESMC_LogDefault.Write("Entering RouteHandle::optimize()", ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write("Entering RouteHandle::optimize()", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
 
     // get the communication matrix from routehandle
     std::vector<int> *commMatrixDstPet       =(std::vector<int> *)getStorage(1);
@@ -458,7 +464,8 @@ int RouteHandle::optimize(
       || commMatrixDstDataCount == NULL
       || commMatrixSrcPet == NULL
       || commMatrixSrcDataCount == NULL){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, ESMCI_ERR_PASSTHRU, &rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc);
       return rc;
     }
   
@@ -466,11 +473,12 @@ int RouteHandle::optimize(
         
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
     return rc;
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", &rc);
+      "- Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
   

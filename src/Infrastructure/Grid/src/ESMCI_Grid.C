@@ -197,7 +197,7 @@ int setDefaultsLUA(int dimCount,
   
     if(mi->dimCount != 1){
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-         "- maxIndex array must be of rank 1", rc);
+         "- maxIndex array must be of rank 1", ESMC_CONTEXT, rc);
        return ESMC_NULL_POINTER;
     }
 
@@ -215,9 +215,8 @@ int setDefaultsLUA(int dimCount,
                                       coordSys, &cs_present,
                                       coordTypeKind, &ctk_present,
                                       &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
-        return ESMC_NULL_POINTER;
-    }
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return ESMC_NULL_POINTER;
   
     if (rc) *rc = localrc;
   
@@ -266,7 +265,7 @@ int setDefaultsLUA(int dimCount,
   
     if(mi->dimCount != 1){
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-         "- maxIndex array must be of rank 1", rc);
+         "- maxIndex array must be of rank 1", ESMC_CONTEXT, rc);
        return ESMC_NULL_POINTER;
     }
 
@@ -287,9 +286,8 @@ int setDefaultsLUA(int dimCount,
                                      coordTypeKind, &ctk_present,
                                      poleKind, &pk_present, &pksize,
                                      &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
-        return grid;
-    }
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return grid;
   
     if (rc) *rc = localrc;
   
@@ -330,8 +328,8 @@ int setDefaultsLUA(int dimCount,
 
   // Get VM
   ESMCI::VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
-   throw localrc;  // bail out with exception
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
 
   // Get pet info
   int localPet = vm->getLocalPet();
@@ -408,8 +406,9 @@ int Grid::addCoordArray(
   
   // Make sure the grid has the correct status for this action
   if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_WRONG,
-      "- grid not of correct status to perform this operation", &rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+      "- grid not of correct status to perform this operation", ESMC_CONTEXT,
+      &rc);
     return rc;
   }  
 
@@ -422,8 +421,8 @@ int Grid::addCoordArray(
 
   // Check staggerloc
   if ((staggerloc < 0) || (staggerloc >= staggerLocCount)) {
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- stagger location out of range", &rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- stagger location out of range", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -431,14 +430,14 @@ int Grid::addCoordArray(
   // Error check and then set information about this stagger's bounds in the staggerLists
   localrc=this->setStaggerInfo(staggerloc, staggerEdgeLWidthArg, staggerEdgeUWidthArg,
 			       staggerAlignArg, staggerMemLBoundArg);
-  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc,
-            ESMCI_ERR_PASSTHRU, &rc)) return rc;        
+  if (ESMC_LogDefault.MsgFoundError(localrc,
+            ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
 
 
   // Get distgrid for this staggerloc 
   localrc=this->getStaggerDistgrid(staggerloc, &staggerDistgrid);
-  if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc,
-            ESMCI_ERR_PASSTHRU, &rc)) return rc;        
+  if (ESMC_LogDefault.MsgFoundError(localrc,
+            ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
 
   // construct ArraySpec for using to call Array::create
   ArraySpec *arrayspec= new ArraySpec;     
@@ -533,13 +532,13 @@ int Grid::addCoordArray(
                           (InterfaceInt *)ESMC_NULL_POINTER,
                           (InterfaceInt *)ESMC_NULL_POINTER, 
                           &localrc);
-    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc,
-                                  ESMCI_ERR_PASSTHRU, &rc)) return rc;        
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
 
     // Set newly created Array into Grid
     localrc=this->setCoordArrayInternal(staggerloc, coord, array, true);
-    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc,
-                                 ESMCI_ERR_PASSTHRU, &rc)) return rc;        
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
     
   } // end of coord loop
 
@@ -601,8 +600,9 @@ int Grid::addCoordArrayArb(
   
   // Make sure the grid has the correct status for this action
   if (status < ESMC_GRIDSTATUS_SHAPE_READY) {
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_WRONG,
-      "- grid not of correct status to perform this operation", &rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+      "- grid not of correct status to perform this operation", ESMC_CONTEXT,
+      &rc);
     return rc;
   }  
 
@@ -616,8 +616,8 @@ int Grid::addCoordArrayArb(
 
   // Check staggerloc
   if ((staggerloc < 0) || (staggerloc >= staggerLocCount)) {
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- stagger location out of range", &rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- stagger location out of range", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -666,13 +666,13 @@ int Grid::addCoordArrayArb(
                        (InterfaceInt *)ESMC_NULL_POINTER,
                        (InterfaceInt *)ESMC_NULL_POINTER, 
 			&localrc);
-    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc,
-                                  ESMCI_ERR_PASSTHRU, &rc)) return rc;        
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
 
     // Set newly created Array into Grid
     localrc=this->setCoordArrayInternal(staggerloc, coord, array, true);
-    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc,
-                                 ESMCI_ERR_PASSTHRU, &rc)) return rc;        
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;        
     
   } // end of coord loop
 

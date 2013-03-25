@@ -206,7 +206,8 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.13 2012/09/20 21:2
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "; Input fabs(rin) = %g > 0 and < 1e-17 or > 1e18\n.",
               rabs);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE, logMsg, &rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE, logMsg, 
+        ESMC_CONTEXT, &rc);
       return(rc);
     }
 

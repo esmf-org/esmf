@@ -202,8 +202,8 @@ int LocalArray::construct(
     LocalArray *aptr = this;
     FTN_X(f_esmf_localarrayf90allocate)(&aptr, &rank, &typekind, counts, 
       lbound, ubound, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
   } 
 
   // Setup info for calculating index tuple location quickly
@@ -219,7 +219,7 @@ int LocalArray::construct(
   if (docopy == DATA_COPY){
     if (ibase_addr == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- Cannot copy data when ibase_addr not provided", &rc);
+        "- Cannot copy data when ibase_addr not provided", ESMC_CONTEXT, &rc);
       return rc;
     }
     // copy data
@@ -264,8 +264,8 @@ int LocalArray::construct(
   if (dealloc){
     // must deallocate data allocation
     FTN_X(f_esmf_localarrayf90deallocate)(&aptr, &rank, &typekind, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
   }
 
   // return successfully
@@ -323,8 +323,8 @@ LocalArray *LocalArray::create(
   
   localrc = a->construct(false, DATA_NONE, tk, rank, oflag, false,
     NULL, NULL, NULL, NULL, NULL, NULL);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return ESMC_NULL_POINTER;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return ESMC_NULL_POINTER;
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -381,8 +381,8 @@ LocalArray *LocalArray::create(
   // construct LocalArray internals, allocate memory for data
   localrc = a->construct(true, docopy, tk, rank, FROM_CPLUSPLUS, true,
     NULL, NULL, NULL, counts, base_addr, NULL);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return ESMC_NULL_POINTER;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return ESMC_NULL_POINTER;
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -441,8 +441,8 @@ LocalArray *LocalArray::create(
   // construct LocalArray internals, allocate memory for data
   localrc = a->construct(true, docopy, tk, rank, FROM_CPLUSPLUS, true,
     NULL, lbounds, ubounds, counts, base_addr, NULL);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return ESMC_NULL_POINTER;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return ESMC_NULL_POINTER;
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -503,8 +503,8 @@ LocalArray *LocalArray::create(
 
   // call into Fortran copy method, which will use larrayOut's lbound and ubound
   FTN_X(f_esmf_localarraycopyf90ptr)(&larrayIn, &larrayOut, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return ESMC_NULL_POINTER;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return ESMC_NULL_POINTER;
   
   // return successfully 
   if (rc != NULL) *rc = ESMF_SUCCESS;
@@ -554,7 +554,7 @@ LocalArray *LocalArray::create(
   for (int i=0; i<rank; i++){
     if (counts[i] != ubounds[i] - lbounds[i] + 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- Mismatch of lbounds, ubounds and counts", rc);
+        "- Mismatch of lbounds, ubounds and counts", ESMC_CONTEXT, rc);
       return NULL;
     }
   }
@@ -564,8 +564,8 @@ LocalArray *LocalArray::create(
   if (copyflag == DATA_COPY){
     // make a copy of the LocalArray object including the data allocation
     larrayOut = LocalArray::create(larrayIn, lbounds, ubounds, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-      return NULL;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return NULL;
   }else{
     // allocate memory for new LocalArray object
     try{
@@ -587,8 +587,8 @@ LocalArray *LocalArray::create(
     // adjust the Fortran dope vector to reflect the new bounds
     FTN_X(f_esmf_localarrayadjust)(&larrayOut, &rank, &typekind, counts,
       larrayOut->lbound, larrayOut->ubound, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-      return NULL;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return NULL;
   }
   
   // Setup info for calculating index tuple location quickly
@@ -634,8 +634,8 @@ int LocalArray::destroy(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   localrc = localarray->destruct();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
 
   delete localarray;
 
@@ -877,7 +877,7 @@ int LocalArray::getData(
   for (int i=0; i<rank; i++) {   
     if ((index[i] < lbound[i]) || (index[i] > ubound[i])) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-        "- index outside of LocalArray bounds", &rc);
+        "- index outside of LocalArray bounds", ESMC_CONTEXT, &rc);
       return rc;
     }
   }
@@ -973,7 +973,7 @@ int LocalArray::setData(
   for (int i=0; i<rank; i++) {   
     if ((index[i] < lbound[i]) || (index[i] > ubound[i])) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-        "- index outside of LocalArray bounds", &rc);
+        "- index outside of LocalArray bounds", ESMC_CONTEXT, &rc);
       return rc;
     }
   }
@@ -1573,8 +1573,8 @@ int LocalArray::write(
       ffile = fopen(filename, "w");
       if (ffile == NULL) {
           sprintf(msgbuf, "error opening file '%s'\n", filename);
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, 
-                                                msgbuf, &rc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, msgbuf,
+            ESMC_CONTEXT, &rc);
           return rc;
       }
   }

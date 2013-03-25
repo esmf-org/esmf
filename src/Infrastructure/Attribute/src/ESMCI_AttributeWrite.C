@@ -1394,7 +1394,7 @@ namespace ESMCI {
       } else if (attrList.at(i)->items >1) { 
       //if (attrList.at(i)->items > 1 && value.substr(5,value.length()) != "farrayPtr") { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
-        ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+        ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
       } else if (attrList.at(i)->items == 0) {
         // do nothing
       } else {
@@ -1500,7 +1500,7 @@ namespace ESMCI {
       //ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
     } else if (attrList.at(i)->items >1) {
       sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
     } else if (attrList.at(i)->items == 0) {
       //do nothing
     } else {
@@ -4634,7 +4634,7 @@ namespace ESMCI {
 
       } else if (attrList.at(i)->items > 1) { 
           sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
-          ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
       } else {
         sprintf(msgbuf,"Items < 1, problem.");
         ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);

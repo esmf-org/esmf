@@ -88,7 +88,8 @@ extern "C" {
 
     // call into ESMCI method 
     state.ptr = (void *)ESMCI::State::create(name, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)){
       state.ptr = NULL; // invalidate
       return state; // bail out
     }
@@ -124,8 +125,8 @@ extern "C" {
     int rc = ESMC_RC_NOT_IMPL;              // final return code
 
     localrc = ((ESMCI::State*)state.ptr)->addArray((ESMCI::Array*)array.ptr);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -158,8 +159,8 @@ extern "C" {
     int rc = ESMC_RC_NOT_IMPL;              // final return code
 
     localrc = ((ESMCI::State*)state.ptr)->addField((ESMCI::Field*)(field.ptr));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -194,8 +195,8 @@ extern "C" {
 
     localrc = ((ESMCI::State*)state.ptr)->getArray(arrayName,
       (ESMCI::Array**)&(array->ptr));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -230,8 +231,8 @@ extern "C" {
 
     localrc = ((ESMCI::State*)state.ptr)->getField(fieldName,
       (ESMCI::Field**)&(field->ptr));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -267,8 +268,8 @@ extern "C" {
     int rc = ESMC_RC_NOT_IMPL;              // final return code
 
     localrc = ((ESMCI::State*)state.ptr)->print();
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -305,8 +306,8 @@ extern "C" {
     int rc = ESMC_RC_NOT_IMPL;              // final return code
     
     localrc = ESMCI::State::destroy((ESMCI::State*)(state->ptr));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return localrc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return localrc;
 
     // invalidate pointer
     state->ptr = NULL;

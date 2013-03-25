@@ -27,12 +27,6 @@
 #include "ESMCI.h"
 #include "ESMC.h"
 
-// remove define which automatically appends the "CONTEXT" to all
-// LogWrite() calls - we do not want to add this file name and line number;
-// the calls to the Test subroutines already include the offending filename
-// and line number, which is formatted into the message to be printed.
-#undef Write
-
 // associated class definition file
 #include "ESMCI_Test.h"
 

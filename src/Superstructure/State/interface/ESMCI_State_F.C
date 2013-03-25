@@ -68,7 +68,7 @@ void FTN_X(c_esmc_stateserialize)(
     if ((*inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                             "Buffer too short to add a State object", localrc);
+           "Buffer too short to add a State object", ESMC_CONTEXT, localrc);
          return;
  
         //buffer = (char *)realloc((void *)buffer,
@@ -97,6 +97,9 @@ void FTN_X(c_esmc_statedeserialize)(
                              int *datacount, 
                              char *buffer, int *offset, int *localrc,
                              ESMCI_FortranStrLenArg buffer_l){
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_statedeserialize()"
 
     int *ip;
 
@@ -169,6 +172,9 @@ void FTN_X(c_esmc_stateitemdeserialize)(int *otype,
                                char *buffer, int *offset, int *localrc,
                                ESMCI_FortranStrLenArg clen,
                                ESMCI_FortranStrLenArg buffer_l) {
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_stateitemdeserialize()"
 
     int *ip;
     char *cp;

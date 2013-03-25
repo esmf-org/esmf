@@ -272,12 +272,14 @@ int PIO_Handler::initializeVM (void
       int petCount;
       int peCount;
       currentVM = ESMC_VMGetCurrent(&rc);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc)) {
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
+        &rc)) {
         return rc;
       }
       rc = ESMC_VMGet(currentVM, &localPet, &petCount, &peCount,
                       &communicator, (int *)NULL, (int *)NULL);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc)) {
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc)) {
         return rc;
       }
       // Figure out the inputs for the initialize call
@@ -1732,12 +1734,14 @@ int PIO_IODescHandler::constructPioDecomp(
   handle = new PIO_IODescHandler(iosys, arr_p);
   pioDofList = (int64_t *)NULL;
   currentVM = ESMC_VMGetCurrent(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &localrc)) {
     return false;
   }
   localrc = ESMC_VMGet(currentVM, &localPet, &petCount, &peCount,
                        &mpiCommunicator, (int *)NULL, (int *)NULL);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &localrc)) {
     return false;
   }
   localDeCount = arr_p->getDELayout()->getLocalDeCount();
@@ -1818,7 +1822,8 @@ int PIO_IODescHandler::constructPioDecomp(
       localrc = ESMF_RC_ARG_BAD;
     }
   } else {
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &localrc);
     // Can't return, need to free pioDofList
   }
 

@@ -145,13 +145,13 @@ int Comp::setServices(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
 
   FTable::setServices(this, (void(*)())func, userRc, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -190,14 +190,14 @@ int Comp::setEntryPoint(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
 
   FTable *ftable = **(FTable***)this;
   if (ftable==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid FTable pointer", &rc);
+      "- Not a valid FTable pointer", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -208,8 +208,8 @@ int Comp::setEntryPoint(
   FTable::newtrim(methodString, slen, &phase, NULL, &fname);
   
   localrc = ftable->setFuncPtr(fname, (void *)functionPtr, FT_VOIDP4INTP);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) 
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
 
   delete[] fname;  // delete memory that "newtrim" allocated above
   
@@ -248,14 +248,14 @@ void *Comp::getInternalState(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, rc);
     return NULL;
   }
   
   FTable *ftable = **(FTable***)this;
   if (ftable==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid FTable pointer", rc);
+      "- Not a valid FTable pointer", ESMC_CONTEXT, rc);
     return NULL;
   }
   
@@ -264,8 +264,8 @@ void *Comp::getInternalState(
   void *data;
   
   localrc = ftable->getDataPtr(name, &data, &dtype);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return NULL;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return NULL;
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -302,14 +302,14 @@ int Comp::setInternalState(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
   FTable *ftable = **(FTable***)this;
   if (ftable==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid FTable pointer", &rc);
+      "- Not a valid FTable pointer", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -317,8 +317,8 @@ int Comp::setInternalState(
   enum dtype dtype = DT_VOIDP;
   
   localrc = ftable->setDataPtr(name, &data, dtype);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -362,7 +362,7 @@ int Comp::execute(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -371,8 +371,8 @@ int Comp::execute(
   
   FTN_X(f_esmf_compexecute)(this, &method, importState, exportState, &clock,
     &blockingFlag, &phase, &timeout, &localUserRc, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   if (userRc) *userRc = localUserRc;
 
@@ -411,13 +411,13 @@ int Comp::getCurrentPhase(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
   FTN_X(f_esmf_compgetcurrentphase)(this, currentPhase, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
+    &rc)) return rc;
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -454,13 +454,13 @@ int Comp::getTimeout(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
   FTN_X(f_esmf_compgettimeout)(this, timeout, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -497,13 +497,13 @@ int Comp::getVmInfo(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
   FTN_X(f_esmf_compgetvminfo)(this, vm_info, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -540,13 +540,13 @@ int Comp::getVm(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
   FTN_X(f_esmf_compgetvm)(this, vm, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -583,13 +583,13 @@ int Comp::getVmParent(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
   FTN_X(f_esmf_compgetvmparent)(this, vmparent, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -626,13 +626,13 @@ int Comp::getVmPlan(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
   FTN_X(f_esmf_compgetvmplan)(this, vmplan, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -669,13 +669,13 @@ int Comp::getFTable(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
   FTN_X(f_esmf_compgetftable)(this, ftable, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -712,13 +712,13 @@ int Comp::getTunnel(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
   FTN_X(f_esmf_compgettunnel)(this, tunnel, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -759,8 +759,8 @@ GridComp *GridComp::create(
   
   FTN_X(f_esmf_gridcompcreate)(comp, name,
     configFile, &clock, &localrc, strlen(name), strlen(configFile));
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return comp;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return comp;
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -797,13 +797,13 @@ int GridComp::destroy(
   // check input
   if (comp==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
   FTN_X(f_esmf_gridcompdestroy)(comp, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   delete comp;
   
@@ -846,7 +846,7 @@ int GridComp::initialize(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -857,8 +857,8 @@ int GridComp::initialize(
   
   FTN_X(f_esmf_gridcompinitialize)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   if (userRc) *userRc = localUserRc;
 
@@ -901,7 +901,7 @@ int GridComp::run(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -912,8 +912,8 @@ int GridComp::run(
 
   FTN_X(f_esmf_gridcomprun)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   if (userRc) *userRc = localUserRc;
 
@@ -956,7 +956,7 @@ int GridComp::finalize(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -967,8 +967,8 @@ int GridComp::finalize(
   
   FTN_X(f_esmf_gridcompfinalize)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   if (userRc) *userRc = localUserRc;
   
@@ -1006,13 +1006,13 @@ int GridComp::print(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
   FTN_X(f_esmf_gridcompprint)(this, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -1053,8 +1053,8 @@ CplComp *CplComp::create(
   
   FTN_X(f_esmf_cplcompcreate)(comp, name, configFile, &clock, &localrc,
     strlen(name), strlen(configFile));
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return comp;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return comp;
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1091,13 +1091,13 @@ int CplComp::destroy(
   // check input
   if (comp==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
   FTN_X(f_esmf_cplcompdestroy)(comp, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   delete comp;
   
@@ -1140,7 +1140,7 @@ int CplComp::initialize(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -1151,8 +1151,8 @@ int CplComp::initialize(
 
   FTN_X(f_esmf_cplcompinitialize)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   if (userRc) *userRc = localUserRc;
   
@@ -1195,7 +1195,7 @@ int CplComp::run(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -1206,8 +1206,8 @@ int CplComp::run(
 
   FTN_X(f_esmf_cplcomprun)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   if (userRc) *userRc = localUserRc;
   
@@ -1250,7 +1250,7 @@ int CplComp::finalize(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -1261,8 +1261,8 @@ int CplComp::finalize(
 
   FTN_X(f_esmf_cplcompfinalize)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   if (userRc) *userRc = localUserRc;
   
@@ -1300,13 +1300,13 @@ int CplComp::print(
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
   FTN_X(f_esmf_cplcompprint)(this, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   // return successfully
   rc = ESMF_SUCCESS;
@@ -1341,23 +1341,17 @@ SciComp *SciComp::create(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc != NULL) 
-  {
     *rc = ESMC_RC_NOT_IMPL;   // final return code
-  }
   
   SciComp *comp = new SciComp;
   
   FTN_X(f_esmf_scicompcreate)(comp, name, &localrc, strlen(name));
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-  {
-    return comp;
-  }
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return comp;
 
   // return successfully
   if (rc != NULL) 
-  {
     *rc = ESMF_SUCCESS;
-  }
 
   return comp;
 }
@@ -1391,18 +1385,15 @@ int SciComp::destroy(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   // check input
-  if (comp == NULL)
-  {
+  if (comp == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
   FTN_X(f_esmf_scicompdestroy)(comp, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-  {
-    return rc;
-  }
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   delete comp;
   
@@ -1439,18 +1430,15 @@ int SciComp::print(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
   // check input
-  if (this==NULL)
-  {
+  if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid comp argument", &rc);
+      "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
   
   FTN_X(f_esmf_scicompprint)(this, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-  {
-    return rc;
-  }
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   // return successfully
   rc = ESMF_SUCCESS;

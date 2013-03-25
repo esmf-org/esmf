@@ -54,7 +54,8 @@ int ESMC_VMPrint(ESMC_VM vm){
 
   // call into ESMCI method  
   localrc = vmp->print();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc))
     return rc;  // bail out
     
   // return successfully
@@ -75,7 +76,8 @@ ESMC_VM ESMC_VMGetGlobal(int *rc){
   vm.ptr = (void *)NULL; // initialize
 
   ESMCI::VM *vmp = ESMCI::VM::getGlobal(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc))
     return vm;  // bail out
 
   vm.ptr = (void*)vmp;
@@ -98,7 +100,8 @@ ESMC_VM ESMC_VMGetCurrent(int *rc){
   vm.ptr = (void *)NULL; // initialize
 
   ESMCI::VM *vmp = ESMCI::VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc))
     return vm;  // bail out
 
   vm.ptr = (void*)vmp;

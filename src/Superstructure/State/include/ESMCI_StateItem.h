@@ -52,11 +52,13 @@ extern "C" {
 
 namespace ESMCI{
   int StateItemWrap::castToFortran(F90ClassHolder *fc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "StateItemWrap::castToFortran()"
     int localrc = ESMC_RC_NOT_IMPL;
     int rc=ESMC_RC_NOT_IMPL;
     FTN_X(f_esmf_stateitemwrapcast)(fc, this, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
     // return successfully
     rc = ESMF_SUCCESS;
     return rc;

@@ -47,6 +47,8 @@ void FTN_X(c_esmc_fieldbundleserialize)(
                             ESMC_InquireFlag *inquireflag, int *localrc,
                             ESMCI_FortranStrLenArg buffer_l){
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_fieldbundleserialize()"
     // either put the code here, or call into a real C++ function
     ESMC_Status *sp;
     int *ip;
@@ -57,7 +59,8 @@ void FTN_X(c_esmc_fieldbundleserialize)(
       if ((*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                            "Buffer too short to add a FieldBundle object", localrc);
+          "Buffer too short to add a FieldBundle object", ESMC_CONTEXT,
+          localrc);
          return;
  
         //buffer = (char *)realloc((void *)buffer,
@@ -88,6 +91,8 @@ void FTN_X(c_esmc_fieldbundledeserialize)(
                               char *buffer, int *offset, int *localrc,
                               ESMCI_FortranStrLenArg buffer_l){
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_fieldbundledeserialize()"
     // either put the code here, or call into a real C++ function
     ESMC_Status *sp;
     int *ip;

@@ -274,7 +274,7 @@ namespace ESMCI{
     // validate input
     if (timeToConvert == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-                                            "; timeToConvert is NULL", &rc);
+        "; timeToConvert is NULL", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -369,7 +369,8 @@ namespace ESMCI{
       // convert remaining time to milliseconds
       Fraction msRemainingTime = remainingTime;
       int rc = msRemainingTime.convert(1000);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc))
         return(rc);
       *ms = msRemainingTime.getn();
 
@@ -381,7 +382,8 @@ namespace ESMCI{
       // convert remaining time to microseconds
       Fraction usRemainingTime = remainingTime;
       int rc = usRemainingTime.convert(1000000);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc))
         return(rc);
       *us = usRemainingTime.getn();
 
@@ -393,7 +395,8 @@ namespace ESMCI{
       // convert remaining time to nanoseconds
       Fraction nsRemainingTime = remainingTime;
       int rc = nsRemainingTime.convert(1000000000);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc))
         return(rc);
       *ns = nsRemainingTime.getn();
     }

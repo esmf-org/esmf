@@ -38,6 +38,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_basecreate)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_basecreate()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -68,7 +70,7 @@ extern "C" {
       scname = ESMC_F90toCstring(superclass, sclen);
       if (!scname) {
            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name", &status);
+                         "bad attribute name", ESMC_CONTEXT, &status);
           if (rc) *rc = status;
           return;
       }
@@ -100,6 +102,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_basedestroy)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_basedestroy()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -131,6 +135,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_baseprint)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_baseprint()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -154,7 +160,8 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
     if (rc) *rc = ESMF_SUCCESS;
     return;
     // for Print, it's not a failure for an uninit object to be printed
@@ -184,6 +191,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_baseserialize)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_baseserialize()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -209,7 +218,8 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
     if (rc) *rc = ESMF_SUCCESS;
     return;
   }
@@ -227,6 +237,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_basedeserialize)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_basedeserialize()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -258,7 +270,7 @@ extern "C" {
   *base = new ESMC_Base(-1);
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object error", ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write("Base object error", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
     if (rc) *rc = ESMF_FAILURE;
     return;
   }
@@ -275,6 +287,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_basevalidate)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_basevalidate()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -297,7 +311,8 @@ extern "C" {
 
   if (!base) {
     //printf("uninitialized Base object\n");
-    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write("Base object uninitialized", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
     if (rc) *rc = ESMF_FAILURE;
     return;
   }
@@ -325,6 +340,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_getname)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_getname()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -366,6 +383,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_setname)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_setname()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -429,6 +448,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_getclassname)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_getclassname()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -464,6 +485,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_getid)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_getid()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -502,6 +525,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_setid)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_setid()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -538,6 +563,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_getvmid)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_getvmid()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -574,6 +601,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_setvmid)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_setvmid()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -611,6 +640,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_basesetbasestatus)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_basesetbasestatus()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -643,6 +674,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_basegetbasestatus)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_basegetbasestatus()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -676,6 +709,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_basesetstatus)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_basesetstatus()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -708,6 +743,8 @@ extern "C" {
 //
 // !INTERFACE:
       void FTN_X(c_esmc_basegetstatus)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_basegetstatus()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list

@@ -62,7 +62,8 @@ ESMC_DistGrid ESMC_DistGridCreate(ESMC_InterfaceInt minIndexInterfaceArg,
     ESMCI::DistGrid::create(minIndexInterface, maxIndexInterface, NULL,
       NULL, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
       &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, rc)){
     distgrid.ptr = NULL;
     return distgrid;  // bail out
   }
@@ -85,8 +86,8 @@ int ESMC_DistGridPrint(ESMC_DistGrid distgrid){
 
   // call into ESMCI method  
   localrc = dgp->print();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, &rc)) return rc;  // bail out
     
   // return successfully
   rc = ESMF_SUCCESS;
@@ -106,8 +107,8 @@ int ESMC_DistGridDestroy(ESMC_DistGrid *distgrid){
 
   // call into ESMCI method  
   localrc = ESMCI::DistGrid::destroy(&dgp);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, &rc)) return rc;  // bail out
   
   // invalidate pointer
   distgrid->ptr = NULL;

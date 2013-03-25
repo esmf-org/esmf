@@ -53,8 +53,8 @@ int ESMC_ArraySpecSet(ESMC_ArraySpec *arrayspec,int rank,
 
   // call into ESMCI interface
   localrc = ((ESMCI::ArraySpec *)arrayspec)->set(rank, typekind);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -72,11 +72,11 @@ int ESMC_ArraySpecGet(ESMC_ArraySpec arrayspec, int *rank,
 
   // call into ESMCI interface
   *rank = ((ESMCI::ArraySpec *)&arrayspec)->getRank(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
   *typekind = ((ESMCI::ArraySpec *)&arrayspec)->getTypeKind(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
     
   // return successfully
   rc = ESMF_SUCCESS;

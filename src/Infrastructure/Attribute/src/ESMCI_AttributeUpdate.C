@@ -1247,7 +1247,8 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
   // if link changes, we bail and recommend StateReconcile
   if (linkChangesOut > 0) {
     ESMC_LogDefault.Write(
-                  "Attribute link changes made, call ESMF_StateReconcile() first", ESMC_LOGMSG_INFO);
+      "Attribute link changes made, call ESMF_StateReconcile() first",
+      ESMC_LOGMSG_INFO, ESMC_CONTEXT);
     delete [] recvBuf;
     delete [] sendBuf;
     return ESMF_FAILURE;
@@ -1255,7 +1256,8 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
   // if no changes, nothing to do
   else if (realChangesOut == 0) {
     ESMC_LogDefault.Write(
-                  "There is nothing to update, gracefully exiting.", ESMC_LOGMSG_INFO);
+      "There is nothing to update, gracefully exiting.", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
     delete [] recvBuf;
     delete [] sendBuf;
     return ESMF_FAILURE;

@@ -2227,7 +2227,8 @@ if (attrRoot == ESMF_TRUE) {
     }
     // add length
     if (attrList.at(i)->items > 1) {
-      ESMC_LogDefault.Write("Write items >1 not yet implemented", ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write("Write items >1 not yet implemented", 
+        ESMC_LOGMSG_INFO, ESMC_CONTEXT);
       attrLens[index] = 0;
     } else if (attrList.at(i)->items == 1) {
         if (attrList.at(i)->tk == ESMC_TYPEKIND_LOGICAL)
@@ -2260,7 +2261,7 @@ if (attrRoot == ESMF_TRUE) {
             } else {
               ESMC_LogDefault.Write(
                "Couldn't find data type, using generic string length", 
-               ESMC_LOGMSG_INFO);
+               ESMC_LOGMSG_INFO, ESMC_CONTEXT);
               attrLens[index] = 10;
             }
         }
@@ -2312,7 +2313,8 @@ if (attrRoot == ESMF_TRUE) {
   attr = AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write(
-      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO);
+      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
     return ESMF_FAILURE;
   }
   else {
@@ -2367,7 +2369,8 @@ if (attrRoot == ESMF_TRUE) {
   attr = AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write(
-      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO);
+      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
     return localrc;
   }
   else {
@@ -2422,7 +2425,8 @@ if (attrRoot == ESMF_TRUE) {
   attr = AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write(
-      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO);
+      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
     return localrc;
   }
   else {
@@ -2477,7 +2481,8 @@ if (attrRoot == ESMF_TRUE) {
   attr = AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write(
-      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO);
+      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
     return localrc;
   }
   else {
@@ -2532,7 +2537,8 @@ if (attrRoot == ESMF_TRUE) {
   attr = AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write(
-      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO);
+      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
     return localrc;
   }
   else {
@@ -2586,7 +2592,8 @@ if (attrRoot == ESMF_TRUE) {
   attr = AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write(
-      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO);
+      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
 // took this out because i think it should return success if not an error.. 
 //    return localrc;
   }
@@ -2594,7 +2601,8 @@ if (attrRoot == ESMF_TRUE) {
     // simple sanity checks
     if (attr->tk == ESMF_NOKIND) {
       ESMC_LogDefault.Write(
-        "Attribute not set, will return empty vector", ESMC_LOGMSG_INFO);
+        "Attribute not set, will return empty vector", ESMC_LOGMSG_INFO,
+        ESMC_CONTEXT);
     }
     else if (attr->tk != ESMC_TYPEKIND_CHARACTER) {
       ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ATTR_WRONGTYPE, 
@@ -2642,7 +2650,8 @@ if (attrRoot == ESMF_TRUE) {
   attr = AttributeGet(name);
   if (!attr) {
     ESMC_LogDefault.Write(
-      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO);
+      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
     return ESMF_FAILURE;
   }
   else {
@@ -2698,7 +2707,8 @@ if (attrRoot == ESMF_TRUE) {
   attr = AttributeGet(num);
   if (!attr) {
     ESMC_LogDefault.Write(
-      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO);
+      "Attribute not found, using default value if present", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
     return ESMF_FAILURE;
   }
   else {
@@ -3632,23 +3642,23 @@ if (attrRoot == ESMF_TRUE) {
   for (i=0; i<attrList.size(); i++) {
     sprintf(msgbuf, "   Attr %d:\n", i);
     printf("%s",msgbuf);
-    ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
   // print name
   sprintf(msgbuf, "        name: %s\n",  attrList.at(i)->attrName.c_str());
   printf("%s",msgbuf);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
   
   // print items if there are any
   if (attrList.at(i)->items <= 0) {
       sprintf(msgbuf, "        value: \n");
       printf("%s",msgbuf);
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
   }
 
   if (attrList.at(i)->items == 1) {
       sprintf(msgbuf, "        value: ");
       printf("%s",msgbuf);
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
              if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
                  sprintf(msgbuf, "%d\n", attrList.at(i)->vip.at(0)); 
              else if (attrList.at(i)->tk == ESMC_TYPEKIND_I8)
@@ -3667,13 +3677,13 @@ if (attrRoot == ESMF_TRUE) {
                  return localrc;
              }
       printf("%s",msgbuf);
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
   }
 
   if (attrList.at(i)->items > 1) { 
       sprintf(msgbuf, "        %d items, values:\n", attrList.at(i)->items);
       printf("%s",msgbuf);
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
       for (unsigned int j=0; j<attrList.at(i)->items; j++) {
                 if (attrList.at(i)->tk == ESMC_TYPEKIND_I4) {
                     sprintf(msgbuf, "          \t item %d: %d\n", j, attrList.at(i)->vip[j]); 
@@ -3694,28 +3704,28 @@ if (attrRoot == ESMF_TRUE) {
                     return localrc;
                 }
       printf("%s",msgbuf);
-      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
       }
   }
 
   // print convention
   sprintf(msgbuf, "        convention: %s\n",  attrList.at(i)->attrConvention.c_str());
   printf("%s",msgbuf);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
   
   // print purpose
   sprintf(msgbuf, "        purpose: %s\n",  attrList.at(i)->attrPurpose.c_str());
   printf("%s",msgbuf);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
   
   // print object
   sprintf(msgbuf, "        object: %s\n",  attrList.at(i)->attrObject.c_str());
   printf("%s",msgbuf);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
 
   sprintf(msgbuf, "        attrCount: %d\n", attrList.at(i)->AttributeGetCountTotal());
   printf("%s",msgbuf);
-  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
+  ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
   }
   
   for (i=0; i<packList.size(); i++) {

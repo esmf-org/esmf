@@ -260,8 +260,8 @@ int ArrayBundle::destroy(
 
   // destruct ArrayBundle object
   localrc = (*arraybundle)->destruct();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   
   // mark as invalid object
   (*arraybundle)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
@@ -327,9 +327,8 @@ int ArrayBundle::read(
   }
 
   IO *newIO = IO::create(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    return rc;
-  }
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
   if ((bool *)NULL == singleFile) {
     localsingleFile = false;
   } else {
@@ -343,13 +342,15 @@ int ArrayBundle::read(
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
         localrc = newIO->addArray(it->second->second, (char *)NULL);
-        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          &rc);
       }
     }
     if (ESMF_SUCCESS == localrc) {
       // Call the IO read function
       localrc = newIO->read(file, localiofmt, timeslice);
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc);
     }
   } else {
     Container<std::string, Array *>::iterator it;
@@ -366,7 +367,8 @@ int ArrayBundle::read(
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
         localrc = newIO->addArray(it->second->second, (char *)NULL);
-        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          &rc);
       }
       if (ESMF_SUCCESS == localrc) {
         spret = sprintf(filename, "%s%03d", file, i);
@@ -375,7 +377,8 @@ int ArrayBundle::read(
         } else {
           // Call the IO read function
           localrc = newIO->read(filename, localiofmt, timeslice);
-          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, &rc);
         }
         newIO->clear();
       }
@@ -438,9 +441,8 @@ int ArrayBundle::write(
   }
 
   IO *newIO = IO::create(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
-    return rc;
-  }
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
 
   // Handle format default
   if ((ESMC_IOFmt_Flag *)NULL == iofmt) {
@@ -474,14 +476,16 @@ int ArrayBundle::write(
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
         localrc = newIO->addArray(it->second->second, (char *)NULL);
-        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          &rc);
       }
     }
     if (ESMF_SUCCESS == localrc) {
       // Call the IO read function
       localrc = newIO->write(file, localiofmt, localoverwrite,
                              localstatus, timeslice);
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc);
     }
   } else {
     Container<std::string, Array *>::iterator it;
@@ -498,7 +502,8 @@ int ArrayBundle::write(
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
         localrc = newIO->addArray(it->second->second, (char *)NULL);
-        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          &rc);
       }
       if (ESMF_SUCCESS == localrc) {
         spret = sprintf(filename, "%s%03d", file, i);
@@ -506,9 +511,10 @@ int ArrayBundle::write(
           localrc = ESMF_RC_SYS;
         } else {
           // Call the IO read function
-          localrc = newIO->write(filename, localiofmt,
-                                 localoverwrite, localstatus, timeslice);
-          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+          localrc = newIO->write(filename, localiofmt, localoverwrite,
+            localstatus, timeslice);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, &rc);
         }
         newIO->clear();
       }

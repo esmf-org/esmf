@@ -125,7 +125,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
       case ESMF_C16: return 16;
       default:
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                                "Unknown TypeKind", NULL);
+        "Unknown TypeKind", ESMC_CONTEXT, NULL);
        return -1;
     }
 
@@ -157,7 +157,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
       case ESMF_STATUS_INVALID:      return  "Invalid";
       default:
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                                      "Unknown Status", NULL);
+        "Unknown Status", ESMC_CONTEXT, NULL);
        return NULL;
     }
 
@@ -193,7 +193,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
       case ESMC_TYPEKIND_CHARACTER: return "Character";
       default:
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                                     "Unknown TypeKind", NULL);
+          "Unknown TypeKind", ESMC_CONTEXT, NULL);
          return "";
     }
 
@@ -221,7 +221,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
       case ESMF_FALSE:     return  "False";
       default:
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
-                                     "Unknown TypeKind", NULL);
+           "Unknown TypeKind", ESMC_CONTEXT, NULL);
          return NULL;
     }
 
@@ -289,7 +289,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (slen < 0)) {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                            "bad count or NULL pointer", NULL);
+        "bad count or NULL pointer", ESMC_CONTEXT, NULL);
        return NULL;
     }
 
@@ -334,7 +334,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
     if ((src == NULL) || (src[0] == '\0') || (slen <= 0) ||
         (dst == NULL) || (dlen <= 0)) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "bad count or NULL pointer", &rc);
+                  "bad count or NULL pointer", ESMC_CONTEXT, &rc);
             return rc;
     }
 
@@ -346,7 +346,8 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
        sprintf(msgbuf, 
              "dest buffer size of %ld bytes too small, must be >= %ld bytes\n", 
              (long) dlen, (long) clen+1);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+         &rc);
        return rc;
     }
     
@@ -390,7 +391,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
     // minor idiotproofing
     if ((src == NULL) || (dst == NULL) || (dlen <= 0)) {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "bad count or NULL pointer", &rc);
+         "bad count or NULL pointer", ESMC_CONTEXT, &rc);
        return rc;
     }
 
@@ -400,7 +401,8 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
        sprintf(msgbuf, 
              "dest buffer size of %ld bytes too small, must be >= %ld bytes\n", 
              (long) dlen, (long) clen);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+         &rc);
        return rc;
     }
 
@@ -449,7 +451,7 @@ extern "C" {
     if ((src == NULL) || (src[0] == '\0') || (slen < 0) ||
         (dst == NULL) || (dlen <= 0)) {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "bad count or NULL pointer", rc);
+                  "bad count or NULL pointer", ESMC_CONTEXT, rc);
        return;
     }
 
@@ -461,7 +463,8 @@ extern "C" {
        sprintf(msgbuf, 
              "dest buffer size of %ld bytes too small, must be >= %ld bytes\n", 
              (long) dlen, (long) clen+1);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+         rc);
        return;
     }
     
@@ -510,7 +513,7 @@ extern "C" {
     if ((src == NULL) || (src[0] == '\0') || (slen < 0) ||
         (dst == NULL) || (dlen <= 0)) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-                  "bad count or NULL pointer", rc);
+                  "bad count or NULL pointer", ESMC_CONTEXT, rc);
             return;
     }
 
@@ -520,7 +523,8 @@ extern "C" {
        sprintf(msgbuf, 
              "dest buffer size of %ld bytes too small, must be >= %ld bytes\n", 
              (long) dlen, (long) clen);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+           rc);
        return;
     }
 

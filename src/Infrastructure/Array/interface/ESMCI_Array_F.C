@@ -82,7 +82,7 @@ extern "C" {
       delete [] cname;
     }else if(*len_name){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid string", ESMC_NOT_PRESENT_FILTER(rc));
+        "- Not a valid string", ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return;
     }
   }
@@ -119,7 +119,7 @@ extern "C" {
       delete [] cname;
     }else if(*len_name){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid string", ESMC_NOT_PRESENT_FILTER(rc));
+        "- Not a valid string", ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return;
     }
   }
@@ -259,7 +259,7 @@ extern "C" {
       if ((*arrayToDistGridMap)->extent[0] < (*ptr)->getRank()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of arrayToDistGridMap array must be of size 'rank'",
-          rc);
+          ESMC_CONTEXT, rc);
         return;
       }
       // fill in arrayToDistGridMap
@@ -325,7 +325,7 @@ extern "C" {
       if ((*exclusiveLBound)->extent[1] < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dimension of exclusiveLBound must be of size 'localDeCount'",
-          rc);
+          ESMC_CONTEXT, rc);
         return;
       }
       // fill in the values: The interface allows to pass in exclusiveLBound
@@ -354,7 +354,7 @@ extern "C" {
       if ((*exclusiveUBound)->extent[1] < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dimension of exclusiveUBound must be of size 'localDeCount'",
-          rc);
+          ESMC_CONTEXT, rc);
         return;
       }
       // fill in the values: The interface allows to pass in exclusiveUBound
@@ -383,7 +383,7 @@ extern "C" {
       if ((*computationalLBound)->extent[1] < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dim of computationalLBound must be of size 'localDeCount'", 
-          rc);
+          ESMC_CONTEXT, rc);
         return;
       }
       // fill in the values: The interface allows to pass in computationalLBound
@@ -414,7 +414,7 @@ extern "C" {
       if ((*computationalUBound)->extent[1] < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dim of computationalUBound must be of size 'localDeCount'",
-          rc);
+          ESMC_CONTEXT, rc);
         return;
       }
       // fill in the values: The interface allows to pass in computationalUBound
@@ -445,7 +445,7 @@ extern "C" {
       if ((*totalLBound)->extent[1] < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dimension of totalLBound must be of size 'localDeCount'",
-          rc);
+          ESMC_CONTEXT, rc);
         return;
       }
       // fill in the values: The interface allows to pass in totalLBound
@@ -474,7 +474,7 @@ extern "C" {
       if ((*totalUBound)->extent[1] < localDeCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dimension of totalUBound must be of size 'localDeCount'",
-          rc);
+          ESMC_CONTEXT, rc);
         return;
       }
       // fill in the values: The interface allows to pass in totalUBound
@@ -497,7 +497,7 @@ extern "C" {
       if ((*computationalLWidth)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of computationalLWidth must be of size 'dimCount'",
-          rc);
+          ESMC_CONTEXT, rc);
         return;
       }
       if ((*computationalLWidth)->extent[1] < localDeCount){
@@ -524,7 +524,7 @@ extern "C" {
       if ((*computationalUWidth)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of computationalUWidth must be of size 'dimCount'",
-          rc);
+          ESMC_CONTEXT, rc);
         return;
       }
       if ((*computationalUWidth)->extent[1] < localDeCount){
@@ -551,7 +551,7 @@ extern "C" {
       if ((*totalLWidth)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of totalLWidth must be of size 'dimCount'",
-          rc);
+          ESMC_CONTEXT, rc);
         return;
       }
       if ((*totalLWidth)->extent[1] < localDeCount){
@@ -578,7 +578,7 @@ extern "C" {
       if ((*totalUWidth)->extent[0] < redDimCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of totalUWidth must be of size 'dimCount'",
-          rc);
+          ESMC_CONTEXT, rc);
         return;
       }
       if ((*totalUWidth)->extent[1] < localDeCount){
@@ -630,7 +630,7 @@ extern "C" {
     localrc = (*array)->write(fileName.c_str(), varName.c_str(),
                               &overwriteflag, status, timeslice, iofmt);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-                                  ESMC_NOT_PRESENT_FILTER(rc));
+      ESMC_NOT_PRESENT_FILTER(rc));
   }
 
   void FTN_X(c_esmc_arrayread)(ESMCI::Array **array,
@@ -823,25 +823,25 @@ extern "C" {
       // must provide valid factorList and factorIndexList args
       if (*factorIndexList == NULL){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-          "- Not a valid pointer to factorIndexList array", rc);
+          "- Not a valid pointer to factorIndexList array", ESMC_CONTEXT, rc);
         return;
       }
       if ((*factorIndexList)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- factorIndexList array must be of rank 2", rc);
+          "- factorIndexList array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((*factorIndexList)->extent[0] != 2 && 
         (*factorIndexList)->extent[0] != 4){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of factorIndexList array must be of size 2 or 4",
-          rc);
+          ESMC_CONTEXT, rc);
         return;
       }
       if ((*factorIndexList)->extent[1] != *factorListCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dimension of factorIndexList does not match factorListCount",
-          rc);
+          ESMC_CONTEXT, rc);
         return;
       }
     }
@@ -861,14 +861,16 @@ extern "C" {
     
     }catch(int localrc){
       // catch standard ESMF return code
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
       return;
     }catch(exception &x){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
       return;
     }catch(...){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        "- Caught exception", rc);
+        "- Caught exception", ESMC_CONTEXT, rc);
       return;
     }
   

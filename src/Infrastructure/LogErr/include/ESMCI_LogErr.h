@@ -69,31 +69,27 @@ private:
                                 // out
     
   public:
+      
 // !PUBLIC MEMBER FUNCTIONS:
-// (see ESMC\_LogErr.C for a description of these methods)
-    
-    bool AllocError(int *rcToReturn);
-    bool AllocError(int LINE,const char FILE[],const char method[],int *rcToReturn);
-    bool DeallocError(int *rcToReturn);
-    bool DeallocError(int LINE,const char FILE[],const char method[],int *rcToReturn);
+    bool AllocError(int LINE, const char FILE[], const char method[],
+      int *rcToReturn);
+    bool DeallocError(int LINE, const char FILE[], const char method[],
+      int *rcToReturn);
     void Close();
-    bool FoundError(int rcToCheck,int *rcToReturn);
-    bool FoundError(int rcToCheck,int LINE,const char FILE[],const char method[],
-         int *rcToReturn);
-    bool MsgAllocError(const char msg[],int *rcToReturn);
-    bool MsgAllocError(const char msg[],int LINE,const char FILE[],const char method[],
-      int *rcToReturn);
-    bool MsgDeallocError(const char msg[],int *rcToReturn);
-    bool MsgDeallocError(const char msg[],int LINE,const char FILE[],const char method[],
-      int *rcToReturn);
-    bool MsgFoundError(int rcToCheck,const char msg[],int *rcToReturn);
-    bool MsgFoundError(int rcToCheck,const char msg[],int LINE,const char FILE[],
-         const char method[],int *rcToReturn);
+    bool FoundError(int rcToCheck, int LINE,const char FILE[],
+      const char method[], int *rcToReturn);
+    bool MsgAllocError(const char msg[], int LINE, const char FILE[],
+      const char method[], int *rcToReturn);
+    bool MsgDeallocError(const char msg[], int LINE, const char FILE[],
+      const char method[], int *rcToReturn);
+    bool MsgFoundError(int rcToCheck, const char msg[], int LINE,
+      const char FILE[], const char method[], int *rcToReturn);
     void Open(const char filename[]);
-    int  Set(int flush);
-    int  Write(const char msg[],int msgtype);
-    int  Write(const char msg[],int msgtype,int LINE,const char FILE[],
-         const char method[]);       
+    int Set(int flush);
+    int Write(const char msg[], int msgtype);
+    int Write(const char msg[], int msgtype, int LINE, const char FILE[],
+      const char method[]);
+    
 // !PUBLIC Variables:          
     std::FILE *ESMC_LogFile;
     char nameLogErrFile[ESMC_MAXPATHLEN];

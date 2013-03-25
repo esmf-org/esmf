@@ -65,7 +65,8 @@ extern "C" {
   void FTN_X(c_esmc_comptunneldestroy)(ESMCI::CompTunnel **ptr, int *rc){
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     if (*ptr == NULL){
-      ESMC_LogDefault.MsgAllocError("- CompTunnel deallocation", rc);  
+      ESMC_LogDefault.MsgAllocError("- CompTunnel deallocation", ESMC_CONTEXT,
+        rc);  
       return;
     }
     delete (*ptr);
@@ -100,12 +101,12 @@ namespace ESMCI {
     // get a pointer to the CompTunnel object that is now inside of the dualComp
     ESMCI::CompTunnel *compTunnel;
     localrc = dualComp->getTunnel(&compTunnel);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-      return; // bail out
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return; // bail out
     // call into setServices for this compTunnel object
     localrc = compTunnel->setServices(dualComp);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) 
-      return; // bail out
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return; // bail out
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
@@ -121,15 +122,15 @@ namespace ESMCI {
     if (vmBased){
       // use the parent VM as bridge during the negotiation    
       localrc = dualComp->getVmParent(&bridgeVM);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-        return rc;
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc;
     }
     
     // negotiation phase
     setDual(dualComp);  // set this side as the dual side
     localrc = negotiate(timeout);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
     
     // return successfully
     rc = ESMF_SUCCESS;
@@ -155,8 +156,8 @@ printf("in CompTunnel::execute() ... call CompTunnel::wait, cargo=%p\n", cargo);
         // only call into wait() if there is an outstanding interaction
 printf("in CompTunnel::execute() ... call CompTunnel::wait really calling\n");
         localrc = wait(cargo);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-          return rc;  // bail out
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, &rc)) return rc;  // bail out
         outstandingWaitFlag = false;  // reset the flag
       }
 
@@ -169,26 +170,27 @@ printf("in CompTunnel::execute() ... call CompTunnel::dual2actual() with method 
         if (method==METHOD_NONE){
           // for wrapup call it is o.k. to just swallow the return codes
           localrc = wait(cargo);
-          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-            return rc;  // bail out
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, &rc)) return rc;  // bail out
           outstandingWaitFlag = false;  // reset the flag
         }else{
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
             "- An outstanding connection first requires a CompTunnel::wait()!",
-            &rc);
+            ESMC_CONTEXT, &rc);
           return rc;  // bail out
         }
       }
 
       // send method info to actual component
       localrc = dual2actual(&method, sizeof(enum method), cargo->timeout);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc))
         return rc;  // bail out
 
       // send phase info to actual component
       localrc = dual2actual(&phase, sizeof(int), cargo->timeout);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-        return rc;  // bail out
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc;  // bail out
       
       // indicate that there is an outstanding connection that needs a wait
       outstandingWaitFlag = true;   // set the flag
@@ -201,22 +203,22 @@ printf("in CompTunnel::execute() ... call CompTunnel::dual2actual() with method 
       
       ESMCI::FTable *ftable;
       localrc = localActualComp->getFTable(&ftable);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-        return rc;  // bail out
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc;  // bail out
       localActualCompCargo.ftable = ftable;
       
       ESMCI::VM *vm_parent;
       localrc = localActualComp->getVmParent(&vm_parent);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-        return rc;  // bail out
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc;  // bail out
       ESMCI::VMPlan *vmplan;
       localrc = localActualComp->getVmPlan(&vmplan);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-        return rc;  // bail out
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc;  // bail out
       void *vm_info;
       localrc = localActualComp->getVmInfo(&vm_info);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-        return rc;  // bail out
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc;  // bail out
 
 printf("now calling into vm_parent->enter() from CompTunnel::execute()\n");
 
@@ -225,8 +227,8 @@ printf("now calling into vm_parent->enter() from CompTunnel::execute()\n");
       
       // enter the child VM -> resurface in ESMCI_FTableCallEntryPointVMHop()
       localrc = vm_parent->enter(vmplan, vm_info, (void*)&localActualCompCargo);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) 
-        return rc; // bail out
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc; // bail out
             
       // ... if the child VM uses threads (multi-threading or single-threading) 
       // then this parent PET continues running concurrently to the child PET
@@ -258,8 +260,8 @@ printf("in CompTunnel::wait() ... \n");
 
       int rcs[2];
       localrc = actual2dual(rcs, 2*sizeof(int), cargo->timeout);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-        return rc;
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc;
       
 printf("in CompTunnel::wait() ... received RC=%d, userRC=%d\n", rcs[0], rcs[1]);
       
@@ -272,16 +274,16 @@ printf("in CompTunnel::wait() ... received RC=%d, userRC=%d\n", rcs[0], rcs[1]);
       //TODO: NOT SURE THIS WORKS ANYMORE!!!
       ESMCI::VM *vm_parent;
       localrc = localActualComp->getVmParent(&vm_parent);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-        return rc;
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc;
       ESMCI::VMPlan *vmplan;
       localrc = localActualComp->getVmPlan(&vmplan);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-        return rc;
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc;
       void *vm_info;
       localrc = localActualComp->getVmInfo(&vm_info);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-        return rc;
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc;
 
 printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
       
@@ -322,7 +324,7 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
     if (getActual()){ isActual = true; comp = getActual();}
     if ((isDual && isActual) || (!isDual && !isActual)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "- CompTunnel is bad!",
-        &rc);
+        ESMC_CONTEXT, &rc);
       return rc;
     }
 
@@ -331,8 +333,8 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
     // get the Component's VM
     VM *vm;
     localrc = comp->getVm(&vm);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc; // bail out
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, &rc)) return rc; // bail out
     localPet = vm->getLocalPet();             // localPet in terms of VM
 
     if (socketBased){
@@ -343,7 +345,7 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
           // master PET on actual side -> initialize server side
           sprintf(logmsg, "negotiate socketBased actual: port=%d, timeout=%g",
             port, timeout);
-          ESMC_LogDefault.Write(logmsg, ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(logmsg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
           char buffer[160];
           int len;
           bool continueFlag = false;
@@ -352,12 +354,13 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
             if (sock <= SOCKERR_UNSPEC){
               if (sock == SOCKERR_TIMEOUT){
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT,
-                  "- No client connected, time out!", &rc);
+                  "- No client connected, time out!", ESMC_CONTEXT, &rc);
                 vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
                 return rc;
               }else{
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
-                  "- Unspecified error setting up socket server side!", &rc);
+                  "- Unspecified error setting up socket server side!",
+                  ESMC_CONTEXT, &rc);
                 vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
                 return rc;
               }
@@ -369,12 +372,14 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
             if (sLen <= SOCKERR_UNSPEC){
               if (sLen == SOCKERR_TIMEOUT){
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT,
-                  "- Client not there to receive, time out!", &rc);
+                  "- Client not there to receive, time out!", ESMC_CONTEXT,
+                  &rc);
                 vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
                 return rc;
               }else{
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
-                  "- Unspecified error sending to client!", &rc);
+                  "- Unspecified error sending to client!", ESMC_CONTEXT,
+                  &rc);
                 vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
                 return rc;
               }
@@ -384,12 +389,13 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
               if (len <= SOCKERR_UNSPEC){
                 if (len == SOCKERR_TIMEOUT){
                   ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT,
-                    "- Client not sending, time out!", &rc);
+                    "- Client not sending, time out!", ESMC_CONTEXT, &rc);
                   vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
                   return rc;
                 }else{
                   ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
-                    "- Unspecified error receiving from client!", &rc);
+                    "- Unspecified error receiving from client!", ESMC_CONTEXT,
+                    &rc);
                   vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
                   return rc;
                 }
@@ -410,12 +416,14 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
               if (sLen <= SOCKERR_UNSPEC){
                 if (sLen == SOCKERR_TIMEOUT){
                   ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT,
-                    "- Client not there to receive, time out!", &rc);
+                    "- Client not there to receive, time out!", ESMC_CONTEXT,
+                    &rc);
                   vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
                   return rc;
                 }else{
                   ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
-                    "- Unspecified error sending to client!", &rc);
+                    "- Unspecified error sending to client!", ESMC_CONTEXT,
+                    &rc);
                   vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
                   return rc;
                 }
@@ -427,12 +435,13 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
             if (sLen <= SOCKERR_UNSPEC){
               if (sLen == SOCKERR_TIMEOUT){
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT,
-                  "- Client not there to receive, time out!", &rc);
+                  "- Client not there to receive, time out!", ESMC_CONTEXT,
+                  &rc);
                 vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
                 return rc;
               }else{
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
-                  "- Unspecified error sending to client!", &rc);
+                  "- Unspecified error sending to client!", ESMC_CONTEXT, &rc);
                 vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
                 return rc;
               }
@@ -442,12 +451,14 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
               if (sLen <= SOCKERR_UNSPEC){
                 if (sLen == SOCKERR_TIMEOUT){
                   ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT,
-                    "- Client not there to wrap up connection, time out!", &rc);
+                    "- Client not there to wrap up connection, time out!",
+                    ESMC_CONTEXT, &rc);
                   vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
                   return rc;
                 }else{
                   ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
-                    "- Unspecified error wrapping up connection!", &rc);
+                    "- Unspecified error wrapping up connection!", ESMC_CONTEXT,
+                    &rc);
                   vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
                   return rc;
                 }
@@ -465,24 +476,25 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
             return rc;
         }
         ESMC_LogDefault.Write("finished socketBased negotiate() on actual "
-          "component side", ESMC_LOGMSG_INFO);
+          "component side", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
       }else{
         // dual: set up client side of the socket based component tunnel
         if (localPet == 0){
           // master PET on dual side -> initialize client side
           sprintf(logmsg, "negotiate socketBased dual: port=%d, timeout=%g",
             port, timeout);
-          ESMC_LogDefault.Write(logmsg, ESMC_LOGMSG_INFO);
+          ESMC_LogDefault.Write(logmsg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
           sock = socketClientInit(server.c_str(), port, timeout);
           if (sock <= SOCKERR_UNSPEC){
             if (sock == SOCKERR_TIMEOUT){
               ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT, 
-                "- No server to connect to, time out!", &rc);
+                "- No server to connect to, time out!", ESMC_CONTEXT, &rc);
               vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
               return rc;
             }else{
               ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
-                "- Unspecified error setting up socket client side!", &rc);
+                "- Unspecified error setting up socket client side!",
+                ESMC_CONTEXT, &rc);
               vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
               return rc;
             }
@@ -496,12 +508,13 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
             if (len <= SOCKERR_UNSPEC){
               if (len == SOCKERR_TIMEOUT){
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT,
-                  "- Server not sending, time out!", &rc);
+                  "- Server not sending, time out!", ESMC_CONTEXT, &rc);
                 vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
                 return rc;
               }else{
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
-                  "- Unspecified error receiving from server!", &rc);
+                  "- Unspecified error receiving from server!", ESMC_CONTEXT,
+                  &rc);
                 vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
                 return rc;
               }
@@ -519,12 +532,12 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
           if (sLen <= SOCKERR_UNSPEC){
             if (sLen == SOCKERR_TIMEOUT){
               ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT,
-                "- Server not there to receive, time out!", &rc);
+                "- Server not there to receive, time out!", ESMC_CONTEXT, &rc);
               vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
               return rc;
             }else{
               ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
-                "- Unspecified error sending to server!", &rc);
+                "- Unspecified error sending to server!", ESMC_CONTEXT, &rc);
               vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
               return rc;
             }
@@ -534,12 +547,13 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
           if (len <= SOCKERR_UNSPEC){
             if (len == SOCKERR_TIMEOUT){
               ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT,
-                "- Server not sending, time out!", &rc);
+                "- Server not sending, time out!", ESMC_CONTEXT, &rc);
               vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
               return rc;
             }else{
               ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
-                "- Unspecified error receiving from server!", &rc);
+                "- Unspecified error receiving from server!", ESMC_CONTEXT,
+                &rc);
               vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
               return rc;
             }
@@ -547,7 +561,8 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
           if (strstr(buffer,
             "Actual Component server will continue now!")!=buffer){
             ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
-              "- Did not received expected continue handshake!", &rc);
+              "- Did not received expected continue handshake!", ESMC_CONTEXT,
+              &rc);
             vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
             return rc;
           }
@@ -562,7 +577,7 @@ printf("now calling into vm_parent->exit() from CompTunnel::wait()\n");
             return rc;
         }
         ESMC_LogDefault.Write("finished socketBased negotiate() on dual "
-          "component side", ESMC_LOGMSG_INFO);
+          "component side", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
       }
       // return successfully
       rc = ESMF_SUCCESS;
@@ -797,7 +812,7 @@ printf("local rootPet was determined as %d\n", interRootPet);
     if (getActual()){ isActual = true; comp = getActual();}
     if ((isDual && isActual) || (!isDual && !isActual)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "- CompTunnel is bad!",
-        &rc);
+        ESMC_CONTEXT, &rc);
       return rc;
     }
 
@@ -808,25 +823,25 @@ printf("local rootPet was determined as %d\n", interRootPet);
       if (isDual){
         // this is a dual component side -> sender
         ESMC_LogDefault.Write("dual2actual() vmBased (dual side)...",
-          ESMC_LOGMSG_INFO);
+          ESMC_LOGMSG_INFO, ESMC_CONTEXT);
         for (int i=0; i<localSendToPetList.size(); i++)
           bridgeVM->send(msg, len, localSendToPetList[i], tag);
       }else{
         // this is the actual component side -> receiver
         ESMC_LogDefault.Write("dual2actual() vmBased (actual side)...",
-          ESMC_LOGMSG_INFO);
+          ESMC_LOGMSG_INFO, ESMC_CONTEXT);
         bridgeVM->recv(msg, len, localRecvFromPet, tag);
       }
     }else if (socketBased){
       // message transfer according to the socketBased tunnel comm pattern
       VM *vm;
       localrc = comp->getVm(&vm);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-        return rc; // bail out
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc; // bail out
       if (isDual){
         // this is a dual component side -> sender
         ESMC_LogDefault.Write("dual2actual() socketBased (dual side)...",
-          ESMC_LOGMSG_INFO);
+          ESMC_LOGMSG_INFO, ESMC_CONTEXT);
         // only master sends through socket
         if (masterFlag){
           int sLen = socketSend(sock, msg, len, timeout);
@@ -834,13 +849,14 @@ printf("local rootPet was determined as %d\n", interRootPet);
             if (sLen == SOCKERR_TIMEOUT){
               sprintf(logmsg, "- socketBased dual side timed out on "
                 " socketSend() with timeout=%g", timeout);
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT, logmsg, &rc);
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT, logmsg,
+                ESMC_CONTEXT, &rc);
               vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
               return rc;
             }else{
               ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
                 "- socketBased dual side failed unspecified in socketSend()",
-                &rc);
+                ESMC_CONTEXT, &rc);
               vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
               return rc;
             }
@@ -856,7 +872,7 @@ printf("local rootPet was determined as %d\n", interRootPet);
       }else{
         // this is the actual component side -> receiver
         ESMC_LogDefault.Write("dual2actual() socketBased (actual side)...",
-          ESMC_LOGMSG_INFO);
+          ESMC_LOGMSG_INFO, ESMC_CONTEXT);
         // only master receives through socket and then broadcasts
         if (masterFlag){
           int rLen = socketRecv(sock, msg, len, timeout);
@@ -864,13 +880,14 @@ printf("local rootPet was determined as %d\n", interRootPet);
             if (rLen == SOCKERR_TIMEOUT){
               sprintf(logmsg, "- socketBased actual side timed out on"
                 " socketRecv() with timeout=%g", timeout);
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT, logmsg, &rc);
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT, logmsg,
+                ESMC_CONTEXT, &rc);
               vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
               return rc;
             }else{
               ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
                 "- socketBased actual side failed unspecified in socketRecv()",
-                &rc);
+                ESMC_CONTEXT, &rc);
               vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
               return rc;
             }
@@ -884,12 +901,12 @@ printf("local rootPet was determined as %d\n", interRootPet);
             return rc;
         }
         localrc = vm->broadcast(msg, len, 0); // localPet 0 is master
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-          return rc; // bail out
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, &rc)) return rc; // bail out
       }
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "Reached an invalid branch in the code.", &rc);
+        "Reached an invalid branch in the code.", ESMC_CONTEXT, &rc);
       return rc; // bail out
     }
 
@@ -912,7 +929,7 @@ printf("local rootPet was determined as %d\n", interRootPet);
     if (getActual()){ isActual = true; comp = getActual();}
     if ((isDual && isActual) || (!isDual && !isActual)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "- CompTunnel is bad!",
-        &rc);
+        ESMC_CONTEXT, &rc);
       return rc;
     }
     
@@ -921,13 +938,13 @@ printf("local rootPet was determined as %d\n", interRootPet);
       if (isActual){
         // this is a actual component side -> sender
         ESMC_LogDefault.Write("actual2dual() vmBased (actual side)...",
-          ESMC_LOGMSG_INFO);
+          ESMC_LOGMSG_INFO, ESMC_CONTEXT);
         for (int i=0; i<localSendToPetList.size(); i++)
           bridgeVM->send(msg, len, localSendToPetList[i], tag);
       }else{
         // this is the dual component side -> receiver
         ESMC_LogDefault.Write("actual2dual() vmBased (dual side)...",
-          ESMC_LOGMSG_INFO);
+          ESMC_LOGMSG_INFO, ESMC_CONTEXT);
         bridgeVM->recv(msg, len, localRecvFromPet, tag);
       }
     }else if (socketBased){
@@ -935,12 +952,12 @@ printf("local rootPet was determined as %d\n", interRootPet);
       // message transfer according to the socketBased tunnel comm pattern
       VM *vm;
       localrc = comp->getVm(&vm);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-        return rc; // bail out
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) return rc; // bail out
       if (isActual){
         // this is a actual component side -> sender
         ESMC_LogDefault.Write("actual2dual() socketBased (actual side)...",
-          ESMC_LOGMSG_INFO);
+          ESMC_LOGMSG_INFO, ESMC_CONTEXT);
         // only master sends through socket
         if (masterFlag){
           int sLen = socketSend(sock, msg, len, timeout);
@@ -948,13 +965,14 @@ printf("local rootPet was determined as %d\n", interRootPet);
             if (sLen == SOCKERR_TIMEOUT){
               sprintf(logmsg, "- socketBased actual side timed out on"
                 " socketSend() with timeout=%g", timeout);
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT, logmsg, &rc);
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT, logmsg,
+                ESMC_CONTEXT, &rc);
               vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
               return rc;
             }else{
               ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
                 "- socketBased actual side failed unspecified in socketSend()",
-                &rc);
+                ESMC_CONTEXT, &rc);
               vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
               return rc;
             }
@@ -970,7 +988,7 @@ printf("local rootPet was determined as %d\n", interRootPet);
       }else{
         // this is the dual component side -> receiver
         ESMC_LogDefault.Write("actual2dual() socketBased (dual side)...", 
-          ESMC_LOGMSG_INFO);
+          ESMC_LOGMSG_INFO, ESMC_CONTEXT);
         // only master receives through socket and then broadcasts
         if (masterFlag){
           int rLen = socketRecv(sock, msg, len, timeout);
@@ -978,13 +996,14 @@ printf("local rootPet was determined as %d\n", interRootPet);
             if (rLen == SOCKERR_TIMEOUT){
               sprintf(logmsg, "- socketBased dual side timed out on"
                 " socketRecv() with timeout=%g", timeout);
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT, logmsg, &rc);
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_TIMEOUT, logmsg,
+                ESMC_CONTEXT, &rc);
               vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
               return rc;
             }else{
               ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
                 "- socketBased dual side failed unspecified in socketRecv()",
-                &rc);
+                ESMC_CONTEXT, &rc);
               vm->broadcast(&rc, sizeof(int), 0); // localPet 0 is master
               return rc;
             }
@@ -998,12 +1017,13 @@ printf("local rootPet was determined as %d\n", interRootPet);
             return rc;
         }
         localrc = vm->broadcast(msg, len, 0); // localPet 0 is master
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, &rc))
           return rc; // bail out
       }
     }else{
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "Reached an invalid branch in the code.", &rc);
+        "Reached an invalid branch in the code.", ESMC_CONTEXT, &rc);
       return rc; // bail out
     }
 
@@ -1033,17 +1053,17 @@ namespace ESMCI {
 
     int port;
     localrc = comp->getCurrentPhase(&port);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-      return; // bail out
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return; // bail out
     
     int timeout;
     localrc = comp->getTimeout(&timeout);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-      return; // bail out
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return; // bail out
 
     sprintf(logmsg, "ServiceLoop: entering with port argument: %d and timeout: "
       "%d", port, timeout);
-    ESMC_LogDefault.Write(logmsg, ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write(logmsg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
     
     // determine whether to use socket or VM based tunnel; if socket set port
     bool socketBasedTunnel = true;
@@ -1052,7 +1072,7 @@ namespace ESMCI {
     else{
       if (port < IPPORT_RESERVED){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-          "port must be >= IPPORT_RESERVED", rc);
+          "port must be >= IPPORT_RESERVED", ESMC_CONTEXT, rc);
       }
     }
     bool vmBasedTunnel = !socketBasedTunnel;  // for now simply the opposite
@@ -1064,7 +1084,8 @@ namespace ESMCI {
       //TODO: for now simply use the parent VM, may not be safe, should change!!
       VM *bridgeVM;
       localrc = comp->getVmParent(&bridgeVM);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc))
         return; // bail out
    
       compTunnel = CompTunnel(bridgeVM);
@@ -1078,8 +1099,8 @@ namespace ESMCI {
     // negotiation phase
     compTunnel.setActual(comp);       // set this component as the actual side
     localrc = compTunnel.negotiate(timeout);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-      return; // bail out
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return; // bail out
 
     // temporary return code buffer    
     int rcs[2];
@@ -1090,18 +1111,18 @@ namespace ESMCI {
       // receive method info from dual component
       enum method method;
       localrc = compTunnel.dual2actual(&method, sizeof(enum method), timeout);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-        return; // bail out
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return; // bail out
 
       // receive phase info from dual component
       int phase;      
       localrc = compTunnel.dual2actual(&phase, sizeof(int), timeout);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-        return; // bail out
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return; // bail out
       
       sprintf(logmsg, "ServiceLoop: received method: %s and phase: %d", 
         FTable::methodString(method), phase);
-      ESMC_LogDefault.Write(logmsg, ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(logmsg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
 
       // break condition
       if (method == METHOD_NONE) break;
@@ -1112,13 +1133,15 @@ namespace ESMCI {
       
       // log the local error code, but do not bail out since dual component
       // remains in control
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, NULL);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        NULL);
       
       // send the return codes to the controlling dual component
       rcs[0] = localrc;
       rcs[1] = userRc;
       localrc = compTunnel.actual2dual(rcs, 2*sizeof(int), timeout);
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, NULL);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        NULL);
       
     }
 
@@ -1126,9 +1149,11 @@ namespace ESMCI {
     rcs[0] = ESMF_SUCCESS;
     rcs[1] = ESMF_SUCCESS;
     localrc = compTunnel.actual2dual(rcs, 2*sizeof(int), timeout);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, NULL);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      NULL);
         
-    ESMC_LogDefault.Write("ServiceLoop: exiting", ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write("ServiceLoop: exiting", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
     
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;

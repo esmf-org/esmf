@@ -213,7 +213,8 @@ bool handle_error(int status) {
   int rc;
   if (status != NC_NOERR) {
     sprintf(errmsg, "NetCDF error: %s", nc_strerror(status));
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,errmsg,&rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, errmsg, ESMC_CONTEXT,
+      &rc);
     return true;
   } else {
     return false;
@@ -371,7 +372,9 @@ extern "C" {
       status = nc_create(c_infile, *mode | NC_64BIT_OFFSET, &id);
       if (status == NC_ENOTNC) {
 	fprintf(stderr, "ERROR: 64 bit file format is not supported in this version of NetCDF library\n");
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB,"ERROR: 64 bit file format is not supported in this version of NetCDF library",rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "ERROR: 64 bit file format "
+          "is not supported in this version of NetCDF library", ESMC_CONTEXT, 
+          rc);
 	return; //bail out
       }
       if (handle_error(status)) return; //bail out
@@ -379,7 +382,9 @@ extern "C" {
       status = nc_create(c_infile, *mode | NC_NETCDF4, &id);
       if (status == NC_ENOTNC) {
 	fprintf(stderr, "ERROR: NetCDF4 file format is not supported in this version of NetCDF library\n");
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB,"ERROR: NetCDF4 file format is not supported in this version of NetCDF library",rc);
+	ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "ERROR: NetCDF4 file format "
+          "is not supported in this version of NetCDF library", ESMC_CONTEXT,
+          rc);
 	return; //bail out
       }
       if (handle_error(status)) return; //bail out
@@ -392,7 +397,8 @@ extern "C" {
     delete [] c_infile;
     return;
 #else
-  ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,"Have to compile with ESMF_NETCDF environment variable defined",rc);
+  ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT, "Have to compile with "
+    "ESMF_NETCDF environment variable defined", ESMC_CONTEXT, rc);
   return;
 #endif
   }
@@ -480,7 +486,8 @@ void FTN_X(c_convertscrip)(
 #if 0
   if (grdim > 1) {
     fprintf(stderr, "%s: grid_rank is greater than 1.  This program only convert grids with grid_rank=1.\n",c_infile);
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,"The grid_rank is not equal 1.", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG, "The grid_rank is not "
+      "equal 1.", ESMC_CONTEXT, rc);
     return;
   }
 #endif
@@ -496,7 +503,8 @@ void FTN_X(c_convertscrip)(
   status = nc_inq_varid(ncid1, "grid_center_lon", &ctlonid);
   if ((status != NC_NOERR && nocenter != 1) || (status == NC_NOERR && nocenter == 1)) {
     fprintf(stderr, "%s: Either grid_center_lat or grid_center_lon does not exist.\n",c_infile);
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND,"Either grid_center_lon or grid_center_lat does not exist.", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, "Either grid_center_lon "
+      "or grid_center_lat does not exist.", ESMC_CONTEXT, rc);
     return;
   }
   status = nc_inq_varid(ncid1, "grid_corner_lat", &colatid);
@@ -527,7 +535,8 @@ void FTN_X(c_convertscrip)(
   }
   if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
     fprintf(stderr, "%s: The units attribute for grid_corner_lon is not degrees nor radians.\n",c_infile);
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,"The units attribute for grid_center_lon is not degrees nor radians.", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG, "The units attribute for "
+      "grid_center_lon is not degrees nor radians.", ESMC_CONTEXT, rc);
     return;
   }
   if (!strncmp(units, "radians", 7)) {
@@ -555,7 +564,8 @@ void FTN_X(c_convertscrip)(
     if (tmppt) {
       cells[i]=tmppt->rank;
     } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,"insert_bucket() failed", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "insert_bucket() failed", ESMC_CONTEXT, rc);
       //printf("insert_buket() failed at index %d\n", i);
       return;
     }
@@ -605,7 +615,8 @@ void FTN_X(c_convertscrip)(
     // copy temp array back to cell, fill with unfilled space with -1
     if (count < 3) {
       //      printf("degenarate cells index %d, edges %d\n", i, count);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,"A cell with less than 3 edges were found", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "A cell with less than 3 edges were found", ESMC_CONTEXT, rc);
       return;
     }
     edges[i]=count;
@@ -767,7 +778,9 @@ void FTN_X(c_convertscrip)(
       }
       if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
           fprintf(stderr, "%s: The units attribute for grid_center_lon is not degrees nor radians.\n", c_infile);
-	  ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,"The units attribute for grid_center_lon is not degrees nor radians.", rc);
+	  ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG, "The units "
+            "attribute for grid_center_lon is not degrees nor radians.",
+            ESMC_CONTEXT, rc);
 	  return;
       }
       if (!strncmp(units, "radians", 7)) {
@@ -846,7 +859,8 @@ void FTN_X(c_convertscrip)(
   }
   if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
     fprintf(stderr, "%s: The units attribute for grid_center_lon is not degrees nor radians.\n", c_infile);
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,"The units attribute for grid_center_lon is not degrees nor radians.", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,"The units attribute for "
+      "grid_center_lon is not degrees nor radians.", ESMC_CONTEXT, rc);
     return;
   }
   if (!strncmp(units, "radians", 7)) {
@@ -881,7 +895,8 @@ void FTN_X(c_convertscrip)(
       dualcellcounts[i1]++;
       if (dualcellcounts[i1] > maxconnection) {
 	fprintf(stderr, "Vertex %d exceed maximal connections %d\n", i1, maxconnection);
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,"Unrecoveable internal error",rc);
+	ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "Unrecoveable internal error", ESMC_CONTEXT, rc);
 	return; // bail out
       }
     }
@@ -1004,7 +1019,8 @@ void FTN_X(c_convertscrip)(
   return;
 
 #else
-  ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,"Have to compile with ESMF_NETCDF environment variable defined",rc);
+  ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT, "Have to compile with "
+    "ESMF_NETCDF environment variable defined", ESMC_CONTEXT, rc);
   return;
 #endif
 }

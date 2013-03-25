@@ -76,7 +76,8 @@ void FTN_X(c_esmc_locstreamgetkeybnds)(ESMCI::Array **_array,
   // Input Error Checking
   if ((localDE < 0) || (localDE >=array->getDistGrid()->getDELayout()->getLocalDeCount())) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-	  "- localDE outside range on this processor", ESMC_NOT_PRESENT_FILTER(rc));
+      "- localDE outside range on this processor", ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
     return;
   }
 
@@ -163,7 +164,8 @@ void FTN_X(c_esmc_locstreamgetelbnd)(ESMCI::DistGrid **_distgrid,
   // Input Error Checking
   if ((localDE < 0) || (localDE >=distgrid->getDELayout()->getLocalDeCount())) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-	  "- localDE outside range on this processor", ESMC_NOT_PRESENT_FILTER(rc));
+      "- localDE outside range on this processor", ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
     return;
   }
 
@@ -180,16 +182,17 @@ void FTN_X(c_esmc_locstreamgetelbnd)(ESMCI::DistGrid **_distgrid,
     // obtain indexList for this DE and dim
     const int *indexList =
       distgrid->getIndexListPDimPLocalDe(localDE, 1, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc)))
-        return;
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
       
       // make sure this dimension is contiguous         
       const int contig=distgrid->getContigFlagPDimPDe(de, 1, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc,
-                                    ESMCI_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc))) return;
+        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
       if (!contig) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-				      "- doesn't handle non-contiguous DEs yet ",  ESMC_NOT_PRESENT_FILTER(rc));
+          "- doesn't handle non-contiguous DEs yet ",  ESMC_CONTEXT,
+          ESMC_NOT_PRESENT_FILTER(rc));
         return;
       }
       
@@ -229,7 +232,8 @@ void FTN_X(c_esmc_locstreamgeteubnd)(ESMCI::DistGrid **_distgrid,
   // Input Error Checking
   if ((localDE < 0) || (localDE >=distgrid->getDELayout()->getLocalDeCount())) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-	  "- localDE outside range on this processor", ESMC_NOT_PRESENT_FILTER(rc));
+      "- localDE outside range on this processor", ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
     return;
   }
 
@@ -250,16 +254,17 @@ void FTN_X(c_esmc_locstreamgeteubnd)(ESMCI::DistGrid **_distgrid,
     // obtain indexList for this DE and dim
     const int *indexList =
       distgrid->getIndexListPDimPLocalDe(localDE, 1, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc)))
-      return;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
     
     // make sure is contiguous         
     const int contig=distgrid->getContigFlagPDimPDe(de, 1, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,
-				      ESMCI_ERR_PASSTHRU, ESMC_NOT_PRESENT_FILTER(rc))) return;
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
     if (!contig) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-				    "- doesn't handle non-contiguous DEs yet ", ESMC_NOT_PRESENT_FILTER(rc));
+        "- doesn't handle non-contiguous DEs yet ", ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc));
       return;
     }
     
@@ -295,7 +300,7 @@ void FTN_X(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag,
     if (*inquireflag != ESMF_INQUIREONLY) {
       if ((*length - *offset) < size) {         
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "Buffer too short to add a LocStream object", localrc);
+          "Buffer too short to add a LocStream object", ESMC_CONTEXT, localrc);
          return;
       }
     }
@@ -373,7 +378,7 @@ void FTN_X(c_esmc_locstreamkeyserialize)(
   if (*inquireflag != ESMF_INQUIREONLY) {
     if ((*length - *offset) < size) {         
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-         "Buffer too short to add a LocStream object", localrc);
+         "Buffer too short to add a LocStream object", ESMC_CONTEXT, localrc);
       return;
     }
   }

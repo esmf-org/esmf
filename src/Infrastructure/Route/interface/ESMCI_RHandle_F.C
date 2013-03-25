@@ -83,11 +83,11 @@ extern "C" {
     try{
       xxe = new ESMCI::XXE(vm, 100, 10, 1000);
     }catch (...){
-      ESMC_LogDefault.AllocError(ESMC_NOT_PRESENT_FILTER(rc));
+      ESMC_LogDefault.AllocError(ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return;
     }
     localrc = (*ptr)->setStorage(xxe);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
        ESMC_NOT_PRESENT_FILTER(rc))) return;
     
     // return successfully

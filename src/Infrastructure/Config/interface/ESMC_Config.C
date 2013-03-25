@@ -212,7 +212,8 @@ ESMC_Config ESMC_ConfigCreate(
 
   // call into Fortran interface
   FTN_X(f_esmf_configcreate)(configp, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) {
     delete configp;
     return config;
   }
@@ -267,7 +268,7 @@ int ESMC_ConfigDestroy(
   // return with errors for NULL pointer
   if (config == ESMC_NULL_POINTER || config->ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to Config", &rc);
+      "- Not a valid pointer to Config", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -276,7 +277,8 @@ int ESMC_ConfigDestroy(
 
   // call into Fortran interface
   FTN_X(f_esmf_configdestroy)(configp, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) {
     return rc;
   }
   delete configp;
@@ -349,7 +351,7 @@ int ESMC_ConfigLoadFile(
   // return with errors for NULL pointer
   if (config.ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to Config", &rc);
+      "- Not a valid pointer to Config", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -364,7 +366,8 @@ int ESMC_ConfigLoadFile(
         ESMCI_ArgGetInt(argPtr);
         break;
       default:
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", ESMC_CONTEXT,
+        &rc);
         return rc;
     }
   }
@@ -378,7 +381,8 @@ int ESMC_ConfigLoadFile(
         unique = ESMCI_ArgGetInt(argPtr);
         break;
       default:
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", ESMC_CONTEXT,
+        &rc);
         return rc;
     }
   }
@@ -387,7 +391,8 @@ int ESMC_ConfigLoadFile(
   // call Fortran interface
   FTN_X(f_esmf_configloadfile)(configp, name, uniquep, &localrc,
      strlen (name));
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc))
     return rc;
 
   // set return code for this branch
@@ -454,7 +459,7 @@ int ESMC_ConfigFindLabel(
   // return with errors for NULL pointer
   if (config.ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to Config", &rc);
+      "- Not a valid pointer to Config", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -465,7 +470,8 @@ int ESMC_ConfigFindLabel(
   ESMC_Logical Fpresent;
   FTN_X(f_esmf_configfindlabel)(configp, label,
       &Fpresent, &localrc, strlen (label));
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) {
     if (isPresent != NULL)
       *isPresent = 0;
     return rc;
@@ -525,7 +531,7 @@ int ESMC_ConfigNextLine(
   // return with errors for NULL pointer
   if (config.ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to Config", &rc);
+      "- Not a valid pointer to Config", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -534,7 +540,8 @@ int ESMC_ConfigNextLine(
 
   // call Fortran interface
   FTN_X(f_esmf_confignextline)(configp, &localtableEnd, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) {
     return rc;
   }
 
@@ -607,7 +614,7 @@ int ESMC_ConfigNextLine(
 //  // return with errors for NULL pointer
 //  if (config.ptr == ESMC_NULL_POINTER) {
 //    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-//      "- Not a valid pointer to Config", &rc);
+//      "- Not a valid pointer to Config", ESMC_CONTEXT, &rc);
 //    return rc;
 //  }
 
@@ -625,7 +632,7 @@ int ESMC_ConfigNextLine(
 //        ESMCI_ArgGetChar(argPtr);
 //        break;
 //      default:
-//        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+//        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", ESMC_CONTEXT, &rc);
 //        return rc;
 //    }
 //  }
@@ -643,7 +650,7 @@ int ESMC_ConfigNextLine(
 //        dvaluep = &dvalue;
 //        break;
 //      default:
-//        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+//        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", ESMC_CONTEXT, &rc);
 //        return rc;
 //    }
 //  }
@@ -654,7 +661,7 @@ int ESMC_ConfigNextLine(
 //    llen = strlen(label);
 //    fLabel = new char[llen];
 //    localrc = ESMC_CtoF90string(label, fLabel, llen);
-//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //      delete[] fLabel;
 //      return rc;
 //    }
@@ -663,7 +670,7 @@ int ESMC_ConfigNextLine(
 //  // call Fortran interface
 //  FTN_X(f_esmf_configgetchar)(configp, value, fLabel, dvaluep, &localrc, 1, llen,
 //    1);
-//  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //    if (fLabel != NULL) {delete[] fLabel;}
 //    return rc;
 //  }
@@ -733,7 +740,7 @@ int ESMC_ConfigNextLine(
   // return with errors for NULL pointer
   if (config.ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to Config", &rc);
+      "- Not a valid pointer to Config", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -748,7 +755,8 @@ int ESMC_ConfigNextLine(
         ESMCI_ArgGetString(argPtr);
         break;
       default:
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", ESMC_CONTEXT,
+          &rc);
         return rc;
     }
   }
@@ -762,7 +770,8 @@ int ESMC_ConfigNextLine(
         label = ESMCI_ArgGetString(argPtr);
         break;
       default:
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", ESMC_CONTEXT,
+          &rc);
         return rc;
     }
   }
@@ -772,14 +781,16 @@ int ESMC_ConfigNextLine(
     // call into Fortran interface
     FTN_X(f_esmf_configgetlen)(configp, wordCount, label, &localrc,
         sizeof (label));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc))
       return rc;
 
   }else{
 
    // call into Fortran interface without the label optional argument
     FTN_X(f_esmf_configgetlennolabel)(configp, wordCount, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc)) {
       return rc;
     }
 
@@ -847,7 +858,7 @@ int ESMC_ConfigNextLine(
   // return with errors for NULL pointer
   if (config.ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to Config", &rc);
+      "- Not a valid pointer to Config", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -862,7 +873,8 @@ int ESMC_ConfigNextLine(
         ESMCI_ArgGetString(argPtr);
         break;
       default:
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", ESMC_CONTEXT,
+          &rc);
         return rc;
     }
   }
@@ -876,7 +888,7 @@ int ESMC_ConfigNextLine(
         label = ESMCI_ArgGetString(argPtr);
         break;
       default:
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", ESMC_CONTEXT, &rc);
         return rc;
     }
   }
@@ -888,13 +900,15 @@ int ESMC_ConfigNextLine(
     // call Fortran interface
     FTN_X(f_esmf_configgetdim)(configp, lineCount, columnCount, label,
         &localrc, sizeof (label));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc))
       return rc;
 
   }else{
 
     FTN_X(f_esmf_configgetdimnolabel)(configp, lineCount, columnCount, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc))
       return rc;
   }
 
@@ -964,7 +978,7 @@ int ESMC_ConfigValidate(
   // return with errors for NULL pointer
   if (config.ptr == ESMC_NULL_POINTER) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to Config", &rc);
+      "- Not a valid pointer to Config", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -979,7 +993,7 @@ int ESMC_ConfigValidate(
         ESMCI_ArgGetString(argPtr);
         break;
       default:
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", ESMC_CONTEXT, &rc);
         return rc;
     }
   }
@@ -993,7 +1007,7 @@ int ESMC_ConfigValidate(
         options = ESMCI_ArgGetString(argPtr);
         break;
       default:
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", ESMC_CONTEXT, &rc);
         return rc;
     }
   }
@@ -1003,12 +1017,14 @@ int ESMC_ConfigValidate(
 
     // call Fortran interface
     FTN_X(f_esmf_configvalidate)(configp, options, &localrc, strlen (options));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc))
       return rc;
 
   }else{
         FTN_X(f_esmf_configvalidatenooptions)(configp,  &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc))
       return rc;
 
   }
@@ -1106,7 +1122,7 @@ int ESMC_ConfigValidate(
 // // return with errors for NULL pointer
 // if (config.ptr == ESMC_NULL_POINTER) {
 //   ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-//     "- Not a valid pointer to Config", &rc);
+//     "- Not a valid pointer to Config", ESMC_CONTEXT, &rc);
 //   return rc;
 // }
 
@@ -1129,7 +1145,7 @@ int ESMC_ConfigValidate(
 //     break;
 //   default:
 //     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-//                     "- unknown data type/kind", &rc);
+//                     "- unknown data type/kind", ESMC_CONTEXT, &rc);
 //     return rc;
 // } // end switch (tk)
 
@@ -1166,7 +1182,7 @@ int ESMC_ConfigValidate(
 //       } // end switch (tk)
 //       break;
 //     default:
-//       ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+//       ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", ESMC_CONTEXT, &rc);
 //       return rc;
 //   } // end switch (argID)
 // } // end while (argID)
@@ -1211,7 +1227,7 @@ int ESMC_ConfigValidate(
 //       } // end switch (tk)
 //       break;
 //     default:
-//       ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+//       ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", ESMC_CONTEXT, &rc);
 //       return rc;
 //   } // end switch (argID)
 // } // end while (argID)
@@ -1222,7 +1238,7 @@ int ESMC_ConfigValidate(
 //   llen = strlen(label);
 //   fLabel = new char[llen];
 //   localrc = ESMC_CtoF90string(label, fLabel, llen);
-//   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //     delete[] fLabel;
 //     return rc;
 //   }
@@ -1242,7 +1258,7 @@ int ESMC_ConfigValidate(
 //       FTN_X(f_esmf_configgetinti4)(configp, (ESMC_I4*)value,
 //                  fLabel, (ESMC_I4*)dvaluep, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1264,7 +1280,7 @@ int ESMC_ConfigValidate(
 //       FTN_X(f_esmf_configgetinti8)(configp, (ESMC_I8*)value,
 //                  fLabel, (ESMC_I8*)dvaluep, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1286,7 +1302,7 @@ int ESMC_ConfigValidate(
 //       FTN_X(f_esmf_configgetfloatr4)(configp, (ESMC_R4*)value,
 //                  fLabel, (ESMC_R4*)dvaluep, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1308,7 +1324,7 @@ int ESMC_ConfigValidate(
 //       FTN_X(f_esmf_configgetfloatr8)(configp, (ESMC_R8*)value,
 //                  fLabel, (ESMC_R8*)dvaluep, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1330,7 +1346,7 @@ int ESMC_ConfigValidate(
 //       FTN_X(f_esmf_configgetlogical)(configp, (int*)value,
 //                  fLabel, (int*)dvaluep, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1349,7 +1365,7 @@ int ESMC_ConfigValidate(
 //       dlen = strlen(dvalue_s);
 //       fDvalue = new char[dlen];
 //       localrc = ESMC_CtoF90string(dvalue_s, fDvalue, dlen);
-//       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //         if (fLabel != NULL) {delete[] fLabel;}
 //         delete[] fDvalue;
 //         return rc;
@@ -1365,7 +1381,7 @@ int ESMC_ConfigValidate(
 //     if (localrc == -1 && dvaluep != NULL) localrc = ESMF_SUCCESS;
 
 //     // check local return code
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       if (fDvalue != NULL) {delete[] fDvalue;}
 //       return rc;
@@ -1373,7 +1389,7 @@ int ESMC_ConfigValidate(
 
 //     // assign fValue_s to value
 //     localrc = ESMC_F90toCstring(fValue, ESMF_MAXSTR, (char*)value, ESMF_MAXSTR);
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       if (fDvalue != NULL) {delete[] fDvalue;}
 //       return rc;
@@ -1460,7 +1476,7 @@ int ESMC_ConfigValidate(
 // // return with errors for NULL pointer
 // if (config.ptr == ESMC_NULL_POINTER) {
 //   ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-//     "- Not a valid pointer to Config", &rc);
+//     "- Not a valid pointer to Config", ESMC_CONTEXT, &rc);
 //   return rc;
 // }
 
@@ -1483,7 +1499,7 @@ int ESMC_ConfigValidate(
 //     break;
 //   default:
 //     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-//                     "- unknown data type/kind", &rc);
+//                     "- unknown data type/kind", ESMC_CONTEXT, &rc);
 //     return rc;
 // } // end switch (tk)
 
@@ -1498,7 +1514,7 @@ int ESMC_ConfigValidate(
 //       ESMCI_ArgGetString(argPtr);
 //       break;
 //     default:
-//       ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+//       ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", ESMC_CONTEXT, &rc);
 //       return rc;
 //   } // end switch (argID)
 // } // end while (argID)
@@ -1515,7 +1531,7 @@ int ESMC_ConfigValidate(
 //       label = ESMCI_ArgGetString(argPtr);
 //       break;
 //     default:
-//       ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", &rc);
+//       ESMC_LogDefault.MsgFoundError(ESMC_RC_OPTARG_BAD, "", ESMC_CONTEXT, &rc);
 //       return rc;
 //   } // end switch (argID)
 // } // end while (argID)
@@ -1526,7 +1542,7 @@ int ESMC_ConfigValidate(
 //   llen = strlen(label);
 //   fLabel = new char[llen];
 //   localrc = ESMC_CtoF90string(label, fLabel, llen);
-//   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //     delete[] fLabel;
 //     return rc;
 //   }
@@ -1547,7 +1563,7 @@ int ESMC_ConfigValidate(
 //       FTN_X(f_esmf_configsetinti4)(configp, (ESMC_I4*)value,
 //                  fLabel, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1571,7 +1587,7 @@ int ESMC_ConfigValidate(
 //       FTN_X(f_esmf_configsetinti8)(configp, (ESMC_I8*)value,
 //                  fLabel, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1595,7 +1611,7 @@ int ESMC_ConfigValidate(
 //       FTN_X(f_esmf_configsetfloatr4)(configp, (ESMC_R4*)value,
 //                  fLabel, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1619,7 +1635,7 @@ int ESMC_ConfigValidate(
 //       FTN_X(f_esmf_configsetfloatr8)(configp, (ESMC_R8*)value,
 //                  fLabel, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1643,7 +1659,7 @@ int ESMC_ConfigValidate(
 //       FTN_X(f_esmf_configsetlogical)(configp, (int*)value,
 //                  fLabel, &localrc, llen);
 //     }
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }
@@ -1662,7 +1678,7 @@ int ESMC_ConfigValidate(
 //     if ((char*)value != NULL) {
 //       vlen = strlen((char*)value);
 //       localrc = ESMC_CtoF90string((char*)value, fValue, vlen);
-//       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //         if (fLabel != NULL) {delete[] fLabel;}
 //         return rc;
 //       }
@@ -1674,7 +1690,7 @@ int ESMC_ConfigValidate(
 //                fLabel, &localrc, vlen, llen);
 
 //     // check local return code
-//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+//     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
 //       if (fLabel != NULL) {delete[] fLabel;}
 //       return rc;
 //     }

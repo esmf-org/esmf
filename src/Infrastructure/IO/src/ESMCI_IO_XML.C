@@ -120,7 +120,8 @@ namespace ESMCI{
       returnCode = io_xml->ESMC_BaseSetName((const char*) ESMC_NULL_POINTER,
                                             "IO_XML");
     }
-    ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc);
 
     if (!fileName.empty())
       io_xml->fileName = fileName;
@@ -129,7 +130,8 @@ namespace ESMCI{
 
     // TODO returnCode = io_xml->validate();
     returnCode = ESMF_SUCCESS;
-    ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc);
 
 #ifdef ESMF_XERCES
     try {
@@ -143,7 +145,8 @@ namespace ESMCI{
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_WARN, ESMC_CONTEXT);
         XMLString::release(&message);
         returnCode = ESMC_RC_LIB;
-        ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc);
+        ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc);
     }
 #endif
 
@@ -175,8 +178,8 @@ namespace ESMCI{
 
   // return with errors for NULL pointer
   if (io_xml == ESMC_NULL_POINTER || *io_xml == ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to io_xml", &rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to io_xml", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -187,11 +190,12 @@ namespace ESMCI{
     (*io_xml)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
     return rc;
   }catch(...){
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", &rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -232,7 +236,7 @@ namespace ESMCI{
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -309,7 +313,8 @@ namespace ESMCI{
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "Unable to load esmf_comp.xsd file\n");
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc);
       return rc;
     }
     if (!parser->loadGrammar ("esmf_grid.xsd",
@@ -318,7 +323,8 @@ namespace ESMCI{
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "Unable to load esmf_grid.xsd file\n");
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc);
       return rc;
     }
     if (!parser->loadGrammar ("esmf_field.xsd",
@@ -327,7 +333,8 @@ namespace ESMCI{
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "Unable to load esmf_field.xsd file\n");
       ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc);
       return rc;
     }
 
@@ -340,7 +347,8 @@ namespace ESMCI{
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "Unable to load file %s\n", this->schemaFileName.c_str());
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, &rc);
         return rc;
       }
     }
@@ -367,7 +375,8 @@ namespace ESMCI{
         sprintf(logMsg, "XML Parse Exception, message is: %s\n", message);
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
         XMLString::release(&message);
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, &rc);
         return rc;
     }
     catch (const SAXParseException& toCatch) {
@@ -376,14 +385,16 @@ namespace ESMCI{
         sprintf(logMsg, "SAX Parse Exception, message is: %s\n", message);
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
         XMLString::release(&message);
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, &rc);
         return rc;
     }
     catch (...) {
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "Unexpected, unknown exception during SAX parse.\n");
         ESMC_LogDefault.Write(logMsg, ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,&rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_READ, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, &rc);
         return rc;
     }
     // parser deleted by auto_ptr via either normal or exception exit
@@ -430,7 +441,7 @@ namespace ESMCI{
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -514,7 +525,8 @@ namespace ESMCI{
       if (writeFile) {
         writeFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
       } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, this->fileName.c_str(), &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, this->fileName.c_str(),
+          ESMC_CONTEXT, &rc);
         return(rc);
       }
     }
@@ -589,7 +601,7 @@ namespace ESMCI{
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -597,7 +609,7 @@ namespace ESMCI{
 
     // write start of tag & any attrs
     rc = writeElementCore(name, value, indentLevel, nPairs, args);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
 
 #ifdef ESMF_XERCES
     // write end-of-line
@@ -648,7 +660,7 @@ namespace ESMCI{
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -656,7 +668,7 @@ namespace ESMCI{
 
     // write start of tag & any attrs
     rc = writeElementCore(name, value, indentLevel, nPairs, args);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
 
 #ifdef ESMF_XERCES
     // write the end of the XML element </name>
@@ -709,7 +721,7 @@ namespace ESMCI{
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -755,7 +767,8 @@ namespace ESMCI{
       if (writeFile) {
         writeFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
       } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, this->fileName.c_str(), &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, this->fileName.c_str(),
+          ESMC_CONTEXT, &rc);
         return(rc);
       }
     }
@@ -800,7 +813,7 @@ namespace ESMCI{
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -845,7 +858,8 @@ namespace ESMCI{
       if (writeFile) {
         writeFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
       } else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, this->fileName.c_str(), &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, this->fileName.c_str(),
+          ESMC_CONTEXT, &rc);
         return(rc);
       }
     }
@@ -915,7 +929,7 @@ namespace ESMCI{
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -1006,7 +1020,7 @@ namespace ESMCI{
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 

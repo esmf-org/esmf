@@ -107,13 +107,15 @@ namespace ESMCI
       returnCode = io_netcdf->ESMC_BaseSetName((const char*) ESMC_NULL_POINTER,
                                                "IO_NetCDF");
     }
-    ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc);
 
     if (base != ESMC_NULL_POINTER) io_netcdf->base = base;
 
     // TODO returnCode = io_netcdf->validate();
     returnCode = ESMF_SUCCESS;
-    ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc);
     return(io_netcdf);
 
  } // end ESMCI_IO_NetCDFCreate (new)
@@ -142,8 +144,8 @@ namespace ESMCI
 
   // return with errors for NULL pointer
   if (io_netcdf == ESMC_NULL_POINTER || *io_netcdf == ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to io_netcdf", &rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to io_netcdf", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -154,11 +156,12 @@ namespace ESMCI
     (*io_netcdf)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, &rc);
     return rc;
   }catch(...){
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", &rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -196,7 +199,7 @@ namespace ESMCI
     if (this == ESMC_NULL_POINTER) 
     {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -238,7 +241,7 @@ namespace ESMCI
       string errstr = "; Attempting to open NcFile: ";
       errstr.append(this->fileName);
       ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN,
-         errstr.c_str(), &rc);
+         errstr.c_str(), ESMC_CONTEXT, &rc);
       return ESMF_FAILURE;
     }
 
@@ -261,7 +264,7 @@ namespace ESMCI
     if (theState == ESMC_NULL_POINTER) 
     {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'theState' pointer is NULL.", &rc);
+         "; 'theState' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(ESMF_FAILURE);
     }
 
@@ -284,7 +287,7 @@ namespace ESMCI
       {
         // TODO:  return ESMF error?
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'thisDim' pointer is not valid.", &rc);
+         "; 'thisDim' pointer is not valid.", ESMC_CONTEXT, &rc);
       return(ESMF_FAILURE);
       }
     }
@@ -308,7 +311,7 @@ namespace ESMCI
       {
         // TODO:  return ESMF error?
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'thisArray' pointer is not valid.", &rc);
+         "; 'thisArray' pointer is not valid.", ESMC_CONTEXT, &rc);
       return(ESMF_FAILURE);
       }
     }
@@ -333,7 +336,7 @@ namespace ESMCI
       {
         // TODO:  return ESMF error?
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'thisAtt' pointer is not valid.", &rc);
+         "; 'thisAtt' pointer is not valid.", ESMC_CONTEXT, &rc);
       return(ESMF_FAILURE);
       }
     }
@@ -377,7 +380,7 @@ namespace ESMCI
     if (this == ESMC_NULL_POINTER) 
     {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(ESMF_FAILURE);
     }
 
@@ -404,7 +407,7 @@ namespace ESMCI
     if (theState == ESMC_NULL_POINTER) 
     {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'theState' pointer is NULL.", &rc);
+         "; 'theState' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(ESMF_FAILURE);
     }
 #endif
@@ -863,8 +866,8 @@ void IO_NetCDF::destruct(void) {
             attVal = attValVector.at(0);
             thisVar->add_att(attName.c_str(), attVal.c_str());
           } else {
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-              "Write items > 1 - Not yet implemented", &rc);
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+              "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &rc);
             return ESMF_FAILURE;}
           //printf("      att name[%d]: %s\n", i, attName.c_str());
           //printf("      att val[%d]: %s\n", i, attVal.c_str());
@@ -880,8 +883,8 @@ void IO_NetCDF::destruct(void) {
             attVal = attValVector.at(0);
           thisVar->add_att(attName.c_str(), attVal);
           } else {
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-              "Write items > 1 - Not yet implemented", &rc);
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+              "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &rc);
             return ESMF_FAILURE;}
           //printf("      att name[%d]: %s\n", i, attName.c_str());
           //printf("      att val[%d]: %d\n", i, attVal);
@@ -897,8 +900,8 @@ void IO_NetCDF::destruct(void) {
             attVal = attValVector.at(0);
           thisVar->add_att(attName.c_str(), attVal);
           } else {
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-              "Write items > 1 - Not yet implemented", &rc);
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+              "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &rc);
             return ESMF_FAILURE;}
           //printf("      att name[%d]: %s\n", i, attName.c_str());
           //printf("      att val[%d]: %f\n", i, attVal);
@@ -914,8 +917,8 @@ void IO_NetCDF::destruct(void) {
             attVal = attValVector.at(0);
           thisVar->add_att(attName.c_str(), attVal);
           } else {
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-              "Write items > 1 - Not yet implemented", &rc);
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+              "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &rc);
             return ESMF_FAILURE;}
           //printf("      att name[%d]: %s\n", i, attName.c_str());
           //printf("      att val[%d]: %g\n", i, attVal);

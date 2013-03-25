@@ -260,7 +260,8 @@ int IO::read(
   PRINTPOS;
   // Open the file
   localrc1 = open(file, ESMC_FILESTATUS_OLD, iofmt);
-  if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, &rc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) {
     switch(rc) {
     case ESMF_RC_LIB_NOT_PRESENT:
     case ESMF_RC_ARG_BAD:
@@ -277,10 +278,11 @@ int IO::read(
   // Close the file
   localrc2 = close();
   PRINTMSG("close returned " << localrc2);
-  if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, &rc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) {
     return ESMF_RC_FILE_READ;
-  } else if (ESMC_LogDefault.MsgFoundError(localrc2,
-                                           ESMCI_ERR_PASSTHRU, &rc)) {
+  } else if (ESMC_LogDefault.MsgFoundError(localrc2, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) {
     return ESMF_RC_FILE_READ;
   }
     
@@ -335,7 +337,8 @@ int IO::read(
       localrc = ESMF_STATUS_INVALID;
       break;
     }
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) {
       // Close the file but return original error even if close fails.
       localrc = close();
       return rc;
@@ -381,7 +384,8 @@ int IO::write(
   // Open the file
   localrc1 = open(file, status, iofmt, overwrite);
   PRINTMSG("open returned " << localrc1);
-  if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, &rc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) {
     switch(rc) {
     case ESMF_RC_LIB_NOT_PRESENT:
     case ESMF_RC_ARG_BAD:
@@ -398,10 +402,11 @@ int IO::write(
   // Close the file
   localrc2 = close();
   PRINTMSG("close returned " << localrc2);
-  if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, &rc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc1, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) {
     return ESMF_RC_FILE_WRITE;
-  } else if (ESMC_LogDefault.MsgFoundError(localrc2,
-                                           ESMCI_ERR_PASSTHRU, &rc)) {
+  } else if (ESMC_LogDefault.MsgFoundError(localrc2, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, &rc)) {
     return ESMF_RC_FILE_WRITE;
   }
     
@@ -458,7 +463,8 @@ int IO::write(
       localrc = ESMF_STATUS_INVALID;
       break;
     }
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) {
       // Close the file but return original error even if close fails.
       localrc = close();
       return rc;
@@ -540,7 +546,8 @@ int IO::open(
 
   // Open the file
   ioHandler->open(file, filestatusflag, overwrite, readonly, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) {
     PRINTMSG("IO_Handler::open returned " << localrc);
     return localrc;
   }
@@ -578,7 +585,8 @@ int IO::flush(void
   // First, ensure that we have an IO_Handler
   if ((IO_Handler *)NULL == ioHandler) {
     localrc = ESMC_RC_OBJ_NOT_CREATED;
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) {
       return rc;
     }
   }
@@ -586,7 +594,8 @@ int IO::flush(void
   // Check to make sure that a file is already open
   if (ioHandler->isOpen() != ESMF_FALSE) {
     ioHandler->flush(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) {
       return rc;
     }
   }
@@ -625,7 +634,8 @@ int IO::close(void
   // First, ensure that we have an IO_Handler
   if ((IO_Handler *)NULL == ioHandler) {
     localrc = ESMC_RC_OBJ_NOT_CREATED;
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) {
       return rc;
     }
   }
@@ -633,18 +643,21 @@ int IO::close(void
   // Check to make sure that a file is already open
   if (ioHandler->isOpen() != ESMF_FALSE) {
     ioHandler->flush(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) {
       return rc;
     }
     if (ESMF_SUCCESS == localrc) {
       ioHandler->close();
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &rc)) {
         return rc;
       }
     }
   } else {
     localrc = ESMC_RC_FILE_CLOSE;
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, &rc)) {
       return rc;
     }
   }

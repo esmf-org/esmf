@@ -520,11 +520,12 @@ void IO_Handler::open (
   if ((char *)NULL == file) {
     localrc = ESMF_RC_PTR_NULL;
     ESMC_LogDefault.MsgFoundError(localrc,
-                                  "- NULL filename argument pointer", rc);
+      "- NULL filename argument pointer", ESMC_CONTEXT, rc);
   } else if (isOpen() == ESMF_TRUE) {
     // Check to make sure that a file is not already open
     localrc = ESMF_RC_FILE_OPEN;
-    ESMC_LogDefault.MsgFoundError(localrc, "- File already open", rc);
+    ESMC_LogDefault.MsgFoundError(localrc, "- File already open", ESMC_CONTEXT,
+      rc);
   }
 
   if (ESMF_SUCCESS == localrc) {
@@ -538,7 +539,8 @@ void IO_Handler::open (
     overwrite = overwrite_arg;
     // Open the file
     open(readonly_arg, &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, "- Error opening file", rc);
+    ESMC_LogDefault.MsgFoundError(localrc, "- Error opening file", ESMC_CONTEXT,
+      rc);
   }
 
   // return
