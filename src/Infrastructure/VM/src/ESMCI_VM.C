@@ -33,8 +33,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 // include associated header file
 #include "ESMCI_VM.h"
 

@@ -19,10 +19,10 @@
 // in the companion file {\tt ESMCI\_SAX2ReadHandler.h}
 //
 //-------------------------------------------------------------------------
-//
 #define ESMC_FILENAME "ESMCI_SAX2ReadHandler.C"
 
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+// associated class definition file
+#include "ESMCI_SAX2ReadHandler.h"
 
 //#include <iostream>
 //using std::cout;
@@ -31,18 +31,15 @@
 #include <exception>
 using std::exception;
 
-#include <ESMCI_LogErr.h>
-
-// associated class definition file
-#include <ESMCI_SAX2ReadHandler.h>
+#include "ESMCI_LogErr.h"
 
 using std::string;
 using std::vector;
 
 //-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.15 2012/09/20 21:19:44 w6ws Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.15 2012/09/20 21:19:44 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{

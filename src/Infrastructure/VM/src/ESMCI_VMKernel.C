@@ -5223,9 +5223,7 @@ typedef void* value_ptr_t;
 
 #endif
 
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 #include "ESMCI_LogErr.h"
-
 
 namespace ESMCI {
 

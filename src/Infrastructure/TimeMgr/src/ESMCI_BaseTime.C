@@ -20,7 +20,8 @@
 //-------------------------------------------------------------------------
 #define ESMC_FILENAME "ESMCI_BaseTime.C"
 
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+// associated class definition file
+#include "ESMCI_BaseTime.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,10 +33,8 @@
 using std::cout;
 using std::endl;
 */
-#include <ESMCI_LogErr.h>
-
-// associated class definition file
-#include "ESMCI_BaseTime.h"
+    
+#include "ESMCI_LogErr.h"
 
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string

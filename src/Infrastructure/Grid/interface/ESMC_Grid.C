@@ -21,8 +21,6 @@
 //EOP
 //------------------------------------------------------------------------------
 // INCLUDES
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 #include "ESMC_Grid.h"
 
 #include "ESMCI_Grid.h"
@@ -31,9 +29,9 @@
 #include "ESMC_Array.h"
 
 //-----------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Grid.C,v 1.12 2012/07/18 22:21:31 rokuingh Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMC_Grid.C,v 1.12 2012/07/18 22:21:31 rokuingh Exp $";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;

@@ -18,12 +18,10 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 #include "ESMCI_Macros.h"
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMCI_LogMacros.inc"
+#include "ESMCI_LogErr.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_Field.h"
 #include "ESMCI_StateItem.h"
-
 #include "ESMCI_Container.h"
 
 #include <string>

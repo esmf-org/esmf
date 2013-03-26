@@ -24,9 +24,6 @@
 // in the companion file ESMCI_Attribute.h
 //
 //-----------------------------------------------------------------------------
-
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 // associated class definition file and others
 #include "ESMCI_Attribute.h"
 
@@ -141,16 +138,16 @@ namespace ESMCI {
   // place file-read attributes into.
   IO_XML *io_xml = ESMCI_IO_XMLCreate("", "", 
                                       (ESMCI::Attribute*)this, &localrc);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   if (localrc != ESMF_SUCCESS) rc = localrc;
 
   // read the XML file, placing contents into this Attribute node
   localrc = io_xml->read(string(fileName,fileNameLen), string(schemaFileName, schemaFileNameLen));
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   if (localrc != ESMF_SUCCESS) rc = localrc;
 
   localrc = ESMCI_IO_XMLDestroy(&io_xml);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   if (localrc != ESMF_SUCCESS) rc = localrc;
 
   return rc;
@@ -206,8 +203,8 @@ namespace ESMCI {
   if((tab=fopen(msgbuf,"w"))==NULL) {
     localrc = ESMF_FAILURE;
     sprintf(msgbuf,"Could not open the write file!");
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                             msgbuf, &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+                             msgbuf, ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;
   } 
 
@@ -215,7 +212,7 @@ namespace ESMCI {
   localrc = AttributeCountTree(convention, purpose, varobj, rows, columns);
   if (localrc != ESMF_SUCCESS) {
     sprintf(msgbuf, "AttributeWriteTab failed counting objects");
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
     fclose(tab);
     return ESMF_FAILURE;
   }
@@ -224,7 +221,7 @@ namespace ESMCI {
   attrLens = new int[columns];
   if (!attrLens) {
     sprintf(msgbuf, "AttributeWriteTab failed allocating attrLens");
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf,  &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf,  ESMC_CONTEXT, &localrc);
     fclose(tab);
     return ESMF_FAILURE;
   }
@@ -236,7 +233,7 @@ namespace ESMCI {
     attrNames);
   if (localrc != ESMF_SUCCESS) {
     sprintf(msgbuf, "AttributeWriteTab failed CountTreeLens");
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
     delete [] attrLens;
     attrNames.clear();
     fclose(tab);
@@ -258,7 +255,7 @@ namespace ESMCI {
     attrLens,attrNames);
   if (localrc != ESMF_SUCCESS) {
     sprintf(msgbuf, "Attribute failed recursing in WriteTab");
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
     delete [] attrLens;
     attrNames.clear();
     fclose(tab);
@@ -316,7 +313,7 @@ namespace ESMCI {
     localrc = attpack->AttributeWriteTabBuffer(tab,index,columns,attrLens,attrNames);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "AttributeWriteTabTraverse failed AttributeWriteTabBuffer");
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
       fclose(tab);
       return ESMF_FAILURE;
     }
@@ -399,7 +396,7 @@ namespace ESMCI {
       }
       else if (attrList.at(i)->items > 1) { 
         sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
         sprintf(msgbuf,"ITEMS>1");
         fprintf(tab,"%s",msgbuf);
       }
@@ -470,7 +467,7 @@ namespace ESMCI {
   string fileName = basename + ".xml";
   IO_XML *io_xml = ESMCI_IO_XMLCreate("", fileName,
                                       (ESMCI::Attribute*)this, &localrc);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   // Write ESMF header
   string comment = "Generated with ESMF Version ";
@@ -479,9 +476,9 @@ namespace ESMCI {
   localrc = io_xml->writeComment(comment);
   if (localrc == ESMF_RC_LIB_NOT_PRESENT) {
     sprintf(msgbuf, "Xerces C++ library (>= v3.1.0) not present");
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, msgbuf, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, msgbuf, ESMC_CONTEXT, &localrc);
     localrc = ESMCI_IO_XMLDestroy(&io_xml);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     return ESMF_RC_LIB_NOT_PRESENT;
   }
 
@@ -495,9 +492,9 @@ namespace ESMCI {
                                attPackInstanceName, &presentflag);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed finding an attribute");
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
       localrc = ESMCI_IO_XMLDestroy(&io_xml);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       return ESMF_FAILURE;
     }
     if (presentflag == ESMF_TRUE) {
@@ -508,9 +505,9 @@ namespace ESMCI {
         else modelcompname = attr->vcpp.at(0);
       } else {
         sprintf(msgbuf, "failed getting attribute value");
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
         localrc = ESMCI_IO_XMLDestroy(&io_xml);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;
       }
     }
@@ -523,9 +520,9 @@ namespace ESMCI {
                                attPackInstanceName, &presentflag);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed finding an attribute");
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
       localrc = ESMCI_IO_XMLDestroy(&io_xml);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       return ESMF_FAILURE;
     }
     if (presentflag == ESMF_TRUE) {
@@ -536,9 +533,9 @@ namespace ESMCI {
         else fullname = attr->vcpp.at(0);
       } else {
         sprintf(msgbuf, "failed getting attribute value");
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
         localrc = ESMCI_IO_XMLDestroy(&io_xml);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;
       }
     }
@@ -551,9 +548,9 @@ namespace ESMCI {
                                attPackInstanceName, &presentflag);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "failed finding an attribute");
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
       localrc = ESMCI_IO_XMLDestroy(&io_xml);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       return ESMF_FAILURE;
     }
     if (presentflag == ESMF_TRUE) {
@@ -564,9 +561,9 @@ namespace ESMCI {
         else version = attr->vcpp.at(0);
       } else {
         sprintf(msgbuf, "failed getting attribute value");
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
         localrc = ESMCI_IO_XMLDestroy(&io_xml);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;
       }
     }
@@ -586,7 +583,7 @@ namespace ESMCI {
   }
   else {
     sprintf(msgbuf, "AttributeWrite called from an invalid ESMF object");
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;
   }
   
@@ -602,48 +599,48 @@ namespace ESMCI {
            "\n  xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance",
            " xmlns:wtr", "http://www.cuahsi.org/waterML/",
            "\n  xmlns", "http://www.cuahsi.org/waterML/1.0/");
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     localrc = io_xml->writeStartElement("queryInfo", "", 1, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   
     localrc = io_xml->writeElement("creationTime",
                                    "2009-01-08T15:52:17.8495Z", 2, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     localrc = io_xml->writeStartElement("criteria", "", 2, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     localrc = io_xml->writeElement("locationParam",
                                    "LittleBearRiver:USU-LBR-Paradise", 3, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     localrc = io_xml->writeElement("variableParam", "LBR:USU39", 3, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     localrc = io_xml->writeStartElement("timeParam", "", 3, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     localrc = io_xml->writeElement("beginDateTime", "2008-04-14T13:00:00", 4, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     localrc = io_xml->writeElement("endDateTime", "2008-04-15T12:00:00", 4, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     localrc = io_xml->writeEndElement("timeParam", 3);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     localrc = io_xml->writeEndElement("criteria", 2);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     localrc = io_xml->writeElement("note", "OD Web Service", 2, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     localrc = io_xml->writeEndElement("queryInfo", 1);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     localrc = io_xml->writeStartElement("timeSeries", "", 1, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   } else if (convention.compare(CIM_1_5_1_CONV)==0 &&
              purpose.compare(GRIDS_PURP)==0) {
@@ -656,7 +653,7 @@ namespace ESMCI {
            "\n      xmlns:gmd", "http://www.isotc211.org/2005/gmd",
            "\n      xmlns", "http://www.purl.org/org/esmetadata/cim/1.5/schemas",
            "\n      xsi:schemaLocation", "http://www.purl.org/org/esmetadata/cim/1.5/schemas http://www.purl.org/org/esmetadata/cim/1.5/schemas");
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   } else if (!(object.compare("comp")==0 &&
                convention.compare(CIM_1_5_CONV)==0 &&
@@ -673,17 +670,17 @@ namespace ESMCI {
            "\n      xmlns:gmd", "http://www.isotc211.org/2005/gmd",
            "\n      xmlns", "http://www.earthsystemmodeling.org",
            "\n      xsi:schemaLocation", "http://www.earthsystemmodeling.org file:/esmf_model_component.xsd");
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 #if 0
     // TODO:  write as separate elements instead of atts ?
     localrc = io_xml->writeStartElement("model_component", "", 1, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeElement("name", modelcompname, 2, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeElement("full_name", fullname, 2, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeElement("version", version, 2, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 #endif
 
   }
@@ -692,9 +689,9 @@ namespace ESMCI {
   localrc = AttributeCountTree(convention, purpose, varobj, rows, columns);
   if (localrc != ESMF_SUCCESS) {
     sprintf(msgbuf, "Attribute failed counting fields");
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
     localrc = ESMCI_IO_XMLDestroy(&io_xml);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;
   }
  
@@ -721,9 +718,9 @@ namespace ESMCI {
   }
   if (localrc != ESMF_SUCCESS) {
     sprintf(msgbuf, "Attribute failed recursing in WriteXML");
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
     localrc = ESMCI_IO_XMLDestroy(&io_xml);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;
   }
 
@@ -733,25 +730,25 @@ namespace ESMCI {
 
     // write the WaterML footer
     localrc = io_xml->writeEndElement("timeSeries", 1);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     localrc = io_xml->writeEndElement("timeSeriesResponse", 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   } else if (convention.compare(CIM_1_5_1_CONV)==0 &&
              purpose.compare(GRIDS_PURP)==0) {
 
     localrc = io_xml->writeElement("documentID", "abcdefgh-1234-4224-4321-zyxwvutsrqpo", 1, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeElement("documentVersion", 
       "1.0.0", 1, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeElement("documentCreationDate", 
       getTime(), 1, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     localrc = io_xml->writeEndElement("gridSpec", 1);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   } else if (!(object.compare("comp")==0 &&
                convention.compare(CIM_1_5_CONV)==0 &&
@@ -759,12 +756,12 @@ namespace ESMCI {
 
     // write the ESMF XML footer
     localrc = io_xml->writeEndElement("model_component", 1);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
   
   // destroy the io_xml object, which closes the file
   localrc = ESMCI_IO_XMLDestroy(&io_xml);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   return localrc;
 
@@ -821,9 +818,9 @@ namespace ESMCI {
 //       attPackInstanceName);
       localrc = attpack->AttributeWriteXMLbuffer(io_xml);
       if (localrc != ESMF_SUCCESS) {
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-          "AttributeWriteXMLtraverse failed AttributeWriteXMLbuffer", &localrc);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          "AttributeWriteXMLtraverse failed AttributeWriteXMLbuffer", ESMC_CONTEXT, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       return ESMF_FAILURE;
       }
       // get next occurence of this attpack, if any
@@ -841,21 +838,21 @@ namespace ESMCI {
           purpose.compare("TimeSeries")==0)) {
       // write the field header
       localrc = io_xml->writeStartElement("variable_set", "", 2, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     // call the field write buffer method
     localrc = AttributeWriteXMLbufferfield(io_xml, convention, purpose, index, columns);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "AttributeWriteXMLtraverse failed AttributeWriteXMLbufferfield");
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       return ESMF_FAILURE;
     }
     if (!(convention.compare("WaterML")==0 &&
           purpose.compare("TimeSeries")==0)) {
       // write the field footer
       localrc = io_xml->writeEndElement("variable_set", 2);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     // done with field
     fielddone = true;
@@ -869,19 +866,19 @@ namespace ESMCI {
       // write the grid header
       localrc = io_xml->writeStartElement("GridSpec", "", 0, 1, "name", attpack->attrBase->ESMC_BaseGetName());
       localrc = io_xml->writeStartElement("Mosaic", "", 1, 1, "name", attpack->attrBase->ESMC_BaseGetName());
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
       localrc = attpack->AttributeWriteXMLbuffergrid(io_xml);
       if (localrc != ESMF_SUCCESS) {
         sprintf(msgbuf, "AttributeWriteXMLtraverse failed AttributeWriteXMLbuffergrid");
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;
       }
       // write the grid footer
       localrc = io_xml->writeEndElement("Mosaic", 1);
       localrc = io_xml->writeEndElement("GridSpec", 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       griddone = true;
       return ESMF_SUCCESS;
     }
@@ -944,9 +941,9 @@ namespace ESMCI {
     if (attpack != NULL) {
       localrc = attpack->AttributeWriteXMLbuffer(io_xml);
       if (localrc != ESMF_SUCCESS) {
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-          "AttributeWriteXMLtraverse failed AttributeWriteXMLbuffer", &localrc);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          "AttributeWriteXMLtraverse failed AttributeWriteXMLbuffer", ESMC_CONTEXT, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       return ESMF_FAILURE;
       }
     }
@@ -959,8 +956,8 @@ namespace ESMCI {
     localrc = AttributeWriteXMLbufferfield(io_xml, convention, purpose, index, columns);
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "AttributeWriteXMLtraverse failed AttributeWriteXMLbufferfield");
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       return ESMF_FAILURE;
     }
     // done with field
@@ -979,7 +976,7 @@ namespace ESMCI {
           "isLeaf", attpack->AttributeGetInternalGridString("isLeaf").c_str(),
           "gridType", attpack->AttributeGetInternalGridString("gridType").c_str(),
           "numTiles", attpack->AttributeGetInternalGridInt("ESMF:tileCount").c_str());
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
       // write the shortname and longname
       localrc = io_xml->writeElement("shortName", 
@@ -997,12 +994,12 @@ namespace ESMCI {
           "id", attpack->AttributeGetInternalGridInt("ESMF:tileCount").c_str(),
           "discretizationType", attpack->AttributeGetInternalGridString("discretizationType").c_str(),
           "geometryType", attpack->AttributeGetInternalGridString("geometryType").c_str());
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
       // start the simpleGridGeom
       localrc = io_xml->writeStartElement("simpleGridGeom", "", 4, 1, 
           "numDims", attpack->AttributeGetInternalGridInt("ESMF:dimCount").c_str());
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
       // write coords
       for (int i=0;  i<attpack->attrList.size(); ++i) { 
@@ -1018,16 +1015,16 @@ namespace ESMCI {
 
       // end the simpleGridGeom
       localrc = io_xml->writeEndElement("simpleGridGeom", 4);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
       // end the gridTile
       localrc = io_xml->writeEndElement("gridTile", 3);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
       // write the grid footer
       // end the esmModelGrid
       localrc = io_xml->writeEndElement("esmModelGrid", 2);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       griddone = true;
       return ESMF_SUCCESS;
     }
@@ -1086,7 +1083,7 @@ namespace ESMCI {
           mod_name.c_str(), &int_value, 
           &localrc,
           mod_name.size());
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     
     // return the output value
     char char_value[10]; // larger than length of biggest possible integer
@@ -1161,7 +1158,7 @@ namespace ESMCI {
                mod_name.c_str(), 
                char_value, 
                &localrc, mod_name.size(), vlen);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     
     // TODO: related to fixed buffer, convert to string and resize to remove cruft
     string char_string_value(char_value, vlen);
@@ -1290,8 +1287,8 @@ namespace ESMCI {
     monthnum = "12";
   else {
     monthnum = "00";
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-      "month string does not match a valid value, ", &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+      "month string does not match a valid value, ", ESMC_CONTEXT, &localrc);
   }
 
   return monthnum;
@@ -1349,46 +1346,46 @@ namespace ESMCI {
           case ESMC_TYPEKIND_I4:
             outstring << attrList.at(i)->vip.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
 
           case ESMC_TYPEKIND_I8:
             outstring << attrList.at(i)->vlp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
 
           case ESMC_TYPEKIND_R4:
             outstring << attrList.at(i)->vfp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
 
           case ESMC_TYPEKIND_R8:
             outstring << attrList.at(i)->vdp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 2, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
 
           case ESMC_TYPEKIND_LOGICAL:
             if (attrList.at(i)->vbp.at(0) == ESMF_TRUE) {
               localrc = io_xml->writeElement(name, "true", 2, 0);
-              ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+              ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             } else if (attrList.at(i)->vbp.at(0) == ESMF_FALSE) {
               localrc = io_xml->writeElement(name, "false", 2, 0);
-              ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+              ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             }
             break;
 
           case ESMC_TYPEKIND_CHARACTER:
             if (strncmp(value.c_str(), "ESMF:", 5) == 0) break;
             localrc = io_xml->writeElement(name, attrList.at(i)->vcpp.at(0), 2, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
 
           default:
             localrc = io_xml->writeElement(name, "N/A", 2, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
         }
       } else if (attrList.at(i)->items >1) { 
@@ -1399,7 +1396,7 @@ namespace ESMCI {
         // do nothing
       } else {
         sprintf(msgbuf,"Items < 1, problem.");
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;
       }
 
@@ -1447,57 +1444,57 @@ namespace ESMCI {
         string name = attrList.at(i)->attrName; 
         //localrc = io_xml->writeStartElement(attrPurpose, "", 2, 0);
         //localrc = io_xml->writeStartElement(name+"_set", "", 2, 0);
-        //ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        //ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         ostringstream outstring;
         switch (attrList.at(i)->tk)
         {
           case ESMC_TYPEKIND_I4:
             outstring << attrList.at(i)->vip.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 3, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
 
           case ESMC_TYPEKIND_I8:
             outstring << attrList.at(i)->vlp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 3, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
 
           case ESMC_TYPEKIND_R4:
             outstring << attrList.at(i)->vfp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 3, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
 
           case ESMC_TYPEKIND_R8:
             outstring << attrList.at(i)->vdp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 3, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
 
           case ESMC_TYPEKIND_LOGICAL:
             if (attrList.at(i)->vbp.at(0) == ESMF_TRUE) {
               localrc = io_xml->writeElement(name, "true", 3, 0);
-              ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+              ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             } else if (attrList.at(i)->vbp.at(0) == ESMF_FALSE) {
               localrc = io_xml->writeElement(name, "false", 3, 0);
-              ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+              ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             }
             break;
 
           case ESMC_TYPEKIND_CHARACTER:
             localrc = io_xml->writeElement(name, attrList.at(i)->vcpp.at(0), 3, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
 
           default:
             localrc = io_xml->writeElement(name, "N/A", 1, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
       }
       //localrc = io_xml->writeEndElement(attrPurpose, 2);
       //localrc = io_xml->writeEndElement(name+"_set", 2);
-      //ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      //ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } else if (attrList.at(i)->items >1) {
       sprintf(msgbuf,"Write items > 1 - Not yet implemented\n");
       ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
@@ -1505,7 +1502,7 @@ namespace ESMCI {
       //do nothing
     } else {
       sprintf(msgbuf,"Items < 1, problem.");
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
       return ESMF_FAILURE;
     }
   }
@@ -1578,7 +1575,7 @@ namespace ESMCI {
                mod_name.c_str(), &int_value, 
                &localrc,
                mod_name.size());
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   
     // write the output value to the output stream and write to XML file
     outstring << int_value;
@@ -1600,7 +1597,7 @@ namespace ESMCI {
                mod_name.c_str(), 
                char_value, &localrc,
                mod_name.size(), vlen);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     
     // TODO: related to fixed buffer, convert to string and resize to remove cruft
     string char_string_value(char_value, vlen);
@@ -1617,7 +1614,7 @@ namespace ESMCI {
     int lens_len = attr->items-1; // -1 because we dont' need the 'value'
     if (attr->items <= 0) {
       sprintf(msgbuf,"farrayPtr requires input arguments!");
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
       return ESMF_FAILURE;
     }
 
@@ -1647,7 +1644,7 @@ namespace ESMCI {
     FTN_X(f_esmf_gridattgetinfoint)(&grid, dimCount_name.c_str(), 
                                     &dimCount, &localrc,
                                     dimCount_name.size());
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     string cTK_name = "coordTypeKind";
     // TODO: remove fixed length buffer
@@ -1656,7 +1653,7 @@ namespace ESMCI {
     FTN_X(f_esmf_gridattgetinfochar)(&grid, cTK_name.c_str(), 
                                      coordTypeKind, &localrc,
                                      cTK_name.size(), vlen);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     // TODO: related to fixed buffer, convert to string and resize to remove cruft
     string cTK_string(coordTypeKind, vlen);
@@ -1672,7 +1669,7 @@ namespace ESMCI {
                &il_present, inputString.c_str(), 
                lens, &lens_len, &localrc,
                exclusiveCount_name.size(), slen);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     // allocate space for the coordinates
     int num_coords = 1;
@@ -1681,7 +1678,7 @@ namespace ESMCI {
     
     if (cTK_string != "ESMF_TYPEKIND_R8") {
       sprintf(msgbuf,"coordinates are only available in ESMF_TYPEKIND_R8 right now..");
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
       delete [] lens;
       delete [] exclusiveCount;
       return ESMF_FAILURE;
@@ -1698,7 +1695,7 @@ namespace ESMCI {
                &il_present, const_cast<char *> (inputString.c_str()), 
                lens, &lens_len, &localrc,
                mod_name.size(), slen);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     
     // write the output values to the output stream and write to XML file
     for (int i=0; i<num_coords; ++i)
@@ -1756,7 +1753,7 @@ namespace ESMCI {
   if (firstcall) {
     firstcall = false;
     localrc = ESMC_InitializeGUID();
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
 
   // save this attribute pointer as the root of the tree to be written out,
@@ -1775,17 +1772,17 @@ namespace ESMCI {
          "xmlns", "http://www.purl.org/org/esmetadata/cim/1.7/schemas",
          "xsi:schemaLocation",
          "http://www.purl.org/org/esmetadata/cim/1.7/schemas/cim.xsd");
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   
   //
   // write CIM document node <modelComponent>
   //
   localrc = AttributeWriteCIMmodelComp(io_xml, 1);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Attribute failed recursing in WriteXML", &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Attribute failed recursing in WriteXML", ESMC_CONTEXT, &localrc);
     localrc = ESMCI_IO_XMLDestroy(&io_xml);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;
   }
 
@@ -1794,10 +1791,10 @@ namespace ESMCI {
   //
   localrc = AttributeWriteCIMsimRun(io_xml);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Attribute failed recursing in WriteXML", &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Attribute failed recursing in WriteXML", ESMC_CONTEXT, &localrc);
     localrc = ESMCI_IO_XMLDestroy(&io_xml);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;
   }
 
@@ -1806,10 +1803,10 @@ namespace ESMCI {
   //
   localrc = AttributeWriteCIMplatform(io_xml);
   if (localrc != ESMF_SUCCESS) {
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Attribute failed recursing in WriteXML", &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Attribute failed recursing in WriteXML", ESMC_CONTEXT, &localrc);
     localrc = ESMCI_IO_XMLDestroy(&io_xml);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;
   }
 
@@ -1817,7 +1814,7 @@ namespace ESMCI {
   // Write the CIM XML file footer
   //
   localrc = io_xml->writeEndElement("CIMDocumentSet", 0);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   return ESMF_SUCCESS;
 
@@ -1865,39 +1862,39 @@ namespace ESMCI {
   if (attpack == NULL) return ESMF_SUCCESS;  // if package not found, return 
 
   localrc = io_xml->writeStartElement("modelComponent", "", indent++, 0);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   if (attpack->AttributeIsSet("ShortName")) {
     localrc = attpack->AttributeGet("ShortName", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     if (attpack->AttributeIsSet("Version")) {
       localrc = attpack->AttributeGet("Version", &valuevector);
       if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;}
       value += valuevector.at(0); // append Version to ShortName
     }
     localrc = io_xml->writeElement("shortName", value, indent, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Main, 'ShortName'+'Version'.", indent+1);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     if (indent <= 2) { // top-level (e.g. coupler) component
       localrc = io_xml->writeComment(
         "   to ESG: 1) Component name, left-side navigator bar.", indent+1);
       localrc = io_xml->writeComment(
         "   to ESG: 2) \"Simulation Metadata:\", top of display, 1st line; "
         "'SimulationShortName' appended.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } else { // lower-level (e.g. gridded) component
       localrc = io_xml->writeComment(
         "   to ESG: Component name, left-side navigator bar.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
   } else {
     ESMC_LogDefault.Write("Attribute ShortName in standard attribute package "
@@ -1908,33 +1905,33 @@ namespace ESMCI {
   if (attpack->AttributeIsSet("LongName")) {
     localrc = attpack->AttributeGet("LongName", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("longName", value, indent, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Main, 'LongName'.", indent+1);
     localrc = io_xml->writeComment(
       "   to ESG: \"Full Name:\", top of display, 2nd line; "
       "'SimulationLongName' appended.", indent+1);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
   if (attpack->AttributeIsSet("Description")) {
     localrc = attpack->AttributeGet("Description", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("description", value, indent, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Main, 'Description'.", indent+1);
     localrc = io_xml->writeComment(
       "   to ESG: \"Description:\" in top box.", indent+1);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
 
   // <componentProperties><componentProperty> nodes
@@ -1960,64 +1957,64 @@ namespace ESMCI {
                                              // mechanism?)
   if (CPgeneral || CPscientific || CPfield) {
     localrc = io_xml->writeStartElement("componentProperties", "", indent, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     if (CPgeneral) {
       localrc = AttributeWriteCIMCP(io_xml, 
                  COMP_PROP_PURP, indent);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     if (CPscientific) {
       localrc = AttributeWriteCIMCP(io_xml,
                  SCI_PROP_PURP, indent);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     if (CPfield) {
       localrc = AttributeWriteCIMCPfield(io_xml, indent);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
  
     localrc = io_xml->writeEndElement("componentProperties", indent);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
 
   // TODO: uncomment and expand when we have better definition from CIM
   //localrc = io_xml->writeElement("numericalProperties", "", indent, 0);
-  //ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  //ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   //
   //localrc = io_xml->writeElement("scientificProperties", "", indent, 0);
-  //ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  //ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   // <responsibleParty> nodes
   localrc = attpack->AttributeWriteCIMRP(io_xml, indent);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
  
   if (attpack->AttributeIsSet("ReleaseDate")) {
     localrc = attpack->AttributeGet("ReleaseDate", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("releaseDate", value, indent, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Main, 'ReleaseDate'.", indent+1);
     localrc = io_xml->writeComment(
       "   to ESG: \"Release Date\" under tabs \"Properties/Basic\"", indent+1);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
 
   // <citation> nodes
   localrc = attpack->AttributeWriteCIMcitation(io_xml, indent);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
  
   // <onlineResource>
   if (attpack->AttributeIsSet("URL")) {
     localrc = attpack->AttributeGet("URL", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeStartElement("onlineResource", "", indent, 0); 
@@ -2027,7 +2024,7 @@ namespace ESMCI {
     localrc = io_xml->writeComment("   to ESG: Not ingested yet.", indent+1);
     localrc = io_xml->writeEndElement("gmd:linkage", --indent); 
     localrc = io_xml->writeEndElement("onlineResource", --indent); 
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
 
 #if 0
@@ -2040,13 +2037,13 @@ namespace ESMCI {
                      inNestedAttPacks=false)) { // only look at CIM/Inputs atts,
                                                 // not nested CF atts
       localrc = io_xml->writeStartElement("composition", "", 2, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
       localrc = AttributeWriteCIMcomposition(io_xml);
 
       localrc = io_xml->writeElement("description", "", 3, 0);
       localrc = io_xml->writeEndElement("composition", 2);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
   }
 #endif
@@ -2064,11 +2061,11 @@ namespace ESMCI {
       } else {
         // recurse through child CIM components
         localrc = io_xml->writeStartElement("childComponent", "", indent, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = linkList.at(i)->AttributeWriteCIMmodelComp(io_xml, ++indent);
 
         localrc = io_xml->writeEndElement("childComponent", --indent);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
     }
   }
@@ -2077,8 +2074,8 @@ namespace ESMCI {
     localrc = attpack->AttributeGet("SimulationNumberOfProcessingElements",
                                     &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeStartElement("deployment", "", indent, 0);
@@ -2090,20 +2087,20 @@ namespace ESMCI {
       "   to ESG: Not ingested yet.", indent+1);
     localrc = io_xml->writeEndElement("parallelisation", --indent);
     localrc = io_xml->writeEndElement("deployment", --indent);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
 
   if (attpack->AttributeIsSet("ModelType")) {
     localrc = attpack->AttributeGet("ModelType", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeStartElement("type", "", indent, 2,
                                         "open", "true", 
                                         "value", value.c_str());
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Main, 'ModelType'.", indent+1);
     localrc = io_xml->writeComment(
@@ -2113,17 +2110,17 @@ namespace ESMCI {
     // TODO:  make new att for ModelTypeCV ? (DRS_CMIP5_componentType, metafor)
     if (callCountBeforeRecursion == 1) { // for top-level component only
       localrc = io_xml->writeElement("name", "metafor", ++indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } else { // for all child components
      localrc = io_xml->writeElement("name", "DRS_CMIP5_componentType", 
                                     ++indent, 0);
-     ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     localrc = io_xml->writeElement("server", 
                "http://proj.badc.rl.ac.uk/svn/metafor/cmip5q/trunk", indent, 0);
     localrc = io_xml->writeEndElement("controlledVocabulary", --indent);
     localrc = io_xml->writeEndElement("type", --indent);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   } else {
     ESMC_LogDefault.Write("Attribute ModelType in standard attribute package "
       "(convention='CIM 1.5', purpose='ModelComp')"
@@ -2134,26 +2131,26 @@ namespace ESMCI {
   // generate and save a GUID for this component, then output it
   ESMC_GenerateGUID(attpack->attrGUID);
   localrc = io_xml->writeElement("documentID", attpack->attrGUID, indent, 0);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   if (attpack->AttributeIsSet("MetadataVersion")) {
     localrc = attpack->AttributeGet("MetadataVersion", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("documentVersion", value, indent, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Main, 'MetadataVersion'.", indent+1);
     localrc = io_xml->writeComment(
       "   to ESG: \"Metadata Version\" under tabs \"Properties/Basic\".",
       indent+1);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   } else {
     localrc = io_xml->writeElement("documentVersion", "1.0", indent, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
 
   // stamp the metadata source as ESMF, version x
@@ -2170,7 +2167,7 @@ namespace ESMCI {
                                      "documentAuthor");
   localrc = io_xml->writeEndElement("gmd:role", --indent);
   localrc = io_xml->writeEndElement("documentAuthor", --indent);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   // use TimeMgr for timestamping
   // TODO: also use timezone when implemented in TimeMgr
@@ -2180,7 +2177,7 @@ namespace ESMCI {
   dateTime.getString(dateTimeString);
   localrc = io_xml->writeElement("documentCreationDate", 
                                  dateTimeString, indent, 0);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   // <documentGenealogy>
   if (attpack->AttributeIsSet("PreviousVersionDescription") || 
@@ -2201,24 +2198,24 @@ namespace ESMCI {
     if (attpack->AttributeIsSet("PreviousVersionDescription")) {
       localrc = attpack->AttributeGet("PreviousVersionDescription", &valuevector);
       if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                            "Write items > 1 - Not yet implemented", &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                            "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
       return ESMF_FAILURE;}
       value = valuevector.at(0);
       localrc = io_xml->writeElement("description", value, ++indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "from ESMF: CIM/Main, 'PreviousVersionDescription'.", indent+1);
       localrc = io_xml->writeComment(
         "   to ESG: Not ingested yet.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
 
     if (attpack->AttributeIsSet("PreviousVersion")) {
       localrc = attpack->AttributeGet("PreviousVersion", &valuevector);
       if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                            "Write items > 1 - Not yet implemented", &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                            "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
       return ESMF_FAILURE;}
       value = valuevector.at(0);
       localrc = io_xml->writeStartElement("target", "", indent, 0);
@@ -2230,7 +2227,7 @@ namespace ESMCI {
         "   to ESG: Not ingested yet.", indent+1);
       localrc = io_xml->writeEndElement("reference", --indent);
       localrc = io_xml->writeEndElement("target", --indent);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } else {
       ESMC_LogDefault.Write("Attribute PreviousVersion in standard attribute "
         "package (convention='CIM 1.5', "
@@ -2243,11 +2240,11 @@ namespace ESMCI {
     localrc = io_xml->writeEndElement("documentRelationship", --indent);
     localrc = io_xml->writeEndElement("relationship", --indent);
     localrc = io_xml->writeEndElement("documentGenealogy", --indent);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
 
   localrc = io_xml->writeEndElement("modelComponent", --indent);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   return ESMF_SUCCESS;
 
@@ -2290,28 +2287,28 @@ namespace ESMCI {
   if (attpack == NULL) return ESMF_SUCCESS;
 
   localrc = io_xml->writeStartElement("simulationRun", "", 1, 0);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   if (attpack->AttributeIsSet("SimulationRationale")) {
     localrc = attpack->AttributeGet("SimulationRationale", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("rationale", value, 2, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Main, 'SimulationRationale'.", 3);
     localrc = io_xml->writeComment(
       "   to ESG: Not ingested yet.", 3);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
   if (attpack->AttributeIsSet("SimulationProjectName")) {
     localrc = attpack->AttributeGet("SimulationProjectName", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeStartElement("project", "", 2, 2, 
@@ -2327,17 +2324,17 @@ namespace ESMCI {
                "http://proj.badc.rl.ac.uk/svn/metafor/cmip5q/trunk", 4, 0);
     localrc = io_xml->writeEndElement("controlledVocabulary", 3);
     localrc = io_xml->writeEndElement("project", 2);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
   if (attpack->AttributeIsSet("SimulationShortName")) {
     localrc = attpack->AttributeGet("SimulationShortName", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("shortName", value, 2, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Main, 'SimulationShortName'.", 3);
     localrc = io_xml->writeComment(
@@ -2346,7 +2343,7 @@ namespace ESMCI {
     localrc = io_xml->writeComment(
       "   to ESG: 2) Appears as 2nd part of simulation name when "
       "Curator website is searched for Simulations/Realm/Earth System.", 3);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   } else {
     ESMC_LogDefault.Write("Attribute SimulationShortName in standard attribute "
       "package (convention='CIM 1.5', "
@@ -2357,18 +2354,18 @@ namespace ESMCI {
   if (attpack->AttributeIsSet("SimulationLongName")) {
     localrc = attpack->AttributeGet("SimulationLongName", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("longName", value, 2, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Main, 'SimulationLongName'.", 3);
     localrc = io_xml->writeComment(
       "   to ESG: \"Full Name:\", top of display, 2nd line under title, "
       "appended to 'LongName'.", 3);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   } else {
     ESMC_LogDefault.Write("Attribute SimulationLongName in standard attribute "
       "package (convention='CIM 1.5', "
@@ -2384,7 +2381,7 @@ namespace ESMCI {
   localrc = io_xml->writeStartElement("calendar", "", 2, 0);
   localrc = io_xml->writeElement("realCalendar", "", 3, 0);
   localrc = io_xml->writeEndElement("calendar", 2);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   // <input> -- for all CIM fields within all child components, 
   // written only here in the one top-level <simulationRun> document)
@@ -2401,47 +2398,47 @@ namespace ESMCI {
   if (attpack->AttributeIsSet("SimulationDuration")) {
     localrc = attpack->AttributeGet("SimulationDuration", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("duration", value, 4, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Main, 'SimulationDuration'.", 5);
     localrc = io_xml->writeComment(
       "   to ESG: \"Simulation Duration\" under tabs \"Properties/Basic\".",5);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
   if (attpack->AttributeIsSet("SimulationEndDate")) {
     localrc = attpack->AttributeGet("SimulationEndDate", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("endDate", value, 4, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Main, 'SimulationEndDate'.", 5);
     localrc = io_xml->writeComment(
       "   to ESG: \"Simulation End Date\" under tabs \"Properties/Basic\".", 5);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
   if (attpack->AttributeIsSet("SimulationStartDate")) {
     localrc = attpack->AttributeGet("SimulationStartDate", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("startDate", value, 4, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Main, 'SimulationStartDate'.", 5);
     localrc = io_xml->writeComment(
       "   to ESG: \"Simulation Start Date\" under tabs \"Properties/Basic\".",5);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   } else {
     ESMC_LogDefault.Write("Attribute SimulationStartDate in standard attribute "
       "package (convention='CIM 1.5', "
@@ -2451,7 +2448,7 @@ namespace ESMCI {
   }
   localrc = io_xml->writeEndElement("closedDateRange", 3);
   localrc = io_xml->writeEndElement("dateRange", 2);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   // TODO: required elements in CIM; need atts defined in package ?
   localrc = io_xml->writeStartElement("model", "", 2, 0);
@@ -2462,30 +2459,30 @@ namespace ESMCI {
   string GUID;
   ESMC_GenerateGUID(GUID);
   localrc = io_xml->writeElement("documentID", GUID, 2, 0);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   if (attpack->AttributeIsSet("MetadataVersion")) {
     localrc = attpack->AttributeGet("MetadataVersion", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("documentVersion", value, 2, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Main, 'MetadataVersion'.", 3);
     localrc = io_xml->writeComment(
       "   to ESG: \"Metadata Version\" under tabs \"Properties/Basic\".", 3);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   } else {
     localrc = io_xml->writeElement("documentVersion", "1.0", 2, 0);
   }
   if (attpack->AttributeIsSet("SimulationEnsembleID")) {
     localrc = attpack->AttributeGet("SimulationEnsembleID", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeStartElement("externalID", "", 2, 2, 
@@ -2500,7 +2497,7 @@ namespace ESMCI {
     localrc = io_xml->writeElement("name", "DRS_CMIP5_ensembleType", 4, 0);
     localrc = io_xml->writeEndElement("standard", 3);
     localrc = io_xml->writeEndElement("externalID", 2);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
   // use TimeMgr for timestamping
   // TODO: also use timezone when implemented in TimeMgr
@@ -2510,10 +2507,10 @@ namespace ESMCI {
   dateTime.getString(dateTimeString);
   localrc = io_xml->writeElement("documentCreationDate", 
                                  dateTimeString, 2, 0);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   localrc = io_xml->writeEndElement("simulationRun", 1);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   return ESMF_SUCCESS;
 
@@ -2554,13 +2551,13 @@ namespace ESMCI {
   if (attpack == NULL) return ESMF_SUCCESS;
 
   localrc = io_xml->writeStartElement("platform", "", 1, 0);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   if (attpack->AttributeIsSet("MachineName")) {
     localrc = attpack->AttributeGet("MachineName", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
       return ESMF_FAILURE;}
     machineName = valuevector.at(0);
   } else {
@@ -2573,8 +2570,8 @@ namespace ESMCI {
   if (attpack->AttributeIsSet("CompilerName")) {
     localrc = attpack->AttributeGet("CompilerName", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
       return ESMF_FAILURE;}
     compilerName = valuevector.at(0);
   }
@@ -2582,197 +2579,197 @@ namespace ESMCI {
   if (!machineName.empty()) {
     if (compilerName.empty()) {
       localrc = io_xml->writeElement("shortName", machineName, 2, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "from ESMF: CIM/Platform, 'MachineName'.", 3);
       localrc = io_xml->writeComment(
         "   to ESG: Ingested below from "
         "[platform][unit][machine][machineName].", 3);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } else {
       localrc = io_xml->writeElement("shortName", machineName + "_" + 
                                                 compilerName, 2, 0);
       localrc = io_xml->writeElement("longName", "Machine " + machineName +
                                      " and compiler " + compilerName, 2, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "from ESMF: CIM/Platform, 'MachineName' and 'CompilerName'.", 3);
       localrc = io_xml->writeComment(
         "   to ESG: Ingested below from [platform][unit][machine][machineName] "
         "and [platform][unit][compiler][compilerName].", 3);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
   }
 
   if (attpack->AttributeIsSet("MachineDescription")) {
     localrc = attpack->AttributeGet("MachineDescription", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("description", value, 2, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Platform, 'MachineDescription'.", 3);
     localrc = io_xml->writeComment(
       "   to ESG: Not ingested yet.", 3);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
 
   localrc = io_xml->writeStartElement("unit", "", 2, 0);
   localrc = io_xml->writeStartElement("machine", "", 3, 0);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   if (!machineName.empty()) {
     localrc = io_xml->writeElement("machineName", machineName, 4, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Platform, 'MachineName'.", 5);
     localrc = io_xml->writeComment(
       "   to ESG: \"Machine Name\" under tabs \"Properties/Technical\".", 5);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
   if (attpack->AttributeIsSet("MachineSystem")) {
     localrc = attpack->AttributeGet("MachineSystem", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("machineSystem", value, 4, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Platform, 'MachineSystem'.", 5);
     localrc = io_xml->writeComment(
       "   to ESG: \"Hardware Type\" under tabs \"Properties/Technical\".", 5);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
   if (attpack->AttributeIsSet("MachineOperatingSystem")) {
     localrc = attpack->AttributeGet("MachineOperatingSystem", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("machineOperatingSystem", "", 4, 2,
                                    "open", "true",
                                    "value", value.c_str());
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Platform, 'MachineOperatingSystem'.", 5);
     localrc = io_xml->writeComment(
       "   to ESG: \"Operating System\" under tabs \"Properties/Technical\".",5);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
   if (attpack->AttributeIsSet("MachineVendor")) {
     localrc = attpack->AttributeGet("MachineVendor", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("machineVendor", "", 4, 2,
                                    "open", "true",
                                    "value", value.c_str());
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Platform, 'MachineVendor'.", 5);
     localrc = io_xml->writeComment(
       "   to ESG: Ingested, but only used to classify platform.", 5);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
   if (attpack->AttributeIsSet("MachineInterconnectType")) {
     localrc = attpack->AttributeGet("MachineInterconnectType", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("machineInterconnect", "", 4, 2,
                                    "open", "true",
                                    "value", value.c_str());
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Platform, 'MachineInterconnectType'.", 5);
     localrc = io_xml->writeComment(
       "   to ESG: \"Interconnect Type\" under tabs \"Properties/Technical\".",5);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
   if (attpack->AttributeIsSet("MachineMaximumProcessors")) {
     localrc = attpack->AttributeGet("MachineMaximumProcessors", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("machineMaximumProcessors", value, 4, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Platform, 'MachineMaximumProcessors'.", 5);
     localrc = io_xml->writeComment(
       "   to ESG: \"Maximum Processors\" under tabs "
       "\"Properties/Technical\".", 5);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
   if (attpack->AttributeIsSet("MachineCoresPerProcessor")) {
     localrc = attpack->AttributeGet("MachineCoresPerProcessor", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("machineCoresPerProcessor", value, 4, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Platform, 'MachineCoresPerProcessor'.", 5);
     localrc = io_xml->writeComment(
       "   to ESG: \"Number of Cores per Processor\" under tabs "
       "\"Properties/Technical\".", 5);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
   if (attpack->AttributeIsSet("MachineProcessorType")) {
     localrc = attpack->AttributeGet("MachineProcessorType", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("machineProcessorType", "", 4, 2,
                                    "open", "true",
                                    "value", value.c_str());
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Platform, 'MachineProcessorType'.", 5);
     localrc = io_xml->writeComment(
       "   to ESG: \"Processor\" under tabs \"Properties/Technical\".", 5);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
 
   localrc = io_xml->writeEndElement("machine", 3);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   if (attpack->AttributeIsSet("CompilerName") ||
       attpack->AttributeIsSet("CompilerVersion")) {
 
     localrc = io_xml->writeStartElement("compiler", "", 3, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     if (attpack->AttributeIsSet("CompilerName")) {
       localrc = attpack->AttributeGet("CompilerName", &valuevector);
       if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                            "Write items > 1 - Not yet implemented", &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                            "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;}
       value = valuevector.at(0);
       localrc = io_xml->writeElement("compilerName", value, 4, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "from ESMF: CIM/Platform, 'CompilerName'.", 5);
       localrc = io_xml->writeComment(
         "   to ESG: \"Compiler\" under tabs \"Properties/Technical\", "
         "'CompilerVersion' appended.", 5);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } else {
       ESMC_LogDefault.Write("Attribute CompilerName in "
        "standard attribute package (convention='CIM 1.5', "
@@ -2784,18 +2781,18 @@ namespace ESMCI {
     if (attpack->AttributeIsSet("CompilerVersion")) {
       localrc = attpack->AttributeGet("CompilerVersion", &valuevector);
       if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                            "Write items > 1 - Not yet implemented", &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                            "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;}
       value = valuevector.at(0);
       localrc = io_xml->writeElement("compilerVersion", value, 4, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "from ESMF: CIM/Platform, 'CompilerVersion'.", 5);
       localrc = io_xml->writeComment(
         "   to ESG: \"Compiler\" under tabs \"Properties/Technical\", "
         "appended to 'CompilerName'.", 5);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } else {
       ESMC_LogDefault.Write("Attribute CompilerVersion in "
        "standard attribute package (convention='CIM 1.5', "
@@ -2805,24 +2802,24 @@ namespace ESMCI {
         ESMC_LOGMSG_WARN, ESMC_CONTEXT);
     }
     localrc = io_xml->writeEndElement("compiler", 3);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   }
 
   localrc = io_xml->writeEndElement("unit", 2);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   //localrc = io_xml->writeElement("contact", "", 2, 0);
   // TODO:  <contact><gmd:CI_ResponsibleParty>
   //localrc = io_xml->writeStartElement("contact", "", 2, 0);
   //localrc = attpack->AttributeWriteCIMRP(io_xml, 3);
   //localrc = io_xml->writeEndElement("contact", 2);
-  //ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  //ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   // generate a GUID for this platform document, then output it
   string GUID;
   ESMC_GenerateGUID(GUID);
   localrc = io_xml->writeElement("documentID", GUID, 2, 0);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   // get CIM/Main package to retrieve MetadataVersion
   attpackMain = AttPackGet(CIM_1_5_CONV, MODEL_COMP_PURP,
@@ -2831,18 +2828,18 @@ namespace ESMCI {
   if (attpackMain->AttributeIsSet("MetadataVersion")) {
     localrc = attpackMain->AttributeGet("MetadataVersion", &valuevector);
     if (valuevector.size() > 1) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;}
     value = valuevector.at(0);
     localrc = io_xml->writeElement("documentVersion", value, 2, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     localrc = io_xml->writeComment(
       "from ESMF: CIM/Main, 'MetadataVersion'.", 3);
     localrc = io_xml->writeComment(
       "   to ESG: Ingested above from [modelComponent][documentVersion] "
       "for top-level component.", 3);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
   } else {
     localrc = io_xml->writeElement("documentVersion", "1.0", 2, 0);
   }
@@ -2855,10 +2852,10 @@ namespace ESMCI {
   dateTime.getString(dateTimeString);
   localrc = io_xml->writeElement("documentCreationDate", 
                                  dateTimeString, 2, 0);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   localrc = io_xml->writeEndElement("platform", 1);
-  ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   return ESMF_SUCCESS;
 
@@ -2907,7 +2904,7 @@ namespace ESMCI {
 
     // responsibleParty header
     localrc = io_xml->writeStartElement("responsibleParty", "", indent++, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     if (attpack->AttributeIsSet("Name")) {
       // first, determine name type:  individual, organization, or position.
       //   first choice is the setting of the NameType attribute ...
@@ -2915,8 +2912,8 @@ namespace ESMCI {
       if (attpack->AttributeIsSet("NameType")) {
           localrc = attpack->AttributeGet("NameType", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                            "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                            "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         transform(value.begin(), value.end(), value.begin(), ::tolower);
@@ -2937,8 +2934,8 @@ namespace ESMCI {
       } else if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
           localrc = attpack->AttributeGet("ResponsiblePartyRole", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                            "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                            "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         role = valuevector.at(0);
         if (role != "PI") transform(role.begin(), role.end(),
@@ -2952,40 +2949,40 @@ namespace ESMCI {
       // ... finally output the Name using the name type
       localrc = attpack->AttributeGet("Name", &valuevector);
       if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                      "Write items > 1 - Not yet implemented", &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;}
       value = valuevector.at(0);
       localrc = io_xml->writeStartElement(nameType, "", indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "from ESMF: CIM/ResponsibleParty, 'Name'.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       if (role == "PI") {
         localrc = io_xml->writeComment(
           "   to ESG: \"Principal Investigator\" under tabs "
           "\"Properties/Basic\".", indent+1);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       } else if (role == "contact") {
         localrc = io_xml->writeComment(
           "   to ESG: \"Contact Name\" under tabs "
           "\"Properties/Basic\".", indent+1);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       } else if (role == "funder") {
         localrc = io_xml->writeComment(
           "   to ESG: \"Funding Source\" under tabs "
           "\"Properties/Basic\".", indent+1);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       } else {
         localrc = io_xml->writeComment(
           "   to ESG: Ingested and stored for role code \"" + role +
           "\", but not displayed yet.", indent+1);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       localrc = io_xml->writeEndElement(nameType, --indent);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
 
     if (attpack->AttributeIsSet("PhysicalAddress") ||
@@ -2994,143 +2991,143 @@ namespace ESMCI {
 
       // contactInfo header
       localrc = io_xml->writeStartElement("gmd:contactInfo", "", indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeStartElement("gmd:CI_Contact", "", ++indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
       if (attpack->AttributeIsSet("PhysicalAddress") ||
           attpack->AttributeIsSet("EmailAddress")) {
 
         // address header
         localrc = io_xml->writeStartElement("gmd:address", "", ++indent, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeStartElement("gmd:CI_Address", "", ++indent, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         if (attpack->AttributeIsSet("PhysicalAddress")) {
           localrc = attpack->AttributeGet("PhysicalAddress", &valuevector);
           if (valuevector.size() > 1) {
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                              "Write items > 1 - Not yet implemented", &localrc);
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                              "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
             return ESMF_FAILURE;}
           value = valuevector.at(0);
           localrc = io_xml->writeStartElement("gmd:deliveryPoint", "", ++indent, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
           localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           localrc = io_xml->writeComment(
             "from ESMF: CIM/ResponsibleParty, 'PhysicalAddress'.", indent+1);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           localrc = io_xml->writeComment(
             "   to ESG: Not ingested yet.", indent+1);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           localrc = io_xml->writeEndElement("gmd:deliveryPoint", --indent);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         }
 
         if (attpack->AttributeIsSet("EmailAddress")) {
           localrc = attpack->AttributeGet("EmailAddress", &valuevector);
           if (valuevector.size() > 1) {
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                              "Write items > 1 - Not yet implemented", &localrc);
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                              "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
             return ESMF_FAILURE;}
           value = valuevector.at(0);
           localrc = io_xml->writeStartElement("gmd:electronicMailAddress", "", indent, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           localrc = io_xml->writeComment(
             "from ESMF: CIM/ResponsibleParty, 'EmailAddress'.", indent+1);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           if (role == "contact") {
             localrc = io_xml->writeComment(
               "   to ESG: \"Contact Email\" under tabs \"Properties/Basic\".", 
               indent+1);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           } else if (role == "PI" || role == "author") {
             localrc = io_xml->writeComment(
               "   to ESG: Ingested and stored for role code \"" + role +
               "\", but not displayed yet.", indent+1);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           } else {
             localrc = io_xml->writeComment(
               "   to ESG: Not ingested yet for role code \"" + role +
               "\".", indent+1);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           }
           localrc = io_xml->writeEndElement("gmd:electronicMailAddress", --indent);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         }
 
         // address footer
         localrc = io_xml->writeEndElement("gmd:CI_Address", --indent);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeEndElement("gmd:address", --indent);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       } // end if PhysicalAddress or EmailAddress
 
       if (attpack->AttributeIsSet("URL")) {
         localrc = attpack->AttributeGet("URL", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                            "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                            "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         localrc = io_xml->writeStartElement("gmd:onlineResource", "", indent, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeStartElement("gmd:CI_OnlineResource", "", ++indent, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeStartElement("gmd:linkage", "", ++indent, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
         localrc = io_xml->writeElement("gmd:URL", value, ++indent, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "from ESMF: CIM/ResponsibleParty, 'URL'.", indent+1);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "   to ESG: Not ingested yet.", indent+1);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeEndElement("gmd:linkage", --indent);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeEndElement("gmd:CI_OnlineResource", --indent);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeEndElement("gmd:onlineResource", --indent);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
 
       // contact footer
       localrc = io_xml->writeEndElement("gmd:CI_Contact", --indent);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeEndElement("gmd:contactInfo", --indent);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } // end if PhysicalAddress, EmailAddress or URL
 
     if (attpack->AttributeIsSet("ResponsiblePartyRole")) {
       localrc = attpack->AttributeGet("ResponsiblePartyRole", &valuevector);
       if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;}
       value = valuevector.at(0);
       if (value != "PI") transform(value.begin(), value.end(),
                                    value.begin(), ::tolower);
       if (value == "center") value = "centre";
       localrc = io_xml->writeStartElement("gmd:role", "", indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeElement("gmd:CI_RoleCode", "", ++indent, 2,
                                      "codeList", "",
                                      "codeListValue",
                                      value.c_str());
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "from ESMF: CIM/ResponsibleParty, 'ResponsiblePartyRole'.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "   to ESG: Ingested, but only used to control display.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeEndElement("gmd:role", --indent);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } else {
       ESMC_LogDefault.Write("Attribute ResponsiblePartyRole in "
         "standard attribute package (convention='ISO 19115', "
@@ -3144,24 +3141,24 @@ namespace ESMCI {
     if (attpack->AttributeIsSet("Abbreviation")) {
       localrc = attpack->AttributeGet("Abbreviation", &valuevector);
       if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;}
       value = valuevector.at(0);
       localrc = io_xml->writeElement("abbreviation", value, indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "from ESMF: CIM/ResponsibleParty, 'Abbreviation'.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "   to ESG: Not ingested yet.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } else if (attpack->AttributeIsSet("Name")) {
       // ... otherwise get initials from "Name"
       localrc = attpack->AttributeGet("Name", &valuevector);
       if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;}
       value = valuevector.at(0);
       char s[2*ESMF_MAXSTR], abbr[ESMF_MAXSTR], *p;
@@ -3174,19 +3171,19 @@ namespace ESMCI {
       }
       abbr[i] = '\0';
       localrc = io_xml->writeElement("abbreviation", abbr, indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "from ESMF: CIM/ResponsibleParty, abbreviation (initials) of 'Name'.",
         indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "   to ESG: Not ingested yet.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
 
     // responsibleParty footer
     localrc = io_xml->writeEndElement("responsibleParty", --indent);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   } // end for each nested package
 
@@ -3227,8 +3224,8 @@ namespace ESMCI {
   string attPackInstanceName;
   attpack = AttPackGet(CIM_1_5_CONV, purpose, "comp", attPackInstanceName);
   if(!attpack) {
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
-      "Cannot find the specified Attribute package\n", &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_NOT_CREATED, 
+      "Cannot find the specified Attribute package\n", ESMC_CONTEXT, &localrc);
     return localrc;
   }
 
@@ -3243,45 +3240,45 @@ namespace ESMCI {
       if (purpose.compare(COMP_PROP_PURP) == 0) { 
         localrc = io_xml->writeStartElement("componentProperty", "", indent+1,
                                  2, "type", "custom", "represented", "true");
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeElement("shortName", name, indent+2, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         for(int j=0; j<valuevector.size(); j++) {
           localrc = io_xml->writeElement("value", valuevector.at(j), indent+2, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         }
 
         localrc = io_xml->writeComment(
           "from ESMF: CIM/GeneralComponentProperties, custom user-defined "
           "attribute name '" + name + "'.", indent+3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "   to ESG: Not ingested yet.", indent+3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeEndElement("componentProperty", indent+1);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       // Scientific properties
       } else {  // purpose = SCI_PROP_PURP
         localrc = io_xml->writeStartElement("componentProperty", "", indent+1,
                                  1, "represented", "true");
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeElement("shortName", name, indent+2, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         for(int j=0; j<valuevector.size(); j++) {
           localrc = io_xml->writeElement("value", valuevector.at(j), indent+2, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         }
 
         localrc = io_xml->writeComment(
           "from ESMF: CIM/ScientificProperties, Metafor-defined "
           "attribute name '" + name + "'.", indent+3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "   to ESG: ESG-name mapped from Metafor-name, under tabs "
           "\"Properties/Scientific\".", indent+3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeEndElement("componentProperty", indent+1);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       } 
     }
   }
@@ -3361,8 +3358,8 @@ namespace ESMCI {
            (ap->parent->AttributeIsSet("Intent"))) {
         localrc = ap->parent->AttributeGet("Intent", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         // map ESMF values {Export,Import} to CIM values {out,in}
@@ -3381,37 +3378,37 @@ namespace ESMCI {
         localrc = io_xml->writeStartElement("componentProperty", "", indent+1,
                                             2, "intent", value.c_str(), 
                                             "represented", "true");
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "from ESMF: CIM/Inputs, 'Intent' (\"Export\"=\"out\", "
           "\"Import=\"in\").", indent+2);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "   to ESG: Not ingested yet.", indent+2);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       } else {
         localrc = io_xml->writeStartElement("componentProperty", "", indent+1,
                                             1, "represented", "true");
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       if (((ap = attpack->AttPackGetAttribute("ShortName")) != NULL) &&
            (ap->parent->AttributeIsSet("ShortName"))) {
         localrc = ap->parent->AttributeGet("ShortName", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         localrc = io_xml->writeElement("shortName", value, indent+2, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "from ESMF: CIM/Inputs, 'ShortName'.", indent+3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "   to ESG: Ingested below from "
           "[simulationRun][input][connection][connectionTarget][dataSource]"
           "[reference][name].", indent+3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       } else {
         ESMC_LogDefault.Write("Attribute ShortName in attpack "
           "CF/General, nested within std attpack (conv='CIM 1.5', "
@@ -3424,25 +3421,25 @@ namespace ESMCI {
            (ap->parent->AttributeIsSet("LongName"))) {
         localrc = ap->parent->AttributeGet("LongName", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         localrc = io_xml->writeElement("longName", value, indent+2, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "from ESMF: CIM/Inputs, 'LongName'.", indent+3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "   to ESG: Not ingested yet.", indent+3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       if (((ap = attpack->AttPackGetAttribute("Units")) != NULL) &&
            (ap->parent->AttributeIsSet("Units"))) {
         localrc = ap->parent->AttributeGet("Units", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         localrc = io_xml->writeStartElement("units", "", indent+2, 2,
@@ -3460,14 +3457,14 @@ namespace ESMCI {
                    indent+4, 0);
         localrc = io_xml->writeEndElement("controlledVocabulary", indent+3);
         localrc = io_xml->writeEndElement("units", indent+2);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       if (((ap = attpack->AttPackGetAttribute("StandardName")) != NULL) &&
            (ap->parent->AttributeIsSet("StandardName"))) {
         localrc = ap->parent->AttributeGet("StandardName", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         localrc = io_xml->writeStartElement("standardName", "", indent+2, 2,
@@ -3485,10 +3482,10 @@ namespace ESMCI {
                    indent+4, 0);
         localrc = io_xml->writeEndElement("controlledVocabulary", indent+3);
         localrc = io_xml->writeEndElement("standardName", indent+2);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       localrc = io_xml->writeEndElement("componentProperty", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
   }
 
@@ -3539,27 +3536,27 @@ namespace ESMCI {
 
     // citation header
     localrc = io_xml->writeStartElement("citation", "", indent, 0);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
     if (attpack->AttributeIsSet("ShortTitle")) {
       localrc = attpack->AttributeGet("ShortTitle", &valuevector);
       if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;}
       value = valuevector.at(0);
       localrc = io_xml->writeStartElement("gmd:title", "", ++indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "from ESMF: CIM/Citation, 'ShortTitle'.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "   to ESG: Not ingested yet.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeEndElement("gmd:title", --indent);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } else {
       ESMC_LogDefault.Write("Attribute ShortTitle in "
         "standard attribute package (convention='ISO 19115', "
@@ -3571,39 +3568,39 @@ namespace ESMCI {
     if (attpack->AttributeIsSet("Date")) {
       localrc = attpack->AttributeGet("Date", &valuevector);
       if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;}
       value = valuevector.at(0);
       localrc = io_xml->writeStartElement("gmd:date", "", indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeStartElement("gmd:CI_Date", "", ++indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeStartElement("gmd:date", "", ++indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeElement("gco:Date", value, ++indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "from ESMF: CIM/Citation, 'Date'.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "   to ESG: Not ingested yet.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeEndElement("gmd:date", --indent);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeStartElement("gmd:dateType", "", indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeElement("gmd:CI_DateTypeCode", "", 
                                      ++indent, 2,
                                      "codeList", "",
                                      "codeListValue", "");
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeEndElement("gmd:dateType", --indent);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeEndElement("gmd:CI_Date", --indent);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeEndElement("gmd:date", --indent);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } else {
       ESMC_LogDefault.Write("Attribute Date in "
         "standard attribute package (convention='ISO 19115', "
@@ -3615,47 +3612,47 @@ namespace ESMCI {
     if (attpack->AttributeIsSet("PresentationForm")) {
       localrc = attpack->AttributeGet("PresentationForm", &valuevector);
       if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;}
       value = valuevector.at(0);
       localrc = io_xml->writeStartElement("gmd:presentationForm", "", indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeElement("gmd:CI_PresentationFormCode", value,
                                      ++indent,
                                      2, "codeList", "",
                                      "codeListValue", "");
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "from ESMF: CIM/Citation, 'PresentationForm'.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "   to ESG: Not ingested yet.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeEndElement("gmd:presentationForm", --indent);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     if (attpack->AttributeIsSet("DOI")) {
       localrc = attpack->AttributeGet("DOI", &valuevector);
       if (valuevector.size() > 1) {
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                          "Write items > 1 - Not yet implemented", &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                          "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;}
       value = valuevector.at(0);
       localrc = io_xml->writeStartElement("gmd:otherCitationDetails", "", 
                                           indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "from ESMF: CIM/Citation, 'DOI'.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "   to ESG: \"Reference\" under tab \"References\", "
         "appended to 'LongTitle'.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeEndElement("gmd:otherCitationDetails", --indent);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     if (attpack->AttributeIsSet("LongTitle") ||
         attpack->AttributeIsSet("URL")) {
@@ -3663,8 +3660,8 @@ namespace ESMCI {
       if (attpack->AttributeIsSet("LongTitle")) {
         localrc = attpack->AttributeGet("LongTitle", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                            "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                            "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
       }
@@ -3675,31 +3672,31 @@ namespace ESMCI {
       if (attpack->AttributeIsSet("URL")) {
         localrc = attpack->AttributeGet("URL", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                            "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                            "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         // append URL to LongTitle for now TODO: separate when place for
         // citation URL is created in CIM
         value += (value.empty() ? "" : " ") + valuevector.at(0);
       }
       localrc = io_xml->writeStartElement("gmd:collectiveTitle", "", indent, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeElement("gco:CharacterString", value, ++indent, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "from ESMF: CIM/Citation, 'LongTitle' + 'URL'.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeComment(
         "   to ESG: \"Reference\" under tab \"References\", "
         "'DOI' appended.", indent+1);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeEndElement("gmd:collectiveTitle", --indent);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
 
     // citation footer
     localrc = io_xml->writeEndElement("citation", --indent);
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
   } // end for each nested package
 
@@ -3754,8 +3751,8 @@ namespace ESMCI {
       if (attpack->AttributeIsSet("CouplingPurpose")) {
         localrc = attpack->AttributeGet("CouplingPurpose", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                        "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                        "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         // map ESMF values {Ancillary, Boundary, Initial} to CIM enum
@@ -3777,7 +3774,7 @@ namespace ESMCI {
         }
         localrc = io_xml->writeStartElement("coupling", "", 3, 2,
                      "fullySpecified", "false", "purpose", value.c_str());
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       } else {
         // Output starting <coupling> element, to match ending element
         // </coupling>, but with a blank purpose="" attr. This will produce an
@@ -3787,7 +3784,7 @@ namespace ESMCI {
         // problem is -- that attribute CouplingPurpose is not set.
         localrc = io_xml->writeStartElement("coupling", "", 3, 2,
                      "fullySpecified", "false", "purpose", "");
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         ESMC_LogDefault.Write("Attribute CouplingPurpose in "
           "standard attribute package (convention='CIM 1.5', "
           "purpose='Inputs') "
@@ -3798,8 +3795,8 @@ namespace ESMCI {
       if (attpack->AttributeIsSet("Frequency")) {
         localrc = attpack->AttributeGet("Frequency", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                      "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
 
@@ -3834,7 +3831,7 @@ namespace ESMCI {
                               "units", value.c_str(), "variableRate", "false");
         localrc = io_xml->writeElement("rate", freq, 5, 0);
         localrc = io_xml->writeEndElement("timeProfile", 4);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       if (attpack->AttributeIsSet("SpatialRegriddingMethod") ||
           attpack->AttributeIsSet("SpatialRegriddingDimension")) {
@@ -3842,8 +3839,8 @@ namespace ESMCI {
         if (attpack->AttributeIsSet("SpatialRegriddingDimension")) {
           localrc = attpack->AttributeGet("SpatialRegriddingDimension",&valuevector);
           if (valuevector.size() > 1) {
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                        "Write items > 1 - Not yet implemented", &localrc);
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                        "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
             return ESMF_FAILURE;}
           value = valuevector.at(0);
           // CIM enum: {1D, 2D, 3D}
@@ -3865,8 +3862,8 @@ namespace ESMCI {
         if (attpack->AttributeIsSet("SpatialRegriddingMethod")) {
           localrc = attpack->AttributeGet("SpatialRegriddingMethod", &value2vector);
           if (value2vector.size() > 1) {
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                        "Write items > 1 - Not yet implemented", &localrc);
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                        "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
             return ESMF_FAILURE;}
           value2 = value2vector.at(0);
           // CIM enum: {linear, near-neighbour, 
@@ -3891,13 +3888,13 @@ namespace ESMCI {
                                        value2.c_str(), 5, 0);
         }
         localrc = io_xml->writeEndElement("spatialRegridding", 4);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       if (attpack->AttributeIsSet("TimeTransformationType")) {
         localrc = attpack->AttributeGet("TimeTransformationType", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                      "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         localrc = io_xml->writeStartElement("timeTransformation", "", 4, 0);
@@ -3905,13 +3902,13 @@ namespace ESMCI {
                                        "open", "true", 
                                        "value", value.c_str());
         localrc = io_xml->writeEndElement("timeTransformation", 4);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       if (attpack->AttributeIsSet("CouplingSource")) {
         localrc = attpack->AttributeGet("CouplingSource", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                      "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         localrc = io_xml->writeStartElement("couplingSource", "", 4, 0);
@@ -3921,7 +3918,7 @@ namespace ESMCI {
         localrc = io_xml->writeEndElement("reference", 6);
         localrc = io_xml->writeEndElement("dataSource", 5);
         localrc = io_xml->writeEndElement("couplingSource", 4);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       } else {
         ESMC_LogDefault.Write("Attribute CouplingSource in "
           "standard attribute package (convention='CIM 1.5', "
@@ -3933,8 +3930,8 @@ namespace ESMCI {
       if (attpack->AttributeIsSet("CouplingTarget")) {
         localrc = attpack->AttributeGet("CouplingTarget", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                      "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         localrc = io_xml->writeStartElement("couplingTarget", "", 4, 0);
@@ -3944,7 +3941,7 @@ namespace ESMCI {
         localrc = io_xml->writeEndElement("reference", 6);
         localrc = io_xml->writeEndElement("dataSource", 5);
         localrc = io_xml->writeEndElement("couplingTarget", 4);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       } else {
         ESMC_LogDefault.Write("Attribute CouplingTarget in "
           "standard attribute package (convention='CIM 1.5', "
@@ -3957,8 +3954,8 @@ namespace ESMCI {
            (ap->parent->AttributeIsSet("ShortName"))) {
         localrc = ap->parent->AttributeGet("ShortName", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         localrc = io_xml->writeStartElement("connection", "", 4, 0);
@@ -3970,10 +3967,10 @@ namespace ESMCI {
         localrc = io_xml->writeEndElement("dataSource", 6);
         localrc = io_xml->writeEndElement("connectionTarget", 5);
         localrc = io_xml->writeEndElement("connection", 4);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       localrc = io_xml->writeEndElement("coupling", 3);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     // recurse through ESMF objects
     localrc = linkList.at(i)->AttributeWriteCIMcomposition(io_xml);
@@ -4030,8 +4027,8 @@ namespace ESMCI {
       if (attpack->AttributeIsSet("CouplingPurpose")) {
         localrc = attpack->AttributeGet("CouplingPurpose", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                        "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                        "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         // map ESMF values {Ancillary, Boundary, Initial} to CIM enum
@@ -4054,16 +4051,16 @@ namespace ESMCI {
         localrc = io_xml->writeStartElement("input", "", 2, 2,
                      "fullySpecified", "true", "purpose", 
                      couplingPurpose.c_str());
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "from ESMF: CIM/Inputs, 'CouplingPurpose' "
           "(\"Ancillary\"=\"ancillaryFile\", "
           "\"Boundary\"=\"boundaryCondition\", "
           "\"Initial\"=\"initialCondition\")", 3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "   to ESG: Title of expandable bar under tab \"Inputs\".", 3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       } else {
         // Output starting <input> element, to match ending element
         // </input>, but with a blank purpose="" attr. This will produce an
@@ -4073,7 +4070,7 @@ namespace ESMCI {
         // problem is -- that attribute CouplingPurpose is not set.
         localrc = io_xml->writeStartElement("input", "", 2, 2,
                      "fullySpecified", "true", "purpose", "");
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         ESMC_LogDefault.Write("Attribute CouplingPurpose in "
           "standard attribute package (convention='CIM 1.5', "
           "purpose='Inputs') "
@@ -4084,18 +4081,18 @@ namespace ESMCI {
       if (attpack->AttributeIsSet("Description")) {
         localrc = attpack->AttributeGet("Description", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                      "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         localrc = io_xml->writeElement("description", value, 3, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "from ESMF: CIM/Inputs, 'Description'.", 4);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "   to ESG: Next to field name (after colon) under tab \"Inputs\".", 4);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       
       if (couplingPurpose == "ancillaryFile") {
@@ -4111,13 +4108,13 @@ namespace ESMCI {
                  "http://proj.badc.rl.ac.uk/svn/metafor/cmip5q/trunk", 5, 0);
       localrc = io_xml->writeEndElement("controlledVocabulary", 4);
       localrc = io_xml->writeEndElement("type", 3);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
       if (attpack->AttributeIsSet("Frequency")) {
         localrc = attpack->AttributeGet("Frequency", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                      "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
 
@@ -4157,7 +4154,7 @@ namespace ESMCI {
           "   to ESG: \"Input Frequency\" under tab \"Inputs\", "
           "under field name.", 5);
         localrc = io_xml->writeEndElement("timeProfile", 3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       if (attpack->AttributeIsSet("SpatialRegriddingMethod") ||
           attpack->AttributeIsSet("SpatialRegriddingDimension")) {
@@ -4165,8 +4162,8 @@ namespace ESMCI {
         if (attpack->AttributeIsSet("SpatialRegriddingDimension")) {
           localrc = attpack->AttributeGet("SpatialRegriddingDimension",&valuevector);
           if (valuevector.size() > 1) {
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                        "Write items > 1 - Not yet implemented", &localrc);
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                        "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
             return ESMF_FAILURE;}
           value = valuevector.at(0);
           // CIM enum: {1D, 2D, 3D}
@@ -4179,25 +4176,25 @@ namespace ESMCI {
           }
           localrc = io_xml->writeStartElement("spatialRegridding", "", 3, 1,
                              "spatialRegriddingDimension", value.c_str()); 
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           localrc = io_xml->writeComment(
             "from ESMF: CIM/Inputs, 'SpatialRegriddingDimension'.", 4);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           localrc = io_xml->writeComment(
             "   to ESG: Not ingested yet.", 4);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         } else {
           // Output starting <spatialRegridding> element, to match ending 
           // element </spatialRegridding>, but without a
           // spatialRegriddingDimension="" xml attribute.
           localrc = io_xml->writeStartElement("spatialRegridding", "", 3, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         }
         if (attpack->AttributeIsSet("SpatialRegriddingMethod")) {
           localrc = attpack->AttributeGet("SpatialRegriddingMethod", &value2vector);
           if (value2vector.size() > 1) {
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                        "Write items > 1 - Not yet implemented", &localrc);
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                        "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
             return ESMF_FAILURE;}
           value2 = value2vector.at(0);
           // CIM enum: {linear, near-neighbour, 
@@ -4220,23 +4217,23 @@ namespace ESMCI {
           }
           localrc = io_xml->writeElement("spatialRegriddingStandardMethod", 
                                        value2.c_str(), 4, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           localrc = io_xml->writeComment(
             "from ESMF: CIM/Inputs, 'SpatialRegriddingMethod'.", 5);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           localrc = io_xml->writeComment(
             "   to ESG: \"Input Spatial Regridding Method\" "
             "under tab \"Inputs\", under field name.", 5);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         }
         localrc = io_xml->writeEndElement("spatialRegridding", 3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       if (attpack->AttributeIsSet("TimeTransformationType")) {
         localrc = attpack->AttributeGet("TimeTransformationType", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                      "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         localrc = io_xml->writeStartElement("timeTransformation", "", 3, 0);
@@ -4245,28 +4242,28 @@ namespace ESMCI {
                                        "value", value.c_str());
         localrc = io_xml->writeComment(
           "from ESMF: CIM/Inputs, 'TimeTransformationType'.", 5);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "   to ESG: \"Input Time Transformation Type\" "
           "under tab \"Inputs\", under field name.", 5);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeEndElement("timeTransformation", 3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       if (attpack->AttributeIsSet("CouplingSource")) {
         localrc = attpack->AttributeGet("CouplingSource", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                      "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
 
         localrc = io_xml->writeStartElement("couplingSource", "", 3, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeStartElement("dataSource", "", 4, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeStartElement("reference", "", 5, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
         // recursively search from top-level component for a
         //   component attpack that has a ShortName value that matches the
@@ -4290,27 +4287,27 @@ namespace ESMCI {
         }
 
         localrc = io_xml->writeElement("name", value, 6, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "from ESMF: CIM/Inputs, 'CouplingSource'.", 7);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "   to ESG: \"Input Source Component\" "
           "under tab \"Inputs\", under field name.", 7);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         if (couplingPurpose == "ancillaryFile") {
           localrc = io_xml->writeElement("type", "dataObject", 6, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         } else {
           localrc = io_xml->writeElement("type", "modelComponent", 6, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         }
         localrc = io_xml->writeEndElement("reference", 5);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeEndElement("dataSource", 4);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeEndElement("couplingSource", 3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       } else {
         ESMC_LogDefault.Write("Attribute CouplingSource in "
           "standard attribute package (convention='CIM 1.5', "
@@ -4322,8 +4319,8 @@ namespace ESMCI {
       if (attpack->AttributeIsSet("CouplingTarget")) {
         localrc = attpack->AttributeGet("CouplingTarget", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                      "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                      "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         localrc = io_xml->writeStartElement("couplingTarget", "", 3, 0);
@@ -4352,23 +4349,23 @@ namespace ESMCI {
         }
 
         localrc = io_xml->writeElement("name", value, 6, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "from ESMF: CIM/Inputs, 'CouplingTarget'.", 7);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "   to ESG: \"Input Target Component\" "
           "under tab \"Inputs\", under field name.", 7);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeElement("type", "modelComponent", 6, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeEndElement("reference", 5);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeEndElement("dataSource", 4);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeEndElement("couplingTarget", 3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       } else {
         ESMC_LogDefault.Write("Attribute CouplingTarget in "
           "standard attribute package (convention='CIM 1.5', "
@@ -4381,39 +4378,39 @@ namespace ESMCI {
            (ap->parent->AttributeIsSet("ShortName"))) {
         localrc = ap->parent->AttributeGet("ShortName", &valuevector);
         if (valuevector.size() > 1) {
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-                  "Write items > 1 - Not yet implemented", &localrc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                  "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
           return ESMF_FAILURE;}
         value = valuevector.at(0);
         localrc = io_xml->writeStartElement("connection", "", 3, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeStartElement("connectionTarget", "", 4, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeStartElement("dataSource", "", 5, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeStartElement("reference", "", 6, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeElement("name", value, 7, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "from ESMF: CIM/Inputs, 'ShortName'.", 8);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeComment(
           "   to ESG: Field name under tab \"Inputs\".", 8);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeElement("type", "componentProperty", 7, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeEndElement("reference", 6);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeEndElement("dataSource", 5);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeEndElement("connectionTarget", 4);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         localrc = io_xml->writeEndElement("connection", 3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       localrc = io_xml->writeEndElement("input", 2);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     // recurse through ESMF objects
     localrc = linkList.at(i)->AttributeWriteCIMinput(io_xml);
@@ -4458,9 +4455,9 @@ namespace ESMCI {
   while (attpack != NULL) {
     localrc = attpack->AttributeWriteCIMbuffer(io_xml, cimDocType);
     if (localrc != ESMF_SUCCESS) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-        "AttributeWriteCIMtraverse failed AttributeWriteCIMbuffer", &localrc);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+        "AttributeWriteCIMtraverse failed AttributeWriteCIMbuffer", ESMC_CONTEXT, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     return ESMF_FAILURE;
     }
 
@@ -4526,8 +4523,8 @@ namespace ESMCI {
     }
     if (localrc != ESMF_SUCCESS) {
       sprintf(msgbuf, "AttributeWriteXMLbufferfield failed AttributeWriteXMLbufferfieldT");
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       return ESMF_FAILURE;
     }
   }
@@ -4577,12 +4574,12 @@ namespace ESMCI {
     for (i=0; i<attrList.size(); i++) { 
       if (index == 0) {
         localrc = io_xml->writeStartElement("variable", "", 3, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
       string name = attrList.at(i)->attrName; 
       if (attrList.at(i)->items == 0) {
         localrc = io_xml->writeElement(name, "", 4, 0);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       } else if (attrList.at(i)->items == 1) {
         ostringstream outstring;
         switch (attrList.at(i)->tk)
@@ -4590,45 +4587,45 @@ namespace ESMCI {
           case ESMC_TYPEKIND_I4:
             outstring << attrList.at(i)->vip.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 4, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
 
           case ESMC_TYPEKIND_I8:
             outstring << attrList.at(i)->vlp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 4, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
 
           case ESMC_TYPEKIND_R4:
             outstring << attrList.at(i)->vfp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 4, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
 
           case ESMC_TYPEKIND_R8:
             outstring << attrList.at(i)->vdp.at(0); 
             localrc = io_xml->writeElement(name, outstring.str(), 4, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
 
           case ESMC_TYPEKIND_LOGICAL:
             if (attrList.at(i)->vbp.at(0) == ESMF_TRUE) {
               localrc = io_xml->writeElement(name, "true", 4, 0);
-              ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+              ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             } else if (attrList.at(i)->vbp.at(0) == ESMF_FALSE) {
               localrc = io_xml->writeElement(name, "false", 4, 0);
-              ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+              ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             }
             break;
 
           case ESMC_TYPEKIND_CHARACTER:
             localrc = io_xml->writeElement(name, attrList.at(i)->vcpp.at(0), 4, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
 
           default:
             localrc = io_xml->writeElement(name, "N/A", 4, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             break;
         }
 
@@ -4637,13 +4634,13 @@ namespace ESMCI {
           ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
       } else {
         sprintf(msgbuf,"Items < 1, problem.");
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &localrc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, &localrc);
         return ESMF_FAILURE;
       }
       ++index;
       if (index == columns) {
         localrc = io_xml->writeEndElement("variable", 3);
-        ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       }
     }
 
@@ -4724,10 +4721,10 @@ namespace ESMCI {
     if (attrPurpose.compare("sourceInfo")==0) {
       localrc = io_xml->writeStartElement("sourceInfo", "", 2, 1,
                                           "xsi:type", "SiteInfoType");
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } else if (attrPurpose.compare("variable")==0) {
       localrc = io_xml->writeStartElement("variable", "", 2, 0);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
 
     // print each attribute in attpack
@@ -4742,48 +4739,48 @@ namespace ESMCI {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcpp.at(0), 3, 2,
                                   "network", "LittleBearRiver", "siteID", "2");
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         } else if (attrList.at(i)->attrName.compare("latitude")==0) {
           localrc = io_xml->writeStartElement("geoLocation", "", 3, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           localrc = io_xml->writeStartElement("geogLocation", "", 4, 2,
                             "xsi:type", "LatLonPointType", "srs", "EPSG:4269");
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcpp.at(0), 5, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         } else if (attrList.at(i)->attrName.compare("longitude")==0) {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcpp.at(0), 5, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           localrc = io_xml->writeEndElement("geogLocation", 4);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         } else if (attrList.at(i)->attrName.compare("X")==0) {
           localrc = io_xml->writeStartElement("localSiteXY", "", 4, 1,
                             "projectionInformation", " NAD83 / UTM zone 12N");
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
 
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcpp.at(0), 5, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         } else if (attrList.at(i)->attrName.compare("Y")==0) {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcpp.at(0), 5, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           localrc = io_xml->writeEndElement("localSiteXY", 4);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           localrc = io_xml->writeEndElement("geoLocation", 3);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         } else if (attrList.at(i)->attrName.compare("County")==0 ||
                    attrList.at(i)->attrName.compare("State")==0  ||
                    attrList.at(i)->attrName.compare("Site Comments")==0) {
           localrc = io_xml->writeElement("note", attrList.at(i)->vcpp.at(0), 3, 1,
                             "title", attrList.at(i)->attrName.c_str());
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         } else { // siteName or verticalDatum
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcpp.at(0), 3, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         }
       } else if (attrPurpose.compare("variable")==0) {
         if (attrList.at(i)->attrName.compare("variableCode")==0) {
@@ -4791,22 +4788,22 @@ namespace ESMCI {
                                          attrList.at(i)->vcpp.at(0), 3, 3,
                             "vocabulary", "LBR", "default", "true",
                             "variableID", "39");
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         } else if (attrList.at(i)->attrName.compare("units")==0) {
           localrc = io_xml->writeElement(attrList.at(i)->attrName, 
                                          attrList.at(i)->vcpp.at(0), 3, 2,
                             "unitsAbbreviation", "mg/L", "unitsCode", "199");
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         } else if (attrList.at(i)->attrName.compare("timeSupport")==0) {
           localrc = io_xml->writeStartElement(attrList.at(i)->attrName, "", 3, 1,
                             "isRegular", (attrList.at(i)->vcpp.at(0)).c_str());
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           localrc = io_xml->writeEndElement(attrList.at(i)->attrName, 3);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         } else {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcpp.at(0), 3, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         }
       } else if (attrPurpose.compare("values")==0) {
         // collect attr names, values to output at end of loop
@@ -4829,41 +4826,41 @@ namespace ESMCI {
           localrc = io_xml->writeStartElement(attrPurpose, "", 3, 1,
                         attrList.at(i)->attrName.c_str(),
                         attrList.at(i)->vcpp.at(0).c_str());
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         } else {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcpp.at(0), 4, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           localrc = io_xml->writeEndElement(attrPurpose, 3);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         }
       } else if (attrPurpose.compare("source")==0) {
         if (attrList.at(i)->attrName.compare("sourceID")==0) {
           localrc = io_xml->writeStartElement(attrPurpose, "", 3, 1,
                         attrList.at(i)->attrName.c_str(),
                         attrList.at(i)->vcpp.at(0).c_str());
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
         } else {
           localrc = io_xml->writeElement(attrList.at(i)->attrName,
                                          attrList.at(i)->vcpp.at(0), 4, 0);
-          ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           if (attrList.at(i)->attrName.compare("SourceDescription")==0) {
             localrc = io_xml->writeStartElement("ContactInformation", "", 4, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             localrc = io_xml->writeElement("ContactName", "Amber Spackman", 5, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             localrc = io_xml->writeElement("TypeOfContact", "main", 5, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             localrc = io_xml->writeElement("Phone", "1-435-797-0045", 5, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             localrc = io_xml->writeElement("Email", "amber.s@aggiemail.usu.edu", 5, 0);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             localrc = io_xml->writeElement("Address", 
                              "8200 Old Main Hill, Logan, Utah 84322-8200", 5, 1,
                              "xsi:type", "xsd:string");
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
             localrc = io_xml->writeEndElement("ContactInformation", 4);
-            ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+            ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
           }
         }
       }
@@ -4874,7 +4871,7 @@ namespace ESMCI {
          xmlAttName[0].c_str(), xmlAttVal[0].c_str(),
          xmlAttName[1].c_str(), xmlAttVal[1].c_str(),
          xmlAttName[2].c_str(), xmlAttVal[2].c_str());
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } else if (attrPurpose.compare((attrPurpose.size()-2),2,".1")==0) {
       // <value>
       ostringstream outstring;
@@ -4886,20 +4883,20 @@ namespace ESMCI {
          xmlAttName[3].c_str(), xmlAttVal[3].c_str(),
          xmlAttName[4].c_str(), xmlAttVal[4].c_str(),
          xmlAttName[5].c_str(), xmlAttVal[5].c_str());
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } else if (attrPurpose.compare("source")==0) {
       localrc = io_xml->writeEndElement("source", 3);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
       localrc = io_xml->writeEndElement("values", 2);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
     // attpack footer
     else if (attrPurpose.compare("sourceInfo")==0) {
       localrc = io_xml->writeEndElement("sourceInfo", 2);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     } else if (attrPurpose.compare("variable")==0) {
       localrc = io_xml->writeEndElement("variable", 2);
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc);
     }
 
   } // end if not TimeSeries attpack wrapper

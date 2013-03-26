@@ -17,8 +17,6 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 #include "ESMCI_Macros.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_LogErr.h"
@@ -883,19 +881,19 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
             continue;
           } else {
             char msg[1024];
-            ESMC_LogDefault.ESMCI_LogWrite("~~~~~~~~~~~~~~~~~ Degenerate Element Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~ Degenerate Element Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
             sprintf(msg,"  degenerate elem. id=%d",elem.get_id());
-            ESMC_LogDefault.ESMCI_LogWrite(msg,ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMCI_LogWrite("  ",ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMCI_LogWrite("  degenerate elem. coords ",ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMCI_LogWrite("  --------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  degenerate elem. coords ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  --------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
             for(int i=0; i< num_poly_nodes_orig; i++) {
               double *pnt=poly_coords_orig+2*i;
               
               sprintf(msg,"    %d  (%f,  %f) ",i,pnt[0],pnt[1]);
-              ESMC_LogDefault.ESMCI_LogWrite(msg,ESMC_LOGMSG_ERROR);
+              ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             }
-            ESMC_LogDefault.ESMCI_LogWrite("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
 
             *degenerate=true;
             return;
@@ -911,19 +909,19 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
         if (right_turn) {
           if (left_turn) { 
             char msg[1024];
-            ESMC_LogDefault.ESMCI_LogWrite("~~~~~~~~~~~~~~~~~ Concave Element Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~ Concave Element Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
             sprintf(msg,"  concave elem. id=%d",elem.get_id());
-            ESMC_LogDefault.ESMCI_LogWrite(msg,ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMCI_LogWrite("  ",ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMCI_LogWrite("  concave elem. coords ",ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMCI_LogWrite("  --------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  concave elem. coords ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  --------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
             for(int i=0; i< num_poly_nodes_orig; i++) {
               double *pnt=poly_coords_orig+2*i;
               
               sprintf(msg,"    %d  (%f,  %f) ",i,pnt[0],pnt[1]);
-              ESMC_LogDefault.ESMCI_LogWrite(msg,ESMC_LOGMSG_ERROR);
+              ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             }
-            ESMC_LogDefault.ESMCI_LogWrite("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
 
             *concave=true;
             return;
@@ -975,12 +973,12 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
             continue;
           } else {
             char msg[1024];
-            ESMC_LogDefault.ESMCI_LogWrite("~~~~~~~~~~~~~~~~~~~~ Degenerate Element Detected ~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~ Degenerate Element Detected ~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
             sprintf(msg,"  degenerate elem. id=%d",elem.get_id());
-            ESMC_LogDefault.ESMCI_LogWrite(msg,ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMCI_LogWrite("  ",ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMCI_LogWrite("  degenerate elem. coords (lon [-180 to 180], lat [-90 to 90]) (x,y,z)",ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMCI_LogWrite("  ----------------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  degenerate elem. coords (lon [-180 to 180], lat [-90 to 90]) (x,y,z)",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  ----------------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
             for(int i=0; i< num_poly_nodes_orig; i++) {
               double *pnt=poly_coords_orig+3*i;
               
@@ -989,9 +987,9 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
                                       &lon, &lat, &r);
 
               sprintf(msg,"    %d  (%f,  %f)  (%f, %f, %f)",i,lon,lat,pnt[0],pnt[1],pnt[2]);
-              ESMC_LogDefault.ESMCI_LogWrite(msg,ESMC_LOGMSG_ERROR);
+              ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             }
-            ESMC_LogDefault.ESMCI_LogWrite("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
 
             *degenerate=true;
             return;
@@ -1007,12 +1005,12 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
         if (right_turn) {
           if (left_turn) { 
             char msg[1024];
-            ESMC_LogDefault.ESMCI_LogWrite("~~~~~~~~~~~~~~~~~~~~ Concave Element Detected ~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~ Concave Element Detected ~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
             sprintf(msg,"  concave elem. id=%d",elem.get_id());
-            ESMC_LogDefault.ESMCI_LogWrite(msg,ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMCI_LogWrite("  ",ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMCI_LogWrite("  concave elem. coords (lon [-180 to 180], lat [-90 to 90]) (x,y,z)",ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMCI_LogWrite("  ----------------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  concave elem. coords (lon [-180 to 180], lat [-90 to 90]) (x,y,z)",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  ----------------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
             for(int i=0; i< num_poly_nodes_orig; i++) {
               double *pnt=poly_coords_orig+3*i;
               
@@ -1021,9 +1019,9 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
                                       &lon, &lat, &r);
 
               sprintf(msg,"    %d  (%f,  %f)  (%f, %f, %f)",i,lon,lat,pnt[0],pnt[1],pnt[2]);
-              ESMC_LogDefault.ESMCI_LogWrite(msg,ESMC_LOGMSG_ERROR);
+              ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             }
-            ESMC_LogDefault.ESMCI_LogWrite("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
 
 #if 0
             write_3D_poly_woid_to_vtk("concave", num_poly_nodes, poly_coords); 

@@ -29,7 +29,6 @@
 // include ESMF headers
 #include "ESMCI_Arg.h"
 #include "ESMCI_LogErr.h"
-#include "ESMCI_LogMacros.inc"
 #include "ESMCI_Time.h"
 #include "ESMCI_Calendar.h"
 

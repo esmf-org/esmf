@@ -20,17 +20,16 @@
 //-------------------------------------------------------------------------
 #define ESMC_FILENAME "ESMCI_Clock.C"
 
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+// associated class definition file
+#include "ESMCI_Clock.h"
 
 // higher level, 3rd party or system includes here
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <ESMCI_LogErr.h>
-#include <ESMCI_Alarm.h>
 
-// associated class definition file
-#include <ESMCI_Clock.h>
+#include "ESMCI_LogErr.h"
+#include "ESMCI_Alarm.h"
 
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string

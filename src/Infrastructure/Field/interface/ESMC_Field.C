@@ -22,7 +22,6 @@
 //EOP
 //------------------------------------------------------------------------------
 // INCLUDES
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 #include "ESMC_Field.h"
 
 #include "ESMCI_Macros.h"

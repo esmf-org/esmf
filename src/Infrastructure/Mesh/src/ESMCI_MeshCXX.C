@@ -12,14 +12,11 @@
 //------------------------------------------------------------------------------
 // INCLUDES    
 //------------------------------------------------------------------------------
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_F90Interface.h"
-
 #include "ESMCI_Exception.h"
-#include <Mesh/include/ESMCI_MeshCXX.h>
+#include "Mesh/include/ESMCI_MeshCXX.h"
 #include "ESMCI_MeshRead.h"
 #include "ESMCI_MeshVTK.h"
 #include "ESMCI_ParEnv.h"
@@ -365,8 +362,8 @@ int MeshCXX::addElements(int numElems, int *elemId,
       int seq = ni->get_data_index();
 
       if (seq >= num_nodes){
-       ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-          "- seq is larger or equal to num_nodes", &localrc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- seq is larger or equal to num_nodes", ESMC_CONTEXT, &localrc);
       return localrc;
     }
 

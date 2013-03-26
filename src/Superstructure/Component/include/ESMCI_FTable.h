@@ -36,7 +36,6 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_Comp.h"
 
-
 namespace ESMCI {
 
 // constants and enums

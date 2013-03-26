@@ -20,15 +20,13 @@
 // 
 //
 //-----------------------------------------------------------------------------
-//
-
-#include <string.h>
-
- // insert any higher level, 3rd party or system includes here
-#include "ESMCI_Macros.h"
-
  // associated class definition file
 #include "ESMCI_State.h"
+
+ // insert any higher level, 3rd party or system includes here
+#include <string.h>
+#include "ESMCI_Macros.h"
+#include "ESMCI_LogErr.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string

@@ -24,14 +24,10 @@
 // services to listen for, and respond to, client requests.
 //
 //-----------------------------------------------------------------------------
-
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 #include "ESMCI_WebServSecureServerSocket.h"
 
 #include "ESMCI_WebServSocketUtils.h"
 #include "ESMCI_Macros.h"
-#include "ESMCI_LogErr.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string

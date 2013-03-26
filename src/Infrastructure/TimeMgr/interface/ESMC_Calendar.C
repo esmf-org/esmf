@@ -23,16 +23,15 @@
 //
 //-----------------------------------------------------------------------------
 
-// include system headers
-#include <string.h>
-
 // include associated header file
 #include "ESMC_Calendar.h"
+
+// include system headers
+#include <string.h>
 
 // include ESMF headers
 #include "ESMCI_Arg.h"
 #include "ESMCI_LogErr.h"
-#include "ESMCI_LogMacros.inc"
 #include "ESMCI_Calendar.h"
 #include "ESMCI_Time.h"
 

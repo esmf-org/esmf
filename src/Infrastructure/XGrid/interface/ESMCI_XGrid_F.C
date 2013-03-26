@@ -20,9 +20,8 @@
 // insert any higher level, 3rd party or system includes here
 
 #include <cstring>
-using namespace std;
 
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+using namespace std;
 
 #include "ESMC_Macros.h"
 #include "ESMCI_LogErr.h"
@@ -262,21 +261,21 @@ void FTN_X(c_esmc_xgridregrid_create)(ESMCI::VM **vmpp,
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   } catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
   // Set return code 
@@ -320,21 +319,21 @@ void FTN_X(c_esmc_meshmerge)(Mesh **srcmeshpp, Mesh **dstmeshpp,
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   } catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
   // Set return code 
@@ -357,21 +356,21 @@ void FTN_X(c_esmc_meshsetfraction)(Mesh **meshpp, double * fraction,
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   } catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
   // Set return code 
@@ -404,21 +403,21 @@ extern "C" void FTN_X(c_esmc_xgrid_getfrac)(Grid **gridpp,
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   } catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -453,21 +452,21 @@ extern "C" void FTN_X(c_esmc_xgrid_getfrac2)(Grid **gridpp,
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   } catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 

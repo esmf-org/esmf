@@ -19,8 +19,8 @@
 //------------------------------------------------------------------------------
 #include <cstdio>
 
-#include <ESMCI_F90Interface.h>
-#include <ESMCI_Alarm.h>
+#include "ESMCI_F90Interface.h"
+#include "ESMCI_Alarm.h"
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:

@@ -18,10 +18,7 @@
 // in the companion file {\tt ESMCI\_IO.h}
 //
 //-------------------------------------------------------------------------
-//
 #define ESMC_FILENAME "ESMCI_IO.C"
-
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 
 // include associated header file
 #include "ESMCI_IO.h"
@@ -35,16 +32,14 @@
 
 // other ESMF include files here.
 #include "ESMCI_Macros.h"
-#include "ESMCI_Container.h"
-#include <ESMCI_LogErr.h>
-#include <ESMCI_ArrayBundle.h>
+#include "ESMCI_LogErr.h"
 
 #include "esmf_io_debug.h"
 
 //-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO.C,v 1.21 2012/10/03 18:29:14 gold2718 Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_IO.C,v 1.21 2012/10/03 18:29:14 gold2718 Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -82,12 +77,13 @@ void IO::destruct(void) {
     } catch(int localrc) {
       int rc;
       // catch standard ESMF return code
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc);
       // Don't return, try to finish anyway
     } catch(...) {
       int rc;
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
-                                            "- Caught exception", &rc);
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
+        "- Caught exception", ESMC_CONTEXT, &rc);
       // Don't return, try to finish anyway
     }
   }
@@ -101,12 +97,13 @@ void IO::destruct(void) {
   } catch(int localrc) {
     int rc;
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
     return;
   } catch(...) {
     int rc;
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
-                                          "- Caught exception", &rc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
+      "- Caught exception", ESMC_CONTEXT, &rc);
     return;
   }
 } // end IO:destruct
@@ -152,8 +149,8 @@ IO *IO::create(
   // call class constructor
   try{
     ioclass = new IO(&localrc);
-    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc,
-                                              ESMCI_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) {
       ioclass = ESMC_NULL_POINTER;
       return ESMC_NULL_POINTER;
     }
@@ -201,9 +198,8 @@ int IO::destroy(
   PRINTPOS;
   // return with errors for NULL pointer
   if (ioclass == ESMC_NULL_POINTER || *ioclass == ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_PTR_NULL,
-                                          "- Not a valid pointer to ioclass",
-                                          &rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "- Not a valid pointer to ioclass", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -214,11 +210,12 @@ int IO::destroy(
     localrc = ESMF_SUCCESS;
   } catch(int localrc) {
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
     return rc;
   } catch(...) {
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "- Caught exception", &rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_CONTEXT, &rc);
     return rc;
   }
 

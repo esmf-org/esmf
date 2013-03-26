@@ -29,15 +29,10 @@
 //EOPI
 //-----------------------------------------------------------------------------
 
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
-#include "ESMCI_LogErr.h"
-
 #include "ESMCI_State.h"
 #include "ESMCI_Clock.h"
 #include "ESMCI_Grid.h"
 #include "ESMCI_F90Interface.h"
-
 
 namespace ESMCI {
 

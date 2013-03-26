@@ -24,9 +24,6 @@
 // (grid or coupler) service.
 //
 //-----------------------------------------------------------------------------
-
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 #include "ESMCI_WebServNetEsmfClient.h"
 
 #include <string.h>
@@ -208,20 +205,20 @@ int  ESMCI_WebServNetEsmfClient::sendRequest(
 
 	if (strcmp(requestStr, "UNKN") == 0)
 	{
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_ARG_VALUE,
          "Invalid request id.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
 
 	if (theSocket.send(requestStr) <= 0)
 	{
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error writing request id to socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
       return ESMF_FAILURE;
 	}
@@ -233,10 +230,10 @@ int  ESMCI_WebServNetEsmfClient::sendRequest(
 	{
 		if ((bytesWritten = theSocket.write(length, data)) != length)
 		{
-      	ESMC_LogDefault.ESMCI_LogMsgFoundError(
+      	ESMC_LogDefault.MsgFoundError(
          	ESMC_RC_FILE_WRITE,
          	"Error writing request data to socket.",
-         	&localrc);
+         	ESMC_CONTEXT, &localrc);
 
       	return ESMF_FAILURE;
 		}
@@ -280,10 +277,10 @@ int  ESMCI_WebServNetEsmfClient::sendData(
 	{
 		if ((bytesWritten = theSocket.write(length, data)) != length)
 		{
-      	ESMC_LogDefault.ESMCI_LogMsgFoundError(
+      	ESMC_LogDefault.MsgFoundError(
          	ESMC_RC_FILE_WRITE,
          	"Error writing data to socket.",
-         	&localrc);
+         	ESMC_CONTEXT, &localrc);
 
       	return ESMF_FAILURE;
 		}
@@ -324,10 +321,10 @@ int  ESMCI_WebServNetEsmfClient::sendString(
 
 	if ((bytesWritten = theSocket.send(data)) <= 0)
 	{
-      ESMC_LogDefault.ESMCI_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error writing string to socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
       return ESMF_FAILURE;
 	}
@@ -368,10 +365,10 @@ int  ESMCI_WebServNetEsmfClient::getResponse(
 	length = 0;
 	if (theSocket.read(length, data) <= 0)
 	{
-     	ESMC_LogDefault.ESMCI_LogMsgFoundError(
+     	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_FILE_WRITE,
         	"Error reading request response from socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
      	return ESMF_FAILURE;
 	}

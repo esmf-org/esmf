@@ -22,14 +22,12 @@
 // in the companion file ESMC_RHandle.h
 //
 //-----------------------------------------------------------------------------
-
 // include associated header file
 #include "ESMC_RHandle.h"
 
 // include ESMF headers
 #include "ESMCI_Arg.h"
 #include "ESMCI_LogErr.h"
-#include "ESMCI_LogMacros.inc"
 #include "ESMCI_RHandle.h"
 #include "ESMC_Interface.h"
 

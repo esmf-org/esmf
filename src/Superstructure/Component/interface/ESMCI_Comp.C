@@ -22,9 +22,6 @@
 // class implemented in Fortran.
 //
 //-----------------------------------------------------------------------------
-
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 // include associated header file
 #include "ESMCI_Comp.h"
 
@@ -35,7 +32,6 @@
 // include ESMF headers
 #include "ESMCI_FTable.h"
 #include "ESMCI_LogErr.h"
-
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string

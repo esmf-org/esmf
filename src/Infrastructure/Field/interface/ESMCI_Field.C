@@ -23,19 +23,16 @@
 // actual code which is implemented in F90.
 //
 //-----------------------------------------------------------------------------
-
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 // associated header file
 #include "ESMCI_Field.h"
-#include "ESMCI_Array.h"
-#include "ESMCI_Grid.h"
 
 //insert any higher level, 3rd party or system includes here
 #include <string.h>         // strlen()
 
-// LogErr headers
+// ESMF headers
 #include "ESMCI_LogErr.h"
+#include "ESMCI_Array.h"
+#include "ESMCI_Grid.h"
 
 //-----------------------------------------------------------------------------
 //BOP

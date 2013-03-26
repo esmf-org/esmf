@@ -19,9 +19,9 @@
 //------------------------------------------------------------------------------
 #include <cstdio>
 
-#include <ESMCI_F90Interface.h>
-#include <ESMCI_TimeInterval.h>
-#include <ESMCI_Time.h>
+#include "ESMCI_F90Interface.h"
+#include "ESMCI_TimeInterval.h"
+#include "ESMCI_Time.h"
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:

@@ -24,9 +24,6 @@
 // create sockets, and to send and receive data across the sockets.
 //
 //-----------------------------------------------------------------------------
-
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 #include "ESMCI_WebServSecureSocket.h"
 
 #ifdef ESMF_OS_MinGW
@@ -163,10 +160,10 @@ int  ESMCI_WebServSecureSocket::nonblock(
 
 	if (theTSock <= 0)
 	{
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_OBJ_WRONG, 
 			"The Server listening socket not valid.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -183,10 +180,10 @@ int  ESMCI_WebServSecureSocket::nonblock(
 
 	if (fcntl(sock, F_SETFL, fcntl(sock, F_GETFL) | O_NONBLOCK) < 0)
 	{
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_CANNOT_SET, 
 			"Unable to set nonblock attribute.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -232,10 +229,10 @@ int  ESMCI_WebServSecureSocket::serverConnect(
 	theTSock = socket(AF_INET, SOCK_STREAM, 0);
 	if (theTSock < 0)
 	{
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_OPEN, 
 			"Unable to open socket connection.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -273,10 +270,10 @@ int  ESMCI_WebServSecureSocket::serverConnect(
 
 	if (status < 0)
 	{
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_OPEN, 
 			"Socket bind failed.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -288,10 +285,10 @@ int  ESMCI_WebServSecureSocket::serverConnect(
 
 	if (listen(theTSock, 5) < 0)
 	{
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_OPEN, 
 			"Socket listen failed.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -330,10 +327,10 @@ int  ESMCI_WebServSecureSocket::accept(
 	//***
 	if (theTSock <= 0)
 	{
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_OBJ_WRONG, 
 			"The Server listening socket not valid.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -351,10 +348,10 @@ int  ESMCI_WebServSecureSocket::accept(
 	{
 		disconnect();
 
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_OPEN, 
 			"Socket accept failed.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -371,10 +368,10 @@ int  ESMCI_WebServSecureSocket::accept(
 	{
 		disconnect();
 
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_OPEN, 
 			"SSL Socket accept failed.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -427,10 +424,10 @@ int  ESMCI_WebServSecureSocket::clientConnect(
 	theSock = socket(AF_INET, SOCK_STREAM, 0);
 	if (theSock < 0)
 	{
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_OPEN, 
 			"Unable to create client socket.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -441,10 +438,10 @@ int  ESMCI_WebServSecureSocket::clientConnect(
 	struct hostent*	hp = gethostbyname(host);
 	if (hp == NULL)
 	{
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_OBJ_BAD, 
 			"Call to gethostbyname failed.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -459,10 +456,10 @@ int  ESMCI_WebServSecureSocket::clientConnect(
 	{
 		disconnect();
 
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_OPEN, 
 			"Client socket connect failed.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -479,10 +476,10 @@ int  ESMCI_WebServSecureSocket::clientConnect(
 	{
 		disconnect();
 
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_OPEN, 
 			"SSL Socket accept failed.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -659,10 +656,10 @@ int  ESMCI_WebServSecureSocket::read(
 	//printf("Reading size: %d\n", thePhSize);
 	if (recv(thePhSize, &thePHead) != thePhSize)
 	{
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_READ, 
 			"Socket receive failed.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return 0;
 	}
@@ -684,10 +681,10 @@ int  ESMCI_WebServSecureSocket::read(
 	{
 		thePHead.magic = MAGIC;
 
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_READ, 
 			"Socket receive failed: invalid packet header.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return 0;
 	}
@@ -703,10 +700,10 @@ int  ESMCI_WebServSecureSocket::read(
 
 	if (bytesRead != size)
 	{
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_READ, 
 			"Socket receive failed: number of bytes read not expected size.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 	}
 	//printf("Data: %s\n", data);
 
@@ -757,10 +754,10 @@ int  ESMCI_WebServSecureSocket::write(
 	int	bytesSent = 0;
 	if ((bytesSent = send(thePhSize, &thePHead)) != thePhSize)
 	{
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_WRITE, 
 			"Socket send failed.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return 0;
 	}
@@ -771,10 +768,10 @@ int  ESMCI_WebServSecureSocket::write(
 	int	bytesWritten = send(size, data);
 	if (bytesWritten != size)
 	{
-		ESMC_LogDefault.ESMCI_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_WRITE, 
 			"Socket send failed: number of bytes sent not expected size.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 	}
 
 	return bytesWritten;

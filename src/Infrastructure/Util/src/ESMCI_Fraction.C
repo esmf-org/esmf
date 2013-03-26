@@ -21,8 +21,6 @@
 #define ESMC_FILENAME "ESMCI_Fraction.C"
 //==============================================================================
 
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 // associated class definition file
 #include "ESMCI_Fraction.h"
  

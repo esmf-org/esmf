@@ -34,7 +34,6 @@
 //-----------------------------------------------------------------------------
 // 
 // !USES:
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 #include "ESMC_Field.h"
 #include "ESMC_Mesh.h"
 #include "ESMC_Array.h"
@@ -43,7 +42,6 @@
 #include "ESMCI_RHandle.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMC_Interface.h"
-#include "ESMCI_LogErr.h"
 #include "ESMCI_Util.h"
 #include "ESMC_Grid.h"
 

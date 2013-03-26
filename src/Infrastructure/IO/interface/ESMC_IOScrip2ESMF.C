@@ -13,8 +13,6 @@
 // data format in NetCDF and generate a dual mesh NetCDF file using the center
 // coordiates.
 
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>

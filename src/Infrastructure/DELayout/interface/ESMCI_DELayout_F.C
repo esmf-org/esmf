@@ -18,8 +18,6 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 #include <cstring>
 
 #include "ESMCI_Macros.h"

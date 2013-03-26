@@ -23,17 +23,13 @@
 // actual code which is implemented in F90.
 //
 //-----------------------------------------------------------------------------
-//
-
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 // associated header file
 #include "ESMCI_State.h"
-#include "ESMCI_IO_NetCDF.h"
 
 //insert any higher level, 3rd party or system includes here
 #include <string.h>         // strlen()
 
+#include "ESMCI_IO_NetCDF.h"
 #include "ESMCI_LogErr.h"
 
 using std::vector;

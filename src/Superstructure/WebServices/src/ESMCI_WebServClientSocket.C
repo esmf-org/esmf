@@ -24,9 +24,6 @@
 // client to send requests to and receive responses from socket services.
 //
 //-----------------------------------------------------------------------------
-
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 #include "ESMCI_WebServClientSocket.h"
 
 #include "ESMCI_WebServSocketUtils.h"

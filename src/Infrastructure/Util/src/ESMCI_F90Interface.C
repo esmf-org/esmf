@@ -15,8 +15,7 @@
 //-----------------------------------------------------------------------------
 
 #include "ESMCI_Macros.h"
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMCI_LogMacros.inc"
+#include "ESMCI_LogErr.h"
 #include "ESMCI_F90Interface.h"
 
 //-----------------------------------------------------------------------------

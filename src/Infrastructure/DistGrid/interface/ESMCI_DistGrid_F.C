@@ -17,17 +17,12 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 #include <cstring>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_DELayout.h"
-
 #include "ESMCI_DistGrid.h"
-
 #include "ESMCI_LogErr.h"
 
 using namespace std;

@@ -22,9 +22,6 @@
 // in the companion file ESMCI_Array.h
 //
 //-----------------------------------------------------------------------------
-
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 // include associated header file
 #include "ESMCI_Array.h"
 
@@ -37,11 +34,8 @@
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
-
-// LogErr headers
 #include "ESMCI_LogErr.h"
 #include "ESMCI_IO.h"
-
 
 using namespace std;
 

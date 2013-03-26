@@ -22,14 +22,12 @@
 // in the companion file ESMC_Array.h
 //
 //-----------------------------------------------------------------------------
-
 // include associated header file
 #include "ESMC_Array.h"
 
 // include ESMF headers
 #include "ESMCI_Arg.h"
 #include "ESMCI_LogErr.h"
-#include "ESMCI_LogMacros.inc"
 #include "ESMCI_Array.h"
 #include "ESMC_Interface.h"
 

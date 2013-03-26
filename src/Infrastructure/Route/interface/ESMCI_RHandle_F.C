@@ -21,8 +21,7 @@
 #include "ESMCI_RHandle.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_DELayout.h"
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMCI_LogMacros.inc"
+#include "ESMCI_LogErr.h"
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:

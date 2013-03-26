@@ -18,10 +18,7 @@
 // in the companion file {\tt ESMCI\_IO\_XML.h}
 //
 //-------------------------------------------------------------------------
-//
 #define ESMC_FILENAME "ESMCI_IO_XML.C"
-
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
 
 // higher level, 3rd party or system includes here
 #include <fstream>
@@ -40,13 +37,13 @@
 #include <xercesc/framework/XMLGrammarPoolImpl.hpp>
 #endif
  
-#include <ESMCI_LogErr.h>
-
 // associated class definition files
-#include <ESMCI_IO_XML.h>
-#include <ESMCI_SAX2ReadHandler.h>
-#include <ESMCI_SAX2WriteHandler.h>
-#include <ESMCI_Util.h>
+#include "ESMCI_IO_XML.h"
+#include "ESMCI_SAX2ReadHandler.h"
+#include "ESMCI_SAX2WriteHandler.h"
+#include "ESMCI_Util.h"
+#include "ESMCI_LogErr.h"
+
 
 using std::string;
 using std::endl;

@@ -20,7 +20,8 @@
 //-------------------------------------------------------------------------
 #define ESMC_FILENAME "ESMCI_Calendar.C"
 
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+// associated class definition file
+#include "ESMCI_Calendar.h"
 
 // higher level, 3rd party or system includes
 #include <stdio.h>
@@ -30,13 +31,9 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include <ESMCI_LogErr.h>
-
-#include <ESMCI_Time.h>
-#include <ESMCI_TimeInterval.h>
-
-// associated class definition file
-#include <ESMCI_Calendar.h>
+#include "ESMCI_LogErr.h"
+#include "ESMCI_Time.h"
+#include "ESMCI_TimeInterval.h"
 
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string

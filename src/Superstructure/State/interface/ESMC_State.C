@@ -22,10 +22,6 @@
 // in the companion file ESMC_State.h
 //
 //-----------------------------------------------------------------------------
-//
-
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 // associated header file
 #include "ESMC_State.h"
 

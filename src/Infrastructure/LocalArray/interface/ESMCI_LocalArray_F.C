@@ -21,11 +21,8 @@
 #include <cstring>
 
 #include "ESMCI_Macros.h"
-
 #include "ESMCI_LocalArray.h"
-
 #include "ESMCI_LogErr.h"
-#include "ESMCI_LogMacros.inc"
 
 using namespace std;
 

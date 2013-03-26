@@ -22,7 +22,6 @@
 // in the companion file ESMC_Util.h
 //
 //-----------------------------------------------------------------------------
-
 // include associated header file
 #include "ESMC_Util.h"
 
@@ -31,9 +30,6 @@
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
-#include "ESMCI_LogErr.h"
-#include "ESMCI_LogMacros.inc"
-
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string

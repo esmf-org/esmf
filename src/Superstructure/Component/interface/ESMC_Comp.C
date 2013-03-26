@@ -22,9 +22,6 @@
 // ESMC_GridComp, ESMC_CplComp and ESMC_SciComp structures.
 //
 //-----------------------------------------------------------------------------
-
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 // include associated header files
 #include "ESMC_GridComp.h"
 #include "ESMC_CplComp.h"

@@ -22,9 +22,6 @@
 // in the companion file ESMCI_DistGrid.h
 //
 //-----------------------------------------------------------------------------
-
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 // include associated header file
 #include "ESMCI_DistGrid.h"
 
@@ -37,7 +34,6 @@
 #include "ESMCI_Base.h" 
 #include "ESMCI_VM.h"
 #include "ESMCI_DELayout.h"
-
 #include "ESMCI_LogErr.h"
 
 using namespace std;

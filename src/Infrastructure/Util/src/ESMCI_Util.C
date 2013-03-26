@@ -25,8 +25,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
-
 // associated class definition file and others
 #include "ESMCI_Util.h"
 

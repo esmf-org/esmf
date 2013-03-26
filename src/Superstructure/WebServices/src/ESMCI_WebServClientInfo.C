@@ -23,8 +23,8 @@
 // provides access methods for the client session information.
 //
 //-----------------------------------------------------------------------------
-
 #include "ESMCI_WebServClientInfo.h"
+
 #include "ESMCI_WebServNetEsmf.h"
 #include <string>
 #include <iostream>

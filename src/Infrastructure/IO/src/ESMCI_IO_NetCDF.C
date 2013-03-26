@@ -18,10 +18,10 @@
 // in the companion file {\tt ESMCI\_IO\_NetCDF.h}
 //
 //-------------------------------------------------------------------------
-//
 #define ESMC_FILENAME "ESMCI_IO_NetCDF.C"
 
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+// associated class definition file
+#include "ESMCI_IO_NetCDF.h"
 
 // higher level, 3rd party or system includes here
 #include <stdio.h>
@@ -29,15 +29,12 @@
 #include <iostream>
 #include <string>
 
-#include <ESMC_Util.h>
-#include <ESMCI_LogErr.h>
-#include <ESMCI_VM.h>
-#include <ESMCI_ArraySpec.h>
-#include <ESMCI_LocalArray.h>
-#include <ESMCI_Array.h>
-
-// associated class definition file
-#include <ESMCI_IO_NetCDF.h>
+#include "ESMC_Util.h"
+#include "ESMCI_LogErr.h"
+#include "ESMCI_VM.h"
+#include "ESMCI_ArraySpec.h"
+#include "ESMCI_LocalArray.h"
+#include "ESMCI_Array.h"
 
 using namespace std; 
 

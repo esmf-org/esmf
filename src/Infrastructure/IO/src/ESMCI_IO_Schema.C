@@ -33,6 +33,9 @@ lonUnits=('degrees_north','degree_north','degrees_N', # Allowed lon unit names
 
 #endif // 0 (comment region)
 
+// include associated header file
+#include "ESMCI_IO_Schema.h"
+
 // higher level, 3rd party or system includes here
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,14 +48,12 @@ lonUnits=('degrees_north','degree_north','degrees_N', # Allowed lon unit names
 // other ESMF include files here.
 #include "ESMCI_Macros.h"
 #include "ESMCI_Container.h"
-
-// include associated header file
-#include "ESMCI_IO_Schema.h"
+#include "ESMCI_LogErr.h"
 
 //-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_Schema.C,v 1.2 2012/09/20 21:19:44 w6ws Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMCI_IO_Schema.C,v 1.2 2012/09/20 21:19:44 w6ws Exp $";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -142,18 +143,16 @@ IO_Schema::IO_Schema(
       }
     }
     // See if we got this far OK (inputs check out)
-    if (ESMC_LogDefault.ESMCI_LogMsgFoundError(localrc,
-                                              ESMCI_ERR_PASSTHRU, rc)) {
-      return;
-    }
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
     localrc = parseFile(filename);
   } catch (int lrc) {
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(lrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(lrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch (...) {
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
-                                          "- Caught exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_CONTEXT, rc);
     return;
   }
   
@@ -240,11 +239,11 @@ int IO_Schema::parseFile(
 
   } catch (int lrc) {
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(lrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(lrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch (...) {
-    ESMC_LogDefault.ESMCI_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
-                                          "- Caught exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_CONTEXT, rc);
     return;
   }
   

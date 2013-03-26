@@ -27,7 +27,6 @@
 //       class we're going to want to keep in the ESMF baseline.)
 //
 //-----------------------------------------------------------------------------
-
 #include "ESMCI_WebServCAMOutputFile.h"
 
 #include <stdlib.h>

@@ -16,8 +16,7 @@ STOREH    = ESMCI_Arg.h ESMF_Macros.inc ESMF.h ESMCI_Util.h \
             ESMF_TypeKindRankMacros.hcppF90 ESMCI_Macros.h \
             ESMCI_F90Interface.h ESMF_ErrReturnCodes.inc \
             ESMF_LogMacros.inc ESMF_LogConstants.inc ESMCI_Fraction.h \
-            ESMF_TypeKindMacros.hcppF90 ESMF_InitMacros.inc \
-            ESMCI_LogMacros.inc
+            ESMF_TypeKindMacros.hcppF90 ESMF_InitMacros.inc
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

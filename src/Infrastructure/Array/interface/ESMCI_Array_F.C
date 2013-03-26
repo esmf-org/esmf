@@ -24,11 +24,8 @@
 #include "ESMCI_DistGrid.h"
 #include "ESMCI_ArraySpec.h"
 #include "ESMCI_RHandle.h"
-
 #include "ESMCI_Array.h"
-
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMCI_LogMacros.inc"
+#include "ESMCI_LogErr.h"
 
 using namespace std;
 

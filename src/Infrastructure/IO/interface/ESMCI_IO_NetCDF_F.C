@@ -17,8 +17,8 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <ESMCI_F90Interface.h>
-#include <ESMCI_IO_NetCDF.h>
+#include "ESMCI_F90Interface.h"
+#include "ESMCI_IO_NetCDF.h"
 
 using std::vector;
 using std::string;

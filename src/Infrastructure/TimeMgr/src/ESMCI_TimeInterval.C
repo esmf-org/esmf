@@ -18,9 +18,10 @@
 // declared in the companion file {\tt ESMCI_TimeInterval.h}.
 //
 //-------------------------------------------------------------------------
-#define ESMC_FILENAME "ESMCI::TimeInterval.C"
+#define ESMC_FILENAME "ESMCI_TimeInterval.C"
 
-#include "ESMF_LogMacros.inc" // TODO: remove once this comes through ESMCI_LogErr.h
+// associated class definition file
+#include "ESMCI_TimeInterval.h"
 
 // higher level, 3rd party or system includes
 #include <stdio.h>
@@ -29,13 +30,10 @@
 #include <float.h>
 #include <string.h>
 
-#include <ESMCI_LogErr.h>
-#include <ESMCI_Time.h>
-#include <ESMCI_Fraction.h>
-#include <ESMCI_Calendar.h>
-
-// associated class definition file
-#include "ESMCI_TimeInterval.h"
+#include "ESMCI_LogErr.h"
+#include "ESMCI_Time.h"
+#include "ESMCI_Fraction.h"
+#include "ESMCI_Calendar.h"
 
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
