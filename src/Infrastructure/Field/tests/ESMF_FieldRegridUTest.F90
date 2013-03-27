@@ -497,9 +497,9 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-#if 1
+#if 0
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_disable_UTest
       ! Test regrid with 2 tile distgrid"
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding from a 2 tile distgrid"
