@@ -497,9 +497,9 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-#if 0
+#if 1
       !------------------------------------------------------------------------
-      !EX_TURNOFF_UTest
+      !EX_UTest
       ! Test regrid with 2 tile distgrid"
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding from a 2 tile distgrid"
@@ -14127,20 +14127,17 @@ write(*,*) "LOCALRC=",localrc
         tileIndexA=1,tileIndexB=2, &
         positionVector=(/src_nx(1),0/), &
         rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
-
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_DistgridConnectionSet(connection=connectionList(2), &
         tileIndexA=2,tileIndexB=1, &
         positionVector=(/-src_nx(1),0/), &
         rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
 
   ! Setup index space
@@ -14160,74 +14157,65 @@ write(*,*) "LOCALRC=",localrc
                               decompflagPTile=decomp,indexflag=ESMF_INDEX_GLOBAL, &
                               connectionList=connectionList,                 &
                               rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
 
   ! setup source grid
   srcGrid=ESMF_GridCreate(distgrid=srcDistgrid, indexflag=ESMF_INDEX_GLOBAL, &
                           coordSys=ESMF_COORDSYS_CART, &
                           rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
 
   ! setup dest. grid
   dstGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/1,petCount/), &
                                 coordSys=ESMF_COORDSYS_CART, indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Create source/destination fields
   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
 
    srcField = ESMF_FieldCreate(srcGrid, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="source", rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
 
    dstField = ESMF_FieldCreate(dstGrid, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="dest", rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   xdstField = ESMF_FieldCreate(dstGrid, arrayspec, &
                          staggerloc=ESMF_STAGGERLOC_CENTER, name="xdest", rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
 
   ! Allocate coordinates
   call ESMF_GridAddCoord(srcGrid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_GridAddCoord(dstGrid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
 
 
@@ -14235,50 +14223,44 @@ write(*,*) "LOCALRC=",localrc
   ! Get arrays
   ! dstArray
   call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
 
   ! srcArray
   call ESMF_FieldGet(srcField, array=srcArray, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
 
   ! Get information for going from localDE to Tile
   call ESMF_GridGet(srcGrid, localDECount=srclocalDECount, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_DistgridGet(srcDistgrid, delayout=delayout, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   allocate(localDEtoDEMap(srclocalDECount))  
 
   call ESMF_DELayoutGet(delayout, deCount=deCount, localDeToDeMap=localDeToDEMap, &
                         rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   allocate(deToTileMap(deCount))  
 
 
   call ESMF_DistgridGet(srcDistgrid, deToTileMap=detoTileMap, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
  ! XMRKX
 
@@ -14290,25 +14272,22 @@ write(*,*) "LOCALRC=",localrc
      !! get coord 1
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-        rc=ESMF_FAILURE
-        return
-     endif
+     if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
      call ESMF_GridGetCoord(srcGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-        rc=ESMF_FAILURE
-        return
-     endif
+     if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
      ! get src pointer
      call ESMF_FieldGet(srcField, lDE, farrayPtr,  rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-        rc=ESMF_FAILURE
-        return
-     endif
+     if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
      !! Get Tile from localDE
@@ -14348,10 +14327,9 @@ write(*,*) "LOCALRC=",localrc
 
   ! Get number of local DEs
   call ESMF_GridGet(dstGrid, localDECount=dstlocalDECount, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-    rc=ESMF_FAILURE
-    return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Get memory and set coords for dst
   do lDE=0,dstlocalDECount-1
@@ -14359,32 +14337,28 @@ write(*,*) "LOCALRC=",localrc
      !! get coords
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-        rc=ESMF_FAILURE
-        return
-     endif
+     if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
      call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=2, &
                             computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrYC, rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-        rc=ESMF_FAILURE
-        return
-     endif
+     if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
      call ESMF_FieldGet(dstField, lDE, farrayPtr, computationalLBound=fclbnd, &
                              computationalUBound=fcubnd,  rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-        rc=ESMF_FAILURE
-        return
-     endif
+     if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
      call ESMF_FieldGet(xdstField, lDE, xfarrayPtr,  rc=localrc)
-     if (localrc /=ESMF_SUCCESS) then
-        rc=ESMF_FAILURE
-        return
-     endif
+     if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
      !! set coords
@@ -14410,18 +14384,16 @@ write(*,*) "LOCALRC=",localrc
   call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
         filename="srcGrid", &
        rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-     rc=ESMF_FAILURE
-     return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_GridWriteVTK(dstGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &
         filename="dstGrid", &
        rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-     rc=ESMF_FAILURE
-     return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 #endif
 
 ! LEAVE HERE AND JUST WRITE OUT THE GRIDS AS A TEST FOR NOW
@@ -14445,23 +14417,20 @@ return
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-      rc=ESMF_FAILURE
-      return
-   endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! Do regrid
   call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-      rc=ESMF_FAILURE
-      return
-   endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
   call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
-  if (localrc /=ESMF_SUCCESS) then
-      rc=ESMF_FAILURE
-      return
-   endif
+  if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
 
   ! Check results

@@ -362,7 +362,8 @@ extern "C" {
     c_infile=NULL;
     c_infile=ESMC_F90toCstring(infile,infileLen);
     if (c_infile == NULL) {
-      ESMC_LogDefault.MsgAllocError("Fail to allocate input NetCDF filename",rc);
+      ESMC_LogDefault.MsgAllocError("Fail to allocate input NetCDF filename",
+        ESMC_CONTEXT, rc);
       return; // bail out
     }
 
@@ -450,14 +451,16 @@ void FTN_X(c_convertscrip)(
   c_infile=NULL;
   c_infile=ESMC_F90toCstring(infile,infileLen);
   if (c_infile == NULL) {
-    ESMC_LogDefault.MsgAllocError("Fail to allocate input NetCDF filename",rc);
+    ESMC_LogDefault.MsgAllocError("Fail to allocate input NetCDF filename",
+      ESMC_CONTEXT, rc);
     return; // bail out
   }
 
   c_outfile=NULL;
   c_outfile=ESMC_F90toCstring(outfile,outfileLen);
   if (c_outfile == NULL) {
-    ESMC_LogDefault.MsgAllocError("Fail to allocate output NetCDF filename",rc);
+    ESMC_LogDefault.MsgAllocError("Fail to allocate output NetCDF filename",
+      ESMC_CONTEXT, rc);
     return; // bail out
   }
   

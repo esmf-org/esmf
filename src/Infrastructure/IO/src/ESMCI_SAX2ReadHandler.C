@@ -111,14 +111,14 @@ void SAX2ReadHandler::startElement(const XMLCh* const uri,
 
       if (cname.empty()) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                             "bad attribute name conversion", &status);
+                      "bad attribute name conversion", ESMC_CONTEXT, &status);
           //if (rc) *rc = status;  TODO
           return;
       }
  
       if (cvalue.empty()) {
           ESMC_LogDefault.Write("Attribute has an empty value argument",
-                                  ESMC_LOGMSG_INFO);
+                                  ESMC_LOGMSG_INFO, ESMC_CONTEXT);
           cvalue = '\0';
       }
 
@@ -148,7 +148,7 @@ void SAX2ReadHandler::startElement(const XMLCh* const uri,
         }
         if (status != ESMF_SUCCESS) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                               "failed setting attribute value", &status);
+                      "failed setting attribute value", ESMC_CONTEXT, &status);
         }
       }
     }
@@ -162,7 +162,7 @@ void SAX2ReadHandler::startElement(const XMLCh* const uri,
       //cout << "AttPackCreateStandard() status = " << status << endl;
       if (status != ESMF_SUCCESS) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                             "failed creating attribute package", &status);
+                  "failed creating attribute package", ESMC_CONTEXT, &status);
       }
     }
 
@@ -199,14 +199,14 @@ void SAX2ReadHandler::characters(const XMLCh *const chars,
 
       if (this->qname.empty()) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "no attribute name to associate value to", &status);
+               "no attribute name to associate value to", ESMC_CONTEXT, &status);
           //if (rc) *rc = status;  TODO
           return;
       }
  
       if (cvalue.empty()) {
           ESMC_LogDefault.Write("Attribute has an empty value argument",
-                                 ESMC_LOGMSG_INFO);
+                                 ESMC_LOGMSG_INFO, ESMC_CONTEXT);
           cvalue = '\0';
       }
 
@@ -228,7 +228,7 @@ void SAX2ReadHandler::characters(const XMLCh *const chars,
       }
       if (status != ESMF_SUCCESS) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                             "failed setting attribute value", &status);
+               "failed setting attribute value", ESMC_CONTEXT, &status);
       }
     }
     XMLString::release(&msg);
