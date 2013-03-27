@@ -14205,7 +14205,6 @@ write(*,*) "LOCALRC=",localrc
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-
   ! Allocate coordinates
   call ESMF_GridAddCoord(srcGrid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
   if (ESMF_LogFoundError(localrc, &

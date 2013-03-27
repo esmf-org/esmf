@@ -295,7 +295,7 @@ DistGrid *DistGrid::create(
     if (indexflag)
       indexflagOpt = indexflag; // provided by caller
     
-    //TODO: maybe also need to hold on to delabellist to preserver DE labeling?
+    //TODO: maybe also need to hold on to delabellist to preserve DE labeling?
     
     // create DistGrid according to collected information
     if (dg->regDecomp!=NULL){
@@ -304,7 +304,7 @@ DistGrid *DistGrid::create(
       InterfaceInt *regDecomp = new InterfaceInt(dg->regDecomp,
         dimInterfaceInt, dimCountInterfaceInt);
     
-      // use decompflag inside dg in order to ensure identical decomposition
+      // use decompflag from inside dg to ensure identical decomposition
       Decomp_Flag *decompflag = dg->decompflag;
       
       if (dg->tileCount==1){
@@ -316,8 +316,7 @@ DistGrid *DistGrid::create(
           decompflagCount, firstExtra, lastExtra, NULL,
           indexflagOpt, connectionList, dg->delayout, dg->vm, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          ESMC_CONTEXT, rc))
-          return ESMC_NULL_POINTER;
+          ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }else{
         // multi tile
         int decompflagCount1 = 0;  // default
@@ -330,8 +329,7 @@ DistGrid *DistGrid::create(
           decompflagCount1, decompflagCount2, firstExtra, lastExtra, NULL,
           indexflagOpt, connectionList, dg->delayout, dg->vm, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          ESMC_CONTEXT, rc))
-          return ESMC_NULL_POINTER;
+          ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }
       delete regDecomp;
     }else{
@@ -1953,10 +1951,11 @@ int DistGrid::construct(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-  // simple variables only kept if possible needed in DistGridCreate() from DG
+  // simple variables kept b/c possibly needed in DistGridCreate() from DG
   if (decompflagArg){
-    decompflag = new Decomp_Flag[dimCountArg];
-    memcpy(decompflag, decompflagArg, sizeof(Decomp_Flag)*dimCountArg);
+    decompflag = new Decomp_Flag[dimCountArg*tileCountArg];
+    memcpy(decompflag, decompflagArg, sizeof(Decomp_Flag)
+      *dimCountArg*tileCountArg);
   }else
     decompflag = NULL;
   if (indexflagArg){
@@ -2076,8 +2075,8 @@ int DistGrid::construct(
     }
   }
   if (regDecompArg){
-    regDecomp = new int[dimCount];
-    memcpy(regDecomp, regDecompArg, sizeof(int)*dimCount);
+    regDecomp = new int[dimCount*tileCount];
+    memcpy(regDecomp, regDecompArg, sizeof(int)*dimCount*tileCount);
   }else
     regDecomp = NULL;
   

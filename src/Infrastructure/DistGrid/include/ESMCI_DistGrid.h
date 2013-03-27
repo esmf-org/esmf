@@ -81,8 +81,9 @@ namespace ESMCI {
     int *collocationTable;        // collocation in packed format [dimCount]
     int **elementCountPCollPLocalDe; // number of elements 
                                   // [diffCollocationCount][localDeCount]
-    int *regDecomp;               // regular decomposition descriptor [dimCount]
-    Decomp_Flag *decompflag;      // decomposition scheme [dimCount]
+    int *regDecomp;               // regular decomposition descriptor
+                                  // [dimCount*tileCount]
+    Decomp_Flag *decompflag;      // decomposition scheme [dimCount*tileCount]
     ESMC_IndexFlag *indexflag;    // index scheme
     // lower level object references
     DELayout *delayout;
