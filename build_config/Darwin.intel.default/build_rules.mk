@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.16 2011/03/16 18:36:32 theurich Exp $
+# $Id$
 #
 # Darwin.intel.default
 #

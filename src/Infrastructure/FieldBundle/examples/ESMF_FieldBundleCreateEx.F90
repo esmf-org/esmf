@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleCreateEx.F90,v 1.25 2012/09/28 20:35:03 svasquez Exp $
+! $Id$
 !
 ! Example/test code which creates a new bundle.
 

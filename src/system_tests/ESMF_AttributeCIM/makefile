@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2011/05/23 05:59:38 eschwab Exp $
+# $Id$
 
 ALL: tree_build_system_tests
 

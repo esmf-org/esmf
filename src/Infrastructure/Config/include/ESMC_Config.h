@@ -1,4 +1,4 @@
-// $Id: ESMC_Config.h,v 1.34 2012/11/08 18:21:43 w6ws Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

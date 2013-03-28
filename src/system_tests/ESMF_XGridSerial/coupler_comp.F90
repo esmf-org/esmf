@@ -1,4 +1,4 @@
-! $Id: coupler_comp.F90,v 1.11 2012/09/28 20:00:40 feiliu Exp $
+! $Id$
 !
 ! Example/test code which shows User Component calls.
 

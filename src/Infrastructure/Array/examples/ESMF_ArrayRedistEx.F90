@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistEx.F90,v 1.24 2012/02/16 01:34:51 theurich Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

@@ -1,4 +1,4 @@
-// $Id: ESMCI_MethodTable.C,v 1.5 2012/04/17 21:48:17 theurich Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

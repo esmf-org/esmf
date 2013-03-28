@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.C,v 1.69 2012/03/29 23:41:11 theurich Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ using std::string;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_FTable.C,v 1.69 2012/03/29 23:41:11 theurich Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 

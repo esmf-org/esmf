@@ -1,4 +1,4 @@
-% $Id: NUOPC_refdoc.ctex,v 1.21 2012/11/14 22:33:57 svasquez Exp $ 
+% $Id$ 
 
 #ifdef STANDALONE
 \documentclass[english]{article}

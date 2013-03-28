@@ -1,4 +1,4 @@
-/*$Id: mpi.c,v 1.6 2008/12/05 19:22:57 w6ws Exp $*/
+/*$Id$*/
 
 /*
       This provides a few of the MPI-uni functions that cannot be implemented

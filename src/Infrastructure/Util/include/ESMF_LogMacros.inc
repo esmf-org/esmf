@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogMacros.inc,v 1.14 2012/09/20 18:21:39 w6ws Exp $
+ $Id$
 
  Earth System Modeling Framework
  Copyright 2002-2013, University Corporation for Atmospheric Research,

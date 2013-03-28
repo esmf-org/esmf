@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.3 2011/12/22 19:06:07 theurich Exp $
+# $Id$
 #
 # Unicos.pathscale.default
 #

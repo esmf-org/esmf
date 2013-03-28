@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.C,v 1.140 2012/09/07 23:16:07 oehmke Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Grid.C,v 1.140 2012/09/07 23:16:07 oehmke Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 #define VERBOSITY             (1)       // 0: off, 10: max

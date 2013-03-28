@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.38 2012/11/19 21:36:07 theurich Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@ program ESMF_DELayoutUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_DELayoutUTest.F90,v 1.38 2012/11/19 21:36:07 theurich Exp $'
+    '$Id$'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeWriteInternalUTest.F90,v 1.13 2012/11/21 23:03:01 rokuingh Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_AttributeWriteIntrnalUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-  '$Id: ESMF_AttributeWriteInternalUTest.F90,v 1.13 2012/11/21 23:03:01 rokuingh Exp $'
+  '$Id$'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------

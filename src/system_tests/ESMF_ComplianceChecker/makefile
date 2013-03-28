@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2010/10/06 13:00:45 theurich Exp $ 
+# $Id$ 
 
 ALL: tree_build_system_tests
 

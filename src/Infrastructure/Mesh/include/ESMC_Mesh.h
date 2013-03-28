@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.h,v 1.43 2012/10/09 00:21:12 jcjacob Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

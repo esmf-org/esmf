@@ -1,4 +1,4 @@
-! $Id: ESMF_StateItem.F90,v 1.14 2012/10/17 05:14:09 theurich Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research, 

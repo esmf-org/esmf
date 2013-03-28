@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldBundleRedistBlk2ArbSTest.F90,v 1.21 2011/07/02 05:54:24 oehmke Exp $
+! $Id$
 !
 ! System test ESMF_FieldBundleRedistBlk2Arb
 !  Description on Sourceforge under System Test #XXXXX

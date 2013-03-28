@@ -1,4 +1,4 @@
-! $Id: ESMF_TestUTest.F90,v 1.15 2012/10/26 16:34:46 w6ws Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2010/12/06 21:51:09 garyblock Exp $ 
+# $Id$ 
 
 catalog : testharncatalog
 

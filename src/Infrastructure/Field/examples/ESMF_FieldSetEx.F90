@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSetEx.F90,v 1.17 2012/01/06 20:16:35 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

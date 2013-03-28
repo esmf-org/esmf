@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldRegridUTest.C,v 1.22 2012/06/22 17:34:49 rokuingh Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

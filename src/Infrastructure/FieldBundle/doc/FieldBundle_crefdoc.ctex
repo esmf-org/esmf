@@ -1,4 +1,4 @@
-% $Id: FieldBundle_crefdoc.ctex,v 1.4 2012/10/11 00:18:53 theurich Exp $
+% $Id$
 
 #ifdef STANDALONE
 \documentclass[]{article}

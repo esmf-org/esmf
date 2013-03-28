@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2012/01/09 22:45:35 theurich Exp $ 
+# $Id$ 
 
 # by default, this makefile builds the executable named "Application"
 ALL:  executable

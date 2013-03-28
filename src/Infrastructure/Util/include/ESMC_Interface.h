@@ -1,4 +1,4 @@
-// $Id: ESMC_Interface.h,v 1.9 2012/03/15 19:24:22 rokuingh Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

@@ -1,5 +1,5 @@
 /*
-** $Id: exmisc.c,v 1.2 2007/11/28 16:13:48 dneckels Exp $
+** $Id$
 **
 ** Miscellaneous functions to support writing simple Zoltan examples.
 */

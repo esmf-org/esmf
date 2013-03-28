@@ -1,5 +1,5 @@
 #!/bin/sh
-# $Id: mpirun,v 1.5 2012/06/06 17:51:46 w6ws Exp $
+# $Id$
 
 CYCLE=1
 while [ $CYCLE = 1 ]

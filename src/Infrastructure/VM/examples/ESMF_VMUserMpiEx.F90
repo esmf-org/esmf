@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUserMpiEx.F90,v 1.23 2012/02/16 22:05:47 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

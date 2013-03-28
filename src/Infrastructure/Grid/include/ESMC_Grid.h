@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.h,v 1.26 2012/07/18 22:21:29 rokuingh Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

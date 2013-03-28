@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGridConnection.F90,v 1.15 2012/03/15 23:09:05 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research, 

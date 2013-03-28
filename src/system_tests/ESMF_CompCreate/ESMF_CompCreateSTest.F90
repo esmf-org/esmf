@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.44 2011/06/30 06:00:38 theurich Exp $
+! $Id$
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029

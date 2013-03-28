@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridXGSMMUTest.F90,v 1.6 2012/11/05 19:20:34 feiliu Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

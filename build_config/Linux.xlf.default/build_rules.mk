@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.20 2011/11/29 19:30:46 theurich Exp $
+# $Id$
 #
 # Linux.xlf.default
 #

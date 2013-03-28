@@ -1,3 +1,3 @@
-% $Id: Array_usage.tex,v 1.5 2006/05/19 16:30:25 theurich Exp $
+% $Id$
 
 An {\tt ESMF\_Array} is a distributed object that must exist on all PETs of the current context. Each PET-local instance of an Array object contains memory allocations for all PET-local DEs. There may be 0, 1, or more DEs per PET and the number of DEs per PET can differ between PETs for the same Array object. Memory allocations may be provided for each PET by the user during Array creation or can be allocated as part of the Array create call. Many of the concepts of the proposed {\tt ESMF\_Array} class are illustrated by the following examples.

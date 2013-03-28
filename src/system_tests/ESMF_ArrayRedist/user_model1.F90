@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.16 2011/07/05 18:29:41 theurich Exp $
+! $Id$
 !
 ! Example/test code which shows User Component calls.
 

@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.22 2011/12/23 21:03:40 theurich Exp $
+# $Id$
 #
 # Dawin.g95.default
 #

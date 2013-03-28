@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldPr.F90,v 1.53 2012/10/03 18:29:04 gold2718 Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research, 

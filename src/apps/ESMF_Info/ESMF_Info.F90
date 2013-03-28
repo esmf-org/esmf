@@ -1,4 +1,4 @@
-! $Id: ESMF_Info.F90,v 1.11 2012/01/09 17:35:58 theurich Exp $
+! $Id$
 
 program ESMF_Info
 

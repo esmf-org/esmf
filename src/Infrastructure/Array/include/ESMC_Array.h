@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.120 2012/01/06 20:15:18 svasquez Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

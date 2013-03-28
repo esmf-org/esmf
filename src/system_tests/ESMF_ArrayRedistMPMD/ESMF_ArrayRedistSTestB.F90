@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTestB.F90,v 1.27 2012/08/24 23:46:35 theurich Exp $
+! $Id$
 !
 !-------------------------------------------------------------------------
 ! ESMF_ArrayRedistSTestA.F90 sets string used by test script to count system tests.

@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.44 2011/03/21 21:37:05 samsoncheung Exp $
+# $Id$
 #
 # Linux.nag.default
 #

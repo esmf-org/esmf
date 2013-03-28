@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridToMesh.C,v 1.20 2012/03/27 20:47:00 oehmke Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

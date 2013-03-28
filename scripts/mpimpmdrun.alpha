@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpimpmdrun.alpha,v 1.1 2005/08/11 17:54:21 theurich Exp $
+# $Id$
 # This script provides an interface such that the simple command
 # mpirun -np # runs # copies of the program in parallel.
 # The qsub on compaq demands this

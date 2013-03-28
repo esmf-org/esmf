@@ -1,4 +1,4 @@
-// $Id: ESMCI_MathUtil.h,v 1.15 2012/11/15 20:50:42 oehmke Exp $
+// $Id$
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 

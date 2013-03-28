@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2009/07/16 20:57:38 feiliu Exp $ 
+# $Id$ 
 
 ALL: tree_build_system_tests
 

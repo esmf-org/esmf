@@ -1,4 +1,4 @@
-// $Id: user_CComponent.C,v 1.22 2012/04/13 16:32:26 rokuingh Exp $
+// $Id$
 //
 // Example/test code which shows User Component calls.
 

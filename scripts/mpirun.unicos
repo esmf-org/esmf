@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.unicos,v 1.6 2008/07/23 04:51:56 theurich Exp $
+# $Id$
 ################################################################################
 # This script abides to the ESMF script rules for executing the bundled test 
 # and example applications.

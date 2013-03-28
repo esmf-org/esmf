@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.15 2011/03/16 18:36:51 theurich Exp $
+# $Id$
 #
 # Linux.nagintel.default
 #

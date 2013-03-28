@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.18 2012/03/23 15:26:57 theurich Exp $"
+"$Id$"
 "Defines the configuration for this machine"
 #endif
 

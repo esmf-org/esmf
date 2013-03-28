@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.29 2011/03/30 00:57:24 svasquez Exp $
+# $Id$
 #
 # Darwin.nag.default
 #
