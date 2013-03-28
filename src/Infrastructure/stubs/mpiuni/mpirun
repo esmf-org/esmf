@@ -23,9 +23,7 @@ do
 
     --version|-v)
 	echo "ESMF mpirun:"
-	echo "  revision$Revision: 1.5 $"
-	echo "  revision date$Date: 2012/06/06 17:51:46 $"
-	echo "  tag$Name:  $"
+	echo "  revision $Id$"
 	exit 0
 	;;
 

@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id'
+      '$Id$'
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0

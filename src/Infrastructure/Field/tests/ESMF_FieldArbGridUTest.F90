@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id'
+      '$Id$'
     
     type(ESMF_Grid) :: grid2d, grid3d
     type(ESMF_VM) :: vm
