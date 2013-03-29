@@ -53,6 +53,8 @@ program ESMF_VMAllToAllUTest
   integer,            allocatable:: iarray1(:),  iarray2(:),  iarray3(:)
   real(ESMF_KIND_R4), allocatable:: r4array1(:), r4array2(:), r4array3(:)
   real(ESMF_KIND_R8), allocatable:: r8array1(:), r8array2(:), r8array3(:)
+  real(ESMF_KIND_R8), allocatable:: r8array2_expected(:)
+
      
   real(ESMF_KIND_R4)  :: r4value
   real(ESMF_KIND_R8)  :: r8value
@@ -84,6 +86,7 @@ program ESMF_VMAllToAllUTest
 
   allocate(r8array1(0:petCount-1))
   allocate(r8array2(0:petCount-1))
+  allocate(r8array2_expected(0:petCount-1))
   allocate(r8array3(0:petCount-1))
 
   ! prepare data arrays
@@ -96,7 +99,13 @@ program ESMF_VMAllToAllUTest
   r4array2 = -1.1_ESMF_KIND_R4
   r4array3 = -2.2_ESMF_KIND_R4
 
-  r8array1 = real(localPet,ESMF_KIND_R8) * 1.01_ESMF_KIND_R8
+  do, i=0, petCount-1
+    r8value = real(i, ESMF_KIND_R8) * 1.01_ESMF_KIND_R8
+    if (i == localPet) then
+      r8array1 = r8value
+    end if
+    r8array2_expected(i) = r8value
+  end do
   r8array2 = -1.1_ESMF_KIND_R8
   r8array3 = -2.2_ESMF_KIND_R8
 
@@ -220,10 +229,9 @@ program ESMF_VMAllToAllUTest
   write(name, *) "Verify r8array2 data after alltoall"
   rc = ESMF_SUCCESS
   do i=0, petCount-1
-    r8value = real(i,ESMF_KIND_R8) * 1.01_ESMF_KIND_R8
-    if (r8array2(i) /= r8value) then
+    if (r8array2(i) /= r8array2_expected(i)) then
       rc = ESMF_FAILURE
-      print *, i, r8array2(i), r8value
+      print *, i, r8array2(i), r8array2_expected(i)
     endif
   enddo
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
