@@ -1,4 +1,4 @@
-/* $Id: ESMF_InfoC.c,v 1.2 2011/06/29 20:26:06 theurich Exp $ */
+/* $Id$ */
 
 #include <stdio.h>
 #include "ESMC.h"

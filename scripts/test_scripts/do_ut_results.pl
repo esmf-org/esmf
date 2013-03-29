@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: do_ut_results.pl,v 1.17 2006/03/07 20:48:00 svasquez Exp $
+# $Id$
 # This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
 # The script calls unit_tests_results with the summary option turned off,

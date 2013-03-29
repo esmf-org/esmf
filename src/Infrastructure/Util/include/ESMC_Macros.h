@@ -1,4 +1,4 @@
-// $Id: ESMC_Macros.h,v 1.54 2012/12/03 16:02:41 theurich Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,

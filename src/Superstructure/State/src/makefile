@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2012/05/30 02:06:42 w6ws Exp $
+# $Id$
 
 ALL: build_here 
 

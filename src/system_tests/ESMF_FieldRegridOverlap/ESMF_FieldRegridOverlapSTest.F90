@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridOverlapSTest.F90,v 1.22 2012/08/07 23:42:14 w6ws Exp $
+! $Id$
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497

@@ -1,4 +1,4 @@
-/* $Id: ESMF_WebServicesClientSTest.C,v 1.2 2011/05/13 18:18:43 ksaint Exp $ */
+/* $Id$ */
 !-------------------------------------------------------------------------
 
 !ESMF_disable_SYSTEM_TEST      String used by test script to count system tests.

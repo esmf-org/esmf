@@ -1,5 +1,5 @@
 /*
-** $Id: exphg.c,v 1.2 2007/11/28 16:13:49 dneckels Exp $
+** $Id$
 **
 ** Functions to support writing Zoltan parallel hypergraph examples.
 **

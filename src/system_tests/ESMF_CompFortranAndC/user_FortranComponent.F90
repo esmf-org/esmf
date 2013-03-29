@@ -1,4 +1,4 @@
-! $Id: user_FortranComponent.F90,v 1.23 2011/06/30 06:00:39 theurich Exp $
+! $Id$
 !
 ! Example/test code which shows User Component calls.
 

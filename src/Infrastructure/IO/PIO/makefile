@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2012/07/23 19:28:31 gold2718 Exp $
+# $Id$
 
 # locally disable parallel build:
 .NOTPARALLEL:

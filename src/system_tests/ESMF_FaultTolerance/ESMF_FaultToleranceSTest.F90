@@ -1,4 +1,4 @@
-! $Id: ESMF_FaultToleranceSTest.F90,v 1.2 2012/03/13 03:02:07 theurich Exp $
+! $Id$
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_MULTI_PROC_SYSTEM_TEST   String used by test script to count system tests.

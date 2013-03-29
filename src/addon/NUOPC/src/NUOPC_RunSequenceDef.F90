@@ -1,4 +1,4 @@
-! $Id: NUOPC_RunSequenceDef.F90,v 1.13 2012/11/16 23:33:09 theurich Exp $
+! $Id$
 
 #define FILENAME "src/addon/NUOPC/NUOPC_RunSequenceDef.F90"
 

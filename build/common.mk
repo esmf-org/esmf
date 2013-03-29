@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.363 2012/11/09 00:41:08 theurich Exp $
+#  $Id$
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!

@@ -1,4 +1,4 @@
-! $Id: land_comp.F90,v 1.10 2012/08/24 14:28:01 feiliu Exp $
+! $Id$
 !
 ! Example/test code which shows User Component calls.
 

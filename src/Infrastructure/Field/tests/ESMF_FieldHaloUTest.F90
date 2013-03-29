@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloUTest.F90,v 1.4 2012/05/16 22:33:56 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@ program ESMF_FieldHaloUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_FieldHaloUTest.F90,v 1.4 2012/05/16 22:33:56 svasquez Exp $'
+    '$Id$'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------

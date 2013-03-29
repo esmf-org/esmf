@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.36 2011/03/25 00:27:39 w6ws Exp $
+# $Id$
 #
 # AIX.default.default
 #

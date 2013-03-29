@@ -1,4 +1,4 @@
-// $Id: ESMCI_CommReg.h,v 1.8 2012/01/06 20:17:47 svasquez Exp $
+// $Id$
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 

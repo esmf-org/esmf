@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray_F.C,v 1.23 2012/07/18 22:21:42 rokuingh Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

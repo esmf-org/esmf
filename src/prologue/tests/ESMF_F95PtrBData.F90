@@ -1,4 +1,4 @@
-! $Id: ESMF_F95PtrBData.F90,v 1.6 2012/01/06 20:19:43 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

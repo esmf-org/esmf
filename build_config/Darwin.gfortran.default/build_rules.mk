@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.26 2012/11/20 21:48:42 theurich Exp $
+# $Id$
 #
 # Darwin.gfortran.default
 #

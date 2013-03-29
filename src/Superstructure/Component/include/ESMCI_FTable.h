@@ -1,4 +1,4 @@
-// $Id: ESMCI_FTable.h,v 1.27 2012/03/29 23:41:07 theurich Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

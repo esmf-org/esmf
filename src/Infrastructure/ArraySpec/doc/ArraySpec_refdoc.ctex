@@ -1,4 +1,4 @@
-% $Id: ArraySpec_refdoc.ctex,v 1.7 2012/09/21 23:17:05 theurich Exp $
+% $Id$
 
 #ifdef STANDALONE
 \documentclass[]{article}

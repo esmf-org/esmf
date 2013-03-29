@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldMeshSMMSTest.F90,v 1.24 2012/08/07 23:42:02 w6ws Exp $
+! $Id$
 !
 ! System test code FieldMeshSMM
 !  Description on Sourceforge under System Test #79497

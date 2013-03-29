@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSparseMatMulSTest.F90,v 1.30 2011/06/30 06:01:23 theurich Exp $
+! $Id$
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.

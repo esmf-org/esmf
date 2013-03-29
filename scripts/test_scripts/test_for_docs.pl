@@ -1,6 +1,6 @@
 #! /usr/bin/env perl -w
 #
-# $Id: test_for_docs.pl,v 1.8 2006/11/17 16:59:13 cdeluca Exp $
+# $Id$
 #
 # test_for_docs.pl
 # 

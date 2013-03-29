@@ -1,4 +1,4 @@
-! $Id: NUOPC_Base.F90,v 1.21 2012/11/19 18:49:26 theurich Exp $
+! $Id$
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Base.F90"
 

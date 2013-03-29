@@ -1,4 +1,4 @@
-% $Id: IO_refdoc.ctex,v 1.4 2012/10/11 00:18:56 theurich Exp $ 
+% $Id$ 
 
 #define INCLUDE_UML
 #ifdef STANDALONE

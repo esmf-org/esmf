@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.28 2012/10/29 03:58:34 gold2718 Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@ module ESMF_IOMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-       '$Id: ESMF_IO.F90,v 1.28 2012/10/29 03:58:34 gold2718 Exp $'
+       '$Id$'
 
 !==============================================================================
 !

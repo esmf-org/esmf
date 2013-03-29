@@ -1,4 +1,4 @@
-! $Id: ESMF_ComponentUTest.F90,v 1.25 2012/05/16 21:55:58 svasquez Exp $
+! $Id$
 !
 ! Test code which creates a new Component.
 

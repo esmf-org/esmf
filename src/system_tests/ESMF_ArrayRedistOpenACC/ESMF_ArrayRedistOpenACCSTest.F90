@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistOpenACCSTest.F90,v 1.2 2012/08/24 23:46:36 theurich Exp $
+! $Id$
 !
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST   String used by test script to count system tests.

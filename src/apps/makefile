@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2011/02/07 18:47:15 gerhard.j.theurich Exp $ 
+# $Id$ 
 
 ALL: build_apps
 

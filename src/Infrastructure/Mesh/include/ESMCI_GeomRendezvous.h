@@ -1,4 +1,4 @@
-// $Id: ESMCI_GeomRendezvous.h,v 1.12 2012/03/02 01:56:47 feiliu Exp $
+// $Id$
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 

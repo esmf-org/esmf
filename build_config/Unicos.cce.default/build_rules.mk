@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.3 2012/01/11 03:37:13 theurich Exp $
+# $Id$
 #
 # Unicos.cce.default
 #

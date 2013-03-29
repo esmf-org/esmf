@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.4 2012/11/08 23:56:39 theurich Exp $
+# $Id$
 #
 # Unicos.gfortran.default
 #

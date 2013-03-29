@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.33 2011/03/16 18:36:48 theurich Exp $
+# $Id$
 #
 # Linux.lahey.default
 #

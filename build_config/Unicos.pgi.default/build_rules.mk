@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.17 2012/04/05 04:23:24 theurich Exp $
+# $Id$
 #
 # Unicos.pgi.default
 #

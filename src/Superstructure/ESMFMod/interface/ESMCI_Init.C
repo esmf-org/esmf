@@ -1,4 +1,4 @@
-// $Id: ESMCI_Init.C,v 1.16 2012/09/07 19:11:42 w6ws Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

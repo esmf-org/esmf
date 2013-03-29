@@ -1,4 +1,4 @@
-! $Id: NUOPC_DriverAtmOcnMed.F90,v 1.1 2012/04/19 05:32:18 theurich Exp $
+! $Id$
 
 #define FILENAME "src/addon/NUOPC/NUOPC_DriverAtmOcnMed.F90"
 

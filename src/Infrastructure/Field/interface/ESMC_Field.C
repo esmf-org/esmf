@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.41 2012/07/18 22:21:25 rokuingh Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,

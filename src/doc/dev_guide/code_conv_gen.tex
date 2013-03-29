@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_gen.tex,v 1.29 2012/03/09 22:03:14 w6ws Exp $
+% CVS $Id$
 
 \subsection{Docs: Code and Documentation Templates and Associated Scripts}
 \label{sec:code_templates}
@@ -388,14 +388,14 @@ The first line of every file in ESMF
   must be its CVS version identification. For example, each \LaTeX\ 
   file must begin:
 \begin{verbatim}
-% $Id: code_conv_gen.tex,v 1.29 2012/03/09 22:03:14 w6ws Exp $ 
+% $Id$ 
 \end{verbatim}
 
 In addition, for source code, the CVS identifier must have the 
 ability to be written to a variable for output to a configuration log.  
 Therefore each F90 module must contain a declaration:
 \begin{verbatim}
-character(len=80), private :: version = '$Id: code_conv_gen.tex,v 1.29 2012/03/09 22:03:14 w6ws Exp $'
+character(len=80), private :: version = '$Id$'
 \end{verbatim}
 
 \subsubsection{License and Copyright Information}

@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle.h,v 1.42 2012/10/03 18:28:59 gold2718 Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

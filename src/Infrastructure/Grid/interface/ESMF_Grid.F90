@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.283 2012/11/13 23:21:31 peggyli Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -308,7 +308,7 @@ public  ESMF_GridDecompType, ESMF_GRID_INVALID, ESMF_GRID_NONARBITRARY, ESMF_GRI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.283 2012/11/13 23:21:31 peggyli Exp $'
+      '$Id$'
 !==============================================================================
 ! 
 ! INTERFACE BLOCKS

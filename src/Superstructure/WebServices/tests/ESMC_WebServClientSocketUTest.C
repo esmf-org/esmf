@@ -1,4 +1,4 @@
-/* $Id: ESMC_WebServClientSocketUTest.C,v 1.3 2012/05/14 20:46:31 svasquez Exp $ */
+/* $Id$ */
 
 #include <stdio.h>
 #include <stdlib.h>
