@@ -87,8 +87,8 @@ contains
 !  Use Quick Sort, reverting to Insertion sort on lists of @\
 !  size <= 20. @\
 ! @\
-!  This is an ESMFized version of SLASRT from LAPACK version 3.1. \\ @\
-!  Univ. of Tennessee, Univ. of California Berkeley and NAG Ltd. \\ @\
+!  This is an ESMFized version of SLASRT from LAPACK version 3.1. @\
+!  Univ. of Tennessee, Univ. of California Berkeley and NAG Ltd. @\
 !  November 2006 @\
 ! @\
 !     The arguments are: @\
