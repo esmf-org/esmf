@@ -57,10 +57,10 @@ program ESMF_AttributeEx
       integer(ESMF_KIND_I4), dimension(3)  :: inI4l
       integer(ESMF_KIND_I8)                :: inI8
       integer(ESMF_KIND_I8), dimension(3)  :: inI8l
-      real(ESMF_KIND_I4)                   :: inR4
-      real(ESMF_KIND_I4), dimension(3)     :: inR4l
-      real(ESMF_KIND_I8)                   :: inR8
-      real(ESMF_KIND_I8), dimension(3)     :: inR8l
+      real(ESMF_KIND_R4)                   :: inR4
+      real(ESMF_KIND_R4), dimension(3)     :: inR4l
+      real(ESMF_KIND_R8)                   :: inR8
+      real(ESMF_KIND_R8), dimension(3)     :: inR8l
       character(ESMF_MAXSTR)               :: inChar
       character(ESMF_MAXSTR), dimension(3) :: inCharl, &
                                            defaultCharl, dfltoutCharl
