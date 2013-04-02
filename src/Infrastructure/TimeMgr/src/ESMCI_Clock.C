@@ -1,4 +1,4 @@
-// $Id: ESMCI_Clock.C,v 1.27 2012/09/20 21:19:50 w6ws Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -18,24 +18,23 @@
 // in the companion file {\tt ESMCI\_Clock.h}
 //
 //-------------------------------------------------------------------------
-//
- #define ESMC_FILENAME "ESMCI_Clock.C"
+#define ESMC_FILENAME "ESMCI_Clock.C"
 
- // higher level, 3rd party or system includes here
- #include <stdio.h>
- #include <string.h>
- #include <ctype.h>
- #include <ESMCI_LogErr.h>
- #include <ESMF_LogMacros.inc>
- #include <ESMCI_Alarm.h>
+// associated class definition file
+#include "ESMCI_Clock.h"
 
- // associated class definition file
- #include <ESMCI_Clock.h>
+// higher level, 3rd party or system includes here
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#include "ESMCI_LogErr.h"
+#include "ESMCI_Alarm.h"
 
 //-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Clock.C,v 1.27 2012/09/20 21:19:50 w6ws Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id$";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -156,7 +155,8 @@ int Clock::count=0;
     clock->prevTime = clock->currTime = clock->startTime;
 
     returnCode = clock->validate();
-    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, 
+      ESMC_CONTEXT, rc)) {
       // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
       //   and at the F90 level, so isInit flag can be set to usable value.
       delete clock;
@@ -214,7 +214,8 @@ int Clock::count=0;
     }
 
     returnCode = clockCopy->validate();
-    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, 
+      ESMC_CONTEXT, rc)) {
       // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
       //   and at the F90 level, so isInit flag can be set to usable value.
       delete clockCopy;
@@ -296,7 +297,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -369,7 +370,8 @@ int Clock::count=0;
     }
 
     rc = Clock::validate();
-    if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) {
       // restore original clock values
       *this = saveClock;
     }
@@ -422,7 +424,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -484,7 +486,8 @@ int Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, calendar);
-      ESMC_LogDefault.MsgFoundError(rc, "Time::get(...calendar) failed.", &rc);
+      ESMC_LogDefault.MsgFoundError(rc, "Time::get(...calendar) failed.",
+        ESMC_CONTEXT, &rc);
     }
     if (calkindflag != ESMC_NULL_POINTER) {
       // get calendar kind from currTime, but could get from any other clock
@@ -501,7 +504,7 @@ int Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       calkindflag);
       ESMC_LogDefault.MsgFoundError(rc, "Time::get(...calkindflag) failed.",
-                                    &rc);
+        ESMC_CONTEXT, &rc);
     }
     if (timeZone != ESMC_NULL_POINTER) {
       // get timeZone from currTime, but could get from any other clock Time,
@@ -517,7 +520,8 @@ int Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, timeZone);
-      ESMC_LogDefault.MsgFoundError(rc, "Time::get(...timeZone) failed.", &rc);
+      ESMC_LogDefault.MsgFoundError(rc, "Time::get(...timeZone) failed.",
+        ESMC_CONTEXT, &rc);
     }
 
     if (advanceCount != ESMC_NULL_POINTER) *advanceCount = this->advanceCount;
@@ -565,7 +569,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -702,7 +706,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, rc);
       return(false);
     }
 
@@ -747,7 +751,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -788,7 +792,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -824,7 +828,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, rc);
       return(false);
     }
 
@@ -860,7 +864,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, rc);
       return(false);
     }
 
@@ -926,7 +930,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, rc);
       return(false);
     }
 
@@ -963,7 +967,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -1007,7 +1011,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -1078,7 +1082,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -1313,14 +1317,15 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
     // set current time to wall clock time
     // TODO:  ensure current time is within startTime and stopTime
     rc = currTime.Time::syncToRealTime();
-    if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
+    if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc))
       return(rc);
     return(Clock::validate());
 
@@ -1421,7 +1426,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", ESMC_NULL_POINTER);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, ESMC_NULL_POINTER);
       return(false);
     }
 
@@ -1455,7 +1460,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", ESMC_NULL_POINTER);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, ESMC_NULL_POINTER);
       return(false);
     }
 
@@ -1526,7 +1531,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -1564,21 +1569,21 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
     // validate required individual properties
     if(ESMC_LogDefault.MsgFoundError(timeStep.TimeInterval::validate(),
-                          "timeStep.TimeInterval::validate() failed", &rc) ||
+        "timeStep.TimeInterval::validate() failed", ESMC_CONTEXT, &rc) ||
        ESMC_LogDefault.MsgFoundError(startTime.Time::validate(),
-                                 "startTime.Time::validate() failed", &rc) ||
+        "startTime.Time::validate() failed", ESMC_CONTEXT, &rc) ||
        ESMC_LogDefault.MsgFoundError(refTime.Time::validate(),
-                                 "refTime.Time::validate() failed", &rc)   ||
+        "refTime.Time::validate() failed", ESMC_CONTEXT, &rc)   ||
        ESMC_LogDefault.MsgFoundError(currTime.Time::validate(),
-                                 "currTime.Time::validate() failed", &rc)  ||
+        "currTime.Time::validate() failed", ESMC_CONTEXT, &rc)  ||
        ESMC_LogDefault.MsgFoundError(prevTime.Time::validate(),
-                                 "prevTime.Time::validate() failed", &rc)) {
+        "prevTime.Time::validate() failed", ESMC_CONTEXT, &rc)) {
        return(rc);
     }
 
@@ -1594,7 +1599,7 @@ int Clock::count=0;
     // validate optional stopTime property if set
     if (stopTimeEnabled) {
       if(ESMC_LogDefault.MsgFoundError(stopTime.Time::validate(),
-                                     "stopTime.Time::validate() failed",
+         "stopTime.Time::validate() failed", ESMC_CONTEXT, 
                                      &rc)) return(rc);
 
 //  The following fixes bugs 801366, 801409, & 806784
@@ -1620,7 +1625,8 @@ int Clock::count=0;
                           ESMC_NULL_POINTER, &startCal);
 
       if(ESMC_LogDefault.MsgFoundError(rc,
-         "startTime.Time::get(...startCal) failed.", &rc)) {
+         "startTime.Time::get(...startCal) failed.", 
+          ESMC_CONTEXT, &rc)) {
         return(rc);   
       }
 
@@ -1639,7 +1645,8 @@ int Clock::count=0;
                           ESMC_NULL_POINTER, &stopCal);
 
       if(ESMC_LogDefault.MsgFoundError(rc,
-         "stopTime.Time::get(...stopCal) failed.", &rc)) {
+         "stopTime.Time::get(...stopCal) failed.", 
+          ESMC_CONTEXT, &rc)) {
         return(rc);   
       }
 
@@ -1734,7 +1741,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -2008,7 +2015,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -2088,7 +2095,7 @@ int Clock::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 

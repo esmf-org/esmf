@@ -1,4 +1,4 @@
-! $Id: ParentGridCompTemplate.F90,v 1.20 2012/08/07 00:56:12 w6ws Exp $
+! $Id$
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component

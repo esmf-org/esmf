@@ -1,5 +1,5 @@
 /*
-** $Id: exzoltan.h,v 1.2 2007/11/28 16:13:49 dneckels Exp $
+** $Id$
 **
 ** Functions to support writing simple Zoltan examples 
 */

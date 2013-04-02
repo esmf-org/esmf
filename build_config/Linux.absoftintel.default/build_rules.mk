@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.21 2011/03/16 18:36:42 theurich Exp $
+# $Id$
 #
 # Linux.absoftintel.default
 #

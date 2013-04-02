@@ -1,4 +1,4 @@
-! $Id: ESMF_WebServicesSTest.F90,v 1.8 2011/06/30 06:01:32 theurich Exp $
+! $Id$
 !
 !-------------------------------------------------------------------------
 !ESMF_disable_SYSTEM_TEST        String used by test script to count system tests.

@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.90 2012/04/05 04:35:55 theurich Exp $
+# $Id$
 #
 # Linux.intel.default
 #

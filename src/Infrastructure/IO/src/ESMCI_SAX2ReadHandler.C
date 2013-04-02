@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2ReadHandler.C,v 1.15 2012/09/20 21:19:44 w6ws Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -19,8 +19,10 @@
 // in the companion file {\tt ESMCI\_SAX2ReadHandler.h}
 //
 //-------------------------------------------------------------------------
-//
 #define ESMC_FILENAME "ESMCI_SAX2ReadHandler.C"
+
+// associated class definition file
+#include "ESMCI_SAX2ReadHandler.h"
 
 //#include <iostream>
 //using std::cout;
@@ -29,19 +31,15 @@
 #include <exception>
 using std::exception;
 
-#include <ESMCI_LogErr.h>
-#include <ESMF_LogMacros.inc>
-
-// associated class definition file
-#include <ESMCI_SAX2ReadHandler.h>
+#include "ESMCI_LogErr.h"
 
 using std::string;
 using std::vector;
 
 //-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_SAX2ReadHandler.C,v 1.15 2012/09/20 21:19:44 w6ws Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id$";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -113,14 +111,14 @@ void SAX2ReadHandler::startElement(const XMLCh* const uri,
 
       if (cname.empty()) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                             "bad attribute name conversion", &status);
+                      "bad attribute name conversion", ESMC_CONTEXT, &status);
           //if (rc) *rc = status;  TODO
           return;
       }
  
       if (cvalue.empty()) {
           ESMC_LogDefault.Write("Attribute has an empty value argument",
-                                  ESMC_LOGMSG_INFO);
+                                  ESMC_LOGMSG_INFO, ESMC_CONTEXT);
           cvalue = '\0';
       }
 
@@ -150,7 +148,7 @@ void SAX2ReadHandler::startElement(const XMLCh* const uri,
         }
         if (status != ESMF_SUCCESS) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                               "failed setting attribute value", &status);
+                      "failed setting attribute value", ESMC_CONTEXT, &status);
         }
       }
     }
@@ -164,7 +162,7 @@ void SAX2ReadHandler::startElement(const XMLCh* const uri,
       //cout << "AttPackCreateStandard() status = " << status << endl;
       if (status != ESMF_SUCCESS) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                             "failed creating attribute package", &status);
+                  "failed creating attribute package", ESMC_CONTEXT, &status);
       }
     }
 
@@ -201,14 +199,14 @@ void SAX2ReadHandler::characters(const XMLCh *const chars,
 
       if (this->qname.empty()) {
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "no attribute name to associate value to", &status);
+               "no attribute name to associate value to", ESMC_CONTEXT, &status);
           //if (rc) *rc = status;  TODO
           return;
       }
  
       if (cvalue.empty()) {
           ESMC_LogDefault.Write("Attribute has an empty value argument",
-                                 ESMC_LOGMSG_INFO);
+                                 ESMC_LOGMSG_INFO, ESMC_CONTEXT);
           cvalue = '\0';
       }
 
@@ -230,7 +228,7 @@ void SAX2ReadHandler::characters(const XMLCh *const chars,
       }
       if (status != ESMF_SUCCESS) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                             "failed setting attribute value", &status);
+               "failed setting attribute value", ESMC_CONTEXT, &status);
       }
     }
     XMLString::release(&msg);

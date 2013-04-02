@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.50 2012/11/21 00:18:01 oehmke Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -46,8 +46,6 @@
 !------------------------------------------------------------------------------
 ! !PRIVATE:
       private
-      integer, SAVE :: PetNo, PetCnt
-      type(ESMF_VM), SAVE:: vm
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -621,6 +619,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       character(len=*), optional, intent(in) :: srccoordnames(:), dstcoordnames(:)
       integer, optional :: rc
 
+      type(ESMF_VM):: vm
+      integer :: PetNo, PetCnt
+
       integer :: total, localCount(1)
       integer :: ncid, ncid1
       integer :: ncStatus
@@ -688,12 +689,13 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
         netcdf4FileFlaglocal = .false.
       endif
 
-     call ESMF_VMGetCurrent(vm, rc=rc)
+      call ESMF_VMGetCurrent(vm, rc=rc)
       if (rc /= ESMF_SUCCESS) return
 
       ! set up local pet info
       call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
       if (rc /= ESMF_SUCCESS) return
+
       localCount(1)=size(factorList,1)
       allocate(allCounts(PetCnt))
       call ESMF_VMAllGather(vm,localCount,allCounts,1,rc=status)
@@ -2618,6 +2620,9 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
     real(ESMF_KIND_R8), pointer, optional :: elementArea (:)
     logical, intent(in), optional  :: convertToDeg
     integer, intent(out), optional :: rc
+
+    type(ESMF_VM) :: vm
+    integer :: PetNo, PetCnt
 
     integer :: ncid
     integer :: ncStatus

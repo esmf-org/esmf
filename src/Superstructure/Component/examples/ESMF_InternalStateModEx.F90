@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateModEx.F90,v 1.16 2012/02/28 18:27:42 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

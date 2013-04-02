@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldConCompSTest.F90,v 1.29 2011/06/30 06:00:56 theurich Exp $
+! $Id$
 !
 ! System test code ConcurrentComponent
 !  Description on Sourceforge under System Test #79497

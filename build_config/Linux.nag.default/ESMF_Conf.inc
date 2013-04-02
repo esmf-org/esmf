@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.11 2012/01/06 20:14:44 svasquez Exp $
+$Id$
 
 Earth System Modeling Framework
 Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -11,6 +11,12 @@ Licensed under the University of Illinois-NCSA License.
 #endif
 
 #if 0
+Enable NAG unix modules when certain non-Standard system calls (e.g., ABORT)
+are made.
+#endif
+#define ESMF_NAG_UNIX_MODULE
+
+#if 0
 Define the proper way to flush Fortran units.  Typically this will
 be one of the following:
 
@@ -20,9 +26,8 @@ be one of the following:
 
   Use F2003 FLUSH statement from 5.2-onwards NAG, because
   the library call has thread-safety problems.  If a pre-5.2
-  compiler is being used, enable the following macros.
+  compiler is being used, enable the following macro.
 #endif
 #if 0
-#define ESMF_NAG_UNIXIO_MODULE
 #define ESMF_IOFlushMacro(unit,status) call flush (unit, status)
 #endif

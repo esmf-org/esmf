@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2008/05/08 02:27:11 theurich Exp $
+# $Id$
 
 ALL: build_here
 

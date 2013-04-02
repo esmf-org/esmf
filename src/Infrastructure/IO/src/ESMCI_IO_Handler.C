@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_Handler.C,v 1.6 2012/10/03 18:29:14 gold2718 Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -18,7 +18,6 @@
 // declared in the companion file {\tt ESMCI\_IO_Handler.h}
 //
 //-------------------------------------------------------------------------
-//
 #define ESMC_FILENAME "ESMCI_IO_Handler.C"
 
 // include associated header file
@@ -35,9 +34,7 @@
 // other ESMF include files here.
 #include "ESMCI_Macros.h"
 #include "ESMCI_Container.h"
-#include <ESMCI_LogErr.h>
-#include <ESMF_LogMacros.inc>
-#include <ESMCI_ArrayBundle.h>
+#include "ESMCI_LogErr.h"
 #include "ESMCI_PIO_Handler.h"
 
 #define ROOT_PET (0)
@@ -45,9 +42,9 @@
 #include "esmf_io_debug.h"
 
 //-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_IO_Handler.C,v 1.6 2012/10/03 18:29:14 gold2718 Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id$";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -261,9 +258,8 @@ int IO_Handler::destroy (
 
   // return with errors for NULL pointer
   if (ioclass == ESMC_NULL_POINTER || *ioclass == ESMC_NULL_POINTER){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_PTR_NULL,
-                                          "- Not a valid pointer to ioclass",
-                                          &rc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_PTR_NULL,
+      "- Not a valid pointer to ioclass", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -274,11 +270,12 @@ int IO_Handler::destroy (
     localrc = ESMF_SUCCESS;
   } catch(int localrc) {
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
     return rc;
   } catch(...) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
-                                          "- Caught exception", &rc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -341,12 +338,13 @@ void IO_Handler::finalize (
   } catch(int localrc) {
     // catch standard ESMF return code
     PRINTMSG("caught passthru, localrc = " << localrc);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc);
     return;
   } catch(...) {
     PRINTMSG("caught unknown error");
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
-                                          "- Caught exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_CONTEXT, rc);
     return;
   }
 
@@ -390,9 +388,8 @@ int IO_Handler::setFilename(
 
   // It is an error if we already have an open file
   if (isOpen() != ESMF_FALSE) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_FILE_ACTIVE,
-                                          "- Cannot change name, file open",
-                                          &rc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_FILE_ACTIVE,
+      "- Cannot change name, file open", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -518,12 +515,13 @@ void IO_Handler::open (
   // Make sure pointer inputs have something in them
   if ((char *)NULL == file) {
     localrc = ESMF_RC_PTR_NULL;
-    ESMC_LogDefault.MsgFoundError(localrc,
-                                  "- NULL filename argument pointer", rc);
+    ESMC_LogDefault.MsgFoundError(localrc, "- NULL filename argument pointer",
+      ESMC_CONTEXT, rc);
   } else if (isOpen() == ESMF_TRUE) {
     // Check to make sure that a file is not already open
     localrc = ESMF_RC_FILE_OPEN;
-    ESMC_LogDefault.MsgFoundError(localrc, "- File already open", rc);
+    ESMC_LogDefault.MsgFoundError(localrc, "- File already open", ESMC_CONTEXT,
+      rc);
   }
 
   if (ESMF_SUCCESS == localrc) {
@@ -537,7 +535,8 @@ void IO_Handler::open (
     overwrite = overwrite_arg;
     // Open the file
     open(readonly_arg, &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, "- Error opening file", rc);
+    ESMC_LogDefault.MsgFoundError(localrc, "- Error opening file", ESMC_CONTEXT,
+      rc);
   }
 
   // return

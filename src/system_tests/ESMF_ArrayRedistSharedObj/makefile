@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2009/10/16 18:43:21 theurich Exp $ 
+# $Id$ 
 
 # share the symbol table of the main executable to allow dynamic
 # linking against its symbols

@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServLowLevelSocket.C,v 1.13 2012/05/18 20:11:56 w6ws Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -24,8 +24,6 @@
 // create sockets, and to send and receive data across the sockets.
 //
 //-----------------------------------------------------------------------------
-
-
 #include "ESMCI_WebServLowLevelSocket.h"
 
 #include <string.h>
@@ -53,12 +51,11 @@ typedef void* value_ptr_t;
 #include "ESMCI_WebServSocketUtils.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServLowLevelSocket.C,v 1.13 2012/05/18 20:11:56 w6ws Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -165,10 +162,10 @@ int  ESMCI_WebServLowLevelSocket::nonblock(
 
 	if (theTSock <= 0)
 	{
-		ESMC_LogDefault.ESMC_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_OBJ_WRONG, 
 			"The Server listening socket not valid.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -186,10 +183,10 @@ int  ESMCI_WebServLowLevelSocket::nonblock(
 #if !defined (ESMF_OS_MinGW)
 	if (fcntl(sock, F_SETFL, fcntl(sock, F_GETFL) | O_NONBLOCK) < 0)
 	{
-		ESMC_LogDefault.ESMC_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_CANNOT_SET, 
 			"Unable to set nonblock attribute.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -230,10 +227,10 @@ int  ESMCI_WebServLowLevelSocket::serverConnect(
 	theTSock = socket(AF_INET, SOCK_STREAM, 0);
 	if (theTSock < 0)
 	{
-		ESMC_LogDefault.ESMC_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_OPEN, 
 			"Unable to open socket connection.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -271,10 +268,10 @@ int  ESMCI_WebServLowLevelSocket::serverConnect(
 
 	if (status < 0)
 	{
-		ESMC_LogDefault.ESMC_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_OPEN, 
 			"Socket bind failed.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -286,10 +283,10 @@ int  ESMCI_WebServLowLevelSocket::serverConnect(
 
 	if (listen(theTSock, 5) < 0)
 	{
-		ESMC_LogDefault.ESMC_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_OPEN, 
 			"Socket listen failed.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -328,10 +325,10 @@ int  ESMCI_WebServLowLevelSocket::accept(
 	//***
 	if (theTSock <= 0)
 	{
-		ESMC_LogDefault.ESMC_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_OBJ_WRONG, 
 			"The Server listening socket not valid.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -349,10 +346,10 @@ int  ESMCI_WebServLowLevelSocket::accept(
 	{
 		disconnect();
 
-		ESMC_LogDefault.ESMC_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_OPEN, 
 			"Socket accept failed.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -399,10 +396,10 @@ int  ESMCI_WebServLowLevelSocket::clientConnect(
 	theSock = socket(AF_INET, SOCK_STREAM, 0);
 	if (theSock < 0)
 	{
-		ESMC_LogDefault.ESMC_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_OPEN, 
 			"Unable to create client socket.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -413,10 +410,10 @@ int  ESMCI_WebServLowLevelSocket::clientConnect(
 	struct hostent*	hp = gethostbyname(host);
 	if (hp == NULL)
 	{
-		ESMC_LogDefault.ESMC_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_OBJ_BAD, 
 			"Call to gethostbyname failed.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -431,10 +428,10 @@ int  ESMCI_WebServLowLevelSocket::clientConnect(
 	{
 		disconnect();
 
-		ESMC_LogDefault.ESMC_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_OPEN, 
 			"Client socket connect failed.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
@@ -617,10 +614,10 @@ int  ESMCI_WebServLowLevelSocket::read(
 	//printf("Reading size: %d\n", thePhSize);
 	if (recv(thePhSize, &thePHead) != thePhSize)
 	{
-		ESMC_LogDefault.ESMC_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_READ, 
 			"Socket receive failed.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return 0;
 	}
@@ -642,10 +639,10 @@ int  ESMCI_WebServLowLevelSocket::read(
 	{
 		thePHead.magic = MAGIC;
 
-		ESMC_LogDefault.ESMC_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_READ, 
 			"Socket receive failed: invalid packet header.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return 0;
 	}
@@ -661,10 +658,10 @@ int  ESMCI_WebServLowLevelSocket::read(
 
 	if (bytesRead != size)
 	{
-		ESMC_LogDefault.ESMC_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_READ, 
 			"Socket receive failed: number of bytes read not expected size.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 	}
 	//printf("Data: %s\n", data);
 
@@ -715,10 +712,10 @@ int  ESMCI_WebServLowLevelSocket::write(
 	int	bytesSent = 0;
 	if ((bytesSent = send(thePhSize, &thePHead)) != thePhSize)
 	{
-		ESMC_LogDefault.ESMC_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_WRITE, 
 			"Socket send failed.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 
 		return 0;
 	}
@@ -729,10 +726,10 @@ int  ESMCI_WebServLowLevelSocket::write(
 	int	bytesWritten = send(size, data);
 	if (bytesWritten != size)
 	{
-		ESMC_LogDefault.ESMC_LogMsgFoundError(
+		ESMC_LogDefault.MsgFoundError(
 			ESMC_RC_FILE_WRITE, 
 			"Socket send failed: number of bytes sent not expected size.", 
-			&localrc);
+			ESMC_CONTEXT, &localrc);
 	}
 
 	return bytesWritten;

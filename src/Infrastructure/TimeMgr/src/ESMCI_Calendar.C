@@ -1,4 +1,4 @@
-// $Id: ESMCI_Calendar.C,v 1.20 2012/09/20 21:19:50 w6ws Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -18,30 +18,27 @@
 // declared in the companion file {\tt ESMC\_Calendar.h}
 //
 //-------------------------------------------------------------------------
-//
- #define ESMC_FILENAME "ESMCI_Calendar.C"
+#define ESMC_FILENAME "ESMCI_Calendar.C"
 
- // higher level, 3rd party or system includes
- #include <stdio.h>
- #include <limits.h>
- #include <string.h>
- #include <ctype.h>
- #include <math.h>
- #include <stdlib.h>
+// associated class definition file
+#include "ESMCI_Calendar.h"
 
- #include <ESMCI_LogErr.h>
- #include <ESMF_LogMacros.inc>
+// higher level, 3rd party or system includes
+#include <stdio.h>
+#include <limits.h>
+#include <string.h>
+#include <ctype.h>
+#include <math.h>
+#include <stdlib.h>
 
- #include <ESMCI_Time.h>
- #include <ESMCI_TimeInterval.h>
-
- // associated class definition file
- #include <ESMCI_Calendar.h>
+#include "ESMCI_LogErr.h"
+#include "ESMCI_Time.h"
+#include "ESMCI_TimeInterval.h"
 
 //-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Calendar.C,v 1.20 2012/09/20 21:19:50 w6ws Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id$";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{
@@ -98,7 +95,7 @@ int Calendar::count=0;
  #define ESMC_METHOD "ESMCI_CalendarInitialize()"
 
   int rc = ESMCI_CalendarSetDefault(calkindflag);
-  ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
+  ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
   return(rc);
 
  } // end ESMCI_CalendarInitialize
@@ -204,13 +201,15 @@ int Calendar::count=0;
     returnCode = calendar->set(strlen(calendar->name), 
                                       calendar->name, 
                                       calkindflag);
-    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) {
       delete calendar;
       return(ESMC_NULL_POINTER);
     }
 
     returnCode = calendar->validate();
-    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) {
       // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
       //   and at the F90 level, so isInit flag can be set to usable value.
       delete calendar;
@@ -285,14 +284,14 @@ int Calendar::count=0;
     returnCode = (*internalCal)->set(strlen((*internalCal)->name), 
                                             (*internalCal)->name, calkindflag);
     if (ESMC_LogDefault.MsgFoundError(returnCode,
-                                      ESMCI_ERR_PASSTHRU, &returnCode)) {
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &returnCode)) {
       delete *internalCal;
       return(returnCode);
     }
 
     returnCode = (*internalCal)->validate();
     if (ESMC_LogDefault.MsgFoundError(returnCode,
-                                      ESMCI_ERR_PASSTHRU, &returnCode)) {
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &returnCode)) {
       // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
       //   and at the F90 level, so isInit flag can be set to usable value.
       delete *internalCal;
@@ -374,13 +373,15 @@ int Calendar::count=0;
                                       daysPerMonth, monthsPerYear,
                                       secondsPerDay, daysPerYear,
                                       daysPerYearDn, daysPerYearDd);
-    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, 
+      ESMC_CONTEXT, rc)) {
       delete calendar;
       return(ESMC_NULL_POINTER);
     }
 
     returnCode = calendar->validate();
-    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) {
       // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
       //   and at the F90 level, so isInit flag can be set to usable value.
       delete calendar;
@@ -438,7 +439,8 @@ int Calendar::count=0;
     }
 
     returnCode = calendarCopy->validate();
-    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(returnCode, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) {
       // TODO: distinguish non-fatal rc's (warnings, info) at this level (C++),
       //   and at the F90 level, so isInit flag can be set to usable value.
       delete calendarCopy;
@@ -510,9 +512,8 @@ int Calendar::count=0;
   }
 
   int rc = (*calendar)->validate();
-  if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc)) {
+  if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
     return(rc);
-  }
 
   // set the default calendar
   Calendar::defaultCalendar = *calendar;
@@ -592,7 +593,7 @@ int Calendar::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -677,7 +678,8 @@ int Calendar::count=0;
             // restore original calendar
             *this = saveCalendar;
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-                 ", must call CalendarSet(custom) for custom calendars.", &rc);
+                 ", must call CalendarSet(custom) for custom calendars.", 
+                ESMC_CONTEXT, &rc);
             break;
 
         default:
@@ -686,7 +688,7 @@ int Calendar::count=0;
             char logMsg[ESMF_MAXSTR];
             sprintf(logMsg, "; unknown calendar kind %d.", calkindflag);
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, logMsg,
-                                                  &rc);
+              ESMC_CONTEXT, &rc);
             break;
     }
     return(rc);
@@ -726,7 +728,7 @@ int Calendar::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -767,7 +769,8 @@ int Calendar::count=0;
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "; monthsPerYear %d negative or > MONTHS_PER_YEAR %d.",
                       monthsPerYear, MONTHS_PER_YEAR);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, logMsg, &rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, logMsg, ESMC_CONTEXT,
+        &rc);
       return(rc);
     }
 
@@ -799,7 +802,8 @@ int Calendar::count=0;
         *this = saveCalendar;
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "; daysPerYeardD equals zero.");
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_DIV_ZERO, logMsg, &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_DIV_ZERO, logMsg, ESMC_CONTEXT,
+          &rc);
         return(rc);
       }
     }
@@ -821,7 +825,7 @@ int Calendar::count=0;
     if ((rc = Calendar::validate()) != ESMF_SUCCESS) {
       // error, restore previous state
       *this = saveCalendar;
-      ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc);
+      ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc);
     }
 
     return(rc);
@@ -865,7 +869,7 @@ int Calendar::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -882,7 +886,7 @@ int Calendar::count=0;
         daysPerYeardD  == ESMC_NULL_POINTER &&
         nameLen == 0) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-                  ", no valid argument passed in.", &rc);
+                  ", no valid argument passed in.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -999,7 +1003,7 @@ int Calendar::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -1016,7 +1020,7 @@ int Calendar::count=0;
               sprintf(logMsg, "; Gregorian %d/%d/%lld (1-12/>=1/>=-4800).",
                       mm, dd, yy); 
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-                                                    logMsg, &rc);
+                logMsg, ESMC_CONTEXT, &rc);
               return(rc);
             }
             // invalid before 3/1/-4800
@@ -1025,7 +1029,7 @@ int Calendar::count=0;
               sprintf(logMsg, "; Gregorian %d/%d/%lld is before 3/1/-4800.",
                       mm, dd, yy); 
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-                                                    logMsg, &rc);
+                logMsg, ESMC_CONTEXT, &rc);
               return(rc);
             }
 
@@ -1039,7 +1043,7 @@ int Calendar::count=0;
               sprintf(logMsg, "; Gregorian: for month %d, dd=%d > %d days "
                       "in the month.", mm, dd, daysPerMonth[mm-1]);
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-                                                    logMsg, &rc);
+                logMsg, ESMC_CONTEXT, &rc);
               return(rc);
             }
             // if February, take leap year into account before checking
@@ -1052,7 +1056,7 @@ int Calendar::count=0;
                         "days in the month.", yy, dd,
                         (daysPerMonth[1]+leapDay));
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-                                                    logMsg, &rc);
+                  logMsg, ESMC_CONTEXT, &rc);
                 return(rc);
               }
             }
@@ -1081,7 +1085,7 @@ int Calendar::count=0;
               sprintf(logMsg, "; Julian %d/%d/%lld (1-12/>=1/>=-4712).",
                       mm, dd, yy); 
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-                                                    logMsg, &rc);
+                logMsg, ESMC_CONTEXT, &rc);
               return(rc);
             }
             // invalid before 3/1/-4712
@@ -1090,7 +1094,7 @@ int Calendar::count=0;
               sprintf(logMsg, "; Julian %d/%d/%lld is before 3/1/-4712.",
                       mm, dd, yy); 
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-                                                    logMsg, &rc);
+                logMsg, ESMC_CONTEXT, &rc);
               return(rc);
             }
 
@@ -1104,7 +1108,7 @@ int Calendar::count=0;
               sprintf(logMsg, "; Julian: for month %d, dd=%d > %d days "
                       "in the month.", mm, dd, daysPerMonth[mm-1]);
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-                                                    logMsg, &rc);
+                logMsg, ESMC_CONTEXT, &rc);
               return(rc);
             }
             // if February, take leap year into account before checking
@@ -1117,7 +1121,7 @@ int Calendar::count=0;
                         "days in the month.", yy, dd,
                         (daysPerMonth[1]+leapDay));
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-                                                    logMsg, &rc);
+                   logMsg, ESMC_CONTEXT, &rc);
                 return(rc);
               }
             }
@@ -1145,7 +1149,7 @@ int Calendar::count=0;
               sprintf(logMsg, "; NoLeap mm=%d (1-12), dd=%d (>=1).",
                       mm, dd);
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-                                                    logMsg, &rc);
+                logMsg, ESMC_CONTEXT, &rc);
               return(rc);
             }
             // check day of the month
@@ -1154,7 +1158,7 @@ int Calendar::count=0;
               sprintf(logMsg, "; NoLeap: for month %d, dd=%d > %d days "
                               "in the month.", mm, dd, daysPerMonth[mm-1]);
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-                                                    logMsg, &rc);
+                 logMsg, ESMC_CONTEXT, &rc);
               return(rc);
             }
             // TODO: upper bounds date range check dependent on machine
@@ -1178,7 +1182,7 @@ int Calendar::count=0;
               char logMsg[ESMF_MAXSTR];
               sprintf(logMsg, "; 360 Day: mm=%d (1-12), dd=%d (1-30).", mm, dd);
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-                                                    logMsg, &rc);
+                logMsg, ESMC_CONTEXT, &rc);
               return(rc);
             }
             // TODO: upper bounds date range check dependent on machine
@@ -1257,7 +1261,7 @@ int Calendar::count=0;
                 sprintf(logMsg, "; Custom calendar mm=%d (1-%d), dd=%d (>=1).",
                         mm, MONTHS_PER_YEAR, dd);
                   ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-                                                      logMsg, &rc);
+                    logMsg, ESMC_CONTEXT, &rc);
                 return(rc);
               }
               // check day of the month
@@ -1266,7 +1270,7 @@ int Calendar::count=0;
                 sprintf(logMsg,"; Custom calendar: for month %d, dd=%d > %d days "
                                 "in the month.", mm, dd, daysPerMonth[mm-1]);
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-                                                      logMsg, &rc);
+                  logMsg, ESMC_CONTEXT, &rc);
                 return(rc);
               }
               // convert mm
@@ -1296,7 +1300,7 @@ int Calendar::count=0;
         case ESMC_CALKIND_NOCALENDAR:
             // need real calendar kind
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-                                                  ", need real calendar.", &rc);
+              ", need real calendar.", ESMC_CONTEXT, &rc);
             return(rc);
             break;
         default:
@@ -1304,7 +1308,7 @@ int Calendar::count=0;
             char logMsg[ESMF_MAXSTR];
             sprintf(logMsg, "; unknown calendar kind %d.", this->calkindflag);
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, logMsg,
-                                                  &rc);
+              ESMC_CONTEXT, &rc);
             return(rc);
             break;
     }
@@ -1377,7 +1381,7 @@ int Calendar::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -1402,7 +1406,7 @@ int Calendar::count=0;
               sprintf(logMsg, "; Julian Day: d=%lld < -68569, out-of-range "
                               "for valid conversion to Gregorian date.", jdays);
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-                                                    logMsg, &rc);
+                logMsg, ESMC_CONTEXT, &rc);
               return(rc);
             }
 
@@ -1417,7 +1421,7 @@ int Calendar::count=0;
                 sprintf(logMsg, "; Julian days value %lld won't fit in given "
                                 "d integer.", jdays);
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-                                                      logMsg, &rc);
+                  logMsg, ESMC_CONTEXT, &rc);
               }
             }
             if (d_i8 != ESMC_NULL_POINTER) {
@@ -1468,7 +1472,7 @@ int Calendar::count=0;
                   sprintf(logMsg, "; year value %lld won't fit in given "
                                   "yy integer.", year);
                   ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-                                                        logMsg, &rc);
+                    logMsg, ESMC_CONTEXT, &rc);
                 }
               }
               if (yy_i8 != ESMC_NULL_POINTER) {
@@ -1533,7 +1537,7 @@ int Calendar::count=0;
               sprintf(logMsg, "; Julian Day: d=%lld < 59, out-of-range "
                               "for valid conversion to Julian date.", jdays);
               ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-                                                    logMsg, &rc);
+                logMsg, ESMC_CONTEXT, &rc);
               return(rc);
             }
 
@@ -1548,7 +1552,7 @@ int Calendar::count=0;
                 sprintf(logMsg, "; Julian days value %lld won't fit in given "
                                 "d integer.", jdays);
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-                                                      logMsg, &rc);
+                  logMsg, ESMC_CONTEXT, &rc);
               }
             }
             if (d_i8 != ESMC_NULL_POINTER) {
@@ -1593,7 +1597,7 @@ int Calendar::count=0;
                   sprintf(logMsg, "; year value %lld won't fit in given "
                                   "yy integer.", year);
                   ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-                                                        logMsg, &rc);
+                    logMsg, ESMC_CONTEXT, &rc);
                 }
               }
               if (yy_i8 != ESMC_NULL_POINTER) {
@@ -1663,7 +1667,7 @@ int Calendar::count=0;
                   sprintf(logMsg, "; year value %lld won't fit in given "
                                   "yy integer.", year);
                   ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-                                                        logMsg, &rc);
+                    logMsg, ESMC_CONTEXT, &rc);
               }
             }
             if (yy_i8 != ESMC_NULL_POINTER) {
@@ -1700,7 +1704,7 @@ int Calendar::count=0;
                 sprintf(logMsg, "; Julian days value %lld won't fit in given "
                                 "d integer.", day);
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-                                                      logMsg, &rc);
+                  logMsg, ESMC_CONTEXT, &rc);
               }
             }
             if (d_i8 != ESMC_NULL_POINTER) {
@@ -1749,7 +1753,7 @@ int Calendar::count=0;
                 sprintf(logMsg, "; year value %lld won't fit in given "
                                 "yy integer.", year);
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-                                                      logMsg, &rc);
+                  logMsg, ESMC_CONTEXT, &rc);
               }
             }
             if (yy_i8 != ESMC_NULL_POINTER) {
@@ -1782,7 +1786,7 @@ int Calendar::count=0;
                 sprintf(logMsg, "; Julian days value %lld won't fit in given "
                                 "d integer.", day);
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-                                                      logMsg, &rc);
+                  logMsg, ESMC_CONTEXT, &rc);
               }
             }
             if (d_i8 != ESMC_NULL_POINTER) {
@@ -1836,7 +1840,7 @@ int Calendar::count=0;
                 sprintf(logMsg, "; Julian days value %lld won't fit in given "
                                 "d integer.", day);
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-                                                      logMsg, &rc);
+                  logMsg, ESMC_CONTEXT, &rc);
               }
             }
             if (d_i8 != ESMC_NULL_POINTER) {
@@ -1887,7 +1891,7 @@ int Calendar::count=0;
                   sprintf(logMsg, "; year value %lld won't fit in given "
                                   "yy integer.", year);
                   ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-                                                        logMsg, &rc);
+                    logMsg, ESMC_CONTEXT, &rc);
               }
             }
             if (yy_i8 != ESMC_NULL_POINTER) {
@@ -1926,7 +1930,7 @@ int Calendar::count=0;
                 sprintf(logMsg, "; Julian days value %lld won't fit in given "
                                 "d integer.", day);
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-                                                      logMsg, &rc);
+                  logMsg, ESMC_CONTEXT, &rc);
               }
             }
             if (d_i8 != ESMC_NULL_POINTER) {
@@ -1959,14 +1963,14 @@ int Calendar::count=0;
         case ESMC_CALKIND_NOCALENDAR:
             // need real calendar kind
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-                                                  ", need real calendar.", &rc);
+              ", need real calendar.", ESMC_CONTEXT, &rc);
             break;
         default:
             // unknown calendar kind
             char logMsg[ESMF_MAXSTR];
             sprintf(logMsg, "; unknown calendar kind %d.", this->calkindflag);
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, logMsg,
-                                                  &rc);
+              ESMC_CONTEXT, &rc);
     }
 
     return(rc);
@@ -2008,7 +2012,8 @@ int Calendar::count=0;
 
     if (this == ESMC_NULL_POINTER || time == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer or time argument is NULL.", ESMC_NULL_POINTER);
+        "; 'this' pointer or time argument is NULL.", ESMC_CONTEXT,
+        ESMC_NULL_POINTER);
       return(zero);
     }
 
@@ -2063,7 +2068,8 @@ int Calendar::count=0;
                                    // TODO: use native C++ interface when
                                    //   ready
                 if (ESMC_LogDefault.MsgFoundError(rc, 
-                            ESMCI_ERR_PASSTHRU, ESMC_NULL_POINTER)) return(sum);
+                   ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NULL_POINTER))
+                   return(sum);
             
                 // do the calendar increment!
                 mm += timeinterval.mm % monthsPerYear;  // months increment
@@ -2101,7 +2107,8 @@ int Calendar::count=0;
                                  // TODO: use native C++ interface when
                                  //   ready
                 if (ESMC_LogDefault.MsgFoundError(rc, 
-                            ESMCI_ERR_PASSTHRU, ESMC_NULL_POINTER)) return(sum);
+                  ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NULL_POINTER))
+                  return(sum);
             }
             break;
         }
@@ -2143,7 +2150,8 @@ int Calendar::count=0;
                                  // TODO: use native C++ interface when
                                  //   ready
               if (ESMC_LogDefault.MsgFoundError(rc, 
-                          ESMCI_ERR_PASSTHRU, ESMC_NULL_POINTER)) return(sum);
+                ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NULL_POINTER))
+                return(sum);
             
               // do the calendar increment!
               mm += timeinterval.mm % monthsPerYear;  // months increment
@@ -2181,7 +2189,8 @@ int Calendar::count=0;
                                // TODO: use native C++ interface when
                                //   ready
               if (ESMC_LogDefault.MsgFoundError(rc, 
-                          ESMCI_ERR_PASSTHRU, ESMC_NULL_POINTER)) return(sum);
+                ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NULL_POINTER))
+                return(sum);
 
             } else if (timeinterval.yy != 0) {
               // convert any relative years increment to absolute time based
@@ -2250,7 +2259,8 @@ int Calendar::count=0;
 
     if (this == ESMC_NULL_POINTER || time == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer or time argument is NULL.", ESMC_NULL_POINTER);
+        "; 'this' pointer or time argument is NULL.", ESMC_CONTEXT,
+        ESMC_NULL_POINTER);
       return(zero);
     }
 
@@ -2308,7 +2318,8 @@ int Calendar::count=0;
                                    // TODO: use native C++ interface when
                                    //   ready
                 if (ESMC_LogDefault.MsgFoundError(rc, 
-                            ESMCI_ERR_PASSTHRU, ESMC_NULL_POINTER)) return(diff);
+                  ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NULL_POINTER))
+                  return(diff);
                 // do the calendar decrement!
                 mm -= timeinterval.mm % monthsPerYear;  // months decrement
                 if (mm < 1) {  // check for year carryunder (borrow)
@@ -2345,7 +2356,8 @@ int Calendar::count=0;
                                   // TODO: use native C++ interface when
                                   //   ready
                 if (ESMC_LogDefault.MsgFoundError(rc, 
-                            ESMCI_ERR_PASSTHRU, ESMC_NULL_POINTER)) return(diff);
+                  ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NULL_POINTER))
+                  return(diff);
             }
             break;
         }
@@ -2387,7 +2399,8 @@ int Calendar::count=0;
                                  // TODO: use native C++ interface when
                                  //   ready
               if (ESMC_LogDefault.MsgFoundError(rc, 
-                          ESMCI_ERR_PASSTHRU, ESMC_NULL_POINTER)) return(diff);
+                ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NULL_POINTER))
+                return(diff);
               // do the calendar decrement!
               mm -= timeinterval.mm % monthsPerYear;  // months decrement
               if (mm < 1) {  // check for year carryunder (borrow)
@@ -2424,7 +2437,8 @@ int Calendar::count=0;
                                 // TODO: use native C++ interface when
                                 //   ready
               if (ESMC_LogDefault.MsgFoundError(rc, 
-                          ESMCI_ERR_PASSTHRU, ESMC_NULL_POINTER)) return(diff);
+                ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NULL_POINTER))
+                return(diff);
 
             } else if (timeinterval.yy != 0) {
               // convert any relative years decrement to absolute time based
@@ -2488,7 +2502,7 @@ int Calendar::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", rc);
+        "; 'this' pointer is NULL.", ESMC_CONTEXT, rc);
       return(false);
     }
 
@@ -2537,7 +2551,7 @@ int Calendar::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", ESMC_NULL_POINTER);
+        "; 'this' pointer is NULL.", ESMC_CONTEXT, ESMC_NULL_POINTER);
       return(false);
     }
 
@@ -2587,7 +2601,7 @@ int Calendar::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", ESMC_NULL_POINTER);
+        "; 'this' pointer is NULL.", ESMC_CONTEXT, ESMC_NULL_POINTER);
       return(false);
     }
 
@@ -2620,7 +2634,7 @@ int Calendar::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", ESMC_NULL_POINTER);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, ESMC_NULL_POINTER);
       return(false);
     }
 
@@ -2670,7 +2684,7 @@ int Calendar::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", ESMC_NULL_POINTER);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, ESMC_NULL_POINTER);
       return(false);
     }
 
@@ -2737,7 +2751,7 @@ int Calendar::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -2774,7 +2788,7 @@ int Calendar::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -2784,14 +2798,14 @@ int Calendar::count=0;
       sprintf(logMsg, "; calkindflag %d (1-%d).", this->calkindflag,
               CALENDAR_KIND_COUNT);
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
-                                            logMsg, &rc);
+        logMsg, ESMC_CONTEXT, &rc);
     }
 
     if (this->monthsPerYear > MONTHS_PER_YEAR || this->monthsPerYear < 0) {
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "; monthsPerYear %d negative or > MONTHS_PER_YEAR %d.",
                       this->monthsPerYear, MONTHS_PER_YEAR);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg, &rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg, ESMC_CONTEXT, &rc);
     }
 
     if (this->monthsPerYear > 0 && this->monthsPerYear <= MONTHS_PER_YEAR) {
@@ -2802,7 +2816,8 @@ int Calendar::count=0;
         if (this->daysPerMonth[i] < 0) {
           char logMsg[ESMF_MAXSTR];
           sprintf(logMsg, "; daysPerMonth[%d] %d < 0", i, this->daysPerMonth[i]);
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg, &rc);
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg, ESMC_CONTEXT,
+            &rc);
         }
       }
 
@@ -2811,25 +2826,28 @@ int Calendar::count=0;
         sprintf(logMsg,"; daysPerYear %lld %lld/%lld != sum of daysPerMonth[] %d.",
                         this->daysPerYear.getw(), this->daysPerYear.getn(),
                         this->daysPerYear.getd(), daysPerYr);
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg, &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg, ESMC_CONTEXT,
+          &rc);
       }
     }
 
     if (this->secondsPerDay < 0) {
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "; secondsPerDay %d < 0", this->secondsPerDay);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg, &rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg, ESMC_CONTEXT,
+        &rc);
     }
 
     if (this->daysPerYear.getn() < 0) {
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "; daysPerYearDn %lld < 0", this->daysPerYear.getn());
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg, &rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg, ESMC_CONTEXT, &rc);
     }
     if (this->daysPerYear.getd() <= 0) {
         char logMsg[ESMF_MAXSTR];
         sprintf(logMsg, "; daysPerYearDd %lld <= 0", this->daysPerYear.getd());
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg, &rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg, ESMC_CONTEXT,
+          &rc);
     }
 
     return(rc);
@@ -2865,7 +2883,7 @@ int Calendar::count=0;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-         "; 'this' pointer is NULL.", &rc);
+         "; 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -2878,7 +2896,7 @@ int Calendar::count=0;
       rc = time->Time::get(ESMC_NULL_POINTER, &yy_i8);
                               // TODO: use native C++ interface when ready
       if (ESMC_LogDefault.MsgFoundError(rc,
-          ESMCI_ERR_PASSTHRU, ESMC_NULL_POINTER)) return(rc);
+          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, ESMC_NULL_POINTER)) return(rc);
       // TODO:  ensure *this* calendar and time's calendar are the same ?
       isLeapYear = Calendar::isLeapYear(yy_i8);
     }
@@ -3025,7 +3043,7 @@ int Calendar::count=0;
     Calendar();  // invoke default constructor
     rc = Calendar::set(strlen(name), name, calkindflag);
     ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU,
-                                          ESMC_NULL_POINTER);
+      ESMC_CONTEXT, ESMC_NULL_POINTER);
 
 }   // end Calendar
 
@@ -3065,7 +3083,7 @@ int Calendar::count=0;
                           daysPerMonth, monthsPerYear, secondsPerDay, 
                           daysPerYear, daysPerYeardN, daysPerYeardD);
     ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU,
-                                          ESMC_NULL_POINTER);
+      ESMC_CONTEXT, ESMC_NULL_POINTER);
 }  // end Calendar
 
 //-------------------------------------------------------------------------

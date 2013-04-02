@@ -2013,11 +2013,11 @@ end subroutine box_rearrange_io2comp_int
        io_proc, io_index )
     implicit none
     integer(kind=pio_offset),intent(in) :: gcoord(:)
+    integer,intent(in) :: ndim
+    integer,intent(in) :: nioproc
     integer(kind=pio_offset),intent(in) :: lb(ndim,nioproc)
     integer(kind=pio_offset),intent(in) :: ub(ndim,nioproc)
     integer,intent(in) :: lstride(ndim,nioproc)
-    integer,intent(in) :: ndim
-    integer,intent(in) :: nioproc
     integer,intent(out) :: io_proc
     integer(kind=pio_offset),intent(out) :: io_index
 

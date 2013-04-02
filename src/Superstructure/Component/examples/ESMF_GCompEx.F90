@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.67 2012/08/07 22:46:45 w6ws Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

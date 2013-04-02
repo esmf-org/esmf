@@ -1,4 +1,4 @@
-! $Id: ESMF_ComplianceIC.F90,v 1.50 2012/11/19 18:49:32 theurich Exp $
+! $Id$
 !
 ! Compliance Interface Component
 !-------------------------------------------------------------------------

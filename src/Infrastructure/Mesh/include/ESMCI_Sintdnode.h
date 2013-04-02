@@ -1,4 +1,4 @@
-// $Id: ESMCI_Sintdnode.h,v 1.7 2012/09/14 16:29:26 feiliu Exp $
+// $Id$
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 

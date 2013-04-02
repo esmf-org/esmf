@@ -1,4 +1,4 @@
-// $Id: ESMCI_IO_F.C,v 1.8 2012/10/03 18:29:12 gold2718 Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -23,11 +23,8 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_DistGrid.h"
 #include "ESMCI_ArraySpec.h"
-
 #include "ESMCI_IO.h"
-
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMCI_LogMacros.inc"
+#include "ESMCI_LogErr.h"
 
 using namespace std;
 

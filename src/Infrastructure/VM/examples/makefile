@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 2012/07/26 22:23:13 theurich Exp $
+# $Id$
 
 ALL:      build_examples
 run:      run_examples

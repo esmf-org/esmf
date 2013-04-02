@@ -1,4 +1,4 @@
-// $Id: ESMCI_Test.C,v 1.25 2012/10/11 18:30:21 w6ws Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,    
@@ -27,19 +27,13 @@
 #include "ESMCI.h"
 #include "ESMC.h"
 
-// remove define which automatically appends the "CONTEXT" to all
-// LogWrite() calls - we do not want to add this file name and line number;
-// the calls to the Test subroutines already include the offending filename
-// and line number, which is formatted into the message to be printed.
-#undef Write
-
 // associated class definition file
 #include "ESMCI_Test.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Test.C,v 1.25 2012/10/11 18:30:21 w6ws Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {

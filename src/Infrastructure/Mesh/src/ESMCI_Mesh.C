@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh.C,v 1.10 2012/10/08 23:46:08 jcjacob Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -10,18 +10,15 @@
 //
 //==============================================================================
 #include "ESMCI_Macros.h"
-#include <Mesh/include/ESMCI_Mesh.h>
-#include <Mesh/include/ESMCI_MeshField.h>
-#include <Mesh/include/ESMCI_MeshOBjConn.h>
-#include <Mesh/include/ESMCI_MeshObjPack.h>
-#include <Mesh/include/ESMCI_MeshSkin.h>
-#include <Mesh/include/ESMCI_SparseMsg.h>
-#include <Mesh/include/ESMCI_ParEnv.h>
-#include <Mesh/include/ESMCI_GlobalIds.h>
-
-// LogErr headers
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "Mesh/include/ESMCI_Mesh.h"
+#include "Mesh/include/ESMCI_MeshField.h"
+#include "Mesh/include/ESMCI_MeshOBjConn.h"
+#include "Mesh/include/ESMCI_MeshObjPack.h"
+#include "Mesh/include/ESMCI_MeshSkin.h"
+#include "Mesh/include/ESMCI_SparseMsg.h"
+#include "Mesh/include/ESMCI_ParEnv.h"
+#include "Mesh/include/ESMCI_GlobalIds.h"
+#include "ESMCI_LogErr.h"
 
 #include <bitset>
 #include <cstdio>
@@ -29,7 +26,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Mesh.C,v 1.10 2012/10/08 23:46:08 jcjacob Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 //#define CRE_DEBUG
@@ -106,9 +103,8 @@ Mesh *Mesh::createfromfile(char *filename, int fileTypeFlag,
 
     if (rc) *rc = localrc;
 
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
-      return ESMC_NULL_POINTER;
-    }
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return ESMC_NULL_POINTER;
   
     return mesh;
 }

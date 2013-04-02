@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2011/04/13 23:12:10 theurich Exp $ 
+# $Id$ 
 
 LOCDIR   = src
 

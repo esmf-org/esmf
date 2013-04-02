@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.17 2011/06/30 06:00:56 theurich Exp $
+! $Id$
 !
 ! System test for Concurrent Components.  User-code, component 1.
 

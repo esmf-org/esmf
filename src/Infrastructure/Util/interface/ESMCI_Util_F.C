@@ -1,4 +1,4 @@
-// $Id: ESMCI_Util_F.C,v 1.10 2012/09/20 21:19:58 w6ws Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -41,7 +41,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Util_F.C,v 1.10 2012/09/20 21:19:58 w6ws Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 
@@ -242,7 +242,8 @@ void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
 
   if (!string) {
     //printf("uninitialized String object\n");
-    ESMC_LogDefault.Write("String object uninitialized", ESMC_LOGMSG_INFO);
+    ESMC_LogDefault.Write("String object uninitialized", ESMC_LOGMSG_INFO,
+      ESMC_CONTEXT);
     if (rc) *rc = ESMF_SUCCESS;
     return;
   }
@@ -252,7 +253,7 @@ void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
     if ((*length - *offset) < fixedpart) {
          
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                             "Buffer too short to add a String object", rc);
+         "Buffer too short to add a String object", ESMC_CONTEXT, rc);
        return;
  
       //buffer = (char *)realloc((void *)buffer,

@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.41 2012/01/06 20:18:57 svasquez Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

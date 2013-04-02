@@ -1,4 +1,4 @@
-! $Id: ESMF_GeomBase.F90,v 1.21 2012/01/06 20:16:52 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -147,7 +147,7 @@ public ESMF_GeomType_Flag,  ESMF_GEOMTYPE_INVALID, ESMF_GEOMTYPE_UNINIT, &
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GeomBase.F90,v 1.21 2012/01/06 20:16:52 svasquez Exp $'
+      '$Id$'
 
 !==============================================================================
 ! 

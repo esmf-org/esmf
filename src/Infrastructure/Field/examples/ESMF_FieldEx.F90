@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldEx.F90,v 1.52 2012/03/15 19:53:57 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -74,7 +74,7 @@
     integer             :: flbound(7), fubound(7)
     type(ESMF_FieldStatus_Flag) :: fstatus
 
-    real(4) :: PI=3.14159265
+    real(ESMF_KIND_R4) :: PI=3.14159265
     integer :: finalrc, i, j, k, result
     character(ESMF_MAXSTR) :: testname
     character(ESMF_MAXSTR) :: failMsg

@@ -1,4 +1,4 @@
-// $Id: ESMCI_Fraction.C,v 1.13 2012/09/20 21:20:00 w6ws Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -33,7 +33,6 @@
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
 
 
 // TODO: resolve ambiguity between C and C++ versions of llabs() function,
@@ -44,7 +43,7 @@
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Fraction.C,v 1.13 2012/09/20 21:20:00 w6ws Exp $";
+static const char *const version = "$Id$";
 //-------------------------------------------------------------------------
 
 // TODO:  Use logarithms for checking if a multiplication or division is about
@@ -205,7 +204,8 @@ static const char *const version = "$Id: ESMCI_Fraction.C,v 1.13 2012/09/20 21:2
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "; Input fabs(rin) = %g > 0 and < 1e-17 or > 1e18\n.",
               rabs);
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE, logMsg, &rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE, logMsg, 
+        ESMC_CONTEXT, &rc);
       return(rc);
     }
 

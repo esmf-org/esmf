@@ -1,4 +1,4 @@
-// $Id: ESMC_DistGrid.C,v 1.12 2012/01/06 20:16:30 svasquez Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -22,20 +22,18 @@
 // in the companion file ESMC_DistGrid.h
 //
 //-----------------------------------------------------------------------------
-
 // include associated header file
 #include "ESMC_DistGrid.h"
 
 // include ESMF headers
 #include "ESMCI_Arg.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_DistGrid.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_DistGrid.C,v 1.12 2012/01/06 20:16:30 svasquez Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -61,7 +59,8 @@ ESMC_DistGrid ESMC_DistGridCreate(ESMC_InterfaceInt minIndexInterfaceArg,
     ESMCI::DistGrid::create(minIndexInterface, maxIndexInterface, NULL,
       NULL, 0, NULL, NULL, NULL, NULL, NULL, (ESMCI::DELayout*)NULL, NULL,
       &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, rc)){
     distgrid.ptr = NULL;
     return distgrid;  // bail out
   }
@@ -84,8 +83,8 @@ int ESMC_DistGridPrint(ESMC_DistGrid distgrid){
 
   // call into ESMCI method  
   localrc = dgp->print();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, &rc)) return rc;  // bail out
     
   // return successfully
   rc = ESMF_SUCCESS;
@@ -105,8 +104,8 @@ int ESMC_DistGridDestroy(ESMC_DistGrid *distgrid){
 
   // call into ESMCI method  
   localrc = ESMCI::DistGrid::destroy(&dgp);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, &rc)) return rc;  // bail out
   
   // invalidate pointer
   distgrid->ptr = NULL;

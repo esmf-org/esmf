@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.70 2012/11/21 23:02:57 rokuingh Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,

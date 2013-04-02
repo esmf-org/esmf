@@ -1,4 +1,4 @@
-! $Id: ESMF_UtilTypes.F90,v 1.164 2012/12/03 16:02:48 theurich Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -132,9 +132,9 @@
       sequence
       !private
 #if (ESMC_POINTER_SIZE == 4)
-          integer*4 :: ptr
+          integer(selected_int_kind( 9)) :: ptr
 #else
-          integer*8 :: ptr
+          integer(selected_int_kind(18)) :: ptr
 #endif
       end type
 

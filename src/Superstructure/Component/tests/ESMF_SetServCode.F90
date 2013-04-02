@@ -1,4 +1,4 @@
-! $Id: ESMF_SetServCode.F90,v 1.25 2012/01/06 20:19:02 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

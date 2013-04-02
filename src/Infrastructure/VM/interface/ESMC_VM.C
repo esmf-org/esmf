@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.15 2012/07/18 18:04:57 theurich Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -29,13 +29,12 @@
 // include ESMF headers
 #include "ESMCI_Arg.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_VM.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.15 2012/07/18 18:04:57 theurich Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -53,7 +52,8 @@ int ESMC_VMPrint(ESMC_VM vm){
 
   // call into ESMCI method  
   localrc = vmp->print();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc))
     return rc;  // bail out
     
   // return successfully
@@ -74,7 +74,8 @@ ESMC_VM ESMC_VMGetGlobal(int *rc){
   vm.ptr = (void *)NULL; // initialize
 
   ESMCI::VM *vmp = ESMCI::VM::getGlobal(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc))
     return vm;  // bail out
 
   vm.ptr = (void*)vmp;
@@ -97,7 +98,8 @@ ESMC_VM ESMC_VMGetCurrent(int *rc){
   vm.ptr = (void *)NULL; // initialize
 
   ESMCI::VM *vmp = ESMCI::VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc))
     return vm;  // bail out
 
   vm.ptr = (void*)vmp;

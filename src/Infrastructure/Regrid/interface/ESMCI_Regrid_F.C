@@ -1,4 +1,4 @@
-// $Id: ESMCI_Regrid_F.C,v 1.83 2012/11/16 22:42:35 oehmke Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -19,8 +19,7 @@
 //------------------------------------------------------------------------------
 #include "ESMCI_Macros.h"
 #include "ESMCI_VM.h"
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMCI_LogErr.h"
 #include "ESMCI_Grid.h"
 #include "ESMCI_GridToMesh.h"
 #include "ESMC_Util.h"
@@ -138,21 +137,23 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     if (concave) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-         "- Src contains a concave cell", &localrc)) throw localrc;
+        "- Src contains a concave cell", ESMC_CONTEXT, &localrc)) throw localrc;
     }
 
     // Clockwise
     if (clockwise) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-       "- Src contains a cell whose corners are clockwise", &localrc)) throw localrc;
+        "- Src contains a cell whose corners are clockwise", ESMC_CONTEXT,
+        &localrc)) throw localrc;
     }
 
     // Degenerate
     if (degenerate) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-         "- Src contains a cell that has corners close enough that the cell collapses to a line or point", &localrc)) throw localrc;
+        "- Src contains a cell that has corners close enough that the cell "
+        "collapses to a line or point", ESMC_CONTEXT, &localrc)) throw localrc;
     }
 
     // Only check dst mesh elements for conservative because for others just nodes are used and it doesn't 
@@ -165,21 +166,23 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
       if (concave) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "- Dst contains a concave cell", &localrc)) throw localrc;
+          "- Dst contains a concave cell", ESMC_CONTEXT, &localrc)) throw localrc;
       }
       
       // Clockwise
       if (clockwise) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-         "- Dst contains a cell whose corners are clockwise", &localrc)) throw localrc;
+          "- Dst contains a cell whose corners are clockwise", ESMC_CONTEXT,
+          &localrc)) throw localrc;
       }
 
       // Degenerate
       if (degenerate) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "- Dst contains a cell which has corners close enough that the cell collapses to a line or point", &localrc)) throw localrc;
+          "- Dst contains a cell which has corners close enough that the cell "
+          "collapses to a line or point", ESMC_CONTEXT, &localrc)) throw localrc;
       }
     }
 
@@ -228,7 +231,8 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
         if (!all_mesh_elem_ids_in_wmat(dstmesh, wts)) {
           int localrc;
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-          "- There exist destination cells which don't overlap with any source cell", &localrc)) throw localrc;
+            "- There exist destination cells which don't overlap with any "
+            "source cell", ESMC_CONTEXT, &localrc)) throw localrc;
         }
       } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
         // CURRENTLY DOESN'T WORK!!!
@@ -236,14 +240,16 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
         if (!all_mesh_node_ids_in_wmat(srcmesh, wts)) {
           int localrc;
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                   "- There exist source points which can't be mapped to any destination point", &localrc)) throw localrc;
+            "- There exist source points which can't be mapped to any "
+            "destination point", ESMC_CONTEXT, &localrc)) throw localrc;
         }
 #endif
       } else { // bilinear, patch, ...
         if (!all_mesh_node_ids_in_wmat(dstmesh, wts)) {
           int localrc;
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                   "- There exist destination points which can't be mapped to any source cell", &localrc)) throw localrc;
+            "- There exist destination points which can't be mapped to any "
+            "source cell", ESMC_CONTEXT, &localrc)) throw localrc;
         }
       }
     }
@@ -326,8 +332,8 @@ wts.Print(Par::Out());
       enum ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
       FTN_X(c_esmc_arraysmmstore)(arraysrcpp, arraydstpp, rh, &tk, factors,
             &num_entries, &iiptr, srcTermProcessing, pipelineDepth, &localrc);
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
-	throw localrc;  // bail out with exception
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
 
 
@@ -380,21 +386,22 @@ wts.Print(Par::Out());
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-       					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+       					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   } catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -433,21 +440,22 @@ extern "C" void FTN_X(c_esmc_regrid_getiwts)(ESMCI::VM **vmpp, Grid **gridpp,
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   } catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -475,21 +483,22 @@ extern "C" void FTN_X(c_esmc_regrid_getarea)(Grid **gridpp,
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   } catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -525,21 +534,22 @@ extern "C" void FTN_X(c_esmc_regrid_getfrac)(Grid **gridpp,
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   } catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -871,19 +881,19 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
             continue;
           } else {
             char msg[1024];
-            ESMC_LogDefault.ESMC_LogWrite("~~~~~~~~~~~~~~~~~ Degenerate Element Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~ Degenerate Element Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
             sprintf(msg,"  degenerate elem. id=%d",elem.get_id());
-            ESMC_LogDefault.ESMC_LogWrite(msg,ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMC_LogWrite("  ",ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMC_LogWrite("  degenerate elem. coords ",ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMC_LogWrite("  --------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  degenerate elem. coords ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  --------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
             for(int i=0; i< num_poly_nodes_orig; i++) {
               double *pnt=poly_coords_orig+2*i;
               
               sprintf(msg,"    %d  (%f,  %f) ",i,pnt[0],pnt[1]);
-              ESMC_LogDefault.ESMC_LogWrite(msg,ESMC_LOGMSG_ERROR);
+              ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             }
-            ESMC_LogDefault.ESMC_LogWrite("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
 
             *degenerate=true;
             return;
@@ -899,19 +909,19 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
         if (right_turn) {
           if (left_turn) { 
             char msg[1024];
-            ESMC_LogDefault.ESMC_LogWrite("~~~~~~~~~~~~~~~~~ Concave Element Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~ Concave Element Detected ~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
             sprintf(msg,"  concave elem. id=%d",elem.get_id());
-            ESMC_LogDefault.ESMC_LogWrite(msg,ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMC_LogWrite("  ",ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMC_LogWrite("  concave elem. coords ",ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMC_LogWrite("  --------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  concave elem. coords ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  --------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
             for(int i=0; i< num_poly_nodes_orig; i++) {
               double *pnt=poly_coords_orig+2*i;
               
               sprintf(msg,"    %d  (%f,  %f) ",i,pnt[0],pnt[1]);
-              ESMC_LogDefault.ESMC_LogWrite(msg,ESMC_LOGMSG_ERROR);
+              ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             }
-            ESMC_LogDefault.ESMC_LogWrite("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
 
             *concave=true;
             return;
@@ -963,12 +973,12 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
             continue;
           } else {
             char msg[1024];
-            ESMC_LogDefault.ESMC_LogWrite("~~~~~~~~~~~~~~~~~~~~ Degenerate Element Detected ~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~ Degenerate Element Detected ~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
             sprintf(msg,"  degenerate elem. id=%d",elem.get_id());
-            ESMC_LogDefault.ESMC_LogWrite(msg,ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMC_LogWrite("  ",ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMC_LogWrite("  degenerate elem. coords (lon [-180 to 180], lat [-90 to 90]) (x,y,z)",ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMC_LogWrite("  ----------------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  degenerate elem. coords (lon [-180 to 180], lat [-90 to 90]) (x,y,z)",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  ----------------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
             for(int i=0; i< num_poly_nodes_orig; i++) {
               double *pnt=poly_coords_orig+3*i;
               
@@ -977,9 +987,9 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
                                       &lon, &lat, &r);
 
               sprintf(msg,"    %d  (%f,  %f)  (%f, %f, %f)",i,lon,lat,pnt[0],pnt[1],pnt[2]);
-              ESMC_LogDefault.ESMC_LogWrite(msg,ESMC_LOGMSG_ERROR);
+              ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             }
-            ESMC_LogDefault.ESMC_LogWrite("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
 
             *degenerate=true;
             return;
@@ -995,12 +1005,12 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
         if (right_turn) {
           if (left_turn) { 
             char msg[1024];
-            ESMC_LogDefault.ESMC_LogWrite("~~~~~~~~~~~~~~~~~~~~ Concave Element Detected ~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~ Concave Element Detected ~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
             sprintf(msg,"  concave elem. id=%d",elem.get_id());
-            ESMC_LogDefault.ESMC_LogWrite(msg,ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMC_LogWrite("  ",ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMC_LogWrite("  concave elem. coords (lon [-180 to 180], lat [-90 to 90]) (x,y,z)",ESMC_LOGMSG_ERROR);
-            ESMC_LogDefault.ESMC_LogWrite("  ----------------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  ",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  concave elem. coords (lon [-180 to 180], lat [-90 to 90]) (x,y,z)",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("  ----------------------------------------------------------------- ",ESMC_LOGMSG_ERROR);
             for(int i=0; i< num_poly_nodes_orig; i++) {
               double *pnt=poly_coords_orig+3*i;
               
@@ -1009,9 +1019,9 @@ void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *conca
                                       &lon, &lat, &r);
 
               sprintf(msg,"    %d  (%f,  %f)  (%f, %f, %f)",i,lon,lat,pnt[0],pnt[1],pnt[2]);
-              ESMC_LogDefault.ESMC_LogWrite(msg,ESMC_LOGMSG_ERROR);
+              ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
             }
-            ESMC_LogDefault.ESMC_LogWrite("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
+            ESMC_LogDefault.Write("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",ESMC_LOGMSG_ERROR);
 
 #if 0
             write_3D_poly_woid_to_vtk("concave", num_poly_nodes, poly_coords); 

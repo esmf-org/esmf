@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.12 2012/01/06 20:14:30 svasquez Exp $
+$Id$
 
 Earth System Modeling Framework
 Copyright 2002-2013, University Corporation for Atmospheric Research,

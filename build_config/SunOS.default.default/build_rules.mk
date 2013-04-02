@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.23 2009/07/25 04:08:14 theurich Exp $
+# $Id$
 # 
 # SunOS.default.default
 #

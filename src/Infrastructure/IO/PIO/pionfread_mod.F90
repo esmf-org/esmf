@@ -3,6 +3,9 @@
 ! Any changes you make to this file may be lost
 !===================================================
 #define __PIO_FILE__ "pionfread_mod.F90.in"
+
+#include "ESMF.h"
+
 module esmfpionfread_mod
 
     use esmfpio_types, only : file_desc_t, var_desc_t, io_desc_t, pio_real, pio_double, pio_int, &
@@ -20,6 +23,9 @@ module esmfpionfread_mod
 #endif
 #ifndef NO_MPIMOD
     use mpi   !_EXTERNAL
+#endif
+#ifdef ESMF_NAG_UNIX_MODULE
+  use f90_unix_proc
 #endif
     implicit none
 #ifdef NO_MPIMOD

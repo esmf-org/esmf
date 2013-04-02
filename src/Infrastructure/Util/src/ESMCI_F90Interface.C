@@ -1,4 +1,4 @@
-// $Id: ESMCI_F90Interface.C,v 1.15 2012/01/06 20:18:20 svasquez Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -15,8 +15,7 @@
 //-----------------------------------------------------------------------------
 
 #include "ESMCI_Macros.h"
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMCI_LogMacros.inc"
+#include "ESMCI_LogErr.h"
 #include "ESMCI_F90Interface.h"
 
 //-----------------------------------------------------------------------------

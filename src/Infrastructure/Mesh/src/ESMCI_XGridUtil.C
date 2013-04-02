@@ -1,4 +1,4 @@
-// $Id: ESMCI_XGridUtil.C,v 1.20 2012/11/09 17:48:19 feiliu Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

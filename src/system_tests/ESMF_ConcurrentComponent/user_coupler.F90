@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.18 2011/06/30 06:00:42 theurich Exp $
+! $Id$
 !
 ! System test of Exclusive components, user-written Coupler component.
 

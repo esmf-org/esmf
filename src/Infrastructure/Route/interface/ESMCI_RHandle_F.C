@@ -1,4 +1,4 @@
-// $Id: ESMCI_RHandle_F.C,v 1.16 2012/09/24 23:24:22 theurich Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -21,8 +21,7 @@
 #include "ESMCI_RHandle.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_DELayout.h"
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMCI_LogMacros.inc"
+#include "ESMCI_LogErr.h"
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -83,11 +82,11 @@ extern "C" {
     try{
       xxe = new ESMCI::XXE(vm, 100, 10, 1000);
     }catch (...){
-      ESMC_LogDefault.AllocError(ESMC_NOT_PRESENT_FILTER(rc));
+      ESMC_LogDefault.AllocError(ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return;
     }
     localrc = (*ptr)->setStorage(xxe);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
        ESMC_NOT_PRESENT_FILTER(rc))) return;
     
     // return successfully

@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.14 2008/07/23 04:51:55 theurich Exp $
+# $Id$
 #
 # Linux.sxcross.default
 #

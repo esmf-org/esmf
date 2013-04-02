@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.17 2011/11/28 21:49:45 theurich Exp $
+# $Id$
 #
 # Cygwin.g95.default
 #

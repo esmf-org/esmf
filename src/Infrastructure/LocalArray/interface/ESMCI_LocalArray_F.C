@@ -1,4 +1,4 @@
-// $Id: ESMCI_LocalArray_F.C,v 1.23 2012/07/18 22:21:42 rokuingh Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -21,11 +21,8 @@
 #include <cstring>
 
 #include "ESMCI_Macros.h"
-
 #include "ESMCI_LocalArray.h"
-
 #include "ESMCI_LogErr.h"
-#include "ESMCI_LogMacros.inc"
 
 using namespace std;
 
@@ -72,7 +69,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     // call into C++
@@ -95,7 +92,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     // ESMC_Logical -> bool casting
@@ -130,7 +127,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     int rank = (*ptr)->getRank();
@@ -150,7 +147,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     int rank = (*ptr)->getRank();
@@ -170,7 +167,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     int rank = (*ptr)->getRank();
@@ -190,7 +187,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     *rank = (*ptr)->getRank();
@@ -207,7 +204,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     *typekind = (*ptr)->getTypeKind();
@@ -224,7 +221,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     localrc = ESMCI::LocalArray::destroy(*ptr);
@@ -243,7 +240,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     (*ptr)->setBaseAddr(XD base);
@@ -260,7 +257,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     *base = (void *)(*ptr)->getBaseAddr();
@@ -278,7 +275,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     localrc = (*ptr)->setFortranDopev(fptr);
@@ -298,7 +295,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     localrc = (*ptr)->getFortranDopev(fptr);
@@ -318,7 +315,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     localrc = (*ptr)->forceFortranPtr(XD base);
@@ -337,7 +334,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     if (*dealloc == ESMF_TRUE)
@@ -357,7 +354,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     if ((*ptr)->getDealloc())
@@ -378,7 +375,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     // make a local copy because opts may be non-writable or not
@@ -411,7 +408,7 @@ extern "C" {
     // check input
     if ((ptr == NULL) || (*ptr == NULL)) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid pointer to LocalArray object", rc);
+        "- Not a valid pointer to LocalArray object", ESMC_CONTEXT, rc);
       return;
     }
     // make a local copy because opts may be non-writable or not

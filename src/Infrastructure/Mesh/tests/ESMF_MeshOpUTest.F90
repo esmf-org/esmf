@@ -1,4 +1,4 @@
-! $Id: ESMF_MeshOpUTest.F90,v 1.2 2012/11/09 18:10:04 feiliu Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-      '$Id'
+      '$Id$'
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: result = 0

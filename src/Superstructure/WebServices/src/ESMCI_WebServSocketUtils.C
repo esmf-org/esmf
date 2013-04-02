@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServSocketUtils.C,v 1.8 2012/03/14 14:44:06 ksaint Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -25,8 +25,6 @@
 // probably be replaced with ESMF error handling code).
 //
 //-----------------------------------------------------------------------------
-
-
 #include "ESMCI_WebServSocketUtils.h"
 
 #include <errno.h>
@@ -42,13 +40,12 @@
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
 #include "ESMCI_WebServNetEsmf.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServSocketUtils.C,v 1.8 2012/03/14 14:44:06 ksaint Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -285,10 +282,10 @@ int  ESMCI_WebServSend(
 		}
 		else if (bytesWritten < 0)
 		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.MsgFoundError(
          	ESMC_RC_FILE_WRITE,
          	"Error while writing to socket.",
-         	&localrc);
+         	ESMC_CONTEXT, &localrc);
 		}
 	}
 
@@ -355,10 +352,10 @@ int  ESMCI_WebServRecv(
 		}
       else if (bytesRead < 0)
 		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.MsgFoundError(
          	ESMC_RC_FILE_READ,
          	"Error while reading from socket.",
-         	&localrc);
+         	ESMC_CONTEXT, &localrc);
 		}
 	}
 

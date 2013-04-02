@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServCAMOutputFile.C,v 1.7 2012/01/06 20:19:29 svasquez Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -27,7 +27,6 @@
 //       class we're going to want to keep in the ESMF baseline.)
 //
 //-----------------------------------------------------------------------------
-
 #include "ESMCI_WebServCAMOutputFile.h"
 
 #include <stdlib.h>
@@ -37,7 +36,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServCAMOutputFile.C,v 1.7 2012/01/06 20:19:29 svasquez Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.24 2011/03/16 18:36:56 theurich Exp $
+# $Id$
 #
 # Linux.pgigcc.default
 #

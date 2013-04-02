@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.53 2012/02/16 19:55:56 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

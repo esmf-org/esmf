@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.118 2012/09/26 14:05:26 w6ws Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -25,11 +25,11 @@ module ESMF_LogErrMod
 !! this should be including ESMF.h, but since it also includes the cover
 !! log macros, it can't be included here.  so just include each file 
 !! individually.  If we add files to ESMF.h they also need to be added here.
+#include "ESMF_LogMacros.inc"
 #include "ESMF_Macros.inc"
 #include "ESMF_Conf.inc"
 #include "ESMF_InitMacros.inc"
 #include "ESMF_LogConstants.inc"
-#include "ESMF_LogMacros.inc"
 #include "ESMF_ErrReturnCodes.inc"
 
 #define ESMF_SUCCESS_DEFAULT_OFF

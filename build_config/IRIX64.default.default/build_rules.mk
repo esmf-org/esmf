@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.39 2012/09/20 22:08:59 w6ws Exp $
+# $Id$
 # 
 # IRIX64.default.default
 #

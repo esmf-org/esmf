@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateRemoveOnlyUTest.F90,v 1.8 2012/08/07 22:36:47 w6ws Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -476,7 +476,7 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
     character(*), parameter :: version = &
-    '$Id: ESMF_AttributeUpdateRemoveOnlyUTest.F90,v 1.8 2012/08/07 22:36:47 w6ws Exp $'
+    '$Id$'
 !------------------------------------------------------------------------------
 
 

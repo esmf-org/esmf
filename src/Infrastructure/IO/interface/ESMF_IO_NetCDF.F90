@@ -1,4 +1,4 @@
-! $Id: ESMF_IO_NetCDF.F90,v 1.5 2012/01/06 20:17:12 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

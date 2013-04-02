@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.C,v 1.12 2012/07/18 22:21:31 rokuingh Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -24,15 +24,14 @@
 #include "ESMC_Grid.h"
 
 #include "ESMCI_Grid.h"
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
 #include "ESMC_Array.h"
 
 //-----------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Grid.C,v 1.12 2012/07/18 22:21:31 rokuingh Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -79,8 +78,8 @@ ESMC_Grid ESMC_GridCreateNoPeriDim(ESMC_InterfaceInt maxIndex,
   
   grid.ptr = reinterpret_cast<ESMCI::Grid *>(ESMCI::Grid::createnoperidim(maxIndex,
                                       coordSys, coordTypeKind, &localrc));
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return grid; // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return grid; // bail out
 
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
@@ -106,8 +105,8 @@ ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt maxIndex,
   grid.ptr = reinterpret_cast<void *>(ESMCI::Grid::create1peridim(maxIndex,
                                       coordSys, coordTypeKind, poleKind, 
                                       &localrc));
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return grid; // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return grid; // bail out
 
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
@@ -128,8 +127,8 @@ int ESMC_GridDestroy(ESMC_Grid *grid){
 
   // Do destroy
   localrc=ESMCI::Grid::destroy(&gridp);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out    
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out    
 
   // Set to NULL
   grid->ptr=NULL;
@@ -155,8 +154,8 @@ int ESMC_GridAddCoord(ESMC_Grid grid, enum ESMC_StaggerLoc staggerloc){
 
   // add coords
   localrc=gridp->ESMCI::Grid::addCoordArray(&stagger, NULL, NULL, NULL, NULL);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc; // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc; // bail out
 
   // return successfully
   return ESMF_SUCCESS;
@@ -185,8 +184,8 @@ void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim,
   ESMCI::Array *coordArray; 
   coordArray = ((gridp)->getCoordArray(&stagger, 
                                        coordDim, NULL, &localrc));
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return NULL; // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return NULL; // bail out
 
   // create an ESMF_Array and cast into pointer access
   ESMC_Array arrayPtr;
@@ -194,18 +193,18 @@ void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim,
 
   // get the Array pointer to return
   void *coordPtr = ESMC_ArrayGetPtr(arrayPtr, 0, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return NULL; // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return NULL; // bail out
 
   // get the bounds
   if(exclusiveLBound && exclusiveUBound) {
     int localDe = 0;
     localrc = gridp->getExclusiveLBound(stagger, localDe, exclusiveLBound);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-      return NULL; // bail out
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return NULL; // bail out
     localrc = gridp->getExclusiveUBound(stagger, localDe, exclusiveUBound);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-      return NULL; // bail out
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return NULL; // bail out
   }
 
 #if 0
@@ -219,8 +218,8 @@ void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim,
                             NULL, NULL, NULL,
                             &computationalLBound, &computationalUBound,
                             NULL, NULL, NULL, NULL, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return NULL; // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return NULL; // bail out
 #endif
 
   // return successfully
@@ -250,11 +249,11 @@ int ESMC_GridGetCoordBounds(ESMC_Grid grid,
   if(exclusiveLBound && exclusiveUBound) {
     int localDe = 0;
     localrc = gridp->getExclusiveLBound(stagger, localDe, exclusiveLBound);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-      return localrc; // bail out
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return localrc; // bail out
     localrc = gridp->getExclusiveUBound(stagger, localDe, exclusiveUBound);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-      return localrc; // bail out
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return localrc; // bail out
   }
 
   // return successfully
@@ -282,8 +281,8 @@ int ESMC_GridAddItem(ESMC_Grid grid, enum ESMC_GridItem_Flag itemflag,
   // add coords
   localrc=gridp->ESMCI::Grid::addItemArray(&stagger, &item, 
                                            NULL, NULL, NULL, NULL, NULL);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc; // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc; // bail out
 
   // return successfully
   return ESMF_SUCCESS;
@@ -312,8 +311,8 @@ void * ESMC_GridGetItem(ESMC_Grid grid,
   // get coord array
   ESMCI::Array *itemArray; 
   itemArray = ((gridp)->getItemArray(&stagger, &item, NULL, &localrc));
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return NULL; // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return NULL; // bail out
 
   // create an ESMF_Array and cast into pointer access
   ESMC_Array arrayPtr;
@@ -321,8 +320,8 @@ void * ESMC_GridGetItem(ESMC_Grid grid,
 
   // get the Array pointer to return
   void *itemPtr = ESMC_ArrayGetPtr(arrayPtr, 0, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return NULL; // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return NULL; // bail out
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -344,8 +343,8 @@ int ESMC_GridWrite(ESMC_Grid grid,
   ESMCI::Grid *gridp = reinterpret_cast<ESMCI::Grid *>(grid.ptr);
 
   localrc=gridp->ESMCI::Grid::write(staggerloc, fname);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out    
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out    
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -354,4 +353,4 @@ int ESMC_GridWrite(ESMC_Grid grid,
 //-----------------------------------------------------------------------------
 
 } // extern "C"
-// $Id: ESMC_Grid.C,v 1.12 2012/07/18 22:21:31 rokuingh Exp $
+// $Id$

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.28 2012/08/07 23:09:05 w6ws Exp $
+! $Id$
 !
 ! System test code FieldRegridConserv
 

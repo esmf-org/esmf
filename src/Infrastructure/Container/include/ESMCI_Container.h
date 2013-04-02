@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container.h,v 1.20 2012/09/20 23:56:53 theurich Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -22,10 +22,7 @@
 #include <list>
 #include <iostream>
 
-// LogErr headers
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMF_LogMacros.inc"             // for LogErr
-
+#include "ESMCI_LogErr.h"
 
 namespace ESMCI {
 
@@ -99,7 +96,7 @@ namespace ESMCI {
       }else{
         if (!relaxed){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-            "key already exists", &rc);
+            "key already exists", ESMC_CONTEXT, &rc);
           throw rc;  // bail out with exception
         }
         if (garbageActive)
@@ -165,13 +162,13 @@ namespace ESMCI {
     if (range.first == range.second){
       // does not exist -> error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "key does not exist", &rc);
+        "key does not exist", ESMC_CONTEXT, &rc);
       throw rc;  // bail out with exception
     }
     if (range.first != --range.second){
       // key is not unique -> error
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "key is not unique", &rc);
+        "key is not unique", ESMC_CONTEXT, &rc);
       throw rc;  // bail out with exception
     }
     return range.first->second->second;
@@ -308,7 +305,7 @@ namespace ESMCI {
       // key does not exist
       if (!relaxed){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "key does not exist", &rc);
+          "key does not exist", ESMC_CONTEXT, &rc);
         throw rc;  // bail out with exception
       }
     }
@@ -318,7 +315,7 @@ namespace ESMCI {
       if (!multi){
         if (!relaxed){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-            "key is not unique", &rc);
+            "key is not unique", ESMC_CONTEXT, &rc);
           throw rc;  // bail out with exception
         }
         return; // bail out without exception
@@ -355,7 +352,7 @@ namespace ESMCI {
       // does not exist
       if (!relaxed){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "key does not exist", &rc);
+          "key does not exist", ESMC_CONTEXT, &rc);
         throw rc;  // bail out with exception
       }
       garbage.push_back(t); // object not used to replace item goes into garbage
@@ -367,7 +364,7 @@ namespace ESMCI {
       if (!multi){
         if (!relaxed){
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-            "key is not unique", &rc);
+            "key is not unique", ESMC_CONTEXT, &rc);
           throw rc;  // bail out with exception
         }
         garbage.push_back(t); // object not used to replace item into garbage

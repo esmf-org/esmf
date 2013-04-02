@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.153 2012/04/05 00:29:01 w6ws Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@ module ESMF_BaseMod
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.153 2012/04/05 00:29:01 w6ws Exp $'
+               '$Id$'
 !------------------------------------------------------------------------------
 
       contains

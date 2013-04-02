@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.6 2011/11/28 22:05:19 theurich Exp $
+# $Id$
 #
 # MinGW.intel.default
 #
