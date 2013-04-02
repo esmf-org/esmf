@@ -132,9 +132,9 @@
       sequence
       !private
 #if (ESMC_POINTER_SIZE == 4)
-          integer*4 :: ptr
+          integer(selected_int_kind( 9)) :: ptr
 #else
-          integer*8 :: ptr
+          integer(selected_int_kind(18)) :: ptr
 #endif
       end type
 
