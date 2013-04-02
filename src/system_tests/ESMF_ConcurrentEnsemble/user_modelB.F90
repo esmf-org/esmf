@@ -158,7 +158,7 @@ module user_modelB
     integer               :: i, j, l1, l2
     character(len=ESMF_MAXSTR) :: compName
     type(dataWrapper)  :: intStatePtr
-    real(ESMF_KIND_I8) :: offset
+    real(ESMF_KIND_R8) :: offset
 
     call ESMF_GridCompGet(comp, name=compName, rc=rc)
     call ESMF_GridCompGetInternalState(comp, intStatePtr, rc)
