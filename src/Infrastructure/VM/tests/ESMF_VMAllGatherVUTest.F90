@@ -54,7 +54,7 @@
       integer:: i, j, idx
 
       integer, allocatable:: array1(:), array2(:), array3(:), array4(:), array5(:)
-      real(ESMF_KIND_I4), allocatable:: i4array1(:), i4array2(:), i4array5(:)
+      integer(ESMF_KIND_I4), allocatable:: i4array1(:), i4array2(:), i4array5(:)
       real(ESMF_KIND_R8), allocatable:: farray1(:), farray2(:), farray5(:)
       real(ESMF_KIND_R4), allocatable:: f4array1(:), f4array2(:), f4array5(:)
       type(ESMF_VMId),    allocatable:: vmidarray1(:), vmidarray2(:), vmidarray3(:)
@@ -148,7 +148,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       write(name, *) "AllGatherV Integer Test"
-      write(failMsg, *) "Did not retuirn ESMF_SUCCESS."
+      write(failMsg, *) "Did not return ESMF_SUCCESS."
       call ESMF_VMAllGatherV(vm, sendData=array2, sendCount=(localPet + 1),  &
 		recvData=array1, recvCounts=array3, recvOffsets=array4, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -177,7 +177,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       write(name, *) "AllGatherV 4-Byte Integer Test"
-      write(failMsg, *) "Did not retuirn ESMF_SUCCESS."
+      write(failMsg, *) "Did not return ESMF_SUCCESS."
       call ESMF_VMAllGatherV(vm, sendData=i4array2, sendCount=(localPet + 1),  &
                 recvData=i4array1, recvCounts=array3, recvOffsets=array4, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

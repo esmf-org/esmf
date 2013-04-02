@@ -44,8 +44,6 @@
 !------------------------------------------------------------------------------
 ! !PRIVATE:
       private
-      integer, SAVE :: PetNo, PetCnt
-      type(ESMF_VM), SAVE:: vm
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -622,6 +620,9 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     logical, intent(in), optional  :: convertToDeg
     integer, intent(out), optional :: rc
 
+    type(ESMF_VM) :: vm
+    integer PetNo, PetCnt
+
     integer :: ncid, meshId
     integer :: ncStatus
     integer :: meshDim
@@ -714,6 +715,9 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     logical, intent(in), optional  :: convertToDeg
     integer, intent(out), optional :: rc
 
+    type(ESMF_VM) :: vm
+    integer PetNo, PetCnt
+
     integer(ESMF_KIND_I4), allocatable :: elmtConnT(:,:)
     integer :: DimIds(2), VarId
     integer :: ncStatus
@@ -734,6 +738,13 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     real(ESMF_KIND_R8), allocatable:: nodeCoord1D(:)
 
 #ifdef ESMF_NETCDF
+
+    ! Get VM information
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
 
     ! Get node coordinates
     ncStatus = nf90_inquire_attribute(ncid, meshId, "node_coordinates", len=len)
@@ -939,6 +950,9 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     integer,           intent(out) :: startElmt
     integer, intent(out), optional :: rc
 
+    type(ESMF_VM) :: vm
+    integer :: PetNo, PetCnt
+
     integer(ESMF_KIND_I4), allocatable :: elmtConnT(:,:)
     integer :: DimIds(2), VarId
     integer :: ncStatus
@@ -959,6 +973,13 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     real(ESMF_KIND_R8), allocatable:: nodeCoord1D(:)
 
 #ifdef ESMF_NETCDF
+
+    ! Get VM information
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
 
     ! Get node coordinates
     ncStatus = nf90_inquire_attribute(ncid, meshId, "node_coordinates", len=len)

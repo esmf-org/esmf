@@ -97,10 +97,10 @@ ESMF_OPTLEVELDEFAULT  = 0
 ############################################################
 # Set kind numbering system to "byte"
 #
-ESMF_F90COMPILEOPTS += -kind=byte
+# ESMF_F90COMPILEOPTS += -kind=byte
 
 ############################################################
-# Set f95 to be more premissive and issue warning before error
+# Set nagfor to be more permissive and issue warnings instead of errors
 #
 ESMF_F90COMPILEOPTS += -dusty
 
