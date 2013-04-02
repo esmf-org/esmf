@@ -88,6 +88,8 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
     integer :: meshId, pos, meshDim
     character(len=80):: varname
 
+    integer, parameter :: nf90_noerror = 0
+
 #ifdef ESMF_NETCDF
     if (present(rc)) rc=ESMF_SUCCESS
     ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
@@ -104,13 +106,19 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
       rc)) return
 
     ! get dimension
-    ncStatus = nf90_get_att (ncid, meshId, "dimension", values=meshDim)
-    errmsg = "Attribute dimension in "//trim(filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
-      ESMF_SRCLINE, errmsg, &
-      rc)) return
-
+    ! Change to topology_dimension based on the update on 2/28/2013 at 
+    ! http://publicwiki.deltares.nl/display/NETCDF/Deltares+CF+proposal+for+Unstructured+Grid+data+model
+    ! for backward compatibility, use dimension if topology_dimension does not exist
+    
+    ncStatus = nf90_get_att (ncid, meshId, "topology_dimension", values=meshDim)
+    if (ncStatus /= nf90_noerror) then    
+       ncStatus = nf90_get_att (ncid, meshId, "dimension", values=meshDim)
+       errmsg = "Attribute topology_dimension or dimension in "//trim(filename)
+       if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+    endif
     ! get number of nodes
     if (present(nodeCount) .or. present(units)) then
       ncStatus = nf90_inquire_attribute(ncid, meshId, "node_coordinates", len=len)
@@ -1091,7 +1099,7 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     ! eventually, we want to support prisms (or wedge as used in UGRID)
     errmsg = "Attribute "//elmtConnName(1:len)//" _FillValue in "//trim(filename)
     ncStatus = nf90_get_att (ncid, VarId, "_FillValue", values=localFillValue)
-    if (ncStatus /= nf90_noerror) localFillValue = -1
+    if (ncStatus .ne. nf90_noerror) localFillValue = -1
     ! Get start_index attribute to find out the index base (0 or 1)
     ncStatus = nf90_get_att (ncid, VarId, "start_index", values=indexBase)
     ! if not defined, default to 0-based
