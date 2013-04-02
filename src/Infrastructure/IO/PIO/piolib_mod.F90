@@ -7,6 +7,8 @@
 #define BGx
 #endif
 
+#include "ESMF.h"
+
 module esmfpiolib_mod
   !--------------
   use esmfpio_kinds
@@ -33,6 +35,9 @@ module esmfpiolib_mod
   use esmfpio_msg_mod
 #ifndef NO_MPIMOD
   use mpi    ! _EXTERNAL
+#endif
+#ifdef ESMF_NAG_UNIX_MODULE
+  use f90_unix_proc
 #endif
   implicit none
   private

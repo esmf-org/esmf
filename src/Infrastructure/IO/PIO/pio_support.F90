@@ -17,8 +17,13 @@
 #define mpi_irsend mpi_isend
 #endif
 
+#include "ESMF.h"
+
 module esmfpio_support
   use esmfpio_kinds
+#ifdef ESMF_NAG_UNIX_MODULE
+  use f90_unix_proc
+#endif
 #ifndef NO_MPIMOD
   use mpi !_EXTERNAL
 #endif

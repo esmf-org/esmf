@@ -41,7 +41,7 @@ module ESMF_IOUtilMod
 
   use ESMF_UtilTypesMod
 #include "ESMF.h"
-#ifdef ESMF_NAG_UNIXIO_MODULE
+#ifdef ESMF_NAG_UNIX_MODULE
   use f90_unix_io
 #endif
 
