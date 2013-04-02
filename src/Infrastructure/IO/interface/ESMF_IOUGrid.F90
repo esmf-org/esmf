@@ -287,12 +287,15 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
       rc)) return
 
     ! get dimension
-    ncStatus = nf90_get_att (ncid, meshId, "dimension", values=meshDim)
-    errmsg = "Attribute dimension in "//trim(filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
-      ESMF_SRCLINE, errmsg, &
-      rc)) return
+    ncStatus = nf90_get_att (ncid, meshId, "topology_dimension", values=meshDim)
+    if (ncStatus /= nf90_noerror) then    
+       ncStatus = nf90_get_att (ncid, meshId, "dimension", values=meshDim)
+       errmsg = "Attribute topology_dimension or dimension in "//trim(filename)
+       if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+    endif
 
     ! get number of nodes
     if (present(nodeXcoords) .or. present(nodeYcoords) .or. present(faceNodeConnX)) then
@@ -628,6 +631,7 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     logical, intent(in), optional  :: convertToDeg
     integer, intent(out), optional :: rc
 
+    
     type(ESMF_VM) :: vm
     integer PetNo, PetCnt
 
@@ -638,6 +642,7 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     character(len=24) :: attbuf
     integer :: len
     logical :: convertToDegLocal
+    integer, parameter :: nf90_noerror = 0
     
 #ifdef ESMF_NETCDF
     convertToDegLocal = .false.
@@ -666,11 +671,14 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
 
     ! Check if cf_role attribute is set
     ncStatus = nf90_get_att (ncid, meshId, "cf_role", values=attbuf)
-    errmsg = "Attribute cf_role in "//trim(filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
-      ESMF_SRCLINE, errmsg, &
-      rc)) return
+    if (ncStatus /= nf90_noerror) then
+      ncStatus = nf90_get_att (ncid, meshId, "standard_name", values=attbuf)
+      errmsg = "Attribute cf_role in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD,  &
+        ESMF_SRCLINE, errmsg, &
+        rc)) return
+    endif 
     if (attbuf(1:13) .ne. 'mesh_topology') then
       call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- cf_role attribute is not mesh_topology", & 
@@ -679,13 +687,16 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     endif
 
     ! Get mesh dimension
-    ncStatus = nf90_get_att (ncid, meshId, "dimension", values=meshDim)
-    errmsg = "Attribute dimension in "//trim(filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
-      ESMF_SRCLINE, errmsg, &
-      rc)) return
-    ! Currently, only support 2D mesh
+    ncStatus = nf90_get_att (ncid, meshId, "topology_dimension", values=meshDim)
+    if (ncStatus /= nf90_noerror) then    
+       ncStatus = nf90_get_att (ncid, meshId, "dimension", values=meshDim)
+       errmsg = "Attribute topology_dimension or dimension in "//trim(filename)
+       if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+    endif
+
     if (meshDim == 2) then
        call ESMF_GetMesh2DFromUGrid (filename, ncid, meshId, nodeCoords, elmtConn, &
                                 elmtNums, startElmt, convertToDegLocal, rc)
