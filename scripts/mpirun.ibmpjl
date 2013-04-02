@@ -1,0 +1,56 @@
+#!/bin/bash
+################################################################################
+# This script abides to the ESMF script rules for executing the bundled test 
+# and example applications.
+#
+# 1) <this_script> -np N prog
+#    runs N copies of executable "prog" in parallel. The script must hide all
+#    of the system specific details, such as going through a queueing system
+#    and/or calling a system specific mpirun script with modified arguments.
+#
+# 2) The output of the script must be written to a file named "prog".stdout and
+#    it must contain the combination of stdout and stderr output of the
+#    execution.
+#
+# 3) The script must block, i.e. _not_ return, until the output described in #2
+#    has become accessible.
+#
+# To access this script set environment variable ESMF_MPIRUN=<this_script> in
+# your shell before executing any of the ESMF run targets or targets that 
+# call run targets indirectly, such as the all_tests.
+################################################################################
+#
+# This script handles calling IBM's mpirun.lsf which is IBM's unified PJL i
+# (parallel job launcher) from within an LSF session.
+
+OTHERARGS=""
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+        -np)
+            shift
+            NP="$1"
+            shift
+            ;;
+        *)
+            OTHERARGS="$OTHERARGS $1"
+            shift
+            ;;
+    esac
+done
+
+tgm(){
+      echo  $1 $2 | awk '{printf "%s","{";                 \
+                      for(i=0;i<$1;){                      \
+                         printf "%s", "("; jmx = i+$2-1;   \
+                         if( jmx > ($1-1) ) { jmx = $1-1; }\
+                         for(j=i;j<jmx;j++){               \
+                            printf "%d,",j;                \
+                         }; printf "%d)",jmx; i=jmx+1;     \
+                      }printf "%s","}"}'
+}
+
+TPN=$(echo $LSB_MCPU_HOSTS|awk '{print $2}')
+export LSB_PJL_TASK_GEOMETRY=$(tgm $NP $TPN)
+
+mpirun.lsf $OTHERARGS
