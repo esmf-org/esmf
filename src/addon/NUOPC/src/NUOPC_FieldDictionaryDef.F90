@@ -30,6 +30,7 @@ module NUOPC_FieldDictionaryDef
   ! public module interfaces
   public NUOPC_FieldDictionaryAddEntryI
   public NUOPC_FieldDictionaryGetEntryI
+  public NUOPC_FieldDictionaryHasEntryI
   public NUOPC_FieldDictionaryDefinition
 
   !-----------------------------------------------------------------------------
@@ -127,6 +128,37 @@ module NUOPC_FieldDictionaryDef
       defaultShortName = trim(fdEntry%wrap%defaultShortName)
 
   end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_FieldDictionaryHasEntryI - Check whether the NUOPC Field dictionary has a specific entry
+! !INTERFACE:
+  function NUOPC_FieldDictionaryHasEntryI(fieldDictionary, standardName, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_FieldDictionaryHasEntryI
+! !ARGUMENTS:
+    type(ESMF_Container),             intent(inout)         :: fieldDictionary
+    character(*),                     intent(in)            :: standardName
+    integer,                          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if the NUOPC Field dictionary has an entry with the
+!   specified StandardName, {\tt .false.} otherwise.
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Logical)            :: isPres
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call c_ESMC_ContainerGetIsPresent(fieldDictionary, trim(standardName), &
+      isPres, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    NUOPC_FieldDictionaryHasEntryI = isPres
+    
+  end function
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------

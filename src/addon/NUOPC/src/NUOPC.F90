@@ -39,6 +39,7 @@ module NUOPC
   public NUOPC_FieldBundleUpdateTime
   public NUOPC_FieldDictionaryAddEntry  
   public NUOPC_FieldDictionaryGetEntry  
+  public NUOPC_FieldDictionaryHasEntry  
   public NUOPC_FieldDictionarySetup
   public NUOPC_FieldIsAtTime
   public NUOPC_FillCplList

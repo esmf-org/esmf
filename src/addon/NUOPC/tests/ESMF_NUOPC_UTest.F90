@@ -252,6 +252,36 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryHasEntry() (existing entry) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  flag =  NUOPC_FieldDictionaryHasEntry("esmf_adoption_level", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryHasEntry() return value (existing entry) Test"
+  write(failMsg, *) "Did not return the correct value"
+  call ESMF_Test((flag), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryHasEntry() (not existing entry) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  flag =  NUOPC_FieldDictionaryHasEntry("this_entry_does_not_exist", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryHasEntry() return value (not existing entry) Test"
+  write(failMsg, *) "Did not return the correct value"
+  call ESMF_Test((.not.flag), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "NUOPC_FieldDictionarySetup() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_FieldDictionarySetup(rc=rc)

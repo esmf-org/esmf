@@ -43,6 +43,7 @@ module NUOPC_Base
   public NUOPC_FieldBundleUpdateTime
   public NUOPC_FieldDictionaryAddEntry  
   public NUOPC_FieldDictionaryGetEntry  
+  public NUOPC_FieldDictionaryHasEntry  
   public NUOPC_FieldDictionarySetup
   public NUOPC_FieldIsAtTime
   public NUOPC_FillCplList
@@ -1002,6 +1003,40 @@ module NUOPC_Base
       return  ! bail out
 
   end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_FieldDictionaryHasEntry - Check whether the NUOPC Field dictionary has a specific entry
+! !INTERFACE:
+  function NUOPC_FieldDictionaryHasEntry(standardName, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_FieldDictionaryHasEntry
+! !ARGUMENTS:
+    character(*),                 intent(in)            :: standardName
+    integer,                      intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if the NUOPC Field dictionary has an entry with the
+!   specified StandardName, {\tt .false.} otherwise.
+!EOP
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    call NUOPC_FieldDictionarySetup(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+    NUOPC_FieldDictionaryHasEntry = &
+      NUOPC_FieldDictionaryHasEntryI(NUOPC_FieldDictionary, &
+      standardName = standardName, rc = rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+  end function
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
