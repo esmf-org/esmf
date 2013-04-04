@@ -39,6 +39,7 @@ module ESMF_IOUtilMod
 
 ! !USES:
 
+! can not use ESMF_LogErrMod because it would cause a module circularity
   use ESMF_UtilTypesMod
 #include "ESMF.h"
 #ifdef ESMF_NAG_UNIX_MODULE
@@ -56,6 +57,8 @@ module ESMF_IOUtilMod
 !
 ! !PUBLIC MEMBER SUBROUTINES:
 !
+  public ESMF_UtilIOMkDir
+  public ESMF_UtilIORmDir
   public ESMF_UtilIOUnitFlush
   public ESMF_UtilIOUnitGet
   public ESMF_UtilIOUnitInit
@@ -99,6 +102,126 @@ module ESMF_IOUtilMod
 !------------------------------------------------------------------------------
 
   contains
+
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilIOMkDir"
+!BOP
+! !IROUTINE: ESMF_UtilIOMkDir - Create a directory in the file system
+!
+! !INTERFACE:
+  subroutine ESMF_UtilIOMkDir (pathName, keywordEnforcer,  &
+      mode, relaxedFlag,  &
+      rc)
+!
+! !PARAMETERS:
+    character(*), intent(in)            :: pathName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,      intent(in),  optional :: mode
+    logical,      intent(in),  optional :: relaxedFlag
+    integer,      intent(out), optional :: rc
+!
+! !STATUS:
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{6.2.0r}
+! \end{itemize}
+!
+! !DESCRIPTION:
+!   Call the system-dependent routine to create a directory in the file system.
+!   If the path already exists, and {\tt relaxedFlag} is either not specified,
+!   or not set to {\tt .true.} an error is returned in {\tt rc}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[pathName]
+!       Name of the directory to be created.
+!     \item[{[mode]}]
+!       File permission mode.  On POSIX-compliant systems, the default
+!       is {\tt o'755'}.  On native Windows, this arguement is ignored
+!       and default security settings are used.
+!     \item[{[relaxedFlag]}]
+!       When set to {\tt .true.}, if the path already exists, {\tt rc}
+!       will be set to {\tt ESMF\_SUCCESS} instead of an error.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+    integer :: mode_local
+    type(ESMF_Logical) :: rflag  
+    integer :: localrc
+    integer :: strptr, strptr_old
+
+    if (present(rc)) rc = ESMF_FAILURE
+
+    mode_local = o'755'
+    if (present (mode)) mode_local = mode
+
+    rflag = .false.
+    if (present (relaxedFlag)) rflag = relaxedFlag
+
+    call c_esmc_makedirectory (pathname, mode_local, rflag, localrc)
+
+    if (present (rc)) then
+      rc = localrc
+    end if
+
+  end subroutine ESMF_UtilIOMkDir
+
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilIORmDir"
+!BOP
+! !IROUTINE: ESMF_UtilIORmDir - Remove a directory from the file system
+!
+! !INTERFACE:
+  subroutine ESMF_UtilIORmDir (pathName, keywordEnforcer,  &
+      relaxedFlag, rc)
+!
+! !PARAMETERS:
+    character(*), intent(in)            :: pathName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,      intent(in),  optional :: relaxedFlag
+    integer,      intent(out), optional :: rc
+!
+! !STATUS:
+! \begin{itemize}
+! \item\apiStatusCompatibleVersion{6.2.0r}
+! \end{itemize}
+!
+! !DESCRIPTION:
+!   Call the system-dependent routine to remove a directory from the file
+!   system.  Note that the directory must be empty in order to be successfully
+!   removed.  If the directory does not exist, and {\tt relaxedFlag} is either
+!   not specified or is set to {\tt .false}, an error is returned in {\tt rc}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[pathName]
+!       Name of the directory to be created.
+!     \item[{[relaxedFlag]}]
+!       If set to {\tt .true.}, and if the specified directory does not exist,
+!       the error is ignored.  Default is {\tt .false.}
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+    integer :: localrc
+    type(ESMF_Logical) :: rflag  
+
+    if (present(rc)) rc = ESMF_FAILURE
+
+    rflag = .false.
+    if (present (relaxedFlag)) rflag = relaxedFlag
+
+    call c_esmc_removedirectory (pathname, rflag, localrc)
+
+    if (present (rc)) then
+      rc = localrc
+    end if
+
+  end subroutine ESMF_UtilIORmDir
 
 !-------------------------------------------------------------------------
 #undef  ESMF_METHOD

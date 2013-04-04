@@ -90,6 +90,9 @@
       character(8), parameter :: sort_descend(4) =  &
           (/ "this", "test", "is  ", "a   " /)
 
+      character(ESMF_MAXSTR) :: pathname
+      logical :: relaxedFlag
+
       type(ESMF_MapPtr) :: mapcontainer
       integer :: newvalue
       integer :: mapsize
@@ -520,129 +523,57 @@
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 
-!MapName Containers
-!==================
+! File system directory creation and removal
+!===========================================
 
-! Note: These are internal ESMF routines, subject to change, and
-! not intended to be end-user callable.
-
-    !
     !EX_UTest
-    ! Test creation of a MapName container
-    write (name, *) "Testing creation of a MapName container"
+    ! Test creating a directory
+    write (name, *) "Testing creating a directory"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    call ESMF_UtilMapNameCreate (mapcontainer, rc=rc)
+    pathname = "ESMF_rocks"
+    call ESMF_UtilIOMkDir (pathname, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
-    ! Test adding a name/value pair
-    write (name, *) "Testing adding a name/value pair"
+    ! Test creating a directory which already exists
+    write (name, *) "Testing creating a directory which already exists"
+    write (failMsg, *) "did not return ESMF_FAILURE"
+    pathname = "ESMF_rocks"
+    call ESMF_UtilIOMkDir (pathname, rc=rc)
+    call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest
+    ! Test creating a directory
+    write (name, *) "Testing creating a directory which already exists w/relaxedFlag"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    call ESMF_UtilMapNameAdd (mapcontainer,  &
-        name="Temperature", value=1, rc=rc)
+    pathname = "ESMF_rocks"
+    call ESMF_UtilIOMkDir (pathname, relaxedFlag=.true., rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
-    ! Test adding a second name/value pair
-    write (name, *) "Testing adding a name/value pair #2"
+    ! Test removing a directory
+    write (name, *) "Testing removing a directory"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    call ESMF_UtilMapNameAdd (mapcontainer,  &
-        name="Pressure", value=42, rc=rc)
+    pathname = "ESMF_rocks"
+    call ESMF_UtilIORmDir (pathname, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
-    ! Test obtaining the size of the map
-    write (name, *) "Testing obtaining size"
-    write (failMsg, *) "did not return correct size"
-    mapsize = ESMF_UtilMapNameSize (mapcontainer)
-    call ESMF_Test(mapsize == 2, name, failMsg, result, ESMF_SRCLINE)
+    ! Test removing a directory which does not exist
+    write (name, *) "Testing removing a directory which does not exist"
+    write (failMsg, *) "did not return failure"
+    pathname = "ESMF_rocks"
+    call ESMF_UtilIORmDir (pathname, rc=rc)
+    call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
-    ! Test obtaining the size of the map
-    write (name, *) "Testing obtaining size return code"
+    ! Test removing a directory which does not exist, relaxed
+    write (name, *) "Testing removing a directory which does not exist, relaxed"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    mapsize = ESMF_UtilMapNameSize (mapcontainer, rc=rc)
+    pathname = "ESMF_rocks"
+    call ESMF_UtilIORmDir (pathname, relaxedFlag=.true., rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
-    !EX_UTest
-    ! Test printing the name/value pairs
-    write (name, *) "Testing debug printout to stdout"
-    write (failMsg, *) "did not return ESMF_SUCCESS"
-    call ESMF_UtilMapNamePrint (mapcontainer, title=name, rc=rc)
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !EX_UTest
-    ! Test looking up a name/value pair (part 1)
-    write (name, *) "Testing looking up a name/value pair (part 1)"
-    write (failMsg, *) "did not return ESMF_SUCCESS"
-    call ESMF_UtilMapNameLookup (mapcontainer,  &
-        name="Temperature", value=newvalue, foundFlag=isfound, rc=rc)
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !EX_UTest
-    ! Test looking up a name/value pair (part 2)
-    write (name, *) "Testing looking up a name/value pair (part 2)"
-    write (failMsg, *) "did not return correct foundFlag"
-    call ESMF_Test(isfound, name, failMsg, result, ESMF_SRCLINE)
-
-    !EX_UTest
-    ! Test looking up a name/value pair (part 3)
-    write (name, *) "Testing looking up a name/value pair (part 3)"
-    write (failMsg, *) "did not return correct value"
-    call ESMF_Test(newvalue == 1, name, failMsg, result, ESMF_SRCLINE)
-
-    !EX_UTest
-    ! Test looking up a second name/value pair (part 1)
-    write (name, *) "Testing looking up a second name/value pair (part 1)"
-    write (failMsg, *) "did not return ESMF_SUCCESS or correct value"
-    call ESMF_UtilMapNameLookup (mapcontainer,  &
-        name="Pressure", value=newvalue, foundFlag=isfound, rc=rc)
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !EX_UTest
-    ! Test looking up a second name/value pair (part 2)
-    write (name, *) "Testing looking up a second name/value pair (part 2)"
-    write (failMsg, *) "did not return correct foundFlag"
-    call ESMF_Test(isfound, name, failMsg, result, ESMF_SRCLINE)
-
-    !EX_UTest
-    ! Test looking up a second name/value pair (part 3)
-    write (name, *) "Testing looking up a second name/value pair (part 3)"
-    write (failMsg, *) "did not return correct value"
-    call ESMF_Test(newvalue == 42, name, failMsg, result, ESMF_SRCLINE)
-
-    !EX_UTest
-    ! Test removing a name/value pair
-    write (name, *) "Testing removing a name/value pair"
-    write (failMsg, *) "did not return ESMF_SUCCESS"
-    call ESMF_UtilMapNameRemove (mapcontainer,  &
-        name="Temperature", rc=rc)
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
-    !EX_UTest
-    ! Test looking up a removed name/value pair (part 1)
-    write (name, *) "Testing looking up a removed name/value pair (part 1)"
-    write (failMsg, *) "did not return ESMF_SUCCESS"
-    call ESMF_UtilMapNameLookup (mapcontainer,  &
-        name="Temperature", value=newvalue, foundFlag=isfound, rc=rc)
-    call ESMF_Test(rc == ESMF_SUCCESS,  &
-        name, failMsg, result, ESMF_SRCLINE)
-
-    !EX_UTest
-    ! Test looking up a removed name/value pair (part 2)
-    write (name, *) "Testing looking up a removed name/value pair (part 2)"
-    write (failMsg, *) "indicated a removed pair was found"
-    call ESMF_Test(.not. isfound,  &
-        name, failMsg, result, ESMF_SRCLINE)
-
-    call ESMF_UtilMapNamePrint (mapcontainer, title=name, rc=rc)
-
-    !EX_UTest
-    ! Test destruction of a MapName container
-    write (name, *) "Testing destruction of a MapName container"
-    write (failMsg, *) "did not return ESMF_SUCCESS"
-    call ESMF_UtilMapNameDestroy (mapcontainer, rc=rc)
-    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 

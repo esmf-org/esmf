@@ -32,6 +32,13 @@
 #include <cstdio>
 using namespace std;
 
+#if !defined (ESMF_OS_MinGW)
+#include <errno.h>
+#include <sys/stat.h>
+#else
+#include <Windows.h>
+#endif
+
 // associated class definition file and others
 #include "ESMCI_Macros.h"
 #include "ESMCI_Util.h"
@@ -314,7 +321,136 @@ void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
 
 
 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// System Call routines
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  c_ESMC_MakeDirectory - Make a directory in the file system 
+//
+// !INTERFACE:
+      void FTN_X(c_esmc_makedirectory)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      const char *pathname,     // in - path name
+      int *mode,                // in - protection mode
+      ESMC_Logical *relaxedFlag,// in - relaxed mode
+      int *rc,                  // out - return code
+      ESMCI_FortranStrLenArg pathname_l) { // in, hidden - pathname length
+// 
+// !DESCRIPTION:
+//     Creates a new directory in the file system.  If the directory already
+//     exists, and the relaxedFlag argument is set to {tt ESMF\_TRUE},
+//     return an rc of ESMF\_SUCCESS.
+//
+//     On native Windows, the protection mode argument is ignored.  Default
+//     security attributes are used.
+//
+//EOPI
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_ESMC_MakeDirectory"
+
+  string path = string (pathname, 0, ESMC_F90lentrim (pathname, pathname_l));
+  bool relaxedflag = *relaxedFlag == ESMF_TRUE;
+
+#if !defined (ESMF_OS_MinGW)
+  if (mkdir (path.c_str(), *mode) == 0)
+    *rc = ESMF_SUCCESS;
+  else
+    switch (errno) {
+      case EEXIST:
+        if (relaxedflag)
+          *rc = ESMF_SUCCESS;
+        else
+          *rc = ESMF_FAILURE;
+        break;
+      default:
+        *rc = ESMF_FAILURE;
+    }
+#else
+  if (CreateDirectory (path.c_str(), NULL))
+    *rc = ESMF_SUCCESS;
+  else
+    switch (GetLastError()) {
+      case ERROR_ALREADY_EXISTS:
+        if (relaxedflag)
+          *rc = ESMF_SUCCESS;
+        else
+          *rc = ESMF_FAILURE;
+        break;
+      default:
+        *rc = ESMF_FAILURE;
+    }
+  }
+#endif
+
+}
+ 
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  c_ESMC_RemoveDirectory - Remove a directory from the file system 
+//
+// !INTERFACE:
+      void FTN_X(c_esmc_removedirectory)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      const char *pathname,     // in - path name
+      ESMC_Logical *relaxedFlag,// in - relaxed mode
+      int *rc,                  // out - return code
+      ESMCI_FortranStrLenArg pathname_l) { // in, hidden - pathname length
+// 
+// !DESCRIPTION:
+//     Removes an existing directory in the file system.
+//
+//EOPI
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_ESMC_RemoveDirectory"
+
+  string path = string (pathname, 0, ESMC_F90lentrim (pathname, pathname_l));
+  bool relaxedflag = *relaxedFlag == ESMF_TRUE;
+
+#if !defined (ESMF_OS_MinGW)
+  if (rmdir (path.c_str()) == 0) {
+    *rc = ESMF_SUCCESS;
+  } else
+    switch (errno) {
+      case ENOENT:
+        if (relaxedflag)
+          *rc = ESMF_SUCCESS;
+        else
+          *rc = ESMF_RC_NOT_FOUND;
+	break;
+      default:
+	*rc = ESMF_FAILURE;
+    }
+#else
+  if (RemoveDirectory (path.c_str())) {
+    *rc = ESMF_SUCCESS;
+  } else {
+    switch (GetLastError ()) {
+      case ERROR_FILE_NOT_FOUND:
+        if (relaxedflag)
+          *rc = ESMF_SUCCESS;
+        else
+          *rc = ESMF_RC_NOT_FOUND;
+        break;
+      default:
+        *rc = ESMF_FAILURE;
+    }
+  }
+#endif
+
+}
+    
 //-----------------------------------------------------------------------------
 
 void FTN_X(c_pointerprint)(void **ptr){
