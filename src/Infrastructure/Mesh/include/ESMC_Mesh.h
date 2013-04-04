@@ -296,6 +296,20 @@ ESMC_Mesh ESMC_MeshCreateFromFile(
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_MeshGetCoord - Get lat/lon coordinates from a Mesh \label{sec:mesh:capi:meshgetcoord}
+//
+// !INTERFACE:
+double * ESMC_MeshGetCoord(
+			 ESMC_Mesh mesh_in, // in (required)
+			 int * num_nodes,   // out
+			 int * rc           // out
+			 );
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //BOPI
 // !IROUTINE: ESMC_MeshCreateDistGrids - Create Dist Grids in a Mesh
 //
