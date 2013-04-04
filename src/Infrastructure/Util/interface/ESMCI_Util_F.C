@@ -16,7 +16,7 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the Fortran callable 
+// The code in this file implements the Fortran callable
 // interfaces to the C++ Util methods.
 //
 //-----------------------------------------------------------------------------
@@ -69,7 +69,7 @@ extern "C" {
 //-----------------------------------------------------------------------------
 // MapName routines allow Fortran callable management of STL map containers
 // containing string/int pairs.
- 
+
 void FTN_X(c_esmc_mapname_add) (MapName **ptr,
                             char *name, // in - name to be entered
                             int *value, // in - associated value
@@ -132,7 +132,7 @@ void FTN_X(c_esmc_mapname_destroy) (MapName **ptr,
 void FTN_X(c_esmc_mapname_lookup) (MapName **ptr,
                             char *name, // in - name to be looked up
                             int *value, // out - associated value
-                            ESMC_Logical *foundflag, // out - true if name was found 
+                            ESMC_Logical *foundflag, // out - true if name was found
                             int *rc,    // out - return code
                             ESMCI_FortranStrLenArg name_len) {
 #undef  ESMC_METHOD
@@ -223,14 +223,14 @@ void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
 
 //-----------------------------------------------------------------------------
 //BOPI
-// !IROUTINE:  c_ESMC_StringSerialize - Serialize String object 
+// !IROUTINE:  c_ESMC_StringSerialize - Serialize String object
 //
 // !INTERFACE:
       void FTN_X(c_esmc_stringserialize)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
-// 
+//
 // !ARGUMENTS:
       char *string,             // in/out - string object
       char *buf,                // in/out - really a byte stream
@@ -239,7 +239,7 @@ void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
       ESMC_InquireFlag *inquireflag, // in - inquire flag
       int *rc,                  // out - return code
       ESMCI_FortranStrLenArg clen) { // in, hidden - string length
-// 
+//
 // !DESCRIPTION:
 //     Serialize the contents of a string object.
 //
@@ -258,11 +258,11 @@ void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
   int fixedpart = clen + 1;
   if (*inquireflag != ESMF_INQUIREONLY) {
     if ((*length - *offset) < fixedpart) {
-         
+
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
          "Buffer too short to add a String object", ESMC_CONTEXT, rc);
        return;
- 
+
       //buffer = (char *)realloc((void *)buffer,
       //                         *length + 2*fixedpart + byte_count);
       //*length += 2 * fixedpart;
@@ -273,7 +273,7 @@ void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
   if (*inquireflag != ESMF_INQUIREONLY)
     memcpy(cp, string, clen);
   cp += clen;
-  
+
   *offset = cp - buf;
 
   if (rc) *rc = ESMF_SUCCESS;
@@ -285,21 +285,21 @@ void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
 
 //-----------------------------------------------------------------------------
 //BOPI
-// !IROUTINE:  c_ESMC_StringDeserialize - Deserialize String object 
+// !IROUTINE:  c_ESMC_StringDeserialize - Deserialize String object
 //
 // !INTERFACE:
       void FTN_X(c_esmc_stringdeserialize)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
-// 
+//
 // !ARGUMENTS:
       char *string,             // in/out - string object
       char *buf,                // in/out - really a byte stream
       int *offset,              // in/out - current offset in the stream
       int *rc,                  // out - return code
       ESMCI_FortranStrLenArg clen) { // in, hidden - string length
-// 
+//
 // !DESCRIPTION:
 //     Deserialize the contents of a base object.
 //
@@ -310,7 +310,7 @@ void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
   cp = buf + *offset;
   memcpy(string, cp, clen);
   cp += clen;
-  
+
   *offset = cp - buf;
 
   if (rc) *rc = ESMF_SUCCESS;
@@ -329,21 +329,21 @@ void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
 
 //-----------------------------------------------------------------------------
 //BOPI
-// !IROUTINE:  c_ESMC_MakeDirectory - Make a directory in the file system 
+// !IROUTINE:  c_ESMC_MakeDirectory - Make a directory in the file system
 //
 // !INTERFACE:
       void FTN_X(c_esmc_makedirectory)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
-// 
+//
 // !ARGUMENTS:
       const char *pathname,     // in - path name
       int *mode,                // in - protection mode
       ESMC_Logical *relaxedFlag,// in - relaxed mode
       int *rc,                  // out - return code
       ESMCI_FortranStrLenArg pathname_l) { // in, hidden - pathname length
-// 
+//
 // !DESCRIPTION:
 //     Creates a new directory in the file system.  If the directory already
 //     exists, and the relaxedFlag argument is set to {tt ESMF\_TRUE},
@@ -391,23 +391,23 @@ void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
 #endif
 
 }
- 
+
 //-----------------------------------------------------------------------------
 //BOPI
-// !IROUTINE:  c_ESMC_RemoveDirectory - Remove a directory from the file system 
+// !IROUTINE:  c_ESMC_RemoveDirectory - Remove a directory from the file system
 //
 // !INTERFACE:
       void FTN_X(c_esmc_removedirectory)(
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
-// 
+//
 // !ARGUMENTS:
       const char *pathname,     // in - path name
       ESMC_Logical *relaxedFlag,// in - relaxed mode
       int *rc,                  // out - return code
       ESMCI_FortranStrLenArg pathname_l) { // in, hidden - pathname length
-// 
+//
 // !DESCRIPTION:
 //     Removes an existing directory in the file system.
 //
@@ -450,7 +450,7 @@ void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
 #endif
 
 }
-    
+
 //-----------------------------------------------------------------------------
 
 void FTN_X(c_pointerprint)(void **ptr){
