@@ -35,6 +35,7 @@ using namespace std;
 #if !defined (ESMF_OS_MinGW)
 #include <errno.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #else
 #include <Windows.h>
 #endif
