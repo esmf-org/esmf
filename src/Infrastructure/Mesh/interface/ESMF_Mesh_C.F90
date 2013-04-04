@@ -69,91 +69,115 @@
       if (c3dpresent == 0 .and. ctodpresent == 0 .and. &
           auapresent == 0) then
       	 mesh = ESMF_MeshCreate(filename, fileTypeFlag, rc=rc)
+         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
       elseif (c3dpresent == 0 .and. ctodpresent == 0 .and. &
               auapresent == 1) then
       	 mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
   	                        addUserArea=addUserArea, rc=rc)      
+         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
       elseif (c3dpresent == 0 .and. ctodpresent == 1 .and. &
               auapresent == 0) then
       	 mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
                                 convertToDual=convertToDual, rc=rc)      
+         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
       elseif (c3dpresent == 0 .and. ctodpresent == 1 .and. &
               auapresent == 1) then
       	 mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
                                 convertToDual=convertToDual, &
                                 addUserArea=addUserArea, rc=rc)      
+         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
       elseif (c3dpresent == 1 .and. ctodpresent == 0 .and. &
               auapresent == 0) then
       	 mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
                                 convert3D=convert3D, rc=rc)      
+         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
       elseif (c3dpresent == 1 .and. ctodpresent == 0 .and. &
               auapresent == 1) then
       	 mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
                                 convert3D=convert3D, &
                                 addUserArea=addUserArea, rc=rc)      
+         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
       elseif (c3dpresent == 1 .and. ctodpresent == 1 .and. &
               auapresent == 0) then
       	 mesh = ESMF_MeshCreate(filename, fileTypeFlag, &      
                                 convert3D=convert3D, &
 				convertToDual=convertToDual, rc=rc)
+         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
       elseif (c3dpresent == 1 .and. ctodpresent == 1 .and. &
               auapresent == 1) then
       	 mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
                                 convert3D=convert3D, &
 				convertToDual=convertToDual, &
                                 addUserArea=addUserArea, rc=rc)
+         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+         PRINT*, "ESMF_Mesh_C.F90(f_esmf_meshcreatefromfile): incorrect args for SCRIP"
+	 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+       	                       msg="- incorrect args for SCRIP", & 
+                               ESMF_CONTEXT, rcToReturn=rc) 
+ 	 if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      	     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
    elseif (filetypeflag == ESMF_FILEFORMAT_ESMFMESH) then
       if (c3dpresent == 0 .and. auapresent == 0) then
       	 mesh = ESMF_MeshCreate(filename, fileTypeFlag, rc=rc)
+         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
       elseif (c3dpresent == 0 .and. auapresent == 1) then
       	 mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
 	                        addUserArea=addUserArea, rc=rc)
+         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
       elseif (c3dpresent == 1 .and. auapresent == 0) then
       	 mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
                                 convert3D=convert3D, rc=rc)
+         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
       elseif (c3dpresent == 1 .and. auapresent == 1) then
       	 mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
 	                        addUserArea=addUserArea, convert3D=convert3D, &
                                 rc=rc)
+         if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+         PRINT*, "ESMF_Mesh_C.F90(f_esmf_meshcreatefromfile): incorrect args for ESMFMESH"
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+	                       msg="- incorrect args for ESMFMESH", & 
+                               ESMF_CONTEXT, rcToReturn=rc) 
+ 	 if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      	     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
    elseif (filetypeflag == ESMF_FILEFORMAT_UGRID) then
        if (mnpresent == 1 .and. ampresent == 1 .and. vnpresent == 1) then
        	  mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
 	       	                 meshname=meshname, addMask=addMask, &
 				 varname=varname, rc=rc)
+          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
        elseif (mnpresent == 1) then
        	  mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
 	       	                 meshname=meshname, rc=rc)
+          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
        else
           PRINT*, "ESMF_Mesh_C.F90(f_esmf_meshcreatefromfile): incorrect args for UGRID"
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
        	                        msg="- incorrect args for UGRID", & 
                                 ESMF_CONTEXT, rcToReturn=rc) 
-          return
+ 	  if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+	      ESMF_CONTEXT, rcToReturn=rc)) return
        endif
    else
    endif
-
-
-   if (c3dpresent == 0 .and. ctodpresent == 0 .and. auapresent == 0 .and. &
-       mnpresent == 0 .and. ampresent == 0 .and. vnpresent == 0) then
-       mesh = ESMF_MeshCreate(filename, fileTypeFlag, rc=rc)
-   else if (c3dpresent == 1 .and. ctodpresent == 1 .and. &
-            auapresent == 1 .and. mnpresent == 1 .and. &
-            ampresent == 1 .and. vnpresent == 1) then
-       mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
-                              convert3D=convert3D, &
-                              convertToDual=convertToDual, &
-                              addUserArea=AddUserArea, &
-                              meshname=meshname, &
-                              addMask=addMask, &
-                              varname=varname, &
-                              rc=rc)
-   endif
-   if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
-   
+  
    meshp=mesh%this
 
    rc = ESMF_SUCCESS
