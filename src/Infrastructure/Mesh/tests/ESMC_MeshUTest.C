@@ -173,6 +173,19 @@ int main(void){
   printf("num_elem = %d\nnum_elem_owned_out=%d\n", num_elem, num_elem_owned_out);
 
   //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "MeshGetCoord");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  double *coords;
+  int num_nodes;
+  coords = ESMC_MeshGetCoord(mesh, &num_nodes, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  //for (int i = 0; i < num_nodes; i++) {
+  //  printf ("%lf,%lf\n",coords[i*2], coords[i*2+1]);
+  //}
+
+  //----------------------------------------------------------------------------
   //NEX_UTest
   // Write out the internal mesh data
   strcpy(name, "MeshWrite");
