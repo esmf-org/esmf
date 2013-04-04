@@ -161,7 +161,6 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
      }
 
-    meshp = new Mesh();
     int localrc;
     meshp = ESMCI::Mesh::createfromfile(filename, fileTypeFlag, convert3D, 
 					convertToDual, addUserArea, meshname, 
