@@ -135,22 +135,6 @@
    else
    endif
 
-
-   if (c3dpresent == 0 .and. ctodpresent == 0 .and. auapresent == 0 .and. &
-       mnpresent == 0 .and. ampresent == 0 .and. vnpresent == 0) then
-       mesh = ESMF_MeshCreate(filename, fileTypeFlag, rc=rc)
-   else if (c3dpresent == 1 .and. ctodpresent == 1 .and. &
-            auapresent == 1 .and. mnpresent == 1 .and. &
-            ampresent == 1 .and. vnpresent == 1) then
-       mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
-                              convert3D=convert3D, &
-                              convertToDual=convertToDual, &
-                              addUserArea=AddUserArea, &
-                              meshname=meshname, &
-                              addMask=addMask, &
-                              varname=varname, &
-                              rc=rc)
-   endif
    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
    
