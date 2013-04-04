@@ -278,6 +278,62 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
     return ESMF_SUCCESS;
   }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MeshCXX::getLocalCoords()"
+  double * MeshCXX::getLocalCoords(int *num_nodes, int *rc) {
+    Mesh &mesh = *meshPointer;
+
+    // Get some info
+    int sdim=mesh.spatial_dim();
+    *num_nodes = mesh.num_nodes();
+
+    MEField<> *coords = mesh.GetCoordField();
+    
+    // Make a map between data index and associated node pointer
+    std::vector<std::pair<int,MeshObj *> > index_to_node;
+    index_to_node.reserve(*num_nodes);
+    
+    // iterate through local nodes collecting indices and node pointers
+    Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+    for (; ni != ne; ++ni) {
+      MeshObj &node = *ni;
+      
+      if (!GetAttr(node).is_locally_owned()) continue;
+      
+      int idx = node.get_data_index();
+      index_to_node.push_back(std::make_pair(idx,&node));
+    }
+  
+    // Sort by data index
+    std::sort(index_to_node.begin(), index_to_node.end());
+  
+    double *nodeCoord;
+  
+    nodeCoord = (double *) malloc (*num_nodes * 2 * sizeof(double));
+    if (nodeCoord == NULL) {
+      fprintf (stderr, "Could not allocate memory for nodeCoord\n");
+      exit(1);
+    }
+
+    // Load coords in order of index
+    int nodeCoordPos=0;
+    for (UInt i = 0; i < index_to_node.size(); ++i) {
+      MeshObj &node = *(index_to_node[i].second);      
+      
+      // Copy coords into output array
+      double *c = coords->data(node);    
+      for (int j=0; j<sdim; j++) {
+	nodeCoord[nodeCoordPos]=c[j];
+	nodeCoordPos++;
+      } 
+    } 
+
+    // Set return code 
+    printf ("set return code\n");
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+    return nodeCoord;
+}
 
 // TODO: most of this routine is duplicated in ESMCI_Mesh_F.C - should be merged  
 int MeshCXX::addElements(int numElems, int *elemId, 
