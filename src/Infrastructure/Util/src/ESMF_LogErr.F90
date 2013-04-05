@@ -32,8 +32,6 @@ module ESMF_LogErrMod
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrReturnCodes.inc"
 
-#define ESMF_SUCCESS_DEFAULT_OFF
-
 !BOPI
 !============================================================================
 ! !MODULE: Fortran Interface to Log class. 
@@ -872,7 +870,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(in),    optional :: line  		      
       character(len=*), intent(in),    optional :: file  		      
       character(len=*), intent(in),    optional :: method		      
-      integer,          intent(out),   optional :: rcToReturn		      
+      integer,          intent(inout), optional :: rcToReturn		      
       type(ESMF_Log),   intent(inout), optional :: log			      
 
 !
@@ -894,7 +892,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \begin{description}
 ! 	
 !      \item [statusToCheck]
-!            Fortran allocation status to check.
+!            Fortran allocation status to check.  Fortran specifies
+!            that a status of 0 (zero) indicates success.
 !      \item [{[msg]}]
 !            User-provided message string.
 !      \item [{[line]}]
@@ -905,9 +904,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[method]}]
 !            User-provided method string.
 !      \item [{[rcToReturn]}]
-!            If specified, set the {\tt rcToReturn} value to 
-!            {\tt ESMF\_RC\_MEM} which is the error code for a memory 
-!            allocation eror.
+!            If specified, when the allocation status indicates an error,
+!            set the {\tt rcToReturn} value to {\tt ESMF\_RC\_MEM}.  Otherwise,
+!            {\tt rcToReturn} is not modified.
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
 !	     of the default Log.
@@ -917,7 +916,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
     character(len=ESMF_MAXSTR)::tempmsg
     character(len=ESMF_MAXSTR)::allocmsg
-    integer::msglen=0
+    integer::msglen
     type(ESMF_LogPrivate), pointer  :: alog
     
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
@@ -955,12 +954,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               line=line, file=file, method=method, log=log)
         endif
         ESMF_LogFoundAllocError=.TRUE.
-#ifdef ESMF_SUCCESS_DEFAULT_ON
-    else
-        if (present(rcToReturn)) then
-            rcToReturn=ESMF_SUCCESS
-        endif
-#endif
     endif
        
 end function ESMF_LogFoundAllocError
@@ -1009,7 +1002,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \begin{description}
 ! 	
 !      \item [statusToCheck]
-!            Fortran deallocation status to check.
+!            Fortran deallocation status to check.  Fortran specifies
+!            that a status of 0 (zero) indicates success.
 !      \item [{[msg]}]
 !            User-provided message string.
 !      \item [{[line]}]
@@ -1020,9 +1014,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[method]}]
 !            User-provided method string.
 !      \item [{[rcToReturn]}]
-!            If specified, set the {\tt rcToReturn} value to 
-!            {\tt ESMF\_RC\_MEM} which is the error code for a memory 
-!            allocation eror.
+!            If specified, when the deallocation status indicates an error,
+!            set the {\tt rcToReturn} value to {\tt ESMF\_RC\_MEM}.  Otherwise,
+!            {\tt rcToReturn} is not modified.
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
 !	     of the default Log.
@@ -1032,7 +1026,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
     character(len=ESMF_MAXSTR)::tempmsg
     character(len=ESMF_MAXSTR)::allocmsg
-    integer::msglen=0
+    integer::msglen
     type(ESMF_LogPrivate), pointer  :: alog
     
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
@@ -1070,12 +1064,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               line=line, file=file, method=method, log=log)
         endif
         ESMF_LogFoundDeallocError=.TRUE.
-#ifdef ESMF_SUCCESS_DEFAULT_ON
-    else
-        if (present(rcToReturn)) then
-            rcToReturn=ESMF_SUCCESS
-        endif
-#endif
     endif
        
 end function ESMF_LogFoundDeallocError
@@ -1102,7 +1090,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(in),    optional :: line
       character(len=*), intent(in),    optional :: file
       character(len=*), intent(in),    optional :: method
-      integer,          intent(out),   optional :: rcToReturn
+      integer,          intent(inout), optional :: rcToReturn
       type(ESMF_Log),   intent(inout), optional :: log
 	
 
@@ -1134,7 +1122,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \item [{[method]}]
 !            User-provided method string.
 !      \item [{[rcToReturn]}]
-!            If specified, copy the {\tt rcToCheck} value to {\tt rc}.
+!            If specified, when {\tt rcToCheck} indicates an error,
+!            set the {\tt rcToReturn} value to {\tt ESMF\_RC\_MEM}.  Otherwise,
+!            {\tt rcToReturn} is not modified.
 !            This is not the return code for this function; it allows
 !            the calling code to do an assignment of the error code
 !            at the same time it is testing the value.
@@ -1145,15 +1135,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      \end{description}
 ! 
 !EOP
-	
+
     integer:: rcToCheckInternal
     integer:: i
     logical:: masked
     type(ESMF_LogPrivate), pointer          :: alog
     character(len=ESMF_MAXSTR)::tempmsg
     character(len=ESMF_MAXSTR)::allocmsg
-    integer::msglen=0
+    integer::msglen
     
+    ! set default return
+    ESMF_LogFoundError = .FALSE.
+
     if (.not.present(rcToCheck)) then
       rcToCheckInternal = ESMF_SUCCESS
     else
@@ -1176,19 +1169,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
-      ! set default returns
-      ESMF_LogFoundError = .FALSE.
-#ifdef ESMF_SUCCESS_DEFAULT_ON	
-      if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
-#endif
-
       if (alog%traceFlag) then
         call ESMF_LogWrite ('called: ' // ESMF_METHOD, ESMF_LOGMSG_TRACE,  &
           line=line, file=file, method=method, log=log)
       end if
     
       ! check the error code
-      if (rcToCheckInternal .NE. ESMF_SUCCESS) then
+      if (rcToCheckInternal /= ESMF_SUCCESS) then
         masked = .false.
         do i=1, alog%errorMaskCount
           if (alog%errorMask(i) == rcToCheckInternal) masked = .true.
@@ -1208,10 +1195,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (present(rcToReturn)) rcToReturn = rcToCheckInternal
         endif
       endif
-#ifdef ESMF_SUCCESS_DEFAULT_ON	
-    else    
-      if (present(rcToReturn)) rcToReturn = ESMF_SUCCESS
-#endif
+    else
+      if (rcToCheckInternal /= ESMF_SUCCESS) then
+        ESMF_LogFoundError=.TRUE.
+        if (present(rcToReturn)) rcToReturn = rcToCheckInternal
+      end if
     endif
        
 end function ESMF_LogFoundError
@@ -1827,7 +1815,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_LogPrivate), pointer          :: alog
     character(len=ESMF_MAXSTR)::tempmsg
     character(len=ESMF_MAXSTR)::allocmsg
-    integer::msglen=0
+    integer::msglen
 
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 

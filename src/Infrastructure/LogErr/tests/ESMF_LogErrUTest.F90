@@ -250,10 +250,18 @@
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
+      ! AllocError and DeallocError tests
+      !
+      ! Note that the StatusToCheck arguments are Fortran status values, not
+      ! ESMF rc values.  By the Fortran Standards, allocate and deallocate
+      ! stat values are zero upon success, and non-zero on error.
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test Log Found Alloc Error
       write(failMsg, *) "Did not return .TRUE."
-      is_error=ESMF_LogFoundAllocError(ESMF_FAILURE,  &
+      is_error=ESMF_LogFoundAllocError(statusToCheck=1,  &
           file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Log Found Alloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
@@ -270,7 +278,7 @@
       !EX_UTest
       ! Test Error Msg Found Alloc Error
       write(failMsg, *) "Did not return .TRUE."
-      is_error=ESMF_LogFoundAllocError(ESMF_FAILURE, msg="hello",  &
+      is_error=ESMF_LogFoundAllocError(statusToCheck=1, msg="hello",  &
           file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Error Msg Found Alloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
@@ -287,7 +295,7 @@
       !EX_UTest
       ! Test Error Msg Found Error
       write(failMsg, *) "Did not return .FALSE."
-      is_error=ESMF_LogFoundAllocError(ESMF_SUCCESS, msg="hello",  &
+      is_error=ESMF_LogFoundAllocError(statusToCheck=0, msg="hello",  &
           file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Error Msg Found Error Test"
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
@@ -296,7 +304,7 @@
       !EX_UTest
       ! Test Log Found Alloc Error
       write(failMsg, *) "Did not return ESMF_FAILURE"
-      is_error=ESMF_LogFoundAllocError(ESMF_FAILURE,  &
+      is_error=ESMF_LogFoundAllocError(statusToCheck=1,  &
           file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Log Found Alloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
@@ -314,7 +322,7 @@
       ! Test Log Found Alloc Error
       write(failMsg, *) "Did not return .FALSE."
       rc2 = ESMF_FAILURE
-      is_error=ESMF_LogFoundAllocError(ESMF_SUCCESS,  &
+      is_error=ESMF_LogFoundAllocError(statusToCheck=0,  &
           file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Log Found Alloc Error Test"
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
@@ -332,7 +340,7 @@
       !EX_UTest
       ! Test Log Found Dealloc Error
       write(failMsg, *) "Did not return .TRUE."
-      is_error=ESMF_LogFoundDeallocError(ESMF_FAILURE,  &
+      is_error=ESMF_LogFoundDeallocError(statusToCheck=1,  &
           file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Log Found Dealloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
@@ -349,7 +357,7 @@
       !EX_UTest
       ! Test Error Msg Found Dealloc Error
       write(failMsg, *) "Did not return .TRUE."
-      is_error=ESMF_LogFoundDeallocError(ESMF_FAILURE, msg="hello",  &
+      is_error=ESMF_LogFoundDeallocError(statusToCheck=1, msg="hello",  &
           file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Error Msg Found Dealloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
@@ -366,7 +374,7 @@
       !EX_UTest
       ! Test Error Msg Found Error
       write(failMsg, *) "Did not return .FALSE."
-      is_error=ESMF_LogFoundDeallocError(ESMF_SUCCESS, msg="hello",  &
+      is_error=ESMF_LogFoundDeallocError(statusToCheck=0, msg="hello",  &
           file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Error Msg Found Error Test"
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
@@ -375,7 +383,7 @@
       !EX_UTest
       ! Test Log Found Dealloc Error
       write(failMsg, *) "Did not return ESMF_FAILURE"
-      is_error=ESMF_LogFoundDeallocError(ESMF_FAILURE,  &
+      is_error=ESMF_LogFoundDeallocError(statusToCheck=1,  &
           file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Log Found Dealloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
@@ -393,7 +401,7 @@
       ! Test Log Found Dealloc Error
       write(failMsg, *) "Did not return .FALSE."
       rc2 = ESMF_FAILURE
-      is_error=ESMF_LogFoundDeallocError(ESMF_SUCCESS,  &
+      is_error=ESMF_LogFoundDeallocError(statusToCheck=0,  &
           file=ESMF_FILENAME, line=__LINE__, rcToReturn=rc2)
       write(name, *) "Log Found Dealloc Error Test"
       call ESMF_Test((.NOT.is_error), name, failMsg, result, ESMF_SRCLINE)
@@ -406,6 +414,10 @@
       write(name, *) " Verify rcToReturn Value Test"
       call ESMF_Test((rc2.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc2 = ", rc2
+
+      !------------------------------------------------------------------------
+      ! Additional Log methods
+      !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
       !EX_UTest
