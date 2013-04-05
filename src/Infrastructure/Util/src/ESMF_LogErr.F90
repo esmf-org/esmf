@@ -980,7 +980,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(in),    optional :: line  		     	
       character(len=*), intent(in),    optional :: file  		     	
       character(len=*), intent(in),    optional :: method		     	
-      integer,          intent(out),   optional :: rcToReturn		     	
+      integer,          intent(inout), optional :: rcToReturn		     	
       type(ESMF_Log),   intent(inout), optional :: log			     	
 
 !
