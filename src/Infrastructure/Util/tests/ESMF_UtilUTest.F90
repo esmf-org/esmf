@@ -526,11 +526,12 @@
 ! File system directory creation and removal
 !===========================================
 
+    write (pathname,'(a,i3.3)') 'ESMF_rocks_', localPet
+
     !EX_UTest
     ! Test creating a directory
     write (name, *) "Testing creating a directory"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    pathname = "ESMF_rocks"
     call ESMF_UtilIOMkDir (pathname, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -538,7 +539,6 @@
     ! Test creating a directory which already exists
     write (name, *) "Testing creating a directory which already exists"
     write (failMsg, *) "did not return ESMF_FAILURE"
-    pathname = "ESMF_rocks"
     call ESMF_UtilIOMkDir (pathname, rc=rc)
     call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -546,7 +546,6 @@
     ! Test creating a directory
     write (name, *) "Testing creating a directory which already exists w/relaxedFlag"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    pathname = "ESMF_rocks"
     call ESMF_UtilIOMkDir (pathname, relaxedFlag=.true., rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -554,7 +553,6 @@
     ! Test removing a directory
     write (name, *) "Testing removing a directory"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    pathname = "ESMF_rocks"
     call ESMF_UtilIORmDir (pathname, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -562,7 +560,6 @@
     ! Test removing a directory which does not exist
     write (name, *) "Testing removing a directory which does not exist"
     write (failMsg, *) "did not return failure"
-    pathname = "ESMF_rocks"
     call ESMF_UtilIORmDir (pathname, rc=rc)
     call ESMF_Test(rc /= ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -570,7 +567,6 @@
     ! Test removing a directory which does not exist, relaxed
     write (name, *) "Testing removing a directory which does not exist, relaxed"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    pathname = "ESMF_rocks"
     call ESMF_UtilIORmDir (pathname, relaxedFlag=.true., rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
