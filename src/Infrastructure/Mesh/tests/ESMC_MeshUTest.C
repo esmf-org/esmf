@@ -173,7 +173,7 @@ int main(void){
   printf("num_elem = %d\nnum_elem_owned_out=%d\n", num_elem, num_elem_owned_out);
 
   //----------------------------------------------------------------------------
-  //EX_UTest
+  //NEX_UTest
   strcpy(name, "MeshGetCoord");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *coords;
