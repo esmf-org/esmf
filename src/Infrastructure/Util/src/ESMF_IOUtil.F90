@@ -123,7 +123,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !STATUS:
 ! \begin{itemize}
-! \item\apiStatusCompatibleVersion{6.2.0r}
+! \item\apiStatusCompatibleVersion{6.2.0}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -136,9 +136,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[pathName]
 !       Name of the directory to be created.
 !     \item[{[mode]}]
-!       File permission mode.  On POSIX-compliant systems, the default
-!       is {\tt o'755'}.  On native Windows, this arguement is ignored
-!       and default security settings are used.
+!       File permission mode.  If not specified on POSIX-compliant systems,
+!       the default is {\tt o'755'}.  On native Windows, this argument is
+!       ignored and default security settings are used.
 !     \item[{[relaxedFlag]}]
 !       When set to {\tt .true.}, if the path already exists, {\tt rc}
 !       will be set to {\tt ESMF\_SUCCESS} instead of an error.
@@ -186,7 +186,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !STATUS:
 ! \begin{itemize}
-! \item\apiStatusCompatibleVersion{6.2.0r}
+! \item\apiStatusCompatibleVersion{6.2.0}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
