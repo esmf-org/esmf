@@ -28,7 +28,7 @@ between the two grids. The input and output files are all in NetCDF format. The 
 different formats:  the SCRIP format~\ref{sec:fileformat:scrip} as is used as an input to SCRIP~\cite{ref:SCRIP}, the GRIDSPEC Tile grid file~\ref{sec:fileformat:gridspec} following the
 \htmladdnormallink{CF metadata conventions}{http://cf-pcmdi.llnl.gov}, 
 the ESMF unstructured grid format~\ref{sec:fileformat:esmf} or the proposed CF unstructured grid~\ref{sec:fileformat:ugrid} 
-in the current ESMF release.  GRIDSPEC is a proposed CF extention for the annotation of complex Earth system grids.  In the current ESMF release, we only support a single tile grid file for rectangular lat/lon grid.  For UGRID, currently we only support the 2D flexible mesh topology with mixed triangles and quadrilaterals.
+in the current ESMF release.  GRIDSPEC is a proposed CF extention for the annotation of complex Earth system grids.  In the current ESMF release, we only support a single tile grid file for rectangular lat/lon grid.  For UGRID, we support the 2D flexible mesh topology with mixed triangles and quadrilaterals and fully 3D unstructured mesh topology with hexahedrons.
 
 The weight file is the same format~\ref{sec:weightfileformat} as is 
 output by SCRIP. The interpolation weights can be generated with
@@ -325,7 +325,15 @@ where
 			offset format is not supported in the NetCDF version 
 			earlier than 3.6.0.  An error message will be generated 
 			if this flag is specified while the application is 
-			linked with a NetCDF library earlier	than 3.6.0.
+			linked with a NetCDF library earlier than 3.6.0.
+
+    --netcdf4           an optional argument specifying that the output weight
+                        will be created in the NetCDF4 format.  This option only
+                        works with NetCDF library version 4.1 and above.
+                        An error message will be generated if this flag is
+			specified while the application is linked with a NetCDF
+			library that was not compiled with the NetCDF4 file format
+                        enabled.
 
     --src_meshname    - this argument is required if the source grid type is
                         UGRID. It defines the dummy variable name that has all 
@@ -717,18 +725,24 @@ variables:
 
 ESMF\_RegridWeightGen supports NetCDF files that follow the CF UGRID convention for unstructured grids.
 
-The UGRID file format is a proposed extention to the CF metadata conventions for the unstructured grid data model. The latest proposal can be found \htmladdnormallink{here}{http://bit.ly/ugrid_cf}.  The proposal is still evolving, the Mesh creation API and ESMF\_RegridWeightGen in the current ESMF release is based on the version updated on 03/14/2012.
+The UGRID file format is a proposed extention to the CF metadata conventions for the unstructured grid data model. The latest proposal can be found \htmladdnormallink{here}{http://bit.ly/ugrid_cf}.  The proposal is still evolving, the Mesh creation API and ESMF\_RegridWeightGen in the current ESMF release is based on the version updated on 02/28/2013.
 
 In the UGRID proposal, a 1D, 2D, or 3D mesh topology can be defined for an unstructured grid.  Currently, ESMF 
-only supports the 2D flexible mesh topology where each cell (a.k.a. "face" as defined in the UGRID document)  
-in the mesh may have 
-differnt number of corner nodes.  The main addition of the UGRID extention is a dummy variable that defines the mesh 
-topology and its connectivity.  This additional variable has a required attribute {\tt standard\_name} with value {\tt "mesh\_topology"}.  In addition, it has three more required attributes: {\tt dimension}, {\tt node\_coordinates} and 
-{\tt face\_node\_connectivity}.  The value of {\tt dimension} attribute should be 2 for a 2D mesh.  The 
-value of attribute {\tt node\_coordinates} is the names of the node longitude and latitude variables.
-The value of attribute {\tt face\_node\_connectivity} is the variable name that defines the corner node indices for each face of the mesh.   
+supports two types of meshes: (1) the 2D flexible mesh topology where each cell (a.k.a. "face" as defined in the UGRID document) in the mesh is either a triangle or a quadrilateral, and (2) the fully 3D unstructured mesh topology where each cell (a.k.a. "volume" as defined in the UGRID document) in the mesh
+is either a tetrahedron or a hexahedron.  Pyramids and wedges are not currently supported in ESMF, but they
+can be defined as degenerated tetrahedrons.   The main addition of the UGRID extention is a dummy variable that defines the mesh 
+topology and its connectivity.  This additional variable has a required attribute {\tt cf\_role} with value {\tt "mesh\_topology"}.  In addition, it has two more required attributes: {\tt topology\_dimension} 
+and {\tt node\_coordinates}.  If it is a 2D mesh (i.e., {\tt topology\_dimension} equals to 2), attribute 
+{\tt face\_node\_connectivity} is required.  If it is a 3D mesh (i.e., {\tt topology\_dimension} equals to 3), attributes {\tt volume\_node\_connectivity} and {\tt volume\_shape\_type} are required. 
+The value of attribute {\tt node\_coordinates} is the names of the node longitude and latitude variables, 
+plus the elevation variable if it is a 3D mesh.
+The value of attribute {\tt face\_node\_connectivity} or {\tt volume\_node\_connectivity} is the variable name that defines the corner node indices for each mesh cell.  Note in the UGRID terminology, a 2D cell is called a {\tt face} and a 3D cell is called a {\tt volume}.  The additional attribute {\tt volume\_shape\_type} for the
+3D mesh points to a flag variable that specifies the shape type of each cell in the mesh.   
 
-In the following example, the dummy mesh topology variable is {\tt fvcom\_mesh}.  As described above, its {\tt standard\_name} attribute has to be {\tt mesh\_topology} and {\tt dimension} attribute has to be 2 for a 2D mesh.  It defines 
+\subsubsection{2D UGRID Example}
+
+Below is a sample 2D mesh called. {\tt FVCOM\_grid2d}. the dummy mesh topology variable is {\tt fvcom\_mesh}.  As described above, its {\tt cf\_role} attribute has to be {\tt mesh\_topology} 
+and {\tt topology\_dimension} attribute has to be 2 for a 2D mesh.  It defines 
 the node coordinate variable names to be {\tt lon} and {\tt lat}.  It also specifies the face/node connectivity variable name as {\tt nv}.
 
 The variable {\tt nv} is a two-dimensional array that defines the node indices of each face. The first dimension 
@@ -786,6 +800,57 @@ variables:
 		va:missing_value = -999. ;
 		va:location = "face" ;
 		va:mesh = "fvcom_mesh" ;
+}
+\end{verbatim}
+
+\subsubsection{3D UGRID Example}
+
+Following is a sample 3D UGRID file containing hexahedron cells. the dummy mesh topology variable is {\tt fvcom\_mesh}. Its {\tt cf\_role} attribute has to be {\tt mesh\_topology} 
+and {\tt topology\_dimension} attribute has to be 3 for a 3D mesh.  There are two additional required attributes:
+{\tt volume\_node\_connectivity} specifies a variable name that defines the corner indices of the mesh cells and 
+{\tt volume\_shape\_type} specifies a variable name that defines the type of the mesh cells.   
+
+The node coordinates are defined by variables {\tt nodelon}, {\tt nodelat} and {\tt height}. Currently, the units 
+attribute for the height variable is either {\tt kilometers}, {\tt km} or {\tt meters}.   
+The variable {\tt vertids} is a two-dimensional array that defines the corner node indices of each mesh cell. The first dimension 
+defines the maximal number of nodes for each cell. There is only one type of cells in the sample grid, i.e. hexahedrons, so the maximal number
+of nodes is 8.  The node order is defined in ~\ref{const:cmeshelemtype}.  The index can be either 1-based or 0-based and
+the default is 0-based.
+ Setting an optional attribute {\tt start\_index} to 1 changed it to 1-based index scheme.
+The variable {\tt meshtype} is a one-dimensional integer array that defines the shape type of each cell.  Currently, ESMF only 
+supports tetrahedron and hexahedron shapes. There are three attributes in {\tt meshtype}: {\tt flag_range}, {\tt flag_values}, and {\tt flag_meanings} representing the range of the flag values, all the possible flag values, and the meaning of each flag value, respectively.  {\tt flag_range} and {\tt flag_values} are either a scaler or an array of integers.  {\tt flag_meanings} is a text string containing a list of shape types separated by space. In this example, there
+is only one shape type, thus, the values of {\meshtype} are all 1.  
+  
+\begin{verbatim}
+netcdf wam_ugrid100_110 {
+dimensions:
+	nnodes = 78432 ;
+	ncells = 66030 ;
+	eight = 8 ;
+variables:
+	int mesh ;
+		mesh:cf_role = "mesh_topology" ;
+		mesh:topology_dimension = 3. ;
+		mesh:node_coordinates = "nodelon nodelat height" ;
+		mesh:volume_node_connectivity = "vertids" ;
+		mesh:volume_shape_type = "meshtype" ;
+	double nodelon(nnodes) ;
+		nodelon:standard_name = "longitude" ;
+		nodelon:units = "degrees_east" ;
+	double nodelat(nnodes) ;
+		nodelat:standard_name = "latitude" ;
+		nodelat:units = "degrees_north" ;
+	double height(nnodes) ;
+		height:standard_name = "elevation" ;
+		height:units = "kilometers" ;
+	int vertids(ncells, eight) ;
+		vertids:cf_role = "volume_node_connectivity" ;
+		vertids:start_index = 1. ;
+	int meshtype(ncells) ;
+		meshtype:cf_role = "volume_shape_type" ;
+		meshtype:flag_range = 1. ;
+		meshtype:flag_values = 1. ;
+		meshtype:flag_meanings = "hexahedron" ;
 }
 \end{verbatim}
 
