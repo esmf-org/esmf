@@ -1043,18 +1043,15 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
             dst_user_area_adj=dst_areas[i]/(*area);
           }
 
-          // Allocate column of empty entries
-          std::vector<IWeights::Entry> col;
-          col.resize(1,col_empty);
-
-          col[0].id=sr.elem->get_id();
-          col[0].value=src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i];
+          // Set col info
+          IWeights::Entry col(sr.elem->get_id(), 0, 
+                              src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i], 0);
 
           // Set row info
           IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
 
           // Put weights into weight matrix
-          iw.InsertRowMerge(row, col);       
+          iw.InsertRowMergeSingle(row, col);  
         }
       }
     } // not generating mid mesh, need to compute weights

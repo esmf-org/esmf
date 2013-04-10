@@ -89,6 +89,8 @@ public:
   void InsertRow(const Entry &row, const std::vector<Entry> &cols);
 
   void InsertRowMerge(const Entry &row, const std::vector<Entry> &cols);
+
+  void InsertRowMergeSingle(const Entry &row, const Entry &col);
   
   void GetRowGIDS(std::vector<UInt> &gids);
 
