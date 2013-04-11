@@ -2,4 +2,6 @@
 %
 The NUOPC Layer uses standard metadata on Fields to implement the decision making in the generic code. Specifically the generic {\tt NUOPC\_Connector} component uses the {\tt StandardName} Attribute to construct a list of matching Fields between the import and export States. The NUOPC Field Dictionary provides a software implementation of a controlled vocabulary for the {\tt StandardName} Attribute. It also associates each registered {\tt StandardName} with a set of canonical {\tt Units}, a default {\tt LongName}, and a default {\tt ShortName}.
 
+The {\tt StandardName} Attributes of all the currently implemented entries in the dictionary comply with the Climate and Forecast (CF) conventions as documented at \htmladdnormallink{http://cf-pcmdi.llnl.gov/}{http://cf-pcmdi.llnl.gov/}.
+
 Besides the {\tt StandardName} Attribute, the NUOPC Layer currently only uses the {\tt Units} entry to verify that Fields are given in their canonical units. The plan is to extend this to support unit conversion in the future. The default {\tt LongName} and default {\tt ShortName} associations are provided as a convenience to the implementor of NUOPC compliant components; the NUOPC Layer itself does not base any decisions on these two Attributes.

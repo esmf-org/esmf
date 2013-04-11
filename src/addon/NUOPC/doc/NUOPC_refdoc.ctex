@@ -85,8 +85,6 @@
 \input{../addon/NUOPC/doc/NUOPC_FieldDictionary}
 #endif
 
-\newpage
-
 \subsection{Metadata}
 
 \subsubsection{Model Component Metadata}
