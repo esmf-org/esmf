@@ -203,28 +203,29 @@ one character short keyword prefixed with {\tt '-'} are supported.  The format t
 as follows:
 
 \begin{verbatim}
-ESMF_RegridWeightGen  [--help]
-                      [--version]
-                      [--source|-s] src_grid_filename
-                      [--destination|-d] dst_grid_filename
-                      [--weight|-w] out_weight_file
-                      [--method|-m] [bilinear|patch|nearestdtos|neareststod|conserve]
-                      [--pole|-p] [none|all|teeth|1|2|..]
-                      [--ignore_unmapped|-i]
-                      --src_type [SCRIP|GRIDSPEC|ESMF|UGRID]
-                      --dst_type [SCRIP|GRIDSPEC|ESMF|UGRID]
-                      -t [SCRIP|GRIDSPEC|ESMF|UGRID]
-                      -r
-                      --src_regional
-                      --dst_regional
-		      --64bit_offset
-                      --src_meshname dummy_var_name
-		      --dst_meshname dummy_var_name
-		      --src_missingvalue var_name
-		      --dst_missingvalue var_name
-		      --src_coordinates lon_name,lat_name
-		      --dst_coordinates lon_name,var_name
-                      --user_areas
+ESMF_RegridWeightGen  
+	[--help]
+        [--version]
+        [--source|-s] src_grid_filename
+        [--destination|-d] dst_grid_filename
+        [--weight|-w] out_weight_file
+        [--method|-m] [bilinear|patch|nearestdtos|neareststod|conserve]
+        [--pole|-p] [none|all|teeth|1|2|..]
+        [--ignore_unmapped|-i]
+        --src_type [SCRIP|GRIDSPEC|ESMF|UGRID]
+        --dst_type [SCRIP|GRIDSPEC|ESMF|UGRID]
+        -t [SCRIP|GRIDSPEC|ESMF|UGRID]
+        -r
+        --src_regional
+        --dst_regional
+	--64bit_offset
+        --src_meshname dummy_var_name
+	--dst_meshname dummy_var_name
+	--src_missingvalue var_name
+	--dst_missingvalue var_name
+	--src_coordinates lon_name,lat_name
+	--dst_coordinates lon_name,var_name
+        --user_areas
 where
   --help              - Print the usage message and exit.
   --version           - Print ESMF version and license information and exit.
@@ -328,8 +329,8 @@ where
 			linked with a NetCDF library earlier than 3.6.0.
 
     --netcdf4           an optional argument specifying that the output weight
-                        will be created in the NetCDF4 format.  This option only
-                        works with NetCDF library version 4.1 and above.
+                        will be created in the NetCDF4 format.  This option 
+                        only works with NetCDF library version 4.1 and above.
                         An error message will be generated if this flag is
 			specified while the application is linked with a NetCDF
 			library that was not compiled with the NetCDF4 file format
@@ -343,8 +344,8 @@ where
 			is UGRID. It defines the dummy variable name that has
 			all the topology information stored in its attributes.
 
-    --src_missingvalue - an optional argument that defines the variable name in
-                         the source grid file if the file type is GRIDSPEC.
+    --src_missingvalue - an optional argument that defines the variable name 
+                         in the source grid file if the file type is GRIDSPEC.
                          The regridder will generate a mask using the missing
 			 values of the data variable.  The missing value is defined
 			 using an attribute called "_FillValue" or "missing_value"
@@ -377,8 +378,9 @@ where
 
     --user_areas      - an optional argument specifying that the conservation
                         is adjusted to hold for the user areas provided in
-                        the grid files. If not specified, then the conservation
-                        will hold for the ESMF calculated (great circle) areas.
+                        the grid files. If not specified, then the 
+                        conservation will hold for the ESMF calculated 
+                        (great circle) areas.
                         Whichever areas the conservation holds for are output
                         to the weight file.
 \end{verbatim}
@@ -549,7 +551,8 @@ variables:
      double nodeCoords(nodeCount, coordDim);
             nodeCoords:units = "degrees" ;
      int elementConn(elementCount, maxNodePElement) ;
-            elementConn:long_name = "Node Indices that define the element connectivity";
+            elementConn:long_name = "Node Indices that define the element /
+                                     connectivity";
             elementConn:_FillValue = -1 ;
      byte numElementConn(elementCount) ;
             numElementConn:long_name = "Number of nodes per element" ;
@@ -623,7 +626,8 @@ variables:
         double  nodeCoords(nodeCount, coordDim);
                 nodeCoords:units = "degrees" ;
         int elementConn(elementCount, maxNodePElement) ;
-                elementConn:long_name = "Node Indices that define the element connectivity";
+                elementConn:long_name = "Node Indices that define the element /
+                                         connectivity";
                 elementConn:_FillValue = -1 ;
         byte numElementConn(elementCount) ;
                 numElementConn:long_name = "Number of nodes per element" ;
