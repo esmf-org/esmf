@@ -125,7 +125,7 @@ void WMat::InsertRowMergeSingle(const Entry &row, const Entry &col) {
 
 
 
-#if 1
+#if 0
 // Insert row and associated columns into matrix complain if column doesn't 
 // exist then add it, if it exists with a different value then complain
 // ASSUMES cols is in sorted order
