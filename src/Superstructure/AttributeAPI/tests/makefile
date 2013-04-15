@@ -1,4 +1,4 @@
-# $Id$ 
+# $Id$
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -68,7 +68,7 @@ include ${ESMF_DIR}/makefile
 
 DIRS        =
 
-CLEANDIRS   = 
+CLEANDIRS   =
 CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
