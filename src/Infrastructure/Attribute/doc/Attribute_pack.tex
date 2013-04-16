@@ -123,7 +123,7 @@ There are many attributes that are used to describe components. There are curren
      {\tt SimulationEndDate} & The date in simulated time of the end of a model simulation. & N/A & activity:SimulationRun:dateRange \\
      {\tt SimulationEnsembleID} & The reference name or number of the ensemble to which a simulation belongs. & N/A & activity:EnsembleMember:ensembleMemberID \\
      {\tt SimulationLongName} & The name of the simulation with any acronyms spelled out. & N/A & activity:NumericalActivity:longName \\
-     {\tt SimulationNumberOfProcessingElements} & The number of PEs used in the simulation. & N/A & software:Parallelization:processes \\
+     {\tt SimulationNumberOfProcessing Elements} & The number of PEs used in the simulation. & N/A & software:Parallelization:processes \\
      {\tt SimulationProjectName} & A campaign, such as a model intercomparison project, that may involve multiple groups and experiments. & N/A & activity:Activity:project \\
      {\tt SimulationRationale} & The reason for performing a simulation. & N/A  & activity:Activity:rationale \\
      {\tt SimulationShortName} & The name of the simulation. & N/A & activity:NumericalActivity:shortName \\
@@ -155,7 +155,7 @@ There are many attributes that are used to describe components. There are curren
     \item Description: This package describes the platform a particular simulation is run on. It must be created in conjunction with the CIM Main Package (see above). This package is nested within the CIM Main Package (above); see the description in Section \ref{sec:AttPackNesting}.
 \end{itemize}
 
-\begin{longtable}{|p{6cm}|p{2cm}|p{1.5cm}|p{6.5cm}|}
+\begin{longtable}{|p{5cm}|p{2.5cm}|p{2cm}|p{6.5cm}|}
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field \linebreak (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
@@ -194,7 +194,7 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{longtable}{|p{6cm}|p{2cm}|p{1.5cm}|p{6.5cm}|}
+\begin{longtable}{|p{4.5cm}|p{3cm}|p{2cm}|p{6.5cm}|}
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
@@ -226,7 +226,7 @@ There are many attributes that are used to describe components. There are curren
 \end{itemize}
 
 
-\begin{longtable}{|p{6cm}|p{2cm}|p{1.5cm}|p{6.5cm}|}
+\begin{longtable}{|p{3.5cm}|p{3cm}|p{3cm}|p{6.5cm}|}
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
@@ -265,7 +265,8 @@ There are many attributes that are used to describe components. There are curren
      \hline\hline
      {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field (<CIM section>:<Entity>:<Field>)}\\
      \hline\hline
-     {\tt <Scientific property name>} & <METAFOR definition>. & \htmladdnormallink{METAFOR mindmap files}{http://metaforclimate.eu/trac/browser/cmip5q/tags/version-1.3/trunk/cmip5q/cmip5q/data/mindmaps}.  & software:SoftwareComponent: scientificProperties \\
+     % This hyperlink is done three times to allow the line to split normally in the table
+     {\tt <Scientific property name>} & <METAFOR definition>. & \htmladdnormallink{METAFOR}{http://metaforclimate.eu/trac/browser/cmip5q/tags/version-1.3/trunk/cmip5q/cmip5q/data/mindmaps} \htmladdnormallink{mindmap}{http://metaforclimate.eu/trac/browser/cmip5q/tags/version-1.3/trunk/cmip5q/cmip5q/data/mindmaps} \htmladdnormallink{files}{http://metaforclimate.eu/trac/browser/cmip5q/tags/version-1.3/trunk/cmip5q/cmip5q/data/mindmaps}.  & software:SoftwareComponent: scientificProperties \\
      \hline\hline
 \end{longtable}
 
@@ -372,7 +373,7 @@ Several standards exist to describe fields. There are currently 4 predefined Fie
     \item Description: This package is used to describe a simulation and the input (initial and boundary) conditions used in that simulation. It is also used to describe any ancillary data sets that contain input condition variables. This package should not be used to describe the variables in an unconfigured model component. A pre-defined Attribute package for that case will be implemented in a future release of ESMF.  This package nests the ESMF General, CF Extended, and CF General Field packages (below) within it; this is described in Section \ref{sec:AttPackNesting}.  The attribute values within these ESMF and CF nested packages currently appear in the Component Properties section of the CIM output file.  A separate Component Properties package may be developed for this purpose in a future ESMF release.
 \end{itemize}
 
-\begin{longtable}{|p{6cm}|p{2cm}|p{1.5cm}|p{6.5cm}|}
+\begin{longtable}{|p{5.5cm}|p{2cm}|p{2cm}|p{6.5cm}|}
     \hline\hline
     {\bf Name} & {\bf Definition} & {\bf Controlled Vocabulary} & {\bf CIM Schema Field (<CIM section>:<Entity>:<Field>)}\\
     \hline\hline
