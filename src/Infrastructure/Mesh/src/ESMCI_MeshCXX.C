@@ -329,7 +329,6 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
     } 
 
     // Set return code 
-    printf ("set return code\n");
     if (rc!=NULL) *rc = ESMF_SUCCESS;
 
     return nodeCoord;
