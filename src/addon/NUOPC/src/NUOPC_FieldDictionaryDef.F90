@@ -206,10 +206,10 @@ module NUOPC_FieldDictionaryDef
 !EOTL
 !BOTL
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "precipitation_amount", &
-      canonicalUnits    = "kg m-2", &
-      defaultLongName   = "Precipitation Amount", &
-      defaultShortName  = "prcp", &
+      standardName      = "precipitation_flux", &
+      canonicalUnits    = "kg m-2 s-1", &
+      defaultLongName   = "Precipitation Flux", &
+      defaultShortName  = "prcf", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
