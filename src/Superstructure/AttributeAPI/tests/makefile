@@ -1,4 +1,4 @@
-# $Id$ 
+# $Id$
 
 ALL:  build_unit_tests
 run:  run_unit_tests
@@ -7,7 +7,9 @@ run_uni:  run_unit_tests_uni
 LOCDIR	  = src/Superstructure/AttributeAPI/tests
 
 
-TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
+TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttributeUpdateRemoveOnlyUTest
+
+DOODLE = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeABundleUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeCplCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeDistGridUTest \
@@ -68,7 +70,7 @@ include ${ESMF_DIR}/makefile
 
 DIRS        =
 
-CLEANDIRS   = 
+CLEANDIRS   =
 CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 

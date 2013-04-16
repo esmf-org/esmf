@@ -12,14 +12,14 @@
 module ESMF_AttributeUpdateRemoveOnlyUTestMod
 
 !  THIS unit test is to show the behavior of a known bug documented for the
-!  510, 520, 520p1, and 520r releases.  When an Attribute 
+!  510, 520, 520p1, and 520r releases.  When an Attribute
 !  hierarchy is updated after ONLY removals have been performed, the newly
 !  removed Attributes are not removed on all PETs by the ESMF_AttributeUpdate()
 !
 !  The reason for this bug is that the routine inside of AttributeUpdate which
 !  unpackes the serialized Attribute hierarchy that is sent from the rootPets
 !  is received on the non-root PETs.  If only removals have happened then the
-!  missing Attributes will not be present on the non root PETs where the 
+!  missing Attributes will not be present on the non root PETs where the
 !  unpacking routine runs.  The routine is recursive, so it depends on an object
 !  hierarchy to guide the program flow.  If there is no Attribute there, it will
 !  not be able to detect that fact.
@@ -40,8 +40,8 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 
   !-------------------------------------------------------------------------
 !   !  The SetVM Register routines for Gridcomp1
- 
-  subroutine userm1_setvm(comp, rc) 
+
+  subroutine userm1_setvm(comp, rc)
     type(ESMF_GridComp)  :: comp
     integer, intent(out) :: rc
 
@@ -55,11 +55,11 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
-    
+
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
@@ -105,9 +105,9 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
 
     ! First test whether ESMF-threading is supported on this machine
@@ -155,9 +155,9 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
 
     ! First test whether ESMF-threading is supported on this machine
@@ -311,7 +311,8 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
-    character(ESMF_MAXSTR)      :: name2,convESMF,purpGen
+    character(ESMF_MAXSTR)      :: name3, name2, value32, convESMF, purpGen
+    character(ESMF_MAXSTR)      :: name_to_add, value_to_add
     type(ESMF_Field)            :: field
     type(ESMF_FieldBundle)      :: fieldbundle
 
@@ -320,6 +321,11 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     convESMF = 'ESMF'
     purpGen = 'General'
     name2 = 'StandardName'
+    name3 = 'LongName'
+    value32 = 'CHANGED!!'
+    name_to_add = "new_attribute"
+    value_to_add = "new_att_value"
+
 
     call ESMF_GridCompGet(comp, vm=vm, rc=status)
     if (status .ne. ESMF_SUCCESS) return
@@ -329,6 +335,15 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     call ESMF_StateGet(exportState, "fieldbundle", fieldbundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
+    if (rc/=ESMF_SUCCESS) return
+
+#if 0
+    call ESMF_AttributeSet(field, name_to_add, value_to_add, rc=status)
+    if (rc/=ESMF_SUCCESS) return
+#endif
+
+    call ESMF_AttributeSet(field, name3, value32, convention=convESMF, &
+      purpose=purpGen, rc=status)
     if (rc/=ESMF_SUCCESS) return
 
     call ESMF_AttributeRemove(field, name2, convention=convESMF, &
@@ -447,7 +462,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     rc = ESMF_SUCCESS
 
   end subroutine usercpl_final
- 
+
 end module
 
 program ESMF_AttributeUpdateRemoveOnlyUTest
@@ -502,7 +517,8 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
       type(ESMF_Field)        :: field
       type(ESMF_FieldBundle)  :: fieldbundle
 
-      character(ESMF_MAXSTR)  :: name2,value2
+      character(ESMF_MAXSTR)  :: name3, name2, value3, value2, value_out
+      character(ESMF_MAXSTR)  :: name_to_add, value_to_add, value_out_added
       logical                 :: isPresent
 
 !-------------------------------------------------------------------------------
@@ -520,7 +536,7 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
     !-----------------------------------------------------------------------------
 
 #ifdef ESMF_TESTEXHAUSTIVE
-    call ESMF_VMGetCurrent(vm, rc=rc) 
+    call ESMF_VMGetCurrent(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
@@ -579,12 +595,42 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
     ! Now we can start doing some testing
     convESMF = 'ESMF'
     purpGen = 'General'
+    name3 = 'LongName'
     name2 = 'StandardName'
+    value3 = 'CHANGED!!'
+    value_out = ''
+    value_out_added = ''
+
+    name_to_add = "new_attribute"
+    value_to_add = "new_att_value"
 
     call ESMF_StateGet(c1exp, "fieldbundle", fieldbundle, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+#if 0
+    !EX_disabled_UTest_Multi_Proc_Only
+    call ESMF_AttributeGet(field, name_to_add, value=value_out_added, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+    write(name, *) "Getting an updated deleted Attribute value from a Field test"
+    call ESMF_Test((rc==ESMF_SUCCESS).and. &
+                    value_to_add == value_out_added, &
+                    name, failMsg, result, ESMF_SRCLINE)
+
+    print *, "value_out_added = ", trim(value_out_added)
+#endif
+
+    !EX_disabled_UTest_Multi_Proc_Only
+    call ESMF_AttributeGet(field, name3, value=value_out, convention=convESMF, &
+      purpose=purpGen, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+    write(name, *) "Getting an updated deleted Attribute value from a Field test"
+    call ESMF_Test((rc==ESMF_SUCCESS).and. &
+                    value3 == value_out, &
+                    name, failMsg, result, ESMF_SRCLINE)
+
+    print *, "value_out = ", trim(value_out)
 
     !EX_disabled_UTest_Multi_Proc_Only
     call ESMF_AttributeGet(field, name2, convention=convESMF, &
