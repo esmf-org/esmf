@@ -11,12 +11,6 @@ Licensed under the University of Illinois-NCSA License.
 #endif
 
 #if 0
-Enable NAG unix modules when certain non-Standard system calls (e.g., ABORT)
-are made.
-#endif
-#define ESMF_NAG_UNIX_MODULE
-
-#if 0
 Define the proper way to flush Fortran units.  Typically this will
 be one of the following:
 

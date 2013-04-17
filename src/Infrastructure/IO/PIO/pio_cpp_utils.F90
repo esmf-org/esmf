@@ -17,11 +17,11 @@ module esmfpio_cpp_utils
 
   type, public :: PIO_C_HANDLE_NODE
     integer :: c_handle_start
-    type(iosystem_desc_t), pointer :: PIO_descriptors(:)
-    type(PIO_C_HANDLE_NODE), pointer :: next
+    type(iosystem_desc_t), pointer :: PIO_descriptors(:) => null ()
+    type(PIO_C_HANDLE_NODE), pointer :: next => null ()
    end type PIO_C_HANDLE_NODE
 
-   type(PIO_C_HANDLE_NODE), private, save, pointer :: PIO_Intracom_handles
+   type(PIO_C_HANDLE_NODE), private, save, pointer :: PIO_Intracom_handles => null ()
    integer, private :: PIO_c_handle_num = 0
 
    ! public interface
