@@ -369,6 +369,13 @@ program ESMF_RegridWeightGenApp
 	   netcdf4FileFlag = .false.
         end if
 
+	if (largeFileFlag .and. netcdf4FileFlag) then
+             write(*,*)
+	     print *, 'ERROR: Both --netcdf4 and --64bit_offset are specified.'
+	     print *, '       Only one flag can be given.'
+	     call ESMF_Finalize(endflag=ESMF_END_ABORT)
+        endif
+
         ! --user_area - to use user-defined area for the cells
  	call ESMF_UtilGetArgIndex('--user_areas', argindex=ind, rc=rc)
 	if (ind /= -1) then
@@ -707,7 +714,7 @@ subroutine PrintUsage()
      print *, "             NetCDF 64-bit offset format.  This option only works with NetCDF library"
      print *, "             version 3.6 and above"
      print *, "--netcdf4  - an optional argument specifying the output weight file is in"
-     print *, "             the NetCDF4 offset format. This option only works with NetCDF library"
+     print *, "             the NetCDF4 format. This option only works with NetCDF library"
      print *, "             version 4.1 and above"
      print *, "--src_meshname  - required if the source grid type is UGRID. It defines the dummy"
      print *, "             variable name that has all the topology information stored in its"
