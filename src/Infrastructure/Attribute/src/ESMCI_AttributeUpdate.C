@@ -816,7 +816,8 @@ printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkLists
       int *linkChanges,            // link changes flag
       int *structChanges,          // structural changes flag
       int *valueChanges,           // value changes flag
-      int *numKeys) const{        // number of keys flag
+      int *deleteChanges,          // value changes flag
+      int *numKeys) const{         // number of keys flag
 //
 // !DESCRIPTION:
 //    Search an {\tt Attribute} hierarchy for changes to be updated.  
@@ -837,18 +838,19 @@ printf("PET %d - BUFSEND recurse attrListsize = %d, packListsize = %d, linkLists
   if (linkChange == ESMF_TRUE) ++(*linkChanges);
   if (structChange == ESMF_TRUE) ++(*structChanges);
   if (valueChange == ESMF_TRUE) ++(*valueChanges);
+  if (deleteChange == ESMF_TRUE) ++(*deleteChanges);
  
   for (i=0; i<attrList.size(); ++i)
     localrc = attrList.at(i)->AttributeUpdateTreeChanges(linkChanges,
-      structChanges, valueChanges, numKeys);
+      structChanges, valueChanges, deleteChanges, numKeys);
 
   for (i=0; i<packList.size(); ++i)
     localrc = packList.at(i)->AttributeUpdateTreeChanges(linkChanges,
-      structChanges, valueChanges, numKeys);
+      structChanges, valueChanges, deleteChanges, numKeys);
   
   for(i=0; i<linkList.size(); ++i)
     localrc = linkList.at(i)->AttributeUpdateTreeChanges(linkChanges,
-      structChanges,valueChanges,numKeys);
+      structChanges, valueChanges, deleteChanges, numKeys);
   
   return ESMF_SUCCESS;
   
@@ -1183,11 +1185,12 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
     int linkChanges = 0;
     int structChanges = 0;
     int valueChanges = 0;
+    int deleteChanges = 0;
     int numKeys = 0;
 
     // look for changes
     localrc = AttributeUpdateTreeChanges(&linkChanges, &structChanges, 
-      &valueChanges, &numKeys);
+      &valueChanges, &deleteChanges, &numKeys);
     if (localrc != ESMF_SUCCESS) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
        "AttributeUpdateNeeded failed AttributeUpdateTreeChanges", ESMC_CONTEXT, &localrc);
@@ -1197,7 +1200,7 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
     }
 
     // create buffer
-    int realChanges = structChanges+valueChanges;
+    int realChanges = structChanges + valueChanges + deleteChanges;
     (*(reinterpret_cast<int*> (sendBuf+offset)))=linkChanges;
     offset += sizeof(int);
     (*(reinterpret_cast<int*> (sendBuf+offset)))=realChanges;
@@ -1324,7 +1327,7 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
 
   delete attrList.at(attrNum);
   attrList.erase(attrList.begin() + attrNum);
-  structChange = ESMF_TRUE;
+  deleteChange = ESMF_TRUE;
 
   return ESMF_SUCCESS;
   
@@ -1359,6 +1362,7 @@ printf("\n\nI am PET #%d, I received message \"%s\" from PET #%d\n\n",
   linkChange = ESMF_FALSE;
   structChange = ESMF_FALSE;
   valueChange = ESMF_FALSE;
+  deleteChange = ESMF_FALSE;
 
   for(i=0; i<attrList.size(); ++i)
     localrc = attrList.at(i)->AttributeUpdateReset();

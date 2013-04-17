@@ -340,11 +340,11 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 #if 0
     call ESMF_AttributeSet(field, name_to_add, value_to_add, rc=status)
     if (rc/=ESMF_SUCCESS) return
-#endif
 
     call ESMF_AttributeSet(field, name3, value32, convention=convESMF, &
       purpose=purpGen, rc=status)
     if (rc/=ESMF_SUCCESS) return
+#endif
 
     call ESMF_AttributeRemove(field, name2, convention=convESMF, &
       purpose=purpGen, rc=status)
@@ -619,7 +619,6 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
                     name, failMsg, result, ESMF_SRCLINE)
 
     print *, "value_out_added = ", trim(value_out_added)
-#endif
 
     !EX_disabled_UTest_Multi_Proc_Only
     call ESMF_AttributeGet(field, name3, value=value_out, convention=convESMF, &
@@ -631,8 +630,9 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
                     name, failMsg, result, ESMF_SRCLINE)
 
     print *, "value_out = ", trim(value_out)
+#endif
 
-    !EX_disabled_UTest_Multi_Proc_Only
+    !EX_UTest_Multi_Proc_Only
     call ESMF_AttributeGet(field, name2, convention=convESMF, &
       purpose=purpGen, isPresent=isPresent, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"

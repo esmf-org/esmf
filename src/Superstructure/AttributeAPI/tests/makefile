@@ -7,9 +7,7 @@ run_uni:  run_unit_tests_uni
 LOCDIR	  = src/Superstructure/AttributeAPI/tests
 
 
-TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttributeUpdateRemoveOnlyUTest
-
-DOODLE = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
+TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeABundleUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeCplCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeDistGridUTest \
@@ -22,6 +20,7 @@ DOODLE = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeStateUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdateUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeUpdate2UTest \
+		$(ESMF_TESTDIR)/ESMF_AttributeUpdateRemoveOnlyUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeWriteInternalUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeXMLUTest \
 		$(ESMF_TESTDIR)/ESMF_AttReadCplCompUTest \
@@ -41,6 +40,7 @@ TESTS_RUN = RUN_ESMF_AttributeArrayUTest \
 		RUN_ESMF_AttributeStateUTest \
 		RUN_ESMF_AttributeUpdateUTest \
 		RUN_ESMF_AttributeUpdate2UTest \
+		RUN_ESMF_AttributeUpdateRemoveOnlyUTest \
 		RUN_ESMF_AttributeWriteInternalUTest \
 		RUN_ESMF_AttributeXMLUTest \
 		RUN_ESMF_AttReadCplCompUTest \
