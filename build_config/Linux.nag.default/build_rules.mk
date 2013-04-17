@@ -85,6 +85,11 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v -V -dryrun
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 
 ############################################################
+# Set NAG unix modules when certain non-Standard system calls
+# (e.g., ABORT) are made.
+ESMF_F90COMPILEOPTS += -DESMF_NAG_UNIX_MODULE
+
+############################################################
 # nag currently does not support OpenMP
 #
 ESMF_OPENMP := OFF
