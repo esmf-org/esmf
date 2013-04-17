@@ -1504,7 +1504,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
     if (attrparent->packList.at(i) == attpack) {
       delete (attrparent->packList.at(i));
       attrparent->packList.erase(attrparent->packList.begin() + i);
-      attrparent->structChange = ESMF_TRUE;
+      attrparent->deleteChange = ESMF_TRUE;
       done = true;
       break;
     }
@@ -3207,7 +3207,7 @@ if (attrRoot == ESMF_TRUE) {
       // found a match, destroy it
       delete attrList.at(i);
       attrList.erase(attrList.begin() + i);
-      //structChange = ESMF_TRUE;
+      deleteChange = ESMF_TRUE;
       done = true;
       break;
     }
@@ -3788,6 +3788,7 @@ if (attrRoot == ESMF_TRUE) {
   linkChange = ESMF_FALSE;
   structChange = ESMF_TRUE;
   valueChange = ESMF_FALSE;
+  deleteChange = ESMF_FALSE;
 
   attrBase = ESMC_NULL_POINTER;
   parent = ESMC_NULL_POINTER;
@@ -3849,6 +3850,7 @@ if (attrRoot == ESMF_TRUE) {
   linkChange = ESMF_FALSE;
   structChange = ESMF_TRUE;
   valueChange = ESMF_FALSE;
+  deleteChange = ESMF_FALSE;
 
   attrBase = ESMC_NULL_POINTER;
   parent = ESMC_NULL_POINTER;
@@ -3902,6 +3904,7 @@ if (attrRoot == ESMF_TRUE) {
   linkChange = ESMF_FALSE;
   structChange = ESMF_TRUE;
   valueChange = ESMF_FALSE;
+  deleteChange = ESMF_FALSE;
 
   attrBase = ESMC_NULL_POINTER;
   parent = ESMC_NULL_POINTER;
@@ -3956,6 +3959,7 @@ if (attrRoot == ESMF_TRUE) {
   linkChange = ESMF_FALSE;
   structChange = ESMF_TRUE;
   valueChange = ESMF_FALSE;
+  deleteChange = ESMF_FALSE;
 
   attrBase = ESMC_NULL_POINTER;
   parent = ESMC_NULL_POINTER;
@@ -4014,6 +4018,7 @@ if (attrRoot == ESMF_TRUE) {
   linkChange = ESMF_FALSE;
   structChange = ESMF_TRUE;
   valueChange = ESMF_FALSE;
+  deleteChange = ESMF_FALSE;
 
   attrBase = ESMC_NULL_POINTER;
   parent = ESMC_NULL_POINTER;
