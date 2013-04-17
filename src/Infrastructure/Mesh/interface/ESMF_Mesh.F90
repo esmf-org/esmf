@@ -646,7 +646,8 @@ contains
 ! !IROUTINE: ESMF_MeshAddNodes - Add nodes to a Mesh \label{sec:mesh:api:meshaddnodes}
 !
 ! !INTERFACE:
-    subroutine ESMF_MeshAddNodes(mesh, nodeIds, nodeCoords, nodeOwners, rc)
+    subroutine ESMF_MeshAddNodes(mesh, nodeIds, nodeCoords, nodeOwners, 
+                                 nodeMask, rc)
 
 !
 ! !ARGUMENTS:
@@ -654,6 +655,7 @@ contains
     integer,            intent(in)            :: nodeIds(:)
     real(ESMF_KIND_R8), intent(in)            :: nodeCoords(:)
     integer,            intent(in)            :: nodeOwners(:)
+    integer,            intent(in),  optional :: nodeMask(:)
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -688,6 +690,11 @@ contains
 !         may be a PET other than the current one. Only nodes owned by this PET
 !         will have PET local entries in a Field created on the Mesh. This input consists of 
 !         a 1D array the size of the number of nodes on this PET.
+!   \item [{[nodeMask]}]
+!          An array containing values which can be used for node masking. Which values indicate
+!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to 
+!          {\tt ESMF\_FieldRegridStore()} call. This input consists of a 1D array the
+!          size of the number of nodes on this PET.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -696,6 +703,7 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: num_nodes
+    type(ESMF_InterfaceInt) :: nodeMaskII
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -720,9 +728,16 @@ contains
        return 
     endif    
 
+
+   ! Create interface int to wrap optional element mask
+   nodeMaskII = ESMF_InterfaceIntCreate(nodeMask, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+
     num_nodes = size(nodeIds)
     call C_ESMC_MeshAddNodes(mesh%this, num_nodes, nodeIds, nodeCoords, &
-                             nodeOwners, localrc)
+                             nodeOwners, nodeMaskII, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -819,7 +834,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreate1Part(parametricDim, spatialDim, &
-                         nodeIds, nodeCoords, nodeOwners, &
+                         nodeIds, nodeCoords, nodeOwners, nodeMask, &
                          elementIds, elementTypes, elementConn, &
                          elementMask, elementArea, rc)
 !
@@ -832,6 +847,7 @@ contains
     integer,            intent(in)            :: nodeIds(:)
     real(ESMF_KIND_R8), intent(in)            :: nodeCoords(:)
     integer,            intent(in)            :: nodeOwners(:)
+    integer,            intent(in),  optional :: nodeMask(:)
     integer,            intent(in)            :: elementIds(:)
     integer,            intent(in)            :: elementTypes(:)
     integer,            intent(in)            :: elementConn(:)
@@ -892,6 +908,11 @@ contains
 !         may be a PET other than the current one. Only nodes owned by this PET
 !         will have PET local entries in a Field created on the Mesh. This input consists of 
 !         a 1D array the size of the number of nodes on this PET.
+!   \item [{[nodeMask]}]
+!          An array containing values which can be used for node masking. Which values indicate
+!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to 
+!          {\tt ESMF\_FieldRegridStore()} call. This input consists of a 1D array the
+!          size of the number of nodes on this PET.
 !   \item [elementIds]
 !          An array containing the global ids of the elements to be created on this PET. 
 !          This input consists of a 1D array the size of the number of elements on this PET.
@@ -933,7 +954,7 @@ contains
     integer                 :: num_nodes
     integer                 :: num_elems, num_elementConn
     type(ESMF_RegridConserve) :: lregridConserve
-    type(ESMF_InterfaceInt) :: elementMaskII
+    type(ESMF_InterfaceInt) :: elementMaskII, nodeMaskII
     real(ESMF_KIND_R8) :: tmpArea(2)
     integer :: areaPresent
 
@@ -967,10 +988,16 @@ contains
     ! Set init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreate1Part)
 
+
+   ! Create interface int to wrap optional element mask
+   nodeMaskII = ESMF_InterfaceIntCreate(nodeMask, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Add the nodes
     num_nodes = size(nodeIds)
     call C_ESMC_MeshAddNodes(ESMF_MeshCreate1Part%this, num_nodes, nodeIds, nodeCoords, &
-                             nodeOwners, localrc)
+                             nodeOwners, nodeMaskII, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

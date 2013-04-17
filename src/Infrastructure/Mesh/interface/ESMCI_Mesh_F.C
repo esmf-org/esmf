@@ -151,7 +151,8 @@ extern "C" void FTN_X(c_esmc_meshcreate)(Mesh **meshpp,
 } // meshcreate
 
 extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *nodeId, 
-               double *nodeCoord, int *nodeOwner, int *rc) 
+                                           double *nodeCoord, int *nodeOwner, InterfaceInt **nodeMaskII,
+                                           int *rc) 
 {
    try {
     Mesh *meshp = *meshpp;
@@ -196,21 +197,69 @@ extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *n
     // Register the nodal coordinate field.
     IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", mesh.spatial_dim());
 
+    // Handle node masking
+    IOField<NodalField> *node_mask_val;
+    IOField<NodalField> *node_mask;
+
+    bool has_node_mask=false;
+    if (*nodeMaskII != NULL) { // if masks exist
+    // Error checking
+    if ((*nodeMaskII)->dimCount !=1) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        "- nodeMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+    }
+
+    if ((*nodeMaskII)->extent[0] != *num_nodes) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+                                       "- nodeMask array must be the same size as the nodeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+    
+    // Register mask fields on mesh
+    node_mask_val = mesh.RegisterNodalField(mesh, "node_mask_val", 1);
+    node_mask = mesh.RegisterNodalField(mesh, "mask", 1);
+
+
+    // Record the fact that it has masks
+    has_node_mask=true;   
+  } 
+    
+
     Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
 
     UInt sdim = mesh.spatial_dim();
 
-    for (UInt nc = 0; ni != ne; ++ni) {
+    // Loop and add coords and mask
+    if (has_node_mask) {
+      int *maskArray=(*nodeMaskII)->array;
+      int nm=0;
+      for (UInt nc = 0; ni != ne; ++ni) {
+        
+        MeshObj &node = *ni;
+      
+        // Coords
+        double *coord = node_coord->data(node);
+        for (UInt c = 0; c < sdim; ++c)
+          coord[c] = nodeCoord[nc+c];
+        nc += sdim;   
 
-      MeshObj &node = *ni;
+        // Mask
+        double *mask = node_mask_val->data(node);
+        *mask=maskArray[nm];
+        nm++;
 
-      double *coord = node_coord->data(node);
-
-      for (UInt c = 0; c < sdim; ++c)
-        coord[c] = nodeCoord[nc+c];
-
-      nc += sdim;
-
+      }
+    } else {
+      for (UInt nc = 0; ni != ne; ++ni) {
+        
+        MeshObj &node = *ni;
+        
+        double *coord = node_coord->data(node);
+        for (UInt c = 0; c < sdim; ++c)
+          coord[c] = nodeCoord[nc+c];        
+        nc += sdim;   
+      }      
     }
 
   } catch(std::exception &x) {
@@ -2269,6 +2318,192 @@ extern "C" void FTN_X(c_esmc_meshturnoffcellmask)(Mesh **meshpp, int *rc) {
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
+
+////////////
+extern "C" void FTN_X(c_esmc_meshturnonnodemask)(Mesh **meshpp, ESMCI::InterfaceInt **maskValuesArg,  int *rc) {
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+	throw localrc;  // bail out with exception
+    }
+    
+    
+    // Get Mesh pointer
+    Mesh *meshp = *meshpp;
+    
+    // Get Mesh reference
+    Mesh &mesh = *meshp;
+    
+
+    // If no mask values then leave
+    if (maskValuesArg == NULL) {
+      // Set return code 
+      if (rc!=NULL) *rc = ESMF_SUCCESS;
+      
+      // Leave
+      return;
+    }
+
+    // If no mask values then leave
+    if (*maskValuesArg == NULL) {
+      // Set return code 
+      if (rc!=NULL) *rc = ESMF_SUCCESS;
+      
+      // Leave
+      return;
+    }
+
+    // Get mask values
+    int numMaskValues=(*maskValuesArg)->extent[0];
+    int *ptrMaskValues=&((*maskValuesArg)->array[0]);
+
+
+    // Set Mask values
+    // Get Fields
+    MEField<> *node_mask_val=mesh.GetField("node_mask_val"); 
+    MEField<> *node_mask=mesh.GetField("mask"); 
+      
+
+    if ((node_mask_val!=NULL) && 
+        (node_mask    !=NULL)) {
+         
+      // Loop through nodes setting values
+      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+      for (; ni != ne; ++ni) {
+        MeshObj &node = *ni;
+        if (!GetAttr(node).is_locally_owned()) continue;
+        // Set mask value to input array
+        double *mv=node_mask_val->data(node);
+        
+        // Round value to nearest integer
+        int mi=(int)((*mv)+0.5);
+
+        // See if gm matches any mask values
+        bool mask=false;
+        for (int i=0; i<numMaskValues; i++) {
+          int mvi=ptrMaskValues[i];
+          if (mi==mvi) {
+            mask=true;
+            break;
+          }
+        }
+        
+        // Set mask
+        double *m=node_mask->data(node);
+        
+        // Set Mask based on grid mask value
+        if (mask) {
+          *m=1.0;
+        } else {
+          *m=0.0;
+        }
+        
+      }
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                             "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+// Turn OFF masking
+extern "C" void FTN_X(c_esmc_meshturnoffnodemask)(Mesh **meshpp, int *rc) {
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+	throw localrc;  // bail out with exception
+    }
+    
+    
+    // Get Mesh pointer
+    Mesh *meshp = *meshpp;
+    
+    // Get Mesh reference
+    Mesh &mesh = *meshp;
+    
+
+    // Set Mask values
+    // Get Fields
+    MEField<> *node_mask_val=mesh.GetField("node_mask_val"); 
+    MEField<> *node_mask=mesh.GetField("mask"); 
+    
+    if ((node_mask_val!=NULL) && 
+        (node_mask    !=NULL)) {
+      
+      // Loop through elements setting values
+      // Here we depend on the fact that data index for elements
+      // is set as the position in the local array above
+      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+      for (; ni != ne; ++ni) {
+        MeshObj &node = *ni;
+        if (!GetAttr(node).is_locally_owned()) continue;
+        
+        // Get mask
+        double *m=node_mask->data(node);
+        
+        // Init mask to 0
+        *m=0.0;
+      }
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                        "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+//////////// 
 
 extern "C" void FTN_X(c_esmc_get_polygon_area)(int *spatialdim, int *nedges, 
 						 double *points, double *area, int *rc) {
