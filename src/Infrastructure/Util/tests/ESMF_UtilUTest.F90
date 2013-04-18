@@ -82,6 +82,9 @@
       integer(ESMF_KIND_I8) :: sorted_dblints (size (random_values))
       real(ESMF_KIND_R8)    :: sorted_dblreals(size (random_values))
 
+      integer, allocatable :: seeds(:)
+      integer :: seed_size
+
       character(8) :: sort_array(4)
       character(8), parameter :: sort_input(4) =  &
           (/ "this", "is  ", "a   ", "test" /)
@@ -308,6 +311,10 @@
 !Sorting
 !=======
 
+    call random_seed (size=seed_size)
+    allocate (seeds(seed_size))
+    seeds = (/ (i*1234, i=1,seed_size) /)
+    call random_seed (put=seeds)
     call random_number (random_values)
 
 ! Reals
