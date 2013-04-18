@@ -338,8 +338,6 @@ extern "C" {
 			  int *rc,
 			  ESMCI_FortranStrLenArg infileLen)
   {
-    bool oldversion = false;
-    bool nc3version = false;
     int status;
     int id;
     char *c_infile;
@@ -347,12 +345,24 @@ extern "C" {
 #ifdef ESMF_NETCDF
 
 #ifndef NC_64BIT_OFFSET
-    oldversion = true;
+    if (*largefileflag) {
+	fprintf(stderr, "ERROR: 64 bit file format is not supported in this version of NetCDF library\n");
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "ERROR: 64 bit file format "
+          "is not supported in this version of NetCDF library", ESMC_CONTEXT, 
+          rc);
+	return
+    }
 #define NC_64BIT_OFFSET 0
 #endif
 
 #ifndef NC_NETCDF4
-    nc3version = true;
+    if (*netcdf4fileflag) {
+	fprintf(stderr, "ERROR: NetCDF4 file format is not supported in this version of NetCDF library\n");
+	ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "ERROR: NetCDF4 file format "
+          "is not supported in this version of NetCDF library", ESMC_CONTEXT,
+          rc);
+	return; //bail out
+    }
 #define NC_NETCDF4 0
 #endif
 
