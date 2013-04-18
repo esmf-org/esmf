@@ -1,6 +1,12 @@
-!|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-
- module esmfpio_kinds
+#include "ESMFPIO.h"
+!>
+!! @file pio_kinds.F90
+!! @brief basic data types 
+!!
+!! $Revision: 751 $
+!! $LastChangedDate: 2013-04-02 09:01:13 -0700 (Tue, 02 Apr 2013) $
+!<
+ module pio_kinds
 
 !BOP
 ! !MODULE: pio_kinds
@@ -10,7 +16,7 @@
 !  types like integer, character, logical, real4 and real8.
 !
 ! !REVISION HISTORY:
-!  CVS:$Id$
+!  CVS:$Id: pio_kinds.F90,v 1.1.1.1 2006/07/31 16:15:30 dennis Exp $
 !  CVS:$Name:  $
 
 ! !USES:
@@ -44,6 +50,6 @@
 !EOC
 !***********************************************************************
 
- end module esmfpio_kinds
+ end module pio_kinds
 
 !|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||

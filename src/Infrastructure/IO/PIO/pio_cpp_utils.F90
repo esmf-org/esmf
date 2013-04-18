@@ -1,11 +1,12 @@
+#include "ESMFPIO.h"
 #define __PIO_FILE__ "pio_cpp_utils.F90"
 ! ---------------------------------------------------------------------
 
 !  utility procedures for use by cpp binding functions
-module esmfpio_cpp_utils
+module pio_cpp_utils
 
-  use esmfpio_kinds, only: i4, r4, r8, pio_offset
-  use esmfpio_types,   only : iosystem_desc_t
+  use pio_kinds, only: i4, r4, r8, pio_offset
+  use pio_types,   only : iosystem_desc_t
 
   implicit none
 
@@ -17,11 +18,11 @@ module esmfpio_cpp_utils
 
   type, public :: PIO_C_HANDLE_NODE
     integer :: c_handle_start
-    type(iosystem_desc_t), pointer :: PIO_descriptors(:) => null ()
-    type(PIO_C_HANDLE_NODE), pointer :: next => null ()
+    type(iosystem_desc_t), pointer :: PIO_descriptors(:)
+    type(PIO_C_HANDLE_NODE), pointer :: next
    end type PIO_C_HANDLE_NODE
 
-   type(PIO_C_HANDLE_NODE), private, save, pointer :: PIO_Intracom_handles => null ()
+   type(PIO_C_HANDLE_NODE), private, save, pointer :: PIO_Intracom_handles
    integer, private :: PIO_c_handle_num = 0
 
    ! public interface
@@ -136,8 +137,8 @@ end function c_len
 
 subroutine new_pio_iosys_handles(iosystem_handles, iosystem)
 
-  use esmfpio_types,   only : iosystem_desc_t
-  use esmfpio_support, only : piodie, debug
+  use pio_types,   only : iosystem_desc_t
+  use pio_support, only : piodie, debug
 
   !  dummy arguments
   integer, intent(inout) :: iosystem_handles(:)
@@ -191,8 +192,8 @@ end subroutine new_pio_iosys_handles
 
 subroutine get_pio_iosys_handle(iosystem_handle, iosystem)
 
-  use esmfpio_types,   only : iosystem_desc_t
-  use esmfpio_support, only : piodie, debug
+  use pio_types,   only : iosystem_desc_t
+  use pio_support, only : piodie, debug
 
   !  dummy arguments
   integer, intent(in) :: iosystem_handle
@@ -233,8 +234,8 @@ end subroutine get_pio_iosys_handle
 
 subroutine delete_pio_iosys_handle(iosystem_handle)
 
-  use esmfpio_types,   only : iosystem_desc_t
-  use esmfpio_support, only : piodie, debug
+  use pio_types,   only : iosystem_desc_t
+  use pio_support, only : piodie, debug
 
   !  dummy arguments
   integer, intent(in) :: iosystem_handle
@@ -293,4 +294,4 @@ subroutine delete_pio_iosys_handle(iosystem_handle)
 
 end subroutine delete_pio_iosys_handle
 
-end module esmfpio_cpp_utils
+end module pio_cpp_utils
