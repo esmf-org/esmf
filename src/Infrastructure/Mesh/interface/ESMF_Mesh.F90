@@ -166,6 +166,8 @@ module ESMF_MeshMod
   public ESMF_MeshMergeSplitDstInd
   public ESMF_MeshTurnOnCellMask
   public ESMF_MeshTurnOffCellMask
+  public ESMF_MeshTurnOnNodeMask
+  public ESMF_MeshTurnOffNodeMask
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -646,7 +648,7 @@ contains
 ! !IROUTINE: ESMF_MeshAddNodes - Add nodes to a Mesh \label{sec:mesh:api:meshaddnodes}
 !
 ! !INTERFACE:
-    subroutine ESMF_MeshAddNodes(mesh, nodeIds, nodeCoords, nodeOwners, 
+    subroutine ESMF_MeshAddNodes(mesh, nodeIds, nodeCoords, nodeOwners, &
                                  nodeMask, rc)
 
 !
@@ -740,6 +742,12 @@ contains
                              nodeOwners, nodeMaskII, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get rid of interface Int wrapper
+    call ESMF_InterfaceIntDestroy(nodeMaskII, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
 
     ! Go to next stage 
     mesh%createStage=2
@@ -1002,6 +1010,13 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
+    ! Get rid of interface Int wrapper
+    call ESMF_InterfaceIntDestroy(nodeMaskII, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+
    ! Create interface int to wrap optional element mask
    elementMaskII = ESMF_InterfaceIntCreate(elementMask, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1060,6 +1075,7 @@ num_elems, &
     call ESMF_InterfaceIntDestroy(elementMaskII, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
+
 
 
     ! The C side has been created
@@ -1888,7 +1904,10 @@ end function ESMF_MeshCreateFromFile
     endif
 
     ! Add nodes
-    call ESMF_MeshAddNodes (Mesh, NodeId, NodeCoords1D, NodeOwners, localrc)
+    call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
+                            NodeCoords=NodeCoords1D, &
+                            NodeOwners=NodeOwners, &
+                            rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3968,6 +3987,105 @@ end subroutine ESMF_MeshMergeSplitDstInd
     if (present(rc)) rc = ESMF_SUCCESS
     
     end subroutine ESMF_MeshTurnOffCellMask
+
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshTurnOnNodeMask()"
+!BOPI
+! !IROUTINE: ESMF_MeshTurnOnNodeMask -- Turn on masking to correspond to maskValues
+!
+! !INTERFACE:
+   subroutine ESMF_MeshTurnOnNodeMask(mesh, maskValues, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                :: mesh
+    integer(ESMF_KIND_I4), optional            :: maskValues(:)
+    integer, intent(out) , optional            :: rc
+!
+! !DESCRIPTION:
+!   Turn on mesh masking
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh to turn on masking for
+!   \item [maskValues]
+!         Values to set as masked
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc 
+    type(ESMF_InterfaceInt) :: maskValuesArg
+
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+
+    ! If not present, then don't need to turn anything on
+    if (.not. present(maskValues)) then
+       if (present(rc)) rc = ESMF_SUCCESS
+       return
+    endif
+
+    ! convert mask values 
+    maskValuesArg = ESMF_InterfaceIntCreate(maskValues, rc=localrc)
+    	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      	  ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    call c_esmc_meshturnonnodemask(mesh, maskValuesArg, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      	    ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InterfaceIntDestroy(maskValuesArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      	    ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    end subroutine ESMF_MeshTurnOnNodeMask
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshTurnOffNodeMask()"
+!BOPI
+! !IROUTINE: ESMF_MeshTurnOffNodeMask -- Turn off masking
+!
+! !INTERFACE:
+   subroutine ESMF_MeshTurnOffNodeMask(mesh, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                :: mesh
+    integer, intent(out) , optional            :: rc
+!
+! !DESCRIPTION:
+!   Turn on mesh masking
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh to turn on masking for
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc 
+    
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+    
+    call c_esmc_meshturnoffnodemask(mesh, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    end subroutine ESMF_MeshTurnOffNodeMask
 
 
 
