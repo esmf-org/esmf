@@ -345,7 +345,7 @@ extern "C" {
 #ifdef ESMF_NETCDF
 
 #ifndef NC_64BIT_OFFSET
-    if (*largefileflag) {
+    if (*largefileflag == ESMF_TRUE) {
 	fprintf(stderr, "ERROR: 64 bit file format is not supported in this version of NetCDF library\n");
         ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "ERROR: 64 bit file format "
           "is not supported in this version of NetCDF library", ESMC_CONTEXT, 
@@ -356,7 +356,7 @@ extern "C" {
 #endif
 
 #ifndef NC_NETCDF4
-    if (*netcdf4fileflag) {
+    if (*netcdf4fileflag == ESMF_TRUE) {
 	fprintf(stderr, "ERROR: NetCDF4 file format is not supported in this version of NetCDF library\n");
 	ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "ERROR: NetCDF4 file format "
           "is not supported in this version of NetCDF library", ESMC_CONTEXT,
