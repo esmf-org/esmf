@@ -2566,9 +2566,8 @@ ESMC_MeshOp_Flag * meshop, double * threshold, int *rc) {
 
 
 
-////////////////
-
-extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_elem_gids, int *elem_gids, Mesh **output_meshpp, int *rc) {
+extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_node_gids, int *node_gids, 
+                                                   int *num_elem_gids, int *elem_gids,  Mesh **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshcreateredist()"
 
@@ -2584,7 +2583,7 @@ extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_
 
 
     // Call C++ side
-    MeshRedistElems(*src_meshpp, *num_elem_gids, elem_gids, output_meshpp);
+    MeshRedist(*src_meshpp, *num_node_gids, node_gids, *num_elem_gids, elem_gids, output_meshpp);
 
 
   } catch(std::exception &x) {
@@ -2611,51 +2610,3 @@ extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
-
-
-#if 0
-////////////////
-
-extern "C" void FTN_X(c_esmc_meshcreateredistnodes)(Mesh **src_meshpp, int *num_node_gids, int *node_gids, Mesh **output_meshpp, int *rc) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshcreateredist()"
-
-  try {
-
-    // Initialize the parallel environment for mesh (if not already done)
-    {
-      int localrc;
-      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
-      throw localrc;  // bail out with exception
-    }
-
-
-    // Call C++ side
-    MeshRedistNodes(*src_meshpp, *num_node_gids, node_gids, output_meshpp);
-
-
-  } catch(std::exception &x) {
-    // catch Mesh exception return code 
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "- Caught unknown exception", rc);
-    return;
-  }
-
-  if (rc!=NULL) *rc=ESMF_SUCCESS;
-}
-#endif

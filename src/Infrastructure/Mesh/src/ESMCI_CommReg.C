@@ -104,11 +104,6 @@ for (UInt i = 0; i < rf.size(); i++) {
   std::cout << rf[i]->name() << ", dim=" << rf[i]->dim() << std::endl;
 }
 */
-  if (sf.size() != rf.size()) {
-    printf("num fields=%d \n",nfields);
-
-    printf("sf.size=%d rf.size()=%d\n",sf.size(),rf.size());
-  }
 
   ThrowRequire(sf.size() == rf.size());
 

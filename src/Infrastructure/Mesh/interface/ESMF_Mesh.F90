@@ -2377,6 +2377,7 @@ end function ESMF_MeshCreateFromScrip
   end function ESMF_MeshCreateFromPointer
 !------------------------------------------------------------------------------
 
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateRedist()"
@@ -2386,17 +2387,17 @@ end function ESMF_MeshCreateFromScrip
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateRedist(mesh, nodeIds, rc)
+    function ESMF_MeshCreateRedist(mesh, nodalDistGrid, elementDistgrid, rc)
 !
 !
 ! !RETURN VALUE:
-    type(ESMF_Mesh)                                   :: ESMF_MeshCreateRedist
+    type(ESMF_Mesh)                            :: ESMF_MeshCreateRedist
+
 ! !ARGUMENTS:
-    type(ESMF_Mesh),            intent(in)            :: mesh
-    integer,                    intent(in)            :: nodeIds(:)
-!    type(ESMF_DistGrid),        intent(out)           :: nodalDistgrid
-!    type(ESMF_DistGrid),         intent(out)          :: elementDistgrid
-    integer,                    intent(out), optional :: rc
+    type(ESMF_Mesh),     intent(in)            :: mesh
+    type(ESMF_DistGrid), intent(in)            :: nodalDistgrid
+    type(ESMF_DistGrid), intent(in)            :: elementDistgrid
+    integer,             intent(out), optional :: rc
 ! 
 ! !DESCRIPTION:
 !  Create a Mesh which is a redistribution of an existing Mesh. 
@@ -2417,7 +2418,9 @@ end function ESMF_MeshCreateFromScrip
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc
-    integer :: numNodeIds
+    integer :: numNodeIds, numElemIds
+    integer, allocatable :: nodeIds(:), elemIds(:)
+
 
     ! Init localrc
     localrc = ESMF_SUCCESS
@@ -2463,14 +2466,63 @@ end function ESMF_MeshCreateFromScrip
        return
     endif
 
-   ! Get number of node ids
-    numNodeIds=size(nodeIds)
 
-    ! Call into C
-    call C_ESMC_MeshCreateRedistElems(mesh, numNodeIds, nodeIds, ESMF_MeshCreateRedist, &
-         localrc)
+    ! Get number of element Ids
+    call ESMF_DistGridGet(nodalDistgrid,localDe=0, &
+         elementCount=numNodeIds, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Allocate space for element Ids
+    allocate(nodeIds(numNodeIds))
+   
+    ! Get element Ids
+    call ESMF_DistGridGet(nodalDistgrid,localDe=0, &
+         seqIndexList=nodeIds, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get number of element Ids
+    call ESMF_DistGridGet(elementDistgrid,localDe=0, &
+         elementCount=numElemIds, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Allocate space for element Ids
+    allocate(elemIds(numElemIds))
+   
+    ! Get element Ids
+    call ESMF_DistGridGet(elementDistgrid,localDe=0, &
+         seqIndexList=elemIds, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Call into C
+    call C_ESMC_MeshCreateRedistElems(mesh,                  &
+                                      numNodeIds, nodeIds,   &
+                                      numElemIds, elemIds,   & 
+                                      ESMF_MeshCreateRedist, &
+                                      localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate gid arrays
+    deallocate(nodeIds)
+    deallocate(elemIds)
+
+    ! Set Distgrids
+    ESMF_MeshCreateRedist%nodal_distgrid=nodalDistGrid
+    ESMF_MeshCreateRedist%element_distgrid=elementDistgrid
+
+
+    ! Same dimensions as input mesh
+    ESMF_MeshCreateRedist%spatialDim=mesh%spatialDim
+    ESMF_MeshCreateRedist%parametricDim=mesh%parametricDim
+
+    ! Set number of owned things
+    ESMF_MeshCreateRedist%numOwnedNodes=numNodeIds
+    ESMF_MeshCreateRedist%numOwnedElements=numElemIds
 
 
     ! Will have same freed status as input mesh
