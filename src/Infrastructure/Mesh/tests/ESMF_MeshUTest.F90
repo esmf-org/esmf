@@ -1051,6 +1051,102 @@ endif
 
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test Mesh Create Redist"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Test mesh
+  call createTestMesh1(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Setup lists
+  if (petCount .eq. 1) then  
+     allocate(nodeIds(9))
+     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+      allocate(elemIds(4))
+      elemIds=(/1,2,3,4/) 
+  else if (petCount .eq. 4) then  
+     if (localPet .eq. 0) then
+        allocate(elemIds(1))
+        elemIds(1)=4
+        
+        allocate(nodeIds(4))
+        nodeIds=(/5,6,8,9/)
+        
+     else if (localPet .eq. 1) then
+        allocate(elemIds(1))
+        elemIds(1)=3
+        
+        allocate(nodeIds(2))
+        nodeIds=(/7,4/)
+        
+     else if (localPet .eq. 2) then
+        allocate(elemIds(1))
+        elemIds(1)=2
+        
+        allocate(nodeIds(2))
+        nodeIds=(/2,3/)
+        
+     else if (localPet .eq. 3) then
+        allocate(elemIds(1))
+        elemIds(1)=1
+        
+        allocate(nodeIds(1))
+        nodeIds=(/1/)
+     endif
+  endif
+
+ ! XMRKX
+
+  ! Create node Distgrid
+  nodedistgrid=ESMF_DistGridCreate(nodeIds, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+ 
+  ! Create element Distgrid
+  elemdistgrid=ESMF_DistGridCreate(elemIds, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get points
+  mesh2=ESMF_MeshCreate(mesh, nodedistgrid, elemdistgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Deallocate
+  deallocate(elemIds)
+  deallocate(nodeIds)
+
+
+  ! Check Output mesh
+  call ESMF_MeshGet(mesh2, parametricDim=parametricDim, &
+                    spatialDim=spatialDim, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+!  call ESMF_MeshWrite(mesh2, filename="mesh2", rc=rc)
+
+
+  ! Get rid of Meshs
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_MeshDestroy(mesh2, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get rid of Distgrids
+  call ESMF_DistgridDestroy(nodedistgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_DistgridDestroy(elemdistgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   ! TODO: "Activate once the mesh is fully created. ESMF_MeshWrite is not meant

@@ -38,7 +38,7 @@
 #include "Mesh/include/ESMCI_Phedra.h"
 #include "Mesh/include/ESMCI_XGridUtil.h"
 #include "Mesh/include/ESMCI_MeshMerge.h"
-
+#include "Mesh/include/ESMCI_MeshRedist.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -2560,6 +2560,54 @@ ESMC_MeshOp_Flag * meshop, double * threshold, int *rc) {
                            "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+
+////////////////
+
+extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_node_gids, int *node_gids, 
+                                                   int *num_elem_gids, int *elem_gids,  Mesh **output_meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreateredist()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+
+    // Call C++ side
+    MeshRedist(*src_meshpp, *num_node_gids, node_gids, *num_elem_gids, elem_gids, output_meshpp);
+
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }

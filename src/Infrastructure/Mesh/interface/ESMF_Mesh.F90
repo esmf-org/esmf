@@ -190,6 +190,7 @@ module ESMF_MeshMod
      module procedure ESMF_MeshCreateFromFile
      module procedure ESMF_MeshCreateFromDG
      module procedure ESMF_MeshCreateFromMeshes
+     module procedure ESMF_MeshCreateRedist
    end interface
 
 !------------------------------------------------------------------------------
@@ -2375,6 +2376,171 @@ end function ESMF_MeshCreateFromScrip
 
   end function ESMF_MeshCreateFromPointer
 !------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateRedist()"
+!BOPI
+
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh by redisting an existing one
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MeshCreate()
+    function ESMF_MeshCreateRedist(mesh, nodalDistGrid, elementDistgrid, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)                            :: ESMF_MeshCreateRedist
+
+! !ARGUMENTS:
+    type(ESMF_Mesh),     intent(in)            :: mesh
+    type(ESMF_DistGrid), intent(in)            :: nodalDistgrid
+    type(ESMF_DistGrid), intent(in)            :: elementDistgrid
+    integer,             intent(out), optional :: rc
+! 
+! !DESCRIPTION:
+!  Create a Mesh which is a redistribution of an existing Mesh. 
+!
+!   \begin{description}
+!   \item [mesh]
+!         The source Mesh to be redistributed. 
+!   \item [nodalDistgrid]
+!         A 1D arbitrary distgrid describing the new distribution of 
+!         the nodes across the PETs. 
+!   \item [elementDistgrid]
+!         A 1D arbitrary distgrid describing the new distribution of 
+!         the elements across the PETs. 
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc
+    integer :: numNodeIds, numElemIds
+    integer, allocatable :: nodeIds(:), elemIds(:)
+
+ ! XMRKX
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+
+    ! Check input mesh
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has not been fully created
+    if (.not. mesh%isFullyCreated) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+                 msg="- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+       return 
+    endif    
+
+
+    ! We don't handle a mesh containing split elements right now, 
+    ! so complain and exit. 
+    ! TODO: Will need to do this before CESM uses with HOMME grid
+    if (mesh%hasSplitElem) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+               msg="- meshes with split elements can not be redisted right now", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
+       return 
+    endif    
+
+
+    ! If the C side doesn't exist, then just need to set the distgrids
+    if (mesh%isCMeshFreed) then
+
+       ! The C side has been created
+       ESMF_MeshCreateRedist%isCMeshFreed=.true.
+       
+       ! Set as fully created
+       !! TODO NEED TO HANDLE SPLIT ELEMENTS SOMEHOW, but for now
+       !! are caught above 
+       ESMF_MeshCreateRedist%hasSplitElem=.false.
+       
+       ESMF_MeshCreateRedist%isFullyCreated=.true.
+       ESMF_INIT_SET_CREATED(ESMF_MeshCreateRedist)
+
+       if (present(rc)) rc=ESMF_SUCCESS
+       return
+    endif
+
+    ! Get number of element Ids
+    call ESMF_DistGridGet(nodalDistgrid,localDe=0, &
+         elementCount=numNodeIds, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Allocate space for element Ids
+    allocate(nodeIds(numNodeIds))
+   
+    ! Get element Ids
+    call ESMF_DistGridGet(nodalDistgrid,localDe=0, &
+         seqIndexList=nodeIds, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get number of element Ids
+    call ESMF_DistGridGet(elementDistgrid,localDe=0, &
+         elementCount=numElemIds, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Allocate space for element Ids
+    allocate(elemIds(numElemIds))
+   
+    ! Get element Ids
+    call ESMF_DistGridGet(elementDistgrid,localDe=0, &
+         seqIndexList=elemIds, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Call into C
+    call C_ESMC_MeshCreateRedistElems(mesh,                  &
+                                      numNodeIds, nodeIds,   &
+                                      numElemIds, elemIds,   & 
+                                      ESMF_MeshCreateRedist, &
+                                      localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate gid arrays
+    deallocate(nodeIds)
+    deallocate(elemIds)
+
+    ! Set Distgrids
+    ESMF_MeshCreateRedist%nodal_distgrid=nodalDistGrid
+    ESMF_MeshCreateRedist%element_distgrid=elementDistgrid
+
+
+    ! Same dimensions as input mesh
+    ESMF_MeshCreateRedist%spatialDim=mesh%spatialDim
+    ESMF_MeshCreateRedist%parametricDim=mesh%parametricDim
+
+    ! Set number of owned things
+    ESMF_MeshCreateRedist%numOwnedNodes=numNodeIds
+    ESMF_MeshCreateRedist%numOwnedElements=numElemIds
+
+
+    ! Will have same freed status as input mesh
+    ESMF_MeshCreateRedist%isCMeshFreed=mesh%isCMeshFreed
+
+    ! Will have same split status as input mesh
+    ESMF_MeshCreateRedist%hasSplitElem=mesh%hasSplitElem
+
+    ! Set as fully created
+    ESMF_MeshCreateRedist%isFullyCreated=.true.
+
+    ESMF_INIT_SET_CREATED(ESMF_MeshCreateRedist)
+
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+
+end function ESMF_MeshCreateRedist
+!------------------------------------------------------------------------------
+
 
 ! -----------------------------------------------------------------------------
 #undef ESMF_METHOD
