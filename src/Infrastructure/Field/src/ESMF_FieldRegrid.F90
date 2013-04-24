@@ -815,6 +815,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 call ESMF_MeshTurnOnCellMask(srcMesh, maskValues=srcMaskValues, rc=localrc);
                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
+             else
+                call ESMF_MeshTurnOnNodeMask(srcMesh, maskValues=srcMaskValues, rc=localrc);
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
              endif
           endif
        endif
@@ -895,6 +899,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (present(dstMaskValues)) then
              if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
                 call ESMF_MeshTurnOnCellMask(dstMesh, maskValues=dstMaskValues, rc=localrc);
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+             else
+                call ESMF_MeshTurnOnNodeMask(dstMesh, maskValues=dstMaskValues, rc=localrc);
                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
              endif
@@ -1058,6 +1066,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  call ESMF_MeshTurnOffCellMask(srcMesh, rc=localrc);
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc)) return
+              else
+                 call ESMF_MeshTurnOffNodeMask(srcMesh, rc=localrc);
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
               endif
            endif
         endif
@@ -1073,6 +1085,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (present(dstMaskValues)) then
               if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
                  call ESMF_MeshTurnOffCellMask(dstMesh, rc=localrc);
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+              else
+                 call ESMF_MeshTurnOffNodeMask(dstMesh, rc=localrc);
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc)) return
               endif

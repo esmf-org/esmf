@@ -50,6 +50,9 @@ void CommRel::Init(const std::string &name, MeshDB &dom, MeshDB &ran, bool sym) 
   domMesh = &dom;
   ranMesh = &ran;
   symmetric = sym;
+
+  printf("#%d Init ranmesh=%d dommesh=%d\n",Par::Rank(),ranMesh,domMesh);
+
 }
 
 CommRel::CommRel(const std::string &name, MeshDB  &dom, bool _sym) :
@@ -390,6 +393,8 @@ void CommRel::build_range(bool ghosting) {
                msg.setPattern(ndproc, NULL);
 
   
+  printf("#%d H0 rmesh=%d dmesh=%d\n",Par::Rank(),rmesh,domMesh);
+
   // ** Sizes.  For each domain object, we send the id_type and object type
   MapType::iterator ci = domain_begin(), ce = domain_end();
   std::vector<UInt> send_size_all(csize, 0); // need vector proc can look up into (Map?)
@@ -482,7 +487,12 @@ std::cout << "P:" << msg.commRank() << " putting in nid=" << send_size_all[domai
 
   // Some things for range mesh, now;  See if coord field exists, else create
   // and populate.
+
+  printf("#%d H1 rmesh=%d dmesh=%d\n",Par::Rank(),rmesh,domMesh);
+
   rmesh->set_spatial_dimension(domMesh->spatial_dim());
+
+printf("H2\n");
 
 }
 

@@ -1,17 +1,26 @@
-module esmfpio
+#include "ESMFPIO.h"
+!>
+!! @file 
+!! @brief User interface Module for PIO, this is the only file a user program should 'use'
+!! 
+!! $Revision: 751 $
+!! $LastChangedDate: 2013-04-02 09:01:13 -0700 (Tue, 02 Apr 2013) $
+!<
+
+module pio
 ! Package all exposed variables and functions under one roof
 
 ! only pio_offset is intended for export from kinds
-  use esmfpio_kinds, only : pio_offset
+  use pio_kinds, only : pio_offset
 
-  use esmfpiolib_mod, only : pio_initdecomp, &
+  use piolib_mod, only : pio_initdecomp, &
        pio_openfile, pio_closefile, pio_createfile, pio_setdebuglevel, &
        pio_seterrorhandling, pio_setframe, pio_init, pio_get_local_array_size, &
        pio_freedecomp, pio_syncfile,pio_numtowrite,pio_numtoread,pio_setiotype, &
        pio_dupiodesc, pio_finalize, pio_set_hint, pio_getnumiotasks, pio_file_is_open, &
        pio_setnum_OST, pio_getnum_OST
 
-  use esmfpio_types, only : io_desc_t, file_desc_t, var_desc_t, iosystem_desc_t, &
+  use pio_types, only : io_desc_t, file_desc_t, var_desc_t, iosystem_desc_t, &
 	pio_int, pio_real, pio_double, pio_noerr, iotype_netcdf, &
 	iotype_pnetcdf, iotype_binary, iotype_direct_pbinary, iotype_pbinary, &
         PIO_iotype_binary, PIO_iotype_direct_pbinary, PIO_iotype_pbinary, &
@@ -21,13 +30,12 @@ module esmfpio
 #if defined(_NETCDF) || defined(_PNETCDF)
 	pio_nofill, pio_unlimited, pio_64bit_offset, &
 #endif
+	pio_iotype_vdc2, &
         pio_rearr_box, pio_internal_error, pio_bcast_error, pio_return_error
 
+  use piodarray, only : pio_read_darray, pio_write_darray, pio_set_buffer_size_limit  
 
-
-  use esmfpiodarray, only : pio_read_darray, pio_write_darray, pio_set_buffer_size_limit  
-
-  use ESMFPIO_nf_mod, only:        &
+  use nf_mod, only:        &
        PIO_enddef,            &
        PIO_inquire ,          &
        PIO_inq_attname ,  &
@@ -49,12 +57,12 @@ module esmfpio
        PIO_inquire_variable , &
        PIO_inquire_dimension 
 
-  use esmfpionfatt_mod, only : PIO_put_att   => put_att,        &
+  use pionfatt_mod, only : PIO_put_att   => put_att,        &
        PIO_get_att   => get_att
-  use esmfpionfput_mod, only : PIO_put_var   => put_var
-  use esmfpionfget_mod, only : PIO_get_var   => get_var
+  use pionfput_mod, only : PIO_put_var   => put_var
+  use pionfget_mod, only : PIO_get_var   => get_var
 
-  use ESMFPIO_calcdecomp, only : pio_set_blocksize
+  use calcdecomp, only : pio_set_blocksize
    
 
 
@@ -72,5 +80,5 @@ contains
     rank = iosystem%io_rank
   end function pio_iotask_rank
 
-end module esmfpio
+end module pio
 

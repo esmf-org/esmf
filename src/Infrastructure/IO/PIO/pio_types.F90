@@ -1,6 +1,14 @@
+#include "ESMFPIO.h"
 #define __PIO_FILE__ "pio_types.F90"
-module esmfpio_types
-    use esmfpio_kinds
+!>
+!! @file 
+!! @brief Derived datatypes and constants for PIO
+!! 
+!! $Revision: 751 $
+!! $LastChangedDate: 2013-04-02 09:01:13 -0700 (Tue, 02 Apr 2013) $
+!<
+module pio_types
+    use pio_kinds
 
 #ifdef _NETCDF
      use netcdf                                  ! _EXTERNAL
@@ -30,7 +38,7 @@ module esmfpio_types
     !------------------------------------
 !>
 !! @public
-!! @struct iosystem_desc_t iosystem_desc_t
+!! @defgroup iosystem_desc_t 
 !! @brief A defined PIO system descriptor created by @ref PIO_init (see pio_types)
 !<
     type, public :: IOSystem_desc_t
@@ -66,46 +74,44 @@ module esmfpio_types
 
         logical(log_kind)        :: IOproc             ! .true. if an IO processor
         logical(log_kind)        :: UseRearranger      ! .true. if data rearrangement is necessary
-        logical(log_kind)        :: async_interface    ! .true. if using the async interface model
+        logical(log_kind)        :: async_interface=.false.    ! .true. if using the async interface model
         integer(i4)              :: rearr         ! type of rearranger
                                                   ! e.g. rearr_{none,box}
-	integer(i4)              :: error_handling ! how esmfpio handles errors
-        integer(i4),pointer      :: ioranks(:)         ! the computational ranks for the IO tasks
+	integer(i4)              :: error_handling ! how pio handles errors
+        integer(i4),pointer      :: ioranks(:) => null()         ! the computational ranks for the IO tasks
 
 	! This holds the IODESC
     end type
 
     type iosystem_list_t
-       type(iosystem_desc_t), pointer :: this_iosystem
+       type(iosystem_desc_t), pointer :: this_iosystem => null()
     end type iosystem_list_t
 
 
     integer, parameter :: MAX_IO_SYSTEMS=6
-    type(iosystem_list_t) :: iosystems(MAX_IO_SYSTEMS)
+    type(iosystem_list_t), save :: iosystems(MAX_IO_SYSTEMS)
 
-
+!> 
+!! @private
+!! @struct io_data_list
+!! @brief Linked list of buffers for pnetcdf non-blocking interface
+!>
     type, public :: io_data_list
-#ifdef SEQUENCE
-	sequence
-#endif
        integer :: request
        real(r4), pointer :: data_real(:) => null()
        integer(i4), pointer :: data_int(:) => null()
        real(r8), pointer :: data_double(:) => null()
-       type(io_data_list), pointer :: next=> null()
+       type(io_data_list), pointer :: next => null()
     end type io_data_list
 
      
 !> 
-!! @public
-!! @struct file_desc_t file_desc_t
-!! @brief File descriptor returned by \ref PIO_openfile or \ref PIO_createfile (see pio_types)
+!! @defgroup file_desc_t
+!! File descriptor returned by \ref PIO_openfile or \ref PIO_createfile (see pio_types)
+!! 
 !>
     type, public :: File_desc_t
-#ifdef SEQUENCE
-	sequence
-#endif
-       type(iosystem_desc_t), pointer :: iosystem
+       type(iosystem_desc_t), pointer :: iosystem => null()
        type(io_data_list), pointer :: data_list_top  => null()  ! used for non-blocking pnetcdf calls
        integer :: buffsize=0
        integer :: request_cnt=0
@@ -139,11 +145,11 @@ module esmfpio_types
 
 !>
 !! @public 
-!! @struct io_desc_t io_desc_t
+!! @struct io_desc_t
 !! @brief  An io descriptor handle that is generated in @ref PIO_initdecomp 
 !! (see pio_types)
 !<
-   type, public :: IO_desc_t
+   type, public :: io_desc_t
 #ifdef SEQUENCE
 	sequence
 #endif
@@ -151,7 +157,6 @@ module esmfpio_types
         type(IO_desc2_t)    :: Write
 	integer(kind=PIO_Offset), pointer :: start(:) => NULL()
 	integer(kind=PIO_Offset), pointer :: count(:) => NULL()
-
 
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         ! fields for box-based rearranger
@@ -188,7 +193,7 @@ module esmfpio_types
 
 !>
 !! @public
-!! @struct var_desc_t var_desc_t
+!! @defgroup var_desc_t 
 !! @brief A variable descriptor returned from @ref PIO_def_var (see pio_types) 
 !<
     type, public :: Var_desc_t
@@ -200,6 +205,7 @@ module esmfpio_types
                                  ! netcdf file
 	integer(i4)     :: type
         integer(i4)     :: ndims ! number of dimensions as defined on the netcdf file.
+	character(len=50) :: name ! vdc needed variable
     end type 
 
 !>
@@ -222,8 +228,11 @@ module esmfpio_types
         PIO_iotype_pnetcdf = 5, &   ! parallel read/write of pNetCDF files
         PIO_iotype_netcdf  = 6, &   ! serial read/write of NetCDF file using 'base_node'
         PIO_iotype_netcdf4c = 7, &  ! netcdf4 (hdf5 format) file opened for compression (serial write access only)   
-        PIO_iotype_netcdf4p = 8     ! netcdf4 (hdf5 format) file opened in parallel (all netcdf4 files for read will be opened this way)
+        PIO_iotype_netcdf4p = 8, &  ! netcdf4 (hdf5 format) file opened in parallel (all netcdf4 files for read will be opened this way)
+        PIO_iotype_vdc2 = 10        ! VDC2 format file opened for compressed parallel write 
 
+
+! These are for backward compatability and should not be used or expanded upon
     integer(i4), public, parameter ::                       &
         iotype_pbinary = PIO_iotype_pbinary,                &
         iotype_direct_pbinary = PIO_iotype_direct_pbinary,  &
@@ -245,16 +254,16 @@ module esmfpio_types
 
 !> 
 !! @public
-!! @defgroup PIO_error_method error handling method 
-!! @brief  The three types of error handling methods are: 
+!! @defgroup PIO_error_method error_methods 
 !! @details
+!! The three types of error handling methods are: 
 !!  - PIO_INTERNAL_ERROR  : abort on error from any task
 !!  - PIO_BCAST_ERROR     : broadcast an error from io_rank 0 to all tasks in comm
 !!  - PIO_RETURN_ERROR    : do nothing - allow the user to handle it
 !<
-  integer(i4), public :: PIO_INTERNAL_ERROR = -51
-  integer(i4), public :: PIO_BCAST_ERROR = -52
-  integer(i4), public :: PIO_RETURN_ERROR = -53
+  integer(i4), public, parameter :: PIO_INTERNAL_ERROR = -51
+  integer(i4), public, parameter :: PIO_BCAST_ERROR = -52
+  integer(i4), public, parameter :: PIO_RETURN_ERROR = -53
 
 !>
 !! @public 
@@ -296,7 +305,8 @@ module esmfpio_types
    integer, public, parameter :: PIO_MAX_NAME = nf_max_name
    integer, public, parameter :: PIO_MAX_VAR_DIMS = nf_max_var_dims
    integer, public, parameter :: PIO_64BIT_OFFSET = nf_64bit_offset
-   integer, public, parameter :: PIO_num_OST =  16
+   integer, public, parameter :: PIO_64BIT_DATA = nf_64bit_data
+
 #else
 #ifdef _NETCDF
    integer, public, parameter :: PIO_global = nf90_global
@@ -314,7 +324,6 @@ module esmfpio_types
    integer, public, parameter :: PIO_MAX_NAME = nf90_max_name
    integer, public, parameter :: PIO_MAX_VAR_DIMS = nf90_max_var_dims
    integer, public, parameter :: PIO_64BIT_OFFSET = nf90_64bit_offset
-   integer, public, parameter :: PIO_num_OST =  16
 #else
    integer, public, parameter :: PIO_global = 0
    integer, public, parameter :: PIO_double = 6
@@ -329,8 +338,8 @@ module esmfpio_types
    integer, public, parameter :: PIO_WRITE = 20
    integer, public, parameter :: PIO_NOWRITE = 21
    integer, public, parameter :: PIO_64BIT_OFFSET = 0
+#endif
+#endif
    integer, public, parameter :: PIO_num_OST =  16
-#endif
-#endif
 
-end module esmfpio_types
+end module pio_types

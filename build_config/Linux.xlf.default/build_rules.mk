@@ -30,7 +30,7 @@ ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
 ESMF_F90DEFAULT         = mpxlf90
 ESMF_CXXDEFAULT         = mpxlC
-ESMF_MPIRUNDEFAULT      = mpirun.cqsub
+ESMF_MPIRUNDEFAULT      = mpirun.runjob
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
