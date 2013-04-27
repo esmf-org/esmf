@@ -85,7 +85,7 @@ void CommReg::SendFields(UInt nfields, MEField<> *const *sfields, MEField<> *con
       throw Ex() << "Send fields, me for " << sfields[i]->name() << " does not match rfield:"
                  << rfields[i]->name();
 
-    std::cout << sfields[i]->name() << " :: " << rfields[i]->name() << "\n";
+    //    std::cout << sfields[i]->name() << " :: " << rfields[i]->name() << "\n";
 
     sfields[i]->Getfields(sf);
     rfields[i]->Getfields(rf);

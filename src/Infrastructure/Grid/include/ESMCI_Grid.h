@@ -293,6 +293,7 @@ template <class TYPE>
         int   getArbDim(void) const { return arbDim;}
 
   bool isEmptyCoordArray(int staggerloc, int coord) {return (coordArrayList[staggerloc][coord]==ESMC_NULL_POINTER);}
+  bool isEmptyItemArray(int staggerloc, int item) {return (itemArrayList[staggerloc][item]==ESMC_NULL_POINTER);}
 
   static bool match(Grid *grid1, Grid *grid2, int *rc=NULL);
 

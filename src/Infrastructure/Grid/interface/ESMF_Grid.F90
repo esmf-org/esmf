@@ -111,7 +111,7 @@
                       ESMF_GRIDITEM_AREA=ESMF_GridItem_Flag(1), &
                       DEPREC_ESMF_GRIDITEM_AREAM=ESMF_GridItem_Flag(2), & ! DEPRECATED: If using, please email esmf support.
                       DEPREC_ESMF_GRIDITEM_FRAC=ESMF_GridItem_Flag(3)     ! DEPRECATED: If using, please email esmf support.
-
+  integer, parameter :: ESMF_GRIDITEM_COUNT=2
 
 !------------------------------------------------------------------------------
 ! ! ESMF_GridConn_Flag
@@ -2744,8 +2744,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_TypeKind_Flag):: tk
        integer:: atodMap(1), k
        real(ESMF_KIND_R8), pointer:: farrayPtr(:), farrayPtr2d(:,:)
-       integer:: rank, dimCount
+       integer:: rank, dimCount, maxNumStaggers
        logical, allocatable:: srcRepl(:), dstRepl(:)
+       type(ESMF_GRIDITEM_FLAG) :: gridItemList(ESMF_GRIDITEM_COUNT)=(/ESMF_GRIDITEM_MASK,ESMF_GRIDITEM_AREA/) 
+       type(ESMF_GRIDITEM_FLAG) :: gridItem
+       
        
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
@@ -2770,6 +2773,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        call ESMF_GridGet(grid, &
             dimCount=dimCount, & 
             coordTypeKind=coordTypeKind, &
+            staggerlocCount=maxNumStaggers, &
             distgridToGridMap=distgridToGridMap(1:dimCount), &
             coordDimCount=coordDimCount(1:dimCount), &
             coordDimMap=coordDimMap(1:dimCount,1:dimCount), &
@@ -2797,6 +2801,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
 
+ ! XMRKX
+
+
+#if 1
+       ! Allocate to maximum number of possible staggers
+       allocate(srcStaggers(maxNumStaggers))
+
+       ! Get list and number of active staggers
+       call c_ESMC_gridgetactivestaggers(grid%this, &
+            nStaggers, srcStaggers, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+#else
         ! For Bob:
         ! please fill out nStaggers and srcStaggers list, rest of the code is
         ! is generic. nStaggers and srcStaggers are currently hardcoded for demo.
@@ -2805,6 +2823,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         srcStaggers(1) = ESMF_STAGGERLOC_CENTER
         srcStaggers(2) = ESMF_STAGGERLOC_EDGE1
         srcStaggers(3) = ESMF_STAGGERLOC_EDGE2
+#endif
+
+
 
        ! Add Coords to new grid       
        do i = 1, nStaggers
@@ -2995,7 +3016,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        deallocate(srcA2D)
        deallocate(dstA)
        deallocate(dstA2D)
-       deallocate(srcStaggers)
        deallocate(srcRepl)
        deallocate(dstRepl)
             
@@ -3010,6 +3030,105 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        call ESMF_ArrayBundleDestroy(dstAB, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+#if 1
+      !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      ! Redist Item Data
+
+       do i=1,ESMF_GRIDITEM_COUNT
+
+          ! Get each grid item
+          gridItem=gridItemList(i)
+          
+          
+          ! Get list and number of active staggersfor this item
+          call c_ESMC_gridgetactiveitemstag(grid%this, &
+               gridItem, nStaggers, srcStaggers, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! If no staggers then go to next item
+          if (nStaggers .eq. 0) cycle
+          
+          ! Add Items to new grid       
+          do j = 1, nStaggers
+             call ESMF_GridAddItem(newGrid, staggerloc=srcStaggers(j), &
+             itemflag=gridItem, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+          
+          ! allocate space to hold arrays
+          allocate(srcA(nStaggers), dstA(nStaggers))
+
+          ! Pull item Arrays out of old grid  for each staggerloc added above          
+          do j = 1, nStaggers
+             call ESMF_GridGetItem(grid, staggerloc=srcStaggers(j), &
+                  itemFlag=gridItem, array=srcA(j), rc=localrc)   
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+       
+          
+          ! Pull item Arrays out of old grid  for each staggerloc added above
+          do j = 1, nStaggers
+             call ESMF_GridGetItem(newGrid, staggerloc=srcStaggers(j), &
+                  itemflag=gridItem, array=dstA(j), rc=localrc)   
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+
+          ! Gerhard had a note that Arraybundle redist doesn't seem to always work
+          ! so just do individual redists until you check with him    
+          !srcAB = ESMF_ArrayBundleCreate(arrayList=srcA(1:nStaggers), rc=localrc)
+          !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          !     ESMF_CONTEXT, rcToReturn=rc)) return
+          !dstAB = ESMF_ArrayBundleCreate(arrayList=dstA(1:nStaggers), rc=localrc)
+          !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          !     ESMF_CONTEXT, rcToReturn=rc)) return
+          ! Redist between ArrayBundles
+          !       call ESMF_ArrayBundleRedistStore(srcAB, dstAB, routehandle=routehandle, rc=localrc)
+          !       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          !            ESMF_CONTEXT, rcToReturn=rc)) return
+          !       call ESMF_ArrayBundleRedist(srcAB, dstAB, routehandle=routehandle, rc=localrc)
+          !       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          !            ESMF_CONTEXT, rcToReturn=rc)) return        
+          do j=1, nStaggers
+             call ESMF_ArrayRedistStore(srcA(j), dstA(j), routehandle=routehandle, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_ArrayRedist(srcA(j), dstA(j), routehandle=routehandle, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+          enddo
+          
+          ! Get rid of lists of arrays            
+          deallocate(srcA)
+          deallocate(dstA)
+            
+
+       ! Destroy ArrayBundles and release Routehandle
+          !       call ESMF_ArrayBundleRedistRelease(routehandle=routehandle, rc=localrc)
+          !       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          !            ESMF_CONTEXT, rcToReturn=rc)) return
+          !call ESMF_ArrayBundleDestroy(srcAB, rc=localrc)
+          !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          !     ESMF_CONTEXT, rcToReturn=rc)) return
+          !call ESMF_ArrayBundleDestroy(dstAB, rc=localrc)
+          !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & 
+          !     ESMF_CONTEXT, rcToReturn=rc)) return
+
+       enddo
+#endif
+
+
+          ! deallocate stagger list
+       deallocate(srcStaggers)
+
 
        ! Set return value
        ESMF_GridCreateCopyFromNewDG = newGrid

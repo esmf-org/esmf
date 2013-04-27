@@ -3174,6 +3174,96 @@ extern "C" {
 
 
   ///////////////////////////////////////////////////////////////////////////////////
+  // NOTE: This method assumes that ActiveList comes in allocated to hold the maximum 
+  //       number of staggers possible for the grid, e.g. gridStaggerLocCount or 2^gridDimCount
+
+  void FTN_X(c_esmc_gridgetactivestaggers)(ESMCI::Grid **_grid, 
+                                           int *_numActive,
+                                           int *ActiveList,
+                                           int *rc) {
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridactivestaggers()"
+    ESMCI::Grid *grid;
+    int dimCount, staggerLocCount, numActive;
+    bool active;
+
+    // Get Grid pointer
+    grid=*_grid;
+
+    // Get Sizes
+    dimCount = grid->getDimCount();
+    staggerLocCount = grid->getStaggerLocCount();
+
+    // Loop setting and counting
+    numActive=0;
+    for (int s=0; s<staggerLocCount; s++) {
+      // Make sure this stagger is active
+      active=true;
+      for (int c=0; c<dimCount; c++) {
+        if (grid->isEmptyCoordArray(s, c)) {    
+          active=false;
+          break;
+        }
+      }
+
+      // We're active so add to list
+      if (active) {
+        ActiveList[numActive]=s;
+        numActive++;
+      }
+    }
+
+    // output size
+    *_numActive=numActive;
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+
+  ///////////////////////////////////////////////////////////////////////////////////
+  // NOTE: This method assumes that ActiveList comes in allocated to hold the maximum 
+  //       number of staggers possible for the grid, e.g. gridStaggerLocCount or 2^gridDimCount
+
+  void FTN_X(c_esmc_gridgetactiveitemstag)(ESMCI::Grid **_grid, 
+                                           int *_item, 
+                                           int *_numActive,
+                                           int *ActiveList,
+                                           int *rc) {
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridactiveitemstag()"
+    ESMCI::Grid *grid;
+    int item;
+    int staggerLocCount, numActive;
+
+
+    // Get Grid pointer
+    grid=*_grid;
+
+    // Get item
+    item=*_item;
+
+    // Get Sizes
+    staggerLocCount = grid->getStaggerLocCount();
+
+    // Loop setting and counting
+    numActive=0;
+    for (int s=0; s<staggerLocCount; s++) {
+      // Make sure this stagger is active for item
+      if (!grid->isEmptyItemArray(s, item)) {    
+        ActiveList[numActive]=s;
+        numActive++;
+      }
+    }
+    
+    // output size
+    *_numActive=numActive;
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
 
 
   

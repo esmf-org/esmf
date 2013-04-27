@@ -1112,7 +1112,7 @@ endif
   elemdistgrid=ESMF_DistGridCreate(elemIds, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  ! Get points
+  ! Create redisted mesh
   mesh2=ESMF_MeshCreate(mesh, nodedistgrid, elemdistgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
@@ -1140,7 +1140,6 @@ endif
 
   call ESMF_DistgridDestroy(elemdistgrid, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
