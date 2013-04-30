@@ -2610,3 +2610,185 @@ extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
+
+
+// This method verifies that nodes in node_gids array are the same as the local nodes in meshpp, otherwise
+// it returns an error (used to test MeshRedist()). 
+// To do this check make sure the number of nodes in both cases are the same and that every
+// entry in node_gids is contained in meshpp
+extern "C" void FTN_X(c_esmc_meshchecknodelist)(Mesh **meshpp, int *_num_node_gids, int *node_gids, 
+                                             int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshchecknodelist()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+ /* XMRKX */
+
+    // For convenience deref mesh 
+    Mesh *meshp = *meshpp;
+    
+    // For convenience deref number
+    int num_node_gids=*_num_node_gids;
+
+
+    // Loop through counting local nodes
+    int num_local_nodes=0;
+    Mesh::iterator ni = meshp->node_begin(), ne = meshp->node_end();
+    for (;ni != ne; ++ni) {
+      const MeshObj &node = *ni;
+ 
+      if (GetAttr(node).is_locally_owned()) {
+        num_local_nodes++;
+      }
+    }
+
+    // See if number of local nodes is the same
+    if (num_node_gids != num_local_nodes) {
+      Throw() << "Number of local nodes in mesh ("<<num_local_nodes<<
+                 ") different that number in list ("<<num_node_gids<<")";
+    }
+
+
+
+    // Loop making sure nodes are all here
+    for (int i=0; i<num_node_gids; i++) {
+      //  Find the corresponding Mesh element
+        Mesh::MeshObjIDMap::iterator mi =  meshp->map_find(MeshObj::NODE, node_gids[i]);
+        if (mi == meshp->map_end(MeshObj::NODE)) {
+          Throw() << "Node "<<node_gids[i]<<" not found in Mesh.";
+        }
+        
+        // Get the element
+        const MeshObj &node = *mi; 
+        
+        // Check if it's locally owned
+        if (!GetAttr(node).is_locally_owned()) {
+          Throw() << "Node "<<node_gids[i]<<" in Mesh, but not local.";
+        }
+
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+
+// This method verifies that elems in elem_gids array are the same as the local elems in meshpp, otherwise
+// it returns an error (used to test MeshRedist()). 
+// To do this check make sure the number of elems in both cases are the same and that every
+// entry in elem_gids is contained in meshpp
+extern "C" void FTN_X(c_esmc_meshcheckelemlist)(Mesh **meshpp, int *_num_elem_gids, int *elem_gids, 
+                                             int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcheckelemlist()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+ /* XMRKX */
+
+    // For convenience deref mesh 
+    Mesh *meshp = *meshpp;
+    
+    // For convenience deref number
+    int num_elem_gids=*_num_elem_gids;
+
+
+    // Loop through counting local elems
+    int num_local_elems=0;
+    Mesh::iterator ni = meshp->elem_begin(), ne = meshp->elem_end();
+    for (;ni != ne; ++ni) {
+      const MeshObj &elem = *ni;
+ 
+      if (GetAttr(elem).is_locally_owned()) {
+        num_local_elems++;
+      }
+    }
+
+    // See if number of local elems is the same
+    if (num_elem_gids != num_local_elems) {
+      Throw() << "Number of local elems in mesh ("<<num_local_elems<<
+                 ") different that number in list ("<<num_elem_gids<<")";
+    }
+
+
+
+    // Loop making sure elems are all here
+    for (int i=0; i<num_elem_gids; i++) {
+      //  Find the corresponding Mesh element
+        Mesh::MeshObjIDMap::iterator mi =  meshp->map_find(MeshObj::ELEMENT, elem_gids[i]);
+        if (mi == meshp->map_end(MeshObj::ELEMENT)) {
+          Throw() << "Elem "<<elem_gids[i]<<" not found in Mesh.";
+        }
+        
+        // Get the element
+        const MeshObj &elem = *mi; 
+        
+        // Check if it's locally owned
+        if (!GetAttr(elem).is_locally_owned()) {
+          Throw() << "Elem "<<elem_gids[i]<<" in Mesh, but not local.";
+        }
+
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}

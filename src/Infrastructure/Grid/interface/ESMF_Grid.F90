@@ -2748,7 +2748,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        logical, allocatable:: srcRepl(:), dstRepl(:)
        type(ESMF_GRIDITEM_FLAG) :: gridItemList(ESMF_GRIDITEM_COUNT)=(/ESMF_GRIDITEM_MASK,ESMF_GRIDITEM_AREA/) 
        type(ESMF_GRIDITEM_FLAG) :: gridItem
-       
+       type(ESMF_CoordSys_Flag) :: coordSys
+    
        
        ! Initialize return code; assume failure until success is certain
        localrc = ESMF_RC_NOT_IMPL
@@ -2773,6 +2774,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        call ESMF_GridGet(grid, &
             dimCount=dimCount, & 
             coordTypeKind=coordTypeKind, &
+            coordSys=coordSys, &
             staggerlocCount=maxNumStaggers, &
             distgridToGridMap=distgridToGridMap(1:dimCount), &
             coordDimCount=coordDimCount(1:dimCount), &
@@ -2789,6 +2791,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        newGrid=ESMF_GridCreate(name=name, &
             coordTypeKind=coordTypeKind, &
             distgrid=distgrid, &
+            coordSys=coordSys, &
             distgridToGridMap=distgridToGridMap(1:dimCount), &
             coordDimCount=coordDimCount(1:dimCount), &
             coordDimMap=coordDimMap(1:dimCount,1:dimCount), &
