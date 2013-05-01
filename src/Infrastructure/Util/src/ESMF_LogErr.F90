@@ -881,10 +881,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !      This function returns {\tt .true.} when {\tt statusToCheck} indicates
-!      a Fortran status code, returned from a Fortran ALLOCATE statement,
-!      indicates a allocation error.  Otherwise it returns {\tt .false.}.
-!      An ESMF predefined memory allocation error message 
-!      will be added to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
+!      an allocation error, otherwise it returns {\tt .false.}.  The status
+!      value is typically returned from a Fortran ALLOCATE statement.
+!      If an error is indicated, a ESMF memory allocation error message 
+!      will be written to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
 !      {\tt line}, {\tt file} and {\tt method}.
 !
 !      The arguments are:
@@ -990,11 +990,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !      This function returns {\tt .true.} when {\tt statusToCheck} indicates
-!      a Fortran status code, returned from a Fortran DEALLOCATE statement,
-!      indicates a deallocation error.
-!      Otherwise {\tt .false.} is returned.
-!      An ESMF predefined memory deallocation error message 
-!      will be added to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
+!      an allocation error, otherwise it returns {\tt .false.}.  The status
+!      value is typically returned from a Fortran DEALLOCATE statement.
+!      If an error is indicated, a ESMF memory allocation error message 
+!      will be written to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
 !      {\tt line}, {\tt file} and {\tt method}.
 !
 !      The arguments are:
@@ -1101,9 +1100,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !      This function returns {\tt .true.} when {\tt rcToCheck} indicates
-!      an ESMF error code other than {\tt ESMF\_SUCCESS}.
-!      Otherwise {\tt .false.} is returned.  An ESMF predefined error message
-!      will be added to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
+!      an return code other than {\tt ESMF\_SUCCESS}, otherwise it returns
+!      {\tt .false.}.
+!      If an error is indicated, a ESMF predefined error message 
+!      will be written to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
 !      {\tt line}, {\tt file} and {\tt method}.
 !
 !      The arguments are:

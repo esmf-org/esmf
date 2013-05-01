@@ -121,11 +121,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,      intent(in),  optional :: relaxedFlag
     integer,      intent(out), optional :: rc
 !
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{6.2.0}
-! \end{itemize}
-!
 ! !DESCRIPTION:
 !   Call the system-dependent routine to create a directory in the file system.
 !
@@ -140,7 +135,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[relaxedFlag]}]
 !       When set to {\tt .true.}, if the directory already exists, {\tt rc}
 !       will be set to {\tt ESMF\_SUCCESS} instead of an error.
-!       The default is {\tt .false.}.
+!       If not specified, the default is {\tt .false.}.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -183,11 +178,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,      intent(in),  optional :: relaxedFlag
     integer,      intent(out), optional :: rc
 !
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{6.2.0}
-! \end{itemize}
-!
 ! !DESCRIPTION:
 !   Call the system-dependent routine to remove a directory from the file
 !   system.  Note that the directory must be empty in order to be successfully
@@ -199,7 +189,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       Name of the directory to be created.
 !     \item[{[relaxedFlag]}]
 !       If set to {\tt .true.}, and if the specified directory does not exist,
-!       the error is ignored.  The default is {\tt .false.}.
+!       the error is ignored and {\tt rc} will be set to {\tt ESMF\_SUCCESS}.
+!       If not specified, the default is {\tt .false.}.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
