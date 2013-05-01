@@ -128,8 +128,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Call the system-dependent routine to create a directory in the file system.
-!   If the path already exists, and {\tt relaxedFlag} is either not specified,
-!   or not set to {\tt .true.} an error is returned in {\tt rc}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -140,8 +138,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       the default is {\tt o'755'}.  On native Windows, this argument is
 !       ignored and default security settings are used.
 !     \item[{[relaxedFlag]}]
-!       When set to {\tt .true.}, if the path already exists, {\tt rc}
+!       When set to {\tt .true.}, if the directory already exists, {\tt rc}
 !       will be set to {\tt ESMF\_SUCCESS} instead of an error.
+!       The default is {\tt .false.}.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -192,8 +191,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   Call the system-dependent routine to remove a directory from the file
 !   system.  Note that the directory must be empty in order to be successfully
-!   removed.  If the directory does not exist, and {\tt relaxedFlag} is either
-!   not specified or is set to {\tt .false}, an error is returned in {\tt rc}.
+!   removed.
 !
 !     The arguments are:
 !     \begin{description}
@@ -201,7 +199,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       Name of the directory to be created.
 !     \item[{[relaxedFlag]}]
 !       If set to {\tt .true.}, and if the specified directory does not exist,
-!       the error is ignored.  Default is {\tt .false.}
+!       the error is ignored.  The default is {\tt .false.}.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

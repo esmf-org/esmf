@@ -880,13 +880,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!      This function returns {\tt .true.} when a Fortran status code
-!      returned from a memory allocation indicates an allocation error.
+!      This function returns {\tt .true.} when {\tt statusToCheck} indicates
+!      a Fortran status code, returned from a Fortran ALLOCATE statement,
+!      indicates a allocation error.  Otherwise it returns {\tt .false.}.
 !      An ESMF predefined memory allocation error message 
 !      will be added to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
-!      {\tt line}, {\tt file} and 
-!      {\tt method}.  Additionally, statusToCheck will be converted to 
-!      {\tt rcToReturn}.
+!      {\tt line}, {\tt file} and {\tt method}.
 !
 !      The arguments are:
 !      \begin{description}
@@ -990,13 +989,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!      This function returns {\tt .true.} when a Fortran status code
-!      returned from a memory deallocation indicates an deallocation error.
+!      This function returns {\tt .true.} when {\tt statusToCheck} indicates
+!      a Fortran status code, returned from a Fortran DEALLOCATE statement,
+!      indicates a deallocation error.
+!      Otherwise {\tt .false.} is returned.
 !      An ESMF predefined memory deallocation error message 
 !      will be added to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
-!      {\tt line}, {\tt file} and 
-!      {\tt method}.  Additionally, statusToCheck will be converted to 
-!      {\tt rcToReturn}.
+!      {\tt line}, {\tt file} and {\tt method}.
 !
 !      The arguments are:
 !      \begin{description}
@@ -1101,16 +1100,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!      This function returns {\tt .true.} for ESMF return codes that indicate
-!      an error.  A predefined error message will added to the {\tt ESMF\_Log} 
-!      along with
-!      a user added {\tt msg}, {\tt line}, {\tt file} and {\tt method}.  
-!      Additionally, {\tt rcToReturn} is set to {\tt rcToCheck}.
+!      This function returns {\tt .true.} when {\tt rcToCheck} indicates
+!      an ESMF error code other than {\tt ESMF\_SUCCESS}.
+!      Otherwise {\tt .false.} is returned.  An ESMF predefined error message
+!      will be added to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
+!      {\tt line}, {\tt file} and {\tt method}.
 !
 !      The arguments are:
 !      \begin{description}
 ! 	
-!      \item [{[rcToCheck}]]
+!      \item [{[rcToCheck]}]
 !            Return code to check. Default is {\tt ESMF\_SUCCESS}.
 !      \item [{[msg]}]
 !            User-provided message string.
@@ -1123,8 +1122,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            User-provided method string.
 !      \item [{[rcToReturn]}]
 !            If specified, when {\tt rcToCheck} indicates an error,
-!            set the {\tt rcToReturn} value to {\tt ESMF\_RC\_MEM}.  Otherwise,
-!            {\tt rcToReturn} is not modified.
+!            set the {\tt rcToReturn} to the value of {\tt rcToCheck}.
+!            Otherwise, {\tt rcToReturn} is not modified.
 !            This is not the return code for this function; it allows
 !            the calling code to do an assignment of the error code
 !            at the same time it is testing the value.
