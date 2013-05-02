@@ -990,7 +990,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !      This function returns {\tt .true.} when {\tt statusToCheck} indicates
-!      an allocation error, otherwise it returns {\tt .false.}.  The status
+!      a deallocation error, otherwise it returns {\tt .false.}.  The status
 !      value is typically returned from a Fortran DEALLOCATE statement.
 !      If an error is indicated, a ESMF memory allocation error message 
 !      will be written to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
