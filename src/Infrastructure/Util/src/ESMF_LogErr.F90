@@ -215,18 +215,20 @@ end type ESMF_LogPrivate
    public ESMF_LogMsg_Flag
 
 !  Overloaded = operator functions
-   public operator(==),operator(>)
+   public :: operator(==), operator(/=), operator(>)
    
 ! overload == and > with additional derived types so you can compare 
 !  them as if they were simple integers.
  
 
 interface operator (==)
+   module procedure ESMF_LogEQ
    module procedure ESMF_lmteq
    module procedure ESMF_llteq
 end interface
 
 interface operator (/=)
+   module procedure ESMF_LogNE
    module procedure ESMF_lltne
 end interface
 
@@ -247,7 +249,7 @@ contains
 
 
 ! -------------------------- ESMF-public method -------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_LogAssignment(=) - Log assignment
 !
 ! !INTERFACE:
@@ -272,7 +274,94 @@ contains
 !     The {\tt ESMF\_Log} object on the right hand side of the assignment.
 !   \end{description}
 !
-!EOPI
+!EOP
+!------------------------------------------------------------------------------
+
+! IMPLEMENTATION NOTE:
+! Use the default Fortran assignment
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_LogOperator(==) - Test if Log 1 is equal to Log 2
+!
+! !INTERFACE:
+!     interface operator(==)
+!     if (log1 == alog2) then ... endif
+!                  OR
+!     result = (log1 == log2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_Log), intent(in) :: log1
+!     type(ESMF_Log), intent(in) :: log2
+!
+!
+! !DESCRIPTION:
+!     Overloads the (==) operator for the {\tt ESMF\_Log} class.
+!     Compare two logs for equality; return {\tt .true.} if equal,
+!     {\tt .false.} otherwise. Comparison is based on IDs, which are distinct
+!     for newly created logs and identical for logs created as copies.
+!
+!     If either side of the equality test is not in the
+!     {\tt ESMF\_INIT\_CREATED} status an error will be logged. However, this
+!     does not affect the return value, which is {\tt .true.} when both
+!     sides are in the {\em same} status, and {\tt .false.} otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[log1]
+!          The {\tt ESMF\_Log} object on the left hand side of the equality
+!          operation.
+!     \item[log2]
+!          The {\tt ESMF\_Log} object on the right hand side of the equality
+!          operation.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_LogOperator(==) - Test if Log 1 is equal to Log 2
+!
+! !INTERFACE:
+!     interface operator(/=)
+!     if (log1 /= alog2) then ... endif
+!                  OR
+!     result = (log1 /= log2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_Log), intent(in) :: log1
+!     type(ESMF_Log), intent(in) :: log2
+!
+!
+! !DESCRIPTION:
+!     Overloads the (/=) operator for the {\tt ESMF\_Log} class.
+!     Compare two logs for inequality; return {\tt .true.} if equal,
+!     {\tt .false.} otherwise. Comparison is based on IDs, which are distinct
+!     for newly created logs and identical for logs created as copies.
+!
+!     If either side of the equality test is not in the
+!     {\tt ESMF\_INIT\_CREATED} status an error will be logged. However, this
+!     does not affect the return value, which is {\tt .true.} when both
+!     sides are in the {\em same} status, and {\tt .false.} otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[log1]
+!          The {\tt ESMF\_Log} object on the left hand side of the non-equality
+!          operation.
+!     \item[log2]
+!          The {\tt ESMF\_Log} object on the right hand side of the non-equality
+!          operation.
+!     \end{description}
+!
+!EOP
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -2143,6 +2232,58 @@ end subroutine ESMF_LogWrite
     endif
 
 end subroutine ESMF_LogEntryCopy
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogEQ()"
+!BOPI
+! !IROUTINE:  ESMF_LogEQ - Compare two Logs for equality
+!
+! !INTERFACE:
+  function ESMF_LogEQ(log1, log2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_LogEQ
+
+! !ARGUMENTS:
+    type(ESMF_Log), intent(in) :: log1
+    type(ESMF_Log), intent(in) :: log2
+
+! !DESCRIPTION:
+!     This method overloads the (==) operator for the {\tt ESMF\_Log}
+!     class.  See "interface operator(==)" above for complete description.
+!
+!EOPI
+
+    ESMF_LogEQ = log1%logTableIndex == log2%logTableIndex
+
+  end function ESMF_LogEQ
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogNE()"
+!BOPI
+! !IROUTINE:  ESMF_LogEQ - Compare two Logs for inequality
+!
+! !INTERFACE:
+  function ESMF_LogNE(log1, log2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_LogNE
+
+! !ARGUMENTS:
+    type(ESMF_Log), intent(in) :: log1
+    type(ESMF_Log), intent(in) :: log2
+
+! !DESCRIPTION:
+!     This method overloads the (/=) operator for the {\tt ESMF\_Log}
+!     class.  See "interface operator(==)" above for complete description.
+!
+!EOPI
+
+    ESMF_LogNE = log1%logTableIndex /= log2%logTableIndex
+
+  end function ESMF_LogNE
 
 end module ESMF_LogErrMod
 
