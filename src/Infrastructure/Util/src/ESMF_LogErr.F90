@@ -286,7 +286,7 @@ contains
 !
 ! !INTERFACE:
 !     interface operator(==)
-!     if (log1 == alog2) then ... endif
+!     if (log1 == log2) then ... endif
 !                  OR
 !     result = (log1 == log2)
 !
