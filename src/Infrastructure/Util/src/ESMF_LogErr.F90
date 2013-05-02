@@ -247,7 +247,7 @@ contains
 
 
 ! -------------------------- ESMF-public method -------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LogAssignment(=) - Log assignment
 !
 ! !INTERFACE:
@@ -272,7 +272,7 @@ contains
 !     The {\tt ESMF\_Log} object on the right hand side of the assignment.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
