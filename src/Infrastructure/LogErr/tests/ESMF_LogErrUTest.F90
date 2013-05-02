@@ -65,6 +65,7 @@
       integer :: datetime_commbuf(8)
       integer, allocatable :: rndseed(:)  ! cannot be pointer b/c absoft bug
       type(ESMF_Log) :: log2, log4, log6, log8
+      type(ESMF_Log) :: log9, log9_alias
       character (5) :: random_chars
       character (9) :: msg_string, random_string
       character :: random_char
@@ -993,6 +994,64 @@ if (time_diff < zero) stop 1
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) " LogGet with logmsgAbort cleared size Test"
       rc = merge (ESMF_SUCCESS, ESMF_FAILURE, size (logabort_flags) == 0)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test opening a log for assignment
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Opening Log for assignment Test"
+      call ESMF_LogOpen (log9, "Log_assignment_log9", rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test ESMF_LogAssignment(=)(log,log) 
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Log assignment (and write via alias) Test"
+      log9_alias = log9
+      call ESMF_LogWrite ("test message via alias",  &
+          logmsgFlag=ESMF_LOGMSG_INFO, log=log9_alias, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test ESMF_LogOperator(==)(log,log) 
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Log equality with same log Test"
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, log9 == log9_alias)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test ESMF_LogOperator(==)(log,log) 
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Log equality with different log Test"
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, .not. (log8 == log9))
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test ESMF_LogOperator(/=)(log,log) 
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Log inequality with same log Test"
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, .not. (log9 /= log9_alias))
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test ESMF_LogOperator(/=)(log,log) 
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Log inequality with different log Test"
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, log8 /= log9)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test closing a log via an alias
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Closing log via alias Test"
+      call ESMF_LogClose (log=log9_alias, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
