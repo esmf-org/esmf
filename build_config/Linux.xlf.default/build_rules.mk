@@ -6,8 +6,8 @@
 ############################################################
 # Default compiler setting.
 #
-ESMF_F90DEFAULT         = blrts_xlf90
-ESMF_CXXDEFAULT         = blrts_xlC
+ESMF_F90DEFAULT         = bgxlf90_r
+ESMF_CXXDEFAULT         = bgxlC_r
 
 ############################################################
 # Default MPI setting.
@@ -28,8 +28,8 @@ ESMF_MPIRUNDEFAULT      = $(ESMF_DIR)/src/Infrastructure/stubs/mpiuni/mpirun
 else
 ifeq ($(ESMF_COMM),mpi)
 # Vendor MPI -----------------------------------------------
-ESMF_F90DEFAULT         = mpxlf90
-ESMF_CXXDEFAULT         = mpxlC
+ESMF_F90DEFAULT         = mpixlf90_r
+ESMF_CXXDEFAULT         = mpixlcxx_r
 ESMF_MPIRUNDEFAULT      = mpirun.runjob
 else
 ifeq ($(ESMF_COMM),user)
@@ -47,29 +47,15 @@ ESMF_F90COMPILER_VERSION = ${ESMF_F90COMPILER} -qversion
 ESMF_CXXCOMPILER_VERSION = ${ESMF_CXXCOMPILER} -qversion
 
 ############################################################
-# BlueGene/L needs to link with F90 front end
+# BlueGene/Q needs to link with F90 front end
 #
 ESMF_CXXLINKERDEFAULT = $(ESMF_F90LINKERDEFAULT)
 
 ############################################################
-# BlueGene/L does not have support for POSIX IPC (memory mapped files)
+# BlueGene/Q special flags
 #
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_POSIXIPC
-
-############################################################
-# BlueGene/L does not have support for POSIX dynamic linking
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_DLFCN
-
-############################################################
-# BlueGene/L does not have support for sockets
-#
-ESMF_CXXCOMPILECPPFLAGS += -DESMF_NO_SOCKETS
-
-############################################################
-# BlueGene/L does not have support for Pthreads
-#
-ESMF_PTHREADS := OFF
+ESMF_F90COMPILEOPTS += -qminimaltoc -qarch=qp -qtune=qp
+ESMF_CXXCOMPILEOPTS += -qminimaltoc -qarch=qp -qtune=qp
 
 ############################################################
 # xlf90 needs flag to indicate FPP options
