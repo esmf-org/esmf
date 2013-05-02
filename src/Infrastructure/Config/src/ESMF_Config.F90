@@ -207,7 +207,7 @@
 
 
 ! -------------------------- ESMF-public method -------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ConfigAssignment(=) - Config assignment
 !
 ! !INTERFACE:
@@ -232,7 +232,7 @@
 !     The {\tt ESMF\_Config} object on the right hand side of the assignment.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
