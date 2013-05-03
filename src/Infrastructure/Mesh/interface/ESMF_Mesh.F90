@@ -2381,9 +2381,9 @@ end function ESMF_MeshCreateFromScrip
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateRedist()"
-!BOPI
+!BOP
 
-! !IROUTINE: ESMF_MeshCreate - Create a Mesh by redisting an existing one
+! !IROUTINE: ESMF_MeshCreate - Create a copy of a Mesh with a new distribution
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
@@ -2400,7 +2400,13 @@ end function ESMF_MeshCreateFromScrip
     integer,             intent(out), optional :: rc
 ! 
 ! !DESCRIPTION:
-!  Create a Mesh which is a redistribution of an existing Mesh. 
+!  Create a copy of an existing Mesh with a new distribution. Information
+! in the Mesh such as connections, coordinates, areas, masks, etc. are 
+! automatically redistributed to the new Mesh. To redistribute 
+! data in Fields built on the orginal Mesh create a Field on the new Mesh
+!  and then use the Field redistribution functionality 
+! ({\tt ESMF\_FieldRedistStore()}, etc.). The equivalent methods
+! can also be used for data in FieldBundles.  
 !
 !   \begin{description}
 !   \item [mesh]
@@ -2415,7 +2421,7 @@ end function ESMF_MeshCreateFromScrip
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: localrc
     integer :: numNodeIds, numElemIds

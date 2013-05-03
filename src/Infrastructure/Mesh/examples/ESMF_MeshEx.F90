@@ -42,8 +42,8 @@ program ESMF_MeshEx
 
   logical :: correct
   type(ESMF_VM) :: vm
-  type(ESMF_Mesh) :: mesh
-  
+  type(ESMF_Mesh) :: mesh, mesh2
+  type(ESMF_DistGrid) :: nodeDistgrid, elemDistgrid  
 
 ! The following arrays are used to declare the mesh to the ESMF framework.
   integer :: numNodes, numTotElems, numTriElems, numQuadElems
@@ -432,7 +432,7 @@ program ESMF_MeshEx
 
 !BOE
 !\subsubsection{Create a small Mesh on 4 PETs in one step}
-!
+!\label{sec:mesh:4pet1step}
 !
 !\begin{verbatim}
 !
@@ -685,11 +685,149 @@ program ESMF_MeshEx
   call ESMF_FieldDestroy(field, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  ! Get rid of Mesh
+  ! DON'T GET RID OF MESH BECAUSE USING IT BELOW
+  !! Get rid of Mesh
+  !call ESMF_MeshDestroy(mesh, rc=localrc)
+  !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+
+
+!BOE
+!\subsubsection{Create a copy of a Mesh with a new distribution}
+!
+!\begin{verbatim}
+!
+!  2.0   7 -------[8]               8 ------- 9          
+!        |         |                |         |
+!        |    4    |                |    5    |
+!        |         |                |         |
+!  1.0   4 ------ [5]               5 ------- 6
+!        
+!       0.0       1.0              1.0       2.0
+!
+!           PET 1                      PET 0
+!
+!
+!  1.0  [4] ----- [5]              [5] ----- [6]
+!        |         |  \                \      |
+!        |    1    | 2  \                \  3 |
+!        |         |      \                \  |
+!  0.0   1 ------- 2 -----[3]                 3
+!
+!       0.0       1.0               1.0      2.0 
+! 
+!           PET 2                      PET 3
+!
+!               Node Id labels at corners
+!              Element Id labels in centers
+!
+!\end{verbatim}
+!
+! This example demonstrates the creation of a new Mesh which is a copy of an existing Mesh
+! with a new distribution of the original Mesh's nodes and elements. To create the new Mesh 
+! in this manner the user needs two DistGrids. One to describe the new distribution of the nodes. 
+! The other to describe the new distribution of the elements. In this example we create new 
+! DistGrids from a list of indices. The DistGrids are then used in the redistribution 
+! Mesh create interface which is overloaded to {\tt ESMF\_MeshCreate()}. In this example
+! we redistribute the Mesh created in the previous example (Section~\ref{sec:mesh:4pet1step}) 
+! to the distribution pictured above. Note that for simplicity's sake, the position of the
+! Mesh in the diagram is basically the same, but the PET positions and node owners 
+! have been changed. 
+!
+!EOE
+
+!BOC
+
+  ! Setup the new location of nodes and elements depending on the processor
+  if (localPet .eq. 0) then !!! This part only for PET 0
+     allocate(elemIds(1))
+     elemIds=(/5/)
+     
+     allocate(nodeIds(4))
+     nodeIds=(/5,6,8,9/)
+     
+  else if (localPet .eq. 1) then !!! This part only for PET 1
+     allocate(elemIds(1))
+     elemIds=(/4/)
+     
+     allocate(nodeIds(2))
+     nodeIds=(/7,4/)        
+     
+  else if (localPet .eq. 2) then !!! This part only for PET 2
+     allocate(elemIds(2))
+     elemIds=(/1,2/)
+     
+     allocate(nodeIds(2))
+     nodeIds=(/1,2/)
+     
+  else if (localPet .eq. 3) then !!! This part only for PET 3
+     allocate(elemIds(1))
+     elemIds=(/3/)
+     
+     allocate(nodeIds(1))
+     nodeIds=(/3/)
+     
+  endif
+
+
+  ! Create new node DistGrid
+  nodedistgrid=ESMF_DistGridCreate(nodeIds, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+ 
+  ! Create new element DistGrid
+  elemdistgrid=ESMF_DistGridCreate(elemIds, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Can now deallocate distribution lists
+  deallocate(elemIds)
+  deallocate(nodeIds)
+
+
+  ! Create new redisted Mesh based on DistGrids
+  mesh2=ESMF_MeshCreate(mesh,                         &
+                        nodalDistgrid=nodedistgrid,   & 
+                        elementDistgrid=elemdistgrid, &
+                        rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Set arrayspec for example field create
+  ! Use a dimension of 1, because Mesh data is linearized 
+  ! into a one dimensional array. 
+  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+
+  ! At this point the mesh is ready to use. For example, as is 
+  ! illustrated here, to have a field created on it. Note that 
+  ! the Field only contains data for nodes owned by the current PET.
+  ! Please see Section "Create a Field from a Mesh" under Field
+  ! for more information on creating a Field on a Mesh. 
+  field = ESMF_FieldCreate(mesh2, arrayspec,  rc=localrc)
+
+!EOC
+  
+ ! Destroy Field
+  call ESMF_FieldDestroy(field, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Destroy Meshes
   call ESMF_MeshDestroy(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-   ! endif for skip for != 4 proc
+  call ESMF_MeshDestroy(mesh2, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Destroy Distgrids
+  call ESMF_DistgridDestroy(nodedistgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_DistgridDestroy(elemdistgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+   ! endif for skip for != 4 proc (extends all the way to previous subsection)
   endif 
 
 !BOE
@@ -754,6 +892,7 @@ program ESMF_MeshEx
   call ESMF_MeshDestroy(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 #endif
+
 
 !BOE
 !\subsubsection{Remove Mesh memory}
