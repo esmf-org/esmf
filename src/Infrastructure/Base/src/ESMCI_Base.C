@@ -1,4 +1,4 @@
-// $Id: ESMCI_Base.C,v 1.8 2012/09/20 21:19:31 w6ws Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Base.C,v 1.8 2012/09/20 21:19:31 w6ws Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -337,7 +337,8 @@ static const char *const version = "$Id: ESMCI_Base.C,v 1.8 2012/09/20 21:19:31 
      if (len >= ESMF_MAXSTR) {
        sprintf(msgbuf, "Error: object type %d bytes longer than limit of %d\n",
                           len, ESMF_MAXSTR-1);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+         &rc);
        return rc;
      }
   }
@@ -377,7 +378,8 @@ static const char *const version = "$Id: ESMCI_Base.C,v 1.8 2012/09/20 21:19:31 
   if (nlen > ESMF_MAXSTR) {
        sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes\n",
                        nlen, ESMF_MAXSTR);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+            &rc);
        return rc;
   }
 
@@ -449,7 +451,8 @@ static const char *const version = "$Id: ESMCI_Base.C,v 1.8 2012/09/20 21:19:31 
      if (len >= ESMF_MAXSTR) {
        sprintf(msgbuf, "object name %d bytes longer than limit of %d bytes\n",
                        len, ESMF_MAXSTR-1);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+           &rc);
        return rc;
      }
      defname = 0;
@@ -460,7 +463,8 @@ static const char *const version = "$Id: ESMCI_Base.C,v 1.8 2012/09/20 21:19:31 
      if (len >= ESMF_MAXSTR) {
        sprintf(msgbuf, "object type %d bytes longer than limit of %d bytes\n",
                        len, ESMF_MAXSTR-1);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+           &rc);
        return rc;
      }
      defclass = 0;
@@ -507,7 +511,8 @@ static const char *const version = "$Id: ESMCI_Base.C,v 1.8 2012/09/20 21:19:31 
   if (nlen > ESMF_MAXSTR) {
        sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes\n",
                        nlen, ESMF_MAXSTR);
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
+           &rc);
        return rc;
   }
 
@@ -759,7 +764,8 @@ static const char *const version = "$Id: ESMCI_Base.C,v 1.8 2012/09/20 21:19:31 
     } else {
       if ((*length - *offset) < fixedpart) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-                               "Buffer too short to add a Base object", &rc);
+                               "Buffer too short to add a Base object", 
+            ESMC_CONTEXT, &rc);
         return ESMF_FAILURE; 
         //buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
         //*length += 2 * fixedpart;

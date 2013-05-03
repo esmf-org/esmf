@@ -1,4 +1,4 @@
-// $Id: ESMCI_BaseTime.h,v 1.18 2012/01/06 20:18:08 svasquez Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,

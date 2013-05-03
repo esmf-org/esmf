@@ -1,4 +1,4 @@
-! $Id: atmos_comp.F90,v 1.9 2012/05/14 19:34:25 feiliu Exp $
+! $Id$
 !
 ! Example/test code which shows User Component calls.
 

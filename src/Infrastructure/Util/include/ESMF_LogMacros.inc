@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogMacros.inc,v 1.14 2012/09/20 18:21:39 w6ws Exp $
+ $Id$
 
  Earth System Modeling Framework
  Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -31,21 +31,5 @@
 
 #define ESMF_CONTEXT  line=__LINE__,file=ESMF_FILENAME,method=ESMF_METHOD
 #define ESMC_CONTEXT  __LINE__,ESMC_FILENAME,ESMC_METHOD
-
-#if 0
- TODO: Remove dependencies on the following macros and remove them! *gjt*
-#endif
-
-#define ESMC_LogAllocError(rc) \
-AllocError(ESMC_CONTEXT,rc)
-
-#define ESMC_LogMsgAllocError(msg,rc) \
-MsgAllocError(msg,ESMC_CONTEXT,rc)
-
-#define ESMC_LogMsgFoundError(status,msg,rc) \
-MsgFoundError(status,msg,ESMC_CONTEXT,rc)
-
-#define ESMC_LogWrite(msg,logtype) \
-Write(msg,logtype,ESMC_CONTEXT)
 
 #endif

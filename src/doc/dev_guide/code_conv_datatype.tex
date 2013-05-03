@@ -1,4 +1,4 @@
-% CVS $Id: code_conv_datatype.tex,v 1.11 2012/07/18 22:21:54 rokuingh Exp $
+% CVS $Id$
 
 \subsection{Code: Data Type Consistency Guidelines}
 
@@ -132,6 +132,61 @@ Finally, there are .eq. and .ne. operators defined to compare {\tt ESMF\_Logical
                  myFlag = myFlag_local                  ! Defined assignment
                end subroutine
 \end{verbatim}
+
+{\bf Character strings:}
+
+When passing character strings to subprograms, most Fortran compilers pass
+'hidden' string length arguments after all of the user-supplied arguments.
+Each hidden argument corresponds to each character string that is passed.
+Because of varying compiler support of 32-bit vs 64-bit string lengths,
+the {\tt ESMCI\_FortranStrLenArg} macro is used in C code to specify the
+data type of the hidden arguments.
+
+For input arguments is usually convenient to copy the Fortran string into a
+C++ string.  The {\tt ESMC\_F90lentrim} procedure provides a common way
+to obtain the length of the Fortran string - while ignoring trailing blanks.
+
+\begin{verbatim}
+  void FTN_X(c_esmc_somecode) (
+      const char *name1,   // in - some name in a character string
+      const char *name2,   // in - some other name
+      int *rc,             // out - return code
+      ESMCI_FortranStrLenArg name1_l,   // in - hidden length of name1
+      ESMCI_FortranStrLenArg name2_l) { // in - hidden length of name2
+
+      string name1_local = string (name1, 0, ESMC_F90lentrim (name1, name1_l));
+      string name2_local = string (name2, 0, ESMC_F90lentrim (name2, name2_l));
+      ...
+  }
+\end{verbatim}
+
+Likewise, when C++ code needs to pass a character string to Fortran code,
+the string may be simply performed by reference:
+
+\begin{verbatim}
+      FTN_X(f_esmf_somef90code) (
+          name1_local.c_str(),
+          name2_local.c_str(),
+          &localrc,
+          (ESMCI_FortranStrLenArg) name1_local.length(),
+          (ESMCI_FortranStrLenArg) name2_local.length())
+\end{verbatim}
+
+Note that when an array of characters is passed, the hidden string size is
+that of an individual array element.  The size of each dimension of the array
+should be explicitly passed through separate arguments.  Thus, in the following
+declaration, the hidden argument would have a value of 32.  The dimensions, 20
+and 30, would need to be separately passed:
+
+\begin{verbatim}
+    character(32) :: char_array(20,30)
+    :
+    call c_esmc_something (  &
+        char_array, size (char_array,1), size (char_array, 2), &
+        localrc)
+\end{verbatim}
+
+
 
 \subsubsection{C and C++}
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2008/09/26 04:16:39 cdeluca Exp $
+# $Id$
 
 # makefile template for the examples directory.
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Mesh.F90,v 1.100 2012/11/09 17:48:14 feiliu Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Mesh.F90,v 1.100 2012/11/09 17:48:14 feiliu Exp $'
+!      '$Id$'
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_MeshMod
@@ -166,6 +166,8 @@ module ESMF_MeshMod
   public ESMF_MeshMergeSplitDstInd
   public ESMF_MeshTurnOnCellMask
   public ESMF_MeshTurnOffCellMask
+  public ESMF_MeshTurnOnNodeMask
+  public ESMF_MeshTurnOffNodeMask
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -173,7 +175,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Mesh.F90,v 1.100 2012/11/09 17:48:14 feiliu Exp $'
+    '$Id$'
 
 !==============================================================================
 ! 
@@ -188,6 +190,7 @@ module ESMF_MeshMod
      module procedure ESMF_MeshCreateFromFile
      module procedure ESMF_MeshCreateFromDG
      module procedure ESMF_MeshCreateFromMeshes
+     module procedure ESMF_MeshCreateRedist
    end interface
 
 !------------------------------------------------------------------------------
@@ -646,7 +649,8 @@ contains
 ! !IROUTINE: ESMF_MeshAddNodes - Add nodes to a Mesh \label{sec:mesh:api:meshaddnodes}
 !
 ! !INTERFACE:
-    subroutine ESMF_MeshAddNodes(mesh, nodeIds, nodeCoords, nodeOwners, rc)
+    subroutine ESMF_MeshAddNodes(mesh, nodeIds, nodeCoords, nodeOwners, &
+                                 nodeMask, rc)
 
 !
 ! !ARGUMENTS:
@@ -654,6 +658,7 @@ contains
     integer,            intent(in)            :: nodeIds(:)
     real(ESMF_KIND_R8), intent(in)            :: nodeCoords(:)
     integer,            intent(in)            :: nodeOwners(:)
+    integer,            intent(in),  optional :: nodeMask(:)
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -688,6 +693,11 @@ contains
 !         may be a PET other than the current one. Only nodes owned by this PET
 !         will have PET local entries in a Field created on the Mesh. This input consists of 
 !         a 1D array the size of the number of nodes on this PET.
+!   \item [{[nodeMask]}]
+!          An array containing values which can be used for node masking. Which values indicate
+!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to 
+!          {\tt ESMF\_FieldRegridStore()} call. This input consists of a 1D array the
+!          size of the number of nodes on this PET.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -696,6 +706,7 @@ contains
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     integer                 :: num_nodes
+    type(ESMF_InterfaceInt) :: nodeMaskII
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -720,11 +731,24 @@ contains
        return 
     endif    
 
+
+   ! Create interface int to wrap optional element mask
+   nodeMaskII = ESMF_InterfaceIntCreate(nodeMask, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+
     num_nodes = size(nodeIds)
     call C_ESMC_MeshAddNodes(mesh%this, num_nodes, nodeIds, nodeCoords, &
-                             nodeOwners, localrc)
+                             nodeOwners, nodeMaskII, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get rid of interface Int wrapper
+    call ESMF_InterfaceIntDestroy(nodeMaskII, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
 
     ! Go to next stage 
     mesh%createStage=2
@@ -819,7 +843,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreate1Part(parametricDim, spatialDim, &
-                         nodeIds, nodeCoords, nodeOwners, &
+                         nodeIds, nodeCoords, nodeOwners, nodeMask, &
                          elementIds, elementTypes, elementConn, &
                          elementMask, elementArea, rc)
 !
@@ -832,6 +856,7 @@ contains
     integer,            intent(in)            :: nodeIds(:)
     real(ESMF_KIND_R8), intent(in)            :: nodeCoords(:)
     integer,            intent(in)            :: nodeOwners(:)
+    integer,            intent(in),  optional :: nodeMask(:)
     integer,            intent(in)            :: elementIds(:)
     integer,            intent(in)            :: elementTypes(:)
     integer,            intent(in)            :: elementConn(:)
@@ -892,6 +917,11 @@ contains
 !         may be a PET other than the current one. Only nodes owned by this PET
 !         will have PET local entries in a Field created on the Mesh. This input consists of 
 !         a 1D array the size of the number of nodes on this PET.
+!   \item [{[nodeMask]}]
+!          An array containing values which can be used for node masking. Which values indicate
+!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to 
+!          {\tt ESMF\_FieldRegridStore()} call. This input consists of a 1D array the
+!          size of the number of nodes on this PET.
 !   \item [elementIds]
 !          An array containing the global ids of the elements to be created on this PET. 
 !          This input consists of a 1D array the size of the number of elements on this PET.
@@ -933,7 +963,7 @@ contains
     integer                 :: num_nodes
     integer                 :: num_elems, num_elementConn
     type(ESMF_RegridConserve) :: lregridConserve
-    type(ESMF_InterfaceInt) :: elementMaskII
+    type(ESMF_InterfaceInt) :: elementMaskII, nodeMaskII
     real(ESMF_KIND_R8) :: tmpArea(2)
     integer :: areaPresent
 
@@ -967,12 +997,25 @@ contains
     ! Set init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreate1Part)
 
+
+   ! Create interface int to wrap optional element mask
+   nodeMaskII = ESMF_InterfaceIntCreate(nodeMask, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Add the nodes
     num_nodes = size(nodeIds)
     call C_ESMC_MeshAddNodes(ESMF_MeshCreate1Part%this, num_nodes, nodeIds, nodeCoords, &
-                             nodeOwners, localrc)
+                             nodeOwners, nodeMaskII, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Get rid of interface Int wrapper
+    call ESMF_InterfaceIntDestroy(nodeMaskII, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
 
 
    ! Create interface int to wrap optional element mask
@@ -1033,6 +1076,7 @@ num_elems, &
     call ESMF_InterfaceIntDestroy(elementMaskII, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
+
 
 
     ! The C side has been created
@@ -1861,7 +1905,10 @@ end function ESMF_MeshCreateFromFile
     endif
 
     ! Add nodes
-    call ESMF_MeshAddNodes (Mesh, NodeId, NodeCoords1D, NodeOwners, localrc)
+    call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
+                            NodeCoords=NodeCoords1D, &
+                            NodeOwners=NodeOwners, &
+                            rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2329,6 +2376,172 @@ end function ESMF_MeshCreateFromScrip
 
   end function ESMF_MeshCreateFromPointer
 !------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateRedist()"
+!BOPI
+
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh by redisting an existing one
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MeshCreate()
+    function ESMF_MeshCreateRedist(mesh, nodalDistGrid, elementDistgrid, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)                            :: ESMF_MeshCreateRedist
+
+! !ARGUMENTS:
+    type(ESMF_Mesh),     intent(in)            :: mesh
+    type(ESMF_DistGrid), intent(in)            :: nodalDistgrid
+    type(ESMF_DistGrid), intent(in)            :: elementDistgrid
+    integer,             intent(out), optional :: rc
+! 
+! !DESCRIPTION:
+!  Create a Mesh which is a redistribution of an existing Mesh. 
+!
+!   \begin{description}
+!   \item [mesh]
+!         The source Mesh to be redistributed. 
+!   \item [nodalDistgrid]
+!         A 1D arbitrary distgrid describing the new distribution of 
+!         the nodes across the PETs. 
+!   \item [elementDistgrid]
+!         A 1D arbitrary distgrid describing the new distribution of 
+!         the elements across the PETs. 
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc
+    integer :: numNodeIds, numElemIds
+    integer, allocatable :: nodeIds(:), elemIds(:)
+
+
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+
+    ! Check input mesh
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has not been fully created
+    if (.not. mesh%isFullyCreated) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+                 msg="- the mesh has not been fully created", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+       return 
+    endif    
+
+
+    ! We don't handle a mesh containing split elements right now, 
+    ! so complain and exit. 
+    ! TODO: Will need to do this before CESM uses with HOMME grid
+    if (mesh%hasSplitElem) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+               msg="- meshes with split elements can not be redisted right now", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
+       return 
+    endif    
+
+
+    ! If the C side doesn't exist, then just need to set the distgrids
+    if (mesh%isCMeshFreed) then
+
+       ! The C side has been created
+       ESMF_MeshCreateRedist%isCMeshFreed=.true.
+       
+       ! Set as fully created
+       !! TODO NEED TO HANDLE SPLIT ELEMENTS SOMEHOW, but for now
+       !! are caught above 
+       ESMF_MeshCreateRedist%hasSplitElem=.false.
+       
+       ESMF_MeshCreateRedist%isFullyCreated=.true.
+       ESMF_INIT_SET_CREATED(ESMF_MeshCreateRedist)
+
+       if (present(rc)) rc=ESMF_SUCCESS
+       return
+    endif
+
+
+    ! Get number of element Ids
+    call ESMF_DistGridGet(nodalDistgrid,localDe=0, &
+         elementCount=numNodeIds, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Allocate space for element Ids
+    allocate(nodeIds(numNodeIds))
+   
+    ! Get element Ids
+    call ESMF_DistGridGet(nodalDistgrid,localDe=0, &
+         seqIndexList=nodeIds, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Get number of element Ids
+    call ESMF_DistGridGet(elementDistgrid,localDe=0, &
+         elementCount=numElemIds, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! Allocate space for element Ids
+    allocate(elemIds(numElemIds))
+   
+    ! Get element Ids
+    call ESMF_DistGridGet(elementDistgrid,localDe=0, &
+         seqIndexList=elemIds, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+    ! Call into C
+    call C_ESMC_MeshCreateRedistElems(mesh,                  &
+                                      numNodeIds, nodeIds,   &
+                                      numElemIds, elemIds,   & 
+                                      ESMF_MeshCreateRedist, &
+                                      localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Deallocate gid arrays
+    deallocate(nodeIds)
+    deallocate(elemIds)
+
+    ! Set Distgrids
+    ESMF_MeshCreateRedist%nodal_distgrid=nodalDistGrid
+    ESMF_MeshCreateRedist%element_distgrid=elementDistgrid
+
+
+    ! Same dimensions as input mesh
+    ESMF_MeshCreateRedist%spatialDim=mesh%spatialDim
+    ESMF_MeshCreateRedist%parametricDim=mesh%parametricDim
+
+    ! Set number of owned things
+    ESMF_MeshCreateRedist%numOwnedNodes=numNodeIds
+    ESMF_MeshCreateRedist%numOwnedElements=numElemIds
+
+
+    ! Will have same freed status as input mesh
+    ESMF_MeshCreateRedist%isCMeshFreed=mesh%isCMeshFreed
+
+    ! Will have same split status as input mesh
+    ESMF_MeshCreateRedist%hasSplitElem=mesh%hasSplitElem
+
+    ! Set as fully created
+    ESMF_MeshCreateRedist%isFullyCreated=.true.
+
+    ESMF_INIT_SET_CREATED(ESMF_MeshCreateRedist)
+
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+
+end function ESMF_MeshCreateRedist
+!------------------------------------------------------------------------------
+
 
 ! -----------------------------------------------------------------------------
 #undef ESMF_METHOD
@@ -3941,6 +4154,105 @@ end subroutine ESMF_MeshMergeSplitDstInd
     if (present(rc)) rc = ESMF_SUCCESS
     
     end subroutine ESMF_MeshTurnOffCellMask
+
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshTurnOnNodeMask()"
+!BOPI
+! !IROUTINE: ESMF_MeshTurnOnNodeMask -- Turn on masking to correspond to maskValues
+!
+! !INTERFACE:
+   subroutine ESMF_MeshTurnOnNodeMask(mesh, maskValues, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                :: mesh
+    integer(ESMF_KIND_I4), optional            :: maskValues(:)
+    integer, intent(out) , optional            :: rc
+!
+! !DESCRIPTION:
+!   Turn on mesh masking
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh to turn on masking for
+!   \item [maskValues]
+!         Values to set as masked
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc 
+    type(ESMF_InterfaceInt) :: maskValuesArg
+
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+
+    ! If not present, then don't need to turn anything on
+    if (.not. present(maskValues)) then
+       if (present(rc)) rc = ESMF_SUCCESS
+       return
+    endif
+
+    ! convert mask values 
+    maskValuesArg = ESMF_InterfaceIntCreate(maskValues, rc=localrc)
+    	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      	  ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    call c_esmc_meshturnonnodemask(mesh, maskValuesArg, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      	    ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_InterfaceIntDestroy(maskValuesArg, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      	    ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    end subroutine ESMF_MeshTurnOnNodeMask
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshTurnOffNodeMask()"
+!BOPI
+! !IROUTINE: ESMF_MeshTurnOffNodeMask -- Turn off masking
+!
+! !INTERFACE:
+   subroutine ESMF_MeshTurnOffNodeMask(mesh, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Mesh), intent(in)                :: mesh
+    integer, intent(out) , optional            :: rc
+!
+! !DESCRIPTION:
+!   Turn on mesh masking
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh to turn on masking for
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc 
+    
+    ! Init localrc
+    localrc = ESMF_SUCCESS
+    
+    call c_esmc_meshturnoffnodemask(mesh, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    end subroutine ESMF_MeshTurnOffNodeMask
 
 
 

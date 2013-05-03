@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBundle.F90,v 1.90 2012/10/29 03:58:29 gold2718 Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@ module ESMF_ArrayBundleMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_ArrayBundle.F90,v 1.90 2012/10/29 03:58:29 gold2718 Exp $'
+    '$Id$'
 
 !==============================================================================
 ! 
@@ -3204,12 +3204,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set default flags
     opt_singlefileflag = ESMF_TRUE
-    if (present(singleFile) .and. .not. singleFile) then
-      opt_singlefileflag = ESMF_FALSE
-    endif
+    if (present(singleFile)) opt_singlefileflag = singlefile
 
     opt_overwriteflag = ESMF_FALSE
-    if (present(overwrite) .and. overwrite) opt_overwriteflag = ESMF_TRUE
+    if (present(overwrite)) opt_overwriteflag = overwrite
 
     opt_status = ESMF_FILESTATUS_UNKNOWN
     if (present(status)) opt_status = status

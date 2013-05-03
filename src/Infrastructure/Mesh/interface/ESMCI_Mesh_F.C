@@ -1,4 +1,4 @@
-// $Id: ESMCI_Mesh_F.C,v 1.64 2012/11/09 17:48:14 feiliu Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -17,14 +17,14 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
+
 #include <string>
 #include <ostream>
 #include <iterator>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_F90Interface.h"
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMF_LogMacros.inc"
+#include "ESMCI_LogErr.h"
 #include "ESMCI_Mesh.h"
 #include "ESMCI_MeshRead.h"
 #include "ESMCI_MeshRegrid.h" //only for the conservative flag in add_elements
@@ -38,12 +38,13 @@
 #include "Mesh/include/ESMCI_Phedra.h"
 #include "Mesh/include/ESMCI_XGridUtil.h"
 #include "Mesh/include/ESMCI_MeshMerge.h"
+#include "Mesh/include/ESMCI_MeshRedist.h"
 
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Mesh_F.C,v 1.64 2012/11/09 17:48:14 feiliu Exp $";
+ static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 
@@ -93,27 +94,30 @@ extern "C" void FTN_X(c_esmc_meshcreate)(Mesh **meshpp,
  int localrc;
  int rc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
    throw localrc;  // bail out with exception
 }
 
      // Some error checking of input
     if (*pdim > *sdim) {
       int localrc;
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-		      "- Parametric dimension can't be greater than spatial dimension", &localrc)) throw localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+         "- Parametric dimension can't be greater than spatial dimension",
+         ESMC_CONTEXT, &localrc)) throw localrc;
     }
 
     if ((*pdim < 2) || (*pdim >3)) {
       int localrc;
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-		      "- Parametric dimension can't be greater than 3D or less than 2D", &localrc)) throw localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+         "- Parametric dimension can't be greater than 3D or less than 2D",
+         ESMC_CONTEXT, &localrc)) throw localrc;
     }
 
     if ((*sdim < 2) || (*sdim >3)) {
       int localrc;
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-		      "- Spatial dimension can't be greater than 3D or less than 2D", &localrc)) throw localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+        "- Spatial dimension can't be greater than 3D or less than 2D",
+        ESMC_CONTEXT, &localrc)) throw localrc;
     }
 
     *meshpp = new Mesh();
@@ -124,21 +128,21 @@ extern "C" void FTN_X(c_esmc_meshcreate)(Mesh **meshpp,
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT,rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT,rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -148,7 +152,8 @@ extern "C" void FTN_X(c_esmc_meshcreate)(Mesh **meshpp,
 } // meshcreate
 
 extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *nodeId, 
-               double *nodeCoord, int *nodeOwner, int *rc) 
+                                           double *nodeCoord, int *nodeOwner, InterfaceInt **nodeMaskII,
+                                           int *rc) 
 {
    try {
     Mesh *meshp = *meshpp;
@@ -160,21 +165,21 @@ extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *n
  int localrc;
  int rc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
    throw localrc;  // bail out with exception
     }
 
     // Get petCount for error checking
     int localrc;
     int petCount = VM::getCurrent(&localrc)->getPetCount();
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception
 
     // Check node owners
     for (int n = 0; n < *num_nodes; ++n) {
       if ((nodeOwner[n]<0) || (nodeOwner[n]>petCount-1)) {
-         if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-           "- Bad nodeOwner value ", &localrc)) throw localrc;
+         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- Bad nodeOwner value ", ESMC_CONTEXT,&localrc)) throw localrc;
       }
     }
 
@@ -193,41 +198,89 @@ extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *n
     // Register the nodal coordinate field.
     IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", mesh.spatial_dim());
 
+    // Handle node masking
+    IOField<NodalField> *node_mask_val;
+    IOField<NodalField> *node_mask;
+
+    bool has_node_mask=false;
+    if (*nodeMaskII != NULL) { // if masks exist
+    // Error checking
+    if ((*nodeMaskII)->dimCount !=1) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        "- nodeMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
+    }
+
+    if ((*nodeMaskII)->extent[0] != *num_nodes) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+                                       "- nodeMask array must be the same size as the nodeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+    
+    // Register mask fields on mesh
+    node_mask_val = mesh.RegisterNodalField(mesh, "node_mask_val", 1);
+    node_mask = mesh.RegisterNodalField(mesh, "mask", 1);
+
+
+    // Record the fact that it has masks
+    has_node_mask=true;   
+  } 
+    
+
     Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
 
     UInt sdim = mesh.spatial_dim();
 
-    for (UInt nc = 0; ni != ne; ++ni) {
+    // Loop and add coords and mask
+    if (has_node_mask) {
+      int *maskArray=(*nodeMaskII)->array;
+      int nm=0;
+      for (UInt nc = 0; ni != ne; ++ni) {
+        
+        MeshObj &node = *ni;
+      
+        // Coords
+        double *coord = node_coord->data(node);
+        for (UInt c = 0; c < sdim; ++c)
+          coord[c] = nodeCoord[nc+c];
+        nc += sdim;   
 
-      MeshObj &node = *ni;
+        // Mask
+        double *mask = node_mask_val->data(node);
+        *mask=maskArray[nm];
+        nm++;
 
-      double *coord = node_coord->data(node);
-
-      for (UInt c = 0; c < sdim; ++c)
-        coord[c] = nodeCoord[nc+c];
-
-      nc += sdim;
-
+      }
+    } else {
+      for (UInt nc = 0; ni != ne; ++ni) {
+        
+        MeshObj &node = *ni;
+        
+        double *coord = node_coord->data(node);
+        for (UInt c = 0; c < sdim; ++c)
+          coord[c] = nodeCoord[nc+c];        
+        nc += sdim;   
+      }      
     }
 
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -246,7 +299,7 @@ extern "C" void FTN_X(c_esmc_meshwrite)(Mesh **meshpp, char *fname, int *rc,
  int localrc;
  int rc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
    throw localrc;  // bail out with exception
     }
 
@@ -259,21 +312,21 @@ extern "C" void FTN_X(c_esmc_meshwrite)(Mesh **meshpp, char *fname, int *rc,
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT,rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -295,7 +348,7 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
  int localrc;
  int rc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
    throw localrc;  // bail out with exception
     }
 
@@ -320,14 +373,16 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
       if (parametric_dim==2) {
         if ((elemType[i] != 5) && (elemType[i] != 9)) {
 	  int localrc;
-	  if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-           "- for a mesh with parametric dimension 2 element types must be either triangles or quadrilaterals ", &localrc)) throw localrc;
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- for a mesh with parametric dimension 2 element types must be either triangles or quadrilaterals ",
+           ESMC_CONTEXT, &localrc)) throw localrc;
         }
       } else if (parametric_dim==3) {
         if ((elemType[i] != 10) && (elemType[i] != 12)) {
 	  int localrc;
-	  if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-           "- for a mesh with parametric dimension 3 element types must be either tetrahedron or hexahedron ", &localrc)) throw localrc;
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- for a mesh with parametric dimension 3 element types must be either tetrahedron or hexahedron ",
+           ESMC_CONTEXT, &localrc)) throw localrc;
         }
 
       }
@@ -343,8 +398,9 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
     }
     if (expected_conn_size != num_elemConn) {
       int localrc;
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-       "- element connectivity list doesn't contain the right number of entries ", &localrc)) throw localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+       "- element connectivity list doesn't contain the right number of entries ",
+       ESMC_CONTEXT, &localrc)) throw localrc;
     }
 
     // Get number of nodes
@@ -369,8 +425,9 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
 
       if (seq >= num_nodes){
 	int localrc;
-	if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-            "- node index is larger or equal to num_nodes", &localrc))  throw localrc;
+	if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+            "- node index is larger or equal to num_nodes", 
+            ESMC_CONTEXT, &localrc))  throw localrc;
          }
       
       all_nodes[seq] = &*ni;
@@ -401,8 +458,9 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
         // Check elemConn
         if ((node_index < 0) || (node_index > num_nodes-1)) {
 	  int localrc;
-	  if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-	   "- elemConn entries should not be greater than number of nodes on processor ", &localrc)) throw localrc;
+	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+	   "- elemConn entries should not be greater than number of nodes on processor ",
+           ESMC_CONTEXT, &localrc)) throw localrc;
 	}
 
         // Setup connectivity list
@@ -430,8 +488,9 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
     
     if (!every_node_used) {
       int localrc;
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
-          "- there are nodes on this PET that were not used in the element connectivity list ", &localrc)) throw localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          "- there are nodes on this PET that were not used in the element connectivity list ",
+          ESMC_CONTEXT, &localrc)) throw localrc;
     }
 
   // Register the frac field
@@ -450,14 +509,14 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
     // Error checking
     if ((*elemMaskII)->dimCount !=1) {
       int localrc;
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-                "- elementMask array must be 1D ", &localrc)) throw localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        "- elementMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
     }
 
     if ((*elemMaskII)->extent[0] != num_elems) {
       int localrc;
-      if(ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_RANK,
-                "- elementMask array must be the same size as elementIds array ", &localrc)) throw localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+        "- elementMask array must be the same size as elementIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
     }
 
     // Context for new fields
@@ -551,21 +610,21 @@ extern "C" void FTN_X(c_esmc_meshaddelements)(Mesh **meshpp,
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -587,7 +646,7 @@ extern "C" void FTN_X(c_esmc_meshvtkheader)(char *filename, int *num_elem, int *
  int localrc;
  int rc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
    throw localrc;  // bail out with exception
 }
 
@@ -617,21 +676,21 @@ extern "C" void FTN_X(c_esmc_meshvtkheader)(char *filename, int *num_elem, int *
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -650,7 +709,7 @@ extern "C" void FTN_X(c_esmc_meshvtkbody)(char *filename, int *nodeId, double *n
  int localrc;
  int rc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
    throw localrc;  // bail out with exception
 }
 
@@ -681,21 +740,21 @@ extern "C" void FTN_X(c_esmc_meshvtkbody)(char *filename, int *nodeId, double *n
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -713,7 +772,7 @@ extern "C" void FTN_X(c_esmc_meshdestroy)(Mesh **meshpp, int *rc) {
  int localrc;
  int rc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
    throw localrc;  // bail out with exception
     }
 
@@ -724,21 +783,21 @@ extern "C" void FTN_X(c_esmc_meshdestroy)(Mesh **meshpp, int *rc) {
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -756,7 +815,7 @@ extern "C" void FTN_X(c_esmc_meshfreememory)(Mesh **meshpp, int *rc) {
  int localrc;
  int rc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
    throw localrc;  // bail out with exception
     }
 
@@ -767,21 +826,21 @@ extern "C" void FTN_X(c_esmc_meshfreememory)(Mesh **meshpp, int *rc) {
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -863,7 +922,7 @@ extern "C" void FTN_X(c_esmc_meshget)(Mesh **meshpp, int *num_nodes, int *num_el
     {
  int localrc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,rc))
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,rc))
    return;  // bail out with exception
     }
 
@@ -890,7 +949,7 @@ extern "C" void FTN_X(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int
  int localrc;
  int rc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
    throw localrc;  // bail out with exception
     }
 
@@ -922,21 +981,21 @@ extern "C" void FTN_X(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -950,8 +1009,8 @@ extern "C" void FTN_X(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int
 
     FTN_X(f_esmf_getmeshdistgrid)(ngrid, &nsize, indices, &rc1);
 
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc1,
-      ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.MsgFoundError(rc1,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
       ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
   {
@@ -963,8 +1022,8 @@ extern "C" void FTN_X(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int
 
     FTN_X(f_esmf_getmeshdistgrid)(egrid, &esize, indices, &rc1);
 
-    if(ESMC_LogDefault.ESMC_LogMsgFoundError(rc1,
-      ESMCI_ERR_PASSTHRU,
+    if(ESMC_LogDefault.MsgFoundError(rc1,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
       ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
 
@@ -988,8 +1047,8 @@ extern "C" void FTN_X(c_esmc_meshinfoserialize)(int *intMeshFreed,
     int size = sizeof(int);
     if (*inquireflag != ESMF_INQUIREONLY) {
       if ((*length - *offset) < size) {         
-         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-          "Buffer too short to add a Mesh object", localrc);
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "Buffer too short to add a Mesh object", ESMC_CONTEXT, localrc);
          return;
       }
     }
@@ -1049,7 +1108,7 @@ extern "C" void FTN_X(c_esmc_meshserialize)(Mesh **meshpp,
      {
  int localrc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
    throw localrc;  // bail out with exception
      }
 
@@ -1087,8 +1146,8 @@ extern "C" void FTN_X(c_esmc_meshserialize)(Mesh **meshpp,
     // TODO: verify length > vars.
     if (*inquireflag != ESMF_INQUIREONLY) {
       if ((*length - *offset) < size) {         
-         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-          "Buffer too short to add Mesh object", rc);
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "Buffer too short to add Mesh object", ESMC_CONTEXT, rc);
          return;
       }
     }
@@ -1145,21 +1204,21 @@ extern "C" void FTN_X(c_esmc_meshserialize)(Mesh **meshpp,
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -1183,7 +1242,7 @@ extern "C" void FTN_X(c_esmc_meshdeserialize)(Mesh **meshpp,
      {
  int localrc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
    throw localrc;  // bail out with exception
      }
 
@@ -1270,21 +1329,21 @@ extern "C" void FTN_X(c_esmc_meshdeserialize)(Mesh **meshpp,
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -1304,7 +1363,7 @@ extern "C" void FTN_X(c_esmc_meshfindpnt)(Mesh **meshpp, int *unmappedaction, in
     {
  int localrc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,rc))
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,rc))
    return;  // bail out with exception
     }
 
@@ -1316,16 +1375,17 @@ extern "C" void FTN_X(c_esmc_meshfindpnt)(Mesh **meshpp, int *unmappedaction, in
     //// Temporary solution because exceptions aren't working in FindPnts()
     if (fp_err != ESMCI_FINDPNT_SUCCESS) {
       if (fp_err == ESMCI_FINDPNT_DIM_MISMATCH) {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-          " - point dimension doesn't match grid/mesh dimension", rc);
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          " - point dimension doesn't match grid/mesh dimension",
+          ESMC_CONTEXT, rc);
          return;
       } else if (fp_err == ESMCI_FINDPNT_PNT_NOT_FOUND) {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-          " - some points lie outside of grid/mesh ", rc);
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          " - some points lie outside of grid/mesh ", ESMC_CONTEXT, rc);
          return;
       } else {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   			     	  " - unknown error in findpnt", rc);
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+	     	  " - unknown error in findpnt", ESMC_CONTEXT, rc);
          return;
       }
     }
@@ -1333,22 +1393,22 @@ extern "C" void FTN_X(c_esmc_meshfindpnt)(Mesh **meshpp, int *unmappedaction, in
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -1368,7 +1428,7 @@ extern "C" void FTN_X(c_esmc_getlocalcoords)(Mesh **meshpp, double *nodeCoord, i
  int localrc;
  int rc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
    throw localrc;  // bail out with exception
     }
 
@@ -1413,21 +1473,21 @@ extern "C" void FTN_X(c_esmc_getlocalcoords)(Mesh **meshpp, double *nodeCoord, i
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -1458,7 +1518,7 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *
     {
       int localrc;
       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
 	throw localrc;  // bail out with exception
     }
     
@@ -1579,21 +1639,21 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -1608,7 +1668,7 @@ extern "C" void FTN_X(c_esmc_meshgetdimensions)(Mesh **meshpp, int *sdim, int *p
     {
       int localrc;
       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
         throw localrc;  // bail out with exception
     }
     
@@ -1624,21 +1684,21 @@ extern "C" void FTN_X(c_esmc_meshgetdimensions)(Mesh **meshpp, int *sdim, int *p
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -1664,7 +1724,7 @@ extern "C" void FTN_X(c_esmc_meshgetcentroid)(Mesh **meshpp, int *num_elem, doub
     {
       int localrc;
       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
 	throw localrc;  // bail out with exception
     }
     
@@ -1787,21 +1847,21 @@ extern "C" void FTN_X(c_esmc_meshgetcentroid)(Mesh **meshpp, int *num_elem, doub
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -1818,7 +1878,7 @@ extern "C" void FTN_X(c_esmc_meshgetfrac)(Mesh **meshpp, int *num_elem, double *
     {
       int localrc;
       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
 	throw localrc;  // bail out with exception
     }
     
@@ -1876,21 +1936,21 @@ extern "C" void FTN_X(c_esmc_meshgetfrac)(Mesh **meshpp, int *num_elem, double *
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -1907,7 +1967,7 @@ extern "C" void FTN_X(c_esmc_meshgetfrac2)(Mesh **meshpp, int *num_elem, double 
     {
       int localrc;
       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
 	throw localrc;  // bail out with exception
     }
     
@@ -1965,21 +2025,21 @@ extern "C" void FTN_X(c_esmc_meshgetfrac2)(Mesh **meshpp, int *num_elem, double 
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -2003,7 +2063,7 @@ extern "C" void FTN_X(c_esmc_triangulate)(int *pdim, int *sdim, int *numPnts,
     {
  int localrc;
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,rc))
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,rc))
    return;  // bail out with exception
     }
 
@@ -2016,29 +2076,33 @@ extern "C" void FTN_X(c_esmc_triangulate)(int *pdim, int *sdim, int *numPnts,
       } else if (*sdim==3) {
         ret=triangulate_poly<GEOM_SPH2D3D>(*numPnts, pnts, td, ti, triInd);
       } else {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-       " - triangulate can't be used for polygons with spatial dimension not equal to 2 or 3", rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          " - triangulate can't be used for polygons with spatial dimension not equal to 2 or 3",
+          ESMC_CONTEXT, rc);
         return;
       }
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-       " - triangulate can't be used for polygons with parametric dimension not equal to 2", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+       " - triangulate can't be used for polygons with parametric dimension not equal to 2",
+       ESMC_CONTEXT, rc);
       return;
     }
 
     // Check return code
     if (ret != ESMCI_TP_SUCCESS) {
       if (ret == ESMCI_TP_DEGENERATE_POLY) {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-          " - can't triangulate a polygon with less than 3 sides", rc);
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          " - can't triangulate a polygon with less than 3 sides", 
+          ESMC_CONTEXT, rc);
          return;
       } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-          " - clockwise polygons not supported in triangulation routine", rc);
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+          " - clockwise polygons not supported in triangulation routine",
+          ESMC_CONTEXT, rc);
          return;
       } else {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   			     	  " - unknown error in triangulation", rc);
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   	    " - unknown error in triangulation", ESMC_CONTEXT, rc);
          return;
       }
     }
@@ -2046,22 +2110,22 @@ extern "C" void FTN_X(c_esmc_triangulate)(int *pdim, int *sdim, int *numPnts,
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -2078,7 +2142,7 @@ extern "C" void FTN_X(c_esmc_meshturnoncellmask)(Mesh **meshpp, ESMCI::Interface
     {
       int localrc;
       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
 	throw localrc;  // bail out with exception
     }
     
@@ -2161,21 +2225,21 @@ extern "C" void FTN_X(c_esmc_meshturnoncellmask)(Mesh **meshpp, ESMCI::Interface
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                             "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -2193,7 +2257,7 @@ extern "C" void FTN_X(c_esmc_meshturnoffcellmask)(Mesh **meshpp, int *rc) {
     {
       int localrc;
       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
 	throw localrc;  // bail out with exception
     }
     
@@ -2233,21 +2297,21 @@ extern "C" void FTN_X(c_esmc_meshturnoffcellmask)(Mesh **meshpp, int *rc) {
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                        "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -2256,6 +2320,192 @@ extern "C" void FTN_X(c_esmc_meshturnoffcellmask)(Mesh **meshpp, int *rc) {
 
 }
 
+////////////
+extern "C" void FTN_X(c_esmc_meshturnonnodemask)(Mesh **meshpp, ESMCI::InterfaceInt **maskValuesArg,  int *rc) {
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+	throw localrc;  // bail out with exception
+    }
+    
+    
+    // Get Mesh pointer
+    Mesh *meshp = *meshpp;
+    
+    // Get Mesh reference
+    Mesh &mesh = *meshp;
+    
+
+    // If no mask values then leave
+    if (maskValuesArg == NULL) {
+      // Set return code 
+      if (rc!=NULL) *rc = ESMF_SUCCESS;
+      
+      // Leave
+      return;
+    }
+
+    // If no mask values then leave
+    if (*maskValuesArg == NULL) {
+      // Set return code 
+      if (rc!=NULL) *rc = ESMF_SUCCESS;
+      
+      // Leave
+      return;
+    }
+
+    // Get mask values
+    int numMaskValues=(*maskValuesArg)->extent[0];
+    int *ptrMaskValues=&((*maskValuesArg)->array[0]);
+
+
+    // Set Mask values
+    // Get Fields
+    MEField<> *node_mask_val=mesh.GetField("node_mask_val"); 
+    MEField<> *node_mask=mesh.GetField("mask"); 
+      
+
+    if ((node_mask_val!=NULL) && 
+        (node_mask    !=NULL)) {
+         
+      // Loop through nodes setting values
+      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+      for (; ni != ne; ++ni) {
+        MeshObj &node = *ni;
+        if (!GetAttr(node).is_locally_owned()) continue;
+        // Set mask value to input array
+        double *mv=node_mask_val->data(node);
+        
+        // Round value to nearest integer
+        int mi=(int)((*mv)+0.5);
+
+        // See if gm matches any mask values
+        bool mask=false;
+        for (int i=0; i<numMaskValues; i++) {
+          int mvi=ptrMaskValues[i];
+          if (mi==mvi) {
+            mask=true;
+            break;
+          }
+        }
+        
+        // Set mask
+        double *m=node_mask->data(node);
+        
+        // Set Mask based on grid mask value
+        if (mask) {
+          *m=1.0;
+        } else {
+          *m=0.0;
+        }
+        
+      }
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                             "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+// Turn OFF masking
+extern "C" void FTN_X(c_esmc_meshturnoffnodemask)(Mesh **meshpp, int *rc) {
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+	throw localrc;  // bail out with exception
+    }
+    
+    
+    // Get Mesh pointer
+    Mesh *meshp = *meshpp;
+    
+    // Get Mesh reference
+    Mesh &mesh = *meshp;
+    
+
+    // Set Mask values
+    // Get Fields
+    MEField<> *node_mask_val=mesh.GetField("node_mask_val"); 
+    MEField<> *node_mask=mesh.GetField("mask"); 
+    
+    if ((node_mask_val!=NULL) && 
+        (node_mask    !=NULL)) {
+      
+      // Loop through elements setting values
+      // Here we depend on the fact that data index for elements
+      // is set as the position in the local array above
+      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+      for (; ni != ne; ++ni) {
+        MeshObj &node = *ni;
+        if (!GetAttr(node).is_locally_owned()) continue;
+        
+        // Get mask
+        double *m=node_mask->data(node);
+        
+        // Init mask to 0
+        *m=0.0;
+      }
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                        "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+//////////// 
+
 extern "C" void FTN_X(c_esmc_get_polygon_area)(int *spatialdim, int *nedges, 
 						 double *points, double *area, int *rc) {
   if (*spatialdim == 2) {
@@ -2263,8 +2513,8 @@ extern "C" void FTN_X(c_esmc_get_polygon_area)(int *spatialdim, int *nedges,
   } else if (*spatialdim == 3) {
     *area = great_circle_area(*nedges, points);
   } else {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "- Spatial dimension > 3", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Spatial dimension > 3", ESMC_CONTEXT, rc);
     return;
   }
 
@@ -2272,7 +2522,6 @@ extern "C" void FTN_X(c_esmc_get_polygon_area)(int *spatialdim, int *nedges,
 }
 
 ////////////////
-
 
 extern "C" void FTN_X(c_esmc_meshcreatefrommeshes)(Mesh **meshapp, Mesh **meshbpp, Mesh **meshpp, 
 ESMC_MeshOp_Flag * meshop, double * threshold, int *rc) {
@@ -2282,7 +2531,7 @@ ESMC_MeshOp_Flag * meshop, double * threshold, int *rc) {
     {
       int localrc;
       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-      if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
       throw localrc;  // bail out with exception
     }
 
@@ -2294,23 +2543,252 @@ ESMC_MeshOp_Flag * meshop, double * threshold, int *rc) {
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-                                            "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+
+
+extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_node_gids, int *node_gids, 
+                                                   int *num_elem_gids, int *elem_gids,  Mesh **output_meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreateredist()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+
+    // Call C++ side
+    MeshRedist(*src_meshpp, *num_node_gids, node_gids, *num_elem_gids, elem_gids, output_meshpp);
+
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+
+// This method verifies that nodes in node_gids array are the same as the local nodes in meshpp, otherwise
+// it returns an error (used to test MeshRedist()). 
+// To do this check make sure the number of nodes in both cases are the same and that every
+// entry in node_gids is contained in meshpp
+extern "C" void FTN_X(c_esmc_meshchecknodelist)(Mesh **meshpp, int *_num_node_gids, int *node_gids, 
+                                             int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshchecknodelist()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+ /* XMRKX */
+
+    // For convenience deref mesh 
+    Mesh *meshp = *meshpp;
+    
+    // For convenience deref number
+    int num_node_gids=*_num_node_gids;
+
+
+    // Loop through counting local nodes
+    int num_local_nodes=0;
+    Mesh::iterator ni = meshp->node_begin(), ne = meshp->node_end();
+    for (;ni != ne; ++ni) {
+      const MeshObj &node = *ni;
+ 
+      if (GetAttr(node).is_locally_owned()) {
+        num_local_nodes++;
+      }
+    }
+
+    // See if number of local nodes is the same
+    if (num_node_gids != num_local_nodes) {
+      Throw() << "Number of local nodes in mesh ("<<num_local_nodes<<
+                 ") different that number in list ("<<num_node_gids<<")";
+    }
+
+
+
+    // Loop making sure nodes are all here
+    for (int i=0; i<num_node_gids; i++) {
+      //  Find the corresponding Mesh element
+        Mesh::MeshObjIDMap::iterator mi =  meshp->map_find(MeshObj::NODE, node_gids[i]);
+        if (mi == meshp->map_end(MeshObj::NODE)) {
+          Throw() << "Node "<<node_gids[i]<<" not found in Mesh.";
+        }
+        
+        // Get the element
+        const MeshObj &node = *mi; 
+        
+        // Check if it's locally owned
+        if (!GetAttr(node).is_locally_owned()) {
+          Throw() << "Node "<<node_gids[i]<<" in Mesh, but not local.";
+        }
+
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+
+// This method verifies that elems in elem_gids array are the same as the local elems in meshpp, otherwise
+// it returns an error (used to test MeshRedist()). 
+// To do this check make sure the number of elems in both cases are the same and that every
+// entry in elem_gids is contained in meshpp
+extern "C" void FTN_X(c_esmc_meshcheckelemlist)(Mesh **meshpp, int *_num_elem_gids, int *elem_gids, 
+                                             int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcheckelemlist()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+ /* XMRKX */
+
+    // For convenience deref mesh 
+    Mesh *meshp = *meshpp;
+    
+    // For convenience deref number
+    int num_elem_gids=*_num_elem_gids;
+
+
+    // Loop through counting local elems
+    int num_local_elems=0;
+    Mesh::iterator ni = meshp->elem_begin(), ne = meshp->elem_end();
+    for (;ni != ne; ++ni) {
+      const MeshObj &elem = *ni;
+ 
+      if (GetAttr(elem).is_locally_owned()) {
+        num_local_elems++;
+      }
+    }
+
+    // See if number of local elems is the same
+    if (num_elem_gids != num_local_elems) {
+      Throw() << "Number of local elems in mesh ("<<num_local_elems<<
+                 ") different that number in list ("<<num_elem_gids<<")";
+    }
+
+
+
+    // Loop making sure elems are all here
+    for (int i=0; i<num_elem_gids; i++) {
+      //  Find the corresponding Mesh element
+        Mesh::MeshObjIDMap::iterator mi =  meshp->map_find(MeshObj::ELEMENT, elem_gids[i]);
+        if (mi == meshp->map_end(MeshObj::ELEMENT)) {
+          Throw() << "Elem "<<elem_gids[i]<<" not found in Mesh.";
+        }
+        
+        // Get the element
+        const MeshObj &elem = *mi; 
+        
+        // Check if it's locally owned
+        if (!GetAttr(elem).is_locally_owned()) {
+          Throw() << "Elem "<<elem_gids[i]<<" in Mesh, but not local.";
+        }
+
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }

@@ -1,4 +1,4 @@
-! $Id: ESMF_IOScrip.F90,v 1.50 2012/11/21 00:18:01 oehmke Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -46,8 +46,6 @@
 !------------------------------------------------------------------------------
 ! !PRIVATE:
       private
-      integer, SAVE :: PetNo, PetCnt
-      type(ESMF_VM), SAVE:: vm
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -621,6 +619,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       character(len=*), optional, intent(in) :: srccoordnames(:), dstcoordnames(:)
       integer, optional :: rc
 
+      type(ESMF_VM):: vm
+      integer :: PetNo, PetCnt
+
       integer :: total, localCount(1)
       integer :: ncid, ncid1
       integer :: ncStatus
@@ -641,6 +642,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       real(ESMF_KIND_R8), pointer   :: cornerlon2D(:,:), cornerlat2D(:,:)
       real(ESMF_KIND_R8), pointer   :: cornerlon3D(:,:,:), cornerlat3D(:,:,:)
       real(ESMF_KIND_R8), pointer   :: weightbuf(:), varBuffer(:,:)
+      real(ESMF_KIND_R8), pointer   :: varBuffer1D(:)
       real(ESMF_KIND_R8) :: missing_value
       integer(ESMF_KIND_I4), pointer:: indexbuf(:), next(:)
       integer(ESMF_KIND_I4), pointer:: mask(:) 
@@ -687,12 +689,13 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
         netcdf4FileFlaglocal = .false.
       endif
 
-     call ESMF_VMGetCurrent(vm, rc=rc)
+      call ESMF_VMGetCurrent(vm, rc=rc)
       if (rc /= ESMF_SUCCESS) return
 
       ! set up local pet info
       call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
       if (rc /= ESMF_SUCCESS) return
+
       localCount(1)=size(factorList,1)
       allocate(allCounts(PetCnt))
       call ESMF_VMAllGather(vm,localCount,allCounts,1,rc=status)
@@ -1687,6 +1690,35 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
               rc)) return
               deallocate(latBuffer, lonBuffer)
 	  endif
+
+           ! Write out mask
+           allocate(mask(srcDim))         
+	   mask(:)=1
+	   if (present(srcMissingValue)) then
+	     if (srcMissingValue) then
+              allocate(varBuffer1D(srcDim))
+              call ESMF_UgridGetVarByName(srcFile, srcvarname, &
+			        varBuffer1D, missingvalue = missing_value, &
+                                rc=status)
+              if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+	      do j=1,size(varBuffer1D)
+	         if (varBuffer1D(j) == missing_value) mask(j)=0
+              enddo
+	      deallocate(varBuffer1D)
+	     endif
+            endif
+
+           ncStatus=nf90_inq_varid(ncid,"mask_a",VarId)
+           ncStatus=nf90_put_var(ncid,VarId, mask)          
+           errmsg = "Variable mask_b in "//trim(wgtfile)
+           if (CDFCheckError (ncStatus, &
+             ESMF_METHOD, &
+             ESMF_SRCLINE,&
+  	     errmsg,&
+             rc)) return
+           deallocate(mask)
+
         endif 
 
         ! Read the dstGrid variables and write them out
@@ -2040,6 +2072,34 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
               rc)) return
               deallocate(latBuffer, lonBuffer)
 	  endif
+
+           ! Write out mask
+           allocate(mask(dstDim))         
+	   mask(:)=1
+	   if (present(dstMissingValue)) then
+	     if (dstMissingValue) then
+              allocate(varBuffer1D(dstDim))
+              call ESMF_UgridGetVarByName(dstFile, dstvarname, &
+			        varBuffer1D, missingvalue = missing_value, &
+                                rc=status)
+              if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+	      do j=1,size(varBuffer1D)
+	         if (varBuffer1D(j) == missing_value) mask(j)=0
+              enddo
+	      deallocate(varBuffer1D)
+	     endif
+            endif
+
+           ncStatus=nf90_inq_varid(ncid,"mask_b",VarId)
+           ncStatus=nf90_put_var(ncid,VarId, mask)          
+           errmsg = "Variable mask_b in "//trim(wgtfile)
+           if (CDFCheckError (ncStatus, &
+             ESMF_METHOD, &
+             ESMF_SRCLINE,&
+  	     errmsg,&
+             rc)) return
+           deallocate(mask)
         endif 
 
          ! Write area_a
@@ -2560,6 +2620,9 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
     real(ESMF_KIND_R8), pointer, optional :: elementArea (:)
     logical, intent(in), optional  :: convertToDeg
     integer, intent(out), optional :: rc
+
+    type(ESMF_VM) :: vm
+    integer :: PetNo, PetCnt
 
     integer :: ncid
     integer :: ncStatus

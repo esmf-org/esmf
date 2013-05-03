@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSharedObjSTest.F90,v 1.25 2012/08/24 23:46:40 theurich Exp $
+! $Id$
 !
 !-------------------------------------------------------------------------
 !ESMF_SHAREDOBJ_SYSTEM_TEST    String used by test script to count system tests.

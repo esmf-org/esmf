@@ -1,4 +1,4 @@
-// $Id: ESMCI_CommReg.C,v 1.7 2012/01/06 20:17:50 svasquez Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -19,7 +19,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_CommReg.C,v 1.7 2012/01/06 20:17:50 svasquez Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 
@@ -84,6 +84,9 @@ void CommReg::SendFields(UInt nfields, MEField<> *const *sfields, MEField<> *con
     if (&sfields[i]->GetMEFamily() != &rfields[i]->GetMEFamily())
       throw Ex() << "Send fields, me for " << sfields[i]->name() << " does not match rfield:"
                  << rfields[i]->name();
+
+    //    std::cout << sfields[i]->name() << " :: " << rfields[i]->name() << "\n";
+
     sfields[i]->Getfields(sf);
     rfields[i]->Getfields(rf);
   }
@@ -101,7 +104,11 @@ for (UInt i = 0; i < rf.size(); i++) {
   std::cout << rf[i]->name() << ", dim=" << rf[i]->dim() << std::endl;
 }
 */
+
   ThrowRequire(sf.size() == rf.size());
+
+
+
   // Now send via the spec(s)
   // TODO: be smarter: select only the relevant spec to send each field.
   if ((obj_type & MeshObj::NODE)) node_rel.send_fields(sf.size(), &sf[0], &rf[0]);

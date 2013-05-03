@@ -1,4 +1,4 @@
-! $Id: NUOPC.F90,v 1.33 2012/11/16 22:53:14 theurich Exp $
+! $Id$
 
 #define FILENAME "src/addon/NUOPC/NUOPC.F90"
 
@@ -39,6 +39,7 @@ module NUOPC
   public NUOPC_FieldBundleUpdateTime
   public NUOPC_FieldDictionaryAddEntry  
   public NUOPC_FieldDictionaryGetEntry  
+  public NUOPC_FieldDictionaryHasEntry  
   public NUOPC_FieldDictionarySetup
   public NUOPC_FieldIsAtTime
   public NUOPC_FillCplList

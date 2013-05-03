@@ -1,4 +1,4 @@
-// $Id: ESMCI_Comp.h,v 1.30 2012/09/07 18:38:44 ksaint Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -29,15 +29,10 @@
 //EOPI
 //-----------------------------------------------------------------------------
 
-
-#include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
-
 #include "ESMCI_State.h"
 #include "ESMCI_Clock.h"
 #include "ESMCI_Grid.h"
 #include "ESMCI_F90Interface.h"
-
 
 namespace ESMCI {
 

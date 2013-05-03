@@ -1,4 +1,4 @@
-// $Id: ESMCI_Time_F.C,v 1.11 2012/01/06 20:18:10 svasquez Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -19,9 +19,9 @@
 //------------------------------------------------------------------------------
 #include <cstdio>
 
-#include <ESMCI_F90Interface.h>
-#include <ESMCI_TimeInterval.h>
-#include <ESMCI_Time.h>
+#include "ESMCI_F90Interface.h"
+#include "ESMCI_TimeInterval.h"
+#include "ESMCI_Time.h"
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:

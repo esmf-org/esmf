@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServCompSvrClient.h,v 1.7 2012/03/14 14:44:45 ksaint Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,

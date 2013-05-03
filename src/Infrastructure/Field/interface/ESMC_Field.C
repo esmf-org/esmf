@@ -1,4 +1,4 @@
-// $Id: ESMC_Field.C,v 1.41 2012/07/18 22:21:25 rokuingh Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -28,7 +28,6 @@
 #include "ESMCI_Field.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_Grid.h"
 
 using namespace ESMCI;
@@ -53,7 +52,8 @@ extern "C" {
     field.ptr = reinterpret_cast<void *>(ESMCI::Field::create(&grid, arrayspec,
       staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, 
       name, &localrc));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)){
       field.ptr = NULL;  // invalidate
       return field; // bail out
     }
@@ -83,7 +83,8 @@ extern "C" {
     field.ptr = reinterpret_cast<void *>(ESMCI::Field::create(&grid, typekind,
       staggerloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, 
       name, &localrc));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)){
       field.ptr = NULL;  // invalidate
       return field; // bail out
     }
@@ -111,7 +112,8 @@ extern "C" {
     // Invoque the C++ interface
     field.ptr = reinterpret_cast<void *>(ESMCI::Field::create(mesh, arrayspec,
       gridToFieldMap, ungriddedLBound, ungriddedUBound, name, &localrc));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)){
       field.ptr = NULL;  // invalidate
       return field; // bail out
     }
@@ -139,7 +141,8 @@ extern "C" {
     // Invoque the C++ interface
     field.ptr = reinterpret_cast<void *>(ESMCI::Field::create(mesh, typekind,
       meshloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, name, &localrc));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)){
       field.ptr = NULL;  // invalidate
       return field; // bail out
     }
@@ -164,8 +167,8 @@ extern "C" {
 
     // Invoque the C++ interface
     localrc = ESMCI::Field::destroy(fieldp);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     // invalidate pointer
     field->ptr = NULL;
@@ -190,8 +193,8 @@ extern "C" {
 
     // Invoque the C++ interface
     localrc = fieldp->print();
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -213,8 +216,8 @@ extern "C" {
 
     // Invoque the C++ interface
     ESMC_Mesh mesh = fieldp->getMesh(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-      return mesh;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return mesh;
 
     // return successfully
     if(rc) *rc = ESMF_SUCCESS;
@@ -236,8 +239,8 @@ extern "C" {
 
     // Invoque the C++ interface
     ESMC_Array array = fieldp->getArray(&localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-      return array;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return array;
 
     // return successfully
     if(rc) *rc = ESMF_SUCCESS;
@@ -255,11 +258,11 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
   ESMC_Array array = ESMC_FieldGetArray(field, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return NULL;  // bail out
 
   void *ptr = ESMC_ArrayGetPtr(array, localDe, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return NULL;  // bail out
 
   // return successfully
@@ -283,8 +286,8 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
 
     // Invoque the C++ interface
     localrc = ESMCI::Field::regridgetarea(fieldp);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;  // bail out
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;  // bail out
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -325,8 +328,8 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
     localrc = ESMCI::Field::regridstore(fieldpsrc, fieldpdst, 
       srcMaskValues, dstMaskValues, &rhPtr, regridmethod, unmappedaction,
       srcfracp, dstfracp);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;  // bail out
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;  // bail out
 
     // return rhPtr in routehandle argument
     routehandle->ptr = NULL;
@@ -359,8 +362,8 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
     // Invoque the C++ interface
     localrc = ESMCI::Field::regrid(fieldpsrc, fieldpdst, routehandlep, 
                                    zeroregion);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;  // bail out
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;  // bail out
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -383,8 +386,8 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
 
     // Invoque the C++ interface
     localrc = ESMCI::Field::regridrelease(routehandlep);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;  // bail out
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;  // bail out
     
     // mark invalid
     routehandle->ptr = NULL;

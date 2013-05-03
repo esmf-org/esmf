@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.29 2011/03/30 00:57:24 svasquez Exp $
+# $Id$
 #
 # Darwin.nag.default
 #
@@ -85,6 +85,11 @@ ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -v -V -dryrun
 ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 
 ############################################################
+# Set NAG unix modules when certain non-Standard system calls
+# (e.g., ABORT) are made.
+ESMF_F90COMPILEOPTS += -DESMF_NAG_UNIX_MODULE
+
+############################################################
 # nag currently does not support OpenMP
 #
 ESMF_OPENMP := OFF
@@ -97,7 +102,7 @@ ESMF_OPTLEVELDEFAULT  = 0
 ############################################################
 # Set kind numbering system to "byte"
 #
-ESMF_F90COMPILEOPTS += -kind=byte
+# ESMF_F90COMPILEOPTS += -kind=byte
 
 ############################################################
 # Set f95 to be more premissive and issue warning before error

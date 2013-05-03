@@ -1,11 +1,12 @@
-module esmfpio_nf_utils
-  use esmfpio_types, only : file_desc_t, var_desc_t
-  use ESMFPIO_nf_mod, only : pio_inq_vartype
-  use esmfpionfget_mod, only : pio_get_var=>get_var
-  use esmfpionfput_mod, only : pio_put_var=>put_var
-  use esmfpio_types, only : pio_int, pio_real, pio_double, pio_char
-  use esmfpio_kinds, only : i4, r4, r8
-  use esmfpio_support, only : piodie
+#include "ESMFPIO.h"
+module pio_nf_utils
+  use pio_types, only : file_desc_t, var_desc_t
+  use nf_mod, only : pio_inq_vartype
+  use pionfget_mod, only : pio_get_var=>get_var
+  use pionfput_mod, only : pio_put_var=>put_var
+  use pio_types, only : pio_int, pio_real, pio_double, pio_char
+  use pio_kinds, only : i4, r4, r8
+  use pio_support, only : piodie
 
   implicit none
   private
@@ -115,4 +116,4 @@ subroutine copy_pio_var2d(ifh, ofh, ivid, ovid, length)
   end select
 end subroutine copy_pio_var2d
 
-end module esmfpio_nf_utils
+end module pio_nf_utils

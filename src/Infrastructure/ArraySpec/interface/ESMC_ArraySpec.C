@@ -1,4 +1,4 @@
-// $Id: ESMC_ArraySpec.C,v 1.19 2012/07/18 22:21:03 rokuingh Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -22,21 +22,19 @@
 // in the companion file ESMC_ArraySpec.h
 //
 //-----------------------------------------------------------------------------
-
 // include associated header file
 #include "ESMC_ArraySpec.h"
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h" 
-#include "ESMF_LogMacros.inc"
 #include "ESMCI_ArraySpec.h" 
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version =
-  "$Id: ESMC_ArraySpec.C,v 1.19 2012/07/18 22:21:03 rokuingh Exp $";
+  "$Id$";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -52,8 +50,8 @@ int ESMC_ArraySpecSet(ESMC_ArraySpec *arrayspec,int rank,
 
   // call into ESMCI interface
   localrc = ((ESMCI::ArraySpec *)arrayspec)->set(rank, typekind);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -71,11 +69,11 @@ int ESMC_ArraySpecGet(ESMC_ArraySpec arrayspec, int *rank,
 
   // call into ESMCI interface
   *rank = ((ESMCI::ArraySpec *)&arrayspec)->getRank(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
   *typekind = ((ESMCI::ArraySpec *)&arrayspec)->getTypeKind(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
     
   // return successfully
   rc = ESMF_SUCCESS;

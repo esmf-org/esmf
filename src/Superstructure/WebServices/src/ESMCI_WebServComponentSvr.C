@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServComponentSvr.C,v 1.22 2012/05/19 00:19:30 w6ws Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -29,7 +29,6 @@
 //        implemented using the ESMCI_WebServPassThruSvr.)
 //
 //-----------------------------------------------------------------------------
-
 #include "ESMCI_WebServComponentSvr.h"
 
 #if !defined (__mips)
@@ -52,7 +51,6 @@ typedef uint64_t u_int64_t;
 #include <ESMCI_IO_NetCDF.h>
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
 
 
 //***
@@ -112,7 +110,7 @@ extern "C"
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServComponentSvr.C,v 1.22 2012/05/19 00:19:30 w6ws Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -156,18 +154,18 @@ ESMCI_WebServComponentSvr::ESMCI_WebServComponentSvr(
 #ifndef ESMF_NO_PTHREADS
 	if (pthread_mutex_init(&theStatusMutex, NULL) != 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_OBJ_WRONG,
          "Error while initializing status mutex lock... behavior unknown.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 	}
 
 	if (pthread_mutex_init(&theDataMutex, NULL) != 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_OBJ_WRONG,
          "Error while initializing data mutex lock... behavior unknown.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 	}
 #endif
 
@@ -224,18 +222,18 @@ ESMCI_WebServComponentSvr::~ESMCI_WebServComponentSvr(
 #ifndef ESMF_NO_PTHREADS
 	if (pthread_mutex_destroy(&theStatusMutex) != 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_OBJ_WRONG,
          "Error while destroying status mutex lock.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 	}
 
 	if (pthread_mutex_destroy(&theDataMutex) != 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_OBJ_WRONG,
          "Error while destroying data mutex lock.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 	}
 #endif
 }
@@ -411,10 +409,10 @@ int  ESMCI_WebServComponentSvr::requestLoop(
    //***
 	if (theSocket.connect(thePort) < 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Connection error for the server socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
       return localrc;
 	}
@@ -433,10 +431,10 @@ int  ESMCI_WebServComponentSvr::requestLoop(
 
 		if (request == ESMF_FAILURE)
 		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.MsgFoundError(
          	ESMC_RC_ARG_VALUE,
          	"Request ID not valid.",
-         	&localrc);
+         	ESMC_CONTEXT, &localrc);
 
       	return ESMF_FAILURE;
 		}
@@ -502,10 +500,10 @@ int  ESMCI_WebServComponentSvr::cplCompRequestLoop(
    //***
 	if (theSocket.connect(thePort) < 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Connection error for the server socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
       return localrc;
 	}
@@ -524,10 +522,10 @@ int  ESMCI_WebServComponentSvr::cplCompRequestLoop(
 
 		if (request == ESMF_FAILURE)
 		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.MsgFoundError(
          	ESMC_RC_ARG_VALUE,
          	"Request ID not valid.",
-         	&localrc);
+         	ESMC_CONTEXT, &localrc);
 
       	return ESMF_FAILURE;
 		}
@@ -573,10 +571,10 @@ int  ESMCI_WebServComponentSvr::getNextRequest(
    //***
 	if (theSocket.accept() < 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_OPEN,
          "The Server socket not accepting requests.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
       return ESMF_FAILURE;
 	}
@@ -589,10 +587,10 @@ int  ESMCI_WebServComponentSvr::getNextRequest(
 
 	if (theSocket.read(n, requestStr) <= 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
          "Unable to read request id from socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		//return localrc;
 		return ESMF_FAILURE;
@@ -715,10 +713,10 @@ void  ESMCI_WebServComponentSvr::setStatus(
 #ifndef ESMF_NO_PTHREADS
 	if (pthread_mutex_lock(&theStatusMutex) != 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_OBJ_WRONG,
          "Error while locking current status mutex lock... behavior unknown.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 	}
 #endif
 
@@ -727,10 +725,10 @@ void  ESMCI_WebServComponentSvr::setStatus(
 #ifndef ESMF_NO_PTHREADS
 	if (pthread_mutex_unlock(&theStatusMutex) != 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_OBJ_WRONG,
          "Error while unlocking current status mutex lock... behavior unknown.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 	}
 #endif
 
@@ -742,10 +740,10 @@ void  ESMCI_WebServComponentSvr::setStatus(
    if (registrar.setStatus(idStr, registrar.getStateStr(theCurrentStatus)) == 
 		ESMF_FAILURE)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_UNEXPECTED,
          "Error setting status on Registrar.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
    }
 }
 
@@ -792,10 +790,10 @@ int  ESMCI_WebServComponentSvr::processInit(
 
 	if (theSocket.read(bytesRead, buf) <= 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
          "Unable to read client id from socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -815,18 +813,18 @@ int  ESMCI_WebServComponentSvr::processInit(
 
 		if (theSocket.write(4, &netStatus) != 4)
 		{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
+     		ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Unable to write error status to socket.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 
 			return localrc;
 		}
 
-     	ESMC_LogDefault.ESMC_LogMsgFoundError(
+     	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_ARG_VALUE,
         	"Invalid client id read from socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -851,10 +849,10 @@ int  ESMCI_WebServComponentSvr::processInit(
 
 		if ((rc = pthread_create(&thread, NULL, initThreadStartup, this)) != 0)
 		{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
+     		ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Error creating initialize thread.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 
 			return localrc;
 		}
@@ -870,10 +868,10 @@ printf("SERVER: Writing Status: %d\n", theCurrentStatus);
 	unsigned int	netStatus = htonl(theCurrentStatus);
 	if (theSocket.write(4, &netStatus) != 4)
 	{
-     	ESMC_LogDefault.ESMC_LogMsgFoundError(
+     	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_FILE_WRITE,
         	"Unable to write status to socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -919,10 +917,10 @@ int  ESMCI_WebServComponentSvr::processRun(
 
 	if (theSocket.read(bytesRead, buf) <= 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
          "Unable to read client id from socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -939,18 +937,18 @@ int  ESMCI_WebServComponentSvr::processRun(
 
 		if (theSocket.write(4, &netStatus) != 4)
 		{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
+     		ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Unable to write error status to socket.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 
 			return localrc;
 		}
 
-     	ESMC_LogDefault.ESMC_LogMsgFoundError(
+     	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_ARG_VALUE,
         	"Invalid client id read from socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -970,10 +968,10 @@ int  ESMCI_WebServComponentSvr::processRun(
 
 		if ((rc = pthread_create(&thread, NULL, runThreadStartup, this)) != 0)
 		{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
+     		ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Error creating run thread.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 
 			return localrc;
 		}
@@ -989,10 +987,10 @@ int  ESMCI_WebServComponentSvr::processRun(
 	unsigned int	netStatus = htonl(theCurrentStatus);
 	if (theSocket.write(4, &netStatus) != 4)
 	{
-     	ESMC_LogDefault.ESMC_LogMsgFoundError(
+     	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_FILE_WRITE,
         	"Unable to write status to socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -1040,10 +1038,10 @@ int  ESMCI_WebServComponentSvr::processTimestep(
 
 	if (theSocket.read(bytesRead, buf) <= 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
          "Unable to read client id from socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -1060,18 +1058,18 @@ int  ESMCI_WebServComponentSvr::processTimestep(
 
 		if (theSocket.write(4, &netStatus) != 4)
 		{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
+     		ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Unable to write error status to socket.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 
 			return localrc;
 		}
 
-     	ESMC_LogDefault.ESMC_LogMsgFoundError(
+     	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_ARG_VALUE,
         	"Invalid client id read from socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -1083,10 +1081,10 @@ int  ESMCI_WebServComponentSvr::processTimestep(
 
 	if (theSocket.read(bytesRead, buf) <= 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
          "Unable to read number of timesteps from socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -1116,10 +1114,10 @@ int  ESMCI_WebServComponentSvr::processTimestep(
 		if ((rc = 
 			pthread_create(&thread, NULL, timeStepThreadStartup, this)) != 0)
 		{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
+     		ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Error creating timestep thread.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 
 			return localrc;
 		}
@@ -1137,10 +1135,10 @@ int  ESMCI_WebServComponentSvr::processTimestep(
 	unsigned int	netStatus = htonl(theCurrentStatus);
 	if (theSocket.write(4, &netStatus) != 4)
 	{
-     	ESMC_LogDefault.ESMC_LogMsgFoundError(
+     	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_FILE_WRITE,
         	"Unable to write status to socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -1186,10 +1184,10 @@ int  ESMCI_WebServComponentSvr::processFinal(
 
 	if (theSocket.read(bytesRead, buf) <= 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
          "Unable to read client id from socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -1206,18 +1204,18 @@ int  ESMCI_WebServComponentSvr::processFinal(
 
 		if (theSocket.write(4, &netStatus) != 4)
 		{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
+     		ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Unable to write error status to socket.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 
 			return localrc;
 		}
 
-     	ESMC_LogDefault.ESMC_LogMsgFoundError(
+     	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_ARG_VALUE,
         	"Invalid client id read from socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -1236,10 +1234,10 @@ int  ESMCI_WebServComponentSvr::processFinal(
 		int			rc = 0;
 		if ((rc = pthread_create(&thread, NULL, finalThreadStartup, this)) != 0)
 		{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
+     		ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Error creating finalize thread.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 
 			return localrc;
 		}
@@ -1255,10 +1253,10 @@ int  ESMCI_WebServComponentSvr::processFinal(
 	unsigned int	netStatus = htonl(theCurrentStatus);
 	if (theSocket.write(4, &netStatus) != 4)
 	{
-     	ESMC_LogDefault.ESMC_LogMsgFoundError(
+     	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_FILE_WRITE,
         	"Unable to write status to socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -1303,10 +1301,10 @@ int  ESMCI_WebServComponentSvr::processState(
 
 	if (theSocket.read(bytesRead, buf) <= 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
          "Unable to read client id from socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -1323,10 +1321,10 @@ int  ESMCI_WebServComponentSvr::processState(
 
 	if (theSocket.write(4, &netStatus) != 4)
 	{
-     	ESMC_LogDefault.ESMC_LogMsgFoundError(
+     	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_FILE_WRITE,
         	"Unable to write status to socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -1374,10 +1372,10 @@ int  ESMCI_WebServComponentSvr::processFiles(
 
 	if (theSocket.read(bytesRead, buf) <= 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
          "Unable to read client id from socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -1397,10 +1395,10 @@ int  ESMCI_WebServComponentSvr::processFiles(
 
 		if (theSocket.write(4, &netNumFiles) != 4)
 		{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
+     		ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Unable to write number of files to socket.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 
 			return localrc;
 		}
@@ -1410,18 +1408,18 @@ int  ESMCI_WebServComponentSvr::processFiles(
 
 		if (theSocket.write(4, &netStatus) != 4)
 		{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
+     		ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Unable to write error status to socket.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 
 			return localrc;
 		}
 
-     	ESMC_LogDefault.ESMC_LogMsgFoundError(
+     	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_ARG_VALUE,
         	"Invalid client id read from socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -1437,10 +1435,10 @@ int  ESMCI_WebServComponentSvr::processFiles(
 		unsigned int  netNumFiles = htonl(numFiles);
 		if (theSocket.write(4, &netNumFiles) != 4)
 		{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
+     		ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Unable to write number of files to socket.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 
 			return localrc;
 		}
@@ -1453,10 +1451,10 @@ int  ESMCI_WebServComponentSvr::processFiles(
 
 			if (theSocket.write(filenameSize, fileInfoBuf) != filenameSize)
 			{
-     			ESMC_LogDefault.ESMC_LogMsgFoundError(
+     			ESMC_LogDefault.MsgFoundError(
         			ESMC_RC_FILE_WRITE,
         			"Unable to write filename to socket.",
-        			&localrc);
+        			ESMC_CONTEXT, &localrc);
 
 				return localrc;
 			}
@@ -1467,10 +1465,10 @@ int  ESMCI_WebServComponentSvr::processFiles(
 
 			if (theSocket.write(filenameSize, fileInfoBuf) != filenameSize)
 			{
-     			ESMC_LogDefault.ESMC_LogMsgFoundError(
+     			ESMC_LogDefault.MsgFoundError(
         			ESMC_RC_FILE_WRITE,
         			"Unable to write filename to socket.",
-        			&localrc);
+        			ESMC_CONTEXT, &localrc);
 
 				return localrc;
 			}
@@ -1482,10 +1480,10 @@ int  ESMCI_WebServComponentSvr::processFiles(
 		unsigned int  netNumFiles = htonl(numFiles);
 		if (theSocket.write(4, &netNumFiles) != 4)
 		{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
+     		ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Unable to write number of files to socket.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 
 			return localrc;
 		}
@@ -1498,10 +1496,10 @@ int  ESMCI_WebServComponentSvr::processFiles(
 	unsigned int	netStatus = htonl(theCurrentStatus);
 	if (theSocket.write(4, &netStatus) != 4)
 	{
-     	ESMC_LogDefault.ESMC_LogMsgFoundError(
+     	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_FILE_WRITE,
         	"Unable to write status to socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -1557,10 +1555,10 @@ int  ESMCI_WebServComponentSvr::processGetDataDesc(
 
 	if (theSocket.read(bytesRead, buf) <= 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
          "Unable to read client id from socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
       return localrc;
    }
@@ -1586,26 +1584,26 @@ int  ESMCI_WebServComponentSvr::processGetDataDesc(
 
 		if (theSocket.write(4, &numVars) != 4)
       {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.MsgFoundError(
             ESMC_RC_FILE_WRITE,
             "Unable to write zero num vars to socket.",
-            &localrc);
+            ESMC_CONTEXT, &localrc);
       }
 
 		if (theSocket.write(4, &numLats) != 4)
       {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.MsgFoundError(
             ESMC_RC_FILE_WRITE,
             "Unable to write zero num lats to socket.",
-            &localrc);
+            ESMC_CONTEXT, &localrc);
       }
 
 		if (theSocket.write(4, (unsigned int*)(&numLons)) != 4)
       {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.MsgFoundError(
             ESMC_RC_FILE_WRITE,
             "Unable to write zero num lons to socket.",
-            &localrc);
+            ESMC_CONTEXT, &localrc);
       }
 	}
 	//***
@@ -1621,10 +1619,10 @@ int  ESMCI_WebServComponentSvr::processGetDataDesc(
 		unsigned int  netNumVars = htonl(numVars);
 		if (theSocket.write(4, &netNumVars) != 4)
    	{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.MsgFoundError(
          	ESMC_RC_FILE_WRITE,
          	"Unable to write num vars to socket.",
-         	&localrc);
+         	ESMC_CONTEXT, &localrc);
 
       	return localrc;
    	}
@@ -1638,10 +1636,10 @@ int  ESMCI_WebServComponentSvr::processGetDataDesc(
 			if (theSocket.write(valueLen, 
                              (void*)(varNames[i].c_str())) != valueLen)
    		{
-      		ESMC_LogDefault.ESMC_LogMsgFoundError(
+      		ESMC_LogDefault.MsgFoundError(
          		ESMC_RC_FILE_WRITE,
          		"Unable to write variable name to socket.",
-         		&localrc);
+         		ESMC_CONTEXT, &localrc);
 
       		return localrc;
    		}
@@ -1651,10 +1649,10 @@ int  ESMCI_WebServComponentSvr::processGetDataDesc(
 		unsigned int  netNumLats = htonl(numLats);
 		if (theSocket.write(4, &netNumLats) != 4)
    	{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.MsgFoundError(
          	ESMC_RC_FILE_WRITE,
          	"Unable to write num lats to socket.",
-         	&localrc);
+         	ESMC_CONTEXT, &localrc);
 	
       	return localrc;
    	}
@@ -1671,10 +1669,10 @@ int  ESMCI_WebServComponentSvr::processGetDataDesc(
 
 		if (theSocket.write(latDataSize, (void*)netLatValues) != latDataSize)
    	{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Unable to write latitude values to socket.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 	
       		return localrc;
 		}
@@ -1684,10 +1682,10 @@ int  ESMCI_WebServComponentSvr::processGetDataDesc(
 	
 		if (theSocket.write(4, &netNumLons) != 4)
    	{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.MsgFoundError(
          	ESMC_RC_FILE_WRITE,
          	"Unable to write num lons to socket.",
-         	&localrc);
+         	ESMC_CONTEXT, &localrc);
 	
       	return localrc;
    	}
@@ -1705,10 +1703,10 @@ int  ESMCI_WebServComponentSvr::processGetDataDesc(
 
 		if (theSocket.write(lonDataSize, (void*)netLonValues) != lonDataSize)
    	{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Unable to write longitude values to socket.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 	
       		return localrc;
 		}
@@ -1724,18 +1722,18 @@ int  ESMCI_WebServComponentSvr::processGetDataDesc(
 		unsigned int	netStatus = htonl(status);
 		if (theSocket.write(4, &netStatus) != 4)
       {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.MsgFoundError(
             ESMC_RC_FILE_WRITE,
             "Unable to write error status to socket.",
-            &localrc);
+            ESMC_CONTEXT, &localrc);
 
          return localrc;
       }
 
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_ARG_VALUE,
          "Invalid client id read from socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
       return localrc;
 	}
@@ -1748,10 +1746,10 @@ int  ESMCI_WebServComponentSvr::processGetDataDesc(
 		unsigned int	netStatus = htonl(theCurrentStatus);
 		if (theSocket.write(4, &netStatus) != 4)
    	{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.MsgFoundError(
          	ESMC_RC_FILE_WRITE,
          	"Unable to write status to socket.",
-         	&localrc);
+         	ESMC_CONTEXT, &localrc);
 
       	return localrc;
    	}
@@ -1808,10 +1806,10 @@ int  ESMCI_WebServComponentSvr::processGetData(
 
 	if (theSocket.read(bytesRead, buf) <= 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
          "Unable to read client id from socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
       return localrc;
    }
@@ -1824,10 +1822,10 @@ int  ESMCI_WebServComponentSvr::processGetData(
 	//***
 	if (theSocket.read(bytesRead, buf) <= 0)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
          "Unable to read time value from socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
       return localrc;
    }
@@ -1849,18 +1847,18 @@ printf("%g\n", *timeValue);
 		unsigned int	netStatus = htonl(status);
 		if (theSocket.write(4, &netStatus) != 4)
       {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.MsgFoundError(
             ESMC_RC_FILE_WRITE,
             "Unable to write error status to socket.",
-            &localrc);
+            ESMC_CONTEXT, &localrc);
 
          return localrc;
       }
 
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_ARG_VALUE,
          "Invalid client id read from socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
       return localrc;
 	}
@@ -1876,18 +1874,18 @@ printf("%g\n", *timeValue);
 		unsigned int	netStatus = htonl(status);
 		if (theSocket.write(4, &netStatus) != 4)
       {
-         ESMC_LogDefault.ESMC_LogMsgFoundError(
+         ESMC_LogDefault.MsgFoundError(
             ESMC_RC_FILE_WRITE,
             "Unable to write error status to socket.",
-            &localrc);
+            ESMC_CONTEXT, &localrc);
 
          return localrc;
       }
 
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_ARG_VALUE,
          "Output data not defined.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
       return localrc;
 	}
@@ -1907,10 +1905,10 @@ printf("%g\n", *timeValue);
 	unsigned int  netNumVars = htonl(numVars);
 	if (theSocket.write(4, &netNumVars) != 4)
    {
-   	ESMC_LogDefault.ESMC_LogMsgFoundError(
+   	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_FILE_WRITE,
         	"Unable to write num vars to socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
      	return localrc;
    }
@@ -1924,10 +1922,10 @@ printf("%g\n", *timeValue);
 	
 		if (theSocket.write(valueLen, (void*)(varNames[i].c_str())) != valueLen)
   		{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
+     		ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Unable to write variable name to socket.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 
      		return localrc;
   		}
@@ -1939,10 +1937,10 @@ printf("%g\n", *timeValue);
 	unsigned int  netNumLats = htonl(numLats);
 	if (theSocket.write(4, &netNumLats) != 4)
    {
-   	ESMC_LogDefault.ESMC_LogMsgFoundError(
+   	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_FILE_WRITE,
         	"Unable to write num lats to socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
      	return localrc;
    }
@@ -1953,10 +1951,10 @@ printf("%g\n", *timeValue);
 	unsigned int  netNumLons = htonl(numLons);
 	if (theSocket.write(4, &netNumLons) != 4)
    {
-   	ESMC_LogDefault.ESMC_LogMsgFoundError(
+   	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_FILE_WRITE,
         	"Unable to write num lons to socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
      	return localrc;
    }
@@ -1984,10 +1982,10 @@ printf("Num Values: %d\n", numValues);
 		if ((bytesSent = theSocket.write(dataSize, (void*)netDataValues)) != 
 			dataSize)
    	{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
+     		ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Unable to write data values to socket.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 
      		return localrc;
    	}
@@ -2000,10 +1998,10 @@ printf("Num Values: %d\n", numValues);
 	unsigned int	netStatus = htonl(theCurrentStatus);
 	if (theSocket.write(4, &netStatus) != 4)
    {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Unable to write status to socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
       return localrc;
    }
@@ -2050,10 +2048,10 @@ int  ESMCI_WebServComponentSvr::processEnd(
 
 	if (theSocket.read(bytesRead, buf) <= 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
          "Unable to read client id from socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -2073,18 +2071,18 @@ int  ESMCI_WebServComponentSvr::processEnd(
 
 		if (theSocket.write(4, &netStatus) != 4)
 		{
-     		ESMC_LogDefault.ESMC_LogMsgFoundError(
+     		ESMC_LogDefault.MsgFoundError(
         		ESMC_RC_FILE_WRITE,
         		"Unable to write error status to socket.",
-        		&localrc);
+        		ESMC_CONTEXT, &localrc);
 
 			return localrc;
 		}
 
-     	ESMC_LogDefault.ESMC_LogMsgFoundError(
+     	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_ARG_VALUE,
         	"Invalid client id read from socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -2098,10 +2096,10 @@ int  ESMCI_WebServComponentSvr::processEnd(
 	unsigned int	netStatus = htonl(theCurrentStatus);
 	if (theSocket.write(4, &netStatus) != 4)
 	{
-     	ESMC_LogDefault.ESMC_LogMsgFoundError(
+     	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_FILE_WRITE,
         	"Unable to write status to socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
 		return localrc;
 	}
@@ -2164,10 +2162,10 @@ void  ESMCI_WebServComponentSvr::runInit(
 	//***
 	if (rc != ESMF_SUCCESS)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          rc,
          "Error while executing initialization.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		setStatus(NET_ESMF_STAT_ERROR);
 	}
@@ -2232,10 +2230,10 @@ void  ESMCI_WebServComponentSvr::runRun(
 	//***
 	if (rc != ESMF_SUCCESS)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          rc,
          "Error while executing run.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		setStatus(NET_ESMF_STAT_ERROR);
 	}
@@ -2299,10 +2297,10 @@ void  ESMCI_WebServComponentSvr::runTimeStep(
 	//***
 	if (rc != ESMF_SUCCESS)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          rc,
          "Error while executing run.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		setStatus(NET_ESMF_STAT_ERROR);
 	}
@@ -2359,10 +2357,10 @@ void  ESMCI_WebServComponentSvr::runFinal(
 	//***
 	if (rc != ESMF_SUCCESS)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          rc,
          "Error while executing finalization.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		setStatus(NET_ESMF_STAT_ERROR);
 	}

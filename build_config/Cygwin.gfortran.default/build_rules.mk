@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.20 2011/12/23 21:03:37 theurich Exp $
+# $Id$
 #
 # Cygwin.gfortran.default
 #

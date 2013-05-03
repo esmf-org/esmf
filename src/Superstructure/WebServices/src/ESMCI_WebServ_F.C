@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServ_F.C,v 1.12 2012/03/14 14:44:06 ksaint Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -42,11 +42,12 @@
 #include "ESMCI_WebServRegistrarClient.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_Comp.h"
+#include "ESMCI_LogErr.h"
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServ_F.C,v 1.12 2012/03/14 14:44:06 ksaint Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -107,10 +108,10 @@ void FTN_X(c_esmc_componentsvcloop)(
                                        *phase, 
                                        *blockingFlag) != ESMF_SUCCESS)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Error during request loop setup.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		*rc = localrc;
 		return;
@@ -171,10 +172,10 @@ printf("Component Server Request Loop\n");
                                               *phase, 
                                               *blockingFlag) != ESMF_SUCCESS)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Error during request loop setup.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		*rc = localrc;
 		return;
@@ -267,10 +268,10 @@ void FTN_X(c_esmc_registercomponent)(
                           descString.c_str(), 
                           hostStr) == ESMF_FAILURE)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_UNEXPECTED,
          "Error registering component service.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		*rc = localrc;
 	}
@@ -329,10 +330,10 @@ void FTN_X(c_esmc_unregistercomponent)(
 	if (client.setStatus(clientIdString.c_str(), 
                         client.getStateStr(NET_ESMF_STAT_DONE)) == ESMF_FAILURE)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_UNEXPECTED,
          "Error unregistering component service.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		*rc = localrc;
 	}

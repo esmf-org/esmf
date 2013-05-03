@@ -1,4 +1,4 @@
-% $Id: TimeMgr_crefdoc.ctex,v 1.13 2012/10/11 00:19:12 theurich Exp $ 
+% $Id$ 
 
 #define INCLUDE_UML
 #ifdef STANDALONE

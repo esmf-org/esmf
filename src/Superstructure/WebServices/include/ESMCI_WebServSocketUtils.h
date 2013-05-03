@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServSocketUtils.h,v 1.8 2012/03/14 23:32:29 ksaint Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,

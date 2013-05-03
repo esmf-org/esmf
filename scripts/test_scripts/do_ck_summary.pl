@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: do_ck_summary.pl,v 1.1 2011/03/17 22:21:49 svasquez Exp $
+# $Id$
 # This prints a summary of system tests, unit tests and examples.
 # The script calls sys_tests_results, examples_results and 
 # unit_tests_results with the summary option turned on,

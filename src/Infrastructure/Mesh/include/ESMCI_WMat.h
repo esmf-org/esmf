@@ -1,4 +1,4 @@
-// $Id: ESMCI_WMat.h,v 1.11 2012/01/06 20:17:47 svasquez Exp $
+// $Id$
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -89,6 +89,8 @@ public:
   void InsertRow(const Entry &row, const std::vector<Entry> &cols);
 
   void InsertRowMerge(const Entry &row, const std::vector<Entry> &cols);
+
+  void InsertRowMergeSingle(const Entry &row, const Entry &col);
   
   void GetRowGIDS(std::vector<UInt> &gids);
 

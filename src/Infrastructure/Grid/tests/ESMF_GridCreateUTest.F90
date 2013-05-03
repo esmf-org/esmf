@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.129 2012/11/09 01:17:30 rokuingh Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_GridCreateUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_GridCreateUTest.F90,v 1.129 2012/11/09 01:17:30 rokuingh Exp $'
+    '$Id$'
 !------------------------------------------------------------------------------
     
   ! cumulative result: count failures; no failures equals "all pass"
@@ -320,6 +320,50 @@ program ESMF_GridCreateUTest
      fptr2D(:,:)=0.0
   enddo
 
+
+#if 1
+  ! Add corner stagger
+  call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+   ! Init coordinates to 0.0 (otherwise can have problem with NAN != NAN)
+  do lDE=0,localDECount-1  
+
+     ! get and fill 1st coord array
+     call ESMF_GridGetCoord(grid, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
+          farrayPtr=fptr2D, rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     fptr2D(:,:)=0.0
+
+     ! get and fill 2nd coord array
+     call ESMF_GridGetCoord(grid, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
+          farrayPtr=fptr2D, rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     fptr2D(:,:)=0.0
+  enddo
+#endif
+
+
+#if 1
+  ! Add item
+  call ESMF_GridAddItem(grid, staggerloc=ESMF_STAGGERLOC_CORNER, &
+       itemflag=ESMF_GRIDITEM_AREA, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+   ! Init area to 0.0 (otherwise can have problem with NAN != NAN)
+  do lDE=0,localDECount-1  
+
+     ! get and fill 1st coord array
+     call ESMF_GridGetItem(grid, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CORNER, &
+          itemflag=ESMF_GRIDITEM_AREA, &
+          farrayPtr=fptr2D, rc=localrc)           
+     if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+     fptr2D(:,:)=0.0
+  enddo
+#endif
 
 
   ! Create Grid 2 from the original grid and distgrid

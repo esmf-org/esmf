@@ -1,4 +1,4 @@
-// $Id: ESMC_SciComp.h,v 1.4 2012/10/10 19:43:40 ksaint Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

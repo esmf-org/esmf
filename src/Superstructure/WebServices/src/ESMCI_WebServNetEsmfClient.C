@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServNetEsmfClient.C,v 1.7 2012/03/14 14:44:06 ksaint Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -24,7 +24,6 @@
 // (grid or coupler) service.
 //
 //-----------------------------------------------------------------------------
-
 #include "ESMCI_WebServNetEsmfClient.h"
 
 #include <string.h>
@@ -32,13 +31,11 @@
 #include "ESMCI_WebServSocketUtils.h"
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
-
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WebServNetEsmfClient.C,v 1.7 2012/03/14 14:44:06 ksaint Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -208,20 +205,20 @@ int  ESMCI_WebServNetEsmfClient::sendRequest(
 
 	if (strcmp(requestStr, "UNKN") == 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_ARG_VALUE,
          "Invalid request id.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
 		return ESMF_FAILURE;
 	}
 
 	if (theSocket.send(requestStr) <= 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error writing request id to socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
       return ESMF_FAILURE;
 	}
@@ -233,10 +230,10 @@ int  ESMCI_WebServNetEsmfClient::sendRequest(
 	{
 		if ((bytesWritten = theSocket.write(length, data)) != length)
 		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.MsgFoundError(
          	ESMC_RC_FILE_WRITE,
          	"Error writing request data to socket.",
-         	&localrc);
+         	ESMC_CONTEXT, &localrc);
 
       	return ESMF_FAILURE;
 		}
@@ -280,10 +277,10 @@ int  ESMCI_WebServNetEsmfClient::sendData(
 	{
 		if ((bytesWritten = theSocket.write(length, data)) != length)
 		{
-      	ESMC_LogDefault.ESMC_LogMsgFoundError(
+      	ESMC_LogDefault.MsgFoundError(
          	ESMC_RC_FILE_WRITE,
          	"Error writing data to socket.",
-         	&localrc);
+         	ESMC_CONTEXT, &localrc);
 
       	return ESMF_FAILURE;
 		}
@@ -324,10 +321,10 @@ int  ESMCI_WebServNetEsmfClient::sendString(
 
 	if ((bytesWritten = theSocket.send(data)) <= 0)
 	{
-      ESMC_LogDefault.ESMC_LogMsgFoundError(
+      ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error writing string to socket.",
-         &localrc);
+         ESMC_CONTEXT, &localrc);
 
       return ESMF_FAILURE;
 	}
@@ -368,10 +365,10 @@ int  ESMCI_WebServNetEsmfClient::getResponse(
 	length = 0;
 	if (theSocket.read(length, data) <= 0)
 	{
-     	ESMC_LogDefault.ESMC_LogMsgFoundError(
+     	ESMC_LogDefault.MsgFoundError(
         	ESMC_RC_FILE_WRITE,
         	"Error reading request response from socket.",
-        	&localrc);
+        	ESMC_CONTEXT, &localrc);
 
      	return ESMF_FAILURE;
 	}

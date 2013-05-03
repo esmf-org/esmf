@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributePackageEx.F90,v 1.39 2012/10/31 21:10:58 rokuingh Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

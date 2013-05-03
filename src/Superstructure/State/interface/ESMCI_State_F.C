@@ -1,4 +1,4 @@
-// $Id: ESMCI_State_F.C,v 1.15 2012/05/23 23:49:59 w6ws Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -20,21 +20,19 @@
 // 
 //
 //-----------------------------------------------------------------------------
-//
-
-#include <string.h>
-
- // insert any higher level, 3rd party or system includes here
-#include "ESMCI_Macros.h"
-
  // associated class definition file
 #include "ESMCI_State.h"
+
+ // insert any higher level, 3rd party or system includes here
+#include <string.h>
+#include "ESMCI_Macros.h"
+#include "ESMCI_LogErr.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMCI_State_F.C,v 1.15 2012/05/23 23:49:59 w6ws Exp $";
+             "$Id$";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -68,7 +66,7 @@ void FTN_X(c_esmc_stateserialize)(
     if ((*inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                             "Buffer too short to add a State object", localrc);
+           "Buffer too short to add a State object", ESMC_CONTEXT, localrc);
          return;
  
         //buffer = (char *)realloc((void *)buffer,
@@ -97,6 +95,9 @@ void FTN_X(c_esmc_statedeserialize)(
                              int *datacount, 
                              char *buffer, int *offset, int *localrc,
                              ESMCI_FortranStrLenArg buffer_l){
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_statedeserialize()"
 
     int *ip;
 
@@ -169,6 +170,9 @@ void FTN_X(c_esmc_stateitemdeserialize)(int *otype,
                                char *buffer, int *offset, int *localrc,
                                ESMCI_FortranStrLenArg clen,
                                ESMCI_FortranStrLenArg buffer_l) {
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_stateitemdeserialize()"
 
     int *ip;
     char *cp;

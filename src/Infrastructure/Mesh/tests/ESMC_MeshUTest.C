@@ -1,4 +1,4 @@
-// $Id: ESMC_MeshUTest.C,v 1.23 2012/05/14 20:46:15 svasquez Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -171,6 +171,19 @@ int main(void){
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   printf("num_elem = %d\nnum_elem_owned_out=%d\n", num_elem, num_elem_owned_out);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "MeshGetCoord");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  double *coords;
+  int num_nodes;
+  coords = ESMC_MeshGetCoord(mesh, &num_nodes, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  //for (int i = 0; i < num_nodes; i++) {
+  //  printf ("%lf,%lf\n",coords[i*2], coords[i*2+1]);
+  //}
 
   //----------------------------------------------------------------------------
   //NEX_UTest

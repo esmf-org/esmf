@@ -1,4 +1,4 @@
-// $Id: ESMCI_CommRel.C,v 1.8 2012/01/06 20:17:50 svasquez Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_CommRel.C,v 1.8 2012/01/06 20:17:50 svasquez Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -50,6 +50,7 @@ void CommRel::Init(const std::string &name, MeshDB &dom, MeshDB &ran, bool sym) 
   domMesh = &dom;
   ranMesh = &ran;
   symmetric = sym;
+
 }
 
 CommRel::CommRel(const std::string &name, MeshDB  &dom, bool _sym) :
@@ -482,7 +483,10 @@ std::cout << "P:" << msg.commRank() << " putting in nid=" << send_size_all[domai
 
   // Some things for range mesh, now;  See if coord field exists, else create
   // and populate.
+
+
   rmesh->set_spatial_dimension(domMesh->spatial_dim());
+
 
 }
 

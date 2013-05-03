@@ -1,5 +1,5 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $Id: ESMF_RegridWeightGen.F90,v 1.22 2012/11/21 00:18:15 oehmke Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -531,11 +531,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Only set useSrcMask to false if srcMissingvalue is not given and the file type is
       ! either GRIDSPEC or UGRID, same for useDstMask
-      if ((.not. srcMissingvalue) .and. (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
-	    localSrcFileType == ESMF_FILEFORMAT_UGRID)) useSrcMask = .false.
+      if ((.not. srcMissingvalue) .and. (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC)) &
+          useSrcMask = .false.
 
-      if ((.not. dstMissingvalue) .and. (dstFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
-	    dstFileType == ESMF_FILEFORMAT_UGRID)) useDstMask = .false.
+      if ((.not. dstMissingvalue) .and. (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC)) &
+           useDstMask = .false.
  
       ! Should I have only PetNO=0 to open the file and find out the size?
       if (PetNo == 0) then

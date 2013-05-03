@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayScatterGatherEx.F90,v 1.24 2012/02/15 22:55:11 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

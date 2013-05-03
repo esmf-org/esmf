@@ -1,4 +1,4 @@
-! $Id: ESMF_VMHigherRankDataEx.F90,v 1.1 2012/07/26 22:23:13 theurich Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

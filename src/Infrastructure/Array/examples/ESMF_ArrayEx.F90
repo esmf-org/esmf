@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayEx.F90,v 1.86 2012/03/15 23:17:57 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

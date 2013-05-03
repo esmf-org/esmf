@@ -1,4 +1,4 @@
-! $Id: NUOPC_Connector.F90,v 1.24 2012/11/14 06:12:25 theurich Exp $
+! $Id$
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Connector.F90"
 
@@ -270,11 +270,13 @@ module NUOPC_Connector
       msg="Allocation of internal cplList() failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (cplListSize/=0) then
+      call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
     ! get the importState std lists
     call NUOPC_StateBuildStdList(importState, importStdAttrNameList, &
       stdFieldList=importFieldList, rc=rc)
@@ -437,11 +439,13 @@ module NUOPC_Connector
       msg="Allocation of internal cplList() failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (cplListSize/=0) then
+      call NUOPC_CplCompAttributeGet(cplcomp, cplList=cplList, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
     ! get the importState std lists
     call NUOPC_StateBuildStdList(importState, importStdAttrNameList, &
       stdFieldList=importFieldList, rc=rc)

@@ -1,4 +1,4 @@
-// $Id: ESMCI_SAX2WriteHandler.C,v 1.5 2012/01/06 20:17:14 svasquez Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -19,8 +19,10 @@
 // in the companion file {\tt ESMCI\_SAX2WriteHandler.h}
 //
 //-------------------------------------------------------------------------
-//
 #define ESMC_FILENAME "ESMCI_SAX2WriteHandler.C"
+
+// associated class definition file
+#include "ESMCI_SAX2WriteHandler.h"
 
 #include<iostream>
 using namespace std;
@@ -29,16 +31,12 @@ using namespace std;
  #include <xercesc/util/XMLUniDefs.hpp>
 #endif
 
-#include <ESMCI_LogErr.h>
-#include <ESMF_LogMacros.inc>
-
-// associated class definition file
-#include <ESMCI_SAX2WriteHandler.h>
+#include "ESMCI_LogErr.h"
 
 //-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_SAX2WriteHandler.C,v 1.5 2012/01/06 20:17:14 svasquez Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id$";
 //-------------------------------------------------------------------------
 
 namespace ESMCI{

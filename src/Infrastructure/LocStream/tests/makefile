@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2010/02/25 19:59:57 oehmke Exp $ 
+# $Id$ 
 
 ALL:      build_unit_tests
 run:      run_unit_tests

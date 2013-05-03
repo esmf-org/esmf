@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistBlk2BlkSTest.F90,v 1.28 2011/07/02 05:54:34 oehmke Exp $
+! $Id$
 !
 ! System test FieldRedistBlk2Blk
 !  Description on Sourceforge under System Test #XXXXX

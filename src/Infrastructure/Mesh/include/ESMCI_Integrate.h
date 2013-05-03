@@ -1,4 +1,4 @@
-// $Id: ESMCI_Integrate.h,v 1.6 2010/06/15 23:10:16 rokuingh Exp $
+// $Id$
 // Earth System Modeling Framework
 // Copyright 2002-2009, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 

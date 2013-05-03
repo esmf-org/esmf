@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.363 2012/11/09 00:41:08 theurich Exp $
+#  $Id$
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -294,6 +294,10 @@ export ESMF_ABI = 64
 endif
 ifeq ($(ESMF_MACHINE),x86_64)
 # and x86_64
+export ESMF_ABI = 64
+endif
+ifeq ($(ESMF_MACHINE),ppc64)
+# and ppc64
 export ESMF_ABI = 64
 endif
 endif

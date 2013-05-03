@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.177 2012/10/29 03:58:27 gold2718 Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@ module ESMF_ArrayMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_Array.F90,v 1.177 2012/10/29 03:58:27 gold2718 Exp $'
+    '$Id$'
 
 !==============================================================================
 ! 
@@ -1578,7 +1578,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set default flags
     opt_overwriteflag = ESMF_FALSE
-    if (present(overwrite) .and. overwrite) opt_overwriteflag = ESMF_TRUE
+    if (present(overwrite)) opt_overwriteflag = overwrite
 
     opt_status = ESMF_FILESTATUS_UNKNOWN
     if (present(status)) opt_status = status

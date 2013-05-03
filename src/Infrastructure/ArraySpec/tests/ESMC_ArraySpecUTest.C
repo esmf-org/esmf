@@ -1,4 +1,4 @@
-// $Id: ESMC_ArraySpecUTest.C,v 1.12 2012/07/18 22:21:05 rokuingh Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

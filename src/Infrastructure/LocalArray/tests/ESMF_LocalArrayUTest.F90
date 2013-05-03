@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.67 2012/05/16 22:45:46 svasquez Exp $
+! $Id$
 !
 ! Example/test code which creates new arrays.
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_ComponentUTest.C,v 1.21 2012/05/14 20:46:24 svasquez Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

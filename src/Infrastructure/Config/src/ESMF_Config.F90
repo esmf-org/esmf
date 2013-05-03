@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.86 2012/11/07 21:58:41 w6ws Exp $
+! $Id$
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -207,7 +207,7 @@
 
 
 ! -------------------------- ESMF-public method -------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ConfigAssignment(=) - Config assignment
 !
 ! !INTERFACE:
@@ -232,7 +232,7 @@
 !     The {\tt ESMF\_Config} object on the right hand side of the assignment.
 !   \end{description}
 !
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------

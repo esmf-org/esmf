@@ -1,4 +1,4 @@
-! $Id: ESMF_NUOPC_UTest.F90,v 1.3 2012/11/20 06:51:42 theurich Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@ program ESMF_NUOPC_UTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter :: version = &
-    '$Id: ESMF_NUOPC_UTest.F90,v 1.3 2012/11/20 06:51:42 theurich Exp $'
+    '$Id$'
 !------------------------------------------------------------------------------
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -248,6 +248,36 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_FieldDictionaryGetEntry("esmf_adoption_level", rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryHasEntry() (existing entry) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  flag =  NUOPC_FieldDictionaryHasEntry("esmf_adoption_level", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryHasEntry() return value (existing entry) Test"
+  write(failMsg, *) "Did not return the correct value"
+  call ESMF_Test((flag), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryHasEntry() (not existing entry) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  flag =  NUOPC_FieldDictionaryHasEntry("this_entry_does_not_exist", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_FieldDictionaryHasEntry() return value (not existing entry) Test"
+  write(failMsg, *) "Did not return the correct value"
+  call ESMF_Test((.not.flag), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------

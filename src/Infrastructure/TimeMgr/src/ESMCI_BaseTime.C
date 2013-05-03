@@ -1,4 +1,4 @@
-// $Id: ESMCI_BaseTime.C,v 1.15 2012/09/20 21:19:50 w6ws Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -18,32 +18,31 @@
 // declared in the companion file {\tt ESMCI\_BaseTime.h}
 //
 //-------------------------------------------------------------------------
-//
- #define ESMC_FILENAME "ESMCI_BaseTime.C"
+#define ESMC_FILENAME "ESMCI_BaseTime.C"
 
- #include <stdio.h>
- #include <stdlib.h>
- #include <limits.h>
- #include <math.h>    // modf()
- /*
- #include <iostream>
- #include <stdlib>
- using std::cout;
- using std::endl;
- */
- #include <ESMCI_LogErr.h>
- #include <ESMF_LogMacros.inc>
+// associated class definition file
+#include "ESMCI_BaseTime.h"
 
- // associated class definition file
- #include "ESMCI_BaseTime.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <math.h>    // modf()
+/*
+#include <iostream>
+#include <stdlib>
+using std::cout;
+using std::endl;
+*/
+    
+#include "ESMCI_LogErr.h"
 
 //-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_BaseTime.C,v 1.15 2012/09/20 21:19:50 w6ws Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id$";
 //-------------------------------------------------------------------------
 
-  namespace ESMCI{
+namespace ESMCI{
 
 //
 //-------------------------------------------------------------------------
@@ -274,7 +273,7 @@
     // validate input
     if (timeToConvert == ESMC_NULL_POINTER) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-                                            "; timeToConvert is NULL", &rc);
+        "; timeToConvert is NULL", ESMC_CONTEXT, &rc);
       return(rc);
     }
 
@@ -369,7 +368,8 @@
       // convert remaining time to milliseconds
       Fraction msRemainingTime = remainingTime;
       int rc = msRemainingTime.convert(1000);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc))
         return(rc);
       *ms = msRemainingTime.getn();
 
@@ -381,7 +381,8 @@
       // convert remaining time to microseconds
       Fraction usRemainingTime = remainingTime;
       int rc = usRemainingTime.convert(1000000);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc))
         return(rc);
       *us = usRemainingTime.getn();
 
@@ -393,7 +394,8 @@
       // convert remaining time to nanoseconds
       Fraction nsRemainingTime = remainingTime;
       int rc = nsRemainingTime.convert(1000000000);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc))
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc))
         return(rc);
       *ns = nsRemainingTime.getn();
     }

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2010/04/13 05:58:58 eschwab Exp $
+# $Id$
 
 ALL:     build_unit_tests
 run:     run_unit_tests

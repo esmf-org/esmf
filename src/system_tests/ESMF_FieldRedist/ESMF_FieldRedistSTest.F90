@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.59 2011/07/02 05:54:29 oehmke Exp $
+! $Id$
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX

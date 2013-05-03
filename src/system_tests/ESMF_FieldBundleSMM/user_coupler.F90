@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.13 2011/06/30 06:00:54 theurich Exp $
+! $Id$
 !
 ! Example/test code which shows User Component calls.
 

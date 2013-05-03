@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeGridCompUTest.F90,v 1.49 2012/11/19 17:26:02 rokuingh Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ program ESMF_AttributeGridCompUTest
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AttributeGridCompUTest.F90,v 1.49 2012/11/19 17:26:02 rokuingh Exp $'
+      '$Id$'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -54,10 +54,10 @@ program ESMF_AttributeGridCompUTest
       integer                :: rc, count, items
       type(ESMF_TypeKind_Flag)    :: attrTK
 
-      real(ESMF_KIND_I8)                     :: inR8, outR8, defaultR8, dfltoutR8
-      real(ESMF_KIND_I8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l, outR8l
+      real(ESMF_KIND_R8)                     :: inR8, outR8, defaultR8, dfltoutR8
+      real(ESMF_KIND_R8), dimension(3)       :: inR8l, defaultR8l, dfltoutR8l, outR8l
       character(ESMF_MAXSTR)           :: inChar, outChar, defaultChar, dfltoutChar
-      real(ESMF_KIND_I8), dimension(4)       :: defaultR8lWrong
+      real(ESMF_KIND_R8), dimension(4)       :: defaultR8lWrong
   
       ! non exhaustive constant value variables
       real(ESMF_KIND_R8)                        :: outConstantR8
@@ -77,9 +77,9 @@ program ESMF_AttributeGridCompUTest
       integer(ESMF_KIND_I4), dimension(3)       :: inI4l, outI4l, defaultI4l, dfltoutI4l
       integer(ESMF_KIND_I8)                     :: inI8, outI8, defaultI8, dfltoutI8
       integer(ESMF_KIND_I8), dimension(3)       :: inI8l, outI8l, defaultI8l, dfltoutI8l
-      real(ESMF_KIND_I4)                     :: inR4, outR4, defaultR4, dfltoutR4
-      real(ESMF_KIND_I4), dimension(3)       :: inR4l, outR4l, defaultR4l, dfltoutR4l
-      real(ESMF_KIND_I8), dimension(10)       :: outR8lLong
+      real(ESMF_KIND_R4)                     :: inR4, outR4, defaultR4, dfltoutR4
+      real(ESMF_KIND_R4), dimension(3)       :: inR4l, outR4l, defaultR4l, dfltoutR4l
+      real(ESMF_KIND_R8), dimension(10)       :: outR8lLong
       character(ESMF_MAXSTR)                     :: inEmpty, outEmpty
       character(ESMF_MAXSTR), dimension(3)       :: inCharl, defaultCharl, dfltoutCharl, outCharl
       character(ESMF_MAXSTR), dimension(4)       :: defaultCharlWrong

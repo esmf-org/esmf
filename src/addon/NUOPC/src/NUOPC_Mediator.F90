@@ -1,4 +1,4 @@
-! $Id: NUOPC_Mediator.F90,v 1.5 2012/10/31 00:04:42 theurich Exp $
+! $Id$
 
 #define FILENAME "src/addon/NUOPC/NUOPC_Mediator.F90"
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateSph2DPlus1Ex.F90,v 1.13 2012/01/06 20:16:55 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

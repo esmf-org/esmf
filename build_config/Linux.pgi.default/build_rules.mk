@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.65 2012/08/17 21:56:30 theurich Exp $
+# $Id$
 #
 # Linux.pgi.default
 #

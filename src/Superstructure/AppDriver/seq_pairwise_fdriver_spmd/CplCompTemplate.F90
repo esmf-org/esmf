@@ -1,4 +1,4 @@
-! $Id: CplCompTemplate.F90,v 1.13 2011/06/30 05:59:39 theurich Exp $
+! $Id$
 !
 ! Test code which supplies a user-written coupler component.
 

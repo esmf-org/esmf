@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2012/10/11 00:19:22 theurich Exp $ 
+# $Id$ 
 
 ALL: onedoc
 

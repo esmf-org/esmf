@@ -1,4 +1,4 @@
-// $Id: ESMCI_StateItem.h,v 1.4 2012/01/06 20:19:17 svasquez Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -22,7 +22,6 @@
 #include "ESMCI_F90Interface.h"
 #include "ESMC_Interface.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -52,11 +51,13 @@ extern "C" {
 
 namespace ESMCI{
   int StateItemWrap::castToFortran(F90ClassHolder *fc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "StateItemWrap::castToFortran()"
     int localrc = ESMC_RC_NOT_IMPL;
     int rc=ESMC_RC_NOT_IMPL;
     FTN_X(f_esmf_stateitemwrapcast)(fc, this, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
     // return successfully
     rc = ESMF_SUCCESS;
     return rc;

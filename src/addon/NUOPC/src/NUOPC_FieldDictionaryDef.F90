@@ -1,4 +1,4 @@
-! $Id: NUOPC_FieldDictionaryDef.F90,v 1.9 2012/10/25 19:48:22 theurich Exp $
+! $Id$
 
 #define FILENAME "src/addon/NUOPC/NUOPC_FieldDictionaryDef.F90"
 
@@ -30,6 +30,7 @@ module NUOPC_FieldDictionaryDef
   ! public module interfaces
   public NUOPC_FieldDictionaryAddEntryI
   public NUOPC_FieldDictionaryGetEntryI
+  public NUOPC_FieldDictionaryHasEntryI
   public NUOPC_FieldDictionaryDefinition
 
   !-----------------------------------------------------------------------------
@@ -131,6 +132,37 @@ module NUOPC_FieldDictionaryDef
 
   !-----------------------------------------------------------------------------
 !BOPI
+! !IROUTINE: NUOPC_FieldDictionaryHasEntryI - Check whether the NUOPC Field dictionary has a specific entry
+! !INTERFACE:
+  function NUOPC_FieldDictionaryHasEntryI(fieldDictionary, standardName, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_FieldDictionaryHasEntryI
+! !ARGUMENTS:
+    type(ESMF_Container),             intent(inout)         :: fieldDictionary
+    character(*),                     intent(in)            :: standardName
+    integer,                          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Returns {\tt .true.} if the NUOPC Field dictionary has an entry with the
+!   specified StandardName, {\tt .false.} otherwise.
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Logical)            :: isPres
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call c_ESMC_ContainerGetIsPresent(fieldDictionary, trim(standardName), &
+      isPres, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+      
+    NUOPC_FieldDictionaryHasEntryI = isPres
+    
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE: NUOPC_FieldDictionaryDefinition - Create the NUOPC Field dictionary
 ! !INTERFACE:
   subroutine NUOPC_FieldDictionaryDefinition(fieldDictionary, rc)
@@ -142,7 +174,6 @@ module NUOPC_FieldDictionaryDef
 !EOPI
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
-
 
 !BOLT l l l l
 ! "{\bf StandardName}"
@@ -165,116 +196,6 @@ module NUOPC_FieldDictionaryDef
 !EOTL
 !BOTL
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "air_sea_temperature_difference", &
-      canonicalUnits    = "K", &
-      defaultLongName   = "Air Sea Temperature Difference", &
-      defaultShortName  = "astd", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "bottom_depth", &
-      canonicalUnits    = "m", &
-      defaultLongName   = "Bottom depth", &
-      defaultShortName  = "bdpt", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "bottom_friction_coefficient", &
-      canonicalUnits    = "1", &
-      defaultLongName   = "Bottom Friction Coefficient", &
-      defaultShortName  = "bfrc", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "eastward_10m_wind", &
-      canonicalUnits    = "m s-1", &
-      defaultLongName   = "Eastward 10m Wind", &
-      defaultShortName  = "wndu", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "eastward_northward_wave_radiation_stress", &
-      canonicalUnits    = "N m-1", &
-      defaultLongName   = "Eastward Northward Wave Radiation Stress", &
-      defaultShortName  = "wsuv", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "eastward_stokes_drift_current", &
-      canonicalUnits    = "m s-1", &
-      defaultLongName   = "Eastward Stokes Drift Current", &
-      defaultShortName  = "sdcu", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "eastward_wave_bottom_current", &
-      canonicalUnits    = "m s-1", &
-      defaultLongName   = "Eastward Wave Bottom Current", &
-      defaultShortName  = "wbcu", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "eastward_wave_radiation_stress", &
-      canonicalUnits    = "N m-1", &
-      defaultLongName   = "Eastward Wave Radiation Stress", &
-      defaultShortName  = "wsuu", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "eastward_wave_radiation_stress_gradient", &
-      canonicalUnits    = "Pa", &
-      defaultLongName   = "Eastward Wave Radiation Stress Gradient", &
-      defaultShortName  = "wsgu", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "isotropic_longwave_radiance_in_air", &
-      canonicalUnits    = "W m-2 sr-1", &
-      defaultLongName   = "Isotropic Longwave Radiance in Air", &
-      defaultShortName  = "rilw", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "isotropic_shortwave_radiance_in_air", &
-      canonicalUnits    = "W m-2 sr-1", &
-      defaultLongName   = "Isotropic Shortwave Radiance in Air", &
-      defaultShortName  = "risw", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "magnitude_of_surface_downward_stress", &
       canonicalUnits    = "Pa", &
       defaultLongName   = "Magnitude of Surface Downward Stress", &
@@ -285,60 +206,10 @@ module NUOPC_FieldDictionaryDef
 !EOTL
 !BOTL
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "northward_10m_wind", &
-      canonicalUnits    = "m s-1", &
-      defaultLongName   = "Northward 10m Wind", &
-      defaultShortName  = "wndv", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "northward_stokes_drift_current", &
-      canonicalUnits    = "m s-1", &
-      defaultLongName   = "Northward Stokes Drift Current", &
-      defaultShortName  = "sdcv", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "northward_wave_bottom_current", &
-      canonicalUnits    = "m s-1", &
-      defaultLongName   = "Northward Wave Bottom Current", &
-      defaultShortName  = "wbcv", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "northward_wave_radiation_stress", &
-      canonicalUnits    = "N m-1", &
-      defaultLongName   = "Northward Wave Radiation Stress", &
-      defaultShortName  = "wsvv", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "northward_wave_radiation_stress_gradient", &
-      canonicalUnits    = "Pa", &
-      defaultLongName   = "Northward Wave Radiation Stress Gradient", &
-      defaultShortName  = "wsgv", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "precipitation_amount", &
-      canonicalUnits    = "kg m-2", &
-      defaultLongName   = "Precipitation Amount", &
-      defaultShortName  = "prcp", &
+      standardName      = "precipitation_flux", &
+      canonicalUnits    = "kg m-2 s-1", &
+      defaultLongName   = "Precipitation Flux", &
+      defaultShortName  = "prcf", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -375,30 +246,10 @@ module NUOPC_FieldDictionaryDef
 !EOTL
 !BOTL
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_air_pressure", &
-      canonicalUnits    = "Pa", &
-      defaultLongName   = "Surface Air Pressure", &
-      defaultShortName  = "psfc", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
       standardName      = "surface_eastward_sea_water_velocity", &
       canonicalUnits    = "m s-1", &
       defaultLongName   = "Surface Eastward Sea Water Velocity", &
       defaultShortName  = "sscu", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_eastward_wave_induced_stress", &
-      canonicalUnits    = "Pa", &
-      defaultLongName   = "Surface Eastward Wave Induced Stress", &
-      defaultShortName  = "wvsu", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -415,9 +266,9 @@ module NUOPC_FieldDictionaryDef
 !EOTL
 !BOTL
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_downward_heat_flux", &
+      standardName      = "surface_downward_heat_flux_in_air", &
       canonicalUnits    = "W m-2", &
-      defaultLongName   = "Surface Downward Heat Flux", &
+      defaultLongName   = "Surface Downward Heat Flux in Air", &
       defaultShortName  = "hfns", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -425,20 +276,10 @@ module NUOPC_FieldDictionaryDef
 !EOTL
 !BOTL
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_downward_latent_heat_flux", &
-      canonicalUnits    = "W m-2", &
-      defaultLongName   = "Surface Downward Latent Heat Flux", &
-      defaultShortName  = "hfls", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_downward_moisture_flux", &
+      standardName      = "surface_downward_water_flux", &
       canonicalUnits    = "kg m-2 s-1", &
-      defaultLongName   = "Surface Downward Moisture Flux", &
-      defaultShortName  = "mfns", &
+      defaultLongName   = "Surface Downward Water Flux", &
+      defaultShortName  = "wfns", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -455,30 +296,20 @@ module NUOPC_FieldDictionaryDef
 !EOTL
 !BOTL
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_downward_sensible_heat_flux", &
+      standardName      = "surface_net_downward_shortwave_flux", &
       canonicalUnits    = "W m-2", &
-      defaultLongName   = "Surface Downward Sensible Heat Flux", &
-      defaultShortName  = "hfss", &
+      defaultLongName   = "Surface Net Downward Shortwave Flux", &
+      defaultShortName  = "rsns", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !BOTL
     call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_downward_x_stress", &
-      canonicalUnits    = "Pa", &
-      defaultLongName   = "Surface Downward X Stress", &
-      defaultShortName  = "taux", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_downward_y_stress", &
-      canonicalUnits    = "Pa", &
-      defaultLongName   = "Surface Downward Y Stress", &
-      defaultShortName  = "tauy", &
+      standardName      = "surface_net_downward_longwave_flux", &
+      canonicalUnits    = "W m-2", &
+      defaultLongName   = "Surface Net Downward Longwave Flux", &
+      defaultShortName  = "rlns", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -489,76 +320,6 @@ module NUOPC_FieldDictionaryDef
       canonicalUnits    = "m s-1", &
       defaultLongName   = "Surface Northward Sea Water Velocity", &
       defaultShortName  = "sscv", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_northward_wave_induced_stress", &
-      canonicalUnits    = "Pa", &
-      defaultLongName   = "Surface Northward Wave Induced Stress", &
-      defaultShortName  = "wvsv", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_roughness_length", &
-      canonicalUnits    = "m", &
-      defaultLongName   = "Surface Roughness Length", &
-      defaultShortName  = "srl", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_total_wave_induced_stress", &
-      canonicalUnits    = "Pa", &
-      defaultLongName   = "Surface Total Wave Induced Stress", &
-      defaultShortName  = "wvst", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "wave_bottom_current_radian_frequency", &
-      canonicalUnits    = "rad s-1", &
-      defaultLongName   = "Wave Bottom Current Radian Frequency", &
-      defaultShortName  = "wbcf", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "wave_induced_charnock_parameter", &
-      canonicalUnits    = "1", &
-      defaultLongName   = "Wave Induced Charnock Parameter", &
-      defaultShortName  = "chnk", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "x_10m_wind", &
-      canonicalUnits    = "m s-1", &
-      defaultLongName   = "X 10m Wind", &
-      defaultShortName  = "wndx", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "y_10m_wind", &
-      canonicalUnits    = "m s-1", &
-      defaultLongName   = "Y 10m Wind", &
-      defaultShortName  = "wndy", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out

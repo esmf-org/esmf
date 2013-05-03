@@ -1,4 +1,4 @@
-// $Id: ESMCI_Attribute.h,v 1.70 2012/11/21 23:02:57 rokuingh Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -73,6 +73,7 @@ class Attribute
     ESMC_Logical attrPackHead;         // the head of an Attpack
     ESMC_Logical attrNested;           // a nested Attpack
 
+    ESMC_Logical deleteChange;         // flag for deletions
     ESMC_Logical linkChange;           // flag for link changes
     ESMC_Logical structChange;         // flag for structural changes
     ESMC_Logical valueChange;          // flag for value changes
@@ -307,7 +308,7 @@ class Attribute
       char *sendBuf, char *recvBuf, const std::vector<ESMC_I4> &roots, 
       const std::vector<ESMC_I4> &nonroots) const;
     int AttributeUpdateTreeChanges(int *linkChanges,
-      int *structChanges, int *valueChanges, int *numKeys) const;
+      int *structChanges, int *valueChanges, int *deletChange, int *numKeys) const;
     bool AttributeUpdateKeyCompare(char *key1, char *key2) const;
     int AttributeUpdateKeyCreate(char *key) const;
     int AttributeUpdateNeeded(VM *vm, int &bufSize,

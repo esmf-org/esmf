@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.12 2012/01/06 20:18:10 svasquez Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -23,16 +23,15 @@
 //
 //-----------------------------------------------------------------------------
 
-// include system headers
-#include <string.h>
-
 // include associated header file
 #include "ESMC_Calendar.h"
+
+// include system headers
+#include <string.h>
 
 // include ESMF headers
 #include "ESMCI_Arg.h"
 #include "ESMCI_LogErr.h"
-#include "ESMCI_LogMacros.inc"
 #include "ESMCI_Calendar.h"
 #include "ESMCI_Time.h"
 
@@ -40,7 +39,7 @@
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
 static const char *const version =
-  "$Id: ESMC_Calendar.C,v 1.12 2012/01/06 20:18:10 svasquez Exp $";
+  "$Id$";
 //-----------------------------------------------------------------------------
 
 // TODO: Implement more -native- C++ TimeMgr API alongside existing

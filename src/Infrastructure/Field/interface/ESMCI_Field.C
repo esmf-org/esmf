@@ -1,4 +1,3 @@
-
 //$1.10 2007/04/26 16:13:59 rosalind Exp $
 //
 // Earth System Modeling Framework
@@ -24,19 +23,16 @@
 // actual code which is implemented in F90.
 //
 //-----------------------------------------------------------------------------
-//
-
 // associated header file
 #include "ESMCI_Field.h"
-#include "ESMCI_Array.h"
-#include "ESMCI_Grid.h"
 
 //insert any higher level, 3rd party or system includes here
 #include <string.h>         // strlen()
 
-// LogErr headers
+// ESMF headers
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"
+#include "ESMCI_Array.h"
+#include "ESMCI_Grid.h"
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -50,7 +46,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_Field.C,v 1.29 2012/07/18 22:21:25 rokuingh Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -186,7 +182,7 @@ namespace ESMCI {
       gtfm = (ESMCI::InterfaceInt *)(gridToFieldMap->ptr);
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-           "- gridToFieldMap array must be of rank 1", rc);
+           "- gridToFieldMap array must be of rank 1", ESMC_CONTEXT, rc);
          return ESMC_NULL_POINTER;
       }
       gtfm_present = 1;
@@ -197,7 +193,7 @@ namespace ESMCI {
       uglb = (ESMCI::InterfaceInt *)(ungriddedLBound->ptr);
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-           "- ungriddedLBound array must be of rank 1", rc);
+           "- ungriddedLBound array must be of rank 1", ESMC_CONTEXT, rc);
          return ESMC_NULL_POINTER;
       }
       uglb_present = 1;
@@ -208,7 +204,7 @@ namespace ESMCI {
       ugub = (ESMCI::InterfaceInt *)(ungriddedUBound->ptr);
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-           "- ungriddedUBound array must be of rank 1", rc);
+           "- ungriddedUBound array must be of rank 1", ESMC_CONTEXT, rc);
          return ESMC_NULL_POINTER;
       }
       ugub_present = 1;
@@ -218,7 +214,8 @@ namespace ESMCI {
     int slen = strlen(name);
     char * fName = new char[slen];
     localrc = ESMC_CtoF90string(name, fName, slen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) {
       if (gtfm_created) if (gtfm_created) delete gtfm;
       if (uglb_created) if (uglb_created) delete uglb;
       if (ugub_created) if (ugub_created) delete ugub;
@@ -232,7 +229,7 @@ namespace ESMCI {
       field = new Field;
     }catch(...){
       // allocation error
-      ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", rc);
+      ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", ESMC_CONTEXT, rc);
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
       if (ugub_created) delete ugub;
@@ -249,7 +246,8 @@ namespace ESMCI {
         uglb->array, &uglb->extent[0], &uglb_present,
         ugub->array, &ugub->extent[0], &ugub_present,
         fName, &localrc, slen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) {
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
       if (ugub_created) delete ugub;
@@ -315,7 +313,7 @@ namespace ESMCI {
       gtfm = (ESMCI::InterfaceInt *)(gridToFieldMap->ptr);
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-           "- gridToFieldMap array must be of rank 1", rc);
+           "- gridToFieldMap array must be of rank 1", ESMC_CONTEXT, rc);
          return ESMC_NULL_POINTER;
       }
       gtfm_present = 1;
@@ -326,7 +324,7 @@ namespace ESMCI {
       uglb = (ESMCI::InterfaceInt *)(ungriddedLBound->ptr);
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-           "- ungriddedLBound array must be of rank 1", rc);
+           "- ungriddedLBound array must be of rank 1", ESMC_CONTEXT, rc);
          return ESMC_NULL_POINTER;
       }
       uglb_present = 1;
@@ -337,7 +335,7 @@ namespace ESMCI {
       ugub = (ESMCI::InterfaceInt *)(ungriddedUBound->ptr);
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-           "- ungriddedUBound array must be of rank 1", rc);
+           "- ungriddedUBound array must be of rank 1", ESMC_CONTEXT, rc);
          return ESMC_NULL_POINTER;
       }
       ugub_present = 1;
@@ -347,7 +345,8 @@ namespace ESMCI {
     int slen = strlen(name);
     char * fName = new char[slen];
     localrc = ESMC_CtoF90string(name, fName, slen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) {
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
       if (ugub_created) delete ugub;
@@ -361,7 +360,7 @@ namespace ESMCI {
       field = new Field;
     }catch(...){
       // allocation error
-      ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", rc);
+      ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", ESMC_CONTEXT, rc);
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
       if (ugub_created) delete ugub;
@@ -378,7 +377,8 @@ namespace ESMCI {
         uglb->array, &uglb->extent[0], &uglb_present,
         ugub->array, &ugub->extent[0], &ugub_present,
         fName, &localrc, slen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) {
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
       if (ugub_created) delete ugub;
@@ -443,7 +443,7 @@ namespace ESMCI {
       gtfm = (ESMCI::InterfaceInt *)(gridToFieldMap->ptr);
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-           "- gridToFieldMap array must be of rank 1", rc);
+           "- gridToFieldMap array must be of rank 1", ESMC_CONTEXT, rc);
          return ESMC_NULL_POINTER;
       }
       gtfm_present = 1;
@@ -454,7 +454,7 @@ namespace ESMCI {
       uglb = (ESMCI::InterfaceInt *)(ungriddedLBound->ptr);
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-           "- ungriddedLBound array must be of rank 1", rc);
+           "- ungriddedLBound array must be of rank 1", ESMC_CONTEXT, rc);
          return ESMC_NULL_POINTER;
       }
       uglb_present = 1;
@@ -465,7 +465,7 @@ namespace ESMCI {
       ugub = (ESMCI::InterfaceInt *)(ungriddedUBound->ptr);
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-           "- ungriddedUBound array must be of rank 1", rc);
+           "- ungriddedUBound array must be of rank 1", ESMC_CONTEXT, rc);
          return ESMC_NULL_POINTER;
       }
       ugub_present = 1;
@@ -475,7 +475,8 @@ namespace ESMCI {
     int slen = strlen(name);
     char * fName = new char[slen];
     localrc = ESMC_CtoF90string(name, fName, slen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) {
       delete[] fName;
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
@@ -488,7 +489,7 @@ namespace ESMCI {
       field = new Field;
     }catch(...){
       // allocation error
-      ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", rc);
+      ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", ESMC_CONTEXT, rc);
       delete[] fName;
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
@@ -501,7 +502,8 @@ namespace ESMCI {
       uglb->array, &uglb->extent[0], &uglb_present,
       ugub->array, &ugub->extent[0], &ugub_present,
       fName, &localrc, slen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) {
       delete[] fName;
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
@@ -567,7 +569,7 @@ namespace ESMCI {
       gtfm = (ESMCI::InterfaceInt *)(gridToFieldMap->ptr);
       if(gtfm->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-           "- gridToFieldMap array must be of rank 1", rc);
+           "- gridToFieldMap array must be of rank 1", ESMC_CONTEXT, rc);
          return ESMC_NULL_POINTER;
       }
       gtfm_present = 1;
@@ -578,7 +580,7 @@ namespace ESMCI {
       uglb = (ESMCI::InterfaceInt *)(ungriddedLBound->ptr);
       if(uglb->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-           "- ungriddedLBound array must be of rank 1", rc);
+           "- ungriddedLBound array must be of rank 1", ESMC_CONTEXT, rc);
          return ESMC_NULL_POINTER;
       }
       uglb_present = 1;
@@ -589,7 +591,7 @@ namespace ESMCI {
       ugub = (ESMCI::InterfaceInt *)(ungriddedUBound->ptr);
       if(ugub->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-           "- ungriddedUBound array must be of rank 1", rc);
+           "- ungriddedUBound array must be of rank 1", ESMC_CONTEXT, rc);
          return ESMC_NULL_POINTER;
       }
       ugub_present = 1;
@@ -599,7 +601,8 @@ namespace ESMCI {
     int slen = strlen(name);
     char * fName = new char[slen];
     localrc = ESMC_CtoF90string(name, fName, slen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) {
       delete[] fName;
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
@@ -612,7 +615,7 @@ namespace ESMCI {
       field = new Field;
     }catch(...){
       // allocation error
-      ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", rc);
+      ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", ESMC_CONTEXT, rc);
       delete[] fName;
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
@@ -625,7 +628,8 @@ namespace ESMCI {
       uglb->array, &uglb->extent[0], &uglb_present,
       ugub->array, &ugub->extent[0], &ugub_present,
       fName, &localrc, slen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) {
       delete[] fName;
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
@@ -707,8 +711,8 @@ namespace ESMCI {
     ESMC_Mesh mesh;
     mesh.ptr = NULL; // initialize
     FTN_X(f_esmf_fieldgetmesh)(this, &(mesh.ptr), &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-      return mesh;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return mesh;
     
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -742,8 +746,8 @@ namespace ESMCI {
     ESMC_Array array;
     array.ptr = NULL; // initialize
     FTN_X(f_esmf_fieldgetarray)(this, (ESMCI::Array **)&(array.ptr), &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-      return array;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return array;
     
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
@@ -775,8 +779,8 @@ namespace ESMCI {
 
     // Invoque the fortran interface through the F90-C++ "glue" code
     FTN_X(f_esmf_fieldprint)(this, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -808,8 +812,8 @@ namespace ESMCI {
 
     // Invoque the fortran interface through the F90-C++ "glue" code
     FTN_X(f_esmf_fieldcast)(fc, this, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -843,8 +847,8 @@ namespace ESMCI {
     int localrc = ESMC_RC_NOT_IMPL;
 
     FTN_X(f_esmf_regridgetarea)(fieldp, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     rc = ESMF_SUCCESS;
     return rc;
@@ -905,7 +909,7 @@ namespace ESMCI {
       smv = (ESMCI::InterfaceInt *)(srcMaskValues->ptr);
       if(smv->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-           "- srcMaskValues array must be of rank 1", &rc);
+           "- srcMaskValues array must be of rank 1", ESMC_CONTEXT, &rc);
          return ESMC_NULL_POINTER;
       }
       smv_present = 1;
@@ -918,7 +922,7 @@ namespace ESMCI {
       dmv = (ESMCI::InterfaceInt *)(dstMaskValues->ptr);
       if(dmv->dimCount != 1){
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-           "- dstMaskValues array must be of rank 1", &rc);
+           "- dstMaskValues array must be of rank 1", ESMC_CONTEXT, &rc);
          if (smv_created) delete smv;
          return ESMC_NULL_POINTER;
       }
@@ -956,7 +960,8 @@ namespace ESMCI {
                               unmappedAction, &ua_present,
                               srcFracField, &sff_present,
                               dstFracField, &dff_present, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc)) {
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) {
       if (smv_created) delete smv;
       if (dmv_created) delete dmv;
       if (sff_created) delete sff;
@@ -1008,8 +1013,8 @@ namespace ESMCI {
     // TODO: why are fields.ptr and routehandle by reference??  from create.. 
     FTN_X(f_esmf_regrid)(fieldpsrc, fieldpdst, &routehandlep, 
                          zeroRegion, &zr_present, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     rc = ESMF_SUCCESS;
     return rc;
@@ -1042,8 +1047,8 @@ namespace ESMCI {
   
     // TODO: why are fields.ptr and routehandle by reference??  from create.. 
     FTN_X(f_esmf_regridrelease)(&routehandlep, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     rc = ESMF_SUCCESS;
     return rc;

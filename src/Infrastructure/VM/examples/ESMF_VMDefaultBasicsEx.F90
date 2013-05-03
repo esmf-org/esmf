@@ -1,4 +1,4 @@
-! $Id: ESMF_VMDefaultBasicsEx.F90,v 1.20 2012/02/16 21:10:53 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

@@ -1,4 +1,4 @@
-! $Id: ESMF_AttributeUpdateMod.F90,v 1.38 2011/07/02 05:54:16 oehmke Exp $
+! $Id$
 !
 ! Example/test code which shows User Component calls.
 

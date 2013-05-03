@@ -1,4 +1,4 @@
-// $Id: ESMCI_Container_F.C,v 1.22 2012/09/20 20:24:51 theurich Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -18,12 +18,10 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 #include "ESMCI_Macros.h"
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMCI_LogMacros.inc"
+#include "ESMCI_LogErr.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_Field.h"
 #include "ESMCI_StateItem.h"
-
 #include "ESMCI_Container.h"
 
 #include <string>

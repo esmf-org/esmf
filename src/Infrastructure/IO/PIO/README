@@ -1,13 +1,18 @@
 PIO directory README
 ====================
 
-Pending Notes:
---------------
+Current Notes:
+-------------
+Updated all pio files to PIO 1.6.6 (Revision 761).  The cpp bindings are
+retained from the pio1_4_1_piocpp branch.
+
+Older Notes:
+-----------
 Starting to bring in new version of PIO with builtin CPP bindings
 Currently using branch pio1_4_1_piocpp which is close to the 1.4.1 release.
 
-Current Notes:
--------------
+Older Notes:
+-----------
 Jim Edwards fixed the bug for Halo array written by 1PE.
 Tested on Pleiades, Linux/Intel/MPICH2 and Linux/gfortran/openmpi
 

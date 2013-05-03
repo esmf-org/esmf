@@ -1,4 +1,4 @@
-// $Id: ESMCI_ArrayBundle_F.C,v 1.46 2012/10/03 18:29:01 gold2718 Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -20,10 +20,7 @@
 #include "ESMCI_Macros.h"
 #include "ESMCI_RHandle.h"
 #include "ESMCI_Array.h"
-
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMCI_LogMacros.inc"
-
+#include "ESMCI_LogErr.h"
 #include "ESMCI_ArrayBundle.h"
 
 #include <vector>
@@ -153,7 +150,7 @@ extern "C" {
     // call into C++
     *ptr = ESMCI::ArrayBundle::create(arrayList, *arrayCount, multi, relaxed,
       &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // set the name in the ArrayBundle object
     char *cname = ESMC_F90toCstring(name, *len_name);
@@ -162,7 +159,7 @@ extern "C" {
       delete [] cname;
     }else if(*len_name){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-        "- Not a valid string", ESMC_NOT_PRESENT_FILTER(rc));
+        "- Not a valid string", ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return;
     }
     // return successfully
@@ -198,7 +195,7 @@ extern "C" {
       // opt_arrayList was provided
       if (*len_arrayList < *arrayCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- opt_arrayList must provide arrayCount elements", rc);
+          "- opt_arrayList must provide arrayCount elements", ESMC_CONTEXT, rc);
         return;
       }
       // opt_arrayList has correct number of elements
@@ -227,7 +224,7 @@ extern "C" {
       // opt_arrayList was provided
       if (*len_arrayList < (*ptr)->getCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- opt_arrayList must provide arrayCount elements", rc);
+          "- opt_arrayList must provide arrayCount elements", ESMC_CONTEXT, rc);
         return;
       }
       // opt_arrayList has correct number of elements
@@ -634,25 +631,25 @@ extern "C" {
       // must provide valid factorList and factorIndexList args
       if (*factorIndexList == NULL){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-          "- Not a valid pointer to factorIndexList array", rc);
+          "- Not a valid pointer to factorIndexList array", ESMC_CONTEXT, rc);
         return;
       }
       if ((*factorIndexList)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- factorIndexList array must be of rank 2", rc);
+          "- factorIndexList array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((*factorIndexList)->extent[0] != 2 && 
         (*factorIndexList)->extent[0] != 4){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dimension of factorIndexList array must be of size 2 or 4",
-          rc);
+          ESMC_CONTEXT, rc);
         return;
       }
       if ((*factorIndexList)->extent[1] != *factorListCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 2nd dimension of factorIndexList does not match factorListCount",
-          rc);
+          ESMC_CONTEXT, rc);
         return;
       }
     }

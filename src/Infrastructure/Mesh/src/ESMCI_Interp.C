@@ -1,4 +1,4 @@
-// $Id: ESMCI_Interp.C,v 1.50 2012/11/14 21:59:08 oehmke Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_Interp.C,v 1.50 2012/11/14 21:59:08 oehmke Exp $";
+ static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 
@@ -786,19 +786,15 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
       if (use_dst_frac) {
         for (int i=0; i<sr.elems.size(); i++) {
           if (valid[i]==1) {
-            
-            // Allocate column of empty entries
-            std::vector<IWeights::Entry> col;
-            col.resize(1,col_empty);
-            
-            col[0].id=sr.elem->get_id();
-            col[0].value=src_frac2*wgts[i];
-            
+            // Set col info
+            IWeights::Entry col(sr.elem->get_id(), 0, 
+                                src_frac2*wgts[i], 0);
+
             // Set row info
             IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
-            
-            // Put weights into dst frac
-            dst_frac.InsertRowMerge(row, col);       
+
+            // Put weights into weight matrix
+            dst_frac.InsertRowMergeSingle(row, col);  
           }
         }
       }
@@ -826,18 +822,15 @@ void calc_conserve_mat_serial_2D_2D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
             dst_user_area_adj=dst_areas[i]/(*area);
           }
 
-          // Allocate column of empty entries
-          std::vector<IWeights::Entry> col;
-          col.resize(1,col_empty);
-
-          col[0].id=sr.elem->get_id();
-          col[0].value=src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i];
+          // Set col info
+          IWeights::Entry col(sr.elem->get_id(), 0, 
+                              src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i], 0);
 
           // Set row info
           IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
 
           // Put weights into weight matrix
-          iw.InsertRowMerge(row, col);       
+          iw.InsertRowMergeSingle(row, col);  
         }
       }
     }
@@ -1003,19 +996,15 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
       if (use_dst_frac) {
         for (int i=0; i<sr.elems.size(); i++) {
           if (valid[i]==1) {
-            
-            // Allocate column of empty entries
-            std::vector<IWeights::Entry> col;
-            col.resize(1,col_empty);
-            
-            col[0].id=sr.elem->get_id();
-            col[0].value=src_frac2*wgts[i];
-            
+            // Set col info
+            IWeights::Entry col(sr.elem->get_id(), 0, 
+                                src_frac2*wgts[i], 0);
+
             // Set row info
             IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
-            
-            // Put weights into dst frac
-            dst_frac.InsertRowMerge(row, col);       
+
+            // Put weights into weight matrix
+            dst_frac.InsertRowMergeSingle(row, col);  
           }
         }
       }
@@ -1043,18 +1032,15 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
             dst_user_area_adj=dst_areas[i]/(*area);
           }
 
-          // Allocate column of empty entries
-          std::vector<IWeights::Entry> col;
-          col.resize(1,col_empty);
-
-          col[0].id=sr.elem->get_id();
-          col[0].value=src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i];
+          // Set col info
+          IWeights::Entry col(sr.elem->get_id(), 0, 
+                              src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i], 0);
 
           // Set row info
           IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
 
           // Put weights into weight matrix
-          iw.InsertRowMerge(row, col);       
+          iw.InsertRowMergeSingle(row, col);  
         }
       }
     } // not generating mid mesh, need to compute weights
@@ -1220,19 +1206,15 @@ void calc_conserve_mat_serial_3D_3D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
     if (use_dst_frac) {
       for (int i=0; i<sr.elems.size(); i++) {
         if (valid[i]==1) {
-          
-          // Allocate column of empty entries
-          std::vector<IWeights::Entry> col;
-          col.resize(1,col_empty);
-          
-          col[0].id=sr.elem->get_id();
-          col[0].value=src_frac2*wgts[i];
-          
-          // Set row info
-          IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
-          
-          // Put weights into dst frac
-          dst_frac.InsertRowMerge(row, col);       
+            // Set col info
+            IWeights::Entry col(sr.elem->get_id(), 0, 
+                                src_frac2*wgts[i], 0);
+
+            // Set row info
+            IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
+
+            // Put weights into weight matrix
+            dst_frac.InsertRowMergeSingle(row, col);  
         }
       }
     }
@@ -1260,18 +1242,15 @@ void calc_conserve_mat_serial_3D_3D_cart(Mesh &srcmesh, Mesh &dstmesh, Mesh *mid
           dst_user_area_adj=dst_areas[i]/(*area);
         }
 
-	// Allocate column of empty entries
-	std::vector<IWeights::Entry> col;
-	col.resize(1,col_empty);
+          // Set col info
+          IWeights::Entry col(sr.elem->get_id(), 0, 
+                              src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i], 0);
 
-	col[0].id=sr.elem->get_id();
-	col[0].value=src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i];
+          // Set row info
+          IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
 
-	// Set row info
-	IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
-
-	// Put weights into weight matrix
-	iw.InsertRowMerge(row, col);       
+          // Put weights into weight matrix
+          iw.InsertRowMergeSingle(row, col);  
       }
     }
 
@@ -1335,27 +1314,17 @@ void calc_nearest_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, I
   }
 
 
+  // Temporary empty col with negatives so unset values
+  // can be detected if they sneak through
+  IWeights::Entry col_empty(-1, 0, -1.0, 0);
+
   // Loop through search results
   SearchResult::iterator sb = sres.begin(), se = sres.end();
   for (; sb != se; sb++) {
     Search_result &sr = **sb;
 
-
-    // Temporary empty col with negatives so unset values
-    // can be detected if they sneak through
-    IWeights::Entry col_empty(-1, 0, -1.0, 0);
-
-
-    // Because this is NEAREST We are only associating one weight 
-    // with each dest node, so only make vector of length 1
-    std::vector<IWeights::Entry> col;
-    col.resize(1,col_empty);
-
-    
-    // Add a weight entry with source id and weight 1.0
-    col[0].id=sr.src_gid;
-    col[0].value=1.0;
-
+    // Set col info
+    IWeights::Entry col(sr.src_gid, 0, 1.0, 0);
 
     // Set row info (i.e. the destination id associated with the above weight)
     IWeights::Entry row(sr.dst_gid, 0, 0.0, 0);
@@ -1363,10 +1332,9 @@ void calc_nearest_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, I
 
     // Put weights into weight matrix
     // Need merge version in nearest src to dest case where there may be more than 1 src,dst pair with the same dst.
-    iw.InsertRowMerge(row, col);       
+    iw.InsertRowMergeSingle(row, col);  
     
   } // for searchresult
-
 }
 
  

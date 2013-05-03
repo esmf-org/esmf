@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.29 2011/12/23 21:03:57 theurich Exp $
+# $Id$
 #
 # Linux.g95.default
 #

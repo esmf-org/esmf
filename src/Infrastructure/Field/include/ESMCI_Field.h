@@ -1,5 +1,4 @@
-
-// $Id: ESMCI_Field.h,v 1.20 2012/07/18 22:21:24 rokuingh Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -43,8 +42,6 @@
 #include "ESMCI_RHandle.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMC_Interface.h"
-#include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_Util.h"
 #include "ESMC_Grid.h"
 

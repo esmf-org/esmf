@@ -1,4 +1,4 @@
-// $Id: ESMCI_Grid.h,v 1.89 2012/09/07 23:16:03 oehmke Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -293,6 +293,7 @@ template <class TYPE>
         int   getArbDim(void) const { return arbDim;}
 
   bool isEmptyCoordArray(int staggerloc, int coord) {return (coordArrayList[staggerloc][coord]==ESMC_NULL_POINTER);}
+  bool isEmptyItemArray(int staggerloc, int item) {return (itemArrayList[staggerloc][item]==ESMC_NULL_POINTER);}
 
   static bool match(Grid *grid1, Grid *grid2, int *rc=NULL);
 

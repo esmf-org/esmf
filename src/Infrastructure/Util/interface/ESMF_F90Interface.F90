@@ -1,4 +1,4 @@
-! $Id: ESMF_F90Interface.F90,v 1.18 2012/01/06 20:18:19 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research, 

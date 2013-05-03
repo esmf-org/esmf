@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.34 2012/11/13 22:22:43 oehmke Exp $
+# $Id$
 
 # leave alone.
 ALL: build_here 
@@ -76,6 +76,7 @@ SOURCEC	  = \
            ESMCI_FindPnts.C \
            ESMCI_Phedra.C \
            ESMCI_ConserveInterp.C \
+           ESMCI_MeshRedist.C \
            ESMCI_MeshCXX.C
 
 SOURCEF	  = ESMF_SolverUtil_C.F90 \

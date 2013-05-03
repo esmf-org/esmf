@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrUTest.C,v 1.13 2012/09/20 21:19:48 w6ws Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,

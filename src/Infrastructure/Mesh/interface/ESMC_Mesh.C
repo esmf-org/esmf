@@ -1,4 +1,4 @@
-// $Id: ESMC_Mesh.C,v 1.29 2012/10/09 00:32:48 jcjacob Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -23,8 +23,7 @@
 // INCLUDES
 
 #include "ESMCI_ParEnv.h"
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMCI_LogErr.h"
 #include "ESMCI_MeshCXX.h"
 #include "ESMC_Mesh.h"
 #include "ESMCI_VM.h"
@@ -32,7 +31,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Mesh.C,v 1.29 2012/10/09 00:32:48 jcjacob Exp $";
+ static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 using namespace ESMCI;
@@ -53,8 +52,8 @@ ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc){
 
   // call into ESMCI method
   mesh.ptr = (void *)MeshCXX::create(parametricDim, spatialDim, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return mesh; // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return mesh; // bail out
 
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
@@ -84,12 +83,24 @@ ESMC_Mesh ESMC_MeshCreateFromFile(char *filename, int fileTypeFlag,
 
   // Call into ESMCI method
   mesh.ptr = (void *)MeshCXX::createFromFile(filename, fileTypeFlag, convert3D, convertToDual, addUserArea, meshname, addMask, varname, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
-    return mesh; // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return mesh; // bail out
 
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
   return mesh;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_MeshGetCoord()"
+double * ESMC_MeshGetCoord(ESMC_Mesh mesh_in, int *num_nodes, int *rc){
+  // typecast into ESMCI type
+  MeshCXX* mep = (MeshCXX*)(mesh_in.ptr);
+  double *nodeCoord;
+  nodeCoord = mep->getLocalCoords(num_nodes, rc);
+  return nodeCoord;
 }
 //-----------------------------------------------------------------------------
 
@@ -108,8 +119,8 @@ int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
   
   // call into ESMCI method
   localrc = mep->addNodes(nodeCount, nodeIds, nodeCoords, nodeOwners);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -135,8 +146,8 @@ int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
   // call into ESMCI method
   localrc = mep->addElements(elementCount, elementIds, elementTypes, 
                              elementConn, elementMask, elementArea);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -161,8 +172,8 @@ int ESMC_MeshCreateDistGrids(ESMC_Mesh mesh, int *nodeDistGrid,
   // call into ESMCI method
   localrc = mep->createDistGrids(nodeDistGrid, elemDistGrid, num_nodes, 
     num_elements);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -185,8 +196,8 @@ int ESMC_MeshDestroy(ESMC_Mesh *mesh){
 
   // Do destroy
   localrc= MeshCXX::destroy(&mep);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out    
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out    
 
   // Set to NULL
   mesh->ptr=NULL;
@@ -211,8 +222,8 @@ int ESMC_MeshFreeMemory(ESMC_Mesh mesh){
   
   // call into ESMCI method
   localrc = mep->freeMemory();
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -239,7 +250,8 @@ int ESMC_MeshGetLocalNodeCount(ESMC_Mesh mesh, int* num_nodes){
   // make sure Mesh has had it's nodes added
   if (!mep->isNodesAdded()) {
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-     "- Mesh must have had its nodes added to get local node count ", &localrc)) return localrc;
+      "- Mesh must have had its nodes added to get local node count ",
+      ESMC_CONTEXT, &localrc)) return localrc;
   }
   
   // call into ESMCI method
@@ -271,7 +283,8 @@ int ESMC_MeshGetOwnedNodeCount(ESMC_Mesh mesh, int* num_nodes){
   // make sure Mesh has been finished
   if (!mep->isMeshFinished()) {
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-     "- Mesh must be finished to get owned node count ", &localrc)) return localrc;
+      "- Mesh must be finished to get owned node count ", ESMC_CONTEXT,
+      &localrc)) return localrc;
   }
   
   // call into ESMCI method
@@ -302,7 +315,8 @@ int ESMC_MeshGetLocalElementCount(ESMC_Mesh mesh, int* num_elems){
   // make sure Mesh has had it's elements added
   if (!mep->isElemsAdded()) {
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-     "- Mesh must have had its elements added to get local element count ", &localrc)) return localrc;
+      "- Mesh must have had its elements added to get local element count ",
+      ESMC_CONTEXT, &localrc)) return localrc;
   }
 
   // call into ESMCI method
@@ -334,7 +348,8 @@ int ESMC_MeshGetOwnedElementCount(ESMC_Mesh mesh, int* num_elems){
   // make sure Mesh has had it's elements added
   if (!mep->isMeshFinished()) {
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-     "- Mesh must be finished to get owned element count ", &localrc)) return localrc;
+      "- Mesh must be finished to get owned element count ", ESMC_CONTEXT,
+      &localrc)) return localrc;
   }
 
   // call into ESMCI method
@@ -359,8 +374,8 @@ int ESMC_MeshVTKHeader(const char *fname, int *num_elem, int *num_node,
 
   // call into ESMCI method
   localrc = MeshVTKHeader(fname, num_elem, num_node, conn_size);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -382,8 +397,8 @@ int ESMC_MeshVTKBody(const char *fname, int *nodeId, double *nodeCoord,
   // call into ESMCI method
   localrc = MeshVTKBody(fname, nodeId, nodeCoord, nodeOwner, elemId, elemType,
     elemConn);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -406,8 +421,8 @@ int ESMC_MeshWrite(ESMC_Mesh mesh, const char* filename){
   
   // call into ESMCI method
   localrc = mep->meshWrite(filename);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-    return rc;  // bail out
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;  // bail out
 
   // return successfully
   rc = ESMF_SUCCESS;

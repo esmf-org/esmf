@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGetAllocBounds.F90,v 1.6 2012/01/06 20:16:40 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -72,7 +72,7 @@ module ESMF_FieldGetAllocBoundsMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldGetAllocBounds.F90,v 1.6 2012/01/06 20:16:40 svasquez Exp $'
+    '$Id$'
 
 !==============================================================================
 !

@@ -1,4 +1,4 @@
-!  $Id: ESMF_Field_C.F90,v 1.41 2012/08/20 22:46:53 theurich Exp $
+!  $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Field_C.F90,v 1.41 2012/08/20 22:46:53 theurich Exp $'
+!      '$Id$'
 !==============================================================================
 
 #undef  ESMF_METHOD

@@ -1,4 +1,4 @@
-// $Id: ESMCI_PIO_Handler.C,v 1.12 2012/10/03 18:29:14 gold2718 Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -18,8 +18,10 @@
 // declared in the companion file {\tt ESMCI\_PIO_Handler.h}
 //
 //-------------------------------------------------------------------------
-//
 #define ESMC_FILENAME "ESMCI_PIO_Handler.C"
+
+// include associated header file
+#include "ESMCI_PIO_Handler.h"
 
 // higher level, 3rd party or system includes here
 #include <stdio.h>
@@ -36,9 +38,6 @@
 #include "ESMC_VM.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_ArrayBundle.h"
-
-// include associated header file
-#include "ESMCI_PIO_Handler.h"
 
 // Define PIO NetCDF and Parallel NetCDF flags
 #ifdef ESMF_PNETCDF
@@ -60,9 +59,9 @@
   PIO_Handler::CheckPIOError((_err), ESMC_CONTEXT, (_str), &(_rc), true)
 
 //-------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMCI_PIO_Handler.C,v 1.12 2012/10/03 18:29:14 gold2718 Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id$";
 //-------------------------------------------------------------------------
 
 namespace ESMCI
@@ -217,12 +216,13 @@ void PIO_Handler::initialize (
   } catch (int catchrc) {
     // catch standard ESMF return code
     PRINTMSG("Exception: " << catchrc);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc);
     return;
   } catch (...) {
     PRINTMSG("Unknown exception");
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
-                                          "- Caught exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_CONTEXT, rc);
     return;
   }
 
@@ -272,12 +272,14 @@ int PIO_Handler::initializeVM (void
       int petCount;
       int peCount;
       currentVM = ESMC_VMGetCurrent(&rc);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc)) {
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
+        &rc)) {
         return rc;
       }
       rc = ESMC_VMGet(currentVM, &localPet, &petCount, &peCount,
                       &communicator, (int *)NULL, (int *)NULL);
-      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, &rc)) {
+      if (ESMC_LogDefault.MsgFoundError(rc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc)) {
         return rc;
       }
       // Figure out the inputs for the initialize call
@@ -309,12 +311,13 @@ int PIO_Handler::initializeVM (void
   } catch (int catchrc) {
     // catch standard ESMF return code
     PRINTMSG("Exception: " << catchrc);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, &rc);
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
     return rc;
   } catch (...) {
     PRINTMSG("Unknown exception");
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
-                                          "- Caught exception", &rc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -357,11 +360,11 @@ void PIO_Handler::finalize (
     PIO_IODescHandler::finalize();
   } catch(int lrc) {
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(lrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(lrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
-                                          "- Caught exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_CONTEXT, rc);
     return;
   }
   try {
@@ -392,11 +395,11 @@ void PIO_Handler::finalize (
     }
   } catch(int lrc) {
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(lrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(lrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
-                                          "- Caught exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_CONTEXT, rc);
     return;
   }
 
@@ -496,11 +499,11 @@ PIO_Handler::PIO_Handler(
   
   } catch (int lrc) {
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(lrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(lrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch (...) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_INTNRL_BAD,
-                                          "- Caught exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD, "- Caught exception",
+      ESMC_CONTEXT, rc);
     return;
   }
   
@@ -612,8 +615,8 @@ void PIO_Handler::arrayRead(
   if (statusOK) {
     iodesc = getIODesc(pioSystemDesc, arr_p, &ioDims, &nioDims,
                        &arrDims, &narrDims, &basepiotype, &localrc);
-    statusOK = !ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                                                      ESMCI_ERR_PASSTHRU, rc);
+    statusOK = !ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc);
   } else {
     ESMC_LogDefault.Write("file not open", ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
   }
@@ -797,8 +800,8 @@ void PIO_Handler::arrayWrite(
   if (statusOK) {
     iodesc = getIODesc(pioSystemDesc, arr_p, &ioDims, &nioDims,
                        &arrDims, &narrDims, &basepiotype, &localrc);
-    statusOK = !ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                                                      ESMCI_ERR_PASSTHRU, rc);
+    statusOK = !ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc);
   } else {
     ESMC_LogDefault.Write("file not open", ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
   }
@@ -1021,7 +1024,8 @@ void PIO_Handler::arrayWrite(
       localrc = pio_cpp_def_dim(pioFileDesc, axis,
                                 ioDims[i], &ncDims[i]);
       if (PIO_noerr != localrc) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          rc);
         statusOK = false;
         break;
       }
@@ -1033,7 +1037,8 @@ void PIO_Handler::arrayWrite(
       localrc = pio_cpp_def_dim(pioFileDesc, "time",
                                 PIO_unlimited, &ncDims[nioDims]);
       if (PIO_noerr != localrc) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+          rc);
         statusOK = false;
       }
       nioDims++;
@@ -1044,7 +1049,8 @@ void PIO_Handler::arrayWrite(
     localrc = pio_cpp_def_var_md(pioFileDesc, varname, basepiotype,
                                  ncDims, nioDims, vardesc);
     if (PIO_noerr != localrc) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
       statusOK = false;
     }
   }
@@ -1074,7 +1080,8 @@ void PIO_Handler::arrayWrite(
   if (statusOK && (getFormat() != ESMF_IOFMT_BIN)) {
     localrc = pio_cpp_enddef(pioFileDesc);
     if (PIO_noerr != localrc) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
       statusOK = false;
     }
   }
@@ -1503,8 +1510,8 @@ void PIO_Handler::close(
     int *arrdimsArg;
     localrc = PIO_IODescHandler::getDims(new_io_desc, &niodimArg, &iodimsArg,
                                          &narrdimArg, &arrdimsArg);
-    if (!ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,
-                                               ESMCI_ERR_PASSTHRU, rc)) {
+    if (!ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) {
       if (ioDims != (int **)NULL) {
         *ioDims = iodimsArg;
       }
@@ -1522,7 +1529,8 @@ void PIO_Handler::close(
   PRINTMSG("getDims complete, calling getIOType");
   if (basepiotype != (int *)NULL) {
     *basepiotype = PIO_IODescHandler::getIOType(new_io_desc, &localrc);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc);
   }
   if (rc != NULL) {
     *rc = localrc;
@@ -1718,26 +1726,27 @@ int PIO_IODescHandler::constructPioDecomp(
   PRINTPOS;
   // check the inputs
   if ((Array *)NULL == arr_p) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_PTR_NULL,
-                                          "- arr_p cannot be NULL", &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_PTR_NULL, "- arr_p cannot be NULL",
+      ESMC_CONTEXT, &localrc);
     return ESMF_RC_ARG_BAD;
   }
   if ((pio_io_desc_t *)NULL == newDecomp_p) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_PTR_NULL,
-                                          "- newDecomp_p cannot be NULL",
-                                          &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_PTR_NULL,
+      "- newDecomp_p cannot be NULL", ESMC_CONTEXT, &localrc);
     return ESMF_RC_ARG_BAD;
   }
 
   handle = new PIO_IODescHandler(iosys, arr_p);
   pioDofList = (int64_t *)NULL;
   currentVM = ESMC_VMGetCurrent(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &localrc)) {
     return false;
   }
   localrc = ESMC_VMGet(currentVM, &localPet, &petCount, &peCount,
                        &mpiCommunicator, (int *)NULL, (int *)NULL);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc)) {
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &localrc)) {
     return false;
   }
   localDeCount = arr_p->getDELayout()->getLocalDeCount();
@@ -1818,7 +1827,8 @@ int PIO_IODescHandler::constructPioDecomp(
       localrc = ESMF_RC_ARG_BAD;
     }
   } else {
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &localrc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &localrc);
     // Can't return, need to free pioDofList
   }
 
@@ -1926,9 +1936,8 @@ int PIO_IODescHandler::freePioDecomp(
 
   // check the inputs
   if ((pio_io_desc_t *)NULL == *decomp_p) {
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_RC_PTR_NULL,
-                                          "- newDecomp_p cannot be NULL",
-                                          &localrc);
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_PTR_NULL,
+      "- newDecomp_p cannot be NULL", ESMC_CONTEXT, &localrc);
     return ESMF_RC_ARG_BAD;
   }
 

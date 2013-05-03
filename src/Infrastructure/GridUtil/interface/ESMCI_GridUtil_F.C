@@ -1,4 +1,4 @@
-// $Id: ESMCI_GridUtil_F.C,v 1.41 2012/07/17 22:46:05 rokuingh Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -22,8 +22,7 @@
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_VM.h"
-#include "ESMCI_LogErr.h"                  // for LogErr
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMCI_LogErr.h"
 #include "ESMCI_Grid.h"
 #include "ESMCI_GridToMesh.h"
 #include "ESMC_Util.h"
@@ -136,7 +135,7 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays
   // Get VM
   int localrc;
   ESMCI::VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,ESMCI_ERR_PASSTHRU,NULL))
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
    throw localrc;  // bail out with exception
 
   // Get pet info
@@ -232,21 +231,21 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc, int *num_arrays
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
     } else {
-      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", rc);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
   }catch(int localrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc);
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
     return;
   } catch(...){
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", rc);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
 

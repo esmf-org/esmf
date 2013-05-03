@@ -1,4 +1,4 @@
-// $Id: ESMCI_WebServCAMOutputFile.h,v 1.5 2012/01/06 20:19:27 svasquez Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research,

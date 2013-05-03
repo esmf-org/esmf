@@ -1,4 +1,4 @@
-! $Id: ESMF_IOUGrid.F90,v 1.8 2012/04/16 22:31:01 peggyli Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -44,8 +44,6 @@
 !------------------------------------------------------------------------------
 ! !PRIVATE:
       private
-      integer, SAVE :: PetNo, PetCnt
-      type(ESMF_VM), SAVE:: vm
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -88,6 +86,8 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
     integer :: meshId, pos, meshDim
     character(len=80):: varname
 
+    integer, parameter :: nf90_noerror = 0
+
 #ifdef ESMF_NETCDF
     if (present(rc)) rc=ESMF_SUCCESS
     ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
@@ -104,13 +104,19 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
       rc)) return
 
     ! get dimension
-    ncStatus = nf90_get_att (ncid, meshId, "dimension", values=meshDim)
-    errmsg = "Attribute dimension in "//trim(filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
-      ESMF_SRCLINE, errmsg, &
-      rc)) return
-
+    ! Change to topology_dimension based on the update on 2/28/2013 at 
+    ! http://publicwiki.deltares.nl/display/NETCDF/Deltares+CF+proposal+for+Unstructured+Grid+data+model
+    ! for backward compatibility, use dimension if topology_dimension does not exist
+    
+    ncStatus = nf90_get_att (ncid, meshId, "topology_dimension", values=meshDim)
+    if (ncStatus /= nf90_noerror) then    
+       ncStatus = nf90_get_att (ncid, meshId, "dimension", values=meshDim)
+       errmsg = "Attribute topology_dimension or dimension in "//trim(filename)
+       if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+    endif
     ! get number of nodes
     if (present(nodeCount) .or. present(units)) then
       ncStatus = nf90_inquire_attribute(ncid, meshId, "node_coordinates", len=len)
@@ -281,12 +287,15 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
       rc)) return
 
     ! get dimension
-    ncStatus = nf90_get_att (ncid, meshId, "dimension", values=meshDim)
-    errmsg = "Attribute dimension in "//trim(filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
-      ESMF_SRCLINE, errmsg, &
-      rc)) return
+    ncStatus = nf90_get_att (ncid, meshId, "topology_dimension", values=meshDim)
+    if (ncStatus /= nf90_noerror) then    
+       ncStatus = nf90_get_att (ncid, meshId, "dimension", values=meshDim)
+       errmsg = "Attribute topology_dimension or dimension in "//trim(filename)
+       if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+    endif
 
     ! get number of nodes
     if (present(nodeXcoords) .or. present(nodeYcoords) .or. present(faceNodeConnX)) then
@@ -622,6 +631,10 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     logical, intent(in), optional  :: convertToDeg
     integer, intent(out), optional :: rc
 
+    
+    type(ESMF_VM) :: vm
+    integer PetNo, PetCnt
+
     integer :: ncid, meshId
     integer :: ncStatus
     integer :: meshDim
@@ -629,6 +642,7 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     character(len=24) :: attbuf
     integer :: len
     logical :: convertToDegLocal
+    integer, parameter :: nf90_noerror = 0
     
 #ifdef ESMF_NETCDF
     convertToDegLocal = .false.
@@ -657,11 +671,14 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
 
     ! Check if cf_role attribute is set
     ncStatus = nf90_get_att (ncid, meshId, "cf_role", values=attbuf)
-    errmsg = "Attribute cf_role in "//trim(filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
-      ESMF_SRCLINE, errmsg, &
-      rc)) return
+    if (ncStatus /= nf90_noerror) then
+      ncStatus = nf90_get_att (ncid, meshId, "standard_name", values=attbuf)
+      errmsg = "Attribute cf_role in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD,  &
+        ESMF_SRCLINE, errmsg, &
+        rc)) return
+    endif 
     if (attbuf(1:13) .ne. 'mesh_topology') then
       call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg="- cf_role attribute is not mesh_topology", & 
@@ -670,13 +687,16 @@ subroutine ESMF_GetMeshFromUGridFile (filename, meshname, nodeCoords, elmtConn, 
     endif
 
     ! Get mesh dimension
-    ncStatus = nf90_get_att (ncid, meshId, "dimension", values=meshDim)
-    errmsg = "Attribute dimension in "//trim(filename)
-    if (CDFCheckError (ncStatus, &
-      ESMF_METHOD,  &
-      ESMF_SRCLINE, errmsg, &
-      rc)) return
-    ! Currently, only support 2D mesh
+    ncStatus = nf90_get_att (ncid, meshId, "topology_dimension", values=meshDim)
+    if (ncStatus /= nf90_noerror) then    
+       ncStatus = nf90_get_att (ncid, meshId, "dimension", values=meshDim)
+       errmsg = "Attribute topology_dimension or dimension in "//trim(filename)
+       if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+    endif
+
     if (meshDim == 2) then
        call ESMF_GetMesh2DFromUGrid (filename, ncid, meshId, nodeCoords, elmtConn, &
                                 elmtNums, startElmt, convertToDegLocal, rc)
@@ -714,6 +734,9 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     logical, intent(in), optional  :: convertToDeg
     integer, intent(out), optional :: rc
 
+    type(ESMF_VM) :: vm
+    integer PetNo, PetCnt
+
     integer(ESMF_KIND_I4), allocatable :: elmtConnT(:,:)
     integer :: DimIds(2), VarId
     integer :: ncStatus
@@ -734,6 +757,13 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     real(ESMF_KIND_R8), allocatable:: nodeCoord1D(:)
 
 #ifdef ESMF_NETCDF
+
+    ! Get VM information
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
 
     ! Get node coordinates
     ncStatus = nf90_inquire_attribute(ncid, meshId, "node_coordinates", len=len)
@@ -939,6 +969,9 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     integer,           intent(out) :: startElmt
     integer, intent(out), optional :: rc
 
+    type(ESMF_VM) :: vm
+    integer :: PetNo, PetCnt
+
     integer(ESMF_KIND_I4), allocatable :: elmtConnT(:,:)
     integer :: DimIds(2), VarId
     integer :: ncStatus
@@ -959,6 +992,13 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     real(ESMF_KIND_R8), allocatable:: nodeCoord1D(:)
 
 #ifdef ESMF_NETCDF
+
+    ! Get VM information
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
 
     ! Get node coordinates
     ncStatus = nf90_inquire_attribute(ncid, meshId, "node_coordinates", len=len)
@@ -1091,7 +1131,7 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     ! eventually, we want to support prisms (or wedge as used in UGRID)
     errmsg = "Attribute "//elmtConnName(1:len)//" _FillValue in "//trim(filename)
     ncStatus = nf90_get_att (ncid, VarId, "_FillValue", values=localFillValue)
-    if (ncStatus /= nf90_noerror) localFillValue = -1
+    if (ncStatus .ne. nf90_noerror) localFillValue = -1
     ! Get start_index attribute to find out the index base (0 or 1)
     ncStatus = nf90_get_att (ncid, VarId, "start_index", values=indexBase)
     ! if not defined, default to 0-based

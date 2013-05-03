@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.26 2012/11/08 23:56:38 theurich Exp $
+# $Id$
 #
 # Linux.gfortran.default
 #

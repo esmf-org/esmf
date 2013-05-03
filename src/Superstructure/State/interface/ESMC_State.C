@@ -1,4 +1,4 @@
-// $Id: ESMC_State.C,v 1.35 2012/01/06 20:19:19 svasquez Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -22,15 +22,12 @@
 // in the companion file ESMC_State.h
 //
 //-----------------------------------------------------------------------------
-//
-
 // associated header file
 #include "ESMC_State.h"
 
 // include ESMF headers
 #include "ESMCI_Arg.h"
 #include "ESMCI_LogErr.h"
-#include "ESMF_LogMacros.inc"             // for LogErr
 #include "ESMCI_State.h"
 
 //-----------------------------------------------------------------------------
@@ -45,7 +42,7 @@
 
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_State.C,v 1.35 2012/01/06 20:19:19 svasquez Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 //
@@ -87,7 +84,8 @@ extern "C" {
 
     // call into ESMCI method 
     state.ptr = (void *)ESMCI::State::create(name, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc)){
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)){
       state.ptr = NULL; // invalidate
       return state; // bail out
     }
@@ -123,8 +121,8 @@ extern "C" {
     int rc = ESMC_RC_NOT_IMPL;              // final return code
 
     localrc = ((ESMCI::State*)state.ptr)->addArray((ESMCI::Array*)array.ptr);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -157,8 +155,8 @@ extern "C" {
     int rc = ESMC_RC_NOT_IMPL;              // final return code
 
     localrc = ((ESMCI::State*)state.ptr)->addField((ESMCI::Field*)(field.ptr));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -193,8 +191,8 @@ extern "C" {
 
     localrc = ((ESMCI::State*)state.ptr)->getArray(arrayName,
       (ESMCI::Array**)&(array->ptr));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -229,8 +227,8 @@ extern "C" {
 
     localrc = ((ESMCI::State*)state.ptr)->getField(fieldName,
       (ESMCI::Field**)&(field->ptr));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -266,8 +264,8 @@ extern "C" {
     int rc = ESMC_RC_NOT_IMPL;              // final return code
 
     localrc = ((ESMCI::State*)state.ptr)->print();
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return rc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -304,8 +302,8 @@ extern "C" {
     int rc = ESMC_RC_NOT_IMPL;              // final return code
     
     localrc = ESMCI::State::destroy((ESMCI::State*)(state->ptr));
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, &rc))
-      return localrc;
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return localrc;
 
     // invalidate pointer
     state->ptr = NULL;

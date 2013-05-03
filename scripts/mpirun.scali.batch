@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.scali.batch,v 1.5 2009/01/08 22:48:17 svasquez Exp $
+# $Id$
 ################################################################################
 # This script abides to the ESMF script rules for executing the bundled test 
 # and example applications.

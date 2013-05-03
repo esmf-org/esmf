@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.48 2012/08/07 22:32:28 w6ws Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

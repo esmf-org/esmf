@@ -1,4 +1,4 @@
-! $Id: ESMF_AttReadCustCplCompEx.F90,v 1.15 2012/02/16 22:20:50 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,

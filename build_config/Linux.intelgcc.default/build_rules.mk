@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.21 2012/04/05 04:31:38 theurich Exp $
+# $Id$
 #
 # Linux.intelgcc.default
 #

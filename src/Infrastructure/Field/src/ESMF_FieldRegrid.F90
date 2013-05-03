@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegrid.F90,v 1.120 2012/11/21 00:17:58 oehmke Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@ module ESMF_FieldRegridMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
-    '$Id: ESMF_FieldRegrid.F90,v 1.120 2012/11/21 00:17:58 oehmke Exp $'
+    '$Id$'
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -815,6 +815,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 call ESMF_MeshTurnOnCellMask(srcMesh, maskValues=srcMaskValues, rc=localrc);
                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
+             else
+                call ESMF_MeshTurnOnNodeMask(srcMesh, maskValues=srcMaskValues, rc=localrc);
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
              endif
           endif
        endif
@@ -895,6 +899,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (present(dstMaskValues)) then
              if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
                 call ESMF_MeshTurnOnCellMask(dstMesh, maskValues=dstMaskValues, rc=localrc);
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+             else
+                call ESMF_MeshTurnOnNodeMask(dstMesh, maskValues=dstMaskValues, rc=localrc);
                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
              endif
@@ -1058,6 +1066,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  call ESMF_MeshTurnOffCellMask(srcMesh, rc=localrc);
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc)) return
+              else
+                 call ESMF_MeshTurnOffNodeMask(srcMesh, rc=localrc);
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
               endif
            endif
         endif
@@ -1073,6 +1085,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            if (present(dstMaskValues)) then
               if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE)) then
                  call ESMF_MeshTurnOffCellMask(dstMesh, rc=localrc);
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+              else
+                 call ESMF_MeshTurnOffNodeMask(dstMesh, rc=localrc);
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc)) return
               endif

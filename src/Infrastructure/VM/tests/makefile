@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.42 2012/03/14 17:08:41 w6ws Exp $ 
+# $Id$ 
 
 ifeq ($(ESMF_TESTFORCEOPENMP),ON)
 ifeq ($(ESMF_OPENMP),OFF)

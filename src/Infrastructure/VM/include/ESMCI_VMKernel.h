@@ -1,4 +1,4 @@
-// $Id: ESMCI_VMKernel.h,v 1.19 2012/08/18 04:03:25 theurich Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 

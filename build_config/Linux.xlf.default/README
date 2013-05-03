@@ -1,4 +1,4 @@
-Settings for a Blue Gene/L system, which runs Linux, using the IBM xlf Fortran
+Settings for IBM Blue Gene/Q system, which runs Linux, using the IBM xlf Fortran
 and C++ compilers.
 
 Requires the following environment settings:

@@ -1,4 +1,4 @@
-/* $Id: ESMC_WebServCompSvrClientUTest.C,v 1.7 2012/05/14 20:46:31 svasquez Exp $ */
+/* $Id$ */
 
 #include <stdio.h>
 #include <stdlib.h>

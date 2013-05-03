@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.50 2012/05/16 22:53:02 svasquez Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.50 2012/05/16 22:53:02 svasquez Exp $'
+      '$Id$'
 !------------------------------------------------------------------------------
 
       integer, parameter :: CONVERT_TO_TIME = 1, CONVERT_TO_DATE = 2, &

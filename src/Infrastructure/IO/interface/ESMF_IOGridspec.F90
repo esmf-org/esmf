@@ -1,4 +1,4 @@
-! $Id: ESMF_IOGridspec.F90,v 1.6 2012/10/02 05:29:42 peggyli Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2011, University Corporation for Atmospheric Research,

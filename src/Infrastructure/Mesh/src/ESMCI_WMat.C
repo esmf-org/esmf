@@ -1,4 +1,4 @@
-// $Id: ESMCI_WMat.C,v 1.19 2012/11/13 22:22:43 oehmke Exp $
+// $Id$
 //
 // Earth System Modeling Framework
 // Copyright 2002-2013, University Corporation for Atmospheric Research, 
@@ -19,7 +19,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMCI_WMat.C,v 1.19 2012/11/13 22:22:43 oehmke Exp $";
+static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -83,6 +83,125 @@ void WMat::InsertRow(const Entry &row, const std::vector<Entry> &cols) {
 // Insert row and associated columns into matrix complain if column doesn't 
 // exist then add it, if it exists with a different value then complain
 // ASSUMES cols is in sorted order
+void WMat::InsertRowMergeSingle(const Entry &row, const Entry &col) {
+
+  // Create vector for col
+  std::vector<Entry> col_vec;
+  col_vec.resize(1,col);
+  
+  std::pair<WeightMap::iterator, bool> wi =
+    weights.insert(std::make_pair(row, col_vec));
+    
+  if (wi.second == false) {
+    // Get old columns associated with original row 
+    std::vector<Entry> &old_cols = wi.first->second;
+
+    // Get location where col should be
+    std::vector<Entry>::iterator lb = 
+      std::lower_bound(old_cols.begin(), old_cols.end(), col);
+        
+      // If we found an entry, see if it's the same
+    if (lb != old_cols.end()) {
+        // Is this the same? 
+      if (*lb == col) {
+        // If it has a different val then complain, otherwise ignore it
+	if (std::abs(lb->value-col.value) < 1e-5) {
+          return;
+        } else {
+          //printf("ERROR dst_id=%d tmp_cols: id=%d idx=%d src_id=%d value=%f old_cols: id=%d idx=%d src_id=%d value=%f \n", row.id,
+          //     tmp_cols[i].id,tmp_cols[i].idx,tmp_cols[i].src_id,tmp_cols[i].value,old_cols[j].id,old_cols[j].idx,old_cols[j].src_id,old_cols[j].value);
+          Throw() << "Shouldn't have same entries with different value!";
+        } 
+      }
+    }
+
+    // Insert col
+    old_cols.insert(lb, col);
+
+  } // else {
+    //  Don't need to do anything here, because it's only a single entry
+    //  }
+}
+
+
+
+#if 0
+// Insert row and associated columns into matrix complain if column doesn't 
+// exist then add it, if it exists with a different value then complain
+// ASSUMES cols is in sorted order
+void WMat::InsertRowMerge(const Entry &row, const std::vector<Entry> &cols) {
+
+  std::pair<WeightMap::iterator, bool> wi =
+    weights.insert(std::make_pair(row, cols));
+    
+  if (wi.second == false) {
+
+    // vector to put cols already not in this row
+    std::vector<Entry> uniq_cols;
+    uniq_cols.reserve(cols.size());
+
+    // Get old columns associated with original row 
+    std::vector<Entry> &old_cols = wi.first->second;
+
+    // interator to beginning of old_cols
+    std::vector<Entry>::iterator beg = old_cols.begin();
+
+    // Only put in entries which don't already exist in old_cols
+    for (int i=0; i< cols.size(); i++) {
+
+      // Get location where col[i] should be
+      std::vector<Entry>::iterator lb = 
+        std::lower_bound(beg, old_cols.end(), cols[i]);
+      
+      // If we found an entry, see if it's the same
+      if (lb != old_cols.end()) {
+        // Is this the same? 
+        if (*lb == cols[i]) {
+          // If it has a different val then complain, otherwise ignore it
+          if (std::abs(lb->value-cols[i].value) < 1e-5) {
+            continue;
+          } else {
+            //printf("ERROR dst_id=%d tmp_cols: id=%d idx=%d src_id=%d value=%f old_cols: id=%d idx=%d src_id=%d value=%f \n", row.id,
+            //     tmp_cols[i].id,tmp_cols[i].idx,tmp_cols[i].src_id,tmp_cols[i].value,old_cols[j].id,old_cols[j].idx,old_cols[j].src_id,old_cols[j].value);
+            Throw() << "Shouldn't have same entries with different value!";
+          } 
+        }
+      }
+      
+      // If it's not the same then put it into the new list
+      uniq_cols.push_back(cols[i]);
+
+      // Since cols is sorted start from the new location
+      beg=lb;
+    }
+
+    // If nothing to be added then exit
+    if (uniq_cols.empty()) return;
+   
+    // temp to put merged results into
+    std::vector<Entry> tmp_cols;
+    tmp_cols.resize(uniq_cols.size()+old_cols.size());
+
+    // Merge cols together
+    std::merge(old_cols.begin(),old_cols.end(), 
+	  uniq_cols.begin(),uniq_cols.end(),
+	  tmp_cols.begin());
+
+    // Put tmp_cols memory into old_cols
+   old_cols.swap(tmp_cols);
+
+  } else {
+    // Sort the column entries (invariant used elsewhere).
+    // DON'T NEED TO SORT COL ASSUMED TO BE SORTED
+    // std::sort(wi.first->second.begin(), wi.first->second.end());
+    // compress storage
+    std::vector<Entry>(wi.first->second).swap(wi.first->second);
+  }
+}
+#else
+// Insert row and associated columns into matrix complain if column doesn't 
+// exist then add it, if it exists with a different value then complain
+// ASSUMES cols is in sorted order
 void WMat::InsertRowMerge(const Entry &row, const std::vector<Entry> &cols) {
 
   std::pair<WeightMap::iterator, bool> wi =
@@ -138,12 +257,12 @@ void WMat::InsertRowMerge(const Entry &row, const std::vector<Entry> &cols) {
 
   } else {
     // Sort the column entries (invariant used elsewhere).
-    std::sort(wi.first->second.begin(), wi.first->second.end());
+     std::sort(wi.first->second.begin(), wi.first->second.end());
     // compress storage
     std::vector<Entry>(wi.first->second).swap(wi.first->second);
   }
 }
-
+#endif
 
 
 void WMat::Print(std::ostream &os) {
