@@ -59,14 +59,14 @@
       type(ESMF_DistGrid)  :: elem_dg
       type(ESMF_Mesh)      :: elem_mesh
       type(ESMF_Field)     :: elem_field
-      integer              :: i, lpet, tlb(1), tub(1), tc(1)
+      integer              :: i, lpet, tlb(1), tub(1), tc(1), localrc
       integer, allocatable :: arbseqlist(:)
       logical:: fieldBool
 
 
 
 #ifdef ESMF_TESTEXHAUSTIVE
-      integer :: cu(2), cl(2), cc(2), localrc
+      integer :: cu(2), cl(2), cc(2)
       integer :: ldecount
       type(ESMF_Grid) :: grid3
       type(ESMF_ArraySpec)            :: arrayspec, arrayspec1
@@ -914,7 +914,7 @@
       !NEX_UTest_Multi_Proc_Only 
       call ESMF_MeshGetFieldBounds(elem_mesh, &
         totalLBound=tlb, totalUBound=tub, &
-        totalCount=tc, rc=localrc)
+        totalCount=tc, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Get Field Bounds based on elem_mesh"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
