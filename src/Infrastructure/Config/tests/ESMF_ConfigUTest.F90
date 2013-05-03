@@ -105,7 +105,7 @@ module config_subrs
         !EX_UTest
         ! Test ESMF_ConfigAssignment(=)(Config,Config)
         write(failMsg, *) "Did not return ESMF_SUCCESS"
-        write(name, *) "Create Config Test"
+        write(name, *) "Config assignment Test"
         cf_alias = cf
         rc = merge (ESMF_SUCCESS, ESMF_FAILURE, associated (cf%cptr, cf_alias%cptr))
 	call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
