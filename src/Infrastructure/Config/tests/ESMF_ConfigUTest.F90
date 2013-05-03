@@ -42,6 +42,7 @@ module config_subrs
         public
 
       type (ESMF_Config), save :: cf, cf1
+      type (ESMF_Config), save :: cf_alias
       
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
@@ -101,6 +102,47 @@ module config_subrs
         endif
 
         !------------------------------------------------------------------------
+        !EX_UTest
+        ! Test ESMF_ConfigAssignment(=)(Config,Config)
+        write(failMsg, *) "Did not return ESMF_SUCCESS"
+        write(name, *) "Config assignment Test"
+        cf_alias = cf
+        rc = merge (ESMF_SUCCESS, ESMF_FAILURE, associated (cf%cptr, cf_alias%cptr))
+	call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+       
+	!------------------------------------------------------------------------
+	!EX_UTest
+	! Test ESMF_ConfigOperator(==)(Config,Config) 
+	write(failMsg, *) "Did not return ESMF_SUCCESS"
+	write(name, *) "Config equality with same Config Test"
+	rc = merge (ESMF_SUCCESS, ESMF_FAILURE, cf == cf_alias)
+	call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+	!------------------------------------------------------------------------
+	!EX_UTest
+	! Test ESMF_ConfigOperator(==)(Config,Config) 
+	write(failMsg, *) "Did not return ESMF_SUCCESS"
+	write(name, *) "Config equality with different Config Test"
+	rc = merge (ESMF_SUCCESS, ESMF_FAILURE, .not. (cf == cf1))
+	call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+	!------------------------------------------------------------------------
+	!EX_UTest
+	! Test ESMF_ConfigOperator(/=)(Config,Config) 
+	write(failMsg, *) "Did not return ESMF_SUCCESS"
+	write(name, *) "Config inequality with same Config Test"
+	rc = merge (ESMF_SUCCESS, ESMF_FAILURE, .not. (cf /= cf_alias))
+	call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+	!------------------------------------------------------------------------
+	!EX_UTest
+	! Test ESMF_ConfigOperator(/=)(Config,Config) 
+	write(failMsg, *) "Did not return ESMF_SUCCESS"
+	write(name, *) "Config inequality with different Config Test"
+	rc = merge (ESMF_SUCCESS, ESMF_FAILURE, cf /= cf1)
+	call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+	!------------------------------------------------------------------------
         !EX_UTest
         ! Config Load File Test
         write(failMsg, *) "Did not return ESMF_RC_DUP_NAME"

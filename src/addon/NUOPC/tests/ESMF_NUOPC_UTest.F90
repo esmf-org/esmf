@@ -290,6 +290,14 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "NUOPC_FieldIsAtTime() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  flag = NUOPC_FieldIsAtTime(field, startTime, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "NUOPC_FillCplList() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   nullify(cplList)
@@ -387,6 +395,14 @@ program ESMF_NUOPC_UTest
   write(name, *) "NUOPC_StateIsFieldConnected() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   flag = NUOPC_StateIsFieldConnected(stateA, "sst", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_StateIsUpdated() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  flag = NUOPC_StateIsUpdated(stateA, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
