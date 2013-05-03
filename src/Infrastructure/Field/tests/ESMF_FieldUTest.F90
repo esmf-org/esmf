@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.170 2012/05/18 15:26:43 feiliu Exp $
+! $Id$
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2013, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.170 2012/05/18 15:26:43 feiliu Exp $'
+      '$Id$'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -59,7 +59,7 @@
       type(ESMF_DistGrid)  :: elem_dg
       type(ESMF_Mesh)      :: elem_mesh
       type(ESMF_Field)     :: elem_field
-      integer              :: i, lpet
+      integer              :: i, lpet, tlb(1), tub(1), tc(1)
       integer, allocatable :: arbseqlist(:)
       logical:: fieldBool
 
@@ -177,6 +177,12 @@
       
       ! Create locstream
       locstream=ESMF_LocStreamCreate(localCount=10, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE   
+
+      ! Test LocStreamGetFieldBounds
+      call ESMF_LocStreamGetFieldBounds(locstream, &
+        totalLBound=tlb, totalUBound=tub, &
+        totalCount =tc, rc=localrc)
       if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE   
 
       ! Create Field
@@ -902,6 +908,15 @@
       elem_mesh = ESMF_MeshCreate(elem_dg, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Create a mesh on the 1D elemental distgrid"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only 
+      call ESMF_MeshGetFieldBounds(elem_mesh, &
+        totalLBound=tlb, totalUBound=tub, &
+        totalCount=tc, rc=localrc)
+      write(failMsg, *) ""
+      write(name, *) "Get Field Bounds based on elem_mesh"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
