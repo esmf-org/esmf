@@ -192,7 +192,7 @@ print *, "bname = ", bname
     !EX_UTest
 !   !  Test Set a Science Component name
     cname = "CAM"
-    call ESMF_CplCompSet(cpl, name=cname, rc=rc)
+    call ESMF_SciCompSet(comp1, name=cname, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Setting  a Science Component name Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
