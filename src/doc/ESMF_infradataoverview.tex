@@ -227,6 +227,12 @@ ESMF\_RegridWeightGen & Application & Grid files & yes  & no & Sec.~\ref{sec:ESM
 
 \smallskip
 
+{\bf Restrictions:}
+ \begin{itemize}
+ \item Cells which contain enough identical corners to collapse to a line or point are currently ignored
+ \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
+ \end{itemize}
+
  To use the bilinear method the user may created their Fields on any stagger location for Grids or the node location ({\tt ESMF\_MESHLOC\_NODE}) for Meshes.
  For Grids, the stagger location upon which the Field was built must contain coordinates. 
 
@@ -259,6 +265,12 @@ ESMF\_RegridWeightGen & Application & Grid files & yes  & no & Sec.~\ref{sec:ESM
 
 \smallskip
 
+{\bf Restrictions:}
+ \begin{itemize}
+ \item Cells which contain enough identical corners to collapse to a line or point are currently ignored
+ \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
+ \end{itemize}
+
  To use the patch method the user may created their Fields on any stagger location for Grids or the node location ({\tt ESMF\_MESHLOC\_NODE}) for Meshes.
  For Grids, the stagger location upon which the Field was built must contain coordinates. 
 
@@ -284,6 +296,11 @@ In nearest source to destination interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 
 \smallskip
 
+\textbf{Restrictions:}\\*
+\textit{NONE}
+
+\smallskip
+
  To use the nearest source to destination method the user may created their Fields on any stagger location for Grids or the node location ({\tt ESMF\_MESHLOC\_NODE}) for Meshes.
  For Grids, the stagger location upon which the Field was built must contain coordinates. 
 
@@ -306,6 +323,11 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
  \item Structured Grids composed of a single logically rectangular patch
  \item Unstructured Meshes composed of hexahedrons (e.g. cubes) and tetrahedras
  \end{itemize}
+
+\smallskip
+
+\textbf{Restrictions:}\\*
+\textit{NONE}
 
 \smallskip
 
@@ -354,22 +376,24 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
  true interpolated values for cells which are only partially covered by the source grid. The fraction also needs to be 
  included when computing the total source and destination integrals. 
 
- The following pseudo-code shows how to compute the total source integral ({\tt src\_total}) given the source field values
- ({\tt src\_field}), the source area ({\tt src\_area}) from the {\tt ESMF\_FieldRegridGetArea()} call, and
- the source fraction ({\tt src\_frac}) from the {\tt ESMF\_FieldRegridStore()} call:
+ When a destination field extends outside the unmasked source field, then the values of the cells which extend partway outside 
+ the unmasked source field are decreased by the fraction they extend outside. To correct these values, the destination field ({\tt dst\_field}) resulting
+ from the {\tt ESMF\_FieldRegrid()} call can be divided by the destination fraction {\tt dst\_frac} from
+ the {\tt ESMF\_FieldRegridStore()} call. The following pseudocode demonstrates  how to do this:
 
 \begin{verbatim}
- src_total=0.0
- for each source element i
-    src_total=src_total+src_field(i)*src_area(i)*src_frac(i)
+
+ for each destination element i
+    if (dst_frac(i) not equal to 0.0) then
+       dst_field(i)=dst_field(i)/dst_frac(i)
+    end if
  end for
 \end{verbatim}
 
  The following pseudo-code shows how to compute the total destination integral ({\tt dst\_total}) given the
  destination field values ({\tt dst\_field}) resulting
  from the {\tt ESMF\_FieldRegrid()} call, the destination area ({\tt dst\_area}) from the {\tt ESMF\_FieldRegridGetArea()}
- call,
- and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldRegridStore()} call. It also 
+ call,  and the destination fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldRegridStore()} call. As shown in the previous paragraph, it also 
  shows how to adjust the destination field ({\tt dst\_field}) resulting from the {\tt ESMF\_FieldRegrid()} call by the
  fraction ({\tt dst\_frac}) from the {\tt ESMF\_FieldRegridStore()} call: 
 
@@ -383,6 +407,18 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
         If mass computed here after dst_field adjust, would need to be:
         dst_total=dst_total+dst_field(i)*dst_area(i)*dst_frac(i) 
     end if
+ end for
+\end{verbatim}
+
+
+ The following pseudo-code shows how to compute the total source integral ({\tt src\_total}) given the source field values
+ ({\tt src\_field}), the source area ({\tt src\_area}) from the {\tt ESMF\_FieldRegridGetArea()} call, and
+ the source fraction ({\tt src\_frac}) from the {\tt ESMF\_FieldRegridStore()} call:
+
+\begin{verbatim}
+ src_total=0.0
+ for each source element i
+    src_total=src_total+src_field(i)*src_area(i)*src_frac(i)
  end for
 \end{verbatim}
 
@@ -404,12 +440,14 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
 
 \smallskip
 
-Further restrictions:
+{\bf Restrictions:}
  \begin{itemize}
  \item Concave cells are currently not supported
- \item Cells which contain enough identical corners to collapse to a line or point are not supported
+ \item Cells which contain enough identical corners to collapse to a line or point are optionally (via a flag) either ignored or return an error
  \item On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported 
  \end{itemize}
+
+\smallskip
 
  To use the conservative method the user must have created their Fields on the center 
  stagger location ({\tt ESMF\_STAGGERLOC\_CENTER} in 2D or {\tt ESMF\_STAGGERLOC\_CENTER\_VCENTER} in 3D) for Grids  or the element location ({\tt ESMF\_MESHLOC\_ELEMENT}) for Meshes.
@@ -421,7 +459,7 @@ Further restrictions:
  unusable values. Masking can also be used on a destination grid to indicate that the portion of the field built on that part of the Grid should not receive 
  regridded data. This is useful, for example, when part of the grid isn't being used (e.g. the land portion of an ocean grid).
 
- ESMF currently supports masking for Fields built on structured Grids and element masking for Fields built on unstructured Meshes. The user may mask out points 
+ ESMF currently supports masking for Fields built on structured Grids and masking for Fields built on unstructured Meshes. The user may mask out points 
  in the source Field or destination Field or both. To do masking the user sets mask information in the Grid (see~\ref{sec:usage:items}) or 
  Mesh (see~\ref{sec:mesh:mask}) upon which the Fields passed into the 
  {\tt ESMF\_FieldRegridStore()} call are built. The `srcMaskValues' and `dstMaskValues' arguments to that call can then be used to specify which values in that mask 
