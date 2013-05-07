@@ -262,7 +262,7 @@ contains
 !
 !
 ! !DESCRIPTION:
-!   Assign {\tt log1} as an alias to the same {\tt ESMF Log} object in memory
+!   Assign {\tt log1} as an alias to the same {\tt ESMF\_Log} object in memory
 !   as {\tt log2}. If {\tt log2} is invalid, then {\tt log1} will be
 !   equally invalid after the assignment.
 !
