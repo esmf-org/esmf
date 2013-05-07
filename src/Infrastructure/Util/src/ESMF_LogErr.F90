@@ -262,9 +262,9 @@ contains
 !
 !
 ! !DESCRIPTION:
-!   Assign log1 as an alias to the same ESMF Log object in memory
-!   as log2. If log2 is invalid, then log1 will be equally invalid after
-!   the assignment.
+!   Assign {\tt log1} as an alias to the same {\tt ESMF Log} object in memory
+!   as {\tt log2}. If {\tt log2} is invalid, then {\tt log1} will be
+!   equally invalid after the assignment.
 !
 !   The arguments are:
 !   \begin{description}
@@ -301,7 +301,7 @@ contains
 ! !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_Log} class.
 !     Compare two logs for equality; return {\tt .true.} if equal,
-!     {\tt .false.} otherwise. Comparison is based on whether the logs
+!     {\tt .false.} otherwise. Comparison is based on whether the objects
 !     are distinct, as with two newly created logs, or are simply aliases
 !     to the same log as would be the case when assignment was involved.
 !
@@ -324,7 +324,7 @@ contains
 !
 ! !INTERFACE:
 !     interface operator(/=)
-!     if (log1 /= alog2) then ... endif
+!     if (log1 /= log2) then ... endif
 !                  OR
 !     result = (log1 /= log2)
 !
@@ -339,7 +339,7 @@ contains
 ! !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_Log} class.
 !     Compare two logs for inequality; return {\tt .true.} if equal,
-!     {\tt .false.} otherwise.  Comparison is based on whether the logs
+!     {\tt .false.} otherwise.  Comparison is based on whether the objects
 !     are distinct, as with two newly created logs, or are simply aliases
 !     to the same log as would be the case when assignment was involved.
 !
