@@ -234,9 +234,9 @@
 !
 !
 ! !DESCRIPTION:
-!   Assign config1 as an alias to the same ESMF Config object in memory
-!   as config2. If config2 is invalid, then config1 will be equally invalid after
-!   the assignment.
+!   Assign {\tt config1} as an alias to the same {\tt ESMF\_Config} object in memory
+!   as {\tt config2}. If {\tt config2} is invalid, then {\tt config1} will be
+!   equally invalid after the assignment.
 !
 !   The arguments are:
 !   \begin{description}
@@ -273,7 +273,7 @@
 ! !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_Config} class.
 !     Compare two configs for equality; return {\tt .true.} if equal,
-!     {\tt .false.} otherwise. Comparison is based on whether the Config objects
+!     {\tt .false.} otherwise. Comparison is based on whether the objects
 !     are distinct, as with two newly created objects, or are simply aliases
 !     to the same object as would be the case when assignment was involved.
 !
