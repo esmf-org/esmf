@@ -157,25 +157,28 @@ the user expects cell edges as straight lines in latitude longitude space, they 
 user should also avoid using cells which contain one edge that runs half way or more around the earth, because the regrid weight calculation assumes the
 edge follows the shorter great circle path. Also, there isn't a unique great circle edge defined between points on the exact opposite side of the earth from one another (antipodal points).
 However, the user can work around both of these problem by breaking the long edge into two smaller edges by inserting an extra node, or by breaking the large target grid cells into two or more smaller grid cells.
-This allows the application to resolve the ambiguity in edge direction.
+This allows the application to resolve the ambiguity in edge direction. One other unexpected case which might cause problems is a grid 
+containing a concave cell with exactly four sides, this will cause the application to return an error. The application will work for a
+grid containing concave cells as long as all of them have more than four sides. 
 
  It is important to note that the current implementation of conservative regridding doesn't normalize the interpolation weights by the destination fraction.
 This means that for a destination grid which only partially overlaps the source grid the destination field which is output from the regrid operation should
 be divided by the corresponding destination fraction to yield the true interpolated values for cells which are only partially covered by the source grid.
 The fraction also needs to be included when computing the total source and destination integrals.
 
- The following pseudo-code shows how to compute the total source integral ({\tt src\_total}) given the source field values ({\tt src\_field}), the source area ({\tt src\_area}) called {\tt area\_a} in the weight file, and the source fraction ({\tt src\_frac}) called {\tt frac\_a} in the weight file:
+The following pseudo-code shows how to adjust a destination field ({\tt dst\_field}) by the destination fraction ({\tt dst\_frac}) called {\tt frac\_b} in the weight file:
 
 \begin{verbatim}
- src_total=0.0
- for each source element i
-    src_total=src_total+src_field(i)*src_area(i)*src_frac(i)
+ for each destination element i
+    if (dst_frac(i) not equal to 0.0) then
+       dst_field(i)=dst_field(i)/dst_frac(i)
+    end if
  end for
 \end{verbatim}
 
 The following pseudo-code shows how to compute the total destination integral ({\tt dst\_total}) given the destination field values ({\tt dst\_field}) resulting
 from the sparse matrix multiply of the weights in the weight file by the source field, the destination area ({\tt dst\_area}) called {\tt area\_b} in the
-weight file, and the destination fraction ({\tt dst\_frac}) called {\tt frac\_b} in the weight file. It also
+weight file, and the destination fraction ({\tt dst\_frac}) called {\tt frac\_b} in the weight file. As in the previous paragraph, it also
 shows how to adjust the destination field ({\tt dst\_field}) resulting from the sparse matrix multiply by the fraction
 ({\tt dst\_frac}) called {\tt frac\_b} in the weight file:
 
@@ -188,6 +191,15 @@ shows how to adjust the destination field ({\tt dst\_field}) resulting from the 
        ! If mass computed here after dst_field adjust, would need to be:
        ! dst_total=dst_total+dst_field(i)*dst_area(i)*dst_frac(i)
     end if
+ end for
+\end{verbatim}
+
+ The following pseudo-code shows how to compute the total source integral ({\tt src\_total}) given the source field values ({\tt src\_field}), the source area ({\tt src\_area}) called {\tt area\_a} in the weight file, and the source fraction ({\tt src\_frac}) called {\tt frac\_a} in the weight file:
+
+\begin{verbatim}
+ src_total=0.0
+ for each source element i
+    src_total=src_total+src_field(i)*src_area(i)*src_frac(i)
  end for
 \end{verbatim}
 
@@ -970,6 +982,35 @@ grid file name.
 The attributes {\tt domain\_b} and {\tt grid\_file\_dst} both indicate the destination grid file name.
 {\tt CVS\_revision} indicates the version of ESMF containing the application which was used to generate the
 weight file.
+
+The following code shows how to apply the weights in the weight file to interpolate a source field (src\_field) defined 
+over the source grid to a destination field (dst\_field) defined over the destination grid. The variables {\tt n\_s}, {\tt n\_b}, 
+{\tt row}, {\tt col}, and {\tt S} are from the weight file. 
+
+\begin{verbatim}
+ ! Initialize destination field to 0.0
+ do i=1, n_b
+   dst_field(i)=0.0
+ enddo
+
+ ! Apply weights
+ do i=1, n_s
+   dst_field(row(i))=dst_field(row(i))+S(i)*src_field(col(i))
+ enddo
+\end{verbatim}
+
+
+If the first-order conservative interpolation method was specified ("-m conserve") then the destination field may need to be adjusted by the destination fraction ({\tt frac\_b}) if the destination grid extends outside the unmasked source grid. (If it isn't known if the destination extends outside the source, then it doesn't hurt to apply the destination fraction in either case. If it doesn't extend outside, then the fraction will be 1.0 everywhere anyway.) The following code shows how to adjust an already interpolated destination field (dst\_field) by the destination fraction. The variables {\tt n\_b}, and {\tt frac\_b} are from the weight file:
+
+\begin{verbatim}
+ ! Adjust destination field by fraction
+ do i=1, n_b
+   if (frac_b(i) .ne. 0.0) then
+      dst_field(i)=dst_field(i)/frac_b(i)
+   endif
+ enddo
+\end{verbatim}
+
 
 \subsection{ESMF\_RegridWeightGenCheck}\label{sec:regridweightgencheck}
 

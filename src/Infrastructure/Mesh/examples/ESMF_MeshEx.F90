@@ -270,17 +270,12 @@ program ESMF_MeshEx
   deallocate(elemConn)
 
 
-  ! Set arrayspec for example field create
-  ! Use a dimension of 1, because Mesh data is linearized 
-  ! into a one dimensional array. 
-  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-
   ! At this point the mesh is ready to use. For example, as is 
   ! illustrated here, to have a field created on it. Note that 
   ! the Field only contains data for nodes owned by the current PET.
   ! Please see Section "Create a Field from a Mesh" under Field
   ! for more information on creating a Field on a Mesh. 
-  field = ESMF_FieldCreate(mesh, arrayspec,  rc=localrc)
+  field = ESMF_FieldCreate(mesh, ESMF_TYPEKIND_R8,  rc=localrc)
 
 !EOC
 
@@ -405,17 +400,12 @@ program ESMF_MeshEx
   deallocate(elemConn)
 
 
-  ! Set arrayspec for example field create
-  ! Use a dimension of 1, because Mesh data is linearized 
-  ! into a one dimensional array. 
-  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-
   ! At this point the mesh is ready to use. For example, as is 
   ! illustrated here, to have a field created on it. Note that 
   ! the Field only contains data for nodes owned by the current PET.
   ! Please see Section "Create a Field from a Mesh" under Field
   ! for more information on creating a Field on a Mesh. 
-  field = ESMF_FieldCreate(mesh, arrayspec,  rc=localrc)
+  field = ESMF_FieldCreate(mesh, ESMF_TYPEKIND_R8,  rc=localrc)
 
 !EOC
 
@@ -667,17 +657,12 @@ program ESMF_MeshEx
   deallocate(elemConn)
 
 
-  ! Set arrayspec for example field create
-  ! Use a dimension of 1, because Mesh data is linearized 
-  ! into a one dimensional array. 
-  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-
   ! At this point the mesh is ready to use. For example, as is 
   ! illustrated here, to have a field created on it. Note that 
   ! the Field only contains data for nodes owned by the current PET.
   ! Please see Section "Create a Field from a Mesh" under Field
   ! for more information on creating a Field on a Mesh. 
-  field = ESMF_FieldCreate(mesh, arrayspec,  rc=localrc)
+  field = ESMF_FieldCreate(mesh, ESMF_TYPEKIND_R8,  rc=localrc)
 
 !EOC
 
@@ -794,17 +779,12 @@ program ESMF_MeshEx
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
 
-  ! Set arrayspec for example field create
-  ! Use a dimension of 1, because Mesh data is linearized 
-  ! into a one dimensional array. 
-  call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
-
   ! At this point the mesh is ready to use. For example, as is 
   ! illustrated here, to have a field created on it. Note that 
   ! the Field only contains data for nodes owned by the current PET.
   ! Please see Section "Create a Field from a Mesh" under Field
   ! for more information on creating a Field on a Mesh. 
-  field = ESMF_FieldCreate(mesh2, arrayspec,  rc=localrc)
+  field = ESMF_FieldCreate(mesh, ESMF_TYPEKIND_R8,  rc=localrc)
 
 !EOC
   
