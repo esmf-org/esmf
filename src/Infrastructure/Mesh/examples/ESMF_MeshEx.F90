@@ -784,7 +784,7 @@ program ESMF_MeshEx
   ! the Field only contains data for nodes owned by the current PET.
   ! Please see Section "Create a Field from a Mesh" under Field
   ! for more information on creating a Field on a Mesh. 
-  field = ESMF_FieldCreate(mesh, ESMF_TYPEKIND_R8,  rc=localrc)
+  field = ESMF_FieldCreate(mesh2, ESMF_TYPEKIND_R8,  rc=localrc)
 
 !EOC
   
