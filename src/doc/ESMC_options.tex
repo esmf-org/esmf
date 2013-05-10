@@ -24,6 +24,30 @@ This flag is documented in section \ref{const:clogmsgflag}.
 \subsection{ESMC\_MESHELEMTYPE}
 This flag is documented in section \ref{const:cmeshelemtype}.
 
+\subsection{ESMF\_METHOD}
+\label{const:cmethod}
+
+{\sf DESCRIPTION:\\}  
+Specify standard ESMF Component method.
+
+The type of this flag is:
+
+{\tt type(ESMF\_Method\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMF\_METHOD\_FINALIZE]
+      Finalize method.
+\item [ESMF\_METHOD\_INITIALIZE]
+      Initialize method.
+\item [ESMF\_METHOD\_READRESTART]
+      ReadRestart method.
+\item [ESMF\_METHOD\_RUN]
+      Run method.
+\item [ESMF\_METHOD\_WRITERESTART]
+      WriteRestart method.
+\end{description}
+
 \subsection{ESMC\_POLEKIND}
 This flag is documented in section \ref{const:cpolekind}.
 

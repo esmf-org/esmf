@@ -104,7 +104,7 @@ int ESMC_MeshAddElements(
 //   \item[elementTypes]
 //          An array containing the types of the elements to be created on this PET. The types used
 //          must be appropriate for the parametric dimension of the Mesh. Please see
-//          Section~\ref{sec:mesh:opt:elemtype} for the list of options. This 
+//          Section~\ref{const:cmeshelemtype} for the list of options. This 
 //          input consists of a 1D array of size {\tt elementCount}.
 //   \item[elementConn]
 //         An array containing the indexes of the sets of nodes to be connected together to form the
@@ -115,7 +115,7 @@ int ESMC_MeshAddElements(
 //         described by {\tt nodeIds(1)}, {\tt nodeCoords(1)}, etc. passed into the
 //         {\tt ESMC\_MeshAddNodes()} call on this PET. It is also
 //         important to note that the order of the nodes in an element connectivity list
-//         matters. Please see Section~\ref{sec:mesh:opt:elemtype} for diagrams illustrating
+//         matters. Please see Section~\ref{const:cmeshelemtype} for diagrams illustrating
 //         the correct order of nodes in a element. This input consists of a 1D array with
 //         a total size equal to the sum of the number of nodes in each element on
 //         this PET. The number of nodes in each element is implied by its element type in
@@ -261,7 +261,7 @@ ESMC_Mesh ESMC_MeshCreateFromFile(
 //   \item [filename]
 //         The name of the grid file
 //   \item[filetypeflag] 
-//         The file type of the grid file to be read, please see Section~\ref{const:mesh:fileformat}
+//         The file type of the grid file to be read, please see Section~\ref{const:mesh:cfileformat}
 //         for a list of valid options. 
 //   \item[{[convert3D]}] 
 //         if 1, the node coordinates will be converted into 3D Cartisian, which

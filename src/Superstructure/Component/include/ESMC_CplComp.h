@@ -350,7 +350,7 @@ int ESMC_CplCompSetEntryPoint(
 //  \item[method]
 //    One of a set of predefined Component methods 
 //    - e.g. {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN},
-//    {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{opt:method}
+//    {\tt ESMF\_METHOD\_FINALIZE}. See section~\ref{const:cmethod}
 //    for a complete list of valid method options. 
 //  \item[userRoutine]
 //    The user-supplied subroutine to be associated for this Component 

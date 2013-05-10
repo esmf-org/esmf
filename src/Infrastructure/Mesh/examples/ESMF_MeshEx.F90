@@ -1002,14 +1002,24 @@ endif ! 1 proc
 !BOE
 !\subsubsection{Mesh Masking}\label{sec:mesh:mask}
 !
-! Mask information is set in the Mesh during creation. It is set using the {\tt elementMask} argument to either {\tt ESMF\_MeshCreate()} or 
-! {\tt ESMF\_MeshAddElements()}. When a regrid store method is called (e.g. {\tt ESMF\_FieldRegridStore()}) the mask values arguments 
+! There are two types of masking available in Mesh: node masking and element masking. These both work
+! in a similar manner, but vary slightly in the details of setting the mask information during mesh creation. 
+!
+! For node masking, the mask information is set using the {\tt nodeMask} argument to either {\tt ESMF\_MeshCreate()} or 
+! {\tt ESMF\_MeshAddNodes()}. When a regrid store method is called (e.g. {\tt ESMF\_FieldRegridStore()}) the mask values arguments 
 ! ({\tt srcMaskValues} and {\tt dstMaskValues}) can 
-! then be used to indicate which particular values set in the {\tt elementMask} array indicate that that element should be masked. For example, when 
+! then be used to indicate which particular values set in the {\tt nodeMask} array indicate that the node should be masked. For example, when 
+! calling {\tt ESMF\_FieldRegridStore()} if {\tt dstMaskValues} has been set to 1, then any node in the destination Mesh whose 
+! corresponding {\tt nodeMask} value is 1 will be masked out (a node with any other value than 1 will not be masked). 
+!
+! For element masking, the mask information is set using the {\tt elementMask} argument to either {\tt ESMF\_MeshCreate()} or 
+! {\tt ESMF\_MeshAddElements()}. In a similar manner to node masking, when a regrid store method is called (e.g. {\tt ESMF\_FieldRegridStore()}) 
+! the mask values arguments 
+! ({\tt srcMaskValues} and {\tt dstMaskValues}) can 
+! then be used to indicate which particular values set in the {\tt elementMask} array indicate that the element should be masked. For example, when 
 ! calling {\tt ESMF\_FieldRegridStore()} if {\tt dstMaskValues} has been set to 1, then any element in the destination Mesh whose 
-! corresponding elementMask value is 1 
-! will be masked out (an element with any other value than 1 will not be masked). {\tt elementMask} is only used to indicate masking for 
-! elements, masking of nodes is not currently supported in Mesh.  
+! corresponding {\tt elementMask} value is 1 will be masked out (an element with any other value than 1 will not be masked). 
+!
 !EOE
 
 

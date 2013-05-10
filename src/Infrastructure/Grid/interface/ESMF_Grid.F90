@@ -21617,12 +21617,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   This method sets the passed in Array as the holder of the item data
-!   for stagger location {\tt staggerloc} and coordinate {\tt coord}. If the location
+!   for stagger location {\tt staggerloc} and item {\tt itemflag}. If the location
 !   already contains an Array, then this one overwrites it. 
 !    
-!   Eventually there should be an Add, Get,... like for the Coords to make things
-!   easy for the user (except restricted to just I4??)
-!
 !     The arguments are:
 !\begin{description}
 !\item[grid]
