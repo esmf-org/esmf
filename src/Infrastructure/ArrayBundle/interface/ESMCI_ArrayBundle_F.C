@@ -27,6 +27,7 @@
 #include <string>
 
 using std::exception;
+using std::string;
 using std::vector;
 
 //------------------------------------------------------------------------------
@@ -395,26 +396,10 @@ extern "C" {
       *rc = ESMC_RC_NOT_IMPL;
     }
     // The Fortran interface always sets the flags and optional variables
-    // except for timeslice. For character variables, create NULL-terminated
-    // C strings.
+    // except for timeslice. For character variables, create a C++ string.
     // helper variable
-    char fileName[ESMF_MAXSTR + 1];
-    int len_fileName = *len_file;
-    if (len_fileName > ESMF_MAXSTR) {
-      ESMC_LogDefault.Write("File name length > ESMF_MAXSTR",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_fileName = ESMF_MAXSTR;
-    } else if (len_fileName < 0) {
-      ESMC_LogDefault.Write("Negative file name length",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_fileName = 0;
-    }
-    if (len_fileName > 0) {
-      strncpy(fileName, file, len_fileName);
-      fileName[len_fileName] = '\0';
-    } else {
-      fileName[0] = '\0';
-    }
+    string fileName = string (file, 0, ESMC_F90lentrim (file, *len_file));
+
     if (ESMC_NOT_PRESENT_FILTER(opt_singleFile) != ESMC_NULL_POINTER) {
       singleFile = (ESMF_FALSE != *opt_singleFile);
     } else {
@@ -426,7 +411,7 @@ extern "C" {
       overwriteflag = false;
     }
     // Call into the actual C++ method wrapped inside LogErr handling
-    localrc = (*bundle)->write(fileName, &singleFile, &overwriteflag,
+    localrc = (*bundle)->write(fileName.c_str(), &singleFile, &overwriteflag,
                                status, timeslice, iofmt);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));
@@ -443,32 +428,17 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(rc) != ESMC_NULL_POINTER) {
       *rc = ESMC_RC_NOT_IMPL;
     }
-    // Create NULL-terminated C string for string input
+    // Create C++ string for string input
     // helper variable
-    char fileName[ESMF_MAXSTR + 1];
-    int len_fileName = *len_file;
-    if (len_fileName > ESMF_MAXSTR) {
-      ESMC_LogDefault.Write("File name length > ESMF_MAXSTR",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_fileName = ESMF_MAXSTR;
-    } else if (len_fileName < 0) {
-      ESMC_LogDefault.Write("Negative file name length",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      len_fileName = 0;
-    }
-    if (len_fileName > 0) {
-      strncpy(fileName, file, len_fileName);
-      fileName[len_fileName] = '\0';
-    } else {
-      fileName[0] = '\0';
-    }
+    string fileName = string (file, 0, ESMC_F90lentrim (file, *len_file));
+
     if (ESMC_NOT_PRESENT_FILTER(opt_singleFile) != ESMC_NULL_POINTER) {
       singleFile = (ESMF_FALSE != *opt_singleFile);
     } else {
       singleFile = true;
     }
     // Call into the actual C++ method wrapped inside LogErr handling
-    localrc = (*bundle)->read(fileName, &singleFile, timeslice, iofmt);
+    localrc = (*bundle)->read(fileName.c_str(), &singleFile, timeslice, iofmt);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                   ESMC_NOT_PRESENT_FILTER(rc));
   }
