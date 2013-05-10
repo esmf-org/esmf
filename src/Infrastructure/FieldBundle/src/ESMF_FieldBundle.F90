@@ -2063,8 +2063,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     integer                        :: i
     type(ESMF_Field), allocatable  :: fieldList(:)
     logical                        :: singlef
-    character(len=ESMF_MAXSTR)     :: filename
     character(len=3)               :: cnum
+    character(len=len (file)+len (cnum)) :: filename
     type(ESMF_Array)               :: array 
     type(ESMF_IOFmt_Flag)          :: iofmtd
     type(ESMF_IO)                  :: io           ! The I/O object
@@ -2086,14 +2086,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     if(present(iofmt)) iofmtd = iofmt
     time = 0
     if(present(timeslice)) time = timeslice
-
-    ! Check to make sure that filename won't be too long
-    if (singlef .and. (len(trim(file)) .gt. (ESMF_MAXSTR - 3))) then
-      localrc = ESMF_RC_LONG_NAME
-      call ESMF_LogWrite("file argument is too long",                   &
-           ESMF_LOGMSG_ERROR, rc=localrc)
-      return
-    endif
 
     call ESMF_FieldBundleGet(fieldbundle, fieldCount=fieldCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
@@ -2133,7 +2125,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         ! Clear the IO object (only need to do this for i > 1)
         if (i .gt. 1) call ESMF_IOClear(io)
         write(cnum,"(i3.3)") i
-        filename = file // cnum
+        filename = trim (file) // cnum
         call ESMF_FieldGet(fieldList(i), array=array, name=name, rc=localrc)
         errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
             ESMF_CONTEXT, rcToReturn=rc)
@@ -4933,8 +4925,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     integer                         :: i
     type(ESMF_Field), allocatable   :: fieldList(:)
     logical                         :: singlef
-    character(len=ESMF_MAXSTR)      :: filename
     character(len=3)                :: cnum
+    character(len=len (file)+len (cnum)) :: filename
     type(ESMF_Array)                :: array 
     logical                         :: opt_overwriteflag ! helper variable
     type(ESMF_FileStatus_Flag)      :: opt_status        ! helper variable
@@ -4962,14 +4954,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 
     iofmtd = ESMF_IOFMT_NETCDF   ! default format
     if(present(iofmt)) iofmtd = iofmt
-
-    ! Check to make sure that filename won't be too long
-    if (singlef .and. (len(trim(file)) .gt. (ESMF_MAXSTR - 3))) then
-      localrc = ESMF_RC_LONG_NAME
-      call ESMF_LogWrite("file argument is too long",                   &
-           ESMF_LOGMSG_ERROR, rc=localrc)
-      return
-    endif
 
     call ESMF_FieldBundleGet(fieldbundle, fieldCount=fieldCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,                  &
@@ -5009,7 +4993,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         ! Clear the IO object (only need to do this for i > 1)
         if (i .gt. 1) call ESMF_IOClear(io)
         write(cnum,"(i3.3)") i
-        filename = file // cnum
+        filename = trim (file) // cnum
         call ESMF_FieldGet(fieldList(i), array=array, name=name, rc=localrc)
         errorFound = ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,     &
             ESMF_CONTEXT, rcToReturn=rc)
