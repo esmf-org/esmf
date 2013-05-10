@@ -648,15 +648,14 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeAdd  - Add an ESMF standard Attribute package
-! containing nested standard Attribute packages
+! !IROUTINE: ESMF_AttributeAdd  - Add an ESMF standard Attribute package containing nested standard Attribute packages
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
 !     subroutine ESMF_AttAddPackStdN(<object>, convention, purpose, &
-!     nestConvention, nestPurpose, nestAttPackInstanceCountList, &
-!     nestAttPackInstanceNameList, nestCount, &
-!     nestAttPackInstanceNameCount,rc)
+!       nestConvention, nestPurpose, nestAttPackInstanceCountList, &
+!       nestAttPackInstanceNameList, nestCount, &
+!       nestAttPackInstanceNameCount,rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -724,19 +723,18 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package or modify an
-! existing Attribute package
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package or modify an existing Attribute package
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
 !     subroutine ESMF_AttAddPackCst(<object>, convention, purpose, &
-!     attrList, count, rc)
+!       attrList, count, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *), intent(in)            :: convention
 !     character (len = *), intent(in)            :: purpose
-!     character (len=*),   intent(in)            :: attrList(:)
+!     character (len = *), intent(in)            :: attrList(:)
 !     integer,             intent(in),  optional :: count
 !     integer,             intent(out), optional :: rc
 !
@@ -779,19 +777,18 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with nested
-! Attribute Packages or modify an existing Attribute package
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with nested Attribute packages or modify an existing Attribute package
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
 !     subroutine ESMF_AttAddPackCstN(<object>, convention, purpose, &
-!     attrList, count, nestConvention, nestPurpose, nestCount, rc)
+!       attrList, count, nestConvention, nestPurpose, nestCount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *), intent(in)            :: convention
 !     character (len = *), intent(in)            :: purpose
-!     character (len=*),   intent(in),  optional :: attrList(:)
+!     character (len = *), intent(in),  optional :: attrList(:)
 !     integer,             intent(in),  optional :: count
 !     character (len = *), intent(in)            :: nestConvention(:)
 !     character (len = *), intent(in)            :: nestPurpose(:)
@@ -848,23 +845,22 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with a single
-! nested Atrribute package, or modify an existing Attribute package
+! !IROUTINE: ESMF_AttributeAdd  - Add a custom Attribute package with a single nested Atrribute package, or modify an existing Attribute package
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
 !     subroutine ESMF_AttAddPackCstN1(<object>, convention, purpose, &
-!     attrList, count, nestConvention, nestPurpose, rc)
+!       attrList, count, nestConvention, nestPurpose, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     character (len=*), intent(in)            :: convention
-!     character (len=*), intent(in)            :: purpose
-!     character (len=*), intent(in),  optional :: attrList(:)
-!     integer,           intent(in),  optional :: count
-!     character (len=*), intent(in)            :: nestConvention
-!     character (len=*), intent(in)            :: nestPurpose
-!     integer,           intent(out), optional :: rc
+!     character (len = *), intent(in)            :: convention
+!     character (len = *), intent(in)            :: purpose
+!     character (len = *), intent(in),  optional :: attrList(:)
+!     integer,             intent(in),  optional :: count
+!     character (len = *), intent(in)            :: nestConvention
+!     character (len = *), intent(in)            :: nestPurpose
+!     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Add a custom Attribute package, with a single nested Attribute
@@ -918,14 +914,14 @@ contains
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeCopy()
 !     subroutine ESMF_AttributeCopy(<object1>, <object2>, copyflag, &
-!                 atttreeflag, rc)
+!       atttreeflag, rc)
 !
 ! !ARGUMENTS:
 !     <object1>, see below for supported values
 !     <object2>, see below for supported values
-!     type(ESMF_Copy_Flag), intent(in) :: copyflag
-!     type(ESMF_AttTreeFlag), intent(in) :: atttreeflag
-!     integer, intent(out), optional :: rc
+!     type(ESMF_Copy_Flag),   intent(in)            :: copyflag
+!     type(ESMF_AttTreeFlag), intent(in)            :: atttreeflag
+!     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Copy an Attribute hierarchy from <object1> to <object2>.
@@ -970,9 +966,8 @@ contains
 ! !IROUTINE: ESMF_AttributeGet  - Get an Attribute
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeGet(<object>, name, <value>, &
-!                    <defaultvalue>, convention, purpose, &
-!                    attPackInstanceName, isPresent, rc)
+!     subroutine ESMF_AttributeGet(<object>, name, <value>, <defaultvalue>, &
+!       convention, purpose, attPackInstanceName, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -1061,21 +1056,18 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class
-!                                information
+! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class information
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeGet(<object>, name, <value>, &
-!                    <defaultvalue>, inputList, &
-!                    convention, purpose, attPackInstanceName, &
-!                    isPresent, rc)
+!     subroutine ESMF_AttributeGet(<object>, name, <value>, <defaultvalue>, &
+!       inputList, convention, purpose, attPackInstanceName, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *), intent(in)            :: name
 !     <value>, see below for supported values
 !     <defaultvalue>, see below for supported values
-!     character (len=*),   intent(in),  optional :: inputList(:)
+!     character (len = *), intent(in),  optional :: inputList(:)
 !     character (len = *), intent(in),  optional :: convention
 !     character (len = *), intent(in),  optional :: purpose
 !     character (len = *), intent(in),  optional :: attPackInstanceName
@@ -1147,12 +1139,12 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGet(<object>, name, <valueList>, &
-!                            <defaultvalueList>, convention, purpose, &
-!                            attPackInstanceName, itemCount, isPresent, rc)
+!       <defaultvalueList>, convention, purpose, attPackInstanceName, &
+!       itemCount, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     character (len = *), intent(in) :: name
+!     character (len = *), intent(in)              :: name
 !     <valueList>, see below for supported values
 !     <defaultvalueList>, see below for supported values
 !     character (len = *), intent(in),    optional :: convention
@@ -1240,21 +1232,19 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class
-!                                information
+! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class information
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGet(<object>, name, <valueList>, &
-!                            <defaultvalueList>, inputList, &
-!                            convention, purpose, attPackInstanceName, &
-!                            itemCount, isPresent, rc)
+!       <defaultvalueList>, inputList, convention, purpose, &
+!       attPackInstanceName, itemCount, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     character (len = *), intent(in) :: name
+!     character (len = *), intent(in)              :: name
 !     <valueList>, see below for supported values
 !     <defaultvalueList>, see below for supported values
-!     character (len=*),   intent(in),    optional :: inputList(:)
+!     character (len = *), intent(in),    optional :: inputList(:)
 !     character (len = *), intent(in),    optional :: convention
 !     character (len = *), intent(in),    optional :: purpose
 !     character (len = *), intent(in),    optional :: attPackInstanceName
@@ -1336,7 +1326,7 @@ contains
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     integer,                    intent(out)           :: count
-!     type(ESMF_AttGetCountFlag), intent(in), optional  :: attcountflag
+!     type(ESMF_AttGetCountFlag), intent(in),  optional :: attcountflag
 !     integer,                    intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1377,19 +1367,17 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet()
-!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, &
-!                                           convention, purpose, &
-!                                           keywordEnforcer, &
-!                                           attPackInstanceName, typekind, &
-!                                           itemCount, isPresent, rc)
+!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, convention, &
+!       purpose, keywordEnforcer, attPackInstanceName, typekind, &
+!       itemCount, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *),      intent(in)            :: name
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     character (len=*),        intent(in),  optional :: convention
-!     character (len=*),        intent(in),  optional :: purpose
-!     character (len=*),        intent(in),  optional :: attPackInstanceName
+!     character (len = *),      intent(in),  optional :: convention
+!     character (len = *),      intent(in),  optional :: purpose
+!     character (len = *),      intent(in),  optional :: attPackInstanceName
 !     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
 !     integer,                  intent(out), optional :: itemCount
 !     logical,                  intent(out), optional :: isPresent
@@ -1543,8 +1531,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLink - Link a Component Attribute hierarchy to that
-! of a Component or State
+! !IROUTINE: ESMF_AttributeLink - Link a Component Attribute hierarchy to that of a Component or State
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLink()
@@ -1591,17 +1578,16 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLink - Link a State Attribute hierarchy with the
-! hierarchy of a an Array, ArrayBundle, Field, FieldBundle, or State
+! !IROUTINE: ESMF_AttributeLink - Link a State Attribute hierarchy with the hierarchy of an Array, ArrayBundle, Field, FieldBundle, or State
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLink()
 !      subroutine ESMF_StateAttLink(state, <object>, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF\_State), intent(inout)         :: state
+!      type(ESMF_State), intent(inout)         :: state
 !      <object>, see below for supported values
-!      integer,           intent(out), optional :: rc
+!      integer,          intent(out), optional :: rc
 !
 !
 ! !DESCRIPTION:
@@ -1631,17 +1617,16 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLink - Link a FieldBundle and Field Attribute
-! hierarchy
+! !IROUTINE: ESMF_AttributeLink - Link a FieldBundle and Field Attribute hierarchy
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLink()
 !      subroutine ESMF_FieldBundleAttLink(fieldbundle, field, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF\_FieldBundle), intent(inout)         :: fieldbundle
-!      type(ESMF\_Field),       intent(in)            :: field
-!      integer,                 intent(out), optional :: rc
+!      type(ESMF_FieldBundle), intent(inout)         :: fieldbundle
+!      type(ESMF_Field),       intent(in)            :: field
+!      integer,                intent(out), optional :: rc
 !
 !
 ! !DESCRIPTION:
@@ -1669,9 +1654,9 @@ contains
 !      subroutine ESMF_FieldAttLink(field, grid, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF\_Field), intent(inout)         :: field
-!      type(ESMF\_Grid),  intent(in)            :: grid
-!      integer,           intent(out), optional :: rc
+!      type(ESMF_Field), intent(inout)         :: field
+!      type(ESMF_Grid),  intent(in)            :: grid
+!      integer,          intent(out), optional :: rc
 !
 !
 ! !DESCRIPTION:
@@ -1692,17 +1677,16 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLink - Link an ArrayBundle and Array Attribute
-! hierarchy
+! !IROUTINE: ESMF_AttributeLink - Link an ArrayBundle and Array Attribute hierarchy
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLink()
 !      subroutine ESMF_ArrayBundleAttLink(arraybundle, array, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF\_ArrayBundle), intent(inout)         :: arraybundle
-!      type(ESMF\_Array),       intent(in)            :: array
-!      integer,                 intent(out), optional :: rc
+!      type(ESMF_ArrayBundle), intent(inout)         :: arraybundle
+!      type(ESMF_Array),       intent(in)            :: array
+!      integer,                intent(out), optional :: rc
 !
 !
 ! !DESCRIPTION:
@@ -1723,8 +1707,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a Component Attribute hierarchy
-! from that of a Component or State
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a Component Attribute hierarchy from that of a Component or State
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLinkRemove()
@@ -1770,17 +1753,16 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a State Attribute hierarchy with
-! the hierarchy of an Array, ArrayBundle, Field, FieldBundle, or State
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a State Attribute hierarchy from the hierarchy of an Array, ArrayBundle, Field, FieldBundle, or State
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLinkRemove()
 !      subroutine ESMF_StateAttLinkRemove(state, <object>, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF\_State), intent(inout)         :: state
+!      type(ESMF_State), intent(inout)         :: state
 !      <object>, see below for supported values
-!      integer,           intent(out), optional :: rc
+!      integer,          intent(out), optional :: rc
 !
 !
 ! !DESCRIPTION:
@@ -1810,17 +1792,16 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a FieldBundle and Field
-! Attribute hierarchy
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a FieldBundle and Field Attribute hierarchy
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLinkRemove()
 !      subroutine ESMF_FieldBundleAttLinkRemove(fieldbundle, field, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF\_FieldBundle), intent(inout)         :: fieldbundle
-!      type(ESMF\_Field),       intent(in)            :: field
-!      integer,                 intent(out), optional :: rc
+!      type(ESMF_FieldBundle), intent(inout)         :: fieldbundle
+!      type(ESMF_Field),       intent(in)            :: field
+!      integer,                intent(out), optional :: rc
 !
 !
 ! !DESCRIPTION:
@@ -1841,17 +1822,16 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a Field and Grid Attribute
-! hierarchy
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink a Field and Grid Attribute hierarchy
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLinkRemove()
 !      subroutine ESMF_FieldAttLinkRemove(field, grid, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF\_Field), intent(inout)         :: field
-!      type(ESMF\_Grid),  intent(in)            :: grid
-!      integer,           intent(out), optional :: rc
+!      type(ESMF_Field), intent(inout)         :: field
+!      type(ESMF_Grid),  intent(in)            :: grid
+!      integer,          intent(out), optional :: rc
 !
 !
 ! !DESCRIPTION:
@@ -1872,17 +1852,16 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeLinkRemove - Unlink an ArrayBundle and Array
-! Attribute hierarchy
+! !IROUTINE: ESMF_AttributeLinkRemove - Unlink an ArrayBundle and Array Attribute hierarchy
 !
 ! !INTERFACE:
 !      ! Private name; call using ESMF_AttributeLinkRemove()
 !      subroutine ESMF_ArrayBundleAttLinkRemove(arraybundle, array, rc)
 !
 ! !ARGUMENTS:
-!      type(ESMF\_ArrayBundle), intent(inout)         :: arraybundle
-!      type(ESMF\_Array),       intent(in)            :: array
-!      integer,                 intent(out), optional :: rc
+!      type(ESMF_ArrayBundle), intent(inout)         :: arraybundle
+!      type(ESMF_Array),       intent(in)            :: array
+!      integer,                intent(out), optional :: rc
 !
 !
 ! !DESCRIPTION:
@@ -1908,12 +1887,12 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeRead(<object>, fileName, schemaFileName, &
-!                                   convention, purpose, rc)
+!       convention, purpose, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     character (len=*),   intent(in),  optional :: fileName
-!     character (len=*),   intent(in),  optional :: schemaFileName
+!     character (len = *), intent(in),  optional :: fileName
+!     character (len = *), intent(in),  optional :: schemaFileName
 !     character (len = *), intent(in),  optional :: convention
 !     character (len = *), intent(in),  optional :: purpose
 !     integer,             intent(out), optional :: rc
@@ -1974,7 +1953,7 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeRemove(<object>, name, convention, purpose, &
-!                                     attPackInstanceName, rc)
+!       attPackInstanceName, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -2036,8 +2015,8 @@ contains
 ! !IROUTINE: ESMF_AttributeSet - Set an Attribute
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeSet(<object>, name, <value>, &
-!                              convention, purpose, attPackInstanceName, rc)
+!     subroutine ESMF_AttributeSet(<object>, name, <value>, convention, &
+!       purpose, attPackInstanceName, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -2105,12 +2084,11 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeSet - Set an Attribute to point to internal class
-!                                information
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute to point to internal class information
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeSet(<object>, name, <value>, inputList, &
-!                              convention, purpose, attPackInstanceName, rc)
+!       convention, purpose, attPackInstanceName, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -2172,9 +2150,8 @@ contains
 ! !IROUTINE: ESMF_AttributeSet - Set an Attribute
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeSet(<object>, name, <valueList>, &
-!                                 convention, purpose, attPackInstanceName, &
-!                                 itemCount, rc)
+!     subroutine ESMF_AttributeSet(<object>, name, <valueList>, convention, &
+!       purpose, attPackInstanceName, itemCount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -2300,7 +2277,7 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeWrite(<object>, convention, purpose, &
-!         attwriteflag, rc)
+!       attwriteflag, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values

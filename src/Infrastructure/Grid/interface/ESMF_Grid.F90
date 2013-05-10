@@ -5635,7 +5635,7 @@ end function ESMF_GridCreateFrmNCFile
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFrmScrip"
-!IBOP
+!BOPI
 ! !IROUTINE: ESMF_GridCreateFrmScrip - Private function that create a Grid from a SRIP Grid File 
   function ESMF_GridCreateFrmScrip(filename, regDecomp, keywordEnforcer, &
     decompflag, isSphere, addCornerStagger, addUserArea, rc)
@@ -5690,7 +5690,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!IEOP
+!EOPI
 
 #ifdef ESMF_NETCDF
     integer :: ncid
@@ -6115,7 +6115,7 @@ end function ESMF_GridCreateFrmScrip
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFrmGridspec"
-!IBOP
+!BOPI
 ! !IROUTINE: ESMF_GridCreateFrmGridspec - Create a Grid from a GridSpec grid file 
 !  with a regular distribution
 
