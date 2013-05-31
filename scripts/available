@@ -1,0 +1,9 @@
+#!/bin/sh
+# This script returns the input argument if it is available as a command, a
+# blank line otherwise.
+EXEC=`which $1 |& awk '{ print $1 }' `
+if [ -f $EXEC ]; then
+echo $1
+else
+echo ""
+fi
