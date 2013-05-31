@@ -220,6 +220,15 @@ info:   script_info
 	-@echo "ESMF_CXXLINKLIBS: $(ESMF_CXXLINKLIBS)"
 	-@echo "ESMF_CXXESMFLINKLIBS: $(ESMF_CXXESMFLINKLIBS)"
 	-@echo ""
+ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
+	-@echo "Shared library build:"
+	-@echo "ESMF_SL_LIBS_TO_MAKE: $(ESMF_SL_LIBS_TO_MAKE)"
+	-@echo "ESMF_SL_SUFFIX:       $(ESMF_SL_SUFFIX)"
+	-@echo "ESMF_SL_LIBLINKER:    $(ESMF_SL_LIBLINKER)"
+	-@echo "ESMF_SL_LIBOPTS:      $(ESMF_SL_LIBOPTS)"
+	-@echo "ESMF_SL_LIBLIBS:      $(ESMF_SL_LIBLIBS)"
+endif
+	-@echo ""
 	-@echo ""
 	-@echo "--------------------------------------------------------------"
 ifeq ($(ESMF_OS),MinGW)
