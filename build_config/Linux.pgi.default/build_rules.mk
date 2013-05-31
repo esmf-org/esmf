@@ -231,4 +231,4 @@ ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
 ############################################################
 # 3rd party code dependency: PIO
 #
-#TODO: commented out for 5.1.0 release: ESMF_PIODEFAULT = internal
+#TODO: activate this once PIO support is stable: ESMF_PIODEFAULT = internal
