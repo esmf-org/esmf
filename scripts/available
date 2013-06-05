@@ -4,7 +4,7 @@
 which $1 > available.tmp 2>&1
 EXEC=`cat available.tmp | awk '{ print $1 }' `
 rm -f available.tmp
-if [ -f $EXEC ]; then
+if [ $EXEC -a -f $EXEC ]; then
 echo $1
 else
 echo ""
