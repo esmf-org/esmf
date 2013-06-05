@@ -147,22 +147,6 @@
 
 
 !------------------------------------------------------------------------------
-! ! ESMF_CoordSys_Flag
-!
-!------------------------------------------------------------------------------
-  type ESMF_CoordSys_Flag
-  sequence
-!  private
-     integer :: coordsys
-  end type
-
-  type(ESMF_CoordSys_Flag), parameter :: &
-    ESMF_COORDSYS_CART    = ESMF_CoordSys_Flag(0), &
-    ESMF_COORDSYS_SPH_DEG = ESMF_CoordSys_Flag(1), &
-    ESMF_COORDSYS_SPH_RAD = ESMF_CoordSys_Flag(2)
-
-
-!------------------------------------------------------------------------------
 ! ! ESMF_DefaultFlag
 !
 !------------------------------------------------------------------------------
