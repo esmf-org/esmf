@@ -13,6 +13,8 @@ ifdef ESMF_PNETCDF
 CPPFLAGS += -D_PNETCDF
 endif
 
+CPPFLAGS += -DNO_MPIMOD
+
 SOURCEC	  = topology.c \
 	piocpp.C
 SOURCEF	  = \
