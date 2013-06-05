@@ -28,6 +28,8 @@
 // include higher level, 3rd party or system headers
 #include <cstdio>
 #include <cstring>
+#include <iomanip>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -292,7 +294,7 @@ int ArrayBundle::read(
 //
 // !ARGUMENTS:
 //
-  char  *file,                  // in    - name of file being read
+  const char  *file,            // in    - name of file being read
   bool *singleFile,             // in    - All arrays from single file if true
   int   *timeslice,             // in    - timeslice option
   ESMC_IOFmt_Flag *iofmt        // in    - IO format flag
@@ -352,15 +354,7 @@ int ArrayBundle::read(
     }
   } else {
     Container<std::string, Array *>::iterator it;
-    char filename[ESMF_MAXSTR];
     int i = 0;
-    int spret;
-    if (strlen(file) >= (ESMF_MAXSTR - 3)) {
-      localrc = ESMF_RC_LONG_NAME;
-      ESMC_LogDefault.Write("file argument is too long",
-                            ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
-      rc = localrc;
-    }
     for (it = arrayContainer.begin();
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
@@ -369,15 +363,12 @@ int ArrayBundle::read(
           &rc);
       }
       if (ESMF_SUCCESS == localrc) {
-        spret = sprintf(filename, "%s%03d", file, i);
-        if (spret <= 0) {
-          localrc = ESMF_RC_SYS;
-        } else {
-          // Call the IO read function
-          localrc = newIO->read(filename, localiofmt, timeslice);
-          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, &rc);
-        }
+        stringstream filename;
+        filename << file << std::fixed << std::setw(3) << std::setfill('0') << i;
+        // Call the IO read function
+        localrc = newIO->read(filename.str().c_str(), localiofmt, timeslice);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, &rc);
         newIO->clear();
       }
       i++;
@@ -408,7 +399,7 @@ int ArrayBundle::write(
 //
 // !ARGUMENTS:
 //
-  char  *file,                    // in    - name of file being read
+  const char  *file,              // in    - name of file being read
   bool *singleFile,               // in    - All arrays to single file if true
   bool *overwrite,                // in    - OK to overwrite fields if true
   ESMC_FileStatus_Flag *status,   // in    - file status flag
@@ -487,15 +478,7 @@ int ArrayBundle::write(
     }
   } else {
     Container<std::string, Array *>::iterator it;
-    char filename[ESMF_MAXSTR + 1];
     int i = 0;
-    int spret;
-    if (strlen(file) > (ESMF_MAXSTR - 3)) {
-      localrc = ESMF_RC_LONG_NAME;
-      ESMC_LogDefault.Write("file argument is too long, truncating",
-                            ESMC_LOGMSG_WARN, ESMC_CONTEXT);
-      file[ESMF_MAXSTR - 3] = '\0';
-    }
     for (it = arrayContainer.begin();
          it != arrayContainer.end(); ++it) {
       if (ESMF_SUCCESS == localrc) {
@@ -504,16 +487,13 @@ int ArrayBundle::write(
           &rc);
       }
       if (ESMF_SUCCESS == localrc) {
-        spret = sprintf(filename, "%s%03d", file, i);
-        if (spret <= 0) {
-          localrc = ESMF_RC_SYS;
-        } else {
-          // Call the IO read function
-          localrc = newIO->write(filename, localiofmt, localoverwrite,
-            localstatus, timeslice);
-          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, &rc);
-        }
+        stringstream filename;
+        filename << file << std::fixed << std::setw(3) << std::setfill('0') << i;
+        // Call the IO write function
+        localrc = newIO->write(filename.str().c_str(), localiofmt, localoverwrite,
+          localstatus, timeslice);
+        ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, &rc);
         newIO->clear();
       }
       i++;

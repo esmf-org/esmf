@@ -117,7 +117,7 @@ options via arguments to the method. The following is a description of these met
 \begin{description}
 \item [ESMF\_GridCreateNoPeriDim()] Allows the user to create a Grid with no edge connections, for example, a regional Grid with closed boundaries.
 
-\item [ESMF\_GridCreate1PeriDim()] Allows the user to create a Grid with 1 periodic dimension and supports a range of options for what to do at the pole (see ~Section~\ref{const:polekind}. Some examples of Grids which can be created here are tripole spheres, bipole spheres, cylinders with open poles. 
+\item [ESMF\_GridCreate1PeriDim()] Allows the user to create a Grid with 1 periodic dimension and supports a range of options for what to do at the pole (see ~Section~\ref{const:polekind}). Some examples of Grids which can be created here are tripole spheres, bipole spheres, cylinders with open poles. 
 
 \item [ESMF\_GridCreate2PeriDim()] Allows the user to create a Grid with 2 periodic dimensions, for example a torus, or a regional Grid with
 doubly periodic boundaries. 
@@ -172,8 +172,8 @@ DE in the distributed dimension.  An {\bf arbitrary} distribution is
 one in which any grid cell can be assigned to any DE.  Any of these
 distribution options can be applied to any of the grid shapes (i.e.,
 rectangle) or types (i.e., rectilinear).  Support for arbitrary distribution 
-is limited in v5.2.0, See section \ref{example:ArbGridWithUndistDim} for
-more detail descriptions.
+is limited in the current version of ESMF, see Section \ref{example:ArbGridWithUndistDim} for
+an example of creating a Grid with an arbitrary distribution.
 
 
 Figure \ref{fig:GridDecomps} illustrates options for distribution.
@@ -267,7 +267,7 @@ However, to achieve other types of staggering, the user may alter
 or eliminate this padding by using the appropriate options when adding
 coordinates to a Grid. 
  
-In v5.2.0, only the cell center stagger location is supported for an
+In the current release, only the cell center stagger location is supported for an
 arbitrarily distributed grid. For examples and a full description of the stagger interface 
 see Section~\ref{sec:usage:staggerloc}. 
 

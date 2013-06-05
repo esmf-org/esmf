@@ -5638,7 +5638,7 @@ end function ESMF_GridCreateFrmNCFile
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFrmScrip"
-!IBOP
+!BOPI
 ! !IROUTINE: ESMF_GridCreateFrmScrip - Private function that create a Grid from a SRIP Grid File 
   function ESMF_GridCreateFrmScrip(filename, regDecomp, keywordEnforcer, &
     decompflag, isSphere, addCornerStagger, addUserArea, rc)
@@ -5693,7 +5693,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!IEOP
+!EOPI
 
 #ifdef ESMF_NETCDF
     integer :: ncid
@@ -6118,7 +6118,7 @@ end function ESMF_GridCreateFrmScrip
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFrmGridspec"
-!IBOP
+!BOPI
 ! !IROUTINE: ESMF_GridCreateFrmGridspec - Create a Grid from a GridSpec grid file 
 !  with a regular distribution
 
@@ -21628,12 +21628,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   This method sets the passed in Array as the holder of the item data
-!   for stagger location {\tt staggerloc} and coordinate {\tt coord}. If the location
+!   for stagger location {\tt staggerloc} and item {\tt itemflag}. If the location
 !   already contains an Array, then this one overwrites it. 
 !    
-!   Eventually there should be an Add, Get,... like for the Coords to make things
-!   easy for the user (except restricted to just I4??)
-!
 !     The arguments are:
 !\begin{description}
 !\item[grid]

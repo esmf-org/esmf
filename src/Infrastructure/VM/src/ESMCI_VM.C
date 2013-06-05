@@ -1582,6 +1582,9 @@ void VM::getMemInfo(
   *virtMemPet = *physMemPet = -1; // initialize
   
 #ifdef ESMF_OS_Linux
+  // must lock/unlock for thread-safety
+  VM *vm = getCurrent();
+  vm->lock();
   FILE* file = fopen("/proc/self/status", "r");
   char line[128];
   while (fgets(line, 128, file) != NULL){
@@ -1595,6 +1598,7 @@ void VM::getMemInfo(
     }
   }
   fclose(file);
+  vm->unlock();
 #endif
   
   // return successfully

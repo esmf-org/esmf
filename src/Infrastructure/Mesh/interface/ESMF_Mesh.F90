@@ -2381,9 +2381,9 @@ end function ESMF_MeshCreateFromScrip
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateRedist()"
-!BOPI
+!BOP
 
-! !IROUTINE: ESMF_MeshCreate - Create a Mesh by redisting an existing one
+! !IROUTINE: ESMF_MeshCreate - Create a copy of a Mesh with a new distribution
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
@@ -2400,7 +2400,13 @@ end function ESMF_MeshCreateFromScrip
     integer,             intent(out), optional :: rc
 ! 
 ! !DESCRIPTION:
-!  Create a Mesh which is a redistribution of an existing Mesh. 
+!  Create a copy of an existing Mesh with a new distribution. Information
+! in the Mesh such as connections, coordinates, areas, masks, etc. are 
+! automatically redistributed to the new Mesh. To redistribute 
+! data in Fields built on the orginal Mesh create a Field on the new Mesh
+!  and then use the Field redistribution functionality 
+! ({\tt ESMF\_FieldRedistStore()}, etc.). The equivalent methods
+! can also be used for data in FieldBundles.  
 !
 !   \begin{description}
 !   \item [mesh]
@@ -2415,7 +2421,7 @@ end function ESMF_MeshCreateFromScrip
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: localrc
     integer :: numNodeIds, numElemIds
@@ -2425,8 +2431,11 @@ end function ESMF_MeshCreateFromScrip
     ! Init localrc
     localrc = ESMF_SUCCESS
 
-    ! Check input mesh
+    ! Check input classes
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, nodalDistgrid, rc)
+    ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, elementDistgrid, rc)
+
 
     ! If mesh has not been fully created
     if (.not. mesh%isFullyCreated) then
@@ -2447,38 +2456,9 @@ end function ESMF_MeshCreateFromScrip
        return 
     endif    
 
-
-    ! If the C side doesn't exist, then just need to set the distgrids
-    if (mesh%isCMeshFreed) then
-
-       ! The C side has been created
-       ESMF_MeshCreateRedist%isCMeshFreed=.true.
-       
-       ! Set as fully created
-       !! TODO NEED TO HANDLE SPLIT ELEMENTS SOMEHOW, but for now
-       !! are caught above 
-       ESMF_MeshCreateRedist%hasSplitElem=.false.
-       
-       ESMF_MeshCreateRedist%isFullyCreated=.true.
-       ESMF_INIT_SET_CREATED(ESMF_MeshCreateRedist)
-
-       if (present(rc)) rc=ESMF_SUCCESS
-       return
-    endif
-
-
-    ! Get number of element Ids
+    ! Get number of node Ids
     call ESMF_DistGridGet(nodalDistgrid,localDe=0, &
          elementCount=numNodeIds, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! Allocate space for element Ids
-    allocate(nodeIds(numNodeIds))
-   
-    ! Get element Ids
-    call ESMF_DistGridGet(nodalDistgrid,localDe=0, &
-         seqIndexList=nodeIds, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2488,6 +2468,48 @@ end function ESMF_MeshCreateFromScrip
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
     
+    ! First fill in information not requiring redist
+
+    ! Set Distgrids
+    ESMF_MeshCreateRedist%nodal_distgrid=nodalDistGrid
+    ESMF_MeshCreateRedist%element_distgrid=elementDistgrid
+
+    ! Same dimensions as input mesh
+    ESMF_MeshCreateRedist%spatialDim=mesh%spatialDim
+    ESMF_MeshCreateRedist%parametricDim=mesh%parametricDim
+
+    ! Set number of owned things
+    ESMF_MeshCreateRedist%numOwnedNodes=numNodeIds
+    ESMF_MeshCreateRedist%numOwnedElements=numElemIds
+
+    ! Will have same freed status as input mesh
+    ESMF_MeshCreateRedist%isCMeshFreed=mesh%isCMeshFreed
+
+    ! Will have same split status as input mesh
+    ESMF_MeshCreateRedist%hasSplitElem=mesh%hasSplitElem
+
+    ! Will have same created status as input mesh
+    ESMF_MeshCreateRedist%isFullyCreated=mesh%isFullyCreated
+
+
+    ! If the C side doesn't exist, then don't need to redist, so exit
+    if (mesh%isCMeshFreed) then
+       ESMF_INIT_SET_CREATED(ESMF_MeshCreateRedist)
+
+       if (present(rc)) rc=ESMF_SUCCESS
+       return
+    endif
+
+    
+    ! Allocate space for node Ids
+    allocate(nodeIds(numNodeIds))
+   
+    ! Get node Ids
+    call ESMF_DistGridGet(nodalDistgrid,localDe=0, &
+         seqIndexList=nodeIds, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Allocate space for element Ids
     allocate(elemIds(numElemIds))
    
@@ -2511,29 +2533,7 @@ end function ESMF_MeshCreateFromScrip
     deallocate(nodeIds)
     deallocate(elemIds)
 
-    ! Set Distgrids
-    ESMF_MeshCreateRedist%nodal_distgrid=nodalDistGrid
-    ESMF_MeshCreateRedist%element_distgrid=elementDistgrid
-
-
-    ! Same dimensions as input mesh
-    ESMF_MeshCreateRedist%spatialDim=mesh%spatialDim
-    ESMF_MeshCreateRedist%parametricDim=mesh%parametricDim
-
-    ! Set number of owned things
-    ESMF_MeshCreateRedist%numOwnedNodes=numNodeIds
-    ESMF_MeshCreateRedist%numOwnedElements=numElemIds
-
-
-    ! Will have same freed status as input mesh
-    ESMF_MeshCreateRedist%isCMeshFreed=mesh%isCMeshFreed
-
-    ! Will have same split status as input mesh
-    ESMF_MeshCreateRedist%hasSplitElem=mesh%hasSplitElem
-
-    ! Set as fully created
-    ESMF_MeshCreateRedist%isFullyCreated=.true.
-
+    ! Set as created
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateRedist)
 
     if (present(rc)) rc=ESMF_SUCCESS

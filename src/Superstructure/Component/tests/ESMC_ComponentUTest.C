@@ -186,6 +186,7 @@ int main(void){
   ESMC_State exportState;
   ESMC_GridComp gcomp;
   ESMC_CplComp cplcomp;
+  ESMC_SciComp scicomp;
   
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
@@ -483,7 +484,34 @@ int main(void){
   rc = ESMC_CplCompDestroy(&cplcomp);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-
+  
+  
+  // ESMC_SciComp tests
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Create ESMC_SciComp object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  scicomp = ESMC_SciCompCreate("science component in C", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Print ESMC_SciComp object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_SciCompPrint(scicomp);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Destroy ESMC_SciComp object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_SciCompDestroy(&scicomp);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
   
   // Garbage collection
     

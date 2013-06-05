@@ -1542,7 +1542,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayBundleGetInit, arraybundle, rc)
 
     ! Get filename length
-    len_fileName = len(trim(file))
+    len_fileName = len_trim(file)
 
     ! Set default flags
     opt_singlefileflag = ESMF_TRUE
@@ -3216,7 +3216,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if ( present(iofmt)) opt_iofmt = iofmt
 
     ! Get string lengths
-    len_fileName = len(trim(file))
+    len_fileName = len_trim(file)
 
     ! Call into the C++ interface, which will call IO object
     call c_esmc_arraybundlewrite(arraybundle, file, len_fileName,            &

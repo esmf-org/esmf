@@ -115,9 +115,9 @@ class ArrayBundle : public ESMC_Base {    // inherits from ESMC_Base class
     }
     int setName(char *name){return ESMC_BaseSetName(name, "ArrayBundle");}
     // read and write
-    int read(char *file, bool *singleFile,
+    int read(const char *file, bool *singleFile,
              int *timeslice, ESMC_IOFmt_Flag *iofmt);
-    int write(char *file, bool *singleFile,
+    int write(const char *file, bool *singleFile,
               bool *overwrite, ESMC_FileStatus_Flag *status,
               int *timeslice, ESMC_IOFmt_Flag *iofmt);
     // misc.

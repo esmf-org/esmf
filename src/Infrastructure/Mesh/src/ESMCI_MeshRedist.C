@@ -40,7 +40,11 @@
 static const char *const version = "$Id: ESMCI_MeshRedist.C,v 1.23 2012/01/06 20:17:51 svasquez Exp $";
 //-----------------------------------------------------------------------------
 
+
+
 namespace ESMCI {
+
+  void send_mesh_fields(Mesh *src_mesh, Mesh *dst_mesh, CommReg &stod_comm);
 
 
   void MeshRedist(Mesh *src_mesh, int num_node_gids, int *node_gids, 
@@ -54,29 +58,16 @@ namespace ESMCI {
     printf("%d :: e_gids=%d \n",i,elem_gids[i]);
   }
 #endif
+
+  // Create Mesh
+  Mesh *output_mesh=new Mesh();
+
+  // Set Mesh dimensions
+  output_mesh->set_spatial_dimension(src_mesh->spatial_dim());
+  output_mesh->set_parametric_dimension(src_mesh->parametric_dim());
+
+
     
-  // Create a distributed directory to figure out where the node should go.
-  DDir<> ndir;
-  
-  std::vector<UInt> n_lids(num_node_gids, 0);
-  std::vector<UInt> n_gids(num_node_gids, 0);
-   
-  for (int i=0; i<num_node_gids; i++) {
-    n_lids[i]=i;
-    if (node_gids[i]>=0) {
-      n_gids[i]=node_gids[i];
-    } else {
-      n_gids[i]=0;
-    }
-  }
-
-  if (num_node_gids) {
-    ndir.Create(num_node_gids, &n_gids[0], &n_lids[0]);
-  } else {
-    ndir.Create(0, (UInt*) NULL, (UInt *)NULL);
-  }
-
-
     
   // Create a distributed directory to figure out where the elems should go.
   DDir<> edir;
@@ -115,7 +106,7 @@ namespace ESMCI {
     elems.push_back(&elem);
   }
   
-  // Get number of gids
+  // Figure out where each element should go
   UInt num_src_gids=gids.size();
   std::vector<UInt> src_gids_proc(num_src_gids, 0);
   std::vector<UInt> src_gids_lids(num_src_gids, 0);
@@ -128,7 +119,7 @@ namespace ESMCI {
   }
 
 
-  // Setup list of mig nodes and destinations
+  // Setup migration pattern for elems
   std::vector<CommRel::CommNode> mignode;
   for (int i=0; i<num_src_gids; i++) {    
     CommRel::CommNode cn(elems[i],src_gids_proc[i]);
@@ -136,69 +127,23 @@ namespace ESMCI {
   }
   
   
-  // Create Mesh
-  Mesh *output_mesh=new Mesh();
-
-  // This is part of prep_meshes
-  output_mesh->set_spatial_dimension(src_mesh->spatial_dim());
-  output_mesh->set_parametric_dimension(src_mesh->parametric_dim());
-
   // Build Comm
-  CommReg dstComm;
-  CommRel &migration = dstComm.GetCommRel(MeshObj::ELEMENT); 
+  CommReg elemComm;
+  CommRel &migration = elemComm.GetCommRel(MeshObj::ELEMENT); 
   migration.Init("migration", *src_mesh, *output_mesh, false);
   migration.add_domain(mignode); 
 
   // Now flush out the comm with lower hierarchy
-  migration.dependants(dstComm.GetCommRel(MeshObj::NODE), MeshObj::NODE); 
-  migration.dependants(dstComm.GetCommRel(MeshObj::EDGE), MeshObj::EDGE);
-  migration.dependants(dstComm.GetCommRel(MeshObj::FACE), MeshObj::FACE);
-
-  // Contexts
-  // ...this is another part of prep_meshes
-  output_mesh->AssumeContexts(*src_mesh);
-  
-
-  // Register Fields on output mesh    
-  // ...this is the other part of prep_meshes
-  {
-    MEField<> *scoord = src_mesh->GetCoordField();
-    if (scoord != NULL) {
-      output_mesh->RegisterField("coordinates", scoord->GetMEFamily(),
-                                 MeshObj::ELEMENT, scoord->GetContext(), scoord->dim());
-    }
-
-    MEField<> *smask = src_mesh->GetField("mask");
-    if (smask != NULL) {
-      output_mesh->RegisterField("mask", smask->GetMEFamily(),
-                                 MeshObj::ELEMENT, smask->GetContext(), smask->dim());
-    }
-       
-    MEField<> *src_elem_mask = src_mesh->GetField("elem_mask");
-    if (src_elem_mask != NULL) {
-      output_mesh->RegisterField("elem_mask", src_elem_mask->GetMEFamily(),
-                                MeshObj::ELEMENT, src_elem_mask->GetContext(), src_elem_mask->dim());
-    }
-    
-    MEField<> *src_elem_area = src_mesh->GetField("elem_area");
-    if (src_elem_area != NULL) {
-      output_mesh->RegisterField("elem_area", src_elem_area->GetMEFamily(),
-       MeshObj::ELEMENT, src_elem_area->GetContext(), src_elem_area->dim());
-    }
-
-    MEField<> *src_elem_frac2 = src_mesh->GetField("elem_frac2");
-    if (src_elem_frac2 != NULL) {
-      output_mesh->RegisterField("elem_frac2", src_elem_frac2->GetMEFamily(),
-       MeshObj::ELEMENT, src_elem_frac2->GetContext(), src_elem_frac2->dim());
-    }
-  }
+  migration.dependants(elemComm.GetCommRel(MeshObj::NODE), MeshObj::NODE); 
+  migration.dependants(elemComm.GetCommRel(MeshObj::EDGE), MeshObj::EDGE);
+  migration.dependants(elemComm.GetCommRel(MeshObj::FACE), MeshObj::FACE);
 
 
   // And now the destination
-  dstComm.GetCommRel(MeshObj::NODE).build_range();
-  dstComm.GetCommRel(MeshObj::EDGE).build_range();
-  dstComm.GetCommRel(MeshObj::FACE).build_range();
-  dstComm.GetCommRel(MeshObj::ELEMENT).build_range();
+  elemComm.GetCommRel(MeshObj::NODE).build_range();
+  elemComm.GetCommRel(MeshObj::EDGE).build_range();
+  elemComm.GetCommRel(MeshObj::FACE).build_range();
+  elemComm.GetCommRel(MeshObj::ELEMENT).build_range();
 
 
   // Get list of nodes that don't have homes yet
@@ -228,7 +173,7 @@ namespace ESMCI {
   }
 #endif
 
- /* XMRKX */
+
 
   // Create DDir for nohome nodes
   DDir<> nhdir;
@@ -276,10 +221,9 @@ namespace ESMCI {
 #endif
 
   /////// Construct second send list to fill in missing nodes /////
-  {
 
     // Setup list of mig nodes and destinations
-    std::vector<CommRel::CommNode> mignode;
+    std::vector<CommRel::CommNode> nhmignode;
     
     // Get list of destinations
     for (int i=0; i<num_sn_gids; i++) {
@@ -296,27 +240,27 @@ namespace ESMCI {
         }
 
         CommRel::CommNode cn(elem, sn_gids_proc[i]);
-        mignode.push_back(cn);
+        nhmignode.push_back(cn);
       }
     }
 
     // Build Comm
-    CommReg dstComm;
-    CommRel &migration = dstComm.GetCommRel(MeshObj::ELEMENT); 
-    migration.Init("migration", *src_mesh, *output_mesh, false);
-    migration.add_domain(mignode); 
+    CommReg nhComm;
+    CommRel &nhmigration = nhComm.GetCommRel(MeshObj::ELEMENT); 
+    nhmigration.Init("migration", *src_mesh, *output_mesh, false);
+    nhmigration.add_domain(nhmignode); 
     
     // Now flush out the comm with lower hierarchy
-    migration.dependants(dstComm.GetCommRel(MeshObj::NODE), MeshObj::NODE); 
-    migration.dependants(dstComm.GetCommRel(MeshObj::EDGE), MeshObj::EDGE);
-    migration.dependants(dstComm.GetCommRel(MeshObj::FACE), MeshObj::FACE);
+    nhmigration.dependants(nhComm.GetCommRel(MeshObj::NODE), MeshObj::NODE); 
+    nhmigration.dependants(nhComm.GetCommRel(MeshObj::EDGE), MeshObj::EDGE);
+    nhmigration.dependants(nhComm.GetCommRel(MeshObj::FACE), MeshObj::FACE);
     
     // And now the destination
-    dstComm.GetCommRel(MeshObj::NODE).build_range();
-    dstComm.GetCommRel(MeshObj::EDGE).build_range();
-    dstComm.GetCommRel(MeshObj::FACE).build_range();
-    dstComm.GetCommRel(MeshObj::ELEMENT).build_range();
-  }
+    nhComm.GetCommRel(MeshObj::NODE).build_range();
+    nhComm.GetCommRel(MeshObj::EDGE).build_range();
+    nhComm.GetCommRel(MeshObj::FACE).build_range();
+    nhComm.GetCommRel(MeshObj::ELEMENT).build_range();
+
  
 
 
@@ -378,6 +322,27 @@ namespace ESMCI {
 
   // Assign node owners
   {
+    // Create a distributed directory to figure out where teach node should go.
+    DDir<> ndir;
+    
+    std::vector<UInt> n_lids(num_node_gids, 0);
+    std::vector<UInt> n_gids(num_node_gids, 0);
+    
+    for (int i=0; i<num_node_gids; i++) {
+      n_lids[i]=i;
+      if (node_gids[i]>=0) {
+        n_gids[i]=node_gids[i];
+      } else {
+        n_gids[i]=0;
+      }
+    }
+    
+    if (num_node_gids) {
+      ndir.Create(num_node_gids, &n_gids[0], &n_lids[0]);
+    } else {
+      ndir.Create(0, (UInt*) NULL, (UInt *)NULL);
+    }
+
     // Get a list of the Mesh elem with gids 
     MeshDB::iterator ni = output_mesh->node_begin(), ne = output_mesh->node_end();
     
@@ -432,71 +397,126 @@ namespace ESMCI {
   }
 
 
+
+  // Set node data indexes
+  {
+     // Set to -1 to mark which ones aren't set next
+    MeshDB::iterator ni = output_mesh->node_begin(), ne = output_mesh->node_end();
+    for (; ni != ne; ++ni) {
+      MeshObj &node=*ni;
+     
+      *(node.get_data_index_ptr())=-1;
+    }    
+
+    for (int i=0; i<num_node_gids; i++) {
+       Mesh::MeshObjIDMap::iterator mi =  output_mesh->map_find(MeshObj::NODE, node_gids[i]);
+      if (mi != output_mesh->map_end(MeshObj::NODE)) {
+        
+        // Get the node
+        MeshObj &node = *mi; 
+        
+        // Set it to it's position in the list
+        *(node.get_data_index_ptr())=i;
+      }
+    }
+
+     // Set non-local to after local
+    int index=num_node_gids;
+    ni = output_mesh->node_begin();
+    for (; ni != ne; ++ni) {
+      MeshObj &node=*ni;
+ 
+      if (node.get_data_index()==-1) {
+        *(node.get_data_index_ptr())=index;
+        index++;
+      }
+    }    
+  }
+
+
+  // Set element data indexes
+  {
+     // Set to -1 to mark which ones aren't set next
+    MeshDB::iterator ei = output_mesh->elem_begin(), ee = output_mesh->elem_end();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem=*ei;
+     
+      *(elem.get_data_index_ptr())=-1;
+    }    
+
+    for (int i=0; i<num_elem_gids; i++) {
+       Mesh::MeshObjIDMap::iterator mi =  output_mesh->map_find(MeshObj::ELEMENT, elem_gids[i]);
+      if (mi != output_mesh->map_end(MeshObj::ELEMENT)) {
+        
+        // Get the elem
+        MeshObj &elem = *mi; 
+        
+        // Set it to it's position in the list
+        *(elem.get_data_index_ptr())=i;
+      }
+    }
+
+     // Set non-local to after local
+    int index=num_elem_gids;
+    ei = output_mesh->elem_begin();
+    for (; ei != ee; ++ei) {
+      MeshObj &elem=*ei;
+ 
+      if (elem.get_data_index()==-1) {
+        *(elem.get_data_index_ptr())=index;
+        index++;
+      }
+    }    
+  }
+
+
+  // Contexts
+  // ...this is another part of prep_meshes
+  output_mesh->AssumeContexts(*src_mesh);
+  
+
+  // Register Fields on output mesh    
+  {
+    MEField<> *scoord = src_mesh->GetCoordField();
+    if (scoord != NULL) {
+      output_mesh->RegisterField("coordinates", scoord->GetMEFamily(),
+                                 MeshObj::ELEMENT, scoord->GetContext(), scoord->dim());
+    }
+
+    MEField<> *smask = src_mesh->GetField("mask");
+    if (smask != NULL) {
+      output_mesh->RegisterField("mask", smask->GetMEFamily(),
+                                 MeshObj::ELEMENT, smask->GetContext(), smask->dim());
+    }
+       
+    MEField<> *src_elem_mask = src_mesh->GetField("elem_mask");
+    if (src_elem_mask != NULL) {
+      output_mesh->RegisterField("elem_mask", src_elem_mask->GetMEFamily(),
+                                MeshObj::ELEMENT, src_elem_mask->GetContext(), src_elem_mask->dim());
+    }
+    
+    MEField<> *src_elem_area = src_mesh->GetField("elem_area");
+    if (src_elem_area != NULL) {
+      output_mesh->RegisterField("elem_area", src_elem_area->GetMEFamily(),
+       MeshObj::ELEMENT, src_elem_area->GetContext(), src_elem_area->dim());
+    }
+
+    MEField<> *src_elem_frac2 = src_mesh->GetField("elem_frac2");
+    if (src_elem_frac2 != NULL) {
+      output_mesh->RegisterField("elem_frac2", src_elem_frac2->GetMEFamily(),
+       MeshObj::ELEMENT, src_elem_frac2->GetContext(), src_elem_frac2->dim());
+    }
+  }
+
+
    // Commit Mesh
   output_mesh->Commit();
   
-  // Pack up and send fields
-  // Can these be combined with the above
+  // Send mesh fields (coords, etc) between src_mesh and output_mesh using elemComm
+  send_mesh_fields(src_mesh, output_mesh, elemComm);
 
-  {
-    int num_snd=0;
-    MEField<> *snd[5],*rcv[5];
-
-    MEField<> *dc = src_mesh->GetCoordField();
-    MEField<> *dc_r = output_mesh->GetCoordField();
-
-    // load coordinate fields
-    snd[num_snd]=dc;
-    rcv[num_snd]=dc_r;
-    num_snd++;            
-
-    // Do masks if necessary
-    MEField<> *dm = src_mesh->GetField("mask");
-    if (dm != NULL) {
-      MEField<> *dm_r = output_mesh->GetField("mask");
-
-      // load mask fields
-      snd[num_snd]=dm;
-      rcv[num_snd]=dm_r;
-      num_snd++;            
-    }
-
-    // Do elem masks if necessary
-    MEField<> *dem = src_mesh->GetField("elem_mask");
-    if (dem != NULL) {
-      MEField<> *dem_r = output_mesh->GetField("elem_mask");
-
-      // load mask fields
-      snd[num_snd]=dem;
-      rcv[num_snd]=dem_r;
-      num_snd++;            
-    }
-
-    // Do elem area if necessary
-    MEField<> *dea = src_mesh->GetField("elem_area");
-    if (dea != NULL) {
-      MEField<> *dea_r = output_mesh->GetField("elem_area");
-
-      // load mask fields
-      snd[num_snd]=dea;
-      rcv[num_snd]=dea_r;
-      num_snd++;            
-    }
-
-    // Do elem creeped frac if necessary
-    MEField<> *def = src_mesh->GetField("elem_frac2");
-    if (def != NULL) {
-      MEField<> *def_r = output_mesh->GetField("elem_frac2");
-
-      // load mask fields
-      snd[num_snd]=def;
-      rcv[num_snd]=def_r;
-      num_snd++;            
-    }
-
-    // Actually communicate fields
-     dstComm.SendFields(num_snd, snd, rcv);
-  } 
+  // Send mesh fields (coords, etc) between src_mesh and output_mesh using nhComm
+  send_mesh_fields(src_mesh, output_mesh, nhComm);
 
 
 #if 0
@@ -529,6 +549,68 @@ namespace ESMCI {
   // Output 
   *_output_mesh=output_mesh;
 }
+
+
+  // Pack up and send fields from source to dest mesh using stod_comm
+  void send_mesh_fields(Mesh *src_mesh, Mesh *dst_mesh, CommReg &stod_comm) {
+    int num_snd=0;
+    MEField<> *snd[5],*rcv[5];
+
+    MEField<> *dc = src_mesh->GetCoordField();
+    MEField<> *dc_r = dst_mesh->GetCoordField();
+
+    // load coordinate fields
+    snd[num_snd]=dc;
+    rcv[num_snd]=dc_r;
+    num_snd++;            
+
+    // Do masks if necessary
+    MEField<> *dm = src_mesh->GetField("mask");
+    if (dm != NULL) {
+      MEField<> *dm_r = dst_mesh->GetField("mask");
+
+      // load mask fields
+      snd[num_snd]=dm;
+      rcv[num_snd]=dm_r;
+      num_snd++;            
+    }
+
+    // Do elem masks if necessary
+    MEField<> *dem = src_mesh->GetField("elem_mask");
+    if (dem != NULL) {
+      MEField<> *dem_r = dst_mesh->GetField("elem_mask");
+
+      // load mask fields
+      snd[num_snd]=dem;
+      rcv[num_snd]=dem_r;
+      num_snd++;            
+    }
+
+    // Do elem area if necessary
+    MEField<> *dea = src_mesh->GetField("elem_area");
+    if (dea != NULL) {
+      MEField<> *dea_r = dst_mesh->GetField("elem_area");
+
+      // load mask fields
+      snd[num_snd]=dea;
+      rcv[num_snd]=dea_r;
+      num_snd++;            
+    }
+
+    // Do elem creeped frac if necessary
+    MEField<> *def = src_mesh->GetField("elem_frac2");
+    if (def != NULL) {
+      MEField<> *def_r = dst_mesh->GetField("elem_frac2");
+
+      // load mask fields
+      snd[num_snd]=def;
+      rcv[num_snd]=def_r;
+      num_snd++;            
+    }
+
+    // Actually communicate fields
+     stod_comm.SendFields(num_snd, snd, rcv);
+  } 
 
 
 

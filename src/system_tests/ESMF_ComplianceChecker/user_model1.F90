@@ -34,7 +34,7 @@ module user_model1
     type(ESMF_GridComp)   :: comp
     integer, intent(out)  :: rc
     
-#ifdef ESMF_TESTWITHTHREADS
+#ifdef ESMF_TESTWITHTHREADS_disabled
     type(ESMF_VM) :: vm
     logical       :: pthreadsEnabled
 #endif
@@ -42,7 +42,7 @@ module user_model1
     ! Initialize user return code
     rc = ESMF_SUCCESS
 
-#ifdef ESMF_TESTWITHTHREADS
+#ifdef ESMF_TESTWITHTHREADS_disabled
     ! The following call will turn on ESMF-threading (single threaded)
     ! for this component. If you are using this file as a template for
     ! your own code development you probably don't want to include the

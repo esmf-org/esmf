@@ -81,13 +81,13 @@
 !EOPI
 
       integer, parameter :: ESMF_VERSION_MAJOR        = 6
-      integer, parameter :: ESMF_VERSION_MINOR        = 2
+      integer, parameter :: ESMF_VERSION_MINOR        = 3
       integer, parameter :: ESMF_VERSION_REVISION     = 0
       integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 0
       logical, parameter :: ESMF_VERSION_PUBLIC       = .false.
       logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .true.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "6.2.0 beta snapshot"
+      character(*), parameter :: ESMF_VERSION_STRING  = "6.3.0 beta snapshot"
 
 !------------------------------------------------------------------------------
 !

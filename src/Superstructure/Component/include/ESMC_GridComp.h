@@ -75,12 +75,6 @@ ESMC_GridComp ESMC_GridCompCreate(
 //  \begin{description}
 //  \item[name]
 //    Name of the newly-created {\tt ESMC\_GridComp}.
-//  \item[mtype]
-//   {\tt ESMC\_GridComp} model type, where models includes {\tt ESMF\_ATM},
-//   {\tt ESMF\_LAND}, {\tt ESMF\_OCEAN}, {\tt ESMF\_SEAICE}, {\tt ESMF\_RIVER},
-//   and {\tt ESMF\_GRIDCOMPTYPE\_UNKNOWN}. Note that this has no meaning to the
-//   framework, it is an annotation for user code to query. See section
-//   \ref{opt:gridcomptype} for a complete list of valid types. 
 //  \item[configFile]
 //   The filename of an {\tt ESMC\_Config} format file. If specified, this file
 //   is opened an {\tt ESMC\_Config}  configuration object is created for the
@@ -362,7 +356,7 @@ int ESMC_GridCompSetEntryPoint(
 //  \begin{sloppypar}
 //    One of a set of predefined Component methods 
 //    - e.g. {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN},
-//    {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{opt:method}
+//    {\tt ESMF\_METHOD\_FINALIZE}. See section~\ref{const:cmethod}
 //    for a complete list of valid method options. 
 //  \end{sloppypar}
 //  \item[userRoutine]

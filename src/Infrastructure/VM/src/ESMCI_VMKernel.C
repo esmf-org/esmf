@@ -5025,6 +5025,28 @@ int VMK::ipmutexunlock(ipmutex *ipm){
 }
 
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~ Simple thread-safety lock/unlock using internal pth_mutex
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+int VMK::lock(){
+#ifndef ESMF_NO_PTHREADS
+  return pthread_mutex_lock(pth_mutex);
+#else
+  return 0;
+#endif
+}
+
+int VMK::unlock(){
+#ifndef ESMF_NO_PTHREADS
+  return pthread_mutex_unlock(pth_mutex);
+#else
+  return 0;
+#endif
+}
+
 } // namespace ESMCI
 
 

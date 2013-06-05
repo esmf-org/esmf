@@ -137,6 +137,20 @@
       end interface
 !
 !------------------------------------------------------------------------------
+!! !IROUTINE: ESMF_ConfigEQ - Test objects for equivalence
+!
+! !INTERFACE:
+    interface operator(==)
+        module procedure ESMF_ConfigEQ
+    end interface
+
+    interface operator(/=)
+        module procedure ESMF_ConfigNE
+    end interface
+
+    public :: operator(==), operator(/=)
+!
+!------------------------------------------------------------------------------
 ! PRIVATE PARAMETER  SETTINGS:
 !------------------------------------------------------------------------------
 ! Revised parameter table to fit Fortran 90 standard.
@@ -199,7 +213,7 @@
           sequence
 #endif
           !private       
-          type (ESMF_ConfigClass), pointer :: cptr
+          type (ESMF_ConfigClass), pointer :: cptr => null ()
           ESMF_INIT_DECLARE
        end type ESMF_Config
 
@@ -220,9 +234,9 @@
 !
 !
 ! !DESCRIPTION:
-!   Assign config1 as an alias to the same ESMF Config object in memory
-!   as config2. If config2 is invalid, then config1 will be equally invalid after
-!   the assignment.
+!   Assign {\tt config1} as an alias to the same {\tt ESMF\_Config} object in memory
+!   as {\tt config2}. If {\tt config2} is invalid, then {\tt config1} will be
+!   equally invalid after the assignment.
 !
 !   The arguments are:
 !   \begin{description}
@@ -231,6 +245,85 @@
 !   \item[config2]
 !     The {\tt ESMF\_Config} object on the right hand side of the assignment.
 !   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+! IMPLEMENTATION NOTE:
+! Use the default Fortran assignment
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_ConfigOperator(==) - Test if Config objects are equivalent
+!
+! !INTERFACE:
+!     interface operator(==)
+!     if (config1 == config2) then ... endif
+!                  OR
+!     result = (config1 == config2)
+!
+! !RETURN VALUE:
+!     configical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_Config), intent(in) :: config1
+!     type(ESMF_Config), intent(in) :: config2
+!
+!
+! !DESCRIPTION:
+!     Overloads the (==) operator for the {\tt ESMF\_Config} class.
+!     Compare two configs for equality; return {\tt .true.} if equal,
+!     {\tt .false.} otherwise. Comparison is based on whether the objects
+!     are distinct, as with two newly created objects, or are simply aliases
+!     to the same object as would be the case when assignment was involved.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[config1]
+!          The {\tt ESMF\_Config} object on the left hand side of the equality
+!          operation.
+!     \item[config2]
+!          The {\tt ESMF\_Config} object on the right hand side of the equality
+!          operation.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_ConfigOperator(/=) - Test if Config objects are not equivalent
+!
+! !INTERFACE:
+!     interface operator(/=)
+!     if (config1 /= config2) then ... endif
+!                  OR
+!     result = (config1 /= config2)
+!
+! !RETURN VALUE:
+!     configical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_Config), intent(in) :: config1
+!     type(ESMF_Config), intent(in) :: config2
+!
+!
+! !DESCRIPTION:
+!     Overloads the (/=) operator for the {\tt ESMF\_Config} class.
+!     Compare two configs for equality; return {\tt .true.} if not equivalent,
+!     {\tt .false.} otherwise. Comparison is based on whether the Config objects
+!     are distinct, as with two newly created objects, or are simply aliases
+!     to the same object as would be the case when assignment was involved.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[config1]
+!          The {\tt ESMF\_Config} object on the left hand side of the equality
+!          operation.
+!     \item[config2]
+!          The {\tt ESMF\_Config} object on the right hand side of the equality
+!          operation.
+!     \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -2935,6 +3028,58 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
 
     end subroutine ESMF_ConfigValidate
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigEQ()"
+!BOPI
+! !IROUTINE:  ESMF_ConfigEQ - Compare two Config objects for equality
+!
+! !INTERFACE:
+  function ESMF_ConfigEQ(Config1, Config2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_ConfigEQ
+
+! !ARGUMENTS:
+    type(ESMF_Config), intent(in) :: Config1
+    type(ESMF_Config), intent(in) :: Config2
+
+! !DESCRIPTION:
+!     This method overloads the (==) operator for the {\tt ESMF\_Config}
+!     class.  See "interface operator(==)" above for complete description.
+!
+!EOPI
+
+    ESMF_ConfigEQ = associated (Config1%cptr, Config2%cptr)
+
+  end function ESMF_ConfigEQ
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ConfigNE()"
+!BOPI
+! !IROUTINE:  ESMF_ConfigEQ - Compare two Config objects for inequality
+!
+! !INTERFACE:
+  function ESMF_ConfigNE(Config1, Config2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_ConfigNE
+
+! !ARGUMENTS:
+    type(ESMF_Config), intent(in) :: Config1
+    type(ESMF_Config), intent(in) :: Config2
+
+! !DESCRIPTION:
+!     This method overloads the (/=) operator for the {\tt ESMF\_Config}
+!     class.  See "interface operator(==)" above for complete description.
+!
+!EOPI
+
+    ESMF_ConfigNE = .not. associated (Config1%cptr, Config2%cptr)
+
+  end function ESMF_ConfigNE
 
 
 !-----------------------------------------------------------------------

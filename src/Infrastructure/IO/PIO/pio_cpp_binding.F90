@@ -32,6 +32,8 @@ subroutine pio_cpp_init_intracom_int(comp_rank, comp_comm, num_iotasks,      &
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_init
 
+  implicit none
+
   !  dummy arguments
   integer(c_int), value :: comp_rank
   integer(c_int), value :: comp_comm
@@ -86,6 +88,8 @@ subroutine pio_cpp_init_intercom_int(component_count, peer_comm, comp_comms,  &
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_init
 
+  implicit none
+
   !  dummy arguments
   integer(c_int), value :: component_count
   integer(c_int), value :: peer_comm
@@ -137,6 +141,8 @@ subroutine pio_cpp_finalize(iosystem_handle, ierr) bind(c)
 
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_finalize
+
+  implicit none
 
   !  dummy arguments
   integer(c_int), intent(inout) :: iosystem_handle
@@ -195,6 +201,8 @@ subroutine pio_cpp_initdecomp_dof_io(iosystem_handle, basepiotype, dims,      &
 
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_initdecomp
+
+  implicit none
 
   !  dummy arguments
   integer(c_int), intent(in) :: iosystem_handle
@@ -266,6 +274,8 @@ subroutine pio_cpp_initdecomp_dof(iosystem_handle, basepiotype, dims,         &
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_initdecomp
 
+  implicit none
+
   !  dummy arguments
   integer(c_int), intent(in) :: iosystem_handle
   integer(c_int), value      :: basepiotype
@@ -330,6 +340,8 @@ subroutine pio_cpp_initdecomp_dof_dof(iosystem_handle, basepiotype, dims,     &
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_initdecomp
 
+  implicit none
+
   !  dummy arguments
   integer(c_int), intent(in) :: iosystem_handle
   integer(c_int), value :: basepiotype
@@ -389,6 +401,8 @@ function pio_cpp_openfile(iosystem_handle, file, iotype, fname, mode)         &
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_openfile
   use esmfpio_cpp_utils, only: f_chars, c_len, max_path_len, get_pio_iosys_handle
+
+  implicit none
 
   !  function result
   integer(c_int) :: ierr
@@ -460,6 +474,8 @@ subroutine pio_cpp_syncfile(file) bind(c)
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_syncfile
 
+  implicit none
+
   !  dummy arguments
   type(c_ptr), value :: file
 
@@ -496,6 +512,8 @@ function pio_cpp_createfile(iosystem_handle, file, iotype, fname, amode_in)   &
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_createfile
   use esmfpio_cpp_utils, only: f_chars, c_len, max_path_len, get_pio_iosys_handle
+
+  implicit none
 
   !  function result
   integer(c_int) :: ierr
@@ -567,6 +585,8 @@ subroutine pio_cpp_closefile(file) bind(c)
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_closefile
 
+  implicit none
+
   !  dummy arguments
   type(c_ptr), value :: file
 
@@ -604,6 +624,8 @@ subroutine pio_cpp_setiotype(file, iotype, rearr) bind(c)
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_setiotype
 
+  implicit none
+
   !  dummy arguments
   type(c_ptr), value :: file
   integer(c_int), value :: iotype
@@ -639,6 +661,8 @@ function pio_cpp_numtoread(iodesc) result(num) bind(c)
 
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_numtoread
+
+  implicit none
 
   !  function result
   integer(c_int) :: num
@@ -680,6 +704,8 @@ function pio_cpp_numtowrite(iodesc) result(num) bind(c)
 
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_numtowrite
+
+  implicit none
 
   !  function result
   integer(c_int) :: num
@@ -725,6 +751,8 @@ subroutine pio_cpp_setframe(vardesc, frame) bind(c)
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_setframe
 
+  implicit none
+
   !  dummy arguments
   type(c_ptr), value :: vardesc
   integer(c_int), value :: frame
@@ -760,6 +788,8 @@ subroutine pio_cpp_advanceframe(vardesc) bind(c)
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_advanceframe
 
+  implicit none
+
   !  dummy arguments
   type(c_ptr), value :: vardesc
 
@@ -794,6 +824,8 @@ subroutine pio_cpp_setdebuglevel(level) bind(c)
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_setdebuglevel
 
+  implicit none
+
   !  dummy arguments
   integer(c_int), value :: level
 
@@ -821,6 +853,8 @@ subroutine pio_cpp_seterrorhandlingf(file, method) bind(c)
 
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_seterrorhandling
+
+  implicit none
 
   !  dummy arguments
   type(c_ptr), value :: file
@@ -860,6 +894,8 @@ subroutine pio_cpp_seterrorhandlingi(iosystem_handle, method) bind(c)
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_seterrorhandling
 
+  implicit none
+
   !  dummy arguments
   integer(c_int), intent(in) :: iosystem_handle
   integer(c_int), value :: method
@@ -894,6 +930,8 @@ function pio_cpp_get_local_array_size(iodesc) result(siz) bind(c)
 
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_get_local_array_size
+
+  implicit none
 
   !  function result
   integer(c_int) :: siz
@@ -939,6 +977,8 @@ subroutine pio_cpp_freedecomp_ios(iosystem_handle, iodesc) bind(c)
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_freedecomp
 
+  implicit none
+
   !  dummy arguments
   integer(c_int), intent(in) :: iosystem_handle
   type(c_ptr), value :: iodesc
@@ -983,6 +1023,8 @@ subroutine pio_cpp_freedecomp_file(file, iodesc) bind(c)
 
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_freedecomp
+
+  implicit none
 
   !  dummy arguments
   type(c_ptr), value :: file
@@ -1064,6 +1106,8 @@ subroutine pio_cpp_getnumiotasks(iosystem_handle, numiotasks) bind(c)
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_getnumiotasks
 
+  implicit none
+
   !  dummy arguments
   integer(c_int), intent(in) :: iosystem_handle
   integer(c_int) :: numiotasks
@@ -1103,6 +1147,8 @@ subroutine pio_cpp_set_hint(iosystem_handle, hint, hintval) bind(c)
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_set_hint
   use esmfpio_cpp_utils, only: f_chars, c_len, max_string_len, get_pio_iosys_handle
+
+  implicit none
 
   !  dummy arguments
   integer(c_int), intent(in) :: iosystem_handle
@@ -1176,6 +1222,8 @@ function pio_cpp_getnum_ost(iosystem_handle) result(numost) bind(c)
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_getnum_ost
 
+  implicit none
+
   !  function result
   integer(c_int) :: numost
 
@@ -1224,6 +1272,8 @@ subroutine pio_cpp_setnum_ost(iosystem_handle, numost) bind(c)
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_setnum_ost
 
+  implicit none
+
   !  dummy arguments
   integer(c_int), intent(in) :: iosystem_handle
   integer(c_int) :: numost
@@ -1259,6 +1309,8 @@ function pio_cpp_file_is_open(file) result(is_open) bind(c)
 
   !  import pio procedure signatures
   use esmfpiolib_mod, only: pio_file_is_open
+
+  implicit none
 
   !  function result
   logical(c_bool) :: is_open

@@ -112,8 +112,8 @@ deallocated with the {\tt ESMC\_ClockDestroy()} call.
 
 See Section \ref{sec:overallimpl}, Overall Design and Implementation 
 Notes, for a brief discussion of deep and shallow classes from 
-an implementation perspective.  For an in-depth look at the design 
-and inter-language issues related to deep and shallow classes,
+an implementation perspective.  For an in-depth look at the design
+ and inter-language issues related to deep and shallow classes,
 see the \htmladdnormallink{{\it ESMF Implementation Report}}{http://www.earthsystemmodeling.org/documents/IMPL\_repdoc/}.
 
 \subsection{Special Methods}
@@ -473,3 +473,23 @@ comparison.
 %for a count of attributes and retrieving names and values
 %by index number.
 
+
+
+\section{Overall Design and Implementation Notes}
+\label{sec:overallimpl}
+
+\begin{enumerate}
+
+\item {\bf Deep and shallow classes.}  The deep and shallow classes 
+described in Section \ref{sec:deepshallow} differ in how and where they
+are allocated within a multi-language implementation environment.  We
+distinguish between the implementation language, which is the language
+a method is written in, and the calling language, which is the language
+that the user application is written in.  Deep classes are allocated 
+off the process heap by the implementation language.  Shallow classes
+are allocated off the stack by the calling language.  
+
+\item {\bf Base class.} All ESMF classes are built upon a Base class,
+which holds a small set of system-wide capabilities.  
+
+\end{enumerate}

@@ -70,7 +70,7 @@ int ESMC_ArraySpecGet(
 //  \item[rank]
 //    Array rank (dimensionality - 1D, 2D, etc). Maximum allowed is 7D.
 //  \item[typekind]
-//    Array typekind. See section ?? for valid values.
+//    Array typekind. See section~\ref{const:ctypekind} for valid values.
 //  \end{description}
 //
 //EOP
@@ -100,7 +100,7 @@ int ESMC_ArraySpecSet(
 //  \item[rank]
 //    Array rank (dimensionality - 1D, 2D, etc). Maximum allowed is 7D.
 //  \item[typekind]
-//    Array typekind. See section ?? for valid values.
+//    Array typekind. See section~\ref{const:ctypekind} for valid values.
 //  \end{description}
 //
 //EOP

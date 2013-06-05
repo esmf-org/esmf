@@ -215,18 +215,20 @@ end type ESMF_LogPrivate
    public ESMF_LogMsg_Flag
 
 !  Overloaded = operator functions
-   public operator(==),operator(>)
+   public :: operator(==), operator(/=), operator(>)
    
 ! overload == and > with additional derived types so you can compare 
 !  them as if they were simple integers.
  
 
 interface operator (==)
+   module procedure ESMF_LogEQ
    module procedure ESMF_lmteq
    module procedure ESMF_llteq
 end interface
 
 interface operator (/=)
+   module procedure ESMF_LogNE
    module procedure ESMF_lltne
 end interface
 
@@ -260,9 +262,9 @@ contains
 !
 !
 ! !DESCRIPTION:
-!   Assign log1 as an alias to the same ESMF Log object in memory
-!   as log2. If log2 is invalid, then log1 will be equally invalid after
-!   the assignment.
+!   Assign {\tt log1} as an alias to the same {\tt ESMF\_Log} object in memory
+!   as {\tt log2}. If {\tt log2} is invalid, then {\tt log1} will be
+!   equally invalid after the assignment.
 !
 !   The arguments are:
 !   \begin{description}
@@ -271,6 +273,85 @@ contains
 !   \item[log2]
 !     The {\tt ESMF\_Log} object on the right hand side of the assignment.
 !   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+! IMPLEMENTATION NOTE:
+! Use the default Fortran assignment
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_LogOperator(==) - Test if Log 1 is equivalent to Log 2
+!
+! !INTERFACE:
+!     interface operator(==)
+!     if (log1 == log2) then ... endif
+!                  OR
+!     result = (log1 == log2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_Log), intent(in) :: log1
+!     type(ESMF_Log), intent(in) :: log2
+!
+!
+! !DESCRIPTION:
+!     Overloads the (==) operator for the {\tt ESMF\_Log} class.
+!     Compare two logs for equality; return {\tt .true.} if equal,
+!     {\tt .false.} otherwise. Comparison is based on whether the objects
+!     are distinct, as with two newly created logs, or are simply aliases
+!     to the same log as would be the case when assignment was involved.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[log1]
+!          The {\tt ESMF\_Log} object on the left hand side of the equality
+!          operation.
+!     \item[log2]
+!          The {\tt ESMF\_Log} object on the right hand side of the equality
+!          operation.
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_LogOperator(/=) - Test if Log 1 is not equivalent to Log 2
+!
+! !INTERFACE:
+!     interface operator(/=)
+!     if (log1 /= log2) then ... endif
+!                  OR
+!     result = (log1 /= log2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:
+!     type(ESMF_Log), intent(in) :: log1
+!     type(ESMF_Log), intent(in) :: log2
+!
+!
+! !DESCRIPTION:
+!     Overloads the (/=) operator for the {\tt ESMF\_Log} class.
+!     Compare two logs for inequality; return {\tt .true.} if equal,
+!     {\tt .false.} otherwise.  Comparison is based on whether the objects
+!     are distinct, as with two newly created logs, or are simply aliases
+!     to the same log as would be the case when assignment was involved.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[log1]
+!          The {\tt ESMF\_Log} object on the left hand side of the non-equality
+!          operation.
+!     \item[log2]
+!          The {\tt ESMF\_Log} object on the right hand side of the non-equality
+!          operation.
+!     \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
@@ -880,13 +961,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!      This function returns {\tt .true.} when a Fortran status code
-!      returned from a memory allocation indicates an allocation error.
-!      An ESMF predefined memory allocation error message 
-!      will be added to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
-!      {\tt line}, {\tt file} and 
-!      {\tt method}.  Additionally, statusToCheck will be converted to 
-!      {\tt rcToReturn}.
+!      This function returns {\tt .true.} when {\tt statusToCheck} indicates
+!      an allocation error, otherwise it returns {\tt .false.}.  The status
+!      value is typically returned from a Fortran ALLOCATE statement.
+!      If an error is indicated, a ESMF memory allocation error message 
+!      will be written to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
+!      {\tt line}, {\tt file} and {\tt method}.
 !
 !      The arguments are:
 !      \begin{description}
@@ -990,13 +1070,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!      This function returns {\tt .true.} when a Fortran status code
-!      returned from a memory deallocation indicates an deallocation error.
-!      An ESMF predefined memory deallocation error message 
-!      will be added to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
-!      {\tt line}, {\tt file} and 
-!      {\tt method}.  Additionally, statusToCheck will be converted to 
-!      {\tt rcToReturn}.
+!      This function returns {\tt .true.} when {\tt statusToCheck} indicates
+!      a deallocation error, otherwise it returns {\tt .false.}.  The status
+!      value is typically returned from a Fortran DEALLOCATE statement.
+!      If an error is indicated, a ESMF memory allocation error message 
+!      will be written to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
+!      {\tt line}, {\tt file} and {\tt method}.
 !
 !      The arguments are:
 !      \begin{description}
@@ -1101,16 +1180,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!      This function returns {\tt .true.} for ESMF return codes that indicate
-!      an error.  A predefined error message will added to the {\tt ESMF\_Log} 
-!      along with
-!      a user added {\tt msg}, {\tt line}, {\tt file} and {\tt method}.  
-!      Additionally, {\tt rcToReturn} is set to {\tt rcToCheck}.
+!      This function returns {\tt .true.} when {\tt rcToCheck} indicates
+!      an return code other than {\tt ESMF\_SUCCESS}, otherwise it returns
+!      {\tt .false.}.
+!      If an error is indicated, a ESMF predefined error message 
+!      will be written to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
+!      {\tt line}, {\tt file} and {\tt method}.
 !
 !      The arguments are:
 !      \begin{description}
 ! 	
-!      \item [{[rcToCheck}]]
+!      \item [{[rcToCheck]}]
 !            Return code to check. Default is {\tt ESMF\_SUCCESS}.
 !      \item [{[msg]}]
 !            User-provided message string.
@@ -1123,8 +1203,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            User-provided method string.
 !      \item [{[rcToReturn]}]
 !            If specified, when {\tt rcToCheck} indicates an error,
-!            set the {\tt rcToReturn} value to {\tt ESMF\_RC\_MEM}.  Otherwise,
-!            {\tt rcToReturn} is not modified.
+!            set the {\tt rcToReturn} to the value of {\tt rcToCheck}.
+!            Otherwise, {\tt rcToReturn} is not modified.
 !            This is not the return code for this function; it allows
 !            the calling code to do an assignment of the error code
 !            at the same time it is testing the value.
@@ -2144,6 +2224,58 @@ end subroutine ESMF_LogWrite
     endif
 
 end subroutine ESMF_LogEntryCopy
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogEQ()"
+!BOPI
+! !IROUTINE:  ESMF_LogEQ - Compare two Logs for equality
+!
+! !INTERFACE:
+  function ESMF_LogEQ(log1, log2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_LogEQ
+
+! !ARGUMENTS:
+    type(ESMF_Log), intent(in) :: log1
+    type(ESMF_Log), intent(in) :: log2
+
+! !DESCRIPTION:
+!     This method overloads the (==) operator for the {\tt ESMF\_Log}
+!     class.  See "interface operator(==)" above for complete description.
+!
+!EOPI
+
+    ESMF_LogEQ = log1%logTableIndex == log2%logTableIndex
+
+  end function ESMF_LogEQ
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LogNE()"
+!BOPI
+! !IROUTINE:  ESMF_LogEQ - Compare two Logs for inequality
+!
+! !INTERFACE:
+  function ESMF_LogNE(log1, log2)
+!
+! !RETURN VALUE:
+    logical :: ESMF_LogNE
+
+! !ARGUMENTS:
+    type(ESMF_Log), intent(in) :: log1
+    type(ESMF_Log), intent(in) :: log2
+
+! !DESCRIPTION:
+!     This method overloads the (/=) operator for the {\tt ESMF\_Log}
+!     class.  See "interface operator(==)" above for complete description.
+!
+!EOPI
+
+    ESMF_LogNE = log1%logTableIndex /= log2%logTableIndex
+
+  end function ESMF_LogNE
 
 end module ESMF_LogErrMod
 

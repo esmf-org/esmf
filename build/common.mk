@@ -296,6 +296,10 @@ ifeq ($(ESMF_MACHINE),x86_64)
 # and x86_64
 export ESMF_ABI = 64
 endif
+ifeq ($(ESMF_MACHINE),ppc64)
+# and ppc64
+export ESMF_ABI = 64
+endif
 endif
 
 ifeq ($(ESMF_OS),Darwin)
@@ -1229,6 +1233,7 @@ ESMF_F90COMPILEOPTS += $(ESMF_OPENMP_F90COMPILEOPTS)
 ESMF_F90LINKOPTS    += $(ESMF_OPENMP_F90LINKOPTS)
 ESMF_CXXCOMPILEOPTS += $(ESMF_OPENMP_CXXCOMPILEOPTS)
 ESMF_CXXLINKOPTS    += $(ESMF_OPENMP_CXXLINKOPTS)
+ESMF_SL_LIBOPTS     += $(ESMF_OPENMP_CXXLINKOPTS)
 endif
 
 #-------------------------------------------------------------------------------

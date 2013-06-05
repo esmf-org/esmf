@@ -388,7 +388,6 @@ void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
       default:
         *rc = ESMF_FAILURE;
     }
-  }
 #endif
 
 }
