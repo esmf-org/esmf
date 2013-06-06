@@ -29,7 +29,7 @@ except:
             try:
                 test(*args, **kwargs)
             except:
-                raise AssertionError('Failure expected')
+                raise AssertionError('SkipTest: Failure expected')
         return inner
 
 
