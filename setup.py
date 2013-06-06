@@ -11,10 +11,8 @@ from distutils.util import get_platform
 
 class BuildCommand(Command):
     description = "build: will build the ESMF package"
-    user_options = [
-                    ('ESMFMKFILE=', 'e',
-                      "Location of esmf.mk for the ESMF installation"),
-                    ]
+    user_options = [('ESMFMKFILE=', 'e',
+                      "Location of esmf.mk for the ESMF installation")]
     def initialize_options(self):
         self.cwd = None
         self.ESMFMKFILE = None
@@ -58,7 +56,7 @@ class CleanCommand(Command):
         os.system('find . -name "*ESMF_LogFile*" -exec rm -f {} \;')
         os.system('find . -name "*.log" -exec rm -f {} \;')
         os.system('find . -name "*.vtk" -exec rm -f {} \;')
-        os.system('rm src/ESMF/esmfmkfile.py')
+        os.system('rm src/ESMF/interface/esmfmkfile.py')
         os.system('rm MANIFEST')
         os.system('rm -rf build')
         os.system('rm -rf dist')
