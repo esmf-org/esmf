@@ -1,0 +1,21 @@
+# $Id: regrid_test_data.txt,v 1.1.2.1 2013/02/22 19:02:37 rokuingh Exp $
+#
+# Input data for regrid_check_driver.py
+
+# total number of test cases
+7
+
+# source_grid : destination_grid : method : options : MaxErr
+
+FVCOM_grid2d.nc : selfe_grid2d.nc : conserve : --src_type UGRID --dst_type UGRID --src_meshname fvcom_mesh --dst_meshname selfe_mesh -i : 0.06
+ne15nc4_scrip.nc : ne30np4-t2.nc : conserve : --src_type SCRIP --dst_type SCRIP -i : 0.06
+FVCOM_grid2d.nc : selfe_grid2d.nc : bilinear : -t UGRID --src_meshname fvcom_mesh --dst_meshname selfe_mesh -i : 0.06
+ne15nc4_scrip.nc : ne30np4-t2.nc : bilinear : -i : 0.06
+
+# cubed sphere to cubed sphere
+ne60np4_pentagons_100408.nc : ne30np4-t2.nc : bilinear : -i  : 10E-04
+# Area error to be added later : 10E-16
+ne60np4_pentagons_100408.nc : ne30np4-t2.nc : patch    : -i  : 10E-04
+# Area error to be added later : 10E-16
+ne60np4_pentagons_100408.nc : ne30np4-t2.nc : conserve : -i : 10E-03
+# Area error to be added later : 10E-13

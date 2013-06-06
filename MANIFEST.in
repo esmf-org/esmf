@@ -1,0 +1,8 @@
+include *.txt
+recursive-include examples *.txt *.py
+recursive-include test *.txt *.py
+recursive-include test_regrid *.txt *.py
+recursive-include tutorial *.txt *.py
+include LICENSE
+
+# $Id: MANIFEST.in,v 1.1.2.1 2013/03/13 23:51:06 rokuingh Exp $
