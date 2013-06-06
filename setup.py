@@ -36,7 +36,7 @@ class BuildCommand(Command):
 
         # create the esmfmkfile.py file holding the value of ESMFMKFILE
         if self.ESMFMKFILE is not None:
-            f = open('src/ESMF/esmfmkfile.py', 'w')
+            f = open('src/ESMF/interface/esmfmkfile.py', 'w')
             f.write('ESMFMKFILE = "%s"' % self.ESMFMKFILE)
             f.close()
 
