@@ -57,7 +57,6 @@ class CleanCommand(Command):
         os.system('find . -name "*.log" -exec rm -f {} \;')
         os.system('find . -name "*.vtk" -exec rm -f {} \;')
         os.system('rm src/ESMF/interface/esmfmkfile.py')
-        os.system('rm MANIFEST')
         os.system('rm -rf build')
         os.system('rm -rf dist')
         os.system('rm -rf src/ESMF/test/regrid_test/regrid_from_file_test/data')

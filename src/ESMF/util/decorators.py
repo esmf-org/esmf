@@ -10,18 +10,28 @@ decorators
 
 import warnings
 import functools
-import nose
 
-def expected_failure(test):
-    @functools.wraps(test)
-    def inner(*args, **kwargs):
-        try:
-            test(*args, **kwargs)
-        except Exception:
-            raise nose.SkipTest
-        else:
-            raise AssertionError('Failure expected')
-    return inner
+try:
+    import nose
+
+    def expected_failure(test):
+        @functools.wraps(test)
+        def inner(*args, **kwargs):
+            try:
+                test(*args, **kwargs)
+            except Exception:
+                raise nose.SkipTest
+        return inner
+except:
+    def expected_failure(test):
+        @functools.wraps(test)
+        def inner(*args, **kwargs):
+            try:
+                test(*args, **kwargs)
+            except:
+                raise AssertionError('Failure expected')
+        return inner
+
 
 def deprecated(func):
     '''This is a decorator which can be used to mark functions
