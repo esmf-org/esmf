@@ -260,6 +260,8 @@ to ESMF offline and integrated regridding capabilities.
 
 * There is no FieldBundle class, only single Fields
 
+* ESMPy cannot use an ESMF installation that is built with external LAPACK support.
+
 Testing related:
 - Only tested with gfortran on Darwin, Linux, and Unicos platforms
 
