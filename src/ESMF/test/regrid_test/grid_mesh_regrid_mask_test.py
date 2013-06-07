@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: grid_mesh_regrid_mask.py,v 1.1.2.11 2013/05/25 00:04:24 rokuingh Exp $
+# $Id$
 
 """
 Two Field objects are created, one on a Grid and the other on a Mesh.  

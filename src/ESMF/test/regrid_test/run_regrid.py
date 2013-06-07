@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: Exp $
+# $Id$
 
 import os
 import ESMF

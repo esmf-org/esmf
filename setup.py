@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: setup.py,v 1.1.2.6 2013/04/22 18:45:48 rokuingh Exp $
+# $Id$
 
 import sys
 import os

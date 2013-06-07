@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: extras.py,v 1.1.2.3 2013/04/09 01:17:58 rokuingh Exp $
+# $Id$
 
 """
 utilities module - most of these routines are not yet implemented.

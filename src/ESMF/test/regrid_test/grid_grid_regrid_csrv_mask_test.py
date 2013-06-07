@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: grid_grid_regrid_csrv_mask.py,v 1.1.2.12 2013/05/25 00:04:23 rokuingh Exp $
+# $Id$
 
 """
 Two Field objects are created on Grids.  The source Field is set to an 

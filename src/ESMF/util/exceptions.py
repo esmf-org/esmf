@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: exceptions.py,v 1.1.2.1 2013/06/06 19:09:06 rokuingh Exp $
+# $Id$
 
 """
 exceptions

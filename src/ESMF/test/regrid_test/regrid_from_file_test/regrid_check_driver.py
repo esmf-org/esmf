@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: regrid_check_driver.py,v 1.1.2.7 2013/05/25 00:04:30 rokuingh Exp $
+# $Id$
 
 """
 Reads each line of a control file where each line corresponds to one test

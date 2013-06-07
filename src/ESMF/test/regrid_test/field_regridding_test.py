@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id:  Exp $
+# $Id$
 
 """
 This is a demonstration of the regridding capabilities available 

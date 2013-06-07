@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: mesh_mesh_regrid.py,v 1.1.2.9 2013/05/25 00:04:24 rokuingh Exp $
+# $Id$
 
 """
 Two Field objects are created, both on a Mesh.  The source Field is set 

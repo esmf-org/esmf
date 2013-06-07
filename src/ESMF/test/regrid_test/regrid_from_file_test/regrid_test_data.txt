@@ -1,4 +1,4 @@
-# $Id: regrid_test_data.txt,v 1.1.2.1 2013/02/22 19:02:37 rokuingh Exp $
+# $Id$
 #
 # Input data for regrid_check_driver.py
 

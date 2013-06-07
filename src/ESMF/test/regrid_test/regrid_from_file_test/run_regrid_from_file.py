@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: utest_regrid_run.py,v 1.1.2.3 2013/04/09 01:18:01 rokuingh Exp $
+# $Id$
 
 import os
 import ESMF

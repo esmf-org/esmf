@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: field.py,v 1.1.2.10 2013/05/25 00:04:26 rokuingh Exp $
+# $Id$
 
 """
 The Field API

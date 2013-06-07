@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: regrid.py,v 1.1.2.6 2013/05/25 00:04:27 rokuingh Exp $
+# $Id$
 
 """
 The Regrid API

@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: regrid_check.py,v 1.1.2.7 2013/04/10 01:44:28 rokuingh Exp $
+# $Id$
 
 """
 Two Field objects are created, one on a source Mesh and the other

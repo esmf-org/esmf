@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: cbindings.py,v 1.1.2.1 2013/06/06 19:08:54 rokuingh Exp $
+# $Id$
 
 """
 The bindings to the ESMF C API

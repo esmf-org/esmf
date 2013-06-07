@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: grid.py,v 1.1.2.10 2013/05/25 00:04:26 rokuingh Exp $
+# $Id$
 
 """
 The Grid API

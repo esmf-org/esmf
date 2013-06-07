@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: constants.py,v 1.1.2.4 2013/04/10 01:44:25 rokuingh Exp $
+# $Id$
 
 import numpy as np
 

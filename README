@@ -92,74 +92,71 @@ The ESMPy package should include the following files:
 
 -- LICENSE - University of Illinois-NCSA License
 
--- MANIFEST.in - file to specify how to create a distribution
-
 -- README - this file
 
 -- setup.py - standard Python build file
 
--- data directory - place to collect data files downloaded with wget
-
 -- doc directory - contains all Sphinx documentation files
-
--- examples directory
-  -- examples_run.py - examples test utility
-  -- examples_run_aprun.py - examples test utility for jaguar
-  -- examples_run_jaguarpf_aprun.py - examples test utility for jaguarpf
-  -- grid_grid_regrid_csrv_mask_3D.py - first-order conservative regridding
-                                        between two 3D Grids with masking
-  -- grid_grid_regrid_csrv_mask.py - first-order conservative regridding
-                                      between two Grids with masking
-  -- grid_mesh_regrid_csrv_mask.py - first-order conservative regridding
-                                      between a Grid and a Mesh with masking
-  -- grid_mesh_regrid_csrv.py - first-order conservative regridding
-                                  between a Grid and a Mesh
-  -- grid_mesh_regrid_mask.py - bilinear regridding between
-                                    a Grid and a Mesh with masking
-  -- grid_mesh_regrid.py - bilinear regridding between a Grid and a Mesh
-  -- mesh_mesh_regrid.py - first-order conservative regridding between
-                              two Meshes
 
 -- src directory
 
   -- ESMF directory
+
     -- __init__.py  - package init file
-    -- cbindings.py - ctypes bindings to ESMF C interface
-    -- constants.py - global constants
-    -- field.py - Field class
-    -- grid.py - Grid class
-    -- loadESMF.py - script to load the ESMF shared library
-    -- manager.py - Manager class
-    -- mesh.py - Mesh class
-    -- regrid.py - Regrid class
 
-  -- fragments directory
-    -- extras.py - ESMPy routines that are not part of the library because
-    -- remap.py - interface to ESMF_RegridWeightGen application
+    -- api directory
+
+      -- constants.py - global constants
+      -- field.py - Field class
+      -- grid.py - Grid class
+      -- manager.py - Manager class
+      -- mesh.py - Mesh class
+      -- regrid.py - Regrid class
+
+    -- fragments directory
+      -- extras.py - ESMPy routines that are not part of the library because
+      -- remap.py - interface to ESMF_RegridWeightGen application
+
+    -- interface directory
+
+      -- cbindings.py - ctypes bindings to ESMF C interface
+      -- loadESMF.py - script to load the ESMF shared library
 
 
--- test directory
+    -- test directory
 
-  -- utest.py - unit tests
-  -- utest_run.py - unit test run utility
-  -- utest_run_aprun.py - unit test run utility for jaguar
+      -- run_unit_test.py - unit test run utility
+      -- unit_test.py - unit tests
 
--- test_regrid directory
+      -- regrid_test directory
 
-  -- regrid_check.py - Regrid testing program
-  -- regrid_check_driver.py - Driver program for regrid testing
-  -- utest_regrid_run.py - regrid test run utility
-  -- utest_regrid_run_aprun.py - regrid test run utility for jaguar
-  -- RegridTestData.txt - text file contains regridding test configurations
+        -- field_regridding_test.py - Field regridding tutorial
 
--- tutorial directory
+        -- grid_grid_regrid_csrv_mask_3D_test.py - first-order conservative regridding
+                                                   between two 3D Grids with masking
+        -- grid_grid_regrid_csrv_mask_test.py - first-order conservative regridding
+                                                between two Grids with masking
+        -- grid_mesh_regrid_csrv_mask_test.py - first-order conservative regridding
+                                                between a Grid and a Mesh with masking
+        -- grid_mesh_regrid_csrv_test.py - first-order conservative regridding
+                                           between a Grid and a Mesh
+        -- grid_mesh_regrid_mask_test.py - bilinear regridding between
+                                          a Grid and a Mesh with masking
+        -- grid_mesh_regrid_test.py - bilinear regridding between a Grid and a Mesh
+        -- mesh_mesh_regrid_test.py - first-order conservative regridding between
+                                      two Meshes
 
-	-- field_regridding.py - Field regridding tutorial
-	-- hello_world.py - 'Hello World!' tutorial
-  -- tutorial_run.py - tutorial run utility
-  -- tutorial_run_aprun.py - tutorial run utility for jaguar
-  -- tutorial_run_jaguarpf_aprun.py - tutorial run utility for jaguarpf
+        -- regrid_from_file_test directory
+  
+          -- regrid_check.py - Regrid testing program
+          -- regrid_check_driver.py - Driver program for regrid testing
+          -- regrid_test_data.txt - text file contains regridding test configurations
+          -- run_regrid_from_file.py - regrid test run utility
 
+    -- util directory
+
+      -- decorators.py - decorators for special functions
+      -- exceptions.py - warning and exception classes
 
 ================================================================================
 
@@ -176,6 +173,7 @@ The following packages are *required* to work with ESMPy:
 The following packages are *optional*:
 
 -- mpi4py - python bindings to MPI
+-- nose - nose testing
 
 INSTALLATION:
 --------
@@ -202,8 +200,17 @@ on what options are available.
 An installation of ESMPy in the default location for Python packages can be done 
 with the following command issued from the top level ESMPy directory:
 
-python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk> install
+- default Python package installation:
 
+    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk> install
+
+- custom install location:
+
+    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk>
+
+    python setup.py install --prefix=<custom_install_location>
+
+    setenv PYTHONPATH <custom_install_location>
 
 Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
 
@@ -223,17 +230,24 @@ The setup.py file can be used to run all of the ESMPy tests, like this:
 
 python setup.py test
 
-Individual unit tests, examples and tutorials can be run using the following
-test manager files:
+or:
 
-test/utest_run.py
-examples/examples_run.py
-tutorial/tutorial_run.py
-test_regrid/utest_regrid_run.py
+python setup.py test_all 
 
-or just by running the Python interpreter on individual test files.
+to also run the regrid_from_file tests.
 
 NOTE: The regrid tests can take up a lot of memory and bandwidth.
+
+Alternatively, if the nose package is available, the test can be run with:
+
+nosetests
+
+Individual tests can be run with nose using the following format:
+
+nosetests <file>:<test>
+
+e.g.  nosetests src/ESMF/test/unit_test.py:field_regrid_test
+
 
 ================================================================================
 
@@ -244,7 +258,6 @@ ESMPy doesn't include many aspects of ESMF, including components, array
 interfaces, time management, etc.  The limitations listed here are relative
 to ESMF offline and integrated regridding capabilities.
 
-* The parallel implementation is not yet functional
 * There is no FieldBundle class, only single Fields
 
 Testing related:
@@ -258,7 +271,7 @@ MORE HELP:
 The ESMPy home page has all of the latest information on the ESMPy project
 including release notes, known bugs, supported platforms, and download
 information.  It can be found here:
-        http://www.earthsystemcog.org/projects/esmp/
+        http://www.earthsystemcog.org/projects/esmpy/
 
 Information about the ESMF project can be found at the ESMF web site:
         http://www.earthsystemmodeling.org
@@ -266,13 +279,6 @@ Information about the ESMF project can be found at the ESMF web site:
 The ESMF User's Guide contains information on building and installing ESMF.
 The ESMF Reference Manual contains information on the architecture of the ESMF,
 example code, and details of the API (Application Programming Interface).
-
-The ESMF library source code is also available for download at:
-        http://sourceforge.net/projects/esmf
-
-Follow the directions on that web page to download a tarball and for
-access to the ESMF CVS repository.  The Sourceforge site also contains
-the bugs, support, and task lists for ESMF.
 
 For more information on the ESMF_RegridWeightGen application, see the ESMF
 Reference Manual:
@@ -283,4 +289,4 @@ Contributions from ESMF users are available at:
 
 Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
 
-$Id: README,v 1.1.2.7 2013/04/19 01:04:00 rokuingh Exp $
+# $Id$

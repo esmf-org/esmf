@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: run_unit_test.py,v 1.1.2.1 2013/06/06 19:14:25 rokuingh Exp $
+# $Id$
 
 import os
 import ESMF

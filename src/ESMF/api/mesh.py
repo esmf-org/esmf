@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: mesh.py,v 1.1.2.7 2013/05/25 00:04:27 rokuingh Exp $
+# $Id$
 
 """
 The Mesh API

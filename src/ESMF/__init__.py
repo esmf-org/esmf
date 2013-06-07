@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: __init__.py,v 1.1.2.9.2.1 2013/06/06 19:00:14 rokuingh Exp $
+# $Id$
 
 '''
 ESMPy is a Python package which contains a prototype Python interface to the

@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: grid_mesh_regrid_csrv.py,v 1.1.2.10 2013/05/25 00:04:23 rokuingh Exp $
+# $Id$
 
 """
 Two Field objects are created, one on a Grid and the other on a Mesh.  

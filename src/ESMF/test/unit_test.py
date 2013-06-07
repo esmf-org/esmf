@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-#    Exp $
+# $Id$
 
 """
 unit test file
@@ -39,7 +37,15 @@ def make_index_3D( nx, ny, nz ):
     
     return np.arange( nx*ny*nz ).reshape( nz, ny, nx )
 
-def test_vm():
+def log_test():
+
+    flush = True
+    ESMP_LogSet(flush)
+
+    # return True from unit test
+    return True
+
+def vm_test():
     # inquire for rank and proc from ESMF Virtual Machine
     localPet = get_localPet()
     petCount = get_petCount()
@@ -50,7 +56,7 @@ def test_vm():
     # return True from unit test
     return True
 
-def test_grid_create():
+def grid_create_test():
 
     max_index = np.array([12,20])
 
@@ -75,7 +81,7 @@ def test_grid_create():
     # return True from unit test
     return True
 
-def test_grid_create_3D():
+def grid_create_3D_test():
 
     max_index = np.array([12,20,37])
 
@@ -101,7 +107,7 @@ def test_grid_create_3D():
     # return True from unit test
     return True
 
-def test_grid_coords():
+def grid_coords_test():
 
     max_index = np.array([12,20])
 
@@ -154,7 +160,7 @@ def test_grid_coords():
     # return correct from unit test
     return correct
 
-def test_grid_coords_3D():
+def grid_coords_3D_test():
 
     max_index = np.array([10,20,30])
 
@@ -223,7 +229,7 @@ def test_grid_coords_3D():
     # return correct from unit test
     return correct
 
-def test_grid_mask():
+def grid_mask_test():
 
     correct = True
     
@@ -263,7 +269,7 @@ def test_grid_mask():
     # return True from unit test
     return correct
 
-def test_grid_mask_3D():
+def grid_mask_3D_test():
 
     max_index = np.array([10,20,30])
 
@@ -285,7 +291,7 @@ def test_grid_mask_3D():
     # return True from unit test
     return True
 
-def test_grid_area():
+def grid_area_test():
 
     max_index = np.array([12,20])
 
@@ -304,7 +310,7 @@ def test_grid_area():
     # return True from unit test
     return True
 
-def test_grid_area_3D():
+def grid_area_3D_test():
 
     max_index = np.array([10,20,30])
 
@@ -324,7 +330,7 @@ def test_grid_area_3D():
     return True
 
 @expected_failure
-def test_grid_write_empty():
+def grid_write_empty_test():
 
     # this test should fail
     try:
@@ -340,7 +346,7 @@ def test_grid_write_empty():
     # return True from unit test
     return True
 
-def test_grid_field():
+def grid_field_test():
 
     # create a Grid with center staggers
     max_index = np.array([12,20])
@@ -356,7 +362,7 @@ def test_grid_field():
     # return True from unit test
     return True
 
-def test_grid_field_edge1():
+def grid_field_edge1_test():
 
     # create a Grid with center staggers
     max_index = np.array([12,20])
@@ -372,7 +378,7 @@ def test_grid_field_edge1():
     # return True from unit test
     return True
 
-def test_grid_field_edge2():
+def grid_field_edge2_test():
 
     # create a Grid with center staggers
     max_index = np.array([12,20])
@@ -388,7 +394,7 @@ def test_grid_field_edge2():
     # return True from unit test
     return True
 
-def test_grid_field_corner():
+def grid_field_corner_test():
 
     # create a Grid with center staggers
     max_index = np.array([12,20])
@@ -404,7 +410,7 @@ def test_grid_field_corner():
     # return True from unit test
     return True
 
-def test_grid_field_3D():
+def grid_field_3D_test():
 
     # create a Grid with center staggers
     max_index = np.array([10,20,30])
@@ -421,7 +427,7 @@ def test_grid_field_3D():
     # return True from unit test
     return True
 
-def test_grid_field_3D_edge1vcenter():
+def grid_field_3D_edge1vcenter_test():
 
     # create a Grid with center staggers
     max_index = np.array([10,20,30])
@@ -440,7 +446,7 @@ def test_grid_field_3D_edge1vcenter():
     # return True from unit test
     return True
 
-def test_grid_field_3D_edge2vcenter():
+def grid_field_3D_edge2vcenter_test():
 
     # create a Grid with center staggers
     max_index = np.array([10,20,30])
@@ -458,7 +464,7 @@ def test_grid_field_3D_edge2vcenter():
     # return True from unit test
     return True
 
-def test_grid_field_3D_cornervcenter():
+def grid_field_3D_cornervcenter_test():
 
     # create a Grid with center staggers
     max_index = np.array([10,20,30])
@@ -477,7 +483,7 @@ def test_grid_field_3D_cornervcenter():
     # return True from unit test
     return True
 
-def test_grid_field_3D_centervface():
+def grid_field_3D_centervface_test():
 
     # create a Grid with center staggers
     max_index = np.array([10,20,30])
@@ -494,7 +500,7 @@ def test_grid_field_3D_centervface():
     # return True from unit test
     return True
 
-def test_grid_field_3D_edge1vface():
+def grid_field_3D_edge1vface_test():
 
     # create a Grid with center staggers
     max_index = np.array([10,20,30])
@@ -511,7 +517,7 @@ def test_grid_field_3D_edge1vface():
     # return True from unit test
     return True
 
-def test_grid_field_3D_edge2vface():
+def grid_field_3D_edge2vface_test():
 
     # create a Grid with center staggers
     max_index = np.array([10,20,30])
@@ -528,7 +534,7 @@ def test_grid_field_3D_edge2vface():
     # return True from unit test
     return True
 
-def test_grid_field_3D_cornervface():
+def grid_field_3D_cornervface_test():
 
     # create a Grid with center staggers
     max_index = np.array([10,20,30])
@@ -603,7 +609,7 @@ def mesh_create_2x2():
     return mesh, nodeCoord
 
 
-def test_mesh():
+def mesh_test():
     status = True
     mesh, nodeCoord = mesh_create_2x2()
     
@@ -629,7 +635,7 @@ def test_mesh():
     # return status from unit test (True if everything passed)
     return status
 
-def test_meshvtk():
+def meshvtk_test():
     mesh, _ = mesh_create_2x2()
 
     mesh.write("mesh")
@@ -637,7 +643,7 @@ def test_meshvtk():
     # return True from unit test
     return True
 
-def test_interfaceint():
+def interfaceint_test():
     Narray = np.array([4,5,6], dtype=np.int32)
     interfaceint = ESMP_InterfaceIntCreate(Narray, len(Narray))
 
@@ -646,7 +652,7 @@ def test_interfaceint():
     return True
 
 @expected_failure
-def test_interfaceint2():
+def interfaceint2_test():
     # This test should fail
     try:
         a = (ct.c_int*3)()
@@ -660,7 +666,7 @@ def test_interfaceint2():
     return True
 
 @expected_failure
-def test_interfaceint3():
+def interfaceint3_test():
     # This test should fail
     try:
         interfaceint2 = ESMP_InterfaceIntCreate(array([1,2,3]), 3)
@@ -671,7 +677,7 @@ def test_interfaceint3():
     # return True from unit test
     return True
 
-def test_field_r8_grid():
+def field_r8_grid_test():
     # create grid
     max_index = np.array([12,20])
     grid = Grid(max_index, num_peri_dims=1, coord_sys=CoordSys.SPH_RAD, \
@@ -692,7 +698,7 @@ def test_field_r8_grid():
     # return True from unit test
     return True
 
-def test_field_r4_grid():
+def field_r4_grid_test():
     # create grid
     max_index = np.array([12,20])
     grid = Grid(max_index, num_peri_dims=1, \
@@ -715,7 +721,7 @@ def test_field_r4_grid():
     # return True from unit test
     return True
 
-def test_field_i8_grid():
+def field_i8_grid_test():
     # create grid
     max_index = np.array([12,20])
     grid = Grid(max_index, num_peri_dims=1, \
@@ -738,7 +744,7 @@ def test_field_i8_grid():
     # return True from unit test
     return True
 
-def test_field_i4_grid():
+def field_i4_grid_test():
     # create grid
     max_index = np.array([12,20])
     grid = Grid(max_index, num_peri_dims=1, \
@@ -761,7 +767,7 @@ def test_field_i4_grid():
     # return True from unit test
     return True
 
-def test_field_r8_mesh():
+def field_r8_mesh_test():
     # create mesh
     mesh = mesh_create_2x2()[0]
 
@@ -782,7 +788,7 @@ def test_field_r8_mesh():
     # return True from unit test
     return True
 
-def test_field_r4_mesh():
+def field_r4_mesh_test():
     # create mesh
     mesh = mesh_create_2x2()[0]
 
@@ -802,7 +808,7 @@ def test_field_r4_mesh():
     # return True from unit test
     return True
 
-def test_field_i8_mesh():
+def field_i8_mesh_test():
     # create mesh
     mesh = mesh_create_2x2()[0]
 
@@ -823,7 +829,7 @@ def test_field_i8_mesh():
     # return True from unit test
     return True
 
-def test_field_i4_mesh():
+def field_i4_mesh_test():
     # create mesh
     mesh = mesh_create_2x2()[0]
 
@@ -844,7 +850,7 @@ def test_field_i4_mesh():
     # return True from unit test
     return True
 
-def test_field_uniqueness():
+def field_uniqueness_test():
     # create mesh
     mesh = mesh_create_2x2()[0]
 
@@ -867,7 +873,7 @@ def test_field_uniqueness():
     # return True from unit test
     return True
 
-def test_field_switchedindices_grid():
+def field_switchedindices_grid_test():
     # create grid
     max_index = np.array([12,20])
     grid = Grid(max_index, num_peri_dims=1, \
@@ -892,7 +898,7 @@ def test_field_switchedindices_grid():
     # return True from unit test
     return True
 
-def test_field_switchedindices_mesh():
+def field_switchedindices_mesh_test():
     # create mesh
     mesh = mesh_create_2x2()[0]
 
@@ -915,7 +921,7 @@ def test_field_switchedindices_mesh():
     # return True from unit test
     return True
 
-def test_field_extraindices_mesh():
+def field_extraindices_mesh_test():
     # create mesh
     mesh = mesh_create_2x2()[0]
 
@@ -940,7 +946,7 @@ def test_field_extraindices_mesh():
     # return True from unit test
     return True
 
-def test_field_regrid():
+def field_regrid_test():
     # create mesh
     mesh = mesh_create_2x2()[0]
     dstfield = Field(mesh, 'MESHFIELD!', meshloc=MeshLoc.ELEMENT)
@@ -974,7 +980,7 @@ def test_field_regrid():
     # return True from unit test
     return True
 
-def test_field_regrid_zeroregion():
+def field_regrid_zeroregion_test():
     # create mesh
     mesh = mesh_create_2x2()[0]
 
@@ -1046,7 +1052,7 @@ def test_field_regrid_zeroregion():
     # return True from unit test
     return True
 
-def test_field_regrid_area():
+def field_regrid_area_test():
     # create mesh
     mesh = mesh_create_2x2()[0]
 
@@ -1091,15 +1097,7 @@ def test_field_regrid_area():
     # return correct from unit test
     return correct
 
-def test_log():
-
-    flush = True
-    ESMP_LogSet(flush)
-
-    # return True from unit test
-    return True
-
-def test_version_compare():
+def version_compare_test():
     correct = True
     # should be -1
     if version_compare("ESMF_5_3_0_ESMP_02","ESMF_5_3_0_ESMP_01") != 1:
@@ -1143,48 +1141,48 @@ def main():
 
     # set up a dictionary with the names of the tests to be run
     dispatch = {
-    (1,'LogSet flush immediately') : test_log,
-    (2,'VMGetGlobal, VMPrint, and VMGet') : test_vm,
-    (3,'Mesh create and destroy') : test_mesh,
-    (4,'Grid create and destroy') : test_grid_create,
-    (4.1,'Grid 3D create and destroy') : test_grid_create_3D,
-    (4.2,'Grid coordinates') : test_grid_coords,
-    (4.3,'Grid 3D coordinates') : test_grid_coords_3D,
-    (4.4,'Grid masking') : test_grid_mask,
-    (4.5,'Grid 3D masking') : test_grid_mask_3D,
-    (4.6,'Grid area') : test_grid_area,
-    (4.7,'Grid 3D area') : test_grid_area_3D,
-    (4.8,'Grid write empty') : test_grid_write_empty,
-    (5.0,'Grid field creation') : test_grid_field,
-    (5.1,'Grid field creation edge1 stagger') : test_grid_field_edge1,
-    (5.2,'Grid field creation edge2 stagger') : test_grid_field_edge2,
-    (5.3,'Grid field creation corner stagger') : test_grid_field_corner,
-    (6.0,'Grid 3D field creation') : test_grid_field_3D,
-    (6.1,'Grid 3D field creation edge1_vcenter stagger') : test_grid_field_3D_edge1vcenter,
-    (6.2,'Grid 3D field creation edge2_vcenter stagger') : test_grid_field_3D_edge2vcenter,
-    (6.3,'Grid 3D field creation corner_vcenter stagger') : test_grid_field_3D_cornervcenter,
-    (6.4,'Grid 3D field creation center_vface stagger') : test_grid_field_3D_centervface,
-    (6.5,'Grid 3D field creation edge1_vface stagger') : test_grid_field_3D_edge1vface,
-    (6.6,'Grid 3D field creation edge2_vface stagger') : test_grid_field_3D_edge2vface,
-    (6.7,'Grid 3D field creation_corner_vface stagger') : test_grid_field_3D_cornervface,
-    (7,'InterfaceInt') : test_interfaceint,
-    (7.1,'InterfaceInt2') : test_interfaceint2,
-    (7.2,'InterfaceInt3') : test_interfaceint3,
-    (8,'Field create and destroy R8 from grid') : test_field_r8_grid,
-    (8.1,'Field create and destroy R4 from grid') : test_field_r4_grid,
-    (8.2,'Field create and destroy I8 from grid') : test_field_i8_grid,
-    (8.3,'Field create and destroy I4 from grid') : test_field_i4_grid,
-    (8.4,'Field create and destroy R8 from mesh') : test_field_r8_mesh,
-    (8.5,'Field create and destroy R4 from mesh') : test_field_r4_mesh,
-    (8.6,'Field create and destroy I8 from mesh') : test_field_i8_mesh,
-    (8.7,'Field create and destroy I4 from mesh') : test_field_i4_mesh,
-    (8.71,'Field uniqueness') : test_field_uniqueness,
-    (8.8,'Field create and destroy with switched indices from grid') : test_field_switchedindices_grid,
-    (8.9,'Field create and destroy with switched indices from mesh') : test_field_switchedindices_mesh,
-    (12,'Field regridding') : test_field_regrid,
-    (12.1,'Field regridding with zeroregion') : test_field_regrid_zeroregion,
-    (13.1,'Field regrid areas') : test_field_regrid_area,
-    (14,'version comparison') : test_version_compare}
+    (0,'version comparison') : version_compare_test,
+    (1,'LogSet flush immediately') : log_test,
+    (2,'VMGetGlobal, VMPrint, and VMGet') : vm_test,
+    (3,'Mesh create and destroy') : mesh_test,
+    (4,'Grid create and destroy') : grid_create_test,
+    (4.1,'Grid 3D create and destroy') : grid_create_3D_test,
+    (4.2,'Grid coordinates') : grid_coords_test,
+    (4.3,'Grid 3D coordinates') : grid_coords_3D_test,
+    (4.4,'Grid masking') : grid_mask_test,
+    (4.5,'Grid 3D masking') : grid_mask_3D_test,
+    (4.6,'Grid area') : grid_area_test,
+    (4.7,'Grid 3D area') : grid_area_3D_test,
+    (4.8,'Grid write empty') : grid_write_empty_test,
+    (5.0,'Grid field creation') : grid_field_test,
+    (5.1,'Grid field creation edge1 stagger') : grid_field_edge1_test,
+    (5.2,'Grid field creation edge2 stagger') : grid_field_edge2_test,
+    (5.3,'Grid field creation corner stagger') : grid_field_corner_test,
+    (6.0,'Grid 3D field creation') : grid_field_3D_test,
+    (6.1,'Grid 3D field creation edge1_vcenter stagger') : grid_field_3D_edge1vcenter_test,
+    (6.2,'Grid 3D field creation edge2_vcenter stagger') : grid_field_3D_edge2vcenter_test,
+    (6.3,'Grid 3D field creation corner_vcenter stagger') : grid_field_3D_cornervcenter_test,
+    (6.4,'Grid 3D field creation center_vface stagger') : grid_field_3D_centervface_test,
+    (6.5,'Grid 3D field creation edge1_vface stagger') : grid_field_3D_edge1vface_test,
+    (6.6,'Grid 3D field creation edge2_vface stagger') : grid_field_3D_edge2vface_test,
+    (6.7,'Grid 3D field creation_corner_vface stagger') : grid_field_3D_cornervface_test,
+    (7,'InterfaceInt') : interfaceint_test,
+    (7.1,'InterfaceInt2') : interfaceint2_test,
+    (7.2,'InterfaceInt3') : interfaceint3_test,
+    (8,'Field create and destroy R8 from grid') : field_r8_grid_test,
+    (8.1,'Field create and destroy R4 from grid') : field_r4_grid_test,
+    (8.2,'Field create and destroy I8 from grid') : field_i8_grid_test,
+    (8.3,'Field create and destroy I4 from grid') : field_i4_grid_test,
+    (8.4,'Field create and destroy R8 from mesh') : field_r8_mesh_test,
+    (8.5,'Field create and destroy R4 from mesh') : field_r4_mesh_test,
+    (8.6,'Field create and destroy I8 from mesh') : field_i8_mesh_test,
+    (8.7,'Field create and destroy I4 from mesh') : field_i4_mesh_test,
+    (8.71,'Field uniqueness') : field_uniqueness_test,
+    (8.8,'Field create and destroy with switched indices from grid') : field_switchedindices_grid_test,
+    (8.9,'Field create and destroy with switched indices from mesh') : field_switchedindices_mesh_test,
+    (12,'Field regridding') : field_regrid_test,
+    (12.1,'Field regridding with zeroregion') : field_regrid_zeroregion_test,
+    (13.1,'Field regrid areas') : field_regrid_area_test}
 
     # here we run the tests that are in the dispatch dictionary
     for test in sorted(dispatch.keys()):

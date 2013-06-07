@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-#
-# $Id: manager.py,v 1.1.2.8 2013/05/25 00:04:26 rokuingh Exp $
+# $Id$
 
 """
 The Manager API
