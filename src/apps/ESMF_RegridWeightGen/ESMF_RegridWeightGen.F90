@@ -44,7 +44,10 @@ program ESMF_RegridWeightGenApp
       character(len=64) :: srcvarname, dstvarname
       character(len=64) :: srcCoordNames(2), dstCoordNames(2)
       character(len=256) :: argStr
+      integer            :: terminateProg
       !real(ESMF_KIND_R8) :: starttime, endtime
+  
+      terminateProg = 0
       !------------------------------------------------------------------------
       ! Initialize ESMF
       !
@@ -71,12 +74,14 @@ program ESMF_RegridWeightGenApp
          call ESMF_UtilGetArgIndex('--help', argindex=ind)
          if (ind /= -1) then
 	   call PrintUsage()
-	   call ESMF_Finalize(endflag=ESMF_END_ABORT)
+           terminateProg=1
+           goto 1110
          endif
          call ESMF_UtilGetArgIndex('--version', argindex=ind)
          if (ind /= -1) then
 	   call PrintVersionInfo()
-	   call ESMF_Finalize(endflag=ESMF_END_ABORT)
+           terminateProg=1
+           goto 1110
          endif
          call ESMF_UtilGetArgIndex('-s', argindex=ind)
          if (ind == -1) call ESMF_UtilGetArgIndex('--source', argindex=ind, rc=rc)
@@ -454,6 +459,39 @@ program ESMF_RegridWeightGenApp
             endif
          endif
 
+     1110 continue 
+        commandbuf2(:)=0
+        if (terminateProg == 1) then
+	    commandbuf2(1)=-9999            
+        else
+            commandbuf2(1)=srcFileType%fileformat
+            commandbuf2(2)=dstFileType%fileformat
+            if (method .eq. 'patch') commandbuf2(3)=1
+	    if (method .eq. 'conserve') commandbuf2(3)=2
+	    if (method .eq. 'neareststod') commandbuf2(3)=3
+            if (method .eq. 'nearestdtos') commandbuf2(3)=4
+            commandbuf2(4)=poleptrs
+            if (srcIsRegional) commandbuf2(9) = 1
+            if (dstIsRegional) commandbuf2(10) = 1
+            if (ignoreUnmapped) commandbuf2(5) = 1
+	    if (userAreaFlag)   commandbuf2(6) = 1
+            if (srcMissingValue) commandbuf2(7) = 1
+            if (dstMissingValue) commandbuf2(8) = 1
+            if (srcIsRegional) commandbuf2(9) = 1
+            if (dstIsRegional) commandbuf2(10) = 1
+            if (useSrcCoordVar) commandbuf2(11) = 1
+            if (useDstCoordVar) commandbuf2(12) = 1
+            if (largeFileFlag) commandbuf2(13) = 1
+            if (netcdf4FileFlag) commandbuf2(14) = 1
+        endif 
+
+        call ESMF_VMBroadcast(vm, commandbuf2, 14, 0, rc=rc)
+        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+
+        if (terminateProg == 1) then
+            goto 1111
+        endif
+
         ! Group the command line arguments and broadcast to other PETs
         commandbuf1(1)=srcfile
         commandbuf1(2)=dstfile
@@ -472,48 +510,14 @@ program ESMF_RegridWeightGenApp
         call ESMF_VMBroadcast(vm, commandbuf3, 80*8, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
-        commandbuf2(:)=0
-        commandbuf2(1)=srcFileType%fileformat
-        commandbuf2(2)=dstFileType%fileformat
-        if (method .eq. 'patch') commandbuf2(3)=1
-        if (method .eq. 'conserve') commandbuf2(3)=2
-        if (method .eq. 'neareststod') commandbuf2(3)=3
-        if (method .eq. 'nearestdtos') commandbuf2(3)=4
-        commandbuf2(4)=poleptrs
-        if (srcIsRegional) commandbuf2(9) = 1
-        if (dstIsRegional) commandbuf2(10) = 1
-        if (ignoreUnmapped) commandbuf2(5) = 1
-	if (userAreaFlag)   commandbuf2(6) = 1
-        if (srcMissingValue) commandbuf2(7) = 1
-        if (dstMissingValue) commandbuf2(8) = 1
-        if (srcIsRegional) commandbuf2(9) = 1
-        if (dstIsRegional) commandbuf2(10) = 1
-        if (useSrcCoordVar) commandbuf2(11) = 1
-        if (useDstCoordVar) commandbuf2(12) = 1
-        if (largeFileFlag) commandbuf2(13) = 1
-        if (netcdf4FileFlag) commandbuf2(14) = 1
-        
-        call ESMF_VMBroadcast(vm, commandbuf2, 14, 0, rc=rc)
-        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
      else
-        call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
-        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-        call ESMF_VMBroadcast(vm, commandbuf3, 80*8, 0, rc=rc)
-        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-        srcfile = commandbuf1(1)
-        dstfile = commandbuf1(2)
-        wgtfile = commandbuf1(3)
-        srcMeshName = commandbuf3(1)
-	dstMeshName = commandbuf3(2)
-        srcVarName = commandbuf3(3)
-	dstVarName = commandbuf3(4)
-	srcCoordNames(1) = commandbuf3(5)
-	srcCoordNames(2) = commandbuf3(6)
-	dstCoordNames(1) = commandbuf3(7)
-	dstCoordNames(2) = commandbuf3(8)
-
         call ESMF_VMBroadcast(vm, commandbuf2, 14, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+
+        if (commandbuf2(1) == -9999) then
+	   goto 1111	  
+        endif
+
 	srcFileType%fileformat = commandbuf2(1)
 	dstFileType%fileformat = commandbuf2(2)
         if (commandbuf2(3)==0) then
@@ -590,6 +594,22 @@ program ESMF_RegridWeightGenApp
         else
            netcdf4FileFlag = .false.
         end if
+
+        call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
+        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+        call ESMF_VMBroadcast(vm, commandbuf3, 80*8, 0, rc=rc)
+        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+        srcfile = commandbuf1(1)
+        dstfile = commandbuf1(2)
+        wgtfile = commandbuf1(3)
+        srcMeshName = commandbuf3(1)
+	dstMeshName = commandbuf3(2)
+        srcVarName = commandbuf3(3)
+	dstVarName = commandbuf3(4)
+	srcCoordNames(1) = commandbuf3(5)
+	srcCoordNames(2) = commandbuf3(6)
+	dstCoordNames(1) = commandbuf3(7)
+	dstCoordNames(2) = commandbuf3(8)
      endif
 
      if (trim(method) .eq. 'bilinear') then
@@ -631,8 +651,8 @@ program ESMF_RegridWeightGenApp
          write(*,*) 
       endif
 
+  1111  continue
       call ESMF_Finalize()
-      stop
 
 contains
 
