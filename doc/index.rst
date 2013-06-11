@@ -11,7 +11,7 @@ ESMPy
 
 Welcome to ESMPy - The ESMF Python Interface!
 
-The `ESMPy home page <http://www.earthsystemcog.org/projects/esmp/>`_ has all of the
+The `ESMPy home page <http://www.earthsystemcog.org/projects/esmpy/>`_ has all of the
 latest information on the ESMPy project including release notes, known
 bugs, supported platforms, and download information.
 
@@ -48,7 +48,7 @@ The ESMF Reference Manual contains information on the architecture of ESMF,
 example code, and details of the API (Application Programming Interface).
 
 Instructions on how to download the ESMPy code can be found at the `ESMPy Download page
-<http://www.earthsystemcog.org/projects/esmp/releases>`_.
+<http://www.earthsystemcog.org/projects/esmpy/releases>`_.
 
 ------------
 Requirements
@@ -56,7 +56,7 @@ Requirements
 
 The following packages are *required* to work with ESMPy:
 
-* `ESMF installation <http://www.earthsystemmodeling.org/esmf_releases/last/ESMF_usrdoc/node9.html>`_
+* `ESMF installation <http://www.earthsystemmodeling.org/esmf_releases/last/ESMF_usrdoc>`_
 * `python <http://python.org/>`_
 * `numpy <http://http://www.numpy.org/>`_
 * ctypes (included with numpy)
@@ -91,8 +91,17 @@ on what options are available.
 An installation of ESMPy in the default location for Python packages can be done 
 with the following command issued from the top level ESMPy directory:
 
-python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk> install
+- default Python package installation:
 
+    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk> install
+
+- custom install location:
+
+    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk>
+
+    python setup.py install --prefix=<custom_install_location>
+
+    setenv PYTHONPATH <custom_install_location>
 
 Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
 
@@ -113,17 +122,23 @@ The setup.py file can be used to run all of the ESMPy tests, like this:
 
 python setup.py test
 
-Individual unit tests, examples and tutorials can be run using the following
-test manager files:
+or:
 
-test/utest_run.py
-examples/examples_run.py
-tutorial/tutorial_run.py
-test_regrid/utest_regrid_run.py
+python setup.py test_all 
 
-or just by running the Python interpreter on individual test files.
+to also run the regrid_from_file tests.
 
 NOTE: The regrid tests can take up a lot of memory and bandwidth.
+
+Alternatively, if the nose package is available, the test can be run with:
+
+nosetests
+
+Individual tests can be run with nose using the following format:
+
+nosetests <file>:<test>
+
+e.g.  nosetests src/ESMF/test/unit_test.py:field_regrid_test
 
 ===========
 Limitations
@@ -133,8 +148,10 @@ ESMPy doesn't include many aspects of ESMF, including components, array
 interfaces, time management, etc.  The limitations listed here are relative
 to ESMF offline and integrated regridding capabilities.
 
-* The parallel implementation is not yet functional
 * There is no FieldBundle class, only single Fields
+* There is no support for tripole or multi-tile Grids
+
+* ESMPy cannot use an ESMF installation that is built with external LAPACK support.
 
 Testing related:
 - Only tested with gfortran on Darwin, Linux, and Unicos platforms

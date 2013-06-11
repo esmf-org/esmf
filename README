@@ -259,6 +259,7 @@ interfaces, time management, etc.  The limitations listed here are relative
 to ESMF offline and integrated regridding capabilities.
 
 * There is no FieldBundle class, only single Fields
+* There is no support for tripole or multi-tile Grids
 
 * ESMPy cannot use an ESMF installation that is built with external LAPACK support.
 
