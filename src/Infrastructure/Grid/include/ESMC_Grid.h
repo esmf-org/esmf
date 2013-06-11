@@ -128,6 +128,9 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
 //EOP
 //-----------------------------------------------------------------------------
 
+ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag, 
+				  int *regDecomp, int *rc);
+
 //------------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_GridDestroy - Destroy a Grid

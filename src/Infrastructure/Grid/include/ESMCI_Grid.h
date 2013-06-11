@@ -250,6 +250,8 @@ template <class TYPE>
                               ESMC_TypeKind_Flag *coordTypeKind, 
                               ESMC_PoleKind_Flag *poleKind, 
                               int *rc);
+  static Grid* createfromfile(char *filename, int fileTypeFlag, 
+			      int *regDecomp, int *rc);
 
   int write(ESMC_StaggerLoc staggerloc, const char *fname);
 
