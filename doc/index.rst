@@ -352,9 +352,9 @@ Named constants                                  Description
 Tutorials
 =========
 
-    .. warning::
+The following tutorials will show you how to build all of the pieces
+necessary to regrid data between Fields built on Grids.
 
-        Under construction..
 
 -------------
 Create a Grid
