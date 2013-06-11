@@ -159,3 +159,47 @@
     rc = ESMF_SUCCESS
   
   end subroutine f_esmf_gridcreate1peridim
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_gridcreatefromfile"
+  subroutine f_esmf_gridcreatefromfile(gridp, filename, fileTypeFlag, &
+  	     			       regDecomp, rc)
+
+    use ESMF_UtilTypesMod
+    use ESMF_LogErrMod
+    use ESMF_GridMod
+
+    implicit none
+
+    ! arguments
+    type(ESMF_Pointer)                     :: gridp
+    character(len=*), intent(in)           :: filename
+    type(ESMF_FileFormat_Flag), intent(in) :: fileTypeFlag
+    integer, dimension(2), intent(in)      :: regDecomp
+    integer, intent(out)                   :: rc              
+  
+    type(ESMF_Grid) :: grid
+
+    print '("Start ESMF_Grid_C.F90 : f_esmf_gridcreatefromfile(",A,", ",I1,", [",I1,",",I1,"])")', filename, fileTypeFlag, regDecomp(1), regDecomp(2)
+
+    ! initialize return code; assume routine not implemented
+    rc = ESMF_RC_NOT_IMPL
+
+    !grid = ESMF_GridCreate(filename, fileTypeFlag, regDecomp, addCornerStagger=.true., rc=rc)
+
+    !grid = ESMF_GridCreate(filename, fileTypeFlag, regDecomp, isSphere=.false., coordNames=(/ 'lon','lat' /),rc=rc)
+
+    !grid = ESMF_GridCreate(filename, fileTypeFlag, regDecomp, isSphere=.false.,rc=rc)
+
+    grid = ESMF_GridCreate(filename, fileTypeFlag, regDecomp, rc=rc)
+
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+ 
+    gridp = grid%this
+  
+    rc = ESMF_SUCCESS
+
+    print '("End ESMF_Grid_C.F90 : f_esmf_gridcreatefromfile()")'
+  
+  end subroutine f_esmf_gridcreatefromfile
