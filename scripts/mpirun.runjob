@@ -27,4 +27,4 @@ num_procs=$2
 shift 2
 prog=$*
 
-runjob $ESMF_MPILAUNCHOPTIONS --np $num_procs --exe $prog
+runjob $ESMF_MPILAUNCHOPTIONS --np $num_procs : $prog
