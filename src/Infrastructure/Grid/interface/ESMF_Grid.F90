@@ -5582,7 +5582,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical         :: localIsSphere, localAddCorner
     type(ESMF_Decomp_Flag) :: localDecompFlag(2)
     
-    print '("Start ESMF_Grid.F90 : ESMF_GridCreateFrmNCFile(",A,", ",I1,", [",I1,",",I1,"])")', filename, fileFormat, regDecomp(1), regDecomp(2)
+    print '("Start ESMF_Grid.F90 : ESMF_GridCreateFrmNCFile(",A,", ",I1,", [",I1,",",I1,"])")',  &
+        filename, fileFormat, regDecomp(1), regDecomp(2)
 
     if (present(rc)) rc=ESMF_FAILURE
 
