@@ -1763,8 +1763,10 @@ int FTable::callVFuncPtr(
         char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
         bool complianceCheckFlag = false;  // default internal compl. check off
         if (envVar != NULL){
-          complianceCheckFlag |= !strcmp(envVar, "on");  // turn on
-          complianceCheckFlag |= !strcmp(envVar, "ON");  // turn on
+          string value(envVar);
+          // see if compliance checker should be turned on
+          complianceCheckFlag |= value.find("on")!=string::npos;  // turn on
+          complianceCheckFlag |= value.find("ON")!=string::npos;  // turn on
         }
         if (complianceCheckFlag){
           int registerIcUserRc;

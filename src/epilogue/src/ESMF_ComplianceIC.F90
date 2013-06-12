@@ -24,7 +24,8 @@ module ESMF_ComplianceICMod
   
   private
   
-  integer, save :: ccfDepth = 1 ! component control flow depth
+  integer, save :: ccfDepth = 1   ! component control flow depth
+  integer, save :: maxDepth = -2  ! maximum depth of compliance checker
   
   public setvmIC, registerIC
         
@@ -82,15 +83,26 @@ module ESMF_ComplianceICMod
       file=FILENAME)) &
       return  ! bail out
     
+    ! Need to set the maxDepth variable unless it has already been set before
+    if (maxDepth < -1) then
+      call c_esmc_getComplianceCheckDepth(maxDepth, rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
+
+    !---------------------------------------------------------------------------
+    ! Start Compliance Checking and IC method Registration
+    
+    if (ccfDepth <= maxDepth .or. maxDepth < 0) then
+
     call ESMF_LogWrite(trim(prefix)//">START register compliance check.", &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    
-    !---------------------------------------------------------------------------
-    ! Start Compliance Checking and IC method Registration
     
     ! check Initialize registration
     call ESMF_GridCompGetEPPhaseCount(comp, ESMF_METHOD_INITIALIZE, phaseCount, &
@@ -234,15 +246,17 @@ module ESMF_ComplianceICMod
       enddo
     endif
 
-    ! Stop Compliance Checking
-    !---------------------------------------------------------------------------
-
     call ESMF_LogWrite(trim(prefix)//">STOP register compliance check.", &
       ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+      
+    endif
+    ! Stop Compliance Checking
+    !---------------------------------------------------------------------------
+
     
   end subroutine
 
@@ -280,6 +294,7 @@ module ESMF_ComplianceICMod
 
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: InitializePrologue
+    if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
     write(output,*) ">START InitializePrologue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
@@ -326,7 +341,8 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-      
+    
+    endif
     ! Stop Compliance Checking: InitializePrologue
     !---------------------------------------------------------------------------
     ccfDepth = ccfDepth + 1
@@ -342,7 +358,8 @@ module ESMF_ComplianceICMod
     ccfDepth = ccfDepth - 1
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: InitializeEpilogue
-    
+    if (ccfDepth <= maxDepth .or. maxDepth < 0) then
+
     call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -419,7 +436,8 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-      
+    
+    endif  
     ! Stop Compliance Checking: InitializeEpilogue
     !---------------------------------------------------------------------------
     
@@ -463,6 +481,7 @@ module ESMF_ComplianceICMod
 
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: RunPrologue
+    if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
     write(output,*) ">START RunPrologue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
@@ -517,7 +536,8 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-      
+    
+    endif
     ! Stop Compliance Checking: RunPrologue
     !---------------------------------------------------------------------------
     ccfDepth = ccfDepth + 1
@@ -533,6 +553,7 @@ module ESMF_ComplianceICMod
     ccfDepth = ccfDepth - 1
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: RunEpilogue
+    if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
     call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -593,7 +614,8 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-      
+    
+    endif
     ! Stop Compliance Checking: RunEpilogue
     !---------------------------------------------------------------------------
 
@@ -637,6 +659,7 @@ module ESMF_ComplianceICMod
 
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: FinalizePrologue
+    if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
     write(output,*) ">START FinalizePrologue for phase=", phase
     call ESMF_LogWrite(trim(prefix)//trim(output), &
@@ -683,7 +706,8 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-      
+    
+    endif
     ! Stop Compliance Checking: FinalizePrologue
     !---------------------------------------------------------------------------
     ccfDepth = ccfDepth + 1
@@ -699,6 +723,7 @@ module ESMF_ComplianceICMod
     ccfDepth = ccfDepth - 1
     !---------------------------------------------------------------------------
     ! Start Compliance Checking: FinalizeEpilogue
+    if (ccfDepth <= maxDepth .or. maxDepth < 0) then
     
     call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
     if (ESMF_LogFoundError(rc, &
@@ -751,7 +776,8 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-      
+    
+    endif
     ! Stop Compliance Checking: FinalizeEpilogue
     !---------------------------------------------------------------------------
 

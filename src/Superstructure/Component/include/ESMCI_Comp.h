@@ -74,6 +74,7 @@ class Comp{
     int getVmPlan(VMPlan **vmplan) const;
     int getFTable(FTable **ftable) const;
     int getTunnel(CompTunnel **tunnel) const;
+    static int getComplianceCheckerDepth(int *depth);
 };
 
 class GridComp:public Comp{
