@@ -5582,9 +5582,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical         :: localIsSphere, localAddCorner
     type(ESMF_Decomp_Flag) :: localDecompFlag(2)
     
-    print '("Start ESMF_Grid.F90 : ESMF_GridCreateFrmNCFile(",A,", ",I1,", [",I1,",",I1,"])")',  &
-        filename, fileFormat, regDecomp(1), regDecomp(2)
-
     if (present(rc)) rc=ESMF_FAILURE
 
     if (present(isSphere)) then
@@ -5610,7 +5607,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
 		addUserArea=addUserArea, rc=localrc)
     else if (fileformat == ESMF_FILEFORMAT_GRIDSPEC) then
-        print *,"Got GRIDSPEC"
 	if (present(addMask)) then
   	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecomp, decompflag=localDecompflag, &
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
@@ -6346,7 +6342,6 @@ end function ESMF_GridCreateFrmScrip
                      array=array, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
-
         call ESMF_ArrayScatter(array, loncoord1D, rootPet=0, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6462,17 +6457,10 @@ end function ESMF_GridCreateFrmScrip
               ESMF_CONTEXT, rcToReturn=rc)) return
 
         ! Set longitude coordinate
-	print *,"ESMF_Grid.F90 : Calling ESMF_GridGetCoord"
-	print *,'ESMF_STAGGERLOC_CENTER=',ESMF_STAGGERLOC_CENTER
         call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=1, &
                      farrayptr=fptrlon, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
-
-        print *,"ESMF_Grid.F90 : Coords dim 1"
-        do i=1,5
-	  print *, fptrlon(i,0)
-	enddo
 
         ! Set latitude coordinate
         call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=2, &

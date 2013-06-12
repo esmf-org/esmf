@@ -336,11 +336,6 @@ int setDefaultsLUA(int dimCount,
     */
     // allocate the grid object
     Grid *grid;
-    /*
-    Array **coord1 = new Array*[1000];
-    for (int i = 0; i < 1000; i++)
-      coord1[i] = new Array[1000];
-    */
     FTN_X(f_esmf_gridcreatefromfile)(&grid, 
 				     filename, &fileTypeFlag, 
 				     regDecomp, &localrc, strlen(filename));
@@ -348,18 +343,7 @@ int setDefaultsLUA(int dimCount,
       rc)) return grid;
 
     if (rc) *rc = localrc;
-    /*
-    printf ("ESMCI_Grid.C : Calling getCoordArryaInternal\n");
-    grid->getCoordArrayInternal(0, 1, coord1);
-    //grid->write(ESMC_STAGGERLOC_CENTER, "ESMCI_Grid.C.out");
 
-    for (int i = 0; i < 10; i++)
-      printf ("%f\n", coord1(i,0);
-
-    for (int i = 0; i < 1000; i++)
-      delete [] coord1[i];
-    delete [] coord1;
-    */
     printf ("End ESMCI_Grid.C : createfromfile()\n");
 
     return grid;

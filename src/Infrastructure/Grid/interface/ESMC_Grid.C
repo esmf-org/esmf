@@ -140,16 +140,26 @@ ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag,
 
   //ESMC_GridWrite(grid, ESMC_STAGGERLOC_CENTER, "ESMC_Grid.C.out");
   int exLB[2]={-1,-1}, exUB[2]={-1,-1};
-  float *gridXCoord;
-  gridXCoord = (float *)ESMC_GridGetCoord(grid, 1, ESMC_STAGGERLOC_CENTER, exLB, exUB, &localrc);
-  printf ("exLB=[%d,%d], exUB=[%d,%d]\n", exLB[0], exLB[1], exUB[0], exUB[1]);
+  double *gridXCoord;
+  gridXCoord = (double *)ESMC_GridGetCoord(grid, 1, ESMC_STAGGERLOC_CENTER, exLB, exUB, &localrc);
+  printf ("Xcoord: exLB=[%d,%d], exUB=[%d,%d]\n", exLB[0], exLB[1], exUB[0], exUB[1]);
   printf ("gridXCoord = [");
   //for (int i = 0; i < exUB[0]*exUB[1]; i++) {
   for (int i = 0; i < 10; i++) {
-    printf ("(%f,%f),\n", gridXCoord[i], gridXCoord[i+1]);
+    printf ("%lf\n", gridXCoord[i]);
   }
   printf ("...]\n");
   
+  double *gridYCoord;
+  gridYCoord = (double *)ESMC_GridGetCoord(grid, 2, ESMC_STAGGERLOC_CENTER, exLB, exUB, &localrc);
+  printf ("yCoord: exLB=[%d,%d], exUB=[%d,%d]\n", exLB[0], exLB[1], exUB[0], exUB[1]);
+  printf ("gridYCoord = [");
+  //for (int i = 0; i < exUB[0]*exUB[1]; i++) {
+  for (int i = 0; i < 10; i++) {
+    printf ("%lf\n", gridYCoord[i]);
+  }
+  printf ("...]\n");
+
   printf ("End ESMC_Grid.C : ESMC_GridCreateFromFile()\n");
   return grid;
 }
@@ -223,7 +233,6 @@ void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim,
 
   // get coord array
   ESMCI::Array *coordArray; 
-  printf ("Calling getCoordArray with coordDim=%d\n", coordDim);
   coordArray = ((gridp)->getCoordArray(&stagger, 
                                        coordDim, NULL, &localrc));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -241,7 +250,6 @@ void * ESMC_GridGetCoord(ESMC_Grid grid, int coordDim,
   // get the bounds
   if(exclusiveLBound && exclusiveUBound) {
     int localDe = 0;
-    printf ("calling getExclusiveLBound\n");
     localrc = gridp->getExclusiveLBound(stagger, localDe, exclusiveLBound);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return NULL; // bail out
