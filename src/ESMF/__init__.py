@@ -63,11 +63,11 @@ __release__ = "ESMPy_620_01"
 
 import sys
 
-from ESMF.api.manager import *
-from ESMF.api.grid import *
-from ESMF.api.mesh import *
-from ESMF.api.field import *
-from ESMF.api.regrid import *
+from api.manager import *
+from api.grid import *
+from api.mesh import *
+from api.field import *
+from api.regrid import *
 
 # for testing
 from ESMF.util.decorators import expected_failure

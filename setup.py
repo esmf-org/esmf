@@ -40,7 +40,6 @@ class BuildCommand(Command):
         sys.path.append('src')
         import ESMF.interface.loadESMF
 
-
 class CleanCommand(Command):
     description = "clean: will remove all libraries, log and output files"
     user_options = []
@@ -129,6 +128,26 @@ class TestAllCommand(Command):
         os.system('python src/ESMF/test/regrid_test/run_regrid.py')
         os.system('python src/ESMF/test/regrid_test/regrid_from_file_test/run_regrid_from_file.py')
 
+## get package structure
+def _get_dot_(path,root='src'):
+    ret = []
+    path_parse = path
+    while True:
+        path_parse,tail = os.path.split(path_parse)
+        if tail == root:
+            break
+        else:
+            ret.append(tail)
+    ret.reverse()
+    return('.'.join(ret))
+package_dir = {'':'src'}
+src_path = os.path.join(package_dir.keys()[0],package_dir.values()[0],'ESMF')
+packages = []
+for dirpath,dirnames,filenames in os.walk(src_path):
+    if '__init__.py' in filenames:
+        package = _get_dot_(dirpath)
+        packages.append(package)
+
 # TODO: remove duplicated metadata: here and src/ESMF/__init__.py
 setup(\
       name="ESMPy",
@@ -145,7 +164,7 @@ setup(\
       license = "University of Illinois-NCSA",
       author_email="esmf_support@list.woc.noaa.gov",
       url="http://earthsystemcog.org/projects/esmp/",
-      packages=["ESMF"],
+      packages=packages,
       package_dir = {'':'src'},
       cmdclass={'build': BuildCommand,
                 'clean': CleanCommand,
