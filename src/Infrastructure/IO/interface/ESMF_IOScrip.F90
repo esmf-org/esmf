@@ -659,6 +659,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       character(len=20) :: varStr
       type(ESMF_Logical) :: largeFileFlaglocal
       type(ESMF_Logical) :: netcdf4FileFlaglocal
+      logical            :: faceCoordFlag
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
@@ -1628,45 +1629,57 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,trim(srcFile),&
              rc)) return
 	else if (srcFileTypeLocal == ESMF_FILEFORMAT_UGRID) then 
+           ! ESMF unstructured grid
   	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
-	      allocate(latBuffer(srcDim), lonBuffer(srcDim))
+	     ! check if faceCoords exit
+	      call ESMF_UGridInq(srcfile, srcmeshname, faceCoordFlag=faceCoordFlag)
 	      allocate(latBuffer2(src_grid_corner,srcDim),&
-			lonBuffer2(src_grid_corner,srcDim)) 
-  	      call ESMF_UGridGetVar(srcfile, srcmeshname, &
+	   	       lonBuffer2(src_grid_corner,srcDim)) 
+              if (faceCoordFlag) then
+ 	        allocate(latBuffer(srcDim), lonBuffer(srcDim))
+  	        call ESMF_UGridGetVar(srcfile, srcmeshname, &
 		   faceXcoords=lonBuffer, faceYcoords=latBuffer, &
 		   faceNodeConnX=lonBuffer2, faceNodeConnY=latBuffer2, rc=status)
+              else
+  	        write(*,*) "Warning: face coordinates not present in src grid file,"// &
+                  " so not outputting xc_a and yc_a to weight file."
+                write(*,*)
+  	        call ESMF_UGridGetVar(srcfile, srcmeshname, &
+		   faceNodeConnX=lonBuffer2, faceNodeConnY=latBuffer2, rc=status)
+              endif
 	      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-        	  ESMF_CONTEXT, rcToReturn=rc)) return
-   	      ncStatus=nf90_inq_varid(ncid,"xc_a",VarId)
-              ncStatus=nf90_put_var(ncid,VarId, lonBuffer)          
-              errmsg = "Variable xc_a in "//trim(wgtfile)
-              if (CDFCheckError (ncStatus, &
-                ESMF_METHOD, &
-                ESMF_SRCLINE,errmsg,&
-                rc)) return
-              ncStatus=nf90_inq_varid(ncid,"yc_a",VarId)
-              ncStatus=nf90_put_var(ncid,VarId, latBuffer)          
-              errmsg = "Variable yc_a in "//trim(wgtfile)
-              if (CDFCheckError (ncStatus, &
-                ESMF_METHOD, &
-                ESMF_SRCLINE,errmsg,&
-              rc)) return
-   	      ncStatus=nf90_inq_varid(ncid,"xv_a",VarId)
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              if (faceCoordFlag) then
+   	        ncStatus=nf90_inq_varid(ncid,"xc_a",VarId)
+                ncStatus=nf90_put_var(ncid,VarId, lonBuffer)          
+                errmsg = "Variable xc_a in "//trim(wgtfile)
+                if (CDFCheckError (ncStatus, &
+                  ESMF_METHOD, &
+                  ESMF_SRCLINE,errmsg,&
+                  rc)) return
+                ncStatus=nf90_inq_varid(ncid,"yc_a",VarId)
+                ncStatus=nf90_put_var(ncid,VarId, latBuffer)          
+                errmsg = "Variable yc_a in "//trim(wgtfile)
+                if (CDFCheckError (ncStatus, &
+                  ESMF_METHOD, &
+                  ESMF_SRCLINE,errmsg,&
+                  rc)) return
+                deallocate(latBuffer, lonBuffer)
+              endif  
+     	      ncStatus=nf90_inq_varid(ncid,"xv_a",VarId)
               ncStatus=nf90_put_var(ncid,VarId, lonBuffer2)          
               errmsg = "Variable xv_b in "//trim(wgtfile)
               if (CDFCheckError (ncStatus, &
-                ESMF_METHOD, &
-                ESMF_SRCLINE,errmsg,&
-                rc)) return
-
+                  ESMF_METHOD, &
+                  ESMF_SRCLINE,errmsg,&
+                  rc)) return
               ncStatus=nf90_inq_varid(ncid,"yv_a",VarId)
               ncStatus=nf90_put_var(ncid,VarId, latBuffer2)          
               errmsg = "Variable yv_b in "//trim(wgtfile)
               if (CDFCheckError (ncStatus, &
-                ESMF_METHOD, &
-                ESMF_SRCLINE,errmsg,&
-                rc)) return
-              deallocate(latBuffer, lonBuffer)
+                  ESMF_METHOD, &
+                  ESMF_SRCLINE,errmsg,&
+                  rc)) return
               deallocate(latBuffer2, lonBuffer2)
 	  else
 	      allocate(latBuffer(srcDim), lonBuffer(srcDim))
@@ -2013,28 +2026,41 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              rc)) return
 	else if (dstFileTypeLocal == ESMF_FILEFORMAT_UGRID) then 
   	   if (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then 
-	      allocate(latBuffer(dstDim), lonBuffer(dstDim))
-	      allocate(latBuffer2(dst_grid_corner,dstDim),&
+	     ! check if faceCoords exit
+	      call ESMF_UGridInq(dstfile, dstmeshname, faceCoordFlag=faceCoordFlag)
+	        allocate(latBuffer2(dst_grid_corner,dstDim),&
 			lonBuffer2(dst_grid_corner,dstDim)) 
-  	      call ESMF_UGridGetVar(dstfile, dstmeshname, &
+              if (faceCoordFlag) then
+  	        allocate(latBuffer(dstDim), lonBuffer(dstDim))
+  	        call ESMF_UGridGetVar(dstfile, dstmeshname, &
 		   faceXcoords=lonBuffer, faceYcoords=latBuffer, &
 		   faceNodeConnX=lonBuffer2, faceNodeConnY=latBuffer2, rc=status)
+              else
+  	        write(*,*) "Warning: face coordinates not present in dst grid file,"// &
+                  " so not outputting xc_a and yc_a to weight file."
+                write(*,*)
+  	        call ESMF_UGridGetVar(dstfile, dstmeshname, &
+		   faceNodeConnX=lonBuffer2, faceNodeConnY=latBuffer2, rc=status)
+              endif
 	      if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-        	  ESMF_CONTEXT, rcToReturn=rc)) return
-   	      ncStatus=nf90_inq_varid(ncid,"xc_b",VarId)
-              ncStatus=nf90_put_var(ncid,VarId, lonBuffer)          
-              errmsg = "Variable xc_a in "//trim(wgtfile)
-              if (CDFCheckError (ncStatus, &
-                ESMF_METHOD, &
-                ESMF_SRCLINE,errmsg,&
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              if (faceCoordFlag) then
+   	        ncStatus=nf90_inq_varid(ncid,"xc_b",VarId)
+                ncStatus=nf90_put_var(ncid,VarId, lonBuffer)          
+                errmsg = "Variable xc_a in "//trim(wgtfile)
+                if (CDFCheckError (ncStatus, &
+                  ESMF_METHOD, &
+                  ESMF_SRCLINE,errmsg,&
+                  rc)) return
+                ncStatus=nf90_inq_varid(ncid,"yc_b",VarId)
+                ncStatus=nf90_put_var(ncid,VarId, latBuffer)          
+                errmsg = "Variable yc_a in "//trim(wgtfile)
+                if (CDFCheckError (ncStatus, &
+                  ESMF_METHOD, &
+                  ESMF_SRCLINE,errmsg,&
                 rc)) return
-              ncStatus=nf90_inq_varid(ncid,"yc_b",VarId)
-              ncStatus=nf90_put_var(ncid,VarId, latBuffer)          
-              errmsg = "Variable yc_a in "//trim(wgtfile)
-              if (CDFCheckError (ncStatus, &
-                ESMF_METHOD, &
-                ESMF_SRCLINE,errmsg,&
-              rc)) return
+                deallocate(latBuffer, lonBuffer)
+              endif
    	      ncStatus=nf90_inq_varid(ncid,"xv_b",VarId)
               ncStatus=nf90_put_var(ncid,VarId, lonBuffer2)          
               errmsg = "Variable xv_b in "//trim(wgtfile)
@@ -2050,7 +2076,6 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 ESMF_METHOD, &
                 ESMF_SRCLINE,errmsg,&
                 rc)) return
-              deallocate(latBuffer, lonBuffer)
               deallocate(latBuffer2, lonBuffer2)
 	  else
 	      allocate(latBuffer(dstDim), lonBuffer(dstDim))
