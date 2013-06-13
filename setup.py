@@ -38,7 +38,7 @@ class BuildCommand(Command):
 
         # load ESMF
         sys.path.append('src')
-        import ESMF.interface.loadESMF as loadESMF
+        import ESMF.interface.loadESMF
 
 
 class CleanCommand(Command):
