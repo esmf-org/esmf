@@ -9,6 +9,8 @@ decorators
 import warnings
 import functools
 
+from ESMF.api.constants import LogKind
+
 try:
     import nose
 
@@ -47,15 +49,14 @@ def deprecated(func):
         return func(*args, **kwargs)
     return new_func
 
-import manager
-from constants import LogKind
-
 def initialize(func):
     '''This is a decorator which can be used to initialize ESMF, by
     creating a Manager object, if it has not already been done.'''
 
     @functools.wraps(func)
     def new_func(*args, **kwargs):
+        from ESMF.api import manager
+
         esmp = manager.Manager(logkind = LogKind.SINGLE, debug = False)
         return func(*args, **kwargs)
     return new_func

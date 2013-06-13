@@ -62,15 +62,13 @@ __release__ = "ESMPy_620_01"
 #### IMPORT LIBRARIES #########################################################
 
 import sys
-sys.path.append('src/ESMF/interface')
-from loadESMF import _ESMF
 
-from manager import *
-from grid import *
-from mesh import *
-from field import *
-from regrid import *
+from ESMF.api.manager import *
+from ESMF.api.grid import *
+from ESMF.api.mesh import *
+from ESMF.api.field import *
+from ESMF.api.regrid import *
 
 # for testing
-from decorators import expected_failure
+from ESMF.util.decorators import expected_failure
 [node, element] = [0, 1]

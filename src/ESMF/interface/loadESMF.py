@@ -6,8 +6,7 @@ import os
 import sys
 import traceback
 
-sys.path.append('src/ESMF/api')
-import constants
+import ESMF.api.constants as constants
 
 try:
     from esmfmkfile import ESMFMKFILE as esmfmk
