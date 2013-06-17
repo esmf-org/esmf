@@ -183,7 +183,10 @@ class Field(ma.MaskedArray):
         obj.grid_to_field_map = local_grid_to_field_map
         obj.ungridded_lower_bound = local_ungridded_lower_bound
         obj.ungridded_upper_bound = local_ungridded_upper_bound
-        
+        obj.grid = grid
+        obj.staggerloc = staggerloc
+        obj.type = typekind
+ 
         return obj
     
     @staticmethod
@@ -259,3 +262,20 @@ class Field(ma.MaskedArray):
 
     #def write(self, filename):
     #    ESMP_FieldWrite(self, filename)
+
+    def dump_ESMF_coords(self):
+        from operator import mul
+
+        # retrieve buffers to esmf coordinate memory
+        field_data = ESMP_FieldGetPtr(self.struct)
+
+        # find the reduced size of the coordinate arrays
+        size = reduce(mul,self.grid.size_local[self.staggerloc])
+
+        # loop through and alias esmf data to numpy arrays
+        buffer = np.core.multiarray.int_asbuffer(
+            ct.addressof(field_data.contents),
+            np.dtype(ESMF2PythonType[self.type]).itemsize*size)
+        esmf_coords = np.frombuffer(buffer, ESMF2PythonType[self.type])
+
+        print esmf_coords
