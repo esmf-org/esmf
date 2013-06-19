@@ -19,6 +19,8 @@ import sys, os
 # this is currently ...../python/ESMP/doc
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('.')+'/../src/ESMF/api')
+sys.path.insert(0, os.path.abspath('.')+'/../src/ESMF/interface')
+sys.path.insert(0, os.path.abspath('.')+'/../src/ESMF/util')
 sys.path.insert(0, os.path.abspath('.')+'/../src/ESMF/test/regrid_test/')
 
 import ESMF

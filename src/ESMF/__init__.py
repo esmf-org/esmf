@@ -57,18 +57,22 @@ __author__ = "University Corporation for Atmospheric Research, \
               Argonne National Laboratory, \
               NASA Goddard Space Flight Center"
 __license__ = "University of Illinois-NCSA"
-__release__ = "ESMPy_620_01"
+__release__ = "620_01b"
 
 #### IMPORT LIBRARIES #########################################################
 
 import sys
 
-from api.manager import *
-from api.grid import *
-from api.mesh import *
-from api.field import *
-from api.regrid import *
+sys.path.append('src/ESMF/api')
+sys.path.append('src/ESMF/interface')
+sys.path.append('src/ESMF/util')
+
+from manager import *
+from grid import *
+from mesh import *
+from field import *
+from regrid import *
 
 # for testing
-from ESMF.util.decorators import expected_failure
+from decorators import expected_failure
 [node, element] = [0, 1]

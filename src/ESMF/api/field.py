@@ -9,13 +9,13 @@ The Field API
 import numpy as np
 import numpy.ma as ma
 
-from ESMF.api.constants import *
-from ESMF.interface.cbindings import *
-from ESMF.util.decorators import initialize
+from constants import *
+from cbindings import *
+from decorators import initialize
 
-from ESMF.api.manager import *
-from ESMF.api.grid import *
-from ESMF.api.mesh import *
+from manager import *
+from grid import *
+from mesh import *
 
 #### Field class ##############################################################
 [node, element] = [0, 1]

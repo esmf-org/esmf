@@ -9,10 +9,10 @@ The Manager API
 import numpy as np
 import numpy.ma as ma
 
-from ESMF.api.constants import *
-from ESMF.interface.cbindings import *
-from ESMF.util.exceptions import *
-from ESMF.util.decorators import initialize
+from constants import *
+from cbindings import *
+from exceptions import *
+from decorators import initialize
 
 import atexit
 import re

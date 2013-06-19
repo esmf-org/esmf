@@ -58,7 +58,7 @@ The following packages are *required* to work with ESMPy:
 
 * `ESMF installation <http://www.earthsystemmodeling.org/esmf_releases/last/ESMF_usrdoc>`_
 * `python <http://python.org/>`_
-* `numpy <http://http://www.numpy.org/>`_
+* `numpy <http://www.numpy.org/>`_
 * ctypes (included with numpy)
 
 The following packages are *optional*:
@@ -154,7 +154,7 @@ to ESMF offline and integrated regridding capabilities.
 * ESMPy cannot use an ESMF installation that is built with external LAPACK support.
 
 Testing related:
-- Only tested with gfortran on Darwin, Linux, and Unicos platforms
+- Only tested with gfortran on Darwin and Linux platforms
 
 
 ================
@@ -360,7 +360,7 @@ necessary to regrid data between Fields built on Grids.
 Create a Grid
 -------------
 
-    .. literalinclude:: ../test/regrid_test/field_regridding_test.py
+    .. literalinclude:: ../src/ESMF/test/regrid_test/field_regridding_test.py
         :pyobject: create_grid
 
 
@@ -368,7 +368,7 @@ Create a Grid
 Create a Field
 --------------
 
-    .. literalinclude:: ../test/regrid_test/field_regridding_test.py
+    .. literalinclude:: ../src/ESMF/test/regrid_test/field_regridding_test.py
         :pyobject: create_field
 
 
@@ -376,7 +376,7 @@ Create a Field
 Build an analytic Field
 -----------------------
 
-    .. literalinclude:: ../test/regrid_test/field_regridding_test.py
+    .. literalinclude:: ../src/ESMF/test/regrid_test/field_regridding_test.py
         :pyobject: build_analyticfield
 
 
@@ -384,7 +384,7 @@ Build an analytic Field
 Run ESMPy regridding
 --------------------
 
-    .. literalinclude:: ../test/regrid_test/field_regridding_test.py
+    .. literalinclude:: ../src/ESMF/test/regrid_test/field_regridding_test.py
         :pyobject: run_regridding
 
 
@@ -392,7 +392,7 @@ Run ESMPy regridding
 Compute mass
 ------------
 
-  .. literalinclude:: ../test/regrid_test/field_regridding_test.py
+  .. literalinclude:: ../src/ESMF/test/regrid_test/field_regridding_test.py
     :pyobject: compute_mass
 
 
@@ -400,7 +400,7 @@ Compute mass
 Compare Field results to exact solution
 ---------------------------------------
 
-    .. literalinclude:: ../test/regrid_test/field_regridding_test.py
+    .. literalinclude:: ../src/ESMF/test/regrid_test/field_regridding_test.py
         :pyobject: compare_fields
 
 
@@ -408,7 +408,7 @@ Compare Field results to exact solution
 Field regridding
 ----------------
 
-.. automodule:: ../test/regrid_test/field_regridding_test
+.. automodule:: ../src/ESMF/test/regrid_test/field_regridding_test
 
 The code for this tutorial can be downloaded `here <http://esmfcontrib.cvs.sourceforge.net/viewvc/esmfcontrib/python/ESMPy/tutorial/field_regridding.py?view=log>`_.
 
@@ -416,7 +416,7 @@ The code for this tutorial can be downloaded `here <http://esmfcontrib.cvs.sourc
 regrid_main()
 ~~~~~~~~~~~~~~~
 
-    .. literalinclude:: ../test/regrid_test/field_regridding_test.py
+    .. literalinclude:: ../src/ESMF/test/regrid_test/field_regridding_test.py
         :pyobject: regrid_main
 
 Running this tutorial will yield the following results:

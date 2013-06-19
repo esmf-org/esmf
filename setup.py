@@ -37,8 +37,10 @@ class BuildCommand(Command):
             f.close()
 
         # load ESMF
-        sys.path.append('src')
-        import ESMF.interface.loadESMF
+        sys.path.append('src/ESMF/api')
+        sys.path.append('src/ESMF/interface')
+
+        import loadESMF
 
 class CleanCommand(Command):
     description = "clean: will remove all libraries, log and output files"
@@ -151,7 +153,7 @@ for dirpath,dirnames,filenames in os.walk(src_path):
 # TODO: remove duplicated metadata: here and src/ESMF/__init__.py
 setup(\
       name="ESMPy",
-      version="620b10-05",
+      version="620_01b",
       description="ESMF Python interface",
       author="University Corporation for Atmospheric Research, \
               Massachusetts Institute of Technology, \
@@ -163,7 +165,7 @@ setup(\
               NASA Goddard Space Flight Center",
       license = "University of Illinois-NCSA",
       author_email="esmf_support@list.woc.noaa.gov",
-      url="http://earthsystemcog.org/projects/esmp/",
+      url="http://earthsystemcog.org/projects/esmpy/",
       packages=packages,
       package_dir = {'':'src'},
       cmdclass={'build': BuildCommand,

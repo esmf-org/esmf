@@ -4,14 +4,12 @@
 The bindings to the ESMF C API
 """
 
-import sys
-
 import ctypes as ct
 import numpy as np
 
-import ESMF.api.constants as constants
-from ESMF.util.decorators import deprecated
-from ESMF.interface.loadESMF import _ESMF
+import constants as constants
+from decorators import deprecated
+from loadESMF import _ESMF
 
 def copy(src):
     dst = type(src)()
