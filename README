@@ -210,7 +210,7 @@ with the following command issued from the top level ESMPy directory:
 
     python setup.py install --prefix=<custom_install_location>
 
-    setenv PYTHONPATH <custom_install_location>
+    setenv PYTHONPATH <custom_install_location>/lib/*/site_packages
 
 Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
 

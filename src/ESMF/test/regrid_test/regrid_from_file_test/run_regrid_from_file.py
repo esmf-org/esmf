@@ -6,7 +6,7 @@ import ESMF
 # run utests, pipe to file
 REGRID_TEST_DIR = 'src/ESMF/test/regrid_test/regrid_from_file_test/'
 rtestfile=os.path.join(REGRID_TEST_DIR, 'regrid_check_driver.py')
-rtestoutfile='run_regrid.log'
+rtestoutfile='run_regrid_from_file.log'
 
 if ESMF.constants._ESMF_OS is ESMF.constants._ESMF_OS_UNICOS:
     os.system("aprun -n 1 -a xt "+rtestfile+" > "+rtestoutfile+" 2>&1")
@@ -31,7 +31,7 @@ for line in RTEST:
 
 RTEST.close()
 
-print "Regrid unit test results: "+rtestoutfile
+print "Regrid from file test results: "+rtestoutfile
 print "PASS = "+str(rtpass)
 print "FAIL = "+str(rtfail)
 print "SKIP = "+str(rtskip)
