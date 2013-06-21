@@ -5,17 +5,14 @@ The Regrid API
 """
 
 #### IMPORT LIBRARIES #########################################################
-import numpy as np
-import numpy.ma as ma
+from ESMF.api.constants import *
+from ESMF.interface.cbindings import *
+from ESMF.util.decorators import initialize
 
-from constants import *
-from cbindings import *
-from decorators import initialize
-
-from manager import *
-from grid import *
-from mesh import *
-from field import *
+from ESMF.api.manager import *
+from ESMF.api.grid import *
+from ESMF.api.mesh import *
+from ESMF.api.field import *
 
 #### Regrid class ##############################################################
 

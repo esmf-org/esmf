@@ -9,7 +9,7 @@ decorators
 import warnings
 import functools
 
-from constants import LogKind
+from ESMF.api.constants import LogKind
 
 try:
     import nose

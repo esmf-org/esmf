@@ -37,10 +37,11 @@ class BuildCommand(Command):
             f.close()
 
         # load ESMF
-        sys.path.append('src/ESMF/api')
-        sys.path.append('src/ESMF/interface')
-
-        import loadESMF
+        try:
+            sys.path.append('src')
+            import ESMF.interface.loadESMF
+        except:
+            raise ImportError("badness")
 
 class CleanCommand(Command):
     description = "clean: will remove all libraries, log and output files"

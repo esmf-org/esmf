@@ -61,18 +61,12 @@ __release__ = "620_01b"
 
 #### IMPORT LIBRARIES #########################################################
 
-import sys
-
-sys.path.append('src/ESMF/api')
-sys.path.append('src/ESMF/interface')
-sys.path.append('src/ESMF/util')
-
-from manager import *
-from grid import *
-from mesh import *
-from field import *
-from regrid import *
+from api.manager import *
+from api.grid import *
+from api.mesh import *
+from api.field import *
+from api.regrid import *
 
 # for testing
-from decorators import expected_failure
+from util.decorators import expected_failure
 [node, element] = [0, 1]

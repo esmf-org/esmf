@@ -6,14 +6,11 @@ The Grid API
 
 #### IMPORT LIBRARIES #########################################################
 
-import numpy as np
-import numpy.ma as ma
+from ESMF.api.constants import *
+from ESMF.interface.cbindings import *
+from ESMF.util.decorators import initialize
 
-from constants import *
-from cbindings import *
-from decorators import initialize
-
-from manager import *
+from ESMF.api.manager import *
 
 #### Grid class #########################################################
 

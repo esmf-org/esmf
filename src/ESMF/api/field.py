@@ -6,16 +6,15 @@ The Field API
 
 #### IMPORT LIBRARIES #########################################################
 
-import numpy as np
 import numpy.ma as ma
 
-from constants import *
-from cbindings import *
-from decorators import initialize
+from ESMF.api.constants import *
+from ESMF.interface.cbindings import *
+from ESMF.util.decorators import initialize
 
-from manager import *
-from grid import *
-from mesh import *
+from ESMF.api.manager import *
+from ESMF.api.grid import *
+from ESMF.api.mesh import *
 
 #### Field class ##############################################################
 [node, element] = [0, 1]
