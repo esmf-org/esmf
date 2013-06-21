@@ -124,13 +124,15 @@ python setup.py test
 
 or:
 
+python setup.py test_regrid
+
+python setup.py test_regrid_from_file
+
 python setup.py test_all 
 
-to also run the regrid_from_file tests.
+NOTE: The regrid_from_file tests can take up a lot of memory and bandwidth.
 
-NOTE: The regrid tests can take up a lot of memory and bandwidth.
-
-Alternatively, if the nose package is available, the test can be run with:
+Alternatively, if the nose package is available, the tests can be run with:
 
 nosetests
 

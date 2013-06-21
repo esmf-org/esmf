@@ -1,8 +1,8 @@
 # $Id$
 
 '''
-ESMPy is a Python package which contains a prototype Python interface to the
-Earth System Modeling Framework (ESMF) regridding utility.  ESMF is software for
+ESMPy is a Python interface to the Earth System Modeling Framework (ESMF) 
+regridding utility.  ESMF is software for
 building and coupling weather, climate, and related models.  ESMF has a robust,
 parallel and scalable remapping package, used to generate remapping weights.
 It can handle a wide variety of grids and options:  logically rectangular grids
