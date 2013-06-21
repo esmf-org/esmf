@@ -41,7 +41,7 @@ class BuildCommand(Command):
             sys.path.append('src')
             import ESMF.interface.loadESMF
         except:
-            raise ImportError("badness")
+            raise ImportError("ESMF library did not load!")
 
 class CleanCommand(Command):
     description = "clean: will remove all libraries, log and output files"

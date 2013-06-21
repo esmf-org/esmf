@@ -11,21 +11,18 @@ import ESMF.api.constants as constants
 try:
     from esmfmkfile import ESMFMKFILE as esmfmk
 except:
-    print 'The ESMFMKFILE cannot be found!'
-    raise ImportError(constants._ESMP_ERROR_LIBS)
+    raise ImportError('The ESMFMKFILE cannot be found!')
 
 try:
     import numpy as np
 except:
-    print 'The Numpy library cannot be found!'
-    raise ImportError(constants._ESMP_ERROR_LIBS)
+    raise ImportError('The Numpy library cannot be found!')
 
 # this library is loaded here so that it can be pulled back up without sys
 try:
     import ctypes as ct
 except:
-    print 'The CTypes library cannot be found!'
-    raise ImportError(constants._ESMP_ERROR_LIBS)
+    raise ImportError('The CTypes library cannot be found!')
 
 #### INVESTIGATE esmf.mk ######################################################
 
@@ -37,10 +34,7 @@ except:
 #       of the routines that require an ESMF build with these dependencies
 
 try:
-    try:
-        MKFILE = open(esmfmk, 'r')
-    except:
-        raise IOError("File not found\n  %s") % esmfmk
+    MKFILE = open(esmfmk, 'r')
     
     # investigate esmf.mk
     libsdir = 0
@@ -56,11 +50,11 @@ try:
             esmfabi = line.split(":")[1]
     MKFILE.close()
     if not libsdir:
-        raise "ESMF_LIBSDIR not found!"
+        raise ValueError("ESMF_LIBSDIR not found!")
     if not esmfos:
-        raise "ESMF_OS not found!"
+        raise ValueError("ESMF_OS not found!")
     if not esmfabi:
-        raise "ESMF_ABI not found!"
+        raise ValueError("ESMF_ABI not found!")
     libsdir = libsdir.rstrip()
     esmfos = esmfos.rstrip()
     
@@ -72,7 +66,7 @@ try:
     elif "Unicos" in esmfos:
         constants._ESMF_OS = constants._ESMF_OS_UNICOS
     else:
-        raise ImportError("Unrecognized ESMF_OS setting!")
+        raise ValueError("Unrecognized ESMF_OS setting!")
     
     # set _ESMF_ABI for 32/64 switching
     if "64" in esmfabi:
@@ -80,10 +74,9 @@ try:
     elif "32" in esmfabi:
         constants._ESMF_ABI=constants._ESMF_ABI_32
 except:
-    print 'There is no ESMF shared library object available \
-           (libesmf_fullylinked.so).'
-    print 'Please set ESMFMKFILE to a current ESMF installation to proceed.'
-    raise ImportError(constants._ESMP_ERROR_ESMFMKFILE)
+    raise ValueError('There is no ESMF shared library object available \
+           (libesmf_fullylinked.so).\nPlease set ESMFMKFILE to a current \
+           ESMF installation to proceed.')
 
 #### SHARED LIBRARY ###########################################################
 
@@ -96,4 +89,4 @@ try:
                         mode=ct.RTLD_GLOBAL)
 except:
     traceback.print_exc(file=sys.stdout)
-    raise ImportError(constants._ESMP_ERROR_SHAREDLIB)
+    raise ImportError('The ESMF shared library did not load!')

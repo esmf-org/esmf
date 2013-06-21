@@ -10,13 +10,6 @@ ESMP_SUCCESS = 0
 # ESMF TYPEKINDS mapped to Python types
 ESMF2PythonType = (0,0,0, np.int32, np.int64, np.float32, np.float64)
 
-#### ERROR CONDITIONS #########################################################
-
-_ESMP_ERROR_LIBS = 1000
-_ESMP_ERROR_PYTHONPATH = 1001
-_ESMP_ERROR_ESMFMKFILE = 1002
-_ESMP_ERROR_SHAREDLIB = 1003
-
 #### CONSTANTS ################################################################
 
 # weird ESMF stuff for ESMC_Initialize optional argument passing prototype
