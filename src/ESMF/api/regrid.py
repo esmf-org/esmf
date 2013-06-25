@@ -74,7 +74,6 @@ class Regrid(object):
             raise RequiredArgs(Regrid.__init__.__doc__)
 
         # kwargs
-        coord_dim = kwargs.get('coord_dim', None)
         src_mask_values = kwargs.get('src_mask_values', None)
         dst_mask_values = kwargs.get('dst_mask_values', None)
         regrid_method = kwargs.get('regrid_method', None)

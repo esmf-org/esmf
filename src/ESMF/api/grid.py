@@ -103,8 +103,8 @@ class Grid(object):
         self.coords_done = [None]
 
         # mask and area
-        self.mask = np.array(None)
-        self.area = np.array(None)
+        self.mask =np.zeros(None)
+        self.area = np.zeros(None)
         self.item_done = [None]
 
         # create the correct grid
@@ -131,12 +131,12 @@ class Grid(object):
         self.staggerloc = [False for a in range(2**self.rank)]
 
         # bounds
-        self.lower_bounds = [np.array(a) for a in range(2**self.rank)]
-        self.upper_bounds = [np.array(a) for a in range(2**self.rank)]
+        self.lower_bounds = [np.zeros(None) for a in range(2**self.rank)]
+        self.upper_bounds = [np.zeros(None) for a in range(2**self.rank)]
         self.bounds_done = [False for a in range(2**self.rank)]
 
         # distributed sizes
-        self.size_local = [np.array(a) for a in range(2**self.rank)]
+        self.size_local = [np.zeros(None) for a in range(2**self.rank)]
 
         # grid size according to stagger locations
         if self.rank == 2:
@@ -172,7 +172,7 @@ class Grid(object):
 
         # initialize the coordinates structures
         # index order is [staggerLoc][coord_dim]
-        self.coords = [[np.array(a) for a in range(self.rank)] \
+        self.coords = [[np.zeros(None) for a in range(self.rank)] \
                         for b in range(2**self.rank)]
         self.coords_done = [[False for a in range(self.rank)] \
                              for b in range(2**self.rank)]
