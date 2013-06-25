@@ -156,9 +156,10 @@ class Manager(object):
         """
         string = ("Manager:\n"
                   "    localPet = %r\n"
-                  "    petCount = %r\n)" % \
-                      (self.localPet,
-                       self.petCount))
+                  "    petCount = %r\n)" 
+                  %
+                  (self.localPet,
+                   self.petCount))
 
         return string
     

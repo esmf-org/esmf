@@ -74,10 +74,12 @@ class Grid(object):
         # ctypes stuff
         self.struct = ESMP_GridStruct()
 
-        # type, kind, rank
+        # type, kind, rank, etc.
         self.type = TypeKind.R8
         self.areatype = TypeKind.R8
         self.rank = None
+        self.num_peri_dims = num_peri_dims
+        self.coord_sys = coord_sys
 
         # size, type and rank of the grid for bookeeping of coordinates 
         self.size = [None]
@@ -209,6 +211,8 @@ class Grid(object):
                   "    type = %r \n"
                   "    areatype = %r \n"
                   "    rank = %r \n"
+                  "    num_peri_dims = %r \n"
+                  "    coord_sys = %r \n"
                   "    size = %r \n"
                   "    size_local = %r \n"
                   "    max_index = %r \n"
@@ -217,20 +221,23 @@ class Grid(object):
                   "    upper_bounds = %r \n"
                   "    coords = %r \n"
                   "    mask = %r \n"
-                  "    area = %r \n" %
-                      (self.struct,
-                       self.type,
-                       self.areatype,
-                       self.rank,
-                       self.size,
-                       self.size_local,
-                       self.max_index,
-                       self.staggerloc,
-                       self.lower_bounds,
-                       self.upper_bounds,
-                       self.coords,
-                       self.mask,
-                       self.area))
+                  "    area = %r \n" 
+                  %
+                  (self.struct,
+                   self.type,
+                   self.areatype,
+                   self.rank,
+                   self.num_peri_dims,
+                   self.coord_sys,
+                   self.size,
+                   self.size_local,
+                   self.max_index,
+                   self.staggerloc,
+                   self.lower_bounds,
+                   self.upper_bounds,
+                   self.coords,
+                   self.mask,
+                   self.area))
 
         return string
     def add_coords(self, **kwargs):

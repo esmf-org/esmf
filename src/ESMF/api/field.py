@@ -162,11 +162,12 @@ class Field(ma.MaskedArray):
 
         # initialize field data
         obj.struct = struct
+        obj.type = typekind
+        obj.staggerloc = staggerloc
+        obj.meshloc = meshloc
         obj.grid_to_field_map = local_grid_to_field_map
         obj.ungridded_lower_bound = local_ungridded_lower_bound
         obj.ungridded_upper_bound = local_ungridded_upper_bound
-        obj.staggerloc = staggerloc
-        obj.type = typekind
         obj.grid = grid
  
         return obj
@@ -238,14 +239,15 @@ class Field(ma.MaskedArray):
                   "    ungridded_upper_bound = %r\n"
                   "    staggerloc = %r\n"
                   "    type = %r\n"
-                  "    grid = \n%r\n)" % \
-                      (self.struct, 
-                       self.grid_to_field_map,
-                       self.ungridded_lower_bound,
-                       self.ungridded_upper_bound,
-                       self.staggerloc,
-                       self.type,
-                       self.grid))
+                  "    grid = \n%r\n)" 
+                  %
+                  (self.struct, 
+                   self.grid_to_field_map,
+                   self.ungridded_lower_bound,
+                   self.ungridded_upper_bound,
+                   self.staggerloc,
+                   self.type,
+                   self.grid))
 
         return string
     

@@ -108,6 +108,16 @@ class Regrid(object):
                                             unmappedaction=unmapped_action,
                                             srcFracField=src_frac_field,
                                             dstFracField=dst_frac_field)
+        
+        self.srcfield = srcfield
+        self.dstfield = dstfield
+        self.src_mask_values = src_mask_values
+        self.dst_mask_values = dst_mask_values
+        self.regrid_method = regrid_method
+        self.unmapped_action = unmapped_action
+        self.src_frac_field = src_frac_field
+        self.dst_frac_field = dst_frac_field
+
 
     def __call__(self, *args, **kwargs):
         """
@@ -161,9 +171,24 @@ class Regrid(object):
         """
         string = ("Regrid:\n"
                   "    routehandle = %r\n"
-                  "    blank = %r\n)" % \
-                      (self.routehandle,
-                       'blank'))
+                  "    src_mask_values = %r\n"
+                  "    dst_mask_values = %r\n"
+                  "    regrid_method = %r\n"
+                  "    unmapped_action = %r\n"
+                  "    src_frac_field = %r\n"
+                  "    dst_frac_field = %r\n"
+                  "    srcfield = %r\n"
+                  "    dstfield = %r\n"
+                  %
+                  (self.routehandle,
+                   self.src_mask_values,
+                   self.dst_mask_values,
+                   self.regrid_method,
+                   self.unmapped_action,
+                   self.src_frac_field,
+                   self.dst_frac_field,
+                   self.srcfield,
+                   self.dstfield))
 
         return string
     

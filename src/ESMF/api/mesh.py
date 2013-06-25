@@ -105,6 +105,10 @@ class Mesh(object):
                                                   convert_to_dual, 
                                                   add_user_area, meshname, 
                                                   add_mask, varname)
+            # save info
+            self.parametric_dim = parametric_dim
+            self.spatial_dim = spatial_dim
+
             # get the sizes
             self.size[node] = ESMP_MeshGetOwnedNodeCount(self)
             self.size_local[node] = ESMP_MeshGetLocalNodeCount(self)
@@ -132,32 +136,13 @@ class Mesh(object):
                   "    parametric_dim = %r\n"
                   "    spatial_dim = %r\n"
                   "    size = %r\n"
-                  "    size_local = %r\n"
-                  "    element_count = %r\n"
-                  "    element_ids = %r\n"
-                  "    element_types = %r\n"
-                  "    element_conn = %r\n"
-                  "    element_mask = %r\n"
-                  "    element_area = %r\n"
-                  "    node_count = %r\n"
-                  "    node_ids = %r\n"
-                  "    node_coords = %r\n"
-                  "    node_owners = %r\n)" % \
-                      (self.struct, 
-                       self.parametric_dim,
-                       self.spatial_dim,
-                       self.size,
-                       self.size_local,
-                       self.element_count,
-                       self.element_ids,
-                       self.element_types,
-                       self.element_conn,
-                       self.element_mask,
-                       self.element_area,
-                       self.node_count,
-                       self.node_ids,
-                       self.node_coords,
-                       self.node_owners))
+                  "    size_local = %r\n" 
+                  %
+                  (self.struct, 
+                   self.parametric_dim,
+                   self.spatial_dim,
+                   self.size,
+                   self.size_local))
 
         return string
     
