@@ -177,3 +177,16 @@ class Regrid(object):
         """
         # call into the ctypes layer
         ESMP_FieldRegridRelease(self.routehandle)
+
+    def __repr__(self):
+        """
+        Return a string containing a printable representation of the object
+        """
+        string = ("Regrid:\n"
+                  "    routehandle = %r\n"
+                  "    blank = %r\n)" % \
+                      (self.routehandle,
+                       'blank'))
+
+        return string
+    

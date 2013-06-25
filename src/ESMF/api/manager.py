@@ -158,3 +158,16 @@ class Manager(object):
         ESMP_Finalize()
         self.__esmp_initialized = False
         self.__esmp_finalized = True
+
+    def __repr__(self):
+        """
+        Return a string containing a printable representation of the object
+        """
+        string = ("Manager:\n"
+                  "    localPet = %r\n"
+                  "    petCount = %r\n)" % \
+                      (self.localPet,
+                       self.petCount))
+
+        return string
+    

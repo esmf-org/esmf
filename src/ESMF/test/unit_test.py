@@ -669,7 +669,7 @@ def interfaceint2_test():
 def interfaceint3_test():
     # This test should fail
     try:
-        interfaceint2 = ESMP_InterfaceIntCreate(array([1,2,3]), 3)
+        interfaceint2 = ESMP_InterfaceIntCreate(np.array([1,2,3]), 3)
         ESMP_InterfaceIntDestroy(interfaceint2)
     except:
         raise TypeError('FAIL: tuples cannot be used in place of numpy.array')
@@ -977,6 +977,13 @@ def field_regrid_test():
     rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.CONSERVE)
     dstfield = rh(srcfield, dstfield)
 
+    # test the __repr__ functions
+    print mesh
+    print grid
+    print repr(srcfield)
+    print "%r" % dstfield
+    print rh
+
     # return True from unit test
     return True
 
@@ -1045,7 +1052,7 @@ def field_regrid_zeroregion_test():
     for i in range(mask.shape[x]):
         for j in range(mask.shape[y]):
             if mask[i, j] == 1:
-                if dstfieldPtr[i, j] >= 0:
+                if dstfield[i, j] >= 0:
                     print "DING: {0}".format(dstfield[i, j])
                     return False
 

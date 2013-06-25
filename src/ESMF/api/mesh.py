@@ -152,6 +152,44 @@ class Mesh(object):
         """
         ESMP_MeshDestroy(self)
 
+    def __repr__(self):
+        """
+        Return a string containing a printable representation of the object
+        """
+        string = ("Mesh:\n"
+                  "    struct = %r\n"
+                  "    parametric_dim = %r\n"
+                  "    spatial_dim = %r\n"
+                  "    size = %r\n"
+                  "    size_local = %r\n"
+                  "    element_count = %r\n"
+                  "    element_ids = %r\n"
+                  "    element_types = %r\n"
+                  "    element_conn = %r\n"
+                  "    element_mask = %r\n"
+                  "    element_area = %r\n"
+                  "    node_count = %r\n"
+                  "    node_ids = %r\n"
+                  "    node_coords = %r\n"
+                  "    node_owners = %r\n)" % \
+                      (self.struct, 
+                       self.parametric_dim,
+                       self.spatial_dim,
+                       self.size,
+                       self.size_local,
+                       self.element_count,
+                       self.element_ids,
+                       self.element_types,
+                       self.element_conn,
+                       self.element_mask,
+                       self.element_area,
+                       self.node_count,
+                       self.node_ids,
+                       self.node_coords,
+                       self.node_owners))
+
+        return string
+    
     def add_elements(self, *args, **kwargs):
         """
         Add elements to a Mesh, this must be done after adding nodes. \n

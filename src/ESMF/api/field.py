@@ -244,6 +244,28 @@ class Field(ma.MaskedArray):
         """
         ESMP_FieldDestroy(self)
 
+    def __repr__(self):
+        """
+        Return a string containing a printable representation of the object
+        """
+        string = ("Field:\n"
+                  "    struct = %r\n"
+                  "    grid_to_field_map = %r\n"
+                  "    ungridded_lower_bound = %r\n"
+                  "    ungridded_upper_bound = %r\n"
+                  "    staggerloc = %r\n"
+                  "    type = %r\n"
+                  "    grid = \n%r\n)" % \
+                      (self.struct, 
+                       self.grid_to_field_map,
+                       self.ungridded_lower_bound,
+                       self.ungridded_upper_bound,
+                       self.staggerloc,
+                       self.type,
+                       self.grid))
+
+        return string
+    
     def get_area(self):
         """
         Initialize a Field with the areas of the cells of the 

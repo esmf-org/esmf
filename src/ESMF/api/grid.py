@@ -211,6 +211,39 @@ class Grid(object):
         """
         ESMP_GridDestroy(self)
 
+    def __repr__(self):
+        """
+        Return a string containing a printable representation of the object
+        """
+        string = ("Grid:\n"
+                  "    struct = %r \n"
+                  "    type = %r \n"
+                  "    areatype = %r \n"
+                  "    rank = %r \n"
+                  "    size = %r \n"
+                  "    size_local = %r \n"
+                  "    max_index = %r \n"
+                  "    staggerloc = %r \n"
+                  "    lower_bounds = %r \n"
+                  "    upper_bounds = %r \n"
+                  "    coords = %r \n"
+                  "    mask = %r \n"
+                  "    area = %r \n" %
+                      (self.struct,
+                       self.type,
+                       self.areatype,
+                       self.rank,
+                       self.size,
+                       self.size_local,
+                       self.max_index,
+                       self.staggerloc,
+                       self.lower_bounds,
+                       self.upper_bounds,
+                       self.coords,
+                       self.mask,
+                       self.area))
+
+        return string
     def add_coords(self, **kwargs):
         """
         Add coordinates to a Grid at the specified
