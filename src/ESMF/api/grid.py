@@ -66,21 +66,10 @@ class Grid(object):
             raise RequiredArgs(Grid.__init__.__doc__)
 
         # kwargs
-        num_peri_dims = 0
-        if 'num_peri_dims' in kwargs:
-            num_peri_dims = kwargs.get('num_peri_dims')
-
-        coord_sys = None
-        if 'coord_sys' in kwargs:
-            coord_sys = kwargs.get('coord_sys')
-
-        coord_typekind = None
-        if 'coord_typekind' in kwargs:
-            coord_typekind = kwargs.get('coord_typekind')
-
-        staggerloc = None
-        if 'staggerloc' in kwargs:
-            staggerloc = kwargs.get('staggerloc')
+        num_peri_dims = kwargs.get('num_peri_dims', 0)
+        coord_sys = kwargs.get('coord_sys', None)
+        coord_typekind = kwargs.get('coord_typekind', None)
+        staggerloc = kwargs.get('staggerloc', None)
 
         # ctypes stuff
         self.struct = ESMP_GridStruct()
@@ -274,13 +263,8 @@ class Grid(object):
             None \n
         """
         # kwargs
-        staggerloc = None
-        if 'staggerloc' in kwargs:
-            staggerloc = kwargs.get('staggerloc')
-
-        coord_dim = None
-        if 'coord_dim' in kwargs:
-            coord_dim = kwargs.get('coord_dim')
+        staggerloc = kwargs.get('staggerloc', None)
+        coord_dim = kwargs.get('coord_dim', None)
    
         # handle the default case
         staggerlocs = 0
@@ -344,9 +328,7 @@ class Grid(object):
             raise RequiredArgs(Grid.add_item.__doc__)
 
         # kwargs
-        staggerloc = None
-        if 'staggerloc' in kwargs:
-            staggerloc = kwargs.get('staggerloc')
+        staggerloc = kwargs.get('staggerloc', None)
 
         # handle the default case
         staggerlocs = 0
@@ -410,9 +392,7 @@ class Grid(object):
             raise RequiredArgs(Grid.get_coords.__doc__)        
         
         # kwargs
-        staggerloc = None
-        if 'staggerloc' in kwargs:
-            staggerloc = kwargs.get('staggerloc')
+        staggerloc = kwargs.get('staggerloc', None)
 
         # handle the default case
         #TODO: return full coordinates, and by dimension as optional
@@ -461,9 +441,7 @@ class Grid(object):
             raise RequiredArgs(Grid.get_item.__doc__)
 
         # kwargs
-        staggerloc = None
-        if 'staggerloc' in kwargs:
-            staggerloc = kwargs.get('staggerloc')
+        staggerloc = kwargs.get('staggerloc', None)
 
         # handle the default case
         if staggerloc == None:
@@ -528,9 +506,7 @@ class Grid(object):
             raise RequiredArgs(Grid.write.__doc__)
 
         # kwargs
-        staggerloc = None
-        if 'staggerloc' in kwargs:
-            staggerloc = kwargs.get('staggerloc')
+        staggerloc = kwargs.get('staggerloc', None)
 
         # handle the default case
         if staggerloc == None:

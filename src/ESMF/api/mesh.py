@@ -57,45 +57,16 @@ class Mesh(object):
             Mesh \n
         """
         # kwargs
-        parametric_dim = None
-        if 'parametric_dim' in kwargs:
-            parametric_dim = kwargs.get('parametric_dim')
-
-        spatial_dim = None
-        if 'spatial_dim' in kwargs:
-            spatial_dim = kwargs.get('spatial_dim')
-
-        filename = ""
-        if 'filename' in kwargs:
-            filename = kwargs.get('filename')
-
-        filetype = None
-        if 'filetype' in kwargs:
-            filetype = kwargs.get('filetype')
-
-        convert3D = None
-        if 'convert3D' in kwargs:
-            convert3D = kwargs.get('convert3D')
-
-        convert_to_dual = None
-        if 'convert_to_dual' in kwargs:
-            convert_to_dual = kwargs.get('convert_to_dual')
-
-        add_user_area = None
-        if 'add_user_area' in kwargs:
-            add_user_area = kwargs.get('add_user_area')
-
-        meshname = ""
-        if 'meshname' in kwargs:
-            meshname = kwargs.get('meshname')
-
-        add_mask = None
-        if 'add_mask' in kwargs:
-            add_mask = kwargs.get('add_mask')
-
-        varname = ""
-        if 'varname' in kwargs:
-            varname = kwargs.get('varname')
+        parametric_dim = kwargs.get('parametric_dim', None)
+        spatial_dim = kwargs.get('spatial_dim', None)
+        filename = kwargs.get('filename', "")
+        filetype = kwargs.get('filetype', None)
+        convert3D = kwargs.get('convert3D', None)
+        convert_to_dual = kwargs.get('convert_to_dual', None)
+        add_user_area = kwargs.get('add_user_area', None)
+        meshname = kwargs.get('meshname', "")
+        add_mask = kwargs.get('add_mask', None)
+        varname = kwargs.get('varname', "")
 
         # ctypes stuff
         self.struct = ESMP_Mesh()
@@ -243,13 +214,8 @@ class Mesh(object):
             raise RequiredArgs(Mesh.add_elements.__doc__)
 
         # kwargs
-        element_mask = None
-        if 'element_mask' in kwargs:
-            element_mask = kwargs.get('element_mask')
-
-        element_area = None
-        if 'element_area' in kwargs:
-            element_area = kwargs.get('element_area')
+        element_mask = kwargs.get('element_mask', None)
+        element_area = kwargs.get('element_area', None)
 
         # initialize not fromfile variables
         self.element_count = element_count

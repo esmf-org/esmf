@@ -88,29 +88,12 @@ class Field(ma.MaskedArray):
             raise RequiredArgs(Field.__init__.__doc__)
 
         # kwargs
-        typekind = TypeKind.R8
-        if 'typekind' in kwargs:
-            typekind = kwargs.get('typekind')
-
-        staggerloc = StaggerLoc.CENTER
-        if 'staggerloc' in kwargs:
-            staggerloc = kwargs.get('staggerloc')
-
-        meshloc = MeshLoc.NODE
-        if 'meshloc' in kwargs:
-            meshloc = kwargs.get('meshloc')
-
-        grid_to_field_map = None
-        if 'grid_to_field_map' in kwargs:
-            grid_to_field_map = kwargs.get('grid_to_field_map')
-
-        ungridded_lower_bound = None
-        if 'ungridded_lower_bound' in kwargs:
-            ungridded_lower_bound = kwargs.get('ungridded_lower_bound')
-
-        ungridded_upper_bound = None
-        if 'ungridded_upper_bound' in kwargs:
-            ungridded_upper_bound = kwargs.get('ungridded_upper_bound')
+        typekind = kwargs.get('typekind', TypeKind.R8)
+        staggerloc = kwargs.get('staggerloc', StaggerLoc.CENTER)
+        meshloc = kwargs.get('meshloc', MeshLoc.NODE)
+        grid_to_field_map = kwargs.get('grid_to_field_map', None)
+        ungridded_lower_bound = kwargs.get('ungridded_lower_bound', None)
+        ungridded_upper_bound = kwargs.get('ungridded_upper_bound', None)
 
         # type handling
         local_grid_to_field_map = None
@@ -182,9 +165,9 @@ class Field(ma.MaskedArray):
         obj.grid_to_field_map = local_grid_to_field_map
         obj.ungridded_lower_bound = local_ungridded_lower_bound
         obj.ungridded_upper_bound = local_ungridded_upper_bound
-        obj.grid = grid
         obj.staggerloc = staggerloc
         obj.type = typekind
+        obj.grid = grid
  
         return obj
     

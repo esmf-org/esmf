@@ -74,33 +74,13 @@ class Regrid(object):
             raise RequiredArgs(Regrid.__init__.__doc__)
 
         # kwargs
-        coord_dim = None
-        if 'coord_dim' in kwargs:
-            coord_dim = kwargs.get('coord_dim')
-
-        src_mask_values = None                                                        
-        if 'src_mask_values' in kwargs:
-            src_mask_values = kwargs.get('src_mask_values')
-
-        dst_mask_values = None
-        if 'dst_mask_values' in kwargs:
-            dst_mask_values = kwargs.get('dst_mask_values')
-
-        regrid_method = None
-        if 'regrid_method' in kwargs:
-            regrid_method = kwargs.get('regrid_method')
-
-        unmapped_action = None
-        if 'unmapped_action' in kwargs:
-            unmapped_action = kwargs.get('unmapped_action')
-
-        src_frac_field = None
-        if 'src_frac_field' in kwargs:
-            src_frac_field = kwargs.get('src_frac_field')
-
-        dst_frac_field = None
-        if 'dst_frac_field' in kwargs:
-            dst_frac_field = kwargs.get('dst_frac_field')
+        coord_dim = kwargs.get('coord_dim', None)
+        src_mask_values = kwargs.get('src_mask_values', None)
+        dst_mask_values = kwargs.get('dst_mask_values', None)
+        regrid_method = kwargs.get('regrid_method', None)
+        unmapped_action = kwargs.get('unmapped_action', None)
+        src_frac_field = kwargs.get('src_frac_field', None)
+        dst_frac_field = kwargs.get('dst_frac_field', None)
 
         # type checking
         local_src_mask_values = None
@@ -156,9 +136,7 @@ class Regrid(object):
             raise RequiredArgs(Regrid.__call__.__doc__)
 
         # kwargs values
-        zero_region = None
-        if 'zero_region' in kwargs:
-            zero_region = kwargs.get('zero_region')
+        zero_region = kwargs.get('zero_region', None)
 
         # call into the ctypes layer
         ESMP_FieldRegrid(srcfield, dstfield,

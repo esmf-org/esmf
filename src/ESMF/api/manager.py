@@ -64,13 +64,8 @@ class Manager(object):
         '''
 
         # kwargs
-        logkind = LogKind.NONE
-        if 'logkind' in kwargs:
-            logkind = kwargs.get('logkind')
-
-        debug = False
-        if 'debug' in kwargs:
-            debug = kwargs.get('debug')
+        logkind = kwargs.get('logkind', LogKind.NONE)
+        debug = kwargs.get('debug', False)
 
         # If this is the first call, create the singleton object
         # and initialize its attributes.
@@ -106,12 +101,8 @@ class Manager(object):
         '''
 
         # kwargs
-        if 'logkind' in kwargs:
-            logkind = kwargs.get('logkind')
-
-        debug = False
-        if 'debug' in kwargs:
-            debug = kwargs.get('debug')
+        logkind = kwargs.get('logkind', LogKind.NONE)
+        debug = kwargs.get('debug', False)
 
         # Return no-op
         if self.__esmp_finalized:
