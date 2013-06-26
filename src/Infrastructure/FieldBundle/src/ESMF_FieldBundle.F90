@@ -1147,19 +1147,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       fieldCount, fieldList, fieldNameList, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_FieldBundle),  intent(in)            :: fieldbundle
+    type(ESMF_FieldBundle),    intent(in)            :: fieldbundle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_ItemOrder_Flag), intent(in),optional :: itemorderflag
-    type(ESMF_GeomType_Flag),intent(out), optional :: geomtype
-    type(ESMF_Grid),         intent(out), optional :: grid
-    type(ESMF_LocStream),    intent(out), optional :: locstream
-    type(ESMF_Mesh),         intent(out), optional :: mesh
-    type(ESMF_XGrid),        intent(out), optional :: xgrid
-    integer,                 intent(out), optional :: fieldCount
-    type(ESMF_Field),        intent(out), optional :: fieldList(:)
-    character(len=*),        intent(out), optional :: fieldNameList(:)
-    character(len=*),        intent(out), optional :: name
-    integer,                 intent(out), optional :: rc
+    type(ESMF_ItemOrder_Flag), intent(in),  optional :: itemorderflag
+    type(ESMF_GeomType_Flag),  intent(out), optional :: geomtype
+    type(ESMF_Grid),           intent(out), optional :: grid
+    type(ESMF_LocStream),      intent(out), optional :: locstream
+    type(ESMF_Mesh),           intent(out), optional :: mesh
+    type(ESMF_XGrid),          intent(out), optional :: xgrid
+    integer,                   intent(out), optional :: fieldCount
+    type(ESMF_Field),          intent(out), optional :: fieldList(:)
+    character(len=*),          intent(out), optional :: fieldNameList(:)
+    character(len=*),          intent(out), optional :: name
+    integer,                   intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
