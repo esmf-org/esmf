@@ -126,24 +126,24 @@ subroutine ESMF_XGridGetDefault(xgrid, keywordEnforcer, &
 
 !
 ! !ARGUMENTS:
-type(ESMF_XGrid), intent(in)                :: xgrid
+type(ESMF_XGrid),     intent(in)            :: xgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-type(ESMF_Grid), intent(out), optional      :: sideAGrid(:), sideBGrid(:)
-type(ESMF_Mesh), intent(out), optional      :: sideAMesh(:), sideBMesh(:)
-integer, intent(out), optional              :: ngridA, ngridB
-real(ESMF_KIND_R8), intent(out), optional   :: area(:)
-real(ESMF_KIND_R8), intent(out), optional   :: centroid(:,:)
-type(ESMF_DistGrid), intent(out), optional  :: distgridA(:)
-type(ESMF_DistGrid), intent(out), optional  :: distgridB(:)
-type(ESMF_DistGrid), intent(out), optional  :: distgridM
-integer, intent(out), optional              :: dimCount
-integer, intent(out), optional              :: localDECount
+type(ESMF_Grid),      intent(out), optional :: sideAGrid(:), sideBGrid(:)
+type(ESMF_Mesh),      intent(out), optional :: sideAMesh(:), sideBMesh(:)
+integer,              intent(out), optional :: ngridA, ngridB
+real(ESMF_KIND_R8),   intent(out), optional :: area(:)
+real(ESMF_KIND_R8),   intent(out), optional :: centroid(:,:)
+type(ESMF_DistGrid),  intent(out), optional :: distgridA(:)
+type(ESMF_DistGrid),  intent(out), optional :: distgridB(:)
+type(ESMF_DistGrid),  intent(out), optional :: distgridM
+integer,              intent(out), optional :: dimCount
+integer,              intent(out), optional :: localDECount
 type(ESMF_XGridSpec), intent(out), optional :: sparseMatA2X(:)
 type(ESMF_XGridSpec), intent(out), optional :: sparseMatX2A(:)
 type(ESMF_XGridSpec), intent(out), optional :: sparseMatB2X(:)
 type(ESMF_XGridSpec), intent(out), optional :: sparseMatX2B(:)
-character (len=*), intent(out), optional    :: name
-integer, intent(out), optional              :: rc 
+character (len=*),    intent(out), optional :: name
+integer,              intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !      Get information about XGrid
@@ -893,12 +893,12 @@ subroutine ESMF_XGridGetDG(xgrid, distgrid, keywordEnforcer, &
 
 !
 ! !ARGUMENTS:
-type(ESMF_XGrid), intent(in)                      :: xgrid
-type(ESMF_DistGrid), intent(out)                  :: distgrid
+type(ESMF_XGrid),          intent(in)            :: xgrid
+type(ESMF_DistGrid),       intent(out)           :: distgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-type(ESMF_XGridSide_Flag), intent(in), optional   :: xgridside
-integer, intent(in), optional                     :: gridindex
-integer, intent(out), optional                    :: rc 
+type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridside
+integer,                   intent(in),  optional :: gridindex
+integer,                   intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !      Get a distgrid from XGrid from a specific side. 
@@ -1002,14 +1002,14 @@ subroutine ESMF_XGridGetEle(xgrid, localDE, keywordEnforcer, &
 
 !
 ! !ARGUMENTS:
-type(ESMF_XGrid), intent(in)                 :: xgrid
-integer, intent(in)                          :: localDE
+type(ESMF_XGrid), intent(in)            :: xgrid
+integer,          intent(in)            :: localDE
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-integer, intent(out), optional               :: elementCount
-integer, intent(out), optional               :: exclusiveCount
-integer, intent(out), optional               :: exclusiveLBound
-integer, intent(out), optional               :: exclusiveUBound
-integer, intent(out), optional               :: rc 
+integer,          intent(out), optional :: elementCount
+integer,          intent(out), optional :: exclusiveCount
+integer,          intent(out), optional :: exclusiveLBound
+integer,          intent(out), optional :: exclusiveUBound
+integer,          intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !      Get localDE specific information about XGrid
