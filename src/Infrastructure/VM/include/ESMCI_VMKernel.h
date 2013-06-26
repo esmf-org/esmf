@@ -390,7 +390,11 @@ class VMK{
     int ipmutexlock(ipmutex *ipmutex);
     int ipmutexunlock(ipmutex *ipmutex);
     
+    // Simple thread-safety lock/unlock using internal pth_mutex
+    int lock();
+    int unlock();
     
+    // Timer methods
     static void wtime(double *time);
     static void wtimeprec(double *prec);
     static void wtimedelay(double delay);

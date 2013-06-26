@@ -72,6 +72,11 @@ void FTN_X(f_esmf_gridcreate1peridim)(ESMCI::Grid **grid,
     ESMC_TypeKind_Flag *coordTypeKind, int *ctk_present,
     ESMC_PoleKind_Flag *poleKind, int *pk_present, int *pksize,
     int *rc);
+
+void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid,
+				      char *filename, int *fileTypeFlag, 
+				      int *regDecomp, int *rc, 
+				      int len_filename);
 }
 
 //
@@ -284,6 +289,63 @@ int setDefaultsLUA(int dimCount,
   
     if (rc) *rc = localrc;
   
+    return grid;
+
+ }
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Grid::createfromfile()"
+//BOP
+// !IROUTINE:  ESMCI::Grid::createfromfile - Create a new Grid from file
+//
+// !INTERFACE:
+      Grid* Grid::createfromfile(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMCI::Grid object
+//
+// !ARGUMENTS:
+    char *filename,
+    int fileTypeFlag,
+    int *regDecomp,
+    int *rc) {           // out - return code
+//
+// !DESCRIPTION:
+//      Create a new Grid from NetCDF file.
+//
+//      Note: this is a class helper function, not a class method
+//      (see declaration in ESMC\_Grid.h)
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    printf ("Start ESMCI_Grid.C : createfromfile(%s,%d,[%d,%d])\n", 
+	    filename, fileTypeFlag, regDecomp[0], regDecomp[1]);
+    int localrc = ESMC_RC_NOT_IMPL;
+    if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
+
+    // handle the optional arguments
+    /*
+    if (coordSys != NULL)
+      cs_present = 1;
+    if (coordTypeKind != NULL)
+      ctk_present = 1; 
+    if (poleKind != NULL)
+      pk_present = 1; 
+    */
+    // allocate the grid object
+    Grid *grid;
+    FTN_X(f_esmf_gridcreatefromfile)(&grid, 
+				     filename, &fileTypeFlag, 
+				     regDecomp, &localrc, strlen(filename));
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return grid;
+
+    if (rc) *rc = localrc;
+
+    printf ("End ESMCI_Grid.C : createfromfile()\n");
+
     return grid;
 
  }

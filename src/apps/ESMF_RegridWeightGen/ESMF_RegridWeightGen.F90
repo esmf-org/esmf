@@ -44,7 +44,10 @@ program ESMF_RegridWeightGenApp
       character(len=64) :: srcvarname, dstvarname
       character(len=64) :: srcCoordNames(2), dstCoordNames(2)
       character(len=256) :: argStr
+      logical            :: terminateProg
       !real(ESMF_KIND_R8) :: starttime, endtime
+  
+      terminateProg = .false.
       !------------------------------------------------------------------------
       ! Initialize ESMF
       !
@@ -71,18 +74,20 @@ program ESMF_RegridWeightGenApp
          call ESMF_UtilGetArgIndex('--help', argindex=ind)
          if (ind /= -1) then
 	   call PrintUsage()
-	   call ESMF_Finalize(endflag=ESMF_END_ABORT)
+           terminateProg=.true.
          endif
          call ESMF_UtilGetArgIndex('--version', argindex=ind)
          if (ind /= -1) then
 	   call PrintVersionInfo()
-	   call ESMF_Finalize(endflag=ESMF_END_ABORT)
+           terminateProg=.true.
          endif
+         if (terminateProg) goto 1110
          call ESMF_UtilGetArgIndex('-s', argindex=ind)
          if (ind == -1) call ESMF_UtilGetArgIndex('--source', argindex=ind, rc=rc)
          if (ind == -1) then
            write(*,*)
-           print *, 'ERROR: The required argument [-s|--source] is missing.'
+           print *, "ERROR: The required argument [-s|--source] is missing."
+           print *, "Use the --help argument to see an explanation of usage."
            call ESMF_Finalize(endflag=ESMF_END_ABORT)
          else
            call ESMF_UtilGetArg(ind+1, argvalue=srcfile)
@@ -92,7 +97,8 @@ program ESMF_RegridWeightGenApp
          if (ind == -1) call ESMF_UtilGetArgIndex('--destination', argindex=ind, rc=rc)
          if (ind == -1) then
            write(*,*)
-           print *, 'ERROR: The required argument [-d|-destination] is missing.'
+           print *, "ERROR: The required argument [-d|-destination] is missing."
+           print *, "Use the --help argument to see an explanation of usage."
            call ESMF_Finalize(endflag=ESMF_END_ABORT)
          else
            call ESMF_UtilGetArg(ind+1, argvalue=dstfile)
@@ -102,7 +108,8 @@ program ESMF_RegridWeightGenApp
          if (ind == -1) call ESMF_UtilGetArgIndex('--weight', argindex=ind, rc=rc)
          if (ind == -1) then
            write(*,*)
-           print *, 'ERROR: The required argument [-w|--weight] is missing.'
+           print *, "ERROR: The required argument [-w|--weight] is missing."
+           print *, "Use the --help argument to see an explanation of usage."
            call ESMF_Finalize(endflag=ESMF_END_ABORT)
          else	
            call ESMF_UtilGetArg(ind+1, argvalue=wgtfile)
@@ -123,6 +130,7 @@ program ESMF_RegridWeightGenApp
               write(*,*)
               print *, 'ERROR: The interpolation method "', trim(method), '" is not supported'
               print *, '  The supported methods are "bilinear", "patch", and "conserve"'
+              print *, "Use the --help argument to see an explanation of usage."
               call ESMF_Finalize(endflag=ESMF_END_ABORT)
            endif    
          endif
@@ -159,6 +167,7 @@ program ESMF_RegridWeightGenApp
 	       (pole .ne. ESMF_POLEMETHOD_NONE)) then
              write(*,*)
 	     print *, 'ERROR: Conserve method only works with no pole.'
+             print *, "Use the --help argument to see an explanation of usage."
              call ESMF_Finalize(endflag=ESMF_END_ABORT)
            endif
          endif
@@ -187,6 +196,7 @@ program ESMF_RegridWeightGenApp
            else if (trim(flag) .ne. 'SCRIP') then
              write(*,*)
 	     print *, 'ERROR: Unknown -t: must be one of ESMF,SCRIP,UGRID or GRIDSPEC.'
+             print *, "Use the --help argument to see an explanation of usage."
              call ESMF_Finalize(endflag=ESMF_END_ABORT)
            endif 
            typeSetFlag = .true.
@@ -203,6 +213,7 @@ program ESMF_RegridWeightGenApp
 	        (trim(flag) .eq. 'SCRIP' .and. srcFileType /= ESMF_FILEFORMAT_SCRIP)) then
                 write(*,*)
 	        print *, 'ERROR: Source file type conflict: --src_type and -t.' 
+                print *, "Use the --help argument to see an explanation of usage."
                 call ESMF_Finalize(endflag=ESMF_END_ABORT)
 	     end if
            endif
@@ -215,6 +226,7 @@ program ESMF_RegridWeightGenApp
            else if (trim(flag) .ne. 'SCRIP') then
              write(*,*)
 	     print *, 'ERROR: Unknown --src_type: must be one of ESMF,SCRIP,UGRID, or GRIDSPEC.'
+             print *, "Use the --help argument to see an explanation of usage."
              call ESMF_Finalize(endflag=ESMF_END_ABORT)
            endif
          endif
@@ -230,6 +242,7 @@ program ESMF_RegridWeightGenApp
 	        (trim(flag) .eq. 'SCRIP' .and. dstFileType /= ESMF_FILEFORMAT_SCRIP)) then
                 write(*,*)
 	        print *, 'ERROR: Destination file type conflict: --dst_type and -t.' 
+                print *, "Use the --help argument to see an explanation of usage."
                 call ESMF_Finalize(endflag=ESMF_END_ABORT)
 	     end if
            endif
@@ -242,6 +255,7 @@ program ESMF_RegridWeightGenApp
            else if (trim(flag) .ne. 'SCRIP') then
              write(*,*)
 	     print *, 'ERROR: Unknown --dst_type: must be one of ESMF,SCRIP,UGRID or GRIDSPEC.'
+             print *, "Use the --help argument to see an explanation of usage."
              call ESMF_Finalize(endflag=ESMF_END_ABORT)
            end if
          endif
@@ -252,6 +266,7 @@ program ESMF_RegridWeightGenApp
             if (ind == -1) then
 	         write(*,*)
                  print *, 'ERROR: The argument --src_meshname is missing.'
+                 print *, "Use the --help argument to see an explanation of usage."
                  call ESMF_Finalize(endflag=ESMF_END_ABORT)
             else
                  call ESMF_UtilGetArg(ind+1, argvalue=srcMeshName)	   
@@ -264,6 +279,7 @@ program ESMF_RegridWeightGenApp
             if (ind == -1) then
 	         write(*,*)
                  print *, 'ERROR: The argument --dst_meshname is missing.'
+                 print *, "Use the --help argument to see an explanation of usage."
                  call ESMF_Finalize(endflag=ESMF_END_ABORT)
             else
                  call ESMF_UtilGetArg(ind+1, argvalue=dstMeshName)	   
@@ -287,12 +303,14 @@ program ESMF_RegridWeightGenApp
               write(*,*)
 	      print *, 'ERROR: --src_missingvalue is supported only when the source grid is in'
 	      print *, '       UGRID or GRIDSPEC format.'
+              print *, "Use the --help argument to see an explanation of usage."
 	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
            else if (srcFileType == ESMF_FILEFORMAT_UGRID .and. (method .ne. 'conserve')) then
               write(*,*)
 	      print *, 'ERROR: --mask is supported on the mesh elment in a unstructured grid, so'
 	      print *, '       it only works with the conservative regridding if the src grid is'
               print *, '       a UGRID'
+              print *, "Use the --help argument to see an explanation of usage."
 	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
            endif
 	 endif
@@ -314,12 +332,14 @@ program ESMF_RegridWeightGenApp
               write(*,*)
 	      print *, 'ERROR: --dst_missingvalue is supported only when the source grid is in'
 	      print *, '       UGRID or GRIDSPEC format.'
+              print *, "Use the --help argument to see an explanation of usage."
 	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
            else if (dstFileType == ESMF_FILEFORMAT_UGRID .and. (method .ne. 'conserve')) then
               write(*,*)
 	      print *, 'ERROR: -- mask is only supported on the mesh elements, so it only'
 	      print *, '       with the conservative regridding when the dst grid is'
               print *, '       a UGRID'
+              print *, "Use the --help argument to see an explanation of usage."
 	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
            endif
 	 endif
@@ -373,6 +393,7 @@ program ESMF_RegridWeightGenApp
              write(*,*)
 	     print *, 'ERROR: Both --netcdf4 and --64bit_offset are specified.'
 	     print *, '       Only one flag can be given.'
+             print *, "Use the --help argument to see an explanation of usage."
 	     call ESMF_Finalize(endflag=ESMF_END_ABORT)
         endif
 
@@ -399,6 +420,7 @@ program ESMF_RegridWeightGenApp
              write(*,*)
 	     print *, 'ERROR: --user_areas is supported only when the source or destination'
 	     print *, '       grid are in SCRIP of ESMF format.'
+             print *, "Use the --help argument to see an explanation of usage."
 	     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 	endif
 
@@ -415,6 +437,7 @@ program ESMF_RegridWeightGenApp
 		    write(*,*)
 		    print *, "ERROR: wrong value for --src_coordinates: should be lon and lat "
 	  	    print *, "       variable names separated by comma" 
+                    print *, "Use the --help argument to see an explanation of usage."
 	            call ESMF_Finalize(endflag=ESMF_END_ABORT)
   	         endif
 	         srcCoordNames(1)=argStr(1:pos-1)
@@ -424,6 +447,7 @@ program ESMF_RegridWeightGenApp
 		    write(*,*)
 		    print *, "ERROR: wrong value for --src_coordinates: should be lon and lat "
 	  	    print *, "       variable names separated by comma" 
+                    print *, "Use the --help argument to see an explanation of usage."
 	            call ESMF_Finalize(endflag=ESMF_END_ABORT)
   	         endif
 	         useSrcCoordVar = .true.
@@ -439,6 +463,7 @@ program ESMF_RegridWeightGenApp
 		    write(*,*)
 		    print *, "ERROR: wrong value for --dst_coordinates: should be lon and lat "
 	  	    print *, "       variable names separated by comma" 
+                    print *, "Use the --help argument to see an explanation of usage."
 	            call ESMF_Finalize(endflag=ESMF_END_ABORT)
   	         endif
 	         dstCoordNames(1)=argStr(1:pos-1)
@@ -448,11 +473,45 @@ program ESMF_RegridWeightGenApp
 		    write(*,*)
 		    print *, "ERROR: wrong value for --dst_coordinates: should be lon and lat "
 	  	    print *, "       variable names separated by comma" 
+                    print *, "Use the --help argument to see an explanation of usage."
 	            call ESMF_Finalize(endflag=ESMF_END_ABORT)
   	         endif
 	         useDstCoordVar = .true.
             endif
          endif
+
+     1110 continue 
+        commandbuf2(:)=0
+        if (terminateProg) then
+	    commandbuf2(1)=-9999            
+        else
+            commandbuf2(1)=srcFileType%fileformat
+            commandbuf2(2)=dstFileType%fileformat
+            if (method .eq. 'patch') commandbuf2(3)=1
+	    if (method .eq. 'conserve') commandbuf2(3)=2
+	    if (method .eq. 'neareststod') commandbuf2(3)=3
+            if (method .eq. 'nearestdtos') commandbuf2(3)=4
+            commandbuf2(4)=poleptrs
+            if (srcIsRegional) commandbuf2(9) = 1
+            if (dstIsRegional) commandbuf2(10) = 1
+            if (ignoreUnmapped) commandbuf2(5) = 1
+	    if (userAreaFlag)   commandbuf2(6) = 1
+            if (srcMissingValue) commandbuf2(7) = 1
+            if (dstMissingValue) commandbuf2(8) = 1
+            if (srcIsRegional) commandbuf2(9) = 1
+            if (dstIsRegional) commandbuf2(10) = 1
+            if (useSrcCoordVar) commandbuf2(11) = 1
+            if (useDstCoordVar) commandbuf2(12) = 1
+            if (largeFileFlag) commandbuf2(13) = 1
+            if (netcdf4FileFlag) commandbuf2(14) = 1
+        endif 
+
+        call ESMF_VMBroadcast(vm, commandbuf2, 14, 0, rc=rc)
+        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+
+        if (terminateProg) then
+            goto 1111
+        endif
 
         ! Group the command line arguments and broadcast to other PETs
         commandbuf1(1)=srcfile
@@ -472,48 +531,14 @@ program ESMF_RegridWeightGenApp
         call ESMF_VMBroadcast(vm, commandbuf3, 80*8, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
-        commandbuf2(:)=0
-        commandbuf2(1)=srcFileType%fileformat
-        commandbuf2(2)=dstFileType%fileformat
-        if (method .eq. 'patch') commandbuf2(3)=1
-        if (method .eq. 'conserve') commandbuf2(3)=2
-        if (method .eq. 'neareststod') commandbuf2(3)=3
-        if (method .eq. 'nearestdtos') commandbuf2(3)=4
-        commandbuf2(4)=poleptrs
-        if (srcIsRegional) commandbuf2(9) = 1
-        if (dstIsRegional) commandbuf2(10) = 1
-        if (ignoreUnmapped) commandbuf2(5) = 1
-	if (userAreaFlag)   commandbuf2(6) = 1
-        if (srcMissingValue) commandbuf2(7) = 1
-        if (dstMissingValue) commandbuf2(8) = 1
-        if (srcIsRegional) commandbuf2(9) = 1
-        if (dstIsRegional) commandbuf2(10) = 1
-        if (useSrcCoordVar) commandbuf2(11) = 1
-        if (useDstCoordVar) commandbuf2(12) = 1
-        if (largeFileFlag) commandbuf2(13) = 1
-        if (netcdf4FileFlag) commandbuf2(14) = 1
-        
-        call ESMF_VMBroadcast(vm, commandbuf2, 14, 0, rc=rc)
-        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
      else
-        call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
-        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-        call ESMF_VMBroadcast(vm, commandbuf3, 80*8, 0, rc=rc)
-        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-        srcfile = commandbuf1(1)
-        dstfile = commandbuf1(2)
-        wgtfile = commandbuf1(3)
-        srcMeshName = commandbuf3(1)
-	dstMeshName = commandbuf3(2)
-        srcVarName = commandbuf3(3)
-	dstVarName = commandbuf3(4)
-	srcCoordNames(1) = commandbuf3(5)
-	srcCoordNames(2) = commandbuf3(6)
-	dstCoordNames(1) = commandbuf3(7)
-	dstCoordNames(2) = commandbuf3(8)
-
         call ESMF_VMBroadcast(vm, commandbuf2, 14, 0, rc=rc)
         if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+
+        if (commandbuf2(1) == -9999) then
+	   goto 1111	  
+        endif
+
 	srcFileType%fileformat = commandbuf2(1)
 	dstFileType%fileformat = commandbuf2(2)
         if (commandbuf2(3)==0) then
@@ -590,6 +615,22 @@ program ESMF_RegridWeightGenApp
         else
            netcdf4FileFlag = .false.
         end if
+
+        call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
+        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+        call ESMF_VMBroadcast(vm, commandbuf3, 80*8, 0, rc=rc)
+        if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
+        srcfile = commandbuf1(1)
+        dstfile = commandbuf1(2)
+        wgtfile = commandbuf1(3)
+        srcMeshName = commandbuf3(1)
+	dstMeshName = commandbuf3(2)
+        srcVarName = commandbuf3(3)
+	dstVarName = commandbuf3(4)
+	srcCoordNames(1) = commandbuf3(5)
+	srcCoordNames(2) = commandbuf3(6)
+	dstCoordNames(1) = commandbuf3(7)
+	dstCoordNames(2) = commandbuf3(8)
      endif
 
      if (trim(method) .eq. 'bilinear') then
@@ -631,8 +672,8 @@ program ESMF_RegridWeightGenApp
          write(*,*) 
       endif
 
+  1111  continue
       call ESMF_Finalize()
-      stop
 
 contains
 
@@ -664,8 +705,8 @@ subroutine PrintUsage()
      print *, "                      --dst_type [SCRIP|ESMF|UGRID|GRIDSPEC]"
      print *, "                      -t [SCRIP|ESMF|UGRID|GRIDSPEC]"
      print *, "                      -r"
-     print *, "                      -- src_regional"
-     print *, "                      -- dst_regional"
+     print *, "                      --src_regional"
+     print *, "                      --dst_regional"
      print *, "                      --64bit_offset"
      print *, "                      --netcdf4"
      print *, "                      --src_meshname src_mesh_variable"

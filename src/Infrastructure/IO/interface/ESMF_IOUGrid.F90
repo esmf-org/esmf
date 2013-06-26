@@ -66,7 +66,7 @@
 !
 ! !INTERFACE:
 subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
-	      		maxNodePElement, units, fillvalue, rc)    
+	      		maxNodePElement, units, fillvalue, faceCoordFlag, rc)    
 
 ! !ARGUMENTS:
 
@@ -77,6 +77,7 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
     integer, intent(out), optional :: maxNodePElement
     character(len=*), intent(out), optional :: units
     integer, intent(out), optional :: fillvalue
+    logical, intent(out), optional :: faceCoordFlag
     integer, intent(out), optional :: rc
 
     integer:: localrc, ncStatus
@@ -227,6 +228,15 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
           rc)) return
       endif
    endif
+
+   if (present(faceCoordFlag)) then
+      ncStatus = nf90_inquire_attribute(ncid, meshId, "face_coordinates", len=len)
+      if (ncStatus /= nf90_noerror) then
+      	  faceCoordFlag = .FALSE.
+      else
+          faceCoordFlag = .TRUE.
+      endif
+   endif 
 
    ncStatus = nf90_close(ncid)
    if (CDFCheckError (ncStatus, &

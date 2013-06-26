@@ -109,6 +109,22 @@ extern "C" {
 };
 //==============================================================================
 
+//==============================================================================
+// ESMCI::Comp interfaces to be called from Fortran side
+extern "C" {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_getcompliancecheckdepth"
+  void FTN_X(c_esmc_getcompliancecheckdepth)(int *depth, int *rc){
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMCI::Comp::getComplianceCheckerDepth(depth);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    // return successfully
+    if (rc) *rc = ESMF_SUCCESS;
+  }
+} // extern "C"
+//==============================================================================
+
 
 namespace ESMCI {
 
@@ -715,6 +731,56 @@ int Comp::getTunnel(
   FTN_X(f_esmf_compgettunnel)(this, tunnel, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Comp:getComplianceCheckerDepth()"
+//BOPI
+// !IROUTINE:  ESMCI::Comp:getComplianceCheckerDepth
+//
+// !INTERFACE:
+int Comp::getComplianceCheckerDepth(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+    int *depth
+  ){
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
+  if (envVar != NULL && depth != NULL){
+    std::string value(envVar);
+    // see if there is a depth specified in ESMF_RUNTIME_COMPLIANCECHECK
+    int index;
+    *depth=-1;
+    index = value.find("depth=");
+    if (index == std::string::npos)
+      index = value.find("DEPTH=");
+    if (index != std::string::npos){
+      index += 6; // right after the equal sign
+      int indexEnd = value.find_first_of(":", index);
+      *depth = atoi(value.substr(index,indexEnd).c_str());
+    }
+    //printf("depth = %d\n", *depth);
+  }
   
   // return successfully
   rc = ESMF_SUCCESS;

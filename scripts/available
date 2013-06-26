@@ -1,0 +1,11 @@
+#!/bin/sh
+# This script returns the input argument if it is available as a command, a
+# blank line otherwise.
+which $1 > available.tmp 2>&1
+EXEC=`cat available.tmp | awk '{ print $1 }' `
+rm -f available.tmp
+if [ $EXEC -a -f $EXEC ]; then
+echo $1
+else
+echo ""
+fi

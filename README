@@ -1,6 +1,6 @@
 ================================================================================
 
-                        README - ESMF v6.2.0
+                        README - ESMF v6.3.0 beta snapshot
 
                     Earth System Modeling Framework (ESMF)
 
@@ -494,7 +494,6 @@ Contributions from ESMF users are available at:
         http://sourceforge.net/projects/esmfcontrib
 
 Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
-
 
 ================================================================================
 $Id$

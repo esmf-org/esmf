@@ -31,5 +31,5 @@ CLOBBERDIRS =
 
 
 RUN_ComplianceChecker:
-	env ESMF_RUNTIME_COMPLIANCECHECK=on $(MAKE) TNAME=ComplianceChecker NP=6 stest
+	env ESMF_RUNTIME_COMPLIANCECHECK=on:depth=2 $(MAKE) TNAME=ComplianceChecker NP=6 stest
 

@@ -116,6 +116,57 @@ ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt maxIndex,
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_GridCreateFromFile()"
+ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag, 
+				  int *regDecomp, int *rc) {
+  printf ("Start ESMC_Grid.C : ESMC_GridCreateFromFile(%s,%d,[%d,%d])\n", 
+	  filename, fileTypeFlag, regDecomp[0], regDecomp[1]);
+  int localrc = ESMC_RC_NOT_IMPL;
+  if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
+
+  // Init Grid
+  ESMC_Grid grid;
+  grid.ptr = NULL;
+
+  grid.ptr = reinterpret_cast<void *>(ESMCI::Grid::createfromfile(filename,
+								  fileTypeFlag,
+								  regDecomp,
+								  &localrc));
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return grid; // bail out
+
+  // return successfully
+  if (rc) *rc = ESMF_SUCCESS;
+
+  //ESMC_GridWrite(grid, ESMC_STAGGERLOC_CENTER, "ESMC_Grid.C.out");
+  int exLB[2]={-1,-1}, exUB[2]={-1,-1};
+  double *gridXCoord;
+  gridXCoord = (double *)ESMC_GridGetCoord(grid, 1, ESMC_STAGGERLOC_CENTER, exLB, exUB, &localrc);
+  printf ("Xcoord: exLB=[%d,%d], exUB=[%d,%d]\n", exLB[0], exLB[1], exUB[0], exUB[1]);
+  printf ("gridXCoord = [");
+  //for (int i = 0; i < exUB[0]*exUB[1]; i++) {
+  for (int i = 0; i < 10; i++) {
+    printf ("%lf\n", gridXCoord[i]);
+  }
+  printf ("...]\n");
+  
+  double *gridYCoord;
+  gridYCoord = (double *)ESMC_GridGetCoord(grid, 2, ESMC_STAGGERLOC_CENTER, exLB, exUB, &localrc);
+  printf ("yCoord: exLB=[%d,%d], exUB=[%d,%d]\n", exLB[0], exLB[1], exUB[0], exUB[1]);
+  printf ("gridYCoord = [");
+  //for (int i = 0; i < exUB[0]*exUB[1]; i++) {
+  for (int i = 0; i < 10; i++) {
+    printf ("%lf\n", gridYCoord[i]);
+  }
+  printf ("...]\n");
+
+  printf ("End ESMC_Grid.C : ESMC_GridCreateFromFile()\n");
+  return grid;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridDestroy()"
 int ESMC_GridDestroy(ESMC_Grid *grid){
   
