@@ -57,7 +57,7 @@ __author__ = "University Corporation for Atmospheric Research, \
               Argonne National Laboratory, \
               NASA Goddard Space Flight Center"
 __license__ = "University of Illinois-NCSA"
-__release__ = "620_02b"
+__release__ = "620_02b_dev"
 
 #### IMPORT LIBRARIES #########################################################
 
