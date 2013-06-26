@@ -114,31 +114,31 @@ contains
     totalLWidth, totalUWidth, localDeCount, name, rc) 
 !
 ! !ARGUMENTS:
-    type(ESMF_Field),      intent(in)            :: field    
+    type(ESMF_Field),           intent(in)            :: field    
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_ArraySpec),  intent(out), optional :: arrayspec
+    type(ESMF_ArraySpec),       intent(out), optional :: arrayspec
     type(ESMF_FieldStatus_Flag),intent(out), optional :: status
     type(ESMF_GeomType_Flag),   intent(out), optional :: geomtype     
-    type(ESMF_Grid),       intent(out), optional :: grid     
-    type(ESMF_Mesh),       intent(out), optional :: mesh     
-    type(ESMF_LocStream),  intent(out), optional :: locstream     
-    type(ESMF_XGrid),      intent(out), optional :: xgrid     
-    type(ESMF_Array),      intent(out), optional :: array     
+    type(ESMF_Grid),            intent(out), optional :: grid     
+    type(ESMF_Mesh),            intent(out), optional :: mesh     
+    type(ESMF_LocStream),       intent(out), optional :: locstream     
+    type(ESMF_XGrid),           intent(out), optional :: xgrid     
+    type(ESMF_Array),           intent(out), optional :: array     
     type(ESMF_TypeKind_Flag),   intent(out), optional :: typekind
-    integer,               intent(out), optional :: dimCount
-    integer,               intent(out), optional :: rank
-    type(ESMF_StaggerLoc), intent(out), optional :: staggerloc 
-    type(ESMF_MeshLoc),    intent(out), optional :: meshloc 
+    integer,                    intent(out), optional :: dimCount
+    integer,                    intent(out), optional :: rank
+    type(ESMF_StaggerLoc),      intent(out), optional :: staggerloc 
+    type(ESMF_MeshLoc),         intent(out), optional :: meshloc 
     type(ESMF_XGridSide_Flag),  intent(out), optional :: xgridside 
-    integer,               intent(out), optional :: gridindex
-    integer,               intent(out), optional :: gridToFieldMap(:)    
-    integer,               intent(out), optional :: ungriddedLBound(:)
-    integer,               intent(out), optional :: ungriddedUBound(:)
-    integer,               intent(out), optional :: totalLWidth(:,:)
-    integer,               intent(out), optional :: totalUWidth(:,:)
-    integer,               intent(out), optional :: localDeCount
-    character(len=*),      intent(out), optional :: name
-    integer,               intent(out), optional :: rc     
+    integer,                    intent(out), optional :: gridindex
+    integer,                    intent(out), optional :: gridToFieldMap(:)    
+    integer,                    intent(out), optional :: ungriddedLBound(:)
+    integer,                    intent(out), optional :: ungriddedUBound(:)
+    integer,                    intent(out), optional :: totalLWidth(:,:)
+    integer,                    intent(out), optional :: totalUWidth(:,:)
+    integer,                    intent(out), optional :: localDeCount
+    character(len=*),           intent(out), optional :: name
+    integer,                    intent(out), optional :: rc     
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -626,7 +626,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   type(ESMF_Field), intent(in)            :: field @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   integer,          intent(in),  optional :: localDe @\
-!   <type> (ESMF_KIND_<kind>), pointer      :: farrayPtr(<rank>) @\
+!   <type> (ESMF_KIND_<kind>),     pointer  :: farrayPtr(<rank>) @\
 !   integer,          intent(out), optional :: exclusiveLBound(:) @\
 !   integer,          intent(out), optional :: exclusiveUBound(:) @\
 !   integer,          intent(out), optional :: exclusiveCount(:) @\
