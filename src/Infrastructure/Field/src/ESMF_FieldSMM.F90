@@ -82,14 +82,14 @@ contains
              zeroregion, termorderflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-        type(ESMF_Field),       intent(in),   optional  :: srcField
-        type(ESMF_Field),       intent(inout),optional  :: dstField
-        type(ESMF_RouteHandle), intent(inout)           :: routehandle
+        type(ESMF_Field),          intent(in),    optional  :: srcField
+        type(ESMF_Field),          intent(inout), optional  :: dstField
+        type(ESMF_RouteHandle),    intent(inout)            :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-        type(ESMF_Region_Flag),  intent(in),   optional :: zeroregion
-        type(ESMF_TermOrder_Flag), intent(in), optional :: termorderflag
-        logical,                intent(in),   optional  :: checkflag
-        integer,                intent(out),  optional  :: rc
+        type(ESMF_Region_Flag),    intent(in),    optional  :: zeroregion
+        type(ESMF_TermOrder_Flag), intent(in),    optional  :: termorderflag
+        logical,                   intent(in),    optional  :: checkflag
+        integer,                   intent(out),   optional  :: rc
 !
 !
 ! !STATUS:
@@ -293,15 +293,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        srcTermProcessing, pipelineDepth, rc) 
 ! 
 ! !ARGUMENTS: 
-!   type(ESMF_Field),         intent(in)            :: srcField  
-!   type(ESMF_Field),         intent(inout)         :: dstField  
-!   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
-!   <type>(ESMF_KIND_<kind>), intent(in)            :: factorList(:) 
-!   integer,                  intent(in),           :: factorIndexList(:,:) 
+!   type(ESMF_Field),         intent(in)              :: srcField  
+!   type(ESMF_Field),         intent(inout)           :: dstField  
+!   type(ESMF_RouteHandle),   intent(inout)           :: routehandle
+!   <type>(ESMF_KIND_<kind>), intent(in)              :: factorList(:) 
+!   integer,                  intent(in),             :: factorIndexList(:,:) 
 !   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                  intent(inout),optional:: srcTermProcessing
-!   integer,                  intent(inout),optional:: pipeLineDepth
-!   integer,                  intent(out), optional :: rc 
+!   integer,                  intent(inout), optional :: srcTermProcessing
+!   integer,                  intent(inout), optional :: pipeLineDepth
+!   integer,                  intent(out),   optional :: rc 
 ! 
 !
 ! !STATUS:
@@ -741,13 +741,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        srcTermProcessing, pipelineDepth, rc)
 ! 
 ! !ARGUMENTS: 
-!   type(ESMF_Field),         intent(in)            :: srcField  
-!   type(ESMF_Field),         intent(inout)         :: dstField  
-!   type(ESMF_RouteHandle),   intent(inout)         :: routehandle
+!   type(ESMF_Field),         intent(in)              :: srcField  
+!   type(ESMF_Field),         intent(inout)           :: dstField  
+!   type(ESMF_RouteHandle),   intent(inout)           :: routehandle
 !   type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!   integer,                  intent(inout),optional:: srcTermProcessing
-!   integer,                  intent(inout),optional:: pipeLineDepth
-!   integer,                  intent(out), optional :: rc 
+!   integer,                  intent(inout), optional :: srcTermProcessing
+!   integer,                  intent(inout), optional :: pipeLineDepth
+!   integer,                  intent(out),   optional :: rc 
 ! 
 !
 ! !STATUS:

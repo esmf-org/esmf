@@ -2558,16 +2558,16 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLSPtr)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompMesh<rank><type><kind>(field, mesh, & @\
-!   farray, meshloc,  indexflag, keywordEnforcer, datacopyflag, & @\
+!   farray, indexflag, keywordEnforcer, meshloc, datacopyflag, & @\
 !   gridToFieldMap, ungriddedLBound, ungriddedUBound, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),          intent(inout)         :: field @\
 !   type(ESMF_Mesh),           intent(in)            :: mesh @\
 !   <type> (ESMF_KIND_<kind>), intent(in),  target   :: farray(<rank>) @\
-!   type(ESMF_MeshLoc),        intent(in),  optional :: meshloc @\
 !   type(ESMF_Index_Flag),     intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_MeshLoc),        intent(in),  optional :: meshloc @\
 !   type(ESMF_DataCopy_Flag),  intent(in),  optional :: datacopyflag @\
 !   integer,                   intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,                   intent(in),  optional :: ungriddedLBound(:) @\
@@ -2593,15 +2593,15 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLSPtr)
 !       Native fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
-! \item [{[location]}] @\
+! \item [indexflag] @\
+!       Indicate how DE-local indices are defined. See section @\
+!       \ref{const:indexflag} for a list of valid indexflag options. @\
+! \item [{[meshloc]}] @\
 !       \begin{sloppypar} @\
 !       Which part of the mesh to build the Field on. Can be set to either @\
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
 !       \end{sloppypar} @\
-! \item [indexflag] @\
-!       Indicate how DE-local indices are defined. See section @\
-!       \ref{const:indexflag} for a list of valid indexflag options. @\
 ! \item [{[datacopyflag]}] @\
 !       Indicates whether to copy the {\tt farray} or reference it directly. @\
 !       For valid values see \ref{const:datacopyflag}.  The default is @\
@@ -2654,16 +2654,16 @@ TypeKindRankDeclarationMacro(FieldEmptyCompLSPtr)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldEmptyCompMesh" @\
   subroutine ESMF_FieldEmptyCompMesh##mrank##D##mtypekind(field, mesh, farray, & @\
-    meshloc, indexflag, keywordEnforcer, datacopyflag, gridToFieldMap, & @\
+    indexflag, keywordEnforcer, meshloc, datacopyflag, gridToFieldMap, & @\
     ungriddedLBound, ungriddedUBound, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field), intent(inout) :: field @\
     type(ESMF_Mesh), intent(in) :: mesh                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
-    type(ESMF_MeshLoc), intent(in), optional    :: meshloc @\
     type(ESMF_Index_Flag),  intent(in)           :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+    type(ESMF_MeshLoc), intent(in), optional    :: meshloc @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
@@ -2759,7 +2759,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMesh)
 !       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
-! \item [{[location]}] @\
+! \item [{[meshloc]}] @\
 !       \begin{sloppypar} @\
 !       Which part of the mesh to build the Field on. Can be set to either @\
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, @\
@@ -2864,18 +2864,18 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMeshPtr)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompXG<rank><type><kind>(field, xgrid, & @\
-!   xgridside, gridindex, & @\
-!   farray, indexflag, keywordEnforcer, datacopyflag, gridToFieldMap, & @\
+!   farray, indexflag, keywordEnforcer, xgridside, gridindex, & @\
+!   datacopyflag, gridToFieldMap, & @\
 !   ungriddedLBound, ungriddedUBound, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),          intent(inout)         :: field @\
 !   type(ESMF_XGrid),          intent(in)            :: xgrid @\
-!   type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridside @\
-!   integer,                   intent(in),  optional :: gridindex @\
 !   <type> (ESMF_KIND_<kind>), intent(in),  target   :: farray(<rank>) @\
 !   type(ESMF_Index_Flag),     intent(in)            :: indexflag @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridside @\
+!   integer,                   intent(in),  optional :: gridindex @\
 !   type(ESMF_DataCopy_Flag),  intent(in),  optional :: datacopyflag @\
 !   integer,                   intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,                   intent(in),  optional :: ungriddedLBound(:) @\
@@ -2897,13 +2897,6 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMeshPtr)
 !       (dimCount) as the rank of the {\tt farray}.  @\
 ! \item [xgrid]  @\
 !       The {\tt ESMF\_XGrid} object to complete the Field. @\
-! \item [{[xgridside]}] @\
-!       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A, @\
-!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then @\
-!       defaults to ESMF\_XGRIDSIDE\_BALANCED. @\
-! \item [{[gridindex]}] @\
-!       If xgridSide is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on @\
-!       that side to create the Field on. If not provided, defaults to 1. @\
 ! \item [farray] @\
 !       Native fortran data array to be copied/referenced in the {\tt field}. @\
 !       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
@@ -2911,6 +2904,13 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMeshPtr)
 ! \item [indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{const:indexflag} for a list of valid indexflag options. @\
+! \item [{[xgridside]}] @\
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A, @\
+!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then @\
+!       defaults to ESMF\_XGRIDSIDE\_BALANCED. @\
+! \item [{[gridindex]}] @\
+!       If xgridSide is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on @\
+!       that side to create the Field on. If not provided, defaults to 1. @\
 ! \item [{[datacopyflag]}] @\
 !       Indicates whether to copy the {\tt farray} or reference it directly. @\
 !       For valid values see \ref{const:datacopyflag}.  The default is @\
@@ -2963,18 +2963,18 @@ TypeKindRankDeclarationMacro(FieldEmptyCompMeshPtr)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldEmptyCompXG" @\
   subroutine ESMF_FieldEmptyCompXG##mrank##D##mtypekind(field, xgrid, & @\
-    xgridside, gridindex, farray, & @\
-    indexflag, keywordEnforcer, datacopyflag, gridToFieldMap, ungriddedLBound, & @\
+    farray, indexflag, keywordEnforcer, xgridside, gridindex, & @\
+    datacopyflag, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, rc) @\
 @\
     ! input arguments @\
     type(ESMF_Field), intent(inout) :: field @\
     type(ESMF_XGrid), intent(in)    :: xgrid                  @\
-    type(ESMF_XGridSide_Flag), intent(in), optional  :: xgridSide @\
-    integer,              intent(in), optional  :: gridIndex @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: farray @\
     type(ESMF_Index_Flag),  intent(in)           :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+    type(ESMF_XGridSide_Flag), intent(in), optional  :: xgridSide @\
+    integer,              intent(in), optional  :: gridIndex @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
@@ -3036,16 +3036,16 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXG)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldEmptyComplete() @\
 ! subroutine ESMF_FieldEmptyCompXGPtr<rank><type><kind>(field, xgrid, & @\
-!   xgridside, gridindex, & @\
-!   farrayPtr, keywordEnforcer, datacopyflag, gridToFieldMap, rc) @\
+!   farrayPtr, xgridside, gridindex, & @\
+!   keywordEnforcer, datacopyflag, gridToFieldMap, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),          intent(inout)         :: field @\
 !   type(ESMF_XGrid),          intent(in)            :: xgrid @\
-!   type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridside @\
-!   integer,                   intent(in),  optional :: gridindex @\
 !   <type> (ESMF_KIND_<kind>), pointer               :: farrayPtr(<rank>) @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridside @\
+!   integer,                   intent(in),  optional :: gridindex @\
 !   type(ESMF_DataCopy_Flag),  intent(in),  optional :: datacopyflag @\
 !   integer,                   intent(in),  optional :: gridToFieldMap(:) @\
 !   integer,                   intent(out), optional :: rc @\
@@ -3068,6 +3068,10 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXG)
 !       (dimCount) as the rank of the {\tt farrayPtr}.  @\
 ! \item [xgrid]  @\
 !       The {\tt ESMF\_XGrid} object to complete the Field. @\
+! \item [farrayPtr] @\
+!       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
+!       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
+!       for the {\tt farrayPtr}. @\
 ! \item [{[xgridside]}] @\
 !       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A, @\
 !       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then @\
@@ -3075,10 +3079,6 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXG)
 ! \item [{[gridindex]}] @\
 !       If xgridside is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on @\
 !       that side to create the Field on. If not provided, defaults to 1. @\
-! \item [farrayPtr] @\
-!       Native fortran data pointer to be copied/referenced in the {\tt field}. @\
-!       The {\tt field} dimension (dimCount) will be the same as the dimCount @\
-!       for the {\tt farrayPtr}. @\
 ! \item [{[datacopyflag]}] @\
 !       Indicates whether to copy the {\tt farrayPtr} or reference it directly. @\
 !       For valid values see \ref{const:datacopyflag}.  The default is @\
@@ -3113,16 +3113,16 @@ TypeKindRankDeclarationMacro(FieldEmptyCompXG)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldEmptyCompXGPtr" @\
 subroutine ESMF_FieldEmptyCompXGPtr##mrank##D##mtypekind(field, xgrid, & @\
-  xgridside, gridindex, & @\
-  farrayPtr, keywordEnforcer, datacopyflag, gridToFieldMap, rc) @\
+  farrayPtr, keywordEnforcer, & @\
+  xgridside, gridindex, datacopyflag, gridToFieldMap, rc) @\
 @\
   ! input arguments @\
   type(ESMF_Field), intent(inout) :: field @\
   type(ESMF_XGrid), intent(in)    :: xgrid                  @\
-  type(ESMF_XGridSide_Flag), intent(in), optional  :: xgridside @\
-  integer,              intent(in), optional  :: gridindex @\
   mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+  type(ESMF_XGridSide_Flag), intent(in), optional  :: xgridside @\
+  integer,              intent(in), optional  :: gridindex @\
   type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
   integer, intent(in), optional :: gridToFieldMap(:)     @\
   integer, intent(out), optional :: rc                @\
@@ -4357,7 +4357,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 ! \item [mesh]
 !       {\tt ESMF\_Mesh} to be set in the {\tt ESMF\_Field}.
-! \item [{[location]}] 
+! \item [{[meshloc]}] 
 !       \begin{sloppypar}
 !       Which part of the mesh to build the Field on. Can be set to either
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set,
