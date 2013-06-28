@@ -627,6 +627,9 @@ ESMF_AREXTRACTDEFAULT       = $(ESMF_ARDEFAULT) -x
 ESMF_RANLIBDEFAULT          = ranlib
 ESMF_SEDDEFAULT             = sed
 ESMF_CPPDEFAULT             = cpp
+ifeq ($(ESMF_OS),Darwin)
+ESMF_CPPDEFAULT		    = gcc -E -x c
+endif
 
 ESMF_RM                     = rm -rf
 ESMF_MV                     = mv -f
