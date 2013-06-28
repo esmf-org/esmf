@@ -3191,7 +3191,7 @@ $(ESMF_LOCOBJDIR)/%.o : %.cpp
 
 ifeq ($(origin ESMF_CPPRULES),undefined)
 .cppF90.F90:
-	cp $< $<.tmp; $(ESMF_CPP) -P -I$(ESMF_INCDIR) $<.tmp | tr "@^|" "\n#'" | $(ESMF_SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@); rm -f $<.tmp
+	$(ESMF_CPP) -P -I$(ESMF_INCDIR) $< | tr "@^|" "\n#'" | $(ESMF_SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@)
 endif
 
 
