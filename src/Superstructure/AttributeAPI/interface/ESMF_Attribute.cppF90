@@ -86,10 +86,12 @@ module ESMF_AttributeMod
 !
 !------------------------------------------------------------------------------
 
+ ! Fortran class type to hold pointer to C++ object
   type ESMF_Attribute
   sequence
-    character(len=ESMF_MAXSTR)  :: attr_name
-    type(ESMF_DataValue)        :: attr_value
+  private
+    type(ESMF_Pointer) :: this
+    ESMF_INIT_DECLARE
   end type
 
 !------------------------------------------------------------------------------
@@ -116,6 +118,7 @@ module ESMF_AttributeMod
       public ESMF_AttributeRead
       public ESMF_AttributeWrite
 
+      public ESMF_HandleGet
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -129,6 +132,10 @@ module ESMF_AttributeMod
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+
+interface ESMF_HandleGet
+	module procedure ESMF_CplCompHandleGet
+end interface
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -2355,6 +2362,90 @@ contains
 !-------------------------------------------------------------------------
 !  Macro versions of the routines
 !-------------------------------------------------------------------------
+
+#define HandleGetMacro(mclass, mthis) \
+@\
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_HandleGet" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_HandleGet - Retrieve an Attribute handle @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_HandleGet() @\
+      function mclass##HandleGet(mthis, name, & @\
+        convention, purpose, attPackInstanceName, rc) @\
+ @\
+ 	  type(ESMF_Attribute) :: mclass##HandleGet @\
+ @\
+      type(mclass), intent(in) :: mthis   @\
+      character (len = *), intent(in) :: name @\
+      character (len = *), intent(in), optional :: convention @\
+      character (len = *), intent(in), optional :: purpose @\
+      character (len = *), intent(in), optional :: attPackInstanceName @\
+      integer, intent(out), optional :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!      Returns an Attribute from the object. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis] @\
+!           An ESMF object. @\
+!     \item [name] @\
+!           The name of the Attribute to retrieve. @\
+!     \item [{[convention]}] @\
+!           The convention of the Attribute package. @\
+!     \item [{[purpose]}] @\
+!           The purpose of the Attribute package. @\
+!     \item [{[attPackInstanceName]}] @\
+!           The name of an Attribute package instance, specifying which one @\
+!           of multiple Attribute package instances of the same convention @\
+!           and purpose, within a nest.  If not specified, defaults to the @\
+!           first instance.  @\
+!     \item [{[rc]}]  @\
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc @\
+      character(len=*), parameter :: fobject=#mthis @\
+ @\
+      ! Initialize @\
+      localrc = ESMF_RC_NOT_IMPL @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check variables @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      if (present(convention).or.present(purpose)) then @\
+        if (present(convention).and..not.present(purpose).or. & @\
+            present(purpose).and..not.present(convention)) then @\
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
+            msg="both convention and purpose must be present or not", & @\
+            ESMF_CONTEXT, rcToReturn=rc) @\
+          if (present(rc)) rc = ESMF_SUCCESS @\
+          return @\
+        endif @\
+      endif @\
+ @\
+      call c_ESMC_HandleGet(mthis, mclass##HandleGet, name, & @\
+      						convention, purpose, & @\
+                            fobject, attPackInstanceName, localrc) @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+      ! Set init code @\
+      ESMF_INIT_SET_CREATED(mclass##HandleGet) @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end function mclass##HandleGet @\
+!------------------------------------------------------------------------------
+
 
 !------------------------------------------------------------------------------
 
@@ -6873,6 +6964,8 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 
 AttUpdateMacro(ESMF_CplComp, comp, comp%compp%base)
 AttWriteMacro(ESMF_CplComp, comp, comp%compp%base, comp, field)
+
+HandleGetMacro(ESMF_CplComp, comp)
 
 !-------------------------------------------------------------------------
 !  GridComp

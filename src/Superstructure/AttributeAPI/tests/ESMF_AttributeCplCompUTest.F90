@@ -109,6 +109,8 @@ program ESMF_AttributeCplCompUTest
       logical :: rc_logical
       character(ESMF_MAXSTR), dimension(1) :: exclusions
 
+	  type(ESMF_Attribute) :: handle
+
 #endif
 
 !-------------------------------------------------------------------------------
@@ -1175,6 +1177,15 @@ program ESMF_AttributeCplCompUTest
         valueList=attpackList, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a char list Attribute in an Attribute package on a CplComp Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! return a Handle on a CplComp Test
+	  handle = ESMF_HandleGet(cplcomp, attrname, &
+                              convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "return a Handle on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 

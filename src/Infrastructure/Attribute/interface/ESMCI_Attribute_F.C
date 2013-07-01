@@ -49,6 +49,183 @@ static const char *const version = "$Id$";
 
 extern "C" {
 
+/*
+  void FTN_X(c_esmc_arraycreateallocate)(ESMCI::Array **ptr, 
+    ESMCI::ArraySpec *arrayspec, ESMCI::DistGrid **distgrid,
+    ESMCI::InterfaceInt **distgridToArrayMap,
+    ESMCI::InterfaceInt **computationalEdgeLWidthArg,
+    ESMCI::InterfaceInt **computationalEdgeUWidthArg,
+    ESMCI::InterfaceInt **computationalLWidthArg,
+    ESMCI::InterfaceInt **computationalUWidthArg, 
+    ESMCI::InterfaceInt **totalLWidthArg, ESMCI::InterfaceInt **totalUWidthArg,
+    ESMC_IndexFlag *indexflag, ESMCI::InterfaceInt **undistLBoundArg,
+    ESMCI::InterfaceInt **undistUBoundArg,
+    char *name, int *len_name, int *rc,
+    ESMCI_FortranStrLenArg name_l){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraycreateallocate()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    *ptr = ESMCI::Array::create(arrayspec, *distgrid, *distgridToArrayMap,
+      *computationalEdgeLWidthArg, *computationalEdgeUWidthArg,
+      *computationalLWidthArg, *computationalUWidthArg, *totalLWidthArg,
+      *totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag), NULL,
+      *undistLBoundArg, *undistUBoundArg, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // set the name in the Array object
+    char *cname = ESMC_F90toCstring(name, *len_name);
+    if (cname){
+      (*ptr)->setName(cname);
+      delete [] cname;
+    }else if(*len_name){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+        "- Not a valid string", ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return;
+    }
+  }
+*/
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_esmc_handleget - get an attpack handle
+//
+// !INTERFACE:
+      void FTN_X(c_esmc_handleget)(
+//
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_handleget()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in/out - base object
+      ESMCI::Attribute **attpack, // in/out - attpack to return
+      char *name,               // in - name
+      char *convention,         // in - convention
+      char *purpose,            // in - purpose
+      char *object,             // in - object
+      char *attPackInstanceName,// in - attpack instance name
+      int *rc,                  // in - return code
+      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMCI_FortranStrLenArg olen,   // hidden/in - strlen count for object
+      ESMCI_FortranStrLenArg alen) { // hidden/in - strlen count for attPackInstanceName
+// 
+// !DESCRIPTION:
+//     Retrieve an attribute package from any Attribute containing object.
+//
+//EOP
+
+  int status;
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad base", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;    
+    return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name", ESMC_CONTEXT, &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention", ESMC_CONTEXT, &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose", ESMC_CONTEXT, &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // simple sanity check before doing any more work
+  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object", ESMC_CONTEXT, &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  string cname(name, nlen);
+  string cconv(convention, clen);
+  string cpurp(purpose, plen);
+  string cobj(object, olen);
+  cname.resize(cname.find_last_not_of(" ")+1);
+  cconv.resize(cconv.find_last_not_of(" ")+1);
+  cpurp.resize(cpurp.find_last_not_of(" ")+1);
+  cobj.resize(cobj.find_last_not_of(" ")+1);
+
+  if (cname.empty()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute name conversion", ESMC_CONTEXT, &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  if (cconv.empty()) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute convention conversion", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  if (cpurp.empty()) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute purpose conversion", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  if (cobj.empty()) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute object conversion", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  // convert optional (char *) arg attPackInstanceName to string
+// TODO: is the following line safe for all F90 compilers when passing a 
+//       not-present char* attPackInstanceName ?  what is value of alen?
+//  string capname((char*)ESMC_NOT_PRESENT_FILTER(attPackInstanceName), alen);
+  string capname;
+  if (ESMC_NOT_PRESENT_FILTER(attPackInstanceName) != ESMC_NULL_POINTER &&
+                                                      alen > 0) {
+    capname.assign(attPackInstanceName, 0, alen);
+  }
+  capname.resize(capname.find_last_not_of(" ")+1);
+
+  // get the Attribute package
+  *attpack = (**base).root.AttPackGet(cconv, cpurp, cobj, capname);
+  if (!attpack) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
+                         "failed getting Attribute package", ESMC_CONTEXT, &status);
+    if (rc) *rc = status;
+    return;
+  }
+
+  if (rc) *rc = ESMF_SUCCESS;
+  
+}  // end c_esmc_handleget
+
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //  Attribute object methods
@@ -170,6 +347,8 @@ extern "C" {
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         ESMC_NOT_PRESENT_FILTER(rc));
 
+  if (rc) *rc = status;
+
 }  // end c_esmc_attpackaddattribute
 
 //-----------------------------------------------------------------------------
@@ -269,6 +448,8 @@ extern "C" {
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
+  if (rc) *rc = status;
+
 }  // end c_esmc_attpackcreatecustom
 
 //-----------------------------------------------------------------------------
@@ -367,6 +548,8 @@ extern "C" {
   status = (**base).root.AttPackCreateStandard(cconv, cpurp, cobj);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+
+  if (rc) *rc = status;
 
 }  // end c_esmc_attpackcreatestandard
 
@@ -548,6 +731,8 @@ extern "C" {
                                      *nestCount, cnconv, cnpurp);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+
+  if (rc) *rc = status;
 
 }  // end c_esmc_attpacknest
 
@@ -822,6 +1007,8 @@ extern "C" {
 
   // return number of converted attpack instance names
   *nestAttPackInstanceNameCount = namecount;
+
+  if (rc) *rc = status;
 
 }  // end c_esmc_attpackcreatestdnest
 
