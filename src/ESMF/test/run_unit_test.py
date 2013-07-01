@@ -4,7 +4,7 @@ import os
 import ESMF
 
 # run utests, pipe to file
-utestfile=os.path.join('src/ESMF/test/','unit_test.py')
+utestfile=os.path.join('./src/ESMF/test/','unit_test.py')
 utestoutfile='run_unit_test.log'
 
 if ESMF.constants._ESMF_OS is ESMF.constants._ESMF_OS_UNICOS:

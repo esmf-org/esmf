@@ -4,7 +4,7 @@ import os
 import ESMF
 
 # run regrid tests, pipe to file
-REGRID_TEST_DIR = 'src/ESMF/test/regrid_test'
+REGRID_TEST_DIR = './src/ESMF/test/regrid_test'
 regridtestoutfile='run_regrid.log'
 regridtestfiles_temp = [ \
 'grid_grid_regrid_csrv_mask_test.py',

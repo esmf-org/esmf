@@ -4,7 +4,7 @@ import os
 import ESMF
 
 # run utests, pipe to file
-REGRID_TEST_DIR = 'src/ESMF/test/regrid_test/regrid_from_file_test/'
+REGRID_TEST_DIR = './src/ESMF/test/regrid_test/regrid_from_file_test/'
 rtestfile=os.path.join(REGRID_TEST_DIR, 'regrid_check_driver.py')
 rtestoutfile='run_regrid_from_file.log'
 
