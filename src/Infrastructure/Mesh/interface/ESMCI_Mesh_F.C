@@ -934,6 +934,7 @@ extern "C" void FTN_X(c_esmc_meshget)(Mesh **meshpp, int *num_nodes, int *num_el
     if(rc != NULL) *rc = ESMF_SUCCESS;
 }
     
+#if 0
 
 extern "C" void FTN_X(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *egrid, int *num_lnodes, int *num_lelems, int *rc) {
 
@@ -1013,6 +1014,138 @@ extern "C" void FTN_X(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
       ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
+  {
+    int esize = *num_lelems = egids.size();
+    int rc1;
+    
+    int *indices = (esize==0)?NULL:&egids[0];
+
+
+    FTN_X(f_esmf_getmeshdistgrid)(egrid, &esize, indices, &rc1);
+
+    if(ESMC_LogDefault.MsgFoundError(rc1,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+#endif
+
+
+extern "C" void FTN_X(c_esmc_meshcreatenodedistgrid)(Mesh **meshpp, int *ngrid, int *num_lnodes, int *rc) {
+
+  // Declare id vectors
+  std::vector<int> ngids; 
+  
+ 
+  try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+   throw localrc;  // bail out with exception
+    }
+
+    Mesh *meshp = *meshpp;
+    
+    // Get the set of owned node ids
+    {
+      getNodeGIDS(*meshp, ngids); 
+    }
+    
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  // Create the distgrids
+  {
+    int nsize = *num_lnodes = ngids.size();
+    int rc1;
+    
+    int *indices = (nsize==0)?NULL:&ngids[0];
+
+    FTN_X(f_esmf_getmeshdistgrid)(ngrid, &nsize, indices, &rc1);
+
+    if (ESMC_LogDefault.MsgFoundError(rc1,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+
+extern "C" void FTN_X(c_esmc_meshcreateelemdistgrid)(Mesh **meshpp, int *egrid, int *num_lelems, int *rc) {
+
+  // Declare id vectors
+  std::vector<int> egids; 
+   
+  try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+   throw localrc;  // bail out with exception
+    }
+
+    Mesh *meshp = *meshpp;
+    
+    // Get the set of owned elem ids
+    {
+      getElemGIDS(*meshp, egids);
+    }
+    
+    
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
   {
     int esize = *num_lelems = egids.size();
     int rc1;
@@ -2566,8 +2699,8 @@ ESMC_MeshOp_Flag * meshop, double * threshold, int *rc) {
 
 
 
-extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_node_gids, int *node_gids, 
-                                                   int *num_elem_gids, int *elem_gids,  Mesh **output_meshpp, int *rc) {
+extern "C" void FTN_X(c_esmc_meshcreateredist)(Mesh **src_meshpp, int *num_node_gids, int *node_gids, 
+                                               int *num_elem_gids, int *elem_gids,  Mesh **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshcreateredist()"
 
@@ -2584,6 +2717,53 @@ extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_
 
     // Call C++ side
     MeshRedist(*src_meshpp, *num_node_gids, node_gids, *num_elem_gids, elem_gids, output_meshpp);
+
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+
+
+extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_elem_gids, int *elem_gids, 
+                                                    Mesh **output_meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreateredistelems()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+
+    // Call C++ side
+    MeshRedistElem(*src_meshpp, *num_elem_gids, elem_gids, output_meshpp);
 
 
   } catch(std::exception &x) {
