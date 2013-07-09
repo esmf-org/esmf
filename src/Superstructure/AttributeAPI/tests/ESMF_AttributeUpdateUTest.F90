@@ -183,6 +183,7 @@ module ESMF_AttributeUpdateUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
+    type(ESMF_Attribute)        :: attpack   
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,value1,value2, &
@@ -223,7 +224,7 @@ module ESMF_AttributeUpdateUTestMod
 
     field = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field", rc=status)
-    call ESMF_AttributeAdd(field, convention=convESMF, purpose=purpGen, &
+    attpack = ESMF_AttributeAdd(field, convention=convESMF, purpose=purpGen, &
       rc=status)
     call ESMF_AttributeSet(field, name1, value1, convention=convESMF, &
       purpose=purpGen, rc=status)
@@ -236,7 +237,7 @@ module ESMF_AttributeUpdateUTestMod
     if (status .ne. ESMF_SUCCESS) return
 
     ! Create the Grid Attribute Package
-    call ESMF_AttributeAdd(grid,convention=convESMF, purpose=purpGen, rc=status)
+    attpack = ESMF_AttributeAdd(grid,convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'RegDecompX',96,convention=convESMF, purpose=purpGen, rc=status)
     call ESMF_AttributeSet(grid,'RegDecompY',84,convention=convESMF, purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
@@ -304,6 +305,7 @@ module ESMF_AttributeUpdateUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
+    type(ESMF_Attribute)        :: attpack   
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name2,value2,convESMF,purpGen,purp2,name3
@@ -341,7 +343,7 @@ module ESMF_AttributeUpdateUTestMod
     call ESMF_AttributeSet(field, name2, value2, convention=convESMF, &
       purpose=purpGen, rc=status)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_AttributeAdd(field, convention=convESMF, purpose=purp2, &
+    attpack = ESMF_AttributeAdd(field, convention=convESMF, purpose=purp2, &
       attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(field, attrList(1), valueList(1), &

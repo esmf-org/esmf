@@ -95,6 +95,7 @@ module user_model4
     integer, intent(out) :: rc
 
     ! Local variables
+	type(ESMF_Attribute)        :: attpack
     character(ESMF_MAXSTR)      :: convCIM, purpComp, purpSci, purpField
     character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
     character(ESMF_MAXSTR)      :: sciPropAtt(5)
@@ -115,7 +116,7 @@ module user_model4
     !
     convCIM = 'CIM 1.5'
     purpComp = 'ModelComp'
-    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, rc=rc)
+    attpack = ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_AttributeSet(comp, 'ShortName', &
@@ -260,7 +261,7 @@ module user_model4
     sciPropAtt(3) = 'OceanBiogeoChemistryOceanBioChemistryCarbonChemistrypH-scale'
     sciPropAtt(4) = 'OceanBiogeoChemistryOceanBioTracersNutrientsListOfSpecies'
     sciPropAtt(5) = 'OceanBiogeoChemistryOceanBioTracersOceanBioTracersEcosystemZooplanctonType'
-    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpSci, &
+    attpack = ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpSci, &
       attrList=sciPropAtt, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -316,7 +317,7 @@ module user_model4
     ! SOA Field
     SOA = ESMF_FieldEmptyCreate(name='SOA', rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_AttributeAdd(SOA, convention=convCIM, purpose=purpField,rc=rc)
+    attpack = ESMF_AttributeAdd(SOA, convention=convCIM, purpose=purpField,rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
 
@@ -394,7 +395,7 @@ module user_model4
     ! POM Field
     POM = ESMF_FieldEmptyCreate(name='POM', rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_AttributeAdd(POM, convention=convCIM, purpose=purpField,rc=rc)
+    attpack = ESMF_AttributeAdd(POM, convention=convCIM, purpose=purpField,rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! POM CF-Extended Attributes

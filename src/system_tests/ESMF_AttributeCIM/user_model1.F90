@@ -95,6 +95,7 @@ module user_model1
     integer, intent(out) :: rc
 
     ! Local variables
+	type(ESMF_Attribute)        :: attpack
     character(ESMF_MAXSTR)      :: convCIM, purpComp, purpSci, purpField
     character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
     character(ESMF_MAXSTR)      :: sciPropAtt(3)
@@ -117,7 +118,7 @@ module user_model1
     purpComp = 'ModelComp'
     ! Specify the Gridded Components to have the default of 1 Responsible
     !   Party sub-package and 1 Citation sub-package
-    call ESMF_AttributeAdd(comp, convention=convCIM, &
+    attpack = ESMF_AttributeAdd(comp, convention=convCIM, &
       purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -241,7 +242,7 @@ module user_model1
     sciPropAtt(1) = 'AtmosphereAtmosConvectTurbulCloudMicrophysicsProcesses'
     sciPropAtt(2) = 'AtmosphereAtmosConvectTurbulCloudAtmosCloudSchemeCloudSchemeAttributesSeparatedCloudTreatment'
     sciPropAtt(3) = 'AtmosphereAtmosConvectTurbulCloudCloudSimulatorInputsRadarRadarType'
-    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpSci, &
+    attpack = ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpSci, &
       attrList=sciPropAtt, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -281,7 +282,7 @@ module user_model1
     ! OH Field
     OH = ESMF_FieldEmptyCreate(name='OH', rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_AttributeAdd(OH, convention=convCIM, purpose=purpField,rc=rc)
+    attpack = ESMF_AttributeAdd(OH, convention=convCIM, purpose=purpField,rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
 
@@ -366,7 +367,7 @@ module user_model1
     ! Orog Field
     Orog = ESMF_FieldEmptyCreate(name='Orog', rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_AttributeAdd(Orog, convention=convCIM, purpose=purpField,rc=rc)
+    attpack = ESMF_AttributeAdd(Orog, convention=convCIM, purpose=purpField,rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
 

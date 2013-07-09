@@ -44,6 +44,7 @@ program ESMF_AttributeWriteIntrnalUTest
   character(ESMF_MAXSTR) :: name
   
   ! local variables
+  type(ESMF_Attribute)   :: attpack   
   type(ESMF_Grid)        :: grid
   integer                :: rc
   
@@ -228,7 +229,7 @@ program ESMF_AttributeWriteIntrnalUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Create standard CF attribute package on the grid
-    call ESMF_AttributeAdd(grid, &
+    attpack = ESMF_AttributeAdd(grid, &
                            convention='CIM 1.5.1', &
                            purpose='grids', &
                            rc=rc)
@@ -243,7 +244,7 @@ program ESMF_AttributeWriteIntrnalUTest
     attrList(1) = 'nestPack1'
     attrList(2) = 'nestPack2'
     attrList(3) = 'nestPack3'
-    call ESMF_AttributeAdd(grid, &
+    attpack = ESMF_AttributeAdd(grid, &
                            convention='CF-nested', &
                            purpose='grids-nested', &
                            attrList=attrList(1:3), &

@@ -133,9 +133,21 @@ module ESMF_AttributeMod
 !
 !==============================================================================
 
-interface ESMF_HandleGet
-	module procedure ESMF_CplCompHandleGet
-end interface
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_AttributeAdd  - Create Attribute packages
+!
+! !INTERFACE:
+	interface ESMF_HandleGet
+
+! !PRIVATE MEMBER FUNCTIONS:
+		module procedure ESMF_CplCompHandleGet
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that retrieve
+!     an Attribute handle.
+
+!EOPI
+	end interface
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -2363,7 +2375,7 @@ contains
 !  Macro versions of the routines
 !-------------------------------------------------------------------------
 
-#define HandleGetMacro(mclass, mthis) \
+#define HandleGetMacro(mclass, mthis, mthisfield) \
 @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_HandleGet" @\
@@ -2373,15 +2385,15 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_HandleGet() @\
-      function mclass##HandleGet(mthis, name, & @\
+      function mclass##HandleGet(mthis, & @\
         convention, purpose, attPackInstanceName, rc) @\
  @\
+! !RETURN: @\
  	  type(ESMF_Attribute) :: mclass##HandleGet @\
  @\
       type(mclass), intent(in) :: mthis   @\
-      character (len = *), intent(in) :: name @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
+      character (len = *), intent(in) :: convention @\
+      character (len = *), intent(in) :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -2393,11 +2405,9 @@ contains
 !     \begin{description} @\
 !     \item [mthis] @\
 !           An ESMF object. @\
-!     \item [name] @\
-!           The name of the Attribute to retrieve. @\
-!     \item [{[convention]}] @\
+!     \item [convention] @\
 !           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
+!     \item [purpose] @\
 !           The purpose of the Attribute package. @\
 !     \item [{[attPackInstanceName]}] @\
 !           The name of an Attribute package instance, specifying which one @\
@@ -2421,18 +2431,7 @@ contains
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          if (present(rc)) rc = ESMF_SUCCESS @\
-          return @\
-        endif @\
-      endif @\
- @\
-      call c_ESMC_HandleGet(mthis, mclass##HandleGet, name, & @\
+      call c_ESMC_HandleGet(mthisfield, mclass##HandleGet, & @\
       						convention, purpose, & @\
                             fobject, attPackInstanceName, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
@@ -2458,8 +2457,12 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
-      subroutine mclass##AttAddPackStd(mthis, convention, purpose, rc) @\
+      function mclass##AttAddPackStd(mthis, convention, purpose, rc) @\
 ! @\
+ @\
+! !RETURN: @\
+ 	  type(ESMF_Attribute) :: mclass##AttAddPackStd @\
+ @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
       character (len = *), intent(in) :: convention @\
@@ -2509,13 +2512,17 @@ contains
  @\
       call c_ESMC_AttPackCreateStandard(mthisfield, convention, & @\
         purpose, object, localrc) @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
+      mclass##AttAddPackStd = mclass##HandleGet(mthis, & @\
+                                convention, purpose, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
-      end subroutine mclass##AttAddPackStd
+      end function mclass##AttAddPackStd
 
 !------------------------------------------------------------------------------
 
@@ -2528,11 +2535,14 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
-      subroutine mclass##AttAddPackStdN(mthis, convention, purpose, & @\
+      function mclass##AttAddPackStdN(mthis, convention, purpose, & @\
       nestConvention, nestPurpose, nestAttPackInstanceCountList, & @\
       nestAttPackInstanceNameList, nestCount, & @\
       nestAttPackInstanceNameCount, rc) @\
 ! @\
+! !RETURN: @\
+ 	  type(ESMF_Attribute) :: mclass##AttAddPackStdN @\
+ @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
       character (len = *), intent(in) :: convention @\
@@ -2704,9 +2714,14 @@ contains
         nestAttPackInstanceNameCount = localNestAPinstNameCount @\
       endif @\
  @\
+      mclass##AttAddPackStdN = mclass##HandleGet(mthis, & @\
+                                 convention, purpose, rc=localrc) @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+         ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
-      end subroutine mclass##AttAddPackStdN
+      end function mclass##AttAddPackStdN
 
 !------------------------------------------------------------------------------
 
@@ -2718,9 +2733,12 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
-      subroutine mclass##AttAddPackCst(mthis, convention, purpose, & @\
+      function mclass##AttAddPackCst(mthis, convention, purpose, & @\
       attrList, count, rc) @\
 ! @\
+! !RETURN: @\
+ 	  type(ESMF_Attribute) :: mclass##AttAddPackCst @\
+ @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: convention @\
@@ -2791,9 +2809,15 @@ contains
       end do @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
          ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+      mclass##AttAddPackCst = mclass##HandleGet(mthis, & @\
+                                convention, purpose, rc=localrc) @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+         ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
-      end subroutine mclass##AttAddPackCst
+      end function mclass##AttAddPackCst
 
 !------------------------------------------------------------------------------
 
@@ -2805,9 +2829,12 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
-      subroutine mclass##AttAddPackCstN(mthis, convention, purpose, & @\
+      function mclass##AttAddPackCstN(mthis, convention, purpose, & @\
       attrList, count, nestConvention, nestPurpose, nestCount, rc) @\
 ! @\
+! !RETURN: @\
+ 	  type(ESMF_Attribute) :: mclass##AttAddPackCstN @\
+ @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: convention @\
@@ -2939,9 +2966,14 @@ contains
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
+      mclass##AttAddPackCstN = mclass##HandleGet(mthis, & @\
+                                 convention, purpose, rc=localrc) @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+         ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
-      end subroutine mclass##AttAddPackCstN
+      end function mclass##AttAddPackCstN
 
 !------------------------------------------------------------------------------
 
@@ -2953,9 +2985,12 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
-      subroutine mclass##AttAddPackCstN1(mthis, convention, purpose, & @\
+      function mclass##AttAddPackCstN1(mthis, convention, purpose, & @\
       attrList, count, nestConvention, nestPurpose, rc) @\
 ! @\
+! !RETURN: @\
+ 	  type(ESMF_Attribute) :: mclass##AttAddPackCstN1 @\
+ @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: convention @\
@@ -3011,13 +3046,17 @@ contains
       nestConvString(1) = nestConvention @\
       nestPurpString(1) = nestPurpose @\
  @\
-      call mclass##AttAddPackCstN(mthis, convention, purpose, & @\
-              attrList, count, nestConvString, nestPurpString, 1, localrc) @\
+      mclass##AttAddPackCstN1 = mclass##AttAddPackCstN(mthis, & @\
+                                  convention, purpose, & @\
+                                  attrList, count, & @\
+                                  nestConvString, nestPurpString, & @\
+                                  1, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
          ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
-      end subroutine mclass##AttAddPackCstN1
+      end function mclass##AttAddPackCstN1
 
 !------------------------------------------------------------------------------
 
@@ -6922,6 +6961,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  CplComp
 !-------------------------------------------------------------------------
 
+HandleGetMacro(ESMF_CplComp, comp, comp%compp%base)
+
 AttAddPackStandardMacro(ESMF_CplComp, comp, comp%compp%base)
 AttAddPackStandardNMacro(ESMF_CplComp, comp, comp%compp%base)
 AttAddPackCustomMacro(ESMF_CplComp, comp, comp%compp%base)
@@ -6965,11 +7006,11 @@ AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 AttUpdateMacro(ESMF_CplComp, comp, comp%compp%base)
 AttWriteMacro(ESMF_CplComp, comp, comp%compp%base, comp, field)
 
-HandleGetMacro(ESMF_CplComp, comp)
-
 !-------------------------------------------------------------------------
 !  GridComp
 !-------------------------------------------------------------------------
+
+HandleGetMacro(ESMF_GridComp, comp, comp%compp%base)
 
 AttAddPackStandardMacro(ESMF_GridComp, comp, comp%compp%base)
 AttAddPackStandardNMacro(ESMF_GridComp, comp, comp%compp%base)
@@ -7017,6 +7058,8 @@ AttWriteMacro(ESMF_GridComp, comp, comp%compp%base, comp, field)
 !  SciComp
 !-------------------------------------------------------------------------
 
+HandleGetMacro(ESMF_SciComp, comp, comp%compp%base)
+
 AttAddPackStandardMacro(ESMF_SciComp, comp, comp%compp%base)
 AttAddPackStandardNMacro(ESMF_SciComp, comp, comp%compp%base)
 AttAddPackCustomMacro(ESMF_SciComp, comp, comp%compp%base)
@@ -7062,6 +7105,8 @@ AttWriteMacro(ESMF_SciComp, comp, comp%compp%base, comp, field)
 !-------------------------------------------------------------------------
 !  STATE
 !-------------------------------------------------------------------------
+
+HandleGetMacro(ESMF_State, state, state%statep%base)
 
 AttAddPackStandardMacro(ESMF_State, state, state%statep%base)
 AttAddPackCustomMacro(ESMF_State, state, state%statep%base)
@@ -7112,6 +7157,8 @@ AttWriteMacro(ESMF_State, state, state%statep%base, state, field)
 !  FIELDBUNDLE
 !-------------------------------------------------------------------------
 
+HandleGetMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
+
 AttAddPackCustomMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttAddPackCustomNMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttAddPackCustomN1Macro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
@@ -7147,6 +7194,8 @@ AttWriteMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base, fieldbundle,
 !  FIELD
 !-------------------------------------------------------------------------
 
+HandleGetMacro(ESMF_Field, field, field%ftypep%base)
+
 AttAddPackStandardMacro(ESMF_Field, field, field%ftypep%base)
 AttAddPackCustomMacro(ESMF_Field, field, field%ftypep%base)
 AttAddPackCustomNMacro(ESMF_Field, field, field%ftypep%base)
@@ -7179,6 +7228,8 @@ AttWriteMacro(ESMF_Field, field, field%ftypep%base, field, field)
 !  ARRAYBUNDLE
 !-------------------------------------------------------------------------
 
+HandleGetMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+
 AttAddPackCustomMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttAddPackCustomNMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttAddPackCustomN1Macro(ESMF_ArrayBundle, arraybundle, arraybundle)
@@ -7208,6 +7259,8 @@ AttWriteMacro(ESMF_ArrayBundle, arraybundle, arraybundle, arraybundle, array)
 !  ARRAY
 !-------------------------------------------------------------------------
 
+HandleGetMacro(ESMF_Array, array, array)
+
 AttAddPackCustomMacro(ESMF_Array, array, array)
 AttAddPackCustomNMacro(ESMF_Array, array, array)
 AttAddPackCustomN1Macro(ESMF_Array, array, array)
@@ -7231,6 +7284,8 @@ AttWriteMacro(ESMF_Array, array, array, array, array)
 !-------------------------------------------------------------------------
 !  GRID
 !-------------------------------------------------------------------------
+
+HandleGetMacro(ESMF_Grid, grid, grid)
 
 AttAddPackStandardMacro(ESMF_Grid, grid, grid)
 AttAddPackCustomMacro(ESMF_Grid, grid, grid)
@@ -7269,6 +7324,8 @@ AttWriteMacro(ESMF_Grid, grid, grid, grid, grid)
 !-------------------------------------------------------------------------
 !  DISTGRID
 !-------------------------------------------------------------------------
+
+HandleGetMacro(ESMF_DistGrid, distgrid, distgrid)
 
 AttAddPackCustomMacro(ESMF_DistGrid, distgrid, distgrid)
 AttAddPackCustomNMacro(ESMF_DistGrid, distgrid, distgrid)

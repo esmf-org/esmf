@@ -46,6 +46,8 @@ program ESMF_AttributeArrayBundleUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
+      type(ESMF_Attribute)   :: attpack
+      
       type(ESMF_ArrayBundle)    :: arraybundle
       type(ESMF_Array), dimension(2) :: array
       type(ESMF_Array)               :: afb
@@ -1143,7 +1145,7 @@ program ESMF_AttributeArrayBundleUTest
       
       !EX_UTest
       ! Create a custom Attribute package on an ArrayBundle Test
-      call ESMF_AttributeAdd(arraybundle, convention=conv, &
+      attpack = ESMF_AttributeAdd(arraybundle, convention=conv, &
         purpose=purp, attrList=attpackList, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attribute package on an ArrayBundle Test"
@@ -1242,7 +1244,7 @@ program ESMF_AttributeArrayBundleUTest
     
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on an ArrayBundle Test
-      call ESMF_AttributeAdd(arraybundle, convention=conv, purpose=purp, &
+      attpack = ESMF_AttributeAdd(arraybundle, convention=conv, purpose=purp, &
         attrList=attpackListTNames, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a standard Attribute package on an ArrayBundle Test"
@@ -1381,7 +1383,7 @@ program ESMF_AttributeArrayBundleUTest
       attrname = "Character_namelist2"
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on an ArrayBundle Test
-      call ESMF_AttributeAdd(arraybundle, convention=nestconv, purpose=nestpurp, &
+      attpack = ESMF_AttributeAdd(arraybundle, convention=nestconv, purpose=nestpurp, &
         attrList=attpackListTNames2, nestConvention=conv, nestPurpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a nested Attribute package on an ArrayBundle Test"

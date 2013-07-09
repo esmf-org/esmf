@@ -46,6 +46,8 @@ program ESMF_AttributeDistGridUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
+      type(ESMF_Attribute)   :: attpack
+      
       type(ESMF_DistGrid)    :: distgrid
       character(ESMF_MAXSTR) :: attrname, attrnameOut, attrvalue
       integer                :: rc, count, items
@@ -1132,7 +1134,7 @@ program ESMF_AttributeDistGridUTest
       
       !EX_UTest
       ! Create a custom Attribute package on a DistGrid Test
-      call ESMF_AttributeAdd(distgrid, convention=conv, &
+      attpack = ESMF_AttributeAdd(distgrid, convention=conv, &
         purpose=purp, attrList=attpackList, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attribute package on a DistGrid Test"
@@ -1232,7 +1234,7 @@ program ESMF_AttributeDistGridUTest
     
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on a DistGrid Test
-      call ESMF_AttributeAdd(distgrid, convention=conv, purpose=purp, &
+      attpack = ESMF_AttributeAdd(distgrid, convention=conv, purpose=purp, &
         attrList=attpackListTNames, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a standard Attribute package on a DistGrid Test"
@@ -1369,9 +1371,10 @@ program ESMF_AttributeDistGridUTest
       attpackDfltList2(2) = "Custom5"
       attpackDfltList2(3) = "Custom6"
       attrname = "Character_namelist2"
+
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on a DistGrid Test
-      call ESMF_AttributeAdd(distgrid, convention=nestconv, purpose=nestpurp, &
+      attpack = ESMF_AttributeAdd(distgrid, convention=nestconv, purpose=nestpurp, &
         attrList=attpackListTNames2, nestConvention=conv, nestPurpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a nested Attribute package on a DistGrid Test"

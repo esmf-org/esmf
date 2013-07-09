@@ -198,6 +198,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
+    type(ESMF_Attribute)        :: attpack   
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,value1,value2, &
@@ -237,7 +238,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 
     field = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field", rc=status)
-    call ESMF_AttributeAdd(field, convention=convESMF, purpose=purpGen, &
+    attpack = ESMF_AttributeAdd(field, convention=convESMF, purpose=purpGen, &
       rc=status)
     call ESMF_AttributeSet(field, name1, value1, convention=convESMF, &
       purpose=purpGen, rc=status)

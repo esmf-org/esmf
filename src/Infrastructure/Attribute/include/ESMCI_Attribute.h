@@ -426,10 +426,9 @@ extern "C" {
 //        with the following prototype:
 // error: more than one instance of overloaded function "c_esmc_attpackremove_" has "C" linkage
   void FTN_X(c_esmc_handleget)(ESMC_Base **base, ESMCI::Attribute **attpack,
-                                  char *name, char *convention, char *purpose,
+                                  char *convention, char *purpose,
                                   char *object, char *attPackInstanceName,
                                   int *rc,
-							      ESMCI_FortranStrLenArg nlen,
                                   ESMCI_FortranStrLenArg clen,
                                   ESMCI_FortranStrLenArg plen,
                                   ESMCI_FortranStrLenArg olen,

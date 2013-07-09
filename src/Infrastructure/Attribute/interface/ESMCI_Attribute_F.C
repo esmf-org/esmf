@@ -103,13 +103,11 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **base,         // in/out - base object
       ESMCI::Attribute **attpack, // in/out - attpack to return
-      char *name,               // in - name
       char *convention,         // in - convention
       char *purpose,            // in - purpose
       char *object,             // in - object
       char *attPackInstanceName,// in - attpack instance name
       int *rc,                  // in - return code
-      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
       ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
       ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
       ESMCI_FortranStrLenArg olen,   // hidden/in - strlen count for object
@@ -130,14 +128,6 @@ extern "C" {
                          "bad base", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!name) || (nlen <= 0) || (name[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
   }
 
   // simple sanity check before doing any more work
@@ -164,21 +154,12 @@ extern "C" {
       return;
   }
 
-  string cname(name, nlen);
   string cconv(convention, clen);
   string cpurp(purpose, plen);
   string cobj(object, olen);
-  cname.resize(cname.find_last_not_of(" ")+1);
   cconv.resize(cconv.find_last_not_of(" ")+1);
   cpurp.resize(cpurp.find_last_not_of(" ")+1);
   cobj.resize(cobj.find_last_not_of(" ")+1);
-
-  if (cname.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute name conversion", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
 
   if (cconv.empty()) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -206,10 +187,12 @@ extern "C" {
 //       not-present char* attPackInstanceName ?  what is value of alen?
 //  string capname((char*)ESMC_NOT_PRESENT_FILTER(attPackInstanceName), alen);
   string capname;
+  capname = "";
   if (ESMC_NOT_PRESENT_FILTER(attPackInstanceName) != ESMC_NULL_POINTER &&
                                                       alen > 0) {
     capname.assign(attPackInstanceName, 0, alen);
   }
+  
   capname.resize(capname.find_last_not_of(" ")+1);
 
   // get the Attribute package

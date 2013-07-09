@@ -52,6 +52,7 @@ program ESMF_AttributeXMLUTest
       integer :: result = 0
 
       ! Local variables  
+      type(ESMF_Attribute)    :: attpack   
       integer                 :: ordinal, rc 
       type(ESMF_GridComp)     :: gridcomp, gridcomp2, gridcomp3
       type(ESMF_Field)        :: field1
@@ -165,7 +166,7 @@ program ESMF_AttributeXMLUTest
     ! Create 2 leaf attribute nodes on the gridded component; 1st leaf
     !  physical address
     attrList(1) = 'gco:CharacterString'
-    call ESMF_AttributeAdd(gridcomp, convention=convCIM, &
+    attpack = ESMF_AttributeAdd(gridcomp, convention=convCIM, &
                                      purpose='gmd:deliveryPoint', &
                                      attrList=attrList, count=1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -176,7 +177,7 @@ program ESMF_AttributeXMLUTest
     !NEX_UTest
     ! Create 2 leaf attribute nodes on the gridded component; 2nd leaf
     !  email address
-    call ESMF_AttributeAdd(gridcomp, convention=convCIM, &
+    attpack = ESMF_AttributeAdd(gridcomp, convention=convCIM, &
                                      purpose='gmd:electronicMailAddress', &
                                      attrList=attrList, count=1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -193,7 +194,7 @@ program ESMF_AttributeXMLUTest
     attrList(1) = 'description'   ! filler, since API requires at least 1
                                   ! TODO: allow 0-item attrList (no attrList,
                                   ! just nested attPacks (children))
-    call ESMF_AttributeAdd(gridcomp, convention=convCIM, &
+    attpack = ESMF_AttributeAdd(gridcomp, convention=convCIM, &
                                      purpose='gmd:CI_Address', &
                                      attrList=attrList, count=1, &
                                      nestConvention=nestConv, &
@@ -206,7 +207,7 @@ program ESMF_AttributeXMLUTest
     !NEX_UTest
     ! Now create 2nd parent node to include the 1 child node (1st parent)
     !   created above
-    call ESMF_AttributeAdd(gridcomp, convention=convCIM, &
+    attpack = ESMF_AttributeAdd(gridcomp, convention=convCIM, &
                                      purpose='gmd:address', &
                                      attrList=attrList, count=1, &
                                      nestConvention=convCIM, &
@@ -269,7 +270,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Create leaf attribute node on the gridded component
      attrList(1) = 'gmd:URL'
-    call ESMF_AttributeAdd(gridcomp, convention=convCIM, &
+    attpack = ESMF_AttributeAdd(gridcomp, convention=convCIM, &
                                      purpose='gmd:linkage', &
                                      attrList=attrList, count=1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -280,7 +281,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Now create parent node to include the child node created above
     attrList(1) = 'description'   ! filler, since API requires at least 1 attr
-    call ESMF_AttributeAdd(gridcomp, convention=convCIM, &
+    attpack = ESMF_AttributeAdd(gridcomp, convention=convCIM, &
                                        purpose='gmd:CI_OnlineResource', &
                                        attrList=attrList, count=1, &
                                        nestConvention=convCIM, &
@@ -292,7 +293,7 @@ program ESMF_AttributeXMLUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Create 2nd parent node on top of parent created above
-    call ESMF_AttributeAdd(gridcomp, convention=convCIM, &
+    attpack = ESMF_AttributeAdd(gridcomp, convention=convCIM, &
                                      purpose='gmd:onlineResource', &
                                      attrList=attrList, count=1, &
                                      nestConvention=convCIM, &
@@ -346,7 +347,7 @@ program ESMF_AttributeXMLUTest
     nestConv(2) = convCIM
     nestPurp(2) = 'gmd:onlineResource'
     attrList(1) = 'description'   ! filler, since API requires at least 1 attr
-    call ESMF_AttributeAdd(gridcomp, convention=convCIM, &
+    attpack = ESMF_AttributeAdd(gridcomp, convention=convCIM, &
                                      purpose='gmd:CI_Contact', &
                                      attrList=attrList, count=1, &
                                      nestConvention=nestConv, &
@@ -369,7 +370,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Create 2nd parent node on top of parent created above
     attrList(1) = 'description'   ! filler, since API requires at least 1 attr
-    call ESMF_AttributeAdd(gridcomp, convention=convCIM, &
+    attpack = ESMF_AttributeAdd(gridcomp, convention=convCIM, &
                                      purpose='gmd:contactInfo', &
                                      attrList=attrList, count=1, &
                                      nestConvention=convCIM, &
@@ -398,7 +399,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Create leaf attribute node on the gridded component
     attrList(1) = 'gco:CharacterString'
-    call ESMF_AttributeAdd(gridcomp, convention=convCIM, &
+    attpack = ESMF_AttributeAdd(gridcomp, convention=convCIM, &
                                      purpose='gmd:individualName', &
                                      attrList=attrList, count=1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -425,7 +426,7 @@ program ESMF_AttributeXMLUTest
     !EX_UTest
     ! Create leaf attribute node on the gridded component
     attrList(1) = 'gmd:CI_RoleCode'
-    call ESMF_AttributeAdd(gridcomp, convention=convCIM, &
+    attpack = ESMF_AttributeAdd(gridcomp, convention=convCIM, &
                                      purpose='gmd:role', &
                                      attrList=attrList, count=1, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -459,7 +460,7 @@ program ESMF_AttributeXMLUTest
     nestConv(3) = convCIM
     nestPurp(3) = 'gmd:role'
     attrList(1) = 'description'   ! filler, since API requires at least 1 attr
-    call ESMF_AttributeAdd(gridcomp, convention=convCIM, &
+    attpack = ESMF_AttributeAdd(gridcomp, convention=convCIM, &
                                      purpose='gmd:CI_ResponsibleParty', &
                                      attrList=attrList, count=1, &
                                      nestConvention=nestConv, &
@@ -491,7 +492,7 @@ program ESMF_AttributeXMLUTest
     ! add new attribute 'abbreviation'
     attrList(1) = 'description'  ! use to hold XML comment
     attrList(2) = 'abbreviation'   
-    call ESMF_AttributeAdd(gridcomp, convention=convCIM, &
+    attpack = ESMF_AttributeAdd(gridcomp, convention=convCIM, &
                                      purpose='responsibleParty', &
                                      attrList=attrList, count=2, &
                                      nestConvention=convCIM, &
@@ -575,7 +576,7 @@ print *, "!!!!!!!!!! BING 2222222 !!!!!!!!!!!!!!!!!!!! "
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Create standard CIM attribute package on the gridded component
-    call ESMF_AttributeAdd(gridcomp2, &
+    attpack = ESMF_AttributeAdd(gridcomp2, &
                            convention=convCIM, &
                            purpose=purpComp, &
                            rc=rc)
@@ -590,7 +591,7 @@ print *, "!!!!!!!!!! BING 2222222 !!!!!!!!!!!!!!!!!!!! "
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Create duplicate standard CIM attribute package on the gridded component
-    call ESMF_AttributeAdd(gridcomp2, &
+    attpack = ESMF_AttributeAdd(gridcomp2, &
                            convention=convCIM, &
                            purpose=purpComp, &
                            rc=rc)
@@ -683,7 +684,7 @@ print *, "!!!!!!!!!! BING 2222222 !!!!!!!!!!!!!!!!!!!! "
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Create triplicate standard CIM attribute package on the gridded component
-    call ESMF_AttributeAdd(gridcomp2, &
+    attpack = ESMF_AttributeAdd(gridcomp2, &
                            convention=convCIM, &
                            purpose=purpComp, &
                            rc=rc)
@@ -792,7 +793,7 @@ print *, "!!!!!!!!!! BING 2222222 !!!!!!!!!!!!!!!!!!!! "
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Create standard CIM attribute package on the gridded component
-    call ESMF_AttributeAdd(gridcomp3, &
+    attpack = ESMF_AttributeAdd(gridcomp3, &
                            convention=convCIM, &
                            purpose=purpComp, &
                            rc=rc)
@@ -1279,7 +1280,7 @@ print *, "!!!!!!!!!! BING 2222222 !!!!!!!!!!!!!!!!!!!! "
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Create standard CIM attribute package on the field
-    call ESMF_AttributeAdd(field1, &
+    attpack = ESMF_AttributeAdd(field1, &
                            convention=convCIM, &
                            purpose=purpField, &
                            rc=rc)

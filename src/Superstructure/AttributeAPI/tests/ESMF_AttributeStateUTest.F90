@@ -46,6 +46,8 @@ program ESMF_AttributeStateUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
+      type(ESMF_Attribute)   :: attpack
+      
       type(ESMF_Field)       :: ffs 
       type(ESMF_State)       :: state, sfs, stateValue, stateHybrid
       type(ESMF_FieldBundle) :: fbfs
@@ -1150,7 +1152,7 @@ program ESMF_AttributeStateUTest
       
       !EX_UTest
       ! Create a custom Attribute package on a State Test
-      call ESMF_AttributeAdd(state, convention=conv, &
+      attpack = ESMF_AttributeAdd(state, convention=conv, &
         purpose=purp, attrList=attpackList, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attribute package on a State Test"
@@ -1245,7 +1247,7 @@ program ESMF_AttributeStateUTest
       
       !NEX_UTest
       ! Create an Attribute package on a State Test
-      call ESMF_AttributeAdd(state, convention=conv, purpose=purp, rc=rc)
+      attpack = ESMF_AttributeAdd(state, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a standard Attribute package on a State Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1273,7 +1275,7 @@ program ESMF_AttributeStateUTest
     
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on a State Test
-      call ESMF_AttributeAdd(state, convention=nestconv, purpose=nestpurp, &
+      attpack = ESMF_AttributeAdd(state, convention=nestconv, purpose=nestpurp, &
         attrList=attpackListTNames, nestConvention=conv, nestPurpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a nested Attribute package on a State Test"

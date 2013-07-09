@@ -90,6 +90,7 @@ module user_coupler
     integer, intent(out) :: rc
 
     ! Local variables
+	type(ESMF_Attribute)        :: attpack
     type(ESMF_VM)          :: vm
     character(ESMF_MAXSTR) :: convCIM, purpComp, purpProp, purpPlatform
     character(ESMF_MAXSTR) :: convISO, purpRP, purpCitation
@@ -147,7 +148,7 @@ module user_coupler
     ! Specify the top-level Coupler Component to have 3 Responsible Party
     !   sub-packages and 2 Citation sub-packages
     nameCount = 0
-    call ESMF_AttributeAdd(comp, convention=convCIM, &
+    attpack = ESMF_AttributeAdd(comp, convention=convCIM, &
       purpose=purpComp, nestConvention=nestConv, nestPurpose=nestPurp, &
       nestAttPackInstanceCountList=(/3,2/), &
       nestAttPackInstanceNameList=nestAttPackName, &
@@ -159,7 +160,7 @@ module user_coupler
     compPropAtt(1) = 'SimulationType'
     compPropAtt(2) = 'SimulationURL'
     compPropAtt(3) = 'Visualization'
-    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpProp, &
+    attpack = ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpProp, &
       attrList=compPropAtt, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 

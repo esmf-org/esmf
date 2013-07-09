@@ -46,6 +46,8 @@ program ESMF_AttributeGridUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
+      type(ESMF_Attribute)   :: attpack
+      
       type(ESMF_Grid)       :: grid
       character(ESMF_MAXSTR) :: conv, purp, attrname, &
                                 attrnameOut, attrvalue
@@ -1132,7 +1134,7 @@ program ESMF_AttributeGridUTest
       
       !EX_UTest
       ! Create a custom Attribute package on a Grid Test
-      call ESMF_AttributeAdd(grid, convention=conv, &
+      attpack = ESMF_AttributeAdd(grid, convention=conv, &
         purpose=purp, attrList=attpackList, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attribute package on a Grid Test"
@@ -1227,7 +1229,7 @@ program ESMF_AttributeGridUTest
       
       !NEX_UTest
       ! Create an Attribute package on a Grid Test
-      call ESMF_AttributeAdd(grid, convention=conv, purpose=purp, rc=rc)
+      attpack = ESMF_AttributeAdd(grid, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a standard Attribute package on a Grid Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1255,7 +1257,7 @@ program ESMF_AttributeGridUTest
     
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on a Grid Test
-      call ESMF_AttributeAdd(grid, convention=nestconv, purpose=nestpurp, &
+      attpack = ESMF_AttributeAdd(grid, convention=nestconv, purpose=nestpurp, &
         attrList=attpackListTNames, nestConvention=conv, nestPurpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a nested Attribute package on a Grid Test"

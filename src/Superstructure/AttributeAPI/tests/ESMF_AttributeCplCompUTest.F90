@@ -46,6 +46,8 @@ program ESMF_AttributeCplCompUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
+      type(ESMF_Attribute)   :: attpack
+      
       type(ESMF_CplComp)     :: cplcomp, cfc, cplcompValue, cplcompHybrid
       type(ESMF_GridComp)    :: gfc
       type(ESMF_State)       :: sfc
@@ -1150,7 +1152,7 @@ program ESMF_AttributeCplCompUTest
       
       !EX_UTest
       ! Create a custom Attribute package on a CplComp Test
-      call ESMF_AttributeAdd(cplcomp, convention=conv, &
+      attpack = ESMF_AttributeAdd(cplcomp, convention=conv, &
         purpose=purp, attrList=attpackList, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attribute package on a CplComp Test"
@@ -1177,15 +1179,6 @@ program ESMF_AttributeCplCompUTest
         valueList=attpackList, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a char list Attribute in an Attribute package on a CplComp Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! return a Handle on a CplComp Test
-	  handle = ESMF_HandleGet(cplcomp, attrname, &
-                              convention=conv, purpose=purp, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "return a Handle on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -1240,7 +1233,7 @@ program ESMF_AttributeCplCompUTest
       
       !NEX_UTest
       ! Create an Attribute package on a CplComp Test
-      call ESMF_AttributeAdd(cplcomp, convention=conv, purpose=purp, rc=rc)
+      attpack = ESMF_AttributeAdd(cplcomp, convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a standard Attribute package on a CplComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1295,7 +1288,7 @@ program ESMF_AttributeCplCompUTest
 
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on a CplComp Test
-      call ESMF_AttributeAdd(cplcomp, convention=nestconv, purpose=nestpurp, &
+      attpack = ESMF_AttributeAdd(cplcomp, convention=nestconv, purpose=nestpurp, &
         attrList=attpackListTNames, nestConvention=conv, nestPurpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a nested Attribute package on a CplComp Test"

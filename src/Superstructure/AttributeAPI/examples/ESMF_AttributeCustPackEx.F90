@@ -40,6 +40,7 @@ program ESMF_AttributeCustPackEx
 
       ! Local variables  
       integer                 :: rc, finalrc, petCount, localPet, result
+      type(ESMF_Attribute)    :: attpack
       type(ESMF_VM)           :: vm
       type(ESMF_GridComp)     :: gridcomp
       character(ESMF_MAXSTR)  :: customConv, customPurp
@@ -103,7 +104,7 @@ program ESMF_AttributeCustPackEx
       customAttrList(2) = 'CustomAttrName2'
       customAttrList(3) = 'CustomAttrName3'
 
-      call ESMF_AttributeAdd(gridcomp, convention=customConv, &
+      attpack = ESMF_AttributeAdd(gridcomp, convention=customConv, &
         purpose=customPurp, attrList=customAttrList, rc=rc)
 
 !EOC

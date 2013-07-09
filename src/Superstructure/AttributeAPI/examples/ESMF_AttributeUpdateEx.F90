@@ -66,6 +66,7 @@ implicit none
 
 
       integer                 :: rc, urc, finalrc, petCount, localPet, result
+	  type(ESMF_Attribute)    :: attpack
       type(ESMF_VM)           :: vm
       type(ESMF_State)        :: c1exp, c2imp
       type(ESMF_GridComp)     :: gridcomp1
@@ -182,7 +183,7 @@ implicit none
 !BOC
       convESMF = 'ESMF'
       purpGen = 'General'
-    call ESMF_AttributeAdd(gridcomp1, convention=convESMF, purpose=purpGen, &
+      attpack = ESMF_AttributeAdd(gridcomp1, convention=convESMF, purpose=purpGen, &
       rc=rc)
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

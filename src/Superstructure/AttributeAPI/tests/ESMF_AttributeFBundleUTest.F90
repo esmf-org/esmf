@@ -46,6 +46,8 @@ program ESMF_AttributeFBundleUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
+      type(ESMF_Attribute)   :: attpack
+      
       type(ESMF_FieldBundle)       :: fieldbundle
       type(ESMF_Field)       :: ffb
       character(ESMF_MAXSTR) :: attrname, &
@@ -133,6 +135,8 @@ program ESMF_AttributeFBundleUTest
       
       if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+
+	  call ESMF_LogSet(flush=.true.)
 !-------------------------------------------------------------------------
 !  FIELDBUNDLE
 !-------------------------------------------------------------------------
@@ -1139,7 +1143,7 @@ program ESMF_AttributeFBundleUTest
       
       !EX_UTest
       ! Create a custom Attribute package on a FieldBundle Test
-      call ESMF_AttributeAdd(fieldbundle, convention=conv, &
+      attpack = ESMF_AttributeAdd(fieldbundle, convention=conv, &
         purpose=purp, attrList=attpackList, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attribute package on a FieldBundle Test"
@@ -1239,7 +1243,7 @@ program ESMF_AttributeFBundleUTest
     
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on a FieldBundle Test
-      call ESMF_AttributeAdd(fieldbundle, convention=conv, purpose=purp, &
+      attpack = ESMF_AttributeAdd(fieldbundle, convention=conv, purpose=purp, &
         attrList=attpackListTNames, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a standard Attribute package on a FieldBundle Test"
@@ -1376,9 +1380,10 @@ program ESMF_AttributeFBundleUTest
       attpackDfltList2(2) = "Custom5"
       attpackDfltList2(3) = "Custom6"
       attrname = "Character_namelist2"
+
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on a FieldBundle Test
-      call ESMF_AttributeAdd(fieldbundle, convention=nestconv, purpose=nestpurp, &
+      attpack = ESMF_AttributeAdd(fieldbundle, convention=nestconv, purpose=nestpurp, &
         attrList=attpackListTNames2, nestConvention=conv, nestPurpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a nested Attribute package on a FieldBundle Test"

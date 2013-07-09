@@ -184,6 +184,7 @@ module ESMF_AttributeUpdate2UTestMod
     integer, intent(out) :: rc
 
     ! Local variables
+	type(ESMF_Attribute) :: attpack
     integer                     :: nameCount
     character(ESMF_MAXSTR)      :: convCIM, purpComp
     character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
@@ -210,7 +211,7 @@ module ESMF_AttributeUpdate2UTestMod
     nestPurp(2) = purpCitation
 
     nameCount = 0
-    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, &
+    attpack = ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, &
       nestConvention=nestConv, nestPurpose=nestPurp, &
       nestAttPackInstanceCountList=(/2,1/), &
       nestAttPackInstanceNameList=nestAttPackName, &
@@ -309,7 +310,8 @@ module ESMF_AttributeUpdate2UTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
-    character(ESMF_MAXSTR)      :: convCIM, purpComp, convISO, purpRP, purpExt
+	type(ESMF_Attribute) :: attpack
+    character(ESMF_MAXSTR) :: convCIM, purpComp, convISO, purpRP, purpExt
     character(ESMF_MAXSTR),dimension(2) :: attrList, valueList, attPackInstNames
     integer attPackInstCount
 
@@ -335,7 +337,7 @@ module ESMF_AttributeUpdate2UTestMod
       attPackInstanceName=attPackInstNames(2), rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
-    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpExt, &
+    attpack = ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpExt, &
       attrList=attrList, nestConvention=convCIM, nestPurpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(comp, attrList(1), valueList(1), &

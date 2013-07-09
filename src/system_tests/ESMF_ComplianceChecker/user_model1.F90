@@ -115,6 +115,7 @@ module user_model1
 
     ! Local variables
     integer               :: localPet
+	type(ESMF_Attribute)  :: attpack
     type(ESMF_DistGrid)   :: distgrid
     type(ESMF_Array)      :: array
     type(ESMF_Field)      :: field
@@ -145,7 +146,7 @@ module user_model1
     call ESMF_StateAdd(importState, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    call ESMF_AttributeAdd(field, convention="ESG", &
+    attpack = ESMF_AttributeAdd(field, convention="ESG", &
       purpose="General", rc=rc)
     
     call ESMF_AttributeSet(field, name="LongName", &

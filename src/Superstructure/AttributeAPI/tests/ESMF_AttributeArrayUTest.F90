@@ -46,6 +46,8 @@ program ESMF_AttributeArrayUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
+      type(ESMF_Attribute)   :: attpack
+      
       type(ESMF_Array)       :: array
       type(ESMF_ArraySpec)   :: arrayspec
       type(ESMF_DistGrid)    :: distgrid
@@ -1138,7 +1140,7 @@ program ESMF_AttributeArrayUTest
       
       !EX_UTest
       ! Create a custom Attribute package on an Array Test
-      call ESMF_AttributeAdd(array, attrList=attpackList, convention=conv, &
+      attpack = ESMF_AttributeAdd(array, attrList=attpackList, convention=conv, &
         purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attribute package on an Array Test"
@@ -1238,7 +1240,7 @@ program ESMF_AttributeArrayUTest
     
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on an Array Test
-      call ESMF_AttributeAdd(array, attrList=attpackListTNames, convention=conv, &
+      attpack = ESMF_AttributeAdd(array, attrList=attpackListTNames, convention=conv, &
         purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a standard Attribute package on an Array Test"
@@ -1402,7 +1404,7 @@ program ESMF_AttributeArrayUTest
       attrname = "Character_namelist2"
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on an Array Test
-      call ESMF_AttributeAdd(array, convention=nestconv, purpose=nestpurp, &
+      attpack = ESMF_AttributeAdd(array, convention=nestconv, purpose=nestpurp, &
         attrList=attpackListTNames2, nestConvention=conv, nestPurpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a nested Attribute package on an Array Test"

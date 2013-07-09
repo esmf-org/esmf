@@ -95,6 +95,7 @@ module user_model1
     integer, intent(out) :: rc
 
     ! Local variables
+	type(ESMF_Attribute)        :: attpack
     type(ESMF_VM)               :: vm
     integer                     :: petCount, localPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,name5, &
@@ -142,7 +143,7 @@ module user_model1
       
     DPEDT = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-    call ESMF_AttributeAdd(DPEDT, convention=conv, purpose=purp, rc=rc)
+    attpack = ESMF_AttributeAdd(DPEDT, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(DPEDT, name1, value1, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(DPEDT, name2, value2, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(DPEDT, name3, value3, convention=conv, purpose=purp, rc=rc)
@@ -157,7 +158,7 @@ module user_model1
 
     DTDT = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-    call ESMF_AttributeAdd(DTDT, convention=conv, purpose=purp, rc=rc)
+    attpack = ESMF_AttributeAdd(DTDT, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(DTDT, name1, value1, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(DTDT, name2, value2, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(DTDT, name3, value3, convention=conv, purpose=purp, rc=rc)
@@ -172,7 +173,7 @@ module user_model1
       
     DUDT = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-    call ESMF_AttributeAdd(DUDT, convention=conv, purpose=purp, rc=rc)
+    attpack = ESMF_AttributeAdd(DUDT, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(DUDT, name1, value1, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(DUDT, name2, value2, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(DUDT, name3, value3, convention=conv, purpose=purp, rc=rc)
@@ -187,7 +188,7 @@ module user_model1
       
     DVDT = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-    call ESMF_AttributeAdd(DVDT, convention=conv, purpose=purp, rc=rc)
+    attpack = ESMF_AttributeAdd(DVDT, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(DVDT, name1, value1, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(DVDT, name2, value2, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(DVDT, name3, value3, convention=conv, purpose=purp, rc=rc)
@@ -202,7 +203,7 @@ module user_model1
       
     PHIS = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-    call ESMF_AttributeAdd(PHIS, convention=conv, purpose=purp, rc=rc)
+    attpack = ESMF_AttributeAdd(PHIS, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(PHIS, name1, value1, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(PHIS, name2, value2, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(PHIS, name3, value3, convention=conv, purpose=purp, rc=rc)
@@ -217,7 +218,7 @@ module user_model1
       
     QTR = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-    call ESMF_AttributeAdd(QTR, convention=conv, purpose=purp, rc=rc)
+    attpack = ESMF_AttributeAdd(QTR, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(QTR, name1, value1, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(QTR, name2, value2, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(QTR, name3, value3, convention=conv, purpose=purp, rc=rc)
@@ -232,7 +233,7 @@ module user_model1
       
     CNV = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-    call ESMF_AttributeAdd(CNV, convention=conv, purpose=purp, rc=rc)
+    attpack = ESMF_AttributeAdd(CNV, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(CNV, name1, value1, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(CNV, name2, value2, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(CNV, name3, value3, convention=conv, purpose=purp, rc=rc)
@@ -247,7 +248,7 @@ module user_model1
       
     CONVCPT = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-    call ESMF_AttributeAdd(CONVCPT, convention=conv, purpose=purp, rc=rc)
+    attpack = ESMF_AttributeAdd(CONVCPT, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(CONVCPT, name1, value1, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(CONVCPT, name2, value2, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(CONVCPT, name3, value3, convention=conv, purpose=purp, rc=rc)
@@ -262,7 +263,7 @@ module user_model1
       
     CONVKE = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-    call ESMF_AttributeAdd(CONVKE, convention=conv, purpose=purp, rc=rc)
+    attpack = ESMF_AttributeAdd(CONVKE, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(CONVKE, name1, value1, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(CONVKE, name2, value2, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(CONVKE, name3, value3, convention=conv, purpose=purp, rc=rc)
@@ -277,7 +278,7 @@ module user_model1
       
     CONVPHI = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
-    call ESMF_AttributeAdd(CONVPHI, convention=conv, purpose=purp, rc=rc)
+    attpack = ESMF_AttributeAdd(CONVPHI, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(CONVPHI, name1, value1, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(CONVPHI, name2, value2, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(CONVPHI, name3, value3, convention=conv, purpose=purp, rc=rc)
@@ -285,7 +286,7 @@ module user_model1
     if (rc .ne. ESMF_SUCCESS) return
 
     ! Create the Grid Attribute Package
-    call ESMF_AttributeAdd(grid,convention=conv, purpose=purp, rc=rc)
+    attpack = ESMF_AttributeAdd(grid,convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(grid,'RegDecompX',96,convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(grid,'RegDecompY',84,convention=conv, purpose=purp, rc=rc)
 
@@ -316,7 +317,7 @@ module user_model1
     if (rc .ne. ESMF_SUCCESS) return
     
     ! Add the Attribute package to comp
-    call ESMF_AttributeAdd(comp, convention=conv, purpose=purp, rc=rc)
+    attpack = ESMF_AttributeAdd(comp, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(comp, 'Agency', 'NASA', &
       convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(comp, 'Author', 'Max Suarez', &
@@ -364,6 +365,7 @@ module user_model1
     integer, intent(out) :: rc
 
     ! Local variables
+	type(ESMF_Attribute)        :: attpack
     type(ESMF_VM)               :: vm
     integer                     :: petCount, myPet, k
     character(ESMF_MAXSTR)      :: name2,value2,conv,purp,purp2,name3
@@ -415,7 +417,7 @@ module user_model1
         call ESMF_AttributeSet(field, name2, value2, convention=conv, purpose=purp, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 #if 1
-        call ESMF_AttributeAdd(field, convention=conv, purpose=purp2, attrList=attrList, &
+        attpack = ESMF_AttributeAdd(field, convention=conv, purpose=purp2, attrList=attrList, &
           count=2, nestConvention=conv, nestPurpose=purp, rc=rc)
         call ESMF_AttributeSet(field, name='Coordinates', value='Latlon', &
           convention=conv, purpose=purp2, rc=rc)
