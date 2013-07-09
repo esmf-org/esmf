@@ -73,6 +73,8 @@ static void compute_weight_sums( int, int *, int, double *,
             double *, double *, MPI_Comm, int, int, int, int);
 #endif /* RB_MAX_WGTS > 1 */
 
+void Zoltan_bisector_merge(void *in, void *inout, int *len, MPI_Datatype *dptr);
+
 /*****************************************************************************/
 /***  Main routine:  Zoltan_RB_find_bisector()                             ***/
 /***                                                                       ***/
