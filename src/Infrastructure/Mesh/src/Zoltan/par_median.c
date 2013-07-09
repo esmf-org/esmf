@@ -38,6 +38,8 @@ struct median {          /* median cut info */
   int       proclo, prochi;     /* unique proc who owns a nearest dot */
 };
 
+/* Forward references */
+void Zoltan_RB_median_merge(void *in, void *inout, int *len, MPI_Datatype *dptr);
 
 /************ R O U T I N E S   I N   T H I S   F I L E  **********************
 
