@@ -626,10 +626,11 @@ ESMF_ARCREATEPREFIX         =
 ESMF_AREXTRACTDEFAULT       = $(ESMF_ARDEFAULT) -x
 ESMF_RANLIBDEFAULT          = ranlib
 ESMF_SEDDEFAULT             = sed
-ESMF_CPPDEFAULT             = cpp
-ifeq ($(ESMF_OS),Darwin)
-ESMF_CPPDEFAULT		    = gcc -E -x c
-endif
+# The gcc preprocessor is used for partially preprocessing .cppF90 files.
+# The -E option stops the gcc overcompiler after preprocessing, the -P
+# option prevents putting #line directives in the output, and -x c states
+# to use C-style preprocessing regardless of file name suffix.
+ESMF_CPPDEFAULT             = gcc -E -P -x c
 
 ESMF_RM                     = rm -rf
 ESMF_MV                     = mv -f
@@ -3171,10 +3172,8 @@ $(ESMF_LOCOBJDIR)/%.o : %.cpp
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_ARCREATEPREFIX)$(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
-# The rules below generate a valid Fortran file using gcc as a preprocessor:
-# The -P option prevents putting #line directives in the output, and
-# -E stops after preprocessing.
-# The 'tr' command substitutes one-for-one, translating:
+# The rules below generate a valid Fortran file using gcc for the first stage
+# of preprocessing.  The 'tr' command substitutes one-for-one, translating:
 #   @ into newline to separate lines in multiline macros (the output
 #     of the preprocessor is a single line which must be separated again)
 #   ^ into # so that other preprocessor commands are ready to be processed by
@@ -3191,7 +3190,7 @@ $(ESMF_LOCOBJDIR)/%.o : %.cpp
 
 ifeq ($(origin ESMF_CPPRULES),undefined)
 .cppF90.F90:
-	$(ESMF_CPP) -P -I$(ESMF_INCDIR) $< | tr "@^|" "\n#'" | $(ESMF_SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@)
+	$(ESMF_CPP) -I$(ESMF_INCDIR) $< | tr "@^|" "\n#'" | $(ESMF_SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@)
 endif
 
 
