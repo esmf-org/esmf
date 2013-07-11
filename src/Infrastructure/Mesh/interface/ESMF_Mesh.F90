@@ -1394,7 +1394,8 @@ end function ESMF_MeshCreateFromMeshes
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromFile(filename, fileTypeFlag, convert3D, &
-                 convertToDual, addUserArea, meshname, addMask, varname, rc)
+                 convertToDual, addUserArea, meshname, addMask, varname, &
+		 elementDistGrid, nodalDistGrid, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1408,6 +1409,8 @@ end function ESMF_MeshCreateFromMeshes
     character(len=*),           intent(in),  optional :: meshname
     logical,                    intent(in),  optional :: addMask
     character(len=*),           intent(in),  optional :: varname
+    type(ESMF_DistGrid),        intent(in),  optional :: elementDistgrid
+    type(ESMF_DistGrid),        intent(in),  optional :: nodalDistgrid
     integer,                    intent(out), optional :: rc
 ! 
 ! !DESCRIPTION:
@@ -1447,6 +1450,12 @@ end function ESMF_MeshCreateFromMeshes
 !         the longitude and the latitude dimension and the mask is derived from the
 !         first 2D values of this variable even if this data is 3D, or 4D array. If not 
 !         specified, defaults to empty string.
+!   \item [{[nodalDistgrid]}]
+!         A 1D arbitrary distgrid describing the user-specified distribution of 
+!         the nodes across the PETs. 
+!   \item [{[elementDistgrid]}]
+!         A 1D arbitrary distgrid describing the user-specified distribution of 
+!         the elements across the PETs. 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1456,6 +1465,7 @@ end function ESMF_MeshCreateFromMeshes
     logical::  localConvert3D      ! local flag
     logical::  localConvertToDual      ! local flag
     logical::  localAddUserArea  
+    type(ESMF_Mesh) :: myMesh
     integer::  localrc
 
     ! Set Defaults
@@ -1489,23 +1499,23 @@ end function ESMF_MeshCreateFromMeshes
     endif
 
     if (filetypeflag == ESMF_FILEFORMAT_SCRIP) then
-	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromScrip(filename, localConvert3D, &
+	myMesh = ESMF_MeshCreateFromScrip(filename, localConvert3D, &
           localConvertToDual, addUserArea=localAddUserArea, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (filetypeflag == ESMF_FILEFORMAT_ESMFMESH) then
-	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromUnstruct(filename, &
+	myMesh = ESMF_MeshCreateFromUnstruct(filename, &
 	   localConvert3D, addUserArea=localAddUserArea, &
 	   filetype=filetypeflag, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (filetypeflag == ESMF_FILEFORMAT_UGRID) then
 	if (present(addMask)) then
-           ESMF_MeshCreateFromFile = ESMF_MeshCreateFromUnstruct(filename, &
+           myMesh = ESMF_MeshCreateFromUnstruct(filename, &
 	     localConvert3D, filetype=filetypeflag, meshname = meshname, &
 	     addMask=addMask, varname=varname, rc=localrc)
 	else
-           ESMF_MeshCreateFromFile = ESMF_MeshCreateFromUnstruct(filename, &
+           myMesh = ESMF_MeshCreateFromUnstruct(filename, &
 	     localConvert3D, filetype=filetypeflag, meshname = meshname, rc=localrc)
 	endif 
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1517,8 +1527,36 @@ end function ESMF_MeshCreateFromMeshes
        return
     endif
 
+    if (present(elementDistGrid) .and. present(nodalDistGrid)) then
+        ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
+       			       nodalDistgrid=nodalDistGrid, &
+       			       elementDistgrid=elementDistGrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+	call ESMF_MeshDestroy(myMesh)
+    elseif (present(elementDistGrid)) then
+        ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
+       			       elementDistgrid=elementDistGrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+	call ESMF_MeshDestroy(myMesh)
+    elseif (present(nodalDistGrid)) then
+        ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
+       			       nodalDistgrid=nodalDistGrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+	call ESMF_MeshDestroy(myMesh)
+    else
+       ESMF_MeshCreateFromFile = myMesh			       
+    endif
+
     if (present(rc)) rc=ESMF_SUCCESS
     return
+
 end function ESMF_MeshCreateFromFile
 !------------------------------------------------------------------------------
 
@@ -2444,7 +2482,6 @@ end function ESMF_MeshCreateFromScrip
     integer :: numNodeIds, numElemIds
     integer, allocatable :: nodeIds(:), elemIds(:)
 
-
     ! Init localrc
     localrc = ESMF_SUCCESS
 
@@ -2452,7 +2489,6 @@ end function ESMF_MeshCreateFromScrip
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, nodalDistgrid, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, elementDistgrid, rc)
-
 
     ! If mesh has not been fully created
     if (.not. mesh%isFullyCreated) then
@@ -2594,7 +2630,6 @@ end function ESMF_MeshCreateFromScrip
                seqIndexList=elemIds, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-
 
           ! Call into C
           call C_ESMC_MeshCreateRedistElems(mesh,                  &
