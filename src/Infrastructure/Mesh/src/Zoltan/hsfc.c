@@ -44,6 +44,10 @@ static PARAM_VARS HSFC_params[] =
 
 /****************************************************************************/
 
+/* Forward references */
+void  Zoltan_HSFC_mpi_sum_max_min (void *in, void *inout, int *len,
+ MPI_Datatype *datatype);
+
 /* Zoltan_HSFC - Main routine, Load Balance: Hilbert Space Filling Curve */
 int Zoltan_HSFC(
  ZZ             *zz,

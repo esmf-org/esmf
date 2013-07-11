@@ -78,6 +78,8 @@ static int serial_rcb(ZZ *, struct Dot_Struct *, int *, int *, int, int,
 static void compute_RCB_box(struct rcb_box *, int, struct Dot_Struct *, int *,
   MPI_Op, MPI_Datatype, MPI_Comm, int, int, int, int);
 
+void Zoltan_RCB_box_merge(void *in, void *inout, int *len, MPI_Datatype *dptr);
+
 /*****************************************************************************/
 /*  Parameters structure for RCB method.  Used in  */
 /*  Zoltan_RCB_Set_Param and Zoltan_RCB.                   */

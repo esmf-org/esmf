@@ -2269,8 +2269,9 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-    forall (i=1:nitems)  &
+    do, i=1, nitems
       pet_needs(i)%needed = any (needs_list(i,:))
+    end do
     if (debug) then
       print *, '    PET', mypet,  &
           ': needed_items array: ', pet_needs%needed
