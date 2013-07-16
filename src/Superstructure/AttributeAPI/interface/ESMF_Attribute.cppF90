@@ -3139,17 +3139,14 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGet##mtypekind(mthis, name, value, & @\
-        defaultvalue, inputList, convention, purpose, & @\
-        attPackInstanceName, isPresent, rc) @\
+        defaultvalue, inputList, attpack, isPresent, rc) @\
  @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), intent(out) :: value @\
       mtype(ESMF_KIND_##mtypekind), intent(in), optional :: defaultvalue @\
       character (len=*), intent(in), optional :: inputList(:) @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
-      character (len = *), intent(in), optional :: attPackInstanceName @\
+	  type(ESMF_Attribute), intent(in), optional :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -3169,15 +3166,8 @@ contains
 !           The real default value of the named Attribute. @\
 !     \item [{[inputList]}] @\
 !           A list of the input parameters required to retrieve internal info. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -3189,7 +3179,7 @@ contains
 @\
       integer :: localrc, i @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_Logical) :: lisPresent @\
       integer :: count @\
       !! TODO: this needs to be dynamically sized !!! @\
       character (len=ESMF_MAXSTR) :: modName @\
@@ -3197,7 +3187,6 @@ contains
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -3223,27 +3212,15 @@ contains
  @\
       count = 1 @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          if (present(rc)) rc = ESMF_SUCCESS @\
-          return @\
-        endif @\
-        isAttpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+      if (present(attpack)) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        							 lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_##mtypekind, count, value, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_##mtypekind, count, & @\
+            value, localrc) @\
         endif @\
       else @\
        @\
@@ -3290,7 +3267,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGet1D##mtypekind(mthis, name, valueList, & @\
-        defaultvalueList, inputList, convention, purpose, attPackInstanceName, & @\
+        defaultvalueList, inputList, attpack, & @\
         itemCount, isPresent, rc) @\
  @\
       type(mclass), intent(in) :: mthis   @\
@@ -3298,9 +3275,7 @@ contains
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(out) :: valueList @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in), optional :: defaultvalueList @\
       character (len=*), intent(in), optional :: inputList(:) @\
-      character (len=*), intent(in), optional :: convention @\
-      character (len=*), intent(in), optional :: purpose @\
-      character (len=*), intent(in), optional :: attPackInstanceName @\
+ 	  type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(out), optional :: itemCount    @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
@@ -3321,15 +3296,8 @@ contains
 !           The list of real default values of the named Attribute. @\
 !     \item [{[inputList]}] @\
 !           A list of the input parameters required to retrieve internal info. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  (Not implemented yet) @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -3341,7 +3309,7 @@ contains
  @\
       integer :: localrc, litemCount, i @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_Logical) :: lisPresent @\
       type(ESMF_TypeKind_Flag) :: localTk @\
       !! TODO: this needs to be dynamically sized !!! @\
       character (len=ESMF_MAXSTR) :: modName @\
@@ -3349,7 +3317,6 @@ contains
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -3375,26 +3342,15 @@ contains
  @\
       litemcount = size(valueList) @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        isAttpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+      if (present(attpack)) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          							 lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-        call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-          ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-          convention, purpose, fobject, attPackInstanceName, localrc) @\
+        call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+          ESMF_TYPEKIND_##mtypekind, litemCount, & @\
+          valueList, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -3469,16 +3425,14 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetLgcl(mthis, name, value, defaultvalue, & @\
-        convention, purpose, attPackInstanceName, isPresent, rc) @\
+        attpack, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
       logical, intent(out) :: value @\
       logical, intent(in), optional :: defaultvalue @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
-      character (len = *), intent(in), optional :: attPackInstanceName @\
+	  type(ESMF_Attribute), intent(in), optional :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -3496,15 +3450,8 @@ contains
 !           The logical value of the named Attribute. @\
 !     \item [{[defaultvalue]}] @\
 !           The logical default value of the named Attribute. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  (Not implemented yet) @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -3516,13 +3463,12 @@ contains
  @\
       integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack, localvalue @\
+      type(ESMF_Logical) :: lisPresent, localvalue @\
       integer :: count @\
 @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
  @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
@@ -3531,26 +3477,15 @@ contains
  @\
       count = 1 @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        isAttpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+      if (present(attpack)) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          							 lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_LOGICAL, count, localvalue, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_LOGICAL, count, & @\
+            localvalue, localrc) @\
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rcToReturn=rc)) return @\
           value = localvalue   @\
@@ -3597,8 +3532,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetLgclList(mthis, name, valueList, & @\
-        defaultvalueList, inputList, convention, purpose, & @\
-        attPackInstanceName, itemCount, isPresent, rc) @\
+        defaultvalueList, inputList, attpack, itemCount, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
@@ -3606,10 +3540,8 @@ contains
       logical, dimension(:), intent(out) :: valueList @\
       logical, dimension(:), intent(in), optional :: defaultvalueList @\
       character (len=*), intent(in), optional :: inputList(:) @\
-      character (len=*), intent(in), optional :: convention @\
-      character (len=*), intent(in), optional :: purpose @\
-      character (len=*), intent(in), optional :: attPackInstanceName @\
-      integer, intent(out), optional :: itemCount    @\
+	  type(ESMF_Attribute), intent(in), optional :: attpack @\
+      integer, intent(out), optional :: itemCount @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
  @\
@@ -3629,15 +3561,8 @@ contains
 !           The logical default value of the named Attribute. @\
 !     \item [{[inputList]}] @\
 !           A list of the input parameters required to retrieve internal info. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  (Not implemented yet) @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[itemCount]}] @\
 !           The number of values in the Attribute. @\
 !     \item [{[isPresent]}] @\
@@ -3651,7 +3576,7 @@ contains
  @\
       integer :: localrc, litemCount, i @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_Logical) :: lisPresent @\
       type(ESMF_TypeKind_Flag) :: localTk @\
       !! TODO: this needs to be dynamically sized !!! @\
       character (len=ESMF_MAXSTR) :: modName @\
@@ -3659,7 +3584,6 @@ contains
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -3685,26 +3609,15 @@ contains
  @\
       litemCount = size(valueList) @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        isAttpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+      if (present(attpack)) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          							 lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_LOGICAL, litemCount, & @\
+            valueList, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -3778,16 +3691,14 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetChar(mthis, name, value, defaultvalue, & @\
-        convention, purpose, attPackInstanceName, isPresent, rc) @\
+        attpack, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
       character (len = *), intent(out) :: value @\
       character (len = *), intent(in), optional :: defaultvalue @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
-      character (len = *), intent(in), optional :: attPackInstanceName @\
+ 	  type(ESMF_Attribute), intent(in), optional :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
  @\
@@ -3805,15 +3716,8 @@ contains
 !           The character value of the named Attribute. @\
 !     \item [{[defaultvalue]}] @\
 !           The character default value of the named Attribute. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance. @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -3825,7 +3729,7 @@ contains
  @\
       integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_Logical) :: lisPresent @\
       integer, dimension(1) :: lens @\
       integer :: count @\
       !! TODO: this needs to be dynamically sized !!! @\
@@ -3834,7 +3738,6 @@ contains
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -3860,35 +3763,24 @@ contains
  @\
       lens(1) = len(value) @\
       count = 1 @\
-@\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        isAttpack = ESMF_TRUE @\
-      endif @\
  @\
-      if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+      if (present(attpack)) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          							 lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetCharList(mthisfield, name, & @\
-            ESMF_TYPEKIND_CHARACTER, count, lens, value, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_CHARACTER, count, lens, & @\
+            value, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttributeGetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-            count, lens, value, localrc) @\
+          call c_ESMC_AttributeGetCharList(mthisfield, attpack, name, & @\
+          	ESMF_TYPEKIND_CHARACTER, count, lens, value, localrc) @\
         endif @\
       endif @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
@@ -3922,7 +3814,7 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetCharList(mthis, name, valueList, & @\
-        defaultvalueList, convention, purpose, attPackInstanceName, & @\
+        defaultvalueList, attpack, & @\
         itemCount, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
@@ -3930,9 +3822,7 @@ contains
       character (len = *), intent(in) :: name @\
       character (len=*), dimension(:), intent(out) :: valueList @\
       character (len=*), dimension(:), intent(in), optional :: defaultvalueList @\
-      character (len=*), intent(in), optional :: convention @\
-      character (len=*), intent(in), optional :: purpose @\
-      character (len=*), intent(in), optional :: attPackInstanceName @\
+  	  type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(out), optional :: itemCount @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
@@ -3951,15 +3841,8 @@ contains
 !           The character list values of the named Attribute. @\
 !     \item [{[defaultvalueList]}] @\
 !           The character list default value of the named Attribute. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  (Not implemented yet) @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[itemCount]}] @\
 !           The itemCount of the character items to retrieve @\
 !     \item [{[isPresent]}] @\
@@ -3973,7 +3856,7 @@ contains
  @\
       integer :: localrc, i, j, litemCount @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_Logical) :: lisPresent @\
       type(ESMF_TypeKind_Flag) :: localTk @\
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
@@ -3981,7 +3864,6 @@ contains
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
       valueString = "" @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
@@ -3994,26 +3876,14 @@ contains
         lens(i) = len(valueList) @\
       enddo @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        isAttpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+      if (present(attpack)) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        							 lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetCharList(mthisfield, name, & @\
-            ESMF_TYPEKIND_CHARACTER, litemCount, lens, valueString, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_CHARACTER, litemCount, lens, valueString, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -4095,15 +3965,13 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGet##mtypekind(mthis, name, value, & @\
-        defaultvalue, convention, purpose, attPackInstanceName, isPresent, rc) @\
+        defaultvalue, attpack, isPresent, rc) @\
  @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), intent(out) :: value @\
       mtype(ESMF_KIND_##mtypekind), intent(in), optional :: defaultvalue @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
-      character (len = *), intent(in), optional :: attPackInstanceName @\
+	  type(ESMF_Attribute), intent(in), optional :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -4121,15 +3989,8 @@ contains
 !           The real value of the named Attribute. @\
 !     \item [{[defaultvalue]}] @\
 !           The real default value of the named Attribute. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -4141,13 +4002,12 @@ contains
 @\
       integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_Logical) :: lisPresent @\
       integer :: count @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -4155,26 +4015,15 @@ contains
  @\
       count = 1 @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        isAttpack = ESMF_TRUE @\
-      endif @\
  @\
-      if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+      if (present(attpack)) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        							 lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_##mtypekind, count, value, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_##mtypekind, count, value, localrc) @\
         endif @\
       else @\
        @\
@@ -4221,16 +4070,13 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGet1D##mtypekind(mthis, name, valueList, & @\
-        defaultvalueList, convention, purpose, attPackInstanceName, & @\
-        itemCount, isPresent, rc) @\
+        defaultvalueList, attpack, itemCount, isPresent, rc) @\
  @\
       type(mclass), intent(in) :: mthis   @\
       character (len=*), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(out) :: valueList @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in), optional :: defaultvalueList @\
-      character (len=*), intent(in), optional :: convention @\
-      character (len=*), intent(in), optional :: purpose @\
-      character (len=*), intent(in), optional :: attPackInstanceName @\
+	  type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(out), optional :: itemCount    @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
@@ -4249,15 +4095,8 @@ contains
 !           The list of real values of the named Attribute. @\
 !     \item [{[defaultvalueList]}] @\
 !           The list of real default values of the named Attribute. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  (Not implemented yet) @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -4269,13 +4108,12 @@ contains
  @\
       integer :: localrc, litemCount, i @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_Logical) :: lisPresent @\
       type(ESMF_TypeKind_Flag) :: localTk @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -4283,26 +4121,14 @@ contains
  @\
       litemcount = size(valueList) @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        isAttpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+      if (present(attpack)) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        							 lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-        call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-          ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-          convention, purpose, fobject, attPackInstanceName, localrc) @\
+        call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+          ESMF_TYPEKIND_##mtypekind, litemCount, valueList, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -4377,16 +4203,14 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetLgcl(mthis, name, value, defaultvalue, & @\
-        convention, purpose, attPackInstanceName, isPresent, rc) @\
+        attpack, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
       logical, intent(out) :: value @\
       logical, intent(in), optional :: defaultvalue @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
-      character (len = *), intent(in), optional :: attPackInstanceName @\
+	  type(ESMF_Attribute), intent(in), optional :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -4404,15 +4228,8 @@ contains
 !           The logical value of the named Attribute. @\
 !     \item [{[defaultvalue]}] @\
 !           The logical default value of the named Attribute. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  (Not implemented yet) @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -4424,13 +4241,12 @@ contains
  @\
       integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack, localvalue @\
+      type(ESMF_Logical) :: lisPresent, localvalue @\
       integer :: count @\
 @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
  @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
@@ -4439,26 +4255,14 @@ contains
  @\
       count = 1 @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        isAttpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+      if (present(attpack)) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        							 lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_LOGICAL, count, localvalue, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_LOGICAL, count, localvalue, localrc) @\
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rcToReturn=rc)) return @\
           value = localvalue   @\
@@ -4505,17 +4309,14 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetLgclList(mthis, name, valueList, & @\
-        defaultvalueList, convention, purpose, attPackInstanceName, & @\
-        itemCount, isPresent, rc) @\
+        defaultvalueList, attpack, itemCount, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character (len=*), intent(in) :: name @\
       logical, dimension(:), intent(out) :: valueList @\
       logical, dimension(:), intent(in), optional :: defaultvalueList @\
-      character (len=*), intent(in), optional :: convention @\
-      character (len=*), intent(in), optional :: purpose @\
-      character (len=*), intent(in), optional :: attPackInstanceName @\
+ 	  type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(out), optional :: itemCount    @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
@@ -4534,15 +4335,8 @@ contains
 !           The logical values of the named Attribute. @\
 !     \item [{[defaultvalueList]}] @\
 !           The logical default value of the named Attribute. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  (Not implemented yet) @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[itemCount]}] @\
 !           The number of values in the Attribute. @\
 !     \item [{[isPresent]}] @\
@@ -4556,13 +4350,12 @@ contains
  @\
       integer :: localrc, litemCount, i @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_Logical) :: lisPresent @\
       type(ESMF_TypeKind_Flag) :: localTk @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -4570,26 +4363,14 @@ contains
  @\
       litemCount = size(valueList) @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        isAttpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+      if (present(attpack)) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        							 lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -4663,16 +4444,14 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetChar(mthis, name, value, defaultvalue, & @\
-        convention, purpose, attPackInstanceName, isPresent, rc) @\
+        attpack, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
       character (len = *), intent(out) :: value @\
       character (len = *), intent(in), optional :: defaultvalue @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
-      character (len = *), intent(in), optional :: attPackInstanceName @\
+  	  type(ESMF_Attribute), intent(in), optional :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
  @\
@@ -4690,15 +4469,8 @@ contains
 !           The character value of the named Attribute. @\
 !     \item [{[defaultvalue]}] @\
 !           The character default value of the named Attribute. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance. @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -4710,14 +4482,13 @@ contains
  @\
       integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_Logical) :: lisPresent @\
       integer, dimension(1) :: lens @\
       integer :: count @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -4726,26 +4497,14 @@ contains
       lens(1) = len(value) @\
       count = 1 @\
 @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        isAttpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+      if (present(attpack)) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        							 lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetCharList(mthisfield, name, & @\
-            ESMF_TYPEKIND_CHARACTER, count, lens, value, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_CHARACTER, count, lens, value, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -4787,17 +4546,14 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetCharList(mthis, name, valueList, & @\
-        defaultvalueList, convention, purpose, attPackInstanceName, & @\
-        itemCount, isPresent, rc) @\
+        defaultvalueList, attpack, itemCount, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
       character (len=*), dimension(:), intent(out) :: valueList @\
       character (len=*), dimension(:), intent(in), optional :: defaultvalueList @\
-      character (len=*), intent(in), optional :: convention @\
-      character (len=*), intent(in), optional :: purpose @\
-      character (len=*), intent(in), optional :: attPackInstanceName @\
+   	  type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(out), optional :: itemCount @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
@@ -4816,15 +4572,8 @@ contains
 !           The character list values of the named Attribute. @\
 !     \item [{[defaultvalueList]}] @\
 !           The character list default value of the named Attribute. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  (Not implemented yet) @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[itemCount]}] @\
 !           The itemCount of the character items to retrieve @\
 !     \item [{[isPresent]}] @\
@@ -4838,7 +4587,7 @@ contains
  @\
       integer :: localrc, i, j, litemCount @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_Logical) :: lisPresent @\
       type(ESMF_TypeKind_Flag) :: localTk @\
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
@@ -4846,7 +4595,6 @@ contains
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
       valueString = "" @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
@@ -4859,26 +4607,14 @@ contains
         lens(i) = len(valueList) @\
       enddo @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        isAttpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+      if (present(attpack)) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+        							 lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetCharList(mthisfield, name, & @\
-            ESMF_TYPEKIND_CHARACTER, litemCount, lens, valueString, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_CHARACTER, litemCount, lens, valueString, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -5020,16 +4756,13 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGetInfoByNam(mthis, name, keywordEnforcer, & @\
-                             convention, purpose, attPackInstanceName, & @\
-                             typekind, itemCount, isPresent, rc) @\
+                             attpack, typekind, itemCount, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character(len=*), intent(in) :: name @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-      character (len=*), intent(in), optional :: convention @\
-      character (len=*), intent(in), optional :: purpose @\
-      character (len=*), intent(in), optional :: attPackInstanceName @\
+	  type(ESMF_Attribute), intent(in), optional :: attpack @\
       type(ESMF_TypeKind_Flag), intent(out), optional :: typekind @\
       integer, intent(out), optional :: itemCount    @\
       logical, intent(out), optional :: isPresent @\
@@ -5046,15 +4779,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to query. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  (Not implemented yet) @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[typekind]}] @\
 !           The typekind of the Attribute. @\
 !     \item [{[itemCount]}] @\
@@ -5071,38 +4797,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       integer :: localrc              @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_Logical) :: lisPresent @\
       type(ESMF_TypeKind_Flag) :: localTk @\
       integer :: litemCount @\
  @\
       ! Initialize  @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
       localrc = ESMF_RC_NOT_IMPL @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        isAttpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+      if (present(attpack)) then @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          							 lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetInfoName(mthisfield, name, localTk, litemCount, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetInfoName(mthisfield, name, & @\
+          								 localTk, litemCount, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\

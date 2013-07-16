@@ -1319,30 +1319,25 @@ printf("size = %d (%d)\n", size, packList.size());
 // 
 // !ARGUMENTS:
       const string &name,                // in - Attribute name
-      const string &convention,          // in - Attribute convention
-      const string &purpose,             // in - Attribute purpose
-      const string &object,              // in - Attribute object type
-      const string &attPackInstanceName, // in - attPack name
-                                       // specifying which one of multiple packs
+	  const Attribute *attpack,          // in - Attribute package
       ESMC_Logical *present) const {     // in/out - the present flag
 // 
 // !DESCRIPTION:
-//     Query an Attribute package for an {\tt Attribute} given its name, convention, 
-//     purpose, and object type.
+//     Query an Attribute package for an {\tt Attribute} given its name
 //
 //EOPI
 
   unsigned int i;
-  Attribute *attr, *attpack;
+  Attribute *attr;
   
-  attr = NULL; attpack = NULL;
+  attr = NULL;
 
   // get the attpack
-  attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
   if (!attpack) {
     *present = ESMF_FALSE;
     return ESMF_SUCCESS;
   }
+  
   // get the attr on the attpack
   attr = attpack->AttPackGetAttribute(name);
   if (!attr) *present = ESMF_FALSE;
