@@ -412,7 +412,6 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     character(ESMF_MAXSTR)  :: attrList(3)
-	type(ESMF_Attribute) :: attpack
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -422,10 +421,10 @@ module NUOPC_Base
     attrList(3) = "CplList"
     
     ! add Attribute packages
-    attpack = ESMF_AttributeAdd(comp, convention="ESG", purpose="General", rc=rc)
+    call ESMF_AttributeAdd(comp, convention="ESG", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    attpack = ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
       attrList=attrList, nestConvention="ESG", nestPurpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -457,18 +456,21 @@ module NUOPC_Base
 !   the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
+	type(ESMF_Attribute) :: attpack
     if (present(rc)) rc = ESMF_SUCCESS
 
+	call ESMF_AttPackGet(comp, attpack, &
+						 convention="NUOPC", purpose="General", rc=rc)
     if (present(cplList)) then
       call ESMF_AttributeGet(comp, name="CplList", valueList=cplList, &
-        itemCount=cplListSize, convention="NUOPC", purpose="General", rc=rc)
+        itemCount=cplListSize, attpack=attpack, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
     else
       call ESMF_AttributeGet(comp, name="CplList", &
-        itemCount=cplListSize, convention="NUOPC", purpose="General", rc=rc)
+        itemCount=cplListSize, attpack=attpack, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -604,7 +606,6 @@ module NUOPC_Base
     logical                           :: accepted
     integer                           :: i
     type(NUOPC_FieldDictionaryEntry)  :: fdEntry
-    type(ESMF_Attribute)              :: attpack
     
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -616,10 +617,10 @@ module NUOPC_Base
     attrList(5) = "Updated" ! values: "true" or "false"
     
     ! add Attribute packages
-    attpack = ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=rc)
+    call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    attpack = ESMF_AttributeAdd(field, convention="NUOPC", purpose="General",   &
+    call ESMF_AttributeAdd(field, convention="NUOPC", purpose="General",   &
       attrList=attrList, nestConvention="ESG", nestPurpose="General", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -786,14 +787,20 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     character(ESMF_MAXSTR)  :: defaultvalue
+    type(ESMF_Attribute) :: attpack
     
     if (present(rc)) rc = ESMF_SUCCESS
 
     defaultvalue = "CheckThisDefaultValue"
 
+	call ESMF_AttPackGet(field, attpack, &
+						 convention="NUOPC", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
     call ESMF_AttributeGet(field, name=name, value=value, &
-      defaultvalue=defaultvalue, convention="NUOPC", purpose="General", &
-      rc=rc)
+      defaultvalue=defaultvalue, attpack=attpack, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -865,6 +872,7 @@ module NUOPC_Base
     type(ESMF_Field), allocatable :: srcFieldList(:)
     type(ESMF_Field), allocatable :: dstFieldList(:)
     integer                       :: i, valueList(9), srcCount, dstCount
+    type(ESMF_Attribute) :: attpack
     
 !gjtdebug    character(ESMF_MAXSTR)  :: tempString1, tempString2
 !gjtdebug    character(5*ESMF_MAXSTR):: msgString
@@ -903,10 +911,14 @@ module NUOPC_Base
     do i=1, srcCount    
       srcField = srcFieldList(i)
       dstField = dstFieldList(i)
+ 	  call ESMF_AttPackGet(srcField, attpack, &
+ 	  					   convention="NUOPC", purpose="General", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
       call ESMF_AttributeGet(srcField, &
-        name="TimeStamp", valueList=valueList, &
-        convention="NUOPC", purpose="General", &
-        rc=rc)
+        name="TimeStamp", valueList=valueList, attpack=attpack, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -1095,6 +1107,7 @@ module NUOPC_Base
     type(ESMF_Time)         :: fieldTime
     integer                 :: i, valueList(9)
     type(ESMF_CalKind_Flag) :: calkindflag
+    type(ESMF_Attribute)    :: attpack
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1106,10 +1119,14 @@ module NUOPC_Base
       file=FILENAME)) &
       return  ! bail out
 
+	call ESMF_AttPackGet(field, attpack, &
+						 convention="NUOPC", purpose="General", rc=rc)
+	if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
     call ESMF_AttributeGet(field, &
-      name="TimeStamp", valueList=valueList, &
-      convention="NUOPC", purpose="General", &
-      rc=rc)
+      name="TimeStamp", valueList=valueList, attpack=attpack, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -1332,11 +1349,11 @@ module NUOPC_Base
     
     ! add Attribute packages
 if (ESMF_VERSION_MAJOR >= 6) then
-    attpack = ESMF_AttributeAdd(comp, convention="CIM 1.5", &
+    call ESMF_AttributeAdd(comp, convention="CIM 1.5", &
       purpose="ModelComp", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    attpack = ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
       attrList=attrList, nestConvention="CIM 1.5", &
       nestPurpose="ModelComp", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1345,11 +1362,11 @@ else
 ! gjt: keep this branch for now because I have an old sandbox where most of
 ! the ESMF is back in the MAJOR 5 because of I/O issues in MAJOR 6.
 ! TODO: remove this else branch once the I/O issues in MAJOR 6 are fixed.
-    attpack = ESMF_AttributeAdd(comp, convention="CIM", &
+    call ESMF_AttributeAdd(comp, convention="CIM", &
       purpose="Model Component Simulation Description", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
-    attpack = ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
+    call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
       attrList=attrList, nestConvention="CIM", &
       nestPurpose="Model Component Simulation Description", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2075,6 +2092,7 @@ endif
     character(ESMF_MAXSTR)                :: value
     integer                 :: i
     character(ESMF_MAXSTR)  :: iString, msgString
+    type(ESMF_Attribute)    :: attpack
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -2097,8 +2115,12 @@ endif
         write (msgString, *) "Failure in NUOPC_StateIsUpdated() for item "// &
           trim(adjustl(iString))//": "//trim(stdItemNameList(i))
         field=stdFieldList(i)
+		call ESMF_AttPackGet(field, attpack, &
+							 convention="NUOPC", purpose="General", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
         call ESMF_AttributeGet(field, name="Updated", value=value, &
-          convention="NUOPC", purpose="General", rc=rc)
+        					   attpack=attpack, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
         if (present(count) .and. trim(value)=="true") then
@@ -2204,6 +2226,7 @@ endif
     integer                 :: yy, mm, dd, h, m, s, ms, us, ns
     integer                 :: i
     logical                 :: selected
+    type(ESMF_Attribute)    :: attpack
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -2239,10 +2262,14 @@ endif
           return  ! bail out
         if (present(selective)) then
           if (selective) then
+			call ESMF_AttPackGet(field, attpack, &
+								 convention="NUOPC", purpose="General", rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
             call ESMF_AttributeGet(field, &
-              name="Updated", value=value, &
-              convention="NUOPC", purpose="General", &
-              rc=rc)
+              name="Updated", value=value, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, &
               file=FILENAME)) &
@@ -2298,6 +2325,7 @@ endif
     type(ESMF_Field)                      :: field
     integer                 :: i, localPet, valueList(9)
     type(ESMF_VM)           :: vm
+    type(ESMF_Attribute)    :: attpack
     
 !gjtdebug    character(ESMF_MAXSTR)  :: tempString1, msgString
 
@@ -2335,10 +2363,14 @@ endif
           file=FILENAME)) &
           return  ! bail out
           
+		call ESMF_AttPackGet(field, attpack, &
+							 convention="NUOPC", purpose="General", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
         call ESMF_AttributeGet(field, &
-          name="TimeStamp", valueList=valueList, &
-          convention="NUOPC", purpose="General", &
-          rc=rc)
+          name="TimeStamp", valueList=valueList, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
           file=FILENAME)) &

@@ -1275,6 +1275,7 @@ module ESMF_ComplianceICMod
     character(*), intent(in)              :: purpose
     integer,      intent(out), optional   :: rc
     
+    type(ESMF_Attribute)                  :: attpack
     type(ESMF_TypeKind_Flag)              :: typekind
     integer                               :: itemCount, i
     logical                               :: isPresent
@@ -1282,8 +1283,9 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: iStr, vStr
     integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
 
-    call ESMF_AttributeGet(comp, name=attributeName, &
-      convention=convention, purpose=purpose, &
+	call ESMF_AttPackGet(comp, convention=convention, &
+							  purpose=purpose, attpack=attpack, rc=rc)
+    call ESMF_AttributeGet(comp, name=attributeName, attpack=attpack, &
       typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -1312,8 +1314,7 @@ module ESMF_ComplianceICMod
       if (typekind == ESMF_TYPEKIND_CHARACTER) then
         allocate(valueStringList(itemCount))
         call ESMF_AttributeGet(comp, name=attributeName, &
-          valueList=valueStringList, &
-          convention=convention, purpose=purpose, rc=rc)
+          valueList=valueStringList, attpack=attpack, rc=rc)
         if (itemCount == 1) then
           ! single valued
           call ESMF_LogWrite(trim(prefix)//" Component level attribute: <"// &
@@ -1342,8 +1343,7 @@ module ESMF_ComplianceICMod
       else if (typekind == ESMF_TYPEKIND_I4) then
         allocate(valueI4List(itemCount))
         call ESMF_AttributeGet(comp, name=attributeName, &
-          valueList=valueI4List, &
-          convention=convention, purpose=purpose, rc=rc)
+          valueList=valueI4List, attpack=attpack, rc=rc)
         if (itemCount == 1) then
           ! single valued
           write(vStr,*) valueI4List(1)
@@ -1484,6 +1484,7 @@ module ESMF_ComplianceICMod
     character(*), intent(in)              :: purpose
     integer,      intent(out), optional   :: rc
     
+    type(ESMF_Attribute)                  :: attpack
     type(ESMF_TypeKind_Flag)              :: typekind
     integer                               :: itemCount, i
     logical                               :: isPresent
@@ -1491,8 +1492,9 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: iStr, vStr
     integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
 
-    call ESMF_AttributeGet(field, name=attributeName, &
-      convention=convention, purpose=purpose, &
+	call ESMF_AttPackGet(field, convention=convention, &
+							  purpose=purpose, attpack=attpack, rc=rc)
+    call ESMF_AttributeGet(field, name=attributeName, attpack=attpack, &
       typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -1521,8 +1523,7 @@ module ESMF_ComplianceICMod
       if (typekind == ESMF_TYPEKIND_CHARACTER) then
         allocate(valueStringList(itemCount))
         call ESMF_AttributeGet(field, name=attributeName, &
-          valueList=valueStringList, &
-          convention=convention, purpose=purpose, rc=rc)
+          valueList=valueStringList, attpack=attpack, rc=rc)
         if (itemCount == 1) then
           ! single valued
           call ESMF_LogWrite(trim(prefix)//" Field level attribute: <"// &
@@ -1551,8 +1552,7 @@ module ESMF_ComplianceICMod
       else if (typekind == ESMF_TYPEKIND_I4) then
         allocate(valueI4List(itemCount))
         call ESMF_AttributeGet(field, name=attributeName, &
-          valueList=valueI4List, &
-          convention=convention, purpose=purpose, rc=rc)
+          valueList=valueI4List, attpack=attpack, rc=rc)
         if (itemCount == 1) then
           ! single valued
           write(vStr,*) valueI4List(1)

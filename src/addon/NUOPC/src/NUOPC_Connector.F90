@@ -577,6 +577,7 @@ module NUOPC_Connector
     integer                   :: phase
     logical                   :: verbose
     character(ESMF_MAXSTR)    :: name
+    type(ESMF_Attribute)      :: attpack
 
     rc = ESMF_SUCCESS
 
@@ -586,9 +587,15 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
     ! determine verbosity
+    call ESMF_AttPackGet(cplcomp, attpack, &
+    	 				 convention="NUOPC", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     verbose = .false. ! initialize
     call ESMF_AttributeGet(cplcomp, name="Verbosity", value=valueString, &
-      convention="NUOPC", purpose="General", rc=rc)
+      attpack=attpack, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (trim(valueString)=="high") &
       verbose = .true.
     

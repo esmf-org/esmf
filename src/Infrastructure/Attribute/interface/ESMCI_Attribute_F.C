@@ -89,13 +89,13 @@ extern "C" {
 */
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  c_esmc_handleget - get an attpack handle
+// !IROUTINE:  c_esmc_attpackget - get an attpack handle
 //
 // !INTERFACE:
-      void FTN_X(c_esmc_handleget)(
+      void FTN_X(c_esmc_attpackget)(
 //
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_handleget()"
+#define ESMC_METHOD "c_esmc_attpackget()"
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
@@ -206,7 +206,7 @@ extern "C" {
 
   if (rc) *rc = ESMF_SUCCESS;
   
-}  // end c_esmc_handleget
+}  // end c_esmc_attpackget
 
 
 //-----------------------------------------------------------------------------
