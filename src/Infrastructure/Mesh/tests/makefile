@@ -24,7 +24,7 @@ TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
 
 TESTS_RUN_UNI = RUN_ESMCI_IntegrateUTestUNI \
  		RUN_ESMC_MeshUTestUNI \
- 		RUN_ESMC_MeshUMOABUTestUNI \
+ 		RUN_ESMC_MeshMOABUTestUNI \
  		RUN_ESMF_MeshOpUTestUNI \
 		RUN_ESMF_MeshUTestUNI
 
