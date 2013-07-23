@@ -8,6 +8,7 @@ LOCDIR    = src/Infrastructure/Mesh/tests
 
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
  		$(ESMF_TESTDIR)/ESMC_MeshUTest \
+ 		$(ESMF_TESTDIR)/ESMC_MeshMOABUTest \
  		$(ESMF_TESTDIR)/ESMC_MeshVTKUTest \
  		$(ESMF_TESTDIR)/ESMF_MeshOpUTest \
  		$(ESMF_TESTDIR)/ESMF_MeshUTest 
@@ -16,12 +17,14 @@ TESTS_OBJ =
 
 TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
  		RUN_ESMC_MeshUTest \
+ 		RUN_ESMC_MeshMOABUTest \
  		RUN_ESMC_MeshVTKUTest \
  		RUN_ESMF_MeshOpUTest \
  		RUN_ESMF_MeshUTest 
 
 TESTS_RUN_UNI = RUN_ESMCI_IntegrateUTestUNI \
  		RUN_ESMC_MeshUTestUNI \
+ 		RUN_ESMC_MeshUMOABTestUNI \
  		RUN_ESMF_MeshOpUTestUNI \
 		RUN_ESMF_MeshUTestUNI
 
@@ -68,5 +71,11 @@ RUN_ESMC_MeshUTest:
 	$(MAKE) TNAME=Mesh NP=1 ctest
 
 RUN_ESMC_MeshUTestUNI:
+	$(MAKE) TNAME=Mesh NP=1 ctest
+
+RUN_ESMC_MeshMOABUTest:
+	$(MAKE) TNAME=Mesh NP=1 ctest
+
+RUN_ESMC_MeshMOABUTestUNI:
 	$(MAKE) TNAME=Mesh NP=1 ctest
 
