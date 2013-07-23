@@ -37,6 +37,7 @@
 #include "ESMCI_Array.h"
 #include "ESMC_Interface.h"
 #include "ESMCI_Util.h"
+#include "ESMCI_CoordSys.h"
 
 // Define prototype coordGeom flag
 #define ESMC_GRIDCOORDGEOM_CART 0

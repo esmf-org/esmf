@@ -21,6 +21,7 @@
 #define ESMC_UTIL_H
 
 #include "ESMC_Conf.h"
+#include "ESMCI_CoordSys.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,12 +32,6 @@ extern "C" {
 #ifdef __cplusplus
 } // extern "C"
 #endif
-
-enum ESMC_CoordSys_Flag {ESMC_COORDSYS_INVALID=-2,
-                    ESMC_COORDSYS_UNINIT,
-                    ESMC_COORDSYS_CART,
-                    ESMC_COORDSYS_SPH_DEG,
-                    ESMC_COORDSYS_SPH_RAD};
 
 enum ESMC_GridItem_Flag {ESMC_GRIDITEM_INVALID=-2,
                          ESMC_GRIDITEM_UNINIT,

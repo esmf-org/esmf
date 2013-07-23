@@ -213,10 +213,6 @@ public ESMF_PoleKind_Flag,  ESMF_POLEKIND_NONE, ESMF_POLEKIND_MONOPOLE, &
                         ESMF_POLEKIND_BIPOLE
 
 
-public ESMF_CoordSys_Flag, ESMF_COORDSYS_CART, &
-                      ESMF_COORDSYS_SPH_DEG, &
-                      ESMF_COORDSYS_SPH_RAD
-
 public ESMF_GridItem_Flag,  ESMF_GRIDITEM_INVALID, ESMF_GRIDITEM_UNINIT, &
                       ESMF_GRIDITEM_MASK, ESMF_GRIDITEM_AREA, &
                       DEPREC_ESMF_GRIDITEM_AREAM, DEPREC_ESMF_GRIDITEM_FRAC
@@ -935,39 +931,6 @@ end interface
 !
 !EOPI
       end interface
-
-!------------------------------------------------------------------------------
-!BOPI
-! !INTERFACE:
-      interface operator (==)
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_CoordSysEqual
-
-! !DESCRIPTION:
-!     This interface overloads the equality operator for the specific
-!     ESMF CoordSys.  It is provided for easy comparisons of 
-!     these types with defined values.
-!
-!EOPI
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOPI
-! !INTERFACE:
-      interface operator (/=)
-
-! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_CoordSysNotEqual
-
-! !DESCRIPTION:
-!     This interface overloads the inequality operator for the specific
-!     ESMF CoordSys.  It is provided for easy comparisons of 
-!     these types with defined values.
-!
-!EOPI
-      end interface
-
 
 !
 !==============================================================================
@@ -25052,76 +25015,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       end subroutine ESMF_GridItemAssignment
 #undef  ESMF_METHOD
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CoordSysEqual"
-!BOPI
-! !IROUTINE: ESMF_CoordSysEqual - Equality of Coordinate Systems
-!
-! !INTERFACE:
-      function ESMF_CoordSysEqual(CoordSys1, CoordSys2)
-
-! !RETURN VALUE:
-      logical :: ESMF_CoordSysEqual
-
-! !ARGUMENTS:
-
-      type (ESMF_CoordSys_Flag), intent(in) :: &
-         CoordSys1,      &! Two igrid statuses to compare for
-         CoordSys2        ! equality
-
-! !DESCRIPTION:
-!     This routine compares two ESMF CoordSys statuses to see if
-!     they are equivalent.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[CoordSys1, CoordSys2]
-!          Two igrid statuses to compare for equality
-!     \end{description}
-!
-!EOPI
-
-      ESMF_CoordSysEqual = (CoordSys1%coordsys == &
-                              CoordSys2%coordsys)
-
-      end function ESMF_CoordSysEqual
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_CoordSysNotEqual"
-!BOPI
-! !IROUTINE: ESMF_CoordSysNotEqual - Non-equality of CoordSys statuses
-!
-! !INTERFACE:
-      function ESMF_CoordSysNotEqual(CoordSys1, CoordSys2)
-
-! !RETURN VALUE:
-      logical :: ESMF_CoordSysNotEqual
-
-! !ARGUMENTS:
-
-      type (ESMF_CoordSys_Flag), intent(in) :: &
-         CoordSys1,      &! Two CoordSys Statuses to compare for
-         CoordSys2        ! inequality
-
-! !DESCRIPTION:
-!     This routine compares two ESMF CoordSys statuses to see if
-!     they are unequal.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[CoordSys1, CoordSys2]
-!          Two statuses of CoordSyss to compare for inequality
-!     \end{description}
-!
-!EOPI
-
-      ESMF_CoordSysNotEqual = (CoordSys1%coordsys /= &
-                                 CoordSys2%coordsys)
-
-      end function ESMF_CoordSysNotEqual
 
 
 
