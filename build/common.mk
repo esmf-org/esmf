@@ -1069,7 +1069,7 @@ endif
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_MOAB),standard)
 ifneq ($(origin ESMF_MOAB_LIBS), environment)
-ESMF_MOAB_LIBS = -lMOAB -liMesh -ldagmc
+ESMF_MOAB_LIBS = -lMOAB
 endif
 endif
 
