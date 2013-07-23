@@ -1,0 +1,28 @@
+#!/bin/bash
+# $Id$
+################################################################################
+# This script takes 2 arguments:
+# $1 - file of the data files to wget. The script will ignore all blank lines
+#      and lines starting with "#".
+#
+# $2 - directory in which to store the data files.
+#
+# Data files that are present and have the same date as the server files,
+# are not retrieved.
+# This script is executed by the "dry_run_use_test_cases target.
+#
+################################################################################
+
+
+if [ ! -d $2 ];then
+
+        mkdir $2
+fi
+cd $2
+
+sed  -e '/#.*$/d' ../$1 | sed -e '/^[ ^]*$/d' > $1.bakup
+cat $1.bakup | while read data_file
+do
+	wget  -N http://www.earthsystemmodeling.org/download/data/$data_file
+done
+rm -f $1.bakup
