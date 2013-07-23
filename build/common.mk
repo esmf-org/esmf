@@ -2183,7 +2183,7 @@ use_test_cases: chkdir_tests
 	$(MAKE) ACTION=tree_use_test_cases tree ; \
 	$(MAKE) check_use_test_cases
 
-tree_use_test_cases: tree_build_use_test_cases tree_run_use_test_cases
+tree_use_test_cases: tree_build_use_test_cases tree_dry_run_use_test_cases tree_run_use_test_cases
 
 #
 # use_test_cases_uni, build and run uni versions of the use test cases
@@ -2202,7 +2202,7 @@ use_test_cases_uni: chkdir_tests
 	$(MAKE) ACTION=tree_use_test_cases_uni tree ; \
 	$(MAKE) check_use_test_cases
 
-tree_use_test_cases_uni: tree_build_use_test_cases tree_run_use_test_cases_uni
+tree_use_test_cases_uni: tree_build_use_test_cases tree_dry_run_use_test_cases tree_run_use_test_cases_uni
 
 #
 # build_use_test_cases
@@ -2301,7 +2301,7 @@ run_use_test_cases:  reqdir_tests
 	$(MAKE) ACTION=tree_run_use_test_cases tree ; \
 	$(MAKE) check_use_test_cases
 
-tree_run_use_test_cases: $(USE_TEST_CASES_RUN) 
+tree_run_use_test_cases: tree_dry_run_use_test_cases $(USE_TEST_CASES_RUN) 
 
 #
 # run_use_test_cases_uni
@@ -2321,7 +2321,27 @@ run_use_test_cases_uni:  reqdir_tests
 	$(MAKE) ACTION=tree_run_use_test_cases_uni tree ; \
 	$(MAKE) check_use_test_cases
 
-tree_run_use_test_cases_uni: $(USE_TEST_CASES_RUN_UNI)
+tree_run_use_test_cases_uni: tree_dry_run_use_test_cases $(USE_TEST_CASES_RUN_UNI)
+
+
+#
+# dry_run_use_test_cases
+#
+dry_run_use_test_cases:  
+	@if [ -d $(ESMF_UTCDIR) ] ; then cd $(ESMF_UTCDIR) ; fi; \
+        if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
+           if [ -d $(USE_TEST_CASE) ] ; then \
+               cd $(USE_TEST_CASE); \
+           else \
+              echo "USE_TEST_CASE  $(USE_TEST_CASE) does not exist."; \
+               echo "Checkout use_test_cases at the $(ESMF_DIR)/src directory."; \
+              exit; \
+           fi; \
+           echo current working directory is now `pwd` ; \
+        fi; \
+        $(MAKE) ACTION=tree_dry_run_use_test_cases tree 
+
+tree_dry_run_use_test_cases: $(USE_TEST_CASES_DRY_RUN)
 
 #
 # run the use test cases, either redirecting the stdout from the command line, or
