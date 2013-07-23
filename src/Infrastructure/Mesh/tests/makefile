@@ -24,7 +24,7 @@ TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
 
 TESTS_RUN_UNI = RUN_ESMCI_IntegrateUTestUNI \
  		RUN_ESMC_MeshUTestUNI \
- 		RUN_ESMC_MeshUMOABTestUNI \
+ 		RUN_ESMC_MeshUMOABUTestUNI \
  		RUN_ESMF_MeshOpUTestUNI \
 		RUN_ESMF_MeshUTestUNI
 
@@ -74,8 +74,8 @@ RUN_ESMC_MeshUTestUNI:
 	$(MAKE) TNAME=Mesh NP=1 ctest
 
 RUN_ESMC_MeshMOABUTest:
-	$(MAKE) TNAME=Mesh NP=1 ctest
+	$(MAKE) TNAME=MeshMOAB NP=1 ctest
 
 RUN_ESMC_MeshMOABUTestUNI:
-	$(MAKE) TNAME=Mesh NP=1 ctest
+	$(MAKE) TNAME=MeshMOAB NP=1 ctest
 
