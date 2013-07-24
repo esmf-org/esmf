@@ -59,7 +59,8 @@ MEField<> *FieldReg::GetCoordField() const {
   Trace __trace("FieldReg::GetCoordField()");
   
   MEField<> *cf = GetField("coordinates");
-  ThrowAssert(cf);
+  //ThrowAssert(cf);
+  if (!cf) return NULL;
   return cf;
 }
 
