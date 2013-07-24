@@ -102,3 +102,7 @@ DIRS	  = Zoltan
 ifeq ($(ESMF_LAPACK),internal)
 DIRS	 += Lapack BLAS
 endif
+ifeq ($(ESMF_MOAB),internal)
+DIRS     += Moab
+endif
+
