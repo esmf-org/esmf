@@ -734,6 +734,13 @@ namespace ESMCI {
       output_mesh->RegisterField("elem_frac2", src_elem_frac2->GetMEFamily(),
        MeshObj::ELEMENT, src_elem_frac2->GetContext(), src_elem_frac2->dim());
     }
+
+    MEField<> *src_elem_frac = src_mesh->GetField("elem_frac");
+    if (src_elem_frac != NULL) {
+      output_mesh->RegisterField("elem_frac", src_elem_frac->GetMEFamily(),
+       MeshObj::ELEMENT, src_elem_frac->GetContext(), src_elem_frac->dim());
+    }
+
   }
 
 
