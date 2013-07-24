@@ -180,7 +180,7 @@
   
     type(ESMF_Grid) :: grid
 
-    print '("Start ESMF_Grid_C.F90 : f_esmf_gridcreatefromfile(",A,", ",I1,", [",I1,",",I1,"])")', filename, fileTypeFlag, regDecomp(1), regDecomp(2)
+    ! print '("Start ESMF_Grid_C.F90 : f_esmf_gridcreatefromfile(",A,", ",I1,", [",I1,",",I1,"])")', filename, fileTypeFlag, regDecomp(1), regDecomp(2)
 
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
@@ -200,6 +200,6 @@
   
     rc = ESMF_SUCCESS
 
-    print '("End ESMF_Grid_C.F90 : f_esmf_gridcreatefromfile()")'
+    ! print '("End ESMF_Grid_C.F90 : f_esmf_gridcreatefromfile()")'
   
   end subroutine f_esmf_gridcreatefromfile
