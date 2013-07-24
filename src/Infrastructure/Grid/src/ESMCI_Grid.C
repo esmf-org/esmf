@@ -319,8 +319,8 @@ int setDefaultsLUA(int dimCount,
 //
 //EOP
     // Initialize return code. Assume routine not implemented
-    printf ("Start ESMCI_Grid.C : createfromfile(%s,%d,[%d,%d])\n", 
-	    filename, fileTypeFlag, regDecomp[0], regDecomp[1]);
+    //printf ("Start ESMCI_Grid.C : createfromfile(%s,%d,[%d,%d])\n", 
+    //	    filename, fileTypeFlag, regDecomp[0], regDecomp[1]);
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
 
@@ -344,7 +344,7 @@ int setDefaultsLUA(int dimCount,
 
     if (rc) *rc = localrc;
 
-    printf ("End ESMCI_Grid.C : createfromfile()\n");
+    //printf ("End ESMCI_Grid.C : createfromfile()\n");
 
     return grid;
 
