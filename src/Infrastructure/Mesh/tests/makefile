@@ -36,6 +36,9 @@ CLEANDIRS   =
 CLEANFILES  = $(TESTS_BUILD)
 CLOBBERDIRS =
 
+ifeq ($(ESMF_MOAB),internal)
+ESMF_CXXCOMPILECPPFLAGS += -I../src/Moab
+endif
 
 
 #
