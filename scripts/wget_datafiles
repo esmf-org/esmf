@@ -23,7 +23,7 @@ sed  -e '/#.*$/d' ../$1 | sed -e '/^[ ^]*$/d' > $1.bakup
 cat $1.bakup | while read data_file
 do
 	if [ ! -f $data_file ];then
-		wget  -N  http://www.earthsystemmodeling.org/download/data/$data_file   1> tmp 2>&1
+		wget  -N  -t 2 http://www.earthsystemmodeling.org/download/data/$data_file   1> tmp 2>&1
 		if  grep "Connection timed out" tmp  &&  grep "Giving up" tmp  ;then
 			echo "The connection to the internet failed. If you are in an execution queue,"
 			echo "please exit the queue and run 'gmake dry_run_use_test_cases' before running"
