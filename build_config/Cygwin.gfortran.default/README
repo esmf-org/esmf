@@ -1,17 +1,29 @@
 Settings for Cygwin, using the GNU gfortran compiler.
 
+ESMF has been tested with both 32-bit cygwin and 64-bit cygwin64.
+Cygwin should have the following optional packages installed:
+
+  - binutils
+  - gcc (be sure to deselect source code box unless you need it)
+  - gcc-core, gcc-fortran, and gcc-g++
+  - make
+
 ESMF requires gfortran 4.3 or later.  The build procedures assume
-that the gfortran-4 and g++-4 packages have been installed via the
+that the gfortran and g++ packages have been installed via the
 cygwin setup installer.
 
-Requires the following environment settings:
+If you are running an older version of cygwin where the gnu compilers
+are named gfortran-4 and/or g++-4, the following environment variables
+should be set:
 
-  ESMF_COMPILER gfortran
+  ESMF_F90 gfortran-4
+  ESMF_CXX g++-4
 
 
-Windows Compute Cluster Server (CCS) 2003 notes:
+Windows HPC Cluster Server 2008 and 2012 notes
+==============================================
 
-ESMF has been tested on Windows CCS using the Microsoft MPI.  To
+ESMF has been tested on Windows HPC using the Microsoft MPI.  To
 use MSMPI, set:
 
   ESMF_COMM msmpi.
@@ -24,15 +36,15 @@ However the spaces in the path name can confuse the ESMF makefile
 system.
 
 To work around this problem, create a symbolic link from the
-ESMF_DIR directory which points to the CCS directory:
+ESMF_DIR directory which points to the HPC directory:
 
   cd $ESMF_DIR
-  ln -s /cygdrive/c/"Program Files"/"Microsoft Compute Cluster Pack" ccsdir
+  ln -s /cygdrive/c/"Program Files"/"Microsoft HPC Pack" msmpidir
 
 Then set the ESMF_MSMPIDIR environment variable to point to the
 symbolic link:
 
-  ESMF_MSMPIDIR $ESMF_DIR/ccsdir
+  ESMF_MSMPIDIR $ESMF_DIR/msmpidir
 
 2.) The Microsoft mpif.h header file contains conditional code
 which is written for the Intel Fortran compiler.  Gfortran does
@@ -61,3 +73,14 @@ Comment out the first PARAMETER statement as follows:
 !DEC$ ENDIF
 
 You may now proceed to building ESMF.
+
+
+Windows Compute Cluster Server (CCS) 2003 notes
+===============================================
+
+Same as HPC Cluster, except that the path name to the MS-MPI files are in
+the CCS directory:
+
+  cd $ESMF_DIR
+  ln -s /cygdrive/c/"Program Files"/"Microsoft Compute Cluster Pack" msmpidir
+
