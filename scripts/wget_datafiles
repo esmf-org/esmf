@@ -7,8 +7,7 @@
 #
 # $2 - directory in which to store the data files.
 #
-# Data files that are present and have the same date as the server files,
-# are not retrieved.
+# Data files that are present are not retrieved.
 # This script is executed by the "dry_run_use_test_cases target.
 #
 ################################################################################
@@ -23,6 +22,15 @@ cd $2
 sed  -e '/#.*$/d' ../$1 | sed -e '/^[ ^]*$/d' > $1.bakup
 cat $1.bakup | while read data_file
 do
-	wget  -N http://www.earthsystemmodeling.org/download/data/$data_file
+	if [ ! -f $data_file ];then
+		wget  -N  http://www.earthsystemmodeling.org/download/data/$data_file   1> tmp 2>&1
+		if  grep "Connection timed out" tmp  &&  grep "Giving up" tmp  ;then
+			echo "The connection to the internet failed. If you are in an execution queue,"
+			echo "please exit the queue and run 'gmake dry_run_use_test_cases' before running"
+			echo "'run_use_use_test_cases'"
+			rm -f $1.bakup tmp
+			exit 1
+		fi
+	fi
 done
-rm -f $1.bakup
+rm -f $1.bakup tmp
