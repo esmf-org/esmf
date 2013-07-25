@@ -27,7 +27,7 @@ do
 		if  grep "Connection timed out" tmp  &&  grep "Giving up" tmp  ;then
 			echo "The connection to the internet failed. If you are in an execution queue,"
 			echo "please exit the queue and run 'gmake dry_run_use_test_cases' before running"
-			echo "'run_use_use_test_cases'"
+			echo "'run_use_use_test_cases'."
 			rm -f $1.bakup tmp
 			exit 1
 		fi
