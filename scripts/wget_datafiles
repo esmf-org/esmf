@@ -25,13 +25,15 @@ do
 	if [ ! -f $data_file ];then
 		wget  -N  -t 2 http://www.earthsystemmodeling.org/download/data/$data_file   1> tmp 2>&1
 		if  grep "Connection timed out" tmp  &&  grep "Giving up" tmp  ;then
-			echo ""
-			echo "################################################################################"
-			echo "# The connection to the internet failed. If you are in an execution queue,     #"
-			echo "# please exit the queue and run 'gmake dry_run_use_test_cases' before running  #"
-			echo "# 'run_use_use_test_cases'.                                                    #"
-			echo "################################################################################"
-			echo ""
+                        echo ""
+                        echo "###################################################################################"
+                        echo "# The connection to the data file server failed. If you are in an execution       #"
+                        echo "# queue, there is a chance that you cannot connect to the internet from the       #"
+                        echo "# compute nodes. Please exit the queue and run 'gmake dry_run_use_use_test_cases' #"
+                        echo "# on the front end system before attempting to run 'gmake run_use_use_test_cases' #"
+                        echo "# through the queue.                                                              #"
+                        echo "###################################################################################"
+                        echo ""
 			rm -f $1.bakup tmp
 			exit 1
 		fi
