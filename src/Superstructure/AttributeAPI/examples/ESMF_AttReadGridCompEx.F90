@@ -51,6 +51,7 @@ program ESMF_AttReadGridCompEx
 
       ! local variables
       type(ESMF_GridComp)    :: gridcomp
+      type(ESMF_Attribute)   :: attpack
       character(ESMF_MAXSTR) :: attrvalue
       type(ESMF_VM)          :: vm
       integer                :: rc, petCount, localPet
@@ -129,9 +130,11 @@ program ESMF_AttReadGridCompEx
 
 !BOC
       ! Get ESG "ComponentShortName" Attribute from a GridComp
+	  call ESMF_AttPackGet(gridcomp, attpack=attpack, &
+	  	convention='ESG', purpose='General', rc=rc)
       call ESMF_AttributeGet(gridcomp, name='ComponentShortName', &
                              value=attrValue, &
-                             convention='ESG', purpose='General', rc=rc)
+                             attpack=attpack, rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='GEOS') &
@@ -143,7 +146,7 @@ program ESMF_AttReadGridCompEx
       ! Get ESG "ComponentLongName" Attribute from a GridComp
       call ESMF_AttributeGet(gridcomp, name='ComponentLongName', &
                              value=attrValue, &
-                             convention='ESG', purpose='General', rc=rc)
+                             attpack=attpack, rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. &
@@ -155,7 +158,7 @@ program ESMF_AttReadGridCompEx
 !BOC
       ! Get ESG "Agency" Attribute from a GridComp
       call ESMF_AttributeGet(gridcomp, name='Agency', value=attrValue, &
-                             convention='ESG', purpose='General', rc=rc)
+                             attpack=attpack, rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='NASA') &
@@ -166,7 +169,7 @@ program ESMF_AttReadGridCompEx
 !BOC
       ! Get ESG "Institution" Attribute from a GridComp
       call ESMF_AttributeGet(gridcomp, name='Institution', value=attrValue, &
-                             convention='ESG', purpose='General', rc=rc)
+                             attpack=attpack, rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. &
@@ -178,7 +181,7 @@ program ESMF_AttReadGridCompEx
 !BOC
       ! Get ESG "Version" Attribute from a GridComp
       call ESMF_AttributeGet(gridcomp, name='Version', value=attrValue, &
-                             convention='ESG', purpose='General', rc=rc)
+                             attpack=attpack, rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='5') &
@@ -189,7 +192,7 @@ program ESMF_AttReadGridCompEx
 !BOC
       ! Get ESG "Author" Attribute from a GridComp
       call ESMF_AttributeGet(gridcomp, name='Author', value=attrValue, &
-                             convention='ESG', purpose='General', rc=rc)
+                             attpack=attpack, rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Max Suarez') &
@@ -200,7 +203,7 @@ program ESMF_AttReadGridCompEx
 !BOC
       ! Get ESG "Discipline" Attribute from a GridComp
       call ESMF_AttributeGet(gridcomp, name='Discipline', value=attrValue, &
-                             convention='ESG', purpose='General', rc=rc)
+                             attpack=attpack, rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Atmosphere') &
@@ -211,8 +214,7 @@ program ESMF_AttReadGridCompEx
 !BOC
       ! Get ESG "PhysicalDomain" Attribute from a GridComp
       call ESMF_AttributeGet(gridcomp, name='PhysicalDomain', &
-                             value=attrValue, convention='ESG', &
-                             purpose='General', rc=rc)
+                             value=attrValue, attpack=attpack, rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Earth System') &
@@ -223,8 +225,7 @@ program ESMF_AttReadGridCompEx
 !BOC
       ! Get ESG "CodingLanguage" Attribute from a GridComp Test
       call ESMF_AttributeGet(gridcomp, name='CodingLanguage', &
-                             value=attrValue,  convention='ESG', &
-                             purpose='General', rc=rc)
+                             value=attrValue,  attpack=attpack, rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Fortran 90') &
@@ -236,7 +237,7 @@ program ESMF_AttReadGridCompEx
       ! Get ESG "ModelComponentFramework" Attribute from a GridComp
       call ESMF_AttributeGet(gridcomp, name='ModelComponentFramework', &
                              value=attrValue, &
-                             convention='ESG', purpose='General', rc=rc)
+                             attpack=attpack, rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. &

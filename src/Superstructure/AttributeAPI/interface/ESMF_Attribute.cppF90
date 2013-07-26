@@ -3087,9 +3087,6 @@ contains
       nestConvString(1) = nestConvention @\
       nestPurpString(1) = nestPurpose @\
  @\
- 	  ! set the created macro @\
-      ESMF_INIT_SET_CREATED(attpack) @\
- @\
       call mclass##AttAddPackCstN(mthis, & @\
                                   convention, purpose, & @\
                                   attrList, count, & @\
@@ -3826,7 +3823,7 @@ contains
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
+          call c_ESMC_AttPackGetCharList(mthisfield, attpack, name, attpack, & @\
             ESMF_TYPEKIND_CHARACTER, count, lens, & @\
             value, localrc) @\
         end if @\
@@ -3835,7 +3832,7 @@ contains
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttributeGetCharList(mthisfield, attpack, name, & @\
+          call c_ESMC_AttributeGetCharList(mthisfield, name, & @\
           	ESMF_TYPEKIND_CHARACTER, count, lens, value, localrc) @\
         endif @\
       endif @\
@@ -4871,7 +4868,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetInfoName(mthisfield, name, & @\
+          call c_ESMC_AttPackGetInfoName(mthisfield, name, attpack, & @\
           								 localTk, litemCount, localrc) @\
         end if @\
       else @\

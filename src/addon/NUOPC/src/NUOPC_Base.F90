@@ -2370,7 +2370,7 @@ endif
           file=FILENAME)) &
           return  ! bail out
         call ESMF_AttributeGet(field, &
-          name="TimeStamp", valueList=valueList, rc=rc)
+          name="TimeStamp", valueList=valueList, attpack=attpack, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
           file=FILENAME)) &

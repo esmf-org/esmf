@@ -238,7 +238,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
 
     field = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field", rc=status)
-    attpack = ESMF_AttributeAdd(field, convention=convESMF, purpose=purpGen, &
+    call ESMF_AttributeAdd(field, convention=convESMF, purpose=purpGen, &
       rc=status)
     call ESMF_AttributeSet(field, name1, value1, convention=convESMF, &
       purpose=purpGen, rc=status)
@@ -515,6 +515,7 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
       type(ESMF_CplComp)      :: cplcomp
       character(ESMF_MAXSTR)  :: convESMF,purpGen
 
+	  type(ESMF_Attribute)    :: attpack
       type(ESMF_Field)        :: field
       type(ESMF_FieldBundle)  :: fieldbundle
 
@@ -634,8 +635,10 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
 #endif
 
     !EX_UTest_Multi_Proc_Only
-    call ESMF_AttributeGet(field, name2, convention=convESMF, &
-      purpose=purpGen, isPresent=isPresent, rc=rc)
+    call ESMF_AttPackGet(field, attpack, convention=convESMF, &
+                         purpose=purpGen, rc=rc)
+    call ESMF_AttributeGet(field, name2, attpack=attpack, &
+    					   isPresent=isPresent, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated deleted Attribute value from a Field test"
     call ESMF_Test((rc==ESMF_SUCCESS).and.(isPresent.eqv..false.), &

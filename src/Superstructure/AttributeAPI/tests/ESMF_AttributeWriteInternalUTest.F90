@@ -229,7 +229,7 @@ program ESMF_AttributeWriteIntrnalUTest
     !-------------------------------------------------------------------------
     !EX_UTest
     ! Create standard CF attribute package on the grid
-    attpack = ESMF_AttributeAdd(grid, &
+    call ESMF_AttributeAdd(grid, &
                            convention='CIM 1.5.1', &
                            purpose='grids', &
                            rc=rc)

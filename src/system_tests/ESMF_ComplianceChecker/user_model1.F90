@@ -146,8 +146,8 @@ module user_model1
     call ESMF_StateAdd(importState, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    attpack = ESMF_AttributeAdd(field, convention="ESG", &
-      purpose="General", rc=rc)
+    call ESMF_AttributeAdd(field, attpack=attpack, &
+      convention="ESG", purpose="General", rc=rc)
     
     call ESMF_AttributeSet(field, name="LongName", &
       value="ExchangeCorrelationEnergy", &

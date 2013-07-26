@@ -182,99 +182,120 @@ program ESMF_AttributePackageEx
       attrList(2) = 'Mask'
 
       ! DPEDT
-      attpack = ESMF_AttributeAdd(DPEDT, convention=convESMF, purpose=purpGen, &
-        rc=rc)
+      call ESMF_AttributeAdd(DPEDT, attpack=attpack, &
+      	convention=convESMF, purpose=purpGen, &
+      	rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-      attpack = ESMF_AttributeAdd(DPEDT, convention=convCC, purpose=purpGen,   &
+      call ESMF_AttributeAdd(DPEDT, attpack=attpack, &
+      	convention=convCC, purpose=purpGen, &
         attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen,  &
         rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! DTDT
-      attpack = ESMF_AttributeAdd(DTDT, convention=convESMF, purpose=purpGen, &
+      call ESMF_AttributeAdd(DTDT, attpack=attpack, &
+      	convention=convESMF, purpose=purpGen, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      attpack = ESMF_AttributeAdd(DTDT, convention=convCC, purpose=purpGen,   &
+      call ESMF_AttributeAdd(DTDT, attpack=attpack, &
+      	convention=convCC, purpose=purpGen,   &
         attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! DUDT
-      attpack = ESMF_AttributeAdd(DUDT, convention=convESMF, purpose=purpGen, &
+      call ESMF_AttributeAdd(DUDT, attpack=attpack, &
+      	convention=convESMF, purpose=purpGen, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      attpack = ESMF_AttributeAdd(DUDT, convention=convCC, purpose=purpGen,   &
+      call ESMF_AttributeAdd(DUDT, attpack=attpack, &
+      	convention=convCC, purpose=purpGen,   &
         attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! DVDT
-      attpack = ESMF_AttributeAdd(DVDT, convention=convESMF, purpose=purpGen, &
+      call ESMF_AttributeAdd(DVDT, attpack=attpack, &
+      	convention=convESMF, purpose=purpGen, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      attpack = ESMF_AttributeAdd(DVDT, convention=convCC, purpose=purpGen,   &
+      call ESMF_AttributeAdd(DVDT, attpack=attpack, &
+      	convention=convCC, purpose=purpGen,   &
         attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! PHIS
-      attpack = ESMF_AttributeAdd(PHIS, convention=convESMF, purpose=purpGen, &
+      call ESMF_AttributeAdd(PHIS, attpack=attpack, &
+      	convention=convESMF, purpose=purpGen, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      attpack = ESMF_AttributeAdd(PHIS, convention=convCC, purpose=purpGen,   &
+      call ESMF_AttributeAdd(PHIS, attpack=attpack, &
+      	convention=convCC, purpose=purpGen,   &
         attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! QTR
-      attpack = ESMF_AttributeAdd(QTR, convention=convESMF, purpose=purpGen, &
+      call ESMF_AttributeAdd(QTR, attpack=attpack, &
+      	convention=convESMF, purpose=purpGen, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      attpack = ESMF_AttributeAdd(QTR, convention=convCC, purpose=purpGen,   &
+      call ESMF_AttributeAdd(QTR, attpack=attpack, &
+      	convention=convCC, purpose=purpGen,   &
         attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! CNV
-      attpack = ESMF_AttributeAdd(CNV, convention=convESMF, purpose=purpGen, &
+      call ESMF_AttributeAdd(CNV, attpack=attpack, &
+      	convention=convESMF, purpose=purpGen, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      attpack = ESMF_AttributeAdd(CNV, convention=convCC, purpose=purpGen,   &
+      call ESMF_AttributeAdd(CNV, attpack=attpack, &
+      	convention=convCC, purpose=purpGen,   &
         attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! CONVCPT
-      attpack = ESMF_AttributeAdd(CONVCPT, convention=convESMF, purpose=purpGen, &
+      call ESMF_AttributeAdd(CONVCPT, attpack=attpack, &
+      	convention=convESMF, purpose=purpGen, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      attpack = ESMF_AttributeAdd(CONVCPT, convention=convCC, purpose=purpGen,   &
+      call ESMF_AttributeAdd(CONVCPT, attpack=attpack, &
+      	convention=convCC, purpose=purpGen,   &
         attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen,    &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! CONVKE
-      attpack = ESMF_AttributeAdd(CONVKE, convention=convESMF, purpose=purpGen, &
+      call ESMF_AttributeAdd(CONVKE, attpack=attpack, &
+      	convention=convESMF, purpose=purpGen, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      attpack = ESMF_AttributeAdd(CONVKE, convention=convCC, purpose=purpGen,   &
+      call ESMF_AttributeAdd(CONVKE, attpack=attpack, &
+      	convention=convCC, purpose=purpGen,   &
         attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen,   &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! CONVPHI
-      attpack = ESMF_AttributeAdd(CONVPHI, convention=convESMF, purpose=purpGen, &
+      call ESMF_AttributeAdd(CONVPHI, attpack=attpack, &
+      	convention=convESMF, purpose=purpGen, &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      attpack = ESMF_AttributeAdd(CONVPHI, convention=convCC, purpose=purpGen,   &
+      call ESMF_AttributeAdd(CONVPHI, attpack=attpack, &
+      	convention=convCC, purpose=purpGen,   &
         attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen,    &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       
-      attpack = ESMF_AttributeAdd(gridcomp, convention=convESMF, &
+      call ESMF_AttributeAdd(gridcomp, attpack=attpack, &
+      	convention=convESMF, &
         purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 

@@ -211,11 +211,12 @@ module ESMF_AttributeUpdate2UTestMod
     nestPurp(2) = purpCitation
 
     nameCount = 0
-    attpack = ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, &
+    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, &
       nestConvention=nestConv, nestPurpose=nestPurp, &
       nestAttPackInstanceCountList=(/2,1/), &
       nestAttPackInstanceNameList=nestAttPackName, &
-      nestCount=2, nestAttPackInstanceNameCount=nameCount, rc=rc)
+      nestCount=2, nestAttPackInstanceNameCount=nameCount, &
+      attpack=attpack, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
     call ESMF_AttributeSet(comp, 'ShortName', &
@@ -337,8 +338,9 @@ module ESMF_AttributeUpdate2UTestMod
       attPackInstanceName=attPackInstNames(2), rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
-    attpack = ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpExt, &
-      attrList=attrList, nestConvention=convCIM, nestPurpose=purpComp, rc=rc)
+    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpExt, &
+      attrList=attrList, nestConvention=convCIM, nestPurpose=purpComp, &
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(comp, attrList(1), valueList(1), &
       convention=convCIM, purpose=purpExt, rc=rc)
@@ -478,6 +480,7 @@ program ESMF_AttributeUpdate2UTest
     type(ESMF_GridComp)     :: gridcomp1
     type(ESMF_GridComp)     :: gridcomp2
     type(ESMF_CplComp)      :: cplcomp
+    type(ESMF_Attribute)    :: attpack
     character(ESMF_MAXSTR)  :: convCIM, purpExt, convISO, purpRP, outVal
     character(ESMF_MAXSTR)  :: attPackInstNames(2)
 
@@ -569,25 +572,32 @@ program ESMF_AttributeUpdate2UTest
     !print *, "attPackInstNames(2)=", attPackInstNames(2)
 
     !EX_UTest_Multi_Proc_Only
+    call ESMF_AttPackGet(gridcomp1, attpack, &
+    	                 convention=convISO, purpose=purpRP, &
+    	                 attPackInstanceName=attPackInstNames(2), rc=rc)
     call ESMF_AttributeGet(gridcomp1, 'Name', value=outVal, &
-      convention=convISO, purpose=purpRP, &
-      attPackInstanceName=attPackInstNames(2), rc=rc)  ! in 2nd RP instance
+      attpack=attpack, rc=rc)  ! in 2nd RP instance
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated Attribute value from a GridComp test"
     call ESMF_Test((rc==ESMF_SUCCESS).and.(outVal=='University of CBA'), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest_Multi_Proc_Only
+    call ESMF_AttPackGet(gridcomp1, attpack, &
+    	                 convention=convISO, purpose=purpRP, &
+    	                 attPackInstanceName=attPackInstNames(1), rc=rc)
     call ESMF_AttributeGet(gridcomp1, 'Name', value=outVal, &
-      convention=convISO, purpose=purpRP, rc=rc)  ! in 1st RP instance
+      attpack=attpack, rc=rc)  ! in 1st RP instance
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated Attribute value from a GridComp test"
     call ESMF_Test((rc==ESMF_SUCCESS).and.(outVal=='John Doe'), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest_Multi_Proc_Only
+    call ESMF_AttPackGet(gridcomp1, attpack, &
+    	                 convention=convISO, purpose=purpRP, rc=rc)
     call ESMF_AttributeGet(gridcomp1, 'Coordinates', value=outVal, &
-      convention=convCIM, purpose=purpExt, rc=rc)
+      attpack=attpack, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated Attribute package Attribute value from a GridComp test"
     call ESMF_Test((rc==ESMF_SUCCESS).and.(outVal=='Latlon'), &
@@ -595,7 +605,7 @@ program ESMF_AttributeUpdate2UTest
 
     !EX_UTest_Multi_Proc_Only
     call ESMF_AttributeGet(gridcomp1, 'Mask', value=outVal, &
-      convention=convCIM, purpose=purpExt, rc=rc)
+      attpack=attpack, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated Attribute package Attribute value from a GridComp test"
     call ESMF_Test((rc==ESMF_SUCCESS).and.(outVal=='Yes'), &
@@ -603,8 +613,7 @@ program ESMF_AttributeUpdate2UTest
 
     !EX_UTest_Multi_Proc_Only
     call ESMF_AttributeGet(gridcomp1, 'EmailAddress', value=outVal, &
-      convention=convISO, purpose=purpRP, &
-      attPackInstanceName=attPackInstNames(2), rc=rc)  ! in 2nd RP instance
+      attpack=attpack, rc=rc)  ! in 2nd RP instance
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated deleted Attribute value from a GridComp test"
     call ESMF_Test((rc/=ESMF_SUCCESS), &
@@ -612,7 +621,7 @@ program ESMF_AttributeUpdate2UTest
 
     !EX_UTest_Multi_Proc_Only
     call ESMF_AttributeGet(gridcomp1, 'PhysicalAddress', value=outVal, &
-      convention=convISO, purpose=purpRP, rc=rc)
+      attpack=attpack, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated deleted Attribute value from a GridComp test"
     call ESMF_Test((rc/=ESMF_SUCCESS), &

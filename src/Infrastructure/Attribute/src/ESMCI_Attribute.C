@@ -1123,7 +1123,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 //printf("AttPackGet(): packList.size() = %d\n", packList.size()); fflush(stdout);
 
 int size = packList.size();
-printf("size = %d (%d)\n", size, packList.size());
+//printf("size = %d (%d)\n", size, packList.size());
 
   for (i=0; i<packList.size(); i++) {
     ap = packList.at(i);

@@ -1322,9 +1322,10 @@ extern "C" {
     return;
   }
 
-  // RLO - ???  why?  i'm removing this nonsensical code for now
+  // RLO - I don't understand this line, but retrieving Attributes from nested
+  //       packages does not seem to work without it..
   // set attpack to parent of found attribute
-  //attpack = attr->AttributeGetParent();
+  (*attpack) = attr->AttributeGetParent();
 
   // get type of the Attribute from the attpack
   status = (*attpack)->AttributeGet(cname, &attrTypeKind, NULL);
@@ -1487,9 +1488,10 @@ extern "C" {
     return;
   }
 
-  // RLO - ???  why?  i'm removing this nonsensical code for now
+  // RLO - I don't understand this line, but retrieving Attributes from nested
+  //       packages does not seem to work without it..
   // set attpack to parent of found attribute
-  //attpack = attr->AttributeGetParent();
+  (*attpack) = attr->AttributeGetParent();
 
   // get type of the Attribute from the attpack
   status = (*attpack)->AttributeGet(cname, &attrTk, &attrCount);
@@ -1804,7 +1806,7 @@ extern "C" {
   
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackIsPresent(name, *attpack, present);
+  status = (**base).root.AttPackIsPresent(cname, *attpack, present);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
   
@@ -2467,6 +2469,8 @@ extern "C" {
     return;
   }
   
+  printf("~~~~~~~~~~~~~~~~~~ cvalue = %s and size = %d\n", cvalue[0].c_str(), cvalue.size());
+  
   // finally we convert them all to f90 and pack them into char*
   j = 0;
   for (i=0; i<lcount; i++) {
@@ -2636,20 +2640,13 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      char *name,               // in - F90, non-null terminated string
+      ESMC_Base **base,              // in/out - base object
+      char *name,                    // in - F90, non-null terminated string
+	  ESMCI::Attribute **attpack,    // in - Attribute package
       ESMC_TypeKind_Flag *tk,        // out - typekind
-      int *count,               // out - item count
-      char *convention,          // in - convention
-      char *purpose,             // in - purpose
-      char *object,              // in - object type
-      char *attPackInstanceName, // in - attpack instance name
-      int *rc,                   // in - return code
-      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
-      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
-      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
-      ESMCI_FortranStrLenArg olen,   // hidden/in - strlen count for object
-      ESMCI_FortranStrLenArg alen) { // hidden/in - strlen count for attPackInstanceName
+      int *count,                    // out - item count
+      int *rc,                       // in - return code
+      ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for name
 // 
 // !DESCRIPTION:
 //   Return the typekind, count of items in the (name,value) pair from any 
@@ -2658,10 +2655,13 @@ extern "C" {
 //EOP
 
   int status;
-  ESMCI::Attribute *attpack, *attr;
+  ESMCI::Attribute *attr;
+
+printf("00000000000000\n");
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
+printf("11111111111111111\n");
 
   if (!base) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -2669,6 +2669,7 @@ extern "C" {
     if (rc) *rc = status;    
     return;
   }
+printf("2222222222222222\n");
 
   if (!tk) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -2692,39 +2693,8 @@ extern "C" {
       return;
   }
 
-  // simple sanity check before doing any more work
-  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-
   string cname(name, nlen);
-  string cconv(convention, clen);
-  string cpurp(purpose, plen);
-  string cobj(object, olen);
   cname.resize(cname.find_last_not_of(" ")+1);
-  cconv.resize(cconv.find_last_not_of(" ")+1);
-  cpurp.resize(cpurp.find_last_not_of(" ")+1);
-  cobj.resize(cobj.find_last_not_of(" ")+1);
-
   if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute name conversion", ESMC_CONTEXT, &status);
@@ -2732,42 +2702,8 @@ extern "C" {
       return;
   }
   
-  if (cconv.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention conversion", ESMC_CONTEXT, &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (cpurp.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose conversion", ESMC_CONTEXT, &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  if (cobj.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object conversion", ESMC_CONTEXT, &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  // convert optional (char *) arg attPackInstanceName to string
-// TODO: is the following line safe for all F90 compilers when passing a 
-//       not-present char* attPackInstanceName ?  what is value of alen?
-//  string capname((char*)ESMC_NOT_PRESENT_FILTER(attPackInstanceName), alen);
-  string capname;
-  if (ESMC_NOT_PRESENT_FILTER(attPackInstanceName) != ESMC_NULL_POINTER &&
-                                                      alen > 0) {
-    capname.assign(attPackInstanceName, 0, alen);
-  }
-  capname.resize(capname.find_last_not_of(" ")+1);
-
-
   // get the Attribute package
-  attpack = (**base).root.AttPackGet(cconv, cpurp, cobj, capname);
-  if (!attpack) {
+  if (!(*attpack)) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
                          "failed getting Attribute package", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
@@ -2775,7 +2711,7 @@ extern "C" {
   }
 
   // get the attribute
-  attr = attpack->AttPackGetAttribute(cname);
+  attr = (*attpack)->AttPackGetAttribute(cname);
   if (!attr) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, 
       "This Attribute package does have the specified Attribute", ESMC_CONTEXT, &status);
@@ -2783,14 +2719,14 @@ extern "C" {
     return;
   }
 
+  // RLO - I don't understand this line, but retrieving Attributes from nested
+  //       packages does not seem to work without it..
   // set attpack to parent of found attribute
-  attpack = attr->AttributeGetParent();
+  (*attpack) = attr->AttributeGetParent();
 
-  status = attpack->AttributeGet(cname, tk, count);
+  status = (*attpack)->AttributeGet(cname, tk, count);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
-
-
 
 }  // end c_ESMC_AttpackGetInfoName
 

@@ -1352,8 +1352,8 @@ program ESMF_AttributeFieldUTest
       
       !EX_UTest
       ! Create a custom Attribute package on a Field Test
-      attpack = ESMF_AttributeAdd(field, convention=conv, &
-        purpose=purp, attrList=attpackList, rc=rc)
+      call ESMF_AttributeAdd(field, convention=conv, &
+        purpose=purp, attrList=attpackList, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attribute package on a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1366,7 +1366,7 @@ program ESMF_AttributeFieldUTest
       !EX_UTest
       ! Get an ESMF_I4 Attribute from a Field Test
       call ESMF_AttributeGet(field, name="NotHere", value=outI4, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET"
       write(name, *) "Getting a nonexistent Attribute from a Field Test"
       call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), &
@@ -1399,7 +1399,7 @@ program ESMF_AttributeFieldUTest
       !EX_UTest
       ! Get a char list Attribute in an Attribute package on a Field Test
       call ESMF_AttributeGet(field, name=attrname, &
-        valueList=attpackListOut, convention=conv, purpose=purp, isPresent=isPresent, rc=rc)
+        valueList=attpackListOut, attpack=attpack, isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a char list Attribute in an Attribute package on a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS) &
@@ -1424,7 +1424,7 @@ program ESMF_AttributeFieldUTest
       ! Get a char list default Attribute in an Attribute package on a Field Test
       call ESMF_AttributeGet(field, name=attrname, &
         valueList=attpackListOut2, defaultvalueList=attpackDfltList, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a default Attribute character list in an Attribute package on a Field test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackListOut2 == attpackDfltList), &
@@ -1435,7 +1435,7 @@ program ESMF_AttributeFieldUTest
       items = 3
       ! Get a char list Attribute isPresent flag and itemCount in an Attribute package on a Field Test
       call ESMF_AttributeGet(field, name=attrname, &
-        valueList=attpackListOut, convention=conv, purpose=purp, &
+        valueList=attpackListOut, attpack=attpack, &
         itemCount=items, isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a char list Attribute isPresent flag and itemCount in an Attribute package on a Field Test"
@@ -1448,7 +1448,7 @@ program ESMF_AttributeFieldUTest
       !EX_UTest
       ! Get a char list Attribute isPresent flag in an Attribute package on a Field Test
       call ESMF_AttributeGet(field, name=attrname, &
-        valueList=attpackListOut, convention=conv, purpose=purp, &
+        valueList=attpackListOut, attpack=attpack, &
         isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a char list Attribute isPresent flag in an Attribute package on a Field Test"
@@ -1461,7 +1461,7 @@ program ESMF_AttributeFieldUTest
       items = 3
       ! Get a char list Attribute itemCount in an Attribute package on a Field Test
       call ESMF_AttributeGet(field, name=attrname, &
-        valueList=attpackListOut, convention=conv, purpose=purp, &
+        valueList=attpackListOut, attpack=attpack, &
         itemCount=items, isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a char list Attribute itemCount in an Attribute package on a Field Test"
@@ -1473,7 +1473,7 @@ program ESMF_AttributeFieldUTest
       !EX_UTest
       ! Get a char list Attribute error in an Attribute package on a Field Test
       call ESMF_AttributeGet(field, name=attrname, &
-        valueList=attpackListOut, convention=conv, purpose=purp, rc=rc)
+        valueList=attpackListOut, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a char list Attribute error in an Attribute package on a Field Test"
       call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), name, failMsg, result, ESMF_SRCLINE)
@@ -1497,7 +1497,8 @@ program ESMF_AttributeFieldUTest
       
       !NEX_UTest
       ! Create an Attribute package on a Field Test
-      attpack = ESMF_AttributeAdd(field, convention=conv, purpose=purp, rc=rc)
+      call ESMF_AttributeAdd(field, convention=conv, purpose=purp, &
+      						 attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a standard Attribute package on a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1546,8 +1547,9 @@ program ESMF_AttributeFieldUTest
     
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on a Field Test
-      attpack = ESMF_AttributeAdd(field, convention=nestconv, purpose=nestpurp, &
-        attrList=attpackListTNames, nestConvention=conv, nestPurpose=purp, rc=rc)
+      call ESMF_AttributeAdd(field, convention=nestconv, purpose=nestpurp, &
+        attrList=attpackListTNames, nestConvention=conv, nestPurpose=purp, &
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a nested Attribute package on a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1665,7 +1667,7 @@ program ESMF_AttributeFieldUTest
       !EX_UTest
       ! Get a char list attribute in an Attribute package on a Field Test
       call ESMF_AttributeGet(field, name=attrname, &
-        valueList=attpackListOut3, convention=nestconv, purpose=nestpurp, rc=rc)
+        valueList=attpackListOut3, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a char list Attribute in an Attribute package on a Field Test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackList == attpackListOut), &
@@ -1696,7 +1698,7 @@ program ESMF_AttributeFieldUTest
       ! Get a char list default Attribute in an Attribute package on a Field Test
       call ESMF_AttributeGet(field, name=attrname, &
         valueList=attpackListOut4, defaultvalueList=attpackDfltList, &
-        convention=nestconv, purpose=nestpurp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a default Attribute character list in an Attribute package on a Field test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackListOut4 == attpackDfltList), &
@@ -1707,7 +1709,7 @@ program ESMF_AttributeFieldUTest
       isPresent = .false.
       ! Get the isPresent flag from an Attribute in an Attribute package on a Field Test
       call ESMF_AttributeGet(field, name="Character_name", &
-        convention=nestconv, purpose=nestpurp, isPresent=isPresent, rc=rc)
+        attpack=attpack, isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting the isPresent flag from an Attribute in an Attribute package on a Field test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. (isPresent.eqv..true.), &

@@ -126,8 +126,8 @@ module user_model2
 
     print *, localPet, "User Comp2 Init starting"
 
-    attpack = ESMF_AttributeAdd(comp, convention="CIM 1.5", &
-      purpose="ModelComp", rc=rc)
+    call ESMF_AttributeAdd(comp, attpack=attpack, &
+      convention="CIM 1.5", purpose="ModelComp", rc=rc)
     
     call ESMF_AttributeSet(comp, name="ShortName", value="ABC", &
       convention="CIM 1.5", purpose="ModelComp", &

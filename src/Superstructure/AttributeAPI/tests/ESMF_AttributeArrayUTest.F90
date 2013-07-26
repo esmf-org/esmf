@@ -46,7 +46,7 @@ program ESMF_AttributeArrayUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_Attribute)   :: attpack
+      type(ESMF_Attribute)   :: attpack, nested_attpack
       
       type(ESMF_Array)       :: array
       type(ESMF_ArraySpec)   :: arrayspec
@@ -1140,8 +1140,8 @@ program ESMF_AttributeArrayUTest
       
       !EX_UTest
       ! Create a custom Attribute package on an Array Test
-      attpack = ESMF_AttributeAdd(array, attrList=attpackList, convention=conv, &
-        purpose=purp, rc=rc)
+      call ESMF_AttributeAdd(array, attrList=attpackList, convention=conv, &
+        purpose=purp, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1154,7 +1154,7 @@ program ESMF_AttributeArrayUTest
       !EX_UTest
       ! Get an ESMF_I4 Attribute from an Array Test
       call ESMF_AttributeGet(array, name="NotHere", value=outI4, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET"
       write(name, *) "Getting a nonexistent Attribute from an Array Test"
       call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), &
@@ -1187,7 +1187,7 @@ program ESMF_AttributeArrayUTest
       !EX_UTest
       ! Get a char list Attribute in an Attribute package on an Array Test
       call ESMF_AttributeGet(array, name=attrname, &
-        valueList=attpackListOut, convention=conv, purpose=purp, rc=rc)
+        valueList=attpackListOut, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a char list Attribute in an Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackList == attpackListOut), &
@@ -1210,7 +1210,7 @@ program ESMF_AttributeArrayUTest
       ! Get a char list default Attribute in an Attribute package on an Array Test
       call ESMF_AttributeGet(array, name=attrname, &
         valueList=attpackListOut2, defaultvalueList=attpackDfltList, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a default Attribute character list in an Attribute package on an Array test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackListOut2 == attpackDfltList), &
@@ -1240,7 +1240,7 @@ program ESMF_AttributeArrayUTest
     
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on an Array Test
-      attpack = ESMF_AttributeAdd(array, attrList=attpackListTNames, convention=conv, &
+      call ESMF_AttributeAdd(array, attrList=attpackListTNames, convention=conv, &
         purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a standard Attribute package on an Array Test"
@@ -1363,7 +1363,7 @@ program ESMF_AttributeArrayUTest
       !EX_UTest
       ! Set a char list Attribute in an Attribute package on an Array Test
       call ESMF_AttributeGet(array, name=attrname, &
-        valueList=outCharl, convention=conv, purpose=purp, rc=rc)
+        valueList=outCharl, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a one element char list Attribute in an Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackList(1:1)==OutCharl(1:1)), &
@@ -1404,8 +1404,9 @@ program ESMF_AttributeArrayUTest
       attrname = "Character_namelist2"
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on an Array Test
-      attpack = ESMF_AttributeAdd(array, convention=nestconv, purpose=nestpurp, &
-        attrList=attpackListTNames2, nestConvention=conv, nestPurpose=purp, rc=rc)
+      call ESMF_AttributeAdd(array, convention=nestconv, purpose=nestpurp, &
+        attrList=attpackListTNames2, nestConvention=conv, nestPurpose=purp, &
+        attpack=nested_attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a nested Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1433,7 +1434,7 @@ program ESMF_AttributeArrayUTest
       ! Get a char list default Attribute in an Attribute package on an Array Test
       call ESMF_AttributeGet(array, name=attrname, &
         valueList=attpackListOut4, defaultvalueList=attpackDfltList2, &
-        convention=nestconv, purpose=nestpurp, rc=rc)
+        attpack=nested_attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a default Attribute character list in an Attribute package on an Array test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackListOut4 == attpackDfltList2), &
@@ -1444,7 +1445,7 @@ program ESMF_AttributeArrayUTest
       !EX_UTest
       ! Get a char list attribute in an Attribute package on an Array Test
       call ESMF_AttributeGet(array, name=attrname, &
-        valueList=attpackListOut3, convention=conv, purpose=purp, rc=rc)
+        valueList=attpackListOut3, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a char list Attribute in an Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackList == attpackListOut3), &

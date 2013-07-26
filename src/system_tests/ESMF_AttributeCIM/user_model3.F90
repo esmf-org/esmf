@@ -118,7 +118,8 @@ module user_model3
     !
     convCIM = 'CIM 1.5'
     purpComp = 'ModelComp'
-    attpack = ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeAdd(comp, attpack=attpack, &
+    	convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_AttributeSet(comp, 'ShortName', &
@@ -238,8 +239,9 @@ module user_model3
     purpSci = 'SciProp'
     sciPropAtt(1) = 'AtmosphereAtmosDynamicalCoreListOfPrognosticVariables'
     sciPropAtt(2) = 'AtmosphereAtmosDynamicalCoreTopBoundaryCondition'
-    attpack = ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpSci, &
-      attrList=sciPropAtt, rc=rc)
+    call ESMF_AttributeAdd(comp, attpack=attpack, &
+    	convention=convCIM, purpose=purpSci, &
+      	attrList=sciPropAtt, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Scientific Properties: user-specified attributes
@@ -272,7 +274,7 @@ module user_model3
     ! Ozone Field
     Ozone = ESMF_FieldEmptyCreate(name='Ozone', rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    attpack = ESMF_AttributeAdd(Ozone, convention=convCIM, purpose=purpField,rc=rc)
+    call ESMF_AttributeAdd(Ozone, convention=convCIM, purpose=purpField,rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Ozone CF-Extended Attributes
@@ -354,7 +356,8 @@ module user_model3
     ! UM Field
     UM = ESMF_FieldEmptyCreate(name='UM', rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    attpack = ESMF_AttributeAdd(UM, convention=convCIM, purpose=purpField,rc=rc)
+    call ESMF_AttributeAdd(UM, attpack=attpack, &
+    	convention=convCIM, purpose=purpField,rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! UM CF-Extended Attributes

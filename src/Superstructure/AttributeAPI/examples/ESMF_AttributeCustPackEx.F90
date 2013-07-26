@@ -104,7 +104,8 @@ program ESMF_AttributeCustPackEx
       customAttrList(2) = 'CustomAttrName2'
       customAttrList(3) = 'CustomAttrName3'
 
-      attpack = ESMF_AttributeAdd(gridcomp, convention=customConv, &
+      call ESMF_AttributeAdd(gridcomp, attpack=attpack, &
+      	convention=customConv, &
         purpose=customPurp, attrList=customAttrList, rc=rc)
 
 !EOC

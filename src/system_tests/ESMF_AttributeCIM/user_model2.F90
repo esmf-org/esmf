@@ -118,7 +118,8 @@ module user_model2
     purpComp = 'ModelComp'
     ! Specify the Gridded Component to have the default of 1 Responsible
     !   Party sub-package and 1 Citation sub-package
-    attpack = ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeAdd(comp, attpack=attpack, &
+    	convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_AttributeSet(comp, 'ShortName', 'EarthSys_Ocean', &
@@ -243,7 +244,8 @@ module user_model2
     sciPropAtt(1) = 'OceanOceanKeyPropertiesModelFamily'
     sciPropAtt(2) = 'OceanOceanKeyPropertiesBasicApproximations'
     sciPropAtt(3) = 'OceanOceanKeyPropertiesListOfPrognosticVariables'
-    attpack = ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpSci, &
+    call ESMF_AttributeAdd(comp, attpack=attpack, &
+    	convention=convCIM, purpose=purpSci, &
       attrList=sciPropAtt, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -282,7 +284,8 @@ module user_model2
     ! DMS_emi Field
     DMS_emi = ESMF_FieldEmptyCreate(name='DMS_emi', rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    attpack = ESMF_AttributeAdd(DMS_emi, convention=convCIM, purpose=purpField,rc=rc)
+    call ESMF_AttributeAdd(DMS_emi, attpack=attpack, &
+    	convention=convCIM, purpose=purpField,rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
 
@@ -367,7 +370,8 @@ module user_model2
     ! SST Field
     SST = ESMF_FieldEmptyCreate(name='SST', rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    attpack = ESMF_AttributeAdd(SST, convention=convCIM, purpose=purpField,rc=rc)
+    call ESMF_AttributeAdd(SST, attpack=attpack, &
+    	convention=convCIM, purpose=purpField,rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! SST CF-Extended Attributes

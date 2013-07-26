@@ -148,11 +148,12 @@ module user_coupler
     ! Specify the top-level Coupler Component to have 3 Responsible Party
     !   sub-packages and 2 Citation sub-packages
     nameCount = 0
-    attpack = ESMF_AttributeAdd(comp, convention=convCIM, &
-      purpose=purpComp, nestConvention=nestConv, nestPurpose=nestPurp, &
-      nestAttPackInstanceCountList=(/3,2/), &
-      nestAttPackInstanceNameList=nestAttPackName, &
-      nestCount=2, nestAttPackInstanceNameCount=nameCount, rc=rc)
+    call ESMF_AttributeAdd(comp, attpack=attpack, &
+    	convention=convCIM, purpose=purpComp, &
+    	nestConvention=nestConv, nestPurpose=nestPurp, &
+      	nestAttPackInstanceCountList=(/3,2/), &
+      	nestAttPackInstanceNameList=nestAttPackName, &
+      	nestCount=2, nestAttPackInstanceNameCount=nameCount, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Specify the top-level Coupler Component to have a Component Properties
@@ -160,8 +161,9 @@ module user_coupler
     compPropAtt(1) = 'SimulationType'
     compPropAtt(2) = 'SimulationURL'
     compPropAtt(3) = 'Visualization'
-    attpack = ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpProp, &
-      attrList=compPropAtt, rc=rc)
+    call ESMF_AttributeAdd(comp, attpack=attpack, &
+    	convention=convCIM, purpose=purpProp, &
+      	attrList=compPropAtt, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_AttributeSet(comp, 'ShortName', 'EarthSys', &

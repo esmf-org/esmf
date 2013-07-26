@@ -140,8 +140,8 @@ program ESMF_SCompEx
       purpCitation = 'Citation'
 
       ! Add CIM Attribute package to the Science Component
-      attpack = ESMF_AttributeAdd(atmcomp, convention=convCIM, &
-        purpose=purpComp, rc=rc)
+      call ESMF_AttributeAdd(atmcomp, attpack=attpack, &
+      	convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -238,8 +238,8 @@ program ESMF_SCompEx
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
 !BOC
-    attpack = ESMF_AttributeAdd(dc_scicomp,  &
-                           convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeAdd(dc_scicomp,  attpack=attpack, &
+      	convention=convCIM, purpose=purpComp, rc=rc)
 
     call ESMF_AttributeSet(dc_scicomp, "ShortName", "AtmosDynamicalCore", &
                            convention=convCIM, purpose=purpComp, rc=rc)
@@ -255,8 +255,8 @@ program ESMF_SCompEx
     dc_sciPropAtt(2) = 'HeatTreatmentAtTop'
     dc_sciPropAtt(3) = 'WindTreatmentAtTop'
 
-    attpack = ESMF_AttributeAdd(dc_scicomp,  &
-                           convention=convCIM, purpose=purpSci, &
+    call ESMF_AttributeAdd(dc_scicomp,  attpack=attpack, &
+      					   convention=convCIM, purpose=purpComp, &
                            attrList=dc_sciPropAtt, rc=rc)
 
     call ESMF_AttributeSet(dc_scicomp, 'TopBoundaryCondition', &
@@ -284,7 +284,7 @@ program ESMF_SCompEx
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
 !BOC
-    attpack = ESMF_AttributeAdd(adv_scicomp,  &
+    call ESMF_AttributeAdd(adv_scicomp, attpack=attpack, &
                            convention=convCIM, purpose=purpComp, rc=rc)
 
     call ESMF_AttributeSet(adv_scicomp, "ShortName", "AtmosAdvection", &
@@ -298,7 +298,7 @@ program ESMF_SCompEx
     adv_sciPropAtt(2) = 'TracersSchemeCharacteristics'
     adv_sciPropAtt(3) = 'MomentumSchemeName'
 
-    attpack = ESMF_AttributeAdd(adv_scicomp,  &
+    call ESMF_AttributeAdd(adv_scicomp, attpack=attpack, &
                            convention=convCIM, purpose=purpSci, &
                            attrList=adv_sciPropAtt, rc=rc)
 
@@ -325,7 +325,7 @@ program ESMF_SCompEx
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
 !BOC
-    attpack = ESMF_AttributeAdd(rad_scicomp,  &
+    call ESMF_AttributeAdd(rad_scicomp, attpack=attpack, &
                            convention=convCIM, purpose=purpComp, rc=rc)
 
     call ESMF_AttributeSet(rad_scicomp, "ShortName", "AtmosRadiation", &
@@ -339,7 +339,7 @@ program ESMF_SCompEx
     rad_sciPropAtt(1) = 'LongwaveSchemeType'
     rad_sciPropAtt(2) = 'LongwaveSchemeMethod'
 
-    attpack = ESMF_AttributeAdd(rad_scicomp,  &
+    call ESMF_AttributeAdd(rad_scicomp, attpack=attpack, &
                            convention=convCIM, purpose=purpSci, &
                            attrList=rad_sciPropAtt, rc=rc)
 

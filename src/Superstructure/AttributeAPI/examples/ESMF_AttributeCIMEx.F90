@@ -171,7 +171,7 @@ program ESMF_AttributeCIMEx
 !EOE
 
 !BOC
-      attpack = ESMF_AttributeAdd(cplcomp,  &
+      call ESMF_AttributeAdd(cplcomp, attpack=attpack, &
                              convention=convCIM, purpose=purpComp, rc=rc)
 
       call ESMF_AttributeSet(cplcomp, "ShortName", "Driver", &
@@ -229,8 +229,8 @@ program ESMF_AttributeCIMEx
 
 !BOC
       ! Add CIM Attribute package to the gridded Component
-      attpack = ESMF_AttributeAdd(gridcomp, convention=convCIM, &
-        purpose=purpComp, rc=rc)
+      call ESMF_AttributeAdd(gridcomp, attpack=attpack, &
+      	convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -240,7 +240,8 @@ program ESMF_AttributeCIMEx
       ! package with two custom attributes, with user-specified names
       compPropAtt(1) = 'SimulationType'
       compPropAtt(2) = 'SimulationURL'
-      attpack = ESMF_AttributeAdd(gridcomp, convention=convCIM, purpose=purpProp, &
+      call ESMF_AttributeAdd(gridcomp, attpack=attpack, &
+      	convention=convCIM, purpose=purpProp, &
         attrList=compPropAtt, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -248,7 +249,8 @@ program ESMF_AttributeCIMEx
 
       
       ! Add CIM Attribute package to the Field
-      attpack = ESMF_AttributeAdd(ozone, convention=convCIM, purpose=purpField, &
+      call ESMF_AttributeAdd(ozone, attpack=attpack, &
+      	convention=convCIM, purpose=purpField, &
         rc=rc)
 !EOC  
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -501,7 +503,7 @@ program ESMF_AttributeCIMEx
 !EOE
 
 !BOC
-      attpack = ESMF_AttributeAdd(scicomp,  &
+      call ESMF_AttributeAdd(scicomp, attpack=attpack, &
                              convention=convCIM, purpose=purpComp, rc=rc)
 
       call ESMF_AttributeSet(scicomp, "ShortName", "AtmosRadiation", &
@@ -520,7 +522,7 @@ program ESMF_AttributeCIMEx
       rad_sciPropAtt(1) = 'LongwaveSchemeType'
       rad_sciPropAtt(2) = 'LongwaveSchemeMethod'
 
-      attpack = ESMF_AttributeAdd(scicomp,  &
+      call ESMF_AttributeAdd(scicomp, attpack=attpack, &
                              convention=convCIM, purpose=purpSci, &
                              attrList=rad_sciPropAtt, rc=rc)
 

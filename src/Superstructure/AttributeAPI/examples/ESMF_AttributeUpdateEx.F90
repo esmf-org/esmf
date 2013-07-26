@@ -183,8 +183,9 @@ implicit none
 !BOC
       convESMF = 'ESMF'
       purpGen = 'General'
-      attpack = ESMF_AttributeAdd(gridcomp1, convention=convESMF, purpose=purpGen, &
-      rc=rc)
+      call ESMF_AttributeAdd(gridcomp1, attpack=attpack, &
+      	convention=convESMF, purpose=purpGen, &
+      	rc=rc)
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC

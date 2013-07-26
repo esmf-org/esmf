@@ -48,6 +48,7 @@ program ESMF_AttReadGridCompUTest
 
       ! local variables
       type(ESMF_GridComp)    :: gridcomp
+      type(ESMF_Attribute)   :: attpack
       logical                :: xercesNotPresent
       integer                :: rc
 
@@ -119,11 +120,22 @@ print *, 'rc = ', rc
 
       !------------------------------------------------------------------------
       !EX_UTest
+      ! Get ESG General Attribute package from a GridComp Test
+      attrname = 'ComponentShortName'
+      attrvalue = 'GEOS'
+      call ESMF_AttPackGet(gridcomp, attpack=attpack, &
+                             convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Get ESG General Attribute package from a GridComp Test"
+      call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
       ! Get ESG "ComponentShortName" Attribute from a GridComp Test
       attrname = 'ComponentShortName'
       attrvalue = 'GEOS'
       call ESMF_AttributeGet(gridcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'ComponentShortName' Attribute from a GridComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -140,7 +152,7 @@ print *, 'outChar = ', trim(adjustL(outChar))
       attrname = 'ComponentLongName'
       attrvalue = 'Goddard Earth Observing System Model'
       call ESMF_AttributeGet(gridcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'ComponentLongName' Attribute from a GridComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -157,7 +169,7 @@ print *, 'outChar = ', outChar
       attrname = 'Agency'
       attrvalue = 'NASA'
       call ESMF_AttributeGet(gridcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'Agency' Attribute from a GridComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -174,7 +186,7 @@ print *, 'outChar = ', outChar
       attrname = 'Institution'
       attrvalue = 'Global Modeling and Assimilation Office (GMAO)'
       call ESMF_AttributeGet(gridcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'Institution' Attribute from a GridComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -191,7 +203,7 @@ print *, 'outChar = ', outChar
       attrname = 'Version'
       attrvalue = '5'
       call ESMF_AttributeGet(gridcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'Version' Attribute from a GridComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -208,7 +220,7 @@ print *, 'outChar = ', outChar
       attrname = 'Author'
       attrvalue = 'Max Suarez'
       call ESMF_AttributeGet(gridcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'Author' Attribute from a GridComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -225,7 +237,7 @@ print *, 'outChar = ', outChar
       attrname = 'Discipline'
       attrvalue = 'Atmosphere'
       call ESMF_AttributeGet(gridcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'Discipline' Attribute from a GridComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -242,7 +254,7 @@ print *, 'outChar = ', outChar
       attrname = 'PhysicalDomain'
       attrvalue = 'Earth System'
       call ESMF_AttributeGet(gridcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'PhysicalDomain' Attribute from a GridComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -259,7 +271,7 @@ print *, 'outChar = ', outChar
       attrname = 'CodingLanguage'
       attrvalue = 'Fortran 90'
       call ESMF_AttributeGet(gridcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'CodingLanguage' Attribute from a GridComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -276,7 +288,7 @@ print *, 'outChar = ', outChar
       attrname = 'ModelComponentFramework'
       attrvalue = 'ESMF (Earth System Modeling Framework)'
       call ESMF_AttributeGet(gridcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'ModelComponentFramework' Attribute from a GridComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &

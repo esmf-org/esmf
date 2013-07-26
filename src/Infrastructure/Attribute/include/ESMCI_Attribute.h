@@ -532,15 +532,10 @@ extern "C" {
                                   int *count, void *value, int *rc, 
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attpackgetinfoname)(ESMC_Base **base, char *name, 
+								  ESMCI::Attribute **attpack,
                                   ESMC_TypeKind_Flag *tk, int *count,
-                                  char *convention, char *purpose, 
-                                  char *object, char *attPackInstanceName,
                                   int *rc,
-                                  ESMCI_FortranStrLenArg nlen,
-                                  ESMCI_FortranStrLenArg clen, 
-                                  ESMCI_FortranStrLenArg plen, 
-                                  ESMCI_FortranStrLenArg olen,
-                                  ESMCI_FortranStrLenArg alen);
+                                  ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attributegetinfoname)(ESMC_Base **base, char *name, 
                                   ESMC_TypeKind_Flag *tk,
                                   int *count, int *rc,
