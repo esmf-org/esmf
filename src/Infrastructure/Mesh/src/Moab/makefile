@@ -57,4 +57,4 @@ CLOBBERDIRS =
 
 include $(ESMF_DIR)/makefile
 
-DIRS	  = io moab parallel
+DIRS	  = io parallel
