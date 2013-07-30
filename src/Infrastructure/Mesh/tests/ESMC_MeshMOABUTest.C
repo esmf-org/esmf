@@ -43,7 +43,6 @@ int main(void){
   char failMsg[80];
   int result = 0;
   int rc;
-  bool correct;
 
   int localPet, petCount;
   ESMC_VM vm;
@@ -194,19 +193,19 @@ int main(void){
 	EntityHandle ehandle = box->get_element(i, j, k);
 	if (0 == ehandle) {
           rc = ESMF_FAILURE;
-          exit;
+          break;
         }
 	  // 3b. Get the connectivity of the element
 	rval = mb->get_connectivity(&ehandle, 1, connect); // get the connectivity, in canonical order
 	if (MB_SUCCESS != rval) {
           rc = ESMF_FAILURE;
-          exit;
+          break;
         }
 	  // 3c. Get the coordinates of the vertices comprising that element
 	rval = mb->get_coords(connect.data(), connect.size(), coords.data()); // get the coordinates of those vertices
 	if (MB_SUCCESS != rval) {
           rc = ESMF_FAILURE;
-          exit;
+          break;
         }
       }
     }
