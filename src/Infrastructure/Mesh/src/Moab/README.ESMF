@@ -1,0 +1,16 @@
+MOAB directory README
+=====================
+
+Current Notes:
+--------------
+This version of Moab is based on version 4.6.0, obtained from:
+
+  http://ftp.mcs.anl.gov/pub/fathom/moab-4.6.0.tar.gz
+
+The makefiles in the main Moab directory, and the ones in the io
+and parallel directories, are designed to work within the ESMF
+build system.
+
+Older Notes:
+------------
+None.
