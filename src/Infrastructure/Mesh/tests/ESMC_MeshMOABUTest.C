@@ -12,6 +12,8 @@
 
 #include <cstring>
 #include <cstdio>
+#include <vector>
+using namespace std;
 
 #if defined (ESMF_MOAB)
 #include "moab/Core.hpp"
@@ -202,7 +204,7 @@ int main(void){
           break;
         }
 	  // 3c. Get the coordinates of the vertices comprising that element
-	rval = mb->get_coords(connect.data(), connect.size(), coords.data()); // get the coordinates of those vertices
+	rval = mb->get_coords(&connect[0], connect.size(), &coords[0]); // get the coordinates of those vertices
 	if (MB_SUCCESS != rval) {
           rc = ESMF_FAILURE;
           break;
