@@ -69,7 +69,7 @@ class Grid(object):
         num_peri_dims = kwargs.get('num_peri_dims', 0)
         coord_sys = kwargs.get('coord_sys', None)
         coord_typekind = kwargs.get('coord_typekind', None)
-        staggerloc = kwargs.get('staggerloc', StaggerLoc.CENTER)
+        staggerloc = kwargs.get('staggerloc', None)
         fname = kwargs.get('fname', None)
         fileTypeFlag = kwargs.get('fileTypeFlag', None)
 
