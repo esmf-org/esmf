@@ -87,6 +87,7 @@ script_info:
 	-@if [ -n "$(ESMF_OPTLEVEL)" ] ; then \
 	  echo "ESMF_OPTLEVEL:          $(ESMF_OPTLEVEL)" ; fi
 	-@echo "ESMF_COMM:              $(ESMF_COMM)"
+	-@echo "ESMF_MOAB:              $(ESMF_MOAB)"
 	-@echo "ESMF_SITE:              $(ESMF_SITE)"
 	-@echo "ESMF_PTHREADS:          $(ESMF_PTHREADS)"
 	-@echo "ESMF_OPENMP:            $(ESMF_OPENMP)"
