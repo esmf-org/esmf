@@ -70,9 +70,11 @@ class Grid(object):
         coord_sys = kwargs.get('coord_sys', None)
         coord_typekind = kwargs.get('coord_typekind', None)
         staggerloc = kwargs.get('staggerloc', StaggerLoc.CENTER)
+        fname = kwargs.get('fname', None)
+        fileTypeFlag = kwargs.get('fileTypeFlag', None)
 
         # ctypes stuff
-        self.struct = ESMP_GridStruct()
+        self.struct = None
 
         # type, kind, rank, etc.
         self.type = TypeKind.R8
@@ -110,16 +112,24 @@ class Grid(object):
         self.item_done = [None]
 
         # create the correct grid
-        if num_peri_dims == 0:
-            self.struct = ESMP_GridCreateNoPeriDim(self.max_index, 
-                                                   coordSys=coord_sys,
-                                                   coordTypeKind=coord_typekind)
-        elif (num_peri_dims == 1):
-            self.struct = ESMP_GridCreate1PeriDim(self.max_index, 
-                                                  coordSys=coord_sys,
-                                                  coordTypeKind=coord_typekind)
+        self.struct = None
+        if fname:
+            #print 'Creating grid from ', fname
+            self.struct = ESMP_GridCreateFromFile(fname, fileTypeFlag,
+                                                  np.array([1,1]))
         else:
-            raise TypeError("Number of periodic dimension should be 2 or 3")
+            # ctypes stuff
+            self.struct = ESMP_GridStruct()
+            if num_peri_dims == 0:
+                self.struct = ESMP_GridCreateNoPeriDim(self.max_index, 
+                                                       coordSys=coord_sys,
+                                                       coordTypeKind=coord_typekind)
+            elif (num_peri_dims == 1):
+                self.struct = ESMP_GridCreate1PeriDim(self.max_index, 
+                                                      coordSys=coord_sys,
+                                                      coordTypeKind=coord_typekind)
+            else:
+                raise TypeError("Number of periodic dimension should be 2 or 3")
 
         # grid type
         if coord_typekind == None:

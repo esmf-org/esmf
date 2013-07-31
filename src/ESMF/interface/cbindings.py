@@ -371,6 +371,32 @@ def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
     # create the ESMP Grid object from ctypes pointer
     return copy(gridstruct)
 
+_ESMF.ESMC_GridCreateFromFile.restype = ESMP_GridStruct
+_ESMF.ESMC_GridCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
+					  np.ctypeslib.ndpointer(dtype=np.int32), \
+					  ct.POINTER(ct.c_int)]
+def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp):
+  """
+  Preconditions: ESMP has been initialized.\n
+  Postconditions: An ESMP_Grid has been created.\n
+  Arguments:\n
+    :RETURN: ESMP_Grid                  :: grid\n
+    string                              :: filename\n
+    ESMP_FileFormat                     :: fileTypeFlag\n
+                                           Argument Values:\n
+                                           ESMP_FILEFORMAT_SCRIP\n
+                                           ESMP_FILEFORMAT_ESMFMESH\n
+                                           ESMP_FILEFORMAT_UGRID\n
+    """
+  lrc = ct.c_int(0)
+  regDecompD = np.array(regDecomp, dtype=np.int32)
+  gridstruct = _ESMF.ESMC_GridCreateFromFile(filename, fileTypeFlag, regDecompD,
+					     ct.byref(lrc))
+  rc = lrc.value
+  if rc != constants.ESMP_SUCCESS:
+    raise NameError('ESMC_GridCreateFromFile() failed with rc = '+str(rc))
+  return gridstruct
+
 _ESMF.ESMC_GridDestroy.restype = ct.c_int
 _ESMF.ESMC_GridDestroy.argtypes = [ct.c_void_p]
 @deprecated
@@ -528,7 +554,33 @@ def ESMP_GridGetCoordPtr(grid, coordDim,
         raise ValueError('ESMC_GridGetCoord() failed with rc = '+str(rc)+'.    '+
                         constants.errmsg)
 
-    return gridCoordPtr
+    # Handle the gridCoordPtr
+    # first need to find the correct size
+    size = grid.size[staggerloc]
+
+    # TODO: deal with types issue more cleanly
+    if grid.type == constants.TypeKind.R8:
+        gridbuffer = np.core.multiarray.int_asbuffer(
+            ct.addressof(gridCoordPtr.contents),
+        np.dtype(np.float64).itemsize*size)
+        gridCoordP = np.frombuffer(gridbuffer, np.float64)
+    elif grid.type == constants.TypeKind.R4:
+        gridbuffer = np.core.multiarray.int_asbuffer(
+        ct.addressof(gridCoordPtr.contents),
+        np.dtype(np.float32).itemsize*size)
+        gridCoordP = np.frombuffer(gridbuffer, np.float32)
+    elif grid.type == constants.TypeKind.I8:
+        gridbuffer = np.core.multiarray.int_asbuffer(
+            ct.addressof(gridCoordPtr.contents),
+            np.dtype(np.int64).itemsize*size)
+        gridCoordP = np.frombuffer(gridbuffer, np.int64)
+    elif grid.type == constants.TypeKind.I4:
+        gridbuffer = np.core.multiarray.int_asbuffer(
+            ct.addressof(gridCoordPtr.contents),
+            np.dtype(np.int32).itemsize*size)
+        gridCoordP = np.frombuffer(gridbuffer, np.int32)
+    return gridCoordP
+
 
 _ESMF.ESMC_GridGetCoordBounds.restype = ct.c_int
 _ESMF.ESMC_GridGetCoordBounds.argtypes = [ct.c_void_p, ct.c_uint,
