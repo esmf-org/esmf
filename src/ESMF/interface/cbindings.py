@@ -554,32 +554,7 @@ def ESMP_GridGetCoordPtr(grid, coordDim,
         raise ValueError('ESMC_GridGetCoord() failed with rc = '+str(rc)+'.    '+
                         constants.errmsg)
 
-    # Handle the gridCoordPtr
-    # first need to find the correct size
-    size = grid.size[staggerloc]
-
-    # TODO: deal with types issue more cleanly
-    if grid.type == constants.TypeKind.R8:
-        gridbuffer = np.core.multiarray.int_asbuffer(
-            ct.addressof(gridCoordPtr.contents),
-        np.dtype(np.float64).itemsize*size)
-        gridCoordP = np.frombuffer(gridbuffer, np.float64)
-    elif grid.type == constants.TypeKind.R4:
-        gridbuffer = np.core.multiarray.int_asbuffer(
-        ct.addressof(gridCoordPtr.contents),
-        np.dtype(np.float32).itemsize*size)
-        gridCoordP = np.frombuffer(gridbuffer, np.float32)
-    elif grid.type == constants.TypeKind.I8:
-        gridbuffer = np.core.multiarray.int_asbuffer(
-            ct.addressof(gridCoordPtr.contents),
-            np.dtype(np.int64).itemsize*size)
-        gridCoordP = np.frombuffer(gridbuffer, np.int64)
-    elif grid.type == constants.TypeKind.I4:
-        gridbuffer = np.core.multiarray.int_asbuffer(
-            ct.addressof(gridCoordPtr.contents),
-            np.dtype(np.int32).itemsize*size)
-        gridCoordP = np.frombuffer(gridbuffer, np.int32)
-    return gridCoordP
+    return gridCoordPtr
 
 
 _ESMF.ESMC_GridGetCoordBounds.restype = ct.c_int

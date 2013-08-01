@@ -583,15 +583,24 @@ class Grid(object):
             self.link_coord_buffer(z, stagger)
 
     def link_coord_buffer(self, coord_dim, stagger):
-        from operator import mul
 
         if self.coords_done[stagger][coord_dim]:
             raise GridCoordsAlreadyLinked
 
+        gridCoordP = self.get_grid_coords_from_esmc(coord_dim, stagger)
+
+        # alias the coordinates to a grid property
+        self.coords[stagger][coord_dim] = gridCoordP.view()
+
+        # set flag to tell this coordinate has been aliased
+        self.coords_done[stagger][coord_dim] = True
+
+    def get_grid_coords_from_esmc(self, coord_dim, stagger):
         # get the pointer to the underlying ESMF data array for coordinates
         coords_out = ESMP_GridGetCoordPtr(self, coord_dim, staggerloc=stagger)
 
         # find the size of the local coordinates at this stagger location
+        from operator import mul
         size = reduce(mul,self.size_local[stagger])
 
         # create a numpy array to point to the ESMF allocation
@@ -603,11 +612,8 @@ class Grid(object):
         # reshape the numpy array of coordinates using Fortran ordering in Grid
         gridCoordP = np.reshape(gridCoordP, self.size_local[stagger], order='F')
 
-        # alias the coordinates to a grid property
-        self.coords[stagger][coord_dim] = gridCoordP.view()
+        return gridCoordP
 
-        # set flag to tell this coordinate has been aliased
-        self.coords_done[stagger][coord_dim] = True
 
     def allocate_items(self, item, stagger):
         # this could be one of several entry points to the grid,
@@ -705,31 +711,16 @@ class Grid(object):
         [x, y, z] = [0, 1, 2]
 
         # retrieve buffers to esmf coordinate memory
-        gridptrX = ESMP_GridGetCoordPtr(self, x, staggerloc=stagger)
-        gridptrY = ESMP_GridGetCoordPtr(self, y, staggerloc=stagger)
+        gridptrX = self.get_grid_coords_from_esmc(x, stagger)
+        gridptrY = self.get_grid_coords_from_esmc(y, stagger)
         if self.rank == 3:
-            gridptrZ = ESMP_GridGetCoordPtr(self, z, staggerloc=stagger)
-
-        # find the reduced size of the coordinate arrays
-        size = reduce(mul,self.size_local[stagger])
+            gridptrZ = self.get_grid_coords_from_esmc(z, stagger)
 
         # create a numpy array for the esmf coordinate
         esmf_coords = 999*np.zeros(shape=(size,self.rank))
 
-        # loop through and alias esmf data to numpy arrays
-        gridbuffer = np.core.multiarray.int_asbuffer(
-            ct.addressof(gridptrX.contents),
-            np.dtype(ESMF2PythonType[self.type]).itemsize*size)
-        esmf_coords[:,x] = np.frombuffer(gridbuffer, ESMF2PythonType[self.type])
-        gridbuffer = np.core.multiarray.int_asbuffer(
-            ct.addressof(gridptrY.contents),
-            np.dtype(ESMF2PythonType[self.type]).itemsize*size)
-        esmf_coords[:,y] = np.frombuffer(gridbuffer, ESMF2PythonType[self.type])
-        if self.rank == 3:
-            gridbuffer = np.core.multiarray.int_asbuffer(
-                ct.addressof(gridptrZ.contents),
-                np.dtype(ESMF2PythonType[self.type]).itemsize*size)
-            esmf_coords[:,z] = np.frombuffer(gridbuffer, 
-                                             ESMF2PythonType[self.type])
+        esmf_coords[:,x] = gridptrX
+        esmf_coords[:,y] = gridptrY
+        esmf_coords[:,z] = gridptrZ
 
         print esmf_coords
