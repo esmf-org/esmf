@@ -26,7 +26,7 @@ else:
 
 for test in regridtestfiles:
     if ESMF.constants._ESMF_OS is ESMF.constants._ESMF_OS_UNICOS:
-        os.system("aprun -n 1 "+test+" >> "+regridtestoutfile+" 2>&1")
+        os.system("aprun -n 1 -a xt python "+test+" >> "+regridtestoutfile+" 2>&1")
     else:
         os.system("python "+test+" >> "+regridtestoutfile+" 2>&1")
 

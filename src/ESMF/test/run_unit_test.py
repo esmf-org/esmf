@@ -8,7 +8,7 @@ utestfile=os.path.join('./src/ESMF/test/','unit_test.py')
 utestoutfile='run_unit_test.log'
 
 if ESMF.constants._ESMF_OS is ESMF.constants._ESMF_OS_UNICOS:
-    os.system("aprun -n 1 -a xt "+utestfile+" > "+utestoutfile+" 2>&1")
+    os.system("aprun -n 1 -a xt python "+utestfile+" > "+utestoutfile+" 2>&1")
 else:
     os.system("python "+utestfile+" > "+utestoutfile+" 2>&1")
 

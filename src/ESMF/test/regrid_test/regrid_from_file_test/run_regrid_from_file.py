@@ -9,7 +9,7 @@ rtestfile=os.path.join(REGRID_TEST_DIR, 'regrid_check_driver.py')
 rtestoutfile='run_regrid_from_file.log'
 
 if ESMF.constants._ESMF_OS is ESMF.constants._ESMF_OS_UNICOS:
-    os.system("aprun -n 1 -a xt "+rtestfile+" > "+rtestoutfile+" 2>&1")
+    os.system("aprun -n 1 -a xt python "+rtestfile+" > "+rtestoutfile+" 2>&1")
 else:
     os.system("python "+rtestfile+" > "+rtestoutfile+" 2>&1")
 
