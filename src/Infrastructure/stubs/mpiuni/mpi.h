@@ -130,11 +130,21 @@ extern int MPIUNI_Memcpy(void*,const void*,int);
 #define MPI_MAX_ERROR_STRING 512
 typedef long MPI_Aint;
 
+/* Collective operators.  Same values used in mpif.h */
 typedef int MPI_Op;
 
+#define MPI_OP_NULL     (-1)
 #define MPI_SUM           0
 #define MPI_MIN           1
 #define MPI_MAX           2
+#define MPI_PROD          3
+#define MPI_LAND          4
+#define MPI_BAND          5
+#define MPI_LOR           6
+#define MPI_BOR           7
+#define MPI_LXOR          8
+#define MPI_BXOR          9
+
 #define MPI_ANY_TAG     (-1)
 
 /* the following values _must_ be monotonic according to MPI standard */
