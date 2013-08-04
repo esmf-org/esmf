@@ -2754,14 +2754,14 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
-      subroutine mclass##AttAddPackCst(mthis, convention, purpose, & @\
-      attrList, count, attpack, rc) @\
+      subroutine mclass##AttAddPackCst(mthis, attrList, convention, purpose, & @\
+      count, attpack, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
+      character (len = *), dimension(:), intent(in) :: attrList @\
       character (len = *), intent(in) :: convention @\
       character (len = *), intent(in) :: purpose @\
-      character (len = *), dimension(:), intent(in) :: attrList @\
       integer, intent(in), optional :: count @\
  	  type(ESMF_Attribute), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
@@ -2775,14 +2775,12 @@ contains
 !     \begin{description} @\
 !     \item [mthis] @\
 !      An ESMF object. @\
-!     \item [attpack] @\
-!      The Attribute package to be created. @\
+!     \item [attrList] @\
+!      An array of character strings specifying the names of the user defined Attributes @\
 !     \item [convention] @\
 !      The convention of the new Attribute package. @\
 !     \item [purpose] @\
 !      The purpose of the new Attribute package. @\
-!     \item [attrList] @\
-!      An array of character strings specifying the names of the user defined Attributes @\
 !     \item [{[count]}] @\
 !      The count of the number of Attributes to add to the package @\
 !     \item [{[attpack}]] @\
@@ -2864,9 +2862,9 @@ contains
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
+      character (len = *), dimension(:), intent(in), optional :: attrList @\
       character (len = *), intent(in) :: convention @\
       character (len = *), intent(in) :: purpose @\
-      character (len = *), dimension(:), intent(in), optional :: attrList @\
       integer, intent(in), optional :: count @\
       character (len = *), dimension(:), intent(in) :: nestConvention @\
       character (len = *), dimension(:), intent(in) :: nestPurpose @\
@@ -2885,14 +2883,12 @@ contains
 !     \begin{description} @\
 !     \item [mthis] @\
 !      An ESMF object. @\
-!     \item [attpack] @\
-!      The Attribute package to be created. @\
+!     \item [{[attrList]}] @\
+!      An array of character strings specifying the names of the user defined Attributes @\
 !     \item [convention] @\
 !      The convention of the new Attribute package. @\
 !     \item [purpose] @\
 !      The purpose of the new Attribute package. @\
-!     \item [{[attrList]}] @\
-!      An array of character strings specifying the names of the user defined Attributes @\
 !     \item [{[count]}] @\
 !      The count of the number of Attributes to add to the package @\
 !     \item [nestConvention] @\
@@ -3024,14 +3020,14 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
-      subroutine mclass##AttAddPackCstN1(mthis, convention, purpose, & @\
-      attrList, count, nestConvention, nestPurpose, attpack, rc) @\
+      subroutine mclass##AttAddPackCstN1(mthis, attrList, convention, purpose, & @\
+      count, nestConvention, nestPurpose, attpack, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
+      character (len = *), dimension(:), intent(in), optional :: attrList @\
       character (len = *), intent(in) :: convention @\
       character (len = *), intent(in) :: purpose @\
-      character (len = *), dimension(:), intent(in), optional :: attrList @\
       integer, intent(in), optional :: count @\
       character (len = *), intent(in) :: nestConvention @\
       character (len = *), intent(in) :: nestPurpose @\
@@ -3049,14 +3045,12 @@ contains
 !     \begin{description} @\
 !     \item [mthis] @\
 !      An ESMF object. @\
-!     \item [attpack] @\
-!      The Attribute package to be created. @\
+!     \item [{[attrList]}] @\
+!      An array of character strings specifying the names of the user defined Attributes @\
 !     \item [convention] @\
 !      The convention of the new Attribute package. @\
 !     \item [purpose] @\
 !      The purpose of the new Attribute package. @\
-!     \item [{[attrList]}] @\
-!      An array of character strings specifying the names of the user defined Attributes @\
 !     \item [{[count]}] @\
 !      The count of the number of Attributes to add to the package @\
 !     \item [nestConventio] @\
