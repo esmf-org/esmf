@@ -1226,8 +1226,8 @@ contains
 
 !
 ! !ARGUMENTS:
-    character(len=ESMF_MAXSTR), intent(in)              :: filename
-    integer,                    intent(out),   optional :: rc
+    character(*), intent(in)              :: filename
+    integer,      intent(out),   optional :: rc
 !
 !
 ! !DESCRIPTION:
@@ -1250,7 +1250,7 @@ contains
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
 
-    call c_ESMC_AddOutputFilename(filename, localrc)
+    call c_ESMC_AddOutputFilename(trim (filename), localrc)
 
     rc = localrc
 
