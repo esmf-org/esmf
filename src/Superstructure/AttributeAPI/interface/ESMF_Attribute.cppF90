@@ -4363,7 +4363,7 @@ contains
       character (len=*), intent(in) :: name @\
       logical, dimension(:), intent(out) :: valueList @\
       logical, dimension(:), intent(in), optional :: defaultvalueList @\
- 	  type(ESMF_Attribute), intent(in), optional :: attpack @\
+ 	    type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(out), optional :: itemCount    @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
@@ -5536,16 +5536,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
-      subroutine mclass##AttSet##mtypekind(mthis, name, value, convention, & @\
-        purpose, attPackInstanceName, rc) @\
+      subroutine mclass##AttSet##mtypekind(mthis, name, value, attpack, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), intent(in) :: value @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
-      character (len = *), intent(in), optional :: attPackInstanceName @\
+      type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -5561,15 +5558,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The integer value of the Attribute to add. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  (Not implemented yet) @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -5579,13 +5569,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       integer :: localrc  @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: attpack @\
       integer :: count @\
       character (len=ESMF_MAXSTR) :: modName @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
-      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -5608,21 +5596,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return @\
       endif @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        attpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (attpack == ESMF_TRUE) then @\
+      if (present(attpack)) then @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, count, value, & @\
-          convention, purpose, fobject, attPackInstanceName, localrc) @\
+          attpack, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, count, value, localrc) @\
@@ -5644,15 +5621,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSet1D##mtypekind(mthis, name, valueList, & @\
-        convention, purpose, attPackInstanceName, itemCount, rc) @\
+        attpack, itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in) :: valueList @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
-      character (len = *), intent(in), optional :: attPackInstanceName @\
+      type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(in), optional :: itemCount    @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -5671,15 +5646,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of the Attribute to add. @\
 !     \item [valueList] @\
 !           The integer values of the Attribute to add. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  (Not implemented yet) @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[itemCount]}] @\
 !           The number of integers in the {\tt valueList}. @\
 !     \item [{[rc]}]  @\
@@ -5691,12 +5659,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
       integer :: localrc, litemCount @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
-      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -5736,21 +5702,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return @\
       endif @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        attpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (attpack == ESMF_TRUE) then @\
+      if (present(attpack)) then @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-          convention, purpose, fobject, attPackInstanceName, localrc) @\
+          attpack, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, litemCount, valueList, localrc) @\
@@ -5773,16 +5728,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
-      subroutine mclass##AttSetLgcl(mthis, name, value, convention, & @\
-        purpose, attPackInstanceName, rc) @\
+      subroutine mclass##AttSetLgcl(mthis, name, value, attpack, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       logical, intent(in) :: value @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
-      character (len = *), intent(in), optional :: attPackInstanceName @\
+      type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -5798,15 +5750,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The logical true/false value of the Attribute to add. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  (Not implemented yet) @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -5817,19 +5762,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: localvalue @\
-      type(ESMF_Logical) :: attpack @\
       integer :: count @\
       character (len=ESMF_MAXSTR) :: modName @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
-      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-       !!!! TODO: this can go away once modName is dynamically sized !!! @\
+      !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
           msg="len(name) cannot be larger than ESMF_MAXSTR for now", & @\
@@ -5843,25 +5786,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
-@\
-     count = 1 @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        attpack = ESMF_TRUE @\
-      endif @\
+      count = 1 @\
  @\
       localvalue = value @\
-      if (attpack == ESMF_TRUE) then @\
+      if (present(attpack)) then @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, count, localvalue, & @\
-          convention, purpose, fobject, attPackInstanceName, localrc) @\
+          attpack, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, count, localvalue, localrc) @\
@@ -5882,16 +5814,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
-      subroutine mclass##AttSetLgclList(mthis, name, valueList, & @\
-        convention, purpose, attPackInstanceName, itemCount, rc) @\
+      subroutine mclass##AttSetLgclList(mthis, name, valueList, attpack, & @\
+        itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       logical, dimension(:), intent(in) :: valueList @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
-      character (len = *), intent(in), optional :: attPackInstanceName @\
+      type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(in), optional :: itemCount    @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -5910,15 +5840,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The logical true/false values of the Attribute. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance.  (Not implemented yet) @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[itemCount]}] @\
 !           The number of logicals in the {\tt valueList}. @\
 !     \item [{[rc]}]  @\
@@ -5930,12 +5853,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       integer :: localrc, litemCount @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
-      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -5975,21 +5896,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return @\
       endif @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        attpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (attpack == ESMF_TRUE) then @\
+      if (present(attpack)) then @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-          convention, purpose, fobject, attPackInstanceName, localrc) @\
+          attpack, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
@@ -6012,16 +5922,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
-      subroutine mclass##AttSetChar(mthis, name, value, convention, & @\
-        purpose, attPackInstanceName, rc) @\
+      subroutine mclass##AttSetChar(mthis, name, value, attpack, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       character (len = *), intent(in) :: value @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
-      character (len = *), intent(in), optional :: attPackInstanceName @\
+      type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -6037,15 +5944,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The character value of the Attribute to add. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance. @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -6056,13 +5956,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
       integer, dimension(1) :: lens @\
-      type(ESMF_Logical) :: attpack @\
       integer :: count @\
       character (len=ESMF_MAXSTR) :: modName @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
-      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -6086,26 +5984,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       lens(1) = len_trim(value) @\
       count = 1 @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        attpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (attpack == ESMF_TRUE) then @\
-!        call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
-!          ESMF_TYPEKIND_CHARACTER, convention, purpose, fobject, & @\
-!          attPackInstanceName, localrc) @\
+      if (present(attpack)) then @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-          count, value, lens, convention, purpose, fobject, & @\
-          attPackInstanceName, localrc) @\
+          count, value, lens, attpack, localrc) @\
       else @\
-!        call c_ESMC_AttributeSetChar(mthisfield, name, value, localrc) @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           count, value, lens, localrc) @\
       endif @\
@@ -6126,15 +6008,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetCharList(mthis, name, valueList, & @\
-        convention, purpose, attPackInstanceName, itemCount, rc) @\
+        attpack, itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
       character(len=*), intent(in) :: name @\
       character (len = *), dimension(:), intent(in) :: valueList @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
-      character (len = *), intent(in), optional :: attPackInstanceName @\
+      type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(in), optional :: itemCount @\
       integer, intent(out), optional :: rc @\
  @\
@@ -6151,15 +6031,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The character value of the Attribute to add. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance. (Not implemented yet) @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -6171,12 +6044,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), parameter :: fobject=#mthis @\
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
-      type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
 @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
-      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -6223,21 +6094,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         j = j + lens(i) @\
       enddo @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        attpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (attpack == ESMF_TRUE) then @\
+      if (present(attpack)) then @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-          litemCount, valueString, lens, convention, purpose, fobject, & @\
-          attPackInstanceName, localrc) @\
+          litemCount, valueString, lens, attpack, localrc) @\
       else @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, localrc) @\
@@ -6259,16 +6118,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetChar(mthis, name, value, inputList, & @\
-        convention, purpose, attPackInstanceName, rc) @\
+        attpack, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
       character (len = *), intent(in) :: name @\
       character (len = *), intent(in) :: value @\
       character (len = *), intent(in), optional :: inputList(:) @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
-      character (len = *), intent(in), optional :: attPackInstanceName @\
+      type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -6286,15 +6143,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The character value of the Attribute to add. @\
 !     \item [{[inputList]}] @\
 !           A list of the input parameters required to set internal info. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance. @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -6305,7 +6155,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc, memstat @\
       character(len=*), parameter :: fobject=#mthis @\
       integer, allocatable :: lens(:) @\
-      type(ESMF_Logical) :: attpack @\
       integer :: litemCount, i, j @\
       character (len=ESMF_MAXSTR) :: modName @\
       character, allocatable :: valueString(:) @\
@@ -6314,7 +6163,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
-      attpack = ESMF_FALSE @\
       tag_size = 6 ! ':Input:' is 7 characters long @\
  @\
       ! check variables @\
@@ -6392,29 +6240,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         enddo @\
       endif @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          deallocate(lens) @\
-          deallocate(valueString) @\
-          return @\
-        endif @\
-        attpack = ESMF_TRUE @\
-      endif @\
  @\
-      if (attpack == ESMF_TRUE) then @\
-!        call c_ESMC_AttPackSetChar(mthisfield, name, value, & @\
-!          ESMF_TYPEKIND_CHARACTER, convention, purpose, fobject, & @\
-!          attPackInstanceName, localrc) @\
- @\
+      if (present(attpack)) then @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-          litemCount, valueString, lens, convention, purpose, fobject, & @\
-          attPackInstanceName, localrc) @\
+          litemCount, valueString, lens, attpack, localrc) @\
       else @\
-!        call c_ESMC_AttributeSetChar(mthisfield, name, value, localrc) @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, localrc) @\
       endif @\
@@ -6440,15 +6270,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetCharList(mthis, name, valueList, & @\
-        convention, purpose, attPackInstanceName, itemCount, rc) @\
+        attpack, itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
       character(len=*), intent(in) :: name @\
       character (len = *), dimension(:), intent(in) :: valueList @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
-      character (len = *), intent(in), optional :: attPackInstanceName @\
+      type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(in), optional :: itemCount @\
       integer, intent(out), optional :: rc @\
  @\
@@ -6465,15 +6293,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The character value of the Attribute to add. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance. (Not implemented yet) @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -6485,12 +6306,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), parameter :: fobject=#mthis @\
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
-      type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
 @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
-      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -6537,21 +6356,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         j = j + lens(i) @\
       enddo @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        attpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (attpack == ESMF_TRUE) then @\
+      if (present(attpack)) then @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-          litemCount, valueString, lens, convention, purpose, fobject, & @\
-          attPackInstanceName, localrc) @\
+          litemCount, valueString, lens, attpack, localrc) @\
       else @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, localrc) @\

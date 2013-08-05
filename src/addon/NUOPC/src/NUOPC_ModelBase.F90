@@ -127,6 +127,7 @@ module NUOPC_ModelBase
     ! local variables    
     character(len=NUOPC_PhaseMapStringLength) :: initPhases(4)
     character(ESMF_MAXSTR):: name
+    type(ESMF_Attribute) :: attpack
 
     rc = ESMF_SUCCESS
 
@@ -140,9 +141,16 @@ module NUOPC_ModelBase
     initPhases(3) = "IPDv00p3=3"
     initPhases(4) = "IPDv00p4=4"
     
+    call ESMF_AttPackGet(gcomp, attpack, &
+      convention="NUOPC", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
     call ESMF_AttributeSet(gcomp, &
       name="InitializePhaseMap", valueList=initPhases, &
-      convention="NUOPC", purpose="General", rc=rc)
+      attpack=attpack, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
