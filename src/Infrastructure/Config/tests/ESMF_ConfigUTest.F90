@@ -51,8 +51,8 @@ module config_subrs
    
 
 
-      character(len=255) :: fname = 'ESMF_Resource_File_Sample.rc'
-      character(len=255) :: restart_file
+      character(*), parameter :: fname = 'ESMF_Resource_File_Sample.rc'
+      character(len=ESMF_MAXPATHLEN) :: restart_file
       integer :: rc, npets
       logical :: unique
       integer   :: nDE
@@ -173,7 +173,7 @@ module config_subrs
 !--------------------------------------------------------------------
       integer, parameter   :: nDE_0 = 32      
       real(ESMF_KIND_R4), parameter      :: tau_0 = 14.0
-      character(ESMF_MAXSTR), parameter :: restart_file_0 = 'RestartFile123'
+      character(*), parameter :: restart_file_0 = 'RestartFile123'
       character(ESMF_MAXSTR), parameter   :: answer_0 = 'y'
       logical, parameter     :: optimize_0 = .false.
       character(ESMF_MAXSTR) :: failMsg
