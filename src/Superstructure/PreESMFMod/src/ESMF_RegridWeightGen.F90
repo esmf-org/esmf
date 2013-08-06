@@ -1416,6 +1416,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical,                      intent(in),  optional :: verboseFlag
   integer,                      intent(out), optional :: rc
 
+!EOP
       
       type(ESMF_RegridMethod_Flag) :: localRegridMethod
       logical            :: localUserAreaFlag
