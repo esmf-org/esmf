@@ -1163,32 +1163,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! write works, then make area io parallel
       if (isConserve) then
          if (srcIsReg) then
-            call computeAreaGrid(srcGrid, PetNo, srcArea, regridScheme, rc)
+            call computeAreaGrid(srcGrid, PetNo, srcArea, regridScheme, localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
           else
-            call computeAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, rc)
+            call computeAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_MeshMergeSplitSrcInd(srcMesh,factorIndexList,rc)
+            call ESMF_MeshMergeSplitSrcInd(srcMesh,factorIndexList,localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
          endif
 
          if (dstIsReg) then
-            call computeAreaGrid(dstGrid, PetNo, dstArea, regridScheme, rc)
+            call computeAreaGrid(dstGrid, PetNo, dstArea, regridScheme, localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
           else
-            call computeAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, rc)
+            call computeAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_MeshMergeSplitDstInd(dstMesh,factorList,factorIndexList,rc)
+            call ESMF_MeshMergeSplitDstInd(dstMesh,factorList,factorIndexList,localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1653,19 +1653,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! Area only valid on PET 0 right now, when parallel Array
         ! write works, then make area io parallel
         if (isConserve) then
-            call computeAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, rc)
+            call computeRedistAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_MeshMergeSplitSrcInd(srcMesh,factorIndexList,rc)
+            call ESMF_MeshMergeSplitSrcInd(srcMesh,factorIndexList,localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
-            call computeAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, rc)
+            call computeRedistAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_MeshMergeSplitDstInd(dstMesh,factorList,factorIndexList,rc)
+            call ESMF_MeshMergeSplitDstInd(dstMesh,factorList,factorIndexList,localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1697,13 +1697,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
         else
-            call gatherFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
+            call gatherRedistFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
                  srcFrac, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
 
-            call gatherFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
+            call gatherRedistFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
                  dstFrac, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1860,12 +1860,12 @@ end subroutine computeAreaGrid
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "computeAreaMesh"
+#define ESMF_METHOD "computeRedistAreaMesh"
 
 ! For now just put into a 1D array on PET 0. When PIO array write is done, then
 ! do it in parallel
 ! AREA ONLY VALID ON PET 0
-subroutine computeAreaMesh(mesh, vm, petNo, petCnt, area, rc)
+subroutine computeRedistAreaMesh(mesh, vm, petNo, petCnt, area, rc)
   type(ESMF_Mesh) :: mesh
   type(ESMF_VM) :: VM
   integer :: petNo,petCnt
@@ -1922,10 +1922,12 @@ subroutine computeAreaMesh(mesh, vm, petNo, petCnt, area, rc)
                          ESMF_CONTEXT, rcToReturn=rc)) return
   endif
 
+  ! The element disgrid is for the split elements, thus the following code
+  ! doesn't work with split element
   call ESMF_MeshGet(mesh, elementDistgrid=distgrid, rc=rc)
-  if (rc /=ESMF_SUCCESS) then
-      return
-  endif
+  if (ESMF_LogFoundError(localrc, &
+                         ESMF_ERR_PASSTHRU, &
+                         ESMF_CONTEXT, rcToReturn=rc)) return
 
   areaArray = ESMF_ArrayCreate(distgrid, localArea, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
@@ -1943,7 +1945,8 @@ subroutine computeAreaMesh(mesh, vm, petNo, petCnt, area, rc)
        ESMF_CONTEXT, rcToReturn=rc)) return
 
   totalCount=globalCount(1)
-  
+  print *, 'local element ', localElemCount, totalCount
+
   ! Create distgrid with everything on PET 0
   justPet0Distgrid = ESMF_DistGridCreate((/1/),(/totalCount/), regDecomp=(/1/),&
   		     rc=localrc) 
@@ -1988,8 +1991,122 @@ subroutine computeAreaMesh(mesh, vm, petNo, petCnt, area, rc)
   ! Get rid of helper variables
   call ESMF_ArrayDestroy(areaArray)
   deallocate(localArea) 
-  call ESMF_ArrayDestroy(justPet0Array)
-  call ESMF_DistGridDestroy(justPet0Distgrid)
+  ! call ESMF_ArrayDestroy(justPet0Array)
+  ! call ESMF_DistGridDestroy(justPet0Distgrid)
+
+end subroutine computeRedistAreaMesh
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "computeAreaMesh"
+
+! For now just put into a 1D array on PET 0. When PIO array write is done, then
+! do it in parallel
+! AREA ONLY VALID ON PET 0
+subroutine computeAreaMesh(mesh, vm, petNo, petCnt, area, rc)
+  type(ESMF_Mesh) :: mesh
+  type(ESMF_VM) :: VM
+  integer :: petNo,petCnt
+  real (ESMF_KIND_R8), pointer :: area(:)
+  integer :: rc
+  real (ESMF_KIND_R8), pointer :: localArea(:)
+  integer :: localrc
+  integer :: localElemCount,i
+  integer (ESMF_KIND_I4) :: localCount(1)
+  integer (ESMF_KIND_I4),pointer :: globalCount(:),globalDispl(:)
+  integer :: totalCount
+  logical :: hasSplitElem
+ 
+  ! Find out if elements are split
+  call ESMF_MeshGetElemSplit(mesh, hasSplitElem=hasSplitElem, rc=localrc)  
+  if (ESMF_LogFoundError(localrc, &
+                         ESMF_ERR_PASSTHRU, &
+                         ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Get area depending on split elements
+  if (hasSplitElem) then 
+     ! Get local size of mesh areas before split
+     call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, &
+            rc=localrc)  
+     if (ESMF_LogFoundError(localrc, &
+                         ESMF_ERR_PASSTHRU, &
+                         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! allocate space for areas
+    allocate(localArea(localElemCount))
+
+    ! Get local Areas
+    call ESMF_MeshGetOrigElemArea(mesh, areaList=localArea, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+                         ESMF_ERR_PASSTHRU, &
+                         ESMF_CONTEXT, rcToReturn=rc)) return
+  else 
+     ! Get local size of mesh areas
+     call ESMF_MeshGet(mesh, numOwnedElements=localElemCount, &
+            rc=localrc)  
+     if (ESMF_LogFoundError(localrc, &
+                         ESMF_ERR_PASSTHRU, &
+                         ESMF_CONTEXT, rcToReturn=rc)) return
+  
+    ! allocate space for areas
+    allocate(localArea(localElemCount))
+
+    ! Get local Areas
+    call ESMF_MeshGetElemArea(mesh, areaList=localArea, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+                         ESMF_ERR_PASSTHRU, &
+                         ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  ! Allocate List of counts
+  allocate(globalCount(petCnt))
+
+  ! Get List of counts
+  localCount(1)=localElemCount
+  call ESMF_VMGather(vm,localCount,globalCount,count=1,rootPet=0,rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+                         ESMF_ERR_PASSTHRU, &
+                         ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Calculate Displacements
+  allocate(globalDispl(petCnt))
+  if (petNo==0) then
+     globalDispl(1)=0
+     do i=2,petCnt
+        globalDispl(i)=globalDispl(i-1)+globalCount(i-1)
+     enddo
+  else
+    globalDispl=0
+  endif
+
+
+  ! Sum size
+  if (petNo==0) then
+    totalCount=0
+    do i=1,petCnt
+       totalCount=totalCount+globalCount(i)
+    enddo
+  else 
+    totalCount=1 ! Because I'm not sure what happens
+                 ! if array is not allocated in VM
+  endif
+
+  ! Allocate final area list
+  allocate(area(totalCount))
+
+  ! Gather all areas
+  call ESMF_VMGatherV(vm,sendData=localArea, sendCount=localElemCount,&
+         recvData=area,recvCounts=globalCount,recvOffsets=globalDispl,&
+         rootPet=0, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+                         ESMF_ERR_PASSTHRU, &
+                         ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Get rid of helper variables
+  deallocate(localArea) 
+  deallocate(globalCount)
+  deallocate(globalDispl)
+  if (petNo .ne. 0) deallocate(area)
 
 end subroutine computeAreaMesh
 
@@ -2269,8 +2386,130 @@ end subroutine gatherFracFieldGrid
 
 ! For now just put into a 1D array on PET 0. When PIO array write is done, then
 ! do it in parallel
-! Frac ONLY VALID ON PET 0
+! AREA ONLY VALID ON PET 0
 subroutine gatherFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, rc)
+  type(ESMF_Mesh) :: mesh
+  type(ESMF_VM) :: VM
+  integer :: petNo,petCnt
+  type(ESMF_Field) :: fracField
+  real (ESMF_KIND_R8), pointer :: frac(:)
+  integer :: rc
+  real (ESMF_KIND_R8), pointer :: localFrac(:)
+  real (ESMF_KIND_R8), pointer :: mergedFrac(:)
+  integer :: localrc
+  integer :: localElemCount,i
+  integer (ESMF_KIND_I4) :: localCount(1)
+  integer (ESMF_KIND_I4),pointer :: globalCount(:),globalDispl(:)
+  integer :: totalCount
+  logical :: hasSplitElem
+  
+  ! Get localFrac from field
+  call ESMF_FieldGet(fracField, localDE=0, farrayPtr=localFrac,  rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=localrc
+     return
+  endif
+
+  ! Find out if elements are split
+  call ESMF_MeshGetElemSplit(mesh, hasSplitElem=hasSplitElem, rc=localrc)  
+  if (localrc /=ESMF_SUCCESS) then
+     rc=localrc
+     return
+  endif
+
+  ! Get merge frac field depending on if split elements
+  if (hasSplitElem) then 
+     ! Get local size of mesh areas before split
+     call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, &
+          rc=localrc)  
+     if (localrc /=ESMF_SUCCESS) then
+        rc=localrc
+        return
+     endif
+
+     ! allocate space for frac
+     allocate(mergedFrac(localElemCount))
+
+     ! Get local Areas
+     call ESMF_MeshGetOrigElemFrac(mesh, splitFracList=localFrac, &
+          origfracList=mergedFrac, rc=localrc)
+     if (localrc /=ESMF_SUCCESS) then
+        rc=localrc
+        return
+     endif
+
+     ! switch to point to merged areas
+     localFrac=>mergedFrac
+  else 
+     localElemCount=size(localFrac)
+     ! localFrac is gotten from the fracField above
+  endif
+
+
+  ! Allocate List of counts
+  allocate(globalCount(petCnt))
+
+  ! Get List of counts
+  localCount(1)=localElemCount
+  call ESMF_VMGather(vm,localCount,globalCount,count=1,rootPet=0,rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=localrc
+     return
+  endif
+
+  ! Calculate Displacements
+  allocate(globalDispl(petCnt))
+  if (petNo==0) then
+     globalDispl(1)=0
+     do i=2,petCnt
+        globalDispl(i)=globalDispl(i-1)+globalCount(i-1)
+     enddo
+  else
+     globalDispl=0
+  endif
+
+
+  ! Sum size
+  if (petNo==0) then
+     totalCount=0
+     do i=1,petCnt
+        totalCount=totalCount+globalCount(i)
+     enddo
+  else 
+     totalCount=1 ! Because I'm not sure what happens
+     ! if array is not allocated in VM
+  endif
+
+  ! Allocate final area list
+  allocate(frac(totalCount))
+
+  ! Gather all areas
+  call ESMF_VMGatherV(vm,sendData=localFrac, sendCount=localElemCount,&
+       recvData=frac,recvCounts=globalCount,recvOffsets=globalDispl,&
+       rootPet=0, rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+     rc=localrc
+     return
+  endif
+
+  ! Get rid of helper variables
+  if (hasSplitElem) then 
+     deallocate(mergedFrac) 
+  endif
+  deallocate(globalCount)
+  deallocate(globalDispl)
+  if (petNo .ne. 0) deallocate(frac)
+
+end subroutine gatherFracFieldMesh
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "gatherRedistFracFieldMesh"
+
+! For now just put into a 1D array on PET 0. When PIO array write is done, then
+! do it in parallel
+! Frac ONLY VALID ON PET 0
+subroutine gatherRedistFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, rc)
   type(ESMF_Mesh) :: mesh
   type(ESMF_VM) :: VM
   integer :: petNo,petCnt
@@ -2417,8 +2656,7 @@ subroutine gatherFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, rc)
   call ESMF_ArrayDestroy(justPet0Array)
   call ESMF_DistGridDestroy(justPet0Distgrid)
 
-end subroutine gatherFracFieldMesh
-
+end subroutine gatherRedistFracFieldMesh
 
 
 !------------------------------------------------------------------------------
