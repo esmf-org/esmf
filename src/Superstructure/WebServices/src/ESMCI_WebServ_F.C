@@ -28,7 +28,8 @@
 #include "ESMCI_WebServ.h"
 
 #include <stdio.h>
-#include <string.h>
+#include <string>
+using namespace std;
 
 #if !defined (ESMF_OS_MinGW)
 #include <unistd.h>
@@ -398,12 +399,11 @@ void FTN_X(c_esmc_addoutputfilename)(
 //-----------------------------------------------------------------------------
 {
 	int	localrc = 0;
-	char	filenameStr[ESMF_MAXSTR];
+	string	filenameStr = string (filename, 0, ESMC_F90lentrim (filename, filenameLen));
 
    // TODO: everything
    if (theComponentServer != NULL)
 	{
-		strncpy(filenameStr, filename, filenameLen);
 		theComponentServer->addOutputFilename(filenameStr);
 	}
 
