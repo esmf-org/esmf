@@ -720,6 +720,8 @@ program ESMF_AttributeXMLUTest
 
     !-------------------------------------------------------------------------
     !EX_UTest
+    call ESMF_AttPackGet(gridcomp2, attpack, convISO, &
+      purpRP, rc=rc)
     ! Set the 2nd attribute value within the last CIM RP package
     call ESMF_AttributeSet(gridcomp2, 'PhysicalAddress', &
       'Department of Meteorology, University of ABC', &
@@ -956,7 +958,7 @@ program ESMF_AttributeXMLUTest
     !EX__UTest
     ! Set the 1st <componentProperty> attribute value within the CIM component
     !   package
-    call ESMF_AttPackGet(gridcomp, attpack, convISO, &
+    call ESMF_AttPackGet(gridcomp, attpack, convCIM, &
       'Scientific Property Description', rc=rc)
     call ESMF_AttributeSet(gridcomp3, 'ScientificPropertyShortName', &
       'TimeStep', attpack=attpack, rc=rc)
