@@ -88,7 +88,8 @@ contains
 ! !IROUTINE: ESMF_RegridWeightGenFile - Generate regrid weight file from grid files
 ! \label{api:esmf_regridweightgenfile}
 ! !INTERFACE:
-subroutine ESMF_RegridWeightGenFile(srcFile, dstFile, weightFile, keywordEnforcer, &
+  ! Private name; call using ESMF_RegridWeightGen()
+  subroutine ESMF_RegridWeightGenFile(srcFile, dstFile, weightFile, keywordEnforcer, &
     regridmethod, polemethod, regridPoleNPnts, &
     unmappedaction, srcFileType, dstFileType, &
     srcRegionalFlag, dstRegionalFlag, srcMeshname, dstMeshname,  &
@@ -1391,7 +1392,8 @@ end subroutine ESMF_RegridWeightGenFile
 !  weight file from grid files in SCRIP format with user-specified distribution
 ! \label{api:esmf_regridweightgenDG}
 ! !INTERFACE:
-subroutine ESMF_RegridWeightGenDG(srcFile, dstFile, regridRouteHandle, &
+  ! Private name; call using ESMF_RegridWeightGen()
+   subroutine ESMF_RegridWeightGenDG(srcFile, dstFile, regridRouteHandle, &
     srcElementDistgrid, dstElementDistgrid, keywordEnforcer, &
     srcNodalDistgrid, dstNodalDistgrid, &
     weightFile, regridmethod, unmappedaction, useUserAreaFlag, &
