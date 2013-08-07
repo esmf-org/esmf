@@ -491,7 +491,7 @@ class Grid(object):
         # use user coordinates to initialize underlying ESMF data
         # self.coords[staggerloc][:,:,coord_dim] = coord_data.copy()
 
-    def write(self, *args, **kwargs):
+    def _write(self, *args, **kwargs):
         """
         Write a Grid to vtk formatted file at a specified stagger 
         location. \n
