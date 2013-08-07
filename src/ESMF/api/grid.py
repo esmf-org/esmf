@@ -117,6 +117,7 @@ class Grid(object):
             #print 'Creating grid from ', fname
             self.struct = ESMP_GridCreateFromFile(fname, fileTypeFlag,
                                                   np.array([1,1]))
+            self.verify_grid_bounds(staggerloc)
         else:
             # ctypes stuff
             self.struct = ESMP_GridStruct()
