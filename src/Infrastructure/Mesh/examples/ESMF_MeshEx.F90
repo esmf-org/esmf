@@ -38,7 +38,6 @@ program ESMF_MeshEx
 
   ! individual test failure message
   character(ESMF_MAXSTR) :: name
-  character(ESMF_MAXSTR) :: filename
 
   logical :: correct
   type(ESMF_VM) :: vm
