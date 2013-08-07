@@ -1416,6 +1416,69 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   logical,                      intent(in),  optional :: verboseFlag
   integer,                      intent(out), optional :: rc
 
+! !DESCRIPTION:
+! This subroutine does online regridding weight generation from files with user specified distribution.  
+! The main differences between this API with the one in \ref{api:esmf\_regridweightgenfile} are as follows:
+! \begin{itemize}
+! \item The input grids are always represented as {\tt ESMF\_Mesh} whether they are logically rectangular or unstructure.
+! \item The input grids will be decomposed using user-specfied distribution instead of a fixed decomposition in the 
+! other subroutine.
+! \item The soruce and destination grid files have to be in the SCRIP grid file format. 
+! \item This subroutine has three additional required arguments: {\tt regridRouteHandle}, {\tt srcElementDistgrid},
+! {\tt dstElementDistgrid}.  {\tt srcElementDistgrid} and {\tt dstElementDistgrid} are of type {\tt ESMF_DistGrid},
+! they are used to define the distribution of the source and destination grid elements. The output {\tt regridRouteHandle} 
+! allows user to regrid the field values later in the application.
+! \item The {\tt weightFile} argument is optional. When it is given, a weightfile will be generated as well.
+! \item The subroutine also takes user-specified nodals distribution {\tt srcNodelDistgrid} and {\tt dstNodalDistgrid} as 
+! optional input arguments.
+! \end{itemize}
+! \smallskip
+! 
+! The arguments are:
+!   \begin{description}
+!   \item [srcFile]
+!     The source grid file name in SCRIP grid file format
+!   \item [dstFile]
+!     The destination grid file name in SCRIP grid file format
+!   \item [regridRouteHandle]
+!     The regrid RouteHandle returned by {\tt ESMF\_FieldRegridStore()}
+!   \item [srcElementDistgrid]
+!     A distGrid that specifies the distribution of the source grid's elements
+!   \item [dstElementDistgrid]
+!     A distGrid taht specifies the distribution of the destination grid's elements
+!   \item [weightFile]
+!     The interpolation weight file name. If present, an output weight file will be generated.
+!   \item [srcNodalDistgrid]
+!     An optinonal distGrid that specifies the distribution of the source grid's nodes
+!   \item [dstNodalDistgrid]
+!     An optional distGrid taht specifies the distribution of the destination grid's nodes
+!   \item [{[regridmethod]}]
+!     The type of interpolation. Please see Section~\ref{opt:regridmethod} 
+!     for a list of valid options. If not specified, defaults to 
+!     {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
+!   \item [{[unmappedaction]}]
+!     specify what should happen if there are destination points that
+!     can't be mapped to a source cell. Options are 
+!     {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
+!     {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
+!     to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!   \item [{[useUserAreaFlag]}]
+!     If .TRUE., the element area values defined in the grid files are used.
+!     Only the SCRIP and ESMF format grid files have user specified areas. This flag
+!     is only used for conservative regridding. The default is .FALSE. 
+!   \item [{[largefileFlag]}]
+!     If .TRUE., the output weight file is in NetCDF 64bit offset format. 
+!     The default is .FALSE.
+!   \item [{[netcdf4fileFlag]}]
+!     If .TRUE., the output weight file is in NetCDF4 file format. 
+!     The default is .FALSE.
+!   \item [{[verboseFlag]}]
+!     If .TRUE., it will print summary information about the regrid parameters,
+!     default to .FALSE.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!EOP
       
       type(ESMF_RegridMethod_Flag) :: localRegridMethod
       logical            :: localUserAreaFlag
