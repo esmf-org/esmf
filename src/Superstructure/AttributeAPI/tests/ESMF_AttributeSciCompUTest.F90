@@ -1174,7 +1174,7 @@ program ESMF_AttributeSciCompUTest
       !EX_UTest
       ! Set an Attribute in an Attribute package on a SciComp Test
       call ESMF_AttributeSet(scicomp, name=attrname, value=attrvalue, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1185,7 +1185,7 @@ program ESMF_AttributeSciCompUTest
       !EX_UTest
       ! Set a char list Attribute in an Attribute package on a SciComp Test
       call ESMF_AttributeSet(scicomp, name=attrname, &
-        valueList=attpackList, convention=conv, purpose=purp, rc=rc)
+        valueList=attpackList, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a char list Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1203,7 +1203,7 @@ program ESMF_AttributeSciCompUTest
 
       !EX_UTest
       ! Remove an Attribute in an Attribute package on a SciComp Test
-      call ESMF_AttributeRemove(scicomp, name=attrname, convention=conv, purpose=purp, rc=rc)
+      call ESMF_AttributeRemove(scicomp, name=attrname, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Removing an Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1226,7 +1226,7 @@ program ESMF_AttributeSciCompUTest
 
       !EX_UTest
       ! Remove the entire Attribute package from a SciComp Test
-      call ESMF_AttributeRemove(scicomp, convention=conv, purpose=purp, rc=rc)
+      call ESMF_AttributeRemove(scicomp, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Removing the entire Attribute package from a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1241,7 +1241,7 @@ program ESMF_AttributeSciCompUTest
       !EX_UTest
       ! Create an Attribute package on a SciComp Test
       call ESMF_AttributeAdd(scicomp, convention=conv, purpose=purp, &
-      						 attpack=attpack, rc=rc)
+      	attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a standard Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1278,7 +1278,7 @@ program ESMF_AttributeSciCompUTest
       !EX_UTest
       ! Set an ESMF_I4name Attribute in an Attribute package on a SciComp Test
       call ESMF_AttributeSet(scicomp, name="ESMF_I4name", value=inI4, &
-        convention=nestconv, purpose=nestpurp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_I4name Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1287,7 +1287,7 @@ program ESMF_AttributeSciCompUTest
       !EX_UTest
       ! Set an ESMF_I4namelist Attribute in an Attribute package on a SciComp Test
       call ESMF_AttributeSet(scicomp, name="ESMF_I4namelist", valueList=inI4l, &
-        convention=nestconv, purpose=nestpurp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_I4namelist Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1296,7 +1296,7 @@ program ESMF_AttributeSciCompUTest
       !EX_UTest
       ! Set an ESMF_I8name Attribute in an Attribute package on a SciComp Test
       call ESMF_AttributeSet(scicomp, name="ESMF_I8name", value=inI8, &
-        convention=nestconv, purpose=nestpurp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_I8name Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1305,7 +1305,7 @@ program ESMF_AttributeSciCompUTest
       !EX_UTest
       ! Set an ESMF_I8namelist Attribute in an Attribute package on a SciComp Test
       call ESMF_AttributeSet(scicomp, name="ESMF_I8namelist", valueList=inI8l, &
-        convention=nestconv, purpose=nestpurp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_I8namelist Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1314,7 +1314,7 @@ program ESMF_AttributeSciCompUTest
       !EX_UTest
       ! Set an ESMF_R4name Attribute in an Attribute package on a SciComp Test
       call ESMF_AttributeSet(scicomp, name="ESMF_R4name", value=inR4, &
-        convention=nestconv, purpose=nestpurp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_R4name Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1323,7 +1323,7 @@ program ESMF_AttributeSciCompUTest
       !EX_UTest
       ! Set an ESMF_R4namelist Attribute in an Attribute package on a SciComp Test
       call ESMF_AttributeSet(scicomp, name="ESMF_R4namelist", valueList=inR4l, &
-        convention=nestconv, purpose=nestpurp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_R4namelist Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1332,7 +1332,7 @@ program ESMF_AttributeSciCompUTest
       !EX_UTest
       ! Set an ESMF_R8name Attribute in an Attribute package on a SciComp Test
       call ESMF_AttributeSet(scicomp, name="ESMF_R8name", value=inR8, &
-        convention=nestconv, purpose=nestpurp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_R8name Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1341,7 +1341,7 @@ program ESMF_AttributeSciCompUTest
       !EX_UTest
       ! Set an ESMF_R8namelist Attribute in an Attribute package on a SciComp Test
       call ESMF_AttributeSet(scicomp, name="ESMF_R8namelist", valueList=inR8l, &
-        convention=nestconv, purpose=nestpurp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_R8namelist Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1350,7 +1350,7 @@ program ESMF_AttributeSciCompUTest
       !EX_UTest
       ! Set a Logical Attribute in an Attribute package on a SciComp Test
       call ESMF_AttributeSet(scicomp, name="Logical_name", value=inLog, &
-        convention=nestconv, purpose=nestpurp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a logical Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1359,7 +1359,7 @@ program ESMF_AttributeSciCompUTest
       !EX_UTest
       ! Set a Logical list Attribute in an Attribute package on a SciComp Test
       call ESMF_AttributeSet(scicomp, name="Logical_namelist", valueList=inLogl, &
-        convention=nestconv, purpose=nestpurp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a logical list Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1368,7 +1368,7 @@ program ESMF_AttributeSciCompUTest
       !EX_UTest
       ! Set a character Attribute in an Attribute package on a SciComp Test
       call ESMF_AttributeSet(scicomp, name="Character_name", value=attrvalue, &
-        convention=nestconv, purpose=nestpurp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a Character Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1378,7 +1378,7 @@ program ESMF_AttributeSciCompUTest
       !EX_UTest
       ! Set a char list Attribute in an Attribute package on a SciComp Test
       call ESMF_AttributeSet(scicomp, name=attrname, &
-        valueList=attpackList, convention=nestconv, purpose=nestpurp, rc=rc)
+        valueList=attpackList, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a char list Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1396,7 +1396,7 @@ program ESMF_AttributeSciCompUTest
 
       !EX_UTest
       ! Remove an Attribute in an Attribute package on a SciComp Test
-      call ESMF_AttributeRemove(scicomp, name=attrname, convention=nestconv, purpose=nestpurp, rc=rc)
+      call ESMF_AttributeRemove(scicomp, name=attrname, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Removing an Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1404,7 +1404,7 @@ program ESMF_AttributeSciCompUTest
 
       !EX_UTest
       ! Remove an Attribute in an Attribute package on a SciComp Test, again
-      call ESMF_AttributeRemove(scicomp, name=attrname, convention=nestconv, purpose=nestpurp, rc=rc)
+      call ESMF_AttributeRemove(scicomp, name=attrname, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_NOT_FOUND"
       write(name, *) "Removing an Attribute in an Attribute package on a SciComp Test, again"
       call ESMF_Test((rc==ESMC_RC_NOT_FOUND), name, failMsg, result, ESMF_SRCLINE)
@@ -1431,7 +1431,7 @@ program ESMF_AttributeSciCompUTest
       !EX_UTest
       ! Set an Attribute in an Attribute package on a SciComp Test
       call ESMF_AttributeSet(scicomp, name=attrname, value=attrvalue, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an Attribute in an Attribute package on a SciComp Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

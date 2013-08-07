@@ -118,17 +118,17 @@ program ESMF_AttributeCustPackEx
 
 !BOC
     call ESMF_AttributeSet(gridcomp, 'CustomAttrName1', 'CustomAttrValue1', &
-      convention=customConv, purpose=customPurp, rc=rc)
+      attpack=attpack, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
     call ESMF_AttributeSet(gridcomp, 'CustomAttrName2', 'CustomAttrValue2', &
-      convention=customConv, purpose=customPurp, rc=rc)
+      attpack=attpack, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
     call ESMF_AttributeSet(gridcomp, 'CustomAttrName3', 'CustomAttrValue3', &
-      convention=customConv, purpose=customPurp, rc=rc)
+      attpack=attpack, rc=rc)
 
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

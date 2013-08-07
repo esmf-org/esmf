@@ -130,8 +130,7 @@ module user_model2
       convention="CIM 1.5", purpose="ModelComp", rc=rc)
     
     call ESMF_AttributeSet(comp, name="ShortName", value="ABC", &
-      convention="CIM 1.5", purpose="ModelComp", &
-      rc=rc)
+      attpack=attpack, rc=rc)
    
     field = ESMF_FieldEmptyCreate(name="myTestField", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

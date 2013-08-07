@@ -239,15 +239,11 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     field = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field", rc=status)
     call ESMF_AttributeAdd(field, convention=convESMF, purpose=purpGen, &
-      rc=status)
-    call ESMF_AttributeSet(field, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name2, value2, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name3, value3, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name4, value4, convention=convESMF, &
-      purpose=purpGen, rc=status)
+      attpack=attpack, rc=status)
+    call ESMF_AttributeSet(field, name1, value1, attpack=attpack, rc=status)
+    call ESMF_AttributeSet(field, name2, value2, attpack=attpack, rc=status)
+    call ESMF_AttributeSet(field, name3, value3, attpack=attpack, rc=status)
+    call ESMF_AttributeSet(field, name4, value4, attpack=attpack, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
@@ -316,6 +312,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     character(ESMF_MAXSTR)      :: name_to_add, value_to_add
     type(ESMF_Field)            :: field
     type(ESMF_FieldBundle)      :: fieldbundle
+    type(ESMF_Attribute)        :: attpack
 
     rc = ESMF_SUCCESS
 
@@ -338,6 +335,9 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
+    call ESMF_AttPackGet(field, attpack, convESMF, purpGen, rc=status)
+    if (rc/=ESMF_SUCCESS) return
+
 #if 0
     call ESMF_AttributeSet(field, name_to_add, value_to_add, rc=status)
     if (rc/=ESMF_SUCCESS) return
@@ -347,8 +347,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     if (rc/=ESMF_SUCCESS) return
 #endif
 
-    call ESMF_AttributeRemove(field, name2, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeRemove(field, name2, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
 
   end subroutine userm1_run

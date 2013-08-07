@@ -1467,11 +1467,7 @@ int size = packList.size();
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      const string &convention,              // in - convention
-      const string &purpose,                 // in - purpose
-      const string &object,                  // in - object type to look for
-      const string &attPackInstanceName) {   // in - attPack name
-                                       // specifying which one of multiple packs
+      ESMCI::Attribute *attpack) {   // in - attPack
 // 
 // !DESCRIPTION:
 //     Remove an {\tt Attribute} package
@@ -1480,16 +1476,15 @@ int size = packList.size();
 
   int localrc;
   unsigned int i;
-  Attribute *attpack, *attrparent;
+  Attribute *attrparent;
   bool done = false;
   
-  attpack = NULL; attrparent = NULL;
+  attrparent = NULL;
 
   // Initialize local return code
   localrc = ESMC_RC_NOT_IMPL;
     
   // get the attpack
-  attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
   if(!attpack) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, 
       "Cannot find the Attribute package", ESMC_CONTEXT, &localrc);
@@ -1532,10 +1527,7 @@ int size = packList.size();
 // 
 // !ARGUMENTS:
       const string &name,                    // in - name
-      const string &convention,              // in - convention
-      const string &purpose,                 // in - purpose
-      const string &object,                  // in - object type to look for
-      const string &attPackInstanceName) {   // in - attPack name
+      ESMCI::Attribute *attpack) {   // in - attPack name
                                        // specifying which one of multiple packs
 // 
 // !DESCRIPTION:
@@ -1545,16 +1537,15 @@ int size = packList.size();
 
   int localrc;
   unsigned int i;
-  Attribute *attr, *attpack, *attrparent;
+  Attribute *attr, *attrparent;
   bool done = false;
 
-  attr = NULL; attpack = NULL; attrparent = NULL;
+  attr = NULL; attrparent = NULL;
 
   // Initialize local return code
   localrc = ESMC_RC_NOT_IMPL;
   
   // get the attpack
-  attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
   if(!attpack) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, 
       "Cannot find the specified Attribute package", ESMC_CONTEXT, &localrc);

@@ -642,12 +642,12 @@ contains
 !     <object>, see below for supported values
 !     character (len = *), intent(in)            :: convention
 !     character (len = *), intent(in)            :: purpose
+!     type(ESMF_Attribute),intent(in),  optional :: attpack
 !     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Add an ESMF standard Attribute package.  See Section~\ref{sec:AttPacks}
-!     for a description of Attribute packages and their conventions, purposes,
-!     and object types.
+!     for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -668,6 +668,8 @@ contains
 !           The convention of the new Attribute package
 !     \item [purpose]
 !           The purpose of the new Attribute package
+!     \item [{[attpack}]]
+!           An optional handle to the Attribute package that is to be created
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -695,6 +697,7 @@ contains
 !     character (len = *), intent(out)           :: nestAttPackInstanceNameList(:)
 !     integer,             intent(in),  optional :: nestCount
 !     integer,             intent(out), optional :: nestAttPackInstanceNameCount
+!     type(ESMF_Attribute),intent(in),  optional :: attpack
 !     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -704,8 +707,7 @@ contains
 !     can be used later to distinguish among multiple nested Attribute
 !     packages of the same type in calls to {\tt ESMF\_AttributeGet()},
 !     {\tt ESMF\_AttributeSet()}, and {\tt ESMF\_AttributeRemove()}.
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -743,6 +745,8 @@ contains
 !           the new Attribute package.
 !     \item [{[nestAttPackInstanceNameCount]}]
 !           The number of nested Attribute package instance names.
+!     \item [{[attpack}]]
+!           An optional handle to the Attribute package that is to be created
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -764,12 +768,12 @@ contains
 !     character (len = *), intent(in)            :: purpose
 !     character (len = *), intent(in)            :: attrList(:)
 !     integer,             intent(in),  optional :: count
+!     type(ESMF_Attribute),intent(in),  optional :: attpack
 !     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Add a custom Attribute package to <object>.
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -797,6 +801,8 @@ contains
 !           The list of Attribute names to specify the custom Attribute package
 !     \item [{[count]}]
 !           The number of Attributes to add to the custom Attribute package
+!     \item [{[attpack}]]
+!           An optional handle to the Attribute package that is to be created
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -821,14 +827,14 @@ contains
 !     character (len = *), intent(in)            :: nestConvention(:)
 !     character (len = *), intent(in)            :: nestPurpose(:)
 !     integer,             intent(in),  optional :: nestCount
+!     type(ESMF_Attribute),intent(in),  optional :: attpack
 !     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Add a custom Attribute package, with one or more nested Attribute
 !     packages, to <object>.  Allows for building full multiple-child Attribute
 !     hierarchies (multi-child trees).
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -865,6 +871,8 @@ contains
 !     \item [{[nestCount]}]
 !           The number of nested Attribute packages to add to the custom
 !           Attribute package
+!     \item [{[attpack}]]
+!           An optional handle to the Attribute package that is to be created
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -888,14 +896,14 @@ contains
 !     integer,             intent(in),  optional :: count
 !     character (len = *), intent(in)            :: nestConvention
 !     character (len = *), intent(in)            :: nestPurpose
+!     type(ESMF_Attribute),intent(in),  optional :: attpack
 !     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Add a custom Attribute package, with a single nested Attribute
 !     package, to <object>.  Allows for building single-child Attribute
 !     hierarchies (single-child trees).
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -929,6 +937,8 @@ contains
 !     \item [nestPurpose]
 !           The purpose of the Attribute package around which to nest the
 !           new Attribute package
+!     \item [{[attpack}]]
+!           An optional handle to the Attribute package that is to be created
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -1002,16 +1012,13 @@ contains
 !     character (len = *), intent(in)            :: name
 !     <value>, see below for supported values
 !     <defaultvalue>, see below for supported values
-!     character (len = *), intent(in),  optional :: convention
-!     character (len = *), intent(in),  optional :: purpose
-!     character (len = *), intent(in),  optional :: attPackInstanceName
+!     type(ESMF_Attribute),intent(in),  optional :: attpack
 !     logical,             intent(out), optional :: isPresent
 !     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt value} from the <object>, or from an Attribute
-!     package on the <object>, specified by {\tt convention} and {\tt purpose},
-!     and optionally {\tt attPackInstanceName}.  Internal information can also
+!     package on the <object>, specified by {\tt attpack}.  Internal information can also
 !     be retrieved from Grid objects by prepending 'ESMF:' to the name of the
 !     piece of information that is requested.  See
 !     Section~\ref{sec:InternalInfo} for more information
@@ -1019,7 +1026,7 @@ contains
 !     A {\tt defaultvalue} argument
 !     may be given if a return code is not desired when the Attribute is not
 !     found.  See Section~\ref{sec:AttPacks} for a description of Attribute
-!     packages and their conventions, purposes, and object types.
+!     packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -1065,15 +1072,8 @@ contains
 !           The value of the named Attribute
 !     \item [{[<defaultvalue>]}]
 !           The default value of the named Attribute
-!     \item [{[convention]}]
-!           The convention of the Attribute package
-!     \item [{[purpose]}]
-!           The purpose of the Attribute package
-!     \item [{[attPackInstanceName]}]
-!           The name of an Attribute package instance, specifying which one of
-!           multiple Attribute package instances of the same convention and
-!           purpose, within a nest.  If not specified, defaults to the first
-!           instance.
+!     \item [{[attpack}]]
+!           An optional handle to the Attribute package that is to be created
 !     \item [{[isPresent]}]
 !           A logical flag to tell if this Attribute is present or not
 !     \item [{[rc]}]
@@ -1096,16 +1096,13 @@ contains
 !     <value>, see below for supported values
 !     <defaultvalue>, see below for supported values
 !     character (len = *), intent(in),  optional :: inputList(:)
-!     character (len = *), intent(in),  optional :: convention
-!     character (len = *), intent(in),  optional :: purpose
-!     character (len = *), intent(in),  optional :: attPackInstanceName
+!     type(ESMF_Attribute),intent(in),  optional :: attpack
 !     logical,             intent(out), optional :: isPresent
 !     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt value} from the <object>, or from an Attribute
-!     package on the <object>, specified by {\tt convention} and {\tt purpose},
-!     and optionally {\tt attPackInstanceName}.  Internal class information can
+!     package on the <object>, specified by {\tt attpack}.  Internal class information can
 !     be retrieved by prepending 'ESMF:' to the name of the
 !     piece of information that is requested.  See
 !     Section~\ref{sec:InternalInfo} for more information
@@ -1113,7 +1110,7 @@ contains
 !     A {\tt defaultvalue} argument
 !     may be given if a return code is not desired when the Attribute is not
 !     found.  See Section~\ref{sec:AttPacks} for a description of Attribute
-!     packages and their conventions, purposes, and object types.
+!     packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -1144,15 +1141,8 @@ contains
 !           The default value of the named Attribute
 !     \item [{[inputList]}]
 !           A list of the input parameters required to retrieve internal info
-!     \item [{[convention]}]
-!           The convention of the Attribute package
-!     \item [{[purpose]}]
-!           The purpose of the Attribute package
-!     \item [{[attPackInstanceName]}]
-!           The name of an Attribute package instance, specifying which one of
-!           multiple Attribute package instances of the same convention and
-!           purpose, within a nest.  If not specified, defaults to the first
-!           instance.
+!     \item [{[attpack}]]
+!           An optional handle to the Attribute package that is to be created
 !     \item [{[isPresent]}]
 !           A logical flag to tell if this Attribute is present or not
 !     \item [{[rc]}]
@@ -1175,25 +1165,21 @@ contains
 !     character (len = *), intent(in)              :: name
 !     <valueList>, see below for supported values
 !     <defaultvalueList>, see below for supported values
-!     character (len = *), intent(in),    optional :: convention
-!     character (len = *), intent(in),    optional :: purpose
-!     character (len = *), intent(in),    optional :: attPackInstanceName
+!     type(ESMF_Attribute),intent(in),    optional :: attpack
 !     integer,             intent(out),   optional :: itemCount
 !     logical,             intent(out),   optional :: isPresent
 !     integer,             intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt valueList} from the <object>, or from an
-!     Attribute package on the <object>, specified by {\tt convention} and
-!     {\tt purpose}, and optionally {\tt attPackInstanceName}.  Internal
+!     Attribute package on the <object>, specified by {\tt attpack}.  Internal
 !     information can also be retrieved from Grid objects by prepending 'ESMF:'
 !     to the name of the piece of information that is requested.  See
 !     Section~\ref{sec:InternalInfo} for more information
 !     on which pieces of Grid data can be retrieved through this interface.
 !     A {\tt defaultvalueList} list argument may be given if
 !     a return code is not desired when the Attribute is not found.
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -1239,15 +1225,8 @@ contains
 !           The valueList of the named Attribute
 !     \item [{[<defaultvalueList>]}]
 !           The default value list of the named Attribute
-!     \item [{[convention]}]
-!           The convention of the Attribute package
-!     \item [{[purpose]}]
-!           The purpose of the Attribute package
-!     \item [{[attPackInstanceName]}]
-!           The name of an Attribute package instance, specifying which one of
-!           multiple Attribute package instances of the same convention and
-!           purpose, within a nest.  If not specified, defaults to the first
-!           instance.  (Not implemented yet)
+!     \item [{[attpack}]]
+!           An optional handle to the Attribute package that is to be created
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute
 !     \item [{[isPresent]}]
@@ -1273,25 +1252,21 @@ contains
 !     <valueList>, see below for supported values
 !     <defaultvalueList>, see below for supported values
 !     character (len = *), intent(in),    optional :: inputList(:)
-!     character (len = *), intent(in),    optional :: convention
-!     character (len = *), intent(in),    optional :: purpose
-!     character (len = *), intent(in),    optional :: attPackInstanceName
+!     type(ESMF_Attribute),intent(in),    optional :: attpack
 !     integer,             intent(out),   optional :: itemCount
 !     logical,             intent(out),   optional :: isPresent
 !     integer,             intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt valueList} from the <object>, or from an
-!     Attribute package on the <object>, specified by {\tt convention} and
-!     {\tt purpose}, and optionally {\tt attPackInstanceName}.  Internal class
+!     Attribute package on the <object>, specified by {\tt attpack}.  Internal class
 !     information can be retrieved by prepending 'ESMF:'
 !     to the name of the piece of information that is requested.  See
 !     Section~\ref{sec:InternalInfo} for more information
 !     on this capability.
 !     A {\tt defaultvalueList} list argument may be given if
 !     a return code is not desired when the Attribute is not found.
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -1324,15 +1299,8 @@ contains
 !           The default value list of the named Attribute
 !     \item [{[inputList]}]
 !           A list of the input parameters required to retrieve internal info
-!     \item [{[convention]}]
-!           The convention of the Attribute package
-!     \item [{[purpose]}]
-!           The purpose of the Attribute package
-!     \item [{[attPackInstanceName]}]
-!           The name of an Attribute package instance, specifying which one of
-!           multiple Attribute package instances of the same convention and
-!           purpose, within a nest.  If not specified, defaults to the first
-!           instance.  (Not implemented yet)
+!     \item [{[attpack}]]
+!           An optional handle to the Attribute package that is to be created
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute
 !     \item [{[isPresent]}]
@@ -1403,9 +1371,7 @@ contains
 !     <object>, see below for supported values
 !     character (len = *),      intent(in)            :: name
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     character (len = *),      intent(in),  optional :: convention
-!     character (len = *),      intent(in),  optional :: purpose
-!     character (len = *),      intent(in),  optional :: attPackInstanceName
+!     type(ESMF_Attribute),     intent(in),  optional :: attpack
 !     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
 !     integer,                  intent(out), optional :: itemCount
 !     logical,                  intent(out), optional :: isPresent
@@ -1435,14 +1401,8 @@ contains
 !           An {\tt ESMF} object
 !     \item [name]
 !           The name of the Attribute to query
-!     \item [{[convention]}]
-!           The convention of the Attribute package
-!     \item [{[purpose]}]
-!           The purpose of the Attribute package
-!     \item [{[attPackInstanceName]}]
-!           The name of an Attribute package instance, specifying which one of
-!           multiple Attribute package instances of the same convention and
-!           purpose, within a nest.  (Not implemented yet)
+!     \item [{[attpack}]]
+!           An optional handle to the Attribute package that is to be created
 !     \item [{[typekind}]]
 !           The typekind of the Attribute
 !     \item [{[itemCount]}]
@@ -1921,21 +1881,13 @@ contains
 !     <object>, see below for supported values
 !     character (len = *), intent(in),  optional :: fileName
 !     character (len = *), intent(in),  optional :: schemaFileName
-!     character (len = *), intent(in),  optional :: convention
-!     character (len = *), intent(in),  optional :: purpose
 !     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Read Attributes for <object> from fileName, whose format is XML.
 !     schemaFileName format is XSD.  If present, the schemaFileName is used to
 !     validate the contents of fileName.  schemaFileName must be specified for
-!     a fileName containing custom, user-defined Attributes.  schemaFileName
-!     need not be specified for convention and purposes specifying a standard,
-!     ESMF-supplied Attribute package.  If present, the convention and purpose
-!     specify an Attribute package which is used to filter the reading to just
-!     those attributes belonging to the Attribute package.
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.
+!     a fileName containing custom, user-defined Attributes.
 !
 !     Requires the third party Xerces C++ XML Parser library to be installed,
 !     v3.1.0 or better.  For more details, see the "ESMF Users Guide",
@@ -1966,10 +1918,6 @@ contains
 !           The name of the XML file to read
 !     \item [{[schemaFileName]}]
 !           The name of the XSD file to validate the contents of fileName
-!     \item [{[convention]}]
-!           The convention of the Attribute package to read
-!     \item [{[purpose]}]
-!           The purpose of the Attribute package to read
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -1986,9 +1934,7 @@ contains
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *), intent(in),  optional :: name
-!     character (len = *), intent(in),  optional :: convention
-!     character (len = *), intent(in),  optional :: purpose
-!     character (len = *), intent(in),  optional :: attPackInstanceName
+!     type(ESMF_Attribute), intent(in), optional :: attpack
 !     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2016,25 +1962,18 @@ contains
 !           An {\tt ESMF} object
 !     \item [{[name]}]
 !           The name of the Attribute to remove
-!     \item [{[convention]}]
-!           The convention of the Attribute package
-!     \item [{[purpose]}]
-!           The purpose of the Attribute package
-!     \item [{[attPackInstanceName]}]
-!           The name of an Attribute package instance, specifying which one of
-!           multiple Attribute package instances of the same convention and
-!           purpose, within a nest.  If not specified, defaults to the first
-!           instance. (Not implemented yet)
+!     \item [{[attpack}]]
+!           An optional handle to the Attribute package that is to be created
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
 !
 !     NOTE:  An entire Attribute package can be removed by specifying
-!            {\tt convention} and {\tt purpose} only, without {\tt name}.  By specifying
-!            {\tt convention}, {\tt purpose}, and {\tt name} an Attribute will be removed
+!            {\tt attpack} only, without {\tt name}.  By specifying
+!            {\tt attpack} an Attribute will be removed
 !            from the corresponding Attribute package, if it exists.  An
 !            Attribute can be removed directly from <object> by specifying
-!            {\tt name}, without {\tt convention} and {\tt purpose}.
+!            {\tt name}, without {\tt attpack}.
 !
 !
 !EOP
@@ -2050,18 +1989,14 @@ contains
 !     <object>, see below for supported values
 !     character (len = *), intent(in)            :: name
 !     <value>, see below for supported values
-!     character (len = *), intent(in),  optional :: convention
-!     character (len = *), intent(in),  optional :: purpose
-!     character (len = *), intent(in),  optional :: attPackInstanceName
+!     type(ESMF_Attribute), intent(in), optional :: attpack
 !     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to <object>, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and {\tt value},
-!     and, if in an Attribute package, a {\tt convention} and {\tt purpose},
-!     and optionally an {\tt attPackInstanceName}.
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.
+!     and, if in an Attribute package, a {\tt attpack}.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -2095,15 +2030,8 @@ contains
 !           The name of the Attribute to set
 !     \item [<value argument>]
 !           The value of the Attribute to set
-!     \item [{[convention]}]
-!           The convention of the Attribute package
-!     \item [{[purpose]}]
-!           The purpose of the Attribute package
-!     \item [{[attPackInstanceName]}]
-!           The name of an Attribute package instance, specifying which one of
-!           multiple Attribute package instances of the same convention and
-!           purpose, within a nest.  If not specified, defaults to the first
-!           instance.
+!     \item [{[attpack}]]
+!           An optional handle to the Attribute package that is to be created
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -2123,18 +2051,15 @@ contains
 !     character (len = *), intent(in)            :: name
 !     <value>, see below for supported values
 !     character (len = *), intent(in),  optional :: inputList(:)
-!     character (len = *), intent(in),  optional :: convention
-!     character (len = *), intent(in),  optional :: purpose
-!     character (len = *), intent(in),  optional :: attPackInstanceName
+!     type(ESMF_Attribute), intent(in), optional :: attpack
 !     integer,             intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to <object>, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and {\tt value},
-!     and, if in an Attribute package, a {\tt convention} and {\tt purpose},
-!     and optionally an {\tt attPackInstanceName}.
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.  The Attribute can
+!     and, if in an Attribute package, a {\tt attpack}.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.  
+!     The Attribute can
 !     also be set to be a pointer to internal class information.  See Section
 !     \ref{sec:InternalInfo} for a description of this capability.
 !
@@ -2158,15 +2083,8 @@ contains
 !           The value of the Attribute to set
 !     \item [{[inputList]}]
 !           A list of the input parameters required to set internal info
-!     \item [{[convention]}]
-!           The convention of the Attribute package
-!     \item [{[purpose]}]
-!           The purpose of the Attribute package
-!     \item [{[attPackInstanceName]}]
-!           The name of an Attribute package instance, specifying which one of
-!           multiple Attribute package instances of the same convention and
-!           purpose, within a nest.  If not specified, defaults to the first
-!           instance.
+!     \item [{[attpack}]]
+!           An optional handle to the Attribute package that is to be created
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -2185,9 +2103,7 @@ contains
 !     <object>, see below for supported values
 !     character (len = *), intent(in)            :: name
 !     <valueList>, see below for supported values
-!     character (len = *), intent(in),  optional :: convention
-!     character (len = *), intent(in),  optional :: purpose
-!     character (len = *), intent(in),  optional :: attPackInstanceName
+!     type(ESMF_Attribute), intent(in), optional :: attpack
 !     integer,             intent(in),  optional :: itemCount
 !     integer,             intent(out), optional :: rc
 !
@@ -2195,10 +2111,8 @@ contains
 !     Attach an Attribute to <object>, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and a
 !     {\tt valueList}, with an {\tt itemCount}, and, if in an Attribute
-!     package, a {\tt convention} and {\tt purpose}, and optionally an
-!     {\tt attPackInstanceName}.  See Section~\ref{sec:AttPacks} for a
-!     description of Attribute packages and their conventions, purposes,
-!     and object types.
+!     package, a {\tt attpack}.  See Section~\ref{sec:AttPacks} for a
+!     description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -2232,15 +2146,8 @@ contains
 !           The name of the Attribute to set
 !     \item [<valueList argument>]
 !           The valueList of the Attribute to set
-!     \item [{[convention]}]
-!           The convention of the Attribute package
-!     \item [{[purpose]}]
-!           The purpose of the Attribute package
-!     \item [{[attPackInstanceName]}]
-!           The name of an Attribute package instance, specifying which one of
-!           multiple Attribute package instances of the same convention and
-!           purpose, within a nest.  If not specified, defaults to the first
-!           instance.  (Not implemented yet)
+!     \item [{[attpack}]]
+!           An optional handle to the Attribute package that is to be created
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute
 !     \item [{[rc]}]
@@ -2398,7 +2305,7 @@ contains
         convention, purpose, attPackInstanceName, rc) @\
  @\
       type(mclass), intent(in) :: mthis   @\
-	  type(ESMF_Attribute), intent(inout) :: attpack @\
+	    type(ESMF_Attribute), intent(inout) :: attpack @\
       character (len = *), intent(in) :: convention @\
       character (len = *), intent(in) :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
@@ -2469,7 +2376,7 @@ contains
       type(mclass), intent(inout) :: mthis @\
       character (len = *), intent(in) :: convention @\
       character (len = *), intent(in) :: purpose @\
- 	  type(ESMF_Attribute), intent(inout), optional :: attpack @\
+ 	    type(ESMF_Attribute), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -2562,7 +2469,7 @@ contains
       character (len = *), dimension(:), intent(out) :: nestAttPackInstanceNameList @\
       integer, intent(in), optional :: nestCount @\
       integer, intent(out), optional :: nestAttPackInstanceNameCount @\
- 	  type(ESMF_Attribute), intent(inout), optional :: attpack @\
+ 	    type(ESMF_Attribute), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -2763,7 +2670,7 @@ contains
       character (len = *), intent(in) :: convention @\
       character (len = *), intent(in) :: purpose @\
       integer, intent(in), optional :: count @\
- 	  type(ESMF_Attribute), intent(inout), optional :: attpack @\
+ 	    type(ESMF_Attribute), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -2869,7 +2776,7 @@ contains
       character (len = *), dimension(:), intent(in) :: nestConvention @\
       character (len = *), dimension(:), intent(in) :: nestPurpose @\
       integer, intent(in), optional :: nestCount @\
- 	  type(ESMF_Attribute), intent(inout), optional :: attpack @\
+ 	    type(ESMF_Attribute), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -3031,7 +2938,7 @@ contains
       integer, intent(in), optional :: count @\
       character (len = *), intent(in) :: nestConvention @\
       character (len = *), intent(in) :: nestPurpose @\
- 	  type(ESMF_Attribute), intent(inout), optional :: attpack @\
+ 	    type(ESMF_Attribute), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -3193,7 +3100,7 @@ contains
       mtype(ESMF_KIND_##mtypekind), intent(out) :: value @\
       mtype(ESMF_KIND_##mtypekind), intent(in), optional :: defaultvalue @\
       character (len=*), intent(in), optional :: inputList(:) @\
-	  type(ESMF_Attribute), intent(in), optional :: attpack @\
+	    type(ESMF_Attribute), intent(in), optional :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -3322,7 +3229,7 @@ contains
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(out) :: valueList @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in), optional :: defaultvalueList @\
       character (len=*), intent(in), optional :: inputList(:) @\
- 	  type(ESMF_Attribute), intent(in), optional :: attpack @\
+ 	    type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(out), optional :: itemCount    @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
@@ -3479,7 +3386,7 @@ contains
       character (len = *), intent(in) :: name @\
       logical, intent(out) :: value @\
       logical, intent(in), optional :: defaultvalue @\
-	  type(ESMF_Attribute), intent(in), optional :: attpack @\
+	    type(ESMF_Attribute), intent(in), optional :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -3587,7 +3494,7 @@ contains
       logical, dimension(:), intent(out) :: valueList @\
       logical, dimension(:), intent(in), optional :: defaultvalueList @\
       character (len=*), intent(in), optional :: inputList(:) @\
-	  type(ESMF_Attribute), intent(in), optional :: attpack @\
+	    type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(out), optional :: itemCount @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
@@ -3745,7 +3652,7 @@ contains
       character (len = *), intent(in) :: name @\
       character (len = *), intent(out) :: value @\
       character (len = *), intent(in), optional :: defaultvalue @\
- 	  type(ESMF_Attribute), intent(in), optional :: attpack @\
+ 	    type(ESMF_Attribute), intent(in), optional :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
  @\
@@ -4018,7 +3925,7 @@ contains
       character (len = *), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), intent(out) :: value @\
       mtype(ESMF_KIND_##mtypekind), intent(in), optional :: defaultvalue @\
-	  type(ESMF_Attribute), intent(in), optional :: attpack @\
+	    type(ESMF_Attribute), intent(in), optional :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -4123,7 +4030,7 @@ contains
       character (len=*), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(out) :: valueList @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in), optional :: defaultvalueList @\
-	  type(ESMF_Attribute), intent(in), optional :: attpack @\
+	    type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(out), optional :: itemCount    @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
@@ -4257,7 +4164,7 @@ contains
       character (len = *), intent(in) :: name @\
       logical, intent(out) :: value @\
       logical, intent(in), optional :: defaultvalue @\
-	  type(ESMF_Attribute), intent(in), optional :: attpack @\
+	    type(ESMF_Attribute), intent(in), optional :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -4809,7 +4716,7 @@ contains
       type(mclass), intent(in) :: mthis   @\
       character(len=*), intent(in) :: name @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-	  type(ESMF_Attribute), intent(in), optional :: attpack @\
+	    type(ESMF_Attribute), intent(in), optional :: attpack @\
       type(ESMF_TypeKind_Flag), intent(out), optional :: typekind @\
       integer, intent(out), optional :: itemCount    @\
       logical, intent(out), optional :: isPresent @\
@@ -5361,22 +5268,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeRead() @\
-      subroutine mclass##AttRead(mthis, fileName, schemaFileName, & @\
-                                 convention, purpose, rc) @\
+      subroutine mclass##AttRead(mthis, fileName, schemaFileName, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
       character (len=*),   intent(in), optional :: fileName @\
       character (len=*),   intent(in), optional :: schemaFileName @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
 ! !DESCRIPTION: @\
 !     Read the Attribute package for the {\tt mthis}. @\
-!     The Attribute package defines the convention, purpose, and object type @\
-!     of the associated Attributes. @\
+!     The Attribute package defines the associated Attributes. @\
 ! @\
 !     The arguments are: @\
 !     \begin{description} @\
@@ -5386,10 +5289,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      The file name to read from. @\
 !     \item [{[schemaFileName]}] @\
 !      The name of the XSD file to validate fileName. @\
-!     \item [convention] @\
-!      The convention of the Attribute package. @\
-!     \item [purpose] @\
-!      The purpose of the Attribute package. @\
 !     \item [{[rc]}]  @\
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -5410,10 +5309,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check input variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS @\
-      !TODO: Remove the following dummy test when dummy argument actually used @\
-      if (present(convention) .and. present(purpose)) continue @\
- @\
       ! get length of given fileNames for C++ validation @\
       if (present(fileName)) then @\
         fileNameLen = len_trim(fileName) @\
@@ -5424,7 +5319,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end if @\
  @\
       ! invoke C to C++ entry point @\
-      ! TODO: convention, purpose @\
       call c_ESMC_AttributeRead(mthisfield, fileNameLen, fileName, & @\
                                 schemaFileNameLen, schemaFileName, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
@@ -5445,15 +5339,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeRemove() @\
-      subroutine mclass##AttRemove(mthis, name, convention, purpose, & @\
-                                   attPackInstanceName, rc) @\
+      subroutine mclass##AttRemove(mthis, name, attpack, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in), optional :: name @\
-      character (len = *), intent(in), optional :: convention @\
-      character (len = *), intent(in), optional :: purpose @\
-      character (len = *), intent(in), optional :: attPackInstanceName @\
+      type(ESMF_Attribute), intent(in), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
 ! @\
 ! !DESCRIPTION: @\
@@ -5465,15 +5356,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to destroy. @\
-!     \item [{[convention]}] @\
-!           The convention of the Attribute package. @\
-!     \item [{[purpose]}] @\
-!           The purpose of the Attribute package. @\
-!     \item [{[attPackInstanceName]}] @\
-!           The name of an Attribute package instance, specifying which one @\
-!           of multiple Attribute package instances of the same convention @\
-!           and purpose, within a nest.  If not specified, defaults to the @\
-!           first instance. @\
+!     \item [{[attpack]}] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -5482,34 +5366,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI @\
  @\
       integer :: localrc @\
-      character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
-      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        attpack = ESMF_TRUE @\
-      endif @\
- @\
-      if (attpack == ESMF_TRUE .and. .not.present(name)) then @\
-        call c_ESMC_AttPackRemove(mthisfield, convention, & @\
-          purpose, fobject, attPackInstanceName, localrc) @\
-      else if (attpack == ESMF_TRUE .and. present(name)) then @\
-        call c_ESMC_AttPackRemoveAttribute(mthisfield, name, convention, & @\
-          purpose, fobject, attPackInstanceName, localrc) @\
+      if (present(attpack) .and. .not.present(name)) then @\
+        call c_ESMC_AttPackRemove(mthisfield, attpack, localrc) @\
+      else if (present(attpack) .and. present(name)) then @\
+        call c_ESMC_AttPackRemoveAttribute(mthisfield, name, attpack, localrc) @\
       else if (present(name)) then @\
         call c_ESMC_AttributeRemove(mthisfield, name, localrc) @\
       endif @\

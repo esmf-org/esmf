@@ -226,21 +226,17 @@ module ESMF_AttributeUpdateUTestMod
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field", rc=status)
     call ESMF_AttributeAdd(field, convention=convESMF, purpose=purpGen, &
       attpack=attpack, rc=status)
-    call ESMF_AttributeSet(field, name1, value1, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name2, value2, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name3, value3, convention=convESMF, &
-      purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(field, name4, value4, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name1, value1, attpack=attpack, rc=status)
+    call ESMF_AttributeSet(field, name2, value2, attpack=attpack, rc=status)
+    call ESMF_AttributeSet(field, name3, value3, attpack=attpack, rc=status)
+    call ESMF_AttributeSet(field, name4, value4, attpack=attpack, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     ! Create the Grid Attribute Package
     call ESMF_AttributeAdd(grid,convention=convESMF, purpose=purpGen, &
-    					   attpack=attpack, rc=status)
-    call ESMF_AttributeSet(grid,'RegDecompX',96,convention=convESMF, purpose=purpGen, rc=status)
-    call ESMF_AttributeSet(grid,'RegDecompY',84,convention=convESMF, purpose=purpGen, rc=status)
+    	attpack=attpack, rc=status)
+    call ESMF_AttributeSet(grid, 'RegDecompX', 96, attpack=attpack, rc=status)
+    call ESMF_AttributeSet(grid, 'RegDecompY', 84, attpack=attpack, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
@@ -306,7 +302,7 @@ module ESMF_AttributeUpdateUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_Attribute)        :: attpack   
+    type(ESMF_Attribute)        :: attpack, attpack_nested  
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name2,value2,convESMF,purpGen,purp2,name3
@@ -341,21 +337,21 @@ module ESMF_AttributeUpdateUTestMod
 
     call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_AttributeSet(field, name2, value2, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttPackGet(field, attpack, convESMF, purpGen, rc=status)
+    if (rc/=ESMF_SUCCESS) return
+    call ESMF_AttributeSet(field, name2, value2, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeAdd(field, convention=convESMF, purpose=purp2, &
       attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, &
-      attpack=attpack, rc=rc)
+      attpack=attpack_nested, rc=rc)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(field, attrList(1), valueList(1), &
-      convention=convESMF, purpose=purp2, rc=rc)
+      attpack=attpack_nested, rc=rc)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(field, attrList(2), valueList(2), &
-      convention=convESMF, purpose=purp2, rc=rc)
+      attpack=attpack_nested, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_AttributeRemove(field, name=name3, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttributeRemove(field, name=name3, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
 
   end subroutine userm1_run

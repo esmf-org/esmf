@@ -528,6 +528,9 @@ module NUOPC_Base
       line=__LINE__, file=FILENAME)) return  ! bail out
       
     ! set Attributes
+    call ESMF_AttPackGet(comp, attpack, "NUOPC", "General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
     call ESMF_AttributeSet(comp, &
       name="ComponentLongName", value="NUOPC Generic Connector Component", &
       attpack=attpack, rc=rc)
@@ -1360,7 +1363,7 @@ if (ESMF_VERSION_MAJOR >= 6) then
       line=__LINE__, file=FILENAME)) return  ! bail out
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="General",   &
       attrList=attrList, nestConvention="CIM 1.5", &
-      nestPurpose="ModelComp", rc=rc)
+      nestPurpose="ModelComp", attpack=attpack, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 else
@@ -2263,12 +2266,6 @@ endif
           return  ! bail out
         if (present(selective)) then
           if (selective) then
-			      call ESMF_AttPackGet(field, attpack, &
-							convention="NUOPC", purpose="General", rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=FILENAME)) &
-              return  ! bail out
             call ESMF_AttributeGet(field, &
               name="Updated", value=value, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2287,6 +2284,12 @@ endif
           selected=.true.
         endif
         if (selected) then
+          call ESMF_AttPackGet(field, attpack, &
+            convention="NUOPC", purpose="General", rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
           call ESMF_AttributeSet(field, &
             name="TimeStamp", valueList=(/yy,mm,dd,h,m,s,ms,us,ns/), &
             attpack=attpack, rc=rc)

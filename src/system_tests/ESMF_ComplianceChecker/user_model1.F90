@@ -151,8 +151,7 @@ module user_model1
     
     call ESMF_AttributeSet(field, name="LongName", &
       value="ExchangeCorrelationEnergy", &
-      convention="ESG", purpose="General", &
-      rc=rc)
+      attpack=attpack, rc=rc)
    
     print *, localPet, "User Comp1 Init returning"
 
