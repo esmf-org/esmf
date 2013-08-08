@@ -1239,7 +1239,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
          else
-            call gatherFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
+            call gatherRedistFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
                  srcFrac, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1252,7 +1252,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
          else
-            call gatherFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
+            call gatherRedistFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
                  dstFrac, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1388,8 +1388,7 @@ end subroutine ESMF_RegridWeightGenFile
 #define ESMF_METHOD "ESMF_RegridWeightGenDG"
 
 !BOP
-! !IROUTINE: ESMF_RegridWeightGenDG - Generate regrid routeHandle and an optional 
-!  weight file from grid files in SCRIP format with user-specified distribution
+! !IROUTINE: ESMF_RegridWeightGenDG - Generate regrid routeHandle and an optional weight file from grid files with user-specified distribution
 ! \label{api:esmf_regridweightgenDG}
 ! !INTERFACE:
   ! Private name; call using ESMF_RegridWeightGen()
