@@ -101,6 +101,7 @@ module NUOPC_Connector
     ! local variables    
     character(len=NUOPC_PhaseMapStringLength) :: initPhases(3)
     character(ESMF_MAXSTR)                    :: name
+    type(ESMF_Attribute)                      :: attpack
 
     rc = ESMF_SUCCESS
 
@@ -113,9 +114,15 @@ module NUOPC_Connector
     initPhases(2) = "IPDv01p2=2"
     initPhases(3) = "IPDv01p3=3"
     
+      call ESMF_AttPackGet(cplcomp, attpack, &
+        convention="NUOPC", purpose="General", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
     call ESMF_AttributeSet(cplcomp, &
       name="InitializePhaseMap", valueList=initPhases, &
-      convention="NUOPC", purpose="General", rc=rc)
+      attpack=attpack, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -212,6 +219,7 @@ module NUOPC_Connector
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: consumerConnection
     character(ESMF_MAXSTR)          :: name
+    type(ESMF_Attribute)            :: attpack
 
     rc = ESMF_SUCCESS
 
@@ -326,18 +334,22 @@ module NUOPC_Connector
         iField=importFieldList(iMatch)
         eField=exportFieldList(eMatch)
         
+        call ESMF_AttPackGet(iField, attpack, &
+          convention="NUOPC", purpose="General", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
         ! set the connected Attribute on import Field
         call ESMF_AttributeSet(iField, &
           name="Connected", value="true", &
-          convention="NUOPC", purpose="General", &
-          rc=rc)
+          attpack=attpack, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         ! set the connected Attribute on export Field
         call ESMF_AttributeSet(eField, &
           name="Connected", value="true", &
-          convention="NUOPC", purpose="General", &
-          rc=rc)
+          attpack=attpack, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       else
@@ -385,7 +397,7 @@ module NUOPC_Connector
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: consumerConnection
     character(ESMF_MAXSTR)          :: name
-
+    type(ESMF_Attribute)            :: attpack
     rc = ESMF_SUCCESS
 
     ! query the Component for info
@@ -511,18 +523,22 @@ module NUOPC_Connector
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           
+        call ESMF_AttPackGet(iField, attpack, &
+          convention="NUOPC", purpose="General", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
         ! set the connected Attribute on import Field
         call ESMF_AttributeSet(iField, &
           name="Connected", value="true", &
-          convention="NUOPC", purpose="General", &
-          rc=rc)
+          attpack=attpack, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         ! set the connected Attribute on export Field
         call ESMF_AttributeSet(eField, &
           name="Connected", value="true", &
-          convention="NUOPC", purpose="General", &
-          rc=rc)
+          attpack=attpack, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       else
@@ -577,6 +593,7 @@ module NUOPC_Connector
     integer                   :: phase
     logical                   :: verbose
     character(ESMF_MAXSTR)    :: name
+    type(ESMF_Attribute)      :: attpack
 
     rc = ESMF_SUCCESS
 
@@ -586,9 +603,15 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
     ! determine verbosity
+    call ESMF_AttPackGet(cplcomp, attpack, &
+    	 				 convention="NUOPC", purpose="General", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     verbose = .false. ! initialize
     call ESMF_AttributeGet(cplcomp, name="Verbosity", value=valueString, &
-      convention="NUOPC", purpose="General", rc=rc)
+      attpack=attpack, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (trim(valueString)=="high") &
       verbose = .true.
     

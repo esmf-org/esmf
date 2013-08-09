@@ -95,6 +95,7 @@ module user_model4
     integer, intent(out) :: rc
 
     ! Local variables
+	type(ESMF_Attribute)        :: attpack
     character(ESMF_MAXSTR)      :: convCIM, purpComp, purpSci, purpField
     character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
     character(ESMF_MAXSTR)      :: sciPropAtt(5)
@@ -115,12 +116,12 @@ module user_model4
     !
     convCIM = 'CIM 1.5'
     purpComp = 'ModelComp'
-    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeAdd(comp, attpack=attpack, &
+    	convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    call ESMF_AttributeSet(comp, 'ShortName', &
-                           'EarthSys_OceanBioGeoChem', &
-      convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeSet(comp, 'ShortName', 'EarthSys_OceanBioGeoChem', &
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  1) Name of component in navigator bar on the left; 
     !                  attribute 'Version' appended, if set.
@@ -130,121 +131,115 @@ module user_model4
     !                  'SimulationShortName'.
 
     call ESMF_AttributeSet(comp, 'LongName', &
-                           'Ocean biogeochemistry component of EarthSys', &
-      convention=convCIM, purpose=purpComp, rc=rc)
+      'Ocean biogeochemistry component of EarthSys', &
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Full Name:"  first part of display, at top, 2nd line 
     !               under title, prepended to attribute 'SimulationLongName'.
 
     call ESMF_AttributeSet(comp, 'Description', &
       'The biogeochemistry component of the EarthSys ocean model.', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Description:" in top box.
 
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
       '2010-06-10T00:00:00Z', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Release Date" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'ModelType', &
-      'ocnBgchem', convention=convCIM, purpose=purpComp, rc=rc)
+      'ocnBgchem', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Maps to "Realm:", expanded under component name, in 
     !               navigator bar on the left.
 
-
     ! Responsible party attributes (for Author)
     convISO = 'ISO 19115'
     purpRP = 'RespParty'
+    call ESMF_AttPackGet(comp, attpack, convISO, purpRP, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     call ESMF_AttributeSet(comp, 'Name', &
-     'EarthSys Atmosphere Model Working Group', &
-      convention=convISO, purpose=purpRP, rc=rc)
+      'EarthSys Atmosphere Model Working Group', &
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display: Ingested and stored, but not yet displayed, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'Abbreviation', &
-     'EAMWG', &
-      convention=convISO, purpose=purpRP, rc=rc)
+      'EAMWG', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'NameType', &
-     'Organization', &
-      convention=convISO, purpose=purpRP, rc=rc)
+      'Organization', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not in CIM output; used only by ESMF to override 
     !               default output of Name's XML element.
 
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
-     'Climate Division, International Center for ' // &
-     'Atmospheric Research', &
-      convention=convISO, purpose=purpRP, rc=rc)
+      'Climate Division, International Center for Atmospheric Research', &
+       attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-     'info@earthsys.org', &
-      convention=convISO, purpose=purpRP, rc=rc)
+      'info@earthsys.org', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display: Ingested and stored, but not yet displayed, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
-     'Author', &
-      convention=convISO, purpose=purpRP, rc=rc)
+      'Author', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Ingested, but only used to control display.
 
     call ESMF_AttributeSet(comp, 'URL', &
-     'http://www.earthsys.org/working_groups/Atmosphere', &
-      convention=convISO, purpose=purpRP, rc=rc)
+      'http://www.earthsys.org/working_groups/Atmosphere', &
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
-
 
     ! Citation attributes
     convISO = 'ISO 19115'
     purpCitation = 'Citation'
+    call ESMF_AttPackGet(comp, attpack, convISO, purpCitation, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     call ESMF_AttributeSet(comp, 'ShortTitle', &
-     'Doe_2005', &
-      convention=convISO, purpose=purpCitation, rc=rc)
+      'Doe_2005', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'LongTitle', &
-     'Doe, J.A.; Doe, S.B.; ' // &
-     'Doe, J.C.; 2005 EarthSys: ' // &
-     'The Earth System High Resolution Global Model - ' // &
-     'Ocean Biogeochemistry model description . Journal of ' // &
-     'Earth Modeling, 11 (5). 1661-1696.', &
-      convention=convISO, purpose=purpCitation, rc=rc)
+      'Doe, J.A.; Doe, S.B.; ' // &
+      'Doe, J.C.; 2005 EarthSys: ' // &
+      'The Earth System High Resolution Global Model - ' // &
+      'Ocean Biogeochemistry model description . Journal of ' // &
+      'Earth Modeling, 11 (5). 1661-1696.', &
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Reference", concatenated with attribute 'DOI', under 
     !               tab "References".
 
     call ESMF_AttributeSet(comp, 'Date', &
-     '2005-07-09', &
-      convention=convISO, purpose=purpCitation, rc=rc)
+      '2005-07-09', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'PresentationForm', &
-     'Online Refereed', &
-      convention=convISO, purpose=purpCitation, rc=rc)
+      'Online Refereed', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'DOI', &
-     'doi:13.1031/2005JCLI4504.1', &
-      convention=convISO, purpose=purpCitation, rc=rc)
+      'doi:13.1031/2005JCLI4504.1', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Concatenated to attribute 'LongTitle' and displayed as 
     !               "Reference" under tab "References".
 
     call ESMF_AttributeSet(comp, 'URL', &
-     'http://www.earthsys.org/publications', &
-      convention=convISO, purpose=purpCitation, rc=rc)
+      'http://www.earthsys.org/publications', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not output to CIM, as of v1.5/1.7 (no definition for it). 
 
@@ -260,48 +255,45 @@ module user_model4
     sciPropAtt(3) = 'OceanBiogeoChemistryOceanBioChemistryCarbonChemistrypH-scale'
     sciPropAtt(4) = 'OceanBiogeoChemistryOceanBioTracersNutrientsListOfSpecies'
     sciPropAtt(5) = 'OceanBiogeoChemistryOceanBioTracersOceanBioTracersEcosystemZooplanctonType'
-    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpSci, &
+    call ESMF_AttributeAdd(comp, attpack=attpack, &
+    	convention=convCIM, purpose=purpSci, &
       attrList=sciPropAtt, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Scientific Properties:  attributes per Metafor standard
 
     call ESMF_AttributeSet(comp, &
-     'OceanBiogeoChemistryOceanBioKeyPropertiesTransportMethod', &
-       'different from Ocean Tracers', &
-      convention=convCIM, purpose=purpSci, rc=rc)
+      'OceanBiogeoChemistryOceanBioKeyPropertiesTransportMethod', &
+      'different from Ocean Tracers', &
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  ESG-name mapped from Metafor-name, under tabs 
     !               "Properties->Scientific"
 
     call ESMF_AttributeSet(comp, &
-     'OceanBiogeoChemistryOceanBioBoundaryForcingAtmosphericDeposition', &
-       'other', &
-      convention=convCIM, purpose=purpSci, rc=rc)
+      'OceanBiogeoChemistryOceanBioBoundaryForcingAtmosphericDeposition', &
+      'other', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  ESG-name mapped from Metafor-name, under tabs 
     !               "Properties->Scientific"
 
     call ESMF_AttributeSet(comp, &
-     'OceanBiogeoChemistryOceanBioChemistryCarbonChemistrypH-scale', &
-       'sea water', &
-      convention=convCIM, purpose=purpSci, rc=rc)
+      'OceanBiogeoChemistryOceanBioChemistryCarbonChemistrypH-scale', &
+      'sea water', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  ESG-name mapped from Metafor-name, under tabs 
     !               "Properties->Scientific"
 
     call ESMF_AttributeSet(comp, &
-     'OceanBiogeoChemistryOceanBioTracersNutrientsListOfSpecies', &
-       'Iron (Fe)', &
-      convention=convCIM, purpose=purpSci, rc=rc)
+      'OceanBiogeoChemistryOceanBioTracersNutrientsListOfSpecies', &
+      'Iron (Fe)', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  ESG-name mapped from Metafor-name, under tabs 
     !               "Properties->Scientific"
 
     call ESMF_AttributeSet(comp, &
-     'OceanBiogeoChemistryOceanBioTracersOceanBioTracersEcosystemZooplanctonType', &
-       'generic', &
-      convention=convCIM, purpose=purpSci, rc=rc)
+      'OceanBiogeoChemistryOceanBioTracersOceanBioTracersEcosystemZooplanctonType', &
+      'generic', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  ESG-name mapped from Metafor-name, under tabs 
     !               "Properties->Scientific"
@@ -316,76 +308,71 @@ module user_model4
     ! SOA Field
     SOA = ESMF_FieldEmptyCreate(name='SOA', rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_AttributeAdd(SOA, convention=convCIM, purpose=purpField,rc=rc)
+    call ESMF_AttributeAdd(SOA, attpack=attpack, &
+    	convention=convCIM, purpose=purpField,rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
 
     ! SOA CF-Extended Attributes
     call ESMF_AttributeSet(SOA, 'ShortName', 'SOA', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  As field name under tab "Inputs".
 
     call ESMF_AttributeSet(SOA, 'LongName', 'Secondary organic aerosols', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(SOA, 'Units', 'kg/m3', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
 
     ! SOA CIM Attributes
     call ESMF_AttributeSet(SOA, 'CouplingPurpose', 'Boundary', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Title of expandable bar under tab "Inputs", 
     !               "Boundary Conditions".
 
     call ESMF_AttributeSet(SOA, 'CouplingSource', &
-                                'EarthSys_OceanBioGeoChem', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'EarthSys_OceanBioGeoChem', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Source Component" under tab "Inputs", 
     !               under field name. 
 
     call ESMF_AttributeSet(SOA, 'CouplingTarget', &
-                                'EarthSys_Ocean', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'EarthSys_Ocean', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Target Component" under tab "Inputs", 
     !               under field name.
 
     call ESMF_AttributeSet(SOA, 'Description', &
-                                'Secondary organic aerosols in the ' // &
-                                'ocean.', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'Secondary organic aerosols in the ocean.', &
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Next to field name (after colon) under tab "Inputs".
 
     call ESMF_AttributeSet(SOA, 'SpatialRegriddingMethod', &
-                                'Cubic', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'Cubic', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Spatial Regridding Method" under tab "Inputs",
     !               under field name. 
 
     call ESMF_AttributeSet(SOA, 'SpatialRegriddingDimension', &
-                                '3D', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      '3D', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(SOA, 'Frequency', '2 Years', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Frequency" under tab "Inputs", under field name.
 
     call ESMF_AttributeSet(SOA, 'TimeTransformationType', &
-                                'Exact', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'Exact', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Time Transformation Type" under tab "Inputs", 
     !               under field name. 
@@ -394,75 +381,70 @@ module user_model4
     ! POM Field
     POM = ESMF_FieldEmptyCreate(name='POM', rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_AttributeAdd(POM, convention=convCIM, purpose=purpField,rc=rc)
+    call ESMF_AttributeAdd(POM, attpack=attpack, &
+    	convention=convCIM, purpose=purpField,rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! POM CF-Extended Attributes
     call ESMF_AttributeSet(POM, 'ShortName', 'POM', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  As field name under tab "Inputs".
 
     call ESMF_AttributeSet(POM, 'LongName', 'Particulate organic matter', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(POM, 'Units', 'mol/m3', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
 
     ! POM CIM Attributes
     call ESMF_AttributeSet(POM, 'CouplingPurpose', 'Initial', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Title of expandable bar under tab "Inputs", 
     !               "Boundary Conditions".
 
     call ESMF_AttributeSet(POM, 'CouplingSource', &
-                                'EarthSys_OceanBioGeoChem', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'EarthSys_OceanBioGeoChem', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Source Component" under tab "Inputs", 
     !               under field name. 
 
     call ESMF_AttributeSet(POM, 'CouplingTarget', &
-                                'EarthSys_Ocean', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'EarthSys_Ocean', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Target Component" under tab "Inputs", 
     !               under field name.
 
     call ESMF_AttributeSet(POM, 'Description', &
-                                'Particulate organic matter in ' // &
-                                'the ocean.', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'Particulate organic matter in the ocean.', &
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Next to field name (after colon) under tab "Inputs".
 
     call ESMF_AttributeSet(POM, 'SpatialRegriddingMethod', &
-                                'Conservative', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'Conservative', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Spatial Regridding Method" under tab "Inputs",
     !               under field name. 
 
     call ESMF_AttributeSet(POM, 'SpatialRegriddingDimension', &
-                                '1D', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      '1D', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(POM, 'Frequency', '45 Seconds', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Frequency" under tab "Inputs", under field name.
 
     call ESMF_AttributeSet(POM, 'TimeTransformationType', &
-                                'TimeAccumulation', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'TimeAccumulation', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Time Transformation Type" under tab "Inputs", 
     !               under field name. 
