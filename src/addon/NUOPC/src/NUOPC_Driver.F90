@@ -20,6 +20,7 @@ module NUOPC_Driver
   public type_PetList
   public label_InternalState
   public label_SetModelCount, label_SetModelPetLists
+  public label_ModifyInitializePhaseMap
   public label_SetModelServices, label_Finalize
   public label_SetRunClock
   
@@ -31,6 +32,8 @@ module NUOPC_Driver
     label_SetModelPetLists = "Driver_SetModelPetLists"
   character(*), parameter :: &
     label_SetModelServices = "Driver_SetModelServices"
+  character(*), parameter :: &
+    label_ModifyInitializePhaseMap = "Driver_ModifyInitializePhaseMap"
   character(*), parameter :: &
     label_Finalize = "Driver_Finalize"
   character(*), parameter :: &
@@ -497,7 +500,7 @@ module NUOPC_Driver
     
     ! SPECIALIZE by calling into attached method to SetServices for modelComps
     call ESMF_MethodExecute(gcomp, label=label_SetModelServices, &
-      existflag=existflag, userRc=localrc, rc=rc)
+      userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -524,6 +527,37 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+
+    ! SPECIALIZE by calling into optional attached method allowing modification
+    ! of the "InitializePhaseMap" metadata.
+    call ESMF_MethodExecute(gcomp, label=label_ModifyInitializePhaseMap, &
+      existflag=existflag, userRc=localrc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! Ingest the InitializePhaseMap
+    do i=0, is%wrap%modelCount
+      if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
+        ! setup modelPhaseMap
+        call setupModelPhaseMap(i=i, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+      do j=0, is%wrap%modelCount
+        if (NUOPC_CplCompAreServicesSet(is%wrap%connectorComp(i,j))) then
+          ! setup modelPhaseMap
+          call setupConnectorPhaseMap(i=i, j=j, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
+      enddo
+    enddo
 
     ! -> Now encode the NUOPC IPDv00, IPDv01, IPDv02:
       
@@ -668,37 +702,28 @@ module NUOPC_Driver
         character(ESMF_MAXSTR)  :: iString, pString
         rc = ESMF_SUCCESS
         write (pString, *) phase
-        do i=0, is%wrap%modelCount
+        do i=1, is%wrap%modelCount
           write (iString, *) i
           if (NUOPC_GridCompAreServicesSet(is%wrap%modelComp(i))) then
-            if (i>0) then
-              call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                return  ! bail out
-              call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
-                importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i),&
-                clock=internalClock, phase=phase, userRc=localrc, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg="NUOPC Incompatible: "//&
-                "Failed calling phase "// &
-                trim(adjustl(pString))//" Initialize for modelComp "// &
-                trim(adjustl(iString))//": "//trim(compName), &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                return  ! bail out
-              if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase "// &
-                trim(adjustl(pString))//" Initialize for modelComp "// &
-                trim(adjustl(iString))//": "//trim(compName)// &
-                " did not return ESMF_SUCCESS", &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                return  ! bail out
-            endif
-            if (phase == 0) then
-              ! setup modelPhaseMap
-              call setupModelPhaseMap(i=i, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                return  ! bail out
-            endif
+            call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
+              importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i),&
+              clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg="NUOPC Incompatible: "//&
+              "Failed calling phase "// &
+              trim(adjustl(pString))//" Initialize for modelComp "// &
+              trim(adjustl(iString))//": "//trim(compName), &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase "// &
+              trim(adjustl(pString))//" Initialize for modelComp "// &
+              trim(adjustl(iString))//": "//trim(compName)// &
+              " did not return ESMF_SUCCESS", &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
           endif
         enddo
       end subroutine
@@ -748,13 +773,6 @@ module NUOPC_Driver
                 trim(compName)//" did not return ESMF_SUCCESS", &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
-              if (phase == 0) then
-                ! setup modelPhaseMap
-                call setupConnectorPhaseMap(i=i, j=j, rc=rc)
-                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                  return  ! bail out
-              endif
             endif
           enddo
         enddo
