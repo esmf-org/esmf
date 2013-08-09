@@ -330,7 +330,7 @@ int ESMC_GridGetCoordBounds(
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE: ESMC_GridWrite - Write a Grid to a VTK file
 //
 // !INTERFACE:
@@ -358,7 +358,7 @@ int ESMC_GridWrite(
 //     The name of the output file.
 //   \end{description}
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
 
 #if defined (__cplusplus)

@@ -45,29 +45,51 @@ module ESMF_RegridWeightGenMod
   use ESMF_FieldRegridMod
   use ESMF_IOScripMod
   use ESMF_IOGridspecMod
-
+  use ESMF_IOUGridMod
+  use ESMF_RHandleMod
   
   implicit none
+
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 ! - ESMF-public methods:
+
   public ESMF_RegridWeightGen
 
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_RegridWeightGen -- Generic interface
+
+! !INTERFACE:
+interface ESMF_RegridWeightGen
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_RegridWeightGenFile
+      module procedure ESMF_RegridWeightGenDG
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_RegridWeightGen} subroutines
+!EOPI 
+end interface
+
+!------------------------------------------------------------------------------
 contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 ! -------------------------- ESMF-public method -------------------------------
-!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_RegridWeightGen"
+#define ESMF_METHOD "ESMF_RegridWeightGenFile"
 
 !BOP
-! !IROUTINE: ESMF_RegridWeightGen - Generate regrid weight file from grid files
-! \label{api:esmf_regridweightgen}
+! !IROUTINE: ESMF_RegridWeightGenFile - Generate regrid weight file from grid files
+! \label{api:esmf_regridweightgenfile}
 ! !INTERFACE:
-subroutine ESMF_RegridWeightGen(srcFile, dstFile, weightFile, keywordEnforcer, &
+  ! Private name; call using ESMF_RegridWeightGen()
+  subroutine ESMF_RegridWeightGenFile(srcFile, dstFile, weightFile, keywordEnforcer, &
     regridmethod, polemethod, regridPoleNPnts, &
     unmappedaction, srcFileType, dstFileType, &
     srcRegionalFlag, dstRegionalFlag, srcMeshname, dstMeshname,  &
@@ -894,6 +916,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	else
 	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, convert3D=.true., &
                     meshname = trim(srcMeshName), rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
+                               ESMF_ERR_PASSTHRU, &
+                               ESMF_CONTEXT, rcToReturn=rc)) return
 	endif
         !call ESMF_MeshWrite(srcMesh, "srcMesh", rc)
         if (ESMF_LogFoundError(localrc, &
@@ -1139,32 +1164,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! write works, then make area io parallel
       if (isConserve) then
          if (srcIsReg) then
-            call computeAreaGrid(srcGrid, PetNo, srcArea, regridScheme, rc)
+            call computeAreaGrid(srcGrid, PetNo, srcArea, regridScheme, localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
           else
-            call computeAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, rc)
+            call computeAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_MeshMergeSplitSrcInd(srcMesh,factorIndexList,rc)
+            call ESMF_MeshMergeSplitSrcInd(srcMesh,factorIndexList,localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
          endif
 
          if (dstIsReg) then
-            call computeAreaGrid(dstGrid, PetNo, dstArea, regridScheme, rc)
+            call computeAreaGrid(dstGrid, PetNo, dstArea, regridScheme, localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
           else
-            call computeAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, rc)
+            call computeAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_MeshMergeSplitDstInd(dstMesh,factorList,factorIndexList,rc)
+            call ESMF_MeshMergeSplitDstInd(dstMesh,factorList,factorIndexList,localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1214,7 +1239,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
          else
-            call gatherFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
+            call gatherRedistFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
                  srcFrac, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1227,7 +1252,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
          else
-            call gatherFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
+            call gatherRedistFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
                  dstFrac, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1356,7 +1381,449 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  ESMF_CONTEXT, rcToReturn=rc) 
       return
 #endif
-end subroutine ESMF_RegridWeightGen
+end subroutine ESMF_RegridWeightGenFile
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridWeightGenDG"
+
+!BOP
+! !IROUTINE: ESMF_RegridWeightGenDG - Generate regrid routeHandle and an optional weight file from grid files with user-specified distribution
+! \label{api:esmf_regridweightgenDG}
+! !INTERFACE:
+  ! Private name; call using ESMF_RegridWeightGen()
+   subroutine ESMF_RegridWeightGenDG(srcFile, dstFile, regridRouteHandle, &
+    srcElementDistgrid, dstElementDistgrid, keywordEnforcer, &
+    srcNodalDistgrid, dstNodalDistgrid, &
+    weightFile, regridmethod, unmappedaction, useUserAreaFlag, &
+    largefileFlag, netcdf4fileFlag, verboseFlag, rc)
+
+! !ARGUMENTS:
+
+  character(len=*),             intent(in)            :: srcFile
+  character(len=*),             intent(in)            :: dstFile
+  type(ESMF_RouteHandle),       intent(out)           :: regridRouteHandle
+  type(ESMF_DistGrid),          intent(in)            :: srcElementDistgrid
+  type(ESMF_DistGrid),          intent(in)            :: dstElementDistgrid
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  character(len=*),             intent(in),  optional :: weightFile
+  type(ESMF_DistGrid),          intent(in),  optional :: srcNodalDistgrid
+  type(ESMF_DistGrid),          intent(in),  optional :: dstNodalDistgrid
+  type(ESMF_RegridMethod_Flag), intent(in),  optional :: regridmethod
+  type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
+  logical,                      intent(in),  optional :: useUserAreaFlag
+  logical,                      intent(in),  optional :: largefileFlag
+  logical,                      intent(in),  optional :: netcdf4fileFlag
+  logical,                      intent(in),  optional :: verboseFlag
+  integer,                      intent(out), optional :: rc
+
+! !DESCRIPTION:
+! This subroutine does online regridding weight generation from files with user specified distribution.  
+! The main differences between this API with the one in \ref{api:esmf\_regridweightgenfile} are as follows:
+! \begin{itemize}
+! \item The input grids are always represented as {\tt ESMF\_Mesh} whether they are logically rectangular or unstructure.
+! \item The input grids will be decomposed using user-specfied distribution instead of a fixed decomposition in the 
+! other subroutine.
+! \item The soruce and destination grid files have to be in the SCRIP grid file format. 
+! \item This subroutine has three additional required arguments: {\tt regridRouteHandle}, {\tt srcElementDistgrid},
+! {\tt dstElementDistgrid}.  {\tt srcElementDistgrid} and {\tt dstElementDistgrid} are of type {\tt ESMF_DistGrid},
+! they are used to define the distribution of the source and destination grid elements. The output {\tt regridRouteHandle} 
+! allows user to regrid the field values later in the application.
+! \item The {\tt weightFile} argument is optional. When it is given, a weightfile will be generated as well.
+! \item The subroutine also takes user-specified nodals distribution {\tt srcNodelDistgrid} and {\tt dstNodalDistgrid} as 
+! optional input arguments.
+! \end{itemize}
+! \smallskip
+! 
+! The arguments are:
+!   \begin{description}
+!   \item [srcFile]
+!     The source grid file name in SCRIP grid file format
+!   \item [dstFile]
+!     The destination grid file name in SCRIP grid file format
+!   \item [regridRouteHandle]
+!     The regrid RouteHandle returned by {\tt ESMF\_FieldRegridStore()}
+!   \item [srcElementDistgrid]
+!     A distGrid that specifies the distribution of the source grid's elements
+!   \item [dstElementDistgrid]
+!     A distGrid taht specifies the distribution of the destination grid's elements
+!   \item [weightFile]
+!     The interpolation weight file name. If present, an output weight file will be generated.
+!   \item [srcNodalDistgrid]
+!     An optinonal distGrid that specifies the distribution of the source grid's nodes
+!   \item [dstNodalDistgrid]
+!     An optional distGrid taht specifies the distribution of the destination grid's nodes
+!   \item [{[regridmethod]}]
+!     The type of interpolation. Please see Section~\ref{opt:regridmethod} 
+!     for a list of valid options. If not specified, defaults to 
+!     {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
+!   \item [{[unmappedaction]}]
+!     specify what should happen if there are destination points that
+!     can't be mapped to a source cell. Options are 
+!     {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
+!     {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
+!     to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!   \item [{[useUserAreaFlag]}]
+!     If .TRUE., the element area values defined in the grid files are used.
+!     Only the SCRIP and ESMF format grid files have user specified areas. This flag
+!     is only used for conservative regridding. The default is .FALSE. 
+!   \item [{[largefileFlag]}]
+!     If .TRUE., the output weight file is in NetCDF 64bit offset format. 
+!     The default is .FALSE.
+!   \item [{[netcdf4fileFlag]}]
+!     If .TRUE., the output weight file is in NetCDF4 file format. 
+!     The default is .FALSE.
+!   \item [{[verboseFlag]}]
+!     If .TRUE., it will print summary information about the regrid parameters,
+!     default to .FALSE.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!EOP
+      
+      type(ESMF_RegridMethod_Flag) :: localRegridMethod
+      logical            :: localUserAreaFlag
+      logical            :: localLargefileFlag
+      logical            :: localNetcdf4fileFlag
+      logical            :: localVerboseFlag
+      integer            :: localrc
+      type(ESMF_VM)      :: vm
+      integer            :: PetNo, PetCnt
+      type(ESMF_Mesh)    :: srcMesh, dstMesh
+      type(ESMF_Field)   :: srcField, dstField
+      type(ESMF_Field)   :: srcFracField, dstFracField
+      type(ESMF_ArraySpec) :: arrayspec
+      integer(ESMF_KIND_I4) :: maskvals(1)
+      integer(ESMF_KIND_I4), pointer:: factorIndexList(:,:)
+      real(ESMF_KIND_R8), pointer :: factorList(:)
+      integer            :: ind
+      logical            :: convert3D
+      logical            :: isConserve
+      logical            :: convertToDual
+      type(ESMF_MeshLoc) :: meshloc
+      character(len=256) :: methodStr
+      real(ESMF_KIND_R8), pointer :: srcArea(:)
+      real(ESMF_KIND_R8), pointer :: dstArea(:)
+      real(ESMF_KIND_R8), pointer :: dstFrac(:), srcFrac(:)
+      integer            :: regridScheme
+      logical            :: wasCompacted
+      integer(ESMF_KIND_I4), pointer:: compactedFactorIndexList(:,:)
+      real(ESMF_KIND_R8), pointer :: compactedFactorList(:)
+      type(ESMF_UnmappedAction_Flag) :: localUnmappedaction
+      character(len=256) :: argStr
+      !real(ESMF_KIND_R8) :: starttime, endtime
+
+#ifdef ESMF_NETCDF     
+      !------------------------------------------------------------------------
+      ! get global vm information
+      !
+      call ESMF_VMGetCurrent(vm, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+                             ESMF_ERR_PASSTHRU, &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! set up local pet info
+      call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+                             ESMF_ERR_PASSTHRU, &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Default values
+      localRegridMethod = ESMF_REGRIDMETHOD_BILINEAR
+      localVerboseFlag = .false.
+      localLargeFileFlag = .false.
+      localNetcdf4FileFlag = .false.
+      localUserAreaflag = .false.
+
+      if (present(regridMethod)) then
+        localRegridMethod = regridMethod
+      endif
+    	
+      if (present(unmappedaction)) then
+        localUnmappedaction = unmappedaction
+      else
+        localUnmappedaction = ESMF_UNMAPPEDACTION_ERROR
+      endif
+
+      if (present(largefileFlag)) then
+	   localLargeFileFlag = largefileFlag
+      endif
+
+      if (present(netcdf4fileFlag)) then
+	   localNetcdf4FileFlag = netcdf4fileFlag
+      endif
+
+      if (present(useUserAreaFlag)) then
+	   localUserAreaFlag = useUserAreaFlag
+      endif
+
+      if (present(verboseFlag)) then
+           localVerboseFlag = verboseFlag
+      endif
+
+      ! user area only needed for conservative regridding
+      if (localUserAreaFlag .and. (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE)) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	    msg = " user defined area is only used for the conservative regridding", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return
+      endif
+
+      ! Print the regrid options
+      if (localVerboseFlag .and. PetNo == 0) then
+  	  print *, "Starting weight generation with these inputs: "
+	  print *, "  Source File: ", trim(srcfile)
+	  print *, "  Destination File: ", trim(dstfile)
+  	  print *, "  Weight File: ", trim(weightFile)
+          if (localRegridMethod == ESMF_REGRIDMETHOD_BILINEAR) then
+             print *, "  Regrid Method: bilinear"
+          elseif (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+             print *, "  Regrid Method: conserve"
+          elseif (localRegridMethod == ESMF_REGRIDMETHOD_PATCH) then
+             print *, "  Regrid Method: patch"
+          elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
+             print *, "  Regrid Method: nearest source to destination"
+          elseif (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
+             print *, "  Regrid Method: nearest destination to source"
+	  endif
+          if (localUnmappedaction .eq. ESMF_UNMAPPEDACTION_IGNORE) then
+	     print *, "  Ignore unmapped destination points"
+          endif
+	  if (localLargeFileFlag) then
+	     print *, "  Output weight file in 64bit offset NetCDF file format"
+          endif
+	  if (localNetcdf4FileFlag) then
+	     print *, "  Output weight file in NetCDF4 file format"
+          endif
+	  if (localUserAreaFlag) then
+	     print *, "  Use user defined cell area for both the source and destination grids"
+          endif
+          write(*,*)
+     endif 
+
+     ! Set flags according to the regrid method
+     if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+        isConserve=.true.
+        convertToDual=.false.
+        meshloc=ESMF_MESHLOC_ELEMENT
+     else
+        isConserve=.false.
+        convertToDual=.true.
+        meshloc=ESMF_MESHLOC_NODE
+     endif
+
+     regridScheme = ESMF_REGRID_SCHEME_FULL3D
+     maskvals(1) = 0
+
+     !Read in the srcfile and create the corresponding ESMF_Mesh object
+     srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, convert3D=.true., &
+                       convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+		       elementDistgrid=srcElementDistgrid, nodalDistgrid=srcNodalDistgrid, &
+		       rc=localrc)
+     if (ESMF_LogFoundError(localrc, &
+                       ESMF_ERR_PASSTHRU, &
+                       ESMF_CONTEXT, rcToReturn=rc)) return
+     !call ESMF_MeshWrite(srcMesh, "srcMesh", rc)
+     call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+     srcField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
+     if (ESMF_LogFoundError(localrc, &
+                        ESMF_ERR_PASSTHRU, &
+                        ESMF_CONTEXT, rcToReturn=rc)) return
+
+     !Read in the dstfile and create the corresponding ESMF object (either
+     ! ESMF_Grid or ESMF_Mesh)
+     dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, convert3D=.true., &
+                       convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+		       elementDistgrid=dstElementDistgrid, nodalDistgrid=dstNodalDistgrid, &
+		       rc=localrc)
+     if (ESMF_LogFoundError(localrc, &
+                       ESMF_ERR_PASSTHRU, &
+                       ESMF_CONTEXT, rcToReturn=rc)) return
+     call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+     if (ESMF_LogFoundError(localrc, &
+                       ESMF_ERR_PASSTHRU, &
+                       ESMF_CONTEXT, rcToReturn=rc)) return
+     dstField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
+     if (ESMF_LogFoundError(localrc, &
+                       ESMF_ERR_PASSTHRU, &
+                       ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Create Frac Fields if conservative
+      if (isConserve) then
+           call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+            srcFracField=ESMF_FieldCreate(srcMesh,arrayspec,meshloc=meshloc,rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+           call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+            dstFracField=ESMF_FieldCreate(dstMesh,arrayspec,meshloc=meshloc,rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      !call ESMF_VMBarrier(vm)
+      !call ESMF_VMWtime(starttime, rc=localrc)
+      if (localRegridMethod == ESMF_REGRIDMETHOD_BILINEAR) then
+            methodStr = "Bilinear remapping"
+      else if (localRegridMethod == ESMF_REGRIDMETHOD_PATCH) then
+            methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Patch
+      else if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD) then
+            methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
+      else if (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS) then
+            methodStr = "Bilinear remapping" ! SCRIP doesn't recognize Nearest neighbor
+      else if (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then
+            methodStr = "Conservative remapping"
+      else ! nothing recognizable so report error
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+            msg="unrecognized RegridMethod", &
+            ESMF_CONTEXT, rcToReturn=rc)
+      endif
+
+      if (present(weightFile)) then
+          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
+	    unmappedaction=localUnmappedaction, &
+	    routehandle=regridRouteHandle, &
+	    factorIndexList=factorIndexList, factorList=factorList, &
+            srcFracField=srcFracField, dstFracField=dstFracField, &
+            regridmethod = localRegridMethod, &
+            polemethod = ESMF_POLEMETHOD_NONE, &
+	    rc=localrc)
+      else
+          call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, & 
+	    srcMaskValues = maskvals, dstMaskValues = maskvals, &
+	    unmappedaction=localUnmappedaction, &
+	    routehandle=regridRouteHandle, &
+            srcFracField=srcFracField, dstFracField=dstFracField, &
+            regridmethod = localRegridMethod, &
+            polemethod = ESMF_POLEMETHOD_NONE, &
+	    rc=localrc)
+       endif
+
+       if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Only compute area, fraction and output weight file is weightFile is present
+      if (present(weightFile)) then
+        ! Compute areas if conservative
+        ! Area only valid on PET 0 right now, when parallel Array
+        ! write works, then make area io parallel
+        if (isConserve) then
+            call computeRedistAreaMesh(srcMesh, vm, petNo, petCnt, srcArea, localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_MeshMergeSplitSrcInd(srcMesh,factorIndexList,localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+            call computeRedistAreaMesh(dstMesh, vm, petNo, petCnt, dstArea, localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_MeshMergeSplitDstInd(dstMesh,factorList,factorIndexList,localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        call compactMatrix(factorList, factorIndexList, &
+                            wasCompacted, &
+                            compactedFactorList, compactedFactorIndexList, &
+                            localrc)
+        if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! If the list was compacted get rid of the old lists and 
+        ! point to the new lists
+        if (wasCompacted) then
+           deallocate(factorList)
+           factorList=>compactedFactorList
+           deallocate(factorIndexList)
+           factorIndexList=>compactedFactorIndexList
+        endif
+
+        ! Computer fraction if bilinear
+        ! src fraction is always 0
+        ! destination fraction depends on the src mask, dst mask, and the weight
+        if (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
+	   call computeFracMesh(dstMesh, vm, factorIndexList, dstFrac, localrc)
+           if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+            call gatherRedistFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
+                 srcFrac, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+            call gatherRedistFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
+                 dstFrac, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        !! Write the weight table into a SCRIP format NetCDF file
+        if (PetNo == 0) then
+           if (isConserve) then
+              call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	           srcFile=srcfile, dstFile=dstfile, method = localRegridMethod, & 
+                   srcArea=srcArea, dstArea=dstArea, srcFrac=srcFrac, &
+		   dstFrac=dstFrac, largeFileFlag=localLargeFileFlag, &
+		   netcdf4FileFlag = localNetcdf4FileFlag, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+           else
+               call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList,  &
+	           srcFile=srcfile, dstFile=dstfile, &
+	           method = localRegridMethod, dstFrac=dstFrac, &
+		   largeFileFlag=localLargeFileFlag, &
+		   netcdf4FileFlag = localNetcdf4FileFlag, rc=localrc)
+               if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+	   endif
+        else 
+	 call ESMF_OutputScripWeightFile(weightFile, factorList, factorIndexList, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
+        !call ESMF_VMBarrier(vm)
+        !call ESMF_VMWtime(endtime, rc=localrc)
+
+        ! Get rid of conservative arrays
+        if (isConserve) then
+           if (PetNo == 0) then
+	      deallocate(srcArea)
+	      deallocate(dstArea)
+           endif
+         endif
+      endif
+      rc = ESMF_SUCCESS
+      return 
+#else
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+      return
+#endif
+end subroutine ESMF_RegridWeightGenDG
+
+
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1454,6 +1921,144 @@ subroutine computeAreaGrid(grid, petNo, area, regridScheme, rc)
 
 end subroutine computeAreaGrid
 
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "computeRedistAreaMesh"
+
+! For now just put into a 1D array on PET 0. When PIO array write is done, then
+! do it in parallel
+! AREA ONLY VALID ON PET 0
+subroutine computeRedistAreaMesh(mesh, vm, petNo, petCnt, area, rc)
+  type(ESMF_Mesh) :: mesh
+  type(ESMF_VM) :: VM
+  integer :: petNo,petCnt
+  real (ESMF_KIND_R8), pointer :: area(:)
+  integer :: rc
+  real (ESMF_KIND_R8), pointer :: localArea(:)
+  integer :: localrc
+  integer :: localElemCount,i
+  integer (ESMF_KIND_I4) :: localCount(1), globalCount(1)
+  integer :: totalCount
+  logical :: hasSplitElem
+  type(ESMF_DistGrid) :: distgrid, justPet0Distgrid
+  type(ESMF_Array) :: areaArray, justPet0Array
+  type(ESMF_RouteHandle) :: rh
+
+  ! Find out if elements are split
+  call ESMF_MeshGetElemSplit(mesh, hasSplitElem=hasSplitElem, rc=localrc)  
+  if (ESMF_LogFoundError(localrc, &
+                         ESMF_ERR_PASSTHRU, &
+                         ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Get area depending on split elements
+  if (hasSplitElem) then 
+     ! Get local size of mesh areas before split
+     call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, &
+            rc=localrc)  
+     if (ESMF_LogFoundError(localrc, &
+                         ESMF_ERR_PASSTHRU, &
+                         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! allocate space for areas
+    allocate(localArea(localElemCount))
+
+    ! Get local Areas
+    call ESMF_MeshGetOrigElemArea(mesh, areaList=localArea, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+                         ESMF_ERR_PASSTHRU, &
+                         ESMF_CONTEXT, rcToReturn=rc)) return
+  else 
+     ! Get local size of mesh areas
+     call ESMF_MeshGet(mesh, numOwnedElements=localElemCount, &
+            rc=localrc)  
+     if (ESMF_LogFoundError(localrc, &
+                         ESMF_ERR_PASSTHRU, &
+                         ESMF_CONTEXT, rcToReturn=rc)) return
+  
+    ! allocate space for areas
+    allocate(localArea(localElemCount))
+
+    ! Get local Areas
+    call ESMF_MeshGetElemArea(mesh, areaList=localArea, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+                         ESMF_ERR_PASSTHRU, &
+                         ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+  ! The element disgrid is for the split elements, thus the following code
+  ! doesn't work with split element
+  call ESMF_MeshGet(mesh, elementDistgrid=distgrid, rc=rc)
+  if (ESMF_LogFoundError(localrc, &
+                         ESMF_ERR_PASSTHRU, &
+                         ESMF_CONTEXT, rcToReturn=rc)) return
+
+  areaArray = ESMF_ArrayCreate(distgrid, localArea, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+  
+  ! Get total size
+  
+  localCount(1)=localElemCount
+  globalCount(1)=0
+  call ESMF_VMAllReduce(vm,localCount,globalCount,count=1, &
+            reduceflag=ESMF_REDUCE_SUM, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  totalCount=globalCount(1)
+  print *, 'local element ', localElemCount, totalCount
+
+  ! Create distgrid with everything on PET 0
+  justPet0Distgrid = ESMF_DistGridCreate((/1/),(/totalCount/), regDecomp=(/1/),&
+  		     rc=localrc) 
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (PetNo == 0) then
+    ! Allocate final area list
+    allocate(area(totalCount))
+  else
+    allocate(area(0))
+  endif
+
+  ! Create array from distgrid
+  justPet0Array=ESMF_ArrayCreate(justPet0Distgrid, &
+                         farrayPtr=area, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Redist from one to the other
+  call ESMF_ArrayRedistStore(srcArray=areaArray, &
+                             dstArray=justPet0Array, &
+                             routehandle=rh, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_ArrayRedist(srcArray=areaArray, &
+                        dstArray=justPet0Array, &
+                        routehandle=rh, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_ArrayRedistRelease(routehandle=rh, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Get rid of helper variables
+  call ESMF_ArrayDestroy(areaArray)
+  deallocate(localArea) 
+  ! call ESMF_ArrayDestroy(justPet0Array)
+  ! call ESMF_DistGridDestroy(justPet0Distgrid)
+
+end subroutine computeRedistAreaMesh
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1839,7 +2444,6 @@ subroutine gatherFracFieldGrid(grid, fracField, petNo, frac, rc)
 
 end subroutine gatherFracFieldGrid
 
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "gatherFracFieldMesh"
@@ -1961,6 +2565,162 @@ subroutine gatherFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, rc)
   if (petNo .ne. 0) deallocate(frac)
 
 end subroutine gatherFracFieldMesh
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "gatherRedistFracFieldMesh"
+
+! For now just put into a 1D array on PET 0. When PIO array write is done, then
+! do it in parallel
+! Frac ONLY VALID ON PET 0
+subroutine gatherRedistFracFieldMesh(mesh, vm, fracField, petNo, petCnt, frac, rc)
+  type(ESMF_Mesh) :: mesh
+  type(ESMF_VM) :: VM
+  integer :: petNo,petCnt
+  type(ESMF_Field) :: fracField
+  type(ESMF_Array) :: fracArray, justPet0Array
+  type(ESMF_DistGrid) :: justPet0DistGrid
+  type(ESMF_RouteHandle) :: rh
+  real (ESMF_KIND_R8), pointer :: frac(:)
+  integer :: rc
+  real (ESMF_KIND_R8), pointer :: localFrac(:)
+  real (ESMF_KIND_R8), pointer :: mergedFrac(:)
+  integer :: localrc
+  integer :: localElemCount,i
+  integer (ESMF_KIND_I4) :: localCount(1), globalCount(1)
+  integer :: totalCount
+  logical :: hasSplitElem
+  integer, pointer :: seqIndexList(:)
+    
+
+
+  ! Get localFrac from field
+  call ESMF_FieldGet(fracField, localDE=0, farrayPtr=localFrac,  rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+  
+
+  ! Find out if elements are split
+  call ESMF_MeshGetElemSplit(mesh, hasSplitElem=hasSplitElem, rc=localrc)  
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+  ! Get merge frac field depending on if split elements
+  if (hasSplitElem) then 
+     ! Get local size of mesh areas before split
+     call ESMF_MeshGetElemSplit(mesh, origElemCount=localElemCount, &
+          rc=localrc)  
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+     ! allocate space for frac
+     allocate(mergedFrac(localElemCount))
+
+     ! Get local Areas
+     call ESMF_MeshGetOrigElemFrac(mesh, splitFracList=localFrac, &
+          origfracList=mergedFrac, rc=localrc)
+     if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+     ! switch to point to merged areas
+     localFrac=>mergedFrac
+  else 
+     localElemCount=size(localFrac)
+     ! localFrac is gotten from the fracField above
+  endif
+
+
+  ! Get total size
+  localCount(1)=localElemCount
+  globalCount(1)=0
+  call ESMF_VMReduce(vm,localCount,globalCount,count=1, &
+            reduceflag=ESMF_REDUCE_SUM, rootPet=0,rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+  ! Set total size
+  if (petNo==0) then
+     totalCount=globalCount(1)
+  else 
+     totalCount=0
+  endif
+
+  ! Allocate and fill array to create distgrid
+  allocate(seqIndexList(totalCount))
+  do i=1,totalCount
+     seqIndexList(i)=i     
+  enddo
+
+  ! Create distgrid with everything on PET 0
+  justPet0Distgrid=ESMF_DistGridCreate(seqIndexList, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Free seqIndexList memory 
+  deallocate(seqIndexList)
+
+
+  ! Allocate final frac list
+  allocate(frac(totalCount))
+
+  ! Create array from distgrid
+  justPet0Array=ESMF_ArrayCreate(justPet0Distgrid, &
+                         farrayPtr=frac, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! Get array from fracField
+  call ESMF_FieldGet(fracField, array=fracArray, &
+                     rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+  ! Redist from one to the other
+  call ESMF_ArrayRedistStore(srcArray=fracArray, &
+                             dstArray=justPet0Array, &
+                             routehandle=rh, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_ArrayRedist(srcArray=fracArray, &
+                        dstArray=justPet0Array, &
+                        routehandle=rh, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_ArrayRedistRelease(routehandle=rh, rc=localrc)
+  if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  
+  ! Properly redisted fractions should now be in frac(:)
+
+
+  ! Get rid of helper variables
+  if (hasSplitElem) then 
+     deallocate(mergedFrac) 
+  endif
+
+  call ESMF_ArrayDestroy(justPet0Array)
+  call ESMF_DistGridDestroy(justPet0Distgrid)
+
+end subroutine gatherRedistFracFieldMesh
 
 
 !------------------------------------------------------------------------------

@@ -37,7 +37,7 @@ int main ( int argc, char **argv )
 //EOE
 
 //BOC
-      char fname [ESMF_MAXSTR] = "myResourceFile.rc";    // file name
+      char fname [] = "myResourceFile.rc";    // file name
       char fn1[10], fn2[10], fn3[10];
       int rc;             // error return code (0 is OK)
       ESMC_I4 n = 0;

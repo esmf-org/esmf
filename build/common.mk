@@ -360,6 +360,14 @@ ifeq ($(ESMF_BOPT),default)
 export ESMF_BOPT = O
 endif
 
+ifndef $(ESMF_MOAB)
+ifneq ($(ESMF_OS),MinGW)
+ifneq ($(ESMF_OS),Cygwin)
+export ESMF_MOAB=internal
+endif
+endif
+endif
+
 ifneq ($(ESMF_ARRAY_LITE),TRUE)
 export ESMF_ARRAY_LITE = FALSE
 endif
