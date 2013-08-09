@@ -1419,7 +1419,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !DESCRIPTION:
 ! This subroutine does online regridding weight generation from files with user specified distribution.  
-! The main differences between this API with the one in \ref{api:esmf\_regridweightgenfile} are as follows:
+! The main differences between this API with the one in \ref{api:esmf_regridweightgenfile} are as follows:
 ! \begin{itemize}
 ! \item The input grids are always represented as {\tt ESMF\_Mesh} whether they are logically rectangular or unstructure.
 ! \item The input grids will be decomposed using user-specfied distribution instead of a fixed decomposition in the 
