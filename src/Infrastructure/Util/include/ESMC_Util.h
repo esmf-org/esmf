@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-  int ESMC_UtilGetArgIndex(int argc, const char *argv[], const char *value, int *rc);
+  int ESMC_UtilGetArgIndex(int argc, char * const argv[], const char *value, int *rc);
 
 #ifdef __cplusplus
 } // extern "C"
