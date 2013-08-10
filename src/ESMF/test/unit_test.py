@@ -329,23 +329,6 @@ def grid_area_3D_test():
     # return True from unit test
     return True
 
-@expected_failure
-def grid_write_empty_test():
-
-    # this test should fail
-    try:
-        max_index = np.array([12,20])
-
-        grid = Grid(max_index)
-
-        grid._write("writebeforeempty")
-
-    except:
-        raise TestGridWriteBeforeCoords("FAIL")
-        
-    # return True from unit test
-    return True
-
 def grid_field_test():
 
     # create a Grid with center staggers
@@ -1160,7 +1143,6 @@ def main():
     (4.5,'Grid 3D masking') : grid_mask_3D_test,
     (4.6,'Grid area') : grid_area_test,
     (4.7,'Grid 3D area') : grid_area_3D_test,
-    (4.8,'Grid write empty') : grid_write_empty_test,
     (5.0,'Grid field creation') : grid_field_test,
     (5.1,'Grid field creation edge1 stagger') : grid_field_edge1_test,
     (5.2,'Grid field creation edge2 stagger') : grid_field_edge2_test,
