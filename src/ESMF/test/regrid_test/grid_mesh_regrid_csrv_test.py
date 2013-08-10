@@ -133,7 +133,7 @@ def create_ESMPmesh_3x3():
     
     mesh.add_elements(num_elem, elemId, elemType, elemConn)
     
-    mesh.write("mesh")
+    mesh._write("mesh")
     
     return mesh, nodeCoord, elemType, elemConn
 

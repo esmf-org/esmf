@@ -246,8 +246,8 @@ def test_main():
     srcgrid = grid_create([0,0,21,21])
     dstgrid = grid_create([0.5,0.5,19.5,19.5])
 
-    srcgrid.write("srcgrid")
-    dstgrid.write("dstgrid")
+    srcgrid._write("srcgrid")
+    dstgrid._write("dstgrid")
 
     # create Field objects on the Meshes
     srcfield = create_fieldgrid(srcgrid, 'srcfield')

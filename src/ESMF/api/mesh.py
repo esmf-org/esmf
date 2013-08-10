@@ -306,7 +306,7 @@ class Mesh(object):
         # call into ctypes layer
         ESMP_MeshFreeMemory(self)
 
-    def write(self, *args):
+    def _write(self, *args):
         """
         Write the Mesh to a vtk formatted file. \n
         Required Arguments: \n

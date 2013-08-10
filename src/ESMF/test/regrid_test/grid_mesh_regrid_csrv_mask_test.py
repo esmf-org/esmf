@@ -162,7 +162,7 @@ def mesh_create_3x3():
     mesh.add_elements(num_elem, elemId, elemType, elemConn, 
                       element_mask=elemMask, element_area=elemArea)
 
-    mesh.write("mesh")
+    mesh._write("mesh")
 
     return mesh, nodeCoord, elemType, elemConn, elemMask, elemArea
 

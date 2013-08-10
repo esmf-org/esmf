@@ -155,7 +155,7 @@ def grid_coords_test():
                 print "FAIL - gridYCoord[,"+str(i)+","+str(j)+"] = "+\
                       str(gridYCoord_check[i,j])
 
-    grid.write("gridcoords2DCart")
+    grid._write("gridcoords2DCart")
 
     # return correct from unit test
     return correct
@@ -224,7 +224,7 @@ def grid_coords_3D_test():
                           str(j)+","+str(k)+"] = "+\
                           str(gridZCoord_check[i, j, k])
 
-    grid.write("gridcoord3DCart")
+    grid._write("gridcoord3DCart")
 
     # return correct from unit test
     return correct
@@ -338,7 +338,7 @@ def grid_write_empty_test():
 
         grid = Grid(max_index)
 
-        grid.write("writebeforeempty")
+        grid._write("writebeforeempty")
 
     except:
         raise TestGridWriteBeforeCoords("FAIL")
@@ -638,7 +638,7 @@ def mesh_test():
 def meshvtk_test():
     mesh, _ = mesh_create_2x2()
 
-    mesh.write("mesh")
+    mesh._write("mesh")
 
     # return True from unit test
     return True

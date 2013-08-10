@@ -268,8 +268,8 @@ def test_main():
     srcgrid = grid_create([0,0,0,21,21,21])
     dstgrid = grid_create([0.5,0.5,0.5,19.5,19.5,19.5])
 
-    srcgrid.write("srcgrid3dCart")
-    dstgrid.write("dstgrid3dCart")
+    srcgrid._write("srcgrid3dCart")
+    dstgrid._write("dstgrid3dCart")
 
     # create Field objects on the Meshes
     srcfield = create_fieldgrid(srcgrid, 'srcfield')

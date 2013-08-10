@@ -351,8 +351,8 @@ def regrid_main():
     srcgrid = create_grid([18,10], True)
     dstgrid = create_grid([10,8], False)
 
-    srcgrid.write("srcgridSphPer")
-    dstgrid.write("dstgridSphPer")
+    srcgrid._write("srcgridSphPer")
+    dstgrid._write("dstgridSphPer")
 
     # create the Fields
     srcfield = create_field(srcgrid, 'srcfield')

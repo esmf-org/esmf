@@ -58,7 +58,7 @@ def grid_create():
     for j in xrange(gridCoord[y].shape[y]):
         gridCoord[y][:, j] = float(j)*cellwidth_y + cellcenter_y
 
-    grid.write("testgrid")
+    grid._write("testgrid")
 
     return grid
 
@@ -120,7 +120,7 @@ def create_ESMPmesh_3x3():
 
     mesh.add_elements(num_elem, elemId, elemType, elemConn)
 
-    mesh.write("mesh")
+    mesh._write("mesh")
 
     return mesh, nodeCoord
 
