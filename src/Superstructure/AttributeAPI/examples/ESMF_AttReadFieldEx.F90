@@ -49,7 +49,6 @@ program ESMF_AttReadFieldEx
 
       ! local variables
       type(ESMF_Field)       :: field
-      type(ESMF_Attribute)   :: attpack, attpack_extended
       character(ESMF_MAXSTR) :: attrvalue
       type(ESMF_VM)          :: vm
       integer                :: rc
@@ -107,10 +106,8 @@ program ESMF_AttReadFieldEx
 
 !BOC
       ! Get CF "ShortName" Attribute from a Field
-	  call ESMF_AttPackGet(field, attpack=attpack, &
-	  	convention='CF', purpose='General', rc=rc)
       call ESMF_AttributeGet(field, name='ShortName', value=attrValue, &
-                             attpack=attpack, rc=rc)
+                             convention='CF', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='DPEDT') &
@@ -120,11 +117,9 @@ program ESMF_AttReadFieldEx
 
 !BOC
       ! Get CF "StandardName" Attribute from a Field
-	  call ESMF_AttPackGet(field, attpack=attpack_extended, &
-	  	convention='CF', purpose='Extended', rc=rc)
       call ESMF_AttributeGet(field, name='StandardName', &
                              value=attrValue, &
-                             attpack=attpack_extended, rc=rc)
+                             convention='CF', purpose='Extended', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. &
@@ -136,7 +131,7 @@ program ESMF_AttReadFieldEx
 !BOC
       ! Get CF "LongName" Attribute from a Field
       call ESMF_AttributeGet(field, name='LongName', value=attrValue, &
-                             attpack=attpack, rc=rc)
+                             convention='CF', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Edge pressure tendency') &
@@ -147,7 +142,7 @@ program ESMF_AttReadFieldEx
 !BOC
       ! Get CF "Units" Attribute from a Field
       call ESMF_AttributeGet(field, name='Units', value=attrValue, &
-                             attpack=attpack, rc=rc)
+                             convention='CF', purpose='General', rc=rc)
 !EOC
 
       if (.not.((rc==ESMF_SUCCESS .and. attrvalue=='Pa s-1') &

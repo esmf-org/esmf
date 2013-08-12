@@ -51,7 +51,6 @@ program ESMF_AttributeCIMEx
 
       ! Local variables  
       integer                 :: rc, finalrc, petCount, localPet, result
-	  type(ESMF_Attribute)    :: attpack
       type(ESMF_VM)           :: vm
       type(ESMF_Field)        :: ozone
       type(ESMF_State)        :: exportState
@@ -171,17 +170,17 @@ program ESMF_AttributeCIMEx
 !EOE
 
 !BOC
-      call ESMF_AttributeAdd(cplcomp, attpack=attpack, &
+      call ESMF_AttributeAdd(cplcomp,  &
                              convention=convCIM, purpose=purpComp, rc=rc)
 
       call ESMF_AttributeSet(cplcomp, "ShortName", "Driver", &
-                             attpack=attpack, rc=rc)
+                             convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, "LongName", &
                              "Model Driver", &
-                             attpack=attpack, rc=rc)
+                             convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(cplcomp, "ModelType", &
                              "climate", &
-                             attpack=attpack, rc=rc)
+                             convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -189,33 +188,33 @@ program ESMF_AttributeCIMEx
 
       ! Simulation run attributes
       call ESMF_AttributeSet(cplcomp, 'SimulationShortName', &
-        'SMS.f09_g16.X.hector', attpack=attpack, rc=rc)
+                                      'SMS.f09_g16.X.hector', &
+        convention=convCIM, purpose=purpComp, rc=rc)
 
       call ESMF_AttributeSet(cplcomp, 'SimulationLongName', &
         'EarthSys - Earth System Modeling Framework Earth System Model 1.0', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 
       call ESMF_AttributeSet(cplcomp, 'SimulationRationale', &
-        'EarthSys-ESMF simulation run in repsect to CMIP5 core experiment 1.1 ()', &
-        attpack=attpack, rc=rc)
+  'EarthSys-ESMF simulation run in repsect to CMIP5 core experiment 1.1 ()', &
+        convention=convCIM, purpose=purpComp, rc=rc)
 
       call ESMF_AttributeSet(cplcomp, 'SimulationStartDate', &
-        '1960-01-01T00:00:00Z', attpack=attpack, rc=rc)
+                                       '1960-01-01T00:00:00Z', &
+        convention=convCIM, purpose=purpComp, rc=rc)
 
       call ESMF_AttributeSet(cplcomp, 'SimulationDuration', 'P10Y', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 
       call ESMF_AttributeSet(cplcomp, &
-        'SimulationNumberOfProcessingElements', '16', &
-        attpack=attpack, rc=rc)
+         'SimulationNumberOfProcessingElements', '16', &
+          convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
-      call ESMF_AttPackGet(cplcomp, attpack, convCIM, purpPlatform, rc=rc)
-
       call ESMF_AttributeSet(cplcomp, 'MachineName', 'HECToR', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpPlatform, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -229,8 +228,8 @@ program ESMF_AttributeCIMEx
 
 !BOC
       ! Add CIM Attribute package to the gridded Component
-      call ESMF_AttributeAdd(gridcomp, attpack=attpack, &
-      	convention=convCIM, purpose=purpComp, rc=rc)
+      call ESMF_AttributeAdd(gridcomp, convention=convCIM, &
+        purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -240,8 +239,7 @@ program ESMF_AttributeCIMEx
       ! package with two custom attributes, with user-specified names
       compPropAtt(1) = 'SimulationType'
       compPropAtt(2) = 'SimulationURL'
-      call ESMF_AttributeAdd(gridcomp, &
-      	convention=convCIM, purpose=purpProp, &
+      call ESMF_AttributeAdd(gridcomp, convention=convCIM, purpose=purpProp, &
         attrList=compPropAtt, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -249,8 +247,7 @@ program ESMF_AttributeCIMEx
 
       
       ! Add CIM Attribute package to the Field
-      call ESMF_AttributeAdd(ozone, &
-      	convention=convCIM, purpose=purpField, &
+      call ESMF_AttributeAdd(ozone, convention=convCIM, purpose=purpField, &
         rc=rc)
 !EOC  
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -270,14 +267,14 @@ program ESMF_AttributeCIMEx
       ! Top-level model component attributes, set on gridded component
       !
       call ESMF_AttributeSet(gridcomp, 'ShortName', 'EarthSys_Atmos', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'LongName', &
         'Earth System High Resolution Global Atmosphere Model', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -289,37 +286,37 @@ program ESMF_AttributeCIMEx
         'Increasing the horizontal resolution of coupled climate ' // &
         'models will allow us to capture climate processes and ' // &
         'weather systems in much greater detail.', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'Version', '2.0', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'ReleaseDate', '2009-01-01T00:00:00Z', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'ModelType', 'aerosol', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'URL', &
-        'www.earthsys.org', attpack=attpack, rc=rc)
+        'www.earthsys.org', convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'MetadataVersion', '1.1', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -327,7 +324,8 @@ program ESMF_AttributeCIMEx
 
       ! Document genealogy
       call ESMF_AttributeSet(gridcomp, 'PreviousVersion', &
-        'EarthSys1 Atmosphere', attpack=attpack, rc=rc)
+                                       'EarthSys1 Atmosphere', &
+        convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -335,28 +333,27 @@ program ESMF_AttributeCIMEx
       call ESMF_AttributeSet(gridcomp, 'PreviousVersionDescription', &
        'Horizontal resolution increased to 1.20 x 0.80 degrees; ' // &
        'Timestep reduced from 30 minutes to 15 minutes.', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-      
-      call ESMF_AttPackGet(gridcomp, attpack, convCIM, purpPlatform, rc=rc)
+
 
       ! Platform description attributes
       call ESMF_AttributeSet(gridcomp, 'CompilerName', 'Pathscale', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpPlatform, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'CompilerVersion', '3.0', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpPlatform, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'MachineName', 'HECToR', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpPlatform, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -365,53 +362,53 @@ program ESMF_AttributeCIMEx
         'HECToR (Phase 2a) is currently an integrated system known ' // &
         'as Rainier, which includes a scalar MPP XT4 system, a vector ' // &
         'system known as BlackWidow, and storage systems.', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpPlatform, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'MachineSystem', 'Parallel', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpPlatform, rc=rc)
       call ESMF_AttributeSet(gridcomp, 'MachineOperatingSystem', 'Unicos', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpPlatform, rc=rc)
       call ESMF_AttributeSet(gridcomp, 'MachineVendor', 'Cray Inc', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpPlatform, rc=rc)
       call ESMF_AttributeSet(gridcomp, 'MachineInterconnectType', &
-        'Cray Interconnect', attpack=attpack, rc=rc)
+                                       'Cray Interconnect', &
+        convention=convCIM, purpose=purpPlatform, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'MachineMaximumProcessors', '22656', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpPlatform, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'MachineCoresPerProcessor', '4', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpPlatform, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'MachineProcessorType', 'AMD X86_64', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpPlatform, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
-      call ESMF_AttPackGet(gridcomp, attpack, convCIM, purpProp, rc=rc)
 
       ! Component Properties: custom attributes
       call ESMF_AttributeSet(gridcomp, 'SimulationType', 'branch', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpProp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'SimulationURL', &
-        'http://earthsys.org/simulations', &
-        attpack=attpack, rc=rc)
+                                       'http://earthsys.org/simulations', &
+        convention=convCIM, purpose=purpProp, rc=rc)
 
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -425,26 +422,25 @@ program ESMF_AttributeCIMEx
 !EOE
 
 !BOC 
-      call ESMF_AttPackGet(gridcomp, attpack, convISO, purpRP, rc=rc)
-
       ! Responsible party attributes (for Principal Investigator)
       call ESMF_AttributeSet(gridcomp, 'Name', 'John Doe', &
-        attpack=attpack, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(gridcomp, 'Abbreviation', 'JD', &
-        attpack=attpack, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(gridcomp, 'PhysicalAddress', &
-        'Department of Meteorology, University of ABC', &
-        attpack=attpack, rc=rc)
+          'Department of Meteorology, University of ABC', &
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(gridcomp, 'EmailAddress', &
-        'john.doe@earthsys.org', attpack=attpack, rc=rc)
+                                       'john.doe@earthsys.org', &
+        convention=convISO, purpose=purpRP, rc=rc)
       call ESMF_AttributeSet(gridcomp, 'ResponsiblePartyRole', 'PI', &
-        attpack=attpack, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'URL', 'www.earthsys.org', &
-        attpack=attpack, rc=rc)
+        convention=convISO, purpose=purpRP, rc=rc)
 
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -456,43 +452,42 @@ program ESMF_AttributeCIMEx
 !\end{sloppypar}
 !EOE
 
-!BOC
-      call ESMF_AttPackGet(gridcomp, attpack, convISO, purpCitation, rc=rc)
-
+!BOC 
       ! Citation attributes
       call ESMF_AttributeSet(gridcomp, 'ShortTitle', 'Doe_2009', &
-        attpack=attpack, rc=rc)
+        convention=convISO, purpose=purpCitation, rc=rc)
       call ESMF_AttributeSet(gridcomp, 'LongTitle', &
        'Doe, J.A.; Norton, A.B.; ' // &
        'Clark, G.H.; Davies, I.J.. 2009 EarthSys: ' // &
        'The Earth System High Resolution Global Atmosphere Model - Model ' // &
        'description and basic evaluation. Journal of Climate, 15 (2). ' // &
        '1261-1296.', &
-        attpack=attpack, rc=rc)
+        convention=convISO, purpose=purpCitation, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'Date', '2010-03-15', &
-        attpack=attpack, rc=rc)
+        convention=convISO, purpose=purpCitation, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'PresentationForm', 'Online Refereed', &
-        attpack=attpack, rc=rc)
+        convention=convISO, purpose=purpCitation, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'DOI', 'doi:17.1035/2009JCLI4508.1', &
-        attpack=attpack, rc=rc)
+        convention=convISO, purpose=purpCitation, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(gridcomp, 'URL', &
-        'http://www.earthsys.org/publications', attpack=attpack, rc=rc)
+                             'http://www.earthsys.org/publications', &
+        convention=convISO, purpose=purpCitation, rc=rc)
 
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -505,14 +500,17 @@ program ESMF_AttributeCIMEx
 !EOE
 
 !BOC
-      call ESMF_AttributeAdd(scicomp, attpack=attpack, &
+      call ESMF_AttributeAdd(scicomp,  &
                              convention=convCIM, purpose=purpComp, rc=rc)
+
       call ESMF_AttributeSet(scicomp, "ShortName", "AtmosRadiation", &
-                             attpack=attpack, rc=rc)
+                             convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(scicomp, "LongName", &
-                             "Atmosphere Radiation", attpack=attpack, rc=rc)
+                             "Atmosphere Radiation", &
+                             convention=convCIM, purpose=purpComp, rc=rc)
       call ESMF_AttributeSet(scicomp, "ModelType", &
-                             "radiation", attpack=attpack, rc=rc)
+                             "radiation", &
+                             convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
 
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -521,14 +519,18 @@ program ESMF_AttributeCIMEx
       rad_sciPropAtt(1) = 'LongwaveSchemeType'
       rad_sciPropAtt(2) = 'LongwaveSchemeMethod'
 
-      call ESMF_AttributeAdd(scicomp, attpack=attpack, &
+      call ESMF_AttributeAdd(scicomp,  &
                              convention=convCIM, purpose=purpSci, &
                              attrList=rad_sciPropAtt, rc=rc)
 
-      call ESMF_AttributeSet(scicomp, 'LongwaveSchemeType', &
-                             'wide-band model', attpack=attpack, rc=rc)
-      call ESMF_AttributeSet(scicomp, 'LongwaveSchemeMethod', &
-                             'two-stream', attpack=attpack, rc=rc)
+      call ESMF_AttributeSet(scicomp, &
+                             'LongwaveSchemeType', &
+                             'wide-band model', &
+                             convention=convCIM, purpose=purpSci, rc=rc)
+      call ESMF_AttributeSet(scicomp, &
+                             'LongwaveSchemeMethod', &
+                             'two-stream', &
+                             convention=convCIM, purpose=purpSci, rc=rc)
 !EOC
 
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -542,17 +544,15 @@ program ESMF_AttributeCIMEx
 !EOE
 
 !BOC
-      call ESMF_AttPackGet(ozone, attpack, convCIM, purpField, rc=rc)
-
       ! ozone CF-Extended Attributes
       call ESMF_AttributeSet(ozone, 'ShortName', 'Global_O3_mon', &
-        attpack=attpack, rc=rc)
+       convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(ozone, 'StandardName', 'ozone', &
-        attpack=attpack, rc=rc)
+       convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(ozone, 'LongName', 'ozone', &
-        attpack=attpack, rc=rc)
+       convention=convCIM, purpose=purpField, rc=rc)
       call ESMF_AttributeSet(ozone, 'Units', 'unknown', &
-        attpack=attpack, rc=rc)
+       convention=convCIM, purpose=purpField, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -560,50 +560,54 @@ program ESMF_AttributeCIMEx
 
       ! ozone CIM Attributes
       call ESMF_AttributeSet(ozone, 'CouplingPurpose', 'Boundary', &
-        attpack=attpack, rc=rc)
+       convention=convCIM, purpose=purpField, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(ozone, 'CouplingSource', 'EarthSys_Atmos', &
-        attpack=attpack, rc=rc)
+       convention=convCIM, purpose=purpField, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(ozone, 'CouplingTarget', &
-        'EarthSys_AtmosDynCore', attpack=attpack, rc=rc)
+       'EarthSys_AtmosDynCore', convention=convCIM, &
+        purpose=purpField, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(ozone, 'Description', &
-        'Global Ozone concentration monitoring in the atmosphere.', &
-        attpack=attpack, rc=rc)
+                                    'Global Ozone concentration ' // &
+                                    'monitoring in the atmosphere.', &
+       convention=convCIM, purpose=purpField, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(ozone, 'SpatialRegriddingMethod', &
-        'Conservative-First-Order', attpack=attpack, rc=rc)
+                                    'Conservative-First-Order', &
+       convention=convCIM, purpose=purpField, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(ozone, 'SpatialRegriddingDimension', '3D', &
-        attpack=attpack, rc=rc)
+       convention=convCIM, purpose=purpField, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(ozone, 'Frequency', '15 Minutes', &
-        attpack=attpack, rc=rc)
+       convention=convCIM, purpose=purpField, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(ozone, 'TimeTransformationType', &
-        'TimeInterpolation', attpack=attpack, rc=rc)
+                                    'TimeInterpolation', &
+       convention=convCIM, purpose=purpField, rc=rc)
 
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

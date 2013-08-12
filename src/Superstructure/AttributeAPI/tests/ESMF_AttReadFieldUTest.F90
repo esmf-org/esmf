@@ -48,7 +48,6 @@ program ESMF_AttReadFieldUTest
 
       ! local variables
       type(ESMF_Field)       :: field
-      type(ESMF_Attribute)   :: attpack
       logical                :: xercesNotPresent
       integer                :: rc
 
@@ -111,25 +110,15 @@ print *, 'rc = ', rc
     !  Check read-in Attributes
     !-------------------------------------------------------------------------
 
-      conv = 'CF'
-      purp = 'General'
-
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Get CF General Attribute package from a Field Test
-      call ESMF_AttPackGet(field, attpack=attpack, &
-                             convention=conv, purpose=purp, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-      write(name, *) "Get CF General Attribute package from a Field Test"
-      call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
-
       !------------------------------------------------------------------------
       !EX_UTest
       ! Get CF "ShortName" Attribute from a Field Test
       attrname = 'ShortName'
       attrvalue = 'DPEDT'
+      conv = 'CF'
+      purp = 'General'
       call ESMF_AttributeGet(field, name=attrname, value=outChar, &
-                             attpack=attpack, rc=rc)
+                             convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting CF 'ShortName' Attribute from a Field Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -148,7 +137,7 @@ print *, 'outChar = ', trim(outChar)
       conv = 'CF'
       purp = 'Extended'
       call ESMF_AttributeGet(field, name=attrname, value=outChar, &
-                             attpack=attpack, rc=rc)
+                             convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting CF 'StandardName' Attribute from a Field Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -167,7 +156,7 @@ print *, 'outChar = ', outChar
       conv = 'CF'
       purp = 'General'
       call ESMF_AttributeGet(field, name=attrname, value=outChar, &
-                             attpack=attpack, rc=rc)
+                             convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting CF 'LongName' Attribute from a Field Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -186,7 +175,7 @@ print *, 'outChar = ', outChar
       conv = 'CF'
       purp = 'General'
       call ESMF_AttributeGet(field, name=attrname, value=outChar, &
-                             attpack=attpack, rc=rc)
+                             convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting CF 'Units' Attribute from a Field Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &

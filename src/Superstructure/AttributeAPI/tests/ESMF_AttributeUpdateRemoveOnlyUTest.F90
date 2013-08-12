@@ -198,7 +198,6 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_Attribute)        :: attpack   
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,value1,value2, &
@@ -239,11 +238,15 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     field = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, name="field", rc=status)
     call ESMF_AttributeAdd(field, convention=convESMF, purpose=purpGen, &
-      attpack=attpack, rc=status)
-    call ESMF_AttributeSet(field, name1, value1, attpack=attpack, rc=status)
-    call ESMF_AttributeSet(field, name2, value2, attpack=attpack, rc=status)
-    call ESMF_AttributeSet(field, name3, value3, attpack=attpack, rc=status)
-    call ESMF_AttributeSet(field, name4, value4, attpack=attpack, rc=status)
+      rc=status)
+    call ESMF_AttributeSet(field, name1, value1, convention=convESMF, &
+      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name2, value2, convention=convESMF, &
+      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name3, value3, convention=convESMF, &
+      purpose=purpGen, rc=status)
+    call ESMF_AttributeSet(field, name4, value4, convention=convESMF, &
+      purpose=purpGen, rc=status)
     if (status .ne. ESMF_SUCCESS) return
 
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle", rc=status)
@@ -312,7 +315,6 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     character(ESMF_MAXSTR)      :: name_to_add, value_to_add
     type(ESMF_Field)            :: field
     type(ESMF_FieldBundle)      :: fieldbundle
-    type(ESMF_Attribute)        :: attpack
 
     rc = ESMF_SUCCESS
 
@@ -335,9 +337,6 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
-    call ESMF_AttPackGet(field, attpack, convESMF, purpGen, rc=status)
-    if (rc/=ESMF_SUCCESS) return
-
 #if 0
     call ESMF_AttributeSet(field, name_to_add, value_to_add, rc=status)
     if (rc/=ESMF_SUCCESS) return
@@ -347,7 +346,8 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     if (rc/=ESMF_SUCCESS) return
 #endif
 
-    call ESMF_AttributeRemove(field, name2, attpack=attpack, rc=status)
+    call ESMF_AttributeRemove(field, name2, convention=convESMF, &
+      purpose=purpGen, rc=status)
     if (rc/=ESMF_SUCCESS) return
 
   end subroutine userm1_run
@@ -514,7 +514,6 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
       type(ESMF_CplComp)      :: cplcomp
       character(ESMF_MAXSTR)  :: convESMF,purpGen
 
-	  type(ESMF_Attribute)    :: attpack
       type(ESMF_Field)        :: field
       type(ESMF_FieldBundle)  :: fieldbundle
 
@@ -634,10 +633,8 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
 #endif
 
     !EX_UTest_Multi_Proc_Only
-    call ESMF_AttPackGet(field, attpack, convention=convESMF, &
-                         purpose=purpGen, rc=rc)
-    call ESMF_AttributeGet(field, name2, attpack=attpack, &
-    					   isPresent=isPresent, rc=rc)
+    call ESMF_AttributeGet(field, name2, convention=convESMF, &
+      purpose=purpGen, isPresent=isPresent, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated deleted Attribute value from a Field test"
     call ESMF_Test((rc==ESMF_SUCCESS).and.(isPresent.eqv..false.), &

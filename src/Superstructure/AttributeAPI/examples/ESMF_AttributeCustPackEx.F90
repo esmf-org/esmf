@@ -40,7 +40,6 @@ program ESMF_AttributeCustPackEx
 
       ! Local variables  
       integer                 :: rc, finalrc, petCount, localPet, result
-      type(ESMF_Attribute)    :: attpack
       type(ESMF_VM)           :: vm
       type(ESMF_GridComp)     :: gridcomp
       character(ESMF_MAXSTR)  :: customConv, customPurp
@@ -104,8 +103,7 @@ program ESMF_AttributeCustPackEx
       customAttrList(2) = 'CustomAttrName2'
       customAttrList(3) = 'CustomAttrName3'
 
-      call ESMF_AttributeAdd(gridcomp, attpack=attpack, &
-      	convention=customConv, &
+      call ESMF_AttributeAdd(gridcomp, convention=customConv, &
         purpose=customPurp, attrList=customAttrList, rc=rc)
 
 !EOC
@@ -118,17 +116,17 @@ program ESMF_AttributeCustPackEx
 
 !BOC
     call ESMF_AttributeSet(gridcomp, 'CustomAttrName1', 'CustomAttrValue1', &
-      attpack=attpack, rc=rc)
+      convention=customConv, purpose=customPurp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
     call ESMF_AttributeSet(gridcomp, 'CustomAttrName2', 'CustomAttrValue2', &
-      attpack=attpack, rc=rc)
+      convention=customConv, purpose=customPurp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
     call ESMF_AttributeSet(gridcomp, 'CustomAttrName3', 'CustomAttrValue3', &
-      attpack=attpack, rc=rc)
+      convention=customConv, purpose=customPurp, rc=rc)
 
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

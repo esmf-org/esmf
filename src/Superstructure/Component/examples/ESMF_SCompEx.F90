@@ -49,7 +49,6 @@ program ESMF_SCompEx
       ! Local variables  
       integer                 :: rc, finalrc, petCount, localPet, result
       type(ESMF_VM)           :: vm
-	  type(ESMF_Attribute)    :: attpack
 
       type(ESMF_CplComp)      :: cplcomp
       type(ESMF_GridComp)     :: atmcomp, ocncomp
@@ -140,8 +139,8 @@ program ESMF_SCompEx
       purpCitation = 'Citation'
 
       ! Add CIM Attribute package to the Science Component
-      call ESMF_AttributeAdd(atmcomp, attpack=attpack, &
-      	convention=convCIM, purpose=purpComp, rc=rc)
+      call ESMF_AttributeAdd(atmcomp, convention=convCIM, &
+        purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -157,14 +156,14 @@ program ESMF_SCompEx
       ! Top-level model component attributes, set on gridded component
       !
       call ESMF_AttributeSet(atmcomp, 'ShortName', 'EarthSys_Atmos', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(atmcomp, 'LongName', &
         'Earth System High Resolution Global Atmosphere Model', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -176,31 +175,31 @@ program ESMF_SCompEx
         'Increasing the horizontal resolution of coupled climate ' // &
         'models will allow us to capture climate processes and ' // &
         'weather systems in much greater detail.', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(atmcomp, 'Version', '2.0', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(atmcomp, 'ReleaseDate', '2009-01-01T00:00:00Z', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(atmcomp, 'ModelType', 'aerosol', &
-        attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
       call ESMF_AttributeSet(atmcomp, 'URL', &
-        'www.earthsys.org', attpack=attpack, rc=rc)
+        'www.earthsys.org', convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -238,14 +237,14 @@ program ESMF_SCompEx
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
 !BOC
-    call ESMF_AttributeAdd(dc_scicomp,  attpack=attpack, &
-      	convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeAdd(dc_scicomp,  &
+                           convention=convCIM, purpose=purpComp, rc=rc)
 
     call ESMF_AttributeSet(dc_scicomp, "ShortName", "AtmosDynamicalCore", &
-                           attpack=attpack, rc=rc)
+                           convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(dc_scicomp, "LongName", &
                            "Atmosphere Dynamical Core", &
-                           attpack=attpack, rc=rc)
+                           convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
 
 !BOC
@@ -255,21 +254,19 @@ program ESMF_SCompEx
     dc_sciPropAtt(2) = 'HeatTreatmentAtTop'
     dc_sciPropAtt(3) = 'WindTreatmentAtTop'
 
-    call ESMF_AttributeAdd(dc_scicomp,  attpack=attpack, &
-      					   convention=convCIM, purpose=purpComp, &
+    call ESMF_AttributeAdd(dc_scicomp,  &
+                           convention=convCIM, purpose=purpSci, &
                            attrList=dc_sciPropAtt, rc=rc)
-
-    call ESMF_AttPackGet(dc_scicomp, attpack, convCIM, purpSci, rc=rc)
 
     call ESMF_AttributeSet(dc_scicomp, 'TopBoundaryCondition', &
                            'radiation boundary condition', &
-                           attpack=attpack, rc=rc)
+                           convention=convCIM, purpose=purpSci, rc=rc)
     call ESMF_AttributeSet(dc_scicomp, 'HeatTreatmentAtTop', &
                            'some heat treatment', &
-                           attpack=attpack, rc=rc)
+                           convention=convCIM, purpose=purpSci, rc=rc)
     call ESMF_AttributeSet(dc_scicomp, 'WindTreatmentAtTop', &
                            'some wind treatment', &
-                           attpack=attpack, rc=rc)
+                           convention=convCIM, purpose=purpSci, rc=rc)
 !EOC
 
 !BOC
@@ -286,13 +283,13 @@ program ESMF_SCompEx
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
 !BOC
-    call ESMF_AttributeAdd(adv_scicomp, attpack=attpack, &
+    call ESMF_AttributeAdd(adv_scicomp,  &
                            convention=convCIM, purpose=purpComp, rc=rc)
 
     call ESMF_AttributeSet(adv_scicomp, "ShortName", "AtmosAdvection", &
-                           attpack=attpack, rc=rc)
+                           convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(adv_scicomp, "LongName", "Atmosphere Advection", &
-                           attpack=attpack, rc=rc)
+                           convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
 
 !BOC
@@ -300,17 +297,17 @@ program ESMF_SCompEx
     adv_sciPropAtt(2) = 'TracersSchemeCharacteristics'
     adv_sciPropAtt(3) = 'MomentumSchemeName'
 
-    call ESMF_AttributeAdd(adv_scicomp, attpack=attpack, &
+    call ESMF_AttributeAdd(adv_scicomp,  &
                            convention=convCIM, purpose=purpSci, &
                            attrList=adv_sciPropAtt, rc=rc)
 
     call ESMF_AttributeSet(adv_scicomp, 'TracersSchemeName', 'Prather', &
-                           attpack=attpack, rc=rc)
+                           convention=convCIM, purpose=purpSci, rc=rc)
     call ESMF_AttributeSet(adv_scicomp, 'TracersSchemeCharacteristics', &
                            'modified Euler', &
-                           attpack=attpack, rc=rc)
+                           convention=convCIM, purpose=purpSci, rc=rc)
     call ESMF_AttributeSet(adv_scicomp, 'MomentumSchemeName', 'Van Leer', &
-                           attpack=attpack, rc=rc)
+                           convention=convCIM, purpose=purpSci, rc=rc)
 !EOC
 
 !BOC
@@ -327,32 +324,32 @@ program ESMF_SCompEx
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
 !BOC
-    call ESMF_AttributeAdd(rad_scicomp, attpack=attpack, &
+    call ESMF_AttributeAdd(rad_scicomp,  &
                            convention=convCIM, purpose=purpComp, rc=rc)
 
     call ESMF_AttributeSet(rad_scicomp, "ShortName", "AtmosRadiation", &
-                           attpack=attpack, rc=rc)
+                           convention=convCIM, purpose=purpComp, rc=rc)
     call ESMF_AttributeSet(rad_scicomp, "LongName", &
                            "Atmosphere Radiation", &
-                           attpack=attpack, rc=rc)
+                           convention=convCIM, purpose=purpComp, rc=rc)
 !EOC
 
 !BOC
     rad_sciPropAtt(1) = 'LongwaveSchemeType'
     rad_sciPropAtt(2) = 'LongwaveSchemeMethod'
 
-    call ESMF_AttributeAdd(rad_scicomp, attpack=attpack, &
+    call ESMF_AttributeAdd(rad_scicomp,  &
                            convention=convCIM, purpose=purpSci, &
                            attrList=rad_sciPropAtt, rc=rc)
 
     call ESMF_AttributeSet(rad_scicomp, &
                            'LongwaveSchemeType', &
                            'wide-band model', &
-                           attpack=attpack, rc=rc)
+                           convention=convCIM, purpose=purpSci, rc=rc)
     call ESMF_AttributeSet(rad_scicomp, &
                            'LongwaveSchemeMethod', &
                            'two-stream', &
-                           attpack=attpack, rc=rc)
+                           convention=convCIM, purpose=purpSci, rc=rc)
 !EOC
 
 
