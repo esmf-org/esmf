@@ -1426,7 +1426,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! other subroutine.
 ! \item The soruce and destination grid files have to be in the SCRIP grid file format. 
 ! \item This subroutine has three additional required arguments: {\tt regridRouteHandle}, {\tt srcElementDistgrid},
-! {\tt dstElementDistgrid}.  {\tt srcElementDistgrid} and {\tt dstElementDistgrid} are of type {\tt ESMF_DistGrid},
+! {\tt dstElementDistgrid}.  {\tt srcElementDistgrid} and {\tt dstElementDistgrid} are of type {\tt ESMF\_DistGrid},
 ! they are used to define the distribution of the source and destination grid elements. The output {\tt regridRouteHandle} 
 ! allows user to regrid the field values later in the application.
 ! \item The {\tt weightFile} argument is optional. When it is given, a weightfile will be generated as well.
