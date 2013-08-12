@@ -1245,7 +1245,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on an ArrayBundle Test
       call ESMF_AttributeAdd(arraybundle, convention=conv, purpose=purp, &
-        attrList=attpackListTNames, rc=rc)
+        attrList=attpackListTNames, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a standard Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

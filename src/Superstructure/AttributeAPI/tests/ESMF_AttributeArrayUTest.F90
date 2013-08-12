@@ -1241,7 +1241,7 @@ program ESMF_AttributeArrayUTest
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on an Array Test
       call ESMF_AttributeAdd(array, attrList=attpackListTNames, convention=conv, &
-        purpose=purp, rc=rc)
+        purpose=purp, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a standard Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
