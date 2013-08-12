@@ -46,6 +46,8 @@ program ESMF_AttributeArrayBundleUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
+      type(ESMF_Attribute)   :: attpack, nested_attpack
+      
       type(ESMF_ArrayBundle)    :: arraybundle
       type(ESMF_Array), dimension(2) :: array
       type(ESMF_Array)               :: afb
@@ -1144,7 +1146,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Create a custom Attribute package on an ArrayBundle Test
       call ESMF_AttributeAdd(arraybundle, convention=conv, &
-        purpose=purp, attrList=attpackList, rc=rc)
+        purpose=purp, attrList=attpackList, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1157,7 +1159,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Get an ESMF_I4 Attribute from an ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name="NotHere", value=outI4, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET"
       write(name, *) "Getting a nonexistent Attribute from an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), &
@@ -1170,7 +1172,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Set an Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name=attrname, value=attrvalue, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1181,7 +1183,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Set a char list Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name=attrname, &
-        valueList=attpackList, convention=conv, purpose=purp, rc=rc)
+        valueList=attpackList, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a char list Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1190,7 +1192,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Get a char list Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name=attrname, &
-        valueList=attpackListOut3, convention=conv, purpose=purp, rc=rc)
+        valueList=attpackListOut3, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a char list Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackList == attpackListOut3), &
@@ -1199,7 +1201,7 @@ program ESMF_AttributeArrayBundleUTest
 
       !EX_UTest
       ! Remove an Attribute in an Attribute package on an ArrayBundle Test
-      call ESMF_AttributeRemove(arraybundle, name=attrname, convention=conv, purpose=purp, rc=rc)
+      call ESMF_AttributeRemove(arraybundle, name=attrname, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Removeing an Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1212,7 +1214,7 @@ program ESMF_AttributeArrayBundleUTest
       ! Get a char list default Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name=attrname, &
         valueList=attpackListOut2, defaultvalueList=attpackDfltList, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a default Attribute character list in an Attribute package on an ArrayBundle test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackListOut2 == attpackDfltList), &
@@ -1221,7 +1223,7 @@ program ESMF_AttributeArrayBundleUTest
 
       !EX_UTest
       ! Remove the entire Attribute package from an ArrayBundle Test
-      call ESMF_AttributeRemove(arraybundle, convention=conv, purpose=purp, rc=rc)
+      call ESMF_AttributeRemove(arraybundle, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Removing the entire Attribute package from an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1252,7 +1254,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Set an ESMF_I4name Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name="ESMF_I4name", value=inI4, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_I4name Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1261,7 +1263,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Set an ESMF_I4namelist Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name="ESMF_I4namelist", valueList=inI4l, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_I4namelist Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1270,7 +1272,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Set an ESMF_I8name Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name="ESMF_I8name", value=inI8, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_I8name Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1279,7 +1281,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Set an ESMF_I8namelist Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name="ESMF_I8namelist", valueList=inI8l, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_I8namelist Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1288,7 +1290,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Set an ESMF_R4name Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name="ESMF_R4name", value=inR4, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_R4name Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1297,7 +1299,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Set an ESMF_R4namelist Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name="ESMF_R4namelist", valueList=inR4l, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_R4namelist Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1306,7 +1308,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Set an ESMF_R8name Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name="ESMF_R8name", value=inR8, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_R8name Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1315,7 +1317,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Set an ESMF_R8namelist Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name="ESMF_R8namelist", valueList=inR8l, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an ESMF_R8namelist Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1324,7 +1326,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Set a Logical Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name="Logical_name", value=inLog, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a logical Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1333,7 +1335,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Set a Logical list Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name="Logical_namelist", valueList=inLogl, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a logical list Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1342,7 +1344,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Set a character Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name="Character_name", value=attrvalue, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a Character Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1352,7 +1354,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Set a char list Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name=attrname, &
-        valueList=attpackList, convention=conv, purpose=purp, rc=rc)
+        valueList=attpackList, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a char list Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1382,7 +1384,8 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on an ArrayBundle Test
       call ESMF_AttributeAdd(arraybundle, convention=nestconv, purpose=nestpurp, &
-        attrList=attpackListTNames2, nestConvention=conv, nestPurpose=purp, rc=rc)
+        attrList=attpackListTNames2, nestConvention=conv, nestPurpose=purp, &
+        attpack=nested_attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a nested Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1390,8 +1393,7 @@ program ESMF_AttributeArrayBundleUTest
 
       !EX_UTest
       ! Remove an Attribute in an Attribute package on an ArrayBundle Test
-      call ESMF_AttributeRemove(arraybundle, name=attrname, convention=nestconv, &
-        purpose=nestpurp, rc=rc)
+      call ESMF_AttributeRemove(arraybundle, name=attrname, attpack=nested_attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Removeing an Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1399,8 +1401,7 @@ program ESMF_AttributeArrayBundleUTest
 
       !EX_UTest
       ! Remove an Attribute in an Attribute package on an ArrayBundle Test, again
-      call ESMF_AttributeRemove(arraybundle, name=attrname, convention=nestconv, &
-        purpose=nestpurp, rc=rc)
+      call ESMF_AttributeRemove(arraybundle, name=attrname, attpack=nested_attpack, rc=rc)
       write(failMsg, *) "Did not return ESMC_RC_NOT_FOUND"
       write(name, *) "Removeing an Attribute in an Attribute package on an ArrayBundle Test, again"
       call ESMF_Test((rc==ESMC_RC_NOT_FOUND), name, failMsg, result, ESMF_SRCLINE)
@@ -1410,7 +1411,7 @@ program ESMF_AttributeArrayBundleUTest
       ! Get a char list default Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name=attrname, &
         valueList=attpackListOut4, defaultvalueList=attpackDfltList2, &
-        convention=nestconv, purpose=nestpurp, rc=rc)
+        attpack=nested_attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a default Attribute character list in an Attribute package on an ArrayBundle test2"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackListOut4 == attpackDfltList2), &
@@ -1421,7 +1422,7 @@ program ESMF_AttributeArrayBundleUTest
       !EX_UTest
       ! Get a char list attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name=attrname, &
-        valueList=attpackListOut3, convention=conv, purpose=purp, rc=rc)
+        valueList=attpackListOut3, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a char list Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackList == attpackListOut3), &

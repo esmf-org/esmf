@@ -115,6 +115,7 @@ module user_model1
 
     ! Local variables
     integer               :: localPet
+	type(ESMF_Attribute)  :: attpack
     type(ESMF_DistGrid)   :: distgrid
     type(ESMF_Array)      :: array
     type(ESMF_Field)      :: field
@@ -145,13 +146,12 @@ module user_model1
     call ESMF_StateAdd(importState, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    call ESMF_AttributeAdd(field, convention="ESG", &
-      purpose="General", rc=rc)
+    call ESMF_AttributeAdd(field, attpack=attpack, &
+      convention="ESG", purpose="General", rc=rc)
     
     call ESMF_AttributeSet(field, name="LongName", &
       value="ExchangeCorrelationEnergy", &
-      convention="ESG", purpose="General", &
-      rc=rc)
+      attpack=attpack, rc=rc)
    
     print *, localPet, "User Comp1 Init returning"
 

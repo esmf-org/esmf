@@ -95,6 +95,7 @@ module user_model2
     integer, intent(out) :: rc
 
     ! Local variables
+	type(ESMF_Attribute)        :: attpack
     character(ESMF_MAXSTR)      :: convCIM, purpComp, purpSci, purpField
     character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
     character(ESMF_MAXSTR)      :: sciPropAtt(3)
@@ -117,11 +118,12 @@ module user_model2
     purpComp = 'ModelComp'
     ! Specify the Gridded Component to have the default of 1 Responsible
     !   Party sub-package and 1 Citation sub-package
-    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpComp, rc=rc)
+    call ESMF_AttributeAdd(comp, attpack=attpack, &
+    	convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_AttributeSet(comp, 'ShortName', 'EarthSys_Ocean', &
-      convention=convCIM, purpose=purpComp, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  1) Name of component in navigator bar on the left; 
     !                  attribute 'Version' appended, if set.
@@ -131,8 +133,7 @@ module user_model2
     !                  'SimulationShortName'.
 
     call ESMF_AttributeSet(comp, 'LongName', &
-                           'Ocean component of EarthSys', &
-      convention=convCIM, purpose=purpComp, rc=rc)
+      'Ocean component of EarthSys', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Full Name:"  first part of display, at top, 2nd line 
     !               under title, prepended to attribute 'SimulationLongName'.
@@ -142,93 +143,89 @@ module user_model2
       'with a zonal resolution of 2 degrees, and a meridional ' // &
       'resolution of 2 degrees.  It has 30 evenly spaced levels in ' // &
       'the vertical.  The timestep period is 1 hour.', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Description:" in top box.
 
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
-      '2009-05-31T23:59:59Z', &
-        convention=convCIM, purpose=purpComp, rc=rc)
+      '2009-05-31T23:59:59Z', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Release Date" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'ModelType', &
-      'ocean', convention=convCIM, purpose=purpComp, rc=rc)
+      'ocean', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Maps to "Realm:", expanded under component name, in 
     !               navigator bar on the left.
 
-
     ! Responsible party attributes (for Center)
     convISO = 'ISO 19115'
     purpRP = 'RespParty'
+    call ESMF_AttPackGet(comp, attpack, convISO, purpRP, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     call ESMF_AttributeSet(comp, 'Name', &
-     'GHI', &
-      convention=convISO, purpose=purpRP, rc=rc)
+      'GHI', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Ingested and stored, but not yet displayed, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
-     'Department of Meteorology, University of ABC', &
-      convention=convISO, purpose=purpRP, rc=rc)
+      'Department of Meteorology, University of ABC', &
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-     'info@earthsys.org', &
-      convention=convISO, purpose=purpRP, rc=rc)
+      'info@earthsys.org', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
-     'Center', &
-      convention=convISO, purpose=purpRP, rc=rc)
+      'Center', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Ingested, but only used to control display.
-
 
     ! Citation attributes
     convISO = 'ISO 19115'
     purpCitation = 'Citation'
+    call ESMF_AttPackGet(comp, attpack, convISO, purpCitation, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     call ESMF_AttributeSet(comp, 'ShortTitle', &
-     'Doe_2007', &
-      convention=convISO, purpose=purpCitation, rc=rc)
+      'Doe_2007', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'LongTitle', &
-     'Doe, J.A.; Doe, S.B.; ' // &
-     'Doe, J.C.; 2007 EarthSys: ' // &
-     'The Earth System High Resolution Global Model - ' // &
-     'Ocean model description . Journal of Earth Modeling, 13 (4). ' // &
-     '1461-1496.', &
-      convention=convISO, purpose=purpCitation, rc=rc)
+      'Doe, J.A.; Doe, S.B.; ' // &
+      'Doe, J.C.; 2007 EarthSys: ' // &
+      'The Earth System High Resolution Global Model - ' // &
+      'Ocean model description . Journal of Earth Modeling, 13 (4). ' // &
+      '1461-1496.', &
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Reference", concatenated with attribute 'DOI', under 
     !               tab "References".
 
     call ESMF_AttributeSet(comp, 'Date', &
-     '2007-05-07', &
-      convention=convISO, purpose=purpCitation, rc=rc)
+      '2007-05-07', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'PresentationForm', &
-     'Online Refereed', &
-      convention=convISO, purpose=purpCitation, rc=rc)
+      'Online Refereed', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'DOI', &
-     'doi:15.1033/2007JCLI4506.1', &
-      convention=convISO, purpose=purpCitation, rc=rc)
+      'doi:15.1033/2007JCLI4506.1', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Concatenated to attribute 'LongTitle' and displayed as 
     !               "Reference" under tab "References".
 
     call ESMF_AttributeSet(comp, 'URL', &
-     'http://www.earthsys.org/publications', &
-      convention=convISO, purpose=purpCitation, rc=rc)
+      'http://www.earthsys.org/publications', &
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not output to CIM, as of v1.5/1.7 (no definition for it).
 
@@ -242,31 +239,29 @@ module user_model2
     sciPropAtt(1) = 'OceanOceanKeyPropertiesModelFamily'
     sciPropAtt(2) = 'OceanOceanKeyPropertiesBasicApproximations'
     sciPropAtt(3) = 'OceanOceanKeyPropertiesListOfPrognosticVariables'
-    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpSci, &
+    call ESMF_AttributeAdd(comp, attpack=attpack, &
+    	convention=convCIM, purpose=purpSci, &
       attrList=sciPropAtt, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Scientific Properties:  attributes per Metafor standard
     call ESMF_AttributeSet(comp, &
-     'OceanOceanKeyPropertiesModelFamily', &
-       'OGCM', &
-      convention=convCIM, purpose=purpSci, rc=rc)
+      'OceanOceanKeyPropertiesModelFamily', &
+      'OGCM', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  ESG-name mapped from Metafor-name, under tabs 
     !               "Properties->Scientific"
 
     call ESMF_AttributeSet(comp, &
-     'OceanOceanKeyPropertiesBasicApproximations', &
-       'non-hydrostatic', &
-      convention=convCIM, purpose=purpSci, rc=rc)
+      'OceanOceanKeyPropertiesBasicApproximations', &
+      'non-hydrostatic', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  ESG-name mapped from Metafor-name, under tabs 
     !               "Properties->Scientific"
 
     call ESMF_AttributeSet(comp, &
-     'OceanOceanKeyPropertiesListOfPrognosticVariables', &
-       'salinity', &
-      convention=convCIM, purpose=purpSci, rc=rc)
+      'OceanOceanKeyPropertiesListOfPrognosticVariables', &
+      'salinity', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  ESG-name mapped from Metafor-name, under tabs 
     !               "Properties->Scientific"
@@ -281,83 +276,78 @@ module user_model2
     ! DMS_emi Field
     DMS_emi = ESMF_FieldEmptyCreate(name='DMS_emi', rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_AttributeAdd(DMS_emi, convention=convCIM, purpose=purpField,rc=rc)
+    call ESMF_AttributeAdd(DMS_emi, attpack=attpack, &
+    	convention=convCIM, purpose=purpField,rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
 
     ! DMS_emi ESMF-General Attribute
     call ESMF_AttributeSet(DMS_emi, 'Intent', 'Export', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
 
     ! DMS_emi CF-Extended Attributes
     call ESMF_AttributeSet(DMS_emi, 'ShortName', 'DMS_emi', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  As field name under tab "Inputs".
 
     call ESMF_AttributeSet(DMS_emi, 'StandardName', 'DMS_emissions', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(DMS_emi, 'LongName', 'DMS emissions', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(DMS_emi, 'Units', 'kg/m2/s', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
 
     ! DMS_emi CIM Attributes
     call ESMF_AttributeSet(DMS_emi, 'CouplingPurpose', &
-                                    'Ancillary', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'Ancillary', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Title of expandable bar under tab "Inputs", 
     !               "Boundary Conditions".
 
     call ESMF_AttributeSet(DMS_emi, 'CouplingSource', &
-                                    'EarthSys_Ocean', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'EarthSys_Ocean', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Source Component" under tab "Inputs", 
     !               under field name. 
 
     call ESMF_AttributeSet(DMS_emi, 'CouplingTarget', &
-                                    'EarthSys_OceanBioGeoChem', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'EarthSys_OceanBioGeoChem', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Target Component" under tab "Inputs", 
     !               under field name.
 
     call ESMF_AttributeSet(DMS_emi, 'Description', &
-                                    'Dimethyl Sulfide emissions in the ' // &
-                                    'atmosphere.', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'Dimethyl Sulfide emissions in the atmosphere.', &
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Next to field name (after colon) under tab "Inputs".
 
     call ESMF_AttributeSet(DMS_emi, 'SpatialRegriddingMethod', &
-                                    'Conservative-First-Order', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'Conservative-First-Order', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Spatial Regridding Method" under tab "Inputs",
     !               under field name. 
 
     call ESMF_AttributeSet(DMS_emi, 'Frequency', '15 Minutes', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Frequency" under tab "Inputs", under field name.
 
     call ESMF_AttributeSet(DMS_emi, 'TimeTransformationType', &
-                                    'TimeAverage', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'TimeAverage', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Time Transformation Type" under tab "Inputs", 
     !               under field name. 
@@ -366,69 +356,64 @@ module user_model2
     ! SST Field
     SST = ESMF_FieldEmptyCreate(name='SST', rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_AttributeAdd(SST, convention=convCIM, purpose=purpField,rc=rc)
+    call ESMF_AttributeAdd(SST, attpack=attpack, &
+    	convention=convCIM, purpose=purpField,rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! SST CF-Extended Attributes
     call ESMF_AttributeSet(SST, 'ShortName', 'SST', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  As field name under tab "Inputs".
 
     call ESMF_AttributeSet(SST, 'Units', 'K', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
 
     ! SST CIM Attributes
     call ESMF_AttributeSet(SST, 'CouplingPurpose', 'Initial', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Title of expandable bar under tab "Inputs", 
     !               "Boundary Conditions".
 
     call ESMF_AttributeSet(SST, 'CouplingSource', &
-                                'EarthSys_Ocean', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'EarthSys_Ocean', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Source Component" under tab "Inputs", 
     !               under field name. 
 
     call ESMF_AttributeSet(SST, 'CouplingTarget', &
-                                'EarthSys_OceanBioGeoChem', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'EarthSys_OceanBioGeoChem', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Target Component" under tab "Inputs", 
     !               under field name.
 
     call ESMF_AttributeSet(SST, 'Description', &
-                                'Sea surface temperature.', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'Sea surface temperature.', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Next to field name (after colon) under tab "Inputs".
 
     call ESMF_AttributeSet(SST, 'SpatialRegriddingMethod', &
-                                'Non-Conservative', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'Non-Conservative', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Spatial Regridding Method" under tab "Inputs",
     !               under field name. 
 
     call ESMF_AttributeSet(SST, 'SpatialRegriddingDimension', &
-                                '2D', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      '2D', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(SST, 'Frequency', '5 Months', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Frequency" under tab "Inputs", under field name.
 
     call ESMF_AttributeSet(SST, 'TimeTransformationType', &
-                                'TimeAverage', &
-         convention=convCIM, purpose=purpField, rc=rc)
+      'TimeAverage', attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Time Transformation Type" under tab "Inputs", 
     !               under field name. 
