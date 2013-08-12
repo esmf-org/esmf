@@ -47,7 +47,8 @@ program ESMF_AttReadCplCompUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_CplComp)    :: cplcomp
+      type(ESMF_CplComp)     :: cplcomp
+      type(ESMF_Attribute)   :: attpack
       logical                :: xercesNotPresent
       integer                :: rc
 
@@ -119,11 +120,20 @@ print *, 'rc = ', rc
 
       !------------------------------------------------------------------------
       !EX_UTest
+      ! Get ESG General Attribute package from a CplComp Test
+      call ESMF_AttPackGet(cplcomp, attpack=attpack, &
+                             convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Get ESG General Attribute package from a CplComp Test"
+      call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
       ! Get ESG "ComponentShortName" Attribute from a CplComp Test
       attrname = 'ComponentShortName'
       attrvalue = 'ESMF Example Coupler'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'ComponentShortName' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -140,7 +150,7 @@ print *, 'outChar = ', trim(adjustL(outChar))
       attrname = 'ComponentLongName'
       attrvalue = 'Earth System Modeling Framework Example Coupler'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'ComponentLongName' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -157,7 +167,7 @@ print *, 'outChar = ', outChar
       attrname = 'Agency'
       attrvalue = 'UCAR'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'Agency' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -174,7 +184,7 @@ print *, 'outChar = ', outChar
       attrname = 'Institution'
       attrvalue = 'National Center for Atmospheric Research (NCAR)'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'Institution' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -191,7 +201,7 @@ print *, 'outChar = ', outChar
       attrname = 'Version'
       attrvalue = '4'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'Version' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -208,7 +218,7 @@ print *, 'outChar = ', outChar
       attrname = 'Author'
       attrvalue = 'Cecelia Deluca, et al.'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'Author' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -225,7 +235,7 @@ print *, 'outChar = ', outChar
       attrname = 'Discipline'
       attrvalue = 'Atmosphere, Ocean, and Land'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'Discipline' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -242,7 +252,7 @@ print *, 'outChar = ', outChar
       attrname = 'PhysicalDomain'
       attrvalue = 'Earth System'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'PhysicalDomain' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -259,7 +269,7 @@ print *, 'outChar = ', outChar
       attrname = 'CodingLanguage'
       attrvalue = 'Fortran 90'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'CodingLanguage' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &
@@ -276,7 +286,7 @@ print *, 'outChar = ', outChar
       attrname = 'ModelComponentFramework'
       attrvalue = 'ESMF (Earth System Modeling Framework)'
       call ESMF_AttributeGet(cplcomp, name=attrname, value=outChar, &
-                             convention=conv, purpose=purp, rc=rc)
+                             attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting ESG 'ModelComponentFramework' Attribute from a CplComp Test"
       call ESMF_Test(((rc==ESMF_SUCCESS .and. outChar==attrvalue) &

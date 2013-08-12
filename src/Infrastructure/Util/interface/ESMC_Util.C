@@ -40,7 +40,7 @@ static const char *const version = "$Id$";
 
 extern "C" {
 
-int ESMC_UtilGetArgIndex(int argc, char *argv[], char *value, int *rc){
+int ESMC_UtilGetArgIndex(int argc, char * const argv[], const char *value, int *rc){
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc) *rc = ESMC_RC_NOT_IMPL;         // final return code

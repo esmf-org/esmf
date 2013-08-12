@@ -241,6 +241,7 @@ module NUOPC_Model
     character(ESMF_MAXSTR):: name
     integer               :: oldUpdatedCount, newUpdatedCount
     logical               :: allUpdated
+    type(ESMF_Attribute)  :: attpack
 
     rc = ESMF_SUCCESS
 
@@ -277,10 +278,15 @@ module NUOPC_Model
     ! deal with the "InitializeDataProgress" Attribute
     if (newUpdatedCount > oldUpdatedCount) then
       ! there are more Fields now that have their "Updated" Attriubute "true"
+      call ESMF_AttPackGet(gcomp, attpack, &
+        convention="NUOPC", purpose="General", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
       call ESMF_AttributeSet(gcomp, &
         name="InitializeDataProgress", value="true", &
-        convention="NUOPC", purpose="General", &
-        rc=rc)
+        attpack=attpack, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     endif
@@ -289,8 +295,7 @@ module NUOPC_Model
     if (allUpdated) then
       call ESMF_AttributeSet(gcomp, &
         name="InitializeDataComplete", value="true", &
-        convention="NUOPC", purpose="General", &
-        rc=rc)
+        attpack=attpack, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
       ! update timestamp on all the export Fields
