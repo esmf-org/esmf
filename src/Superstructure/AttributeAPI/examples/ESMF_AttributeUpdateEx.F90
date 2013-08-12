@@ -66,7 +66,6 @@ implicit none
 
 
       integer                 :: rc, urc, finalrc, petCount, localPet, result
-	  type(ESMF_Attribute)    :: attpack
       type(ESMF_VM)           :: vm
       type(ESMF_State)        :: c1exp, c2imp
       type(ESMF_GridComp)     :: gridcomp1
@@ -183,64 +182,64 @@ implicit none
 !BOC
       convESMF = 'ESMF'
       purpGen = 'General'
-      call ESMF_AttributeAdd(gridcomp1, attpack=attpack, &
-      	convention=convESMF, purpose=purpGen, &
-      	rc=rc)
+    call ESMF_AttributeAdd(gridcomp1, convention=convESMF, purpose=purpGen, &
+      rc=rc)
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
     call ESMF_AttributeSet(gridcomp1, 'Agency', 'NASA', &
-      attpack=attpack, rc=rc)
+      convention=convESMF, purpose=purpGen, rc=rc)
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
     call ESMF_AttributeSet(gridcomp1, 'Author', 'Max Suarez', &
-      attpack=attpack, rc=rc)
+      convention=convESMF, purpose=purpGen, rc=rc)
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
     call ESMF_AttributeSet(gridcomp1, 'CodingLanguage', &
-      'Fortran 90', attpack=attpack, rc=rc)
+      'Fortran 90', convention=convESMF, purpose=purpGen, rc=rc)
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
     call ESMF_AttributeSet(gridcomp1, 'Discipline', &
-      'Atmosphere', attpack=attpack, rc=rc)
+      'Atmosphere', convention=convESMF, purpose=purpGen, rc=rc)
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
     call ESMF_AttributeSet(gridcomp1, 'ComponentLongName', &
    'Goddard Earth Observing System Version 5 Finite Volume Dynamical Core', &
-        attpack=attpack, rc=rc)
+        convention=convESMF, purpose=purpGen, rc=rc)
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
     call ESMF_AttributeSet(gridcomp1, 'ModelComponentFramework', &
-      'ESMF', attpack=attpack, rc=rc)
+      'ESMF', &
+      convention=convESMF, purpose=purpGen, rc=rc)
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
     call ESMF_AttributeSet(gridcomp1, 'ComponentShortName', &
-      'GEOS-5 FV dynamical core', attpack=attpack, rc=rc)
+      'GEOS-5 FV dynamical core', convention=convESMF, purpose=purpGen, rc=rc)
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
     call ESMF_AttributeSet(gridcomp1, 'PhysicalDomain', &
-      'Earth system', attpack=attpack, rc=rc)
+      'Earth system', convention=convESMF, purpose=purpGen, rc=rc)
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
     call ESMF_AttributeSet(gridcomp1, 'Version', &
-      'GEOSagcm-EROS-beta7p12', attpack=attpack, rc=rc)
+      'GEOSagcm-EROS-beta7p12', convention=convESMF, purpose=purpGen, rc=rc)
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC

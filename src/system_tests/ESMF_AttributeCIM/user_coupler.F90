@@ -90,7 +90,6 @@ module user_coupler
     integer, intent(out) :: rc
 
     ! Local variables
-	type(ESMF_Attribute)        :: attpack
     type(ESMF_VM)          :: vm
     character(ESMF_MAXSTR) :: convCIM, purpComp, purpProp, purpPlatform
     character(ESMF_MAXSTR) :: convISO, purpRP, purpCitation
@@ -148,12 +147,11 @@ module user_coupler
     ! Specify the top-level Coupler Component to have 3 Responsible Party
     !   sub-packages and 2 Citation sub-packages
     nameCount = 0
-    call ESMF_AttributeAdd(comp, attpack=attpack, &
-    	convention=convCIM, purpose=purpComp, &
-    	nestConvention=nestConv, nestPurpose=nestPurp, &
-      	nestAttPackInstanceCountList=(/3,2/), &
-      	nestAttPackInstanceNameList=nestAttPackName, &
-      	nestCount=2, nestAttPackInstanceNameCount=nameCount, rc=rc)
+    call ESMF_AttributeAdd(comp, convention=convCIM, &
+      purpose=purpComp, nestConvention=nestConv, nestPurpose=nestPurp, &
+      nestAttPackInstanceCountList=(/3,2/), &
+      nestAttPackInstanceNameList=nestAttPackName, &
+      nestCount=2, nestAttPackInstanceNameCount=nameCount, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Specify the top-level Coupler Component to have a Component Properties
@@ -161,13 +159,12 @@ module user_coupler
     compPropAtt(1) = 'SimulationType'
     compPropAtt(2) = 'SimulationURL'
     compPropAtt(3) = 'Visualization'
-    call ESMF_AttributeAdd(comp, &
-    	convention=convCIM, purpose=purpProp, &
+    call ESMF_AttributeAdd(comp, convention=convCIM, purpose=purpProp, &
       attrList=compPropAtt, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_AttributeSet(comp, 'ShortName', 'EarthSys', &
-      attpack=attpack, rc=rc)
+      convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  1) Name of component in navigator bar on the left; 
     !                  attribute 'Version' appended, if set.
@@ -177,8 +174,8 @@ module user_coupler
     !                  'SimulationShortName'.
 
     call ESMF_AttributeSet(comp, 'LongName', &
-      'Earth System High Resolution Global Model', &
-      attpack=attpack, rc=rc)
+                           'Earth System High Resolution Global Model', &
+      convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Full Name:"  first part of display, at top, 2nd line 
     !               under title, prepended to attribute 'SimulationLongName'.
@@ -190,41 +187,44 @@ module user_coupler
       'Increasing the horizontal resolution of coupled climate ' // &
       'models will allow us to capture climate processes and ' // &
       'weather systems in much greater detail.', &
-      attpack=attpack, rc=rc)
+        convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Description:" in top box.
 
-    call ESMF_AttributeSet(comp, 'Version', '2.0', &
-      attpack=attpack, rc=rc)
+    call ESMF_AttributeSet(comp, 'Version', &
+      '2.0', &
+        convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Appended to attribute 'ShortName', then displayed as name 
     !               of component in navigator bar on the left.
 
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
-      '2009-01-01T00:00:00Z', attpack=attpack, rc=rc)
+      '2009-01-01T00:00:00Z', &
+        convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Release Date" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'ModelType', &
-      'model', attpack=attpack, rc=rc)
+      'model', convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Maps to "Realm:", expanded under component name, in 
     !               navigator bar on the left.
 
     call ESMF_AttributeSet(comp, 'URL', &
-      'www.earthsys.org', attpack=attpack, rc=rc)
+      'www.earthsys.org', convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'MetadataVersion', &
-      '1.2', attpack=attpack, rc=rc)
+      '1.2', convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Metadata Version" under tabs "Properties->Basic".
 
 
     ! Simulation run attributes
     call ESMF_AttributeSet(comp, 'SimulationShortName', &
-      'SMS.f09_g16.X.hector', attpack=attpack, rc=rc)
+      'SMS.f09_g16.X.hector', &
+      convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Simulation Metadata:"  1st part of display, at top, 
     !               1st line, appended to top-level component's attributes 
@@ -234,143 +234,156 @@ module user_coupler
 
     call ESMF_AttributeSet(comp, 'SimulationLongName', &
       'EarthSys - Earth System Modeling Framework Earth System Model 1.0', &
-      attpack=attpack, rc=rc)
+      convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Full Name:"  1st part of display, at top, 2nd line under 
     !               title, appended to attribute 'LongName'.
 
     call ESMF_AttributeSet(comp, 'SimulationProjectName', &
-      'CMIP5', attpack=attpack, rc=rc)
+      'CMIP5', &
+      convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Project" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'SimulationEnsembleID', &
-      'a1b1c1', attpack=attpack, rc=rc)
+      'a1b1c1', &
+      convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Ensemble Identification" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'SimulationRationale', &
-      'EarthSys-ESMF simulation run in repsect to CMIP5 core experiment 1.1 ()', &
-      attpack=attpack, rc=rc)
+'EarthSys-ESMF simulation run in repsect to CMIP5 core experiment 1.1 ()', &
+      convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'SimulationStartDate', &
-      '1960-01-01T00:00:00Z', attpack=attpack, rc=rc)
+     '1960-01-01T00:00:00Z', &
+      convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Simulation Start Date" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'SimulationDuration', &
-      'P10Y', attpack=attpack, rc=rc)
+     'P10Y', &
+      convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Simulation Duration" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'SimulationEndDate', &
-      '1970-01-01T00:00:00Z', attpack=attpack, rc=rc)
+     '1970-01-01T00:00:00Z', &
+      convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Simulation End Date" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'SimulationNumberOfProcessingElements', &
-      '16', attpack=attpack, rc=rc)
+     '16', &
+      convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
 
     ! Document genealogy
     call ESMF_AttributeSet(comp, 'PreviousVersion', &
-      'HadGEM1 Atmosphere', attpack=attpack, rc=rc)
+     'HadGEM1 Atmosphere', &
+      convention=convCIM, purpose=purpComp, rc=rc)
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'PreviousVersionDescription', &
-      'Horizontal resolution increased to 1.20 x 0.80 degrees; ' // &
-      'Timestep reduced from 30 minutes to 15 minutes.', &
-      attpack=attpack, rc=rc)
+     'Horizontal resolution increased to 1.20 x 0.80 degrees; ' // &
+     'Timestep reduced from 30 minutes to 15 minutes.', &
+      convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
 
     ! Platform description attributes
-    call ESMF_AttPackGet(comp, attpack, convCIM, purpPlatform, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
     call ESMF_AttributeSet(comp, 'CompilerName', &
-      'Pathscale', attpack=attpack, rc=rc)
+     'Pathscale', &
+      convention=convCIM, purpose=purpPlatform, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Compiler", concatenated with attribute 'CompilerVersion',
     !               under tabs "Properties->Technical".
 
     call ESMF_AttributeSet(comp, 'CompilerVersion', &
-      '3.0', attpack=attpack, rc=rc)
+     '3.0', &
+      convention=convCIM, purpose=purpPlatform, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Concatenated to attribute 'CompilerName' and displayed as 
     !               "Compiler" under tabs "Properties->Technical".
 
     call ESMF_AttributeSet(comp, 'MachineName', &
-      'HECToR', attpack=attpack, rc=rc)
+     'HECToR', &
+      convention=convCIM, purpose=purpPlatform, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Machine Name" under tabs "Properties->Technical".
 
     call ESMF_AttributeSet(comp, 'MachineDescription', &
-      'HECToR (Phase 2a) is currently an integrated system known ' // &
-      'as Rainier, which includes a scalar MPP XT4 system, a vector ' // &
-      'system known as BlackWidow, and storage systems.', &
-      attpack=attpack, rc=rc)
+     'HECToR (Phase 2a) is currently an integrated system known ' // &
+     'as Rainier, which includes a scalar MPP XT4 system, a vector ' // &
+     'system known as BlackWidow, and storage systems.', &
+      convention=convCIM, purpose=purpPlatform, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'MachineSystem', &
-      'Parallel', attpack=attpack, rc=rc)
+     'Parallel', &
+      convention=convCIM, purpose=purpPlatform, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Hardware Type" under tabs "Properties->Technical".
 
     call ESMF_AttributeSet(comp, 'MachineOperatingSystem', &
-      'Unicos', attpack=attpack, rc=rc)
+     'Unicos', &
+      convention=convCIM, purpose=purpPlatform, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Operating System" under tabs "Properties->Technical".
 
     call ESMF_AttributeSet(comp, 'MachineVendor', &
-      'Cray Inc', attpack=attpack, rc=rc)
+     'Cray Inc', &
+      convention=convCIM, purpose=purpPlatform, rc=rc)
     ! ESG Display:  Ingested, but not displayed, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'MachineInterconnectType', &
-      'Cray Interconnect', attpack=attpack, rc=rc)
+     'Cray Interconnect', &
+      convention=convCIM, purpose=purpPlatform, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Interconnect Type" under tabs "Properties->Technical".
 
     call ESMF_AttributeSet(comp, 'MachineMaximumProcessors', &
-      '22656', attpack=attpack, rc=rc)
+     '22656', &
+      convention=convCIM, purpose=purpPlatform, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Maximum Processors" under tabs "Properties->Technical".
 
     call ESMF_AttributeSet(comp, 'MachineCoresPerProcessor', &
-      '4', attpack=attpack, rc=rc)
+     '4', &
+      convention=convCIM, purpose=purpPlatform, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Number of Cores per Processor" under tabs 
     !               "Properties->Technical".
 
     call ESMF_AttributeSet(comp, 'MachineProcessorType', &
-      'AMD X86_64', attpack=attpack, rc=rc)
+     'AMD X86_64', &
+      convention=convCIM, purpose=purpPlatform, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Processor" under tabs "Properties->Technical".
 
 
     ! Component Properties: custom attributes
-    call ESMF_AttPackGet(comp, attpack, convCIM, purpProp, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
     call ESMF_AttributeSet(comp, 'SimulationType', &
-      'branch', attpack=attpack, rc=rc)
+     'branch', &
+      convention=convCIM, purpose=purpProp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'SimulationURL', &
-      'http://earthsys.org/simulations', &
-      attpack=attpack, rc=rc)
+     'http://earthsys.org/simulations', &
+      convention=convCIM, purpose=purpProp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'Visualization', &
-      'true', attpack=attpack, rc=rc)
+     'true', &
+      convention=convCIM, purpose=purpProp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
@@ -379,101 +392,113 @@ module user_coupler
     ! for the Coupler Component in the ESMF\_AttributeAdd(comp, ...) call.
 
     ! Responsible party attributes (for Principal Investigator)
-    call ESMF_AttPackGet(comp, attpack, convISO, purpRP, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
     call ESMF_AttributeSet(comp, 'Name', &
-      'John Doe', attpack=attpack, rc=rc)
+     'John Doe', &
+      convention=convISO, purpose=purpRP, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Principal Investigator" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'Abbreviation', &
-      'JD', attpack=attpack, rc=rc)
+     'JD', &
+      convention=convISO, purpose=purpRP, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
-      'Department of Meteorology, University of ABC', &
-      attpack=attpack, rc=rc)
+     'Department of Meteorology, University of ABC', &
+      convention=convISO, purpose=purpRP, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-      'john.doe@earthsys.org', attpack=attpack, rc=rc)
+     'john.doe@earthsys.org', &
+      convention=convISO, purpose=purpRP, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Ingested, but not displayed, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
-      'PI', attpack=attpack, rc=rc)
+     'PI', &
+      convention=convISO, purpose=purpRP, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Ingested, but only used to control display.
 
     call ESMF_AttributeSet(comp, 'URL', &
-      'www.earthsys.org', attpack=attpack, rc=rc)
+     'www.earthsys.org', &
+      convention=convISO, purpose=purpRP, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
 
     ! Responsible party attributes (for Contact)
-    call ESMF_AttPackGet(comp, attpack, convISO, purpRP, &
-      attPackInstanceName=nestAttPackName(2), rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
     call ESMF_AttributeSet(comp, 'Name', &
-      'Samuel Doe', attpack=attpack, rc=rc)
+     'Samuel Doe', &
+      convention=convISO, purpose=purpRP, &
+      attPackInstanceName=nestAttPackName(2),rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Contact Name" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'Abbreviation', &
-      'SD', attpack=attpack,rc=rc)
+     'SD', &
+      convention=convISO, purpose=purpRP, &
+      attPackInstanceName=nestAttPackName(2),rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
-      'Department of Meteorology, University of ABC', &
-      attpack=attpack, rc=rc)
+     'Department of Meteorology, University of ABC', &
+      convention=convISO, purpose=purpRP, &
+      attPackInstanceName=nestAttPackName(2),rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-      'samuel.doe@earthsys.org', attpack=attpack, rc=rc)
+     'samuel.doe@earthsys.org', &
+      convention=convISO, purpose=purpRP, &
+      attPackInstanceName=nestAttPackName(2),rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Contact Email" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
-      'Contact', attpack=attpack, rc=rc)
+     'Contact', &
+      convention=convISO, purpose=purpRP, &
+      attPackInstanceName=nestAttPackName(2),rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Ingested, but only used to control display.
 
     call ESMF_AttributeSet(comp, 'URL', &
-      'www.earthsys.org', attpack=attpack, rc=rc)
+     'www.earthsys.org', &
+      convention=convISO, purpose=purpRP, &
+      attPackInstanceName=nestAttPackName(2),rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
 
     ! Responsible party attributes (for Funder)
-    call ESMF_AttPackGet(comp, attpack, convISO, purpRP, &
-      attPackInstanceName=nestAttPackName(3), rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
     call ESMF_AttributeSet(comp, 'Name', &
-      'EarthSys Funding Office', attpack=attpack, rc=rc)
+     'EarthSys Funding Office', &
+      convention=convISO, purpose=purpRP, &
+      attPackInstanceName=nestAttPackName(3),rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Funding Source" under tabs "Properties->Basic".
 
     call ESMF_AttributeSet(comp, 'PhysicalAddress', &
-      'Department of Oceanography, University of GHI', &
-      attpack=attpack, rc=rc)
+     'Department of Oceanography, University of GHI', &
+      convention=convISO, purpose=purpRP, &
+      attPackInstanceName=nestAttPackName(3),rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'EmailAddress', &
-      'sally.doe@earthsys.org', attpack=attpack, rc=rc)
+     'sally.doe@earthsys.org', &
+      convention=convISO, purpose=purpRP, &
+      attPackInstanceName=nestAttPackName(3),rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'ResponsiblePartyRole', &
-     'Funder', attpack=attpack, rc=rc)
+     'Funder', &
+      convention=convISO, purpose=purpRP, &
+      attPackInstanceName=nestAttPackName(3),rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Ingested, but only used to control display.
 
@@ -482,43 +507,45 @@ module user_coupler
     ! for the Coupler Component in the ESMF\_AttributeAdd(comp, ...) call.
 
     ! Citation attributes (1st Citation attribute package)
-    call ESMF_AttPackGet(comp, attpack, convISO, purpCitation, rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
     call ESMF_AttributeSet(comp, 'ShortTitle', &
-      'Doe_2009', attpack=attpack, rc=rc)
+     'Doe_2009', &
+      convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'LongTitle', &
-      'Doe, J.A.; Doe, S.B.; ' // &
-      'Doe, J.C.; 2009 EarthSys: ' // &
-      'The Earth System High Resolution Global Model - ' // &
-      'Coupled Atmosphere-Ocean model description and basic evaluation. ' // &
-      'Journal of Earth Modeling, 15 (2). 1261-1296.', &
-      attpack=attpack, rc=rc)
+     'Doe, J.A.; Doe, S.B.; ' // &
+     'Doe, J.C.; 2009 EarthSys: ' // &
+     'The Earth System High Resolution Global Model - ' // &
+     'Coupled Atmosphere-Ocean model description and basic evaluation. ' // &
+     'Journal of Earth Modeling, 15 (2). 1261-1296.', &
+      convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Reference", concatenated with attribute 'DOI', under 
     !               tab "References".
 
     call ESMF_AttributeSet(comp, 'Date', &
-      '2009-03-05', attpack=attpack, rc=rc)
+     '2009-03-05', &
+      convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'PresentationForm', &
-      'Online Refereed', attpack=attpack, rc=rc)
+     'Online Refereed', &
+      convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'DOI', &
-      'doi:17.1035/2009JCLI4508.1', attpack=attpack, rc=rc)
+     'doi:17.1035/2009JCLI4508.1', &
+      convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Concatenated to attribute 'LongTitle' and displayed as 
     !               "Reference" under tab "References".
 
     call ESMF_AttributeSet(comp, 'URL', &
-      'http://www.earthsys.org/publications', attpack=attpack, rc=rc)
+     'http://www.earthsys.org/publications', &
+      convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not output to CIM, as of v1.5/1.7 (no definition for it). 
 
@@ -531,45 +558,51 @@ module user_coupler
     !         nestAttPackName(x) is not needed (optional)
     !         when referring to the 1st nested attribute package
     !         of either a Responsible Party or a Citation.
-    call ESMF_AttPackGet(comp, attpack, convISO, purpCitation, &
-      attPackInstanceName=nestAttPackName(5), rc=rc)
-    if (rc/=ESMF_SUCCESS) return ! bail out
-
     call ESMF_AttributeSet(comp, 'ShortTitle', &
-     'Doe_2006', attpack=attpack, rc=rc)
+     'Doe_2006', &
+      convention=convISO, purpose=purpCitation, &
+      attPackInstanceName=nestAttPackName(5),rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'LongTitle', &
-      'Doe, J.A.; Doe, S.B.; ' // &
-      '2006 EarthSys: ' // &
-      'The Earth System High Resolution Global Model - ' // &
-      'Improvements in Atmosphere and Ocean modeling. ' // &
-      'Journal of Earth Modeling, 11 (3). 1021-1036.', &
-      attpack=attpack, rc=rc)
+     'Doe, J.A.; Doe, S.B.; ' // &
+     '2006 EarthSys: ' // &
+     'The Earth System High Resolution Global Model - ' // &
+     'Improvements in Atmosphere and Ocean modeling. ' // &
+     'Journal of Earth Modeling, 11 (3). 1021-1036.', &
+      convention=convISO, purpose=purpCitation, &
+      attPackInstanceName=nestAttPackName(5),rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Reference", concatenated with attribute 'DOI', under 
     !               tab "References".
 
     call ESMF_AttributeSet(comp, 'Date', &
-      '2006-10-21', attpack=attpack, rc=rc)
+     '2006-10-21', &
+      convention=convISO, purpose=purpCitation, &
+      attPackInstanceName=nestAttPackName(5),rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'PresentationForm', &
-      'Online Refereed', attpack=attpack, rc=rc)
+     'Online Refereed', &
+      convention=convISO, purpose=purpCitation, &
+      attPackInstanceName=nestAttPackName(5),rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
 
     call ESMF_AttributeSet(comp, 'DOI', &
-      'doi:11.1234/2006JCLI1357.1', attpack=attpack, rc=rc)
+     'doi:11.1234/2006JCLI1357.1', &
+      convention=convISO, purpose=purpCitation, &
+      attPackInstanceName=nestAttPackName(5),rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Concatenated to attribute 'LongTitle' and displayed as 
     !               "Reference" under tab "References".
 
     call ESMF_AttributeSet(comp, 'URL', &
-      'http://www.earthsys.org/publications', &
-      attpack=attpack, rc=rc)
+     'http://www.earthsys.org/publications', &
+      convention=convISO, purpose=purpCitation, &
+      attPackInstanceName=nestAttPackName(5),rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not output to CIM, as of v1.5/1.7 (no definition for it). 
 

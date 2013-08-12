@@ -1722,10 +1722,6 @@ contains
        
     write (ESMF_UtilIOStdout,*) " Component name = ", trim(cname)
     
-    call ESMF_BasePrint(compp%base, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
-
     ! TODO: add more info here
 
     ! Return successfully

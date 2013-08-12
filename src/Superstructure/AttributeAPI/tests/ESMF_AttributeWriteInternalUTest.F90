@@ -44,7 +44,6 @@ program ESMF_AttributeWriteIntrnalUTest
   character(ESMF_MAXSTR) :: name
   
   ! local variables
-  type(ESMF_Attribute)   :: attpack   
   type(ESMF_Grid)        :: grid
   integer                :: rc
   
@@ -244,7 +243,7 @@ program ESMF_AttributeWriteIntrnalUTest
     attrList(1) = 'nestPack1'
     attrList(2) = 'nestPack2'
     attrList(3) = 'nestPack3'
-    attpack = ESMF_AttributeAdd(grid, &
+    call ESMF_AttributeAdd(grid, &
                            convention='CF-nested', &
                            purpose='grids-nested', &
                            attrList=attrList(1:3), &
