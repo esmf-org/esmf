@@ -2048,19 +2048,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_CplCompSetServices()
   recursive subroutine ESMF_CplCompSetServicesShObj(cplcomp, userRoutine, &
-    keywordEnforcer, sharedObj, userRc, rc)
+    keywordEnforcer, sharedObj, userRoutineFound, userRc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(inout)         :: cplcomp
     character(len=*),    intent(in)            :: userRoutine
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),    intent(in),  optional :: sharedObj
+    logical,             intent(out), optional :: userRoutineFound
     integer,             intent(out), optional :: userRc
     integer,             intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.3.0] Added argument {\tt userRoutineFound}.
+!              The new argument provides a way to test availability without
+!              causing error conditions.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2103,6 +2110,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Name of shared object that contains {\tt userRoutine}. If the
 !   {\tt sharedObj} argument is not provided the executable itself will be
 !   searched for {\tt userRoutine}.
+! \item[{[userRoutineFound]}]
+!   Report back whether the specified {\tt userRoutine} was found and executed,
+!   or was not available. If this argument is present, not finding the 
+!   {\tt userRoutine} will not result in returning an error in {\tt rc}.
+!   The default is to return an error if the {\tt userRoutine} cannot be found.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
 ! \item[{[rc]}]
@@ -2113,7 +2125,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer :: localrc                       ! local error status
     integer :: localUserRc
-    character(len=0) :: emptyString
+    character(len=0)    :: emptyString
+    type(ESMF_Logical)  :: userRoutineFoundHelp
+    logical             :: userRoutineFoundHelpHelp
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -2123,17 +2137,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
     if (present(sharedObj)) then
       call c_ESMC_SetServicesShObj(cplcomp, userRoutine, sharedObj, &
-        localUserRc, localrc)
+        userRoutineFoundHelp, localUserRc, localrc)
     else
       call c_ESMC_SetServicesShObj(cplcomp, userRoutine, emptyString, &
-        localUserRc, localrc)
+        userRoutineFoundHelp, localUserRc, localrc)
     endif
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! now indicate that this Component has a VM associated
-    cplcomp%compp%compStatus%vmIsPresent = .true.
+    ! translate ESMF_Logical -> logical
+    userRoutineFoundHelpHelp = userRoutineFoundHelp
+    
+    ! report back
+    if (present(userRoutineFound)) userRoutineFound = userRoutineFoundHelpHelp
+    
+    if (userRoutineFoundHelpHelp) then
+      ! routine found and executed -> indicate this Component has VM associated
+      cplcomp%compp%compStatus%vmIsPresent = .true.
+    else
+      ! routine not found
+      if (.not.present(userRoutineFound)) then
+        ! an error condition that needs to be reported back
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="userRoutine was not found", &
+          ESMF_CONTEXT, rcTOReturn=rc)
+        return
+      endif
+    endif
     
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
