@@ -274,7 +274,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setservicesshobj"
   void FTN_X(c_esmc_setservicesshobj)(void *ptr, char const *routineArg, 
-    char const *sharedObjArg, int *userRc, int *rc, 
+    char const *sharedObjArg, ESMC_Logical *foundRoutine, int *userRc, int *rc,
     ESMCI_FortranStrLenArg rlen, ESMCI_FortranStrLenArg llen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -283,6 +283,7 @@ extern "C" {
       "- System does not support dynamic loading.", ESMC_CONTEXT, rc);
     return;
 #else
+    *foundRoutine = ESMF_FALSE; // initialize
     void *lib;
     if (llen>0){
       string sharedObj(sharedObjArg, llen);
@@ -298,14 +299,13 @@ extern "C" {
     string routine(routineArg, rlen);
     routine.resize(routine.find_last_not_of(" ")+1);
     void (*func)() = (void (*)())dlsym(lib, routine.c_str());
-    if ((void *)func == NULL){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-        "routine not found", ESMC_CONTEXT, rc);
-      return;
+    if ((void *)func != NULL){
+      // Routine was found
+      *foundRoutine = ESMF_TRUE;
+      ESMCI::FTable::setServices(ptr, func, userRc, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc)) return;
     }
-    ESMCI::FTable::setServices(ptr, func, userRc, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc)) return;
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
 #endif

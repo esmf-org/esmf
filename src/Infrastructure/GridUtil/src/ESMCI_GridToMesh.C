@@ -99,16 +99,12 @@ void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, const std:
 
  bool is_sphere = grid.isSphere();
 
- /*
+
  // *** Grid error checking here ***
- if (!grid.hasCoordStaggerLoc(staggerLoc))
-   Throw() << "Grid being used in Regrid call does not contain coordinates at appropriate staggerloc ";
-*/
- int status;
  if (!grid.hasCoordStaggerLoc(staggerLoc)) {
    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-				 "Grid being used in Regrid call does not contain coordinates at appropriate staggerloc ", ESMC_CONTEXT, &rc);
-     return;
+	    "- Grid being used in Regrid call does not contain coordinates at appropriate staggerloc ", ESMC_CONTEXT, &localrc);
+   throw localrc;
  }
      
  // *** Set some meta-data ***

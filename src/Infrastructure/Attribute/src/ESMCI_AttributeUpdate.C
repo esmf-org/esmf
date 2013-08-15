@@ -508,7 +508,9 @@ static const int keySize = 4*sizeof(int) + 1;
     string attPackInstanceName;
     localrc = packList.at(i)->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
     if (localrc == ESMC_ATTUPDATERM_ATTPACK) {
-      localrc = AttPackRemove(packList.at(i));
+      localrc = AttPackRemove(packList.at(i)->attrConvention, 
+        packList.at(i)->attrPurpose, packList.at(i)->attrObject,
+                        attPackInstanceName);
       if (localrc != ESMF_SUCCESS) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                   "AttributeUpdateBufRecv failed AttPackRemove",

@@ -1122,9 +1122,6 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   
 //printf("AttPackGet(): packList.size() = %d\n", packList.size()); fflush(stdout);
 
-int size = packList.size();
-//printf("size = %d (%d)\n", size, packList.size());
-
   for (i=0; i<packList.size(); i++) {
     ap = packList.at(i);
     // look for the attpack on this Attribute, at this level, and return the
@@ -1319,25 +1316,30 @@ int size = packList.size();
 // 
 // !ARGUMENTS:
       const string &name,                // in - Attribute name
-	  const Attribute *attpack,          // in - Attribute package
+      const string &convention,          // in - Attribute convention
+      const string &purpose,             // in - Attribute purpose
+      const string &object,              // in - Attribute object type
+      const string &attPackInstanceName, // in - attPack name
+                                       // specifying which one of multiple packs
       ESMC_Logical *present) const {     // in/out - the present flag
 // 
 // !DESCRIPTION:
-//     Query an Attribute package for an {\tt Attribute} given its name
+//     Query an Attribute package for an {\tt Attribute} given its name, convention, 
+//     purpose, and object type.
 //
 //EOPI
 
   unsigned int i;
-  Attribute *attr;
+  Attribute *attr, *attpack;
   
-  attr = NULL;
+  attr = NULL; attpack = NULL;
 
   // get the attpack
+  attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
   if (!attpack) {
     *present = ESMF_FALSE;
     return ESMF_SUCCESS;
   }
-  
   // get the attr on the attpack
   attr = attpack->AttPackGetAttribute(name);
   if (!attr) *present = ESMF_FALSE;
@@ -1467,7 +1469,11 @@ int size = packList.size();
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      ESMCI::Attribute *attpack) {   // in - attPack
+      const string &convention,              // in - convention
+      const string &purpose,                 // in - purpose
+      const string &object,                  // in - object type to look for
+      const string &attPackInstanceName) {   // in - attPack name
+                                       // specifying which one of multiple packs
 // 
 // !DESCRIPTION:
 //     Remove an {\tt Attribute} package
@@ -1476,15 +1482,16 @@ int size = packList.size();
 
   int localrc;
   unsigned int i;
-  Attribute *attrparent;
+  Attribute *attpack, *attrparent;
   bool done = false;
   
-  attrparent = NULL;
+  attpack = NULL; attrparent = NULL;
 
   // Initialize local return code
   localrc = ESMC_RC_NOT_IMPL;
     
   // get the attpack
+  attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
   if(!attpack) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, 
       "Cannot find the Attribute package", ESMC_CONTEXT, &localrc);
@@ -1527,7 +1534,10 @@ int size = packList.size();
 // 
 // !ARGUMENTS:
       const string &name,                    // in - name
-      ESMCI::Attribute *attpack) {   // in - attPack name
+      const string &convention,              // in - convention
+      const string &purpose,                 // in - purpose
+      const string &object,                  // in - object type to look for
+      const string &attPackInstanceName) {   // in - attPack name
                                        // specifying which one of multiple packs
 // 
 // !DESCRIPTION:
@@ -1537,15 +1547,16 @@ int size = packList.size();
 
   int localrc;
   unsigned int i;
-  Attribute *attr, *attrparent;
+  Attribute *attr, *attpack, *attrparent;
   bool done = false;
 
-  attr = NULL; attrparent = NULL;
+  attr = NULL; attpack = NULL; attrparent = NULL;
 
   // Initialize local return code
   localrc = ESMC_RC_NOT_IMPL;
   
   // get the attpack
+  attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
   if(!attpack) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, 
       "Cannot find the specified Attribute package", ESMC_CONTEXT, &localrc);

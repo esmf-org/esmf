@@ -69,7 +69,7 @@ Fortran {\em submodules}, introduced as an extention to Fortran 2003, and now pa
 
 {\em Pros}: Avoids Fortran USE dependencies: a change to lower level component code will not trigger a complete recompilation of all of the higher level components throughout the component hierarchy. The component code does not have to be accessible until runtime and may be located in a shared object, thus avoiding relinking of the application.
 
-{\em Cons}: The user-code SetServices interface is not checked by the compiler. The user must explicitly deal with all of the Fortran name mangeling issues: 1) Accessing a module routine requires precise knowledge of the name mangeling rules of the specific compiler. 2) Alternatively the user-code SetServices routine may be implemented as an external routine (avoiding the module name mangeling), but then the user must ensure uniqueness of the name across the entire application. 3) Fortran compilers typically append one or two underscores on a symbol name. This must be considered when passing the name into the {\tt ESMF\_<Grid/Cpl>CompSetServices()} method.
+{\em Cons}: The user-code SetServices interface is not checked by the compiler. The user must explicitly deal with all of the Fortran name mangeling issues: 1) Accessing a module routine requires precise knowledge of the name mangeling rules of the specific compiler. Alternatively the user-code SetServices routine may be implemented as an external routine, avoiding the module name mangeling. 2) Even then, Fortran compilers typically append one or two underscores on a symbol name. This must be considered when passing the name into the {\tt ESMF\_<Grid/Cpl>CompSetServices()} method.
 
 \end{sloppypar}
 \end{itemize}

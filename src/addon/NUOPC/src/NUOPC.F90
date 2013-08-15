@@ -47,6 +47,7 @@ module NUOPC
   public NUOPC_GridCompAttributeAdd
   public NUOPC_GridCompCheckSetClock
   public NUOPC_GridCompSetClock
+  public NUOPC_GridCompSetServices
   public NUOPC_GridCreateSimpleXY
   public NUOPC_IsCreated
   public NUOPC_StateAdvertiseField
