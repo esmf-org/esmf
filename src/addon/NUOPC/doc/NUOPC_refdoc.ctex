@@ -201,6 +201,19 @@ Figure \ref{fig:NUOPCRunSequence} depicts the data structures surrounding the {\
 \input{../addon/NUOPC/doc/NUOPC_Base_fapi}
 #endif
 
+\newpage
+
+% re-set to a standard paragraph style
+\setlength{\parskip}{1.5ex}
+
+\section{Standardized Component Dependencies}
+#ifdef STANDALONE
+\input{NUOPC_StandardComponentDep}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_StandardComponentDep}
+#endif
+
+
 %#ifdef STANDALONE
 %\section{Bibliography}
 %\bibliography{comp} 

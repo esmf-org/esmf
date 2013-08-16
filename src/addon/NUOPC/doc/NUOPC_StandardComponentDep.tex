@@ -1,0 +1,501 @@
+% $Id$
+
+Most of the NUOPC Layer deals with specifying the interaction between ESMF components within a running ESMF application. ESMF provides several mechanisms of how an application can be made up of individual Components. This chapter deals with reigning in the many options supported by ESMF and setting up a standard way for assembling NUOPC compliant components into a working application.
+
+ESMF supports single executable as well as some forms of multiple executable applications. Currently the NUOPC Layer only addresses the case of single executable applications. While it is generally true that executing single executable applications is easier and more widely supported than executing multiple executable applications, building a single executable from multiple components can be challenging. This is especially true when the individual components are supplied by different groups, and the assembly of the final application happens apart from the component development. The purpose of standardizing component dependencies as part of the NUOPC Layer is to provide a solution to the technical aspect of assembling applications built from NUOPC compliant components.
+
+As with the other parts of the NUOPC Layer, the standardized component dependencies specify aspects that ESMF purposefully leaves unspecified. Having a standard way to deal with component dependencies has several advantages. It makes reading and understand NUOPC compliant applications more easily. It also provides a means to promote best practices across a wide range of application systems. Ultimately the goal of standardizing the component dependencies is to support "plug \& build" between NUOPC compliant components and applications, where everything needed to use a component by a upper level software layer is supplied in a standard way, ready to be used by the software.
+
+There is one aspect of the standardized component dependency that affects the component code itself: {\bf The name of the public set services entry point into a NUOPC compliant component must be called "SetServices"}. The only exception to this rule are components that are written in C/C++ and made available for static linking. In this case, because of lack of namespace protection, the {\tt SetServices} part must be followed by a component specific suffix. This will be discussed later in this chapter. For all other cases, unique namespaces exist that allow the entry point to be called {\tt SetServices} across all components.
+
+Having standardized the name of the single public entry point into a component solves the issue of having to communicate its name to the software layer that intends to use the component. At the same time, limiting the public entry point to a single accepted name does not remove any flexibility that is generally leveraged by ESMF applications. Within the context of the NUOPC Layer, there is great flexibility designed into the initialize steps. Removing the need to have to deal with alternative set services routines focuses and clarifies the NUOPC approach.
+
+The remaining aspects of component dependency standardization all deal with build specific issues, i.e. how does the software layer that uses a component compile and link against the component code. For now the NUOPC Layer does not deal with the question on how the component itself is being built. Instead the focus is on the information that a component must provide about itself, and the format of this information, in order to be usable by another piece of software. This clear separation allows components to provide their own independent build system, which often is critical to ensure bit-for-bit reproducibility. At the same time it does not prevent build systems to be connected top-down if that is desirable.
+
+Technically the problem of passing component specific build information up the build hierarchy is solved by using GNU makefile fragments that allow every component to provide information in form of variables to the upper level build system. The NUOPC Layer standardization requires that: {\bf Every component must provide a makefile fragment that defines 6 variables:
+\begin{verbatim}
+  ESMF_DEP_FRONT     
+  ESMF_DEP_INCPATH   
+  ESMF_DEP_CMPL_OBJS 
+  ESMF_DEP_LINK_OBJS 
+  ESMF_DEP_SHRD_PATH 
+  ESMF_DEP_SHRD_LIBS 
+\end{verbatim}
+}
+The convention for makefile fragments is to provide them in files with a suffix of {\tt .mk}.  The NUOPC Layer currently adds no further restriction to the name of the makefile fragment file of a component. There seems little gain in standardizing the name of the NUOPC compliant makefile fragment of a component since the location must be made available anyway, and adding the specific file name at the end of the supplied path does not appear inappropriate.
+
+The meaning of the 6 makefile variables is defined in a manner that supports many different situations, ranging from simple statically linked components to situations where components are made available in shared objects, not loaded by the application until needed during runtime. The design idea of the NUOPC Layer component makefile fragment is to have each component provide a simple makefile fragment that is self-describing. Usage of advanced options requires a more sophisticated build system on the software layer that {\em uses} the component, while at the same time the same standard format is able to keep simple situations simple.
+
+An indepth understanding of the capabilities of the NUOPC Layer build dependency standard requires looking at various common cases in detail. The remainder of this chapter is dedicated to this effort. Here a general definition of each variable is provided.
+
+\begin{itemize}
+
+\item {\tt ESMF\_DEP\_FRONT} - The name of the Fortran module to be used in a USE statement, or (if it ends in ".h") the name of the header file to be used in an \#include statement, or (if it ends in ".so") the name of the shared object to be loaded at run-time.
+
+\item {\tt ESMF\_DEP\_INCPATH} - The include path to find module or header files during compilation. Must be specified as absolute path.
+
+\item {\tt ESMF\_DEP\_CMPL\_OBJS} - Object files that need to be considered as compile dependencies. Must be specified with absolute path.
+
+\item {\tt ESMF\_DEP\_LINK\_OBJS} - Object files that need to be considered as link dependencies. Must be specified with absolute path.
+
+\item {\tt ESMF\_DEP\_SHRD\_PATH} - The path to find shared libraries during link-time (and during run-time unless overridden by LD\_LIBRARY\_PATH). Must be specified as absolute path.
+
+\item {\tt ESMF\_DEP\_SHRD\_LIBS} - Shared libraries that need to be specified during link-time, and must be available during run-time. Must be specified with absolute path.
+
+\end{itemize}
+
+The following sections discuss how the standard makefile fragment is utilized in common use cases. It shows how the {\tt .mk} file would need to look like in these cases. Each section further contains hints of how a compliant {\tt .mk} file can be auto-generated by the component build system (provider side), as well as hints on how it can be used by an upper level software layer (consumer side). Makefile segments provided in these hint sections are {\em not} part of the NUOPC Layer component dependency standard. They are only provided here as a convenience to the user, showing best practices of how the standard {\tt .mk} files can be used in practice. Any specific compiler and linker flags shown in the hint sections are those compliant with the GNU Compiler Collection. 
+
+The NUOPC Layer standard only covers the contents of the {\tt .mk} file itself.
+
+\subsection{Fortran components that are statically built into the executable}
+\label{StandardCompDep:FortranStatic}
+
+Statically building a component into the executable requires that the associated files (object files, and for Fortran the associated module files) are available when the application is being built. It makes the component code part of the executable. A change in the component code requires re-compilation and re-linking of the executable.
+
+A NUOPC compliant Fortran component that defines its public entry point in a module called "ABC", where all component code is contained in a single object file called "abc.o", makes itself available by providing the following {\tt .mk} file:
+
+\begin{verbatim}
+  ESMF_DEP_FRONT      = ABC
+  ESMF_DEP_INCPATH    = <absolute path to associated ABC module file>
+  ESMF_DEP_CMPL_OBJS  = <absolute path>/abc.o
+  ESMF_DEP_LINK_OBJS  = <absolute path>/abc.o
+  ESMF_DEP_SHRD_PATH  = 
+  ESMF_DEP_SHRD_LIBS  =
+\end{verbatim}
+
+If, however, the component implementation is spread across several object files (e.g. abc.o and xyz.o), they must all be listed in the {\tt ESMF\_DEP\_LINK\_OBJS} variable:
+
+\begin{verbatim}
+  ESMF_DEP_FRONT      = ABC
+  ESMF_DEP_INCPATH    = <absolute path to associated ABC module file>
+  ESMF_DEP_CMPL_OBJS  = <absolute path>/abc.o
+  ESMF_DEP_LINK_OBJS  = <absolute path>/abc.o <absolute path>/xyz.o
+  ESMF_DEP_SHRD_PATH  = 
+  ESMF_DEP_SHRD_LIBS  =
+\end{verbatim}
+
+In cases that require a large number of object files to be linked into the executable it is often more convenient to provide them in an archive file, e.g. "libABC.a". Archive files are also specified in {\tt ESMF\_DEP\_LINK\_OBJS}:
+
+\begin{verbatim}
+  ESMF_DEP_FRONT      = ABC
+  ESMF_DEP_INCPATH    = <absolute path to associated ABC module file>
+  ESMF_DEP_CMPL_OBJS  = <absolute path>/abc.o
+  ESMF_DEP_LINK_OBJS  = <absolute path>/libABC.a
+  ESMF_DEP_SHRD_PATH  = 
+  ESMF_DEP_SHRD_LIBS  =
+\end{verbatim}
+
+{\bf Hints for the provider side:} A build rule for creating a compliant self-describing {\tt .mk} file can be added to the component's makefile. For the case that component "ABC" is implemented in object files listed in variable "OBJS", a build rule that produces "abc.mk" could look like this:
+
+\begin{verbatim}
+.PRECIOUS: %.o
+%.mk : %.o
+        @echo "# ESMF self-describing build dependency makefile fragment" > $@
+        @echo >> $@
+        @echo "ESMF_DEP_FRONT     = ABC"                          >> $@
+        @echo "ESMF_DEP_INCPATH   = `pwd`"                        >> $@
+        @echo "ESMF_DEP_CMPL_OBJS = `pwd`/"$<                     >> $@
+        @echo "ESMF_DEP_LINK_OBJS = "$(addprefix `pwd`/, $(OBJS)) >> $@
+        @echo "ESMF_DEP_SHRD_PATH = "                             >> $@
+        @echo "ESMF_DEP_SHRD_LIBS = "                             >> $@
+
+abc.mk: $(OBJS)
+\end{verbatim}
+
+{\bf Hints for the consumer side:} The format of the NUOPC compliant {\tt .mk} files allows the consumer side to collect the information provided by multiple components into one set of internal variables. Notice that in the makefile code below it is critical to use the {\tt :=} style assignment instead of a simple {\tt =} in order to have the assignment be based on the {\em current} value of the right hand variables.
+
+\begin{verbatim}
+include abc.mk
+DEP_FRONTS    := $(DEP_FRONTS) -DFRONT_ABC=$(ESMF_DEP_FRONT)
+DEP_INCS      := $(DEP_INCS) $(addprefix -I, $(ESMF_DEP_INCPATH))
+DEP_CMPL_OBJS := $(DEP_CMPL_OBJS) $(ESMF_DEP_CMPL_OBJS)
+DEP_LINK_OBJS := $(DEP_LINK_OBJS) $(ESMF_DEP_LINK_OBJS)
+DEP_SHRD_PATH := $(DEP_SHRD_PATH) $(addprefix -L, $(ESMF_DEP_SHRD_PATH))
+DEP_SHRD_LIBS := $(DEP_SHRD_LIBS) $(addprefix -l, $(ESMF_DEP_SHRD_LIBS))
+
+include xyz.mk
+DEP_FRONTS    := $(DEP_FRONTS) -DFRONT_XYZ=$(ESMF_DEP_FRONT)
+DEP_INCS      := $(DEP_INCS) $(addprefix -I, $(ESMF_DEP_INCPATH))
+DEP_CMPL_OBJS := $(DEP_CMPL_OBJS) $(ESMF_DEP_CMPL_OBJS)
+DEP_LINK_OBJS := $(DEP_LINK_OBJS) $(ESMF_DEP_LINK_OBJS)
+DEP_SHRD_PATH := $(DEP_SHRD_PATH) $(addprefix -L, $(ESMF_DEP_SHRD_PATH))
+DEP_SHRD_LIBS := $(DEP_SHRD_LIBS) $(addprefix -l, $(ESMF_DEP_SHRD_LIBS))
+\end{verbatim}
+
+Besides the accumulation of information into the internal variables, there is a small amount of processing going on. The module name provided by the {\tt ESMF\_DEP\_FRONT} variable is assigned to a pre-processor macro. The intention of this macro is to be used in a Fortran {\tt USE} statement to access the Fortran module that contains the public access point of the component.
+
+The include paths in {\tt ESMF\_DEP\_INCPATH} are prepended with the appropriate compiler flag (here "-I"). The {\tt ESMF\_DEP\_SHRD\_PATH} and {\tt ESMF\_DEP\_SHRD\_LIBS} variables are also prepended by the respective compiler and linker flags in case a component brings in a shared library dependencies.
+
+Once the {\tt .mk} files of all component dependencies have been included and processed in this manner, the internal variables can be used in the build system of the application layer, as shown in the following example:
+
+\begin{verbatim}
+.SUFFIXES: .f90 .F90 .c .C
+
+%.o : %.f90
+        $(ESMF_F90COMPILER) -c $(DEP_FRONTS) $(DEP_INCS) \
+$(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREENOCPP) $<
+
+%.o : %.F90
+        $(ESMF_F90COMPILER) -c $(DEP_FRONTS) $(DEP_INCS) \
+$(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREECPP) \
+$(ESMF_F90COMPILECPPFLAGS) $<
+        
+%.o : %.c
+        $(ESMF_CXXCOMPILER) -c $(DEP_FRONTS) $(DEP_INCS) \
+$(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) \
+$(ESMF_CXXCOMPILECPPFLAGS) $<
+
+%.o : %.C
+        $(ESMF_CXXCOMPILER) -c $(DEP_FRONTS) $(DEP_INCS) \
+$(ESMF_CXXCOMPILEOPTS) $(ESMF_CXXCOMPILEPATHSLOCAL) $(ESMF_CXXCOMPILEPATHS) \ 
+$(ESMF_CXXCOMPILECPPFLAGS) $<
+
+app: app.o appSub.o $(DEP_LINK_OBJS)
+        $(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) \
+$(ESMF_F90LINKRPATHS) -o $@ $^ $(DEP_SHRD_PATH) $(DEP_SHRD_LIBS) \
+$(ESMF_F90ESMFLINKLIBS)
+
+app.o: appSub.o
+appSub.o: $(DEP_CMPL_OBJS)
+
+\end{verbatim}
+
+\subsection{Fortran components that are provided as shared libraries}
+\label{StandardCompDep:FortranSharedLib}
+
+Providing a component in form of a shared library requires that the associated files (object files, and for Fortran the associated module files) are available when the application is being built. However, different from the statically linked case, the component code does {\em not} become part of the executable, instead it will be loaded separately each time the executable is loaded during start-up. This requires that the executable finds the component shared libraries, on which it depends, during start-up. A change in the component code typically does not require re-compilation and re-linking of the executable, instead a new version of the component shared library will be loaded automatically when it is available at execution start-up.
+
+A NUOPC compliant Fortran component that defines its public entry point in a module called "ABC", where all component code is contained in a single shared library called "libABC.so", makes itself available by providing the following {\tt .mk} file:
+
+\begin{verbatim}
+  ESMF_DEP_FRONT      = ABC
+  ESMF_DEP_INCPATH    = <absolute path to associated ABC module file>
+  ESMF_DEP_CMPL_OBJS  = 
+  ESMF_DEP_LINK_OBJS  = 
+  ESMF_DEP_SHRD_PATH  = <absolute path to libABC.so>
+  ESMF_DEP_SHRD_LIBS  = libABC.so
+\end{verbatim}
+
+{\bf Hints for the provider side:} The following build rule will create a compliant self-describing {\tt .mk} file ("abc.mk") for a component that is made available as a shared library. The case assumes that component "ABC" is implemented in object files listed in variable "OBJS".
+
+\begin{verbatim}
+.PRECIOUS: %.so
+%.mk : %.so
+        @echo "# ESMF self-describing build dependency makefile fragment" > $@
+        @echo >> $@
+        @echo "ESMF_DEP_FRONT     = ABC"                          >> $@
+        @echo "ESMF_DEP_INCPATH   = `pwd`"                        >> $@
+        @echo "ESMF_DEP_CMPL_OBJS = "                             >> $@
+        @echo "ESMF_DEP_LINK_OBJS = "                             >> $@
+        @echo "ESMF_DEP_SHRD_PATH = `pwd`"                        >> $@
+        @echo "ESMF_DEP_SHRD_LIBS = "$*                           >> $@
+
+abc.mk:
+
+abc.so: $(OBJS)
+        $(ESMF_CXXLINKER) -shared -o $@ $<
+        mv $@ lib$@
+        rm -f $<
+\end{verbatim}
+
+{\bf Hints for the consumer side:} The format of the NUOPC compliant {\tt .mk} files allows the consumer side to collect the information provided by multiple components into one set of internal variables. This is independent on whether some or all of the components are provided as shared libraries.
+
+The path specified in {\tt ESMF\_DEP\_SHRD\_PATH} is required when building the executable in order for the linker to find the shared library. Depending on the situation, it may be desirable to also encode this search path into the executable through the RPATH mechanism as shown below. However, in some cases, e.g. when the actual shared library to be used during execution is {\em not} available from the same location as during build-time, it may not be useful to encode the RPATH. In either case, having set the {\tt LD\_LIBRARY\_PATH} environment variable to the desired location of the shared library at run-time will ensure that the correct library file is found.
+
+Notice that in the makefile code below it is critical to use the {\tt :=} style assignment instead of a simple {\tt =} in order to have the assignment be based on the {\em current} value of the right hand variables.
+
+\begin{verbatim}
+include abc.mk
+DEP_FRONTS    := $(DEP_FRONTS) -DFRONT_ABC=$(ESMF_DEP_FRONT)
+DEP_INCS      := $(DEP_INCS) $(addprefix -I, $(ESMF_DEP_INCPATH))
+DEP_CMPL_OBJS := $(DEP_CMPL_OBJS) $(ESMF_DEP_CMPL_OBJS)
+DEP_LINK_OBJS := $(DEP_LINK_OBJS) $(ESMF_DEP_LINK_OBJS)
+DEP_SHRD_PATH := $(DEP_SHRD_PATH) $(addprefix -L, $(ESMF_DEP_SHRD_PATH)) \
+  $(addprefix -Wl$(COMMA)-rpath$(COMMA), $(ESMF_DEP_SHRD_PATH))
+DEP_SHRD_LIBS := $(DEP_SHRD_LIBS) $(addprefix -l, $(ESMF_DEP_SHRD_LIBS))
+\end{verbatim}
+
+(Here {\tt COMMA} is a variable that contains a single comma which would cause syntax issues if it was written into the "addprefix" command directly.)
+
+The internal variables set by the above makefile code can then be used by exactly the same makefile rules shown for the statically linked case. In fact, component "ABC" that comes in through "abc.mk" could either be a statically linked component or a shared library component. The makefile code shown here for the consumer side handles both cases alike.
+
+\subsection{Components that are loaded during run-time as shared objects}
+\label{StandardCompDep:SharedObject}
+
+Making components available in the form of shared objects allows the executable to be built in the complete absence of any information that depends on the component code. The only information required when building the executable is the name of the shared object file that will supply the component code during run-time. The shared object file of the component can be replaced at will, and it is not until run-time, when the executable actually tries to access the component, that the shared object must be available to be loaded.
+
+A NUOPC compliant component where all component code, including its public access point, is contained in a single shared object called "abc.so", makes itself available by providing the following {\tt .mk} file:
+
+\begin{verbatim}
+  ESMF_DEP_FRONT      = abc.so
+  ESMF_DEP_INCPATH    = 
+  ESMF_DEP_CMPL_OBJS  = 
+  ESMF_DEP_LINK_OBJS  = 
+  ESMF_DEP_SHRD_PATH  = 
+  ESMF_DEP_SHRD_LIBS  = 
+\end{verbatim}
+
+The other parts of the {\tt .mk} file may be utilized in special cases, but typically the shared object should be self-contained.
+
+It is interesting to note that at this level of abstraction, there is no more difference between a component written in Fortran, and a component written in  in C/C++. In both cases the public entry point available in the shared object must be {\tt SetServices} as required by the NUOPC Layer component dependency standard. (NUOPC does allow for customary name mangling by the Fortran compiler.)
+
+{\bf Hints for the provider side:} The following build rule will create a compliant self-describing {\tt .mk} file ("abc.mk") for a component that is made available as a shared object. The case assumes that component "ABC" is implemented in object files listed in variable "OBJS".
+
+\begin{verbatim}
+.PRECIOUS: %.so
+%.mk : %.so
+        @echo "# ESMF self-describing build dependency makefile fragment" > $@
+        @echo >> $@
+        @echo "ESMF_DEP_FRONT     = "$<                           >> $@
+        @echo "ESMF_DEP_INCPATH   = "                             >> $@
+        @echo "ESMF_DEP_CMPL_OBJS = "                             >> $@
+        @echo "ESMF_DEP_LINK_OBJS = "                             >> $@
+        @echo "ESMF_DEP_SHRD_PATH = "                             >> $@
+        @echo "ESMF_DEP_SHRD_LIBS = "                             >> $@
+
+abc.mk:
+
+abc.so: $(OBJS)
+        $(ESMF_CXXLINKER) -shared -o $@ $<
+        rm -f $<
+\end{verbatim}
+
+{\bf Hints for the consumer side:} The format of the NUOPC compliant {\tt .mk} files still allows the consumer side to collect the information provided by multiple components into one set of internal variables. This still holds when some or all of the components are provided as shared objects. In fact it is very simple to make all of the component sections in the consumer makefile handle both cases.
+
+Notice that in the makefile code below it is critical to use the {\tt :=} style assignment instead of a simple {\tt =} in order to have the assignment be based on the {\em current} value of the right hand variables.
+
+\begin{verbatim}
+include abc.mk
+ifneq (,$(findstring .so,$(ESMF_DEP_FRONT)))
+DEP_FRONTS    := $(DEP_FRONTS) -DFRONT_SO_ABC=\"$(ESMF_DEP_FRONT)\"
+else
+DEP_FRONTS    := $(DEP_FRONTS) -DFRONT_ABC=$(ESMF_DEP_FRONT)
+endif
+DEP_FRONTS    := $(DEP_FRONTS) -DFRONT_ABC=$(ESMF_DEP_FRONT)
+DEP_INCS      := $(DEP_INCS) $(addprefix -I, $(ESMF_DEP_INCPATH))
+DEP_CMPL_OBJS := $(DEP_CMPL_OBJS) $(ESMF_DEP_CMPL_OBJS)
+DEP_LINK_OBJS := $(DEP_LINK_OBJS) $(ESMF_DEP_LINK_OBJS)
+DEP_SHRD_PATH := $(DEP_SHRD_PATH) $(addprefix -L, $(ESMF_DEP_SHRD_PATH)) \
+  $(addprefix -Wl$(COMMA)-rpath$(COMMA), $(ESMF_DEP_SHRD_PATH))
+DEP_SHRD_LIBS := $(DEP_SHRD_LIBS) $(addprefix -l, $(ESMF_DEP_SHRD_LIBS))
+\end{verbatim}
+
+The above makefile segment supports component "ABC" that is described in "abc.mk" to be made available as a Fortran static component, a Fortran shared library, or a shared object. The conditional around assigning variable {\tt DEP\_FRONTS} either leads to having set the macro {\tt FRONT\_ABC} as before, or setting a different macro {\tt FRONT\_SO\_ABC}. The former indicates that a Fortran module is available for the component and requires a {\tt USE} statement in the code. The latter macro indicates that the component is made available through a shared object, and the macro can be used to specify the name of the shared object in the associated call.
+
+Again the internal variables set by the above makefile code can be used by the same makefile rules shown for the statically linked case.
+
+\subsection{Components that depend on components}
+\label{StandardCompDep:CompOnComp}
+
+The NUOPC Layer supports component hierarchies where a component can be a child of another component. This hierarchy of components translates into component build dependencies that must be dealt with in the NUOPC Layer standardization of component dependencies.
+
+A component that sits in an intermediate level of the component hierarchy depends on the components "below" while at the same time it introduces a dependency by itself for the parent further "up" in the hierarchy. Within the NUOPC Layer component dependency standard this means that the intermediate component functions as a consumer of its child components' {\tt .mk} files, and as a provider of its own {\tt .mk} file that is then consumed by its parent. In practice this double role translates into passing link dependencies and shared library dependencies through to the parent, while the front and compile dependency is simply defined my the intermediate component itself.
+
+Consider a NUOPC compliant component that defines its public entry point in a module called "ABC", and where all component code is contained in a single object file called "abc.o". Further assume that component "ABC" depends on two components "XXX" and "YYY", where "XXX" provides the {\tt .mk} file:
+\begin{verbatim}
+  ESMF_DEP_FRONT      = XXX
+  ESMF_DEP_INCPATH    = <absolute path to the associated XXX module file>
+  ESMF_DEP_CMPL_OBJS  = <absolute path>/xxx.o
+  ESMF_DEP_LINK_OBJS  = <absolute path>/xxx.o
+  ESMF_DEP_SHRD_PATH  = 
+  ESMF_DEP_SHRD_LIBS  = 
+\end{verbatim}
+and "YYY" provides the following:
+\begin{verbatim}
+  ESMF_DEP_FRONT      = YYY
+  ESMF_DEP_INCPATH    = <absolute path to the associated XXX module file>
+  ESMF_DEP_CMPL_OBJS  = 
+  ESMF_DEP_LINK_OBJS  = 
+  ESMF_DEP_SHRD_PATH  = <absolute path to libYYY.so>
+  ESMF_DEP_SHRD_LIBS  = libYYY.so
+\end{verbatim}
+Then the {\tt .mk} file provided by "ABC" needs to contain the following information:
+\begin{verbatim}
+  ESMF_DEP_FRONT      = ABC
+  ESMF_DEP_INCPATH    = <absolute path to the associated ABC module file>
+  ESMF_DEP_CMPL_OBJS  = <absolute path>/abc.o
+  ESMF_DEP_LINK_OBJS  = <absolute path>/abc.o <absolute path>/xxx.o
+  ESMF_DEP_SHRD_PATH  = <absolute path to libYYY.so>
+  ESMF_DEP_SHRD_LIBS  = libYYY.so
+\end{verbatim}
+
+{\bf Hints for an intermediate component that is consumer and provider:} For the consumer side it is convenient to collect the information provided by multiple component dependencies into one set of internal variables. However, the details on how some of the imported information is processed into the internal variables depends on whether the intermediate component is going to make itself available for static or dynamic access.
+
+In the static case all link and shared library dependencies must be passed to the next higher level, and these dependencies should simply be collected and passed on to the next level:
+
+\begin{verbatim}
+include xxx.mk
+DEP_FRONTS    := $(DEP_FRONTS) -DFRONT_XXX=$(ESMF_DEP_FRONT)
+DEP_INCS      := $(DEP_INCS) $(addprefix -I, $(ESMF_DEP_INCPATH))
+DEP_CMPL_OBJS := $(DEP_CMPL_OBJS) $(ESMF_DEP_CMPL_OBJS)
+DEP_LINK_OBJS := $(DEP_LINK_OBJS) $(ESMF_DEP_LINK_OBJS)
+DEP_SHRD_PATH := $(DEP_SHRD_PATH) $(ESMF_DEP_SHRD_PATH)
+DEP_SHRD_LIBS := $(DEP_SHRD_LIBS) $(ESMF_DEP_SHRD_LIBS)
+
+include yyy.mk
+DEP_FRONTS    := $(DEP_FRONTS) -DFRONT_YYY=$(ESMF_DEP_FRONT)
+DEP_INCS      := $(DEP_INCS) $(addprefix -I, $(ESMF_DEP_INCPATH))
+DEP_CMPL_OBJS := $(DEP_CMPL_OBJS) $(ESMF_DEP_CMPL_OBJS)
+DEP_LINK_OBJS := $(DEP_LINK_OBJS) $(ESMF_DEP_LINK_OBJS)
+DEP_SHRD_PATH := $(DEP_SHRD_PATH) $(ESMF_DEP_SHRD_PATH)
+DEP_SHRD_LIBS := $(DEP_SHRD_LIBS) $(ESMF_DEP_SHRD_LIBS)
+
+.PRECIOUS: %.o
+%.mk : %.o
+	@echo "# ESMF self-describing build dependency makefile fragment" > $@
+	@echo >> $@
+	@echo "ESMF_DEP_FRONT     = ABC"                        >> $@
+	@echo "ESMF_DEP_INCPATH   = `pwd`"                      >> $@
+	@echo "ESMF_DEP_CMPL_OBJS = `pwd`/"$<                   >> $@
+	@echo "ESMF_DEP_LINK_OBJS = `pwd`/"$< $(DEP_LINK_OBJS)  >> $@
+	@echo "ESMF_DEP_SHRD_PATH = " $(DEP_SHRD_PATH)          >> $@
+	@echo "ESMF_DEP_SHRD_LIBS = " $(DEP_SHRD_LIBS)          >> $@
+\end{verbatim}
+
+In the case where the intermediate component is linked into a dynamic library, or a dynamic object, all of its object and shared library dependencies can be linked in. In this case it is more useful to do some processing on the shared library dependencies, and not to include them in the produced {\tt .mk} file.
+
+\begin{verbatim}
+include xxx.mk
+DEP_FRONTS    := $(DEP_FRONTS) -DFRONT_XXX=$(ESMF_DEP_FRONT)
+DEP_INCS      := $(DEP_INCS) $(addprefix -I, $(ESMF_DEP_INCPATH))
+DEP_CMPL_OBJS := $(DEP_CMPL_OBJS) $(ESMF_DEP_CMPL_OBJS)
+DEP_LINK_OBJS := $(DEP_LINK_OBJS) $(ESMF_DEP_LINK_OBJS)
+DEP_SHRD_PATH := $(DEP_SHRD_PATH) $(addprefix -L, $(ESMF_DEP_SHRD_PATH)) \
+  $(addprefix -Wl$(COMMA)-rpath$(COMMA), $(ESMF_DEP_SHRD_PATH))
+DEP_SHRD_LIBS := $(DEP_SHRD_LIBS) $(addprefix -l, $(ESMF_DEP_SHRD_LIBS))
+
+include yyy.mk
+DEP_FRONTS    := $(DEP_FRONTS) -DFRONT_YYY=$(ESMF_DEP_FRONT)
+DEP_INCS      := $(DEP_INCS) $(addprefix -I, $(ESMF_DEP_INCPATH))
+DEP_CMPL_OBJS := $(DEP_CMPL_OBJS) $(ESMF_DEP_CMPL_OBJS)
+DEP_LINK_OBJS := $(DEP_LINK_OBJS) $(ESMF_DEP_LINK_OBJS)
+DEP_SHRD_PATH := $(DEP_SHRD_PATH) $(addprefix -L, $(ESMF_DEP_SHRD_PATH)) \
+  $(addprefix -Wl$(COMMA)-rpath$(COMMA), $(ESMF_DEP_SHRD_PATH))
+DEP_SHRD_LIBS := $(DEP_SHRD_LIBS) $(addprefix -l, $(ESMF_DEP_SHRD_LIBS))
+
+.PRECIOUS: %.o
+%.mk : %.o
+	@echo "# ESMF self-describing build dependency makefile fragment" > $@
+	@echo >> $@
+	@echo "ESMF_DEP_FRONT     = ABC"                        >> $@
+	@echo "ESMF_DEP_INCPATH   = `pwd`"                      >> $@
+	@echo "ESMF_DEP_CMPL_OBJS = `pwd`/"$<                   >> $@
+	@echo "ESMF_DEP_LINK_OBJS = `pwd`/"$<                   >> $@
+	@echo "ESMF_DEP_SHRD_PATH = "                           >> $@
+	@echo "ESMF_DEP_SHRD_LIBS = "                           >> $@
+\end{verbatim}
+
+\subsection{Components written in C/C++}
+\label{StandardCompDep:C}
+
+ESMF provides a basic C API that supports writing components in C or C++. There is currently no C version of the NUOPC Layer API available, making it harder, but not impossible to write NUOPC Layer compliant ESMF components in C/C++. For the sake of completeness, the NUOPC component dependency standardization does cover the case of components being written in C/C++.
+
+The issue of whether a component is written in Fortran or C/C++ only matters when the dependent software layer has a compile dependency on the component.  In other words, components that are accessed through a shared object have no compile dependency, and the language is of no effect (see \ref{StandardCompDep:SharedObject}). However, components that are statically linked or made available through shared libraries do introduce compile dependencies. These compile dependencies become language dependent: a Fortran component must be accessed via the {\tt USE} statement, while a component with a C interface must be accessed via {\tt \#include}.
+
+The decision between the three cases: compile dependency on a Fortran component, compile dependency on a C/C++ component, or no compile dependency can be made on the {\tt ESMF\_DEP\_FRONT} variable. By default it is assumed to contain the name of the Fortran module that provides the public entry point into a component written in Fortran. However, if the contents of the {\tt ESMF\_DEP\_FRONT} variable ends in {\tt .h}, it is interpreted as the header file of a component with a C interface. Finally, if it ends in {\tt .so}, there is no compile dependency, and the component is accessible through a shared object.
+
+A NUOPC compliant component written in C/C++ that defines its public access point in "abc.h", where all component code is contained in a single object file called "abc.o", makes itself available by providing the following {\tt .mk} file:
+
+\begin{verbatim}
+  ESMF_DEP_FRONT      = abc.h
+  ESMF_DEP_INCPATH    = <absolute path to abc.h>
+  ESMF_DEP_CMPL_OBJS  = <absolute path>/abc.o
+  ESMF_DEP_LINK_OBJS  = <absolute path>/abc.o
+  ESMF_DEP_SHRD_PATH  = 
+  ESMF_DEP_SHRD_LIBS  =
+\end{verbatim}
+
+{\bf Hints for the implementor:}
+
+There are a few subtle complications to cover for the case where a component with C interface comes in as a compile dependency. First there is Fortran name mangling of symbols which includes underscores, but also changes to lower or upper case letters. The ESMF C interface provides a macro ({\tt FTN\_X}) that deals with the underscore issue on the C component side, but it cannot address the lower/upper case issue. The ESMF convention for using C in Fortran assumes all external symbols lower case. The NUOPC Layer follows this convention in accessing components with C interface from Fortran.
+
+Secondly, there is no namespace protection of the public entry points. For this reason, the public entry point cannot just be {\tt setservices} for all components written in C. Instead, for components with C interface, the public entry point must be {\tt setservices\_name}, where "name" is the same as the root name of the header file specified in {\tt ESMF\_DEP\_FRONT}. (The absence of namespace protection is still an issue where multiple C components with the same name are specified. This case requires that components are renamed to something more unique.)
+
+Finally there is the issue of providing an explicit Fortran interface for the public entry point. One way of handling this is to provide the explicit Fortran interface as part of the components header file. This is essentially a few lines of Fortran code that can be used by the upper software layer to implement the explicit interface. As such it must be protected from being processed by the C/C++ compiler:
+
+\begin{verbatim}
+#if (defined  __STDC__ || defined __cplusplus)
+
+// ---------- C/C++ block ------------
+
+#include "ESMC.h"
+extern "C" {
+  void FTN_X(setservices_abc)(ESMC_GridComp gcomp, int *rc);
+}
+
+#else
+
+!! ---------- Fortran block ----------
+
+interface
+  subroutine setservices_abc(gcomp, rc)
+    use ESMF
+    type(ESMF_GridComp)  :: gcomp
+    integer, intent(out) :: rc
+  end subroutine
+end interface
+
+#endif
+\end{verbatim}
+
+An upper level software layer that intends to use a component that comes with such a header file can then use it directly on the Fortran side to make the component available with an explicit interface. For example, assuming the macro {\tt FRONT\_H\_ATMF} holds the name of the associated header file:
+
+\begin{verbatim}
+#ifdef FRONT_H_ATMF
+module ABC
+#include FRONT_H_ATMF
+end module
+#endif
+\end{verbatim}
+
+This puts the explicit interface of the {\tt setservices\_abc} entry point into a module named "ABC". Except for this small block of code, the C/C++ component becomes indistinguishable from a component implemented in Fortran.
+
+{\bf Hints for the provider side:} Adding a build rule for creating a compliant self-describing {\tt .mk} file into the component's makefile is straight forward. For the case that the component in "abc.h" is implemented in object files listed in variable "OBJS", a build rule that produces "abc.mk" could look like this:
+
+\begin{verbatim}
+.PRECIOUS: %.o
+%.mk : %.o
+	@echo "# ESMF self-describing build dependency makefile fragment" > $@
+	@echo >> $@
+	@echo "ESMF_DEP_FRONT     = abc.h"     >> $@
+	@echo "ESMF_DEP_INCPATH   = `pwd`"      >> $@
+	@echo "ESMF_DEP_CMPL_OBJS = `pwd`/"$<   >> $@
+	@echo "ESMF_DEP_LINK_OBJS = `pwd`/"$<   >> $@
+	@echo "ESMF_DEP_SHRD_PATH = "           >> $@
+	@echo "ESMF_DEP_SHRD_LIBS = "           >> $@
+
+abc.mk:
+
+abc.o: abc.h
+
+\end{verbatim}
+
+{\bf Hints for the consumer side:} The format of the NUOPC compliant {\tt .mk} files still allows the consumer side to collect the information provided by multiple components into one set of internal variables. This still holds even when any of the provided components could come in as a Fortran component for static linking, as a C/C++ component for static linking, or as a shared object. All of the component sections in the consumer makefile can be made capable of handling all three cases. However, if it is clear that a certain component is for sure supplied as one of these flavors, it may be clearer to hard-code support for only one mechanism for this component. 
+
+Notice that in the makefile code below it is critical to use the {\tt :=} style assignment instead of a simple {\tt =} in order to have the assignment be based on the {\em current} value of the right hand variables.
+
+This example shows how the section for a specific component can be made compatible with all component dependency modes:
+
+\begin{verbatim}
+include abc.mk
+ifneq (,$(findstring .h,$(ESMF_DEP_FRONT)))
+DEP_FRONTS    := $(DEP_FRONTS) -DFRONT_H_ABC=\"$(ESMF_DEP_FRONT)\"
+else ifneq (,$(findstring .so,$(ESMF_DEP_FRONT)))
+DEP_FRONTS    := $(DEP_FRONTS) -DFRONT_SO_ABC=\"$(ESMF_DEP_FRONT)\"
+else
+DEP_FRONTS    := $(DEP_FRONTS) -DFRONT_ABC=$(ESMF_DEP_FRONT)
+endif
+DEP_FRONTS    := $(DEP_FRONTS) -DFRONT_ABC=$(ESMF_DEP_FRONT)
+DEP_INCS      := $(DEP_INCS) $(addprefix -I, $(ESMF_DEP_INCPATH))
+DEP_CMPL_OBJS := $(DEP_CMPL_OBJS) $(ESMF_DEP_CMPL_OBJS)
+DEP_LINK_OBJS := $(DEP_LINK_OBJS) $(ESMF_DEP_LINK_OBJS)
+DEP_SHRD_PATH := $(DEP_SHRD_PATH) $(addprefix -L, $(ESMF_DEP_SHRD_PATH)) \
+  $(addprefix -Wl$(COMMA)-rpath$(COMMA), $(ESMF_DEP_SHRD_PATH))
+DEP_SHRD_LIBS := $(DEP_SHRD_LIBS) $(addprefix -l, $(ESMF_DEP_SHRD_LIBS))
+\end{verbatim}
+
+The above makefile segment will end up setting macro {\tt FRONT\_H\_ABC} to the header file name, if the component described in "abc.mk" is a C/C++ component. It will instead set macro {\tt FRONT\_SO\_ABC} to the shared object if this is how the component is made available, or set macro {\tt FRONT\_ABC} to the Fortran module name if that is the mechanism for gaining access to the component code. The calling code can use these macros to activate the corresponding code, as well as has access to the required name string in each case
+
+The internal variables set by the above makefile code can be used by the same makefile rules shown for the statically linked case. This usage implements the correct dependency rules, and passes the macros through the compiler flags.
+
