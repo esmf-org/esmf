@@ -373,30 +373,41 @@ def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
 
 _ESMF.ESMC_GridCreateFromFile.restype = ESMP_GridStruct
 _ESMF.ESMC_GridCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
-					  np.ctypeslib.ndpointer(dtype=np.int32), \
-					  ct.POINTER(ct.c_int)]
-def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp):
-  """
-  Preconditions: ESMP has been initialized.\n
-  Postconditions: An ESMP_Grid has been created.\n
-  Arguments:\n
-    :RETURN: ESMP_Grid                  :: grid\n
-    string                              :: filename\n
-    ESMP_FileFormat                     :: fileTypeFlag\n
-                                           Argument Values:\n
-                                           ESMP_FILEFORMAT_SCRIP\n
-                                           ESMP_FILEFORMAT_ESMFMESH\n
-                                           ESMP_FILEFORMAT_UGRID\n
+                                          np.ctypeslib.ndpointer(dtype=np.int32),
+                                          OptionalNamedConstant,
+                                          OptionalNamedConstant,
+                                          OptionalNamedConstant,
+                                          OptionalNamedConstant,
+                                          OptionalNamedConstant,
+                                          ct.c_char_p,
+                                          ct.c_char_p,
+                                          ct.POINTER(ct.c_int)]
+def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp, decompflag=None,
+                            isSphere=None, addCornerStagger=None, addUserArea=None,
+                            addMask=None, varname="", coordNames=""):
     """
-  lrc = ct.c_int(0)
-  regDecompD = np.array(regDecomp, dtype=np.int32)
-  gridstruct = _ESMF.ESMC_GridCreateFromFile(filename, fileTypeFlag, regDecompD,
-					     ct.byref(lrc))
-  rc = lrc.value
-  if rc != constants.ESMP_SUCCESS:
-    raise NameError('ESMC_GridCreateFromFile() failed with rc = '+str(rc))
-  return gridstruct
-
+    Preconditions: ESMP has been initialized.\n
+    Postconditions: An ESMP_Grid has been created.\n
+    Arguments:\n
+        :RETURN: ESMP_Grid                  :: grid\n
+        string                              :: filename\n
+        ESMP_FileFormat                     :: fileTypeFlag\n
+            Argument Values:\n
+                ESMP_FILEFORMAT_SCRIP\n
+                ESMP_FILEFORMAT_ESMFMESH\n
+                ESMP_FILEFORMAT_UGRID\n
+    """
+    lrc = ct.c_int(0)
+    regDecompD = np.array(regDecomp, dtype=np.int32)
+    gridstruct = _ESMF.ESMC_GridCreateFromFile(filename, fileTypeFlag, regDecompD, 
+                                               decompflag, isSphere, addCornerStagger,
+                                               addUserArea, addMask, varname, coordNames,
+                                               ct.byref(lrc))
+    rc = lrc.value
+    if rc != constants.ESMP_SUCCESS:
+        raise NameError('ESMC_GridCreateFromFile() failed with rc = '+str(rc))
+    return gridstruct
+    
 _ESMF.ESMC_GridDestroy.restype = ct.c_int
 _ESMF.ESMC_GridDestroy.argtypes = [ct.c_void_p]
 @deprecated

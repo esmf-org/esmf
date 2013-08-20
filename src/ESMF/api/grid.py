@@ -72,6 +72,14 @@ class Grid(object):
         staggerloc = kwargs.get('staggerloc', None)
         fname = kwargs.get('fname', None)
         fileTypeFlag = kwargs.get('fileTypeFlag', None)
+        regDecomp = kwargs.get('regDecomp',np.array([1,1]))
+        decompflag = kwargs.get('decompflag', None)
+        isSphere = kwargs.get('isSphere', None)
+        addCornerStagger = kwargs.get('addCornerStagger', None)
+        addUserArea = kwargs.get('addUserArea', None)
+        addMask = kwargs.get('addMask', None)
+        varname = kwargs.get('varname', "")
+        coordNames = kwargs.get('coordNames', "")
 
         # ctypes stuff
         self.struct = None
@@ -115,8 +123,13 @@ class Grid(object):
         self.struct = None
         if fname:
             #print 'Creating grid from ', fname
-            self.struct = ESMP_GridCreateFromFile(fname, fileTypeFlag,
-                                                  np.array([1,1]))
+            self.struct = ESMP_GridCreateFromFile(fname, fileTypeFlag, regDecomp,
+                                                  decompflag=decompflag,
+                                                  isSphere=isSphere,
+                                                  addCornerStagger=addCornerStagger,
+                                                  addUserArea=addUserArea,
+                                                  addMask=addMask, varname=varname,
+                                                  coordNames=coordNames)
             self.verify_grid_bounds(staggerloc)
         else:
             # ctypes stuff
