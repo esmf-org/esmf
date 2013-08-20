@@ -1239,7 +1239,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
          else
-            call gatherRedistFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
+            call gatherFracFieldMesh(srcMesh, vm, srcFracField, petNo, petCnt, &
                  srcFrac, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1252,7 +1252,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
          else
-            call gatherRedistFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
+            call gatherFracFieldMesh(dstMesh, vm, dstFracField, petNo, petCnt, &
                  dstFrac, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &

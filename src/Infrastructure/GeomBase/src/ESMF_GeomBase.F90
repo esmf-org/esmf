@@ -41,6 +41,7 @@
       use ESMF_MeshMod
       use ESMF_LocStreamMod
       use ESMF_XGridMod
+      use ESMF_XGridGeomBaseMod
       use ESMF_XGridGetMod
 
 !     NEED TO ADD MORE HERE
@@ -832,6 +833,7 @@ end interface
 !
 !EOPI
     type(ESMF_GeomBaseClass),pointer :: gbcp
+    type(ESMF_XGridGeomBase)         :: xgrid_geombase
     integer                          :: localrc
 
     ! Initialize return code; assume failure until success is certain
@@ -976,27 +978,44 @@ end interface
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
        case (ESMF_GEOMTYPE_XGRID%type) ! XGrid
-            if (present(dimCount)) dimCount = 1
-            if (present(distgridToGridMap)) distgridToGridMap = 1
-            if (present(localDECount)) then
-                call ESMF_XGridGet(gbcp%xgrid, localDECount=localDECount, rc=localrc)
-                if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-            endif
 
-          ! Get distgrid
-	  if (present(distgrid)) then
-              call ESMF_XGridGet(gbcp%xgrid, gridIndex=gbcp%xgridindex, &
-                                 xgridSide=gbcp%xgridSide, &
-                                 distgrid=distgrid, rc=localrc)
-              if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-          endif
-          if (present(indexFlag)) indexFlag = ESMF_INDEX_DELOCAL
-          if (present(xgridside)) xgridside=gbcp%xgridside
-          if (present(gridIndex)) gridIndex=gbcp%xgridIndex
+         if(gbcp%xgridside == ESMF_XGRIDSIDE_BALANCED) then
+           if (present(dimCount)) dimCount = 1
+           if (present(distgridToGridMap)) distgridToGridMap = 1
+           if (present(localDECount)) then
+               call ESMF_XGridGet(gbcp%xgrid, localDECount=localDECount, rc=localrc)
+               if (ESMF_LogFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+         else
+           call ESMF_XGridGet(gbcp%xgrid, xgrid_geombase, xgridSide=gbcp%xgridSide, &
+                              gridindex=gbcp%xgridindex, rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
+                            ESMF_ERR_PASSTHRU, &
+                            ESMF_CONTEXT, rcToReturn=rc)) return
+           call ESMF_XGridGeomBaseGet(xgrid_geombase, &
+              dimCount=dimCount, localDeCount=localDECount, distgrid=distgrid, &
+              distgridToGridMap=distgridToGridMap, indexFlag=indexFlag, &
+              grid=grid, staggerloc=staggerloc, mesh=mesh, meshloc=meshloc, &
+              rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+         endif
+
+         ! Get distgrid
+         if (present(distgrid)) then
+             call ESMF_XGridGet(gbcp%xgrid, gridIndex=gbcp%xgridindex, &
+                                xgridSide=gbcp%xgridSide, &
+                                distgrid=distgrid, rc=localrc)
+             if (ESMF_LogFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rcToReturn=rc)) return
+         endif
+         if (present(indexFlag)) indexFlag = ESMF_INDEX_DELOCAL
+         if (present(xgridside)) xgridside=gbcp%xgridside
+         if (present(gridIndex)) gridIndex=gbcp%xgridIndex
              
        case default
          if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &

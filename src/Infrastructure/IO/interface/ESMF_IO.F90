@@ -477,7 +477,9 @@ contains
 
     ! Set default flags
     opt_overwriteflag = ESMF_FALSE
-    if (present(overwrite) .and. overwrite) opt_overwriteflag = ESMF_TRUE
+    if (present(overwrite)) then
+      if (overwrite) opt_overwriteflag = ESMF_TRUE
+    end if
 
     opt_status = ESMF_FILESTATUS_UNKNOWN
     if (present(status)) opt_status = status

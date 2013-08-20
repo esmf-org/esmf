@@ -69,7 +69,7 @@
 !-------------------------------- Example -----------------------------
 !>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%>%
 !BOE
-!\subsubsection{Create an XGrid from user input data then use it for regridding}
+!\subsubsection{Create an XGrid from Grids then use it for regridding}
 !\label{sec:xgrid:usage:xgrid_create}
 !
 ! An {\tt ESMF\_XGrid} object can be created from Grids on either side
