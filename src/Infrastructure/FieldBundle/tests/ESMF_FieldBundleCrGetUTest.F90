@@ -400,11 +400,18 @@ contains
                     if( farray4(i, j) .ne. i + 2 + (j+3) * 5) localrc = ESMF_FAILURE
                 enddo
             enddo
-            if (present(datacopyflag) .and. datacopyflag.eq.ESMF_DATACOPY_VALUE) then
-              ! only DATA_COPY is expected to work correctly
-              if (ESMF_LogFoundError(localrc, &
-                    ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc)) return
+            if (present(datacopyflag)) then
+              if (datacopyflag.eq.ESMF_DATACOPY_VALUE) then
+        	! only DATA_COPY is expected to work correctly
+        	if (ESMF_LogFoundError(localrc, &
+                      ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+              else
+        	if (ESMF_LogFoundError(localrc, &
+                      ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) continue
+        	rc = ESMF_SUCCESS ! reset
+              end if
             else
               if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
@@ -428,11 +435,18 @@ contains
                     if( farray5(i, j) .ne. i + 2 + (j*2-1) * 5) localrc = ESMF_FAILURE
                 enddo
             enddo
-            if (present(datacopyflag) .and. datacopyflag.eq.ESMF_DATACOPY_VALUE) then
+            if (present(datacopyflag)) then
+              if (datacopyflag.eq.ESMF_DATACOPY_VALUE) then
               ! only DATA_COPY is expected to work correctly
-              if (ESMF_LogFoundError(localrc, &
-                    ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc)) return
+        	if (ESMF_LogFoundError(localrc, &
+                      ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+              else
+        	if (ESMF_LogFoundError(localrc, &
+                      ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) continue
+        	rc = ESMF_SUCCESS ! reset
+              end if
             else
               if (ESMF_LogFoundError(localrc, &
                     ESMF_ERR_PASSTHRU, &
