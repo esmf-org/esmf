@@ -128,8 +128,10 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
 //EOP
 //-----------------------------------------------------------------------------
 
-ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag, 
-				  int *regDecomp, int *rc);
+ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag, int *regDecomp, 
+				  int *decompflag, int *isSphere, int *addCornerStagger,
+				  int *addUserArea, int *addMask, char *varname,
+				  char *coordNames, int *rc);
 
 //------------------------------------------------------------------------------
 //BOP

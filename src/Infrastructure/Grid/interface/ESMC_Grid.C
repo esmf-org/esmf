@@ -117,10 +117,14 @@ ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt maxIndex,
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreateFromFile()"
-ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag, 
-				  int *regDecomp, int *rc) {
+ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag, int *regDecomp, 
+				  int *decompflag, int *isSphere, int *addCornerStagger,
+				  int *addUserArea, int *addMask, char *varname,
+				  char *coordNames, int *rc) {
+
   //printf ("Start ESMC_Grid.C : ESMC_GridCreateFromFile(%s,%d,[%d,%d])\n", 
-  //	  filename, fileTypeFlag, regDecomp[0], regDecomp[1]);
+  //  	    filename, fileTypeFlag, regDecomp[0], regDecomp[1]);
+
   int localrc = ESMC_RC_NOT_IMPL;
   if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
 
@@ -128,9 +132,14 @@ ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag,
   ESMC_Grid grid;
   grid.ptr = NULL;
 
-  grid.ptr = reinterpret_cast<void *>(ESMCI::Grid::createfromfile(filename,
-								  fileTypeFlag,
-								  regDecomp,
+  grid.ptr = reinterpret_cast<void *>(ESMCI::Grid::createfromfile(filename, fileTypeFlag,
+								  regDecomp, 
+								  decompflag,
+								  isSphere, 
+								  addCornerStagger,
+								  addUserArea, 
+								  addMask, varname, 
+								  coordNames, 
 								  &localrc));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return grid; // bail out
