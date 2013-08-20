@@ -4179,14 +4179,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Sanity checking
     if(present(ungriddedLBound) .and. present(ungriddedUBound)) then
-
-      if(present(xgridside) .and. xgridside /= ESMF_XGRIDSIDE_BALANCED) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-          msg="- ungriddedBound cannot be specified for non-balanced side", &  
-          ESMF_CONTEXT, rcToReturn=rc) 
-        return
-      endif 
-
       if(present(ungriddedLBound)) then
         ungridded_ldimcount = size(ungriddedLBound)
       endif
@@ -4336,14 +4328,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Sanity checking
     if(present(ungriddedLBound) .and. present(ungriddedUBound)) then
-
-      if(present(xgridside) .and. xgridside /= ESMF_XGRIDSIDE_BALANCED) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-          msg="- ungriddedBound cannot be specified for non-balanced side", &  
-          ESMF_CONTEXT, rcToReturn=rc) 
-        return
-      endif 
-
       if(present(ungriddedLBound)) then
         ungridded_ldimcount = size(ungriddedLBound)
       endif
@@ -4526,14 +4510,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     ! Sanity checking @\
     if(present(ungriddedLBound) .and. present(ungriddedUBound)) then @\
- @\
-      if(present(xgridside) .and. xgridside /= ESMF_XGRIDSIDE_BALANCED) then @\
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
-          msg="- ungriddedBound cannot be specified for non-balanced side", &   @\
-          ESMF_CONTEXT, rcToReturn=rc)  @\
-        return @\
-      endif  @\
- @\
       if(present(ungriddedLBound)) then @\
         ungridded_ldimcount = size(ungriddedLBound) @\
       endif @\
