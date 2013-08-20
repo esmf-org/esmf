@@ -38,6 +38,8 @@ module ESMF_FieldCreateMod
   use ESMF_StaggerLocMod
   use ESMF_GridMod
   use ESMF_XGridMod
+  use ESMF_XGridGetMod
+  use ESMF_XGridGeomBaseMod
   use ESMF_DistGridMod
   use ESMF_MeshMod
   use ESMF_LocStreamMod
@@ -4005,8 +4007,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
     type(ESMF_ArraySpec) :: arrayspec
+    type(ESMF_XGridGeomBase)  :: xgeom
     integer :: rank, ungridded_dimcount, ungridded_ldimcount, ungridded_udimcount
-    integer :: memDimCount
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -4015,26 +4017,41 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Compute rank
-    ungridded_dimcount = 0
-    if(present(ungriddedLBound)) then
-      ungridded_ldimcount = size(ungriddedLBound)
-      ungridded_dimcount = ungridded_ldimcount
-    endif
-    if(present(ungriddedUBound)) then
-      ungridded_udimcount = size(ungriddedUBound)
-      ungridded_dimcount = ungridded_udimcount
-    endif
+    if(.not. present(xgridside)) then
+      ungridded_dimcount = 0
+      if(present(ungriddedLBound)) then
+        ungridded_ldimcount = size(ungriddedLBound)
+        ungridded_dimcount = ungridded_ldimcount
+      endif
+      if(present(ungriddedUBound)) then
+        ungridded_udimcount = size(ungriddedUBound)
+        ungridded_dimcount = ungridded_udimcount
+      endif
 
-    if(present(ungriddedLBound) .and. present(ungriddedUBound)) then
-      if(ungridded_ldimcount /= ungridded_udimcount) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-          msg="- ungriddedLBound size must equal to ungriddedUBound size", &  
-          ESMF_CONTEXT, rcToReturn=rc) 
-        return
+      rank = ungridded_dimcount + 1
+    else
+      if(xgridside==ESMF_XGRIDSIDE_BALANCED) then
+        ungridded_dimcount = 0
+        if(present(ungriddedLBound)) then
+          ungridded_ldimcount = size(ungriddedLBound)
+          ungridded_dimcount = ungridded_ldimcount
+        endif
+        if(present(ungriddedUBound)) then
+          ungridded_udimcount = size(ungriddedUBound)
+          ungridded_dimcount = ungridded_udimcount
+        endif
+
+        rank = ungridded_dimcount + 1
+      else
+        call ESMF_XGridGet(xgrid, xgeom, &
+          xgridside=xgridside, gridindex=gridindex, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_XGridGeomBaseGet(xgeom, dimCount=rank, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
       endif
     endif
-
-    rank = ungridded_dimcount + 1
 
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
@@ -4146,6 +4163,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
     type(ESMF_GeomBase) :: geombase
+    integer :: ungridded_ldimcount, ungridded_udimcount
 
     ! Initialize 
     localrc = ESMF_RC_NOT_IMPL
@@ -4158,6 +4176,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! check init status of input parameters
     ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
+
+    ! Sanity checking
+    if(present(ungriddedLBound) .and. present(ungriddedUBound)) then
+
+      if(present(xgridside) .and. xgridside /= ESMF_XGRIDSIDE_BALANCED) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+          msg="- ungriddedBound cannot be specified for non-balanced side", &  
+          ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif 
+
+      if(present(ungriddedLBound)) then
+        ungridded_ldimcount = size(ungriddedLBound)
+      endif
+      if(present(ungriddedUBound)) then
+        ungridded_udimcount = size(ungriddedUBound)
+      endif
+      if(ungridded_ldimcount /= ungridded_udimcount) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+          msg="- ungriddedLBound size must equal to ungriddedUBound size", &  
+          ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif
+    endif
 
     ! Create GeomBase from Xgrid
     geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex, rc=localrc)
@@ -4278,6 +4320,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
     integer :: localrc                       !  Local error code
     type(ESMF_GeomBase) :: geombase
+    integer :: ungridded_ldimcount, ungridded_udimcount
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -4290,6 +4333,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! check init status of input parameters
     ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+    ! Sanity checking
+    if(present(ungriddedLBound) .and. present(ungriddedUBound)) then
+
+      if(present(xgridside) .and. xgridside /= ESMF_XGRIDSIDE_BALANCED) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+          msg="- ungriddedBound cannot be specified for non-balanced side", &  
+          ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif 
+
+      if(present(ungriddedLBound)) then
+        ungridded_ldimcount = size(ungriddedLBound)
+      endif
+      if(present(ungriddedUBound)) then
+        ungridded_udimcount = size(ungriddedUBound)
+      endif
+      if(ungridded_ldimcount /= ungridded_udimcount) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+          msg="- ungriddedLBound size must equal to ungriddedUBound size", &  
+          ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif
+    endif
 
     ! Create GeomBase from Mesh
     geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex, rc=localrc)
@@ -4443,6 +4510,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
     integer :: localrc                       !  Local error code@\
     type(ESMF_GeomBase) :: geombase @\
+    integer :: ungridded_ldimcount, ungridded_udimcount @\
 @\
     ! Initialize @\
     localrc = ESMF_RC_NOT_IMPL@\
@@ -4455,6 +4523,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! check init status of input parameters@\
     ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)@\
 @\
+@\
+    ! Sanity checking @\
+    if(present(ungriddedLBound) .and. present(ungriddedUBound)) then @\
+ @\
+      if(present(xgridside) .and. xgridside /= ESMF_XGRIDSIDE_BALANCED) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
+          msg="- ungriddedBound cannot be specified for non-balanced side", &   @\
+          ESMF_CONTEXT, rcToReturn=rc)  @\
+        return @\
+      endif  @\
+ @\
+      if(present(ungriddedLBound)) then @\
+        ungridded_ldimcount = size(ungriddedLBound) @\
+      endif @\
+      if(present(ungriddedUBound)) then @\
+        ungridded_udimcount = size(ungriddedUBound) @\
+      endif @\
+      if(ungridded_ldimcount /= ungridded_udimcount) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
+          msg="- ungriddedLBound size must equal to ungriddedUBound size", &   @\
+          ESMF_CONTEXT, rcToReturn=rc)  @\
+        return @\
+      endif @\
+    endif @\
 @\
     ! Create GeomBase from Xgrid@\
     geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex ,rc=localrc)@\

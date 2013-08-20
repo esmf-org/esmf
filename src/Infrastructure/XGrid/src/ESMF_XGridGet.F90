@@ -86,6 +86,7 @@ module ESMF_XGridGetMod
         module procedure ESMF_XGridGetDefault
         module procedure ESMF_XGridGetDG
         module procedure ESMF_XGridGetGB
+        module procedure ESMF_XGridGetGeomObj
         module procedure ESMF_XGridGetSMMSpecFrac
 
 
@@ -583,6 +584,118 @@ integer, intent(out), optional              :: rc
     if(present(rc)) rc = ESMF_SUCCESS
 
 end subroutine ESMF_XGridGetGB
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_XGridGetGeomObj()"
+!BOPI
+! !IROUTINE:  ESMF_XGridGet - Get an individual GeomBase Obj from an XGrid
+
+! !INTERFACE: ESMF_XGridGet
+! ! Private name; call using ESMF_XGridGet()
+
+subroutine ESMF_XGridGetGeomObj(xgrid, geombase, keywordEnforcer, &
+    xgridside, gridindex, &
+    rc) 
+
+!
+! !ARGUMENTS:
+type(ESMF_XGrid),          intent(in)            :: xgrid
+type(ESMF_XGridGeomBase),  intent(out)           :: geombase
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridside
+integer,                   intent(in),  optional :: gridindex
+integer,                   intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Get a distgrid from XGrid from a specific side. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [xgrid]
+!       The {\tt ESMF\_XGrid} object used to retrieve information from.
+!     \item [geombase]
+!       Geombase Object referenced by gridIndex-th Grid or Mesh
+!       on xgridSide stored in the xgrid object.
+!     \item [{[xgridside]}] 
+!       \begin{sloppypar}
+!       Which side of the XGrid to retrieve the distgrid from (either ESMF\_XGRIDSIDE\_A,
+!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then
+!       defaults to ESMF\_XGRIDSIDE\_BALANCED.
+!       \end{sloppypar}
+!     \item [{[gridindex]}] 
+!       If xgridSide is ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index 
+!       selects the Distgrid associated with the Grid on
+!       that side. If not provided, defaults to 1. 
+!     \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
+!       is created.
+!     \end{description}
+!
+!EOP
+
+    type(ESMF_XGridType), pointer :: xgtypep
+    type(ESMF_XGridSide_Flag)     :: l_xgridSide
+    integer                       :: l_gridIndex
+
+    ! Initialize return code   
+    if(present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! check init status of input XGrid
+    ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
+
+    xgtypep => xgrid%xgtypep
+
+    if(present(xgridSide)) then
+        l_xgridSide = xgridSide
+    else                   
+        l_xgridSide = ESMF_XGRIDSIDE_BALANCED
+    endif
+
+    if(present(gridIndex)) then
+        l_gridIndex = gridIndex
+    else                   
+        l_gridIndex = 1
+    endif
+
+    if(l_gridIndex .lt. 0) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+           msg="- gridIndex cannot be less than 0", &
+           ESMF_CONTEXT, rcToReturn=rc) 
+        return
+    endif
+
+    if(l_xgridSide .eq. ESMF_XGRIDSIDE_BALANCED) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+           msg="- XGridSide cannot be Balanced while retrieving geombase obj", &
+           ESMF_CONTEXT, rcToReturn=rc) 
+        return
+    endif
+
+    if(l_xgridSide .eq. ESMF_XGRIDSIDE_A) then
+        if(l_gridIndex .gt. size(xgtypep%distgridA, 1)) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+msg="- gridIndex cannot be greater than the size of distgridA in the XGrid", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+        endif
+        geombase = xgtypep%sideA(l_gridIndex)
+    endif
+
+    if(l_xgridSide .eq. ESMF_XGRIDSIDE_B) then
+        if(l_gridIndex .gt. size(xgtypep%distgridB, 1)) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+msg="- gridIndex cannot be greater than the size of distgridB in the XGrid", &
+               ESMF_CONTEXT, rcToReturn=rc) 
+            return
+        endif
+        geombase = xgtypep%sideB(l_gridIndex)
+    endif
+
+    ! success
+    if(present(rc)) rc = ESMF_SUCCESS
+
+end subroutine ESMF_XGridGetGeomObj
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

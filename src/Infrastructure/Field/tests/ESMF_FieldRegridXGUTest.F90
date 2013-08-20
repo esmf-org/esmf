@@ -235,7 +235,7 @@ contains
 
     ! local variables
     type(ESMF_Grid)                 :: grid_atm, grid_ocn
-    type(ESMF_Field)                :: f_atm, f_ocn, f_xgrid
+    type(ESMF_Field)                :: f_atm, f_ocn, f_xgrid, f_tmp
     real(ESMF_KIND_R8)              :: startx, starty
     integer                         :: localrc, npet, i, j, lpet
     real(ESMF_KIND_R8), pointer     :: weights(:)
@@ -499,6 +499,12 @@ contains
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    f_tmp = ESMF_FieldCreate(xgrid, xgridside=ESMF_XGRIDSIDE_A, typekind=ESMF_TYPEKIND_R8, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_FieldDestroy(f_tmp)
 
     ! make sure serialize and deserialize works
     call checkProxy(xgrid, rc=localrc)
