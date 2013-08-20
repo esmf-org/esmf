@@ -21,7 +21,6 @@
 #define ESMC_UTIL_H
 
 #include "ESMC_Conf.h"
-#include "ESMCI_CoordSys.h"
 
 #ifdef __cplusplus
 extern "C" {

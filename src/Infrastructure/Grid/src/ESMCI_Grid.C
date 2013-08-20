@@ -9308,7 +9308,7 @@ int Grid::getCartCoordDimCount() {
   int cartDimCount;
 
   // call into coord sys method to calculate this
-  localrc=ESMCI_CoordSys_CalcCartDim(coordSys, dimCount, cartDimCount);
+  localrc=ESMCI_CoordSys_CalcCartDim(coordSys, dimCount, &cartDimCount);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
        &rc)) throw rc;
 

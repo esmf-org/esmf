@@ -8,7 +8,8 @@ SOURCEF	  = ESMF_Util.F90 ESMF_F90Interface.F90 ESMF_Fraction.F90
 SOURCEH	  = 
 
 # List all .h files which should be copied to common include dir
-STOREH    = ESMC_Arg.h ESMC_Interface.h ESMC_Macros.h ESMC_Util.h ESMC_ReturnCodes.h
+STOREH    = ESMC_Arg.h ESMC_Interface.h ESMC_Macros.h ESMC_Util.h ESMC_ReturnCodes.h \
+	    ESMC_CoordSys.h
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
