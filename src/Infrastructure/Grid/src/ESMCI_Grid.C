@@ -84,7 +84,9 @@ void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid, char *filename, int *f
 				      int *addMask, int *ampresent, 
 				      char *varname, int *vnpresent,
 				      char *coordNames, int *cnpresent, int *rc, 
-				      int len_filename, int len_varname, int len_coordNames);
+				      ESMCI_FortranStrLenArg len_filename, 
+				      ESMCI_FortranStrLenArg len_varname, 
+				      ESMCI_FortranStrLenArg len_coordNames);
 }
 
 //
