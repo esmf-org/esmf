@@ -119,8 +119,8 @@ ESMF_F90COMPILEOPTS += -ffree-line-length-none
 ############################################################
 # Blank out variables to prevent rpath encoding
 #
-ESMF_F90LINKRPATHS      =
-ESMF_CXXLINKRPATHS      =
+#ESMF_F90LINKRPATHS      =
+#ESMF_CXXLINKRPATHS      =
 
 ############################################################
 # Determine where gcc's libraries are located
