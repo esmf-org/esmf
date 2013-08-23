@@ -636,7 +636,7 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
-!     subroutine ESMF_AttAddPackStd(<object>, convention, purpose, rc)
+!     subroutine ESMF_AttAddPackStd(<object>, convention, purpose, attpack, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -685,7 +685,7 @@ contains
 !     subroutine ESMF_AttAddPackStdN(<object>, convention, purpose, &
 !       nestConvention, nestPurpose, nestAttPackInstanceCountList, &
 !       nestAttPackInstanceNameList, nestCount, &
-!       nestAttPackInstanceNameCount,rc)
+!       nestAttPackInstanceNameCount, attpack, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -760,7 +760,7 @@ contains
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
 !     subroutine ESMF_AttAddPackCst(<object>, convention, purpose, &
-!       attrList, count, rc)
+!       attrList, count, attpack, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -816,7 +816,7 @@ contains
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
 !     subroutine ESMF_AttAddPackCstN(<object>, convention, purpose, &
-!       attrList, count, nestConvention, nestPurpose, nestCount, rc)
+!       attrList, count, nestConvention, nestPurpose, nestCount, attpack, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -886,7 +886,7 @@ contains
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
 !     subroutine ESMF_AttAddPackCstN1(<object>, convention, purpose, &
-!       attrList, count, nestConvention, nestPurpose, rc)
+!       attrList, count, nestConvention, nestPurpose, attpack, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -1005,7 +1005,7 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGet(<object>, name, <value>, <defaultvalue>, &
-!       convention, purpose, attPackInstanceName, isPresent, rc)
+!       attpack, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -1088,7 +1088,7 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGet(<object>, name, <value>, <defaultvalue>, &
-!       inputList, convention, purpose, attPackInstanceName, isPresent, rc)
+!       inputList, attpack, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -1157,8 +1157,7 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGet(<object>, name, <valueList>, &
-!       <defaultvalueList>, convention, purpose, attPackInstanceName, &
-!       itemCount, isPresent, rc)
+!       <defaultvalueList>, attpack, itemCount, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -1243,8 +1242,7 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGet(<object>, name, <valueList>, &
-!       <defaultvalueList>, inputList, convention, purpose, &
-!       attPackInstanceName, itemCount, isPresent, rc)
+!       <defaultvalueList>, inputList, attpack, itemCount, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -1363,9 +1361,8 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet()
-!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, convention, &
-!       purpose, keywordEnforcer, attPackInstanceName, typekind, &
-!       itemCount, isPresent, rc)
+!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, keywordEnforcer, &
+!       attpack, typekind, itemCount, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -1874,8 +1871,7 @@ contains
 ! \label{api:AttributeRead}
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeRead(<object>, fileName, schemaFileName, &
-!       convention, purpose, rc)
+!     subroutine ESMF_AttributeRead(<object>, fileName, schemaFileName, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -1928,8 +1924,7 @@ contains
 ! !IROUTINE: ESMF_AttributeRemove - Remove an Attribute or Attribute package
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeRemove(<object>, name, convention, purpose, &
-!       attPackInstanceName, rc)
+!     subroutine ESMF_AttributeRemove(<object>, name, attpack, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -1982,8 +1977,7 @@ contains
 ! !IROUTINE: ESMF_AttributeSet - Set an Attribute
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeSet(<object>, name, <value>, convention, &
-!       purpose, attPackInstanceName, rc)
+!     subroutine ESMF_AttributeSet(<object>, name, <value>, attpack, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -2043,8 +2037,7 @@ contains
 ! !IROUTINE: ESMF_AttributeSet - Set an Attribute to point to internal class information
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeSet(<object>, name, <value>, inputList, &
-!       convention, purpose, attPackInstanceName, rc)
+!     subroutine ESMF_AttributeSet(<object>, name, <value>, inputList, attpack, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -2096,8 +2089,8 @@ contains
 ! !IROUTINE: ESMF_AttributeSet - Set an Attribute
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeSet(<object>, name, <valueList>, convention, &
-!       purpose, attPackInstanceName, itemCount, rc)
+!     subroutine ESMF_AttributeSet(<object>, name, <valueList>, &
+!       attpack, itemCount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
