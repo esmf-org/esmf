@@ -9,6 +9,36 @@ This flag is documented in section \ref{const:calkindflag_c}.
 \subsection{ESMC\_COORDSYS}
 This flag is documented in section \ref{const:ccoordsys}.
 
+\subsection{ESMC\_DECOMP}
+\label{const:cdecompflag}
+{\sf DESCRIPTION:\\}
+Indicates how DistGrid elements are decomposed over DEs.
+
+The type of this flag is:
+
+{\tt type(ESMC\_Decomp\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMC\_DECOMP\_BALANCED]
+      Decompose elements as balanced as possible across DEs. The maximum 
+      difference in number of elements per DE is 1, with the extra elements on
+      the lower DEs.
+\item [ESMC\_DECOMP\_CYCLIC]
+      Decompose elements cyclically across DEs.
+\item [ESMC\_DECOMP\_DEFAULT]
+      Use default decomposition behavior. Currently equal to 
+      {\tt ESMC\_DECOMP\_BALANCED}.
+\item [ESMC\_DECOMP\_RESTFIRST]
+      Divide elements over DEs. Assign the rest of this division to the first
+      DE.
+\item [ESMC\_DECOMP\_RESTLAST]
+      Divide elements over DEs. Assign the rest of this division to the last DE.
+\end{description}
+
+\subsection{ESMC\_FILEFORMAT}
+This flag is documented in section \ref{const:cfileformat}.
+
 \subsection{ESMC\_GRIDITEM}
 This flag is documented in section \ref{const:cgriditem}.
 
