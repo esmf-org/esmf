@@ -387,15 +387,28 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp, decompflag=None,
                             addMask=None, varname="", coordNames=""):
     """
     Preconditions: ESMP has been initialized.\n
-    Postconditions: An ESMP_Grid has been created.\n
+    Postconditions: An ESMP_GridStruct has been created.\n
     Arguments:\n
-        :RETURN: ESMP_Grid                  :: grid\n
-        string                              :: filename\n
-        ESMP_FileFormat                     :: fileTypeFlag\n
+        :RETURN: ESMP_GridStruct            :: gridstruct\n
+        String                              :: filename\n
+        FileFormat                          :: fileTypeFlag\n
             Argument Values:\n
-                ESMP_FILEFORMAT_SCRIP\n
-                ESMP_FILEFORMAT_ESMFMESH\n
-                ESMP_FILEFORMAT_UGRID\n
+                SCRIP\n
+                GRIDSPEC\n
+        List                                :: regDecomp\n
+        DecompFlag (optional)               :: decompflag\n
+            Argument Values:\n
+                DEFAULT\n
+                BALANCED\n
+                RESTFIRST\n
+                RESTLAST\n
+                CYCLIC\n
+        Boolean (optional)                  :: isSphere\n
+        Boolean (optional)                  :: addCornerStagger\n
+        Boolean (optional)                  :: addUserArea\n
+        Boolean (optional)                  :: addMask\n
+        String (optional)                   :: varname\n
+        String (optional)                   :: coordNames\n
     """
     lrc = ct.c_int(0)
     regDecompD = np.array(regDecomp, dtype=np.int32)
