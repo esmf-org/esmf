@@ -83,7 +83,8 @@ This is a specialization of the {\tt NUOPC\_Driver} generic component, driving a
     \item Optionally replace the default clock. 
     \item Optionally replace the default run sequence.
   \end{itemize}
-  \item Implement the initialize sequence for the child components, compatible with up to IPD version 01, as documented in section \ref{IPD}.
+  \item Execute Initialize phase=0 for all Model, Mediator, and Connector components. This is the method where each component is required to initialize its {\tt InitializePhaseMap} Attribute.
+  \item Implement the initialize sequence for the child components, compatible with up to IPD version 02, as documented in section \ref{IPD}.
   \end{itemize}  
 \end{itemize}
 

@@ -89,6 +89,14 @@ the application.  On some systems, the BLAS library must also be included.
 \label{sec:netcdf}
 ESMF provides the ability to read Grid and Mesh data in 
 \htmladdnormallink{NetCDF}{http://www.unidata.ucar.edu/software/netcdf/} format. 
+
+In the NetCDF 4.2 released in March 2012, the C, C++, and Fortran libraries are released as separate packages.
+To compile ESMF with NetCDF 4.2, it is required to have the NetCDF 4.2 Fortran Library, 
+the NetCDF 4.2 C Library, and the NetCDF 4.2 Legacy C++ Library installed in the same directory. 
+The {\tt ESMF\_NETCDF} environement variable has to be set to {\tt "split"}.  Note that currently ESMF does not
+work with the new C++ API introduced in NetCDF 4.2, therefore, the Legacy C++ Library has to be 
+used.
+
 The following environment variables enable, and specify the name and location
 of the desired NetCDF library and associated header files:
 
@@ -142,13 +150,6 @@ typical case where {\tt ESMF\_NETCDF} is set to {\tt "standard"},
 When {\tt ESMF\_NETCDF} is set to {\tt "split"}, {\tt ESMF\_NETCDF\_LIBS} 
 is set to {\tt "-lnetcdff -lnetcdf\_c++ -lnetcdf"}.
 \end{description}
-
-In the NetCDF 4.2 released in March 2012, the C, C++, and Fortran libraries are released as separate packages.
-To compile ESMF with NetCDF 4.2, it is required to have the NetCDF 4.2 Fortran Library, 
-the NetCDF 4.2 C Library, and the NetCDF 4.2 Legacy C++ Library installed in the same directory. 
-The {\tt ESMF\_NETCDF} environement variable has to be set to {\tt "split"}.  Note that currently ESMF does not
-work with the new C++ API introduced in NetCDF 4.2, therefore, the Legacy C++ Library has to be 
-used.
 
 \subsubsection{Parallel-NetCDF}
 \label{sec:pnetcdf}

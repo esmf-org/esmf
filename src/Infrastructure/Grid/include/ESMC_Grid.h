@@ -38,6 +38,7 @@
 
 #include "ESMC_Interface.h"
 #include "ESMC_Util.h"
+#include "ESMC_CoordSys.h"
 
 #if defined (__cplusplus)
 extern "C" {
@@ -128,8 +129,65 @@ ESMC_Grid ESMC_GridCreate1PeriDim(
 //EOP
 //-----------------------------------------------------------------------------
 
-ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag, 
-				  int *regDecomp, int *rc);
+//------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_GridCreateFromFile - Create a Grid from a NetCDF file specification.
+//
+// !INTERFACE:
+ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag, int *regDecomp, 
+				  int *decompflag, int *isSphere, int *addCornerStagger,
+				  int *addUserArea, int *addMask, char *varname,
+				  char *coordNames, int *rc);
+// !RETURN VALUE:
+//  type(ESMC_Grid)
+//
+// !DESCRIPTION:
+// This function creates a {\tt ESMC\_Grid} object from the specification in
+// a NetCDF file.
+//
+//  The arguments are:
+//  \begin{description}
+// \item[filename]
+//     The NetCDF Grid filename.
+// \item[fileTypeFlag]
+//     The Grid file format, please see Section~\ref{const:cfileformat}
+//         for a list of valid options. 
+// \item[regDecomp] 
+//      A 2 element array specifying how the grid is decomposed.
+//      Each entry is the number of decounts for that dimension.
+// \item[{[decompflag]}]
+//      List of decomposition flags indicating how each dimension of the
+//      tile is to be divided between the DEs. The default setting
+//      is {\tt ESMC\_DECOMP\_BALANCED} in all dimensions. Please see
+//      Section~\ref{const:cdecompflag} for a full description of the 
+//      possible options. 
+// \item[{[isSphere]}]
+//      If 1 is a spherical grid, if 0 is regional. Defaults to 1.
+// \item[{[addCornerStagger]}]
+//      Uses the information in the grid file to add the Corner stagger to 
+//      the Grid. The coordinates for the corner stagger is required for conservative
+//      regridding. If not specified, defaults to false. 
+// \item[{[addUserArea]}]
+//      If 1, read in the cell area from the Grid file, otherwise, ESMF will calculate it
+// \item[{[addMask]}]
+//      If 1, generate the mask using the missing\_value attribute defined in 'varname'
+// \item[{[varname]}]
+//      If addMask is true, provide a variable name stored in the grid file and
+//      the mask will be generated using the missing value of the data value of
+//      this variable.  The first two dimensions of the variable has to be the
+//      the longitude and the latitude dimension and the mask is derived from the
+//      first 2D values of this variable even if this data is 3D, or 4D array.
+//\item[{coordNames}]
+//      a 2D array containing the longitude and latitude variable names in a GRIDSPEC
+//      file if there are multiple coordinates defined in the file
+// \item[{[rc]}]
+//      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \item[grid]
+//    Grid object whose memory is to be freed. 
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //BOP
@@ -330,7 +388,7 @@ int ESMC_GridGetCoordBounds(
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE: ESMC_GridWrite - Write a Grid to a VTK file
 //
 // !INTERFACE:
@@ -358,7 +416,7 @@ int ESMC_GridWrite(
 //     The name of the output file.
 //   \end{description}
 //
-//EOP
+//EOPI
 //-----------------------------------------------------------------------------
 
 #if defined (__cplusplus)

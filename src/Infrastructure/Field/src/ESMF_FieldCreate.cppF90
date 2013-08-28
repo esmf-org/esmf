@@ -38,6 +38,8 @@ module ESMF_FieldCreateMod
   use ESMF_StaggerLocMod
   use ESMF_GridMod
   use ESMF_XGridMod
+  use ESMF_XGridGetMod
+  use ESMF_XGridGeomBaseMod
   use ESMF_DistGridMod
   use ESMF_MeshMod
   use ESMF_LocStreamMod
@@ -361,7 +363,7 @@ contains
 ! !ARGUMENTS:
        type(ESMF_Field),  intent(inout)          :: fieldOut
        type(ESMF_Field),  intent(in)             :: fieldIn
-       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer,           intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
@@ -1512,7 +1514,7 @@ TypeKindRankDeclarationMacro(FieldCreateGBDataPtr)
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateGridTKR"
-!BOPI
+!BOP
 ! !IROUTINE:   ESMF_FieldCreate - Create a Field from Grid and typekind
 
 ! !INTERFACE:
@@ -1564,7 +1566,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      for a list of valid indexflag options. The default indexflag value is the 
 !      one stored in then {\tt ESMF\_Grid} object. Currently it is 
 !      erroneous to specify an indexflag
-!      different from the one stored in the {\tt ESMF\_Grid} object.
+!      different from the one stored in the {\tt ESMF\_Grid} object. The default
+!      value is {\tt ESMF\_INDEXFLAG\_DELOCAL}
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values see section \ref{const:staggerloc}.
@@ -1630,7 +1633,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
     type(ESMF_ArraySpec) :: arrayspec
@@ -1689,7 +1692,7 @@ end function ESMF_FieldCreateGridTKR
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateGridArraySpec"
-!BOPI
+!BOP
 ! !IROUTINE:   ESMF_FieldCreate - Create a Field from Grid and ArraySpec
 
 ! !INTERFACE:
@@ -1741,7 +1744,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      for a list of valid indexflag options. The default indexflag value is the 
 !      one stored in then {\tt ESMF\_Grid} object. Currently it is 
 !      erroneous to specify an indexflag 
-!      different from the one stored in the {\tt ESMF\_Grid} object.
+!      different from the one stored in the {\tt ESMF\_Grid} object.The default
+!      value is {\tt ESMF\_INDEXFLAG\_DELOCAL}
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values see section \ref{const:staggerloc}.
@@ -1807,7 +1811,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
     type(ESMF_GeomBase) :: geombase
@@ -1900,7 +1904,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldCreateGridArray"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldCreate - Create a Field from Grid and Array
 
 ! !INTERFACE:
@@ -2013,7 +2017,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer :: localrc                       !  Local error code
     type(ESMF_GeomBase) :: geombase
@@ -2104,19 +2108,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   type(ESMF_Field) :: ESMF_FieldCreateGridData<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Grid),       intent(in)            :: grid                  @\
-!   <type> (ESMF_KIND_<kind>), intent(in) target :: farray(<rank>) @\
-!   type(ESMF_Index_Flag),  intent(in)            :: indexflag @\
+!   type(ESMF_Grid),          intent(in)            :: grid           @\
+!   <type> (ESMF_KIND_<kind>),intent(in),  target   :: farray(<rank>) @\
+!   type(ESMF_Index_Flag),    intent(in)            :: indexflag      @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
-!   type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc  @\
-!   integer,               intent(in),  optional :: gridToFieldMap(:)     @\
-!   integer,               intent(in),  optional :: ungriddedLBound(:) @\
-!   integer,               intent(in),  optional :: ungriddedUBound(:) @\
-!   integer,               intent(in),  optional :: totalLWidth(:) @\
-!   integer,               intent(in),  optional :: totalUWidth(:) @\
-!   character (len=*),     intent(in),  optional :: name  @\
-!   integer,               intent(out), optional :: rc                @\
+!   type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag @\
+!   type(ESMF_StaggerLoc),    intent(in),  optional :: staggerloc  @\
+!   integer,                  intent(in),  optional :: gridToFieldMap(:)  @\
+!   integer,                  intent(in),  optional :: ungriddedLBound(:) @\
+!   integer,                  intent(in),  optional :: ungriddedUBound(:) @\
+!   integer,                  intent(in),  optional :: totalLWidth(:) @\
+!   integer,                  intent(in),  optional :: totalUWidth(:) @\
+!   character (len=*),        intent(in),  optional :: name  @\
+!   integer,                  intent(out), optional :: rc             @\
 ! @\
 ! !STATUS: @\
 ! \begin{itemize} @\
@@ -2237,19 +2241,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Field) :: ESMF_FieldCreateGridData##mrank##D##mtypekind @\
 @\
     ! input arguments @\
-    type(ESMF_Grid),       intent(in)            :: grid @\
+    type(ESMF_Grid),         intent(in)            :: grid @\
     mname (ESMF_KIND_##mtypekind), intent(in), target :: farray(mdim) @\
-    type(ESMF_Index_Flag),  intent(in)            :: indexflag @\
+    type(ESMF_Index_Flag),   intent(in)            :: indexflag @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-    type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
-    type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc @\
-    integer,               intent(in),  optional :: gridToFieldMap(:) @\
-    integer,               intent(in),  optional :: ungriddedLBound(:) @\
-    integer,               intent(in),  optional :: ungriddedUBound(:) @\
-    integer,               intent(in),  optional :: totalLWidth(:) @\
-    integer,               intent(in),  optional :: totalUWidth(:) @\
-    character (len=*),     intent(in),  optional :: name @\
-    integer,               intent(out), optional :: rc @\
+    type(ESMF_DataCopy_Flag),intent(in),  optional :: datacopyflag @\
+    type(ESMF_StaggerLoc),   intent(in),  optional :: staggerloc @\
+    integer,                 intent(in),  optional :: gridToFieldMap(:) @\
+    integer,                 intent(in),  optional :: ungriddedLBound(:) @\
+    integer,                 intent(in),  optional :: ungriddedUBound(:) @\
+    integer,                 intent(in),  optional :: totalLWidth(:) @\
+    integer,                 intent(in),  optional :: totalUWidth(:) @\
+    character (len=*),       intent(in),  optional :: name @\
+    integer,                 intent(out), optional :: rc @\
 @\
     integer :: localrc                       !  Local error code@\
     type(ESMF_GeomBase) :: geombase @\
@@ -2345,16 +2349,16 @@ TypeKindRankDeclarationMacro(FieldCreateGridData)
 !   type(ESMF_Field) :: ESMF_FieldCreateGridDataPtr<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Grid),       intent(in)            :: grid                  @\
-!   <type> (ESMF_KIND_<kind>), pointer           :: farrayPtr(<rank>) @\
+!   type(ESMF_Grid),           intent(in)            :: grid              @\
+!   <type> (ESMF_KIND_<kind>), pointer               :: farrayPtr(<rank>) @\
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
-!   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
-!   type(ESMF_StaggerLoc), intent(in),  optional :: staggerloc  @\
-!   integer,               intent(in),  optional :: gridToFieldMap(:)     @\
-!   integer,               intent(in),  optional :: totalLWidth(:) @\
-!   integer,               intent(in),  optional :: totalUWidth(:) @\
-!   character (len=*),     intent(in),  optional :: name  @\
-!   integer,               intent(out), optional :: rc                @\
+!   type(ESMF_DataCopy_Flag),  intent(in),  optional :: datacopyflag @\
+!   type(ESMF_StaggerLoc),     intent(in),  optional :: staggerloc  @\
+!   integer,                   intent(in),  optional :: gridToFieldMap(:)     @\
+!   integer,                   intent(in),  optional :: totalLWidth(:) @\
+!   integer,                   intent(in),  optional :: totalUWidth(:) @\
+!   character (len=*),         intent(in),  optional :: name  @\
+!   integer,                   intent(out), optional :: rc                @\
 ! @\
 ! !STATUS: @\
 ! \begin{itemize} @\
@@ -2552,20 +2556,21 @@ TypeKindRankDeclarationMacro(FieldCreateGridDataPtr)
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateLSTKR(locstream, typekind, &
-    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    keywordEnforcer, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateLSTKR
 !
 ! !ARGUMENTS:
-    type(ESMF_LocStream), intent(in)            :: locstream
-    type(ESMF_TypeKind_Flag),  intent(in)            :: typekind
-    integer,              intent(in),  optional :: gridToFieldMap(:)    
-    integer,              intent(in),  optional :: ungriddedLBound(:)
-    integer,              intent(in),  optional :: ungriddedUBound(:)
-    character (len=*),    intent(in),  optional :: name 
-    integer,              intent(out), optional :: rc              
+    type(ESMF_LocStream),    intent(in)            :: locstream
+    type(ESMF_TypeKind_Flag),intent(in)            :: typekind
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                 intent(in),  optional :: gridToFieldMap(:)    
+    integer,                 intent(in),  optional :: ungriddedLBound(:)
+    integer,                 intent(in),  optional :: ungriddedUBound(:)
+    character (len=*),       intent(in),  optional :: name 
+    integer,                 intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Field} and allocate space internally for an
@@ -2682,7 +2687,7 @@ end function ESMF_FieldCreateLSTKR
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateLSArraySpec(locstream, arrayspec, &
-    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    keywordEnforcer, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
 ! !RETURN VALUE:
@@ -2691,6 +2696,7 @@ end function ESMF_FieldCreateLSTKR
 ! !ARGUMENTS:
     type(ESMF_LocStream), intent(in)            :: locstream
     type(ESMF_ArraySpec), intent(in)            :: arrayspec     
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(in),  optional :: gridToFieldMap(:)    
     integer,              intent(in),  optional :: ungriddedLBound(:)
     integer,              intent(in),  optional :: ungriddedUBound(:)
@@ -2797,21 +2803,22 @@ end function ESMF_FieldCreateLSTKR
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateLSArray(locstream, array, &
-    datacopyflag, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    keywordEnforcer, datacopyflag, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateLSArray    
 !
 ! !ARGUMENTS:
-    type(ESMF_LocStream), intent(in)            :: locstream                
-    type(ESMF_Array),     intent(in)            :: array              
-    type(ESMF_DataCopy_Flag),  intent(in),  optional :: datacopyflag       
-    integer,              intent(in),  optional :: gridToFieldMap(:)    
-    integer,              intent(in),  optional :: ungriddedLBound(:)
-    integer,              intent(in),  optional :: ungriddedUBound(:)
-    character (len = *),  intent(in),  optional :: name   
-    integer,              intent(out), optional :: rc                
+    type(ESMF_LocStream),     intent(in)            :: locstream                
+    type(ESMF_Array),         intent(in)            :: array              
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag       
+    integer,                  intent(in),  optional :: gridToFieldMap(:)    
+    integer,                  intent(in),  optional :: ungriddedLBound(:)
+    integer,                  intent(in),  optional :: ungriddedUBound(:)
+    character (len = *),      intent(in),  optional :: name   
+    integer,                  intent(out), optional :: rc                
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Field}.  This version of creation
@@ -2917,22 +2924,23 @@ end function ESMF_FieldCreateLSTKR
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateLSData<rank><type><kind>(locstream, farray, & @\
-!   indexflag, datacopyflag, gridToFieldMap, ungriddedLBound, & @\
+!   indexflag, keywordEnforcer, datacopyflag, gridToFieldMap, ungriddedLBound, & @\
 !   ungriddedUBound, name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateLSData<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_LocStream),  intent(in)            :: locstream                  @\
-!   <type> (ESMF_KIND_<kind>), intent(in), target:: farray(<rank>) @\
-!   type(ESMF_Index_Flag),  intent(in)            :: indexflag @\
-!   type(ESMF_DataCopy_Flag),   intent(in),  optional :: datacopyflag @\
-!   integer,               intent(in),  optional :: gridToFieldMap(:)     @\
-!   integer,               intent(in),  optional :: ungriddedLBound(:) @\
-!   integer,               intent(in),  optional :: ungriddedUBound(:) @\
-!   character (len=*),     intent(in),  optional :: name  @\
-!   integer,               intent(out), optional :: rc                @\
+!   type(ESMF_LocStream),     intent(in)            :: locstream      @\
+!   <type> (ESMF_KIND_<kind>),intent(in), target    :: farray(<rank>) @\
+!   type(ESMF_Index_Flag),    intent(in)            :: indexflag @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag @\
+!   integer,                  intent(in),  optional :: gridToFieldMap(:)     @\
+!   integer,                  intent(in),  optional :: ungriddedLBound(:) @\
+!   integer,                  intent(in),  optional :: ungriddedUBound(:) @\
+!   character (len=*),        intent(in),  optional :: name  @\
+!   integer,                  intent(out), optional :: rc    @\
 ! @\
 ! !DESCRIPTION: @\
 ! \begin{sloppypar} @\
@@ -3011,7 +3019,7 @@ end function ESMF_FieldCreateLSTKR
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldCreateLSData" @\
   function ESMF_FieldCreateLSData##mrank##D##mtypekind(locstream, farray, & @\
-    indexflag, datacopyflag, gridToFieldMap, ungriddedLBound, & @\
+    indexflag, keywordEnforcer, datacopyflag, gridToFieldMap, ungriddedLBound, & @\
     ungriddedUBound, name, rc) @\
 @\
     ! return value @\
@@ -3021,6 +3029,7 @@ end function ESMF_FieldCreateLSTKR
     type(ESMF_LocStream), intent(in) :: locstream                  @\
     mname (ESMF_KIND_##mtypekind), intent(in), target :: farray(mdim) @\
     type(ESMF_Index_Flag), intent(in)            :: indexflag @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
@@ -3076,19 +3085,20 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateLSDataPtr<rank><type><kind>(locstream, & @\
-!   farrayPtr, datacopyflag, gridToFieldMap, & @\
+!   keywordEnforcer, farrayPtr, datacopyflag, gridToFieldMap, & @\
 !   name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateLSDataPtr<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_LocStream), intent(in)           :: locstream                  @\
-!   <type> (ESMF_KIND_<kind>), pointer         :: farrayPtr(<rank>) @\
-!   type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag @\
-!   integer,             intent(in),  optional :: gridToFieldMap(:)     @\
-!   character (len=*),   intent(in),  optional :: name  @\
-!   integer,             intent(out), optional :: rc                @\
+!   type(ESMF_LocStream),     intent(in)            :: locstream         @\
+!   <type> (ESMF_KIND_<kind>),pointer               :: farrayPtr(<rank>) @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag      @\
+!   integer,                  intent(in),  optional :: gridToFieldMap(:) @\
+!   character (len=*),        intent(in),  optional :: name              @\
+!   integer,                  intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
 ! \begin{sloppypar} @\
@@ -3147,7 +3157,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldCreateLSDataPtr" @\
   function ESMF_FieldCreateLSDataPtr##mrank##D##mtypekind(locstream, & @\
-    farrayPtr, datacopyflag, gridToFieldMap, & @\
+    farrayPtr, keywordEnforcer, datacopyflag, gridToFieldMap, & @\
     name, rc) @\
 @\
     ! return value @\
@@ -3156,6 +3166,7 @@ TypeKindRankDeclarationMacro(FieldCreateLSData)
     ! input arguments @\
     type(ESMF_LocStream), intent(in) :: locstream                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     character (len=*), intent(in), optional :: name  @\
@@ -3209,22 +3220,23 @@ TypeKindRankDeclarationMacro(FieldCreateLSDataPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateMeshTKR(mesh, typekind, meshloc,  &
-    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+  function ESMF_FieldCreateMeshTKR(mesh, typekind, &
+    keywordEnforcer, meshloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateMeshTKR
 !
 ! !ARGUMENTS:
-    type(ESMF_Mesh),     intent(in)            :: mesh               
+    type(ESMF_Mesh),          intent(in)            :: mesh               
     type(ESMF_TypeKind_Flag), intent(in)            :: typekind
-    type(ESMF_MeshLoc),  intent(in),  optional :: meshloc
-    integer,             intent(in),  optional :: gridToFieldMap(:)    
-    integer,             intent(in),  optional :: ungriddedLBound(:)
-    integer,             intent(in),  optional :: ungriddedUBound(:)
-    character (len=*),   intent(in),  optional :: name 
-    integer,             intent(out), optional :: rc              
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_MeshLoc),       intent(in),  optional :: meshloc
+    integer,                  intent(in),  optional :: gridToFieldMap(:)    
+    integer,                  intent(in),  optional :: ungriddedLBound(:)
+    integer,                  intent(in),  optional :: ungriddedUBound(:)
+    character (len=*),        intent(in),  optional :: name 
+    integer,                  intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Field} and allocate space internally for an
@@ -3347,7 +3359,7 @@ end function ESMF_FieldCreateMeshTKR
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
   function ESMF_FieldCreateMeshArraySpec(mesh, arrayspec, &
-    meshloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+    keywordEnforcer, meshloc, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
 ! !RETURN VALUE:
@@ -3356,6 +3368,7 @@ end function ESMF_FieldCreateMeshTKR
 ! !ARGUMENTS:
     type(ESMF_Mesh),      intent(in)            :: mesh               
     type(ESMF_ArraySpec), intent(in)            :: arrayspec     
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_MeshLoc),   intent(in),  optional :: meshloc
     integer,              intent(in),  optional :: gridToFieldMap(:)    
     integer,              intent(in),  optional :: ungriddedLBound(:)
@@ -3469,23 +3482,25 @@ end function ESMF_FieldCreateMeshTKR
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateMeshArray(mesh, array, meshloc,  &
-    datacopyflag, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+  function ESMF_FieldCreateMeshArray(mesh, array, &
+    keywordEnforcer, datacopyflag, meshloc, &
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateMeshArray    
 !
 ! !ARGUMENTS:
-    type(ESMF_Mesh),     intent(in)            :: mesh                
-    type(ESMF_Array),    intent(in)            :: array     
-    type(ESMF_MeshLoc),  intent(in),  optional :: meshloc         
+    type(ESMF_Mesh),          intent(in)            :: mesh                
+    type(ESMF_Array),         intent(in)            :: array     
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag       
-    integer,             intent(in),  optional :: gridToFieldMap(:)    
-    integer,             intent(in),  optional :: ungriddedLBound(:)
-    integer,             intent(in),  optional :: ungriddedUBound(:)
-    character (len = *), intent(in),  optional :: name   
-    integer,             intent(out), optional :: rc                
+    type(ESMF_MeshLoc),       intent(in),  optional :: meshloc         
+    integer,                  intent(in),  optional :: gridToFieldMap(:)    
+    integer,                  intent(in),  optional :: ungriddedLBound(:)
+    integer,                  intent(in),  optional :: ungriddedUBound(:)
+    character (len = *),      intent(in),  optional :: name   
+    integer,                  intent(out), optional :: rc                
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Field}.  This version of creation
@@ -3500,16 +3515,16 @@ end function ESMF_FieldCreateMeshTKR
 !       {\tt ESMF\_Mesh} object. 
 ! \item [array]
 !       {\tt ESMF\_Array} object.
+! \item [{[datacopyflag]}]
+!       Indicates whether to copy the contents of the {\tt array} or reference it directly.
+!       For valid values see \ref{const:datacopyflag}.  The default is
+!       {\tt ESMF\_DATACOPY\_REFERENCE}.
 ! \item [{[meshloc]}]
 !       \begin{sloppypar}
 !       The part of the Mesh on which to build the Field. For valid
 !       predefined values see Section~\ref{const:meshloc}.
 !       If not set, defaults to {\tt ESMF\_MESHLOC\_NODE}.
 !       \end{sloppypar}
-! \item [{[datacopyflag]}]
-!       Indicates whether to copy the contents of the {\tt array} or reference it directly.
-!       For valid values see \ref{const:datacopyflag}.  The default is
-!       {\tt ESMF\_DATACOPY\_REFERENCE}.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
@@ -3597,23 +3612,24 @@ end function ESMF_FieldCreateMeshTKR
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateMeshData<rank><type><kind>(mesh, & @\
-!   farray, meshloc,  indexflag, datacopyflag, & @\
+!   farray, indexflag, keywordEnforcer, datacopyflag, meshloc, & @\
 !   gridToFieldMap, ungriddedLBound, ungriddedUBound, name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateMeshData<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Mesh),     intent(in)               :: mesh                  @\
-!   <type> (ESMF_KIND_<kind>), intent(in), target :: farray(<rank>) @\
-!   type(ESMF_MeshLoc),  intent(in),  optional    :: meshloc @\
-!   type(ESMF_Index_Flag), intent(in)              :: indexflag @\
+!   type(ESMF_Mesh),          intent(in)               :: mesh           @\
+!   <type> (ESMF_KIND_<kind>),intent(in),  target      :: farray(<rank>) @\
+!   type(ESMF_Index_Flag),    intent(in)               :: indexflag @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   type(ESMF_DataCopy_Flag), intent(in),  optional    :: datacopyflag @\
-!   integer,             intent(in),  optional    :: gridToFieldMap(:)     @\
-!   integer,             intent(in),  optional    :: ungriddedLBound(:) @\
-!   integer,             intent(in),  optional    :: ungriddedUBound(:) @\
-!   character (len=*),   intent(in),  optional    :: name  @\
-!   integer,             intent(out), optional    :: rc                @\
+!   type(ESMF_MeshLoc),       intent(in),  optional    :: meshloc @\
+!   integer,                  intent(in),  optional    :: gridToFieldMap(:)  @\
+!   integer,                  intent(in),  optional    :: ungriddedLBound(:) @\
+!   integer,                  intent(in),  optional    :: ungriddedUBound(:) @\
+!   character (len=*),        intent(in),  optional    :: name  @\
+!   integer,                  intent(out), optional    :: rc    @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Mesh}. @\
@@ -3628,12 +3644,6 @@ end function ESMF_FieldCreateMeshTKR
 !       Native fortran data array to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farray}. @\
-! \item [{[meshloc]}] @\
-!       \begin{sloppypar} @\
-!       The part of the Mesh on which to build the Field. For valid @\
-!       predefined values see Section~\ref{const:meshloc}. @\
-!       If not set, defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
-!       \end{sloppypar} @\
 ! \item[indexflag] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{const:indexflag} for a list of valid indexflag options. @\
@@ -3641,6 +3651,12 @@ end function ESMF_FieldCreateMeshTKR
 !       Whether to copy the contents of the {\tt farray} or reference it directly. @\
 !       For valid values see \ref{const:datacopyflag}.  The default is @\
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
+! \item [{[meshloc]}] @\
+!       \begin{sloppypar} @\
+!       The part of the Mesh on which to build the Field. For valid @\
+!       predefined values see Section~\ref{const:meshloc}. @\
+!       If not set, defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
+!       \end{sloppypar} @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt mesh}|s dimCount.  The list elements map each dimension @\
@@ -3696,7 +3712,7 @@ end function ESMF_FieldCreateMeshTKR
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldCreateMeshData" @\
   function ESMF_FieldCreateMeshData##mrank##D##mtypekind(mesh, & @\
-    farray, meshloc,  indexflag, datacopyflag, & @\
+    farray, indexflag, keywordEnforcer, datacopyflag, meshloc, & @\
     gridToFieldMap, ungriddedLBound, ungriddedUBound, name, rc) @\
 @\
     ! return value @\
@@ -3705,9 +3721,10 @@ end function ESMF_FieldCreateMeshTKR
     ! input arguments @\
     type(ESMF_Mesh), intent(in) :: mesh                  @\
     mname (ESMF_KIND_##mtypekind), intent(in), target :: farray(mdim) @\
-    type(ESMF_MeshLoc), intent(in), optional    :: meshloc @\
     type(ESMF_Index_Flag), intent(in)            :: indexflag @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
+    type(ESMF_MeshLoc), intent(in), optional    :: meshloc @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     integer, intent(in), optional :: ungriddedLBound(:) @\
     integer, intent(in), optional :: ungriddedUBound(:) @\
@@ -3762,20 +3779,21 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateMeshDataPtr<rank><type><kind>(mesh, & @\
-!   farrayPtr, meshloc,  datacopyflag, gridToFieldMap, & @\
+!   farrayPtr, keywordEnforcer, datacopyflag, meshloc, gridToFieldMap, & @\
 !   name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateMeshDataPtr<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_Mesh),     intent(in)            :: mesh                  @\
-!   <type> (ESMF_KIND_<kind>), pointer         :: farrayPtr(<rank>) @\
-!   type(ESMF_MeshLoc),  intent(in),  optional :: meshloc @\
-!   type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag @\
-!   integer,             intent(in),  optional :: gridToFieldMap(:)     @\
-!   character (len=*),   intent(in),  optional :: name  @\
-!   integer,             intent(out), optional :: rc                @\
+!   type(ESMF_Mesh),          intent(in)            :: mesh              @\
+!   <type> (ESMF_KIND_<kind>),pointer               :: farrayPtr(<rank>) @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag      @\
+!   type(ESMF_MeshLoc),       intent(in),  optional :: meshloc           @\
+!   integer,                  intent(in),  optional :: gridToFieldMap(:) @\
+!   character (len=*),        intent(in),  optional :: name              @\
+!   integer,                  intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_Mesh}. @\
@@ -3791,16 +3809,16 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 !       Native fortran data pointer to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
 !       for the {\tt farrayPtr}. @\
+! \item [{[datacopyflag]}] @\
+!       Whether to copy the contents of the {\tt farrayPtr} or reference it directly. @\
+!       For valid values see \ref{const:datacopyflag}.  The default is @\
+!       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[meshloc]}] @\
 !       \begin{sloppypar} @\
 !       The part of the Mesh on which to build the Field. For valid @\
 !       predefined values see Section~\ref{const:meshloc}. @\
 !       If not set, defaults to {\tt ESMF\_MESHLOC\_NODE}. @\
 !       \end{sloppypar} @\
-! \item [{[datacopyflag]}] @\
-!       Whether to copy the contents of the {\tt farrayPtr} or reference it directly. @\
-!       For valid values see \ref{const:datacopyflag}.  The default is @\
-!       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt mesh}|s dimCount.  The list elements map each dimension @\
@@ -3838,7 +3856,7 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldCreateMeshDataPtr" @\
   function ESMF_FieldCreateMeshDataPtr##mrank##D##mtypekind(mesh, & @\
-    farrayPtr, meshloc,  datacopyflag, gridToFieldMap, & @\
+    farrayPtr, keywordEnforcer, datacopyflag, meshloc, gridToFieldMap, & @\
     name, rc) @\
 @\
     ! return value @\
@@ -3847,8 +3865,9 @@ TypeKindRankDeclarationMacro(FieldCreateMeshData)
     ! input arguments @\
     type(ESMF_Mesh), intent(in) :: mesh                  @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
-    type(ESMF_MeshLoc), intent(in), optional :: meshloc @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
+    type(ESMF_MeshLoc), intent(in), optional :: meshloc @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     character (len=*), intent(in), optional :: name  @\
     integer, intent(out), optional :: rc                @\
@@ -3902,7 +3921,8 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateXGTKR(xgrid, xgridside, gridindex, typekind, &
+  function ESMF_FieldCreateXGTKR(xgrid, typekind, &
+    keywordEnforcer, xgridside, gridindex, &
     gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
@@ -3910,15 +3930,16 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
     type(ESMF_Field) :: ESMF_FieldCreateXGTKR
 !
 ! !ARGUMENTS:
-    type(ESMF_XGrid),     intent(in)            :: xgrid
-    type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridside
-    integer,              intent(in),  optional :: gridindex
+    type(ESMF_XGrid),          intent(in)            :: xgrid
     type(ESMF_TypeKind_Flag),  intent(in)            :: typekind
-    integer,              intent(in),  optional :: gridToFieldMap(:)    
-    integer,              intent(in),  optional :: ungriddedLBound(:)
-    integer,              intent(in),  optional :: ungriddedUBound(:)
-    character (len=*),    intent(in),  optional :: name 
-    integer,              intent(out), optional :: rc              
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridside
+    integer,                   intent(in),  optional :: gridindex
+    integer,                   intent(in),  optional :: gridToFieldMap(:)    
+    integer,                   intent(in),  optional :: ungriddedLBound(:)
+    integer,                   intent(in),  optional :: ungriddedUBound(:)
+    character (len=*),         intent(in),  optional :: name 
+    integer,                   intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Field} and allocate space internally for an
@@ -3930,6 +3951,8 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
 ! \begin{description}
 ! \item [xgrid] 
 !       {\tt ESMF\_XGrid} object. 
+! \item[typekind]
+!      The typekind of the Field.
 ! \item [{[xgridside]}] 
 !       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A,
 !       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then
@@ -3937,8 +3960,6 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
 ! \item [{[gridindex]}] 
 !       If xgridSide is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on
 !       that side to create the Field on. If not provided, defaults to 1. 
-! \item[typekind]
-!      The typekind of the Field.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
@@ -3986,8 +4007,8 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
     type(ESMF_ArraySpec) :: arrayspec
+    type(ESMF_XGridGeomBase)  :: xgeom
     integer :: rank, ungridded_dimcount, ungridded_ldimcount, ungridded_udimcount
-    integer :: memDimCount
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -3996,33 +4017,49 @@ TypeKindRankDeclarationMacro(FieldCreateMeshDataPtr)
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Compute rank
-    ungridded_dimcount = 0
-    if(present(ungriddedLBound)) then
-      ungridded_ldimcount = size(ungriddedLBound)
-      ungridded_dimcount = ungridded_ldimcount
-    endif
-    if(present(ungriddedUBound)) then
-      ungridded_udimcount = size(ungriddedUBound)
-      ungridded_dimcount = ungridded_udimcount
-    endif
+    if(.not. present(xgridside)) then
+      ungridded_dimcount = 0
+      if(present(ungriddedLBound)) then
+        ungridded_ldimcount = size(ungriddedLBound)
+        ungridded_dimcount = ungridded_ldimcount
+      endif
+      if(present(ungriddedUBound)) then
+        ungridded_udimcount = size(ungriddedUBound)
+        ungridded_dimcount = ungridded_udimcount
+      endif
 
-    if(present(ungriddedLBound) .and. present(ungriddedUBound)) then
-      if(ungridded_ldimcount /= ungridded_udimcount) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-          msg="- ungriddedLBound size must equal to ungriddedUBound size", &  
-          ESMF_CONTEXT, rcToReturn=rc) 
-        return
+      rank = ungridded_dimcount + 1
+    else
+      if(xgridside==ESMF_XGRIDSIDE_BALANCED) then
+        ungridded_dimcount = 0
+        if(present(ungriddedLBound)) then
+          ungridded_ldimcount = size(ungriddedLBound)
+          ungridded_dimcount = ungridded_ldimcount
+        endif
+        if(present(ungriddedUBound)) then
+          ungridded_udimcount = size(ungriddedUBound)
+          ungridded_dimcount = ungridded_udimcount
+        endif
+
+        rank = ungridded_dimcount + 1
+      else
+        call ESMF_XGridGet(xgrid, xgeom, &
+          xgridside=xgridside, gridindex=gridindex, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_XGridGeomBaseGet(xgeom, dimCount=rank, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
       endif
     endif
-
-    rank = ungridded_dimcount + 1
 
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ESMF_FieldCreateXGTKR = ESMF_FieldCreate(xgrid, xgridside, gridIndex, arrayspec, &
+    ESMF_FieldCreateXGTKR = ESMF_FieldCreate(xgrid, arrayspec, &
+        xgridside=xgridside, gridindex=gridIndex, &
         gridToFieldMap=gridToFieldMap, ungriddedLBound=ungriddedLBound, &
         ungriddedUBound=ungriddedUBound, name=name, rc=rc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4040,8 +4077,9 @@ end function ESMF_FieldCreateXGTKR
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateXGArraySpec(xgrid, xgridside, gridindex, &
-    arrayspec, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+  function ESMF_FieldCreateXGArraySpec(xgrid, arrayspec, &
+    keywordEnforcer, xgridside, gridindex, &
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
 ! !RETURN VALUE:
@@ -4049,9 +4087,10 @@ end function ESMF_FieldCreateXGTKR
 !
 ! !ARGUMENTS:
     type(ESMF_XGrid),          intent(in)            :: xgrid
+    type(ESMF_ArraySpec),      intent(in)            :: arrayspec     
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridSide
     integer,                   intent(in),  optional :: gridIndex
-    type(ESMF_ArraySpec),      intent(in)            :: arrayspec     
     integer,                   intent(in),  optional :: gridToFieldMap(:)    
     integer,                   intent(in),  optional :: ungriddedLBound(:)
     integer,                   intent(in),  optional :: ungriddedUBound(:)
@@ -4068,6 +4107,8 @@ end function ESMF_FieldCreateXGTKR
 ! \begin{description}
 ! \item [xgrid] 
 !       {\tt ESMF\_XGrid} object. 
+! \item [arrayspec]
+!       Data type and kind specification. 
 ! \item [{[xgridside]}] 
 !       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A,
 !       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then
@@ -4075,8 +4116,6 @@ end function ESMF_FieldCreateXGTKR
 ! \item [{[gridindex]}] 
 !       If xgridside is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on
 !       that side to create the Field on. If not provided, defaults to 1. 
-! \item [arrayspec]
-!       Data type and kind specification. 
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
@@ -4124,6 +4163,7 @@ end function ESMF_FieldCreateXGTKR
 !------------------------------------------------------------------------------
     integer :: localrc                          !  Local error code
     type(ESMF_GeomBase) :: geombase
+    integer :: ungridded_ldimcount, ungridded_udimcount
 
     ! Initialize 
     localrc = ESMF_RC_NOT_IMPL
@@ -4136,6 +4176,22 @@ end function ESMF_FieldCreateXGTKR
     ! check init status of input parameters
     ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
+
+    ! Sanity checking
+    if(present(ungriddedLBound) .and. present(ungriddedUBound)) then
+      if(present(ungriddedLBound)) then
+        ungridded_ldimcount = size(ungriddedLBound)
+      endif
+      if(present(ungriddedUBound)) then
+        ungridded_udimcount = size(ungriddedUBound)
+      endif
+      if(ungridded_ldimcount /= ungridded_udimcount) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+          msg="- ungriddedLBound size must equal to ungriddedUBound size", &  
+          ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif
+    endif
 
     ! Create GeomBase from Xgrid
     geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex, rc=localrc)
@@ -4164,24 +4220,26 @@ end function ESMF_FieldCreateXGTKR
 
 ! !INTERFACE:
   ! Private name; call using ESMF_FieldCreate()
-  function ESMF_FieldCreateXGArray(xgrid, xgridside, gridindex, array, &
-    datacopyflag, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
+  function ESMF_FieldCreateXGArray(xgrid, array, &
+    keywordEnforcer, datacopyflag, xgridside, gridindex, &
+    gridToFieldMap, ungriddedLBound, ungriddedUBound, &
     name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldCreateXGArray    
 !
 ! !ARGUMENTS:
-    type(ESMF_XGrid),     intent(in)            :: xgrid
-    type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridside
-    integer,              intent(in),  optional :: gridindex
-    type(ESMF_Array),     intent(in)            :: array              
+    type(ESMF_XGrid),          intent(in)            :: xgrid
+    type(ESMF_Array),          intent(in)            :: array              
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DataCopy_Flag),  intent(in),  optional :: datacopyflag       
-    integer,              intent(in),  optional :: gridToFieldMap(:)    
-    integer,              intent(in),  optional :: ungriddedLBound(:)
-    integer,              intent(in),  optional :: ungriddedUBound(:)
-    character (len = *),  intent(in),  optional :: name   
-    integer,              intent(out), optional :: rc                
+    type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridside
+    integer,                   intent(in),  optional :: gridindex
+    integer,                   intent(in),  optional :: gridToFieldMap(:)    
+    integer,                   intent(in),  optional :: ungriddedLBound(:)
+    integer,                   intent(in),  optional :: ungriddedUBound(:)
+    character (len = *),       intent(in),  optional :: name   
+    integer,                   intent(out), optional :: rc                
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Field}.  This version of creation
@@ -4194,6 +4252,12 @@ end function ESMF_FieldCreateXGTKR
 ! \begin{description}
 ! \item [xgrid] 
 !       {\tt ESMF\_XGrid} object. 
+! \item [array]
+!       {\tt ESMF\_Array} object.
+! \item [{[datacopyflag]}]
+!       Indicates whether to copy the contents of the {\tt array} or reference it directly.
+!       For valid values see \ref{const:datacopyflag}.  The default is
+!       {\tt ESMF\_DATACOPY\_REFERENCE}.
 ! \item [{[xgridside]}] 
 !       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A,
 !       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then
@@ -4201,12 +4265,6 @@ end function ESMF_FieldCreateXGTKR
 ! \item [{[gridindex]}] 
 !       If xgridSide is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on
 !       that side to create the Field on. If not provided, defaults to 1. 
-! \item [array]
-!       {\tt ESMF\_Array} object.
-! \item [{[datacopyflag]}]
-!       Indicates whether to copy the contents of the {\tt array} or reference it directly.
-!       For valid values see \ref{const:datacopyflag}.  The default is
-!       {\tt ESMF\_DATACOPY\_REFERENCE}.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
@@ -4254,6 +4312,7 @@ end function ESMF_FieldCreateXGTKR
 !------------------------------------------------------------------------------
     integer :: localrc                       !  Local error code
     type(ESMF_GeomBase) :: geombase
+    integer :: ungridded_ldimcount, ungridded_udimcount
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -4266,6 +4325,22 @@ end function ESMF_FieldCreateXGTKR
     ! check init status of input parameters
     ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit,array,rc)
+
+    ! Sanity checking
+    if(present(ungriddedLBound) .and. present(ungriddedUBound)) then
+      if(present(ungriddedLBound)) then
+        ungridded_ldimcount = size(ungriddedLBound)
+      endif
+      if(present(ungriddedUBound)) then
+        ungridded_udimcount = size(ungriddedUBound)
+      endif
+      if(ungridded_ldimcount /= ungridded_udimcount) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+          msg="- ungriddedLBound size must equal to ungriddedUBound size", &  
+          ESMF_CONTEXT, rcToReturn=rc) 
+        return
+      endif
+    endif
 
     ! Create GeomBase from Mesh
     geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex, rc=localrc)
@@ -4294,7 +4369,7 @@ end function ESMF_FieldCreateXGTKR
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\
 ! function ESMF_FieldCreateXGData<rank><type><kind>(xgrid, & @\
-!   xgridside, gridindex, farray, indexflag, datacopyflag,     & @\
+!   farray, indexflag, keywordEnforcer, datacopyflag, xgridside, gridindex, & @\
 !   gridToFieldMap, ungriddedLBound, ungriddedUBound, name,& @\
 !   rc) @\
 ! @\
@@ -4302,17 +4377,18 @@ end function ESMF_FieldCreateXGTKR
 !   type(ESMF_Field) :: ESMF_FieldCreateXGData<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_XGrid),     intent(in)              :: xgrid @\
-!   type(ESMF_XGridSide_Flag), intent(in), optional    :: xgridside @\
-!   integer,              intent(in), optional    :: gridindex @\
-!   <type> (ESMF_KIND_<kind>), intent(in), target :: farray(<rank>) @\
-!   type(ESMF_Index_Flag), intent(in)              :: indexflag @\
-!   type(ESMF_DataCopy_Flag), intent(in),  optional    :: datacopyflag @\
-!   integer,             intent(in),  optional    :: gridToFieldMap(:)     @\
-!   integer,             intent(in),  optional    :: ungriddedLBound(:) @\
-!   integer,             intent(in),  optional    :: ungriddedUBound(:) @\
-!   character (len=*),   intent(in),  optional    :: name  @\
-!   integer,             intent(out), optional    :: rc                @\
+!   type(ESMF_XGrid),          intent(in)               :: xgrid              @\
+!   <type> (ESMF_KIND_<kind>), intent(in),  target      :: farray(<rank>)     @\
+!   type(ESMF_Index_Flag),     intent(in)               :: indexflag          @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_DataCopy_Flag),  intent(in),  optional    :: datacopyflag       @\
+!   type(ESMF_XGridSide_Flag), intent(in),  optional    :: xgridside          @\
+!   integer,                   intent(in),  optional    :: gridindex          @\
+!   integer,                   intent(in),  optional    :: gridToFieldMap(:)  @\
+!   integer,                   intent(in),  optional    :: ungriddedLBound(:) @\
+!   integer,                   intent(in),  optional    :: ungriddedUBound(:) @\
+!   character (len=*),         intent(in),  optional    :: name               @\
+!   integer,                   intent(out), optional    :: rc                 @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data array and {\tt ESMF\_Xgrid}. @\
@@ -4323,13 +4399,6 @@ end function ESMF_FieldCreateXGTKR
 ! \begin{description} @\
 ! \item [xgrid] @\
 !       {\tt ESMF\_XGrid} object. @\
-! \item [{[xgridside]}] @\
-!       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A, @\
-!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then @\
-!       defaults to ESMF\_XGRIDSIDE\_BALANCED. @\
-! \item [{[gridindex]}] @\
-!       If xgridside is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on @\
-!       that side to create the Field on. If not provided, defaults to 1. @\
 ! \item [farray] @\
 !       Native fortran data array to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
@@ -4341,6 +4410,13 @@ end function ESMF_FieldCreateXGTKR
 !       Whether to copy the contents of the {\tt farray} or reference directly. @\
 !       For valid values see \ref{const:datacopyflag}.  The default is @\
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
+! \item [{[xgridside]}] @\
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A, @\
+!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then @\
+!       defaults to ESMF\_XGRIDSIDE\_BALANCED. @\
+! \item [{[gridindex]}] @\
+!       If xgridside is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on @\
+!       that side to create the Field on. If not provided, defaults to 1. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt xgrid}|s dimCount.  The list elements map each dimension @\
@@ -4396,7 +4472,7 @@ end function ESMF_FieldCreateXGTKR
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldCreateXGData" @\
   function ESMF_FieldCreateXGData##mrank##D##mtypekind(xgrid, & @\
-    xgridside, gridindex, farray, indexflag, datacopyflag, & @\
+    farray, indexflag, keywordEnforcer, datacopyflag, xgridside, gridindex, & @\
     gridToFieldMap, ungriddedLBound, ungriddedUBound, name, rc) @\
 @\
     ! return value @\
@@ -4404,11 +4480,12 @@ end function ESMF_FieldCreateXGTKR
 @\
     ! input arguments @\
     type(ESMF_XGrid), intent(in)                      :: xgrid @\
-    type(ESMF_XGridSide_Flag), intent(in), optional   :: xgridside @\
-    integer, intent(in), optional                     :: gridindex @\
     mname (ESMF_KIND_##mtypekind), intent(in), target :: farray(mdim) @\
     type(ESMF_Index_Flag), intent(in)                 :: indexflag @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag), intent(in), optional    :: datacopyflag @\
+    type(ESMF_XGridSide_Flag), intent(in), optional   :: xgridside @\
+    integer, intent(in), optional                     :: gridindex @\
     integer, intent(in), optional                     :: gridToFieldMap(:)     @\
     integer, intent(in), optional                     :: ungriddedLBound(:) @\
     integer, intent(in), optional                     :: ungriddedUBound(:) @\
@@ -4417,6 +4494,7 @@ end function ESMF_FieldCreateXGTKR
 @\
     integer :: localrc                       !  Local error code@\
     type(ESMF_GeomBase) :: geombase @\
+    integer :: ungridded_ldimcount, ungridded_udimcount @\
 @\
     ! Initialize @\
     localrc = ESMF_RC_NOT_IMPL@\
@@ -4429,6 +4507,22 @@ end function ESMF_FieldCreateXGTKR
     ! check init status of input parameters@\
     ESMF_INIT_CHECK_DEEP(ESMF_XGridGetInit,xgrid,rc)@\
 @\
+@\
+    ! Sanity checking @\
+    if(present(ungriddedLBound) .and. present(ungriddedUBound)) then @\
+      if(present(ungriddedLBound)) then @\
+        ungridded_ldimcount = size(ungriddedLBound) @\
+      endif @\
+      if(present(ungriddedUBound)) then @\
+        ungridded_udimcount = size(ungriddedUBound) @\
+      endif @\
+      if(ungridded_ldimcount /= ungridded_udimcount) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
+          msg="- ungriddedLBound size must equal to ungriddedUBound size", &   @\
+          ESMF_CONTEXT, rcToReturn=rc)  @\
+        return @\
+      endif @\
+    endif @\
 @\
     ! Create GeomBase from Xgrid@\
     geombase=ESMF_GeomBaseCreate(xgrid, xgridSide, gridIndex ,rc=localrc)@\
@@ -4462,21 +4556,23 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldCreate() @\
-! function ESMF_FieldCreateXGDataPtr<rank><type><kind>(xgrid, xgridside, & @\
-!   gridindex, farrayPtr, datacopyflag, gridToFieldMap, name, rc) @\
+! function ESMF_FieldCreateXGDataPtr<rank><type><kind>(xgrid, farrayPtr, & @\
+!   keywordEnforcer, datacopyflag, xgridside, & @\
+!   gridindex, gridToFieldMap, name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
 !   type(ESMF_Field) :: ESMF_FieldCreateXGDataPtr<rank><type><kind> @\
 ! @\
 ! !ARGUMENTS: @\
-!   type(ESMF_XGrid), intent(in) :: xgrid @\
-!   type(ESMF_XGridSide_Flag), intent(in), optional :: xgridside @\
-!   integer,              intent(in), optional :: gridindex @\
-!   <type> (ESMF_KIND_<kind>), pointer         :: farrayPtr(<rank>) @\
-!   type(ESMF_DataCopy_Flag), intent(in),  optional :: datacopyflag @\
-!   integer,             intent(in),  optional :: gridToFieldMap(:)     @\
-!   character (len=*),   intent(in),  optional :: name  @\
-!   integer,             intent(out), optional :: rc                @\
+!   type(ESMF_XGrid),          intent(in)            :: xgrid             @\
+!   <type> (ESMF_KIND_<kind>), pointer               :: farrayPtr(<rank>) @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!   type(ESMF_DataCopy_Flag),  intent(in),  optional :: datacopyflag      @\
+!   type(ESMF_XGridSide_Flag), intent(in),  optional :: xgridside         @\
+!   integer,                   intent(in),  optional :: gridindex         @\
+!   integer,                   intent(in),  optional :: gridToFieldMap(:) @\
+!   character (len=*),         intent(in),  optional :: name              @\
+!   integer,                   intent(out), optional :: rc                @\
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Field} from a fortran data pointer and {\tt ESMF\_Xgrid}. @\
@@ -4488,13 +4584,6 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 ! \begin{description} @\
 ! \item [xgrid] @\
 !       {\tt ESMF\_XGrid} object. @\
-! \item [{[xgridside]}] @\
-!       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A, @\
-!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then @\
-!       defaults to ESMF\_XGRIDSIDE\_BALANCED. @\
-! \item [{[gridindex]}] @\
-!       If xgridside is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on @\
-!       that side to create the Field on. If not provided, defaults to 1. @\
 ! \item [farrayPtr] @\
 !       Native fortran data pointer to be copied/referenced in the Field @\
 !       The Field dimension (dimCount) will be the same as the dimCount @\
@@ -4503,6 +4592,13 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 !       Whether to copy the contents of the {\tt farrayPtr} or reference it directly. @\
 !       For valid values see \ref{const:datacopyflag}.  The default is @\
 !       {\tt ESMF\_DATACOPY\_REFERENCE}. @\
+! \item [{[xgridside]}] @\
+!       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A, @\
+!       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then @\
+!       defaults to ESMF\_XGRIDSIDE\_BALANCED. @\
+! \item [{[gridindex]}] @\
+!       If xgridside is  ESMF\_XGRIDSIDE\_A or ESMF\_XGRIDSIDE\_B then this index tells which Grid on @\
+!       that side to create the Field on. If not provided, defaults to 1. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt xgrid}|s dimCount.  The list elements map each dimension @\
@@ -4539,8 +4635,8 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 !---------------------------------------------------------------------------- @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldCreateXGDataPtr" @\
-  function ESMF_FieldCreateXGDataPtr##mrank##D##mtypekind(xgrid, & @\
-    xgridside, gridindex, farrayPtr, datacopyflag, gridToFieldMap, & @\
+  function ESMF_FieldCreateXGDataPtr##mrank##D##mtypekind(xgrid, farrayPtr, & @\
+    keywordEnforcer, datacopyflag, xgridside, gridindex, gridToFieldMap, & @\
     name, rc) @\
 @\
     ! return value @\
@@ -4548,10 +4644,11 @@ TypeKindRankDeclarationMacro(FieldCreateXGData)
 @\
     ! input arguments @\
     type(ESMF_XGrid), intent(in) :: xgrid @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+    type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     type(ESMF_XGridSide_Flag), intent(in), optional  :: xgridside @\
     integer, intent(in), optional               :: gridindex @\
-    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
-    type(ESMF_DataCopy_Flag), intent(in), optional   :: datacopyflag @\
     integer, intent(in), optional :: gridToFieldMap(:)     @\
     character (len=*), intent(in), optional :: name  @\
     integer, intent(out), optional :: rc                @\

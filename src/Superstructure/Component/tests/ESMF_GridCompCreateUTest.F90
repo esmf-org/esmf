@@ -58,6 +58,8 @@
     type(dataWrapper) :: wrap1, wrap2, wrap3, wrap4, wrap5, wrap6
     type(ESMF_Grid) :: grid, gridIn
     logical         :: isPresent
+    type(ESMF_Config) :: config
+    integer           :: fred
 #endif
 
 !-------------------------------------------------------------------------------
@@ -275,6 +277,58 @@
     write(name, *) "Creating a Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct config handling
+
+    call ESMF_GridCompGet(comp1, configIsPresent=isPresent, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Config handling Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct config handling
+    write(failMsg, *) "Did not return correct isPresent status"
+    write(name, *) "Config handling Test"
+    call ESMF_Test((isPresent), name, failMsg, result, ESMF_SRCLINE)
+    
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct config handling
+
+    call ESMF_GridCompGet(comp1, config=config, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Config handling Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct config handling
+
+    call ESMF_ConfigGetAttribute(config, fred, label="fred:", rc=rc)
+    
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Config handling Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct config handling
+
+    print *, "fred = ", fred
+
+    write(failMsg, *) "Did not return correct value in fred"
+    write(name, *) "Config handling Test"
+    call ESMF_Test((fred==1), name, failMsg, result, ESMF_SRCLINE)
+    
 !-------------------------------------------------------------------------
 !   !
     !EX_UTest

@@ -5,7 +5,8 @@ ALL: build_here
 AUTOGEN   = ESMF_FortranWordsize.F90 ESMF_TypeKindGet.F90 \
             ESMF_UtilSort.F90
 
-SOURCEC	  = ESMCI_Util.C ESMCI_Fraction.C ESMCI_F90Interface.C
+SOURCEC	  = ESMCI_Util.C ESMCI_Fraction.C ESMCI_F90Interface.C \
+	    ESMCI_CoordSys.C
 SOURCEF	  = ESMF_UtilTypes.F90 \
             ESMF_LogErr.F90  \
             $(AUTOGEN) \
@@ -16,7 +17,7 @@ STOREH    = ESMCI_Arg.h ESMF_Macros.inc ESMF.h ESMCI_Util.h \
             ESMF_TypeKindRankMacros.hcppF90 ESMCI_Macros.h \
             ESMCI_F90Interface.h ESMF_ErrReturnCodes.inc \
             ESMF_LogMacros.inc ESMF_LogConstants.inc ESMCI_Fraction.h \
-            ESMF_TypeKindMacros.hcppF90 ESMF_InitMacros.inc
+            ESMF_TypeKindMacros.hcppF90 ESMF_InitMacros.inc ESMCI_CoordSys.h
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))

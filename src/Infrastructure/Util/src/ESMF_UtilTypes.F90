@@ -664,6 +664,22 @@
                             ESMF_REGRID_SCHEME_DCON3DWPOLE=6
 
 
+
+!------------------------------------------------------------------------------
+! ! ESMF_CoordSys_Flag
+!
+!------------------------------------------------------------------------------
+  type ESMF_CoordSys_Flag
+  sequence
+!  private
+     integer :: coordsys
+  end type
+
+  type(ESMF_CoordSys_Flag), parameter :: &
+    ESMF_COORDSYS_CART    = ESMF_CoordSys_Flag(0), &
+    ESMF_COORDSYS_SPH_DEG = ESMF_CoordSys_Flag(1), &
+    ESMF_COORDSYS_SPH_RAD = ESMF_CoordSys_Flag(2)
+
 !------------------------------------------------------------------------------
 !
   type ESMF_FileFormat_Flag
@@ -881,6 +897,11 @@
       public ESMF_MeshOp_Flag
       public ESMF_MESHOP_DIFFERENCE
 
+
+      public ESMF_CoordSys_Flag
+      public ESMF_COORDSYS_CART, ESMF_COORDSYS_SPH_DEG, &
+             ESMF_COORDSYS_SPH_RAD
+
       
 !  Overloaded = operator functions
       public operator(==), operator(/=), assignment(=)
@@ -911,6 +932,7 @@ interface operator (==)
   module procedure ESMF_FileFormatEq
   module procedure ESMF_FileStatusEq
   module procedure ESMF_RegridMethodEq
+  module procedure ESMF_CoordSysEqual
 end interface
 
 interface operator (/=)
@@ -927,6 +949,7 @@ interface operator (/=)
   module procedure ESMF_FileFormatNe
   module procedure ESMF_FileStatusNe
   module procedure ESMF_RegridMethodNe
+  module procedure ESMF_CoordSysNotEqual
 end interface
 
 interface assignment (=)
@@ -1487,5 +1510,73 @@ function ESMF_RegridMethodNe(rp1, rp2)
 end function
 
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CoordSysEqual"
+!BOPI
+! !IROUTINE: ESMF_CoordSysEqual - Equality of Coordinate Systems
+!
+! !INTERFACE:
+      function ESMF_CoordSysEqual(CoordSys1, CoordSys2)
+
+! !RETURN VALUE:
+      logical :: ESMF_CoordSysEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_CoordSys_Flag), intent(in) :: &
+         CoordSys1,      &! Two igrid statuses to compare for
+         CoordSys2        ! equality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF CoordSys statuses to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[CoordSys1, CoordSys2]
+!          Two igrid statuses to compare for equality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_CoordSysEqual = (CoordSys1%coordsys == &
+                              CoordSys2%coordsys)
+
+      end function ESMF_CoordSysEqual
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CoordSysNotEqual"
+!BOPI
+! !IROUTINE: ESMF_CoordSysNotEqual - Non-equality of CoordSys statuses
+!
+! !INTERFACE:
+      function ESMF_CoordSysNotEqual(CoordSys1, CoordSys2)
+
+! !RETURN VALUE:
+      logical :: ESMF_CoordSysNotEqual
+
+! !ARGUMENTS:
+
+      type (ESMF_CoordSys_Flag), intent(in) :: &
+         CoordSys1,      &! Two CoordSys Statuses to compare for
+         CoordSys2        ! inequality
+
+! !DESCRIPTION:
+!     This routine compares two ESMF CoordSys statuses to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[CoordSys1, CoordSys2]
+!          Two statuses of CoordSyss to compare for inequality
+!     \end{description}
+!
+!EOPI
+
+      ESMF_CoordSysNotEqual = (CoordSys1%coordsys /= &
+                                 CoordSys2%coordsys)
+
+      end function ESMF_CoordSysNotEqual
 
       end module ESMF_UtilTypesMod

@@ -78,7 +78,7 @@ contains
 ! @\
 ! !ARGUMENTS: @\
 !   type(ESMF_Field),           intent(in)              :: field @\
-!   <type>(ESMF_KIND_<kind>),   intent(out), target     :: farray(<rank>) @\
+!   <type>(ESMF_KIND_<kind>),   intent(out),  target    :: farray(<rank>) @\
 !   integer,                    intent(in)              :: rootPet @\
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !   integer,                    intent(in),   optional  :: tile @\

@@ -51,6 +51,7 @@ module NUOPC_Base
   public NUOPC_GridCompAttributeAdd
   public NUOPC_GridCompCheckSetClock
   public NUOPC_GridCompSetClock
+  public NUOPC_GridCompSetServices
   public NUOPC_GridCreateSimpleXY
   public NUOPC_IsCreated
   public NUOPC_StateAdvertiseField
@@ -1464,6 +1465,122 @@ endif
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+  end subroutine
+  !-----------------------------------------------------------------------------
+  
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_GridCompSetServices - Try to find and call SetServices in a shared object
+! !INTERFACE:
+  recursive subroutine NUOPC_GridCompSetServices(comp, sharedObj, userRc, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp),     intent(inout)         :: comp
+    character(len=*),        intent(in),  optional :: sharedObj
+    integer,                 intent(out), optional :: userRc
+    integer,                 intent(out), optional :: rc
+! !DESCRIPTION:
+!   Try to find a routine called "SetServices" in the sharedObj and execute it
+!   to set the component's services. An attempt is made to find a routine that
+!   is close in name to "SetServices", allowing compiler name mangeling, i.e.
+!   upper and lower case, as well as trailing underscores.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    logical           :: userRoutineFound
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! attempt to find something called SetServices, allowing variations
+    ! caused by compiler name mangeling
+    
+    call ESMF_GridCompSetServices(comp, userRoutine="setservices", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+      
+    call ESMF_GridCompSetServices(comp, userRoutine="setservices_", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+      
+    call ESMF_GridCompSetServices(comp, userRoutine="setservices__", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+      
+    call ESMF_GridCompSetServices(comp, userRoutine="SETSERVICES", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+      
+    call ESMF_GridCompSetServices(comp, userRoutine="SETSERVICES_", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+      
+    call ESMF_GridCompSetServices(comp, userRoutine="SETSERVICES__", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+      
+    call ESMF_GridCompSetServices(comp, userRoutine="SetServices", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+      
+    call ESMF_GridCompSetServices(comp, userRoutine="SetServices_", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+
+    call ESMF_GridCompSetServices(comp, userRoutine="SetServices__", &
+      sharedObj=sharedObj, userRoutineFound=userRoutineFound, &
+      userRc=userRc, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (userRoutineFound) return ! bail out successfully
+
+    ! getting down to here means that none of the attempts were successful
+    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+      msg="Could not find a matching SetServices routine in "//trim(sharedObj),&
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)
+      
   end subroutine
   !-----------------------------------------------------------------------------
   

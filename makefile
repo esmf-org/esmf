@@ -116,6 +116,18 @@ script_info:
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * ESMF environment variables pointing to 3rd party software *"
+	-@if [ -n "$(ESMF_MOAB)" ] ; then \
+	  echo "ESMF_MOAB:              $(ESMF_PIO)" ; \
+	  if [ -n "$(ESMF_MOAB_INCLUDE)" ] ; then \
+	    echo "ESMF_MOAB_INCLUDE:      $(ESMF_MOAB_INCLUDE)" ; \
+          fi; \
+	  if [ -n "$(ESMF_MOAB_LIBS)" ] ; then \
+	    echo "ESMF_MOAB_LIBS:         $(ESMF_MOAB_LIBS)" ; \
+          fi; \
+	  if [ -n "$(ESMF_MOAB_LIBPATH)" ] ; then \
+	    echo "ESMF_MOAB_LIBPATH:      $(ESMF_MOAB_LIBPATH)" ; \
+          fi; \
+         fi
 	-@if [ -n "$(ESMF_LAPACK)" ] ; then \
 	  echo "ESMF_LAPACK:            $(ESMF_LAPACK)" ; \
 	  if [ -n "$(ESMF_LAPACK_LIBS)" ] ; then \
@@ -350,6 +362,18 @@ info_mk: chkdir_lib
 	-@echo "# ESMF_DEFER_LIB_BUILD:   $(ESMF_DEFER_LIB_BUILD)" >> $(MKINFO)
 	-@echo "# " >> $(MKINFO)
 	-@echo "# ESMF environment variables pointing to 3rd party software:" >> $(MKINFO)
+	-@if [ -n "$(ESMF_MOAB)" ] ; then \
+	  echo "# ESMF_MOAB:              $(ESMF_MOAB)" >> $(MKINFO) ; \
+	  if [ -n "$(ESMF_MOAB_INCLUDE)" ] ; then \
+	    echo "# ESMF_MOAB_INCLUDE:      $(ESMF_MOAB_INCLUDE)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_MOAB_LIBS)" ] ; then \
+	    echo "# ESMF_MOAB_LIBS:         $(ESMF_MOAB_LIBS)" >> $(MKINFO) ; \
+          fi; \
+	  if [ -n "$(ESMF_MOAB_LIBPATH)" ] ; then \
+	    echo "# ESMF_MOAB_LIBPATH:      $(ESMF_MOAB_LIBPATH)" >> $(MKINFO) ; \
+          fi; \
+         fi
 	-@if [ -n "$(ESMF_LAPACK)" ] ; then \
 	  echo "# ESMF_LAPACK:            $(ESMF_LAPACK)" >> $(MKINFO) ; \
 	  if [ -n "$(ESMF_LAPACK_LIBS)" ] ; then \
@@ -451,7 +475,9 @@ install:
 	cp -f $(ESMF_MODDIR)/*.mod $(ESMF_INSTALL_MODDIR_ABSPATH)
 	mkdir -p $(ESMF_INSTALL_LIBDIR_ABSPATH)
 	cp -f $(ESMF_LIBDIR)/lib*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
+ifneq ($(ESMF_OS),Cygwin)
 	$(ESMF_RANLIB) $(ESMF_INSTALL_LIBDIR_ABSPATH)/lib*.a
+endif
 	$(MAKE) install_apps
 	mkdir -p $(ESMF_INSTALL_DOCDIR_ABSPATH)
 	@if [ -d $(ESMF_DOCDIR) ]; then \

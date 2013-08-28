@@ -33,6 +33,7 @@
 #include "ESMCI_MeshUtils.h"
 #include "ESMCI_GlobalIds.h"
 #include "ESMCI_VM.h"
+#include "ESMCI_CoordSys.h"
 #include "ESMCI_FindPnts.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_Phedra.h"
@@ -80,7 +81,8 @@ extern "C" void FTN_X(c_esmc_meshinit)(char *logfile, int *use_log,
 
 
 extern "C" void FTN_X(c_esmc_meshcreate)(Mesh **meshpp,
-                         int *pdim, int *sdim, int *rc)
+                                         int *pdim, int *sdim, 
+                                         ESMC_CoordSys_Flag *coordSys, int *rc)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshcreate()"
@@ -122,8 +124,16 @@ extern "C" void FTN_X(c_esmc_meshcreate)(Mesh **meshpp,
 
     *meshpp = new Mesh();
 
+    // Get cartesian dimension
+    int cart_sdim;
+    int localrc;
+    localrc=ESMCI_CoordSys_CalcCartDim(*coordSys, *sdim, &cart_sdim);
+    if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception    
+
+    // Set dimensions
     (*meshpp)->set_parametric_dimension(*pdim);
-    (*meshpp)->set_spatial_dimension(*sdim);
+    (*meshpp)->set_spatial_dimension(cart_sdim);
 
   } catch(std::exception &x) {
     // catch Mesh exception return code 
@@ -153,12 +163,18 @@ extern "C" void FTN_X(c_esmc_meshcreate)(Mesh **meshpp,
 
 extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *nodeId, 
                                            double *nodeCoord, int *nodeOwner, InterfaceInt **nodeMaskII,
+                                           ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
                                            int *rc) 
 {
    try {
     Mesh *meshp = *meshpp;
     ThrowRequire(meshp);
     Mesh &mesh = *meshp;
+
+    ESMC_CoordSys_Flag coordSys=*_coordSys;
+    int sdim = mesh.spatial_dim(); // spatial dim of mesh (after conversion to Cartesian)
+    int orig_sdim = *_orig_sdim;   // original sdim (before conversion to Cartesian)
+
 
   // Initialize the parallel environment for mesh (if not already done)
     {
@@ -196,7 +212,13 @@ extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *n
     }
 
     // Register the nodal coordinate field.
-    IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", mesh.spatial_dim());
+    IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", sdim);
+
+    // If not cartesian then keep original coordinate field
+    IOField<NodalField> *node_orig_coord;
+    if (coordSys != ESMC_COORDSYS_CART) {
+      node_orig_coord = mesh.RegisterNodalField(mesh, "orig_coordinates", orig_sdim);
+    }
 
     // Handle node masking
     IOField<NodalField> *node_mask_val;
@@ -227,10 +249,7 @@ extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *n
   } 
     
 
-    Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
-
-    UInt sdim = mesh.spatial_dim();
-
+#if 0
     // Loop and add coords and mask
     if (has_node_mask) {
       int *maskArray=(*nodeMaskII)->array;
@@ -262,7 +281,58 @@ extern "C" void FTN_X(c_esmc_meshaddnodes)(Mesh **meshpp, int *num_nodes, int *n
         nc += sdim;   
       }      
     }
+#endif
 
+    // Loop and add coords
+    if (coordSys == ESMC_COORDSYS_CART) {
+      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+
+      int nc=0;
+      for (; ni != ne; ++ni) {        
+        MeshObj &node = *ni;
+        
+        double *coord = node_coord->data(node);
+        for (UInt c = 0; c < sdim; ++c)
+          coord[c] = nodeCoord[nc+c];        
+        nc += sdim;   
+      }      
+    } else {
+      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+
+      int nc=0;
+      for (; ni != ne; ++ni) {        
+        MeshObj &node = *ni;
+
+        // Save original coordinates        
+        double *orig_coord = node_orig_coord->data(node);
+        for (UInt c = 0; c<orig_sdim; ++c)
+          orig_coord[c] = nodeCoord[nc+c];        
+        nc += orig_sdim;
+
+        // Convert and save Cartesian coordinates
+        double *coord = node_coord->data(node);
+        ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim, 
+                                     orig_coord, coord);
+      }
+    }
+
+
+    // Loop and add mask
+    if (has_node_mask) {
+      int *maskArray=(*nodeMaskII)->array;    
+      Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
+
+      int nm=0;
+      for (; ni != ne; ++ni) {
+        MeshObj &node = *ni;
+        
+        // Mask
+        double *mask = node_mask_val->data(node);
+        *mask=maskArray[nm];
+        nm++; 
+      }
+    }
+    
   } catch(std::exception &x) {
     // catch Mesh exception return code 
     if (x.what()) {
@@ -934,6 +1004,7 @@ extern "C" void FTN_X(c_esmc_meshget)(Mesh **meshpp, int *num_nodes, int *num_el
     if(rc != NULL) *rc = ESMF_SUCCESS;
 }
     
+#if 0
 
 extern "C" void FTN_X(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int *egrid, int *num_lnodes, int *num_lelems, int *rc) {
 
@@ -1013,6 +1084,138 @@ extern "C" void FTN_X(c_esmc_meshcreatedistgrids)(Mesh **meshpp, int *ngrid, int
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
       ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
+  {
+    int esize = *num_lelems = egids.size();
+    int rc1;
+    
+    int *indices = (esize==0)?NULL:&egids[0];
+
+
+    FTN_X(f_esmf_getmeshdistgrid)(egrid, &esize, indices, &rc1);
+
+    if(ESMC_LogDefault.MsgFoundError(rc1,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+#endif
+
+
+extern "C" void FTN_X(c_esmc_meshcreatenodedistgrid)(Mesh **meshpp, int *ngrid, int *num_lnodes, int *rc) {
+
+  // Declare id vectors
+  std::vector<int> ngids; 
+  
+ 
+  try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+   throw localrc;  // bail out with exception
+    }
+
+    Mesh *meshp = *meshpp;
+    
+    // Get the set of owned node ids
+    {
+      getNodeGIDS(*meshp, ngids); 
+    }
+    
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  // Create the distgrids
+  {
+    int nsize = *num_lnodes = ngids.size();
+    int rc1;
+    
+    int *indices = (nsize==0)?NULL:&ngids[0];
+
+    FTN_X(f_esmf_getmeshdistgrid)(ngrid, &nsize, indices, &rc1);
+
+    if (ESMC_LogDefault.MsgFoundError(rc1,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+  }
+
+  // Set return code 
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+
+extern "C" void FTN_X(c_esmc_meshcreateelemdistgrid)(Mesh **meshpp, int *egrid, int *num_lelems, int *rc) {
+
+  // Declare id vectors
+  std::vector<int> egids; 
+   
+  try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+   throw localrc;  // bail out with exception
+    }
+
+    Mesh *meshp = *meshpp;
+    
+    // Get the set of owned elem ids
+    {
+      getElemGIDS(*meshp, egids);
+    }
+    
+    
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
   {
     int esize = *num_lelems = egids.size();
     int rc1;
@@ -1416,12 +1619,13 @@ extern "C" void FTN_X(c_esmc_meshfindpnt)(Mesh **meshpp, int *unmappedaction, in
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
-extern "C" void FTN_X(c_esmc_getlocalcoords)(Mesh **meshpp, double *nodeCoord, int *rc) 
+extern "C" void FTN_X(c_esmc_getlocalcoords)(Mesh **meshpp, double *nodeCoord, int *_orig_sdim, int *rc) 
 {
    try {
     Mesh *meshp = *meshpp;
     ThrowRequire(meshp);
     Mesh &mesh = *meshp;
+
 
   // Initialize the parallel environment for mesh (if not already done)
     {
@@ -1432,12 +1636,20 @@ extern "C" void FTN_X(c_esmc_getlocalcoords)(Mesh **meshpp, double *nodeCoord, i
    throw localrc;  // bail out with exception
     }
 
-
     // Get some info
-    int sdim=mesh.spatial_dim();
     int num_nodes = mesh.num_nodes();
-    MEField<> *coords = mesh.GetCoordField();
-    
+
+    // Choose which coords field and dimension to use
+    // try orig_coordinates first, if it doesn't exist 
+    // then go with coordinates
+    MEField<> *coords=mesh.GetField("orig_coordinates"); 
+    int sdim=*_orig_sdim;
+    if (!coords) {
+      coords = mesh.GetCoordField();
+      sdim=mesh.spatial_dim();
+    }
+
+
     // Make a map between data index and associated node pointer
     std::vector<std::pair<int,MeshObj *> > index_to_node;
     index_to_node.reserve(num_nodes);
@@ -2566,8 +2778,8 @@ ESMC_MeshOp_Flag * meshop, double * threshold, int *rc) {
 
 
 
-extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_node_gids, int *node_gids, 
-                                                   int *num_elem_gids, int *elem_gids,  Mesh **output_meshpp, int *rc) {
+extern "C" void FTN_X(c_esmc_meshcreateredist)(Mesh **src_meshpp, int *num_node_gids, int *node_gids, 
+                                               int *num_elem_gids, int *elem_gids,  Mesh **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_meshcreateredist()"
 
@@ -2584,6 +2796,53 @@ extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_
 
     // Call C++ side
     MeshRedist(*src_meshpp, *num_node_gids, node_gids, *num_elem_gids, elem_gids, output_meshpp);
+
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
+
+
+
+extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_elem_gids, int *elem_gids, 
+                                                    Mesh **output_meshpp, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreateredistelems()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+
+    // Call C++ side
+    MeshRedistElem(*src_meshpp, *num_elem_gids, elem_gids, output_meshpp);
 
 
   } catch(std::exception &x) {

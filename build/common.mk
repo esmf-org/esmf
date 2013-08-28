@@ -360,6 +360,14 @@ ifeq ($(ESMF_BOPT),default)
 export ESMF_BOPT = O
 endif
 
+ifndef $(ESMF_MOAB)
+ifneq ($(ESMF_OS),MinGW)
+ifneq ($(ESMF_OS),Cygwin)
+export ESMF_MOAB=internal
+endif
+endif
+endif
+
 ifneq ($(ESMF_ARRAY_LITE),TRUE)
 export ESMF_ARRAY_LITE = FALSE
 endif
@@ -626,7 +634,11 @@ ESMF_ARCREATEPREFIX         =
 ESMF_AREXTRACTDEFAULT       = $(ESMF_ARDEFAULT) -x
 ESMF_RANLIBDEFAULT          = ranlib
 ESMF_SEDDEFAULT             = sed
-ESMF_CPPDEFAULT             = gcc
+# The gcc preprocessor is used for partially preprocessing .cppF90 files.
+# The -E option stops the gcc overcompiler after preprocessing, the -P
+# option prevents putting #line directives in the output, and -x c states
+# to use C-style preprocessing regardless of file name suffix.
+ESMF_CPPDEFAULT             = gcc -E -P -x c
 
 ESMF_RM                     = rm -rf
 ESMF_MV                     = mv -f
@@ -1057,6 +1069,33 @@ ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_LAPACK_LIBPATH)
 ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_LAPACK_LIBPATH)
 ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_LAPACK_LIBPATH)
 ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_LAPACK_LIBPATH)
+endif
+endif
+
+#-------------------------------------------------------------------------------
+# MOAB
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_MOAB),standard)
+ifneq ($(origin ESMF_MOAB_LIBS), environment)
+ESMF_MOAB_LIBS = -lMOAB
+endif
+endif
+
+ifdef ESMF_MOAB
+CPPFLAGS                += -DESMF_MOAB=1
+ifdef ESMF_MOAB_INCLUDE
+ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_MOAB_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_MOAB_INCLUDE)
+endif
+ifdef ESMF_MOAB_LIBS
+ESMF_CXXLINKLIBS        := $(ESMF_MOAB_LIBS) $(ESMF_CXXLINKLIBS)
+ESMF_F90LINKLIBS        := $(ESMF_MOAB_LIBS) $(ESMF_F90LINKLIBS)
+endif
+ifdef ESMF_MOAB_LIBPATH
+ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_MOAB_LIBPATH)
+ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_MOAB_LIBPATH)
+ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_MOAB_LIBPATH)
+ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_MOAB_LIBPATH)
 endif
 endif
 
@@ -2152,7 +2191,7 @@ use_test_cases: chkdir_tests
 	$(MAKE) ACTION=tree_use_test_cases tree ; \
 	$(MAKE) check_use_test_cases
 
-tree_use_test_cases: tree_build_use_test_cases tree_run_use_test_cases
+tree_use_test_cases: tree_build_use_test_cases tree_dry_run_use_test_cases tree_run_use_test_cases
 
 #
 # use_test_cases_uni, build and run uni versions of the use test cases
@@ -2171,7 +2210,7 @@ use_test_cases_uni: chkdir_tests
 	$(MAKE) ACTION=tree_use_test_cases_uni tree ; \
 	$(MAKE) check_use_test_cases
 
-tree_use_test_cases_uni: tree_build_use_test_cases tree_run_use_test_cases_uni
+tree_use_test_cases_uni: tree_build_use_test_cases tree_dry_run_use_test_cases tree_run_use_test_cases_uni
 
 #
 # build_use_test_cases
@@ -2270,7 +2309,7 @@ run_use_test_cases:  reqdir_tests
 	$(MAKE) ACTION=tree_run_use_test_cases tree ; \
 	$(MAKE) check_use_test_cases
 
-tree_run_use_test_cases: $(USE_TEST_CASES_RUN) 
+tree_run_use_test_cases: tree_dry_run_use_test_cases $(USE_TEST_CASES_RUN) 
 
 #
 # run_use_test_cases_uni
@@ -2290,7 +2329,27 @@ run_use_test_cases_uni:  reqdir_tests
 	$(MAKE) ACTION=tree_run_use_test_cases_uni tree ; \
 	$(MAKE) check_use_test_cases
 
-tree_run_use_test_cases_uni: $(USE_TEST_CASES_RUN_UNI)
+tree_run_use_test_cases_uni: tree_dry_run_use_test_cases $(USE_TEST_CASES_RUN_UNI)
+
+
+#
+# dry_run_use_test_cases
+#
+dry_run_use_test_cases:  
+	@if [ -d $(ESMF_UTCDIR) ] ; then cd $(ESMF_UTCDIR) ; fi; \
+        if [ ! $(USE_TEST_CASE)foo = foo ] ; then \
+           if [ -d $(USE_TEST_CASE) ] ; then \
+               cd $(USE_TEST_CASE); \
+           else \
+              echo "USE_TEST_CASE  $(USE_TEST_CASE) does not exist."; \
+               echo "Checkout use_test_cases at the $(ESMF_DIR)/src directory."; \
+              exit; \
+           fi; \
+           echo current working directory is now `pwd` ; \
+        fi; \
+        $(MAKE) ACTION=tree_dry_run_use_test_cases tree 
+
+tree_dry_run_use_test_cases: $(USE_TEST_CASES_DRY_RUN)
 
 #
 # run the use test cases, either redirecting the stdout from the command line, or
@@ -3009,7 +3068,7 @@ endif
 #-------------------------------------------------------------------------------
 # Suffixes (TODO: seems that the last three have become obsolete *gjt*)
 #-------------------------------------------------------------------------------
-.SUFFIXES: .f .f90 .F .F90 .cppF90 .C .$(ESMF_SL_SUFFIX) .$(ESMF_LIB_SUFFIX) .cc .r .rm
+.SUFFIXES: .f .f90 .F .F90 .cppF90 .C .$(ESMF_SL_SUFFIX) .$(ESMF_LIB_SUFFIX) .cpp .cc .r .rm
 
 #-------------------------------------------------------------------------------
 #  Compile rules for F90, C++, and c files for both to .o and .a files
@@ -3055,6 +3114,9 @@ $(ESMF_OBJDIR)/%.o : %.c
 $(ESMF_OBJDIR)/%.o : %.C
 	$(ESMF_CXXCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
 
+$(ESMF_OBJDIR)/%.o : %.cpp
+	$(ESMF_CXXCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
+
 $(ESMF_LOCOBJDIR)/%.o : %.F90
 	$(MAKE) chkdir_locobj 
 	$(ESMF_F90COMPILEFREECPP_CMD) $< $(ESMF_OBJOUT_OPTION)
@@ -3079,6 +3141,10 @@ $(ESMF_LOCOBJDIR)/%.o : %.C
 	$(MAKE) chkdir_locobj 
 	$(ESMF_CXXCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
 
+$(ESMF_LOCOBJDIR)/%.o : %.cpp
+	$(MAKE) chkdir_locobj 
+	$(ESMF_CXXCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
+
 .F90.o:
 	$(ESMF_F90COMPILEFREECPP_CMD) $< $(ESMF_OBJOUT_OPTION)
 
@@ -3095,6 +3161,9 @@ $(ESMF_LOCOBJDIR)/%.o : %.C
 	$(ESMF_CXXCOMPILE_CMD) $<
 
 .C.o:
+	$(ESMF_CXXCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
+
+.cpp.o:
 	$(ESMF_CXXCOMPILE_CMD) $< $(ESMF_OBJOUT_OPTION)
         
 .F90.$(ESMF_SL_SUFFIX):
@@ -3131,10 +3200,8 @@ $(ESMF_LOCOBJDIR)/%.o : %.C
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_ARCREATEPREFIX)$(LIBNAME) $*.o
 	$(ESMF_RM) $*.o
 
-# The rules below generate a valid Fortran file using gcc as a preprocessor:
-# The -P option prevents putting #line directives in the output, and
-# -E stops after preprocessing.
-# The 'tr' command substitutes one-for-one, translating:
+# The rules below generate a valid Fortran file using gcc for the first stage
+# of preprocessing.  The 'tr' command substitutes one-for-one, translating:
 #   @ into newline to separate lines in multiline macros (the output
 #     of the preprocessor is a single line which must be separated again)
 #   ^ into # so that other preprocessor commands are ready to be processed by
@@ -3150,11 +3217,8 @@ $(ESMF_LOCOBJDIR)/%.o : %.C
 # the mod dir to build.
 
 ifeq ($(origin ESMF_CPPRULES),undefined)
-.cpp.F90:
-	$(ESMF_CPP) -E -P -I$(ESMF_INCDIR) $< | tr "@^" "\n#" | $(ESMF_SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@)
-
 .cppF90.F90:
-	cp $< $<.cpp; $(ESMF_CPP) -E -P -I$(ESMF_INCDIR) $<.cpp | tr "@^|" "\n#'" | $(ESMF_SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@); rm -f $<.cpp
+	$(ESMF_CPP) -I$(ESMF_INCDIR) $< | tr "@^|" "\n#'" | $(ESMF_SED) -e '/^#pragma GCC/d' > $(dir $<)$(notdir $@)
 endif
 
 
@@ -3487,7 +3551,7 @@ $(ESMF_DOCDIR)/%_crefdoc: %_crefdoc.ctex $(REFDOC_DEP_FILES)
 #-------------------------------------------------------------------------------
 #  These rules are for compiling the test examples.
 #-------------------------------------------------------------------------------
-.cpp.rm .cc.rm .C.rm .F.rm .f.rm .c.rm:
+.cc.rm .C.rm .F.rm .f.rm .c.rm:
 	-@$(ESMF_RM) $* *.o *.$(ESMF_SL_SUFFIX) $*.mon.* gmon.out mon.out
 
 

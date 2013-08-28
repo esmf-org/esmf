@@ -1059,7 +1059,7 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
     *frac2 = 1.0;
     double *area = elem_area->data(*(elem_list[i]));
     *area = sintd_cells[i]->get_area();
-    std::cout << i << "th cell area: " << *area << "\n";
+    //std::cout << i << "th cell area: " << *area << "\n";
     double *centroid = elem_centroid->data(*(elem_list[i]));
     sintd_cells[i]->get_centroid(centroid, sdim, pdim);
   }

@@ -6,8 +6,8 @@
 ############################################################
 # Default compiler setting.
 #
-ESMF_F90DEFAULT         = gfortran-4
-ESMF_CXXDEFAULT         = g++-4
+ESMF_F90DEFAULT         = gfortran
+ESMF_CXXDEFAULT         = g++
 
 ############################################################
 # Default MPI setting.
@@ -122,16 +122,6 @@ else
 $(error "ESMF_FORTRANSYMBOLS = $(ESMF_FORTRANSYMBOLS)" not supported by ESMF and/or this platform)
 endif
 endif
-endif
-
-############################################################
-# On IA64 set long and pointer types to 64-bit
-#
-ifeq ($(ESMF_ABI),64)
-ESMF_CXXCOMPILEOPTS       += -march=k8 -m64 -mcmodel=medium
-ESMF_CXXLINKOPTS          += -march=k8 -m64 -mcmodel=medium
-ESMF_F90COMPILEOPTS       += -march=k8 -m64 -mcmodel=medium
-ESMF_F90LINKOPTS          += -march=k8 -m64 -mcmodel=medium
 endif
 
 ############################################################

@@ -50,8 +50,8 @@
 !EOE
 
 !BOC
-      character(ESMF_MAXSTR) :: fname ! config file name
-      character*20  :: fn1, fn2, fn3, input_file ! strings to be read in
+      character(ESMF_MAXPATHLEN) :: fname ! config file name
+      character(ESMF_MAXPATHLEN) :: fn1, fn2, fn3, input_file ! strings to be read in
       integer       :: rc            ! error return code (0 is OK)
       integer       :: i_n           ! the first constant in the RF
       real          :: param_1       ! the second constant in the RF
@@ -165,7 +165,7 @@
     if(radius .ne. 6.37E6)then
       finalrc = ESMF_FAILURE
       print*, "******** Radius not retrieved correctly"
-      print*, input_file
+      print*, trim (input_file)
     endif
 
 
@@ -193,14 +193,14 @@
     else
         print*, "Results from using the dictionary-like method of data retrieval of a string"
         print*, "The input file name (a string) was retrieved from the Resource File"
-        print*, "Its value is: ", input_file
+        print*, "Its value is: ", trim (input_file)
         print*, "---------------------------------------------------------------"
     endif
 
     if(input_file .ne. "dummy_input.nc")then
        finalrc = ESMF_FAILURE
        print*, "******* input_file not retrieved correctly"
-       print*, input_file
+       print*, trim (input_file)
     endif
 
 !BOE
@@ -220,14 +220,14 @@
     else
         print*, "Results when the label in the call does not exist in the Resource File"
         print*, "The default value is returned."
-        print*, "Its value is: ",input_file
+        print*, "Its value is: ", trim (input_file)
         print*, "---------------------------------------------------------------"
     endif
 
     if (input_file .ne. "./default.nc") then
       finalrc = ESMF_FAILURE
       print*, "****** Demonstration of default value (input_file) not working correctly"
-      print*, input_file
+      print*, trim (input_file)
     endif
 !----------------------------------------------------------------
 ! Second Method of Retrieval
@@ -317,11 +317,11 @@
       else
         print*, "Results from retrieving multi-value strings:"
         print*, "The first file name was was retrieved from the Resource File"
-        print*, "Its value is: ", fn1
+        print*, "Its value is: ", trim (fn1)
         print*, "The second file name was was retrieved from the Resource File"
-        print*, "Its value is: ", fn2
+        print*, "Its value is: ", trim (fn2)
         print*, "The third file name was was retrieved from the Resource File"
-        print*, "Its value is: ", fn3
+        print*, "Its value is: ", trim (fn3)
         print*, "---------------------------------------------------------------"
       endif
 

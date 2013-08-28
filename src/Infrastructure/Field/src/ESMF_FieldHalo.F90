@@ -103,13 +103,13 @@ contains
                             routesyncflag, finishedflag, checkflag, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Field),       intent(inout)           :: field
-    type(ESMF_RouteHandle), intent(inout)           :: routehandle
+    type(ESMF_Field),          intent(inout)          :: field
+    type(ESMF_RouteHandle),    intent(inout)          :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for the below
-    type(ESMF_RouteSync_Flag), intent(in), optional :: routesyncflag
-    logical,                intent(out),  optional  :: finishedflag
-    logical,                intent(in),   optional  :: checkflag
-    integer,                intent(out),  optional  :: rc
+    type(ESMF_RouteSync_Flag), intent(in),  optional  :: routesyncflag
+    logical,                   intent(out), optional  :: finishedflag
+    logical,                   intent(in),  optional  :: checkflag
+    integer,                   intent(out), optional  :: rc
 !
 !
 ! !STATUS:
@@ -259,13 +259,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       startregion, haloLDepth, haloUDepth, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Field),       intent(inout)                :: field
-    type(ESMF_RouteHandle), intent(inout)                :: routehandle
+    type(ESMF_Field),            intent(inout)           :: field
+    type(ESMF_RouteHandle),      intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_StartRegion_Flag), intent(in),    optional :: startregion
-    integer,                intent(in),         optional :: haloLDepth(:)
-    integer,                intent(in),         optional :: haloUDepth(:)
-    integer,                intent(out),        optional :: rc
+    integer,                     intent(in),    optional :: haloLDepth(:)
+    integer,                     intent(in),    optional :: haloUDepth(:)
+    integer,                     intent(out),   optional :: rc
 !
 !
 ! !STATUS:

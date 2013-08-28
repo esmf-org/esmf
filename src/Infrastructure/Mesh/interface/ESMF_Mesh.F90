@@ -77,6 +77,11 @@ module ESMF_MeshMod
     integer :: spatialDim
     integer :: parametricDim
 
+    type(ESMF_CoordSys_Flag) :: coordSys ! Put this here for now. 
+                                         ! Eventually may need to also put lower in C++ Mesh???
+                                         ! If connect this via MeshCXX then move this there.
+
+
     ! Info about Split elements if created from a file
     ! Eventually may allow this even if not created 
     ! from a file
@@ -436,8 +441,6 @@ contains
 !   Test if both {\tt mesh1} and {\tt mesh2} alias the same ESMF Mesh 
 !   object.
 !
-!EOPI
-!-------------------------------------------------------------------------------
 
     ESMF_INIT_TYPE minit1, minit2
     integer :: localrc1, localrc2
@@ -611,12 +614,18 @@ contains
     endif
 
 
-    ! We create two dist grids, one for nodal one for element
-    call C_ESMC_MeshCreateDistGrids(mesh%this, mesh%nodal_distgrid, &
-                      mesh%element_distgrid, &
-                      mesh%numOwnedNodes, mesh%numOwnedElements, localrc)
+    ! Create two distgrids, one for nodes and one for elements
+    call C_ESMC_MeshCreateNodeDistGrid(mesh%this, mesh%nodal_distgrid, &
+                                       mesh%numOwnedNodes, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return    
+
+    call C_ESMC_MeshCreateElemDistGrid(mesh%this, mesh%element_distgrid, &
+                                       mesh%numOwnedElements, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return    
+
+
 
     !call ESMF_DistGridPrint(mesh%nodal_distgrid)
     !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, mesh%nodal_distgrid, rc)
@@ -740,7 +749,8 @@ contains
 
     num_nodes = size(nodeIds)
     call C_ESMC_MeshAddNodes(mesh%this, num_nodes, nodeIds, nodeCoords, &
-                             nodeOwners, nodeMaskII, localrc)
+                         nodeOwners, nodeMaskII, &
+                         mesh%coordSys, mesh%spatialDim, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -766,15 +776,17 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreate3Part(parametricDim, spatialDim, rc)
+    function ESMF_MeshCreate3Part(parametricDim, spatialDim, &
+                                  coordSys, rc)
 !
 !
 ! !RETURN VALUE:
     type(ESMF_Mesh)         :: ESMF_MeshCreate3Part
 ! !ARGUMENTS:
-    integer,                intent(in)            :: parametricDim
-    integer,                intent(in)            :: spatialDim
-    integer,                intent(out), optional :: rc
+    integer,                  intent(in)            :: parametricDim
+    integer,                  intent(in)            :: spatialDim
+    type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
+    integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   This call is the first part of the three part mesh create
@@ -795,21 +807,36 @@ contains
 !         The number of coordinate dimensions needed to describe the locations of the nodes 
 !         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
 !         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
+! \item[{[coordSys]}] 
+!         The coordinate system of the grid coordinate data. 
+!         For a full list of options, please see Section~\ref{const:coordsys}. 
+!         If not specified then defaults to ESMF\_COORDSYS\_CART.  
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
+    integer                  :: localrc      ! local return code
+    type(ESMF_CoordSys_Flag) :: coordSysLocal
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+   ! Set Default coordSys
+   if (present(coordSys)) then
+      coordSysLocal=coordSys
+   else 
+      coordSysLocal=ESMF_COORDSYS_CART
+   endif
+
+
+    ! Create C++ Mesh
     ESMF_MeshCreate3Part%this = ESMF_NULL_POINTER
 
-    call c_ESMC_meshcreate(ESMF_MeshCreate3Part%this, parametricDim, spatialDim, localrc)
+    call c_ESMC_meshcreate(ESMF_MeshCreate3Part%this, parametricDim, spatialDim, &
+                           coordSysLocal, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -825,6 +852,9 @@ contains
     ! Set dimension information
     ESMF_MeshCreate3Part%spatialDim=spatialDim
     ESMF_MeshCreate3Part%parametricDim=parametricDim
+
+    ! Set CoordSys
+    ESMF_MeshCreate3Part%coordSys=coordSysLocal
 
     ! Check init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreate3Part)
@@ -845,7 +875,7 @@ contains
     function ESMF_MeshCreate1Part(parametricDim, spatialDim, &
                          nodeIds, nodeCoords, nodeOwners, nodeMask, &
                          elementIds, elementTypes, elementConn, &
-                         elementMask, elementArea, rc)
+                         elementMask, elementArea, coordSys, rc)
 !
 !
 ! !RETURN VALUE:
@@ -862,6 +892,7 @@ contains
     integer,            intent(in)            :: elementConn(:)
     integer,            intent(in),  optional :: elementMask(:)
     real(ESMF_KIND_R8), intent(in),  optional :: elementArea(:)  
+    type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -953,6 +984,10 @@ contains
 !   \item [{[elementArea]}]
 !          An array containing element areas. If not specified, the element areas are internally calculated. 
 !          This input consists of a 1D array the size of the number of elements on this PET.
+!   \item[{[coordSys]}] 
+!         The coordinate system of the grid coordinate data. 
+!         For a full list of options, please see Section~\ref{const:coordsys}. 
+!         If not specified then defaults to ESMF\_COORDSYS\_CART.  
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -966,6 +1001,7 @@ contains
     type(ESMF_InterfaceInt) :: elementMaskII, nodeMaskII
     real(ESMF_KIND_R8) :: tmpArea(2)
     integer :: areaPresent
+    type(ESMF_CoordSys_Flag) :: coordSysLocal
 
 
     ! initialize return code; assume routine not implemented
@@ -990,7 +1026,17 @@ contains
        lregridConserve=ESMF_REGRID_CONSERVE_ON
 !    endif
 
-    call c_ESMC_meshcreate(ESMF_MeshCreate1Part%this, parametricDim, spatialDim, localrc)
+   
+   ! Set Default coordSys
+   if (present(coordSys)) then
+      coordSysLocal=coordSys
+   else 
+      coordSysLocal=ESMF_COORDSYS_CART
+   endif
+
+    ! Create C++ Mesh
+    call c_ESMC_meshcreate(ESMF_MeshCreate1Part%this, parametricDim, spatialDim, &
+                           coordSyslocal, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1006,7 +1052,8 @@ contains
     ! Add the nodes
     num_nodes = size(nodeIds)
     call C_ESMC_MeshAddNodes(ESMF_MeshCreate1Part%this, num_nodes, nodeIds, nodeCoords, &
-                             nodeOwners, nodeMaskII, localrc)
+                             nodeOwners, nodeMaskII, &
+                             coordSysLocal, spatialDim, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1062,22 +1109,27 @@ num_elems, &
     endif
 
 
-
-
-    ! We create two dist grids, one for nodal one for element
-    call C_ESMC_MeshCreateDistGrids(ESMF_MeshCreate1Part%this, ESMF_MeshCreate1Part%nodal_distgrid, &
-                      ESMF_MeshCreate1Part%element_distgrid, &
-                      ESMF_MeshCreate1Part%numOwnedNodes, ESMF_MeshCreate1Part%numOwnedElements, localrc)
+    ! Create two distgrids, one for nodes and one for elements
+    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreate1Part%this, &
+                                       ESMF_MeshCreate1Part%nodal_distgrid, &
+                                       ESMF_MeshCreate1Part%numOwnedNodes, &
+                                       localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return    
+
+    call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreate1Part%this, &
+                                       ESMF_MeshCreate1Part%element_distgrid, &
+                                       ESMF_MeshCreate1Part%numOwnedElements, &
+                                       localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return    
+
 
 
     ! Get rid of interface Int wrapper
     call ESMF_InterfaceIntDestroy(elementMaskII, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-
-
 
     ! The C side has been created
     ESMF_MeshCreate1Part%isCMeshFreed=.false.
@@ -1091,6 +1143,9 @@ num_elems, &
     ! Set dimension information
     ESMF_MeshCreate1Part%spatialDim=spatialDim
     ESMF_MeshCreate1Part%parametricDim=parametricDim
+
+    ! Set coord sys information
+    ESMF_MeshCreate1Part%coordSys=coordSysLocal
 
     !call ESMF_DistGridPrint(ESMF_MeshCreate1Part%nodal_distgrid)
     !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, ESMF_MeshCreate1Part%nodal_distgrid, rc)
@@ -1108,7 +1163,8 @@ num_elems, &
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromDG(distgrid, parametricDim, spatialDim, rc)
+    function ESMF_MeshCreateFromDG(distgrid, parametricDim, spatialDim, &
+                                   coordSys, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1117,7 +1173,9 @@ num_elems, &
     type(ESMF_DistGrid),        intent(in)            :: distgrid
     integer,                    intent(in), optional  :: parametricDim
     integer,                    intent(in), optional  :: spatialDim
+    type(ESMF_CoordSys_Flag),   intent(in), optional  :: coordSys
     integer,                    intent(out), optional :: rc
+
 ! 
 ! !DESCRIPTION:
 !   Create a Mesh from an elemental distgrid. Such a mesh will have no coordinate or
@@ -1134,6 +1192,10 @@ num_elems, &
 !         The number of coordinate dimensions needed to describe the locations of the nodes 
 !         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
 !         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
+!   \item[{[coordSys]}] 
+!         The coordinate system of the grid coordinate data. 
+!         For a full list of options, please see Section~\ref{const:coordsys}. 
+!         If not specified then defaults to ESMF\_COORDSYS\_CART.  
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1141,18 +1203,29 @@ num_elems, &
 !EOPI
 !------------------------------------------------------------------------------
     integer::  localrc, l_pdim, l_sdim
+    type(ESMF_CoordSys_Flag) :: coordSysLocal
 
     l_pdim = 2
     l_sdim = 3
     if(present(parametricDim)) l_pdim = parametricDim
     if(present(spatialDim))    l_sdim = spatialDim
 
-    ESMF_MeshCreateFromDG = ESMF_MeshCreate3part(l_pdim, l_sdim, localrc)
+   ! Set Default coordSys
+   if (present(coordSys)) then
+      coordSysLocal=coordSys
+   else 
+      coordSysLocal=ESMF_COORDSYS_CART
+   endif
+
+    ESMF_MeshCreateFromDG = ESMF_MeshCreate3part(l_pdim, l_sdim, &
+                           coordSysLocal, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_MeshCreateFromDG%isFullyCreated=.true.
     ESMF_MeshCreateFromDG%element_distgrid = distgrid
+
+
 
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromDG)
 
@@ -1383,7 +1456,8 @@ end function ESMF_MeshCreateFromMeshes
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromFile(filename, fileTypeFlag, convert3D, &
-                 convertToDual, addUserArea, meshname, addMask, varname, rc)
+                 convertToDual, addUserArea, meshname, addMask, varname, &
+		 elementDistGrid, nodalDistGrid, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1397,6 +1471,8 @@ end function ESMF_MeshCreateFromMeshes
     character(len=*),           intent(in),  optional :: meshname
     logical,                    intent(in),  optional :: addMask
     character(len=*),           intent(in),  optional :: varname
+    type(ESMF_DistGrid),        intent(in),  optional :: elementDistgrid
+    type(ESMF_DistGrid),        intent(in),  optional :: nodalDistgrid
     integer,                    intent(out), optional :: rc
 ! 
 ! !DESCRIPTION:
@@ -1436,6 +1512,12 @@ end function ESMF_MeshCreateFromMeshes
 !         the longitude and the latitude dimension and the mask is derived from the
 !         first 2D values of this variable even if this data is 3D, or 4D array. If not 
 !         specified, defaults to empty string.
+!   \item [{[nodalDistgrid]}]
+!         A 1D arbitrary distgrid describing the user-specified distribution of 
+!         the nodes across the PETs. 
+!   \item [{[elementDistgrid]}]
+!         A 1D arbitrary distgrid describing the user-specified distribution of 
+!         the elements across the PETs. 
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1445,6 +1527,7 @@ end function ESMF_MeshCreateFromMeshes
     logical::  localConvert3D      ! local flag
     logical::  localConvertToDual      ! local flag
     logical::  localAddUserArea  
+    type(ESMF_Mesh) :: myMesh
     integer::  localrc
 
     ! Set Defaults
@@ -1478,23 +1561,23 @@ end function ESMF_MeshCreateFromMeshes
     endif
 
     if (filetypeflag == ESMF_FILEFORMAT_SCRIP) then
-	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromScrip(filename, localConvert3D, &
+	myMesh = ESMF_MeshCreateFromScrip(filename, localConvert3D, &
           localConvertToDual, addUserArea=localAddUserArea, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (filetypeflag == ESMF_FILEFORMAT_ESMFMESH) then
-	ESMF_MeshCreateFromFile = ESMF_MeshCreateFromUnstruct(filename, &
+	myMesh = ESMF_MeshCreateFromUnstruct(filename, &
 	   localConvert3D, addUserArea=localAddUserArea, &
 	   filetype=filetypeflag, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (filetypeflag == ESMF_FILEFORMAT_UGRID) then
 	if (present(addMask)) then
-           ESMF_MeshCreateFromFile = ESMF_MeshCreateFromUnstruct(filename, &
+           myMesh = ESMF_MeshCreateFromUnstruct(filename, &
 	     localConvert3D, filetype=filetypeflag, meshname = meshname, &
 	     addMask=addMask, varname=varname, rc=localrc)
 	else
-           ESMF_MeshCreateFromFile = ESMF_MeshCreateFromUnstruct(filename, &
+           myMesh = ESMF_MeshCreateFromUnstruct(filename, &
 	     localConvert3D, filetype=filetypeflag, meshname = meshname, rc=localrc)
 	endif 
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1506,8 +1589,36 @@ end function ESMF_MeshCreateFromMeshes
        return
     endif
 
+    if (present(elementDistGrid) .and. present(nodalDistGrid)) then
+        ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
+       			       nodalDistgrid=nodalDistGrid, &
+       			       elementDistgrid=elementDistGrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+	call ESMF_MeshDestroy(myMesh)
+    elseif (present(elementDistGrid)) then
+        ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
+       			       elementDistgrid=elementDistGrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+	call ESMF_MeshDestroy(myMesh)
+    elseif (present(nodalDistGrid)) then
+        ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
+       			       nodalDistgrid=nodalDistGrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+	call ESMF_MeshDestroy(myMesh)
+    else
+       ESMF_MeshCreateFromFile = myMesh			       
+    endif
+
     if (present(rc)) rc=ESMF_SUCCESS
     return
+
 end function ESMF_MeshCreateFromFile
 !------------------------------------------------------------------------------
 
@@ -1779,7 +1890,7 @@ end function ESMF_MeshCreateFromFile
     endif
 
     ! create the mesh
-    Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, localrc)
+    Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2354,14 +2465,20 @@ end function ESMF_MeshCreateFromScrip
     ! Check init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromPointer)
 
-    ! We create two dist grids, one for nodal one for element
-    call C_ESMC_MeshCreateDistGrids(ESMF_MeshCreateFromPointer%this, &
-                      ESMF_MeshCreateFromPointer%nodal_distgrid, &
-                      ESMF_MeshCreateFromPointer%element_distgrid, &
-                      ESMF_MeshCreateFromPointer%numOwnedNodes, &
-                      ESMF_MeshCreateFromPointer%numOwnedElements, localrc)
+    ! Create two distgrids, one for nodes and one for elements
+    call C_ESMC_MeshCreateNodeDistGrid(ESMF_MeshCreateFromPointer%this, &
+                                       ESMF_MeshCreateFromPointer%nodal_distgrid, &
+                                       ESMF_MeshCreateFromPointer%numOwnedNodes, &
+                                       localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return    
+
+    call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromPointer%this, &
+                                       ESMF_MeshCreateFromPointer%element_distgrid, &
+                                       ESMF_MeshCreateFromPointer%numOwnedElements, &
+                                       localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return    
 
     ! The C side has been created
     ESMF_MeshCreateFromPointer%isCMeshFreed=.false.
@@ -2371,6 +2488,9 @@ end function ESMF_MeshCreateFromScrip
 
     ! Set as fully created 
     ESMF_MeshCreateFromPointer%isFullyCreated=.true.
+
+    ! Set default coordsys
+    ESMF_MeshCreateFromPointer%coordSys=ESMF_COORDSYS_CART
 
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -2395,8 +2515,8 @@ end function ESMF_MeshCreateFromScrip
 
 ! !ARGUMENTS:
     type(ESMF_Mesh),     intent(in)            :: mesh
-    type(ESMF_DistGrid), intent(in)            :: nodalDistgrid
-    type(ESMF_DistGrid), intent(in)            :: elementDistgrid
+    type(ESMF_DistGrid), intent(in),  optional :: nodalDistgrid
+    type(ESMF_DistGrid), intent(in),  optional :: elementDistgrid
     integer,             intent(out), optional :: rc
 ! 
 ! !DESCRIPTION:
@@ -2411,10 +2531,10 @@ end function ESMF_MeshCreateFromScrip
 !   \begin{description}
 !   \item [mesh]
 !         The source Mesh to be redistributed. 
-!   \item [nodalDistgrid]
+!   \item [{[nodalDistgrid]}]
 !         A 1D arbitrary distgrid describing the new distribution of 
 !         the nodes across the PETs. 
-!   \item [elementDistgrid]
+!   \item [{[elementDistgrid]}]
 !         A 1D arbitrary distgrid describing the new distribution of 
 !         the elements across the PETs. 
 !   \item [{[rc]}]
@@ -2427,7 +2547,6 @@ end function ESMF_MeshCreateFromScrip
     integer :: numNodeIds, numElemIds
     integer, allocatable :: nodeIds(:), elemIds(:)
 
-
     ! Init localrc
     localrc = ESMF_SUCCESS
 
@@ -2435,7 +2554,6 @@ end function ESMF_MeshCreateFromScrip
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, nodalDistgrid, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, elementDistgrid, rc)
-
 
     ! If mesh has not been fully created
     if (.not. mesh%isFullyCreated) then
@@ -2456,31 +2574,13 @@ end function ESMF_MeshCreateFromScrip
        return 
     endif    
 
-    ! Get number of node Ids
-    call ESMF_DistGridGet(nodalDistgrid,localDe=0, &
-         elementCount=numNodeIds, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Get number of element Ids
-    call ESMF_DistGridGet(elementDistgrid,localDe=0, &
-         elementCount=numElemIds, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! First fill in information not requiring redist
-
-    ! Set Distgrids
-    ESMF_MeshCreateRedist%nodal_distgrid=nodalDistGrid
-    ESMF_MeshCreateRedist%element_distgrid=elementDistgrid
-
+    !! Fill in information available in input mesh
     ! Same dimensions as input mesh
     ESMF_MeshCreateRedist%spatialDim=mesh%spatialDim
     ESMF_MeshCreateRedist%parametricDim=mesh%parametricDim
 
-    ! Set number of owned things
-    ESMF_MeshCreateRedist%numOwnedNodes=numNodeIds
-    ESMF_MeshCreateRedist%numOwnedElements=numElemIds
+    ! Same coordSys
+    ESMF_MeshCreateRedist%coordSys=mesh%coordSys
 
     ! Will have same freed status as input mesh
     ESMF_MeshCreateRedist%isCMeshFreed=mesh%isCMeshFreed
@@ -2492,46 +2592,140 @@ end function ESMF_MeshCreateFromScrip
     ESMF_MeshCreateRedist%isFullyCreated=mesh%isFullyCreated
 
 
-    ! If the C side doesn't exist, then don't need to redist, so exit
-    if (mesh%isCMeshFreed) then
-       ESMF_INIT_SET_CREATED(ESMF_MeshCreateRedist)
+    !!! OPERATE BASED ON PRECENCE OF DISTGRIDS  !!!
+    if (present(nodalDistgrid)) then
 
-       if (present(rc)) rc=ESMF_SUCCESS
-       return
+       !! NODE AND ELEMENT DISTGRID BOTH PRESENT !!
+       if (present(elementDistgrid)) then
+
+          ! Get number of node Ids
+          call ESMF_DistGridGet(nodalDistgrid,localDe=0, &
+               elementCount=numNodeIds, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Get number of element Ids
+          call ESMF_DistGridGet(elementDistgrid,localDe=0, &
+               elementCount=numElemIds, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! First fill in information not requiring redist
+
+          ! Set Distgrids
+          ESMF_MeshCreateRedist%nodal_distgrid=nodalDistGrid
+          ESMF_MeshCreateRedist%element_distgrid=elementDistgrid
+
+          ! Set number of owned things
+          ESMF_MeshCreateRedist%numOwnedNodes=numNodeIds
+          ESMF_MeshCreateRedist%numOwnedElements=numElemIds
+
+          ! If the C side doesn't exist, then don't need to redist, so exit
+          if (mesh%isCMeshFreed) then
+             ESMF_INIT_SET_CREATED(ESMF_MeshCreateRedist)
+
+             if (present(rc)) rc=ESMF_SUCCESS
+             return
+          endif
+
+          ! Allocate space for node Ids
+          allocate(nodeIds(numNodeIds))
+
+          ! Get node Ids
+          call ESMF_DistGridGet(nodalDistgrid,localDe=0, &
+               seqIndexList=nodeIds, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Allocate space for element Ids
+          allocate(elemIds(numElemIds))
+
+          ! Get element Ids
+          call ESMF_DistGridGet(elementDistgrid,localDe=0, &
+               seqIndexList=elemIds, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+
+          ! Call into C
+          call C_ESMC_MeshCreateRedist(mesh,                  &
+               numNodeIds, nodeIds,   &
+               numElemIds, elemIds,   & 
+               ESMF_MeshCreateRedist, &
+               localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Deallocate gid arrays
+          deallocate(nodeIds)
+          deallocate(elemIds)
+       else  !! JUST NODE DISTGRID PRESENT !!
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+               msg="- this method currently will not work with just the nodalDistgrid specified", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
+          return 
+       endif
+    else
+       !! JUST ELEMENT DISTGRID PRESENT !!
+       if (present(elementDistgrid)) then
+
+          ! Get number of element Ids
+          call ESMF_DistGridGet(elementDistgrid,localDe=0, &
+               elementCount=numElemIds, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! First fill in elem information not requiring redist
+          ESMF_MeshCreateRedist%element_distgrid=elementDistgrid
+          ESMF_MeshCreateRedist%numOwnedElements=numElemIds
+
+
+          ! If the C side doesn't exist, then return an error 
+          ! because I don't know how to distribute nodes without elem info 
+          if (mesh%isCMeshFreed) then
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+   msg="- method does not work if the input Mesh has no " // &
+       "C Mesh attached and just the elemDistgrid is specified", & 
+                  ESMF_CONTEXT, rcToReturn=rc) 
+             return
+          endif
+
+          ! Allocate space for element Ids
+          allocate(elemIds(numElemIds))
+
+          ! Get element Ids
+          call ESMF_DistGridGet(elementDistgrid,localDe=0, &
+               seqIndexList=elemIds, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Call into C
+          call C_ESMC_MeshCreateRedistElems(mesh,                  &
+               numElemIds, elemIds,   & 
+               ESMF_MeshCreateRedist, &
+               localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Deallocate gid arrays
+          deallocate(elemIds)
+
+           ! Create node distgrid and get number of nodes
+          call C_ESMC_MeshCreateNodeDistGrid( &
+                      ESMF_MeshCreateRedist%this, &
+                      ESMF_MeshCreateRedist%nodal_distgrid, &
+                      ESMF_MeshCreateRedist%numOwnedNodes, localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return    
+
+       else !! NO DISTGRIDs PRESENT !!
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+               msg="- this method will not work with neither Distgrid specified.", & 
+               ESMF_CONTEXT, rcToReturn=rc) 
+          return 
+       endif
     endif
 
-    
-    ! Allocate space for node Ids
-    allocate(nodeIds(numNodeIds))
-   
-    ! Get node Ids
-    call ESMF_DistGridGet(nodalDistgrid,localDe=0, &
-         seqIndexList=nodeIds, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Allocate space for element Ids
-    allocate(elemIds(numElemIds))
-   
-    ! Get element Ids
-    call ESMF_DistGridGet(elementDistgrid,localDe=0, &
-         seqIndexList=elemIds, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-
-    ! Call into C
-    call C_ESMC_MeshCreateRedistElems(mesh,                  &
-                                      numNodeIds, nodeIds,   &
-                                      numElemIds, elemIds,   & 
-                                      ESMF_MeshCreateRedist, &
-                                      localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Deallocate gid arrays
-    deallocate(nodeIds)
-    deallocate(elemIds)
 
     ! Set as created
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateRedist)
@@ -2683,21 +2877,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       subroutine ESMF_MeshGet(mesh, parametricDim, spatialDim, &
                    nodalDistgrid, elementDistgrid, &
                    numOwnedNodes, ownedNodeCoords, &
-                   numOwnedElements, isMemFreed, rc)
+                   numOwnedElements, isMemFreed, coordSys, rc)
 !
 ! !RETURN VALUE:
 !
 ! !ARGUMENTS:
-    type(ESMF_Mesh),     intent(in)            :: mesh
-    integer,             intent(out), optional :: parametricDim
-    integer,             intent(out), optional :: spatialDim
-    type(ESMF_DistGrid), intent(out), optional :: nodalDistgrid
-    type(ESMF_DistGrid), intent(out), optional :: elementDistgrid
-    integer,             intent(out), optional :: numOwnedNodes
-    real(ESMF_KIND_R8),  intent(out), optional :: ownedNodeCoords(:)
-    integer,             intent(out), optional :: numOwnedElements
-    logical,             intent(out), optional :: isMemFreed
-    integer,             intent(out), optional :: rc
+    type(ESMF_Mesh),          intent(in)            :: mesh
+    integer,                  intent(out), optional :: parametricDim
+    integer,                  intent(out), optional :: spatialDim
+    type(ESMF_DistGrid),      intent(out), optional :: nodalDistgrid
+    type(ESMF_DistGrid),      intent(out), optional :: elementDistgrid
+    integer,                  intent(out), optional :: numOwnedNodes
+    real(ESMF_KIND_R8),       intent(out), optional :: ownedNodeCoords(:)
+    integer,                  intent(out), optional :: numOwnedElements
+    logical,                  intent(out), optional :: isMemFreed
+    type(ESMF_CoordSys_Flag), intent(out), optional :: coordSys
+    integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Get various information from a mesh.
@@ -2737,6 +2932,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[isMemFreed]}]
 ! Indicates if the coordinate and connection memory been freed from {\tt mesh}. If so, it
 ! can no longer be used as part of an {\tt ESMF\_FieldRegridStore()} call.
+! \item[{[coordSys]}] 
+!  The coordinate system of the grid coordinate data. 
 ! \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2774,7 +2971,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        endif
 
        ! Get coords from C
-       call C_ESMC_GetLocalCoords(mesh, ownedNodeCoords, localrc) 
+       call C_ESMC_GetLocalCoords(mesh, ownedNodeCoords, &
+                                  mesh%spatialDim,localrc) 
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -2788,6 +2986,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(isMemFreed)) then
             isMemFreed=mesh%isCMeshFreed
       endif
+      if (present(coordSys)) coordSys =mesh%coordSys 
 
       if (present(rc)) rc = localrc
 

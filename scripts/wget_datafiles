@@ -1,0 +1,42 @@
+#!/bin/bash
+# $Id$
+################################################################################
+# This script takes 2 arguments:
+# $1 - file of the data files to wget. The script will ignore all blank lines
+#      and lines starting with "#".
+#
+# $2 - directory in which to store the data files.
+#
+# Data files that are present are not retrieved.
+# This script is executed by the "dry_run_use_test_cases target.
+#
+################################################################################
+
+
+if [ ! -d $2 ];then
+
+        mkdir $2
+fi
+cd $2
+
+sed  -e '/#.*$/d' ../$1 | sed -e '/^[ ^]*$/d' > $1.bakup
+cat $1.bakup | while read data_file
+do
+	if [ ! -f $data_file ];then
+		wget  -N  -t 2 http://www.earthsystemmodeling.org/download/data/$data_file   1> tmp 2>&1
+		if  grep "Connection timed out" tmp  &&  grep "Giving up" tmp  ;then
+                        echo ""
+                        echo "###################################################################################"
+                        echo "# The connection to the data file server failed. If you are in an execution       #"
+                        echo "# queue, there is a chance that you cannot connect to the internet from the       #"
+                        echo "# compute nodes. Please exit the queue and run 'gmake dry_run_use_use_test_cases' #"
+                        echo "# on the front end system before attempting to run 'gmake run_use_use_test_cases' #"
+                        echo "# through the queue.                                                              #"
+                        echo "###################################################################################"
+                        echo ""
+			rm -f $1.bakup tmp
+			exit 1
+		fi
+	fi
+done
+rm -f $1.bakup tmp
