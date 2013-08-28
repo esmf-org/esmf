@@ -382,6 +382,7 @@ _ESMF.ESMC_GridCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
                                           ct.c_char_p,
                                           ct.c_char_p,
                                           ct.POINTER(ct.c_int)]
+# TO DO: coordNames needs to be a List of Strings, not a String.
 def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp, decompflag=None,
                             isSphere=None, addCornerStagger=None, addUserArea=None,
                             addMask=None, varname="", coordNames=""):
@@ -395,7 +396,7 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp, decompflag=None,
             Argument Values:\n
                 SCRIP\n
                 GRIDSPEC\n
-        List                                :: regDecomp\n
+        Numpy.array(dtype=int32)            :: regDecomp\n
         DecompFlag (optional)               :: decompflag\n
             Argument Values:\n
                 DEFAULT\n
@@ -408,7 +409,7 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp, decompflag=None,
         Boolean (optional)                  :: addUserArea\n
         Boolean (optional)                  :: addMask\n
         String (optional)                   :: varname\n
-        String (optional)                   :: coordNames\n
+        List of Strings (optional)          :: coordNames\n
     """
     lrc = ct.c_int(0)
     regDecompD = np.array(regDecomp, dtype=np.int32)
