@@ -162,28 +162,27 @@ ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag, int *regDeco
 //      Section~\ref{const:cdecompflag} for a full description of the 
 //      possible options. 
 // \item[{[isSphere]}]
-//      If 1 is a spherical grid, if 0 is regional. Defaults to 1.
+//      Set to 1 for a spherical grid, or 0 for regional. Defaults to 1.
 // \item[{[addCornerStagger]}]
-//      Uses the information in the grid file to add the Corner stagger to 
-//      the Grid. The coordinates for the corner stagger is required for conservative
-//      regridding. If not specified, defaults to false. 
+//      Set to 1 to use the information in the grid file to add the Corner stagger to 
+//      the Grid. The coordinates for the corner stagger are required for conservative
+//      regridding. If not specified, defaults to 0. 
 // \item[{[addUserArea]}]
-//      If 1, read in the cell area from the Grid file, otherwise, ESMF will calculate it
+//      Set to 1 to read in the cell area from the Grid file; otherwise, ESMF will 
+//      calculate it.
 // \item[{[addMask]}]
-//      If 1, generate the mask using the missing\_value attribute defined in 'varname'
+//      Set to 1 to generate the mask using the missing\_value attribute defined in 'varname'
 // \item[{[varname]}]
-//      If addMask is true, provide a variable name stored in the grid file and
+//      If addMask is non-zero, provide a variable name stored in the grid file and
 //      the mask will be generated using the missing value of the data value of
 //      this variable.  The first two dimensions of the variable has to be the
-//      the longitude and the latitude dimension and the mask is derived from the
+//      longitude and the latitude dimension and the mask is derived from the
 //      first 2D values of this variable even if this data is 3D, or 4D array.
-//\item[{coordNames}]
-//      a 2D array containing the longitude and latitude variable names in a GRIDSPEC
-//      file if there are multiple coordinates defined in the file
+//\item[{[coordNames]}]
+//      A two-element array containing the longitude and latitude variable names in a
+//      GRIDSPEC file if there are multiple coordinates defined in the file.
 // \item[{[rc]}]
 //      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-//  \item[grid]
-//    Grid object whose memory is to be freed. 
 //  \end{description}
 //
 //EOP
