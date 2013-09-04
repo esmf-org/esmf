@@ -822,7 +822,6 @@ program ESMF_DistGridCreateGetUTest
 
   deallocate(collocation)
 
-
   !-----------------------------------------------------------------------------
   !NEX_UTest
   ! test the serialize inquire-only option
@@ -866,6 +865,68 @@ program ESMF_DistGridCreateGetUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
   
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridDestroy()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridDestroy(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !-----------------------------------------------------------------------------
+  ! Multi tile tests
+  !-----------------------------------------------------------------------------
+
+  dimCount  = 2
+  tileCount = 4
+  allocate(minIndexPTile(dimCount,tileCount))
+  allocate(maxIndexPTile(dimCount,tileCount))
+  minIndexPTile(:,1) = (/11,1/)
+  maxIndexPTile(:,1) = (/20,10/)
+  minIndexPTile(:,2) = (/11,11/)
+  maxIndexPTile(:,2) = (/20,20/)
+  minIndexPTile(:,3) = (/1,11/)
+  maxIndexPTile(:,3) = (/10,20/)
+  minIndexPTile(:,4) = (/1,1/)
+  maxIndexPTile(:,4) = (/10,10/)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridCreate() - 2D Multi Tile Default"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  distgrid = ESMF_DistGridCreate(minIndexPTile=minIndexPTile, &
+    maxIndexPTile=maxIndexPTile, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+ 
+  deallocate(minIndexPTile, maxIndexPTile)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridGet() - elementCount"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DistGridGet(distgrid, localDe=0, elementCount=elementCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "DistGridGet() - seqIndexList(:)"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  allocate(seqIndexList(elementCount))
+  call ESMF_DistGridGet(distgrid, localDe=0, seqIndexList=seqIndexList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Verify seqIndexList(:)"
+  write(failMsg, *) "Wrong result"
+  loopResult = .true.
+  do i=1, elementCount
+    if (seqIndexList(i) /= localPet*100 + i) &
+      loopResult = .false.
+  enddo
+  call ESMF_Test(loopResult, &
+    name, failMsg, result, ESMF_SRCLINE)
+  deallocate(seqIndexList)
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "DistGridDestroy()"
