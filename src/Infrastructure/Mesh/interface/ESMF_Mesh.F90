@@ -77,6 +77,11 @@ module ESMF_MeshMod
     integer :: spatialDim
     integer :: parametricDim
 
+    type(ESMF_CoordSys_Flag) :: coordSys ! Put this here for now. 
+                                         ! Eventually may need to also put lower in C++ Mesh???
+                                         ! If connect this via MeshCXX then move this there.
+
+
     ! Info about Split elements if created from a file
     ! Eventually may allow this even if not created 
     ! from a file
@@ -436,8 +441,6 @@ contains
 !   Test if both {\tt mesh1} and {\tt mesh2} alias the same ESMF Mesh 
 !   object.
 !
-!EOPI
-!-------------------------------------------------------------------------------
 
     ESMF_INIT_TYPE minit1, minit2
     integer :: localrc1, localrc2
@@ -746,7 +749,8 @@ contains
 
     num_nodes = size(nodeIds)
     call C_ESMC_MeshAddNodes(mesh%this, num_nodes, nodeIds, nodeCoords, &
-                             nodeOwners, nodeMaskII, localrc)
+                         nodeOwners, nodeMaskII, &
+                         mesh%coordSys, mesh%spatialDim, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -772,15 +776,17 @@ contains
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreate3Part(parametricDim, spatialDim, rc)
+    function ESMF_MeshCreate3Part(parametricDim, spatialDim, &
+                                  coordSys, rc)
 !
 !
 ! !RETURN VALUE:
     type(ESMF_Mesh)         :: ESMF_MeshCreate3Part
 ! !ARGUMENTS:
-    integer,                intent(in)            :: parametricDim
-    integer,                intent(in)            :: spatialDim
-    integer,                intent(out), optional :: rc
+    integer,                  intent(in)            :: parametricDim
+    integer,                  intent(in)            :: spatialDim
+    type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
+    integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   This call is the first part of the three part mesh create
@@ -801,21 +807,36 @@ contains
 !         The number of coordinate dimensions needed to describe the locations of the nodes 
 !         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
 !         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
+! \item[{[coordSys]}] 
+!         The coordinate system of the grid coordinate data. 
+!         For a full list of options, please see Section~\ref{const:coordsys}. 
+!         If not specified then defaults to ESMF\_COORDSYS\_CART.  
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
+    integer                  :: localrc      ! local return code
+    type(ESMF_CoordSys_Flag) :: coordSysLocal
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+   ! Set Default coordSys
+   if (present(coordSys)) then
+      coordSysLocal=coordSys
+   else 
+      coordSysLocal=ESMF_COORDSYS_CART
+   endif
+
+
+    ! Create C++ Mesh
     ESMF_MeshCreate3Part%this = ESMF_NULL_POINTER
 
-    call c_ESMC_meshcreate(ESMF_MeshCreate3Part%this, parametricDim, spatialDim, localrc)
+    call c_ESMC_meshcreate(ESMF_MeshCreate3Part%this, parametricDim, spatialDim, &
+                           coordSysLocal, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -831,6 +852,9 @@ contains
     ! Set dimension information
     ESMF_MeshCreate3Part%spatialDim=spatialDim
     ESMF_MeshCreate3Part%parametricDim=parametricDim
+
+    ! Set CoordSys
+    ESMF_MeshCreate3Part%coordSys=coordSysLocal
 
     ! Check init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreate3Part)
@@ -851,7 +875,7 @@ contains
     function ESMF_MeshCreate1Part(parametricDim, spatialDim, &
                          nodeIds, nodeCoords, nodeOwners, nodeMask, &
                          elementIds, elementTypes, elementConn, &
-                         elementMask, elementArea, rc)
+                         elementMask, elementArea, coordSys, rc)
 !
 !
 ! !RETURN VALUE:
@@ -868,6 +892,7 @@ contains
     integer,            intent(in)            :: elementConn(:)
     integer,            intent(in),  optional :: elementMask(:)
     real(ESMF_KIND_R8), intent(in),  optional :: elementArea(:)  
+    type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -959,6 +984,10 @@ contains
 !   \item [{[elementArea]}]
 !          An array containing element areas. If not specified, the element areas are internally calculated. 
 !          This input consists of a 1D array the size of the number of elements on this PET.
+!   \item[{[coordSys]}] 
+!         The coordinate system of the grid coordinate data. 
+!         For a full list of options, please see Section~\ref{const:coordsys}. 
+!         If not specified then defaults to ESMF\_COORDSYS\_CART.  
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -972,6 +1001,7 @@ contains
     type(ESMF_InterfaceInt) :: elementMaskII, nodeMaskII
     real(ESMF_KIND_R8) :: tmpArea(2)
     integer :: areaPresent
+    type(ESMF_CoordSys_Flag) :: coordSysLocal
 
 
     ! initialize return code; assume routine not implemented
@@ -996,7 +1026,17 @@ contains
        lregridConserve=ESMF_REGRID_CONSERVE_ON
 !    endif
 
-    call c_ESMC_meshcreate(ESMF_MeshCreate1Part%this, parametricDim, spatialDim, localrc)
+   
+   ! Set Default coordSys
+   if (present(coordSys)) then
+      coordSysLocal=coordSys
+   else 
+      coordSysLocal=ESMF_COORDSYS_CART
+   endif
+
+    ! Create C++ Mesh
+    call c_ESMC_meshcreate(ESMF_MeshCreate1Part%this, parametricDim, spatialDim, &
+                           coordSyslocal, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1012,7 +1052,8 @@ contains
     ! Add the nodes
     num_nodes = size(nodeIds)
     call C_ESMC_MeshAddNodes(ESMF_MeshCreate1Part%this, num_nodes, nodeIds, nodeCoords, &
-                             nodeOwners, nodeMaskII, localrc)
+                             nodeOwners, nodeMaskII, &
+                             coordSysLocal, spatialDim, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1103,6 +1144,9 @@ num_elems, &
     ESMF_MeshCreate1Part%spatialDim=spatialDim
     ESMF_MeshCreate1Part%parametricDim=parametricDim
 
+    ! Set coord sys information
+    ESMF_MeshCreate1Part%coordSys=coordSysLocal
+
     !call ESMF_DistGridPrint(ESMF_MeshCreate1Part%nodal_distgrid)
     !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, ESMF_MeshCreate1Part%nodal_distgrid, rc)
 
@@ -1119,7 +1163,8 @@ num_elems, &
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromDG(distgrid, parametricDim, spatialDim, rc)
+    function ESMF_MeshCreateFromDG(distgrid, parametricDim, spatialDim, &
+                                   coordSys, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1128,7 +1173,9 @@ num_elems, &
     type(ESMF_DistGrid),        intent(in)            :: distgrid
     integer,                    intent(in), optional  :: parametricDim
     integer,                    intent(in), optional  :: spatialDim
+    type(ESMF_CoordSys_Flag),   intent(in), optional  :: coordSys
     integer,                    intent(out), optional :: rc
+
 ! 
 ! !DESCRIPTION:
 !   Create a Mesh from an elemental distgrid. Such a mesh will have no coordinate or
@@ -1145,6 +1192,10 @@ num_elems, &
 !         The number of coordinate dimensions needed to describe the locations of the nodes 
 !         making up the Mesh. For a manifold, the spatial dimesion can be larger than the 
 !         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
+!   \item[{[coordSys]}] 
+!         The coordinate system of the grid coordinate data. 
+!         For a full list of options, please see Section~\ref{const:coordsys}. 
+!         If not specified then defaults to ESMF\_COORDSYS\_CART.  
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1152,18 +1203,29 @@ num_elems, &
 !EOPI
 !------------------------------------------------------------------------------
     integer::  localrc, l_pdim, l_sdim
+    type(ESMF_CoordSys_Flag) :: coordSysLocal
 
     l_pdim = 2
     l_sdim = 3
     if(present(parametricDim)) l_pdim = parametricDim
     if(present(spatialDim))    l_sdim = spatialDim
 
-    ESMF_MeshCreateFromDG = ESMF_MeshCreate3part(l_pdim, l_sdim, localrc)
+   ! Set Default coordSys
+   if (present(coordSys)) then
+      coordSysLocal=coordSys
+   else 
+      coordSysLocal=ESMF_COORDSYS_CART
+   endif
+
+    ESMF_MeshCreateFromDG = ESMF_MeshCreate3part(l_pdim, l_sdim, &
+                           coordSysLocal, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_MeshCreateFromDG%isFullyCreated=.true.
     ESMF_MeshCreateFromDG%element_distgrid = distgrid
+
+
 
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromDG)
 
@@ -1828,7 +1890,7 @@ end function ESMF_MeshCreateFromFile
     endif
 
     ! create the mesh
-    Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, localrc)
+    Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2427,6 +2489,9 @@ end function ESMF_MeshCreateFromScrip
     ! Set as fully created 
     ESMF_MeshCreateFromPointer%isFullyCreated=.true.
 
+    ! Set default coordsys
+    ESMF_MeshCreateFromPointer%coordSys=ESMF_COORDSYS_CART
+
     if(present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_MeshCreateFromPointer
@@ -2513,6 +2578,9 @@ end function ESMF_MeshCreateFromScrip
     ! Same dimensions as input mesh
     ESMF_MeshCreateRedist%spatialDim=mesh%spatialDim
     ESMF_MeshCreateRedist%parametricDim=mesh%parametricDim
+
+    ! Same coordSys
+    ESMF_MeshCreateRedist%coordSys=mesh%coordSys
 
     ! Will have same freed status as input mesh
     ESMF_MeshCreateRedist%isCMeshFreed=mesh%isCMeshFreed
@@ -2809,21 +2877,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       subroutine ESMF_MeshGet(mesh, parametricDim, spatialDim, &
                    nodalDistgrid, elementDistgrid, &
                    numOwnedNodes, ownedNodeCoords, &
-                   numOwnedElements, isMemFreed, rc)
+                   numOwnedElements, isMemFreed, coordSys, rc)
 !
 ! !RETURN VALUE:
 !
 ! !ARGUMENTS:
-    type(ESMF_Mesh),     intent(in)            :: mesh
-    integer,             intent(out), optional :: parametricDim
-    integer,             intent(out), optional :: spatialDim
-    type(ESMF_DistGrid), intent(out), optional :: nodalDistgrid
-    type(ESMF_DistGrid), intent(out), optional :: elementDistgrid
-    integer,             intent(out), optional :: numOwnedNodes
-    real(ESMF_KIND_R8),  intent(out), optional :: ownedNodeCoords(:)
-    integer,             intent(out), optional :: numOwnedElements
-    logical,             intent(out), optional :: isMemFreed
-    integer,             intent(out), optional :: rc
+    type(ESMF_Mesh),          intent(in)            :: mesh
+    integer,                  intent(out), optional :: parametricDim
+    integer,                  intent(out), optional :: spatialDim
+    type(ESMF_DistGrid),      intent(out), optional :: nodalDistgrid
+    type(ESMF_DistGrid),      intent(out), optional :: elementDistgrid
+    integer,                  intent(out), optional :: numOwnedNodes
+    real(ESMF_KIND_R8),       intent(out), optional :: ownedNodeCoords(:)
+    integer,                  intent(out), optional :: numOwnedElements
+    logical,                  intent(out), optional :: isMemFreed
+    type(ESMF_CoordSys_Flag), intent(out), optional :: coordSys
+    integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Get various information from a mesh.
@@ -2863,6 +2932,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[isMemFreed]}]
 ! Indicates if the coordinate and connection memory been freed from {\tt mesh}. If so, it
 ! can no longer be used as part of an {\tt ESMF\_FieldRegridStore()} call.
+! \item[{[coordSys]}] 
+!  The coordinate system of the grid coordinate data. 
 ! \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2900,7 +2971,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        endif
 
        ! Get coords from C
-       call C_ESMC_GetLocalCoords(mesh, ownedNodeCoords, localrc) 
+       call C_ESMC_GetLocalCoords(mesh, ownedNodeCoords, &
+                                  mesh%spatialDim,localrc) 
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -2914,6 +2986,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(isMemFreed)) then
             isMemFreed=mesh%isCMeshFreed
       endif
+      if (present(coordSys)) coordSys =mesh%coordSys 
 
       if (present(rc)) rc = localrc
 

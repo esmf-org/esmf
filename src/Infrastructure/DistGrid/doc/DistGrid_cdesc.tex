@@ -22,9 +22,9 @@ and describes its decomposition in terms of DEs. Combined with DELayout and VM
 the DistGrid defines the data distribution of a domain decomposition across the
 computational resources of an ESMF Component.
 
-The global domain is defined as the union or ``tilework'' of logically
+The global domain is defined as the union of logically
 rectangular (LR) sub-domains or {\em tiles}. The DistGrid create methods allow
-the specification of such a tilework global domain and its decomposition into
+the specification of such a multi-tile global domain and its decomposition into
 exclusive, DE-local LR regions according to various degrees of user specified
 constraints. Complex index space topologies can be constructed by specifying
 connection relationships between tiles during creation.

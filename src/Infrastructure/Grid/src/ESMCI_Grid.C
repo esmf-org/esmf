@@ -25,6 +25,7 @@
 // include associated header file
 #include "ESMCI_Grid.h"
 
+
 // include higher level, 3rd party or system headers
 #include <stdio.h>
 #include <string.h>
@@ -33,6 +34,7 @@
 // include ESMF headers
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
+#include "ESMCI_CoordSys.h"
 #include "ESMCI_GridToMesh.h"
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/ESMCI_MeshRead.h"
@@ -73,10 +75,18 @@ void FTN_X(f_esmf_gridcreate1peridim)(ESMCI::Grid **grid,
     ESMC_PoleKind_Flag *poleKind, int *pk_present, int *pksize,
     int *rc);
 
-void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid,
-				      char *filename, int *fileTypeFlag, 
-				      int *regDecomp, int *rc, 
-				      int len_filename);
+void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid, char *filename, int *fileTypeFlag, 
+				      int *rank, int *regDecomp, 
+				      int *decompflag, int *dfpresent,
+				      int *isSphere, int *ispresent,
+				      int *addCornerStagger, int *acspresent,
+				      int *addUserArea, int *auapresent,
+				      int *addMask, int *ampresent, 
+				      char *varname, int *vnpresent,
+				      char *coordNames, int *cnpresent, int *rc, 
+				      ESMCI_FortranStrLenArg len_filename, 
+				      ESMCI_FortranStrLenArg len_varname, 
+				      ESMCI_FortranStrLenArg len_coordNames);
 }
 
 //
@@ -309,6 +319,13 @@ int setDefaultsLUA(int dimCount,
     char *filename,
     int fileTypeFlag,
     int *regDecomp,
+    int *decompflag,
+    int *isSphere,
+    int *addCornerStagger,
+    int *addUserArea,
+    int *addMask,
+    char *varname,
+    char *coordNames,
     int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -318,27 +335,37 @@ int setDefaultsLUA(int dimCount,
 //      (see declaration in ESMC\_Grid.h)
 //
 //EOP
-    // Initialize return code. Assume routine not implemented
+
     //printf ("Start ESMCI_Grid.C : createfromfile(%s,%d,[%d,%d])\n", 
-    //	    filename, fileTypeFlag, regDecomp[0], regDecomp[1]);
+    //        filename, fileTypeFlag, regDecomp[0], regDecomp[1]);
+
+    // Initialize return code. Assume routine not implemented
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
 
 
     // handle the optional arguments
-    /*
-    if (coordSys != NULL)
-      cs_present = 1;
-    if (coordTypeKind != NULL)
-      ctk_present = 1; 
-    if (poleKind != NULL)
-      pk_present = 1; 
-    */
+    int dfpresent, ispresent, acspresent, auapresent, ampresent, vnpresent, cnpresent;
+    dfpresent = decompflag != NULL;
+    ispresent = isSphere != NULL;
+    acspresent = addCornerStagger != NULL;
+    auapresent = addUserArea != NULL;
+    ampresent = addMask != NULL;
+    vnpresent = strlen(varname) > 0;
+    cnpresent = strlen(coordNames) > 0;
+
+    // Determine number of dimensions
+    int rank = sizeof(regDecomp) / sizeof(int);
+
     // allocate the grid object
     Grid *grid;
-    FTN_X(f_esmf_gridcreatefromfile)(&grid, 
-				     filename, &fileTypeFlag, 
-				     regDecomp, &localrc, strlen(filename));
+    FTN_X(f_esmf_gridcreatefromfile)(&grid, filename, &fileTypeFlag, &rank, regDecomp, 
+				     decompflag, &dfpresent, 
+				     isSphere, &ispresent, 
+				     addCornerStagger, &acspresent, addUserArea, &auapresent,
+				     addMask, &ampresent, varname, &vnpresent, 
+				     coordNames, &cnpresent, &localrc,
+				     strlen(filename), strlen(varname), strlen(coordNames));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return grid;
 
@@ -347,7 +374,6 @@ int setDefaultsLUA(int dimCount,
     //printf ("End ESMCI_Grid.C : createfromfile()\n");
 
     return grid;
-
  }
 
 //-----------------------------------------------------------------------------
@@ -7551,32 +7577,24 @@ void GridIter::getCartCoord(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  int localrc;
+  int localrc,rc;
+  TYPE orig_coord[ESMF_MAXDIM];
 
   // if done then leave
   if (done) return;
 
   // get coordinates
-  grid->getCoordInternal(staggerloc, curDE, curInd, coord);
+  grid->getCoordInternal(staggerloc, curDE, curInd, orig_coord);
 
-  // transform if necessary to cartesian
-  if (grid->getCoordSys()==ESMC_COORDSYS_SPH_DEG) {
-    const double DEG2RAD = M_PI/180.0;
-    double lon = coord[0];
-    double lat = coord[1];
-    const double ninety = 90.0;
-    double theta = DEG2RAD*lon, phi = DEG2RAD*(ninety-lat);
-    coord[0] = std::cos(theta)*std::sin(phi);
-    coord[1] = std::sin(theta)*std::sin(phi);
-    coord[2] = std::cos(phi);    
-  } else if (grid->getCoordSys()==ESMC_COORDSYS_SPH_RAD) {
-    const double half_pi = 0.5*M_PI;
-    double theta = coord[0];
-    double phi = half_pi-coord[1];
-    coord[0] = std::cos(theta)*std::sin(phi);
-    coord[1] = std::sin(theta)*std::sin(phi);
-    coord[2] = std::cos(phi);    
-  }
+  
+  // Call into coordsys method to convert to Cart
+  localrc=ESMCI_CoordSys_ConvertToCart(grid->getCoordSys(),
+                                       grid->getDimCount(),
+                                       orig_coord,  // Input coordinates 
+                                       coord);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                    &rc)) throw rc;
+  
 
 }
 // Add more types here if necessary
@@ -9310,21 +9328,16 @@ bool Grid::match(
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Grid::getCartCoordDimCount()"
 int Grid::getCartCoordDimCount() {
-  if (coordSys==ESMC_COORDSYS_CART) {
-    return dimCount;
-  } else if ((coordSys==ESMC_COORDSYS_SPH_DEG) || (coordSys==ESMC_COORDSYS_SPH_RAD)) {
-    if (dimCount==2) {
-      return 3;
-    } else {
-      int rc;
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "- ESMF_COORDSYS_SPH currently only works with Grids of dimcount 2",
-        ESMC_CONTEXT, &rc);
-      throw rc;
-      return -1;
-    }
-  }
-  return -1; // should never get here, but just to quiet compiler warning on cray
+  int localrc, rc;
+  int cartDimCount;
+
+  // call into coord sys method to calculate this
+  localrc=ESMCI_CoordSys_CalcCartDim(coordSys, dimCount, &cartDimCount);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+       &rc)) throw rc;
+
+  // return cart dim
+  return cartDimCount;
 }
 
 

@@ -75,6 +75,7 @@ program ESMF_MeshUTest
   integer :: spatialDim, parametricDim, cu(1),cl(1)
   logical:: meshBool
   integer :: sizeOfList
+  type(ESMF_CoordSys_Flag) :: coordSys
 
 
 !-------------------------------------------------------------------------------
@@ -1353,6 +1354,98 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test Mesh Create with coordSys ESMF_COORDSYS_SPH_DEG"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Test mesh
+  call createTestMeshSphDeg(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Check CoordSys flag
+  call ESMF_MeshGet(mesh, coordSys=coordSys, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  if (coordSys .ne. ESMF_COORDSYS_SPH_DEG) correct=.false.
+
+
+  ! Check owned coordinates
+  call ESMF_MeshGet(mesh, numOwnedNodes=numOwnedNodes, &
+                    rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  allocate(ownedNodeCoords(2*numOwnedNodes))
+
+  call ESMF_MeshGet(mesh, &
+                    ownedNodeCoords=ownedNodeCoords, &
+                    rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  
+  ! Check coords
+  if (petCount .eq. 1) then
+      if (numOwnedNodes .ne. 9) correct=.false.
+    
+      if (.not. ALL(ownedNodeCoords .eq. &
+             (/0.0,0.0, &
+                 10.0,0.0, &
+                 20.0,0.0, &
+                 0.0,10.0, &
+                 10.0,10.0, &
+                 20.0,10.0, &
+                 0.0,20.0, &
+                 10.0,20.0, &
+                 20.0,20.0 /))) correct=.false.
+
+   else if (petCount .eq. 4) then
+     if (localPet .eq. 0) then
+        if (numOwnedNodes .ne. 4) correct=.false.
+
+       if (.not. ALL(ownedNodeCoords .eq. &
+               (/0.0,0.0, &
+                10.0,0.0, &
+                 0.0,10.0, &
+                 10.0,10.0/))) correct=.false.
+
+     else if (localPet .eq. 1) then
+        if (numOwnedNodes .ne. 2) correct=.false.
+
+        if (.not. ALL(ownedNodeCoords .eq. &
+                      (/20.0,0.0, &
+                        20.0,10.0/))) correct=.false.
+
+     else if (localPet .eq. 2) then
+        if (numOwnedNodes .ne. 2) correct=.false.
+
+        if (.not. ALL(ownedNodeCoords .eq. &
+                      (/0.0,20.0, &
+                       10.0,20.0/))) correct=.false.
+
+     else 
+       if (numOwnedNodes .ne. 1) correct=.false.
+
+        if (.not. ALL(ownedNodeCoords .eq. &
+            (/20.0,20.0/))) correct=.false.
+     endif
+   endif
+
+
+  ! deallocate coords
+  deallocate(ownedNodeCoords)
+
+  ! Get rid of Meshs
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
   !------------------------------------------------------------------------
   ! TODO: "Activate once the mesh is fully created. ESMF_MeshWrite is not meant
   !  to be called until then".
@@ -1378,17 +1471,17 @@ contains
   ! 
   !              Mesh Ids
   !
-  !  2.0   7 ------- 8 -------- 9
-  !        |         |          |
-  !        |    3    |    4     |
-  !        |         |          |
-  !  1.0   4 ------- 5 -------- 6
-  !        |         |          |
-  !        |    1    |    2     |
-  !        |         |          |
-  !  0.0   1 ------- 2 -------- 3
+  !   2.0   7 ------- 8 -------- 9
+  !         |         |          |
+  !         |    3    |    4     |
+  !         |         |          |
+  !   1.0   4 ------- 5 -------- 6
+  !         |         |          |
+  !         |    1    |    2     |
+  !         |         |          |
+  !   0.0   1 ------- 2 -------- 3
   !
-  !       0.0       1.0        2.0 
+  !        0.0       1.0        2.0 
   !
   !      Node Ids at corners
   !      Element Ids in centers
@@ -1400,15 +1493,15 @@ contains
   !
   !             Mesh Owners
   !
-  !  2.0   2 ------- 2 -------- 3
+  !   2.0  2 ------- 2 -------- 3
   !        |         |          |
   !        |    2    |    3     |
   !        |         |          |
-  !  1.0   0 ------- 0 -------- 1
+  !   1.0  0 ------- 0 -------- 1
   !        |         |          |
   !        |    0    |    1     |
   !        |         |          |
-  !  0.0   0 ------- 0 -------- 1
+  !   0.0  0 ------- 0 -------- 1
   !
   !       0.0       1.0        2.0 
   !
@@ -1649,6 +1742,290 @@ subroutine createTestMesh1(mesh, rc)
    deallocate(elemConn)
 
 end subroutine createTestMesh1
+
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! 
+  ! Creates the following mesh on 
+  ! 1 or 4 PETs. Returns an error 
+  ! if run on other than 1 or 4 PETs
+  ! 
+  !              Mesh Ids
+  !
+  !   20.0   7 ------- 8 -------- 9
+  !          |         |          |
+  !          |    3    |    4     |
+  !          |         |          |
+  !   10.0   4 ------- 5 -------- 6
+  !          |         |          |
+  !          |    1    |    2     |
+  !          |         |          |
+  !   0.0    1 ------- 2 -------- 3
+  !
+  !        0.0       10.0        20.0 
+  !
+  !      Node Ids at corners
+  !      Element Ids in centers
+  ! 
+  !!!!! 
+  ! 
+  ! The owners for 1 PET are all Pet 0.
+  ! The owners for 4 PETs are as follows:
+  !
+  !             Mesh Owners
+  !
+  !   20.0  2 ------- 2 -------- 3
+  !         |         |          |
+  !         |    2    |    3     |
+  !         |         |          |
+  !   10.0  0 ------- 0 -------- 1
+  !         |         |          |
+  !         |    0    |    1     |
+  !         |         |          |
+  !   0.0   0 ------- 0 -------- 1
+  !
+  !        0.0       10.0       20.0 
+  !
+  !      Node Owners at corners
+  !      Element Owners in centers
+  ! 
+subroutine createTestMeshSphDeg(mesh, rc)
+  type(ESMF_Mesh), intent(out) :: mesh
+  integer :: rc
+
+  integer, pointer :: nodeIds(:),nodeOwners(:)
+  real(ESMF_KIND_R8), pointer :: nodeCoords(:)
+  real(ESMF_KIND_R8), pointer :: ownedNodeCoords(:)
+  integer :: numNodes, numOwnedNodes, numOwnedNodesTst
+  integer :: numElems,numOwnedElemsTst
+  integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer :: petCount, localPet
+  type(ESMF_VM) :: vm
+
+
+  ! get global VM
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=rc)
+  if (rc /= ESMF_SUCCESS) return
+
+  ! return with an error if not 1 or 4 PETs
+  if ((petCount /= 1) .and. (petCount /=4)) then
+     rc=ESMF_FAILURE
+     return
+  endif
+
+
+  ! Setup mesh info depending on the 
+  ! number of PETs
+  if (petCount .eq. 1) then
+
+     ! Fill in node data
+     numNodes=9
+
+     !! node ids
+     allocate(nodeIds(numNodes))
+     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+     
+     !! node Coords
+     allocate(nodeCoords(numNodes*2))
+     nodeCoords=(/0.0,0.0, &
+                 10.0,0.0, &
+                 20.0,0.0, &
+                 0.0,10.0, &
+                 10.0,10.0, &
+                 20.0,10.0, &
+                 0.0,20.0, &
+                 10.0,20.0, &
+                 20.0,20.0 /)
+
+      !! node owners
+      allocate(nodeOwners(numNodes))
+      nodeOwners=0 ! everything on proc 0
+
+
+      ! Fill in elem data
+      numElems=4
+
+      !! elem ids
+      allocate(elemIds(numElems))
+      elemIds=(/1,2,3,4/) 
+
+      !! elem types
+      allocate(elemTypes(numElems))
+      elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+      !! elem conn
+      allocate(elemConn(numElems*4))
+      elemConn=(/1,2,5,4, & 
+                 2,3,6,5, & 
+                 4,5,8,7, & 
+                 5,6,9,8/)
+
+   else if (petCount .eq. 4) then
+     ! Setup mesh data depending on PET
+     if (localPet .eq. 0) then
+        ! Fill in node data
+        numNodes=4
+        numOwnedNodes=4
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/1,2,4,5/) 
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/0.0,0.0, &
+                    10.0,0.0, &
+                    0.0,10.0, &
+                    10.0,10.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,0,0,0/) ! everything on proc 0
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/1/) 
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)
+     else if (localPet .eq. 1) then
+        ! Fill in node data
+        numNodes=4
+        numOwnedNodes=2
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/2,3,5,6/) 
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/10.0,0.0, &
+                    20.0,0.0, &
+                    10.0,10.0, &
+                    20.0,10.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,1,0,1/) 
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/2/) 
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)
+     else if (localPet .eq. 2) then
+        ! Fill in node data
+        numNodes=4
+        numOwnedNodes=2
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/4,5,7,8/) 
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/0.0,10.0, &
+                    10.0,10.0, &
+                    0.0,20.0, &
+                    10.0,20.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,0,2,2/) 
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/3/) 
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)  
+     else 
+        ! Fill in node data
+        numNodes=4
+        numOwnedNodes=1
+
+       !! node ids
+       allocate(nodeIds(numNodes))
+       nodeIds=(/5,6,8,9/) 
+
+       !! node Coords
+       allocate(nodeCoords(numNodes*2))
+       nodeCoords=(/10.0,10.0, &
+                    20.0,10.0, &
+                    10.0,20.0, &
+                    20.0,20.0/)
+
+       !! node owners
+       allocate(nodeOwners(numNodes))
+       nodeOwners=(/0,1,2,3/) 
+
+       ! Fill in elem data
+       numElems=1
+
+       !! elem ids
+       allocate(elemIds(numElems))
+       elemIds=(/4/) 
+
+       !! elem type
+       allocate(elemTypes(numElems))
+       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+       !! elem conn
+       allocate(elemConn(numElems*4))
+       elemConn=(/1,2,4,3/)  
+     endif
+   endif
+
+   
+   ! Create Mesh structure in 1 step
+   mesh=ESMF_MeshCreate(parametricDim=2,spatialDim=2, &
+        nodeIds=nodeIds, nodeCoords=nodeCoords, &
+        nodeOwners=nodeOwners, elementIds=elemIds,&
+        elementTypes=elemTypes, elementConn=elemConn, &
+        coordSys=ESMF_COORDSYS_SPH_DEG, rc=rc)
+   if (rc /= ESMF_SUCCESS) return
+
+   ! deallocate node data
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+   
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+
+end subroutine createTestMeshSphDeg
+
+
 
 
 

@@ -2152,7 +2152,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         ESMF_CONTEXT, rcToReturn=localrc)
 
     ! Last chance to return an error code (IODestroy failed)
-    if (present(rc) .and. (rc .eq. ESMF_SUCCESS)) rc = localrc
+    if (present(rc)) then
+      if (rc == ESMF_SUCCESS) rc = localrc
+    end if
 
 #else
     ! Return indicating PIO not present
@@ -5021,7 +5023,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
         ESMF_CONTEXT, rcToReturn=localrc)
 
     ! Last chance to return an error code (IODestroy failed)
-    if (present(rc) .and. (rc .eq. ESMF_SUCCESS)) rc = localrc
+    if (present(rc)) then
+      if (rc == ESMF_SUCCESS) rc = localrc
+    end if
 
 #else
     ! Return indicating PIO not present

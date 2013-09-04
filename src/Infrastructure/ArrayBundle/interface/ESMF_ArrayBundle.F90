@@ -1546,8 +1546,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set default flags
     opt_singlefileflag = ESMF_TRUE
-    if (present(singleFile) .and. .not. singleFile) then
-      opt_singlefileflag = ESMF_FALSE
+    if (present(singleFile)) then
+      if (.not. singleFile) then
+        opt_singlefileflag = ESMF_FALSE
+      end if
     endif
 
     ! Call into the C++ interface, which will call IO object

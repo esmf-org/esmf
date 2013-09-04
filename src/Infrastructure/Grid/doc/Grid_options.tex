@@ -1,28 +1,5 @@
 % $Id$
 
-\subsubsection{ESMF\_COORDSYS}
-\label{const:coordsys}
-
-{\sf DESCRIPTION:\\}
- A set of values which indicates in which system the coordinates in the Grid are. This value is useful both to indicate to 
-other users the type of the coordinates, but also to control how the coordinates are interpreted in regridding methods 
-(e.g. {\tt ESMF\_FieldRegridStore()}).
-
-The type of this flag is:
-
-{\tt type(ESMF\_CoordSys\_Flag)}
-
-The valid values are:
-\begin{description}
-\item [ESMF\_COORDSYS\_CART] Cartesian coordinate system. In this system, the cartesian coordinates are mapped to the Grid coordinate dimensions in the following order: x,y,z. (E.g. using {\tt coordDim=2} in ESMF\_GridGetCoord() references the y dimension) 
-
-\item [ESMF\_COORDSYS\_SPH\_DEG] Spherical coordinates in degrees. In this system, the spherical coordinates are mapped to the Grid coordinate dimensions in the following order: longitude, latitude, radius. (E.g. using {\tt coordDim=2} in ESMF\_GridGetCoord() references the latitude dimension) Note, however, that ESMF\_FieldRegridStore() currently just supports longitude and latitude (i.e. with this system, only Grids of dimension 2 are supported in the regridding).
-
-\item [ESMF\_COORDSYS\_SPH\_RAD] Spherical coordinates in radians. In this system, the spherical coordinates are mapped to the Grid coordinate dimensions in the following order: longitude, latitude, radius. (E.g. using {\tt coordDim=2} in ESMF\_GridGetCoord() references the latitude dimension) Note, however, that ESMF\_FieldRegridStore() currently just supports longitude and latitude (i.e. with this system, only Grids of dimension 2 are supported in the regridding).
-
-\end{description}
-
-
 \subsubsection{ESMF\_GRIDCONN}
 \label{const:gridconn}
 

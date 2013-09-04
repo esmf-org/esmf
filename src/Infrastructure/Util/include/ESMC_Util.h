@@ -32,12 +32,6 @@ extern "C" {
 } // extern "C"
 #endif
 
-enum ESMC_CoordSys_Flag {ESMC_COORDSYS_INVALID=-2,
-                    ESMC_COORDSYS_UNINIT,
-                    ESMC_COORDSYS_CART,
-                    ESMC_COORDSYS_SPH_DEG,
-                    ESMC_COORDSYS_SPH_RAD};
-
 enum ESMC_GridItem_Flag {ESMC_GRIDITEM_INVALID=-2,
                          ESMC_GRIDITEM_UNINIT,
                          ESMC_GRIDITEM_MASK,
@@ -102,11 +96,13 @@ enum ESMC_TypeKind_Flag {ESMC_TYPEKIND_I1=1,
 enum ESMC_UnmappedAction_Flag {ESMC_UNMAPPEDACTION_ERROR=0,
 			       ESMC_UNMAPPEDACTION_IGNORE};
 
-
 enum ESMC_FileFormat_Flag {ESMC_FILEFORMAT_UNDEFINED, ESMC_FILEFORMAT_VTK,
 			   ESMC_FILEFORMAT_SCRIP, ESMC_FILEFORMAT_ESMFMESH,
 			   ESMC_FILEFORMAT_ESMCGRID, ESMC_FILEFORMAT_UGRID,
 			   ESMC_FILEFORMAT_GRIDSPEC};
+
+enum ESMC_Decomp_Flag {ESMC_DECOMP_DEFAULT, ESMC_DECOMP_BALANCED, ESMC_DECOMP_RESTFIRST,
+		       ESMC_DECOMP_RESTLAST, ESMC_DECOMP_CYCLIC};
 
 // ESMF platform-dependent data types
 #if (ESMC_POINTER_SIZE == 4)

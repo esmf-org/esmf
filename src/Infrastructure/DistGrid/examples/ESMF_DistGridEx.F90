@@ -662,14 +662,14 @@ program ESMF_DistGridEx
 !EOE
 
 !BOE
-! \subsubsection{2D tilework DistGrid with regular decomposition}
+! \subsubsection{2D multi-tile DistGrid with regular decomposition}
 ! 
 ! Creating a DistGrid from a list of LR domains is a straight forward
 ! extension of the case with a single LR domain. The first four 
 ! arguments of {\tt ESMF\_DistGridCreate()} are promoted to rank 2, the 
 ! second dimension being the tile count index.
 ! 
-! The following 2D tilework domain consisting of 3 LR tiles will 
+! The following 2D multi-tile domain consisting of 3 LR tiles will 
 ! be used in the examples of this section:
 ! \begin{verbatim}
 !   ----------------------------------------> 2nd dim
@@ -694,7 +694,7 @@ program ESMF_DistGridEx
 !  1st dim
 ! \end{verbatim}
 !
-! The first step in creating a tilework global domain is to construct the
+! The first step in creating a multi-tile global domain is to construct the
 ! {\tt minIndex} and {\tt maxIndex} arrays.
 !EOE
 !BOC
@@ -745,7 +745,7 @@ program ESMF_DistGridEx
 !
 ! Each tile can be decomposed differently into DEs. The default DE labeling 
 ! follows the column major order for each tile. This is demonstrated in the
-! following case where the tilework global domain is decomposed into 9 DEs,
+! following case where the multi-tile global domain is decomposed into 9 DEs,
 !EOE
 !BOC
   regDecomp(:,1) = (/2,2/)    ! 4 DEs
