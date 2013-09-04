@@ -175,6 +175,6 @@ setup(\
                 'test': TestCommand,
                 'test_regrid': TestRegridCommand,
                 'test_regrid_from_file': TestRegridFromFileCommand,
-                #'test_regrid_from_file_dryrun': TestRegridFromFileDryrunCommand,
+                'test_regrid_from_file_dryrun': TestRegridFromFileDryrunCommand,
                 'test_all': TestAllCommand}
      )

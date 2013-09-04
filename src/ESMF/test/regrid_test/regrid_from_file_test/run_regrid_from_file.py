@@ -2,10 +2,10 @@
 
 import os
 import ESMF
-
+import sys
 # run utests, pipe to file
 REGRID_TEST_DIR = './src/ESMF/test/regrid_test/regrid_from_file_test/'
-rtestfile=os.path.join(REGRID_TEST_DIR, 'regrid_check_driver.py')
+rtestfile=' '.join([os.path.join(REGRID_TEST_DIR, 'regrid_check_driver.py')]+sys.argv[1:])
 rtestoutfile='run_regrid_from_file.log'
 
 if ESMF.constants._ESMF_OS is ESMF.constants._ESMF_OS_UNICOS:
