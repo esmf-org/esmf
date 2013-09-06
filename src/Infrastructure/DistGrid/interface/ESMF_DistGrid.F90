@@ -1557,7 +1557,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateRDT()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from tilework with regular decomposition
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object on multiple tiles with regular decomposition
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1590,11 +1590,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
+!     Create an {\tt ESMF\_DistGrid} on multiple logically 
 !     rectangular (LR) tiles with regular decomposition. A regular
 !     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
-!     tilework of tiles is expressed by a list of DE count vectors, one
+!     multi-tile DistGrid is expressed by a list of DE count vectors, one
 !     vector for each tile. Each vector contained in the 
 !     {\tt regDecompPTile} argument ascribes DE counts for each dimension. It is 
 !     erroneous to provide more tiles than there are DEs.
@@ -1764,7 +1764,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBP()"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from tilework with regular decomposition
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object on multiple tiles with regular decomposition
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1786,11 +1786,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
+!     Create an {\tt ESMF\_DistGrid} on multiple logically 
 !     rectangular (LR) tiles with regular decomposition. A regular
 !     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
-!     tilework of tiles is expressed by a list of DE count vectors, one
+!     multi-tile DistGrid is expressed by a list of DE count vectors, one
 !     vector for each tile. Each vector contained in the 
 !     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
 !     erroneous to provide more tiles than there are DEs.
@@ -1911,7 +1911,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateRDTFA()"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from tilework with regular decomposition and fast axis
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object on multiple tiles with regular decomposition and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1934,11 +1934,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
+!     Create an {\tt ESMF\_DistGrid} on multiple logically 
 !     rectangular (LR) tiles with regular decomposition. A regular
 !     decomposition is of the same rank as the tile and decomposes
 !     each dimension into a fixed number of DEs. A regular decomposition of a
-!     tilework of tiles is expressed by a list of DE count vectors, one
+!     multi-tile DistGrid is expressed by a list of DE count vectors, one
 !     vector for each tile. Each vector contained in the 
 !     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
 !     erroneous to provide more tiles than there are DEs.
@@ -2059,7 +2059,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBPFA()"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from tilework with DE blocks and fast axis
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object on multiple tiles with DE blocks and fast axis
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -2081,7 +2081,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Create an {\tt ESMF\_DistGrid} from a tilework of logically 
+!     Create an {\tt ESMF\_DistGrid} on multiple logically 
 !     rectangular (LR) tiles with decomposition specified by {\tt deBlockList}.
 !
 !     The arguments are:
@@ -2865,12 +2865,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     indices.
 !   \item[{[seqIndexList]}]
 !     \begin{sloppypar}
-!     List of DistGrid tile-local sequence indices for {\tt localDe}, with
-!     {\tt size(seqIndexList) == (/elementCountPDe(localDe)/)}.
+!     List of sequence indices for the elements on {\tt localDe}, with
+!     {\tt size(seqIndexList) == (/elementCountPDe(localDeToDeMap(localDe))/)}.
 !     \end{sloppypar}
 !   \item[{[elementCount]}]
 !     Number of elements in the localDe, i.e. identical to
-!     elementCountPDe(localDe).
+!     elementCountPDe(localDeToDeMap(localDe)).
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2953,7 +2953,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[indexList]
 !     Upon return this holds the list of DistGrid tile-local indices
 !     for {\tt localDe} along dimension {\tt dim}. The supplied variable 
-!     must be at least of size {\tt indexCountPDimPDe(dim, de(localDe))}.
+!     must be at least of size {\tt indexCountPDimPDe(dim, localDeToDeMap(localDe))}.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
