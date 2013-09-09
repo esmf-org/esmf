@@ -74,12 +74,12 @@ This is a specialization of the {\tt NUOPC\_Driver} generic component, driving a
   \item {\it Optional specialization} to provide Model and Connector {\tt petList} members in the internal state: {\tt label\_SetModelPetList}.
   \item Create {\tt atm}, {\tt ocn}, and {\tt med} components with their import and export States.
   \item Attach standard NUOPC Model Component metadata.
-  \item Create {\tt atm2ocn}, {atm2med}, {\tt ocn2atm}, {\tt ocn2atm}, {\tt med2atm}, and {\tt med2ocn} Connector components.
+  \item Create {\tt atm2med}, {\tt ocn2med}, {\tt med2atm}, and {\tt med2ocn} Connector components.
   \item Attach standard NUOPC Connector Component metadata.
   \item Initialize the default run sequence.
   \item {\it Required specialization} to set component services: {\tt label\_SetModelServices}. 
   \begin{itemize}
-    \item Call into SetServices() for the {\tt atm}, {\tt ocn}, {\tt med}, {\tt atm2ocn}, {atm2med}, {\tt ocn2atm}, {\tt ocn2atm}, {\tt med2atm}, and {\tt med2ocn} components.
+    \item Call into SetServices() for the {\tt atm}, {\tt ocn}, {\tt med}, {\tt atm2med}, {\tt ocn2med}, {\tt med2atm}, and {\tt med2ocn} components.
     \item Optionally replace the default clock. 
     \item Optionally replace the default run sequence.
   \end{itemize}
@@ -94,7 +94,7 @@ This is a specialization of the {\tt NUOPC\_Driver} generic component, driving a
   \begin{itemize}
   \item If the incoming clock is valid, set the internal stop time to one time step interval on the incoming clock.
   \item Time stepping loop, from current time to stop time, incrementing by time step.
-  \item For each time step iteration, the Run() methods for {\tt atm}, {\tt ocn}, {\tt med}, {\tt atm2ocn}, {atm2med}, {\tt ocn2atm}, {\tt ocn2atm}, {\tt med2atm}, and {\tt med2ocn} are being called according to the run sequence.
+  \item For each time step iteration, the Run() methods for {\tt atm}, {\tt ocn}, {\tt med}, {\tt atm2med}, {\tt ocn2med}, {\tt med2atm}, and {\tt med2ocn} are being called according to the run sequence.
   \end{itemize}    
 \end{itemize}
 
@@ -103,10 +103,10 @@ This is a specialization of the {\tt NUOPC\_Driver} generic component, driving a
 \item phase 1: ({\sc Required, NUOPC Provided})
   \begin{itemize}
   \item {\it Optional specialization} to finalize driver component: {\tt label\_Finalize}.
-  \item Execute Finalize() for {\tt atm2ocn}, {atm2med}, {\tt ocn2atm}, {\tt ocn2atm}, {\tt med2atm}, and {\tt med2ocn}.
+  \item Execute Finalize() for {\tt atm2med}, {\tt ocn2med}, {\tt med2atm}, and {\tt med2ocn}.
   \item Execute Finalize() for {\tt atm}, {\tt ocn}, and {\tt med}.
   \item Destroy {\tt atm}, {\tt ocn}, and {\tt med} and their import and export States.
-  \item Destroy {\tt atm2ocn}, {atm2med}, {\tt ocn2atm}, {\tt ocn2atm}, {\tt med2atm}, and {\tt med2ocn}.
+  \item Destroy {\tt atm2med}, {\tt ocn2med}, {\tt med2atm}, and {\tt med2ocn}.
   \item Deallocate the run sequence.
   \item Deallocate the internal state.
   \end{itemize}      
