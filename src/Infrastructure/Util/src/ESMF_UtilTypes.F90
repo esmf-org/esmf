@@ -82,12 +82,12 @@
 
       integer, parameter :: ESMF_VERSION_MAJOR        = 6
       integer, parameter :: ESMF_VERSION_MINOR        = 2
-      integer, parameter :: ESMF_VERSION_REVISION     = 0
+      integer, parameter :: ESMF_VERSION_REVISION     = 1
       integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 0
       logical, parameter :: ESMF_VERSION_PUBLIC       = .false.
-      logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .false.
+      logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .true.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "6.2.0"
+      character(*), parameter :: ESMF_VERSION_STRING  = "6.2.1 beta snapshot"
 
 !------------------------------------------------------------------------------
 !
