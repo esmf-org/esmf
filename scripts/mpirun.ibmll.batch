@@ -1,0 +1,60 @@
+#!/bin/ksh
+# $Id$
+################################################################################
+# This script abides to the ESMF script rules for executing the bundled test 
+# and example applications.
+#
+# 1) <this_script> -np N prog
+#    runs N copies of executable "prog" in parallel. The script must hide all
+#    of the system specific details, such as going through a queueing system
+#    and/or calling a system specific mpirun script with modified arguments.
+#
+# 2) The output of the script must be written to a file named "prog".stdout and
+#    it must contain the combination of stdout and stderr output of the
+#    execution.
+#
+# 3) The script must block, i.e. _not_ return, until the output described in #2
+#    has become accessible.
+#
+# To access this script set environment variable ESMF_MPIRUN=<this_script> in
+# your shell before executing any of the ESMF run targets or targets that 
+# call run targets indirectly, such as the all_tests.
+################################################################################
+
+if [ "$1" != "-np" ] 
+then
+        echo "Usage: mpirun -np # prog"
+        exit 1
+fi
+
+num_procs=$2
+logname=$3
+shift 2
+prog=$*
+
+# Write out LoadLeveler script to run the test
+cat > $ESMF_DIR/scripts/esmf_script.ll << THE_END_OF_BATCH_SCRIPT
+#@ shell = /usr/bin/ksh
+#@ class=parallel
+#@ job_type = parallel
+#@ output = $logname.stdout
+#@ error = $logname.stdout
+#@ notification = never
+#@ resources = ConsumableMemory(200mb)
+#@ node = 1
+#@ total_tasks = $num_procs
+#@ wall_clock_limit = 00:00:30
+#@ node_usage = shared
+#@ queue
+
+poe $prog
+
+exit
+THE_END_OF_BATCH_SCRIPT
+
+# Submit the script that has just been written to LoadLeveler
+# (the "-s" qualifier makes the script block until the job finishes)
+llsubmit -s $ESMF_DIR/scripts/esmf_script.ll
+
+# Clean up
+#rm -f $ESMF_DIR/scripts/esmf_script.ll
