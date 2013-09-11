@@ -116,7 +116,7 @@ class TestRegridFromFileDryrunCommand(Command):
         self.cwd = os.getcwd()
     def run(self):
         assert os.getcwd() == self.cwd, 'Must be in package root: %s' % self.cwd
-        os.system('python src/ESMF/test/regrid_test/regrid_from_file_test/run_regrid_from_file.py --dryrun')
+        os.system('python src/ESMF/test/regrid_test/regrid_from_file_test/run_regrid_from_file_dryrun.py')
 
 class TestAllCommand(Command):
     description = "test all"
