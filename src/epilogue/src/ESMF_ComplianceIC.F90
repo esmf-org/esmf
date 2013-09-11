@@ -1518,7 +1518,7 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: iStr, vStr
     integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
 
-	call ESMF_AttPackGet(field, convention=convention, &
+	  call ESMF_AttPackGet(field, convention=convention, &
 							  purpose=purpose, attpack=attpack, rc=rc)
     call ESMF_AttributeGet(field, name=attributeName, attpack=attpack, &
       typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
