@@ -15,6 +15,7 @@
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{\Large {\bf NUOPC Layer Reference}}
 \newcommand{\myauthors}{\large {\it CSC Committee Members}}
+\newcommand{\myversion}{ESMF v5.2.0rp3}
 #endif
 
 #ifdef STANDALONE

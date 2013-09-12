@@ -85,9 +85,9 @@
       integer, parameter :: ESMF_VERSION_REVISION     = 0
       integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 3
       logical, parameter :: ESMF_VERSION_PUBLIC       = .true.
-      logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .true.
+      logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .false.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "5.2.0rp3 beta snapshot"
+      character(*), parameter :: ESMF_VERSION_STRING  = "5.2.0rp3"
 
 !------------------------------------------------------------------------------
 !
