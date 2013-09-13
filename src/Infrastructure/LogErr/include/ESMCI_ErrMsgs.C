@@ -94,9 +94,12 @@ static const char *errMsg[] = {
 
   "Timeout reached ",                                 //   62 = ESMF_RC_TIMEOUT
 
-// 62-499 reserved for future F90 symmetric return code definitions
+  "File already exists ",                             //   63 = ESMF_RC_FILE_EXISTS
+  "File is not a directory ",                         //   64 = ESMF_RC_FILE_NOTDIR
+
+// 64-499 reserved for future F90 symmetric return code definitions
                                                                           
-                                         "","","","","","","","","","","","",
+                                               "","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
@@ -195,9 +198,12 @@ static const char *errMsg[] = {
 
   "Timeout reached ",                                 //  562 = ESMC_RC_TIMEOUT
 
-// 562-999 reserved for future C++ symmetric return code definitions
+  "File already exists ",                             //  563 = ESMC_RC_FILE_EXISTS
+  "File is not a directory ",                         //  564 = ESMC_RC_FILE_NOTDIR
+
+// 564-999 reserved for future C++ symmetric return code definitions
                                                                          
-                                         "","","","","","","","","","","","",
+                                               "","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
   "","","","","","","","","","","","","","","","","","","","","","","","","",
