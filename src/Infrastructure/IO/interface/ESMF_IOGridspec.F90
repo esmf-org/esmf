@@ -79,7 +79,7 @@
 !
 ! !INTERFACE:
   subroutine ESMF_GridspecInq(grid_filename, ndims, grid_dims, coord_names, &
-	dimids, coordids, rc)
+	dimids, coordids, hasbound, rc)
 
 ! !ARGUMENTS:
  
@@ -89,6 +89,7 @@
     character(len=*), intent(in), optional :: coord_names(:)
     integer, intent(out), optional:: dimids(:)
     integer, intent(out), optional:: coordids(:)
+    logical, intent(out), optional:: hasbound
     integer, intent(out), optional :: rc
 
     integer :: localrc, ncStatus
@@ -97,7 +98,7 @@
     integer :: nvars, len
     integer :: gridid, i
     integer :: dimidslocal(2), localdimids(2)
-    character (len=256) :: errmsg
+    character (len=256) :: errmsg, boundvar
     character (len=80)  :: attstr
     logical :: foundlon, foundlat
     logical :: useCoordName
@@ -110,7 +111,7 @@
         ESMF_SRCLINE, &
         trim(grid_filename), &
         rc)) return
-#if 1
+
     if (present(coord_names)) then 
         if (size(coord_names) /= 2) then
             call ESMF_LogSetError(ESMF_FAILURE, & 
@@ -185,7 +186,6 @@
 	    return
 	endif
     else
-#endif
         ! get a list of variables in the file, inquire its standard_name and/or long_name to
         ! find out which one is longitude and which one is latitude variable
         ncStatus = nf90_inquire(gridid, nVariables = nvars)
@@ -247,9 +247,17 @@
 	      endif
 	   endif
          enddo
-#if 1
     endif
-#endif
+
+    ! Check if "bounds" attribute is defined for the coordinate variable
+    if (present(hasbound)) then
+      ncStatus = nf90_get_att(gridid, varids(1), "bounds", boundvar)
+      if (ncStatus /= nf90_noerror) then
+         hasbound = .false.
+      else
+         hasbound = .true.
+      endif
+    endif
 
     ! find the dimension of the coordinate variables
     ncStatus = nf90_inquire_variable(gridid, varids(1), ndims=ndims, dimids=dimidslocal)

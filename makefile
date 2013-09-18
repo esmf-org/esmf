@@ -117,7 +117,7 @@ script_info:
 	-@echo "--------------------------------------------------------------"
 	-@echo " * ESMF environment variables pointing to 3rd party software *"
 	-@if [ -n "$(ESMF_MOAB)" ] ; then \
-	  echo "ESMF_MOAB:              $(ESMF_PIO)" ; \
+	  echo "ESMF_MOAB:              $(ESMF_MOAB)" ; \
 	  if [ -n "$(ESMF_MOAB_INCLUDE)" ] ; then \
 	    echo "ESMF_MOAB_INCLUDE:      $(ESMF_MOAB_INCLUDE)" ; \
           fi; \
@@ -197,7 +197,6 @@ script_info:
 	-@echo " "
 #
 info:   script_info
-	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * Compilers, Linkers, Flags, and Libraries *"
 	-@echo "Location of the preprocessor:     " `which $(word 1, $(ESMF_CPP))`

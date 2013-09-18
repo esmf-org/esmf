@@ -2064,7 +2064,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     type(ESMF_Field), allocatable  :: fieldList(:)
     logical                        :: singlef
     character(len=3)               :: cnum
-    character(len=len (file)+len (cnum)) :: filename
+    character(len=len (file) + 3)  :: filename     ! len (file)+len (cnum)
     type(ESMF_Array)               :: array 
     type(ESMF_IOFmt_Flag)          :: iofmtd
     type(ESMF_IO)                  :: io           ! The I/O object
@@ -4928,7 +4928,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
     type(ESMF_Field), allocatable   :: fieldList(:)
     logical                         :: singlef
     character(len=3)                :: cnum
-    character(len=len (file)+len (cnum)) :: filename
+    character(len=len (file) + 3)   :: filename          ! len (file) + len (cnum)
     type(ESMF_Array)                :: array 
     logical                         :: opt_overwriteflag ! helper variable
     type(ESMF_FileStatus_Flag)      :: opt_status        ! helper variable

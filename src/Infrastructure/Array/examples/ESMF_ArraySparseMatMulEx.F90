@@ -152,7 +152,7 @@ program ESMF_ArraySparseMatMulEx
 ! The extra padding of 1 element in each direction around the exclusive elements on
 ! each DE are "invisible" to the Array spare matrix multiplication method. These
 ! extra elements are either updated by the computational kernel or by Array halo
-! operations (not yet implemented!).
+! operations.
 !
 ! An alternative way to assign sequence indices to all the elements in the tiles
 ! covered by a DistGrid object is to use a special {\tt ESMF\_DistGridCreate()}

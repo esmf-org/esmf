@@ -110,7 +110,7 @@ const char *ESMC_LogGetErrMsg(
   int rc
 );
 int ESMC_LogSetFilename(
-  char filename[]
+  const char filename[]
 );
 void ESMC_TimeStamp(
   int *y,

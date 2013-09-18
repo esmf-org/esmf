@@ -3324,7 +3324,7 @@ int DistGrid::getSequenceIndexTile(
   }
   if (onTile){
     // add all the elements of previous tiles
-    for (int i=0; i<tile-2; i++)
+    for (int i=0; i<tile-1; i++)
       seqindex += elementCountPTile[i];
     ++seqindex;  // shift sequentialized index to basis 1 !!!!
   }else if (depth >= 0){

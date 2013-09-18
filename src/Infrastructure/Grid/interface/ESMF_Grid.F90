@@ -5514,9 +5514,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      this variable.  The first two dimensions of the variable has to be the
 !      the longitude and the latitude dimension and the mask is derived from the
 !      first 2D values of this variable even if this data is 3D, or 4D array.
-!\item[{coordNames}]
-!      a 2D array containing the longitude and latitude variable names in a GRIDSPEC
-!      file if there are multiple coordinates defined in the file
+!\item[{[coordNames]}]
+!      a two-element array containing the longitude and latitude variable names in a 
+!      GRIDSPEC file if there are multiple coordinates defined in the file
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -6121,9 +6121,9 @@ end function ESMF_GridCreateFrmScrip
 !      this variable.  The first two dimensions of the variable has to be the
 !      the longitude and the latitude dimension and the mask is derived from the
 !      first 2D values of this variable even if this data is 3D, or 4D array.
-!\item[{coordNames}]
-!      a 2D array containing the longitude and latitude variable names in a GRIDSPEC
-!      file if there are multiple coordinates defined in the file
+!\item[{[coordNames]}]
+!      a two-element array containing the longitude and latitude variable names in a 
+!      GRIDSPEC file if there are multiple coordinates defined in the file
 ! \item[{[isSphere]}]
 !      If .true. is a spherical grid, if .false. is regional. Defaults to .true.
 ! \item[{[addCornerStagger]}]

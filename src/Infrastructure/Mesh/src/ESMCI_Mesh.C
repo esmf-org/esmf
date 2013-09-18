@@ -41,8 +41,9 @@ extern "C" {
  					int *addMask, int *ampresent,
  					char *varname, int *vnpresent,
 					int *rc,
-					int len_filename, int len_meshname,
-					int len_varname);
+					ESMCI_FortranStrLenArg len_filename,
+					ESMCI_FortranStrLenArg len_meshname,
+					ESMCI_FortranStrLenArg len_varname);
 }
 
 namespace ESMCI {
