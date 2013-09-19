@@ -633,7 +633,6 @@
     type(ESMF_PoleMethod_Flag) :: polemethod_loc
     integer :: regridPoleNPnts_loc
   
-    print *, "ESMF_Field_C.F90"
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL

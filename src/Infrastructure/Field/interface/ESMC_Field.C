@@ -310,8 +310,6 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
                             ESMC_Field *srcFracField,
                             ESMC_Field *dstFracField){
 
-    printf ("ESMC_Field.C");
-
     // Initialize return code. Assume routine not implemented
     int rc = ESMF_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;

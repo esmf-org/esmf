@@ -888,7 +888,6 @@ namespace ESMCI {
 //
 //EOP
     // Initialize return code. Assume routine not implemented
-    printf ("ESMCI_Field.C\n");
     int rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
   
