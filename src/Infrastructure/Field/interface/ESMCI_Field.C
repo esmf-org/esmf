@@ -114,6 +114,8 @@ void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   int *dstMaskValues, int *len2, int *dmv_present,
   ESMCI::RouteHandle **routehandlep, 
   ESMC_RegridMethod_Flag *regridmethod, int *rm_present,
+  ESMC_PoleMethod_Flag *polemethod, int *pm_present,
+  int *regridPoleNPnts, int *rpnp_present,
   ESMC_UnmappedAction_Flag *unmappedaction, int *ua_present,
   ESMCI::Field *srcfracfieldp, int *sff_present, 
   ESMCI::Field *dstfracfieldp, int *dff_present, int *rc);
@@ -875,6 +877,8 @@ namespace ESMCI {
     ESMC_InterfaceInt *dstMaskValues, 
     RouteHandle **routehandlep, 
     ESMC_RegridMethod_Flag *regridMethod, 
+    ESMC_PoleMethod_Flag *polemethod,
+    int *regridPoleNPnts,
     ESMC_UnmappedAction_Flag *unmappedAction,
     Field *srcFracField, 
     Field *dstFracField) {
@@ -884,12 +888,14 @@ namespace ESMCI {
 //
 //EOP
     // Initialize return code. Assume routine not implemented
+    printf ("ESMCI_Field.C\n");
     int rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
   
     int smv_present, dmv_present;
     int sff_present, dff_present;
     int rm_present, ua_present;
+    int pm_present, rpnp_present;
     bool smv_created, dmv_created;
     bool sff_created, dff_created;
     smv_present = 0;
@@ -898,6 +904,8 @@ namespace ESMCI {
     dff_present = 0;
     rm_present = 0;
     ua_present = 0;
+    pm_present = 0;
+    rpnp_present = 0;
     smv_created = false;
     dmv_created = false;
     sff_created = false;
@@ -952,11 +960,19 @@ namespace ESMCI {
     if (unmappedAction != NULL)
       ua_present = 1;
 
+    if (polemethod != NULL)
+      pm_present = 1;
+
+    if (regridPoleNPnts != NULL)
+      rpnp_present = 1;
+
     FTN_X(f_esmf_regridstore)(fieldpsrc, fieldpdst, 
                               smv->array, &smv->extent[0], &smv_present,
                               dmv->array, &dmv->extent[0], &dmv_present,
                               routehandlep,
                               regridMethod, &rm_present,
+			      polemethod, &pm_present,
+			      regridPoleNPnts, &rpnp_present,
                               unmappedAction, &ua_present,
                               srcFracField, &sff_present,
                               dstFracField, &dff_present, &localrc);

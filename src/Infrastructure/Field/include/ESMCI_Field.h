@@ -88,7 +88,9 @@ namespace ESMCI{
                            ESMC_InterfaceInt *srcMaskValues, 
                            ESMC_InterfaceInt *dstMaskValues,
                            RouteHandle **routehandle,
-		                       ESMC_RegridMethod_Flag *regridMethod, 
+			   ESMC_RegridMethod_Flag *regridMethod, 
+			   ESMC_PoleMethod_Flag *polemethod,
+			   int *regridPoleNPnts,
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            Field *srcFracField, Field *dstFracField);
     static int regrid(Field *fieldsrc, Field *fielddst, 
