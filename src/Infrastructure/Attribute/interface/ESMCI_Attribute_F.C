@@ -1108,7 +1108,7 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **base,              // in/out - base object
       char *name,                    // in - F90, non-null terminated string
-	  ESMCI::Attribute **attpack,    // in - Attribute package
+	    ESMCI::Attribute **attpack,    // in - Attribute package
       ESMC_TypeKind_Flag *tk,        // in - typekind
       int *count,                    // in - must match actual length
       int *lens,                     // in/out - length of strings

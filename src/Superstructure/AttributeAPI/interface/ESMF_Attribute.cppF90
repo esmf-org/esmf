@@ -120,6 +120,10 @@ module ESMF_AttributeMod
 
       public ESMF_AttPackGet
 
+      public ESMF_AttributeGetInit
+      !public ESMF_AttributeValidate
+
+
 !EOPI
 !------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
@@ -2419,6 +2423,39 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 
+    function ESMF_AttributeGetInit(attpack)
+      type(ESMF_Attribute), intent(in), optional :: attpack
+      ESMF_INIT_TYPE :: ESMF_AttributeGetInit
+    
+      if (present(attpack)) then
+          ESMF_AttributeGetInit=ESMF_INIT_GET(attpack)
+      else
+          ESMF_AttributeGetInit=ESMF_INIT_CREATED
+      endif
+    
+    end function ESMF_AttributeGetInit
+
+!-----------------------------------------------------------------------------
+
+#if 0
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_AttributeValidate"
+    subroutine ESMF_AttributeValidate(attpack, rc)
+        type(ESMF_Attribute), intent(in) :: attpack
+        integer, intent(out), optional :: rc
+ 
+        ! Check Init Status
+        ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc)
+ 
+        ! Add other checks here
+ 
+        ! If all checks passed return success
+        if (present(rc)) then
+            rc=ESMF_SUCCESS
+        endif
+
+    end subroutine ESMF_AttributeValidate
+#endif
 
 !-------------------------------------------------------------------------
 !  Macro versions of the routines
@@ -2477,14 +2514,14 @@ contains
       localrc = ESMF_RC_NOT_IMPL @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
-      ! check variables @\
-      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
- @\
       call c_ESMC_AttPackGet(mthisfield, attpack, & @\
-      						convention, purpose, & @\
-                            fobject, attPackInstanceName, localrc) @\
+      						           convention, purpose, & @\
+                             fobject, attPackInstanceName, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+      ! set the created macro @\
+      ESMF_INIT_SET_CREATED(attpack) @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -2561,16 +2598,13 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if ( present(attpack) ) then @\
- 	      ! set the created macro @\
-        ESMF_INIT_SET_CREATED(attpack) @\
- @\
         ! retrieve the optional attribute package handle @\
         call mclass##AttPackGet(mthis, attpack, & @\
                                 convention, purpose, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
       end if @\
- @\ 
+ @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
       end subroutine mclass##AttAddPackStd
@@ -2768,9 +2802,6 @@ contains
       endif @\
  @\
       if ( present(attpack) ) then @\
- 	      ! set the created macro @\
-        ESMF_INIT_SET_CREATED(attpack) @\
- @\
         ! retrieve the optional attribute package handle @\
         call mclass##AttPackGet(mthis, attpack, & @\
                                 convention, purpose, rc=localrc) @\
@@ -2870,9 +2901,6 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if ( present(attpack) ) then @\
-   	    ! set the created macro @\
-        ESMF_INIT_SET_CREATED(attpack) @\
- @\
         ! retrieve the optional attribute package handle @\
         call mclass##AttPackGet(mthis, attpack, & @\
                                 convention, purpose, rc=localrc) @\
@@ -3032,9 +3060,6 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if ( present(attpack) ) then @\
-   	    ! set the created macro @\
-        ESMF_INIT_SET_CREATED(attpack) @\
- @\
         ! retrieve the optional attribute package handle @\
         call mclass##AttPackGet(mthis, attpack, & @\
                                 convention, purpose, rc=localrc) @\
@@ -3126,9 +3151,6 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
       if ( present(attpack) ) then @\
- 	      ! set the created macro @\
-        ESMF_INIT_SET_CREATED(attpack) @\
- @\
         ! retrieve the optional attribute package handle @\
         call mclass##AttPackGet(mthis, attpack, & @\
                                 convention, purpose, rc=localrc) @\
@@ -3274,6 +3296,7 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -3390,6 +3413,7 @@ contains
       integer :: count @\
       !! TODO: this needs to be dynamically sized !!! @\
       character (len=ESMF_MAXSTR) :: modName @\
+      type(ESMF_Attribute) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -3433,14 +3457,17 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+        call mclass##AttPackGet(mthis, attpack, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_##mtypekind, count, value, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_##mtypekind, count, value, localrc) @\
         endif @\
       else @\
        @\
@@ -3542,6 +3569,7 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -3689,6 +3717,7 @@ contains
       type(ESMF_TypeKind_Flag) :: localTk @\
       !! TODO: this needs to be dynamically sized !!! @\
       character (len=ESMF_MAXSTR) :: modName @\
+      type(ESMF_Attribute) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -3731,14 +3760,17 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+        call mclass##AttPackGet(mthis, attpack, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-        call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-          ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-          convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_##mtypekind, litemcount, valueList, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -3862,6 +3894,7 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       count = 1 @\
  @\
@@ -3956,6 +3989,7 @@ contains
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack, localvalue @\
       integer :: count @\
+      type(ESMF_Attribute) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -3981,14 +4015,17 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+        call mclass##AttPackGet(mthis, attpack, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_LOGICAL, count, localvalue, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_LOGICAL, count, localvalue, localrc) @\
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rcToReturn=rc)) return @\
           value = localvalue   @\
@@ -4091,6 +4128,7 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -4240,6 +4278,7 @@ contains
       type(ESMF_TypeKind_Flag) :: localTk @\
       !! TODO: this needs to be dynamically sized !!! @\
       character (len=ESMF_MAXSTR) :: modName @\
+      type(ESMF_Attribute) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -4282,14 +4321,17 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+        call mclass##AttPackGet(mthis, attpack, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -4414,7 +4456,8 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
-@\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
+ @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
@@ -4441,7 +4484,7 @@ contains
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
       if (lisPresent == ESMF_TRUE) then @\
-        call c_ESMC_AttPackGetCharList(mthisfield, attpack, name, attpack, & @\
+        call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
           ESMF_TYPEKIND_CHARACTER, count, lens, & @\
           value, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
@@ -4528,6 +4571,7 @@ contains
       integer :: count @\
       !! TODO: this needs to be dynamically sized !!! @\
       character (len=ESMF_MAXSTR) :: modName @\
+      type(ESMF_Attribute) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -4537,7 +4581,7 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
-@\
+ @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
@@ -4571,14 +4615,17 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+        call mclass##AttPackGet(mthis, attpack, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetCharList(mthisfield, name, & @\
-            ESMF_TYPEKIND_CHARACTER, count, lens, value, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_CHARACTER, count, lens, value, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -4675,8 +4722,9 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
-    litemCount = size(valueList) @\
+      litemCount = size(valueList) @\
  @\
       do  i=1,litemCount @\
         lens(i) = len(valueList) @\
@@ -4811,6 +4859,7 @@ contains
       type(ESMF_TypeKind_Flag) :: localTk @\
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
+      type(ESMF_Attribute) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -4822,7 +4871,7 @@ contains
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-    litemCount = size(valueList) @\
+      litemCount = size(valueList) @\
  @\
       do  i=1,litemCount @\
         lens(i) = len(valueList) @\
@@ -4840,14 +4889,17 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+        call mclass##AttPackGet(mthis, attpack, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetCharList(mthisfield, name, & @\
-            ESMF_TYPEKIND_CHARACTER, litemCount, lens, valueString, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_CHARACTER, litemCount, lens, valueString, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -4976,6 +5028,7 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       count = 1 @\
  @\
@@ -5066,6 +5119,7 @@ contains
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack @\
       integer :: count @\
+      type(ESMF_Attribute) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -5091,14 +5145,17 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+        call mclass##AttPackGet(mthis, attpack, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_##mtypekind, count, value, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_##mtypekind, count, value, localrc) @\
         endif @\
       else @\
        @\
@@ -5193,6 +5250,7 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       litemcount = size(valueList) @\
  @\
@@ -5315,6 +5373,7 @@ contains
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack @\
       type(ESMF_TypeKind_Flag) :: localTk @\
+      type(ESMF_Attribute) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -5339,14 +5398,17 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+        call mclass##AttPackGet(mthis, attpack, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-        call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-          ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-          convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_##mtypekind, litemcount, valueList, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -5470,6 +5532,7 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       count = 1 @\
  @\
@@ -5563,7 +5626,8 @@ contains
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack, localvalue @\
       integer :: count @\
-@\
+      type(ESMF_Attribute) :: attpack @\
+ @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
@@ -5588,14 +5652,17 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+        call mclass##AttPackGet(mthis, attpack, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_LOGICAL, count, localvalue, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_LOGICAL, count, localvalue, localrc) @\
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
             ESMF_CONTEXT, rcToReturn=rc)) return @\
           value = localvalue   @\
@@ -5693,6 +5760,7 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       litemCount = size(valueList) @\
  @\
@@ -5818,6 +5886,7 @@ contains
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack @\
       type(ESMF_TypeKind_Flag) :: localTk @\
+      type(ESMF_Attribute) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -5841,14 +5910,17 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+        call mclass##AttPackGet(mthis, attpack, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -5971,10 +6043,11 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
-@\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
+ @\
       lens(1) = len(value) @\
       count = 1 @\
-@\
+ @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
                      lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
@@ -6064,6 +6137,7 @@ contains
       type(ESMF_Logical) :: lisPresent, isAttpack @\
       integer, dimension(1) :: lens @\
       integer :: count @\
+      type(ESMF_Attribute) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -6073,10 +6147,10 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
-@\
+ @\
       lens(1) = len(value) @\
       count = 1 @\
-@\
+ @\
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
@@ -6089,14 +6163,17 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+        call mclass##AttPackGet(mthis, attpack, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetCharList(mthisfield, name, & @\
-            ESMF_TYPEKIND_CHARACTER, count, lens, value, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_CHARACTER, count, lens, value, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -6192,8 +6269,9 @@ contains
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
-    litemCount = size(valueList) @\
+      litemCount = size(valueList) @\
  @\
       do  i=1,litemCount @\
         lens(i) = len(valueList) @\
@@ -6328,6 +6406,7 @@ contains
       type(ESMF_TypeKind_Flag) :: localTk @\
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
+      type(ESMF_Attribute) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -6339,7 +6418,7 @@ contains
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-    litemCount = size(valueList) @\
+      litemCount = size(valueList) @\
  @\
       do  i=1,litemCount @\
         lens(i) = len(valueList) @\
@@ -6357,14 +6436,17 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+        call mclass##AttPackGet(mthis, attpack, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetCharList(mthisfield, name, & @\
-            ESMF_TYPEKIND_CHARACTER, litemCount, lens, valueString, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetCharList(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_CHARACTER, litemCount, lens, valueString, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -6558,6 +6640,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
                        lisPresent, localrc) @\
@@ -6840,7 +6923,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), parameter :: object=#mthis @\
       integer, dimension(size(attPackInstanceNameList)) :: APinstNameLens @\
       character(len=(size(attPackInstanceNameList)*len(attPackInstanceNameList))) :: APinstNameString @\
-@\
+ @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
@@ -7257,7 +7340,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in), optional :: name @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_Attribute), intent(inout) :: attpack @\
       integer, intent(out), optional :: rc    @\
 ! @\
 ! !DESCRIPTION: @\
@@ -7286,11 +7369,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       if (present(name)) then @\
         call c_ESMC_AttPackRemoveAttribute(mthisfield, name, attpack, localrc) @\
       else @\
         call c_ESMC_AttPackRemove(mthisfield, attpack, localrc) @\
+        ESMF_INIT_SET_DELETED(attpack) @\
       endif @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
@@ -7346,6 +7431,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: attpack @\
+      type(ESMF_Attribute) :: attpackobj @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -7367,11 +7453,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE .and. .not.present(name)) then @\
-        call c_ESMC_AttPackRemove(mthisfield, convention, & @\
-          purpose, fobject, attPackInstanceName, localrc) @\
+        call mclass##AttPackGet(mthis, attpackobj, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        call c_ESMC_AttPackRemove(mthisfield, attpackobj, localrc) @\
+        ESMF_INIT_SET_DELETED(attpackobj) @\
       else if (attpack == ESMF_TRUE .and. present(name)) then @\
-        call c_ESMC_AttPackRemoveAttribute(mthisfield, name, convention, & @\
-          purpose, fobject, attPackInstanceName, localrc) @\
+        call mclass##AttPackGet(mthis, attpackobj, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+        call c_ESMC_AttPackRemoveAttribute(mthisfield, name, attpackobj, localrc) @\
       else if (present(name)) then @\
         call c_ESMC_AttributeRemove(mthisfield, name, localrc) @\
       endif @\
@@ -7440,6 +7533,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       count = 1 @\
  @\
@@ -7524,6 +7618,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Logical) :: attpack @\
       integer :: count @\
       character (len=ESMF_MAXSTR) :: modName @\
+      type(ESMF_Attribute) :: attpackobj @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -7562,9 +7657,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
+        call mclass##AttPackGet(mthis, attpackobj, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, count, value, & @\
-          convention, purpose, fobject, attPackInstanceName, localrc) @\
+          attpackobj, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, count, value, localrc) @\
@@ -7632,6 +7731,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -7735,6 +7835,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
+      type(ESMF_Attribute) :: attpackobj @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -7790,9 +7891,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
+        call mclass##AttPackGet(mthis, attpackobj, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, litemCount, valueList, & @\
-          convention, purpose, fobject, attPackInstanceName, localrc) @\
+          attpackobj, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_##mtypekind, litemCount, valueList, localrc) @\
@@ -7858,6 +7963,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -7943,6 +8049,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Logical) :: attpack @\
       integer :: count @\
       character (len=ESMF_MAXSTR) :: modName @\
+      type(ESMF_Attribute) :: attpackobj @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -7982,9 +8089,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       localvalue = value @\
       if (attpack == ESMF_TRUE) then @\
+        call mclass##AttPackGet(mthis, attpackobj, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, count, localvalue, & @\
-          convention, purpose, fobject, attPackInstanceName, localrc) @\
+          attpackobj, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, count, localvalue, localrc) @\
@@ -8052,6 +8163,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -8155,6 +8267,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
+      type(ESMF_Attribute) :: attpackobj @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -8210,9 +8323,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
+        call mclass##AttPackGet(mthis, attpackobj, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-          convention, purpose, fobject, attPackInstanceName, localrc) @\
+          attpackobj, localrc) @\
       else @\
         call c_ESMC_AttributeSetValue(mthisfield, name, & @\
           ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
@@ -8278,6 +8395,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -8362,6 +8480,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Logical) :: attpack @\
       integer :: count @\
       character (len=ESMF_MAXSTR) :: modName @\
+      type(ESMF_Attribute) :: attpackobj @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -8385,7 +8504,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
-@\
+ @\
       lens(1) = len_trim(value) @\
       count = 1 @\
  @\
@@ -8401,9 +8520,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
+        call mclass##AttPackGet(mthis, attpackobj, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-          count, value, lens, convention, purpose, fobject, & @\
-          attPackInstanceName, localrc) @\
+          count, value, lens, attpackobj, localrc) @\
       else @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           count, value, lens, localrc) @\
@@ -8462,13 +8584,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
       character (len=ESMF_MAXSTR) :: modName @\
-@\
+ @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -8484,7 +8607,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
-@\
+ @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
@@ -8576,7 +8699,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=(size(valueList)*len(valueList))) :: valueString @\
       type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
-@\
+      type(ESMF_Attribute) :: attpackobj @\
+ @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       attpack = ESMF_FALSE @\
@@ -8599,7 +8723,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
-@\
+ @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
@@ -8638,9 +8762,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
+        call mclass##AttPackGet(mthis, attpackobj, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-          litemCount, valueString, lens, convention, purpose, fobject, & @\
-          attPackInstanceName, localrc) @\
+          litemCount, valueString, lens, attpackobj, localrc) @\
       else @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, localrc) @\
@@ -8713,6 +8840,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -8728,7 +8856,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
-@\
+ @\
       ! allocate arrays @\
       if (present (inputList)) then @\
         valuestring_size = len(value) @\
@@ -8863,6 +8991,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=ESMF_MAXSTR) :: modName @\
       character, allocatable :: valueString(:) @\
       integer :: lens_size, valuestring_size, tag_size @\
+      type(ESMF_Attribute) :: attpackobj @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -8887,7 +9016,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
-@\
+ @\
       ! allocate arrays @\
       if (present (inputList)) then @\
         valuestring_size = len(value) @\
@@ -8959,9 +9088,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
+        call mclass##AttPackGet(mthis, attpackobj, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-          litemCount, valueString, lens, convention, purpose, fobject, & @\
-          attPackInstanceName, localrc) @\
+          litemCount, valueString, lens, attpackobj, localrc) @\
       else @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, localrc) @\
@@ -9025,13 +9157,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
       character (len=ESMF_MAXSTR) :: modName @\
-@\
+ @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+      ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
@@ -9047,7 +9180,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
-@\
+ @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
@@ -9139,7 +9272,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=(size(valueList)*len(valueList))) :: valueString @\
       type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
-@\
+      type(ESMF_Attribute) :: attpackobj @\
+ @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       attpack = ESMF_FALSE @\
@@ -9162,7 +9296,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
-@\
+ @\
       if (present(itemCount)) then @\
         if (itemCount > size(valueList)) then @\
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & @\
@@ -9201,9 +9335,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
+        call mclass##AttPackGet(mthis, attpackobj, & @\
+                                convention, purpose, rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
-          litemCount, valueString, lens, convention, purpose, fobject, & @\
-          attPackInstanceName, localrc) @\
+          litemCount, valueString, lens, attpackobj, localrc) @\
       else @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, localrc) @\

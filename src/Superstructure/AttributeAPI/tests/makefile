@@ -7,7 +7,8 @@ run_uni:  run_unit_tests_uni
 LOCDIR	  = src/Superstructure/AttributeAPI/tests
 
 
-TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
+TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttPackPresenceUTest \
+		$(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeABundleUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeCplCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeDistGridUTest \
@@ -27,7 +28,8 @@ TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
 		$(ESMF_TESTDIR)/ESMF_AttReadGridCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttReadFieldUTest
 
-TESTS_RUN = RUN_ESMF_AttributeArrayUTest \
+TESTS_RUN = RUN_ESMF_AttPackPresenceUTest \
+		RUN_ESMF_AttributeArrayUTest \
 		RUN_ESMF_AttributeABundleUTest \
 		RUN_ESMF_AttributeCplCompUTest \
 		RUN_ESMF_AttributeDistGridUTest \
@@ -47,7 +49,8 @@ TESTS_RUN = RUN_ESMF_AttributeArrayUTest \
 		RUN_ESMF_AttReadGridCompUTest \
 		RUN_ESMF_AttReadFieldUTest
 
-TESTS_RUN_UNI = RUN_ESMF_AttributeGridGetUTestUNI \
+TESTS_RUN_UNI = RUN_ESMF_AttPackPresenceUTestUNI \
+		RUN_ESMF_AttributeGridGetUTestUNI \
 		RUN_ESMF_AttributeArrayUTestUNI \
 		RUN_ESMF_AttributeABundleUTestUNI \
 		RUN_ESMF_AttributeCplCompUTestUNI \
@@ -78,6 +81,14 @@ CLOBBERDIRS =
 #
 #  Attribute class
 #
+
+# --- AttPackPresence
+
+RUN_ESMF_AttPackPresenceUTest:
+	$(MAKE) TNAME=AttPackPresence NP=4 ftest
+
+RUN_ESMF_AttPackPresenceUTestUNI:
+	$(MAKE) TNAME=AttPackPresence NP=1 ftest
 
 # --- Array
 
