@@ -304,9 +304,13 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
                             ESMC_InterfaceInt *dstMaskValues,
                             ESMC_RouteHandle *routehandle, 
                             enum ESMC_RegridMethod_Flag *regridmethod, 
+			    ESMC_PoleMethod_Flag *polemethod,
+			    int *regridPoleNPnts,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
                             ESMC_Field *srcFracField,
                             ESMC_Field *dstFracField){
+
+    printf ("ESMC_Field.C");
 
     // Initialize return code. Assume routine not implemented
     int rc = ESMF_RC_NOT_IMPL;
@@ -326,7 +330,8 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
 
     // Invoque the C++ interface
     localrc = ESMCI::Field::regridstore(fieldpsrc, fieldpdst, 
-      srcMaskValues, dstMaskValues, &rhPtr, regridmethod, unmappedaction,
+      srcMaskValues, dstMaskValues, &rhPtr, regridmethod, 
+      polemethod, regridPoleNPnts, unmappedaction,
       srcfracp, dstfracp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out

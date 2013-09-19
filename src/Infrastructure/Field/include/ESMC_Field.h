@@ -518,6 +518,8 @@ int ESMC_FieldRegridStore(
     ESMC_InterfaceInt *dstMaskValues,          // in
     ESMC_RouteHandle *routehandle,             // inout
     enum ESMC_RegridMethod_Flag *regridmethod,       // in
+    ESMC_PoleMethod_Flag *polemethod,          // in
+    int *regridPoleNPnts,                      // in
     enum ESMC_UnmappedAction_Flag *unmappedaction,   // in
     ESMC_Field *srcFracField,                  // out
     ESMC_Field *dstFracField);                 // out
@@ -548,6 +550,15 @@ int ESMC_FieldRegridStore(
 //    The handle that implements the regrid, to be used in ESMC\_FieldRegrid().
 //  \item[regridmethod]
 //    The type of interpolation. If not specified, defaults to ESMF\_REGRIDMETHOD\_BILINEAR.
+//  \item [polemethod]
+//    Which type of artificial pole
+//    to construct on the source Grid for regridding. 
+//    If not specified, defaults to {\tt ESMC\_POLEMETHOD\_ALLAVG}. 
+//  \item [regridPoleNPnts]
+//    If {\tt polemethod} is {\tt ESMC\_POLEMETHOD\_NPNTAVG}.
+//    This parameter indicates how many points should be averaged
+//    over. Must be specified if {\tt polemethod} is 
+//    {\tt ESMC\_POLEMETHOD\_NPNTAVG}.
 //  \item[unmappedaction]
 //    Specifies what should happen if there are destination points that can't 
 //    be mapped to a source cell. Options are ESMF\_UNMAPPEDACTION\_ERROR or 
