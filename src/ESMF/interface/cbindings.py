@@ -1333,12 +1333,15 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p, ct.c_void_p,
                                         ct.POINTER(ct.c_void_p),
                                         OptionalNamedConstant,
                                         OptionalNamedConstant,
+                                        OptionalNamedConstant,
+                                        OptionalNamedConstant,
                                         OptionalField,
                                         OptionalField]
 @deprecated
 def ESMP_FieldRegridStore(srcField, dstField,
                           srcMaskValues=None, dstMaskValues=None,
-                          regridmethod=None, unmappedaction=None,
+                          regridmethod=None, polemethod=None,
+                          regridPoleNPnts=None, unmappedaction=None,
                           srcFracField=None, dstFracField=None):
     """
     Preconditions: Two ESMP_Fields have been created and initialized
@@ -1363,6 +1366,13 @@ def ESMP_FieldRegridStore(srcField, dstField,
                 (default) RegridMethod.BILINEAR\n
                 RegridMethod.PATCH\n
                 RegridMethod.CONSERVE\n
+        PoleMethod (optional)               :: polemethod\n
+            Argument values:\n
+                (default for regridmethod == RegridMethod.CONSERVE) PoleMethod.NONE\n
+                (default for regridmethod != RegridMethod.CONSERVE) PoleMethod.ALLAVG\n
+                PoleMethod.NPNTAVG\n
+                PoleMethod.TEETH\n
+        integer (optional)                  :: regridPoleNPnts\n
         UnmappedAction (optional)           :: unmappedaction\n
             Argument values:\n
                 (default) UnmappedAction.ERROR\n
@@ -1391,7 +1401,10 @@ def ESMP_FieldRegridStore(srcField, dstField,
                                      srcMaskValues_i, \
                                      dstMaskValues_i, \
                                      ct.byref(routehandle), \
-                                     regridmethod, unmappedaction, \
+                                     regridmethod, \
+                                     polemethod, \
+                                     regridPoleNPnts, \
+                                     unmappedaction, \
                                      srcFracField, \
                                      dstFracField)
     if rc != constants.ESMP_SUCCESS:
