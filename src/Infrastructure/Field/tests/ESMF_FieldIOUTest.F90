@@ -41,6 +41,7 @@ program ESMF_FieldIOUTest
   type(ESMF_VM):: vm
   type(ESMF_ArraySpec):: arrayspec
   type(ESMF_Field) :: field_w, field_r, field_t, field_s, field_tr, field_sr, field
+  type(ESMF_Field) :: field_w_nohalo
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_w, Farray_r
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_tw, Farray_tr
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_sw, Farray_sr
@@ -134,6 +135,12 @@ program ESMF_FieldIOUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
+  !print '(a,2(a,i0.1,a,i0.1),a)', 'field_w Farray_w bounds = ',  &
+  !    '(', lbound (Farray_w,1), ':', ubound (Farray_w,1),  &
+  !    ',', lbound (Farray_w,2), ':', ubound (Farray_w,2),')'
+  !print '(a,2(a,i0.1,a,i0.1),a)', 'field_w exclusive bounds = ',  &
+  !    '(', exclusiveLBound(1), ':', exclusiveUBound(1),  &
+  !    ',', exclusiveLBound(2), ':', exclusiveUBound(2),')'
 ! Set values of fortran array
   Farray_w = 0.02  ! halo points will have value 0.02
   do j=exclusiveLBound(2),exclusiveUBound(2)
@@ -156,6 +163,55 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Create Field without halo region
+  field_w_nohalo=ESMF_FieldCreate(grid, arrayspec=arrayspec, &
+           name="temperature",  rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Create a field from grid and fortran dummy array without halo"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Get Array pointer from nohalo Field
+  call ESMF_FieldGet(field_w_nohalo, localDe=0, farrayPtr=Farray_w, &
+      exclusiveLBound=exclusiveLBound, &
+      exclusiveUBound=exclusiveUBound, rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Get Farray_w from nohalo field"
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+  !print '(a,2(a,i0.1,a,i0.1),a)', 'field_w_nohalo Farray_w bounds = ',  &
+  !    '(', lbound (Farray_w,1), ':', ubound (Farray_w,1),  &
+  !    ',', lbound (Farray_w,2), ':', ubound (Farray_w,2),')'
+  !print '(a,2(a,i0.1,a,i0.1),a)', 'field_w_nohalo exclusive bounds = ',  &
+  !    '(', exclusiveLBound(1), ':', exclusiveUBound(1),  &
+  !    ',', exclusiveLBound(2), ':', exclusiveUBound(2),')'
+
+! Set values of fortran array
+  do j=exclusiveLBound(2),exclusiveUBound(2)
+  do i=exclusiveLBound(1),exclusiveUBound(1)
+    Farray_w(i,j) = sin(dble(i)/5.0)*tan(dble(j)/5.0)
+  enddo
+  enddo
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  ! Write Fortran array in nohalo Field
+  call ESMF_FieldWrite(field_w_nohalo, file="fieldNoHalo.nc",        &
+       status=ESMF_FILESTATUS_REPLACE, rc=rc)
+  write(failMsg, *) ""
+  write(name, *) "Write Fortran array in nohalo Field"
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+
 !------------------------------------------------------------------------
 
 !
@@ -235,7 +291,7 @@ program ESMF_FieldIOUTest
       exit
     endif
 !------------------------------------------------------------------------
-    ! Write Fortran array in Field withou halo
+    ! Write Fortran array in Field without halo
     call ESMF_FieldWrite(field_s, file="fieldNoHalo_time.nc", timeslice=t,   &
          status=statusFlag, overwrite=.true., rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
@@ -257,7 +313,6 @@ program ESMF_FieldIOUTest
   write(name, *) "Write Farray_tw at different time t in a loop"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_Test((countfail==0), name, failMsg, result, ESMF_SRCLINE)
-
 
 !------------------------------------------------------------------------
 !------------------------------------------------------------------------
@@ -534,13 +589,18 @@ program ESMF_FieldIOUTest
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   ! Verifying that a Field with no data can be destroyed
-  call ESMF_FieldDestroy(field_w, rc=rc)
+  countfail = 0
   call ESMF_FieldDestroy(field_r, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(field_t, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_FieldDestroy(field_w_nohalo, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_FieldDestroy(field_w, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Destroying all Fields"
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
+  call ESMF_Test(countfail == 0, name, failMsg, result, ESMF_SRCLINE)
 !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 
