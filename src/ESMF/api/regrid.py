@@ -46,6 +46,15 @@ class Regrid(object):
                     (default) RegridMethod.BILINEAR\n
                     RegridMethod.PATCH\n
                     RegridMethod.CONSERVE\n
+            pole_method: specifies which type of artificial pole
+                         to construct on the source Grid for regridding.\n
+                Argument values are:\n
+                    (default for regridmethod == RegridMethod.CONSERVE) PoleMethod.NONE\n
+                    (default for regridmethod != RegridMethod.CONSERVE) PoleMethod.ALLAVG\n
+                    PoleMethod.NPNTAVG\n
+                    PoleMethod.TEETH\n
+            regridPoleNPnts: specifies how many points to average over 
+                             if polemethod == PoleMethod.NPNTAVG\n
             unmapped_action: specifies which action to take if a 
                              destination point is found which does not 
                              map to any source point.\n
@@ -77,6 +86,8 @@ class Regrid(object):
         src_mask_values = kwargs.get('src_mask_values', None)
         dst_mask_values = kwargs.get('dst_mask_values', None)
         regrid_method = kwargs.get('regrid_method', None)
+        pole_method = kwargs.get('pole_method', None)
+        regridPoleNPnts = kwargs.get('regridPoleNPnts', None)
         unmapped_action = kwargs.get('unmapped_action', None)
         src_frac_field = kwargs.get('src_frac_field', None)
         dst_frac_field = kwargs.get('dst_frac_field', None)
@@ -105,6 +116,8 @@ class Regrid(object):
                                             srcMaskValues=local_src_mask_values,
                                             dstMaskValues=local_dst_mask_values,
                                             regridmethod=regrid_method,
+                                            polemethod=pole_method,
+                                            regridPoleNPnts=regridPoleNPnts,
                                             unmappedaction=unmapped_action,
                                             srcFracField=src_frac_field,
                                             dstFracField=dst_frac_field)
@@ -114,6 +127,8 @@ class Regrid(object):
         self.src_mask_values = src_mask_values
         self.dst_mask_values = dst_mask_values
         self.regrid_method = regrid_method
+        self.pole_method = pole_method
+        self.regridPoleNPnts = regridPoleNPnts
         self.unmapped_action = unmapped_action
         self.src_frac_field = src_frac_field
         self.dst_frac_field = dst_frac_field
