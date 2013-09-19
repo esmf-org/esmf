@@ -66,6 +66,11 @@ enum ESMC_PoleKind_Flag {ESMC_POLEKIND_NONE=0,
                          ESMC_POLEKIND_MONOPOLE=1,
                          ESMC_POLEKIND_BIPOLE=2};
 
+enum ESMC_PoleMethod_Flag {ESMF_POLEMETHOD_NONE=0,
+			   ESMF_POLEMETHOD_ALLAVG,
+			   ESMF_POLEMETHOD_NPNTAVG,
+			   ESMF_POLEMETHOD_TEETH};
+
 enum ESMC_Region_Flag { ESMC_REGION_TOTAL=0,
                        ESMC_REGION_SELECT,
                        ESMC_REGION_EMPTY};
