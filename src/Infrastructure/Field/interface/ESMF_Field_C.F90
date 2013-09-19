@@ -593,7 +593,9 @@
                                 srcMaskValues, len1, smvpresent, &
                                 dstMaskValues, len2, dmvpresent, &
                                 routehandle, &
-                                regridmethod, rmpresent, &
+				regridmethod, rmpresent, &
+				polemethod, pmpresent, &
+				regridPoleNPnts, rpnppresent, &
                                 unmappedaction, uapresent, &
                                 srcFracField, sffpresent, &
                                 dstFracField, dffpresent, rc)
@@ -607,16 +609,20 @@
 
     implicit none
 
-      type(ESMF_Field)               :: srcField
-      type(ESMF_Field)               :: dstField
-      integer, intent(in)            :: len1, len2
-      integer, intent(in)            :: smvpresent, dmvpresent
-      integer, intent(in)            :: sffpresent, dffpresent
-      integer                        :: srcMaskValues(1:len1), &
-                                        dstMaskValues(1:len2)
-      type(ESMF_RouteHandle)         :: routehandle
-      integer, intent(in)            :: rmpresent, uapresent
-      type(ESMF_RegridMethod_Flag)   :: regridmethod
+      type(ESMF_Field)                       :: srcField
+      type(ESMF_Field)                       :: dstField
+      integer, intent(in)                    :: len1, len2
+      integer, intent(in)                    :: smvpresent, dmvpresent
+      integer, intent(in)                    :: sffpresent, dffpresent
+      integer                                :: srcMaskValues(1:len1), &
+                                                dstMaskValues(1:len2)
+      type(ESMF_RouteHandle)                 :: routehandle
+      integer, intent(in)                    :: rmpresent, uapresent
+      type(ESMF_RegridMethod_Flag)           :: regridmethod
+      type(ESMF_PoleMethod_Flag), intent(in) :: polemethod
+      integer, intent(in)                    :: pmpresent, rpnppresent
+      integer, intent(in)                    :: regridPoleNPnts
+      
       type(ESMF_UnmappedAction_Flag) :: unmappedaction
       type(ESMF_Field)               :: srcFracField
       type(ESMF_Field)               :: dstFracField
@@ -624,10 +630,32 @@
 
     integer :: localrc
     type(ESMF_RouteHandle) :: l_routehandle
+    type(ESMF_PoleMethod_Flag) :: polemethod_loc
+    integer :: regridPoleNPnts_loc
   
+    print *, "ESMF_Field_C.F90"
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
+
+    ! Set reasonable defaults for some of the optional arguments
+    if (pmpresent == 0) then
+      if ((rmpresent == 1) .and. &
+          ((regridmethod == ESMF_REGRIDMETHOD_CONSERVE) .or. &
+	   (regridmethod == ESMF_REGRIDMETHOD_NEAREST_STOD) .or. &
+	   (regridmethod == ESMF_REGRIDMETHOD_NEAREST_DTOS))) then
+	polemethod_loc = ESMF_POLEMETHOD_NONE
+      else
+        polemethod_loc = ESMF_POLEMETHOD_ALLAVG
+      endif
+    else
+      polemethod_loc = polemethod
+    endif
+    if (rpnppresent == 0) then
+      regridPoleNPnts_loc = 0
+    else
+      regridPoleNPnts_loc = regridPoleNPnts
+    endif
 
     ! handle the optional parameters
     if (rmpresent == 1 .and. uapresent == 1) then
@@ -637,6 +665,8 @@
                                    regridmethod=regridmethod, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -645,6 +675,8 @@
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -653,6 +685,8 @@
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
@@ -661,6 +695,8 @@
                                    regridmethod=regridmethod, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
@@ -669,6 +705,8 @@
                                    regridmethod=regridmethod, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -678,6 +716,8 @@
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -687,6 +727,8 @@
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -696,6 +738,8 @@
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -705,6 +749,8 @@
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -714,6 +760,8 @@
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
@@ -723,6 +771,8 @@
                                    regridmethod=regridmethod, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -733,6 +783,8 @@
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -743,6 +795,8 @@
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -753,6 +807,8 @@
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -763,6 +819,8 @@
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -774,6 +832,8 @@
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       endif
     elseif (rmpresent == 0 .and. uapresent == 1) then
@@ -782,6 +842,8 @@
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -789,6 +851,8 @@
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -796,6 +860,8 @@
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
@@ -803,6 +869,8 @@
                                    dstMaskValues=dstMaskValues, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
@@ -810,6 +878,8 @@
                                    srcMaskValues=srcMaskValues, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -818,6 +888,8 @@
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -826,6 +898,8 @@
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -834,6 +908,8 @@
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -842,6 +918,8 @@
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -850,6 +928,8 @@
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
@@ -858,6 +938,8 @@
                                    dstMaskValues=dstMaskValues, &
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -867,6 +949,8 @@
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -876,6 +960,8 @@
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -885,6 +971,8 @@
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -894,6 +982,8 @@
                                    unmappedaction=unmappedaction, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -904,6 +994,8 @@
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       endif
     elseif (rmpresent == 1 .and. uapresent == 0) then
@@ -912,6 +1004,8 @@
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    regridmethod=regridmethod, &
                                    routehandle=l_routehandle, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -919,6 +1013,8 @@
                                    regridmethod=regridmethod, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -926,6 +1022,8 @@
                                    regridmethod=regridmethod, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
@@ -933,6 +1031,8 @@
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
                                    routehandle=l_routehandle, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
@@ -940,6 +1040,8 @@
                                    srcMaskValues=srcMaskValues, &
                                    regridmethod=regridmethod, &
                                    routehandle=l_routehandle, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -948,6 +1050,8 @@
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -956,6 +1060,8 @@
                                    regridmethod=regridmethod, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -964,6 +1070,8 @@
                                    regridmethod=regridmethod, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -972,6 +1080,8 @@
                                    regridmethod=regridmethod, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -980,6 +1090,8 @@
                                    regridmethod=regridmethod, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
@@ -988,6 +1100,8 @@
                                    dstMaskValues=dstMaskValues, &
                                    regridmethod=regridmethod, &
                                    routehandle=l_routehandle, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -997,6 +1111,8 @@
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -1006,6 +1122,8 @@
                                    regridmethod=regridmethod, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -1015,6 +1133,8 @@
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -1024,6 +1144,8 @@
                                    regridmethod=regridmethod, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -1034,6 +1156,8 @@
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       endif
     elseif (rmpresent == 0 .and. uapresent == 0) then
@@ -1041,30 +1165,40 @@
           .and. sffpresent == 0 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    routehandle=l_routehandle, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    dstMaskValues=dstMaskValues, &
                                    routehandle=l_routehandle, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
         call ESMF_FieldRegridStore(srcField, dstField, &
                                    srcMaskValues=srcMaskValues, &
                                    routehandle=l_routehandle, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -1072,6 +1206,8 @@
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -1079,6 +1215,8 @@
                                    dstMaskValues=dstMaskValues, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -1086,6 +1224,8 @@
                                    srcMaskValues=srcMaskValues, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -1093,6 +1233,8 @@
                                    dstMaskValues=dstMaskValues, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -1100,6 +1242,8 @@
                                    srcMaskValues=srcMaskValues, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 0) then
@@ -1107,6 +1251,8 @@
                                    srcMaskValues=srcMaskValues, &
                                    dstMaskValues=dstMaskValues, &
                                    routehandle=l_routehandle, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 0 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -1115,6 +1261,8 @@
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 0) then
@@ -1123,6 +1271,8 @@
                                    dstMaskValues=dstMaskValues, &
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 0 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -1131,6 +1281,8 @@
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 0 .and. dffpresent == 1) then
@@ -1139,6 +1291,8 @@
                                    dstMaskValues=dstMaskValues, &
                                    routehandle=l_routehandle, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       else if (smvpresent == 1 .and. dmvpresent == 1 &
                .and. sffpresent == 1 .and. dffpresent == 1) then
@@ -1148,6 +1302,8 @@
                                    routehandle=l_routehandle, &
                                    srcFracField=srcFracField, &
                                    dstFracField=dstFracField, &
+    				   polemethod=polemethod_loc, &
+				   regridPoleNPnts=regridPoleNPnts_loc, &
                                    rc=localrc)
       endif
     endif
