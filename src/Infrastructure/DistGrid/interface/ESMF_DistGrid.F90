@@ -764,13 +764,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDGT
 !
 ! !ARGUMENTS:
-    type(ESMF_DistGrid),        intent(in)            :: distgrid
-    integer, target,            intent(in)            :: firstExtraPTile(:,:)
-    integer, target,            intent(in)            :: lastExtraPTile(:,:)
+    type(ESMF_DistGrid),           intent(in)            :: distgrid
+    integer, target,               intent(in)            :: firstExtraPTile(:,:)
+    integer, target,               intent(in)            :: lastExtraPTile(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_Index_Flag),      intent(in),  optional :: indexflag
+    type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
-    integer,                    intent(out), optional :: rc
+    integer,                       intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -887,19 +887,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRD
 !
 ! !ARGUMENTS:
-    integer,                   intent(in)            :: minIndex(:)
-    integer,                   intent(in)            :: maxIndex(:)
+    integer,                        intent(in)            :: minIndex(:)
+    integer,                        intent(in)            :: maxIndex(:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,      target,      intent(in),  optional :: regDecomp(:)
+    integer,                target, intent(in),  optional :: regDecomp(:)
     type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflag(:)
-    integer,      target,      intent(in),  optional :: regDecompFirstExtra(:)
-    integer,      target,      intent(in),  optional :: regDecompLastExtra(:)
-    integer,      target,      intent(in),  optional :: deLabelList(:)
-    type(ESMF_Index_Flag),     intent(in),  optional :: indexflag
+    integer,                target, intent(in),  optional :: regDecompFirstExtra(:)
+    integer,                target, intent(in),  optional :: regDecompLastExtra(:)
+    integer,                target, intent(in),  optional :: deLabelList(:)
+    type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection),  intent(in),  optional :: connectionList(:)
-    type(ESMF_DELayout),       intent(in),  optional :: delayout
-    type(ESMF_VM),             intent(in),  optional :: vm
-    integer,                   intent(out), optional :: rc
+    type(ESMF_DELayout),            intent(in),  optional :: delayout
+    type(ESMF_VM),                  intent(in),  optional :: vm
+    integer,                        intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -1080,15 +1080,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDB
 !
 ! !ARGUMENTS:
-    integer,                       intent(in)           :: minIndex(:)
-    integer,                       intent(in)           :: maxIndex(:)
-    integer,                       intent(in)           :: deBlockList(:,:,:)
+    integer,                       intent(in)            :: minIndex(:)
+    integer,                       intent(in)            :: maxIndex(:)
+    integer,                       intent(in)            :: deBlockList(:,:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                       intent(in), optional :: deLabelList(:)
-    type(ESMF_Index_Flag),         intent(in), optional :: indexflag
-    type(ESMF_DistGridConnection), intent(in), optional ::connectionList(:)
-    type(ESMF_DELayout),           intent(in), optional :: delayout
-    type(ESMF_VM),                 intent(in), optional :: vm
+    integer,                       intent(in),  optional :: deLabelList(:)
+    type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
+    type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
+    type(ESMF_DELayout),           intent(in),  optional :: delayout
+    type(ESMF_VM),                 intent(in),  optional :: vm
     integer,                       intent(out), optional :: rc
 !
 ! !STATUS:
@@ -1248,8 +1248,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                        intent(in)            :: maxIndex(:)
     integer,                        intent(in),  optional :: regDecomp(:)
     type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflag(:)
-    integer, target,                intent(in),  optional :: regDecompFirstExtra(:)
-    integer, target,                intent(in),  optional :: regDecompLastExtra(:)
+    integer,                target, intent(in),  optional :: regDecompFirstExtra(:)
+    integer,                target, intent(in),  optional :: regDecompLastExtra(:)
     integer,                        intent(in),  optional :: deLabelList(:)
     type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection),  intent(in),  optional :: connectionList(:)
@@ -1570,19 +1570,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRDT
 !
 ! !ARGUMENTS:
-    integer,            intent(in)           :: minIndexPTile(:,:)
-    integer,            intent(in)           :: maxIndexPTile(:,:)
+    integer,                        intent(in)            :: minIndexPTile(:,:)
+    integer,                        intent(in)            :: maxIndexPTile(:,:)
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,            intent(in), optional :: regDecompPTile(:,:)
-    type(ESMF_Decomp_Flag),target,intent(in), optional ::decompflagPTile(:,:)
-    integer,    target, intent(in), optional :: regDecompFirstExtraPTile(:,:)
-    integer,     target, intent(in),optional :: regDecompLastExtraPTile(:,:)
-    integer,             intent(in),optional :: deLabelList(:)
-    type(ESMF_Index_Flag),intent(in),optional :: indexflag
-    type(ESMF_DistGridConnection), intent(in), optional :: connectionList(:)
-    type(ESMF_DELayout),intent(in), optional :: delayout
-    type(ESMF_VM),      intent(in), optional :: vm
-    integer,            intent(out),optional :: rc
+    integer,                        intent(in),  optional :: regDecompPTile(:,:)
+    type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflagPTile(:,:)
+    integer,                target, intent(in),  optional :: regDecompFirstExtraPTile(:,:)
+    integer,                target, intent(in),  optional :: regDecompLastExtraPTile(:,:)
+    integer,                        intent(in),  optional :: deLabelList(:)
+    type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
+    type(ESMF_DistGridConnection),  intent(in),  optional :: connectionList(:)
+    type(ESMF_DELayout),            intent(in),  optional :: delayout
+    type(ESMF_VM),                  intent(in),  optional :: vm
+    integer,                        intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
