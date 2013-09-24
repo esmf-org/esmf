@@ -776,6 +776,58 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_AttPackGet  - Get an ESMF Attribute package object
+!
+! !INTERFACE:
+!     subroutine ESMF_AttPackGet(<object>, attpack, convention, purpose, 
+!       attPackInstanceName, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     type(ESMF_Attribute),intent(inout),          :: attpack
+!     character (len = *), intent(in)              :: convention
+!     character (len = *), intent(in)              :: purpose
+!     character (len = *), intent(in),    optional :: attPackInstanceName
+!     integer,             intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+!     Get an ESMF Attribute package object.  See Section~\ref{sec:AttPacks}
+!     for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),    intent(inout) :: array
+!     \item type(ESMF\_CplComp),  intent(inout) :: comp
+!     \item type(ESMF\_GridComp), intent(inout) :: comp
+!     \item type(ESMF\_SciComp),  intent(inout) :: comp
+!     \item type(ESMF\_Field),    intent(inout) :: field
+!     \item type(ESMF\_Grid),     intent(inout) :: grid
+!     \item type(ESMF\_State),    intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object
+!     \item [attpack]
+!           A handle to the Attribute package
+!     \item [convention]
+!           The convention of the new Attribute package
+!     \item [purpose]
+!           The purpose of the new Attribute package
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_AttributeAdd  - Add an ESMF standard Attribute package
 !
 ! !INTERFACE:
@@ -1856,14 +1908,14 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet()
-!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, keywordEnforcer, &
-!       attpack, typekind, itemCount, isPresent, rc)
+!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, attpack, &
+!       keywordEnforcer, typekind, itemCount, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *),      intent(in)            :: name
+!     type(ESMF_Attribute),     intent(in),           :: attpack
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     type(ESMF_Attribute),     intent(in),  optional :: attpack
 !     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
 !     integer,                  intent(out), optional :: itemCount
 !     logical,                  intent(out), optional :: isPresent
@@ -1909,6 +1961,74 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_AttributeGet - Get Attribute info by name
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, keywordEnforcer, &
+!       convention, purpose, attPackInstanceName, &
+!       typekind, itemCount, isPresent, rc)
+!       
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),      intent(in)            :: name
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     character (len=*),        intent(in),  optional :: convention
+!     character (len=*),        intent(in),  optional :: purpose
+!     character (len=*),        intent(in),  optional :: attPackInstanceName
+!     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+!     integer,                  intent(out), optional :: itemCount
+!     logical,                  intent(out), optional :: isPresent
+!     integer,                  intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Return information associated with the named Attribute,
+!     including {\tt typekind} and {\tt itemCount}.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(in) :: array
+!     \item type(ESMF\_ArrayBundle), intent(in) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(in) :: comp
+!     \item type(ESMF\_GridComp),    intent(in) :: comp
+!     \item type(ESMF\_SciComp),     intent(in) :: comp
+!     \item type(ESMF\_DistGrid),    intent(in) :: distgrid
+!     \item type(ESMF\_Field),       intent(in) :: field
+!     \item type(ESMF\_FieldBundle), intent(in) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(in) :: grid
+!     \item type(ESMF\_State),       intent(in) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object
+!     \item [name]
+!           The name of the Attribute to query
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance.  (Not implemented yet)
+!     \item [{[typekind}]]
+!           The typekind of the Attribute
+!     \item [{[itemCount]}]
+!           The number of items in this Attribute
+!     \item [{[isPresent]}] @\
+!           A logical flag to tell if this Attribute is present or not @\
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_AttributeGet - Get Attribute info by index number
 !
 ! !INTERFACE:
@@ -1918,10 +2038,11 @@ contains
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     integer,             intent(in)            :: attributeIndex
-!     character (len = *), intent(out)           :: name
-!     integer,             intent(out), optional :: itemCount
-!     integer,             intent(out), optional :: rc
+!     integer,                  intent(in)            :: attributeIndex
+!     character (len = *),      intent(out)           :: name
+      type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+!     integer,                  intent(out), optional :: itemCount
+!     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Returns information associated with the indexed Attribute,
@@ -1971,8 +2092,8 @@ contains
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     character (len = *), intent(in), optional  :: convention
-!     character (len = *), intent(in), optional  :: purpose
+!     character (len = *), intent(in),           :: convention
+!     character (len = *), intent(in),           :: purpose
 !     character (len = *), intent(out)           :: attPackInstanceNameList(:)
 !     integer,             intent(out)           :: attPackInstanceNameCount
 !     integer,             intent(out), optional :: rc
@@ -2423,9 +2544,9 @@ contains
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     character (len = *), intent(in),  optional :: name
-!     type(ESMF_Attribute), intent(in) :: attpack
-!     integer,             intent(out), optional :: rc
+!     character (len = *),  intent(in),  optional :: name
+!     type(ESMF_Attribute), intent(inout)         :: attpack
+!     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Remove an Attribute, or Attribute package on <object>.
@@ -2452,8 +2573,8 @@ contains
 !           An {\tt ESMF} object
 !     \item [{[name]}]
 !           The name of the Attribute to remove
-!     \item [{[attpack}]]
-!           An optional handle to the Attribute package that is to be created
+!     \item [attpack]
+!           A handle to the Attribute package that is to be created
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -2469,6 +2590,69 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_AttributeRemove - Remove an Attribute or Attribute package
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeRemove(<object>, name, convention, purpose, &
+!       attPackInstanceName, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),  intent(in),  optional :: name
+!     character (len = *),  intent(in),  optional :: convention
+!     character (len = *),  intent(in),  optional :: purpose
+!     character (len = *),  intent(in),  optional :: attPackInstanceName
+!     integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Remove an Attribute, or Attribute package on <object>.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
+!     and their conventions, purposes, and object types.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object
+!     \item [{[name]}]
+!           The name of the Attribute to remove
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!     NOTE:  An entire Attribute package can be removed by specifying
+!            {\tt convention}, {\tt purpose}, and {\tt attPackInstanceName}
+!            only, without {\tt name}. An
+!            Attribute can be removed directly from <object> by specifying
+!            {\tt name}, without {\tt convention}, {\tt purpose}, and 
+!            {\tt attPackInstanceName}.
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_AttributeSet - Set an Attribute
 !
 ! !INTERFACE:
@@ -2476,10 +2660,10 @@ contains
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     character (len = *), intent(in)            :: name
+!     character (len = *),  intent(in)            :: name
 !     <value>, see below for supported values
-!     type(ESMF_Attribute), intent(in) :: attpack
-!     integer,             intent(out), optional :: rc
+!     type(ESMF_Attribute), intent(in)            :: attpack
+!     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to <object>, or set an Attribute in an
@@ -2536,11 +2720,11 @@ contains
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     character (len = *), intent(in)            :: name
+!     character (len = *),  intent(in)            :: name
 !     <value>, see below for supported values
-!     character (len = *), intent(in),  optional :: inputList(:)
-!     type(ESMF_Attribute), intent(in) :: attpack
-!     integer,             intent(out), optional :: rc
+!     character (len = *),  intent(in),  optional :: inputList(:)
+!     type(ESMF_Attribute), intent(in)            :: attpack
+!     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to <object>, or set an Attribute in an
@@ -2589,11 +2773,11 @@ contains
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     character (len = *), intent(in)            :: name
+!     character (len = *),  intent(in)            :: name
 !     <valueList>, see below for supported values
-!     type(ESMF_Attribute), intent(in) :: attpack
-!     integer,             intent(in),  optional :: itemCount
-!     integer,             intent(out), optional :: rc
+!     type(ESMF_Attribute), intent(in)            :: attpack
+!     integer,              intent(in),  optional :: itemCount
+!     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Attach an Attribute to <object>, or set an Attribute in an
@@ -2636,6 +2820,214 @@ contains
 !           The valueList of the Attribute to set
 !     \item [{[attpack}]]
 !           An optional handle to the Attribute package that is to be created
+!     \item [{[itemCount]}]
+!           The number of items in a multi-valued Attribute
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!
+!EOP!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeSet(<object>, name, <value>, &
+!       convention, purpose, attPackInstanceName, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),  intent(in)            :: name
+!     <value>, see below for supported values
+!     character (len = *),  intent(in),  optional :: convention
+!     character (len = *),  intent(in),  optional :: purpose
+!     character (len = *),  intent(in),  optional :: attPackInstanceName
+!     integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attach an Attribute to <object>, or set an Attribute in an
+!     Attribute package.  The Attribute has a {\tt name} and {\tt value},
+!     and, if in an Attribute package, {\tt convention}, {\tt purpose}, and 
+!     {\tt attPackInstanceName}.  
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     Supported values for the <value> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: value
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: value
+!     \item real (ESMF\_KIND\_R4),   intent(in) :: value
+!     \item real (ESMF\_KIND\_R8),   intent(in) :: value
+!     \item logical,                 intent(in) :: value
+!     \item character (len = *),     intent(in) :: value
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object
+!     \item [name]
+!           The name of the Attribute to set
+!     \item [<value argument>]
+!           The value of the Attribute to set
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance. (Not implemented yet)
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute to point to internal class information
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeSet(<object>, name, <value>, inputList, 
+!       convention, purpose, attPackInstanceName, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),  intent(in)            :: name
+!     <value>, see below for supported values
+!     character (len = *),  intent(in),  optional :: inputList(:)
+!     character (len = *),  intent(in),  optional :: convention
+!     character (len = *),  intent(in),  optional :: purpose
+!     character (len = *),  intent(in),  optional :: attPackInstanceName
+!     integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attach an Attribute to <object>, or set an Attribute in an
+!     Attribute package.  The Attribute has a {\tt name} and {\tt value},
+!     and, if in an Attribute package, {\tt convention}, {\tt purpose}, and 
+!     {\tt attPackInstanceName}.  
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.  
+!     The Attribute can
+!     also be set to be a pointer to internal class information.  See Section
+!     \ref{sec:InternalInfo} for a description of this capability.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Grid), intent(inout) :: grid
+!     \end{description}
+!
+!     Supported values for the <value> are:
+!     \begin{description}
+!     \item character (len = *), intent(in), :: value
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object
+!     \item [name]
+!           The name of the Attribute to set
+!     \item [<value argument>]
+!           The value of the Attribute to set
+!     \item [{[inputList]}]
+!           A list of the input parameters required to set internal info
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance. (Not implemented yet)
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeSet(<object>, name, <valueList>, &
+!       convention, purpose, attPackInstanceName, itemCount, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),  intent(in)            :: name
+!     <valueList>, see below for supported values
+!     character (len = *),  intent(in),  optional :: convention
+!     character (len = *),  intent(in),  optional :: purpose
+!     character (len = *),  intent(in),  optional :: attPackInstanceName
+!     integer,              intent(in),  optional :: itemCount
+!     integer,              intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Attach an Attribute to <object>, or set an Attribute in an
+!     Attribute package.  The Attribute has a {\tt name} and a
+!     {\tt valueList}, with an {\tt itemCount}, and, if in an Attribute
+!     package, {\tt convention}, {\tt purpose}, and {\tt attPackInstanceName}.  
+!     See Section~\ref{sec:AttPacks} for a
+!     description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     Supported values for the <valueList> are:
+!     \begin{description}
+!     \item integer(ESMF\_KIND\_I4), intent(in) :: valueList(:)
+!     \item integer(ESMF\_KIND\_I8), intent(in) :: valueList(:)
+!     \item real (ESMF\_KIND\_R4),   intent(in) :: valueList(:)
+!     \item real (ESMF\_KIND\_R8),   intent(in) :: valueList(:)
+!     \item logical,                 intent(in) :: valueList(:)
+!     \item character (len = *),     intent(in) :: valueList(:)
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object
+!     \item [name]
+!           The name of the Attribute to set
+!     \item [<valueList argument>]
+!           The valueList of the Attribute to set
+!     \item [{[convention]}]
+!           The convention of the Attribute package.
+!     \item [{[purpose]}]
+!           The purpose of the Attribute package.
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance. (Not implemented yet)
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute
 !     \item [{[rc]}]
