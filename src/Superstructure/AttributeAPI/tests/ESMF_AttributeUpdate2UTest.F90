@@ -188,7 +188,7 @@ module ESMF_AttributeUpdate2UTestMod
     integer                     :: nameCount
     character(ESMF_MAXSTR)      :: convCIM, purpComp
     character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
-    character(ESMF_MAXSTR), dimension(2) :: nestConv, nestPurp, attPackInstNames
+    character(ESMF_MAXSTR), dimension(2) :: nestConv, nestPurp
     character(ESMF_MAXSTR), dimension(5) :: nestAttPackName
 
     
@@ -232,7 +232,8 @@ module ESMF_AttributeUpdate2UTestMod
         attpack=attpack, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    call ESMF_AttPackGet(comp, attpack1, convISO, purpRP, rc=rc)
+    call ESMF_AttPackGet(comp, attpack1, convISO, purpRP, &
+      attPackInstanceName=nestAttPackName(1), rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
     ! Responsible party attributes (for Principal Investigator)
@@ -251,7 +252,7 @@ module ESMF_AttributeUpdate2UTestMod
     if (rc .ne. ESMF_SUCCESS) return
 
     call ESMF_AttPackGet(comp, attpack2, convISO, purpRP, &
-      attPackInstanceName=attPackInstNames(2), rc=rc)
+      attPackInstanceName=nestAttPackName(2), rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
     ! Responsible party attributes (for Center)

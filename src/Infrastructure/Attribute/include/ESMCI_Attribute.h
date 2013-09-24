@@ -421,7 +421,7 @@ extern "C" {
 // TODO:  intel 11.0.083 compiler on Columbia errors out on ESMCI_Attribute_F.C
 //        with the following prototype:
 // error: more than one instance of overloaded function "c_esmc_attpackremove_" has "C" linkage
-  void FTN_X(c_esmc_handleget)(ESMC_Base **base, ESMCI::Attribute **attpack,
+  void FTN_X(c_esmc_attpackget)(ESMC_Base **base, ESMCI::Attribute **attpack,
                                   char *convention, char *purpose,
                                   char *object, char *attPackInstanceName,
                                   int *rc,

@@ -2509,14 +2509,19 @@ contains
  @\
       integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
+      character(ESMF_MAXSTR) :: lapin @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
+      lapin = "" @\
+      if (present(attpackInstanceName)) then @\
+        lapin = attpackInstanceName @\
+      endif @\
       call c_ESMC_AttPackGet(mthisfield, attpack, & @\
-      						           convention, purpose, & @\
-                             fobject, attPackInstanceName, localrc) @\
+                             convention, purpose, & @\
+                             fobject, lapin, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
