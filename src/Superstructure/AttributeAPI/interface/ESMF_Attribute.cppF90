@@ -847,13 +847,16 @@ contains
 !
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF\_Array),    intent(inout) :: array
-!     \item type(ESMF\_CplComp),  intent(inout) :: comp
-!     \item type(ESMF\_GridComp), intent(inout) :: comp
-!     \item type(ESMF\_SciComp),  intent(inout) :: comp
-!     \item type(ESMF\_Field),    intent(inout) :: field
-!     \item type(ESMF\_Grid),     intent(inout) :: grid
-!     \item type(ESMF\_State),    intent(inout) :: state
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
 !     \end{description}
 !
 !     The arguments are:
