@@ -61,7 +61,8 @@ program ESMF_ArrayGatherUTest
     !------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     ! 1D ArrayGather() test contiguous Array
-    call test_gather_1d(totalLWidth=(/0/), totalUWidth=(/0/), rc=rc)
+    call test_gather_1d(totalLWidth=(/0/), totalUWidth=(/0/), &
+      dgCase="regDecomp", rc=rc)
     write(failMsg, *) ""
     write(name, *) "ArrayGather 1d test, contiguous Array"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -69,9 +70,28 @@ program ESMF_ArrayGatherUTest
     !------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     ! 1D ArrayGather() test non-contiguous Array
-    call test_gather_1d(totalLWidth=(/2/), totalUWidth=(/3/), rc=rc)
+    call test_gather_1d(totalLWidth=(/2/), totalUWidth=(/3/), &
+      dgCase="regDecomp", rc=rc)
     write(failMsg, *) ""
     write(name, *) "ArrayGather 1d test, non-contiguous Array"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    ! 1D ArrayGather() test contiguous Array with deBlockList DistGrid
+    call test_gather_1d(totalLWidth=(/0/), totalUWidth=(/0/), &
+      dgCase="deBlockList", rc=rc)
+    write(failMsg, *) ""
+    write(name, *) "ArrayGather 1d test, contiguous Array, deBlockList DistGrid"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !------------------------------------------------------------------------
+    !NEX_UTest_Multi_Proc_Only
+    ! 1D ArrayGather() test non-contiguous Array with deBlockList DistGrid
+    call test_gather_1d(totalLWidth=(/2/), totalUWidth=(/3/), &
+      dgCase="deBlockList", rc=rc)
+    write(failMsg, *) ""
+    write(name, *) "ArrayGather 1d test, non-contiguous Array, deBlockList DistGrid"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
@@ -112,9 +132,10 @@ contains
 
 #undef ESMF_METHOD
 #define ESMF_METHOD "test_gather_1d"
-    subroutine test_gather_1d(totalLWidth, totalUWidth, rc)
-        integer, intent(in)   :: totalLWidth(:), totalUWidth(:)
-        integer, intent(out)  :: rc
+    subroutine test_gather_1d(totalLWidth, totalUWidth, dgCase, rc)
+        integer, intent(in)       :: totalLWidth(:), totalUWidth(:)
+        character(*), intent(in)  :: dgCase
+        integer, intent(out)      :: rc
 
         ! local arguments used to create field etc
         type(ESMF_DistGrid)                         :: distgrid
@@ -122,6 +143,7 @@ contains
         type(ESMF_Array)                            :: array
         type(ESMF_ArraySpec)                        :: arrayspec
         integer                                     :: localrc, localPet, i, j
+        integer, allocatable                        :: deBlockList(:,:,:)
 
         integer, pointer                            :: farray(:)
         integer, pointer                            :: farrayDst(:)
@@ -138,12 +160,37 @@ contains
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-
-        distgrid = ESMF_DistGridCreate(minIndex =(/1/), maxIndex=(/16/), &
-          rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+          
+        if (trim(dgCase)=="regDecomp") then
+          ! default DistGrid with regDecomp
+          distgrid = ESMF_DistGridCreate(minIndex =(/1/), maxIndex=(/16/), &
+            rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        else if (trim(dgCase)=="deBlockList") then
+          ! DistGrid with deBlockList
+          allocate(deBlockList(1, 2, 4))  ! dimCount, 2, deCount
+          deBlockList(1, 1, 1) = 5        ! 1st DE minIndex
+          deBlockList(1, 2, 1) = 8        ! 1st DE maxIndex
+          deBlockList(1, 1, 2) = 9        ! 2nd DE minIndex
+          deBlockList(1, 2, 2) = 12       ! 2nd DE maxIndex
+          deBlockList(1, 1, 3) = 13       ! 3rd DE minIndex
+          deBlockList(1, 2, 3) = 16       ! 3rd DE maxIndex
+          deBlockList(1, 1, 4) = 1        ! 4th DE minIndex
+          deBlockList(1, 2, 4) = 4        ! 4th DE maxIndex
+          distgrid = ESMF_DistGridCreate(minIndex =(/1/), maxIndex=(/16/), &
+            deBlockList=deBlockList, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          deallocate(deBlockList)
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="An invalid 'option' argument was provided.", &
+            ESMF_CONTEXT, rcToReturn=rc)
+          return
+        endif
 
         call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=1, &
           rc=localrc)
@@ -164,7 +211,11 @@ contains
 
         farray = 0  ! initialize the entire local array
         do i=1, 4
-          farray(lbound(farray,1)+totalLWidth(1)-1+i) = localPet * 10 + i
+          if (trim(dgCase)=="regDecomp") then
+            farray(lbound(farray,1)+totalLWidth(1)-1+i) = localPet * 10 + i
+          else if (trim(dgCase)=="deBlockList") then
+            farray(lbound(farray,1)+totalLWidth(1)-1+i) = mod(localPet+1,4) * 10 + i
+          endif
         enddo
 
         if(localPet .eq. 0) allocate(farrayDst(16))  ! rootPet
