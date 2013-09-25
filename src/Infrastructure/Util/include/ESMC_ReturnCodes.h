@@ -90,6 +90,8 @@ Fortran Symmetric Return Codes 1-500
 #define  ESMF_RC_ATTR_LINK         60
 #define  ESMF_RC_BUFFER_SHORT      61
 #define  ESMF_RC_TIMEOUT           62
+#define  ESMF_RC_FILE_EXISTS       63
+#define  ESMF_RC_FILE_NOTDIR       64
 
 #if 0
 62-499 reserved for future Fortran symmetric return code definitions
@@ -163,6 +165,8 @@ C/C++ Symmetric Return Codes 501-999
 #define  ESMC_RC_ATTR_LINK        560
 #define  ESMC_RC_BUFFER_SHORT     561
 #define  ESMC_RC_TIMEOUT          562
+#define  ESMC_RC_FILE_EXISTS      563
+#define  ESMC_RC_FILE_NOTDIR      564
 
 #if 0
 562-999 reserved for future C/C++ symmetric return code definitions

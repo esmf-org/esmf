@@ -53,168 +53,7 @@ static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 
-// MapName container type for name/int pairs
-typedef struct {
-  std::map<std::string, int> table;
-} MapName;
-
-
 extern "C" {
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-// Map container routines
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------
-// MapName routines allow Fortran callable management of STL map containers
-// containing string/int pairs.
-
-void FTN_X(c_esmc_mapname_add) (MapName **ptr,
-                            char *name, // in - name to be entered
-                            int *value, // in - associated value
-                            int *rc,    // out - return code
-                            ESMCI_FortranStrLenArg name_len) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_mapname_add"
-
-        ESMF_CHECK_POINTER(ptr, rc)
-
-        string cname (name, name_len);
-#if defined (MAPDEBUG)
-        cout << ESMC_METHOD << ": cname = " << cname;
-        cout << ", value = " << *value << endl;
-//        cout << "    nameTable map address = " << hex << *ptr << endl;
-#endif
-        (*ptr) -> table[cname] = *value;
-#if defined (MAPDEBUG)
-        cout << "    value lookup returned: " << (*ptr) -> table[cname] << endl;
-#endif
-        *rc = ESMF_SUCCESS;
-
-}
-
-void FTN_X(c_esmc_mapname_create) (MapName **ptr,
-                            int *rc     // out - return code
-                            ) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_mapname_create"
-
-        ESMF_CHECK_POINTER(ptr, rc)
-
-#if defined (MAPDEBUG)
-        cout << ESMC_METHOD << ": entered" << endl;
-#endif
-        *ptr = new MapName;
-        *rc = *ptr ? ESMF_SUCCESS : ESMF_FAILURE;
-#if defined (MAPDEBUG)
-        cout << "    nameTable map address = " << hex << *ptr << endl;
-#endif
-
-}
-
-void FTN_X(c_esmc_mapname_destroy) (MapName **ptr,
-                            int *rc     // out - return code
-                            ) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_mapname_destroy"
-
-        ESMF_CHECK_POINTER(ptr, rc)
-
-#if defined (MAPDEBUG)
-        cout << ESMC_METHOD << ": entered" << endl;
-#endif
-        delete *ptr;
-        *rc = ESMF_SUCCESS;
-
-}
-
-void FTN_X(c_esmc_mapname_lookup) (MapName **ptr,
-                            char *name, // in - name to be looked up
-                            int *value, // out - associated value
-                            ESMC_Logical *foundflag, // out - true if name was found
-                            int *rc,    // out - return code
-                            ESMCI_FortranStrLenArg name_len) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_mapname_lookup"
-
-        ESMF_CHECK_POINTER(ptr, rc)
-
-#if defined (MAPDEBUG)
-        cout << ESMC_METHOD << ": entered" << endl;
-#endif
-        string cname (name, name_len);
-        std::map<std::string, int>::iterator pos;
-        pos = (*ptr)->table.find (cname);
-
-        bool found = pos != (*ptr)->table.end ();
-        if (found)
-          *value = pos->second;
-        else
-          *value = -1;
-        *foundflag = found ? ESMF_TRUE : ESMF_FALSE;
-#if defined (MAPDEBUG)
-        cout << "    name: " << cname << ", value returned = " << *value;
-        cout << ", found = " << found << endl;
-#endif
-        *rc = ESMF_SUCCESS;
-}
-
-void FTN_X(c_esmc_mapname_print) (MapName **ptr,
-                            char *title, // in - title for printout
-                            int *rc,     // out - return code
-                            ESMCI_FortranStrLenArg title_len) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_mapname_print"
-
-        ESMF_CHECK_POINTER(ptr, rc)
-
-	fprintf (stdout, "%s\n", string(title, title_len).c_str ());
-	fprintf (stdout, "%s\n", string(title_len, '-').c_str ());
-#if defined (MAPDEBUG)
-        cout << " map size = " << (*ptr)->table.size () << endl;
-#endif
-
-        std::map<std::string, int>::iterator pos;
-        int i=1;
-	for (pos=(*ptr)->table.begin (); pos != (*ptr)->table.end (); ++pos)
-	  fprintf (stdout, " %i: %s, %i\n",
-             i++, pos->first.c_str (), pos->second);
-        *rc = ESMF_SUCCESS;
-}
-
-void FTN_X(c_esmc_mapname_remove) (MapName **ptr,
-                            char *name, // in - name to be entered
-                            int *rc,    // out - return code
-                            ESMCI_FortranStrLenArg name_len) {
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_mapname_remove"
-
-        ESMF_CHECK_POINTER(ptr, rc)
-
-#if defined (MAPDEBUG)
-        cout << ESMC_METHOD << ": entered" << endl;
-#endif
-        string cname (name, name_len);
-        (*ptr)->table.erase (cname);
-        *rc = ESMF_SUCCESS;
-}
-
-void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
-                            int *size,  // out - # of items in the map
-                            int *rc) {  // out - return code
-#undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_mapname_sizeget"
-
-        ESMF_CHECK_POINTER(ptr, rc)
-
-#if defined (MAPDEBUG)
-        cout << ESMC_METHOD << ": entered" << endl;
-#endif
-        *size = (*ptr)->table.size ();
-        *rc = ESMF_SUCCESS;
-}
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -245,6 +84,8 @@ void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
 //     Serialize the contents of a string object.
 //
 //EOPI
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_ESMC_StringSerialize"
 
   char *cp;
 
@@ -305,6 +146,8 @@ void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
 //     Deserialize the contents of a base object.
 //
 //EOPI
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_ESMC_StringDeserialize"
 
   char *cp;
 
@@ -413,7 +256,7 @@ void FTN_X(c_esmc_mapname_sizeget) (MapName **ptr,
 //
 //EOPI
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_ESMC_RemoveDirectory"
+#define ESMC_METHOD "c_ESMC_UtilRemoveDirectory"
 
   string path = string (pathname, 0, ESMC_F90lentrim (pathname, pathname_l));
   bool relaxedflag = *relaxedFlag == ESMF_TRUE;

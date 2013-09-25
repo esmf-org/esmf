@@ -63,29 +63,6 @@
 !
 !==============================================================================
 
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_UtilNameMapAdd
-
-! !INTERFACE:
-
-    interface ESMF_UtilMapNameAdd
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_UtilMapNameContainerAdd
-      module procedure ESMF_UtilMapNameValueAdd
-    end interface
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_UtilNameMapLookup
-
-! !INTERFACE:
-
-    interface ESMF_UtilMapNameLookup
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_UtilMapNameContainerLookup
-      module procedure ESMF_UtilMapNameValueLookup
-    end interface
 
 !------------------------------------------------------------------------------
 
@@ -97,20 +74,14 @@
       public :: operator(/=)
       public :: assignment(=)
 
-!  STL map container interface
-
-      public :: ESMF_UtilMapNameAdd
-      public :: ESMF_UtilMapNameCreate
-      public :: ESMF_UtilMapNameDestroy
-      public :: ESMF_UtilMapNameLookup
-      public :: ESMF_UtilMapNamePrint
-      public :: ESMF_UtilMapNameRemove
-      public :: ESMF_UtilMapNameSize
-
 !  Command line argument methods
       public :: ESMF_UtilGetArgC
       public :: ESMF_UtilGetArg
       public :: ESMF_UtilGetArgIndex
+
+!  File system directory methods
+      public :: ESMF_UtilIOMkDir
+      public :: ESMF_UtilIORmDir
 
 !  Misc methods
       public :: ESMF_Array2String
@@ -119,6 +90,7 @@
       public :: ESMF_StringUpperCase
 
 !  Misc type-to-string methods
+      public :: ESMF_UtilInt2String
       public :: ESMF_StatusString
       public :: ESMF_TypeKindString
       public :: ESMF_LogicalString
@@ -140,446 +112,6 @@
 !------------------------------------------------------------------------------
 
       contains
-
-!------------------------------------------------------------------------- 
-! Map routines - Interfaces to C++ STL map containers
-!------------------------------------------------------------------------- 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_UtilMapNameContainerAdd"
-!BOPI
-! !IROUTINE:  ESMF_UtilMapNameContainerAdd - Add a name/value pair to a map container
-!
-! !INTERFACE:
-  subroutine ESMF_UtilMapNameContainerAdd (this, name, value, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_MapPtr), intent(in) :: this
-    character(*),      intent(in) :: name
-    type(ESMF_Pointer),intent(in) :: value
-    integer,           intent(out), optional :: rc
-!
-! !Description:
-! This method adds a name/value pair to a MapName container.  The
-! name argument is used within the container to identify the pair
-! for lookups.
-!
-! The arguments are:
-! \begin{description}
-! \item [{[this]}]
-! A ESMF\_MapName object
-! \item [{[name]}]
-! A character string which will be the keyword used to identify the
-! pair within the container.
-! \item [{[value]}]
-! A pointer associated with the name.
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!EOPI
-
-    integer :: localrc
-
-    localrc = ESMF_FAILURE
-
-    if (this%this%ptr == 0) then
-      if (present (rc))  &
-        rc = ESMF_RC_PTR_NULL
-      return
-    end if
-
-    call c_esmc_mapname_add (this, trim (name), value, localrc)
-
-    if (present (rc))  &
-      rc = localrc
-
-  end subroutine ESMF_UtilMapNameContainerAdd
-
-!------------------------------------------------------------------------- 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_UtilMapNameValueAdd"
-!BOPI
-! !IROUTINE:  ESMF_UtilMapNameValueAdd - Add a name/value pair to a map container
-!
-! !INTERFACE:
-  subroutine ESMF_UtilMapNameValueAdd (this, name, value, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_MapPtr), intent(in) :: this
-    character(*),      intent(in) :: name
-    integer,           intent(in) :: value
-    integer,           intent(out), optional :: rc
-!
-! !Description:
-! This method adds a name/value pair to a MapName container.  The
-! name argument is used within the container to identify the pair
-! for lookups.
-!
-! The arguments are:
-! \begin{description}
-! \item [{[this]}]
-! A ESMF\_MapName object
-! \item [{[name]}]
-! A character string which will be the keyword used to identify the
-! pair within the container.
-! \item [{[value]}]
-! An integer value associated with the name.
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!EOPI
-
-    integer :: localrc
-
-    localrc = ESMF_FAILURE
-
-    if (this%this%ptr == 0) then
-      if (present (rc))  &
-        rc = ESMF_RC_PTR_NULL
-      return
-    end if
-
-    call c_esmc_mapname_add (this, trim (name), value, localrc)
-
-    if (present (rc))  &
-      rc = localrc
-
-  end subroutine ESMF_UtilMapNameValueAdd
-
-!------------------------------------------------------------------------- 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_UtilMapNameCreate"
-!BOPI
-! !IROUTINE:  ESMF_UtilMapNameCreate - Create a map container for name/value pairs
-!
-! !INTERFACE:
-  subroutine ESMF_UtilMapNameCreate (this, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_MapPtr), intent(out) :: this
-    integer,           intent(out), optional :: rc
-!
-! !Description:
-! This method creates a MapName container.
-!
-! The arguments are:
-! \begin{description}
-! \item [{[this]}]
-! A ESMF\_MapName object to be created.
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!EOPI
-
-    integer :: localrc
-
-    localrc = ESMF_FAILURE
-
-    call c_esmc_mapname_create (this, localrc)
-
-    if (present (rc))  &
-      rc = localrc
-
-  end subroutine ESMF_UtilMapNameCreate
-
-!------------------------------------------------------------------------- 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_UtilMapNameDestroy"
-!BOPI
-! !IROUTINE:  ESMF_UtilMapNameDestroy - Destroy a map container
-!
-! !INTERFACE:
-  subroutine ESMF_UtilMapNameDestroy (this, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_MapPtr), intent(inout) :: this
-    integer,           intent(out), optional :: rc
-!
-! !Description:
-! This method destroys a MapName container.
-!
-! The arguments are:
-! \begin{description}
-! \item [{[this]}]
-! A ESMF\_MapName object to be destroyed.
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!EOPI
-
-    integer :: localrc
-
-    localrc = ESMF_FAILURE
-
-    if (this%this%ptr == 0) then
-      if (present (rc))  &
-        rc = ESMF_RC_PTR_NULL
-      return
-    end if
-
-    call c_esmc_mapname_destroy (this, localrc)
-
-    if (present (rc))  &
-      rc = localrc
-
-  end subroutine ESMF_UtilMapNameDestroy
-
-!------------------------------------------------------------------------- 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_UtilMapNameContainerLookup"
-!BOPI
-! !IROUTINE:  ESMF_UtilMapNameContainerLookup - Return the pointer associated with a name
-!
-! !INTERFACE:
-  subroutine ESMF_UtilMapNameContainerLookup (this, name, value, foundFlag, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_MapPtr), intent(in)  :: this
-    character(*),      intent(in)  :: name
-    type(ESMF_Pointer),intent(out) :: value
-    logical,           intent(out) :: foundFlag
-    integer,           intent(out), optional :: rc
-!
-! !Description:
-! This method looks up a name/value pair in a MapName container
-! and returns the value.
-!
-! The arguments are:
-! \begin{description}
-! \item [{[this]}]
-! A ESMF\_MapName object
-! \item [{[name]}]
-! A character string which will be the keyword used to identify the
-! pair within the container.
-! \item [{[value]}]
-! The pointer associated with the name.
-! \item [{[foundFlag]}]
-! Set to .TRUE. if the name is found, otherwise .FALSE.
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!EOPI
-
-    type(ESMF_Logical) :: localfoundflag
-    integer :: localrc
-
-    localrc = ESMF_FAILURE
-
-    if (this%this%ptr == 0) then
-      if (present (rc))  &
-        rc = ESMF_RC_PTR_NULL
-      return
-    end if
-
-    call c_esmc_mapname_lookup (this, trim (name),  &
-                                value, localfoundFlag, localrc)
-    foundflag = localfoundflag
-
-    if (present (rc))  &
-      rc = localrc
-
-  end subroutine ESMF_UtilMapNameContainerLookup
-
-!------------------------------------------------------------------------- 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_UtilMapNameValueLookup"
-!BOPI
-! !IROUTINE:  ESMF_UtilMapNameValueLookup - Return the value associated with a name
-!
-! !INTERFACE:
-  subroutine ESMF_UtilMapNameValueLookup (this, name, value, foundFlag, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_MapPtr), intent(in)  :: this
-    character(*),      intent(in)  :: name
-    integer,           intent(out) :: value
-    logical,           intent(out) :: foundFlag
-    integer,           intent(out), optional :: rc
-!
-! !Description:
-! This method looks up a name/value pair in a MapName container
-! and returns the value.
-!
-! The arguments are:
-! \begin{description}
-! \item [{[this]}]
-! A ESMF\_MapName object
-! \item [{[name]}]
-! A character string which will be the keyword used to identify the
-! pair within the container.
-! \item [{[value]}]
-! The integer value associated with the name.
-! \item [{[foundFlag]}]
-! Set to .TRUE. if the name is found, otherwise .FALSE.
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!EOPI
-
-    type(ESMF_Logical) :: localfoundflag
-    integer :: localrc
-
-    localrc = ESMF_FAILURE
-
-    if (this%this%ptr == 0) then
-      if (present (rc))  &
-        rc = ESMF_RC_PTR_NULL
-      return
-    end if
-
-    call c_esmc_mapname_lookup (this, trim (name),  &
-                                value, localfoundFlag, localrc)
-    foundflag = localfoundflag
-
-    if (present (rc))  &
-      rc = localrc
-
-  end subroutine ESMF_UtilMapNameValueLookup
-
-!------------------------------------------------------------------------- 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_UtilMapNamePrint"
-!BOPI
-! !IROUTINE:  ESMF_UtilMapNamePrint - Print the name/value pairs 
-!
-! !INTERFACE:
-  subroutine ESMF_UtilMapNamePrint (this, title, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_MapPtr), intent(in) :: this
-    character(*),      intent(in),  optional :: title
-    integer,           intent(out), optional :: rc
-!
-! !Description:
-! This method prints the name/value pair from a MapName container to
-! stdout.
-!
-! The arguments are:
-! \begin{description}
-! \item [{[this]}]
-! A ESMF\_MapName object
-! \item [{[title]}]
-! Title of the print out
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!EOPI
-
-    integer :: localrc, ignorerc
-
-    localrc = ESMF_FAILURE
-
-    if (present (title)) then
-      print *, trim (title)
-    else
-      print *, "ESMF_UtilMapNamePrint:"
-    end if
-
-    if (this%this%ptr == 0) then
-      print *, " *** NULL MapName pointer ***"
-      if (present (rc))  &
-        rc = ESMF_SUCCESS
-      return
-    end if
-
-    call ESMF_UtilIOUnitFlush (ESMF_UtilIOstderr, rc=ignorerc)
-    call ESMF_UtilIOUnitFlush (ESMF_UtilIOstdout, rc=ignorerc)
-
-    if (present (title)) then
-      call c_esmc_mapname_print (this, trim (title), localrc)
-    else
-      call c_esmc_mapname_print (this, "ESMF_UtilMapNamePrint:", localrc)
-    end if
-
-    if (present (rc))  &
-      rc = localrc
-
-  end subroutine ESMF_UtilMapNamePrint
-
-!------------------------------------------------------------------------- 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_UtilMapNameRemove"
-!BOPI
-! !IROUTINE:  ESMF_UtilMapNameRemove - Remove a name/value pair
-!
-! !INTERFACE:
-  subroutine ESMF_UtilMapNameRemove (this, name, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_MapPtr), intent(in) :: this
-    character(*),      intent(in) :: name
-    integer,           intent(out), optional :: rc
-!
-! !Description:
-! This method removes a name/value pair from a MapName container.
-!
-! The arguments are:
-! \begin{description}
-! \item [{[this]}]
-! A ESMF\_MapName object
-! \item [{[name]}]
-! A character string which will be the keyword used to identify the
-! pair within the container.
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!EOPI
-
-    integer :: localrc
-
-    localrc = ESMF_FAILURE
-
-    if (this%this%ptr == 0) then
-      if (present (rc))  &
-        rc = ESMF_RC_PTR_NULL
-      return
-    end if
-
-    call c_esmc_mapname_remove (this, trim (name), localrc)
-
-    if (present (rc))  &
-      rc = localrc
-
-  end subroutine ESMF_UtilMapNameRemove
-
-!------------------------------------------------------------------------- 
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_UtilMapNameSize"
-!BOPI
-! !IROUTINE:  ESMF_UtilMapNameSize - Return the size of the map
-!
-! !INTERFACE:
-  function ESMF_UtilMapNameSize (this, rc)
-!
-! !RETURN VALUE:
-    integer :: ESMF_UtilMapNameSize
-!
-! !ARGUMENTS:
-    type(ESMF_MapPtr), intent(in) :: this
-    integer,           intent(out), optional :: rc
-!
-! !Description:
-! This method returns the number of elements contained within
-! a MapName container.
-!
-! The arguments are:
-! \begin{description}
-! \item [{[this]}]
-! A ESMF\_MapName object
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
-!EOPI
-
-    integer :: localrc
-
-    localrc = ESMF_FAILURE
-
-    if (this%this%ptr == 0) then
-      ESMF_UtilMapNameSize = 0
-      if (present (rc))  &
-        rc = ESMF_SUCCESS
-      return
-    end if
-
-    call c_esmc_mapname_sizeget (this, ESMF_UtilMapNameSize, localrc)
-
-    if (present (rc))  &
-      rc = localrc
-
-  end function ESMF_UtilMapNameSize
-
-!------------------------------------------------------------------------- 
 
 !------------------------------------------------------------------------- 
 ! Command line interfaces
@@ -950,6 +482,146 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   end subroutine ESMF_UtilGetArgIndex
 
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilIOMkDir"
+!BOP
+! !IROUTINE: ESMF_UtilIOMkDir - Create a directory in the file system
+!
+! !INTERFACE:
+  subroutine ESMF_UtilIOMkDir (pathName, keywordEnforcer,  &
+      mode, parentsFlag, relaxedFlag,  &
+      rc)
+!
+! !PARAMETERS:
+    character(*), intent(in)            :: pathName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,      intent(in),  optional :: mode
+    logical,      intent(in),  optional :: parentsFlag
+    logical,      intent(in),  optional :: relaxedFlag
+    integer,      intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Call the system-dependent routine to create a directory in the file system.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[pathName]
+!       Name of the directory to be created.
+!     \item[{[mode]}]
+!       File permission mode.  If not specified on POSIX-compliant systems,
+!       the default is {\tt o'755'}.  On native Windows, this argument is
+!       ignored and default security settings are used.
+!     \item[{[parentsFlag]}]
+!       When set to {\tt .true.}, create parent directories as needed.
+!       If not specified, the default is {\tt .false.}.
+!     \item[{[relaxedFlag]}]
+!       When set to {\tt .true.}, if the directory already exists, {\tt rc}
+!       will be set to {\tt ESMF\_SUCCESS} instead of an error.
+!       If not specified, the default is {\tt .false.}.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+    integer :: mode_local
+    type(ESMF_Logical) :: pflag, rflag  
+    integer :: localrc
+
+    if (present(rc)) rc = ESMF_FAILURE
+
+    mode_local = o'755'
+    if (present (mode)) mode_local = mode
+
+    pflag = .false.
+    if (present (parentsFlag)) pflag = parentsFlag
+    if (pflag == ESMF_TRUE) then
+      if (ESMF_LogFoundError (ESMF_RC_NOT_IMPL, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc))  &
+      return
+    end if
+
+    rflag = .false.
+    if (present (relaxedFlag)) rflag = relaxedFlag
+
+    call c_esmc_makedirectory (pathname, mode_local, rflag, localrc)
+    if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc))  &
+      return
+
+    if (present (rc)) then
+      rc = localrc
+    end if
+
+  end subroutine ESMF_UtilIOMkDir
+
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilIORmDir"
+!BOP
+! !IROUTINE: ESMF_UtilIORmDir - Remove a directory from the file system
+!
+! !INTERFACE:
+  subroutine ESMF_UtilIORmDir (pathName, keywordEnforcer,  &
+      filesFlag, relaxedFlag, rc)
+!
+! !PARAMETERS:
+    character(*), intent(in)            :: pathName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,      intent(in),  optional :: filesFlag
+    logical,      intent(in),  optional :: relaxedFlag
+    integer,      intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Call the system-dependent routine to remove a directory from the file
+!   system.  Note that the directory must be empty in order to be successfully
+!   removed.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[pathName]
+!       Name of the directory to be removed.
+!     \item[{[filesFlag]}]
+!       When set to {\tt .true.}, remove the directory, including any contained
+!       files.  Contained directories are not removed.  If not specified,
+!       the default is {\tt .false.}.
+!     \item[{[relaxedFlag]}]
+!       If set to {\tt .true.}, and if the specified directory does not exist,
+!       the error is ignored and {\tt rc} will be set to {\tt ESMF\_SUCCESS}.
+!       If not specified, the default is {\tt .false.}.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+    integer :: localrc
+    type(ESMF_Logical) :: fflag  
+    type(ESMF_Logical) :: rflag  
+
+    if (present(rc)) rc = ESMF_FAILURE
+
+    fflag = .false.
+    if (present (filesFlag)) fflag = filesFlag
+    if (fflag == ESMF_TRUE) then
+      if (ESMF_LogFoundError (ESMF_RC_NOT_IMPL, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc))  &
+      return
+    end if
+
+    rflag = .false.
+    if (present (relaxedFlag)) rflag = relaxedFlag
+
+    call c_esmc_removedirectory (pathname, rflag, localrc)
+    if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc))  &
+      return
+
+    if (present (rc)) then
+      rc = localrc
+    end if
+
+  end subroutine ESMF_UtilIORmDir
+
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_Array2String"
@@ -1104,6 +776,77 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------- 
 !------------------------------------------------------------------------- 
 ! misc print routines
+!------------------------------------------------------------------------- 
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilInt2String"
+!BOPI
+!  !IROUTINE:  ESMF_UtilInt2String - Convert an integer to a string
+!
+! ! INTERFACE:
+      pure function ESMF_UtilInt2String (i)
+!
+!  !ARGUMENTS:
+        integer, intent(in) :: i
+!
+! !RETURN VALUE:
+        character(len=ESMF_UtilIntWidth (i)) :: ESMF_UtilInt2String 
+!
+!  !DESCRIPTION:
+!    Return a minimal length character string containing a textual version
+!    of the provided integer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[i]
+!       The integer to be converted.
+!     \end{description}
+!
+!
+!EOPI
+
+        write (ESMF_UtilInt2String,'(i0.1)') i
+
+      end function ESMF_UtilInt2String
+
+!------------------------------------------------------------------------- 
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilIntWidth"
+!BOPI
+!  !IROUTINE:  ESMF_UtilIntWidth - compute number of digits in an integer
+!
+! ! INTERFACE:
+      elemental function ESMF_UtilIntWidth (i)
+!
+!  !ARGUMENTS:
+        integer, intent(in) :: i
+!
+! !RETURN VALUE:
+        integer :: ESMF_UtilIntWidth
+!
+!  !DESCRIPTION:
+!    Return the number of decimal digits, including sign, of the
+!    provided integer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[i]
+!       Integer input.
+!     \end{description}
+!
+!
+!EOPI
+
+        select case (i)
+        case (:-1)
+          ESMF_UtilIntWidth = log10 (real (abs (i))) + 2
+        case (0)
+          ESMF_UtilIntWidth = 1
+        case (1:)
+          ESMF_UtilIntWidth = log10 (real (i)) + 1
+        end select
+
+      end function ESMF_UtilIntWidth
+
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StatusString"
