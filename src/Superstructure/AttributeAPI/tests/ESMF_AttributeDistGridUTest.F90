@@ -46,7 +46,7 @@ program ESMF_AttributeDistGridUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_Attribute)   :: attpack, nested_attpack
+      type(ESMF_AttPack)   :: attpack, nested_attpack
       
       type(ESMF_DistGrid)    :: distgrid
       character(ESMF_MAXSTR) :: attrname, attrnameOut, attrvalue

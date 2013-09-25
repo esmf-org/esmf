@@ -184,7 +184,7 @@ module ESMF_AttributeUpdate2UTestMod
     integer, intent(out) :: rc
 
     ! Local variables
-	  type(ESMF_Attribute) :: attpack, attpack1, attpack2
+	  type(ESMF_AttPack) :: attpack, attpack1, attpack2
     integer                     :: nameCount
     character(ESMF_MAXSTR)      :: convCIM, purpComp
     character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
@@ -313,7 +313,7 @@ module ESMF_AttributeUpdate2UTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
-	  type(ESMF_Attribute) :: attpack1, attpack2, attpack_nested
+	  type(ESMF_AttPack) :: attpack1, attpack2, attpack_nested
     character(ESMF_MAXSTR) :: convCIM, purpComp, convISO, purpRP, purpExt
     character(ESMF_MAXSTR),dimension(2) :: attrList, valueList, attPackInstNames
     integer attPackInstCount
@@ -486,7 +486,7 @@ program ESMF_AttributeUpdate2UTest
     type(ESMF_GridComp)     :: gridcomp1
     type(ESMF_GridComp)     :: gridcomp2
     type(ESMF_CplComp)      :: cplcomp
-    type(ESMF_Attribute)    :: attpack
+    type(ESMF_AttPack)    :: attpack
     character(ESMF_MAXSTR)  :: convCIM, purpExt, convISO, purpRP, outVal
     character(ESMF_MAXSTR)  :: attPackInstNames(2)
 

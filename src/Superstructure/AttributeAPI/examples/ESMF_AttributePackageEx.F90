@@ -47,7 +47,7 @@ program ESMF_AttributePackageEx
 
       ! Local variables  
       integer                 :: rc, finalrc, petCount, localPet, result
-	  type(ESMF_Attribute)    :: attpack
+	  type(ESMF_AttPack)    :: attpack
       type(ESMF_VM)           :: vm
       type(ESMF_Field)        :: DPEDT,DTDT,DUDT,DVDT,PHIS,QTR,CNV,CONVCPT,&
                                  CONVKE,CONVPHI

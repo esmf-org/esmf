@@ -66,7 +66,7 @@ implicit none
 
 
       integer                 :: rc, urc, finalrc, petCount, localPet, result
-	  type(ESMF_Attribute)    :: attpack
+	  type(ESMF_AttPack)    :: attpack
       type(ESMF_VM)           :: vm
       type(ESMF_State)        :: c1exp, c2imp
       type(ESMF_GridComp)     :: gridcomp1

@@ -198,7 +198,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_Attribute)        :: attpack   
+    type(ESMF_AttPack)        :: attpack   
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,value1,value2, &
@@ -312,7 +312,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     character(ESMF_MAXSTR)      :: name_to_add, value_to_add
     type(ESMF_Field)            :: field
     type(ESMF_FieldBundle)      :: fieldbundle
-    type(ESMF_Attribute)        :: attpack
+    type(ESMF_AttPack)        :: attpack
 
     rc = ESMF_SUCCESS
 
@@ -514,7 +514,7 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
       type(ESMF_CplComp)      :: cplcomp
       character(ESMF_MAXSTR)  :: convESMF,purpGen
 
-	  type(ESMF_Attribute)    :: attpack
+	  type(ESMF_AttPack)    :: attpack
       type(ESMF_Field)        :: field
       type(ESMF_FieldBundle)  :: fieldbundle
 

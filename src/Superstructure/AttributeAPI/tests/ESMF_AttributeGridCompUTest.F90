@@ -46,7 +46,7 @@ program ESMF_AttributeGridCompUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_Attribute)   :: attpack
+      type(ESMF_AttPack)   :: attpack
       
       type(ESMF_CplComp)     :: cfg
       type(ESMF_GridComp)    :: gridcomp, gfg, gridcompValue, gridcompHybrid

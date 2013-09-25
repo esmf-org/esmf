@@ -412,7 +412,7 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     character(ESMF_MAXSTR)  :: attrList(3)
-    type(ESMF_Attribute) :: attpack
+    type(ESMF_AttPack)   :: attpack
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -458,7 +458,7 @@ module NUOPC_Base
 !   the Attribute is not present or not set.
 !EOP
   !-----------------------------------------------------------------------------
-	type(ESMF_Attribute) :: attpack
+	type(ESMF_AttPack)   :: attpack
     if (present(rc)) rc = ESMF_SUCCESS
 
 	  call ESMF_AttPackGet(comp, attpack, &
@@ -517,7 +517,7 @@ module NUOPC_Base
     ! local variables
     character(ESMF_MAXSTR), pointer :: cplList(:)
     integer                         :: count
-    type(ESMF_Attribute) :: attpack
+    type(ESMF_AttPack)   :: attpack
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -615,7 +615,7 @@ module NUOPC_Base
     logical                           :: accepted
     integer                           :: i
     type(NUOPC_FieldDictionaryEntry)  :: fdEntry
-    type(ESMF_Attribute) :: attpack
+    type(ESMF_AttPack)   :: attpack
     
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -789,7 +789,7 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     character(ESMF_MAXSTR)  :: defaultvalue
-    type(ESMF_Attribute) :: attpack
+    type(ESMF_AttPack)   :: attpack
     
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -841,7 +841,7 @@ module NUOPC_Base
 !   convention {\tt NUOPC} and purpose {\tt General}.
 !EOP
   !-----------------------------------------------------------------------------
-    type(ESMF_Attribute) :: attpack
+    type(ESMF_AttPack)   :: attpack
     
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -881,7 +881,7 @@ module NUOPC_Base
     type(ESMF_Field), allocatable :: srcFieldList(:)
     type(ESMF_Field), allocatable :: dstFieldList(:)
     integer                       :: i, valueList(9), srcCount, dstCount
-    type(ESMF_Attribute) :: attpack
+    type(ESMF_AttPack)   :: attpack
     
 !gjtdebug    character(ESMF_MAXSTR)  :: tempString1, tempString2
 !gjtdebug    character(5*ESMF_MAXSTR):: msgString
@@ -1115,7 +1115,7 @@ module NUOPC_Base
     type(ESMF_Time)         :: fieldTime
     integer                 :: i, valueList(9)
     type(ESMF_CalKind_Flag) :: calkindflag
-    type(ESMF_Attribute)    :: attpack
+    type(ESMF_AttPack)      :: attpack
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -1342,7 +1342,7 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     character(ESMF_MAXSTR)            :: attrList(7)
-    type(ESMF_Attribute)              :: attpack
+    type(ESMF_AttPack)                :: attpack
     
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -2096,7 +2096,7 @@ endif
     character(ESMF_MAXSTR)                :: value
     integer                 :: i
     character(ESMF_MAXSTR)  :: iString, msgString
-    type(ESMF_Attribute)    :: attpack
+    type(ESMF_AttPack)      :: attpack
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -2230,7 +2230,7 @@ endif
     integer                 :: yy, mm, dd, h, m, s, ms, us, ns
     integer                 :: i
     logical                 :: selected
-    type(ESMF_Attribute)    :: attpack
+    type(ESMF_AttPack)      :: attpack
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -2328,7 +2328,7 @@ endif
     type(ESMF_Field)                      :: field
     integer                 :: i, localPet, valueList(9)
     type(ESMF_VM)           :: vm
-    type(ESMF_Attribute)    :: attpack
+    type(ESMF_AttPack)      :: attpack
     
 !gjtdebug    character(ESMF_MAXSTR)  :: tempString1, msgString
 

@@ -95,7 +95,7 @@ module user_model2
     integer, intent(out) :: rc
 
     ! Local variables
-	type(ESMF_Attribute)        :: attpack
+	  type(ESMF_AttPack)        :: attpack
     character(ESMF_MAXSTR)      :: convCIM, purpComp, purpSci, purpField
     character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
     character(ESMF_MAXSTR)      :: sciPropAtt(3)

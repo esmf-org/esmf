@@ -113,7 +113,7 @@ module user_model2
 
     ! Local variables
     integer               :: localPet
-	type(ESMF_Attribute)  :: attpack
+	type(ESMF_AttPack)  :: attpack
     type(ESMF_Field)      :: field
     type(ESMF_FieldBundle):: fieldbundle
     type(ESMF_Clock)      :: clockInternal

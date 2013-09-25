@@ -1301,7 +1301,7 @@ module ESMF_ComplianceICMod
     character(*), intent(in)              :: purpose
     integer,      intent(out), optional   :: rc
     
-    type(ESMF_Attribute)                  :: attpack
+    type(ESMF_AttPack)                    :: attpack
     type(ESMF_TypeKind_Flag)              :: typekind
     integer                               :: itemCount, i
     logical                               :: isPresent
@@ -1510,7 +1510,7 @@ module ESMF_ComplianceICMod
     character(*), intent(in)              :: purpose
     integer,      intent(out), optional   :: rc
     
-    type(ESMF_Attribute)                  :: attpack
+    type(ESMF_AttPack)                    :: attpack
     type(ESMF_TypeKind_Flag)              :: typekind
     integer                               :: itemCount, i
     logical                               :: isPresent

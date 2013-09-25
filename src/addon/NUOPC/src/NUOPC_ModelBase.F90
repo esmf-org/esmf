@@ -127,7 +127,7 @@ module NUOPC_ModelBase
     ! local variables    
     character(len=NUOPC_PhaseMapStringLength) :: initPhases(4)
     character(ESMF_MAXSTR):: name
-    type(ESMF_Attribute) :: attpack
+    type(ESMF_AttPack)    :: attpack
 
     rc = ESMF_SUCCESS
 
@@ -175,7 +175,7 @@ module NUOPC_ModelBase
     logical                   :: verbose
     character(ESMF_MAXSTR)    :: defaultvalue
     character(ESMF_MAXSTR)    :: name
-	type(ESMF_Attribute)      :: attpack
+	  type(ESMF_AttPack)        :: attpack
 
     rc = ESMF_SUCCESS
 

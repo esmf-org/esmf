@@ -128,7 +128,7 @@ module NUOPC_Driver
     ! local variables    
     character(len=NUOPC_PhaseMapStringLength) :: initPhases(1)
     character(ESMF_MAXSTR):: name
-    type(ESMF_Attribute) :: attpack
+    type(ESMF_AttPack)   :: attpack
 
     rc = ESMF_SUCCESS
 
@@ -791,7 +791,7 @@ module NUOPC_Driver
         integer                 :: k, phaseCount, stat, ind
         character(len=NUOPC_PhaseMapStringLength) :: tempString
         character(len=40)       :: attributeName
-        type(ESMF_Attribute)    :: attpack
+        type(ESMF_AttPack)      :: attpack
         rc = ESMF_SUCCESS
         ! set the attributeName according to who this is for
         if (i==0) then
@@ -848,7 +848,7 @@ module NUOPC_Driver
         integer, intent(in)     :: i, j
         integer, intent(out)    :: rc
         integer                 :: k, phaseCount, stat, ind
-        type(ESMF_Attribute)    :: attpack
+        type(ESMF_AttPack)      :: attpack
         character(len=NUOPC_PhaseMapStringLength) :: tempString
         rc = ESMF_SUCCESS
         ! obtain number of initPhases from the Model Attributes
@@ -1009,7 +1009,7 @@ module NUOPC_Driver
         character(len=*), parameter :: phaseString = "IPDv02p5"
         type(ESMF_State)            :: imState, exState
         logical                     :: allComplete, someProgress
-        type(ESMF_Attribute)        :: attpack
+        type(ESMF_AttPack)          :: attpack
         ! initialize out arguments
         rc = ESMF_SUCCESS
         
@@ -1151,7 +1151,7 @@ module NUOPC_Driver
     character(ESMF_MAXSTR)          :: name
     logical                         :: verbose
     character(ESMF_MAXSTR)          :: defaultvalue
-    type(ESMF_Attribute)            :: attpack
+    type(ESMF_AttPack)              :: attpack
 
     rc = ESMF_SUCCESS
     

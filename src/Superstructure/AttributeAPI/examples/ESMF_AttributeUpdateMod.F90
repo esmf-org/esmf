@@ -189,7 +189,7 @@ module ESMF_AttributeUpdateMod
 !EOE
 
 !BOC
-	type(ESMF_Attribute)     :: attpack
+	type(ESMF_AttPack)     :: attpack
     type(ESMF_VM)            :: vm
     integer                  :: petCount, status, myPet
     character(ESMF_MAXSTR)   :: name1,name2,name3,name4,value1,value2, &
@@ -546,7 +546,7 @@ module ESMF_AttributeUpdateMod
 !EOE
 
 !BOC
-	type(ESMF_Attribute)          :: attpack, attpackGen
+	type(ESMF_AttPack)          :: attpack, attpackGen
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet, k
     character(ESMF_MAXSTR)      :: name2,value2,convESMF,purpGen,purp2,name3

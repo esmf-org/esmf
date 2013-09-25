@@ -90,7 +90,7 @@ module user_coupler
     integer, intent(out) :: rc
 
     ! Local variables
-	type(ESMF_Attribute)        :: attpack
+	  type(ESMF_AttPack)        :: attpack
     type(ESMF_VM)          :: vm
     character(ESMF_MAXSTR) :: convCIM, purpComp, purpProp, purpPlatform
     character(ESMF_MAXSTR) :: convISO, purpRP, purpCitation

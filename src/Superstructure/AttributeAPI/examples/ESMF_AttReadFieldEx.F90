@@ -49,7 +49,7 @@ program ESMF_AttReadFieldEx
 
       ! local variables
       type(ESMF_Field)       :: field
-      type(ESMF_Attribute)   :: attpack, attpack_extended
+      type(ESMF_AttPack)   :: attpack, attpack_extended
       character(ESMF_MAXSTR) :: attrvalue
       type(ESMF_VM)          :: vm
       integer                :: rc

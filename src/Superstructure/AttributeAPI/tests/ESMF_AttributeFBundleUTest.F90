@@ -46,7 +46,7 @@ program ESMF_AttributeFBundleUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_Attribute)   :: attpack, nested_attpack
+      type(ESMF_AttPack)   :: attpack, nested_attpack
       
       type(ESMF_FieldBundle)       :: fieldbundle
       type(ESMF_Field)       :: ffb

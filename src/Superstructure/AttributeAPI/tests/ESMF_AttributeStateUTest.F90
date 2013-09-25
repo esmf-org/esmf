@@ -46,7 +46,7 @@ program ESMF_AttributeStateUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_Attribute)   :: attpack
+      type(ESMF_AttPack)   :: attpack
       
       type(ESMF_Field)       :: ffs 
       type(ESMF_State)       :: state, sfs, stateValue, stateHybrid

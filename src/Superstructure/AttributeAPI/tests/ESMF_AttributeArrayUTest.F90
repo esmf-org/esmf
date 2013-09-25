@@ -46,7 +46,7 @@ program ESMF_AttributeArrayUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_Attribute)   :: attpack, nested_attpack
+      type(ESMF_AttPack)   :: attpack, nested_attpack
       
       type(ESMF_Array)       :: array
       type(ESMF_ArraySpec)   :: arrayspec

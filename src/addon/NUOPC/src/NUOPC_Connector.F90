@@ -101,7 +101,7 @@ module NUOPC_Connector
     ! local variables    
     character(len=NUOPC_PhaseMapStringLength) :: initPhases(3)
     character(ESMF_MAXSTR)                    :: name
-    type(ESMF_Attribute)                      :: attpack
+    type(ESMF_AttPack)                        :: attpack
 
     rc = ESMF_SUCCESS
 
@@ -219,7 +219,7 @@ module NUOPC_Connector
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: consumerConnection
     character(ESMF_MAXSTR)          :: name
-    type(ESMF_Attribute)            :: attpack
+    type(ESMF_AttPack)              :: attpack
 
     rc = ESMF_SUCCESS
 
@@ -397,7 +397,7 @@ module NUOPC_Connector
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: consumerConnection
     character(ESMF_MAXSTR)          :: name
-    type(ESMF_Attribute)            :: attpack
+    type(ESMF_AttPack)              :: attpack
     rc = ESMF_SUCCESS
 
     ! query the Component for info
@@ -593,7 +593,7 @@ module NUOPC_Connector
     integer                   :: phase
     logical                   :: verbose
     character(ESMF_MAXSTR)    :: name
-    type(ESMF_Attribute)      :: attpack
+    type(ESMF_AttPack)        :: attpack
 
     rc = ESMF_SUCCESS
 

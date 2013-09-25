@@ -216,7 +216,7 @@ module NUOPC_Mediator
     character(ESMF_MAXSTR):: name
     integer               :: oldUpdatedCount, newUpdatedCount
     logical               :: allUpdated
-    type(ESMF_Attribute)  :: attpack
+    type(ESMF_AttPack)    :: attpack
 
     rc = ESMF_SUCCESS
 

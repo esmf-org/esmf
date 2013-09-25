@@ -48,7 +48,7 @@ program ESMF_AttReadGridCompUTest
 
       ! local variables
       type(ESMF_GridComp)    :: gridcomp
-      type(ESMF_Attribute)   :: attpack
+      type(ESMF_AttPack)   :: attpack
       logical                :: xercesNotPresent
       integer                :: rc
 

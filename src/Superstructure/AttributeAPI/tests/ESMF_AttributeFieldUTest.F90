@@ -46,7 +46,7 @@ program ESMF_AttributeFieldUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
-      type(ESMF_Attribute)   :: attpack
+      type(ESMF_AttPack)   :: attpack
       
       type(ESMF_Grid)        :: grid
       type(ESMF_Field)       :: field

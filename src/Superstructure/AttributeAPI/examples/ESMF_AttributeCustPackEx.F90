@@ -40,7 +40,7 @@ program ESMF_AttributeCustPackEx
 
       ! Local variables  
       integer                 :: rc, finalrc, petCount, localPet, result
-      type(ESMF_Attribute)    :: attpack
+      type(ESMF_AttPack)    :: attpack
       type(ESMF_VM)           :: vm
       type(ESMF_GridComp)     :: gridcomp
       character(ESMF_MAXSTR)  :: customConv, customPurp

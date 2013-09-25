@@ -95,7 +95,7 @@ module user_model1
     integer, intent(out) :: rc
 
     ! Local variables
-	type(ESMF_Attribute)        :: attpack
+	type(ESMF_AttPack)        :: attpack
     type(ESMF_VM)               :: vm
     integer                     :: petCount, localPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,name5, &
@@ -363,7 +363,7 @@ module user_model1
     integer, intent(out) :: rc
 
     ! Local variables
-	type(ESMF_Attribute)        :: attpack, attpack2
+	type(ESMF_AttPack)        :: attpack, attpack2
     type(ESMF_VM)               :: vm
     integer                     :: petCount, myPet, k
     character(ESMF_MAXSTR)      :: name2,value2,conv,purp,purp2,name3

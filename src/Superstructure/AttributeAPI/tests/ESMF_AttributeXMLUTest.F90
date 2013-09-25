@@ -52,7 +52,7 @@ program ESMF_AttributeXMLUTest
       integer :: result = 0
 
       ! Local variables  
-      type(ESMF_Attribute)    :: attpack   
+      type(ESMF_AttPack)    :: attpack   
       integer                 :: ordinal, rc 
       type(ESMF_GridComp)     :: gridcomp, gridcomp2, gridcomp3
       type(ESMF_Field)        :: field1

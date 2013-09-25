@@ -87,7 +87,7 @@ module ESMF_AttributeMod
 !------------------------------------------------------------------------------
 
  ! Fortran class type to hold pointer to C++ object
-  type ESMF_Attribute
+  type ESMF_AttPack
   sequence
   private
     type(ESMF_Pointer) :: this
@@ -104,9 +104,11 @@ module ESMF_AttributeMod
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 !   Classes
-      public ESMF_Attribute
+      public ESMF_AttPack
 
 !  Attribute methods
+      public ESMF_AttPackGet
+
       public ESMF_AttributeAdd
       public ESMF_AttributeCopy
       public ESMF_AttributeRemove
@@ -117,8 +119,6 @@ module ESMF_AttributeMod
       public ESMF_AttributeUpdate
       public ESMF_AttributeRead
       public ESMF_AttributeWrite
-
-      public ESMF_AttPackGet
 
       public ESMF_AttributeGetInit
       !public ESMF_AttributeValidate
@@ -784,7 +784,7 @@ contains
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     type(ESMF_Attribute),intent(inout),          :: attpack
+!     type(ESMF_AttPack),  intent(inout),          :: attpack
 !     character (len = *), intent(in)              :: convention
 !     character (len = *), intent(in)              :: purpose
 !     character (len = *), intent(in),    optional :: attPackInstanceName
@@ -838,7 +838,7 @@ contains
 !     <object>, see below for supported values
 !     character (len = *), intent(in)              :: convention
 !     character (len = *), intent(in)              :: purpose
-!     type(ESMF_Attribute),intent(inout), optional :: attpack
+!     type(ESMF_AttPack),  intent(inout), optional :: attpack
 !     integer,             intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
@@ -896,7 +896,7 @@ contains
 !     character (len = *), intent(out)             :: nestAttPackInstanceNameList(:)
 !     integer,             intent(in),    optional :: nestCount
 !     integer,             intent(out),   optional :: nestAttPackInstanceNameCount
-!     type(ESMF_Attribute),intent(inout), optional :: attpack
+!     type(ESMF_AttPack),  intent(inout), optional :: attpack
 !     integer,             intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
@@ -967,7 +967,7 @@ contains
 !     character (len = *), intent(in)              :: convention
 !     character (len = *), intent(in)              :: purpose
 !     integer,             intent(in),    optional :: count
-!     type(ESMF_Attribute),intent(inout), optional :: attpack
+!     type(ESMF_AttPack),  intent(inout), optional :: attpack
 !     integer,             intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
@@ -1026,7 +1026,7 @@ contains
 !     character (len = *), intent(in)              :: nestConvention(:)
 !     character (len = *), intent(in)              :: nestPurpose(:)
 !     integer,             intent(in),    optional :: nestCount
-!     type(ESMF_Attribute),intent(inout), optional :: attpack
+!     type(ESMF_AttPack),  intent(inout), optional :: attpack
 !     integer,             intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
@@ -1095,7 +1095,7 @@ contains
 !     integer,             intent(in),    optional :: count
 !     character (len = *), intent(in)              :: nestConvention
 !     character (len = *), intent(in)              :: nestPurpose
-!     type(ESMF_Attribute),intent(inout), optional :: attpack
+!     type(ESMF_AttPack),  intent(inout), optional :: attpack
 !     integer,             intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
@@ -1211,7 +1211,7 @@ contains
 !     character (len = *), intent(in)            :: name
 !     <value>, see below for supported values
 !     <defaultvalue>, see below for supported values
-!     type(ESMF_Attribute),intent(in),  optional :: attpack
+!     type(ESMF_AttPack),  intent(in),  optional :: attpack
 !     logical,             intent(out), optional :: isPresent
 !     integer,             intent(out), optional :: rc
 !
@@ -1295,7 +1295,7 @@ contains
 !     <value>, see below for supported values
 !     <defaultvalue>, see below for supported values
 !     character (len = *), intent(in),  optional :: inputList(:)
-!     type(ESMF_Attribute),intent(in),  optional :: attpack
+!     type(ESMF_AttPack),  intent(in),  optional :: attpack
 !     logical,             intent(out), optional :: isPresent
 !     integer,             intent(out), optional :: rc
 !
@@ -1363,7 +1363,7 @@ contains
 !     character (len = *), intent(in)              :: name
 !     <valueList>, see below for supported values
 !     <defaultvalueList>, see below for supported values
-!     type(ESMF_Attribute),intent(in),    optional :: attpack
+!     type(ESMF_AttPack),  intent(in),    optional :: attpack
 !     integer,             intent(out),   optional :: itemCount
 !     logical,             intent(out),   optional :: isPresent
 !     integer,             intent(out),   optional :: rc
@@ -1449,7 +1449,7 @@ contains
 !     <valueList>, see below for supported values
 !     <defaultvalueList>, see below for supported values
 !     character (len = *), intent(in),    optional :: inputList(:)
-!     type(ESMF_Attribute),intent(in),    optional :: attpack
+!     type(ESMF_AttPack),  intent(in),    optional :: attpack
 !     integer,             intent(out),   optional :: itemCount
 !     logical,             intent(out),   optional :: isPresent
 !     integer,             intent(out),   optional :: rc
@@ -1917,7 +1917,7 @@ contains
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *),      intent(in)            :: name
-!     type(ESMF_Attribute),     intent(in),           :: attpack
+!     type(ESMF_AttPack),       intent(in),           :: attpack
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
 !     integer,                  intent(out), optional :: itemCount
@@ -2043,7 +2043,7 @@ contains
 !     <object>, see below for supported values
 !     integer,                  intent(in)            :: attributeIndex
 !     character (len = *),      intent(out)           :: name
-      type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+!     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
 !     integer,                  intent(out), optional :: itemCount
 !     integer,                  intent(out), optional :: rc
 !
@@ -2548,7 +2548,7 @@ contains
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *),  intent(in),  optional :: name
-!     type(ESMF_Attribute), intent(inout)         :: attpack
+!     type(ESMF_AttPack),   intent(inout)         :: attpack
 !     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2665,7 +2665,7 @@ contains
 !     <object>, see below for supported values
 !     character (len = *),  intent(in)            :: name
 !     <value>, see below for supported values
-!     type(ESMF_Attribute), intent(in)            :: attpack
+!     type(ESMF_AttPack),   intent(in)            :: attpack
 !     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2726,7 +2726,7 @@ contains
 !     character (len = *),  intent(in)            :: name
 !     <value>, see below for supported values
 !     character (len = *),  intent(in),  optional :: inputList(:)
-!     type(ESMF_Attribute), intent(in)            :: attpack
+!     type(ESMF_AttPack),   intent(in)            :: attpack
 !     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2778,7 +2778,7 @@ contains
 !     <object>, see below for supported values
 !     character (len = *),  intent(in)            :: name
 !     <valueList>, see below for supported values
-!     type(ESMF_Attribute), intent(in)            :: attpack
+!     type(ESMF_AttPack),   intent(in)            :: attpack
 !     integer,              intent(in),  optional :: itemCount
 !     integer,              intent(out), optional :: rc
 !
@@ -3170,7 +3170,7 @@ contains
 !------------------------------------------------------------------------------
 
     function ESMF_AttributeGetInit(attpack)
-      type(ESMF_Attribute), intent(in), optional :: attpack
+      type(ESMF_AttPack), intent(in), optional :: attpack
       ESMF_INIT_TYPE :: ESMF_AttributeGetInit
     
       if (present(attpack)) then
@@ -3187,7 +3187,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_AttributeValidate"
     subroutine ESMF_AttributeValidate(attpack, rc)
-        type(ESMF_Attribute), intent(in) :: attpack
+        type(ESMF_AttPack), intent(in) :: attpack
         integer, intent(out), optional :: rc
  
         ! Check Init Status
@@ -3221,7 +3221,7 @@ contains
         convention, purpose, attPackInstanceName, rc) @\
  @\
       type(mclass), intent(in) :: mthis   @\
-	    type(ESMF_Attribute), intent(inout) :: attpack @\
+	    type(ESMF_AttPack), intent(inout) :: attpack @\
       character (len = *), intent(in) :: convention @\
       character (len = *), intent(in) :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
@@ -3297,7 +3297,7 @@ contains
       type(mclass), intent(inout) :: mthis @\
       character (len = *), intent(in) :: convention @\
       character (len = *), intent(in) :: purpose @\
- 	    type(ESMF_Attribute), intent(inout), optional :: attpack @\
+ 	    type(ESMF_AttPack), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -3386,7 +3386,7 @@ contains
       character (len = *), dimension(:), intent(out) :: nestAttPackInstanceNameList @\
       integer, intent(in), optional :: nestCount @\
       integer, intent(out), optional :: nestAttPackInstanceNameCount @\
- 	    type(ESMF_Attribute), intent(inout), optional :: attpack @\
+ 	    type(ESMF_AttPack), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -3583,7 +3583,7 @@ contains
       character (len = *), intent(in) :: convention @\
       character (len = *), intent(in) :: purpose @\
       integer, intent(in), optional :: count @\
- 	    type(ESMF_Attribute), intent(inout), optional :: attpack @\
+ 	    type(ESMF_AttPack), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -3685,7 +3685,7 @@ contains
       character (len = *), dimension(:), intent(in) :: nestConvention @\
       character (len = *), dimension(:), intent(in) :: nestPurpose @\
       integer, intent(in), optional :: nestCount @\
- 	    type(ESMF_Attribute), intent(inout), optional :: attpack @\
+ 	    type(ESMF_AttPack), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -3843,7 +3843,7 @@ contains
       integer, intent(in), optional :: count @\
       character (len = *), intent(in) :: nestConvention @\
       character (len = *), intent(in) :: nestPurpose @\
- 	    type(ESMF_Attribute), intent(inout), optional :: attpack @\
+ 	    type(ESMF_AttPack), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -4002,7 +4002,7 @@ contains
       mtype(ESMF_KIND_##mtypekind), intent(out) :: value @\
       mtype(ESMF_KIND_##mtypekind), intent(in), optional :: defaultvalue @\
       character (len=*), intent(in), optional :: inputList(:) @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -4164,7 +4164,7 @@ contains
       integer :: count @\
       !! TODO: this needs to be dynamically sized !!! @\
       character (len=ESMF_MAXSTR) :: modName @\
-      type(ESMF_Attribute) :: attpack @\
+      type(ESMF_AttPack) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -4274,7 +4274,7 @@ contains
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(out) :: valueList @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in), optional :: defaultvalueList @\
       character (len=*), intent(in), optional :: inputList(:) @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(out), optional :: itemCount    @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
@@ -4468,7 +4468,7 @@ contains
       type(ESMF_TypeKind_Flag) :: localTk @\
       !! TODO: this needs to be dynamically sized !!! @\
       character (len=ESMF_MAXSTR) :: modName @\
-      type(ESMF_Attribute) :: attpack @\
+      type(ESMF_AttPack) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -4603,7 +4603,7 @@ contains
       character (len = *), intent(in) :: name @\
       logical, intent(out) :: value @\
       logical, intent(in), optional :: defaultvalue @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -4740,7 +4740,7 @@ contains
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack, localvalue @\
       integer :: count @\
-      type(ESMF_Attribute) :: attpack @\
+      type(ESMF_AttPack) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -4831,7 +4831,7 @@ contains
       logical, dimension(:), intent(out) :: valueList @\
       logical, dimension(:), intent(in), optional :: defaultvalueList @\
       character (len=*), intent(in), optional :: inputList(:) @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(out), optional :: itemCount @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
@@ -5029,7 +5029,7 @@ contains
       type(ESMF_TypeKind_Flag) :: localTk @\
       !! TODO: this needs to be dynamically sized !!! @\
       character (len=ESMF_MAXSTR) :: modName @\
-      type(ESMF_Attribute) :: attpack @\
+      type(ESMF_AttPack) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -5163,7 +5163,7 @@ contains
       character (len = *), intent(in) :: name @\
       character (len = *), intent(out) :: value @\
       character (len = *), intent(in), optional :: defaultvalue @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
  @\
@@ -5322,7 +5322,7 @@ contains
       integer :: count @\
       !! TODO: this needs to be dynamically sized !!! @\
       character (len=ESMF_MAXSTR) :: modName @\
-      type(ESMF_Attribute) :: attpack @\
+      type(ESMF_AttPack) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -5426,7 +5426,7 @@ contains
       character (len = *), intent(in) :: name @\
       character (len=*), dimension(:), intent(out) :: valueList @\
       character (len=*), dimension(:), intent(in), optional :: defaultvalueList @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(out), optional :: itemCount @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
@@ -5610,7 +5610,7 @@ contains
       type(ESMF_TypeKind_Flag) :: localTk @\
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
-      type(ESMF_Attribute) :: attpack @\
+      type(ESMF_AttPack) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -5738,7 +5738,7 @@ contains
       character (len = *), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), intent(out) :: value @\
       mtype(ESMF_KIND_##mtypekind), intent(in), optional :: defaultvalue @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -5870,7 +5870,7 @@ contains
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack @\
       integer :: count @\
-      type(ESMF_Attribute) :: attpack @\
+      type(ESMF_AttPack) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -5959,7 +5959,7 @@ contains
       character (len=*), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(out) :: valueList @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in), optional :: defaultvalueList @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(out), optional :: itemCount    @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
@@ -6124,7 +6124,7 @@ contains
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack @\
       type(ESMF_TypeKind_Flag) :: localTk @\
-      type(ESMF_Attribute) :: attpack @\
+      type(ESMF_AttPack) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -6241,7 +6241,7 @@ contains
       character (len = *), intent(in) :: name @\
       logical, intent(out) :: value @\
       logical, intent(in), optional :: defaultvalue @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -6377,7 +6377,7 @@ contains
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack, localvalue @\
       integer :: count @\
-      type(ESMF_Attribute) :: attpack @\
+      type(ESMF_AttPack) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -6467,7 +6467,7 @@ contains
       character (len=*), intent(in) :: name @\
       logical, dimension(:), intent(out) :: valueList @\
       logical, dimension(:), intent(in), optional :: defaultvalueList @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(out), optional :: itemCount    @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
@@ -6637,7 +6637,7 @@ contains
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: lisPresent, isAttpack @\
       type(ESMF_TypeKind_Flag) :: localTk @\
-      type(ESMF_Attribute) :: attpack @\
+      type(ESMF_AttPack) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -6752,7 +6752,7 @@ contains
       character (len = *), intent(in) :: name @\
       character (len = *), intent(out) :: value @\
       character (len = *), intent(in), optional :: defaultvalue @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
  @\
@@ -6888,7 +6888,7 @@ contains
       type(ESMF_Logical) :: lisPresent, isAttpack @\
       integer, dimension(1) :: lens @\
       integer :: count @\
-      type(ESMF_Attribute) :: attpack @\
+      type(ESMF_AttPack) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -6973,7 +6973,7 @@ contains
       character (len = *), intent(in) :: name @\
       character (len=*), dimension(:), intent(out) :: valueList @\
       character (len=*), dimension(:), intent(in), optional :: defaultvalueList @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(out), optional :: itemCount @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
@@ -7157,7 +7157,7 @@ contains
       type(ESMF_TypeKind_Flag) :: localTk @\
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
-      type(ESMF_Attribute) :: attpack @\
+      type(ESMF_AttPack) :: attpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -7344,7 +7344,7 @@ contains
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character(len=*), intent(in) :: name @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       type(ESMF_TypeKind_Flag), intent(out), optional :: typekind @\
       integer, intent(out), optional :: itemCount    @\
@@ -8091,7 +8091,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in), optional :: name @\
-      type(ESMF_Attribute), intent(inout) :: attpack @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
       integer, intent(out), optional :: rc    @\
 ! @\
 ! !DESCRIPTION: @\
@@ -8182,7 +8182,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: attpack @\
-      type(ESMF_Attribute) :: attpackobj @\
+      type(ESMF_AttPack) :: attpackobj @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -8248,7 +8248,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), intent(in) :: value @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -8369,7 +8369,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Logical) :: attpack @\
       integer :: count @\
       character (len=ESMF_MAXSTR) :: modName @\
-      type(ESMF_Attribute) :: attpackobj @\
+      type(ESMF_AttPack) :: attpackobj @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -8442,7 +8442,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in) :: valueList @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(in), optional :: itemCount    @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -8586,7 +8586,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
-      type(ESMF_Attribute) :: attpackobj @\
+      type(ESMF_AttPack) :: attpackobj @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -8677,7 +8677,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       logical, intent(in) :: value @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -8800,7 +8800,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Logical) :: attpack @\
       integer :: count @\
       character (len=ESMF_MAXSTR) :: modName @\
-      type(ESMF_Attribute) :: attpackobj @\
+      type(ESMF_AttPack) :: attpackobj @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -8874,7 +8874,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       logical, dimension(:), intent(in) :: valueList @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(in), optional :: itemCount    @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -9018,7 +9018,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), parameter :: fobject=#mthis @\
       type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
-      type(ESMF_Attribute) :: attpackobj @\
+      type(ESMF_AttPack) :: attpackobj @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -9109,7 +9109,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       character (len = *), intent(in) :: value @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -9231,7 +9231,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Logical) :: attpack @\
       integer :: count @\
       character (len=ESMF_MAXSTR) :: modName @\
-      type(ESMF_Attribute) :: attpackobj @\
+      type(ESMF_AttPack) :: attpackobj @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -9304,7 +9304,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(mclass), intent(inout) :: mthis @\
       character(len=*), intent(in) :: name @\
       character (len = *), dimension(:), intent(in) :: valueList @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(in), optional :: itemCount @\
       integer, intent(out), optional :: rc @\
  @\
@@ -9450,7 +9450,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=(size(valueList)*len(valueList))) :: valueString @\
       type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
-      type(ESMF_Attribute) :: attpackobj @\
+      type(ESMF_AttPack) :: attpackobj @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -9549,7 +9549,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), intent(in) :: name @\
       character (len = *), intent(in) :: value @\
       character (len = *), intent(in), optional :: inputList(:) @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -9742,7 +9742,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len=ESMF_MAXSTR) :: modName @\
       character, allocatable :: valueString(:) @\
       integer :: lens_size, valuestring_size, tag_size @\
-      type(ESMF_Attribute) :: attpackobj @\
+      type(ESMF_AttPack) :: attpackobj @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
@@ -9877,7 +9877,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(mclass), intent(inout) :: mthis @\
       character(len=*), intent(in) :: name @\
       character (len = *), dimension(:), intent(in) :: valueList @\
-      type(ESMF_Attribute), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(in), optional :: itemCount @\
       integer, intent(out), optional :: rc @\
  @\
@@ -10023,7 +10023,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=(size(valueList)*len(valueList))) :: valueString @\
       type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
-      type(ESMF_Attribute) :: attpackobj @\
+      type(ESMF_AttPack) :: attpackobj @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\

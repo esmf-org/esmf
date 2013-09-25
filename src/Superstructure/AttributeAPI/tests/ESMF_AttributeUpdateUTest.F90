@@ -183,7 +183,7 @@ module ESMF_AttributeUpdateUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_Attribute)        :: attpack   
+    type(ESMF_AttPack)        :: attpack   
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,value1,value2, &
@@ -302,7 +302,7 @@ module ESMF_AttributeUpdateUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_Attribute)        :: attpack, attpack_nested  
+    type(ESMF_AttPack)        :: attpack, attpack_nested  
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name2,value2,convESMF,purpGen,purp2,name3
@@ -542,7 +542,7 @@ program ESMF_AttributeUpdateUTest
       type(ESMF_CplComp)      :: cplcomp
       character(ESMF_MAXSTR)  :: convESMF,purpGen
 
-	type(ESMF_Attribute)        :: attpack
+	type(ESMF_AttPack)        :: attpack
     type(ESMF_Field)            :: field
     type(ESMF_FieldBundle)      :: fieldbundle
     type(ESMF_Grid)             :: grid
