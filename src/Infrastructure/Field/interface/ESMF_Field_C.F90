@@ -639,13 +639,16 @@
 
     ! Set reasonable defaults for some of the optional arguments
     if (pmpresent == 0) then
-      if ((rmpresent == 1) .and. &
-          ((regridmethod == ESMF_REGRIDMETHOD_CONSERVE) .or. &
+      if (rmpresent == 1) then 
+      	 if ((regridmethod == ESMF_REGRIDMETHOD_CONSERVE) .or. &
 	   (regridmethod == ESMF_REGRIDMETHOD_NEAREST_STOD) .or. &
-	   (regridmethod == ESMF_REGRIDMETHOD_NEAREST_DTOS))) then
-	polemethod_loc = ESMF_POLEMETHOD_NONE
+	   (regridmethod == ESMF_REGRIDMETHOD_NEAREST_DTOS)) then
+	   polemethod_loc = ESMF_POLEMETHOD_NONE
+         else
+           polemethod_loc = ESMF_POLEMETHOD_ALLAVG
+	 endif
       else
-        polemethod_loc = ESMF_POLEMETHOD_ALLAVG
+         polemethod_loc = ESMF_POLEMETHOD_ALLAVG
       endif
     else
       polemethod_loc = polemethod
