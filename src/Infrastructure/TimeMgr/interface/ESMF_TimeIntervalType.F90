@@ -89,6 +89,7 @@
       type(ESMF_Pointer)    :: calendar1           ! associated calendar
       integer               :: timeZone1           ! local timezone
 #endif
+      integer pad1 ! jm 20130916
       ! match ESMC_Time on C++ side
 #ifndef ESMF_NO_INITIALIZERS
       integer(ESMF_KIND_I8) :: s2    = 0   ! whole seconds
@@ -103,6 +104,7 @@
       type(ESMF_Pointer)    :: calendar2           ! associated calendar
       integer               :: timeZone2           ! local timezone
 #endif
+      integer pad2 ! jm 20130916
       ! match additional ESMC_TimeInterval members on C++ side
 #ifndef ESMF_NO_INITIALIZERS
       type(ESMF_Pointer)    :: calendar = ESMF_NULL_POINTER ! associated calendar
@@ -115,7 +117,9 @@
       integer(ESMF_KIND_I8) :: mm        ! calendar interval number of months
       integer(ESMF_KIND_I8) :: d         ! calendar interval number of days
 #endif
-
+      integer pad3  !gjt need extra padding to match C++ side (when padded here)
+      
+      
 #ifdef NOSKIP
         type(ESMF_BaseTime)   :: baseTime  ! inherit base class
         type(ESMF_Time)       :: startTime ! start time for absolute calendar

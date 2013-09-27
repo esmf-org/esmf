@@ -97,6 +97,7 @@
       integer                      :: pad       ! to satisfy halem compiler
 #endif
 #endif
+      integer pad !jm 20130916
 
       ESMF_INIT_DECLARE
      end type

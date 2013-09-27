@@ -192,6 +192,7 @@
         type(ESMF_ValidFlag) :: valid
         type(ESMF_ReqForRestartFlag) :: reqrestart
         logical :: proxyFlag
+logical pad ! jm 20130916
         integer :: indirect_index
         character(len=ESMF_MAXSTR) :: namep
          ESMF_INIT_DECLARE

@@ -88,7 +88,9 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
                                              // fully aligned with F90 equiv)
   private:
     ESMC_Time startTime;  // for absolute calendar intervals
+    int pad1; // gjt to match jm 20130916 on Fortran side
     ESMC_Time endTime;    // for absolute calendar intervals
+    int pad2; // gjt to match jm 20130916 on Fortran side
     ESMC_Calendar *calendar;  // for calendar intervals on a 
                               //   specific calendar
     ESMC_I8 yy;      // for relative Calendar intervals:  number of years

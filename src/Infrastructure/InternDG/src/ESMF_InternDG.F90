@@ -143,7 +143,7 @@ module ESMF_InternDGMod
 !     !  requiring additional interprocessor communication.
 
   type ESMF_InternDGType
-  sequence
+!gjt   sequence
   !private
 
     type(ESMF_Base)     :: base         ! standard ESMF base object
@@ -166,6 +166,7 @@ module ESMF_InternDGMod
     integer :: dimCount               ! Number of dimensions
     integer :: arbitrary              ! identifier for arbitrary storage
     integer :: igridBoundaryWidth      ! # of exterior cells/edge
+!gjt integer pad ! jm 20130916
 
   end type
 
@@ -175,7 +176,7 @@ module ESMF_InternDGMod
 !     !  The InternDG data structure that is passed between languages.
 
   type ESMF_InternDG
-  sequence
+!gjt  sequence
   !private
     type (ESMF_InternDGType), pointer :: ptr 
     ESMF_INIT_DECLARE

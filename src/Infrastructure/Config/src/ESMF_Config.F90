@@ -185,16 +185,17 @@
 ! !OPAQUE TYPES:
 !------------------------------------------------------------------------------
        type ESMF_ConfigAttrUsed
-          sequence
+!gjt          sequence
           private              
           character(len=LSZ)      :: label  ! attribute label
           logical                 :: used   ! attribute used (retrieved) or not
+!gjt          integer pad ! jm 20130916
           ESMF_INIT_DECLARE
        end type ESMF_ConfigAttrUsed
 
        type ESMF_ConfigClass
 #ifndef ESMF_SEQUENCE_BUG
-          sequence
+!gjt          sequence
 #endif
           !private              
 #ifndef ESMF_NO_INITIALIZERS
@@ -210,6 +211,7 @@
           integer :: next_line                         ! index_ for next line 
                                                        !   on buffer
           integer :: value_begin                       ! index of beginning of
+!gjt integer pad1 ! jm 20130916
                                                        !   value
 #ifndef ESMF_NO_INITIALIZERS
           type(ESMF_ConfigAttrUsed), dimension(:), &
@@ -222,6 +224,7 @@
           integer :: nattr                             ! number of attributes
                                                        !   in the "used" table
           character(len=LSZ)          :: current_attr  ! the current attr label
+!gjt          integer :: pad ! JM 20130916
           ESMF_INIT_DECLARE
        end type ESMF_ConfigClass
 

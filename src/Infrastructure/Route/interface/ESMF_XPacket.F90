@@ -51,13 +51,14 @@
 !     ! Description of ESMF_XPacket. 
 
       type ESMF_XPacket
-      sequence
+!gjt       sequence
       private
         integer :: rank
         integer :: offset
         integer :: contig_length
         integer :: stride(ESMF_MAXDIM)
         integer :: rep_count(ESMF_MAXDIM)
+!gjt integer pad !jm 20130916
 	ESMF_INIT_DECLARE
       end type
 

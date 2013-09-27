@@ -115,6 +115,7 @@ type ESMF_Log
 #else
     integer                                         ::  logTableIndex
 #endif
+    integer pad !jm 20130916
     ESMF_INIT_DECLARE
 end type ESMF_Log
 

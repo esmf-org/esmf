@@ -61,6 +61,7 @@
         integer :: whole        ! Integer (whole) seconds (signed)
         integer :: numerator    ! Integer fraction (exact) n/d; numerator (signed)
         integer :: denominator  ! Integer fraction (exact) n/d; denominator
+        integer :: pad ! jm 20130916
         ESMF_INIT_DECLARE
       end type
 !

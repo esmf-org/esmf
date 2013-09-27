@@ -64,9 +64,10 @@ module ESMF_InternArrayMod
   ! Object for specifiying halo directions (mostly a placeholder for now)
 
   type ESMF_HaloDirection
-  sequence
+!gjt   sequence
   private
     integer :: edges
+!gjt integer pad ! JM 20130916
     ESMF_INIT_DECLARE
   end type
 

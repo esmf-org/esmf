@@ -92,12 +92,13 @@
 !! ESMF_LocalFieldBundle
 !
       type ESMF_LocalFieldBundle
-      sequence
+!gjt      sequence
       !private
         type(ESMF_InternArray) :: packed_data               ! local packed array
         type(ESMF_Status) :: gridstatus
         type(ESMF_Status) :: arraystatus
         integer :: accesscount
+!gjt integer pad ! jm 20130916
         ESMF_INIT_DECLARE
       end type
 
@@ -105,7 +106,7 @@
 !!     ESMF_FieldBundleType
 !
       type ESMF_FieldBundleType
-      sequence
+!gjt      sequence
       ! this data type is not private so the bundlecomm code can
       ! reach directly in and get at the localdata without a loop
       ! of subroutine calls.  but this causes problems with the 'pattern'
@@ -129,8 +130,10 @@
         logical :: isCongruent                   ! are all fields identical?
         logical :: hasPattern                    ! first data field sets this
         logical :: is_proxy                      ! true if this is a proxy FB
+!gjt logical pad1 ! jm 20130916
         !type(ESMF_FieldBundleCongrntData) :: pattern ! what they must match
         integer :: field_count      
+!gjt integer pad ! jm 20130916
         ESMF_INIT_DECLARE
       end type
 
@@ -141,7 +144,7 @@
 !! calling languages.
 
       type ESMF_FieldBundle
-      sequence
+!gjt      sequence
       !private
       type (ESMF_FieldBundleType), pointer :: btypep 
 
