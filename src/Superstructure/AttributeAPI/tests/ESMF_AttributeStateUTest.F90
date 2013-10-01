@@ -1674,6 +1674,14 @@ program ESMF_AttributeStateUTest
                                        .and.(items==1), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      !EX_UTest
+      ! Validate an Attribute package on a State Test
+      call ESMF_AttributeValidate(state, attpack, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Validate an Attribute package on a State Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
       !------------------------------------------------------------------------
       ! clean up
       call ESMF_FieldBundleDestroy(fbfs, rc=rc)

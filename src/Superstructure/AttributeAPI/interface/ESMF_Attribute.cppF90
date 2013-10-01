@@ -107,21 +107,21 @@ module ESMF_AttributeMod
       public ESMF_AttPack
 
 !  Attribute methods
+      public ESMF_AttributeGetInit
+
       public ESMF_AttPackGet
 
       public ESMF_AttributeAdd
       public ESMF_AttributeCopy
-      public ESMF_AttributeRemove
       public ESMF_AttributeGet
       public ESMF_AttributeLink
       public ESMF_AttributeLinkRemove
       public ESMF_AttributeSet
-      public ESMF_AttributeUpdate
       public ESMF_AttributeRead
+      public ESMF_AttributeRemove
+      public ESMF_AttributeUpdate
+      public ESMF_AttributeValidate
       public ESMF_AttributeWrite
-
-      public ESMF_AttributeGetInit
-      !public ESMF_AttributeValidate
 
 
 !EOPI
@@ -715,6 +715,33 @@ module ESMF_AttributeMod
 
 !EOPI
       end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_AttributeValidate  - Validate an Attribute Package
+!
+! !INTERFACE:
+      interface ESMF_AttributeValidate
+
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_ArrayAttValidate
+        module procedure ESMF_ArrayBundleAttValidate
+        module procedure ESMF_CplCompAttValidate
+        module procedure ESMF_GridCompAttValidate
+        module procedure ESMF_SciCompAttValidate
+        module procedure ESMF_DistGridAttValidate
+        module procedure ESMF_FieldAttValidate
+        module procedure ESMF_FieldBundleAttValidate
+        module procedure ESMF_GridAttValidate
+        module procedure ESMF_StateAttValidate
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that write
+!     an Attribute or Attribute package.
+
+!EOPI
+      end interface
+
 !
 !------------------------------------------------------------------------------
 !BOPI
@@ -3090,6 +3117,46 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_AttributeValidate  - Validate an Attribute package
+!
+! !INTERFACE:
+!     subroutine ESMF_AttributeValidate(<object>, attpack, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     type(ESMF_AttPack), intent(in),  optional :: attpack
+!     integer,            intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Validate the {\tt ESMF_AttPack} object for <object>.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object
+!     \item [{[attpack}]]
+!           An Attribute package
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_AttributeWrite  - Write an Attribute package
 ! \label{api:AttributeWrite}
 !
@@ -3183,30 +3250,11 @@ contains
 
 !-----------------------------------------------------------------------------
 
-#if 0
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_AttributeValidate"
-    subroutine ESMF_AttributeValidate(attpack, rc)
-        type(ESMF_AttPack), intent(in) :: attpack
-        integer, intent(out), optional :: rc
- 
-        ! Check Init Status
-        ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc)
- 
-        ! Add other checks here
- 
-        ! If all checks passed return success
-        if (present(rc)) then
-            rc=ESMF_SUCCESS
-        endif
-
-    end subroutine ESMF_AttributeValidate
-#endif
-
 !-------------------------------------------------------------------------
 !  Macro versions of the routines
 !-------------------------------------------------------------------------
 
+#undef  ESMF_METHOD
 #define AttPackGetMacro(mclass, mthis, mthisfield) \
 @\
 ^undef  ESMF_METHOD @\
@@ -10161,6 +10209,52 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !-----------------------------------------------------------------------------
 
+#define AttValidateMacro(mclass, mthis) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttValidate" @\
+ @\
+!BOPI @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeValidate() @\
+      subroutine mclass##AttValidate(mthis, attpack, rc) @\
+ @\
+! !ARGUMENTS: @\
+        type(mclass), intent(in) :: mthis   @\
+        type(ESMF_AttPack), intent(in) :: attpack @\
+        integer, intent(out), optional :: rc @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Validate an Attribute package. @\
+! @\
+! This call is collective across the current VM. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis] @\
+!      An {\tt mclass} object. @\
+!     \item [attpack] @\
+!      An {\tt ESMF_AttPack} object. @\
+!     \item [{[rc]}]  @\
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+        ! Check Init Status @\
+        ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
+ @\
+        ! Add other checks here @\
+ @\
+        ! If all checks passed return success @\
+        if (present(rc)) then @\
+            rc=ESMF_SUCCESS @\
+        endif @\
+ @\
+    end subroutine mclass##AttValidate @\
+
+!-----------------------------------------------------------------------------
+
 #define AttWriteMacro(mclass, mthis, mthisfield, mthisobj, mthistar) \
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttWrite" @\
@@ -10189,8 +10283,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 !     The arguments are: @\
 !     \begin{description} @\
-!     \item [state] @\
-!      An {\tt ESMF\_State} object. @\
+!     \item [mthis] @\
+!      An {\tt mclass} object. @\
 !     \item [convention] @\
 !      The convention of the Attribute package. @\
 !     \item [purpose] @\
@@ -10305,6 +10399,7 @@ AttSetLogicalMacro(ESMF_CplComp, comp, comp%compp%base)
 AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 
 AttUpdateMacro(ESMF_CplComp, comp, comp%compp%base)
+AttValidateMacro(ESMF_CplComp, comp)
 AttWriteMacro(ESMF_CplComp, comp, comp%compp%base, comp, field)
 
 !-------------------------------------------------------------------------
@@ -10353,6 +10448,7 @@ AttSetLogicalMacro(ESMF_GridComp, comp, comp%compp%base)
 AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 
 AttUpdateMacro(ESMF_GridComp, comp, comp%compp%base)
+AttValidateMacro(ESMF_GridComp, comp)
 AttWriteMacro(ESMF_GridComp, comp, comp%compp%base, comp, field)
 
 !-------------------------------------------------------------------------
@@ -10401,6 +10497,7 @@ AttSetLogicalMacro(ESMF_SciComp, comp, comp%compp%base)
 AttSetCharacterMacro(ESMF_SciComp, comp, comp%compp%base)
 
 AttUpdateMacro(ESMF_SciComp, comp, comp%compp%base)
+AttValidateMacro(ESMF_SciComp, comp)
 AttWriteMacro(ESMF_SciComp, comp, comp%compp%base, comp, field)
 
 !-------------------------------------------------------------------------
@@ -10452,6 +10549,7 @@ AttSetLogicalMacro(ESMF_State, state, state%statep%base)
 AttSetCharacterMacro(ESMF_State, state, state%statep%base)
 
 AttUpdateMacro(ESMF_State, state, state%statep%base)
+AttValidateMacro(ESMF_State, state)
 AttWriteMacro(ESMF_State, state, state%statep%base, state, field)
 
 !-------------------------------------------------------------------------
@@ -10489,6 +10587,7 @@ AttSetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 
 AttUpdateMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
+AttValidateMacro(ESMF_FieldBundle, fieldbundle)
 AttWriteMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base, fieldbundle, field)
 
 !-------------------------------------------------------------------------
@@ -10523,6 +10622,7 @@ AttSetLogicalMacro(ESMF_Field, field, field%ftypep%base)
 AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
 
 AttUpdateMacro(ESMF_Field, field, field%ftypep%base)
+AttValidateMacro(ESMF_Field, field)
 AttWriteMacro(ESMF_Field, field, field%ftypep%base, field, field)
 
 !-------------------------------------------------------------------------
@@ -10554,6 +10654,7 @@ AttSetLogicalMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttSetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 
 AttUpdateMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttValidateMacro(ESMF_ArrayBundle, arraybundle)
 AttWriteMacro(ESMF_ArrayBundle, arraybundle, arraybundle, arraybundle, array)
 
 !-------------------------------------------------------------------------
@@ -10580,6 +10681,7 @@ AttSetLogicalMacro(ESMF_Array, array, array)
 AttSetCharacterMacro(ESMF_Array, array, array)
 
 AttUpdateMacro(ESMF_Array, array, array)
+AttValidateMacro(ESMF_Array, array)
 AttWriteMacro(ESMF_Array, array, array, array, array)
 
 !-------------------------------------------------------------------------
@@ -10620,6 +10722,7 @@ TypeKind3DeclarationMacro(AttSet, ESMF_Grid, grid, grid)
 AttSetLogicalMacro(ESMF_Grid, grid, grid)
 AttSetCharacterBMacro(ESMF_Grid, grid, grid)
 
+AttValidateMacro(ESMF_Grid, grid)
 AttWriteMacro(ESMF_Grid, grid, grid, grid, grid)
 
 !-------------------------------------------------------------------------
@@ -10644,6 +10747,8 @@ AttRemoveMacro(ESMF_DistGrid, distgrid, distgrid)
 TypeKind3DeclarationMacro(AttSet, ESMF_DistGrid, distgrid, distgrid)
 AttSetLogicalMacro(ESMF_DistGrid, distgrid, distgrid)
 AttSetCharacterMacro(ESMF_DistGrid, distgrid, distgrid)
+
+AttValidateMacro(ESMF_DistGrid, distgrid)
 
 !------------------------------------------------------------------------------
 

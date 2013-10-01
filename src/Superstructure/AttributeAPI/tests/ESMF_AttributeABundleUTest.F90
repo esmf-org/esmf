@@ -1563,7 +1563,7 @@ program ESMF_AttributeArrayBundleUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-     !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
       ! clean up
       call ESMF_ArrayBundleDestroy(arraybundle, rc=rc)
       call ESMF_ArrayDestroy(afb, rc=rc)

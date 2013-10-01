@@ -1688,6 +1688,14 @@ program ESMF_AttributeCplCompUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
+      ! Validate an Attribute package on a CplComp Test
+      call ESMF_AttributeValidate(cplcomp, attpack, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Validate an Attribute package on a CplComp Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
       !------------------------------------------------------------------------
       ! clean up
       call ESMF_CplCompDestroy(cplcomp, rc=rc)

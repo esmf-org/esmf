@@ -1536,7 +1536,15 @@ program ESMF_AttributeArrayUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-     !------------------------------------------------------------------------
+      !EX_UTest
+      ! Validate an Attribute package on an Array Test
+      call ESMF_AttributeValidate(array, attpack, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Validate an Attribute package on an Array Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !------------------------------------------------------------------------
       ! clean up
       call ESMF_ArrayDestroy(array, rc=rc)
       call ESMF_DistGridDestroy(distGrid, rc=rc)

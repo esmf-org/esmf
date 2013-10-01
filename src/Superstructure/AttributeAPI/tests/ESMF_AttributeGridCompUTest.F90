@@ -1676,6 +1676,14 @@ program ESMF_AttributeGridCompUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
+      ! Validate an Attribute package on a GridComp Test
+      call ESMF_AttributeValidate(gridcomp, attpack, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Validate an Attribute package on a GridComp Test"
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
       !------------------------------------------------------------------------
       ! clean up      
       call ESMF_GridCompDestroy(gridcomp, rc=rc)
