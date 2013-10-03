@@ -304,7 +304,7 @@ void *ESMC_FieldGetPtr(ESMC_Field field, int localDe, int *rc){
                             ESMC_InterfaceInt *dstMaskValues,
                             ESMC_RouteHandle *routehandle, 
                             enum ESMC_RegridMethod_Flag *regridmethod, 
-			    ESMC_PoleMethod_Flag *polemethod,
+			    enum ESMC_PoleMethod_Flag *polemethod,
 			    int *regridPoleNPnts,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
                             ESMC_Field *srcFracField,
