@@ -3330,7 +3330,7 @@ int Grid::setItemArray(
       return rc;
     }
 
-  // Make sure that they match
+  // Ensure the passed in array has the correct distgrid
   if (!DistGrid::match(staggerDistgrid, arrayArg->getDistGrid())) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- Array and Grid DistGrid mismatch ", ESMC_CONTEXT, &rc);

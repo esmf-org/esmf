@@ -517,8 +517,8 @@ int ESMC_FieldRegridStore(
     ESMC_InterfaceInt *srcMaskValues,          // in
     ESMC_InterfaceInt *dstMaskValues,          // in
     ESMC_RouteHandle *routehandle,             // inout
-    enum ESMC_RegridMethod_Flag *regridmethod,       // in
-    ESMC_PoleMethod_Flag *polemethod,          // in
+    enum ESMC_RegridMethod_Flag *regridmethod, // in
+    enum ESMC_PoleMethod_Flag *polemethod,     // in
     int *regridPoleNPnts,                      // in
     enum ESMC_UnmappedAction_Flag *unmappedaction,   // in
     ESMC_Field *srcFracField,                  // out

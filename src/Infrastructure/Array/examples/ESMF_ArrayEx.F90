@@ -273,8 +273,8 @@ program ESMF_ArrayEx
 ! pieces of information:
 ! \begin{itemize}
 ! \item The extent and topology of the global domain covered by the Array object
-!       in terms of indexed elements. The total extent may be a composition or 
-!       tilework of smaller logically rectangular (LR) domain pieces or tiles.
+!       in terms of indexed elements. The total extent may be a composition of
+!       smaller logically rectangular (LR) domain pieces called tiles.
 ! \item The decomposition of the entire domain into "element exclusive" DE-local
 !       LR chunks. {\em Element exclusive} means that there is no element overlap
 !       between DE-local chunks. This, however, does not exclude degeneracies 

@@ -458,12 +458,14 @@ contains
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Array} object from existing local native Fortran @\
-! arrays with pointer attribute, according to distgrid. Besides @\
-! {\tt farrayPtr} each PET must issue this call with identical arguments in @\
-! order to create a consistent Array object. The bounds of the local arrays @\
-! are preserved by this call and determine the bounds of the total region of @\
-! the resulting Array object. Bounds of the DE-local exclusive regions are @\
-! set to be consistent with the total regions and the specified distgrid @\
+! arrays with pointer attribute. The decomposition and distribution is @\
+! specified by the {\tt distgrid} argument. Each PET must issue this call @\
+! with identical arguments in order to create a consistent Array object. @\
+! The only exception is the {\tt farrayPtr} argument which will be different @\
+! on each PET. The bounds of the local arrays are preserved by this call and @\
+! determine the bounds of the total region of the @\
+! resulting Array object. Bounds of the DE-local exclusive regions are set @\
+! to be consistent with the total regions and the specified {\tt distgrid} @\
 ! argument. Bounds for Array dimensions that are not distributed are @\
 ! automatically set to the bounds provided by {\tt farrayPtr}. @\
 ! @\
@@ -471,8 +473,7 @@ contains
 ! not be created and an error will be returned if this condition is not met. @\
 ! @\
 ! The not distributed Array dimensions form a tensor of rank = array.rank - @\
-! distgrid.dimCount. By default all tensor elements are associated with @\
-! stagger location 0. The widths of the computational region are set to @\
+! distgrid.dimCount. The widths of the computational region are set to @\
 ! the provided value, or zero by default, for all tensor elements. Use @\
 ! {\tt ESMF\_ArraySet()} to change these default settings after the @\
 ! Array object has been created. @\
@@ -543,13 +544,13 @@ contains
 ! \item[{[totalLWidth]}] @\
 !      This vector argument must have dimCount elements, where dimCount is @\
 !      specified in distgrid. It specifies the lower corner of the total memory @\
-!      region with respect to the lower corner of the computational region. @\
+!      region with respect to the lower corner of the exclusive region. @\
 !      The default is to accommodate the union of exclusive and computational @\
 !      region exactly. @\
 ! \item[{[totalUWidth]}] @\
 !      This vector argument must have dimCount elements, where dimCount is @\
 !      specified in distgrid. It specifies the upper corner of the total memory @\
-!      region with respect to the upper corner of the computational region. @\
+!      region with respect to the upper corner of the exclusive region. @\
 !      The default is a vector that contains the remaining number of elements @\
 !      in each direction as to fit the union of exclusive and computational @\
 !      region into the memory region provided by the {\tt farrayPtr} argument. @\
@@ -696,8 +697,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtr)
 ! not be created and an error will be returned if this condition is not met. @\
 ! @\
 ! The not distributed Array dimensions form a tensor of rank = array.rank - @\
-! distgrid.dimCount. By default all tensor elements are associated with @\
-! stagger location 0. The widths of the computational region are set to @\
+! distgrid.dimCount. The widths of the computational region are set to @\
 ! the provided value, or zero by default, for all tensor elements. Use @\
 ! {\tt ESMF\_ArraySet()} to change these default settings after the @\
 ! Array object has been created. @\
@@ -881,20 +881,21 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
 ! @\
 ! !DESCRIPTION: @\
 ! Create an {\tt ESMF\_Array} object from an existing local native Fortran @\
-! array according to distgrid. Besides {\tt farray} each PET must issue this @\
-! call with identical arguments in order to create a consistent Array object. @\
-! The local arrays provided must be dimensioned according to the DE-local @\
-! total region. Bounds of the exclusive regions are set as specified in the @\
-! distgrid argument. Bounds for Array dimensions that are not distributed can @\
-! be chosen freely using the {\tt undistLBound} and {\tt undistUBound} @\
-! arguments. @\
+! array. The decomposition and distribution is @\
+! specified by the {\tt distgrid} argument. Each PET must issue this call @\
+! with identical arguments in order to create a consistent Array object. @\
+! The only exception is the {\tt farray} argument which will be different @\
+! on each PET. The local arrays provided must be dimensioned according to @\
+! the DE-local total region. Bounds of the exclusive regions are set as @\
+! specified in the {\tt distgrid} argument. Bounds for Array dimensions @\
+! that are not distributed can be chosen freely using the @\
+! {\tt undistLBound} and {\tt undistUBound} arguments. @\
 ! @\
 ! This interface requires a 1 DE per PET decomposition. The Array object will @\
 ! not be created and an error will be returned if this condition is not met. @\
 ! @\
 ! The not distributed Array dimensions form a tensor of rank = array.rank - @\
-! distgrid.dimCount. By default all tensor elements are associated with @\
-! stagger location 0. The widths of the computational region are set to @\
+! distgrid.dimCount. The widths of the computational region are set to @\
 ! the provided value, or zero by default, for all tensor elements. Use @\
 ! {\tt ESMF\_ArraySet()} to change these default settings after the @\
 ! Array object has been created. @\
@@ -966,13 +967,13 @@ TypeKindRankDeclarationMacro(ArrayCreateFromPtrArb)
 ! \item[{[totalLWidth]}] @\
 !      This vector argument must have dimCount elements, where dimCount is @\
 !      specified in distgrid. It specifies the lower corner of the total memory @\
-!      region with respect to the lower corner of the computational region. @\
+!      region with respect to the lower corner of the exclusive region. @\
 !      The default is to accommodate the union of exclusive and computational @\
 !      region exactly. @\
 ! \item[{[totalUWidth]}] @\
 !      This vector argument must have dimCount elements, where dimCount is @\
 !      specified in distgrid. It specifies the upper corner of the total memory @\
-!      region with respect to the upper corner of the computational region. @\
+!      region with respect to the upper corner of the exclusive region. @\
 !      The default is a vector that contains the remaining number of elements @\
 !      in each direction as to fit the union of exclusive and computational @\
 !      region into the memory region provided by the {\tt farray} argument. @\
@@ -1139,20 +1140,22 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! !DESCRIPTION:
 ! \begin{sloppypar}
 ! Create an {\tt ESMF\_Array} object from existing {\tt ESMF\_LocalArray}
-! objects according to distgrid. Besides {\tt localarrayList} each PET must issue
-! this call with identical arguments in order to create a consistent Array 
-! object. The local arrays provided must be dimensioned according to the 
-! DE-local total region. Bounds of the exclusive regions are set as specified 
-! in the distgrid argument. Bounds for array dimensions that are not distributed
-! can be chosen freely using the {\tt undistLBound} and {\tt undistUBound}
-! arguments.
+! objects. The decomposition and distribution is @\
+! specified by the {\tt distgrid} argument. Each PET must issue this call @\
+! with identical arguments in order to create a consistent Array object. @\
+! The only exception is the {\tt localarrayList} argument which will be @
+! different on each PET. The local arrays provided must be dimensioned @
+! according to @\
+! the DE-local total region. Bounds of the exclusive regions are set as @\
+! specified in the {\tt distgrid} argument. Bounds for Array dimensions @\
+! that are not distributed can be chosen freely using the @\
+! {\tt undistLBound} and {\tt undistUBound} arguments. @\
 ! \end{sloppypar}
 !
 ! This interface is able to handle multiple DEs per PET.
 !
 ! The not distributed Array dimensions form a tensor of rank = array.rank - 
-! distgrid.dimCount. By default all tensor elements are associated with 
-! stagger location 0. The widths of the computational region are set to 
+! distgrid.dimCount. The widths of the computational region are set to 
 ! the provided value, or zero by default, for all tensor elements. Use 
 ! {\tt ESMF\_ArraySet()} to change these default settings after the 
 ! Array object has been created.
@@ -1227,7 +1230,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! \item[{[totalLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the total memory
-!      region with respect to the lower corner of the computational region.
+!      region with respect to the lower corner of the exclusive region.
 !      The default is to accommodate the union of exclusive and computational
 !      region exactly.
 ! \item[{[totalUWidth]}]
@@ -1677,13 +1680,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! \item[{[totalLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the total memory
-!      region with respect to the lower corner of the computational region.
+!      region with respect to the lower corner of the exclusive region.
 !      The default is to accommodate the union of exclusive and computational
 !      region.
 ! \item[{[totalUWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the upper corner of the total memory
-!      region with respect to the upper corner of the computational region.
+!      region with respect to the upper corner of the exclusive region.
 !      The default is to accommodate the union of exclusive and computational
 !      region.
 ! \item[{[undistLBound]}]
@@ -1995,13 +1998,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ! \item[{[totalLWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the lower corner of the total memory
-!      region with respect to the lower corner of the computational region.
+!      region with respect to the lower corner of the exclusive region.
 !      The default is to accommodate the union of exclusive and computational
 !      region.
 ! \item[{[totalUWidth]}]
 !      This vector argument must have dimCount elements, where dimCount is
 !      specified in distgrid. It specifies the upper corner of the total memory
-!      region with respect to the upper corner of the computational region.
+!      region with respect to the upper corner of the exclusive region.
 !      The default is to accommodate the union of exclusive and computational
 !      region.
 ! \item[{[undistLBound]}]

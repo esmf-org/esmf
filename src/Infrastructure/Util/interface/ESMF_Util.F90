@@ -90,7 +90,6 @@
       public :: ESMF_StringUpperCase
 
 !  Misc type-to-string methods
-      public :: ESMF_UtilInt2String
       public :: ESMF_StatusString
       public :: ESMF_TypeKindString
       public :: ESMF_LogicalString
@@ -777,76 +776,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------- 
 ! misc print routines
 !------------------------------------------------------------------------- 
-#undef ESMF_METHOD
-#define ESMF_METHOD "ESMF_UtilInt2String"
-!BOPI
-!  !IROUTINE:  ESMF_UtilInt2String - Convert an integer to a string
-!
-! ! INTERFACE:
-      pure function ESMF_UtilInt2String (i)
-!
-!  !ARGUMENTS:
-        integer, intent(in) :: i
-!
-! !RETURN VALUE:
-        character(len=ESMF_UtilIntWidth (i)) :: ESMF_UtilInt2String 
-!
-!  !DESCRIPTION:
-!    Return a minimal length character string containing a textual version
-!    of the provided integer.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[i]
-!       The integer to be converted.
-!     \end{description}
-!
-!
-!EOPI
-
-        write (ESMF_UtilInt2String,'(i0.1)') i
-
-      end function ESMF_UtilInt2String
-
-!------------------------------------------------------------------------- 
-#undef ESMF_METHOD
-#define ESMF_METHOD "ESMF_UtilIntWidth"
-!BOPI
-!  !IROUTINE:  ESMF_UtilIntWidth - compute number of digits in an integer
-!
-! ! INTERFACE:
-      elemental function ESMF_UtilIntWidth (i)
-!
-!  !ARGUMENTS:
-        integer, intent(in) :: i
-!
-! !RETURN VALUE:
-        integer :: ESMF_UtilIntWidth
-!
-!  !DESCRIPTION:
-!    Return the number of decimal digits, including sign, of the
-!    provided integer.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[i]
-!       Integer input.
-!     \end{description}
-!
-!
-!EOPI
-
-        select case (i)
-        case (:-1)
-          ESMF_UtilIntWidth = log10 (real (abs (i))) + 2
-        case (0)
-          ESMF_UtilIntWidth = 1
-        case (1:)
-          ESMF_UtilIntWidth = log10 (real (i)) + 1
-        end select
-
-      end function ESMF_UtilIntWidth
-
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StatusString"
