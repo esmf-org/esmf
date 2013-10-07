@@ -3056,8 +3056,8 @@ extern "C" void FTN_X(c_esmc_meshcheckelemlist)(Mesh **meshpp, int *_num_elem_gi
 // Input is: lon, lat - spherical coordinates in degrees
 // Output is: x,y,z - Cartesian coordinates
 // 
-extern "C" void FTN_X(c_esmc_sphdeg_to_cart)(double *lon, double *lat, 
-				     	     double *x, double *y, double *z, int *rc){
+extern "C" void FTN_X(c_esmc_sphdeg_to_cart)(double *lon, double *lat,
+                                             double *x, double *y, double *z, int *rc){
    try {
 
   // Initialize the parallel environment for mesh (if not already done)
