@@ -3051,3 +3051,65 @@ extern "C" void FTN_X(c_esmc_meshcheckelemlist)(Mesh **meshpp, int *_num_elem_gi
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
 }
+
+// Interface to internal code to convert coords from spherical in degrees to Cartesian
+// Input is: lon, lat - spherical coordinates in degrees
+// Output is: x,y,z - Cartesian coordinates
+// 
+extern "C" void FTN_X(c_esmc_sphdeg_to_cart)(double *lon, double *lat, 
+				     	     double *x, double *y, double *z, int *rc){
+   try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,rc))
+   return;  // bail out with exception
+    }
+
+    // TODO: should I change this to take in coords in array format?
+
+    // temp arrays
+    double sph_coords[2];
+    double cart_coords[3];
+
+    // Put sph coords into temporary array
+    sph_coords[0]=*lon;
+    sph_coords[1]=*lat;
+
+    // Convert coords using standard function
+    ESMCI_CoordSys_ConvertToCart(ESMC_COORDSYS_SPH_DEG, 2, 
+                                 sph_coords, cart_coords);
+
+    // Get cart coords from temporary array
+   *x=cart_coords[0];
+   *y=cart_coords[1];
+   *z=cart_coords[2];
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      					  x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+   					  "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code 
+  if(rc != NULL) *rc = ESMF_SUCCESS;
+}
+

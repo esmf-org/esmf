@@ -680,6 +680,17 @@
     ESMF_COORDSYS_SPH_DEG = ESMF_CoordSys_Flag(1), &
     ESMF_COORDSYS_SPH_RAD = ESMF_CoordSys_Flag(2)
 
+
+!------------------------------------------------------------------------------
+! ! ESMF_CoordSys constants
+! (Need to match the ones in ESMC_CoordSys.C)
+!
+!------------------------------------------------------------------------------
+   real(ESMF_KIND_R8), parameter :: &
+              ESMF_COORDSYS_DEG2RAD=0.01745329251994_ESMF_KIND_R8
+   real(ESMF_KIND_R8), parameter :: &
+              ESMF_COORDSYS_RAD2DEG=57.2957795130931_ESMF_KIND_R8
+
 !------------------------------------------------------------------------------
 !
   type ESMF_FileFormat_Flag
@@ -902,6 +913,8 @@
       public ESMF_COORDSYS_CART, ESMF_COORDSYS_SPH_DEG, &
              ESMF_COORDSYS_SPH_RAD
 
+      public ESMF_COORDSYS_DEG2RAD, &
+             ESMF_COORDSYS_RAD2DEG
       
 !  Overloaded = operator functions
       public operator(==), operator(/=), assignment(=)

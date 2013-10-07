@@ -122,11 +122,11 @@ template <class TYPE>
       cart_coord[i]=in_coord[i];
     }               
   } else if (cs==ESMC_COORDSYS_SPH_DEG) {
-    const double DEG2RAD = M_PI/180.0;
     double lon = in_coord[0];
     double lat = in_coord[1];
     const double ninety = 90.0;
-    double theta = DEG2RAD*lon, phi = DEG2RAD*(ninety-lat);
+    double theta = lon*ESMC_CoordSys_Deg2Rad;
+    double phi   = (ninety-lat)*ESMC_CoordSys_Deg2Rad;
     cart_coord[0] = std::cos(theta)*std::sin(phi);
     cart_coord[1] = std::sin(theta)*std::sin(phi);
     cart_coord[2] = std::cos(phi);    

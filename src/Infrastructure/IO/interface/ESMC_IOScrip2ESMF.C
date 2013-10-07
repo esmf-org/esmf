@@ -23,6 +23,7 @@
 #include "ESMC_Conf.h"
 #include "ESMCI_Util.h"
 #include "ESMCI_LogErr.h"
+#include "ESMC_CoordSys.h"
 
 #ifdef ESMF_NETCDF
 #include <netcdf.h>
@@ -453,7 +454,6 @@ void FTN_X(c_convertscrip)(
   char units[80];
   int isRadian = 0;
   size_t len;
-  double rad2deg = 180.0/M_PI;
 
   *rc = 1;
 #ifdef ESMF_NETCDF
@@ -553,11 +553,11 @@ void FTN_X(c_convertscrip)(
   if (!strncmp(units, "radians", 7)) {
     isRadian=1;
     for (i = 0; i < gcdim*gsdim; i++) {
-      cornerlats[i] *= rad2deg;
-      cornerlons[i] *= rad2deg;
+      cornerlats[i] *= ESMC_CoordSys_Rad2Deg;
+      cornerlons[i] *= ESMC_CoordSys_Rad2Deg;
     }
   }
-
+  
   // convert longitude to (0, 360) degrees
   for (i = 0; i < gcdim*gsdim; i++) {
     if (cornerlons[i] <= 0) {
@@ -796,7 +796,7 @@ void FTN_X(c_convertscrip)(
       }
       if (!strncmp(units, "radians", 7)) {
 	for (i=0; i<gsdim*2; i++) {
-	  inbuf1[i] *= rad2deg;
+	  inbuf1[i] *= ESMC_CoordSys_Rad2Deg;
 	}
       }
       starts[0]=0;
@@ -876,7 +876,7 @@ void FTN_X(c_convertscrip)(
   }
   if (!strncmp(units, "radians", 7)) {
     for (i=0; i<gsdim*2; i++) {
-      inbuf1[i] *= rad2deg;
+      inbuf1[i] *= ESMC_CoordSys_Rad2Deg;
     }
   }
   free(inbuf);

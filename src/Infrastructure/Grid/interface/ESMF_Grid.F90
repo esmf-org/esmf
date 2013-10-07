@@ -18941,10 +18941,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   This method sets the passed in Array as the holder of the coordinate data
-!   for stagger location {\tt staggerloc} and coordinate {\tt coord}. If the location
-!   already contains an Array, then this one overwrites it. 
-!    
+! This method sets the passed in Array as the holder of the coordinate
+! data for stagger location staggerloc and coordinate coord. This method
+! can be used in place of ESMF\_GridAddCoord(). In fact, if the Grid
+! location already contains an Array for this coordinate, then this one
+! replaces it. For this method to replace ESMF\_GridAddCoord() and produce
+! a valid set of coordinates, then this method must be used to set
+! an Array for each coordDim ranging from 1 to the dimCount of the passed in Grid. 
+!
 !     The arguments are:
 !\begin{description}
 !\item[grid]
@@ -21546,6 +21550,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridSetItem - Set an item using an Array
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_GridSetItem()
       subroutine ESMF_GridSetItemFromArray(grid, itemflag,  staggerloc, &
         array, keywordEnforcer, rc)
 !
@@ -21565,7 +21570,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   This method sets the passed in Array as the holder of the item data
 !   for stagger location {\tt staggerloc} and item {\tt itemflag}. If the location
-!   already contains an Array, then this one overwrites it. 
+!   already contains an Array, then this one overwrites it. This method can
+!   be used as a replacement for ESMF\_GridAddItem().
 !    
 !     The arguments are:
 !\begin{description}
