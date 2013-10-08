@@ -127,7 +127,8 @@ print *, 'rc = ', rc
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Get ESG General Attribute package from a GridComp Test"
-      call ESMF_Test(rc==ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc==ESMF_SUCCESS &
+                      .or. xercesNotPresent), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest

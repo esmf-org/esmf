@@ -197,7 +197,7 @@ extern "C" {
 
   // get the Attribute package
   *attpack = (**base).root.AttPackGet(cconv, cpurp, cobj, capname);
-  if (!attpack) {
+  if (!(*attpack)) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
                          "failed getting Attribute package", ESMC_CONTEXT, &status);
     if (rc) *rc = status;

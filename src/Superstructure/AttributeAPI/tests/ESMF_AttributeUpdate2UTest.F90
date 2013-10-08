@@ -486,7 +486,7 @@ program ESMF_AttributeUpdate2UTest
     type(ESMF_GridComp)     :: gridcomp1
     type(ESMF_GridComp)     :: gridcomp2
     type(ESMF_CplComp)      :: cplcomp
-    type(ESMF_AttPack)    :: attpack
+    type(ESMF_AttPack)      :: attpack
     character(ESMF_MAXSTR)  :: convCIM, purpExt, convISO, purpRP, outVal
     character(ESMF_MAXSTR)  :: attPackInstNames(2)
 
@@ -642,9 +642,11 @@ program ESMF_AttributeUpdate2UTest
 
     !EX_UTest_Multi_Proc_Only
     call ESMF_AttPackGet(gridcomp1, attpack, &
-                       convention=convISO, purpose=purpExt, rc=rc)
+                       convention=convISO, purpose=purpRP, &
+                       attPackInstanceName=attPackInstNames(2), rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
-    write(name, *) "Get Attribute package ["!, convISO, ", ", purpExt, "]"
+    write(name, *) "Get Attribute package ["!, convISO, ", ", purpRP, ", ",&
+                    !attPackInstNames(2), "]"
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest_Multi_Proc_Only
@@ -654,6 +656,13 @@ program ESMF_AttributeUpdate2UTest
     write(name, *) "Getting an updated deleted Attribute value from a GridComp test"
     call ESMF_Test((rc/=ESMF_SUCCESS), &
                     name, failMsg, result, ESMF_SRCLINE)
+
+    !EX_UTest_Multi_Proc_Only
+    call ESMF_AttPackGet(gridcomp1, attpack, &
+                       convention=convISO, purpose=purpRP, rc=rc)
+    write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+    write(name, *) "Get Attribute package ["!, convISO, ", ", purpExt, "]"
+    call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest_Multi_Proc_Only
     call ESMF_AttributeGet(gridcomp1, 'PhysicalAddress', value=outVal, &
