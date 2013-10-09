@@ -10,6 +10,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_StringUTest \
                 $(ESMF_TESTDIR)/ESMF_WordsizeUTest \
                 $(ESMF_TESTDIR)/ESMF_F90ArrayPtrUTest \
 		$(ESMF_TESTDIR)/ESMF_LAPACKUTest \
+		$(ESMF_TESTDIR)/ESMF_FeatureUTest \
 		$(ESMF_TESTDIR)/ESMCI_ExceptionsUTest
 #		$(ESMF_TESTDIR)/ESMF_F95PtrUTest
 
@@ -63,6 +64,19 @@ RUN_ESMF_F90ArrayPtrUTestUNI:
 	$(MAKE) TNAME=F90ArrayPtr NP=1 ftest
 
 
+
+#
+# Special for testing various Fortran features that ESMF depends on.
+#
+
+ESMF_UTEST_Feature_OBJS = ESMCI_FeatureSubr.o
+ESMF_FeatureUTest.o : ESMCI_FeatureSubr.o
+
+RUN_ESMF_FeatureUTest:
+	$(MAKE) TNAME=Feature NP=2 ftest
+
+RUN_ESMF_FeatureUTestUNI:
+	$(MAKE) TNAME=Feature NP=1 ftest
 
 #
 # Special for testing wordsizes
