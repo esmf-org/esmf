@@ -761,7 +761,6 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     integer :: pos0, pos, pos1, pos2, n, yesNode
     integer :: len, indexBase
     character(len=24) :: units
-    real(ESMF_KIND_R8) :: rad2deg
     logical :: convertToDegLocal
     integer, parameter :: nf90_noerror = 0
     real(ESMF_KIND_R8), allocatable:: nodeCoord1D(:)
@@ -856,9 +855,8 @@ subroutine ESMF_GetMesh2DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
       ! if units is "radians", convert it to degrees
       if (convertToDegLocal) then
          if (units(1:7) .eq. "radians") then
-            rad2deg = 180.0/3.141592653589793238
-            !print *, 'Convert radians to degree ', rad2deg
-            nodeCoords(i,:) = nodeCoords(i,:)*rad2deg
+            nodeCoords(i,:) = &
+                 nodeCoords(i,:)*ESMF_COORDSYS_RAD2DEG
          endif
       endif	   
     

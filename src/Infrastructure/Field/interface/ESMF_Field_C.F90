@@ -654,7 +654,7 @@
       polemethod_loc = polemethod
     endif
     if (rpnppresent == 0) then
-      regridPoleNPnts_loc = 0
+      regridPoleNPnts_loc = 1
     else
       regridPoleNPnts_loc = regridPoleNPnts
     endif

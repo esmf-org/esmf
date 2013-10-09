@@ -51,6 +51,8 @@ program ESMF_ArrayRedistUTest
   type(ESMF_RouteHandle):: routehandle
   integer(ESMF_KIND_I4), pointer :: farrayPtr(:)  ! matching Fortran array pointer
 #ifdef ESMF_TESTEXHAUSTIVE
+  integer, allocatable  :: deBlockList(:,:,:)
+  type(ESMF_DistGrid)   :: srcDistgridWHoles
   type(ESMF_DistGrid)   :: srcDistgrid2, dstDistgridWrong
   type(ESMF_Array)      :: srcArray2, srcArray3
   type(ESMF_Array)      :: dstArray2, dstArray3, dstArrayWrong
@@ -416,6 +418,171 @@ program ESMF_ArrayRedistUTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_TESTEXHAUSTIVE
+
+!------------------------------------------------------------------------
+  ! Testing a srcArray where the DEs do not fully cover the index space
+  ! defined by the DistGrid minIndex/maxIndex. Such a DistGrid with holes
+  ! can be set up by using a deBlockList.
+
+  allocate(deBlockList(1,2,0:5))  ! dimCount, 2, deCount
+  deBlockList(1,:,0) = (/103,110/)  ! DE 0
+  deBlockList(1,:,1) = (/122,125/)  ! DE 1
+  deBlockList(1,:,2) = (/117,120/)  ! DE 2
+  deBlockList(1,:,3) = (/126,131/)  ! DE 3
+  deBlockList(1,:,4) = (/139,141/)  ! DE 4
+  deBlockList(1,:,5) = (/133,138/)  ! DE 5
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "srcDistgridWHoles Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  srcDistgridWHoles = ESMF_DistGridCreate(minIndex=(/101/), maxIndex=(/142/), &
+    deBlockList=deBlockList, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "srcArray Create Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  srcArray = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=srcDistgridWHoles, &
+    indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Get srcArray Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(srcArray, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+    farrayPtr(i) = i    ! initialize with a value equal to the global index
+  enddo
+  
+  ! The array bounds are in global index space. Therefore:
+  !
+  ! PET   localDE   DE    srcArray contents
+  ! 0     0         0     103, 104, 105, 106, 107, 108, 109, 110
+  ! 1     0         1     122, 123, 124, 125
+  ! 2     0         2     117, 118, 119, 120
+  ! 3     0         3     126, 127, 128, 129, 130, 131
+  ! 4     0         4     139, 140, 141
+  ! 5     0         5     133, 134, 135, 136, 137, 138
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayRedistStore Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayRedistStore(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "ArrayRedist: srcArray -> dstArray Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayRedist(srcArray=srcArray, dstArray=dstArray, &
+    routehandle=routehandle, checkflag=.true., rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  ! To understand the expected redistribution result keep these points in mind:
+  !   1) Sequence indices are tied to the tile order, and the canonical order
+  !      of elements within the tiles. Sequence indices are unaffected by 
+  !      decomposition and distribution! Therefore, on the srcArray side with
+  !      the srcDistgridWHoles, the crazy deBlockList has no affect on how
+  !      the elements are labeled by sequence indices. It is still simply
+  !      a DistGrid with one tile that has (142-101+1) = 42 elements. Therefore
+  !      the sequence index goes from 1->42, simply labeling the elements.
+  !      However, not all 42 elements are present, but that does not affect
+  !      the labeling.
+  !   2) It does not matter which DE on the src side holds a specific index
+  !      space range of the tile, the sequence index is connected to the 
+  !      index space and not the DE numbering.
+  !   3) The dstArray is _not_ being zero'ed out during the Redist, and since 
+  !      there are holes in the srcArray some of the dstArray elements stay 
+  !      unchanged, i.e. they keep the value of the previous Redist operation.
+  ! The expected result of the redistribution of srcArray into dstArray is:
+  !
+  ! PET   localDE   DE    dstArray contents
+  ! 0     0         0     1, 2, 103, 104, 105, 106, 107
+  ! 1     0         1     108, 109, 110, 14, 15, 16, 17
+  ! 2     0         2     21, 22, 117, 118, 119, 120, 27
+  ! 3     0         3     122, 123, 124, 125, 126, 127, 128
+  ! 4     0         4     129, 130, 131, 44, 133, 134, 135
+  ! 5     0         5     136, 137, 138, 139, 140, 141, 57
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "dstArray Get Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayGet(dstArray, farrayPtr=farrayPtr, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "Verify results in dstArray Test"
+  write(failMsg, *) "Wrong results" 
+  if (localPet == 0) then
+    call ESMF_Test(((farrayPtr(1).eq.1).and. &
+      (farrayPtr(2).eq.2).and.(farrayPtr(3).eq.103).and. &
+      (farrayPtr(4).eq.104).and.(farrayPtr(5).eq.105).and. &
+      (farrayPtr(6).eq.106).and.(farrayPtr(7).eq.107)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 1) then
+    call ESMF_Test(((farrayPtr(1).eq.108).and. &
+      (farrayPtr(2).eq.109).and.(farrayPtr(3).eq.110).and. &
+      (farrayPtr(4).eq.14).and.(farrayPtr(5).eq.15).and. &
+      (farrayPtr(6).eq.16).and.(farrayPtr(7).eq.17)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 2) then
+    call ESMF_Test(((farrayPtr(1).eq.21).and. &
+      (farrayPtr(2).eq.22).and.(farrayPtr(3).eq.117).and. &
+      (farrayPtr(4).eq.118).and.(farrayPtr(5).eq.119).and. &
+      (farrayPtr(6).eq.120).and.(farrayPtr(7).eq.27)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 3) then
+    call ESMF_Test(((farrayPtr(1).eq.122).and. &
+      (farrayPtr(2).eq.123).and.(farrayPtr(3).eq.124).and. &
+      (farrayPtr(4).eq.125).and.(farrayPtr(5).eq.126).and. &
+      (farrayPtr(6).eq.127).and.(farrayPtr(7).eq.128)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 4) then
+    call ESMF_Test(((farrayPtr(1).eq.129).and. &
+      (farrayPtr(2).eq.130).and.(farrayPtr(3).eq.131).and. &
+      (farrayPtr(4).eq.44).and.(farrayPtr(5).eq.133).and. &
+      (farrayPtr(6).eq.134).and.(farrayPtr(7).eq.135)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  else if (localPet == 5) then
+    call ESMF_Test(((farrayPtr(1).eq.136).and. &
+      (farrayPtr(2).eq.137).and.(farrayPtr(3).eq.138).and. &
+      (farrayPtr(4).eq.139).and.(farrayPtr(5).eq.140).and. &
+      (farrayPtr(6).eq.141).and.(farrayPtr(7).eq.57)), &
+      name, failMsg, result, ESMF_SRCLINE)
+  endif
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "routehandle Release Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayRedistRelease(routehandle=routehandle, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "srcArray Destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_ArrayDestroy(srcArray, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!------------------------------------------------------------------------
+  !EX_UTest_Multi_Proc_Only
+  write(name, *) "srcDistgridWHoles Destroy Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_DistGridDestroy(srcDistgridWHoles, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate(deBlockList)
+  
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Array Spec rank=1, R8 Set Test"
@@ -511,7 +678,7 @@ program ESMF_ArrayRedistUTest
       (farrayPtr5(6).eq.26).and.(farrayPtr5(7).eq.27)), &
       name, failMsg, result, ESMF_SRCLINE)
   else if (localPet == 3) then
-    call ESMF_Test(((farrayPtr(1).eq.31).and. &
+    call ESMF_Test(((farrayPtr5(1).eq.31).and. &
       (farrayPtr5(2).eq.32).and.(farrayPtr5(3).eq.33).and. &
       (farrayPtr5(4).eq.34).and.(farrayPtr5(5).eq.35).and. &
       (farrayPtr5(6).eq.36).and.(farrayPtr5(7).eq.37)), &

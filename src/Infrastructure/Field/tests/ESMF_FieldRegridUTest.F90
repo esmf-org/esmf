@@ -515,6 +515,24 @@
       !------------------------------------------------------------------------
 #endif
 
+#if 1
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test regrid between Fields where srcGrid has holes in index space"
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Test regridding with holes in srcGrid"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+      
+      ! do test
+      call test_regridSrcHoles(rc)
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+#endif
+
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid with masks
@@ -15355,7 +15373,174 @@ return
  end subroutine test_regridMeshToMeshMask
 
 
+#define FILE "ESMF_FieldRegridUTest.F90"
+
+  subroutine test_regridSrcHoles(rc)
+    integer, intent(out)  :: rc
+    
+    integer,  parameter           :: iMax = 200
+    integer,  parameter           :: jMax = 100
+    real(ESMF_KIND_R8), parameter :: lonMinS = 0.d0, lonMaxS = 210.d0
+    real(ESMF_KIND_R8), parameter :: latMinS = -40.d0, latMaxS = 50.d0
+    real(ESMF_KIND_R8), parameter :: lonMinD = 10.d0, lonMaxD = 200.d0
+    real(ESMF_KIND_R8), parameter :: latMinD = -30.d0, latMaxD = 40.d0
+    
+    type(ESMF_VM)         :: vm
+    integer               :: petCount, localPet
+    integer               :: i, j
+    integer, allocatable  :: deBlockList(:,:,:)
+    type(ESMF_DistGrid)   :: srcDistGrid, dstDistGrid
+    type(ESMF_Grid)       :: srcGrid, dstGrid
+    type(ESMF_Field)      :: srcField, dstField
+    real(ESMF_KIND_R8), pointer :: fptr(:,:)
+    
+    type(ESMF_RouteHandle):: rh
+    
+    rc = ESMF_SUCCESS
+    
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILE)) return ! bail out
+    
+    call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILE)) return ! bail out
+      
+    ! --- set up the source side ---
+
+    allocate(deBlockList(2,2,0:petCount-1)) ! dimCount, 2, deCount
+    
+    ! Set up deBlockList that covers the (1...iMax) x (1...jMax) index space
+    ! by a row decomposition along j.
+    do i=0, petCount-1
+      deBlockList(:,1,i) = (/1,i*jMax/petCount+1/)        ! minIndex DE i
+      if (i == petCount-1) then
+        deBlockList(:,2,i) = (/iMax,jMax/)                ! maxIndex DE i
+      else
+        deBlockList(:,2,i) = (/iMax,(i+1)*jMax/petCount/) ! maxIndex DE i
+      endif
+    enddo
+    
+#if 0
+    ! Modify the deBlockList to have holes in the index space coverage.
+    do i=0, petCount-1
+      deBlockList(1,1,i) = deBlockList(1,1,i) + 1 ! shift the lower bound 1 up
+      deBlockList(2,1,i) = deBlockList(2,1,i) + 2 ! shift the lower bound 2 up
+      deBlockList(1,2,i) = deBlockList(1,2,i) - 3 ! shift the upper bound 3 dn
+      deBlockList(2,2,i) = deBlockList(2,2,i) - 4 ! shift the lower bound 4 dn
+    enddo
+#endif
+
+    if (localPet==0) then
+      do i=0, petCount-1
+        print *, i, "deBlockList:", deBlockList(:,1,i), deBlockList(:,2,i)
+      enddo
+    endif
+
+    ! Create the srcDistGrid.
+    srcDistGrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/iMax,jMax/),&
+      deBlockList=deBlockList, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILE)) return ! bail out
+
+    ! Create the srcGrid.
+    srcGrid = ESMF_GridCreate(srcDistGrid, coordSys=ESMF_COORDSYS_SPH_DEG, &
+      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILE)) return ! bail out
+
+    ! Add coordinates to the srcGrid.
+    call ESMF_GridAddCoord(srcGrid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILE)) return ! bail out
+
+    ! Access the longitude coordinate pointer in srcGrid and fill.
+    call ESMF_GridGetCoord(srcGrid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+      coordDim=1, farrayPtr=fptr, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILE)) return ! bail out
+    do j=lbound(fptr,2), ubound(fptr,2)
+    do i=lbound(fptr,1), ubound(fptr,1)
+      fptr(i,j) = (lonMaxS-lonMinS)/real(iMax) * (i-1) + lonMinS
+    enddo
+    enddo
+
+    ! Access the latitude coordinate pointer in srcGrid and fill.
+    call ESMF_GridGetCoord(srcGrid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+      coordDim=2, farrayPtr=fptr, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILE)) return ! bail out
+    do j=lbound(fptr,2), ubound(fptr,2)
+    do i=lbound(fptr,1), ubound(fptr,1)
+      fptr(i,j) = (latMaxS-latMinS)/real(jMax) * (j-1) + latMinS
+    enddo
+    enddo
+    
+    ! Create the srcField.
+    srcField =  ESMF_FieldCreate(srcGrid, typekind=ESMF_TYPEKIND_R8, &
+      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILE)) return ! bail out
+    
+    ! --- set up the destination side ---
+    
+    ! Create the dstDistGrid with default decomposition (no holes!).
+    dstDistGrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/iMax,jMax/),&
+      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILE)) return ! bail out
+
+    ! Create the dstGrid.
+    dstGrid = ESMF_GridCreate(dstDistGrid, coordSys=ESMF_COORDSYS_SPH_DEG, &
+      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILE)) return ! bail out
+
+    ! Add coordinates to the dstGrid.
+    call ESMF_GridAddCoord(dstGrid, staggerLoc=ESMF_STAGGERLOC_CENTER, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILE)) return ! bail out
+
+    ! Access the longitude coordinate pointer in dstGrid and fill.
+    call ESMF_GridGetCoord(dstGrid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+      coordDim=1, farrayPtr=fptr, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILE)) return ! bail out
+    do j=lbound(fptr,2), ubound(fptr,2)
+    do i=lbound(fptr,1), ubound(fptr,1)
+      fptr(i,j) = (lonMaxD-lonMinD)/real(iMax) * (i-1) + lonMinD
+    enddo
+    enddo
+
+    ! Access the latitude coordinate pointer in dstGrid and fill.
+    call ESMF_GridGetCoord(dstGrid, staggerLoc=ESMF_STAGGERLOC_CENTER, &
+      coordDim=2, farrayPtr=fptr, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILE)) return ! bail out
+    do j=lbound(fptr,2), ubound(fptr,2)
+    do i=lbound(fptr,1), ubound(fptr,1)
+      fptr(i,j) = (latMaxD-latMinD)/real(jMax) * (j-1) + latMinD
+    enddo
+    enddo
+    
+    ! Create the dstField.
+    dstField =  ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
+      indexflag=ESMF_INDEX_GLOBAL, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILE)) return ! bail out
+    
+    ! --- Regridding ---
+    
+    ! Pre-compute the regrid RouteHandle.
+    call ESMF_FieldRegridStore(srcField=srcField, dstField=dstField, &
+      routehandle=rh, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILE)) return ! bail out
+    
+    !TODO: execute the Regrid and validate the result.
+    !TODO: right now it doesn't even make it that far for srcDistGrid w/ holes
 
 
+  end subroutine test_regridSrcHoles
 
 end program ESMF_FieldRegridUTest
