@@ -101,15 +101,16 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_Base **base,         // in/out - base object
-      ESMCI::Attribute **attpack, // in/out - attpack to return
-      char *convention,         // in - convention
-      char *purpose,            // in - purpose
-      char *object,             // in - object
-      char *attPackInstanceName,// in - attpack instance name
-      int *rc,                  // in - return code
-      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
-      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
+      ESMC_Base **base,              // in/out - base object
+      ESMCI::Attribute **attpack,    // in/out - attpack to return
+      char *convention,              // in - convention
+      char *purpose,                 // in - purpose
+      char *object,                  // in - object
+      char *attPackInstanceName,     // in - attpack instance name
+      ESMC_Logical *present,         // out/out - present flag 
+      int *rc,                       // in - return code
+      ESMCI_FortranStrLenArg clen,   // hidden/in - strlen count for convention
+      ESMCI_FortranStrLenArg plen,   // hidden/in - strlen count for purpose
       ESMCI_FortranStrLenArg olen,   // hidden/in - strlen count for object
       ESMCI_FortranStrLenArg alen) { // hidden/in - strlen count for attPackInstanceName
 // 
@@ -154,6 +155,13 @@ extern "C" {
       return;
   }
 
+  if (!present) {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad attribute present flag", ESMC_CONTEXT, &status);
+      if (rc) *rc = status;
+      return;
+  }
+
   string cconv(convention, clen);
   string cpurp(purpose, plen);
   string cobj(object, olen);
@@ -187,7 +195,6 @@ extern "C" {
 //       not-present char* attPackInstanceName ?  what is value of alen?
 //  string capname((char*)ESMC_NOT_PRESENT_FILTER(attPackInstanceName), alen);
   string capname;
-  capname = "";
   if (ESMC_NOT_PRESENT_FILTER(attPackInstanceName) != ESMC_NULL_POINTER &&
                                                       alen > 0) {
     capname.assign(attPackInstanceName, 0, alen);
@@ -198,11 +205,9 @@ extern "C" {
   // get the Attribute package
   *attpack = (**base).root.AttPackGet(cconv, cpurp, cobj, capname);
   if (!(*attpack)) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
-                         "failed getting Attribute package", ESMC_CONTEXT, &status);
-    if (rc) *rc = status;
-    return;
+    *present = ESMF_FALSE;
   }
+  else *present = ESMF_TRUE;
 
   if (rc) *rc = ESMF_SUCCESS;
   

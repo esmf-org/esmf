@@ -424,7 +424,7 @@ extern "C" {
   void FTN_X(c_esmc_attpackget)(ESMC_Base **base, ESMCI::Attribute **attpack,
                                   char *convention, char *purpose,
                                   char *object, char *attPackInstanceName,
-                                  int *rc,
+                                  ESMC_Logical *present, int *rc,
                                   ESMCI_FortranStrLenArg clen,
                                   ESMCI_FortranStrLenArg plen,
                                   ESMCI_FortranStrLenArg olen,

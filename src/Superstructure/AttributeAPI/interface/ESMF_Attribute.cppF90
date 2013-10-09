@@ -1299,7 +1299,7 @@ contains
 !     \item [{[<defaultvalue>]}]
 !           The default value of the named Attribute
 !     \item [{[attpack}]]
-!           An optional handle to the Attribute package that is to be created
+!           A handle to the Attribute package
 !     \item [{[isPresent]}]
 !           A logical flag to tell if this Attribute is present or not
 !     \item [{[rc]}]
@@ -1368,7 +1368,7 @@ contains
 !     \item [{[inputList]}]
 !           A list of the input parameters required to retrieve internal info
 !     \item [{[attpack}]]
-!           An optional handle to the Attribute package that is to be created
+!           A handle to the Attribute package
 !     \item [{[isPresent]}]
 !           A logical flag to tell if this Attribute is present or not
 !     \item [{[rc]}]
@@ -1451,7 +1451,7 @@ contains
 !     \item [{[<defaultvalueList>]}]
 !           The default value list of the named Attribute
 !     \item [{[attpack}]]
-!           An optional handle to the Attribute package that is to be created
+!           A handle to the Attribute package
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute
 !     \item [{[isPresent]}]
@@ -1524,7 +1524,7 @@ contains
 !     \item [{[inputList]}]
 !           A list of the input parameters required to retrieve internal info
 !     \item [{[attpack}]]
-!           An optional handle to the Attribute package that is to be created
+!           A handle to the Attribute package
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute
 !     \item [{[isPresent]}]
@@ -1976,7 +1976,7 @@ contains
 !     \item [name]
 !           The name of the Attribute to query
 !     \item [{[attpack}]]
-!           An optional handle to the Attribute package that is to be created
+!           A handle to the Attribute package
 !     \item [{[typekind}]]
 !           The typekind of the Attribute
 !     \item [{[itemCount]}]
@@ -2604,7 +2604,7 @@ contains
 !     \item [{[name]}]
 !           The name of the Attribute to remove
 !     \item [attpack]
-!           A handle to the Attribute package that is to be created
+!           A handle to the Attribute package
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -2734,7 +2734,7 @@ contains
 !     \item [<value argument>]
 !           The value of the Attribute to set
 !     \item [{[attpack}]]
-!           An optional handle to the Attribute package that is to be created
+!           A handle to the Attribute package
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -2786,7 +2786,7 @@ contains
 !     \item [{[inputList]}]
 !           A list of the input parameters required to set internal info
 !     \item [{[attpack}]]
-!           An optional handle to the Attribute package that is to be created
+!           A handle to the Attribute package
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -2849,7 +2849,7 @@ contains
 !     \item [<valueList argument>]
 !           The valueList of the Attribute to set
 !     \item [{[attpack}]]
-!           An optional handle to the Attribute package that is to be created
+!           A handle to the Attribute package
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute
 !     \item [{[rc]}]
@@ -3266,13 +3266,14 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttPackGet() @\
       subroutine mclass##AttPackGet(mthis, attpack, & @\
-        convention, purpose, attPackInstanceName, rc) @\
+        convention, purpose, attPackInstanceName, isPresent, rc) @\
  @\
       type(mclass), intent(in) :: mthis   @\
 	    type(ESMF_AttPack), intent(inout) :: attpack @\
       character (len = *), intent(in) :: convention @\
       character (len = *), intent(in) :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
+      logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -3294,6 +3295,8 @@ contains
 !           of multiple Attribute package instances of the same convention @\
 !           and purpose, within a nest.  If not specified, defaults to the @\
 !           first instance.  @\
+!     \item [{[isPresent]}] @\
+!           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -3302,22 +3305,24 @@ contains
 !EOPI @\
  @\
       integer :: localrc @\
+      type(ESMF_Logical) :: lisPresent @\
       character(len=*), parameter :: fobject=#mthis @\
-      character(ESMF_MAXSTR) :: lapin @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
+      lisPresent = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
-      lapin = "" @\
-      if (present(attpackInstanceName)) then @\
-        lapin = attpackInstanceName @\
-      endif @\
       call c_ESMC_AttPackGet(mthisfield, attpack, & @\
                              convention, purpose, & @\
-                             fobject, lapin, localrc) @\
+                             fobject, attPackInstanceName, & @\
+                             lisPresent, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
         ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+      if (present(isPresent)) then @\
+        isPresent = lisPresent @\
+      endif @\
  @\
       ! set the created macro @\
       ESMF_INIT_SET_CREATED(attpack) @\
