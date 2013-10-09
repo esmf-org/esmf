@@ -10,7 +10,7 @@
 !
 !==============================================================================
 
-    program OptArgTest
+    program FeatureTest
     
 #include "ESMF.h"
 
@@ -34,14 +34,18 @@
     end interface
 
 !------------------------------------------------------------------------
-! Test to ensure that NULL is used for an OPTIONAL argument when the
-! argument is not present.  NULL conforms to the value specified in
-! Fortran TS 29113.
+! Tests for various Fortran features and implementation issues that ESMF
+! depends on.
 
     result = 0
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!------------------------------------------------------------------------
+! Test to ensure that NULL is used for an OPTIONAL argument when the
+! argument is not present.  NULL conforms to the value specified in
+! Section 8.7 of Fortran TS 29113 (WG5/N1942 - 9/19/2012.)
 
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
@@ -79,5 +83,5 @@
 
     call ESMF_TestEnd(ESMF_SRCLINE)
 
-    end program OptArgTest
+    end program FeatureTest
     
