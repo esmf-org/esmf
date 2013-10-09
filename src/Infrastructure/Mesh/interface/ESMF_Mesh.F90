@@ -1985,12 +1985,20 @@ end function ESMF_MeshCreateFromFile
           if (NodeUsed(NodeNo) > 0) then
              NodeId(i) = NodeNo     
              if (convert3D) then
+
+               call c_esmc_sphdeg_to_cart(nodeCoords(1,NodeNo), nodeCoords(2,NodeNo), & 
+                    NodeCoords1D((i-1)*3+1),NodeCoords1D((i-1)*3+2), NodeCoords1D((i-1)*3+3), &
+                    localrc)
+               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+#if 0
                 coorX = nodeCoords(1,NodeNo)*deg2rad
                 coorY = (90.0-nodeCoords(2,NodeNo))*deg2rad
                 NodeCoords1D((i-1)*3+1) = COS(coorX)*SIN(coorY)             
                 NodeCoords1D((i-1)*3+2) = SIN(coorX)*SIN(coorY)             
                 NodeCoords1D((i-1)*3+3) = COS(coorY)
                 !   write (*,'(6F8.4)')nodeCoords(:,NodeNo), COS(coorX),SIN(coorX),COS(coorY),SIN(coorY)
+#endif
              else 
                 do dim = 1, NodeDim
                    NodeCoords1D ((i-1)*NodeDim+dim) = nodeCoords (dim, NodeNo)

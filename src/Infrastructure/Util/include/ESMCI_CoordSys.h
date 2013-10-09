@@ -16,7 +16,7 @@
 #ifndef ESMCI_COORDSYS_H
 #define ESMCI_COORDSYS_H
 
-// Definition of CoordSys flag
+// Definition of CoordSys flag and constants
 #include "ESMC_CoordSys.h"
 
 

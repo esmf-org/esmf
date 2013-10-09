@@ -308,7 +308,6 @@ end subroutine ESMF_ScripInqUnits
     integer:: len
     character(len=128) :: units
     character(len=256) :: errmsg
-    real(ESMF_KIND_R8) :: rad2deg
     integer:: start1(1), count1(1), start2(2), count2(2)
     integer:: totalcells, grid_corners
     logical :: convertToDegLocal
@@ -389,9 +388,8 @@ end subroutine ESMF_ScripInqUnits
       ! if units is "radians", convert it to degrees
       if (convertToDegLocal) then
          if (units(1:7) .eq. "radians") then
-            rad2deg = 180.0/3.141592653589793238
-  !         print *, 'Convert radians to degree ', rad2deg
-            grid_center_lon(:) = grid_center_lon(:)*rad2deg
+            grid_center_lon(:) = &
+                   grid_center_lon(:)*ESMF_COORDSYS_RAD2DEG
          endif
       endif	   
     endif
@@ -434,8 +432,8 @@ end subroutine ESMF_ScripInqUnits
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
          if (units(1:7) .eq. "radians") then
-            rad2deg = 180.0/3.141592653589793238
-            grid_center_lat(:) = grid_center_lat(:)*rad2deg
+            grid_center_lat(:) = &
+                 grid_center_lat(:)*ESMF_COORDSYS_RAD2DEG
          endif
       endif
     endif
@@ -497,9 +495,8 @@ end subroutine ESMF_ScripInqUnits
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
          if (units(1:7) .eq. "radians") then
-            rad2deg = 180.0/3.141592653589793238
-!           print *, 'Convert radians to degree ', rad2deg
-            grid_corner_lon(:,:) = grid_corner_lon(:,:)*rad2deg
+            grid_corner_lon(:,:) = &
+               grid_corner_lon(:,:)*ESMF_COORDSYS_RAD2DEG
          endif
       endif	   
     endif
@@ -542,8 +539,8 @@ end subroutine ESMF_ScripInqUnits
       ! if units is "radians", convert it to degree
       if (convertToDegLocal) then
          if (units(1:7) .eq. "radians") then
-            rad2deg = 180.0/3.141592653589793238
-            grid_corner_lat(:,:) = grid_corner_lat(:,:)*rad2deg
+            grid_corner_lat(:,:) = &
+                grid_corner_lat(:,:)*ESMF_COORDSYS_RAD2DEG
          endif
       endif
     endif
@@ -2699,7 +2696,6 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
     integer :: VarNo
     character(len=256)::errmsg
     character(len=80) :: units
-    real(ESMF_KIND_R8) :: rad2deg
     integer :: len
     logical :: convertToDegLocal
 
@@ -2796,8 +2792,8 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
        ! if units is "radians", convert it to degree
        if (convertToDegLocal) then
           if (units(1:7) .eq. "radians") then
-             rad2deg = 180.0/3.141592653589793238
-             nodeCoords(:,:) = nodeCoords(:,:)*rad2deg
+             nodeCoords(:,:) = &
+                 nodeCoords(:,:)*ESMF_COORDSYS_RAD2DEG
           endif
        endif
     endif

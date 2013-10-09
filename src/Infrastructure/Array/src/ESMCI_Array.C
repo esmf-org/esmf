@@ -4611,7 +4611,6 @@ int Array::redistStore(
     factorIndexList = new int[(srcN+dstN)*factorListCount];
     int jj = 0; // reset
     for (int i=0; i<srcLocalDeCount; i++){
-      int de = srcLocalDeToDeMap[i];
       //TODO: this is hardcoded for first collocation only
       int arbSeqIndexCount = srcArbSeqIndexCountPCollPLocalDe[0][i];
       const int *srcArbSeqIndexListPLocalDe =
@@ -4623,14 +4622,20 @@ int Array::redistStore(
           ++jj;
         }
       }else{
-        int seqIndexOffset = 1; // reset, seqIndex is basis 1
-        for (int j=0; j<de; j++)
-          seqIndexOffset += srcElementCountPDe[j];
-        for (int j=0; j<srcElementCountPDe[de]; j++){
+        // multi-dim loop object
+        ArrayElement arrayElement(srcArray, i);
+        // set up to skip over undistributed, i.e. tensor dimensions
+        const int *srcArrayToDistGridMap = srcArray->getArrayToDistGridMap();
+        for (int j=0; j<srcArray->getRank(); j++)
+          if (srcArrayToDistGridMap[j]==0) arrayElement.setSkipDim(j);
+        // fill in the factorIndexList
+        while(arrayElement.isWithin()){
+          SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
           factorIndexList[2*jj] = factorIndexList[2*jj+1] =
-            seqIndexOffset + j;
-          ++jj;
-        }
+            seqIndex.decompSeqIndex;
+          ++jj; // increment counter
+          arrayElement.next();
+        } // end while over all exclusive elements
       }
     }  
     
@@ -4840,6 +4845,13 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
     delete [] dstTuple;
   }
   
+#if 0
+fprintf(stderr, "factorListCount = %d\n", factorListCount);
+for (int i=0; i<factorListCount; i++)
+  fprintf(stderr, "%d, %d, %d\n", i, factorIndexList[2*i], 
+    factorIndexList[2*i+1]);
+#endif
+
   // load type specific factorList with "1"
   void *factorList;
   if (typekindFactor == ESMC_TYPEKIND_R4){
