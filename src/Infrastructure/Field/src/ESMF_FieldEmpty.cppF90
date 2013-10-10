@@ -1115,8 +1115,8 @@ end subroutine ESMF_FieldEmptyCompTK
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      nullify(arrayLBound)
-      nullify(arrayUBound)
+      allocate (arrayLBound(0))
+      allocate (arrayUBound(0))
       ! Get dimmap and undistibuted bounds
       call ESMF_GeomBaseGetArrayInfo(geombase,                                            &
                               gridToFieldMap=gridToFieldMap, &
@@ -1176,10 +1176,8 @@ end subroutine ESMF_FieldEmptyCompTK
 
     ! cleanup
     deallocate(distgridToArrayMap)
-    if(ungriddedDimCount /= 0) then		
-      deallocate(arrayLBound)
-      deallocate(arrayUBound)
-    endif
+    deallocate(arrayLBound)
+    deallocate(arrayUBound)
 
     if (present(rc)) rc = ESMF_SUCCESS
 
