@@ -18,6 +18,7 @@ TESTS_RUN     = RUN_ESMF_StringUTest \
                 RUN_ESMF_WordsizeUTest \
                 RUN_ESMF_F90ArrayPtrUTest \
 		RUN_ESMF_LAPACKUTest \
+		RUN_ESMF_FeatureUTest \
 		RUN_ESMCI_ExceptionsUTest
 #		RUN_ESMF_F95PtrUTest
 
@@ -25,6 +26,7 @@ TESTS_RUN_UNI = RUN_ESMF_StringUTestUNI \
                 RUN_ESMF_WordsizeUTestUNI \
                 RUN_ESMF_F90ArrayPtrUTestUNI \
 		RUN_ESMF_LAPACKUTestUNI \
+		RUN_ESMF_FeatureUTestUNI \
 		RUN_ESMCI_ExceptionsUTestUNI
 #		RUN_ESMF_F95PtrUTestUNI
 
