@@ -648,6 +648,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                       msg="- Only ESMF_POLEMETHOD_NONE polemethod supported for ESMF_REGRIDMETHOD_CONSERVE", & 
                       ESMF_CONTEXT, rcToReturn=rc) 
                  return
+	      else
+  	         localpolemethod = polemethod
               endif
            else    
               localpolemethod=ESMF_POLEMETHOD_NONE
