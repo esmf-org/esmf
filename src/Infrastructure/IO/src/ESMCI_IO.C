@@ -507,7 +507,7 @@ int IO::open(
 
   PRINTPOS;
   // Make sure pointer inputs have something in them
-  if ((char const * const)NULL == file) {
+  if (NULL == file) {
     localrc = ESMC_RC_PTR_NULL;
     ESMC_LogDefault.Write("Filename to open cannot be NULL",
                           ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
@@ -702,7 +702,7 @@ int IO::addArray(
     ESMC_LogDefault.Write("Array argument cannot be NULL",
                           ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
   } else {
-    if (((const char * const)NULL != variableName) &&
+    if ((NULL != variableName) &&
         (strlen(variableName) > ESMF_MAXSTR)) {
       ESMC_LogDefault.Write("Array name length exceeds ESMF_MAXSTR, truncated",
                             ESMC_LOGMSG_WARN, ESMC_CONTEXT);
