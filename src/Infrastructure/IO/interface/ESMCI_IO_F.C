@@ -102,7 +102,7 @@ extern "C" {
     // helper variable
     string varName;
     if (*len_variableName > 0)
-       varName = string (opt_variableName, 0, *len_variableName);
+       varName = string (opt_variableName, *len_variableName);
     // call into C++
     localrc = (*ptr)->addArray(*array, varName.c_str());
     ESMC_LogDefault.MsgFoundError(localrc,
@@ -130,7 +130,7 @@ extern "C" {
     }
     int localrc = ESMC_RC_NOT_IMPL;
     // helper variable
-    string fileName (file, 0, *len_file);
+    string fileName (file, *len_file);
 
     ESMC_IOFmt_Flag iofmt = ESMF_IOFMT_NETCDF;             // default
     bool overwrite = false;                                // default
@@ -175,7 +175,7 @@ extern "C" {
     }
     int localrc = ESMC_RC_NOT_IMPL;
     // helper variables
-    string fileName (file, 0, *len_file);
+    string fileName (file, *len_file);
     ESMC_IOFmt_Flag iofmt = ESMF_IOFMT_NETCDF; // default
     int timeslice = 0; // default
 
