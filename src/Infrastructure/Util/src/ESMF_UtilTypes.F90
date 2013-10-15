@@ -686,10 +686,10 @@
 ! (Need to match the ones in ESMC_CoordSys.C)
 !
 !------------------------------------------------------------------------------
-   real(ESMF_KIND_R8), parameter :: &
-              ESMF_COORDSYS_DEG2RAD=0.01745329251994_ESMF_KIND_R8
-   real(ESMF_KIND_R8), parameter :: &
-              ESMF_COORDSYS_RAD2DEG=57.2957795130931_ESMF_KIND_R8
+   real(ESMF_KIND_R8), parameter ::  ESMF_COORDSYS_DEG2RAD= &
+                     0.01745329251994329547437_ESMF_KIND_R8
+   real(ESMF_KIND_R8), parameter :: ESMF_COORDSYS_RAD2DEG=&
+                    57.29577951308232286464772_ESMF_KIND_R8
 
 !------------------------------------------------------------------------------
 !
