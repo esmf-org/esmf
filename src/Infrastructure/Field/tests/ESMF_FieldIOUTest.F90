@@ -17,6 +17,10 @@ program ESMF_FieldIOUTest
 #include "ESMF_Macros.inc"
 #include "ESMF.h"
 
+! Eventually these macros can be replaced with F2008 block/end block
+#define ESMF_BLOCK(LABEL) LABEL: do
+#define ESMF_ENDBLOCK(LABEL) if (0 == 0) exit LABEL; end do LABEL
+
 !==============================================================================
 !BOP
 ! !PROGRAM: ESMF_FieldIOUTest -  Tests FieldWrite()
@@ -45,19 +49,19 @@ program ESMF_FieldIOUTest
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_w, Farray_r
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_tw, Farray_tr
   real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_sw, Farray_sr
-  real(ESMF_KIND_R4), pointer, dimension(:,:) ::  fptr
+  real(ESMF_KIND_R4), pointer, dimension(:,:) ::  fptr => null ()
   ! Note: 
   ! field_w---Farray_w; field_r---Farray_r; 
   ! field_t---Farray_tw; field_tr---Farray_tr 
   ! field_s---Farray_sw; field_sr---Farray_sr
   type(ESMF_Grid) :: grid
-  type(ESMF_StaggerLoc)                       :: sloc
-  integer                                 :: rc, de
+
+  integer                                 :: rc
   integer, allocatable :: computationalLBound(:),computationalUBound(:)
   integer, allocatable :: exclusiveLBound(:), exclusiveUBound(:)
-  integer      :: localDeCount, localPet, petCount, tlb(2), tub(2)
-  integer :: i,j, t, endtime, k, finalrc
-  real*8 :: Maxvalue, diff
+  integer      :: localPet, petCount, tlb(2), tub(2)
+  integer :: i,j, t, endtime, k
+  real(ESMF_KIND_R8) :: Maxvalue, diff
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -107,7 +111,6 @@ program ESMF_FieldIOUTest
   allocate(Farray_sw(5,10))  ! do it by hand for without halo case
   allocate(Farray_tr(5,10))
 
-  localDeCount = 1
   allocate(exclusiveLBound(2))         ! dimCount=2
   allocate(exclusiveUBound(2))         ! dimCount=2
   allocate(computationalLBound(2))
@@ -254,16 +257,17 @@ program ESMF_FieldIOUTest
     ! Write Fortran array in Field
     ! After two timesteps, test the auto-increment feature.
     ! Also, stop using the status flag after t = 3
-    if (t .le. 2) then
+    select case (t)
+    case (1,2)
       call ESMF_FieldWrite(field_t, file="field_time.nc", timeslice=t,     &
            status=statusFlag, overwrite=.true., rc=rc)
-    else if (t .le. 3) then
+    case (3)
       call ESMF_FieldWrite(field_t, file="field_time.nc",                  &
            status=statusFlag, overwrite=.true., rc=rc)
-    else
+    case (4:)
       call ESMF_FieldWrite(field_t, file="field_time.nc",                  &
            overwrite=.true., rc=rc)
-    endif
+    end select
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
     if(rc.ne.ESMF_SUCCESS) then
       countfail = countfail + 1
@@ -528,47 +532,54 @@ program ESMF_FieldIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  finalrc = ESMF_SUCCESS                   ! Initialize
+  rc = ESMF_SUCCESS                   ! Initialize
   write(name, *) "Write Field"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  grid = ESMF_GridCreateNoPeriDim(maxIndex=(/44, 8/), gridEdgeLWidth=(/0,0/), &
-    rc=rc)
-  if(rc /= ESMF_SUCCESS) finalrc = rc
-  field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, &
-    staggerLoc=ESMF_STAGGERLOC_EDGE1, name="velocity", &
-    totalLWidth=(/1,1/), totalUWidth=(/1,1/), rc=rc)
-  if(rc /= ESMF_SUCCESS) finalrc = rc
-  call ESMF_FieldGet(field, farrayPtr=fptr, &
-    totalLBound=tlb, totalUBound=tub, &
-    rc=rc)
-  if(rc /= ESMF_SUCCESS) finalrc = rc
-  print *, tlb, tub
+  ESMF_BLOCK(write_field_test)
+    grid = ESMF_GridCreateNoPeriDim(maxIndex=(/44, 8/), gridEdgeLWidth=(/0,0/), &
+      rc=rc)
+    if(rc /= ESMF_SUCCESS) exit write_field_test
 
-  ! Replace file first time through
-  statusFlag = ESMF_FILESTATUS_REPLACE
-  do k = 1, 5
-    do i = tlb(1), tub(1)
-      do j = tlb(2), tub(2)
-        fptr(i,j) = ((i-1)*(tub(2)-tlb(2))+j)*(10**(k-1))
+    field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, &
+      staggerLoc=ESMF_STAGGERLOC_EDGE1, name="velocity", &
+      totalLWidth=(/1,1/), totalUWidth=(/1,1/), rc=rc)
+    if(rc /= ESMF_SUCCESS) exit write_field_test
+
+    call ESMF_FieldGet(field, farrayPtr=fptr, &
+      totalLBound=tlb, totalUBound=tub, &
+      rc=rc)
+    if(rc /= ESMF_SUCCESS) exit write_field_test
+
+    if (.not. associated (fptr)) then
+      rc = ESMF_RC_PTR_NOTALLOC
+      exit write_field_test
+    end if
+
+    print *, tlb, tub
+
+    ! Replace file first time through
+    statusFlag = ESMF_FILESTATUS_REPLACE
+    do k = 1, 5
+      do i = tlb(1), tub(1)
+	do j = tlb(2), tub(2)
+          fptr(i,j) = ((i-1)*(tub(2)-tlb(2))+j)*(10**(k-1))
+	enddo
       enddo
-    enddo
-#ifdef ESMF_MPICH
-    ! something in this test blows up inside of FieldWrite() under MPICH
-    rc=ESMF_SUCCESS
-#else
-    call ESMF_FieldWrite(field, file='halof.nc', timeslice=k,   &
-         status=statusFlag, overwrite=.true., rc=rc)
-#endif
-#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-    if(rc.ne.ESMF_SUCCESS) finalrc = rc
-#else
-    if(rc.ne.ESMF_RC_LIB_NOT_PRESENT) finalrc = rc
-#endif
-    ! Next time through the loop, write to same file
-    statusFlag = ESMF_FILESTATUS_OLD
 
-  enddo
-  call ESMF_Test((finalrc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldWrite(field, file='halof.nc', timeslice=k,   &
+           status=statusFlag, overwrite=.true., rc=rc)
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+      if(rc /= ESMF_SUCCESS) exit write_field_test
+#else
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, rc == ESMF_RC_LIB_NOT_PRESENT)
+      exit write_field_test
+#endif
+      ! Next time through the loop, write to same file
+      statusFlag = ESMF_FILESTATUS_OLD
+
+    enddo
+  ESMF_ENDBLOCK(write_field_test)
+  call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
