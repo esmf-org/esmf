@@ -22,7 +22,7 @@ module pio_cpp_utils
     type(PIO_C_HANDLE_NODE), pointer :: next
    end type PIO_C_HANDLE_NODE
 
-   type(PIO_C_HANDLE_NODE), private, save, pointer :: PIO_Intracom_handles
+   type(PIO_C_HANDLE_NODE), private, save, pointer :: PIO_Intracom_handles => null ()
    integer, private :: PIO_c_handle_num = 0
 
    ! public interface
@@ -93,16 +93,20 @@ pure subroutine c_chars(cs, fc)
 
   !  local
   integer :: i
-  integer :: len
+  integer :: len_fc
 
   !  text
   continue
 
-  len = len_trim(fc)
-  convert_kind: do i = 1, len
+  len_fc = len_trim(fc)
+  convert_kind: do i = 1, len_fc
     cs(i: i) = fc(i: i)
   end do convert_kind
-  cs(len+1:len+1) = C_NULL_CHAR
+  if (len_fc < len (cs)) then
+    cs(len_fc+1:len_fc+1) = C_NULL_CHAR
+  else
+    cs(len (cs):len (cs)) = C_NULL_CHAR
+  end if
 
   return
 
