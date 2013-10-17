@@ -213,8 +213,9 @@ class _Region(object):
     '''
 
 # RegridMethod
-RegridMethod = namedtuple('RegridMethod', ['BILINEAR', 'PATCH', 'CONSERVE'])
-RegridMethod = RegridMethod(BILINEAR=0, PATCH=1, CONSERVE=2)
+RegridMethod = namedtuple('RegridMethod', ['BILINEAR', 'PATCH', 'CONSERVE', 
+                                           'NEAREST_STOD', 'NEAREST_DTOS'])
+RegridMethod = RegridMethod(BILINEAR=0, PATCH=1, CONSERVE=2, NEAREST_STOD=3, NEAREST_DTOS=4)
 
 # This is a dummy class object used for documentation purposes only
 class _RegridMethod(object):
@@ -226,7 +227,7 @@ class _RegridMethod(object):
             of the source values in the cell which contains the destination 
             point. The weights for the linear combination are based on the 
             distance of the destination point from each source value.
-            PATCH = 1
+        PATCH = 1
             Higher-order patch recovery interpolation. Destination value is a
             weighted average of 2D polynomial patches constructed from cells 
             surrounding the source cell which contains the destination point. 
@@ -245,6 +246,18 @@ class _RegridMethod(object):
             method requires the corner coordinate values to be provided in the 
             Grid, and it currently only works for Fields created on the Grid 
             center stagger (or the Mesh element location).
+        NEAREST_STOD = 3
+            Nearest neighbor interpolation where each destination
+            point is mapped to the closest source point. A given
+            source point may go to multiple destination points, but
+            no destination point will receive input from more than
+            one source point.
+        NEAREST_DTOS = 4
+            Nearest neighbor interpolation where each destination
+            point is mapped to the closest source point. A given
+            source point may go to multiple destination points, but no
+            destination point will receive input from more than one
+            source point.
     '''
 
 # StaggerLoc
