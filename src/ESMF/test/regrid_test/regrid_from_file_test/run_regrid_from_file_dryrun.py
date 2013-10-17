@@ -34,7 +34,7 @@ def cache_data_files_for_test_cases(test_cases):
     # the test subroutine.
     status_ok = True
     for test_case in test_cases:
-        (src_fname, dst_fname, regrid_method, options, max_err) = test_case
+        (src_fname, dst_fname, regrid_method, options, max_err, max_area_err) = test_case
         src_fname_full = os.path.join(DATA_SUBDIR, src_fname)
         dst_fname_full = os.path.join(DATA_SUBDIR, dst_fname)
 

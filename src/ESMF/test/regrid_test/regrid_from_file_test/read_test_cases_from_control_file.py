@@ -18,7 +18,7 @@ def read_test_cases_from_control_file():
     for line in open(os.path.join(TEST_REGRID_DIR, CONTROL_FNAME), 'r'):
         if line[0] != '#' and re.match('(\s*.+\s*:){3}', line):
             (src_fname, dst_fname, regrid_method, options,
-             max_err_str) = re.split('\s*:\s*', line)
+             max_err_str, max_area_err_str) = re.split('\s*:\s*', line)
             test_cases.append([src_fname, dst_fname, regrid_method, options,
-                            float(max_err_str)])
+                              float(max_err_str), float(max_area_err_str)])
     return test_cases
