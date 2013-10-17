@@ -1333,7 +1333,7 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p, ct.c_void_p,
                                         ct.POINTER(ct.c_void_p),
                                         OptionalNamedConstant,
                                         OptionalNamedConstant,
-                                        OptionalNamedConstant,
+                                        ct.POINTER(ct.c_void_p),
                                         OptionalNamedConstant,
                                         OptionalField,
                                         OptionalField]
@@ -1381,7 +1381,11 @@ def ESMP_FieldRegridStore(srcField, dstField,
         ESMP_Field (optional)               :: dstFracField\n
     """
     routehandle = ct.c_void_p(0)
-
+    if regridPoleNPnts:
+        regridPoleNPnts_ct = ct.byref(ct.c_void_p(regridPoleNPnts))
+    else:
+        regridPoleNPnts_ct = None
+        
     #InterfaceInt requires int32 type numpy arrays
     srcMaskValues_i = srcMaskValues
     if (srcMaskValues != None):
@@ -1403,7 +1407,7 @@ def ESMP_FieldRegridStore(srcField, dstField,
                                      ct.byref(routehandle), \
                                      regridmethod, \
                                      polemethod, \
-                                     regridPoleNPnts, \
+                                     regridPoleNPnts_ct, \
                                      unmappedaction, \
                                      srcFracField, \
                                      dstFracField)
