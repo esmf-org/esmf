@@ -2158,7 +2158,7 @@ contains
 #if defined(USEMPIIO) || defined(_PNETCDF) || defined(_NETCDF4)
 #ifndef _MPISERIAL
     if(iosystem%ioproc .and. (iosystem%info /= MPI_INFO_NULL)) then
-       if(iosystem%io_rank==0 .or. Debug) print *,'Setting mpi info: ',hint,'=',hintval
+!gjt       if(iosystem%io_rank==0 .or. Debug) print *,'Setting mpi info: ',hint,'=',hintval
        call mpi_info_set(iosystem%info,hint,hintval,ierr)
        call checkmpireturn('PIO_set_hint',ierr)
     else
