@@ -41,6 +41,8 @@
 #include "ESMCI_VMKernel.h"    // inherit from ESMCI::VMK class
 #include "ESMCI_Util.h"
 
+#include <string>
+
 //-------------------------------------------------------------------------
 
 namespace ESMCI {
@@ -106,6 +108,7 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static VMId *getCurrentID(int *rc=NULL);  // VMId of current VM
     static void getCurrentGarbageInfo(int *, int *); // garbage info current VM
     static void getMemInfo(int *virtMemPet, int *physMemPet);   // memory info
+    static void logMemInfo(std::string prefix);   // memory info
     static int getBaseIDAndInc(VMId *vmID);
     static void addObject(ESMC_Base *, VMId *vmID);
     static void addFObject(void **fobject, int objectID, VMId *vmID);

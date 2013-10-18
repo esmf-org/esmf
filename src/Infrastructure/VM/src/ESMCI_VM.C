@@ -1572,7 +1572,7 @@ void VM::getMemInfo(
   ){
 //
 // !DESCRIPTION:
-//   Get the {\tt ESMC\_VM} object of the current context.
+//   Get the memory information of the local PET.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1595,6 +1595,52 @@ void VM::getMemInfo(
     if (strncmp(line, "VmRSS:", 6) == 0){
       *physMemPet = procParseLine(line);
       if (*virtMemPet!=-1) break;
+    }
+  }
+  fclose(file);
+  vm->unlock();
+#endif
+  
+  // return successfully
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::logMemInfo()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::logMemInfo - Log memory info
+//
+// !INTERFACE:
+void VM::logMemInfo(
+//
+// !ARGUMENTS:
+//
+  std::string prefix
+  ){
+//
+// !DESCRIPTION:
+//   Log the memory information of the local PET.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;   // final return code
+
+#ifdef ESMF_OS_Linux
+  // must lock/unlock for thread-safety
+  VM *vm = getCurrent();
+  vm->lock();
+  FILE* file = fopen("/proc/self/status", "r");
+  char line[128];
+  char msg[256];
+  while (fgets(line, 128, file) != NULL){
+    if (strncmp(line, "Vm", 2) == 0){
+      int len = strlen(line);
+      line[len-1] = '\0'; // replace the newline with null
+      sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), line);
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     }
   }
   fclose(file);
