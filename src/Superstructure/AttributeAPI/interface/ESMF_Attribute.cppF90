@@ -3135,7 +3135,7 @@ contains
 !     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Validate the {\tt ESMF_AttPack} object for <object>.
+!     Validate the {\tt ESMF\_AttPack} object for <object>.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -10246,7 +10246,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [mthis] @\
 !      An {\tt mclass} object. @\
 !     \item [attpack] @\
-!      An {\tt ESMF_AttPack} object. @\
+!      An {\tt ESMF\_AttPack} object. @\
 !     \item [{[rc]}]  @\
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
