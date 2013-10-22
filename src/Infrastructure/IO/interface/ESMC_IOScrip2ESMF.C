@@ -414,6 +414,39 @@ extern "C" {
   }
 }
 
+//--------------------------------------------------------------------------
+// Function to return the grid_rank from a SCRIP NetCDF file.
+
+extern "C" {
+  int ESMC_ScripInqRank(char *);
+}
+
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMC_ScripInqRank"
+int ESMC_ScripInqRank(char *infile)
+{
+  int ncid1;
+  int grdimid;
+  int status;
+
+  // Open input SCRIP file
+  status = nc_open(infile, NC_NOWRITE, &ncid1);  
+  if (handle_error(status)) return -1; // bail out;
+
+  // Inquire grid rank
+  status = nc_inq_dimid(ncid1, "grid_rank", &grdimid);
+  if (handle_error(status)) return -2; // bail out;
+
+  // Close input SCRIP file
+  nc_close(ncid1);
+
+  // Return successfully
+  return grdimid;
+}
+//--------------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------------
 #undef ESMC_METHOD
 #define ESMC_METHOD "c_convertscrip"
 extern "C" { 
