@@ -1572,6 +1572,16 @@ end function ESMF_MeshCreateFromMeshes
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (filetypeflag == ESMF_FILEFORMAT_UGRID) then
+        ! Warning message about add user area
+        if (localAddUserArea) then
+           call ESMF_LogWrite("ESMF does not currently support " // &
+                "user areas in UGRID format, so user areas will " // &
+                "not be used for the UGRID file.", &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        endif
+
 	if (present(addMask)) then
            myMesh = ESMF_MeshCreateFromUnstruct(filename, &
 	     localConvert3D, filetype=filetypeflag, meshname = meshname, &

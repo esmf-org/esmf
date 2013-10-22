@@ -5554,6 +5554,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &
 		addUserArea=addUserArea, rc=localrc)
     else if (fileformat == ESMF_FILEFORMAT_GRIDSPEC) then
+        ! Warning about user area in GridSpec 
+        if (present(addUserArea)) then
+           if (addUserArea) then
+              call ESMF_LogWrite("ESMF does not currently support " // &
+                   "user areas in GRIDSPEC format, so user areas will " // &
+                   "not be used for the GRIDSPEC file.", &
+                   ESMF_LOGMSG_WARNING, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+        endif
+
 	if (present(addMask)) then
   	  grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecomp, decompflag=localDecompflag, &
 		isSphere=localIsSphere, addCornerStagger=localAddCorner, &

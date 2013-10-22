@@ -912,9 +912,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	if (srcMissingValue) then
 	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, convert3D=.true., &
                     meshname = trim(srcMeshName), addMask=.true., &
+                    addUserArea=localUserAreaFlag, &
 		    varname=trim(srcMissingvalueVar), rc=localrc)
 	else
 	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, convert3D=.true., &
+                    addUserArea=localUserAreaFlag, &
                     meshname = trim(srcMeshName), rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                                ESMF_ERR_PASSTHRU, &
@@ -1028,9 +1030,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	if (dstMissingValue) then
  	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, convert3D=.true., &
                     meshname = trim(dstMeshName), addMask=.true., &
+                    addUserArea=localUserAreaFlag, &
 		    varname=trim(dstMissingvalueVar), rc=localrc)
 	else
 	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, convert3D=.true., &
+                    addUserArea=localUserAreaFlag, &
                     meshname = trim(dstMeshName), rc=localrc)
         endif
         if (ESMF_LogFoundError(localrc, &
