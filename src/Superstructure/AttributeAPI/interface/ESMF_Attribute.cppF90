@@ -807,7 +807,7 @@ contains
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttPackGet(<object>, attpack, convention, purpose, 
-!       attPackInstanceName, rc)
+!       attPackInstanceName, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -815,6 +815,7 @@ contains
 !     character (len = *), intent(in)              :: convention
 !     character (len = *), intent(in)              :: purpose
 !     character (len = *), intent(in),    optional :: attPackInstanceName
+!     logical,             intent(out),   optional :: isPresent
 !     integer,             intent(out),   optional :: rc
 !
 ! !DESCRIPTION:
@@ -823,13 +824,16 @@ contains
 !
 !     Supported values for <object> are:
 !     \begin{description}
-!     \item type(ESMF\_Array),    intent(inout) :: array
-!     \item type(ESMF\_CplComp),  intent(inout) :: comp
-!     \item type(ESMF\_GridComp), intent(inout) :: comp
-!     \item type(ESMF\_SciComp),  intent(inout) :: comp
-!     \item type(ESMF\_Field),    intent(inout) :: field
-!     \item type(ESMF\_Grid),     intent(inout) :: grid
-!     \item type(ESMF\_State),    intent(inout) :: state
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
 !     \end{description}
 !
 !     The arguments are:
@@ -839,14 +843,16 @@ contains
 !     \item [attpack]
 !           A handle to the Attribute package
 !     \item [convention]
-!           The convention of the new Attribute package
+!           The convention of the Attribute package
 !     \item [purpose]
-!           The purpose of the new Attribute package
+!           The purpose of the Attribute package
 !     \item [{[attPackInstanceName]}]
 !           The name of an Attribute package instance, specifying which one
 !           of multiple Attribute package instances of the same convention
 !           and purpose, within a nest.  If not specified, defaults to the
 !           first instance.
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute package is present or not
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -894,7 +900,7 @@ contains
 !           The convention of the new Attribute package
 !     \item [purpose]
 !           The purpose of the new Attribute package
-!     \item [{[attpack}]]
+!     \item [{[attpack]}]
 !           An optional handle to the Attribute package that is to be created
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
@@ -971,7 +977,7 @@ contains
 !           the new Attribute package.
 !     \item [{[nestAttPackInstanceNameCount]}]
 !           The number of nested Attribute package instance names.
-!     \item [{[attpack}]]
+!     \item [{[attpack]}]
 !           An optional handle to the Attribute package that is to be created
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
@@ -1027,7 +1033,7 @@ contains
 !           The purpose of the Attribute package
 !     \item [{[count]}]
 !           The number of Attributes to add to the custom Attribute package
-!     \item [{[attpack}]]
+!     \item [{[attpack]}]
 !           An optional handle to the Attribute package that is to be created
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
@@ -1097,7 +1103,7 @@ contains
 !     \item [{[nestCount]}]
 !           The number of nested Attribute packages to add to the custom
 !           Attribute package
-!     \item [{[attpack}]]
+!     \item [{[attpack]}]
 !           An optional handle to the Attribute package that is to be created
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
@@ -1163,7 +1169,7 @@ contains
 !     \item [nestPurpose]
 !           The purpose of the Attribute package around which to nest the
 !           new Attribute package
-!     \item [{[attpack}]]
+!     \item [{[attpack]}]
 !           An optional handle to the Attribute package that is to be created
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
@@ -1298,7 +1304,7 @@ contains
 !           The value of the named Attribute
 !     \item [{[<defaultvalue>]}]
 !           The default value of the named Attribute
-!     \item [{[attpack}]]
+!     \item [{[attpack]}]
 !           A handle to the Attribute package
 !     \item [{[isPresent]}]
 !           A logical flag to tell if this Attribute is present or not
@@ -1367,7 +1373,7 @@ contains
 !           The default value of the named Attribute
 !     \item [{[inputList]}]
 !           A list of the input parameters required to retrieve internal info
-!     \item [{[attpack}]]
+!     \item [{[attpack]}]
 !           A handle to the Attribute package
 !     \item [{[isPresent]}]
 !           A logical flag to tell if this Attribute is present or not
@@ -1450,7 +1456,7 @@ contains
 !           The valueList of the named Attribute
 !     \item [{[<defaultvalueList>]}]
 !           The default value list of the named Attribute
-!     \item [{[attpack}]]
+!     \item [{[attpack]}]
 !           A handle to the Attribute package
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute
@@ -1523,7 +1529,7 @@ contains
 !           The default value list of the named Attribute
 !     \item [{[inputList]}]
 !           A list of the input parameters required to retrieve internal info
-!     \item [{[attpack}]]
+!     \item [{[attpack]}]
 !           A handle to the Attribute package
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute
@@ -1534,7 +1540,8 @@ contains
 !     \end{description}
 !
 !
-!EOP!------------------------------------------------------------------------------
+!EOP
+!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_AttributeGet  - Get an Attribute
 !
@@ -1938,7 +1945,7 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet()
-!     subroutine ESMF_AttributeGetInfoByNam(<object>, name, attpack, &
+!     subroutine ESMF_AttributeGetInfoByNamAP(<object>, name, attpack, &
 !       keywordEnforcer, typekind, itemCount, isPresent, rc)
 !
 ! !ARGUMENTS:
@@ -1952,7 +1959,7 @@ contains
 !     integer,                  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Return information associated with the named Attribute,
+!     Return information associated with an Attribute in an Attribute package,
 !     including {\tt typekind} and {\tt itemCount}.
 !
 !     Supported values for <object> are:
@@ -1975,7 +1982,7 @@ contains
 !           An {\tt ESMF} object
 !     \item [name]
 !           The name of the Attribute to query
-!     \item [{[attpack}]]
+!     \item [{[attpack]}]
 !           A handle to the Attribute package
 !     \item [{[typekind}]]
 !           The typekind of the Attribute
@@ -2733,7 +2740,7 @@ contains
 !           The name of the Attribute to set
 !     \item [<value argument>]
 !           The value of the Attribute to set
-!     \item [{[attpack}]]
+!     \item [attpack]
 !           A handle to the Attribute package
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
@@ -2785,7 +2792,7 @@ contains
 !           The value of the Attribute to set
 !     \item [{[inputList]}]
 !           A list of the input parameters required to set internal info
-!     \item [{[attpack}]]
+!     \item [attpack]
 !           A handle to the Attribute package
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
@@ -2848,7 +2855,7 @@ contains
 !           The name of the Attribute to set
 !     \item [<valueList argument>]
 !           The valueList of the Attribute to set
-!     \item [{[attpack}]]
+!     \item [attpack]
 !           A handle to the Attribute package
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute
@@ -3148,7 +3155,7 @@ contains
 !     \begin{description}
 !     \item [<object>]
 !           An {\tt ESMF} object
-!     \item [{[attpack}]]
+!     \item [{[attpack]}]
 !           An Attribute package
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
@@ -3296,7 +3303,7 @@ contains
 !           and purpose, within a nest.  If not specified, defaults to the @\
 !           first instance.  @\
 !     \item [{[isPresent]}] @\
-!           A logical flag to tell if this Attribute is present or not @\
+!           A logical flag to tell if this Attribute package is present or not @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -3365,7 +3372,7 @@ contains
 !      The convention of the new Attribute package. @\
 !     \item [purpose] @\
 !      The purpose of the new Attribute package. @\
-!     \item [{[attpack}]] @\
+!     \item [{[attpack]}] @\
 !      An optional handle to the Attribute package that is to be created. @\
 !     \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -3493,7 +3500,7 @@ contains
 !      the new Attribute package. @\
 !     \item [{[nestAttPackInstanceNameCount]}] @\
 !      The number of nested Attribute package instance names. @\
-!     \item [{[attpack}]] @\
+!     \item [{[attpack]}] @\
 !      An optional handle to the Attribute package that is to be created. @\
 !     \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -3656,7 +3663,7 @@ contains
 !      The purpose of the new Attribute package. @\
 !     \item [{[count]}] @\
 !      The count of the number of Attributes to add to the package @\
-!     \item [{[attpack}]] @\
+!     \item [{[attpack]}] @\
 !      An optional handle to the Attribute package that is to be created. @\
 !     \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -3769,7 +3776,7 @@ contains
 !     \item [{[nestCount]}] @\
 !      The count of the number of nested Attribute packages to add to the @\
 !      new Attribute package @\
-!     \item [{[attpack}]] @\
+!     \item [{[attpack]}] @\
 !      An optional handle to the Attribute package that is to be created. @\
 !     \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -3924,7 +3931,7 @@ contains
 !     \item [nestPurpose] @\
 !      The purpose of the Attribute package around which to nest the @\
 !      new Attribute package. @\
-!     \item [{[attpack}]] @\
+!     \item [{[attpack]}] @\
 !      An optional handle to the Attribute package that is to be created. @\
 !     \item [{[rc]}]  @\
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
