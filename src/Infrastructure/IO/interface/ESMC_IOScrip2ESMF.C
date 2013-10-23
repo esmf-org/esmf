@@ -418,12 +418,12 @@ extern "C" {
 // Function to return the grid_rank from a SCRIP NetCDF file.
 
 extern "C" {
-  int ESMC_ScripInqRank(char *);
+  size_t ESMC_ScripInqRank(char *);
 }
 
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMC_ScripInqRank"
-int ESMC_ScripInqRank(char *infile)
+size_t ESMC_ScripInqRank(char *infile)
 {
   size_t grdim = -4;
 #ifdef ESMF_NETCDF
@@ -453,7 +453,6 @@ int ESMC_ScripInqRank(char *infile)
   return grdim;
 }
 //--------------------------------------------------------------------------
-
 
 //--------------------------------------------------------------------------
 #undef ESMC_METHOD
