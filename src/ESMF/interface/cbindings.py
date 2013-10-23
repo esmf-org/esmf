@@ -1436,3 +1436,39 @@ def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
     if rc != constants.ESMP_SUCCESS:
         raise ValueError('ESMC_FieldRegrid() failed with rc = '+str(rc)+
                         '.    '+constants.errmsg)
+
+_ESMF.ESMC_ScripInqRank.restype = ct.c_size_t
+_ESMF.ESMC_ScripInqRank.argtypes = [ct.c_char_p]
+@deprecated
+def ESMP_ScripInqRank(filename):
+    """
+    Preconditions: ESMP has been initialized.\n
+    Postconditions:  The grid rank of the specified SCRIP NetCDF file or an error code
+                     has been returned.\n
+    Arguments:\n
+        String :: filename\n
+    """
+    grid_rank = _ESMF.ESMC_ScripInqRank(filename)
+    print "Got grid_rank = ",grid_rank
+    return grid_rank
+
+_ESMF.ESMC_ScripInqDims.restype = ct.c_int
+_ESMF.ESMC_ScripInqDims.argtypes = [ct.c_char_p, 
+                                    np.ctypeslib.ndpointer(dtype=np.int32)]
+@deprecated
+def ESMP_ScripInqDims(filename):
+    """
+    Preconditions: ESMP has been initialized.\n
+    Postconditions:  The grid rank of the specified SCRIP NetCDF file or an error code
+                     has been returned.\n
+    Arguments:\n
+        String :: filename\n
+    """
+    grid_rank = ESMP_ScripInqRank(filename)
+    dims = np.array(np.zeros(grid_rank),dtype=np.int32)
+    status = _ESMF.ESMC_ScripInqDims(filename, dims)
+    if status == 0:
+        print 'got dims ',dims
+    else:
+        print 'got status ',status
+    return dims
