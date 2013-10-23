@@ -425,8 +425,9 @@ extern "C" {
 #define ESMC_METHOD "ESMC_ScripInqRank"
 int ESMC_ScripInqRank(char *infile)
 {
+  int grdimid = -3;
+#ifdef ESMF_NETCDF
   int ncid1;
-  int grdimid;
   int status;
 
   // Open input SCRIP file
@@ -440,6 +441,11 @@ int ESMC_ScripInqRank(char *infile)
   // Close input SCRIP file
   nc_close(ncid1);
 
+#else
+  int rc;
+  ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT, "Have to compile with "
+    "ESMF_NETCDF environment variable defined", ESMC_CONTEXT, &rc);
+#endif
   // Return successfully
   return grdimid;
 }
