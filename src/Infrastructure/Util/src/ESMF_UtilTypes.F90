@@ -90,21 +90,21 @@
       character(*), parameter :: ESMF_VERSION_STRING  = "6.3.0 beta snapshot"
 
 #if defined (ESMF_NETCDF)
-      logical, parameter :: ESMF_IO_NETCDF = .true.
+      logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.
 #else
-      logical, parameter :: ESMF_IO_NETCDF = .false.
+      logical, parameter :: ESMF_IO_NETCDF_PRESENT = .false.
 #endif
 
 #if defined (ESMF_PIO)
-      logical, parameter :: ESMF_IO_PIO = .true.
+      logical, parameter :: ESMF_IO_PIO_PRESENT = .true.
 #else
-      logical, parameter :: ESMF_IO_PIO = .false.
+      logical, parameter :: ESMF_IO_PIO_PRESENT = .false.
 #endif
 
 #if defined (ESMF_PNETCDF)
-      logical, parameter :: ESMF_IO_PNETCDF = .true.
+      logical, parameter :: ESMF_IO_PNETCDF_PRESENT = .true.
 #else
-      logical, parameter :: ESMF_IO_PNETCDF = .false.
+      logical, parameter :: ESMF_IO_PNETCDF_PRESENT = .false.
 #endif
 
 !------------------------------------------------------------------------------
@@ -870,7 +870,8 @@
 
       public ESMF_FAILURE, ESMF_SUCCESS
 
-      public ESMF_IO_NETCDF, ESMF_IO_PIO, ESMF_IO_PNETCDF
+      public ESMF_IO_NETCDF_PRESENT, ESMF_IO_PIO_PRESENT
+      public ESMF_IO_PNETCDF_PRESENT
 
       public ESMF_MAXSTR
       public ESMF_MAXPATHLEN
