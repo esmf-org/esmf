@@ -39,6 +39,11 @@ program ESMF_Info
       print *, "  ESMF_VERSION_PATCHLEVEL:   ", ESMF_VERSION_PATCHLEVEL
       print *, "  ESMF_VERSION_PUBLIC:       ", ESMF_VERSION_PUBLIC
       print *, "  ESMF_VERSION_BETASNAPSHOT: ", ESMF_VERSION_BETASNAPSHOT
+      print *
+      print *, "I/O feature support enabled:"
+      print *, "  ESMF_IO_NETCDF:	     ", ESMF_IO_NETCDF
+      print *, "  ESMF_IO_PIO:               ", ESMF_IO_PIO
+      print *, "  ESMF_IO_PNETCDF:           ", ESMF_IO_PNETCDF
     end if
   endif
   
