@@ -454,6 +454,51 @@ size_t ESMC_ScripInqRank(char *infile)
 }
 //--------------------------------------------------------------------------
 
+
+//--------------------------------------------------------------------------
+// Function to return the grid_dims from a SCRIP NetCDF file.
+// The return variable, dims, must point to allocated memory to hold
+// grid_rank number of integers.  Use ESMC_ScripInqRank(filename) to
+// get the grid_rank.
+extern "C" {
+  int ESMC_ScripInqDims(char *, size_t *dims);
+}
+
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMC_ScripInqDims"
+int ESMC_ScripInqDims(char *infile, size_t *dims)
+{
+#ifdef ESMF_NETCDF
+  int ncid1;
+  int gd_id;
+  int status;
+
+  // Open input SCRIP file
+  status = nc_open(infile, NC_NOWRITE, &ncid1);  
+  if (handle_error(status)) return -1; // bail out;
+
+  // Inquire grid dimensions
+  status = nc_inq_varid(ncid1, "grid_dims", &gd_id);
+  if (handle_error(status)) return -2; // bail out;
+  status = nc_get_var(ncid1, gd_id, dims);
+  if (handle_error(status)) return -3; // bail out;
+
+
+  // Close input SCRIP file
+  nc_close(ncid1);
+
+#else
+  int rc;
+  ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT, "Have to compile with "
+    "ESMF_NETCDF environment variable defined", ESMC_CONTEXT, &rc);
+  return -4;
+#endif
+  // Return successfully
+  return 0;
+}
+//--------------------------------------------------------------------------
+
+
 //--------------------------------------------------------------------------
 #undef ESMC_METHOD
 #define ESMC_METHOD "c_convertscrip"
