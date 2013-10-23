@@ -425,8 +425,9 @@ extern "C" {
 #define ESMC_METHOD "ESMC_ScripInqRank"
 int ESMC_ScripInqRank(char *infile)
 {
-  int grdimid = -3;
+  size_t grdim = -4;
 #ifdef ESMF_NETCDF
+  int grdimid;
   int ncid1;
   int status;
 
@@ -437,6 +438,8 @@ int ESMC_ScripInqRank(char *infile)
   // Inquire grid rank
   status = nc_inq_dimid(ncid1, "grid_rank", &grdimid);
   if (handle_error(status)) return -2; // bail out;
+  status = nc_inq_dimlen(ncid1, grdimid, &grdim);
+  if (handle_error(status)) return -3; // bail out;
 
   // Close input SCRIP file
   nc_close(ncid1);
@@ -447,7 +450,7 @@ int ESMC_ScripInqRank(char *infile)
     "ESMF_NETCDF environment variable defined", ESMC_CONTEXT, &rc);
 #endif
   // Return successfully
-  return grdimid;
+  return grdim;
 }
 //--------------------------------------------------------------------------
 
