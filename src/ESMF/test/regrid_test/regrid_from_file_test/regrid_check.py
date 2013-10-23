@@ -24,22 +24,68 @@ try:
 except:
     raise ImportError('The ESMF library cannot be found!')
 
-def create_field(mesh, name, regridmethod):
+regrid_method_map = {"bilinear" : ESMF.RegridMethod.BILINEAR,
+                     "patch" : ESMF.RegridMethod.PATCH,
+                     "conserve" : ESMF.RegridMethod.CONSERVE,
+                     "neareststod" : ESMF.RegridMethod.NEAREST_STOD,
+                     "nearestdtos" : ESMF.RegridMethod.NEAREST_DTOS}
+file_type_map = {"VTK" : ESMF.FileFormat.VTK,
+                 "SCRIP" : ESMF.FileFormat.SCRIP,
+                 "ESMFMESH" : ESMF.FileFormat.ESMFMESH,
+                 "ESMFGRID" : ESMF.FileFormat.ESMFGRID,
+                 "UGRID" : ESMF.FileFormat.UGRID,
+                 "GRIDSPEC" : ESMF.FileFormat.GRIDSPEC}
+pole_method_map = {"none" : ESMF.PoleMethod.NONE,
+                   "all" : ESMF.PoleMethod.ALLAVG,
+                   "teeth" : ESMF.PoleMethod.TEETH}
+
+def nc_is_mesh(filename, filetype):
+    is_mesh = False
+    if filetype == ESMF.FileFormat.UGRID:
+        is_mesh = True
+    if filetype == ESMF.FileFormat.SCRIP:
+        grid_rank = ESMF.ESMP_ScripInqRank(filename)
+        print "%s rank is %d" % (filename, grid_rank)
+        if grid_rank == 1:
+            is_mesh = True
+    return is_mesh
+    
+
+def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_dual=None,
+                                  isSphere=None):
+    if nc_is_mesh(filename, filetype):
+        print "Creating ESMF.Mesh object"
+        grid = ESMF.Mesh(filename=filename,
+                         filetype=filetype,
+                         meshname=meshname,
+                         convert3D=True,
+                         convert_to_dual=convert_to_dual)
+    else:
+        print "Creating ESMF.Grid object"
+        grid_dims = ESMF.ESMP_ScripInqDims(filename)
+        print filename + " dims are ", grid_dims
+        grid = ESMF.Grid(grid_dims, fname=filename, fileTypeFlag=filetype,
+                         staggerloc=ESMF.StaggerLoc.CENTER, isSphere=isSphere)
+    return grid
+
+def create_field(grid, name, regridmethod=None):
     '''
-    PRECONDITIONS: A Mesh has been created, and 'name' is a string that
+    PRECONDITIONS: A Mesh or Grid has been created, and 'name' is a string that
                    will be used to initialize the name of a new Field.
     POSTCONDITIONS: A Field has been created.
     '''
-    if regridmethod == ESMF.RegridMethod.CONSERVE:
-        field = ESMF.Field(mesh, name, meshloc=ESMF.MeshLoc.ELEMENT)
+    if isinstance(grid,ESMF.Mesh):
+        if regridmethod == ESMF.RegridMethod.CONSERVE:
+            field = ESMF.Field(grid, name, meshloc=ESMF.MeshLoc.ELEMENT)
+        else:
+            field = ESMF.Field(grid, name, meshloc=ESMF.MeshLoc.NODE)
     else:
-        field = ESMF.Field(mesh, name, meshloc=ESMF.MeshLoc.NODE)
-
+        field = ESMF.Field(grid, name)
     return field
 
-def build_analyticfield_const_mesh(field):
+def build_analyticfield_const(field):
     '''
-    PRECONDITIONS: A Field has been created on the elements of a Mesh.
+    PRECONDITIONS: A Field has been created on the elements of a Mesh or Grid.
     POSTCONDITIONS: The 'field' has been initialized to a constant analytic field.
     '''
     # set the field to a constant value
@@ -49,17 +95,20 @@ def build_analyticfield_const_mesh(field):
     return field
 
 def run_regridding(srcfield, dstfield, regridmethod, unmappedaction,
-                   dstFracField):
+                   dstFracField, polemethod=None, regridPoleNPnts=None):
     '''
     PRECONDITIONS: Two Fields have been created and a regridding operation
                    is desired from 'srcfield' to 'dstfield'.
     POSTCONDITIONS: A regridding operation has set the data on 'dstfield'.
     '''
     # call the regridding functions
+    print 'polemethod = ',polemethod
     regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
                                 regrid_method=regridmethod,
                                 unmapped_action=unmappedaction,
-                                dst_frac_field=dstFracField)
+                                dst_frac_field=dstFracField,
+                                pole_method=polemethod,
+                                regridPoleNPnts=regridPoleNPnts)
     dstfield = regridSrc2Dst(srcfield, dstfield, zero_region=ESMF.Region.SELECT)
 
     return dstfield
@@ -80,18 +129,26 @@ def compare_fields(field1, field2, regridmethod, dstFracField, max_err,
     # initialize to True, and check for False point values
     correct = True
     totalErr = 0.0
-    for i in range(field1.shape[0]):
-        #print "field1 %f, field2 %f\n" % (field1ptr[i], field2ptr[i])
-        #print "dstFracFieldptr[i] = ", dstFracFieldptr[i]
+    #print 'field1.shape=',field1.shape
+    #print 'field1.size=',field1.size
+    #print 'dstFracField.shape=',dstFracField.shape
+    #print 'dstFracField.size=',dstFracField.size
+    field1data = np.ravel(field1.data)
+    field2data = np.ravel(field2.data)
+    dstFracFieldData = np.ravel(dstFracField.data)
+    for i in range(field1.size):
+        #print "i=",i
+        #print "field1 %f, field2 %f" % (field1data[i], field2data[i])
+        #print "dstFracField %f" % dstFracFieldData[i]
         if (regridmethod != ESMF.RegridMethod.CONSERVE or
-                dstFracField[i] >= 0.999):
-                err = abs(field1[i] - field2[i])/abs(field2[i])
-                if err > max_err:
-                    correct = False
-                    print "ACCURACY ERROR - "+str(err)
-                totalErr += err
-#        else:
-#            print "Partial dest fraction -- skipping"
+            dstFracFieldData[i] >= 0.999):
+            err = abs(field1data[i] - field2data[i])/abs(field2data[i])
+            if err > max_err:
+                correct = False
+                print "ACCURACY ERROR - "+str(err)
+            totalErr += err
+        #else:
+            #print "Partial dest fraction -- skipping"
 
 
     # this is for parallel
@@ -125,14 +182,17 @@ def compare_fields(field1, field2, regridmethod, dstFracField, max_err,
 
 def parse_options(options):
         options = options.split()
-        opts, args = getopt(options,'it:', ['src_type=', 'dst_type=',
-                                            'src_meshname=', 'dst_meshname=',
-                                            'ignore_unmapped'])
+        opts, args = getopt(options,'it:p:r', ['src_type=', 'dst_type=', 
+                                               'src_meshname=', 'dst_meshname=',
+                                               'ignore_unmapped', 'src_regional', 'dst_regional'])
         src_type_str = "SCRIP"
         dst_type_str = "SCRIP"
         src_meshname = "Undefined"
         dst_meshname = "Undefined"
+        pole_method_str = None
         unmapped_action = ESMF.UnmappedAction.ERROR
+        src_regional = False
+        dst_regional = False
         for opt, arg in opts:
             if opt == '--src_type':
                 src_type_str = arg
@@ -147,22 +207,21 @@ def parse_options(options):
             elif opt == '-t':
                 src_type_str = arg
                 dst_type_str = arg
+            elif opt == '-p':
+                pole_method_str = arg
+            elif opt == '-r':
+                src_regional = True
+                dst_regional = True
+            elif opt == '--src_regional':
+                src_regional = True
+            elif opt == '--dst_regional':
+                dst_regional = True
         return (src_type_str, dst_type_str, src_meshname, dst_meshname,
-                unmapped_action)
+                unmapped_action, pole_method_str, src_regional, dst_regional)
 
-def mesh_check(src_fname, dst_fname, regrid_method, options, max_err):
+def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
 
 #    print "\nregrid_weight_gen_check.py: mesh_check()"
-
-    regrid_method_map = {"bilinear" : ESMF.RegridMethod.BILINEAR,
-                         "patch"        : ESMF.RegridMethod.PATCH,
-                         "conserve" : ESMF.RegridMethod.CONSERVE}
-    file_type_map = {"VTK" : ESMF.FileFormat.VTK,
-                     "SCRIP" : ESMF.FileFormat.SCRIP,
-                     "ESMFMESH" : ESMF.FileFormat.ESMFMESH,
-                     "ESMFGRID" : ESMF.FileFormat.ESMFGRID,
-                     "UGRID" : ESMF.FileFormat.UGRID,
-                     "GRIDSPEC" : ESMF.FileFormat.GRIDSPEC}
 
     parallel = False
 #    if petCount > 1:
@@ -175,52 +234,41 @@ def mesh_check(src_fname, dst_fname, regrid_method, options, max_err):
 
     # Settings for regrid
     (src_type_str, dst_type_str, src_meshname, dst_meshname,
-     unmappedaction) = parse_options(options)
+     unmappedaction, pole_method_str, src_regional, dst_regional) = parse_options(options)
     src_type = file_type_map[src_type_str]
     dst_type = file_type_map[dst_type_str]
-
     regridmethod = regrid_method_map[regrid_method]
     convert_to_dual = (regridmethod == ESMF.RegridMethod.BILINEAR)
+    src_is_sphere = not src_regional
+    dst_is_sphere = not dst_regional
+    pole_method = None
+    pole_method_npntavg = 1
+    if pole_method_str:
+        if pole_method_str in pole_method_map:
+            pole_method = pole_method_map[pole_method_str]
+        else:
+            pole_method = ESMF.PoleMethod.NPNTAVG
+            pole_method_npntavg = int(pole_method_str)
+            
+    srcgrid = create_grid_or_mesh_from_file(src_fname, src_type, meshname=src_meshname,
+                                            convert_to_dual=convert_to_dual, isSphere=src_is_sphere)
+    dstgrid = create_grid_or_mesh_from_file(dst_fname, dst_type, meshname=dst_meshname,
+                                            convert_to_dual=convert_to_dual, isSphere=dst_is_sphere)
 
-    if src_type == ESMF.FileFormat.UGRID:
-        srcmesh = ESMF.Mesh(filename=src_fname,
-                            filetype=src_type,
-                            meshname=src_meshname,
-                            convert3D=True)
-    elif src_type == ESMF.FileFormat.SCRIP:
-        srcmesh = ESMF.Mesh(filename=src_fname,
-                            filetype=src_type,
-                            convert3D=True,
-                            convert_to_dual=convert_to_dual)
-    if dst_type == ESMF.FileFormat.UGRID:
-        dstmesh = ESMF.Mesh(filename=dst_fname,
-                            filetype=dst_type,
-                            meshname=dst_meshname,
-                            convert3D=True)
-    elif dst_type == ESMF.FileFormat.SCRIP:
-        dstmesh = ESMF.Mesh(filename=dst_fname,
-                            filetype=dst_type,
-                            convert3D=True,
-                            convert_to_dual=convert_to_dual)
-#    if mymesh:
-#        print "mymesh = ", mymesh
-#        print "meshwrite = ", mymesh.write("step7.out")
-#        print "mymesh elem cnt = ", mymesh.size_local[1]
-
-    # create Field objects on the Meshes
-    srcfield = create_field(srcmesh, 'srcfield', regridmethod)
-    dstfield = create_field(dstmesh, 'dstfield', regridmethod)
-    dstfield2 = create_field(dstmesh, 'dstfield_exact', regridmethod)
-    dstFracField = create_field(dstmesh, 'dstFracField', regridmethod)
+    # create Field objects on the Grids
+    srcfield = create_field(srcgrid, 'srcfield', regridmethod)
+    dstfield = create_field(dstgrid, 'dstfield', regridmethod)
+    dstfield2 = create_field(dstgrid, 'dstfield_exact', regridmethod)
+    dstFracField = create_field(dstgrid, 'dstFracField', regridmethod)
 
     # initialize the Fields to an analytic function
-    srcfield = build_analyticfield_const_mesh(srcfield)
-    dstfield = build_analyticfield_const_mesh(dstfield)
-    dstfield2 = build_analyticfield_const_mesh(dstfield2)
+    srcfield = build_analyticfield_const(srcfield)
+    dstfield = build_analyticfield_const(dstfield)
+    dstfield2 = build_analyticfield_const(dstfield2)
 
     # run the ESMF regridding
-    dstfield = run_regridding(srcfield, dstfield, regridmethod, unmappedaction,
-                              dstFracField)
+    dstfield = run_regridding(srcfield, dstfield, regridmethod, unmappedaction, dstFracField, 
+                              polemethod=pole_method, regridPoleNPnts=pole_method_npntavg)
 
     # compare results and output PASS or FAIL
     correct = compare_fields(dstfield, dstfield2, regridmethod, dstFracField,
@@ -228,11 +276,41 @@ def mesh_check(src_fname, dst_fname, regrid_method, options, max_err):
 
     return correct
 
-if __name__ == '__main__':
-    src_fname = "FVCOM_grid2d.nc"
-    dst_fname = "selfe_grid2d.nc"
-    regrid_method = "conserve"
-    options = "--src_type UGRID --dst_type UGRID --src_meshname fvcom_mesh --dst_meshname selfe_mesh"
-    max_err = 0.06
+# def grid_check(src_fname, options):
+#
+#     (src_type_str, dst_type_str, src_meshname, dst_meshname,
+#      unmappedaction) = parse_options(options)
+#     src_type = file_type_map[src_type_str]
+#     srcgrid = ESMF.Grid(np.array([360,300]),fname=src_fname, fileTypeFlag=src_type,
+#                         staggerloc=ESMF.StaggerLoc.CENTER)
+#     exLB, exUB = ESMF.ESMP_GridGetCoord(srcgrid, ESMF.StaggerLoc.CENTER)
+#     print 'regrid_check.py: exLB =',exLB
+#     print 'regrid_check.py: exUB =',exUB
+#     [x,y] = [0,1]
+#     gridXCoord = srcgrid.get_grid_coords_from_esmc(x, ESMF.StaggerLoc.CENTER)
+#     gridYCoord = srcgrid.get_grid_coords_from_esmc(y, ESMF.StaggerLoc.CENTER)
+#
+#     print 'regrid_check.py: gridXCoord=',gridXCoord[0:10,0:10]
+#     print 'regrid_check.py: gridYCoord=',gridYCoord[0:10,0:10]
+#
+#     return True
 
-    sys.exit(mesh_check(src_fname, dst_fname, regrid_method, options, max_err))
+
+if __name__ == '__main__':
+    #src_fname = "FVCOM_grid2d.nc"
+    #dst_fname = "selfe_grid2d.nc"
+    #regrid_method = "conserve"
+    #options = "-i --src_type UGRID --dst_type UGRID --src_meshname fvcom_mesh --dst_meshname selfe_mesh"
+    #max_err = 0.06
+    #src_fname = "ll2.5deg_grid.nc"
+    #dst_fname = "T42_grid.nc"
+    #regrid_method = "bilinear"
+    #options = "-p none -i"
+    #max_err = 10E-04
+    src_fname = "T42_grid.nc"
+    dst_fname = "ar9v4_100920.nc"
+    regrid_method = "patch"
+    options = "--dst_regional"
+    max_err = 10E-04
+    sys.exit(regrid_check(src_fname, dst_fname, regrid_method, options, max_err))
+
