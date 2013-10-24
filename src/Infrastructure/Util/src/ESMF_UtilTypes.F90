@@ -89,6 +89,24 @@
 
       character(*), parameter :: ESMF_VERSION_STRING  = "6.3.0 beta snapshot"
 
+#if defined (ESMF_NETCDF)
+      logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.
+#else
+      logical, parameter :: ESMF_IO_NETCDF_PRESENT = .false.
+#endif
+
+#if defined (ESMF_PIO)
+      logical, parameter :: ESMF_IO_PIO_PRESENT = .true.
+#else
+      logical, parameter :: ESMF_IO_PIO_PRESENT = .false.
+#endif
+
+#if defined (ESMF_PNETCDF)
+      logical, parameter :: ESMF_IO_PNETCDF_PRESENT = .true.
+#else
+      logical, parameter :: ESMF_IO_PNETCDF_PRESENT = .false.
+#endif
+
 !------------------------------------------------------------------------------
 !
 !    ! Keyword enforcement type
@@ -851,11 +869,15 @@
               ESMF_REGRID_SCHEME_DCON3DWPOLE
 
       public ESMF_FAILURE, ESMF_SUCCESS
+
+      public ESMF_IO_NETCDF_PRESENT, ESMF_IO_PIO_PRESENT
+      public ESMF_IO_PNETCDF_PRESENT
+
       public ESMF_MAXSTR
       public ESMF_MAXPATHLEN
 ! TODO:FIELDINTEGRATION Adjust MAXGRIDDIM
       public ESMF_MAXDIM, ESMF_MAXIGRIDDIM, ESMF_MAXGRIDDIM
-     
+
       public ESMF_VERSION_MAJOR, ESMF_VERSION_MINOR
       public ESMF_VERSION_REVISION, ESMF_VERSION_PATCHLEVEL
       public ESMF_VERSION_PUBLIC, ESMF_VERSION_BETASNAPSHOT
