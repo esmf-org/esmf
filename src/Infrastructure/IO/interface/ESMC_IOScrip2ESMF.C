@@ -418,15 +418,15 @@ extern "C" {
 // Function to return the grid_rank from a SCRIP NetCDF file.
 
 extern "C" {
-  size_t ESMC_ScripInqRank(char *);
+  int ESMC_ScripInqRank(char *);
 }
 
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMC_ScripInqRank"
-size_t ESMC_ScripInqRank(char *infile)
+int ESMC_ScripInqRank(char *infile)
 {
-  size_t grdim = -4;
 #ifdef ESMF_NETCDF
+  size_t grdim;
   int grdimid;
   int ncid1;
   int status;
@@ -444,13 +444,14 @@ size_t ESMC_ScripInqRank(char *infile)
   // Close input SCRIP file
   nc_close(ncid1);
 
+  // Return successfully
+  return (int)grdim;
 #else
   int rc;
   ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT, "Have to compile with "
     "ESMF_NETCDF environment variable defined", ESMC_CONTEXT, &rc);
+  return -4;
 #endif
-  // Return successfully
-  return grdim;
 }
 //--------------------------------------------------------------------------
 
@@ -461,12 +462,12 @@ size_t ESMC_ScripInqRank(char *infile)
 // grid_rank number of integers.  Use ESMC_ScripInqRank(filename) to
 // get the grid_rank.
 extern "C" {
-  int ESMC_ScripInqDims(char *, size_t *dims);
+  int ESMC_ScripInqDims(char *, int *dims);
 }
 
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMC_ScripInqDims"
-int ESMC_ScripInqDims(char *infile, size_t *dims)
+int ESMC_ScripInqDims(char *infile, int *dims)
 {
 #ifdef ESMF_NETCDF
   int ncid1;
@@ -480,7 +481,7 @@ int ESMC_ScripInqDims(char *infile, size_t *dims)
   // Inquire grid dimensions
   status = nc_inq_varid(ncid1, "grid_dims", &gd_id);
   if (handle_error(status)) return -2; // bail out;
-  status = nc_get_var(ncid1, gd_id, dims);
+  status = nc_get_var_int(ncid1, gd_id, dims);
   if (handle_error(status)) return -3; // bail out;
 
 
