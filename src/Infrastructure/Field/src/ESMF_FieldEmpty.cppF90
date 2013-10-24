@@ -1115,8 +1115,8 @@ end subroutine ESMF_FieldEmptyCompTK
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
-      allocate (arrayLBound(0))
-      allocate (arrayUBound(0))
+      nullify (arrayLBound)
+      nullify (arrayUBound)
       ! Get dimmap and undistibuted bounds
       call ESMF_GeomBaseGetArrayInfo(geombase,                                            &
                               gridToFieldMap=gridToFieldMap, &
