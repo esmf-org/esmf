@@ -1176,8 +1176,10 @@ end subroutine ESMF_FieldEmptyCompTK
 
     ! cleanup
     deallocate(distgridToArrayMap)
-    deallocate(arrayLBound)
-    deallocate(arrayUBound)
+    if (ungriddedDimCount /= 0) then
+      deallocate(arrayLBound)
+      deallocate(arrayUBound)
+    end if
 
     if (present(rc)) rc = ESMF_SUCCESS
 
