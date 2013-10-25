@@ -16,8 +16,10 @@ module NUOPC_Mediator
     type_InternalState              => type_InternalState, &
     type_InternalStateStruct        => type_InternalStateStruct, &
     label_InternalState             => label_InternalState, &
+    label_Advance                   => label_Advance, &
     label_CheckImport               => label_CheckImport, &
-    label_Advance                   => label_Advance
+    label_SetRunClock               => label_SetRunClock, &
+    ModelBase_label_TimestampExport => label_TimestampExport
 
   implicit none
   
@@ -35,7 +37,8 @@ module NUOPC_Mediator
     label_InternalState, &
     label_Advance, &
     label_CheckImport, &
-    label_DataInitialize
+    label_DataInitialize, &
+    label_SetRunClock
 
   character(*), parameter :: &
     label_DataInitialize = "Mediator_DataInitialize"
