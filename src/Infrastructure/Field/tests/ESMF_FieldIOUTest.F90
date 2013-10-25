@@ -19,7 +19,7 @@ program ESMF_FieldIOUTest
 
 ! Eventually these macros can be replaced with F2008 block/end block
 #define ESMF_BLOCK(LABEL) LABEL: do
-#define ESMF_ENDBLOCK(LABEL) if (0 == 0) exit LABEL; end do LABEL
+#define ESMF_ENDBLOCK(LABEL) if (.true.) exit LABEL; end do LABEL
 
 !==============================================================================
 !BOP
@@ -538,22 +538,24 @@ program ESMF_FieldIOUTest
   ESMF_BLOCK(write_field_test)
     grid = ESMF_GridCreateNoPeriDim(maxIndex=(/44, 8/), gridEdgeLWidth=(/0,0/), &
       rc=rc)
-    if(rc /= ESMF_SUCCESS) exit write_field_test
+    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+        line=__LINE__, file=ESMF_FILENAME)) exit write_field_test
 
     field = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R4, &
       staggerLoc=ESMF_STAGGERLOC_EDGE1, name="velocity", &
       totalLWidth=(/1,1/), totalUWidth=(/1,1/), rc=rc)
-    if(rc /= ESMF_SUCCESS) exit write_field_test
+    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+        line=__LINE__, file=ESMF_FILENAME)) exit write_field_test
 
     call ESMF_FieldGet(field, farrayPtr=fptr, &
       totalLBound=tlb, totalUBound=tub, &
       rc=rc)
-    if(rc /= ESMF_SUCCESS) exit write_field_test
+    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+        line=__LINE__, file=ESMF_FILENAME)) exit write_field_test
 
-    if (.not. associated (fptr)) then
-      rc = ESMF_RC_PTR_NOTALLOC
-      exit write_field_test
-    end if
+    if (.not. associated (fptr)) rc = ESMF_RC_PTR_NOTALLOC
+    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+        line=__LINE__, file=ESMF_FILENAME)) exit write_field_test
 
     print *, tlb, tub
 
@@ -569,7 +571,8 @@ program ESMF_FieldIOUTest
       call ESMF_FieldWrite(field, file='halof.nc', timeslice=k,   &
            status=statusFlag, overwrite=.true., rc=rc)
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-      if(rc /= ESMF_SUCCESS) exit write_field_test
+    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+        line=__LINE__, file=ESMF_FILENAME)) exit write_field_test
 #else
       rc = merge (ESMF_SUCCESS, ESMF_FAILURE, rc == ESMF_RC_LIB_NOT_PRESENT)
       exit write_field_test
