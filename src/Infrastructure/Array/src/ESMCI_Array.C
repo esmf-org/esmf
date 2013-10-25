@@ -7931,7 +7931,7 @@ int Array::sparseMatMulStore(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
-#define ASMMSTOREMEMLOG_on
+#define ASMMSTOREMEMLOG_off
 
   try{
   
@@ -8501,8 +8501,8 @@ int Array::sparseMatMulStore(
 #endif
   
 ////gjt  
-printf("srcMin/Max = %d/%d, dstMinMax = %d/%d\n", srcSeqIndexMinGlobal,
-  srcSeqIndexMaxGlobal, dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal);
+//printf("srcMin/Max = %d/%d, dstMinMax = %d/%d\n", srcSeqIndexMinGlobal,
+//  srcSeqIndexMaxGlobal, dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal);
 
 
   // set up a distributed directory for dstArray seqIndex look-up
