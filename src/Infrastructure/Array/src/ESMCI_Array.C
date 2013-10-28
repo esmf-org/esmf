@@ -4014,7 +4014,9 @@ int Array::haloStore(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  try{
+#define HALOSTOREMEMLOG_off
+  
+    try{
     
     // every Pet must provide array argument
     if (array == NULL){
@@ -4029,6 +4031,10 @@ int Array::haloStore(
       &rc)) return rc;
     int localPet = vm->getLocalPet();
     int petCount = vm->getPetCount();
+    
+#ifdef HALOSTOREMEMLOG_on
+    VM::logMemInfo(std::string("HaloStore1"));
+#endif
     
     // prepare haloOutsideLBound and haloInsideLBound arrays
     int localDeCount = array->getDELayout()->getLocalDeCount();
@@ -4175,7 +4181,11 @@ int Array::haloStore(
       }
     }
     
-#define HALOTENSORMIX_disable
+#ifdef HALOSTOREMEMLOG_on
+    VM::logMemInfo(std::string("HaloStore2"));
+#endif
+
+#define HALOTENSORMIX_off
     // construct identity sparse matrix from rim elements with valid seqIndex
     vector<int> factorIndexList;
     int factorListCount = 0;  // init
@@ -4207,11 +4217,11 @@ int Array::haloStore(
           if (withinHalo){
             // add element to identity matrix
             factorIndexList.push_back(seqIndex.decompSeqIndex); // src
-#ifdef HALOTENSORMIX
+#ifdef HALOTENSORMIX_on
             factorIndexList.push_back(seqIndex.tensorSeqIndex); // src
 #endif
             factorIndexList.push_back(seqIndex.decompSeqIndex); // dst
-#ifdef HALOTENSORMIX
+#ifdef HALOTENSORMIX_on
             factorIndexList.push_back(seqIndex.tensorSeqIndex); // dst
 #endif
             ++factorListCount;  // count this element
@@ -4259,16 +4269,24 @@ int Array::haloStore(
     int *factorIndexListPtr = NULL; // initialize
     if (factorListCount>0) factorIndexListPtr = &(factorIndexList[0]);
     sparseMatrix.push_back(SparseMatrix(typekindFactor, factorList,
-#ifdef HALOTENSORMIX
+#ifdef HALOTENSORMIX_on
       factorListCount, 2, 2, factorIndexListPtr));
 #else
       factorListCount, 1, 1, factorIndexListPtr));
 #endif
     
+#ifdef HALOSTOREMEMLOG_on
+    VM::logMemInfo(std::string("HaloStore3"));
+#endif
+
     // precompute sparse matrix multiplication
     int srcTermProcessing = 0;  // no need to use auto-tuning to figure this out
     localrc = sparseMatMulStore(array, array, routehandle, sparseMatrix, true,
       &srcTermProcessing, pipelineDepthArg);
+    
+#ifdef HALOSTOREMEMLOG_on
+    VM::logMemInfo(std::string("HaloStore4"));
+#endif
     
     // remove seqIndex masking in Array rim region before evaluating return code
     for (int i=0; i<localDeCount; i++){
@@ -4277,6 +4295,10 @@ int Array::haloStore(
         array->rimSeqIndex[i][element] = rimMaskSeqIndex[i][k]; // restore
       }
     }
+    
+#ifdef HALOSTOREMEMLOG_on
+    VM::logMemInfo(std::string("HaloStore5"));
+#endif
     
     // garbage collection before evaluating return code
     if (typekindFactor == ESMC_TYPEKIND_R4){
@@ -4292,6 +4314,10 @@ int Array::haloStore(
       ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
       delete [] factorListT;
     }
+    
+#ifdef HALOSTOREMEMLOG_on
+    VM::logMemInfo(std::string("HaloStore6"));
+#endif
     
     // error handling
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -7608,6 +7634,8 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
   }
 
   // -------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DD::setupSeqIndexFactorLookup()"
   int setupSeqIndexFactorLookup(VM *vm,
     vector<SeqIndexFactorLookup> &seqIndexFactorLookup,
     const int petCount, const int localPet, const int factorListCount,
@@ -7832,8 +7860,14 @@ int Array::sparseMatMulStore(
   RouteHandle **routehandle,                // inout - handle to precomp. comm
   vector<SparseMatrix> const &sparseMatrix, // in    - sparse matrix vector
   bool haloFlag,                            // in    - support halo conditions
-  int *srcTermProcessingArg,                // in (optional)
-  int *pipelineDepthArg                     // in (optional)
+  int *srcTermProcessingArg,                // inout - src term proc (optional)
+                                // if (NULL) -> auto-tune, no pass back
+                                // if (!NULL && -1) -> auto-tune, pass back
+                                // if (!NULL && >=0) -> no auto-tune, use input
+  int *pipelineDepthArg                     // inout - pipeline depth (optional)
+                                // if (NULL) -> auto-tune, no pass back
+                                // if (!NULL && -1) -> auto-tune, pass back
+                                // if (!NULL && >=0) -> no auto-tune, use input
   ){
 //
 // !DESCRIPTION:
@@ -7886,6 +7920,10 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t0);    //gjt - profile
 #endif
   
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore1.0"));
+#endif
+
   // every Pet must provide srcArray and dstArray
   if (srcArray == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -8045,6 +8083,10 @@ int Array::sparseMatMulStore(
   // Phase II
   //---------------------------------------------------------------------------
 
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.0"));
+#endif
+
   // determine local srcElementCount
   const int srcLocalDeCount = srcArray->delayout->getLocalDeCount();
   const int *srcLocalDeToDeMap = srcArray->delayout->getLocalDeToDeMap();
@@ -8060,6 +8102,10 @@ int Array::sparseMatMulStore(
   // todo: use nb-allgather and wait right before needed below
   int *srcElementCountList = new int[petCount];
   vm->allgather(&srcElementCount, srcElementCountList, sizeof(int));
+
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.1"));
+#endif
 
   // determine local dstElementCount
   const int dstLocalDeCount = dstArray->delayout->getLocalDeCount();
@@ -8089,7 +8135,11 @@ int Array::sparseMatMulStore(
   int *dstElementCountList = new int[petCount];
   vm->allgather(&dstElementCount, dstElementCountList, sizeof(int));
   
-  // set the effective tensorElementCount for src and dst Arrays
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.2"));
+#endif
+
+    // set the effective tensorElementCount for src and dst Arrays
   int srcTensorElementCountEff = srcArray->tensorElementCount;  // default
   int dstTensorElementCountEff = dstArray->tensorElementCount;  // default
   if (!tensorMixFlag){
@@ -8097,6 +8147,10 @@ int Array::sparseMatMulStore(
     srcTensorElementCountEff = 1;
     dstTensorElementCountEff = 1;
   }    
+
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.3"));
+#endif
 
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t2);   //gjt - profile
@@ -8108,15 +8162,15 @@ int Array::sparseMatMulStore(
 //return rc;
 //---DEBUG-------------------
   
-  // find seqIndex Min/Max
+  // find local srcSeqIndex Min/Max
   int srcSeqIndexMinMax[2]; // [0]=min, [1]=max
   srcSeqIndexMinMax[0] = srcSeqIndexMinMax[1] = -1; // visibly invalidate
   bool firstMinMax = true;
   for (int i=0; i<srcLocalDeCount; i++){
     if (srcLocalDeElementCount[i]){
-      // there are elements for this local DE
+      // there are elements for local DE i
       ArrayElement arrayElement(srcArray, i);
-      // loop over all elements in exclusive region for this DE
+      // loop over all elements in exclusive region for local DE i
       while(arrayElement.isWithin()){
         // determine the sequentialized index for the current Array element
         SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
@@ -8136,11 +8190,19 @@ int Array::sparseMatMulStore(
     }
   }
   
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.4"));
+#endif
+
   // communicate srcSeqIndexMinMax across all Pets
   // todo: use nb-allgather and wait right before needed below
   int *srcSeqIndexMinMaxList = new int[2*petCount];
   vm->allgather(srcSeqIndexMinMax, srcSeqIndexMinMaxList, 2*sizeof(int));  
   
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.5"));
+#endif
+
 //---DEBUG-------------------
 //char msg[160];
 //sprintf(msg, "srcLocalDeCount=%d, srcLocalDeElementCount[0]=%d,"
@@ -8160,13 +8222,13 @@ int Array::sparseMatMulStore(
       i, srcSeqIndexMinMaxList[i*2], srcSeqIndexMinMaxList[i*2+1]);
 #endif
 
-  // find seqIndex Min/Max
+  // find local dstSeqIndex Min/Max
   int dstSeqIndexMinMax[2]; // [0]=min, [1]=max
   dstSeqIndexMinMax[0] = dstSeqIndexMinMax[1] = -1; // visibly invalidate
   firstMinMax = true;
   for (int i=0; i<dstLocalDeCount; i++){
     if (dstLocalDeElementCount[i]){
-      // there are elements for this local DE
+      // there are elements for local DE i
       if (haloFlag){
         // for halo the dst elements are in the rim of dstArray
         for (int k=0; k<dstArray->rimElementCount[i]; k++){
@@ -8188,7 +8250,7 @@ int Array::sparseMatMulStore(
         }
       }else{
         ArrayElement arrayElement(dstArray, i);
-        // loop over all elements in exclusive region for this DE
+        // loop over all elements in exclusive region for local DE i
         while(arrayElement.isWithin()){
           // determine the sequentialized index for the current Array element
           SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
@@ -8209,11 +8271,19 @@ int Array::sparseMatMulStore(
     }
   }
 
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.6"));
+#endif
+
   // communicate dstSeqIndexMinMax across all Pets
   // todo: use nb-allgather and wait right before needed below
   int *dstSeqIndexMinMaxList = new int[2*petCount];
   vm->allgather(dstSeqIndexMinMax, dstSeqIndexMinMaxList, 2*sizeof(int));
   
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.7"));
+#endif
+
 //---DEBUG-------------------
 //char msg[160];
 //sprintf(msg, "dstLocalDeCount=%d, dstLocalDeElementCount[0]=%d,"
@@ -8241,6 +8311,10 @@ int Array::sparseMatMulStore(
 //return rc;
 //---DEBUG-------------------
 
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.8"));
+#endif
+
   // set up structure and intervals of src and dst distributed directories
   
   // determine the srcSeqIndexMinGlobal and MaxGlobal
@@ -8249,7 +8323,7 @@ int Array::sparseMatMulStore(
   int pastInitFlag = 0; // reset
   for (int i=0; i<petCount; i++){
     if (srcElementCountList[i]){
-      // this Pet does hold elements in srcArray
+      // Pet i holds elements in srcArray
       if (pastInitFlag){
         if (srcSeqIndexMinMaxList[2*i] < srcSeqIndexMinGlobal)
           srcSeqIndexMinGlobal = srcSeqIndexMinMaxList[2*i];
@@ -8263,6 +8337,10 @@ int Array::sparseMatMulStore(
       }
     }
   }
+  
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.9"));
+#endif
   
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t4a1);   //gjt - profile
@@ -8288,6 +8366,10 @@ int Array::sparseMatMulStore(
     srcSeqIndexInterval[petCount-1].max - srcSeqIndexInterval[petCount-1].min
     + 1;
   
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.10"));
+#endif
+
 #ifdef ASMMSTOREPRINT
   fprintf(asmmstoreprintfp, "gjt: localPet %d, srcElementCountList[localPet] = "
     "%d, srcSeqIndexMinMax = %d / %d, srcSeqIndexMinGlobal/MaxGlobal = %d, %d, "
@@ -8345,13 +8427,17 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t4a);   //gjt - profile
 #endif
   
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.11"));
+#endif
+
   // determine the dstSeqIndexMinGlobal and MaxGlobal
   // todo: for nb-allgather(dstSeqIndexMinMaxList) here insert commwait()
   int dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal;
   pastInitFlag = 0; // reset
   for (int i=0; i<petCount; i++){
     if (dstElementCountList[i]){
-      // this Pet does hold elements in dstArray
+      // Pet i holds elements in dstArray
       if (pastInitFlag){
         if (dstSeqIndexMinMaxList[2*i] < dstSeqIndexMinGlobal)
           dstSeqIndexMinGlobal = dstSeqIndexMinMaxList[2*i];
@@ -8365,6 +8451,10 @@ int Array::sparseMatMulStore(
       }
     }
   }
+    
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.12"));
+#endif
     
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t4b1);   //gjt - profile
@@ -8392,6 +8482,10 @@ int Array::sparseMatMulStore(
     dstSeqIndexInterval[petCount-1].max - dstSeqIndexInterval[petCount-1].min
     + 1;
   
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.13"));
+#endif
+
 #ifdef ASMMSTOREPRINT
     fprintf(asmmstoreprintfp, "gjt: localPet %d, dstElementCountList[localPet] "
     "= %d, "
@@ -8411,7 +8505,7 @@ int Array::sparseMatMulStore(
   int *dstLocalElementsPerIntervalCount = new int[petCount];
   {
     // prepare temporary seqIndexList for sorting
-    //TODO: this scales in memory as the srcArray size, does not consider sparse
+    //TODO: this scales in memory as the dstArray size, does not consider sparse
     vector<int> seqIndexList(dstElementCount);
     int jj=0;
     for (int j=0; j<dstLocalDeCount; j++){
@@ -8467,6 +8561,10 @@ int Array::sparseMatMulStore(
   delete [] srcSeqIndexMinMaxList;
   delete [] dstSeqIndexMinMaxList;
 
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.14"));
+#endif
+
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t4);   //gjt - profile
 #endif
@@ -8491,6 +8589,10 @@ int Array::sparseMatMulStore(
       
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t5c);   //gjt - profile
+#endif
+
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.15"));
 #endif
 
   // allocate local look-up map indexed by dstSeqIndex, i.e. distributed dir.
@@ -8519,6 +8621,10 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t5);   //gjt - profile
 #endif
   
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.16"));
+#endif
+  
   // prepare count arrays for src partner look-up in dstSeqIndexFactorLookup
   int *srcLocalPartnerElementsPerIntervalCount = new int[petCount];
   for (int i=0; i<petCount; i++){
@@ -8541,6 +8647,10 @@ int Array::sparseMatMulStore(
   vm->alltoall(srcLocalPartnerElementsPerIntervalCount, sizeof(int),
     dstLocalPartnerIntervalPerPetCount, sizeof(int), vmBYTE);
   
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.17"));
+#endif
+
   // fill partnerDe in srcSeqIndexFactorLookup using dstSeqIndexFactorLookup
   {
     DD::FillPartnerDeInfo *fillPartnerDeInfo =
@@ -8561,6 +8671,10 @@ int Array::sparseMatMulStore(
   delete [] srcLocalPartnerElementsPerIntervalCount;
   delete [] dstLocalPartnerIntervalPerPetCount;
       
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.18"));
+#endif
+
   // prepare count arrays for dst partner look-up in srcSeqIndexFactorLookup
   int *dstLocalPartnerElementsPerIntervalCount = new int[petCount];
   for (int i=0; i<petCount; i++){
@@ -8583,6 +8697,10 @@ int Array::sparseMatMulStore(
   vm->alltoall(dstLocalPartnerElementsPerIntervalCount, sizeof(int),
     srcLocalPartnerIntervalPerPetCount, sizeof(int), vmBYTE);
   
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.19"));
+#endif
+
   // fill partnerDe in dstSeqIndexFactorLookup using srcSeqIndexFactorLookup
   {
     DD::FillPartnerDeInfo *fillPartnerDeInfo =
@@ -8601,6 +8719,10 @@ int Array::sparseMatMulStore(
   // garbage collection
   delete [] dstLocalPartnerElementsPerIntervalCount;
   delete [] srcLocalPartnerIntervalPerPetCount;
+
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore2.20"));
+#endif
 
 #ifdef ASMMSTOREPRINT
   fprintf(asmmstoreprintfp, "\n========================================"
@@ -8678,6 +8800,10 @@ int Array::sparseMatMulStore(
   // Phase III -> represent sparse matrix in "run distribution"
   //---------------------------------------------------------------------------
   
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore3.0"));
+#endif
+
   vector<DD::AssociationElement> *srcLinSeqVect =
     new vector<DD::AssociationElement>[srcLocalDeCount];
   vector<DD::AssociationElement> *dstLinSeqVect =
@@ -8940,6 +9066,10 @@ int Array::sparseMatMulStore(
   // Phase IV
   //---------------------------------------------------------------------------
 
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore4.0"));
+#endif
+
   // prepare for relative run-time addressing (RRA)
   int rraCount = srcArray->delayout->getLocalDeCount();
   rraCount += dstArray->delayout->getLocalDeCount();
@@ -9058,6 +9188,10 @@ int Array::sparseMatMulStore(
   fclose(asmmstoreprintfp);
 #endif
   
+#ifdef ASMMSTOREMEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore5.0"));
+#endif
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -9109,8 +9243,14 @@ int sparseMatMulStoreEncodeXXE(
   double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
   double *t14,
 #endif
-  int *srcTermProcessingArg,              // in (optional)
-  int *pipelineDepthArg                   // in (optional)
+  int *srcTermProcessingArg,              // inout (optional)
+                                // if (NULL) -> auto-tune, no pass back
+                                // if (!NULL && -1) -> auto-tune, pass back
+                                // if (!NULL && >=0) -> no auto-tune, use input
+  int *pipelineDepthArg                   // inout (optional)
+                                // if (NULL) -> auto-tune, no pass back
+                                // if (!NULL && -1) -> auto-tune, pass back
+                                // if (!NULL && >=0) -> no auto-tune, use input
   ){
 //
 // !DESCRIPTION:
@@ -9890,6 +10030,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
   
   if (srcTermProcessingArg && *srcTermProcessingArg >= 0){
+    // use the provided srcTermProcessing
 #ifdef SMMSTOREENCODEXXEINFO
     char msg[160];
     sprintf(msg, "srcTermProcessingArg = %d was provided -> do not tune",
@@ -10027,6 +10168,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
 
   if (pipelineDepthArg && *pipelineDepthArg >= 0){
+    // use the provided pipelineDepthArg
 #ifdef SMMSTOREENCODEXXEINFO
     char msg[160];
     sprintf(msg, "pipelineDepthArg = %d was provided -> do not tune",
