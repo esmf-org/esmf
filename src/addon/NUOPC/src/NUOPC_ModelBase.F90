@@ -162,11 +162,11 @@ module NUOPC_ModelBase
     type(ESMF_Clock)          :: internalClock
     logical                   :: allCurrent
     logical                   :: existflag
-    character(ESMF_MAXSTR)    :: modelName, msgString, valueString
+    character(ESMF_MAXSTR)    :: modelName, msgString, valueString, pString
     integer                   :: phase
     logical                   :: verbose
     character(ESMF_MAXSTR)    :: defaultvalue
-    character(ESMF_MAXSTR):: name
+    character(ESMF_MAXSTR)    :: name
 
     rc = ESMF_SUCCESS
 
@@ -237,8 +237,10 @@ module NUOPC_ModelBase
 
     ! conditionally output diagnostic to Log file
     if (verbose) then
+      write (pString,*) phase
       call NUOPC_ClockPrintCurrTime(internalClock, ">>>"// &
-        trim(modelName)//" entered Run with current time: ", msgString, rc=rc)
+        trim(modelName)//" entered Run (phase="//trim(adjustl(pString))// &
+        ") with current time: ", msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -334,7 +336,8 @@ module NUOPC_ModelBase
     ! conditionally output diagnostic to Log file
     if (verbose) then
       call NUOPC_ClockPrintCurrTime(internalClock, "<<<"// &
-        trim(modelName)//" leaving Run with current time: ", msgString, rc=rc)
+        trim(modelName)//" leaving Run (phase="//trim(adjustl(pString))// &
+        ") with current time: ", msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
