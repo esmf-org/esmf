@@ -4014,8 +4014,6 @@ int Array::haloStore(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-#define HALOSTOREMEMLOG_on
-
   try{
     
     // every Pet must provide array argument
@@ -4031,10 +4029,6 @@ int Array::haloStore(
       &rc)) return rc;
     int localPet = vm->getLocalPet();
     int petCount = vm->getPetCount();
-    
-#ifdef HALOSTOREMEMLOG_on
-    VM::logMemInfo(std::string("HaloStore1"));
-#endif
     
     // prepare haloOutsideLBound and haloInsideLBound arrays
     int localDeCount = array->getDELayout()->getLocalDeCount();
@@ -4181,11 +4175,7 @@ int Array::haloStore(
       }
     }
     
-#ifdef HALOSTOREMEMLOG_on
-    VM::logMemInfo(std::string("HaloStore2"));
-#endif
-
-#define HALOTENSORMIX_off
+#define HALOTENSORMIX_disable
     // construct identity sparse matrix from rim elements with valid seqIndex
     vector<int> factorIndexList;
     int factorListCount = 0;  // init
@@ -4217,11 +4207,11 @@ int Array::haloStore(
           if (withinHalo){
             // add element to identity matrix
             factorIndexList.push_back(seqIndex.decompSeqIndex); // src
-#ifdef HALOTENSORMIX_on
+#ifdef HALOTENSORMIX
             factorIndexList.push_back(seqIndex.tensorSeqIndex); // src
 #endif
             factorIndexList.push_back(seqIndex.decompSeqIndex); // dst
-#ifdef HALOTENSORMIX_on
+#ifdef HALOTENSORMIX
             factorIndexList.push_back(seqIndex.tensorSeqIndex); // dst
 #endif
             ++factorListCount;  // count this element
@@ -4269,25 +4259,17 @@ int Array::haloStore(
     int *factorIndexListPtr = NULL; // initialize
     if (factorListCount>0) factorIndexListPtr = &(factorIndexList[0]);
     sparseMatrix.push_back(SparseMatrix(typekindFactor, factorList,
-#ifdef HALOTENSORMIX_on
+#ifdef HALOTENSORMIX
       factorListCount, 2, 2, factorIndexListPtr));
 #else
       factorListCount, 1, 1, factorIndexListPtr));
 #endif
     
-#ifdef HALOSTOREMEMLOG_on
-    VM::logMemInfo(std::string("HaloStore3"));
-#endif
-
     // precompute sparse matrix multiplication
     int srcTermProcessing = 0;  // no need to use auto-tuning to figure this out
     localrc = sparseMatMulStore(array, array, routehandle, sparseMatrix, true,
       &srcTermProcessing, pipelineDepthArg);
     
-#ifdef HALOSTOREMEMLOG_on
-    VM::logMemInfo(std::string("HaloStore4"));
-#endif
-
     // remove seqIndex masking in Array rim region before evaluating return code
     for (int i=0; i<localDeCount; i++){
       for (int k=0; k<rimMaskElement[i].size(); k++){
@@ -4296,10 +4278,6 @@ int Array::haloStore(
       }
     }
     
-#ifdef HALOSTOREMEMLOG_on
-    VM::logMemInfo(std::string("HaloStore5"));
-#endif
-
     // garbage collection before evaluating return code
     if (typekindFactor == ESMC_TYPEKIND_R4){
       ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
@@ -4315,10 +4293,6 @@ int Array::haloStore(
       delete [] factorListT;
     }
     
-#ifdef HALOSTOREMEMLOG_on
-    VM::logMemInfo(std::string("HaloStore6"));
-#endif
-
     // error handling
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, &rc)) return rc;
@@ -6606,23 +6580,14 @@ namespace DD{
   bool operator<(FactorElement a, FactorElement b){
     return (a.partnerSeqIndex < b.partnerSeqIndex);
   }
-  
 
-  struct SeqIndexFactorLookupElement{
+  struct SeqIndexFactorLookup{
     vector<int> de;
     int factorCount;
     vector<FactorElement> factorList;
   public:
-    SeqIndexFactorLookupElement(){
-      factorCount = 0;
-    }
-  };
-
-  struct SeqIndexFactorLookup{
-    SeqIndexFactorLookupElement *lookup;
-  public:
     SeqIndexFactorLookup(){
-      lookup = NULL;
+      factorCount = 0;
     }
   };
   
@@ -6957,12 +6922,12 @@ void localClientServerExchange(FillLinSeqVectInfo *fillLinSeqVectInfo){
             int lookupIndex = seqInd - seqIndMin;
             if (tensorMixFlag)
               lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-            SeqIndexFactorLookupElement *lookup =
-              seqIndexFactorLookup[lookupIndex].lookup;
-            if (lookup){
+            int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
+            if (factorCount > 0){
               AssociationElement element;
-              element.factorCount = lookup->factorCount;
-              element.factorList = lookup->factorList;
+              element.factorCount = factorCount;
+              element.factorList =
+                seqIndexFactorLookup[lookupIndex].factorList;
               element.linIndex =
                 fillLinSeqVectInfo->array->getRimLinIndex()[j][k];
               element.seqIndex = seqIndex;
@@ -6981,12 +6946,11 @@ void localClientServerExchange(FillLinSeqVectInfo *fillLinSeqVectInfo){
           int lookupIndex = seqInd - seqIndMin;
           if (tensorMixFlag)
             lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-          SeqIndexFactorLookupElement *lookup =
-            seqIndexFactorLookup[lookupIndex].lookup;
-          if (lookup){
+          int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
+          if (factorCount > 0){
             AssociationElement element;
-            element.factorCount = lookup->factorCount;
-            element.factorList = lookup->factorList;
+            element.factorCount = factorCount;
+            element.factorList = seqIndexFactorLookup[lookupIndex].factorList;
             element.linIndex = arrayElement.getLinearIndexExclusive();
             element.seqIndex = seqIndex;
             linSeqVect[j].push_back(element);
@@ -7009,13 +6973,13 @@ int serverResponseSize(FillLinSeqVectInfo *fillLinSeqVectInfo, int count,
   int *requestStreamServerInt = (int *)requestStreamServer[srcPet];
   for (int j=0; j<count; j++){
     int lookupIndex = requestStreamServerInt[5*j];
-    SeqIndexFactorLookupElement *lookup =
-      seqIndexFactorLookup[lookupIndex].lookup;
-    if (lookup){
+    int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
+    if (factorCount > 0){
       ++indexCounter;
-      factorElementCounter += lookup->factorCount;
-      for (int jj=0; jj<lookup->factorCount; jj++)
-        partnerDeCounter += lookup->factorList[jj].partnerDe.size();
+      factorElementCounter += factorCount;
+      for (int jj=0; jj<factorCount; jj++)
+        partnerDeCounter +=
+          seqIndexFactorLookup[lookupIndex].factorList[jj].partnerDe.size();
     }
   }
   int responseStreamSize = 
@@ -7035,26 +6999,28 @@ void serverResponse(FillLinSeqVectInfo *fillLinSeqVectInfo, int count,
   int *requestStreamServerInt = (int *)requestStreamServer[srcPet];
   for (int jj=0; jj<count; jj++){
     int lookupIndex = requestStreamServerInt[5*jj];
-    SeqIndexFactorLookupElement *lookup =
-      seqIndexFactorLookup[lookupIndex].lookup;
-    if (lookup){
+    int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
+    if (factorCount > 0){
       *responseStreamInt++ = requestStreamServerInt[5*jj+1];  // j
       *responseStreamInt++ = requestStreamServerInt[5*jj+2];  // decompSeqIndex
       *responseStreamInt++ = requestStreamServerInt[5*jj+3];  // tensorSeqIndex
       *responseStreamInt++ = requestStreamServerInt[5*jj+4];  // linIndex
-      *responseStreamInt++ = lookup->factorCount;
-      for (int k=0; k<lookup->factorCount; k++){
-        *responseStreamInt++ = lookup->
-          factorList[k].partnerSeqIndex.decompSeqIndex;
-        *responseStreamInt++ = lookup->
-          factorList[k].partnerSeqIndex.tensorSeqIndex;
-        int size = lookup->factorList[k].partnerDe.size();
+      *responseStreamInt++ = factorCount;
+      for (int k=0; k<factorCount; k++){
+        *responseStreamInt++ = seqIndexFactorLookup[lookupIndex].factorList[k]
+          .partnerSeqIndex.decompSeqIndex;
+        *responseStreamInt++ = seqIndexFactorLookup[lookupIndex].factorList[k]
+          .partnerSeqIndex.tensorSeqIndex;
+        int size = seqIndexFactorLookup[lookupIndex]
+          .factorList[k].partnerDe.size();
         *responseStreamInt++ = size;
         for (int kk=0; kk<size; kk++)
-          *responseStreamInt++ = lookup->factorList[k].partnerDe[kk];
+          *responseStreamInt++ = seqIndexFactorLookup[lookupIndex]
+            .factorList[k].partnerDe[kk];
         char *responseStreamChar = (char *)responseStreamInt;
         for (int kk=0; kk<8; kk++)
-          *responseStreamChar++ = lookup->factorList[k].factor[kk];
+          *responseStreamChar++ =
+            seqIndexFactorLookup[lookupIndex].factorList[k].factor[kk];
         responseStreamInt = (int *)responseStreamChar;
       }
     }
@@ -7119,26 +7085,23 @@ void clientRequest(FillPartnerDeInfo *fillPartnerDeInfo, int dstPet,
   int localLookupIndex = 0; // reset
   for (vector<DD::SeqIndexFactorLookup>::const_iterator
     j=seqIndexFactorLookupOut.begin(); j!=seqIndexFactorLookupOut.end(); ++j){
-    SeqIndexFactorLookupElement *lookup = j->lookup;
-    if (lookup){
-      for (int k=0; k<lookup->factorCount; k++){
-        int partnerSeqInd = lookup->factorList[k]
-          .partnerSeqIndex.decompSeqIndex;
-        if (partnerSeqInd >= seqIndMin && partnerSeqInd <= seqIndMax){
-          int lookupIndex = partnerSeqInd - seqIndMin;
-          if (tensorMixFlag){
-            lookupIndex += (lookup->factorList[k]
-              .partnerSeqIndex.tensorSeqIndex - 1) * seqIndCount;
-          }
-          int *requestStreamClientInt = (int *)requestStreamClient[dstPet];
-          requestStreamClientInt[3*jj] = lookupIndex;
-          requestStreamClientInt[3*jj+1] = localLookupIndex;
-          requestStreamClientInt[3*jj+2] = k;
-          ++jj; // increment counter
+    for (int k=0; k<j->factorCount; k++){
+      int partnerSeqInd = j->factorList[k]
+        .partnerSeqIndex.decompSeqIndex;
+      if (partnerSeqInd >= seqIndMin && partnerSeqInd <= seqIndMax){
+        int lookupIndex = partnerSeqInd - seqIndMin;
+        if (tensorMixFlag){
+          lookupIndex += (j->factorList[k]
+            .partnerSeqIndex.tensorSeqIndex - 1) * seqIndCount;
         }
+        int *requestStreamClientInt = (int *)requestStreamClient[dstPet];
+        requestStreamClientInt[3*jj] = lookupIndex;
+        requestStreamClientInt[3*jj+1] = localLookupIndex;
+        requestStreamClientInt[3*jj+2] = k;
+        ++jj; // increment counter
       }
-      ++localLookupIndex;
     }
+    ++localLookupIndex;
   }
 }
 
@@ -7157,24 +7120,19 @@ void localClientServerExchange(FillPartnerDeInfo *fillPartnerDeInfo){
   int seqIndCount = seqIndexIntervalIn[localPet].count;
   for (vector<DD::SeqIndexFactorLookup>::iterator
     j=seqIndexFactorLookupOut.begin(); j!=seqIndexFactorLookupOut.end(); ++j){
-    SeqIndexFactorLookupElement *lookup = j->lookup;
-    if (lookup){
-      for (int k=0; k<lookup->factorCount; k++){
-        int partnerSeqInd = lookup->factorList[k]
-          .partnerSeqIndex.decompSeqIndex;
-        if (partnerSeqInd >= seqIndMin && partnerSeqInd <= seqIndMax){
-          int lookupIndex = partnerSeqInd - seqIndMin;
-          if (tensorMixFlag){
-            lookupIndex += (lookup->factorList[k]
-              .partnerSeqIndex.tensorSeqIndex - 1) * seqIndCount;
-          }
-          if (seqIndexFactorLookupIn[lookupIndex].lookup){
-            lookup->factorList[k].partnerDe.insert(
-              lookup->factorList[k].partnerDe.end(),
-              seqIndexFactorLookupIn[lookupIndex].lookup->de.begin(),
-              seqIndexFactorLookupIn[lookupIndex].lookup->de.end());
-          }
+    for (int k=0; k<j->factorCount; k++){
+      int partnerSeqInd = j->factorList[k]
+        .partnerSeqIndex.decompSeqIndex;
+      if (partnerSeqInd >= seqIndMin && partnerSeqInd <= seqIndMax){
+        int lookupIndex = partnerSeqInd - seqIndMin;
+        if (tensorMixFlag){
+          lookupIndex += (j->factorList[k]
+            .partnerSeqIndex.tensorSeqIndex - 1) * seqIndCount;
         }
+        j->factorList[k].partnerDe.insert(
+          j->factorList[k].partnerDe.end(),
+          seqIndexFactorLookupIn[lookupIndex].de.begin(),
+          seqIndexFactorLookupIn[lookupIndex].de.end());
       }
     }
   }
@@ -7188,8 +7146,7 @@ int serverResponseSize(FillPartnerDeInfo *fillPartnerDeInfo, int count,
   int responseCount = 0;  // reset
   for (int i=0; i<count; i++){
     int lookupIndex = requestStreamServerInt[3*i];
-    if (seqIndexFactorLookupIn[lookupIndex].lookup)
-      responseCount += seqIndexFactorLookupIn[lookupIndex].lookup->de.size();
+    responseCount += seqIndexFactorLookupIn[lookupIndex].de.size();
     responseCount += 3; // localLookupIndex, k, size
   }
   int responseStreamSize = responseCount * sizeof(int);
@@ -7207,12 +7164,10 @@ void serverResponse(FillPartnerDeInfo *fillPartnerDeInfo, int count,
     int lookupIndex = requestStreamServerInt[3*i];
     *responseStreamInt++ = requestStreamServerInt[3*i+1];   // localLookupIndex
     *responseStreamInt++ = requestStreamServerInt[3*i+2];   // k
-    int size = 0;
-    if (seqIndexFactorLookupIn[lookupIndex].lookup)
-      size = seqIndexFactorLookupIn[lookupIndex].lookup->de.size();
+    int size = seqIndexFactorLookupIn[lookupIndex].de.size();
     *responseStreamInt++ = size;                            // size
     for (int j=0; j<size; j++)
-      *responseStreamInt++ = seqIndexFactorLookupIn[lookupIndex].lookup->de[j];
+      *responseStreamInt++ = seqIndexFactorLookupIn[lookupIndex].de[j]; // de
   }
 }        
         
@@ -7228,8 +7183,8 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     int size = *responseStreamInt++;
     for (int j=0; j<size; j++){
       int de = *responseStreamInt++;
-      seqIndexFactorLookupOut[localLookupIndex].lookup->
-        factorList[k].partnerDe.push_back(de);
+      seqIndexFactorLookupOut[localLookupIndex].factorList[k].partnerDe
+        .push_back(de);
     }
   }
 }
@@ -7337,10 +7292,9 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
       int *bufferInt = (int *)buffer;    
       for (int jj=0; jj<count; jj++){
         int lookupIndex = bufferInt[2*jj];
-        if (seqIndexFactorLookup[lookupIndex].lookup){
+        if (seqIndexFactorLookup[lookupIndex].factorCount > 0){
           // element with factors -> fill in the DE
-          seqIndexFactorLookup[lookupIndex].lookup->
-            de.push_back(bufferInt[2*jj+1]);
+          seqIndexFactorLookup[lookupIndex].de.push_back(bufferInt[2*jj+1]);
           // this will lead to duplicate de entries for cases with tensor
           // elements but no tensor mixing
           // -> duplicates must be eliminated by the calling code
@@ -7363,10 +7317,9 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
                 int lookupIndex = seqInd - seqIndMin;
                 if (tensorMixFlag)
                   lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-                if (seqIndexFactorLookup[lookupIndex].lookup){
+                if (seqIndexFactorLookup[lookupIndex].factorCount > 0){
                   // element with factors -> fill in the DE
-                  seqIndexFactorLookup[lookupIndex].lookup->
-                    de.push_back(de);
+                  seqIndexFactorLookup[lookupIndex].de.push_back(de);
                   // this will lead to duplicate de entries for cases with
                   // tensor elements but no tensor mixing
                   // -> duplicates must be eliminated by the calling code
@@ -7384,10 +7337,9 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
               int lookupIndex = seqInd - seqIndMin;
               if (tensorMixFlag)
                 lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-              if (seqIndexFactorLookup[lookupIndex].lookup){
+              if (seqIndexFactorLookup[lookupIndex].factorCount > 0){
                 // element with factors -> fill in the DE
-                seqIndexFactorLookup[lookupIndex].lookup->
-                  de.push_back(de);
+                seqIndexFactorLookup[lookupIndex].de.push_back(de);
                 // this will lead to duplicate de entries for cases with tensor
                 // elements but no tensor mixing
                 // -> duplicates must be eliminated by the calling code
@@ -7494,10 +7446,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
         // loop over buffer entries
         int lookupIndex = bufferInt[i];
         // count this factor
-        if (seqIndexFactorLookup[lookupIndex].lookup == NULL)
-          seqIndexFactorLookup[lookupIndex].lookup =
-            new SeqIndexFactorLookupElement();
-        ++(seqIndexFactorLookup[lookupIndex].lookup->factorCount);
+        ++(seqIndexFactorLookup[lookupIndex].factorCount);
       }
     }
     virtual void localPrepareAndProcess(int localPet){
@@ -7505,10 +7454,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
         // loop over factorList entries in localPet's seqIndex interval
         int lookupIndex = seqIntervFactorListLookupIndexToPet[localPet][i];
         // count this factor
-        if (seqIndexFactorLookup[lookupIndex].lookup == NULL)
-          seqIndexFactorLookup[lookupIndex].lookup =
-            new SeqIndexFactorLookupElement();
-        ++(seqIndexFactorLookup[lookupIndex].lookup->factorCount);
+        ++(seqIndexFactorLookup[lookupIndex].factorCount);
       }
     }
     friend class SetupSeqIndexFactorLookupStage2;
@@ -7621,8 +7567,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
         intStream++;  // skip padding
         factorStream = (T *)intStream;
         *((T *)factorElement.factor) = *factorStream++;
-        seqIndexFactorLookup[lookupIndex].lookup->
-          factorList.push_back(factorElement);
+        seqIndexFactorLookup[lookupIndex].factorList.push_back(factorElement);
       }
     }
     template<typename T> void fillSeqIndexFactorLookupLocally(int localPet){
@@ -7645,8 +7590,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
         factorElement.partnerSeqIndex.decompSeqIndex = seqIndex;
         factorElement.partnerSeqIndex.tensorSeqIndex = tensorSeqIndex;
         *((T *)factorElement.factor) = ((T *)sparseMatrix->getFactorList())[j];
-        seqIndexFactorLookup[lookupIndex].lookup->
-          factorList.push_back(factorElement);
+        seqIndexFactorLookup[lookupIndex].factorList.push_back(factorElement);
       }
     }
   };
@@ -7664,8 +7608,6 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
   }
 
   // -------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DD::setupSeqIndexFactorLookup()"
   int setupSeqIndexFactorLookup(VM *vm,
     vector<SeqIndexFactorLookup> &seqIndexFactorLookup,
     const int petCount, const int localPet, const int factorListCount,
@@ -7774,8 +7716,7 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     for (vector<SeqIndexFactorLookup>::iterator
       i=seqIndexFactorLookup.begin(); i!=seqIndexFactorLookup.end(); ++i){
       // obtain memory
-      if (i->lookup)
-        i->lookup->factorList.reserve(i->lookup->factorCount);  
+      i->factorList.reserve(i->factorCount);  
     }
 #endif
     
@@ -7792,34 +7733,32 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
         "befr duplicate elimination seqIndexFactorLookup[%d].factorCount=%d\n",
         i-seqIndexFactorLookup.begin(), i->factorCount);
 #endif
-      if (i->lookup){
-        sort(i->lookup->factorList.begin(), i->lookup->factorList.end());
-        if (!haloFlag){
-          // not halo: sum duplicate sparse matrix entries into the first occur.
-          for (int j=0; j<i->lookup->factorCount; j++){
-            int k;
-            for (k=j+1; k<i->lookup->factorCount; k++){
-              if (i->lookup->factorList[j] == i->lookup->factorList[k]){
-                sum(i->lookup->factorList[j].factor,
-                  i->lookup->factorList[k].factor, typekindFactors);
-              }else
-                break;
-            }
-            j=k-1;  // skip over the duplicates
+      sort(i->factorList.begin(), i->factorList.end());
+      if (!haloFlag){
+        // not halo: sum duplicate sparse matrix entries into the first occur.
+        for (int j=0; j<i->factorCount; j++){
+          int k;
+          for (k=j+1; k<i->factorCount; k++){
+            if (i->factorList[j] == i->factorList[k]){
+              sum(i->factorList[j].factor,
+                i->factorList[k].factor, typekindFactors);
+            }else
+              break;
           }
+          j=k-1;  // skip over the duplicates
         }
-        // eliminate duplicates in factorList, only leaving first occurrences
-        i->lookup->factorList.erase(
-          unique(i->lookup->factorList.begin(),
-          i->lookup->factorList.end()),
-          i->lookup->factorList.end());
-        i->lookup->factorCount = i->lookup->factorList.size();
-#ifdef ASMMSTOREPRINT
-        fprintf(asmmstoreprintfp,
-          "aftr duplicate elimination seqIndexFactorLookup[%d].factorCount=%d\n",
-          i-seqIndexFactorLookup.begin(), i->lookup->factorCount);
-#endif
       }
+      // eliminate duplicates in factorList, only leaving first occurrences
+      i->factorList.erase(
+        unique(i->factorList.begin(),
+        i->factorList.end()),
+        i->factorList.end());
+      i->factorCount = i->factorList.size();
+#ifdef ASMMSTOREPRINT
+      fprintf(asmmstoreprintfp,
+        "aftr duplicate elimination seqIndexFactorLookup[%d].factorCount=%d\n",
+        i-seqIndexFactorLookup.begin(), i->factorCount);
+#endif
     }
     
     // communicate between Pets to set up "de" member in seqIndexFactorLookup[]
@@ -7843,11 +7782,8 @@ void clientProcess(FillPartnerDeInfo *fillPartnerDeInfo,
     // eliminate duplicate de entries in seqIndexFactorLookup
     for (vector<SeqIndexFactorLookup>::iterator
       i=seqIndexFactorLookup.begin(); i!=seqIndexFactorLookup.end(); ++i){
-      if (i->lookup){
-        sort(i->lookup->de.begin(), i->lookup->de.end());
-        i->lookup->de.erase(unique(i->lookup->de.begin(),i->lookup->de.end()),
-        i->lookup->de.end());
-      }
+      sort(i->de.begin(), i->de.end());
+      i->de.erase(unique(i->de.begin(),i->de.end()),i->de.end());
     }
   
     // return successfully
@@ -7896,14 +7832,8 @@ int Array::sparseMatMulStore(
   RouteHandle **routehandle,                // inout - handle to precomp. comm
   vector<SparseMatrix> const &sparseMatrix, // in    - sparse matrix vector
   bool haloFlag,                            // in    - support halo conditions
-  int *srcTermProcessingArg,                // inout - src term proc (optional)
-                                // if (NULL) -> auto-tune, no pass back
-                                // if (!NULL && -1) -> auto-tune, pass back
-                                // if (!NULL && >=0) -> no auto-tune, use input
-  int *pipelineDepthArg                     // inout - pipeline depth (optional)
-                                // if (NULL) -> auto-tune, no pass back
-                                // if (!NULL && -1) -> auto-tune, pass back
-                                // if (!NULL && >=0) -> no auto-tune, use input
+  int *srcTermProcessingArg,                // in (optional)
+  int *pipelineDepthArg                     // in (optional)
   ){
 //
 // !DESCRIPTION:
@@ -7932,7 +7862,6 @@ int Array::sparseMatMulStore(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
 #define ASMMSTOREMEMLOG_off
-
   try{
   
   //---------------------------------------------------------------------------
@@ -7957,10 +7886,6 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t0);    //gjt - profile
 #endif
   
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore1.0"));
-#endif
-
   // every Pet must provide srcArray and dstArray
   if (srcArray == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -8120,10 +8045,6 @@ int Array::sparseMatMulStore(
   // Phase II
   //---------------------------------------------------------------------------
 
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.0"));
-#endif
-
   // determine local srcElementCount
   const int srcLocalDeCount = srcArray->delayout->getLocalDeCount();
   const int *srcLocalDeToDeMap = srcArray->delayout->getLocalDeToDeMap();
@@ -8139,10 +8060,6 @@ int Array::sparseMatMulStore(
   // todo: use nb-allgather and wait right before needed below
   int *srcElementCountList = new int[petCount];
   vm->allgather(&srcElementCount, srcElementCountList, sizeof(int));
-
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.1"));
-#endif
 
   // determine local dstElementCount
   const int dstLocalDeCount = dstArray->delayout->getLocalDeCount();
@@ -8172,11 +8089,7 @@ int Array::sparseMatMulStore(
   int *dstElementCountList = new int[petCount];
   vm->allgather(&dstElementCount, dstElementCountList, sizeof(int));
   
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.2"));
-#endif
-
-    // set the effective tensorElementCount for src and dst Arrays
+  // set the effective tensorElementCount for src and dst Arrays
   int srcTensorElementCountEff = srcArray->tensorElementCount;  // default
   int dstTensorElementCountEff = dstArray->tensorElementCount;  // default
   if (!tensorMixFlag){
@@ -8184,10 +8097,6 @@ int Array::sparseMatMulStore(
     srcTensorElementCountEff = 1;
     dstTensorElementCountEff = 1;
   }    
-
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.3"));
-#endif
 
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t2);   //gjt - profile
@@ -8199,15 +8108,15 @@ int Array::sparseMatMulStore(
 //return rc;
 //---DEBUG-------------------
   
-  // find local srcSeqIndex Min/Max
+  // find seqIndex Min/Max
   int srcSeqIndexMinMax[2]; // [0]=min, [1]=max
   srcSeqIndexMinMax[0] = srcSeqIndexMinMax[1] = -1; // visibly invalidate
   bool firstMinMax = true;
   for (int i=0; i<srcLocalDeCount; i++){
     if (srcLocalDeElementCount[i]){
-      // there are elements for local DE i
+      // there are elements for this local DE
       ArrayElement arrayElement(srcArray, i);
-      // loop over all elements in exclusive region for local DE i
+      // loop over all elements in exclusive region for this DE
       while(arrayElement.isWithin()){
         // determine the sequentialized index for the current Array element
         SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
@@ -8227,19 +8136,11 @@ int Array::sparseMatMulStore(
     }
   }
   
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.4"));
-#endif
-
   // communicate srcSeqIndexMinMax across all Pets
   // todo: use nb-allgather and wait right before needed below
   int *srcSeqIndexMinMaxList = new int[2*petCount];
   vm->allgather(srcSeqIndexMinMax, srcSeqIndexMinMaxList, 2*sizeof(int));  
   
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.5"));
-#endif
-
 //---DEBUG-------------------
 //char msg[160];
 //sprintf(msg, "srcLocalDeCount=%d, srcLocalDeElementCount[0]=%d,"
@@ -8259,13 +8160,13 @@ int Array::sparseMatMulStore(
       i, srcSeqIndexMinMaxList[i*2], srcSeqIndexMinMaxList[i*2+1]);
 #endif
 
-  // find local dstSeqIndex Min/Max
+  // find seqIndex Min/Max
   int dstSeqIndexMinMax[2]; // [0]=min, [1]=max
   dstSeqIndexMinMax[0] = dstSeqIndexMinMax[1] = -1; // visibly invalidate
   firstMinMax = true;
   for (int i=0; i<dstLocalDeCount; i++){
     if (dstLocalDeElementCount[i]){
-      // there are elements for local DE i
+      // there are elements for this local DE
       if (haloFlag){
         // for halo the dst elements are in the rim of dstArray
         for (int k=0; k<dstArray->rimElementCount[i]; k++){
@@ -8287,7 +8188,7 @@ int Array::sparseMatMulStore(
         }
       }else{
         ArrayElement arrayElement(dstArray, i);
-        // loop over all elements in exclusive region for local DE i
+        // loop over all elements in exclusive region for this DE
         while(arrayElement.isWithin()){
           // determine the sequentialized index for the current Array element
           SeqIndex seqIndex = arrayElement.getSequenceIndexExclusive();
@@ -8308,19 +8209,11 @@ int Array::sparseMatMulStore(
     }
   }
 
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.6"));
-#endif
-
   // communicate dstSeqIndexMinMax across all Pets
   // todo: use nb-allgather and wait right before needed below
   int *dstSeqIndexMinMaxList = new int[2*petCount];
   vm->allgather(dstSeqIndexMinMax, dstSeqIndexMinMaxList, 2*sizeof(int));
   
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.7"));
-#endif
-
 //---DEBUG-------------------
 //char msg[160];
 //sprintf(msg, "dstLocalDeCount=%d, dstLocalDeElementCount[0]=%d,"
@@ -8348,10 +8241,6 @@ int Array::sparseMatMulStore(
 //return rc;
 //---DEBUG-------------------
 
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.8"));
-#endif
-
   // set up structure and intervals of src and dst distributed directories
   
   // determine the srcSeqIndexMinGlobal and MaxGlobal
@@ -8360,7 +8249,7 @@ int Array::sparseMatMulStore(
   int pastInitFlag = 0; // reset
   for (int i=0; i<petCount; i++){
     if (srcElementCountList[i]){
-      // Pet i holds elements in srcArray
+      // this Pet does hold elements in srcArray
       if (pastInitFlag){
         if (srcSeqIndexMinMaxList[2*i] < srcSeqIndexMinGlobal)
           srcSeqIndexMinGlobal = srcSeqIndexMinMaxList[2*i];
@@ -8375,41 +8264,30 @@ int Array::sparseMatMulStore(
     }
   }
   
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.9"));
-#endif
-
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t4a1);   //gjt - profile
 #endif
-  
-  // set up a distributed directory for srcArray seqIndex look-up
-  DD::Interval *srcSeqIndexInterval = new DD::Interval[petCount];
-  {
-    srcSeqIndexInterval[0].min = srcSeqIndexMinGlobal;  // start
-    int indicesPerPet = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
-      / petCount;
-    int extraIndices = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
-      % petCount;
-    for (int i=0; i<petCount-1; i++){
-      srcSeqIndexInterval[i].max = srcSeqIndexInterval[i].min + indicesPerPet
-        - 1;
-      if (i<extraIndices)
-        ++srcSeqIndexInterval[i].max;   // distribute extra indices evenly
-      srcSeqIndexInterval[i].count = 
-        srcSeqIndexInterval[i].max - srcSeqIndexInterval[i].min + 1;
-      srcSeqIndexInterval[i+1].min = srcSeqIndexInterval[i].max + 1;
-    }
-    srcSeqIndexInterval[petCount-1].max = srcSeqIndexMaxGlobal;  // finish
-    srcSeqIndexInterval[petCount-1].count = 
-      srcSeqIndexInterval[petCount-1].max - srcSeqIndexInterval[petCount-1].min
-      + 1;
-  }
-  
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.10"));
-#endif
 
+  // set up a distributed directory for srcArray seqIndex look-up
+  int indicesPerPet = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
+    / petCount;
+  int extraIndices = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
+    % petCount;
+  DD::Interval *srcSeqIndexInterval = new DD::Interval[petCount];
+  srcSeqIndexInterval[0].min = srcSeqIndexMinGlobal;  // start
+  for (int i=0; i<petCount-1; i++){
+    srcSeqIndexInterval[i].max = srcSeqIndexInterval[i].min + indicesPerPet - 1;
+    if (i<extraIndices)
+      ++srcSeqIndexInterval[i].max;   // distribute extra indices homogeneously
+    srcSeqIndexInterval[i].count = 
+      srcSeqIndexInterval[i].max - srcSeqIndexInterval[i].min + 1;
+    srcSeqIndexInterval[i+1].min = srcSeqIndexInterval[i].max + 1;
+  }
+  srcSeqIndexInterval[petCount-1].max = srcSeqIndexMaxGlobal;  // finish
+  srcSeqIndexInterval[petCount-1].count = 
+    srcSeqIndexInterval[petCount-1].max - srcSeqIndexInterval[petCount-1].min
+    + 1;
+  
 #ifdef ASMMSTOREPRINT
   fprintf(asmmstoreprintfp, "gjt: localPet %d, srcElementCountList[localPet] = "
     "%d, srcSeqIndexMinMax = %d / %d, srcSeqIndexMinGlobal/MaxGlobal = %d, %d, "
@@ -8467,17 +8345,13 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t4a);   //gjt - profile
 #endif
   
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.11"));
-#endif
-
   // determine the dstSeqIndexMinGlobal and MaxGlobal
   // todo: for nb-allgather(dstSeqIndexMinMaxList) here insert commwait()
   int dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal;
   pastInitFlag = 0; // reset
   for (int i=0; i<petCount; i++){
     if (dstElementCountList[i]){
-      // Pet i holds elements in dstArray
+      // this Pet does hold elements in dstArray
       if (pastInitFlag){
         if (dstSeqIndexMinMaxList[2*i] < dstSeqIndexMinGlobal)
           dstSeqIndexMinGlobal = dstSeqIndexMinMaxList[2*i];
@@ -8492,10 +8366,6 @@ int Array::sparseMatMulStore(
     }
   }
     
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.12"));
-#endif
-
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t4b1);   //gjt - profile
 #endif
@@ -8504,34 +8374,24 @@ int Array::sparseMatMulStore(
 //printf("srcMin/Max = %d/%d, dstMinMax = %d/%d\n", srcSeqIndexMinGlobal,
 //  srcSeqIndexMaxGlobal, dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal);
 
-
   // set up a distributed directory for dstArray seqIndex look-up
+  indicesPerPet = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) / petCount;
+  extraIndices = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) % petCount;
   DD::Interval *dstSeqIndexInterval = new DD::Interval[petCount];
-  {
-    dstSeqIndexInterval[0].min = dstSeqIndexMinGlobal;  // start
-    int indicesPerPet = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1)
-      / petCount;
-    int extraIndices = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1)
-      % petCount;
-    for (int i=0; i<petCount-1; i++){
-      dstSeqIndexInterval[i].max = dstSeqIndexInterval[i].min + indicesPerPet
-        - 1;
-      if (i<extraIndices)
-        ++dstSeqIndexInterval[i].max;   // distribute extra indices evenly
-      dstSeqIndexInterval[i].count = 
-        dstSeqIndexInterval[i].max - dstSeqIndexInterval[i].min + 1;
-      dstSeqIndexInterval[i+1].min = dstSeqIndexInterval[i].max + 1;
-    }
-    dstSeqIndexInterval[petCount-1].max = dstSeqIndexMaxGlobal;  // finish
-    dstSeqIndexInterval[petCount-1].count = 
-      dstSeqIndexInterval[petCount-1].max - dstSeqIndexInterval[petCount-1].min
-      + 1;
+  dstSeqIndexInterval[0].min = dstSeqIndexMinGlobal;  // start
+  for (int i=0; i<petCount-1; i++){
+    dstSeqIndexInterval[i].max = dstSeqIndexInterval[i].min + indicesPerPet - 1;
+    if (i<extraIndices)
+      ++dstSeqIndexInterval[i].max;   // distribute extra indices homogeneously
+    dstSeqIndexInterval[i].count = 
+      dstSeqIndexInterval[i].max - dstSeqIndexInterval[i].min + 1;
+    dstSeqIndexInterval[i+1].min = dstSeqIndexInterval[i].max + 1;
   }
+  dstSeqIndexInterval[petCount-1].max = dstSeqIndexMaxGlobal;  // finish
+  dstSeqIndexInterval[petCount-1].count = 
+    dstSeqIndexInterval[petCount-1].max - dstSeqIndexInterval[petCount-1].min
+    + 1;
   
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.13"));
-#endif
-
 #ifdef ASMMSTOREPRINT
     fprintf(asmmstoreprintfp, "gjt: localPet %d, dstElementCountList[localPet] "
     "= %d, "
@@ -8551,7 +8411,7 @@ int Array::sparseMatMulStore(
   int *dstLocalElementsPerIntervalCount = new int[petCount];
   {
     // prepare temporary seqIndexList for sorting
-    //TODO: this scales in memory as the dstArray size, does not consider sparse
+    //TODO: this scales in memory as the srcArray size, does not consider sparse
     vector<int> seqIndexList(dstElementCount);
     int jj=0;
     for (int j=0; j<dstLocalDeCount; j++){
@@ -8607,10 +8467,6 @@ int Array::sparseMatMulStore(
   delete [] srcSeqIndexMinMaxList;
   delete [] dstSeqIndexMinMaxList;
 
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.14"));
-#endif
-
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t4);   //gjt - profile
 #endif
@@ -8635,10 +8491,6 @@ int Array::sparseMatMulStore(
       
 #ifdef ASMMSTORETIMING
   VMK::wtime(&t5c);   //gjt - profile
-#endif
-
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.15"));
 #endif
 
   // allocate local look-up map indexed by dstSeqIndex, i.e. distributed dir.
@@ -8667,10 +8519,6 @@ int Array::sparseMatMulStore(
   VMK::wtime(&t5);   //gjt - profile
 #endif
   
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.16"));
-#endif
-
   // prepare count arrays for src partner look-up in dstSeqIndexFactorLookup
   int *srcLocalPartnerElementsPerIntervalCount = new int[petCount];
   for (int i=0; i<petCount; i++){
@@ -8680,13 +8528,11 @@ int Array::sparseMatMulStore(
     int count = 0; // reset
     for (vector<DD::SeqIndexFactorLookup>::const_iterator
       j=srcSeqIndexFactorLookup.begin(); j!=srcSeqIndexFactorLookup.end(); ++j){
-      if (j->lookup){
-        for (int k=0; k<j->lookup->factorCount; k++){
-          int partnerSeqIndex = j->lookup->factorList[k]
-            .partnerSeqIndex.decompSeqIndex;
-          if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax)
-            ++count; // increment counter
-        }
+      for (int k=0; k<j->factorCount; k++){
+        int partnerSeqIndex = j->factorList[k]
+          .partnerSeqIndex.decompSeqIndex;
+        if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax)
+          ++count; // increment counter
       }
     }
     srcLocalPartnerElementsPerIntervalCount[i] = count;
@@ -8695,10 +8541,6 @@ int Array::sparseMatMulStore(
   vm->alltoall(srcLocalPartnerElementsPerIntervalCount, sizeof(int),
     dstLocalPartnerIntervalPerPetCount, sizeof(int), vmBYTE);
   
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.17"));
-#endif
-
   // fill partnerDe in srcSeqIndexFactorLookup using dstSeqIndexFactorLookup
   {
     DD::FillPartnerDeInfo *fillPartnerDeInfo =
@@ -8719,10 +8561,6 @@ int Array::sparseMatMulStore(
   delete [] srcLocalPartnerElementsPerIntervalCount;
   delete [] dstLocalPartnerIntervalPerPetCount;
       
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.18"));
-#endif
-
   // prepare count arrays for dst partner look-up in srcSeqIndexFactorLookup
   int *dstLocalPartnerElementsPerIntervalCount = new int[petCount];
   for (int i=0; i<petCount; i++){
@@ -8732,13 +8570,11 @@ int Array::sparseMatMulStore(
     int count = 0; // reset
     for (vector<DD::SeqIndexFactorLookup>::const_iterator
       j=dstSeqIndexFactorLookup.begin(); j!=dstSeqIndexFactorLookup.end(); ++j){
-      if (j->lookup){
-        for (int k=0; k<j->lookup->factorCount; k++){
-          int partnerSeqIndex = j->lookup->factorList[k]
-            .partnerSeqIndex.decompSeqIndex;
-          if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax)
-            ++count; // increment counter
-        }
+      for (int k=0; k<j->factorCount; k++){
+        int partnerSeqIndex = j->factorList[k]
+          .partnerSeqIndex.decompSeqIndex;
+        if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax)
+          ++count; // increment counter
       }
     }
     dstLocalPartnerElementsPerIntervalCount[i] = count;
@@ -8747,10 +8583,6 @@ int Array::sparseMatMulStore(
   vm->alltoall(dstLocalPartnerElementsPerIntervalCount, sizeof(int),
     srcLocalPartnerIntervalPerPetCount, sizeof(int), vmBYTE);
   
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.19"));
-#endif
-
   // fill partnerDe in dstSeqIndexFactorLookup using srcSeqIndexFactorLookup
   {
     DD::FillPartnerDeInfo *fillPartnerDeInfo =
@@ -8769,10 +8601,6 @@ int Array::sparseMatMulStore(
   // garbage collection
   delete [] dstLocalPartnerElementsPerIntervalCount;
   delete [] srcLocalPartnerIntervalPerPetCount;
-
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.20"));
-#endif
 
 #ifdef ASMMSTOREPRINT
   fprintf(asmmstoreprintfp, "\n========================================"
@@ -8850,10 +8678,6 @@ int Array::sparseMatMulStore(
   // Phase III -> represent sparse matrix in "run distribution"
   //---------------------------------------------------------------------------
   
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore3.0"));
-#endif
-
   vector<DD::AssociationElement> *srcLinSeqVect =
     new vector<DD::AssociationElement>[srcLocalDeCount];
   vector<DD::AssociationElement> *dstLinSeqVect =
@@ -8907,30 +8731,20 @@ int Array::sparseMatMulStore(
 /////////////////////////  
   for (vector<DD::SeqIndexFactorLookup>::const_iterator
     i=srcSeqIndexFactorLookup.begin(); i!=srcSeqIndexFactorLookup.end(); ++i){
-    if (i->lookup)
-      fprintf(stderr, "src: lookupIndex=%d, factorCount=%d\n",
-        i-srcSeqIndexFactorLookup.begin(), i->factorCount);
+    
+    fprintf(stderr, "src: lookupIndex=%d, factorCount=%d\n",
+      i-srcSeqIndexFactorLookup.begin(), i->factorCount);
   }
 /////////////////////////  
 /////////////////////////  
   for (vector<DD::SeqIndexFactorLookup>::const_iterator
     i=dstSeqIndexFactorLookup.begin(); i!=dstSeqIndexFactorLookup.end(); ++i){
-    if (i->lookup)    
-      fprintf(stderr, "dst: lookupIndex=%d, factorCount=%d\n",
-        i-dstSeqIndexFactorLookup.begin(), i->factorCount);
+    
+    fprintf(stderr, "dst: lookupIndex=%d, factorCount=%d\n",
+      i-dstSeqIndexFactorLookup.begin(), i->factorCount);
   }
 /////////////////////////  
 #endif
-  
-  // garbage collection
-  for (vector<DD::SeqIndexFactorLookup>::const_iterator
-    i=srcSeqIndexFactorLookup.begin(); i!=srcSeqIndexFactorLookup.end(); ++i){
-    if (i->lookup) delete i->lookup;
-  }
-  for (vector<DD::SeqIndexFactorLookup>::const_iterator
-    i=dstSeqIndexFactorLookup.begin(); i!=dstSeqIndexFactorLookup.end(); ++i){
-    if (i->lookup) delete i->lookup;
-  }
   
 #ifdef ASMMSTOREPRINT
   fprintf(asmmstoreprintfp, "\n========================================"
@@ -9126,10 +8940,6 @@ int Array::sparseMatMulStore(
   // Phase IV
   //---------------------------------------------------------------------------
 
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore4.0"));
-#endif
-
   // prepare for relative run-time addressing (RRA)
   int rraCount = srcArray->delayout->getLocalDeCount();
   rraCount += dstArray->delayout->getLocalDeCount();
@@ -9248,10 +9058,6 @@ int Array::sparseMatMulStore(
   fclose(asmmstoreprintfp);
 #endif
   
-#ifdef ASMMSTOREMEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore5.0"));
-#endif
-
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -9303,14 +9109,8 @@ int sparseMatMulStoreEncodeXXE(
   double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
   double *t14,
 #endif
-  int *srcTermProcessingArg,              // inout (optional)
-                                // if (NULL) -> auto-tune, no pass back
-                                // if (!NULL && -1) -> auto-tune, pass back
-                                // if (!NULL && >=0) -> no auto-tune, use input
-  int *pipelineDepthArg                   // inout (optional)
-                                // if (NULL) -> auto-tune, no pass back
-                                // if (!NULL && -1) -> auto-tune, pass back
-                                // if (!NULL && >=0) -> no auto-tune, use input
+  int *srcTermProcessingArg,              // in (optional)
+  int *pipelineDepthArg                   // in (optional)
   ){
 //
 // !DESCRIPTION:
@@ -10090,7 +9890,6 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
   
   if (srcTermProcessingArg && *srcTermProcessingArg >= 0){
-    // use the provided srcTermProcessing
 #ifdef SMMSTOREENCODEXXEINFO
     char msg[160];
     sprintf(msg, "srcTermProcessingArg = %d was provided -> do not tune",
@@ -10228,7 +10027,6 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
 
   if (pipelineDepthArg && *pipelineDepthArg >= 0){
-    // use the provided pipelineDepthArg
 #ifdef SMMSTOREENCODEXXEINFO
     char msg[160];
     sprintf(msg, "pipelineDepthArg = %d was provided -> do not tune",
