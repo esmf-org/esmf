@@ -8347,24 +8347,27 @@ int Array::sparseMatMulStore(
 #endif
 
   // set up a distributed directory for srcArray seqIndex look-up
-  int indicesPerPet = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
-    / petCount;
-  int extraIndices = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
-    % petCount;
   DD::Interval *srcSeqIndexInterval = new DD::Interval[petCount];
-  srcSeqIndexInterval[0].min = srcSeqIndexMinGlobal;  // start
-  for (int i=0; i<petCount-1; i++){
-    srcSeqIndexInterval[i].max = srcSeqIndexInterval[i].min + indicesPerPet - 1;
-    if (i<extraIndices)
-      ++srcSeqIndexInterval[i].max;   // distribute extra indices homogeneously
-    srcSeqIndexInterval[i].count = 
-      srcSeqIndexInterval[i].max - srcSeqIndexInterval[i].min + 1;
-    srcSeqIndexInterval[i+1].min = srcSeqIndexInterval[i].max + 1;
+  {
+    srcSeqIndexInterval[0].min = srcSeqIndexMinGlobal;  // start
+    int indicesPerPet = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
+      / petCount;
+    int extraIndices = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
+      % petCount;
+    for (int i=0; i<petCount-1; i++){
+      srcSeqIndexInterval[i].max = srcSeqIndexInterval[i].min + indicesPerPet
+        - 1;
+      if (i<extraIndices)
+        ++srcSeqIndexInterval[i].max;   // distribute extra indices evenly
+      srcSeqIndexInterval[i].count = 
+        srcSeqIndexInterval[i].max - srcSeqIndexInterval[i].min + 1;
+      srcSeqIndexInterval[i+1].min = srcSeqIndexInterval[i].max + 1;
+    }
+    srcSeqIndexInterval[petCount-1].max = srcSeqIndexMaxGlobal;  // finish
+    srcSeqIndexInterval[petCount-1].count = 
+      srcSeqIndexInterval[petCount-1].max - srcSeqIndexInterval[petCount-1].min
+      + 1;
   }
-  srcSeqIndexInterval[petCount-1].max = srcSeqIndexMaxGlobal;  // finish
-  srcSeqIndexInterval[petCount-1].count = 
-    srcSeqIndexInterval[petCount-1].max - srcSeqIndexInterval[petCount-1].min
-    + 1;
   
 #ifdef ASMMSTOREMEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.10"));
@@ -8465,22 +8468,27 @@ int Array::sparseMatMulStore(
 //  srcSeqIndexMaxGlobal, dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal);
 
   // set up a distributed directory for dstArray seqIndex look-up
-  indicesPerPet = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) / petCount;
-  extraIndices = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1) % petCount;
   DD::Interval *dstSeqIndexInterval = new DD::Interval[petCount];
-  dstSeqIndexInterval[0].min = dstSeqIndexMinGlobal;  // start
-  for (int i=0; i<petCount-1; i++){
-    dstSeqIndexInterval[i].max = dstSeqIndexInterval[i].min + indicesPerPet - 1;
-    if (i<extraIndices)
-      ++dstSeqIndexInterval[i].max;   // distribute extra indices homogeneously
-    dstSeqIndexInterval[i].count = 
-      dstSeqIndexInterval[i].max - dstSeqIndexInterval[i].min + 1;
-    dstSeqIndexInterval[i+1].min = dstSeqIndexInterval[i].max + 1;
+  {
+    dstSeqIndexInterval[0].min = dstSeqIndexMinGlobal;  // start
+    int indicesPerPet = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1)
+      / petCount;
+    int extraIndices = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1)
+      % petCount;
+    for (int i=0; i<petCount-1; i++){
+      dstSeqIndexInterval[i].max = dstSeqIndexInterval[i].min + indicesPerPet
+        - 1;
+      if (i<extraIndices)
+        ++dstSeqIndexInterval[i].max;   // distribute extra indices evenly
+      dstSeqIndexInterval[i].count = 
+        dstSeqIndexInterval[i].max - dstSeqIndexInterval[i].min + 1;
+      dstSeqIndexInterval[i+1].min = dstSeqIndexInterval[i].max + 1;
+    }
+    dstSeqIndexInterval[petCount-1].max = dstSeqIndexMaxGlobal;  // finish
+    dstSeqIndexInterval[petCount-1].count = 
+      dstSeqIndexInterval[petCount-1].max - dstSeqIndexInterval[petCount-1].min
+      + 1;
   }
-  dstSeqIndexInterval[petCount-1].max = dstSeqIndexMaxGlobal;  // finish
-  dstSeqIndexInterval[petCount-1].count = 
-    dstSeqIndexInterval[petCount-1].max - dstSeqIndexInterval[petCount-1].min
-    + 1;
   
 #ifdef ASMMSTOREMEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.13"));
