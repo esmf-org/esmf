@@ -134,6 +134,11 @@ class Attribute
     static const char COMP_PROP_PURP[];
     static const char GRIDS_PURP[];
 
+    // accessors for private member variables
+    inline const std::string getConvention() {return this->attrConvention;}
+    inline const std::string getPurpose() {return this->attrPurpose;}
+    inline const std::string getObject() {return this->attrObject;}
+
     // helper to set the Base address in attrBase
     void setBase(ESMC_Base *setBase){ attrBase = setBase; }
 
@@ -449,16 +454,12 @@ extern "C" {
                                   void *value, int *rc, 
                                   ESMCI_FortranStrLenArg nlen);
   void FTN_X(c_esmc_attpackgetapinstnames)(ESMC_Base **base, 
-                                  char *convention, char *purpose, 
-                                  char *object, 
+                                  ESMCI::Attribute **attpack,
                                   char *attPackInstanceNameList,
                                   int *attPackInstanceNameLens,
                                   int *attPackInstanceNameSize,
                                   int *attPackInstanceNameCount,
                                   int *rc, 
-                                  ESMCI_FortranStrLenArg clen, 
-                                  ESMCI_FortranStrLenArg plen, 
-                                  ESMCI_FortranStrLenArg olen,
                                   ESMCI_FortranStrLenArg napinlen);
   void FTN_X(c_esmc_attpackispresent)(ESMC_Base **base, char *name,
 								                  ESMCI::Attribute **attpack,

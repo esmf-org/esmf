@@ -278,8 +278,8 @@ module NUOPC_Model
     ! deal with the "InitializeDataProgress" Attribute
     if (newUpdatedCount > oldUpdatedCount) then
       ! there are more Fields now that have their "Updated" Attriubute "true"
-      call ESMF_AttPackGet(gcomp, attpack, &
-        convention="NUOPC", purpose="General", rc=rc)
+      call ESMF_AttPackGet(gcomp, convention="NUOPC", purpose="General", &
+        attpack=attpack, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &

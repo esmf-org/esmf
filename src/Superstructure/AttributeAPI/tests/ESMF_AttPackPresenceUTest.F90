@@ -340,14 +340,6 @@ program ESMF_AttPackPresenceUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Validate an Attribute package on an Array Test
-      call ESMF_AttributeValidate(arraybundle, attpack, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Validate an Attribute package on an Array Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
       ! Remove the entire Attribute package from an Array Test
       call ESMF_AttributeRemove(arraybundle, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"

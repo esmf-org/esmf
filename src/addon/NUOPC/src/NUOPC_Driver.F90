@@ -139,8 +139,8 @@ module NUOPC_Driver
 
     initPhases(1) = "IPDv00p1=1"
     
-    call ESMF_AttPackGet(gcomp, attpack, &
-      convention="NUOPC", purpose="General", rc=rc)
+    call ESMF_AttPackGet(gcomp, convention="NUOPC", purpose="General", &
+      attpack=attpack, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -802,8 +802,8 @@ module NUOPC_Driver
           attributeName = "InitializePhaseMap"
         endif
         ! obtain number of initPhases from the Model Attributes
-		call ESMF_AttPackGet(is%wrap%modelComp(i), attpack, &
-							 convention="NUOPC", purpose="General", rc=rc)
+		    call ESMF_AttPackGet(is%wrap%modelComp(i), &
+          convention="NUOPC", purpose="General", attpack=attpack, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
@@ -852,8 +852,8 @@ module NUOPC_Driver
         character(len=NUOPC_PhaseMapStringLength) :: tempString
         rc = ESMF_SUCCESS
         ! obtain number of initPhases from the Model Attributes
-		call ESMF_AttPackGet(is%wrap%connectorComp(i,j), attpack, &
-							 convention="NUOPC", purpose="General", rc=rc)
+		    call ESMF_AttPackGet(is%wrap%connectorComp(i,j), &
+							 convention="NUOPC", purpose="General", attpack=attpack, rc=rc)
         call ESMF_AttributeGet(is%wrap%connectorComp(i,j), &
           name="InitializePhaseMap", &
           itemCount=phaseCount, &
@@ -1032,8 +1032,8 @@ module NUOPC_Driver
               write (pString, *) phase
               
               ! check model InitializeDataComplete Attribute to see if complete
-			  call ESMF_AttPackGet(is%wrap%modelComp(i), attpack, &
-			  					   convention="NUOPC",  purpose="General", rc=rc)
+			        call ESMF_AttPackGet(is%wrap%modelComp(i), &
+			  					   convention="NUOPC",  purpose="General", attpack=attpack, rc=rc)
               call ESMF_AttributeGet(is%wrap%modelComp(i), &
                 name="InitializeDataComplete", value=valueString, &
                 attpack=attpack, rc=rc)
@@ -1162,8 +1162,8 @@ module NUOPC_Driver
       return  ! bail out
     
     ! determine verbosity
-    call ESMF_AttPackGet(gcomp, attpack, &
-    					 convention="NUOPC", purpose="General", rc=rc)
+    call ESMF_AttPackGet(gcomp, convention="NUOPC", purpose="General", &
+      attpack=attpack, rc=rc)
     defaultvalue = "high"
     call ESMF_AttributeGet(gcomp, name="Verbosity", value=valueString, &
       defaultvalue=defaultvalue, attpack=attpack, rc=rc)

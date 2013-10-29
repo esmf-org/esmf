@@ -259,7 +259,7 @@ program ESMF_SCompEx
       					   convention=convCIM, purpose=purpComp, &
                            attrList=dc_sciPropAtt, rc=rc)
 
-    call ESMF_AttPackGet(dc_scicomp, attpack, convCIM, purpSci, rc=rc)
+    call ESMF_AttPackGet(dc_scicomp, convCIM, purpSci, attpack=attpack, rc=rc)
 
     call ESMF_AttributeSet(dc_scicomp, 'TopBoundaryCondition', &
                            'radiation boundary condition', &

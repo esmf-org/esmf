@@ -120,7 +120,6 @@ module ESMF_AttributeMod
       public ESMF_AttributeRead
       public ESMF_AttributeRemove
       public ESMF_AttributeUpdate
-      public ESMF_AttributeValidate
       public ESMF_AttributeWrite
 
 
@@ -338,6 +337,7 @@ module ESMF_AttributeMod
         module procedure ESMF_CplCompAttGetInfoByNum
         module procedure ESMF_CplCompAttGetCount
         module procedure ESMF_CplCompAttGetAPinstNames
+        module procedure ESMF_CplCompAttGetAPinstNamesAP
 
         TypeKindInterfaceMacro(ESMF_GridCompAttGet)
         TypeKindInterfaceMacro(ESMF_GridCompAttGet1D)
@@ -356,6 +356,7 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttGetInfoByNum
         module procedure ESMF_GridCompAttGetCount
         module procedure ESMF_GridCompAttGetAPinstNames
+        module procedure ESMF_GridCompAttGetAPinstNamesAP
 
         TypeKindInterfaceMacro(ESMF_SciCompAttGet)
         TypeKindInterfaceMacro(ESMF_SciCompAttGet1D)
@@ -374,6 +375,7 @@ module ESMF_AttributeMod
         module procedure ESMF_SciCompAttGetInfoByNum
         module procedure ESMF_SciCompAttGetCount
         module procedure ESMF_SciCompAttGetAPinstNames
+        module procedure ESMF_SciCompAttGetAPinstNamesAP
 
         TypeKindInterfaceMacro(ESMF_DistGridAttGet)
         TypeKindInterfaceMacro(ESMF_DistGridAttGet1D)
@@ -718,33 +720,6 @@ module ESMF_AttributeMod
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_AttributeValidate  - Validate an Attribute Package
-!
-! !INTERFACE:
-      interface ESMF_AttributeValidate
-
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_ArrayAttValidate
-        module procedure ESMF_ArrayBundleAttValidate
-        module procedure ESMF_CplCompAttValidate
-        module procedure ESMF_GridCompAttValidate
-        module procedure ESMF_SciCompAttValidate
-        module procedure ESMF_DistGridAttValidate
-        module procedure ESMF_FieldAttValidate
-        module procedure ESMF_FieldBundleAttValidate
-        module procedure ESMF_GridAttValidate
-        module procedure ESMF_StateAttValidate
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that write
-!     an Attribute or Attribute package.
-
-!EOPI
-      end interface
-
-!
-!------------------------------------------------------------------------------
-!BOPI
 ! !IROUTINE: ESMF_AttributeWrite  - Write an Attribute or Attribute Package
 !
 ! !INTERFACE:
@@ -806,15 +781,16 @@ contains
 ! !IROUTINE: ESMF_AttPackGet  - Get an ESMF Attribute package object
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttPackGet(<object>, attpack, convention, purpose, 
-!       attPackInstanceName, isPresent, rc)
+!     subroutine ESMF_AttPackGet(<object>, convention, purpose, keywordEnforcer
+!       attPackInstanceName, attpack, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     type(ESMF_AttPack),  intent(inout),          :: attpack
 !     character (len = *), intent(in)              :: convention
 !     character (len = *), intent(in)              :: purpose
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     character (len = *), intent(in),    optional :: attPackInstanceName
+!     type(ESMF_AttPack),  intent(inout), optional :: attpack
 !     logical,             intent(out),   optional :: isPresent
 !     integer,             intent(out),   optional :: rc
 !
@@ -840,8 +816,6 @@ contains
 !     \begin{description}
 !     \item [<object>]
 !           An {\tt ESMF} object
-!     \item [attpack]
-!           A handle to the Attribute package
 !     \item [convention]
 !           The convention of the Attribute package
 !     \item [purpose]
@@ -851,6 +825,8 @@ contains
 !           of multiple Attribute package instances of the same convention
 !           and purpose, within a nest.  If not specified, defaults to the
 !           first instance.
+!     \item [{[attpack]}]
+!           A handle to the Attribute package
 !     \item [{[isPresent]}]
 !           A logical flag to tell if this Attribute package is present or not
 !     \item [{[rc]}]
@@ -1233,18 +1209,19 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet  - Get an Attribute
+! !IROUTINE: ESMF_AttributeGet  - Get an Attribute from an {\tt ESMF\_AttPack} 
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeGet(<object>, name, <value>, <defaultvalue>, &
-!       attpack, isPresent, rc)
+!     subroutine ESMF_AttributeGet(<object>, name, attpack, <value> &
+!       keywordEnforcer, <defaultvalue>, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *), intent(in)            :: name
+!     type(ESMF_AttPack),  intent(inout)         :: attpack
 !     <value>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     <defaultvalue>, see below for supported values
-!     type(ESMF_AttPack),  intent(in),  optional :: attpack
 !     logical,             intent(out), optional :: isPresent
 !     integer,             intent(out), optional :: rc
 !
@@ -1300,12 +1277,12 @@ contains
 !           An {\tt ESMF} object
 !     \item [name]
 !           The name of the Attribute to retrieve
+!     \item [attpack]
+!           A handle to the Attribute package
 !     \item [<value>]
 !           The value of the named Attribute
 !     \item [{[<defaultvalue>]}]
 !           The default value of the named Attribute
-!     \item [{[attpack]}]
-!           A handle to the Attribute package
 !     \item [{[isPresent]}]
 !           A logical flag to tell if this Attribute is present or not
 !     \item [{[rc]}]
@@ -1316,19 +1293,20 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class information
+! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class information from an {\tt ESMF\_AttPack} 
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeGet(<object>, name, <value>, <defaultvalue>, &
-!       inputList, attpack, isPresent, rc)
+!     subroutine ESMF_AttributeGet(<object>, name, attpack, <value>, &
+!       keywordEnforcer, <defaultvalue>, inputList, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *), intent(in)            :: name
+!     type(ESMF_AttPack),  intent(inout)         :: attpack
 !     <value>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     <defaultvalue>, see below for supported values
 !     character (len = *), intent(in),  optional :: inputList(:)
-!     type(ESMF_AttPack),  intent(in),  optional :: attpack
 !     logical,             intent(out), optional :: isPresent
 !     integer,             intent(out), optional :: rc
 !
@@ -1367,14 +1345,14 @@ contains
 !           An {\tt ESMF} object
 !     \item [name]
 !           The name of the Attribute to retrieve
+!     \item [attpack]
+!           A handle to the Attribute package
 !     \item [<value argument>]
 !           The value of the named Attribute
 !     \item [{[<defaultvalue argument>]}]
 !           The default value of the named Attribute
 !     \item [{[inputList]}]
 !           A list of the input parameters required to retrieve internal info
-!     \item [{[attpack]}]
-!           A handle to the Attribute package
 !     \item [{[isPresent]}]
 !           A logical flag to tell if this Attribute is present or not
 !     \item [{[rc]}]
@@ -1385,18 +1363,19 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet  - Get an Attribute
+! !IROUTINE: ESMF_AttributeGet  - Get an Attribute from an {\tt ESMF\_AttPack} 
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeGet(<object>, name, <valueList>, &
-!       <defaultvalueList>, attpack, itemCount, isPresent, rc)
+!     subroutine ESMF_AttributeGet(<object>, name, attpack, <valueList>, &
+!       keywordEnforcer, <defaultvalueList>, itemCount, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *), intent(in)              :: name
+!     type(ESMF_AttPack),  intent(inout)           :: attpack
 !     <valueList>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     <defaultvalueList>, see below for supported values
-!     type(ESMF_AttPack),  intent(in),    optional :: attpack
 !     integer,             intent(out),   optional :: itemCount
 !     logical,             intent(out),   optional :: isPresent
 !     integer,             intent(out),   optional :: rc
@@ -1452,12 +1431,12 @@ contains
 !           An {\tt ESMF} object
 !     \item [name]
 !           The name of the Attribute to retrieve
+!     \item [attpack]
+!           A handle to the Attribute package
 !     \item [<valueList>]
 !           The valueList of the named Attribute
 !     \item [{[<defaultvalueList>]}]
 !           The default value list of the named Attribute
-!     \item [{[attpack]}]
-!           A handle to the Attribute package
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute
 !     \item [{[isPresent]}]
@@ -1470,19 +1449,20 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class information
+! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class information from an {\tt ESMF\_AttPack} 
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeGet(<object>, name, <valueList>, &
-!       <defaultvalueList>, inputList, attpack, itemCount, isPresent, rc)
+!     subroutine ESMF_AttributeGet(<object>, name, attpack, <valueList>, &
+!       keywordEnforcer, <defaultvalueList>, inputList, itemCount, isPresent, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *), intent(in)              :: name
+!     type(ESMF_AttPack),  intent(inout)           :: attpack
 !     <valueList>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     <defaultvalueList>, see below for supported values
 !     character (len = *), intent(in),    optional :: inputList(:)
-!     type(ESMF_AttPack),  intent(in),    optional :: attpack
 !     integer,             intent(out),   optional :: itemCount
 !     logical,             intent(out),   optional :: isPresent
 !     integer,             intent(out),   optional :: rc
@@ -1523,14 +1503,14 @@ contains
 !           An {\tt ESMF} object
 !     \item [name]
 !           The name of the Attribute to retrieve
+!     \item [attpack]
+!           A handle to the Attribute package
 !     \item [<valueList>]
 !           The valueList of the named Attribute
 !     \item [{[<defaultvalueList>]}]
 !           The default value list of the named Attribute
 !     \item [{[inputList]}]
 !           A list of the input parameters required to retrieve internal info
-!     \item [{[attpack]}]
-!           A handle to the Attribute package
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute
 !     \item [{[isPresent]}]
@@ -1941,7 +1921,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet - Get Attribute info by name
+! !IROUTINE: ESMF_AttributeGet - Get Attribute info by name from an {\tt ESMF\_AttPack} 
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet()
@@ -1951,7 +1931,7 @@ contains
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *),      intent(in)            :: name
-!     type(ESMF_AttPack),       intent(in),           :: attpack
+!     type(ESMF_AttPack),       intent(inout)         :: attpack
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
 !     integer,                  intent(out), optional :: itemCount
@@ -1982,7 +1962,7 @@ contains
 !           An {\tt ESMF} object
 !     \item [name]
 !           The name of the Attribute to query
-!     \item [{[attpack]}]
+!     \item [attpack]
 !           A handle to the Attribute package
 !     \item [{[typekind}]]
 !           The typekind of the Attribute
@@ -2112,6 +2092,52 @@ contains
 !           The typekind of the Attribute
 !     \item [{[itemCount]}]
 !           The number of items in this Attribute
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGet  - Get Attribute package instance names from an {\tt ESMF\_AttPack}
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGet()
+!     subroutine ESMF_AttributeGetAPinstNamesAP(<object>, attpack, &
+!       attPackInstanceNameList, attPackInstanceNameCount, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     type(ESMF_AttPack),  intent(inout)         :: attpack
+!     character (len = *), intent(out)           :: attPackInstanceNameList(:)
+!     integer,             intent(out)           :: attPackInstanceNameCount
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     integer,             intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Get the Attribute package instance names of the {\tt ESMF\_AttPack}.  
+!     Also get the number of such names.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_CplComp),  intent(in) :: comp
+!     \item type(ESMF\_GridComp), intent(in) :: comp
+!     \item type(ESMF\_SciComp),  intent(in) :: comp
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object
+!     \item [attpack]
+!           A handle to the Attribute package
+!     \item [attPackInstanceNameList]
+!           The name(s) of the Attribute package instances of the given
+!           convention and purpose.
+!     \item [attPackInstanceNameCount]
+!           The number of Attribute package instance names.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -2574,13 +2600,15 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeRemove - Remove an Attribute or Attribute package
+! !IROUTINE: ESMF_AttributeRemove - Remove an Attribute or Attribute package using an {\tt ESMF\_AttPack} 
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeRemove(<object>, name, attpack, rc)
+!     subroutine ESMF_AttributeRemove(<object>, keywordEnforcer, name, &
+!       attpack, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     character (len = *),  intent(in),  optional :: name
 !     type(ESMF_AttPack),   intent(inout)         :: attpack
 !     integer,              intent(out), optional :: rc
@@ -2690,16 +2718,18 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeSet - Set an Attribute
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute in an {\tt ESMF\_AttPack} 
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeSet(<object>, name, <value>, attpack, rc)
+!     subroutine ESMF_AttributeSet(<object>, name, <value>, attpack, &
+!       keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *),  intent(in)            :: name
 !     <value>, see below for supported values
-!     type(ESMF_AttPack),   intent(in)            :: attpack
+!     type(ESMF_AttPack),   intent(inout)         :: attpack
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2750,17 +2780,19 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeSet - Set an Attribute to point to internal class information
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute to point to internal class information in an {\tt ESMF\_AttPack} 
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeSet(<object>, name, <value>, inputList, attpack, rc)
+!     subroutine ESMF_AttributeSet(<object>, name, <value>,  attpack, &
+!       keywordEnforcer, inputList, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *),  intent(in)            :: name
 !     <value>, see below for supported values
+!     type(ESMF_AttPack),   intent(inout)         :: attpack
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     character (len = *),  intent(in),  optional :: inputList(:)
-!     type(ESMF_AttPack),   intent(in)            :: attpack
 !     integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2790,10 +2822,10 @@ contains
 !           The name of the Attribute to set
 !     \item [<value argument>]
 !           The value of the Attribute to set
-!     \item [{[inputList]}]
-!           A list of the input parameters required to set internal info
 !     \item [attpack]
 !           A handle to the Attribute package
+!     \item [{[inputList]}]
+!           A list of the input parameters required to set internal info
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
 !     \end{description}
@@ -2802,17 +2834,18 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeSet - Set an Attribute
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute in an {\tt ESMF\_AttPack} 
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeSet(<object>, name, <valueList>, &
-!       attpack, itemCount, rc)
+!     subroutine ESMF_AttributeSet(<object>, name, <valueList>, attpack, &
+!       keywordEnforcer, itemCount, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *),  intent(in)            :: name
 !     <valueList>, see below for supported values
 !     type(ESMF_AttPack),   intent(in)            :: attpack
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     integer,              intent(in),  optional :: itemCount
 !     integer,              intent(out), optional :: rc
 !
@@ -3124,46 +3157,6 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeValidate  - Validate an Attribute package
-!
-! !INTERFACE:
-!     subroutine ESMF_AttributeValidate(<object>, attpack, rc)
-!
-! !ARGUMENTS:
-!     <object>, see below for supported values
-!     type(ESMF_AttPack), intent(in),  optional :: attpack
-!     integer,            intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Validate the {\tt ESMF\_AttPack} object for <object>.
-!
-!     Supported values for <object> are:
-!     \begin{description}
-!     \item type(ESMF\_Array),       intent(inout) :: array
-!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp),     intent(inout) :: comp
-!     \item type(ESMF\_GridComp),    intent(inout) :: comp
-!     \item type(ESMF\_SciComp),     intent(inout) :: comp
-!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
-!     \item type(ESMF\_Field),       intent(inout) :: field
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
-!     \item type(ESMF\_Grid),        intent(inout) :: grid
-!     \item type(ESMF\_State),       intent(inout) :: state
-!     \end{description}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [<object>]
-!           An {\tt ESMF} object
-!     \item [{[attpack]}]
-!           An Attribute package
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
-!     \end{description}
-!
-!EOP
-!------------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: ESMF_AttributeWrite  - Write an Attribute package
 ! \label{api:AttributeWrite}
 !
@@ -3272,14 +3265,16 @@ contains
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttPackGet() @\
-      subroutine mclass##AttPackGet(mthis, attpack, & @\
-        convention, purpose, attPackInstanceName, isPresent, rc) @\
+      subroutine mclass##AttPackGet(mthis, & @\
+        convention, purpose, keywordEnforcer, attPackInstanceName, & @\
+        attpack, isPresent, rc) @\
  @\
       type(mclass), intent(in) :: mthis   @\
-	    type(ESMF_AttPack), intent(inout) :: attpack @\
       character (len = *), intent(in) :: convention @\
       character (len = *), intent(in) :: purpose @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
+      type(ESMF_AttPack), intent(inout), optional :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -3291,8 +3286,6 @@ contains
 !     \begin{description} @\
 !     \item [mthis] @\
 !           An ESMF object. @\
-!     \item [attpack] @\
-!           The Attribute package to return. @\
 !     \item [convention] @\
 !           The convention of the Attribute package. @\
 !     \item [purpose] @\
@@ -3302,6 +3295,8 @@ contains
 !           of multiple Attribute package instances of the same convention @\
 !           and purpose, within a nest.  If not specified, defaults to the @\
 !           first instance.  @\
+!     \item [{[attpack]}] @\
+!           The Attribute package to return. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute package is present or not @\
 !     \item [{[rc]}]  @\
@@ -3314,13 +3309,14 @@ contains
       integer :: localrc @\
       type(ESMF_Logical) :: lisPresent @\
       character(len=*), parameter :: fobject=#mthis @\
+      type(ESMF_AttPack) :: lattpack @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
-      call c_ESMC_AttPackGet(mthisfield, attpack, & @\
+      call c_ESMC_AttPackGet(mthisfield, lattpack, & @\
                              convention, purpose, & @\
                              fobject, attPackInstanceName, & @\
                              lisPresent, localrc) @\
@@ -3331,8 +3327,12 @@ contains
         isPresent = lisPresent @\
       endif @\
  @\
-      ! set the created macro @\
-      ESMF_INIT_SET_CREATED(attpack) @\
+      if (present(attpack)) then @\
+        attpack = lattpack @\
+ @\
+        ! set the created macro @\
+        ESMF_INIT_SET_CREATED(attpack) @\
+      endif @\
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
@@ -3410,8 +3410,9 @@ contains
  @\
       if ( present(attpack) ) then @\
         ! retrieve the optional attribute package handle @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
       end if @\
@@ -3614,8 +3615,9 @@ contains
  @\
       if ( present(attpack) ) then @\
         ! retrieve the optional attribute package handle @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
       end if @\
@@ -3713,8 +3715,9 @@ contains
  @\
       if ( present(attpack) ) then @\
         ! retrieve the optional attribute package handle @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
       end if @\
@@ -3872,8 +3875,9 @@ contains
  @\
       if ( present(attpack) ) then @\
         ! retrieve the optional attribute package handle @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
       end if @\
@@ -3963,8 +3967,9 @@ contains
  @\
       if ( present(attpack) ) then @\
         ! retrieve the optional attribute package handle @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
       end if @\
@@ -4050,19 +4055,20 @@ contains
 ^define ESMF_METHOD "ESMF_AttGet" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Retrieve an Attribute @\
+! !IROUTINE: ESMF_AttributeGet - Retrieve an Attribute from an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGetAP##mtypekind(mthis, name, value, & @\
-        defaultvalue, inputList, attpack, isPresent, rc) @\
+      subroutine mclass##AttGetAP##mtypekind(mthis, name, attpack, value, & @\
+        keywordEnforcer, defaultvalue, inputList, isPresent, rc) @\
  @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
       mtype(ESMF_KIND_##mtypekind), intent(out) :: value @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       mtype(ESMF_KIND_##mtypekind), intent(in), optional :: defaultvalue @\
       character (len=*), intent(in), optional :: inputList(:) @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -4076,14 +4082,14 @@ contains
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to retrieve. @\
+!     \item [attpack] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [value] @\
 !           The real value of the named Attribute. @\
 !     \item [{[defaultvalue]}] @\
 !           The real default value of the named Attribute. @\
 !     \item [{[inputList]}] @\
 !           A list of the input parameters required to retrieve internal info. @\
-!     \item [{[attpack]}] @\
-!           An Attribute package handle containing identifying information. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -4268,8 +4274,9 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -4321,20 +4328,21 @@ contains
 ^define ESMF_METHOD "ESMF_AttGet1D" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Retrieve an Attribute @\
+! !IROUTINE: ESMF_AttributeGet - Retrieve an Attribute from an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGet1DAP##mtypekind(mthis, name, valueList, & @\
-        defaultvalueList, inputList, attpack, & @\
+      subroutine mclass##AttGet1DAP##mtypekind(mthis, name, attpack, & @\
+        valueList, keywordEnforcer, defaultvalueList, inputList, & @\
         itemCount, isPresent, rc) @\
  @\
       type(mclass), intent(in) :: mthis   @\
       character (len=*), intent(in) :: name @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(out) :: valueList @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in), optional :: defaultvalueList @\
       character (len=*), intent(in), optional :: inputList(:) @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(out), optional :: itemCount    @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
@@ -4349,14 +4357,14 @@ contains
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to retrieve. @\
+!     \item [attpack] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [valueList] @\
 !           The list of real values of the named Attribute. @\
 !     \item [{[defaultvalueList]}] @\
 !           The list of real default values of the named Attribute. @\
 !     \item [{[inputList]}] @\
 !           A list of the input parameters required to retrieve internal info. @\
-!     \item [{[attpack]}] @\
-!           An Attribute package handle containing identifying information. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -4473,8 +4481,8 @@ contains
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
       subroutine mclass##AttGet1D##mtypekind(mthis, name, valueList, & @\
-        defaultvalueList, inputList, convention, purpose, attPackInstanceName, & @\
-        itemCount, isPresent, rc) @\
+        defaultvalueList, inputList, convention, purpose, & @\
+        attPackInstanceName, itemCount, isPresent, rc) @\
  @\
       type(mclass), intent(in) :: mthis   @\
       character (len=*), intent(in) :: name @\
@@ -4484,7 +4492,7 @@ contains
       character (len=*), intent(in), optional :: convention @\
       character (len=*), intent(in), optional :: purpose @\
       character (len=*), intent(in), optional :: attPackInstanceName @\
-      integer, intent(out), optional :: itemCount    @\
+      integer, intent(out), optional :: itemCount @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
  @\
@@ -4571,8 +4579,9 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -4651,19 +4660,20 @@ contains
 ^define ESMF_METHOD "ESMF_AttGetLgcl" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical Attribute @\
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical Attribute from an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGetLgclAP(mthis, name, value, defaultvalue, & @\
-        attpack, isPresent, rc) @\
+      subroutine mclass##AttGetLgclAP(mthis, name, attpack, value, & @\
+        keywordEnforcer, defaultvalue, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
       logical, intent(out) :: value @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       logical, intent(in), optional :: defaultvalue @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -4677,12 +4687,12 @@ contains
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to retrieve. @\
+!     \item [attpack] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [value] @\
 !           The logical value of the named Attribute. @\
 !     \item [{[defaultvalue]}] @\
 !           The logical default value of the named Attribute. @\
-!     \item [{[attpack]}] @\
-!           An Attribute package handle containing identifying information. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -4826,8 +4836,9 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -4878,20 +4889,22 @@ contains
 ^define ESMF_METHOD "ESMF_AttGetLgclList" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list Attribute @\
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list Attribute from an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGetLgclListAP(mthis, name, valueList, & @\
-        defaultvalueList, inputList, attpack, itemCount, isPresent, rc) @\
+      subroutine mclass##AttGetLgclListAP(mthis, name, attpack, valueList, & @\
+        keywordEnforcer, defaultvalueList, inputList, itemCount, & @\
+        isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character (len=*), intent(in) :: name @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
       logical, dimension(:), intent(out) :: valueList @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       logical, dimension(:), intent(in), optional :: defaultvalueList @\
       character (len=*), intent(in), optional :: inputList(:) @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(out), optional :: itemCount @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
@@ -4906,14 +4919,14 @@ contains
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to retrieve. @\
+!     \item [attpack] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [valueList] @\
 !           The logical values of the named Attribute. @\
 !     \item [{[defaultvalueList]}] @\
 !           The logical default value of the named Attribute. @\
 !     \item [{[inputList]}] @\
 !           A list of the input parameters required to retrieve internal info. @\
-!     \item [{[attpack]}] @\
-!           An Attribute package handle containing identifying information. @\
 !     \item [{[itemCount]}] @\
 !           The number of values in the Attribute. @\
 !     \item [{[isPresent]}] @\
@@ -5132,8 +5145,9 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -5211,19 +5225,20 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttGetChar" @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute @\
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute from an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGetCharAP(mthis, name, value, defaultvalue, & @\
-        attpack, isPresent, rc) @\
+      subroutine mclass##AttGetCharAP(mthis, name, attpack, value, & @\
+        keywordEnforcer, defaultvalue, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
       character (len = *), intent(out) :: value @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       character (len = *), intent(in), optional :: defaultvalue @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
  @\
@@ -5237,12 +5252,12 @@ contains
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to retrieve. @\
+!     \item [attpack] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [value] @\
 !           The character value of the named Attribute. @\
 !     \item [{[defaultvalue]}] @\
 !           The character default value of the named Attribute. @\
-!     \item [{[attpack]}] @\
-!           An Attribute package handle containing identifying information. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -5426,8 +5441,9 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -5473,20 +5489,20 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttGetCharList" @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute list @\
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character list Attribute from an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGetCharListAP(mthis, name, valueList, & @\
-        defaultvalueList, attpack, & @\
-        itemCount, isPresent, rc) @\
+      subroutine mclass##AttGetCharListAP(mthis, name, attpack, valueList, & @\
+        keywordEnforcer, defaultvalueList, itemCount, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
       character (len=*), dimension(:), intent(out) :: valueList @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       character (len=*), dimension(:), intent(in), optional :: defaultvalueList @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(out), optional :: itemCount @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
@@ -5501,12 +5517,12 @@ contains
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to retrieve. @\
+!     \item [attpack] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [valueList] @\
 !           The character list values of the named Attribute. @\
 !     \item [{[defaultvalueList]}] @\
 !           The character list default value of the named Attribute. @\
-!     \item [{[attpack]}] @\
-!           An Attribute package handle containing identifying information. @\
 !     \item [{[itemCount]}] @\
 !           The itemCount of the character items to retrieve @\
 !     \item [{[isPresent]}] @\
@@ -5610,7 +5626,7 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttGetCharList" @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute list @\
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character list Attribute @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
@@ -5700,8 +5716,9 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -5787,18 +5804,19 @@ contains
 ^define ESMF_METHOD "ESMF_AttGet" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Retrieve an Attribute @\
+! !IROUTINE: ESMF_AttributeGet - Retrieve an Attribute from an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGetAP##mtypekind(mthis, name, value, & @\
-        defaultvalue, attpack, isPresent, rc) @\
+      subroutine mclass##AttGetAP##mtypekind(mthis, name, attpack, value, & @\
+        keywordEnforcer, defaultvalue, isPresent, rc) @\
  @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
       mtype(ESMF_KIND_##mtypekind), intent(out) :: value @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       mtype(ESMF_KIND_##mtypekind), intent(in), optional :: defaultvalue @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -5812,12 +5830,12 @@ contains
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to retrieve. @\
+!     \item [attpack] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [value] @\
 !           The real value of the named Attribute. @\
 !     \item [{[defaultvalue]}] @\
 !           The real default value of the named Attribute. @\
-!     \item [{[attpack]}] @\
-!           An Attribute package handle containing identifying information. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -5956,8 +5974,9 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -6008,19 +6027,21 @@ contains
 ^define ESMF_METHOD "ESMF_AttGet1D" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Retrieve an Attribute @\
+! !IROUTINE: ESMF_AttributeGet - Retrieve an Attribute from an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGet1DAP##mtypekind(mthis, name, valueList, & @\
-        defaultvalueList, attpack, itemCount, isPresent, rc) @\
+      subroutine mclass##AttGet1DAP##mtypekind(mthis, name, attpack, & @\
+        valueList, keywordEnforcer, defaultvalueList, itemCount, & @\
+        isPresent, rc) @\
  @\
       type(mclass), intent(in) :: mthis   @\
       character (len=*), intent(in) :: name @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(out) :: valueList @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in), optional :: defaultvalueList @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
-      integer, intent(out), optional :: itemCount    @\
+      integer, intent(out), optional :: itemCount @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
  @\
@@ -6034,12 +6055,12 @@ contains
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to retrieve. @\
+!     \item [attpack] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [valueList] @\
 !           The list of real values of the named Attribute. @\
 !     \item [{[defaultvalueList]}] @\
 !           The list of real default values of the named Attribute. @\
-!     \item [{[attpack]}] @\
-!           An Attribute package handle containing identifying information. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -6209,8 +6230,9 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -6289,21 +6311,22 @@ contains
 ^define ESMF_METHOD "ESMF_AttGetLgcl" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical Attribute @\
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical Attribute from an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGetLgclAP(mthis, name, value, defaultvalue, & @\
-        attpack, isPresent, rc) @\
+      subroutine mclass##AttGetLgclAP(mthis, name, attpack, value, & @\
+        keywordEnforcer, defaultvalue, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
       logical, intent(out) :: value @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       logical, intent(in), optional :: defaultvalue @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
       logical, intent(out), optional :: isPresent @\
-      integer, intent(out), optional :: rc    @\
+      integer, intent(out), optional :: rc @\
  @\
 ! @\
 ! !DESCRIPTION: @\
@@ -6315,12 +6338,12 @@ contains
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to retrieve. @\
+!     \item [attpack] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [value] @\
 !           The logical value of the named Attribute. @\
 !     \item [{[defaultvalue]}] @\
 !           The logical default value of the named Attribute. @\
-!     \item [{[attpack]}] @\
-!           An Attribute package handle containing identifying information. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -6463,8 +6486,9 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -6515,20 +6539,21 @@ contains
 ^define ESMF_METHOD "ESMF_AttGetLgclList" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list Attribute @\
+! !IROUTINE: ESMF_AttributeGet - Retrieve a logical list Attribute from an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGetLgclListAP(mthis, name, valueList, & @\
-        defaultvalueList, attpack, itemCount, isPresent, rc) @\
+      subroutine mclass##AttGetLgclListAP(mthis, name, attpack, valueList, & @\
+        keywordEnforcer, defaultvalueList, itemCount, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character (len=*), intent(in) :: name @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
       logical, dimension(:), intent(out) :: valueList @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       logical, dimension(:), intent(in), optional :: defaultvalueList @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
-      integer, intent(out), optional :: itemCount    @\
+      integer, intent(out), optional :: itemCount @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
  @\
@@ -6542,12 +6567,12 @@ contains
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to retrieve. @\
+!     \item [attpack] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [valueList] @\
 !           The logical values of the named Attribute. @\
 !     \item [{[defaultvalueList]}] @\
 !           The logical default value of the named Attribute. @\
-!     \item [{[attpack]}] @\
-!           An Attribute package handle containing identifying information. @\
 !     \item [{[itemCount]}] @\
 !           The number of values in the Attribute. @\
 !     \item [{[isPresent]}] @\
@@ -6721,8 +6746,9 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -6800,19 +6826,20 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttGetChar" @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute @\
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute from an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGetCharAP(mthis, name, value, defaultvalue, & @\
-        attpack, isPresent, rc) @\
+      subroutine mclass##AttGetCharAP(mthis, name, attpack, value, & @\
+        keywordEnforcer, defaultvalue, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
       character (len = *), intent(out) :: value @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       character (len = *), intent(in), optional :: defaultvalue @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc @\
  @\
@@ -6826,12 +6853,12 @@ contains
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to retrieve. @\
+!     \item [attpack] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [value] @\
 !           The character value of the named Attribute. @\
 !     \item [{[defaultvalue]}] @\
 !           The character default value of the named Attribute. @\
-!     \item [{[attpack]}] @\
-!           An Attribute package handle containing identifying information. @\
 !     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
@@ -6974,8 +7001,9 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -7021,19 +7049,20 @@ contains
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttGetCharList" @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute list @\
+! !IROUTINE: ESMF_AttributeGet - Retrieve a character Attribute list from an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
-      subroutine mclass##AttGetCharListAP(mthis, name, valueList, & @\
-        defaultvalueList, attpack, itemCount, isPresent, rc) @\
+      subroutine mclass##AttGetCharListAP(mthis, name, attpack, valueList, & @\
+        keywordEnforcer, defaultvalueList, itemCount, isPresent, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character (len = *), intent(in) :: name @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
       character (len=*), dimension(:), intent(out) :: valueList @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       character (len=*), dimension(:), intent(in), optional :: defaultvalueList @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(out), optional :: itemCount @\
       logical, intent(out), optional :: isPresent @\
       integer, intent(out), optional :: rc    @\
@@ -7048,12 +7077,12 @@ contains
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to retrieve. @\
+!     \item [attpack] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [valueList] @\
 !           The character list values of the named Attribute. @\
 !     \item [{[defaultvalueList]}] @\
 !           The character list default value of the named Attribute. @\
-!     \item [{[attpack]}] @\
-!           An Attribute package handle containing identifying information. @\
 !     \item [{[itemCount]}] @\
 !           The itemCount of the character items to retrieve @\
 !     \item [{[isPresent]}] @\
@@ -7247,8 +7276,9 @@ contains
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpack, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
@@ -7394,7 +7424,7 @@ contains
 ^define ESMF_METHOD "ESMF_AttGetInfoByNam" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeGet - Query Attributes by name @\
+! !IROUTINE: ESMF_AttributeGet - Query Attributes by name from an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeGet() @\
@@ -7404,7 +7434,7 @@ contains
 ! !ARGUMENTS: @\
       type(mclass), intent(in) :: mthis   @\
       character(len=*), intent(in) :: name @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       type(ESMF_TypeKind_Flag), intent(out), optional :: typekind @\
       integer, intent(out), optional :: itemCount    @\
@@ -7422,7 +7452,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to query. @\
-!     \item [{[attpack]}] @\
+!     \item [attpack] @\
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[typekind]}] @\
 !           The typekind of the Attribute. @\
@@ -7688,6 +7718,84 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 #define AttGetAPinstNamesMacro(mclass, mthis, mthisfield) \
 ^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttGetAPinstNamesAP" @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeGet - Retrieve a list of AttPack instance names using an {\tt ESMF\_AttPack} @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeGet() @\
+      subroutine mclass##AttGetAPinstNamesAP(mthis, attpack, & @\
+        attPackInstanceNameList, attPackInstanceNameCount, keywordEnforcer, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass), intent(in) :: mthis @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
+      character (len = *), dimension(:), intent(out) :: attPackInstanceNameList @\
+      integer, intent(out) :: attPackInstanceNameCount @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+      integer, intent(out), optional :: rc @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Get the Attribute package instance names of the specified @\
+!     {\tt ESMF\_Attpack}.  Also get the number of such names. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis] @\
+!      An ESMF object. @\
+!     \item [attpack] @\
+!      An Attribute package handle containing identifying information. @\
+!     \item [attPackInstanceNameList] @\
+!      The name(s) of the Attribute package instances of the given @\
+!      convention and purpose. @\
+!     \item [attPackInstanceNameCount] @\
+!      The number of Attribute package instance names. @\
+!     \item [{[rc]}]  @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc, i, j, APinstNameSize @\
+      character(len=*), parameter :: object=#mthis @\
+      integer, dimension(size(attPackInstanceNameList)) :: APinstNameLens @\
+      character(len=(size(attPackInstanceNameList)*len(attPackInstanceNameList))) :: APinstNameString @\
+ @\
+      ! Initialize return code; assume failure until success is certain @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check input variables @\
+      ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
+ @\
+      ! pack widths of NameList elements @\
+      APinstNameSize = size(attPackInstanceNameList) @\
+      do  i=1,APinstNameSize @\
+        APinstNameLens(i) = len(attPackInstanceNameList(i)) @\
+      enddo @\
+ @\
+      call c_ESMC_AttPackGetAPinstNames(mthisfield, attpack, & @\
+        APinstNameString, APinstNameLens, APinstNameSize, & @\
+        attPackInstanceNameCount, localrc) @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+         ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+      ! unpack returned attpack instance names @\
+      j = 1 @\
+      do  i=1,attPackInstanceNameCount @\
+        attPackInstanceNameList(i) = & @\
+                       APinstNameString(j:(j+APinstNameLens(i)-1)) @\
+        j = j + APinstNameLens(i) @\
+      enddo @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass##AttGetAPinstNamesAP @\
+ @\
+!--------------------------------------------------------------------------- @\
+ @\
+^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_AttGetAPinstNames" @\
 !BOPI @\
 ! !IROUTINE: ESMF_AttributeGet - Retrieve a list of AttPack instance names @\
@@ -7734,6 +7842,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), parameter :: object=#mthis @\
       integer, dimension(size(attPackInstanceNameList)) :: APinstNameLens @\
       character(len=(size(attPackInstanceNameList)*len(attPackInstanceNameList))) :: APinstNameString @\
+      type(ESMF_AttPack) :: attpack @\
  @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
@@ -7747,8 +7856,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         APinstNameLens(i) = len(attPackInstanceNameList(i)) @\
       enddo @\
  @\
-      call c_ESMC_AttPackGetAPinstNames(mthisfield, & @\
-        convention, purpose, object, & @\
+      call mclass##AttPackGet(mthis, & @\
+                              convention, purpose, & @\
+                              attpack=attpack, rc=localrc) @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+        ESMF_CONTEXT, rcToReturn=rc)) return @\
+      call c_ESMC_AttPackGetAPinstNames(mthisfield, attpack, & @\
         APinstNameString, APinstNameLens, APinstNameSize, & @\
         attPackInstanceNameCount, localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
@@ -8142,14 +8255,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^define ESMF_METHOD "ESMF_AttRemove" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeRemove  - Remove an Attribute or Attribute Package @\
+! !IROUTINE: ESMF_AttributeRemove  - Remove an Attribute or Attribute Package using an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeRemove() @\
-      subroutine mclass##AttRemoveAP(mthis, name, attpack, rc) @\
+      subroutine mclass##AttRemoveAP(mthis, keywordEnforcer, name, & @\
+        attpack, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       character (len = *), intent(in), optional :: name @\
       type(ESMF_AttPack), intent(inout) :: attpack @\
       integer, intent(out), optional :: rc    @\
@@ -8163,7 +8278,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           An ESMF object. @\
 !     \item [name] @\
 !           The name of the Attribute to destroy. @\
-!     \item [{[attpack]}] @\
+!     \item [attpack] @\
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -8264,15 +8379,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE .and. .not.present(name)) then @\
-        call mclass##AttPackGet(mthis, attpackobj, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpackobj, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackRemove(mthisfield, attpackobj, localrc) @\
         ESMF_INIT_SET_DELETED(attpackobj) @\
       else if (attpack == ESMF_TRUE .and. present(name)) then @\
-        call mclass##AttPackGet(mthis, attpackobj, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpackobj, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackRemoveAttribute(mthisfield, name, attpackobj, localrc) @\
@@ -8298,17 +8415,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^define ESMF_METHOD "ESMF_AttSet" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeSet - Set an Attribute @\
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute in an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
-      subroutine mclass##AttSetAP##mtypekind(mthis, name, value, attpack, rc) @\
+      subroutine mclass##AttSetAP##mtypekind(mthis, name, value, attpack, & @\
+        keywordEnforcer, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       mtype(ESMF_KIND_##mtypekind), intent(in) :: value @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -8324,7 +8443,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The integer value of the Attribute to add. @\
-!     \item [{[attpack]}] @\
+!     \item [attpack] @\
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -8393,7 +8512,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), intent(in), optional :: convention @\
       character (len = *), intent(in), optional :: purpose @\
       character (len = *), intent(in), optional :: attPackInstanceName @\
-      integer, intent(out), optional :: rc    @\
+      integer, intent(out), optional :: rc @\
  @\
 ! @\
 ! !DESCRIPTION: @\
@@ -8468,8 +8587,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpackobj, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpackobj, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
@@ -8491,20 +8611,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^define ESMF_METHOD "ESMF_AttSet1D" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeSet - Set an Attribute @\
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute in an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
-      subroutine mclass##AttSet1DAP##mtypekind(mthis, name, valueList, & @\
-        attpack, itemCount, rc) @\
+      subroutine mclass##AttSet1DAP##mtypekind(mthis, name, & @\
+        valueList, attpack, keywordEnforcer, itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
       mtype(ESMF_KIND_##mtypekind), dimension(:), intent(in) :: valueList @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
-      integer, intent(in), optional :: itemCount    @\
-      integer, intent(out), optional :: rc    @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+      integer, intent(in), optional :: itemCount @\
+      integer, intent(out), optional :: rc @\
  @\
 ! @\
 ! !DESCRIPTION: @\
@@ -8521,7 +8642,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of the Attribute to add. @\
 !     \item [valueList] @\
 !           The integer values of the Attribute to add. @\
-!     \item [{[attpack]}] @\
+!     \item [attpack] @\
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[itemCount]}] @\
 !           The number of integers in the {\tt valueList}. @\
@@ -8702,8 +8823,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpackobj, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpackobj, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
@@ -8727,17 +8849,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^define ESMF_METHOD "ESMF_AttSetLgcl" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeSet - Set a logical Attribute @\
+! !IROUTINE: ESMF_AttributeSet - Set a logical Attribute in an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
-      subroutine mclass##AttSetLgclAP(mthis, name, value, attpack, rc) @\
+      subroutine mclass##AttSetLgclAP(mthis, name, value, attpack, & @\
+        keywordEnforcer, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       logical, intent(in) :: value @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -8753,7 +8877,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The logical true/false value of the Attribute to add. @\
-!     \item [{[attpack]}] @\
+!     \item [attpack] @\
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -8900,8 +9024,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       localvalue = value @\
       if (attpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpackobj, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpackobj, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
@@ -8923,20 +9048,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^define ESMF_METHOD "ESMF_AttSetLgclList" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeSet - Set a logical list Attribute @\
+! !IROUTINE: ESMF_AttributeSet - Set a logical list Attribute in an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
       subroutine mclass##AttSetLgclListAP(mthis, name, valueList, attpack, & @\
-        itemCount, rc) @\
+        keywordEnforcer, itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       logical, dimension(:), intent(in) :: valueList @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
-      integer, intent(in), optional :: itemCount    @\
-      integer, intent(out), optional :: rc    @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+      integer, intent(in), optional :: itemCount @\
+      integer, intent(out), optional :: rc @\
  @\
 ! @\
 ! !DESCRIPTION: @\
@@ -8953,7 +9079,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The logical true/false values of the Attribute. @\
-!     \item [{[attpack]}] @\
+!     \item [attpack] @\
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[itemCount]}] @\
 !           The number of logicals in the {\tt valueList}. @\
@@ -9134,8 +9260,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpackobj, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpackobj, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetValue(mthisfield, name, & @\
@@ -9159,18 +9286,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^define ESMF_METHOD "ESMF_AttSetChar" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeSet - Set a character Attribute @\
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute in an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
-      subroutine mclass##AttSetCharAP(mthis, name, value, attpack, rc) @\
+      subroutine mclass##AttSetCharAP(mthis, name, value, attpack, & @\
+        keywordEnforcer, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), intent(in) :: name @\
       character (len = *), intent(in) :: value @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
-      integer, intent(out), optional :: rc    @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+      integer, intent(out), optional :: rc @\
  @\
 ! @\
 ! !DESCRIPTION: @\
@@ -9185,7 +9314,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The character value of the Attribute to add. @\
-!     \item [{[attpack]}] @\
+!     \item [attpack] @\
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -9331,8 +9460,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpackobj, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpackobj, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
@@ -9353,18 +9483,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^define ESMF_METHOD "ESMF_AttSetCharList" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeSet - Set a character Attribute list @\
+! !IROUTINE: ESMF_AttributeSet - Set a character list Attribute in an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
-      subroutine mclass##AttSetCharListAP(mthis, name, valueList, & @\
-        attpack, itemCount, rc) @\
+      subroutine mclass##AttSetCharListAP(mthis, name, valueList, attpack, & @\
+        keywordEnforcer, itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
       character(len=*), intent(in) :: name @\
       character (len = *), dimension(:), intent(in) :: valueList @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       integer, intent(in), optional :: itemCount @\
       integer, intent(out), optional :: rc @\
  @\
@@ -9381,7 +9512,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The character value of the Attribute to add. @\
-!     \item [{[attpack]}] @\
+!     \item [attpack] @\
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -9458,7 +9589,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^define ESMF_METHOD "ESMF_AttSetCharList" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeSet - Set a character Attribute list @\
+! !IROUTINE: ESMF_AttributeSet - Set a character list Attribute @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
@@ -9573,8 +9704,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpackobj, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpackobj, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
@@ -9597,19 +9729,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^define ESMF_METHOD "ESMF_AttSetChar" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeSet - Set a character Attribute @\
+! !IROUTINE: ESMF_AttributeSet - Set a character Attribute in an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
-      subroutine mclass##AttSetCharAP(mthis, name, value, inputList, & @\
-        attpack, rc) @\
+      subroutine mclass##AttSetCharAP(mthis, name, value, attpack, & @\
+        keywordEnforcer, inputList, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
       character (len = *), intent(in) :: name @\
       character (len = *), intent(in) :: value @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       character (len = *), intent(in), optional :: inputList(:) @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -9625,10 +9758,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The character value of the Attribute to add. @\
+!     \item [attpack] @\
+!           An Attribute package handle containing identifying information. @\
 !     \item [{[inputList]}] @\
 !           A list of the input parameters required to set internal info. @\
-!     \item [{[attpack]}] @\
-!           An Attribute package handle containing identifying information. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !     \end{description} @\
@@ -9899,8 +10032,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpackobj, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpackobj, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
@@ -9926,18 +10060,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^define ESMF_METHOD "ESMF_AttSetCharList" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeSet - Set a character Attribute list @\
+! !IROUTINE: ESMF_AttributeSet - Set a character list Attribute in an {\tt ESMF\_AttPack} @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
-      subroutine mclass##AttSetCharListAP(mthis, name, valueList, & @\
-        attpack, itemCount, rc) @\
+      subroutine mclass##AttSetCharListAP(mthis, name, valueList, attpack, & @\
+        keywordEnforcer, itemCount, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
       character(len=*), intent(in) :: name @\
       character (len = *), dimension(:), intent(in) :: valueList @\
-      type(ESMF_AttPack), intent(in) :: attpack @\
+      type(ESMF_AttPack), intent(inout) :: attpack @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       integer, intent(in), optional :: itemCount @\
       integer, intent(out), optional :: rc @\
  @\
@@ -9954,7 +10089,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The name of the Attribute to add. @\
 !     \item [value] @\
 !           The character value of the Attribute to add. @\
-!     \item [{[attpack]}] @\
+!     \item [attpack] @\
 !           An Attribute package handle containing identifying information. @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -10031,7 +10166,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^define ESMF_METHOD "ESMF_AttSetCharList" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttributeSet - Set a character Attribute list @\
+! !IROUTINE: ESMF_AttributeSet - Set a character list Attribute @\
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeSet() @\
@@ -10146,8 +10281,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, attpackobj, & @\
-                                convention, purpose, rc=localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, & @\
+                                attpack=attpackobj, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
@@ -10218,52 +10354,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
       end subroutine mclass##AttUpdate @\
-
-!-----------------------------------------------------------------------------
-
-#define AttValidateMacro(mclass, mthis) \
-^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_AttValidate" @\
- @\
-!BOPI @\
-! !INTERFACE: @\
-      ! Private name; call using ESMF_AttributeValidate() @\
-      subroutine mclass##AttValidate(mthis, attpack, rc) @\
- @\
-! !ARGUMENTS: @\
-        type(mclass), intent(in) :: mthis   @\
-        type(ESMF_AttPack), intent(in) :: attpack @\
-        integer, intent(out), optional :: rc @\
- @\
-! @\
-! !DESCRIPTION: @\
-!     Validate an Attribute package. @\
-! @\
-! This call is collective across the current VM. @\
-! @\
-!     The arguments are: @\
-!     \begin{description} @\
-!     \item [mthis] @\
-!      An {\tt mclass} object. @\
-!     \item [attpack] @\
-!      An {\tt ESMF\_AttPack} object. @\
-!     \item [{[rc]}]  @\
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
-!     \end{description} @\
-! @\
-! @\
-!EOPI @\
-        ! Check Init Status @\
-        ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
- @\
-        ! Add other checks here @\
- @\
-        ! If all checks passed return success @\
-        if (present(rc)) then @\
-            rc=ESMF_SUCCESS @\
-        endif @\
- @\
-    end subroutine mclass##AttValidate @\
 
 !-----------------------------------------------------------------------------
 
@@ -10411,7 +10501,6 @@ AttSetLogicalMacro(ESMF_CplComp, comp, comp%compp%base)
 AttSetCharacterMacro(ESMF_CplComp, comp, comp%compp%base)
 
 AttUpdateMacro(ESMF_CplComp, comp, comp%compp%base)
-AttValidateMacro(ESMF_CplComp, comp)
 AttWriteMacro(ESMF_CplComp, comp, comp%compp%base, comp, field)
 
 !-------------------------------------------------------------------------
@@ -10460,7 +10549,6 @@ AttSetLogicalMacro(ESMF_GridComp, comp, comp%compp%base)
 AttSetCharacterMacro(ESMF_GridComp, comp, comp%compp%base)
 
 AttUpdateMacro(ESMF_GridComp, comp, comp%compp%base)
-AttValidateMacro(ESMF_GridComp, comp)
 AttWriteMacro(ESMF_GridComp, comp, comp%compp%base, comp, field)
 
 !-------------------------------------------------------------------------
@@ -10509,7 +10597,6 @@ AttSetLogicalMacro(ESMF_SciComp, comp, comp%compp%base)
 AttSetCharacterMacro(ESMF_SciComp, comp, comp%compp%base)
 
 AttUpdateMacro(ESMF_SciComp, comp, comp%compp%base)
-AttValidateMacro(ESMF_SciComp, comp)
 AttWriteMacro(ESMF_SciComp, comp, comp%compp%base, comp, field)
 
 !-------------------------------------------------------------------------
@@ -10561,7 +10648,6 @@ AttSetLogicalMacro(ESMF_State, state, state%statep%base)
 AttSetCharacterMacro(ESMF_State, state, state%statep%base)
 
 AttUpdateMacro(ESMF_State, state, state%statep%base)
-AttValidateMacro(ESMF_State, state)
 AttWriteMacro(ESMF_State, state, state%statep%base, state, field)
 
 !-------------------------------------------------------------------------
@@ -10599,7 +10685,6 @@ AttSetLogicalMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttSetCharacterMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 
 AttUpdateMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
-AttValidateMacro(ESMF_FieldBundle, fieldbundle)
 AttWriteMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base, fieldbundle, field)
 
 !-------------------------------------------------------------------------
@@ -10634,7 +10719,6 @@ AttSetLogicalMacro(ESMF_Field, field, field%ftypep%base)
 AttSetCharacterMacro(ESMF_Field, field, field%ftypep%base)
 
 AttUpdateMacro(ESMF_Field, field, field%ftypep%base)
-AttValidateMacro(ESMF_Field, field)
 AttWriteMacro(ESMF_Field, field, field%ftypep%base, field, field)
 
 !-------------------------------------------------------------------------
@@ -10666,7 +10750,6 @@ AttSetLogicalMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttSetCharacterMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 
 AttUpdateMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
-AttValidateMacro(ESMF_ArrayBundle, arraybundle)
 AttWriteMacro(ESMF_ArrayBundle, arraybundle, arraybundle, arraybundle, array)
 
 !-------------------------------------------------------------------------
@@ -10693,7 +10776,6 @@ AttSetLogicalMacro(ESMF_Array, array, array)
 AttSetCharacterMacro(ESMF_Array, array, array)
 
 AttUpdateMacro(ESMF_Array, array, array)
-AttValidateMacro(ESMF_Array, array)
 AttWriteMacro(ESMF_Array, array, array, array, array)
 
 !-------------------------------------------------------------------------
@@ -10734,7 +10816,6 @@ TypeKind3DeclarationMacro(AttSet, ESMF_Grid, grid, grid)
 AttSetLogicalMacro(ESMF_Grid, grid, grid)
 AttSetCharacterBMacro(ESMF_Grid, grid, grid)
 
-AttValidateMacro(ESMF_Grid, grid)
 AttWriteMacro(ESMF_Grid, grid, grid, grid, grid)
 
 !-------------------------------------------------------------------------
@@ -10759,8 +10840,6 @@ AttRemoveMacro(ESMF_DistGrid, distgrid, distgrid)
 TypeKind3DeclarationMacro(AttSet, ESMF_DistGrid, distgrid, distgrid)
 AttSetLogicalMacro(ESMF_DistGrid, distgrid, distgrid)
 AttSetCharacterMacro(ESMF_DistGrid, distgrid, distgrid)
-
-AttValidateMacro(ESMF_DistGrid, distgrid)
 
 !------------------------------------------------------------------------------
 

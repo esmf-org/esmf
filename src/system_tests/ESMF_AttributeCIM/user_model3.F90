@@ -159,7 +159,7 @@ module user_model3
     ! Responsible party attributes (for Contact)
     convISO = 'ISO 19115'
     purpRP = 'RespParty'
-    call ESMF_AttPackGet(comp, attpack, convISO, purpRP, rc=rc)
+    call ESMF_AttPackGet(comp, convISO, purpRP, attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_AttributeSet(comp, 'Name', &
@@ -187,7 +187,7 @@ module user_model3
     ! Citation attributes
     convISO = 'ISO 19115'
     purpCitation = 'Citation'
-    call ESMF_AttPackGet(comp, attpack, convISO, purpCitation, rc=rc)
+    call ESMF_AttPackGet(comp, convISO, purpCitation, attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     call ESMF_AttributeSet(comp, 'ShortTitle', &

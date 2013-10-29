@@ -141,8 +141,8 @@ module NUOPC_ModelBase
     initPhases(3) = "IPDv00p3=3"
     initPhases(4) = "IPDv00p4=4"
     
-    call ESMF_AttPackGet(gcomp, attpack, &
-      convention="NUOPC", purpose="General", rc=rc)
+    call ESMF_AttPackGet(gcomp, convention="NUOPC", purpose="General", &
+      attpack=attpack, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -185,8 +185,8 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! determine verbosity
-    call ESMF_AttPackGet(gcomp, attpack, &
-    					 convention="NUOPC", purpose="General", rc=rc)
+    call ESMF_AttPackGet(gcomp, convention="NUOPC", purpose="General", &
+      attpack=attpack, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out

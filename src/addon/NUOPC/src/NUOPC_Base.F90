@@ -461,8 +461,8 @@ module NUOPC_Base
 	type(ESMF_AttPack)   :: attpack
     if (present(rc)) rc = ESMF_SUCCESS
 
-	  call ESMF_AttPackGet(comp, attpack, &
-			convention="NUOPC", purpose="General", rc=rc)
+	  call ESMF_AttPackGet(comp, convention="NUOPC", purpose="General", &
+      attpack=attpack, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -528,7 +528,8 @@ module NUOPC_Base
       line=__LINE__, file=FILENAME)) return  ! bail out
       
     ! set Attributes
-    call ESMF_AttPackGet(comp, attpack, "NUOPC", "General", rc=rc)
+    call ESMF_AttPackGet(comp, "NUOPC", "General", &
+      attpack=attpack, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     call ESMF_AttributeSet(comp, &
@@ -795,8 +796,8 @@ module NUOPC_Base
 
     defaultvalue = "CheckThisDefaultValue"
 
-	  call ESMF_AttPackGet(field, attpack, &
-						 convention="NUOPC", purpose="General", rc=rc)
+	  call ESMF_AttPackGet(field, convention="NUOPC", purpose="General", &
+      attpack=attpack, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -845,8 +846,8 @@ module NUOPC_Base
     
     if (present(rc)) rc = ESMF_SUCCESS
 
-    call ESMF_AttPackGet(field, attpack, &
-             convention="NUOPC", purpose="General", rc=rc)
+    call ESMF_AttPackGet(field, convention="NUOPC", purpose="General", &
+      attpack=attpack, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -920,8 +921,8 @@ module NUOPC_Base
     do i=1, srcCount    
       srcField = srcFieldList(i)
       dstField = dstFieldList(i)
- 	  call ESMF_AttPackGet(srcField, attpack, &
- 	  					   convention="NUOPC", purpose="General", rc=rc)
+ 	    call ESMF_AttPackGet(srcField, convention="NUOPC", purpose="General", &
+        attpack=attpack, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -1127,9 +1128,9 @@ module NUOPC_Base
       file=FILENAME)) &
       return  ! bail out
 
-	call ESMF_AttPackGet(field, attpack, &
-						 convention="NUOPC", purpose="General", rc=rc)
-	if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+	  call ESMF_AttPackGet(field, convention="NUOPC", purpose="General", &
+      attpack=attpack, rc=rc)
+	  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
@@ -2119,8 +2120,8 @@ endif
         write (msgString, *) "Failure in NUOPC_StateIsUpdated() for item "// &
           trim(adjustl(iString))//": "//trim(stdItemNameList(i))
         field=stdFieldList(i)
-		call ESMF_AttPackGet(field, attpack, &
-							 convention="NUOPC", purpose="General", rc=rc)
+		    call ESMF_AttPackGet(field, convention="NUOPC", purpose="General", &
+          attpack=attpack, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
         call ESMF_AttributeGet(field, name="Updated", value=value, &
@@ -2284,8 +2285,8 @@ endif
           selected=.true.
         endif
         if (selected) then
-          call ESMF_AttPackGet(field, attpack, &
-            convention="NUOPC", purpose="General", rc=rc)
+          call ESMF_AttPackGet(field, convention="NUOPC", purpose="General", &
+            attpack=attpack, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -2366,8 +2367,8 @@ endif
           file=FILENAME)) &
           return  ! bail out
           
-		    call ESMF_AttPackGet(field, attpack, &
-					convention="NUOPC", purpose="General", rc=rc)
+		    call ESMF_AttPackGet(field, convention="NUOPC", purpose="General", &
+          attpack=attpack, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
           file=FILENAME)) &

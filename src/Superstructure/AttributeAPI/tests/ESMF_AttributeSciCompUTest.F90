@@ -1676,14 +1676,6 @@ program ESMF_AttributeSciCompUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !EX_UTest
-      ! Validate an Attribute package on a SciComp Test
-      call ESMF_AttributeValidate(scicomp, attpack, rc=rc)
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Validate an Attribute package on a SciComp Test"
-      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
       !------------------------------------------------------------------------
       ! clean up      
       call ESMF_SciCompDestroy(scicomp, rc=rc)

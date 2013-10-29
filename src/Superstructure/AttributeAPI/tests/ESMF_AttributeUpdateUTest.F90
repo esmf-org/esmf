@@ -337,7 +337,7 @@ module ESMF_AttributeUpdateUTestMod
 
     call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_AttPackGet(field, attpack, convESMF, purpGen, rc=status)
+    call ESMF_AttPackGet(field, convESMF, purpGen, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeSet(field, name2, value2, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
@@ -641,8 +641,8 @@ program ESMF_AttributeUpdateUTest
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !EX_UTest_Multi_Proc_Only
-	call ESMF_AttPackGet(field, attpack, &
-						 convention=convESMF, purpose=purpGen, rc=rc)
+	call ESMF_AttPackGet(field, convention=convESMF, purpose=purpGen, &
+        attpack=attpack, rc=rc)
     call ESMF_AttributeGet(field, name2, value=outVal, attpack=attpack, rc=rc)
     print *, "outVal = ", outVal 
     print *, "value2 = ", value2
@@ -652,8 +652,8 @@ program ESMF_AttributeUpdateUTest
                     name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest_Multi_Proc_Only
-	call ESMF_AttPackGet(field, attpack, &
-						 convention=convESMF, purpose=purp2, rc=rc)
+	call ESMF_AttPackGet(field, convention=convESMF, purpose=purp2, &
+        attpack=attpack, rc=rc)
     call ESMF_AttributeGet(field, attrList(1), value=outVal, &
       attpack=attpack, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
