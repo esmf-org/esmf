@@ -872,8 +872,15 @@ type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
       if (alog%FileIsOpen /= ESMF_TRUE) then
-        write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-            ": ESMF_Log not open -- cannot ESMF_LogFlush()."
+        if (present (log)) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+              ": ESMF_Log not open -- cannot ESMF_LogFlush()."
+          if (present (rc))  &
+            rc=ESMF_RC_FILE_OPEN
+        else
+          if (present (rc))  &
+            rc=ESMF_SUCCESS
+        end if
         return
       endif
       if ((alog%FileIsOpen == ESMF_TRUE) .AND. &

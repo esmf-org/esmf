@@ -678,7 +678,7 @@ if (time_diff < zero) stop 1
       write(failMsg, *) "Did not return ESMF_FAILURE"
       write(name, *) " LogFlush of unopened log Test"
       call ESMF_LogFlush(log2, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc == ESMF_RC_FILE_OPEN), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
