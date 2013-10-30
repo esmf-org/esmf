@@ -19,7 +19,7 @@ module NUOPC_Mediator
     label_Advance                   => label_Advance, &
     label_CheckImport               => label_CheckImport, &
     label_SetRunClock               => label_SetRunClock, &
-    ModelBase_label_TimestampExport => label_TimestampExport
+    label_TimestampExport           => label_TimestampExport
 
   implicit none
   
@@ -38,7 +38,8 @@ module NUOPC_Mediator
     label_Advance, &
     label_CheckImport, &
     label_DataInitialize, &
-    label_SetRunClock
+    label_SetRunClock, &
+    label_TimestampExport
 
   character(*), parameter :: &
     label_DataInitialize = "Mediator_DataInitialize"
