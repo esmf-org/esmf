@@ -347,7 +347,8 @@ module NUOPC_ModelBase
     endif
     
     ! SPECIALIZE optionally: label_TimestampExport
-    call ESMF_MethodExecute(gcomp, label=label_TimestampExport, &
+    ! -> first check for the label with phase index
+    call ESMF_MethodExecute(gcomp, label=label_TimestampExport, index=phase, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -356,6 +357,18 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
+    if (.not.existflag) then
+      ! -> next check for the label without phase index
+      call ESMF_MethodExecute(gcomp, label=label_TimestampExport, &
+        existflag=existflag, userRc=localrc, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! deallocate internal state memory
     deallocate(is%wrap, stat=stat)
