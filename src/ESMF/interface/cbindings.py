@@ -965,7 +965,7 @@ def ESMP_MeshGetCoordPtr(mesh):
     """
     lrc = ct.c_int(0)
     lnum_nodes = ct.c_int(0)
-    meshCoordPtr = _ESMF.ESMC_MeshGetCoord(mesh, ct.byref(lnum_nodes),
+    meshCoordPtr = _ESMF.ESMC_MeshGetCoord(mesh.struct.ptr, ct.byref(lnum_nodes),
                                            ct.byref(lrc))
     num_nodes = lnum_nodes.value
     rc = lrc.value
