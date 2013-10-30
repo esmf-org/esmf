@@ -103,12 +103,6 @@
           (/ "this", "test", "is  ", "a   " /)
 
       character(ESMF_MAXSTR) :: pathname
-      logical :: relaxedFlag
-
-      type(ESMF_MapPtr) :: mapcontainer
-      integer :: newvalue
-      integer :: mapsize
-      logical :: isfound
 #endif
 
 !-------------------------------------------------------------------------------
@@ -336,9 +330,10 @@
     write (failMsg, *) "did not return ESMF_SUCCESS"
     rc = ESMF_SUCCESS
     do, i=2, size (sorted_reals)
-      if (sorted_reals(i-1) < sorted_reals(i)) cycle
-      rc = ESMF_FAILURE
-      exit
+      if (sorted_reals(i-1) > sorted_reals(i)) then
+	rc = ESMF_FAILURE
+	exit
+      end if
     end do
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -356,9 +351,10 @@
     write (failMsg, *) "did not return ESMF_SUCCESS"
     rc = ESMF_SUCCESS
     do, i=2, size (sorted_reals)
-      if (sorted_reals(i-1) > sorted_reals(i)) cycle
-      rc = ESMF_FAILURE
-      exit
+      if (sorted_reals(i-1) < sorted_reals(i)) then
+	rc = ESMF_FAILURE
+	exit
+      end if
     end do
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -378,9 +374,10 @@
     write (failMsg, *) "did not return ESMF_SUCCESS"
     rc = ESMF_SUCCESS
     do, i=2, size (sorted_dblreals)
-      if (sorted_dblreals(i-1) < sorted_dblreals(i)) cycle
-      rc = ESMF_FAILURE
-      exit
+      if (sorted_dblreals(i-1) > sorted_dblreals(i)) then
+	rc = ESMF_FAILURE
+	exit
+      end if
     end do
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -398,9 +395,10 @@
     write (failMsg, *) "did not return ESMF_SUCCESS"
     rc = ESMF_SUCCESS
     do, i=2, size (sorted_dblreals)
-      if (sorted_dblreals(i-1) > sorted_dblreals(i)) cycle
-      rc = ESMF_FAILURE
-      exit
+      if (sorted_dblreals(i-1) < sorted_dblreals(i)) then
+	rc = ESMF_FAILURE
+	exit
+      end if
     end do
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -420,10 +418,11 @@
     write (failMsg, *) "did not return ESMF_SUCCESS"
     rc = ESMF_SUCCESS
     do, i=2, size (sorted_ints)
-      if (sorted_ints(i-1) < sorted_ints(i)) cycle
-      print *, 'failed testing: ', sorted_ints(i-1), " < ", sorted_ints(i)
-      rc = ESMF_FAILURE
-      exit
+      if (sorted_ints(i-1) > sorted_ints(i)) then
+        print *, 'failed testing: ', sorted_ints(i-1), " < ", sorted_ints(i)
+	rc = ESMF_FAILURE
+	exit
+      end if
     end do
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -441,10 +440,11 @@
     write (failMsg, *) "did not return ESMF_SUCCESS"
     rc = ESMF_SUCCESS
     do, i=2, size (sorted_ints)
-      if (sorted_ints(i-1) > sorted_ints(i)) cycle
-      print *, 'failed testing: ', sorted_ints(i-1), " > ", sorted_ints(i)
-      rc = ESMF_FAILURE
-      exit
+      if (sorted_ints(i-1) < sorted_ints(i)) then
+        print *, 'failed testing: ', sorted_ints(i-1), " > ", sorted_ints(i)
+	rc = ESMF_FAILURE
+	exit
+      end if
     end do
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -464,10 +464,11 @@
     write (failMsg, *) "did not return ESMF_SUCCESS"
     rc = ESMF_SUCCESS
     do, i=2, size (sorted_dblints)
-      if (sorted_dblints(i-1) < sorted_dblints(i)) cycle
-      print *, 'failed testing: ', sorted_dblints(i-1), " < ", sorted_dblints(i)
-      rc = ESMF_FAILURE
-      exit
+      if (sorted_dblints(i-1) > sorted_dblints(i)) then
+        print *, 'failed testing: ', sorted_dblints(i-1), " < ", sorted_dblints(i)
+	rc = ESMF_FAILURE
+	exit
+      end if
     end do
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -485,10 +486,11 @@
     write (failMsg, *) "did not return ESMF_SUCCESS"
     rc = ESMF_SUCCESS
     do, i=2, size (sorted_dblints)
-      if (sorted_dblints(i-1) > sorted_dblints(i)) cycle
-      print *, 'failed testing: ', sorted_dblints(i-1), " > ", sorted_dblints(i)
-      rc = ESMF_FAILURE
-      exit
+      if (sorted_dblints(i-1) < sorted_dblints(i)) then
+        print *, 'failed testing: ', sorted_dblints(i-1), " > ", sorted_dblints(i)
+	rc = ESMF_FAILURE
+	exit
+      end if
     end do
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
