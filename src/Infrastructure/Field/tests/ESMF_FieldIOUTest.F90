@@ -14,12 +14,7 @@ program ESMF_FieldIOUTest
 
 !------------------------------------------------------------------------------
 
-#include "ESMF_Macros.inc"
 #include "ESMF.h"
-
-! Eventually these macros can be replaced with F2008 block/end block
-#define ESMF_BLOCK(LABEL) LABEL: do
-#define ESMF_ENDBLOCK(LABEL) if (.true.) exit LABEL; end do LABEL
 
 !==============================================================================
 !BOP
