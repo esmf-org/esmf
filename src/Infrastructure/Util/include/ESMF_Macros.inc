@@ -40,5 +40,18 @@ unmatched quotes confuse some preprocessors with delusions of grammar.)
 #define ESMF_FILENAME __FILE__
 #endif
 
+#if 0
+Macros to allow structured early exits from blocks of Fortran code.
+These are typically when testing for errors.
+
+Eventually these macros can be rewritten or replaced using the F2008
+block/end block statements.
+#endif
+
+#if defined (_FROM_FORTRAN)
+#define ESMF_BLOCK(ESMF_BLOCK_LABEL) ESMF_BLOCK_LABEL: do
+#define ESMF_ENDBLOCK(ESMF_BLOCK_LABEL) if (.true.) exit ESMF_BLOCK_LABEL; end do ESMF_BLOCK_LABEL
+#endif
+
 #endif 
 

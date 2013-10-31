@@ -32,8 +32,8 @@ uniform error messages and exit codes.
 #ifndef ESMF_H
 #define ESMF_H
 
-#include "ESMF_Macros.inc"
 #define _FROM_FORTRAN 1
+#include "ESMF_Macros.inc"
 #include "ESMC_Conf.h"
 #include "ESMF_Conf.inc"
 #include "ESMF_LogConstants.inc"
