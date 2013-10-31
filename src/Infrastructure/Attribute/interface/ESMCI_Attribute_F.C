@@ -1328,7 +1328,7 @@ extern "C" {
   }
 
   // check the attribute package
-  if (!attpack) {
+  if (!(*attpack)) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NOTALLOC,
                     "failed getting attribute package", ESMC_CONTEXT, &status);
     if (rc) *rc = status;
