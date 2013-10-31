@@ -103,9 +103,7 @@ program ESMF_ArrayScatterGatherEx
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-  if (localPet == 0) then
-    deallocate(farray)
-  endif
+  deallocate(farray)
 !EOC
 !BOE
 ! The destination of the ArrayScatter() operation are all the DEs of a single
@@ -120,15 +118,15 @@ program ESMF_ArrayScatterGatherEx
 !BOC
   if (localPet == 3) then
     allocate(farray(10,20,30))
+  else
+    allocate(farray(0,0,0))
   endif
   
   call ESMF_ArrayGather(array, farray=farray, rootPet=3, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-  if (localPet == 3) then
-    deallocate(farray)
-  endif
+  deallocate(farray)
 !EOC
 !BOE
 ! The source of the ArrayGather() operation are all the DEs of a single
@@ -174,15 +172,15 @@ program ESMF_ArrayScatterGatherEx
         myFarray2D(i,j) = i * 100.d0 + j * 1.2345d0 ! initialize
       enddo
     enddo
+  else
+    allocate(myFarray2D(0,0))
   endif
   
   call ESMF_ArrayScatter(array, farray=myFarray2D, rootPet=0, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-  if (localPet == 0) then
-    deallocate(myFarray2D)
-  endif
+  deallocate(myFarray2D)
 !EOC
 !BOE
 ! This will have filled each local 4 x 2 Array piece with the replicated
@@ -242,15 +240,15 @@ program ESMF_ArrayScatterGatherEx
         myFarray2D2(i,j) = i * 100.d0 + j * 1.2345d0 ! initialize
       enddo
     enddo
+  else
+    allocate(myFarray2D2(0,0))
   endif
   
   call ESMF_ArrayScatter(array, farray=myFarray2D2, rootPet=0, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-  if (localPet == 0) then
-    deallocate(myFarray2D2)
-  endif
+  deallocate(myFarray2D2)
 !EOC
 !BOE
 ! The Array pieces on every DE will receive the same source data, resulting
