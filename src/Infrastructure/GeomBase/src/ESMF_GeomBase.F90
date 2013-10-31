@@ -240,8 +240,8 @@ end interface
        integer,               intent(in),  optional :: ungriddedUBound(:)
        type(ESMF_DistGrid),   intent(out), optional :: distgrid
        integer,               intent(out)           :: distgridToArrayMap(:)
-       integer,               intent(out)           :: undistLBound(:)
-       integer,               intent(out)           :: undistUBound(:)
+       integer,               intent(out), optional :: undistLBound(:)
+       integer,               intent(out), optional :: undistUBound(:)
        integer,               intent(out), optional :: rc
 
 !
@@ -315,10 +315,10 @@ end interface
             distgridToArrayMap = 1
           endif
 
-          if (present(ungriddedLBound)) then
+          if (present(ungriddedLBound) .and. present (undistLBound)) then
               if (size(ungriddedLBound) .gt. 0) undistLBound = ungriddedLBound
           endif
-          if (present(ungriddedUBound)) then
+          if (present(ungriddedUBound) .and. present (undistUBound)) then
               if (size(ungriddedUBound) .gt. 0) undistUBound = ungriddedUBound
           endif
 
@@ -353,10 +353,10 @@ end interface
              distgridToArrayMap = 1
           endif
 
-          if (present(ungriddedLBound)) then
+          if (present(ungriddedLBound) .and. present (undistLBound)) then
               if (size(ungriddedLBound) .gt. 0) undistLBound = ungriddedLBound
           endif
-          if (present(ungriddedUBound)) then
+          if (present(ungriddedUBound) .and. present (undistUBound)) then
               if (size(ungriddedUBound) .gt. 0) undistUBound = ungriddedUBound
           endif
 
@@ -376,10 +376,10 @@ end interface
              distgridToArrayMap = 1
           endif
 
-          if (present(ungriddedLBound)) then
+          if (present(ungriddedLBound) .and. present (undistLBound)) then
               if (size(ungriddedLBound) .gt. 0) undistLBound = ungriddedLBound
           endif
-          if (present(ungriddedUBound)) then
+          if (present(ungriddedUBound) .and. present (undistUBound)) then
               if (size(ungriddedUBound) .gt. 0) undistUBound = ungriddedUBound
           endif
 

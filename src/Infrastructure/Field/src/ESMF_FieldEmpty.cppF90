@@ -1123,8 +1123,6 @@ end subroutine ESMF_FieldEmptyCompTK
                               ungriddedLBound=ungriddedLBound, &
                               ungriddedUBound=ungriddedUBound, &
                               distgridToArrayMap=distgridToArrayMap, &
-                              undistLBound=arrayLBound, &
-                              undistUBound=arrayUBound,   &
                               rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return

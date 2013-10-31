@@ -2227,8 +2227,8 @@ end subroutine ESMF_GridConvertIndex
        integer,               intent(in),  optional :: ungriddedUBound(:)
        type(ESMF_DistGrid),   intent(out), optional :: staggerDistgrid 
        integer,               intent(out)           :: distgridToArrayMap(:)
-       integer,               intent(out)           :: undistLBound(:)
-       integer,               intent(out)           :: undistUBound(:)
+       integer,               intent(out), optional :: undistLBound(:)
+       integer,               intent(out), optional :: undistUBound(:)
        integer,               intent(out), optional :: rc
 
 !
@@ -2490,8 +2490,10 @@ end subroutine ESMF_GridConvertIndex
           bndpos=1
           do i=1,arrayDimCount
              if (arrayDimType(i) == 2) then
-                undistLBound(bndpos)=ungriddedLBound(arrayDimInd(i))
-                undistUBound(bndpos)=ungriddedUBound(arrayDimInd(i))
+                if (present (undistLBound)) &
+                  undistLBound(bndpos)=ungriddedLBound(arrayDimInd(i))
+                if (present (undistUBound)) &
+                  undistUBound(bndpos)=ungriddedUBound(arrayDimInd(i))
                 bndpos=bndpos+1
              endif
           enddo
@@ -2614,10 +2616,10 @@ end subroutine ESMF_GridConvertIndex
        ! if there are undistributed dimensions ...
        if (undistArrayDimCount > 0) then      
 	  ! Copy ungriddedBound to undistBound
-	  do i=1,undistArrayDimCount
-            undistLBound(i)=ungriddedLBound(i)
-            undistUBound(i)=ungriddedUBound(i)
-	  enddo
+          if (present (undistLBound))  &
+            undistLBound(:undistArrayDimCount) = ungriddedLBound(:undistArrayDimCount)
+          if (present (undistUBound))  &
+            undistUBound(:undistArrayDimCount) = ungriddedUBound(:undistArrayDimCount)
        endif
     endif
 
