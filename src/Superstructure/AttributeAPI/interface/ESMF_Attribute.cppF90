@@ -972,9 +972,9 @@ contains
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     character (len = *), intent(in)              :: attrList(:)
 !     character (len = *), intent(in)              :: convention
 !     character (len = *), intent(in)              :: purpose
+!     character (len = *), intent(in)              :: attrList(:)
 !     integer,             intent(in),    optional :: count
 !     type(ESMF_AttPack),  intent(inout), optional :: attpack
 !     integer,             intent(out),   optional :: rc
@@ -1001,12 +1001,12 @@ contains
 !     \begin{description}
 !     \item [<object>]
 !           An {\tt ESMF} object
-!     \item [attrList]
-!           The list of Attribute names to specify the custom Attribute package
 !     \item [convention]
 !           The convention of the Attribute package
 !     \item [purpose]
 !           The purpose of the Attribute package
+!     \item [attrList]
+!           The list of Attribute names to specify the custom Attribute package
 !     \item [{[count]}]
 !           The number of Attributes to add to the custom Attribute package
 !     \item [{[attpack]}]
@@ -1028,9 +1028,9 @@ contains
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     character (len = *), intent(in),    optional :: attrList(:)
 !     character (len = *), intent(in)              :: convention
 !     character (len = *), intent(in)              :: purpose
+!     character (len = *), intent(in),    optional :: attrList(:)
 !     integer,             intent(in),    optional :: count
 !     character (len = *), intent(in)              :: nestConvention(:)
 !     character (len = *), intent(in)              :: nestPurpose(:)
@@ -1098,9 +1098,9 @@ contains
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
-!     character (len = *), intent(in),    optional :: attrList(:)
 !     character (len = *), intent(in)              :: convention
 !     character (len = *), intent(in)              :: purpose
+!     character (len = *), intent(in),    optional :: attrList(:)
 !     integer,             intent(in),    optional :: count
 !     character (len = *), intent(in)              :: nestConvention
 !     character (len = *), intent(in)              :: nestPurpose
