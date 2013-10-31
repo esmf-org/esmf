@@ -218,7 +218,11 @@ contains
           endif
         enddo
 
-        if(localPet .eq. 0) allocate(farrayDst(16))  ! rootPet
+        if(localPet .eq. 0) then
+          allocate(farrayDst(16))  ! rootPet
+        else
+          allocate(farrayDst(0))
+        end if
         call ESMF_ArrayGather(array, farrayDst, rootPet=0, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -314,7 +318,11 @@ contains
         enddo
         enddo
 
-        if(localPet .eq. 0) allocate(farrayDst(10,20))  ! rootPet
+        if(localPet .eq. 0) then
+          allocate(farrayDst(10,20))  ! rootPet
+        else
+          allocate(farrayDst(0,0))
+        end if
         call ESMF_ArrayGather(array, farrayDst, rootPet=0, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -438,7 +446,11 @@ contains
         enddo
         enddo
 
-        if(localPet .eq. 0) allocate(farrayDst(10,20,5))  ! rootPet
+        if(localPet .eq. 0) then
+          allocate(farrayDst(10,20,5))  ! rootPet
+        else
+          allocate(farrayDst(0,0,0))  ! rootPet
+        end if
         call ESMF_ArrayGather(array, farrayDst, rootPet=0, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &

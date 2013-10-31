@@ -126,16 +126,20 @@ print *, min_R4, min_R8
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "2D ESMF_TYPEKIND_R8 ArrayScatter() w/ incompatible Fortran Array (typekind) Test"
   write(failMsg, *) "Did return ESMF_SUCCESS"
+  allocate (srcfarray_R4(1,1))
   call ESMF_ArrayScatter(array, srcfarray_R4, rootPet=0, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate (srcfarray_R4)
   
 #ifdef ESMF_TESTEXHAUSTIVE
   !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "2D ESMF_TYPEKIND_R8 ArrayScatter() w/ incompatible Fortran Array (rank) Test"
   write(failMsg, *) "Did return ESMF_SUCCESS"
+  allocate (srcfarray3d(1,1,1))
   call ESMF_ArrayScatter(array, srcfarray3d, rootPet=0, rc=rc)
   call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate (srcfarray3d)
 #endif
 
   !------------------------------------------------------------------------

@@ -387,16 +387,20 @@ program ESMF_DELayoutUTest
   ! Get from a destroyed DELayout
   write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
   write(name, *) "DELayoutGet from destroyed DELayout Test"
+  allocate(petMap(2*petCount))
   call ESMF_DELayoutGet(delayout, vm=vm1, petMap=petMap, rc=rc)
   call ESMF_Test((rc.eq.ESMF_RC_OBJ_DELETED), name, failMsg, result, ESMF_SRCLINE)
+  deallocate (petMap)
 
   !------------------------------------------------------------------------
   !EX_UTest
   ! Get from a non-created DELayout
   write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
   write(name, *) "DELayoutGet from non-created DELayout Test"
+  allocate(petMap(2*petCount))
   call ESMF_DELayoutGet(delayout1, vm=vm1, petMap=petMap, rc=rc)
   call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+  deallocate (petMap)
 
   !------------------------------------------------------------------------
   !EX_UTest

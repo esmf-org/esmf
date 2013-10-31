@@ -47,15 +47,12 @@
     ! local arguments used to create field etc
     type(ESMF_Field)                            :: field
     type(ESMF_Grid)                             :: grid
-    type(ESMF_DistGrid)                         :: distgrid
     type(ESMF_VM)                               :: vm
-    type(ESMF_Array)                            :: array
     integer                                     :: localrc, lpe, i, j
 
-    integer, allocatable                        :: farray(:,:)
     integer, allocatable                        :: farrayDst(:,:)
     integer, allocatable                        :: farraySrc(:,:)
-    integer                                     :: fa_shape(2), result
+    integer                                     :: result
     integer, pointer                            :: fptr(:,:)
     character(ESMF_MAXSTR) :: testname
     character(ESMF_MAXSTR) :: failMsg
@@ -140,7 +137,11 @@
     fptr = lpe
 
     ! allocate the Fortran data array on PET 0 to store gathered data
-    if(lpe .eq. 0) allocate(farrayDst(10,20))
+    if(lpe .eq. 0) then
+      allocate (farrayDst(10,20))
+    else
+      allocate (farrayDst(0,0))
+    end if
     call ESMF_FieldGather(field, farrayDst, rootPet=0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -219,6 +220,8 @@
         farraySrc(6:10,1:10) = 1
         farraySrc(1:5,11:20) = 2
         farraySrc(6:10,11:20) = 3
+    else
+      allocate (farraySrc(0,0))
     endif
 
     ! scatter the data onto individual PETs of the Field

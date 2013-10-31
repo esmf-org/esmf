@@ -77,6 +77,8 @@ program ESMF_ArrayScatterGatherEx
         enddo
       enddo
     enddo
+  else
+    allocate(farray(0,0,0))
   endif
 !EOC
 !BOC
