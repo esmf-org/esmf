@@ -340,6 +340,17 @@ program ESMF_AttPackPresenceUTest
       !------------------------------------------------------------------------
 
       !EX_UTest
+      isPresent = .false.
+      ! Test for the presence of an AttPack object on an ArrayBundle
+      call ESMF_AttPackGet(arraybundle, convention=conv, purpose=purp, &
+        isPresent=isPresent, rc=rc)     
+      write(failMsg, *) "Did not return isPresent=True"
+      write(name, *) "Test for the presence of an AttPack object on an ArrayBundle"
+      call ESMF_Test((rc==ESMF_SUCCESS .and. isPresent.eqv..true.), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
       ! Remove the entire Attribute package from an Array Test
       call ESMF_AttributeRemove(arraybundle, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
