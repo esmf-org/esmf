@@ -793,7 +793,7 @@ contains
 ! !IROUTINE: ESMF_CompDestruct - Release resources associated with a Component
 
 ! !INTERFACE:
-  subroutine ESMF_CompDestruct(compp, interCompComm, fullShutdown, &
+  recursive subroutine ESMF_CompDestruct(compp, interCompComm, fullShutdown, &
     timeout, timeoutFlag, rc)
 !
 ! !ARGUMENTS:
