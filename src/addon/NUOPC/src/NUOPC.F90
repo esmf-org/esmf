@@ -62,10 +62,11 @@ module NUOPC
   public NUOPC_TimePrint
   
   ! defined in NUOPC_RunSequenceDef
-  public NUOPC_RunElement, NUOPC_RunSequence
-  public NUOPC_RunElementAdd, NUOPC_RunSequenceAdd
-  public NUOPC_RunElementPrint, NUOPC_RunSequencePrint
-  public NUOPC_RunSequenceSet
+  public NUOPC_RunElement
+  public NUOPC_RunElementAdd, NUOPC_RunElementAddComp, NUOPC_RunElementAddLink
+  public NUOPC_RunElementPrint
+  public NUOPC_RunSequence
+  public NUOPC_RunSequenceAdd, NUOPC_RunSequenceSet, NUOPC_RunSequencePrint
   public NUOPC_RunSequenceDeallocate
   public NUOPC_RunSequenceIterate
   

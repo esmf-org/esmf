@@ -11,10 +11,11 @@ module NUOPC_RunSequenceDef
   
   private
   
-  public NUOPC_RunElement, NUOPC_RunSequence
-  public NUOPC_RunElementAdd, NUOPC_RunSequenceAdd
-  public NUOPC_RunElementPrint, NUOPC_RunSequencePrint
-  public NUOPC_RunSequenceSet
+  public NUOPC_RunElement
+  public NUOPC_RunElementAdd, NUOPC_RunElementAddComp, NUOPC_RunElementAddLink
+  public NUOPC_RunElementPrint
+  public NUOPC_RunSequence
+  public NUOPC_RunSequenceAdd, NUOPC_RunSequenceSet, NUOPC_RunSequencePrint
   public NUOPC_RunSequenceDeallocate
   public NUOPC_RunSequenceIterate
   
@@ -70,8 +71,8 @@ module NUOPC_RunSequenceDef
     integer,                 intent(in)            :: i, j, phase
     integer, optional,       intent(out)           :: rc
 ! !DESCRIPTION:
-!   Add a new RunElement at the end of a RunSequence. The RunElement is set to
-!   the values provided for {\tt i}, {\tt j}, {\tt phase}.
+!   Add a new RunElement at the end of an existing RunSequence. The RunElement
+!   is set to the values provided for {\tt i}, {\tt j}, {\tt phase}.
 !EOP
   !-----------------------------------------------------------------------------
     integer                                :: stat
@@ -82,7 +83,7 @@ module NUOPC_RunSequenceDef
     
     ! sanity check
     if (.not.associated(runSeq%first)) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="first must be associated",&
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="runSeq must exist",&
         line=__LINE__, file=FILENAME, rcToReturn=rc)
       return  ! bail out
     endif
@@ -110,6 +111,112 @@ module NUOPC_RunSequenceDef
       runElement%next => searchElement
       prevElement%next => runElement
     endif
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_RunElementAddComp - Add a RunElement for a Component to the end of a RunSequence
+! !INTERFACE:
+  subroutine NUOPC_RunElementAddComp(runSeq, i, j, phase, rc)
+! !ARGUMENTS:
+    type(NUOPC_RunSequence), intent(inout), target :: runSeq
+    integer,                 intent(in)            :: i
+    integer,                 intent(in),  optional :: j
+    integer,                 intent(in),  optional :: phase
+    integer, optional,       intent(out)           :: rc
+! !DESCRIPTION:
+!   Add a new RunElement for a Component to the end of an existing RunSequence.
+!   The RunElement is set to the values provided for {\tt i}, {\tt j}, 
+!   {\tt phase}, or as determined by their defaults.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[runSeq]
+!     An existing {\tt NUOPC\_RunSequence} object.
+!   \item[i]
+!     Element {\tt i} index. This index must be > 0. Corresponds to the Model 
+!     or Mediator component index if {\tt j} < 0. Corresponds to src side of a
+!     Connector if {\tt j} >= 0.
+!   \item[{[j]}]
+!     Element {\tt j} index. Defaults to -1.
+!   \item[{[phase]}]
+!     Element {\tt phase} index. Defaults to 1.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    integer                                :: jLocal, pLocal
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! error checking
+    if (i<0) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="i must not be < 0.",&
+        line=__LINE__, file=FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+    
+    ! handle defaults
+    if (present(j)) then
+      jLocal = j
+    else
+      jLocal = -1
+    endif
+    if (present(phase)) then
+      pLocal = phase
+    else
+      pLocal = 1
+    endif
+    
+    ! call into the more generic method
+    call NUOPC_RunElementAdd(runSeq, i=i, j=jLocal, phase=pLocal, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_RunElementAddLink - Add a RunElement for a Link to the end of a RunSequence
+! !INTERFACE:
+  subroutine NUOPC_RunElementAddLink(runSeq, slot, rc)
+! !ARGUMENTS:
+    type(NUOPC_RunSequence), intent(inout), target :: runSeq
+    integer,                 intent(in)            :: slot
+    integer, optional,       intent(out)           :: rc
+! !DESCRIPTION:
+!   Add a new RunElement for a link to the end of an existing RunSequence.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[runSeq]
+!     An existing {\tt NUOPC\_RunSequence} object.
+!   \item[slot]
+!     Run sequence slot to be linked to. Must be > 0.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! error checking
+    if (slot<=0) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="slot must be > 0.",&
+        line=__LINE__, file=FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+    
+    ! call into the more generic method
+    call NUOPC_RunElementAdd(runSeq, i=-slot, j=0, phase=0, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
   end subroutine
   !-----------------------------------------------------------------------------
