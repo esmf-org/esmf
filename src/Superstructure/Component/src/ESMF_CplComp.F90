@@ -487,7 +487,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_CplCompDestroy - Release resources associated with a CplComp
 
 ! !INTERFACE:
-  subroutine ESMF_CplCompDestroy(cplcomp, keywordEnforcer, &
+  recursive subroutine ESMF_CplCompDestroy(cplcomp, keywordEnforcer, &
     timeout, timeoutFlag, rc)
 !
 ! !ARGUMENTS:

@@ -500,7 +500,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridCompDestroy - Release resources associated with a GridComp
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompDestroy(gridcomp, keywordEnforcer, &
+  recursive subroutine ESMF_GridCompDestroy(gridcomp, keywordEnforcer, &
     timeout, timeoutFlag, rc)
 !
 ! !ARGUMENTS:
