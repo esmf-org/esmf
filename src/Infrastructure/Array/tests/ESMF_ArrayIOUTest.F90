@@ -14,7 +14,6 @@ program ESMF_ArrayIOUTest
 
 !------------------------------------------------------------------------------
 
-#include "ESMF_Macros.inc"
 #include "ESMF.h"
 
 !==============================================================================
@@ -134,35 +133,46 @@ program ESMF_ArrayIOUTest
 ! !  Get Fortran pointer to Array data
 ! !  Data is type ESMF_KIND_I4
   localDeCount = 1
-  call ESMF_ArrayGet(array_withhalo, localDe=0, farrayPtr=Farray3D_withhalo, rc=rc)
-  call ESMF_ArrayGet(array_wouthalo, localDe=0, farrayPtr=Farray3D_wouthalo, rc=rc)
+  ESMF_BLOCK(aget_i4)
+    call ESMF_ArrayGet(array_withhalo, localDe=0, farrayPtr=Farray3D_withhalo, rc=rc)
+    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+        line=__LINE__, file=ESMF_FILENAME)) exit aget_i4
 
-  localDeCount = 1
-  allocate(exclusiveLBound(3,localDeCount))         ! dimCount=3
-  allocate(exclusiveUBound(3,localDeCount))         ! dimCount=3
+    call ESMF_ArrayGet(array_wouthalo, localDe=0, farrayPtr=Farray3D_wouthalo, rc=rc)
+    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+        line=__LINE__, file=ESMF_FILENAME)) exit aget_i4
 
-  call ESMF_ArrayGet(array_wouthalo, exclusiveLBound=exclusiveLBound, &
-                     exclusiveUBound=exclusiveUBound, rc=rc)
+    localDeCount = 1
+    allocate(exclusiveLBound(3,localDeCount))         ! dimCount=3
+    allocate(exclusiveUBound(3,localDeCount))         ! dimCount=3
 
-  do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
-  do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
-  do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
-    Farray3D_wouthalo(i,j,k) = i+j+k  ! init to something i, j, k dependent
-  enddo
-  enddo
-  enddo
+    call ESMF_ArrayGet(array_wouthalo, exclusiveLBound=exclusiveLBound, &
+                       exclusiveUBound=exclusiveUBound, rc=rc)
+    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+        line=__LINE__, file=ESMF_FILENAME)) exit aget_i4
 
-  call ESMF_ArrayGet(array_withhalo, exclusiveLBound=exclusiveLBound, &
-                     exclusiveUBound=exclusiveUBound, rc=rc)
-  Farray3D_withhalo = 1     ! All entries are 1 including the halos.
-  do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
-  do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
-  do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
-    Farray3D_withhalo(i,j,k) = i+j+k  ! init to something i, j, k dependent
-  enddo
-  enddo
-  enddo
+    do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
+    do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
+    do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
+      Farray3D_wouthalo(i,j,k) = i+j+k  ! init to something i, j, k dependent
+    enddo
+    enddo
+    enddo
 
+    call ESMF_ArrayGet(array_withhalo, exclusiveLBound=exclusiveLBound, &
+                       exclusiveUBound=exclusiveUBound, rc=rc)
+    if (ESMF_LogFoundError (rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU,  &
+        line=__LINE__, file=ESMF_FILENAME)) exit aget_i4
+
+    Farray3D_withhalo = 1     ! All entries are 1 including the halos.
+    do k=exclusiveLBound(3,1),exclusiveUBound(3,1)
+    do j=exclusiveLBound(2,1),exclusiveUBound(2,1)
+    do i=exclusiveLBound(1,1),exclusiveUBound(1,1)
+      Farray3D_withhalo(i,j,k) = i+j+k  ! init to something i, j, k dependent
+    enddo
+    enddo
+    enddo
+  ESMF_ENDBLOCK(aget_i4)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
