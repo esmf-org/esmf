@@ -421,9 +421,9 @@ void VMK::init(MPI_Comm mpiCommunicator){
   }
 #else
   long int *temp_ssiid = new long int[ncores];
-  int hostid = gethostid();
-  MPI_Allgather(&hostid, sizeof(long int), MPI_BYTE, temp_ssiid, 
-    sizeof(long int), MPI_BYTE, mpi_c);
+  long hostid = gethostid();
+  MPI_Allgather(&hostid, 1, MPI_LONG,
+             temp_ssiid, 1, MPI_LONG, mpi_c);
   // now re-number the ssiid[] to go like 0, 1, 2, ...
   int ssi_counter=0;
   for (int i=0; i<ncores; i++){
