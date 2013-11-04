@@ -51,6 +51,7 @@ module NUOPC
   public NUOPC_GridCreateSimpleXY
   public NUOPC_IsCreated
   public NUOPC_StateAdvertiseField
+  public NUOPC_StateAdvertiseFields
   public NUOPC_StateBuildStdList
   public NUOPC_StateIsAllConnected
   public NUOPC_StateIsAtTime
