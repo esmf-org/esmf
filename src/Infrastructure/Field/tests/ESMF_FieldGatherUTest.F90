@@ -164,7 +164,11 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if(lpe .eq. 0) allocate(farrayDst(16))
+        if(lpe .eq. 0) then
+          allocate(farrayDst(16))
+        else
+          allocate(farrayDst(0))
+        end if
         call ESMF_FieldGather(field, farrayDst, rootPet=0, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -253,7 +257,11 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if(lpe .eq. 0) allocate(farrayDst(10,20))
+        if(lpe .eq. 0) then
+          allocate(farrayDst(10,20))
+        else
+          allocate(farrayDst(0,0))
+        end if
         call ESMF_FieldGather(field, farrayDst, rootPet=0, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -341,7 +349,11 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if(lpe .eq. 0) allocate(farrayDst(10,20,5))
+        if(lpe .eq. 0) then
+          allocate(farrayDst(10,20,5))
+        else
+          allocate(farrayDst(0,0,0))
+        end if
         call ESMF_FieldGather(field, farrayDst, rootPet=0, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -442,6 +454,8 @@ contains
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+          allocate (farraySrc(0,0))
         endif
 
         call ESMF_FieldScatter(field, farraySrc, rootPet=0, rc=localrc)
