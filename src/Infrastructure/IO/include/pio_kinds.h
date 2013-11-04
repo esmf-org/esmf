@@ -17,7 +17,7 @@
 // sizeof( iosystem_desc_t)
 typedef int pio_iosystem_desc_t;
 extern "C" const pio_iosystem_desc_t PIO_IOSYSTEM_DESC_NULL;
-#define PIO_SIZE_IOSYSTEM_DESC  168
+#define PIO_SIZE_IOSYSTEM_DESC  184
 
 // sizeof( file_desc_t)
 typedef void *pio_file_desc_t;
@@ -29,7 +29,7 @@ typedef void *pio_io_desc_t;
 
 // sizeof( var_desc_t)
 typedef void *pio_var_desc_t;
-#define PIO_SIZE_VAR_DESC        16
+#define PIO_SIZE_VAR_DESC        68
 
 // PIO_OFFSET is the same type as MPI_Offset which is a typedef in C
 #define PIO_OFFSET MPI_Offset
