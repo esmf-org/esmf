@@ -299,8 +299,8 @@ It is analogous to the Fortran {\tt len\_trim} intrinsic function.
       ESMCI_FortranStrLenArg name1_l,   // in - hidden length of name1
       ESMCI_FortranStrLenArg name2_l) { // in - hidden length of name2
 
-      string name1_local = string (name1, 0, ESMC_F90lentrim (name1, name1_l));
-      string name2_local = string (name2, 0, ESMC_F90lentrim (name2, name2_l));
+      string name1_local = string (name1, ESMC_F90lentrim (name1, name1_l));
+      string name2_local = string (name2, ESMC_F90lentrim (name2, name2_l));
       ...
   }
 \end{verbatim}
