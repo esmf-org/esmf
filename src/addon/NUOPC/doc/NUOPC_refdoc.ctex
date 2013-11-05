@@ -88,7 +88,7 @@
 
 \subsection{Metadata}
 
-\subsubsection{Model Component Metadata}
+\subsubsection{Model and Mediator Component Metadata}
 #ifdef STANDALONE
 \input{NUOPC_ModelComponent_metadata}
 #elif defined(CONSTITUENT)
@@ -111,11 +111,20 @@
 
 \newpage
 
-\subsection{Initialize Phase Definitions}
+\subsection{Initialization}
+
+\subsubsection{Initialize Phase Definitions}
 #ifdef STANDALONE
 \input{NUOPC_IPD}
 #elif defined(CONSTITUENT)
 \input{../addon/NUOPC/doc/NUOPC_IPD}
+#endif
+
+\subsubsection{Data-Dependencies during Initialize}
+#ifdef STANDALONE
+\input{NUOPC_DataDepInit}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_DataDepInit}
 #endif
 
 \newpage

@@ -68,27 +68,33 @@ Mediator component with a default {\em explicit} time dependency. Each time the 
       \end{itemize}
     \item IPDv00p2 = phase 2: ({\sc Required, Implementor Provided})
       \begin{itemize}
-      \item Realize advertised Fields in import and export States.
+      \item Realize the advertised Fields in import and export States.
       \end{itemize}  
     \item IPDv00p3 = phase 3: ({\sc Required, NUOPC Provided})
       \begin{itemize}
-      \item Additional initialization phase.
+      \item Check compatibility of the Fields' Connected status.
       \end{itemize}
     \item IPDv00p4 = phase 4: ({\sc Required, NUOPC Provided})
       \begin{itemize}
-      \item Additional initialization phase.
+      \item Handle Field data initialization. Time stamp the export Fields.
       \end{itemize}
     \end{itemize}  
   \end{itemize}  
-\item phase 3: ({\sc Required, NUOPC Provided})
+\item phase 3: ({\sc NUOPC Provided}, suitable for: IPDv00p3, IPDv01p4, IPDv02p4)
   \begin{itemize}
   \item Set the Mediator internal clock as a copy of the incoming clock. 
   \item Check compatibility, ensuring all advertised import Fields are connected.
   \end{itemize}  
-\item phase 4: ({\sc Required, NUOPC Provided})
+\item phase 4: ({\sc NUOPC Provided}, suitable for: IPDv00p4, IPDv01p5)
   \begin{itemize}
   \item {\it Optional specialization} to initialize export Fields: {\tt label\_DataInitialize}
   \item Time stamp Fields in import and export States for compatibility checking.
+  \end{itemize}    
+\item phase 5: ({\sc NUOPC Provided}, suitable for: IPDv02p5)
+  \begin{itemize}
+  \item {\it Optional specialization} to initialize export Fields: {\tt label\_DataInitialize}
+  \item Time stamp Fields in export State for compatibility checking.
+  \item Set Component metadata used to resolve initialize data dependencies.
   \end{itemize}    
 \end{itemize}
 
@@ -98,10 +104,12 @@ Mediator component with a default {\em explicit} time dependency. Each time the 
   \begin{itemize}
   \item Allocate internal state memory.
   \item Assign the {\tt driverClock} member in the internal state as an alias to the incoming clock.
-  \item Check that internal clock and incoming clock agree on current time and that the time step of the incoming clock is a multiple of the internal clock time step (remember that the generic InitializePhase2 set the Mediator internal clock identical to the incoming clock). Under these conditions, set the internal stop time to one time step interval on the incoming clock. Otherwise exit with error, flagging incompatibility.
+  \item {\it Optional specialization} to check and set the internal clock against the incoming clock: {\tt label\_SetRunClock}.
+  \item Alternatively use the default specialization: check that internal clock and incoming clock agree on current time and that the time step of the incoming clock is a multiple of the internal clock time step. Under these conditions set the internal stop time to one time step interval on the incoming clock. Otherwise exit with error, flagging incompatibility.
   \item {\it Optional specialization} to check Fields in import State: {\tt label\_CheckImport}.
   \item Alternatively use the default specialization: check that all import Fields are at the current time of the internal clock.
-  \item Timestamp all export Fields at the current time of the internal clock, i.e. the current time of the incoming clock.
+  \item {\it Optional specialization} to timestamp the Fields in the export State: {\tt label\_TimestampExport}.
+  \item Alternatively timestamp all export Fields at the current time of the internal clock, i.e. the current time of the incoming clock.
   \item Mediator time step forward on the internal Clock, which is the same time step as on the incoming Clock. This prepares the internal clock for the next iteration.
   \item {\it Required specialization} to mediate the Fields: {\tt label\_Advance}.
   \item Deallocate internal state memory.

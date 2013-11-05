@@ -55,6 +55,7 @@ module NUOPC_Base
   public NUOPC_GridCreateSimpleXY
   public NUOPC_IsCreated
   public NUOPC_StateAdvertiseField
+  public NUOPC_StateAdvertiseFields
   public NUOPC_StateBuildStdList
   public NUOPC_StateIsAllConnected
   public NUOPC_StateIsAtTime
@@ -1684,7 +1685,7 @@ endif
   end function
   !-----------------------------------------------------------------------------
   
-   !-----------------------------------------------------------------------------
+  !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_StateAdvertiseField - Advertise a Field in a State
 ! !INTERFACE:
@@ -1782,6 +1783,49 @@ endif
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_StateAdvertiseFields - Advertise Fields in a State
+! !INTERFACE:
+  subroutine NUOPC_StateAdvertiseFields(state, StandardNames, rc)
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)         :: state
+    character(*),     intent(in)            :: StandardNames(:)
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Advertises Fields in a State. Defaults are set according to the 
+!   NUOPC Field Dictionary.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object through which the Field is advertised.
+!   \item[StandardNames]
+!     A list of StandardNames of the advertised Fields. Must be StandardNames 
+!     found in the  NUOPC Field Dictionary.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                 :: i
+    
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    do i=1, size(StandardNames)
+      call NUOPC_StateAdvertiseField(state, StandardName=StandardNames(i), &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    enddo
     
   end subroutine
   !-----------------------------------------------------------------------------
