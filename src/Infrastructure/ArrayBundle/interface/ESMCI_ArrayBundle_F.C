@@ -398,7 +398,7 @@ extern "C" {
     // The Fortran interface always sets the flags and optional variables
     // except for timeslice. For character variables, create a C++ string.
     // helper variable
-    string fileName = string (file, 0, ESMC_F90lentrim (file, *len_file));
+    string fileName = string (file, ESMC_F90lentrim (file, *len_file));
 
     if (ESMC_NOT_PRESENT_FILTER(opt_singleFile) != ESMC_NULL_POINTER) {
       singleFile = (ESMF_FALSE != *opt_singleFile);
@@ -430,7 +430,7 @@ extern "C" {
     }
     // Create C++ string for string input
     // helper variable
-    string fileName = string (file, 0, ESMC_F90lentrim (file, *len_file));
+    string fileName = string (file, ESMC_F90lentrim (file, *len_file));
 
     if (ESMC_NOT_PRESENT_FILTER(opt_singleFile) != ESMC_NULL_POINTER) {
       singleFile = (ESMF_FALSE != *opt_singleFile);

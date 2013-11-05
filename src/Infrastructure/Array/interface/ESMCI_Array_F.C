@@ -615,11 +615,11 @@ extern "C" {
     // The Fortran interface always sets the flags and optional variables
     // except for timeslice. For character variables, create c++ string copies.
 
-    string fileName (file, 0, ESMC_F90lentrim (file, file_l));
+    string fileName (file, ESMC_F90lentrim (file, file_l));
 
     string varName;
     if (*len_variableName > 0)
-      varName = string (variableName, 0,
+      varName = string (variableName,
         ESMC_F90lentrim (variableName, *len_variableName));
 
     overwriteflag = (*opt_overwriteflag == ESMF_TRUE);
@@ -647,11 +647,11 @@ extern "C" {
 
     //  For character variables, create c++ string copies.
 
-    string fileName (file, 0, ESMC_F90lentrim (file, file_l));
+    string fileName (file, ESMC_F90lentrim (file, file_l));
 
     string varName;
     if (*len_variableName > 0)
-      varName = string (variableName, 0,
+      varName = string (variableName,
         ESMC_F90lentrim (variableName, *len_variableName));
 
     // Call into the actual C++ method wrapped inside LogErr handling

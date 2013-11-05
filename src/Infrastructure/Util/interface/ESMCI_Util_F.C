@@ -200,7 +200,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_ESMC_MakeDirectory"
 
-  string path = string (pathname, 0, ESMC_F90lentrim (pathname, pathname_l));
+  string path = string (pathname, ESMC_F90lentrim (pathname, pathname_l));
   bool relaxedflag = *relaxedFlag == ESMF_TRUE;
 
 #if !defined (ESMF_OS_MinGW)
@@ -258,7 +258,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_ESMC_UtilRemoveDirectory"
 
-  string path = string (pathname, 0, ESMC_F90lentrim (pathname, pathname_l));
+  string path = string (pathname, ESMC_F90lentrim (pathname, pathname_l));
   bool relaxedflag = *relaxedFlag == ESMF_TRUE;
 
 #if !defined (ESMF_OS_MinGW)
