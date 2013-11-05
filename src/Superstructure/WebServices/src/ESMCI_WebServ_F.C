@@ -399,7 +399,7 @@ void FTN_X(c_esmc_addoutputfilename)(
 //-----------------------------------------------------------------------------
 {
 	int	localrc = 0;
-	string	filenameStr = string (filename, 0, ESMC_F90lentrim (filename, filenameLen));
+	string	filenameStr = string (filename, ESMC_F90lentrim (filename, filenameLen));
 
    // TODO: everything
    if (theComponentServer != NULL)
