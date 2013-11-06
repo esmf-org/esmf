@@ -222,6 +222,19 @@ Figure \ref{fig:NUOPCRunSequence} depicts the data structures surrounding the {\
 \input{../addon/NUOPC/doc/NUOPC_StandardComponentDep}
 #endif
 
+\section{NUOPC Layer Compliance}
+#ifdef STANDALONE
+\input{NUOPC_Compliance}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_Compliance}
+#endif
+
+\subsection{The Component Explorer}
+#ifdef STANDALONE
+\input{NUOPC_ComponentExplorer}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_ComponentExplorer}
+#endif
 
 %#ifdef STANDALONE
 %\section{Bibliography}

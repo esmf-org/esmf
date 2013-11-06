@@ -1,0 +1,76 @@
+% $Id$
+%
+
+\label{Explorer}
+
+The NUOPC Component Explorer is a run-time tool that can be used to gain insight into a NUOPC Layer compliant component, or to test a component's compliance. The Component Explorer is currently available as a separate download from the prototype repository:
+
+\begin{verbatim}
+https://sourceforge.net/p/esmfcontrib/svn/HEAD/tree/NUOPC/trunk/ComponentExplorer/
+\end{verbatim}
+
+There are two parts to the Component Explorer. First a script is available that can be used to compile and link the explorer application specifically against a specified component. This part of the explorer leverages the standardized component dependencies discussed in section \ref{componentDep}. This step is executed by providing the component's mk-file to the explorer script:
+
+\begin{verbatim}
+./nuopcExplorerScript <component-mk-file>
+\end{verbatim}
+
+Any issues found during this step are reported. The successful completion of this step will produce an executable called {\tt nuopcExplorerApp}.
+
+The second part of the Component Explorer is the explorer application. It can either be built using the explorer script as outlined above, or by using the makefile directly:
+
+\begin{verbatim}
+make nuopcExplorerApp
+\end{verbatim}
+
+In the second case, the resulting {\tt nuopcExplorerApp} will not be tied to a specific component, but expects a component in form of a shared object to be specified when executing {\tt nuopcExplorerApp}. In either case the explorer application needs to be started according to the execution requirements of the component it attempts to explore. This may mean that input files must be present, and a sufficient number of processes need to be specified. In terms of the common {\tt mpirun} tool launching {\tt nuopcExplorerApp} may look like this
+\begin{verbatim}
+mpirun -np X ./nuopcExplorerApp
+\end{verbatim}
+for an executable that was built against a specific component. Or like this
+\begin{verbatim}
+mpirun -np X ./nuopcExplorerApp <component-shared-object-file>
+\end{verbatim}
+for an executable that expects a the component in form of a shared object. In both cases the output of the {\tt nuopcExplorerApp} will report what it finds during the interaction with the component. The output will look similar to this:
+
+\begin{verbatim}
+ NUOPC Component Explorer App
+ ----------------------------
+ Exploring a component with a Fortran module front...
+ Model component # 1 InitializePhaseMap:
+   IPDv00p1=1
+   IPDv00p2=2
+   IPDv00p3=3
+   IPDv00p4=4
+ Model component # 1 // name = ocnA
+   ocnA: <LongName>    : Attribute is present but NOT set!
+   ocnA: <ShortName>   : Attribute is present but NOT set!
+   ocnA: <Description> : Attribute is present but NOT set!
+      --------
+   ocnA: importState // itemCount = 2
+   ocnA: importState // item # 001 // [FIELD] name = pmsl
+               <StandardName> = air_pressure_at_sea_level
+                      <Units> = Pa
+                   <LongName> = Air Pressure at Sea Level
+                  <ShortName> = pmsl
+   ocnA: importState // item # 002 // [FIELD] name = rsns
+               <StandardName> = surface_net_downward_shortwave_flux
+                      <Units> = W m-2
+                   <LongName> = Surface Net Downward Shortwave Flux
+                  <ShortName> = rsns
+      --------
+   ocnA: exportState // itemCount = 1
+   ocnA: exportState // item # 001 // [FIELD] name = sst
+               <StandardName> = sea_surface_temperature
+                      <Units> = K
+                   <LongName> = Sea Surface Temperature
+                  <ShortName> = sst
+\end{verbatim}
+
+Turning on the Compliance Checker will result in additional information in the log files.
+
+
+
+
+
+
