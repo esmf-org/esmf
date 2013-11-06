@@ -77,6 +77,9 @@ class Field(ma.MaskedArray):
                                    ungridded dimensions of the field. \n
                 type: np.array \n
                 shape: [number of ungridded dimensions, 1] \n
+            mask_vals: A Python list of integer values to use for masking. \n
+                type: Python list \n
+                shape: [grid.shape, 1] \n
         Returns: \n
             Field \n
         """
@@ -94,6 +97,7 @@ class Field(ma.MaskedArray):
         grid_to_field_map = kwargs.get('grid_to_field_map', None)
         ungridded_lower_bound = kwargs.get('ungridded_lower_bound', None)
         ungridded_upper_bound = kwargs.get('ungridded_upper_bound', None)
+        mask_vals = kwargs.get('mask_vals', None)
 
         # type handling
         local_grid_to_field_map = None
@@ -157,8 +161,12 @@ class Field(ma.MaskedArray):
         else:
             raise ValueError("Field must be created on a Grid or Mesh")
      
+        field_mask = False
+        if mask is not None and mask_vals is not None:
+            field_mask = [x if x in mask_vals else 0 for x in mask.flatten().tolist()]
+        
         # create the new Field instance
-        obj = super(Field, cls).__new__(cls, data = data, mask = mask)
+        obj = super(Field, cls).__new__(cls, data = data, mask = field_mask)
 
         # initialize field data
         obj.struct = struct

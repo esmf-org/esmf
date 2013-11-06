@@ -251,20 +251,40 @@ def grid_mask_test():
             else:
                 mask[i, j] = 0;
 
+    # return True from unit test
+    return correct
+
+def field_mask_test():
+
+    correct = True
+    
+    max_index = np.array([12,20])
+
+    grid = Grid(max_index)
+
+    # Add coordinates
+    grid.add_coords(staggerloc=[StaggerLoc.CENTER])
+
+    # Add Mask
+    mask = grid.add_item(GridItem.MASK)
+
+    [x, y] = [0, 1]
+    for i in xrange(mask.shape[x]):
+        for j in xrange(mask.shape[y]):
+            if (i == 2.0):
+                mask[i, j] = 2
+            elif (i == 3.0):
+                mask[i,j] = 3
+            else:
+                mask[i, j] = 0;
+
     # create a Field on the Grid, should inherit the mask
-    field = Field(grid, "FIELD!")
-    assert(field.mask.any() == 1)
-
-    field.mask[0,3] = True
+    field = Field(grid, "FIELD!", mask_vals = [2])
      
-    # the nature of MaskedArray is that the Field will inherit a copy
-    # of the Grid's mask, so changing the Field mask will not change the
-    # original Grid mask.
-     
-    #if(mask[0,3] != 1):
-    #    correct = False
-
-    #import pdb; pdb.set_trace()
+    if(not field.mask[2][0]):
+        correct = False
+        print field.mask
+        raise ValueError("field mask is incorrect")
 
     # return True from unit test
     return correct
@@ -1140,6 +1160,7 @@ def main():
     (4.2,'Grid coordinates') : grid_coords_test,
     (4.3,'Grid 3D coordinates') : grid_coords_3D_test,
     (4.4,'Grid masking') : grid_mask_test,
+    (4.45,'Field masking') : field_mask_test,
     (4.5,'Grid 3D masking') : grid_mask_3D_test,
     (4.6,'Grid area') : grid_area_test,
     (4.7,'Grid 3D area') : grid_area_3D_test,
