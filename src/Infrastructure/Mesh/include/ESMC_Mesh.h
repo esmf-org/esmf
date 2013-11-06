@@ -303,6 +303,7 @@ ESMC_Mesh ESMC_MeshCreateFromFile(
 double * ESMC_MeshGetCoord(
 			 ESMC_Mesh mesh_in, // in (required)
 			 int * num_nodes,   // out
+			 int * num_dims,    // out
 			 int * rc           // out
 			 );
 // !RETURN VALUE:
@@ -312,19 +313,18 @@ double * ESMC_MeshGetCoord(
 //
 // This call returns a pointer of values of type {\tt double}.  The
 // values are the node coordinates of the {\tt ESMC\_Mesh} passed as an
-// argument.  The values indicate the longitude and then latitude for
-// each node in an alternating manner.  For example, for $N$ nodes the
-// values will be lon$_0$, lat$_0$, lon$_1$, lat$_1$, lon$_2$, lat$_2$,
-// \ldots, lon$_{N-1}$, lat$_{N-1}$ in that order.  So, the index of the
-// $i$-th node's longitude will be $i \times 2$ and the index of the
-// $i$-th node's latitude will be $i \times 2 + 1$, with numbering
-// starting at $i=0$ for the first node.
+// argument.  A 1-D array is returned with the coordinates for a given node
+// in adjacent indices.  For example, for $d$-dimensional coordinates, the first
+// $d$ values in the returned array are the coordinates for the first node,
+// the second $d$ values are the coordinates for the second node, etc.
 // 
 // The arguments are:
 // \begin{description}
 // \item[mesh\_in] Mesh object.
 // \item[num\_nodes] Pointer to an integer.  The number of nodes found in
 // the input Mesh is returned here.
+// \item[num\_dims] Pointer to an integer.  The number of coordinate dimensions 
+// is returned here.
 // \item[rc] Return code; equals {\tt ESMF\_SUCCESS} if there are no
 // errors.
 // \end{description}
