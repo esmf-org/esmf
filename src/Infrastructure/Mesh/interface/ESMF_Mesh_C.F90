@@ -156,14 +156,25 @@
       	     ESMF_CONTEXT, rcToReturn=rc)) return
       endif
    elseif (filetypeflag == ESMF_FILEFORMAT_UGRID) then
-       if (mnpresent == 1 .and. ampresent == 1 .and. vnpresent == 1) then
+       if (c3dpresent == 0 .and. mnpresent == 1 .and. ampresent == 1 .and. vnpresent == 1) then
        	  mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
 	       	                 meshname=meshname, addMask=addMask, &
 				 varname=varname, rc=rc)
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-       elseif (mnpresent == 1) then
+       elseif (c3dpresent == 0 .and. mnpresent == 1) then
        	  mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
+	       	                 meshname=meshname, rc=rc)
+          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+       elseif (c3dpresent == 1 .and. mnpresent == 1 .and. ampresent == 1 .and. vnpresent == 1) then
+       	  mesh = ESMF_MeshCreate(filename, fileTypeFlag, convert3d=convert3D, &
+	       	                 meshname=meshname, addMask=addMask, &
+				 varname=varname, rc=rc)
+          if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+       elseif (c3dpresent == 1 .and. mnpresent == 1) then
+       	  mesh = ESMF_MeshCreate(filename, fileTypeFlag, convert3d=convert3D, &
 	       	                 meshname=meshname, rc=rc)
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
