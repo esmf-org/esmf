@@ -280,12 +280,13 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MeshCXX::getLocalCoords()"
-  double * MeshCXX::getLocalCoords(int *num_nodes, int *rc) {
+  double * MeshCXX::getLocalCoords(int *num_nodes, int *num_dims, int *rc) {
     Mesh &mesh = *meshPointer;
 
     // Get some info
     int sdim=mesh.spatial_dim();
     *num_nodes = mesh.num_nodes();
+    *num_dims = sdim;
 
     MEField<> *coords = mesh.GetCoordField();
     
@@ -309,7 +310,7 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
   
     double *nodeCoord;
   
-    nodeCoord = (double *) malloc (*num_nodes * 2 * sizeof(double));
+    nodeCoord = (double *) malloc (*num_nodes * sdim * sizeof(double));
     if (nodeCoord == NULL) {
       fprintf (stderr, "Could not allocate memory for nodeCoord\n");
       exit(1);
