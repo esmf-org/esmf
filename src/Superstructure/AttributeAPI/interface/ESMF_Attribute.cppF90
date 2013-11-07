@@ -7592,6 +7592,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Logical) :: lisPresent, isAttpack @\
       type(ESMF_TypeKind_Flag) :: localTk @\
       integer :: litemCount @\
+      type(ESMF_AttPack) :: attpack @\
  @\
       ! Initialize  @\
       lisPresent = ESMF_FALSE @\
@@ -7614,13 +7615,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call c_ESMC_AttPackIsPresent(mthisfield, name, convention, purpose, & @\
-          fobject, attPackInstanceName, lisPresent, localrc) @\
+        call mclass##AttPackGet(mthis, & @\
+                                convention, purpose, attpack=attpack, & @\
+                                attPackInstanceName=attPackInstanceName, & @\
+                                rc=localrc) @\
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+          ESMF_CONTEXT, rcToReturn=rc)) return @\
+         call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
+          lisPresent, localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetInfoName(mthisfield, name, localTk, litemCount, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+        call c_ESMC_AttPackGetInfoName(mthisfield, name, attpack, & @\
+                         localTk, litemCount, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
