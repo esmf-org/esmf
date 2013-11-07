@@ -22,7 +22,14 @@ from ESMF.api.mesh import *
 class Field(ma.MaskedArray):
 
     @initialize
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, grid, name, 
+                typekind=TypeKind.R8, 
+                staggerloc=StaggerLoc.CENTER,
+                meshloc=MeshLoc.NODE,
+                grid_to_field_map=None,
+                ungridded_lower_bound=None,
+                ungridded_upper_bound=None,
+                mask_vals=None):
         """
         Create a Field from a Grid or Mesh. \n
         Required Arguments: \n
@@ -83,21 +90,6 @@ class Field(ma.MaskedArray):
         Returns: \n
             Field \n
         """
-        # args
-        try:
-            grid = args[0]
-            name = args[1]
-        except:
-            raise RequiredArgs(Field.__init__.__doc__)
-
-        # kwargs
-        typekind = kwargs.get('typekind', TypeKind.R8)
-        staggerloc = kwargs.get('staggerloc', StaggerLoc.CENTER)
-        meshloc = kwargs.get('meshloc', MeshLoc.NODE)
-        grid_to_field_map = kwargs.get('grid_to_field_map', None)
-        ungridded_lower_bound = kwargs.get('ungridded_lower_bound', None)
-        ungridded_upper_bound = kwargs.get('ungridded_upper_bound', None)
-        mask_vals = kwargs.get('mask_vals', None)
 
         # type handling
         local_grid_to_field_map = None

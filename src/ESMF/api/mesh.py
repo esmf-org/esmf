@@ -18,7 +18,16 @@ from ESMF.api.manager import *
 class Mesh(object):
 
     @initialize
-    def __init__(self, **kwargs):
+    def __init__(self, parametric_dim=None,
+                 spatial_dim=None,
+                 filename=None,
+                 filetype=None,
+                 convert3D=None,
+                 convert_to_dual=None,
+                 add_user_area=None,
+                 meshname="",
+                 add_mask=None,
+                 varname=None):
         """
         Create an unstructured Mesh. This can be done manually in 3 
         steps: \n
@@ -56,17 +65,6 @@ class Mesh(object):
         Returns: \n
             Mesh \n
         """
-        # kwargs
-        parametric_dim = kwargs.get('parametric_dim', None)
-        spatial_dim = kwargs.get('spatial_dim', None)
-        filename = kwargs.get('filename', "")
-        filetype = kwargs.get('filetype', None)
-        convert3D = kwargs.get('convert3D', None)
-        convert_to_dual = kwargs.get('convert_to_dual', None)
-        add_user_area = kwargs.get('add_user_area', None)
-        meshname = kwargs.get('meshname', "")
-        add_mask = kwargs.get('add_mask', None)
-        varname = kwargs.get('varname', "")
 
         # ctypes stuff
         self.struct = ESMP_Mesh()
@@ -146,7 +144,12 @@ class Mesh(object):
 
         return string
     
-    def add_elements(self, *args, **kwargs):
+    def add_elements(self, element_count, 
+                     element_ids,
+                     element_types,
+                     element_conn,
+                     element_mask=None,
+                     element_area=None):
         """
         Add elements to a Mesh, this must be done after adding nodes. \n
         Required Arguments: \n
@@ -189,18 +192,6 @@ class Mesh(object):
         Returns: \n
             None \n
         """
-        # args
-        try:
-            element_count = args[0]
-            element_ids   = args[1]
-            element_types = args[2]
-            element_conn  = args[3]
-        except:
-            raise RequiredArgs(Mesh.add_elements.__doc__)
-
-        # kwargs
-        element_mask = kwargs.get('element_mask', None)
-        element_area = kwargs.get('element_area', None)
 
         # initialize not fromfile variables
         self.element_count = element_count
@@ -238,7 +229,10 @@ class Mesh(object):
         self.size[element] = ESMP_MeshGetOwnedElementCount(self)
         self.size_local[element] = ESMP_MeshGetLocalElementCount(self)
         
-    def add_nodes(self, *args):
+    def add_nodes(self, node_count,
+                  node_ids,
+                  node_coords,
+                  node_owners):
         """
         Add nodes to a Mesh, this must be done before adding elements. \n
         Required Arguments: \n
@@ -264,14 +258,6 @@ class Mesh(object):
         Returns: \n
             None \n
         """
-        # args
-        try:
-            node_count = args[0]
-            node_ids = args[1]
-            node_coords = args[2]
-            node_owners = args[3]
-        except:
-            raise RequiredArgs(Mesh.add_nodes.__doc__)
 
         self.node_count = node_count
         if node_ids.dtype is not np.int32:
@@ -306,7 +292,7 @@ class Mesh(object):
         # call into ctypes layer
         ESMP_MeshFreeMemory(self)
 
-    def _write(self, *args):
+    def _write(self, filename):
         """
         Write the Mesh to a vtk formatted file. \n
         Required Arguments: \n
@@ -316,11 +302,6 @@ class Mesh(object):
         Returns: \n
             None \n
         """
-        # args
-        try:
-            filename = args[0]
-        except:
-            raise RequiredArgs(Mesh.write.__doc__)
 
         # call into ctypes layer
         ESMP_MeshWrite(self, filename)

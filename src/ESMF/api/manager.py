@@ -57,15 +57,11 @@ class Manager(object):
     # The singleton instance for this class
     __singleton = None
     
-    def __new__(cls, **kwargs):
+    def __new__(cls, logkind=LogKind.NONE, debug=False):
         '''
         Returns the singleton instance of this class,
         creating it if it does not already exist.
         '''
-
-        # kwargs
-        logkind = kwargs.get('logkind', LogKind.NONE)
-        debug = kwargs.get('debug', False)
 
         # If this is the first call, create the singleton object
         # and initialize its attributes.
@@ -76,7 +72,7 @@ class Manager(object):
         return cls.__singleton
 
 
-    def __init__(self, **kwargs):
+    def __init__(self, logkind=LogKind.NONE, debug=False):
         '''
         Calls ESMP_Initialize and registers __del__ with atexit
         when called the first time.  Subsequent calls only return
@@ -99,10 +95,6 @@ class Manager(object):
         Returns: \n
             Manager \n
         '''
-
-        # kwargs
-        logkind = kwargs.get('logkind', LogKind.NONE)
-        debug = kwargs.get('debug', False)
 
         # Return no-op
         if self.__esmp_finalized:
