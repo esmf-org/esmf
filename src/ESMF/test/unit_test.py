@@ -628,8 +628,8 @@ def mesh_test():
     node_count = mesh.size[node]
     print 'owned node_count = '+str(node_count)+'\n'
     
-    coords, num_nodes = ESMP_MeshGetCoordPtr(mesh.struct.ptr)
-    print 'ESMP_MeshGetCoordPtr() - num_nodes = '+str(num_nodes)+'\n'
+    coords, num_nodes, num_dims = ESMP_MeshGetCoordPtr(mesh)
+    print 'ESMP_MeshGetCoordPtr() - num_nodes = '+str(num_nodes)+', num_dims = '+str(num_dims)+'\n'
     status = all([coords[i] == nodeCoord[i] for i in range(num_nodes*2)])
 
     # this call fails if nodes and elements have not been added first
