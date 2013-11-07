@@ -47,11 +47,11 @@ def log_test():
 
 def vm_test():
     # inquire for rank and proc from ESMF Virtual Machine
-    localPet = get_localPet()
-    petCount = get_petCount()
+    localpet = local_pet()
+    petcount = pet_count()
 
-    print '\nlocalPet = {0}\n'.format(localPet)
-    print '\npetCount = {0}\n'.format(petCount)
+    print '\nlocal_pet = {0}\n'.format(localpet)
+    print '\npet_count = {0}\n'.format(petcount)
 
     # return True from unit test
     return True

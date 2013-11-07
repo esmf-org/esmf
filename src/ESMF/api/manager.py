@@ -29,16 +29,16 @@ def version_compare(a, b, separator = '.', ignorecase = True):
         return False
 
 @initialize
-def get_localPet():
+def local_pet():
     vm = ESMP_VMGetGlobal()
-    localPet, _ = ESMP_VMGet(vm)
-    return localPet
+    local_pet, _ = ESMP_VMGet(vm)
+    return local_pet
 
 @initialize
-def get_petCount():
+def pet_count():
     vm = ESMP_VMGetGlobal()
-    _, petCount = ESMP_VMGet(vm)
-    return petCount
+    _, pet_count = ESMP_VMGet(vm)
+    return pet_count
 
 #### Manager class #########################################################
 
@@ -78,7 +78,7 @@ class Manager(object):
         when called the first time.  Subsequent calls only return
         whether or not ESMF is initialized.  Registering __del__ with
         atexit ensures the ESMP_Finalize will always be called
-        prior to exiting Python.  Calling __init__ explicitely
+        prior to exiting Python.  Calling __init__ explicitly
         results in a no-op. \n
         Required Arguments: \n
             None \n
@@ -110,7 +110,7 @@ class Manager(object):
             #atexit.register(self.__del__)
             self.__esmp_initialized = True
             vm = ESMP_VMGetGlobal()
-            self.localPet, self.petCount = ESMP_VMGet(vm)
+            self.local_pet, self.pet_count = ESMP_VMGet(vm)
             ESMP_LogSet(debug)
         return
 
@@ -147,11 +147,11 @@ class Manager(object):
         Return a string containing a printable representation of the object
         """
         string = ("Manager:\n"
-                  "    localPet = %r\n"
-                  "    petCount = %r\n)" 
+                  "    local_pet = %r\n"
+                  "    pet_count = %r\n)" 
                   %
-                  (self.localPet,
-                   self.petCount))
+                  (self.local_pet,
+                   self.pet_count))
 
         return string
     

@@ -229,17 +229,17 @@ def test_main():
     #manager = ESMF.Manager(logkind=ESMF.LogKind.SINGLE, debug=True)
 
     # inquire for rank and proc from ESMF Virtual Machine
-    localPet = ESMF.get_localPet()
-    petCount = ESMF.get_petCount()
+    local_pet = ESMF.local_pet()
+    pet_count = ESMF.pet_count()
 
     parallel = False
-    if petCount > 1:
-        if petCount > 4:
+    if pet_count > 1:
+        if pet_count > 4:
             raise NameError('MPI rank must be <=4 in parallel mode!')
         parallel = True
 
     # opening remarks
-    if localPet == 0:
+    if local_pet == 0:
         print "\ngrid_grid_regrid_csrv_mask"
 
     # create two unique Grid objects
