@@ -948,8 +948,8 @@ def ESMP_MeshFreeMemory(mesh):
                         '.    '+constants.errmsg)
 
 _ESMF.ESMC_MeshGetCoord.restype = ct.POINTER(ct.c_double)
-_ESMF.ESMC_MeshGetCoord.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int), ct.POINTER(ct.c_int),
-                                    ct.POINTER(ct.c_int)]
+_ESMF.ESMC_MeshGetCoord.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int), 
+                                    ct.POINTER(ct.c_int), ct.POINTER(ct.c_int)]
 @deprecated
 def ESMP_MeshGetCoordPtr(mesh):
     """
@@ -966,8 +966,8 @@ def ESMP_MeshGetCoordPtr(mesh):
     lrc = ct.c_int(0)
     lnum_nodes = ct.c_int(0)
     lnum_dims = ct.c_int(0)
-    meshCoordPtr = _ESMF.ESMC_MeshGetCoord(mesh.struct.ptr, ct.byref(lnum_nodes), ct.byref(lnum_dims),
-                                           ct.byref(lrc))
+    meshCoordPtr = _ESMF.ESMC_MeshGetCoord(mesh.struct.ptr, ct.byref(lnum_nodes), 
+                                           ct.byref(lnum_dims), ct.byref(lrc))
     num_nodes = lnum_nodes.value
     num_dims = lnum_dims.value
     rc = lrc.value
