@@ -1,7 +1,7 @@
 # $Id$
 
 """
-The Manager API
+The ESMPyManager API
 """
 
 #### IMPORT LIBRARIES #########################################################
@@ -48,7 +48,7 @@ class Manager(object):
     and __del__ are designed to called ESMP_Initialize and
     ESMP_Finalize once, and only once, in a Python session.
 
-    ESMF is initialized at Manager object creation,
+    ESMF is initialized at ESMPyManager object creation,
     __del__ is registered with atexit to ensure ESMF is always
     finalized prior to exiting Python.  If the object is copied,
     the copy will always be an alias to the original Manager object.
@@ -146,7 +146,7 @@ class Manager(object):
         """
         Return a string containing a printable representation of the object
         """
-        string = ("Manager:\n"
+        string = ("ESMPyManager:\n"
                   "    local_pet = %r\n"
                   "    pet_count = %r\n)" 
                   %

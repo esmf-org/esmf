@@ -12,7 +12,7 @@ from ESMF.api.constants import *
 from ESMF.interface.cbindings import *
 from ESMF.util.decorators import initialize
 
-from ESMF.api.manager import *
+from ESMF.api.esmpymanager import *
 from ESMF.api.grid import *
 from ESMF.api.mesh import *
 

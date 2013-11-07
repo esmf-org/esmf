@@ -10,7 +10,7 @@ from ESMF.api.constants import *
 from ESMF.interface.cbindings import *
 from ESMF.util.decorators import initialize
 
-from ESMF.api.manager import *
+from ESMF.api.esmpymanager import *
 
 #### Mesh class ###############################################################
 [node, element] = [0, 1]

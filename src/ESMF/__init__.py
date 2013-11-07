@@ -61,7 +61,7 @@ __release__ = "620_02b_dev"
 
 #### IMPORT LIBRARIES #########################################################
 
-from api.manager import *
+from api.esmpymanager import *
 from api.grid import *
 from api.mesh import *
 from api.field import *
