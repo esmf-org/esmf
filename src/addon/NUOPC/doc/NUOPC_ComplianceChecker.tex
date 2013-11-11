@@ -1,0 +1,104 @@
+% $Id$
+%
+
+\label{Checker}
+
+The NUOPC Compliance Checker is a run-time analysis tool that can be turned on for any ESMF application. The Compliance Checker is turned off by default, as to not negatively affect performance critical runs. The Compliance Checker is enabled by setting the following ESMF runtime environment variable:
+\begin{verbatim}
+ESMF_RUNTIME_COMPLIANCECHECK=ON 
+\end{verbatim}
+As a run-time variable, setting it does not require recompilation of the ESMF library or the user application. The same executable and library will start to generate Compliance Checker output when the above variable is found set during execution.
+
+The function of the Compliance Checker is to intercept all interactions between the components of an ESMF application, and to analyze them according to the NUOPC Layer rules of engagement. The following aspects are currently reported on:
+\begin{itemize}
+\item Presence of the standard ESMF Initialize, Run, and Finalize methods and the number of phases in each.
+\item Timekeeping and whether it conforms with the NUOPC Layer rules.
+\item Fields or FieldBundles (not Arrays/ArrayBundles) being passed between Components.
+\item Details about the Fields being passed through import and export States. \item Component and Field metadata.
+\end{itemize}
+
+Besides the above aspects, the output of the Compliance Checker also provides a means to easily get an idea of the exact dynamical control flow between the components of an application.
+
+The Compliance Checker uses the ESMF Log facility to produce the compliance report during the execution of an ESMF application. The output is located in the default ESMF Log files. There are advantages of using the existing Log facility to generate the compliance report. First, the ESMF Log facility offers time stamping of messages, and deals with all of the file access and multi-PET issues. Second, going through the ESMF Log guarantees that all the output appears in the correct chronological order. This applies to all of the output, including entries from other ESMF system levels or from the user level. 
+
+A sample output of the Compliance Checker output in action:
+
+{\tiny
+\begin{verbatim}
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM:>START register compliance check.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM: phase Zero for Initialize registered.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM:             5 phase(s) of Initialize registered.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM:             1 phase(s) of Run registered.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM:             1 phase(s) of Finalize registered.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM:>STOP register compliance check.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM2MED:>START register compliance check.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM2MED: phase Zero for Initialize registered.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM2MED:             3 phase(s) of Initialize registered.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM2MED:             1 phase(s) of Run registered.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM2MED:             1 phase(s) of Finalize registered.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM2MED:>STOP register compliance check.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:MED2ATM:>START register compliance check.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:MED2ATM: phase Zero for Initialize registered.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:MED2ATM:             3 phase(s) of Initialize registered.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:MED2ATM:             1 phase(s) of Run registered.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:MED2ATM:             1 phase(s) of Finalize registered.
+20131108 172844.458 INFO     PET0 COMPLIANCECHECKER:|->|->|->:MED2ATM:>STOP register compliance check.
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM: >START InitializePrologue for phase=           0
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM: importState name: modelComp 1 Import State
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM: importState stateintent: ESMF_STATEINTENT_IMPORT
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM: importState itemCount:            0
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM: exportState name: modelComp 1 Export State
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM: exportState stateintent: ESMF_STATEINTENT_EXPORT
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM: exportState itemCount:            0
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM:ESMF Stats: the virtual memory used by this PET (in KB): 974868
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM:ESMF Stats: the physical memory used by this PET (in KB): 49440
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM:ESMF Stats: ESMF Fortran objects referenced by the ESMF garbage collection: 0
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM:ESMF Stats: ESMF objects (F & C++) referenced by the ESMF garbage collection: 0
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|->|->|->:ATM: >STOP InitializePrologue for phase=           0
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: >START InitializeEpilogue for phase=           0
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM:ESMF Stats: the virtual memory used by this PET (in KB): 974868
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM:ESMF Stats: the physical memory used by this PET (in KB): 49448
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM:ESMF Stats: ESMF Fortran objects referenced by the ESMF garbage collection: 0
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM:ESMF Stats: ESMF objects (F & C++) referenced by the ESMF garbage collection: 0
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: GridComp level attribute check: convention: 'NUOPC', purpose: 'General'.
+20131108 172844.459 WARNING  PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: ==> Component level attribute: <ShortName> present but NOT set!
+20131108 172844.459 WARNING  PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: ==> Component level attribute: <LongName> present but NOT set!
+20131108 172844.459 WARNING  PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: ==> Component level attribute: <Description> present but NOT set!
+20131108 172844.459 WARNING  PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: ==> Component level attribute: <ModelType> present but NOT set!
+20131108 172844.459 WARNING  PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: ==> Component level attribute: <ReleaseDate> present but NOT set!
+20131108 172844.459 WARNING  PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: ==> Component level attribute: <PreviousVersion> present but NOT set!
+20131108 172844.459 WARNING  PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: ==> Component level attribute: <ResponsiblePartyRole> present but NOT set!
+20131108 172844.459 WARNING  PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: ==> Component level attribute: <Name> present but NOT set!
+20131108 172844.459 WARNING  PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: ==> Component level attribute: <EmailAddress> present but NOT set!
+20131108 172844.459 WARNING  PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: ==> Component level attribute: <PhysicalAddress> present but NOT set!
+20131108 172844.459 WARNING  PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: ==> Component level attribute: <URL> present but NOT set!
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: Component level attribute: <Verbosity> present and set: high
+20131108 172844.459 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: Component level attribute: <InitializePhaseMap>[1] present and set: IPDv02p1=1
+20131108 172844.460 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: Component level attribute: <InitializePhaseMap>[2] present and set: IPDv02p3=2
+20131108 172844.460 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: Component level attribute: <InitializePhaseMap>[3] present and set: IPDv02p4=3
+20131108 172844.460 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: Component level attribute: <InitializePhaseMap>[4] present and set: IPDv02p5=5
+20131108 172844.460 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: Component level attribute: <NestingGeneration> present and set:            0
+20131108 172844.460 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: Component level attribute: <Nestling> present and set:            0
+20131108 172844.460 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: importState name: modelComp 1 Import State
+20131108 172844.460 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: importState stateintent: ESMF_STATEINTENT_IMPORT
+20131108 172844.460 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: importState itemCount:            0
+20131108 172844.460 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: exportState name: modelComp 1 Export State
+20131108 172844.460 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: exportState stateintent: ESMF_STATEINTENT_EXPORT
+20131108 172844.460 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: exportState itemCount:            0
+20131108 172844.460 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: The incoming Clock was not modified.
+20131108 172844.460 WARNING  PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: ==> The internal Clock is not present!
+20131108 172844.460 INFO     PET0 COMPLIANCECHECKER:|<-|<-|<-:ATM: >STOP InitializeEpilogue for phase=           0
+\end{verbatim}
+}
+
+All of the output generated by the Compliance Checker contains the string {\tt COMPLIANCECHECK}, which can be used to grep on. The checker currently generates two types of messages, {\tt INFO} for general analysis output, and {\tt WARNING} for when issues with respect to the NUOPC Layer rules are detected.
+
+In practice, when dealing with applications that have been componentized down to a very low level of the model, the output generated by the Compliance Checker can become overwhelming. For this reason a {\tt depth} parameter is available that can be specified for the Compliance Checker environment variable:
+\begin{verbatim}
+ESMF_RUNTIME_COMPLIANCECHECK=ON:depth=4
+\end{verbatim}
+This will limit the number of component levels that the Compliance Checker parses (here 4 levels), starting from the top level application.
+
+
+
+
