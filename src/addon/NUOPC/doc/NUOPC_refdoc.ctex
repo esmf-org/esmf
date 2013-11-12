@@ -229,6 +229,13 @@ Figure \ref{fig:NUOPCRunSequence} depicts the data structures surrounding the {\
 \input{../addon/NUOPC/doc/NUOPC_Compliance}
 #endif
 
+\subsection{The Compliance Checker}
+#ifdef STANDALONE
+\input{NUOPC_ComplianceChecker}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_ComplianceChecker}
+#endif
+
 \subsection{The Component Explorer}
 #ifdef STANDALONE
 \input{NUOPC_ComponentExplorer}
