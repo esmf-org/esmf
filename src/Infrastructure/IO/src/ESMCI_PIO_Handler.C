@@ -1209,13 +1209,13 @@ void PIO_Handler::open(
 #else  // ESMF_NETCDF
     localrc = ESMF_RC_LIB_NOT_PRESENT;
 #endif // ESMF_NETCDF
-  } else if (getFormat() == ESMF_IOFMT_NETCDF4P) {
+  } else if (getFormat() == ESMF_IOFMT_NETCDF4C) {
 #ifdef ESMF_NETCDF
     iotype = PIO_iotype_netcdf4c;
 #else  // ESMF_NETCDF
     localrc = ESMF_RC_LIB_NOT_PRESENT;
 #endif // ESMF_NETCDF
-  } else if (getFormat() == ESMF_IOFMT_NETCDF4C) {
+  } else if (getFormat() == ESMF_IOFMT_NETCDF4P) {
 #ifdef ESMF_NETCDF
     iotype = PIO_iotype_netcdf4p;
 #else  // ESMF_NETCDF
