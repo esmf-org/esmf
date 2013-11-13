@@ -824,13 +824,12 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-   ! Set Default coordSys
-   if (present(coordSys)) then
-      coordSysLocal=coordSys
-   else 
-      coordSysLocal=ESMF_COORDSYS_CART
-   endif
-
+    ! Set Default coordSys
+    if (present(coordSys)) then
+       coordSysLocal=coordSys
+    else 
+       coordSysLocal=ESMF_COORDSYS_CART
+    endif
 
     ! Create C++ Mesh
     ESMF_MeshCreate3Part%this = ESMF_NULL_POINTER
@@ -1455,7 +1454,7 @@ end function ESMF_MeshCreateFromMeshes
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromFile(filename, fileTypeFlag, convert3D, &
+    function ESMF_MeshCreateFromFile(filename, fileTypeFlag, &
                  convertToDual, addUserArea, meshname, addMask, varname, &
 		 elementDistGrid, nodalDistGrid, rc)
 !
@@ -1465,7 +1464,6 @@ end function ESMF_MeshCreateFromMeshes
 ! !ARGUMENTS:
     character(len=*),           intent(in)            :: filename
     type(ESMF_FileFormat_Flag), intent(in)            :: fileTypeFlag
-    logical,                    intent(in),  optional :: convert3D
     logical,                    intent(in),  optional :: convertToDual
     logical,                    intent(in),  optional :: addUserArea
     character(len=*),           intent(in),  optional :: meshname
@@ -1487,9 +1485,6 @@ end function ESMF_MeshCreateFromMeshes
 !   \item[filetypeflag] 
 !         The file type of the grid file to be read, please see Section~\ref{const:mesh:fileformat}
 !         for a list of valid options. 
-!   \item[{[convert3D]}] 
-!         if {\tt .true.}, the node coordinates will be converted into 3D Cartisian, which
-!         is required for a global grid. If not specified, defaults is {\tt .false.}.
 !   \item[{[convertToDual]}] 
 !         if {\tt .true.}, the mesh will be converted to its dual. If not specified,
 !         defaults to {\tt .true.}. Converting to dual is only supported with
@@ -1524,19 +1519,12 @@ end function ESMF_MeshCreateFromMeshes
 !
 !EOP
 !------------------------------------------------------------------------------
-    logical::  localConvert3D      ! local flag
     logical::  localConvertToDual      ! local flag
     logical::  localAddUserArea  
     type(ESMF_Mesh) :: myMesh
     integer::  localrc
 
     ! Set Defaults
-    if (present(convert3D)) then
-	localConvert3D = convert3D
-    else
-	localConvert3D = .false.
-    endif
-
     if (present(convertToDual)) then
 	localConvertToDual = convertToDual
     else
@@ -1561,13 +1549,13 @@ end function ESMF_MeshCreateFromMeshes
     endif
 
     if (filetypeflag == ESMF_FILEFORMAT_SCRIP) then
-	myMesh = ESMF_MeshCreateFromScrip(filename, localConvert3D, &
-          localConvertToDual, addUserArea=localAddUserArea, rc=localrc)
+	myMesh = ESMF_MeshCreateFromScrip(filename, localConvertToDual, &
+          addUserArea=localAddUserArea, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (filetypeflag == ESMF_FILEFORMAT_ESMFMESH) then
 	myMesh = ESMF_MeshCreateFromUnstruct(filename, &
-	   localConvert3D, addUserArea=localAddUserArea, &
+	   addUserArea=localAddUserArea, &
 	   filetype=filetypeflag, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1584,11 +1572,13 @@ end function ESMF_MeshCreateFromMeshes
 
 	if (present(addMask)) then
            myMesh = ESMF_MeshCreateFromUnstruct(filename, &
-	     localConvert3D, filetype=filetypeflag, meshname = meshname, &
-	     addMask=addMask, varname=varname, rc=localrc)
+	     filetype=filetypeflag, meshname = meshname, &
+	     addMask=addMask, varname=varname, &
+	     rc=localrc)
 	else
            myMesh = ESMF_MeshCreateFromUnstruct(filename, &
-	     localConvert3D, filetype=filetypeflag, meshname = meshname, rc=localrc)
+	     filetype=filetypeflag, meshname = meshname, &
+	     rc=localrc)
 	endif 
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1651,7 +1641,7 @@ end function ESMF_MeshCreateFromFile
 !  the mesh
 ! !INTERFACE:
 ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromUnstruct(filename, convert3D, filetype, meshname, &
+    function ESMF_MeshCreateFromUnstruct(filename, filetype, meshname, &
 			addUserArea, addMask, varname, rc)
 !
 !
@@ -1659,13 +1649,12 @@ end function ESMF_MeshCreateFromFile
     type(ESMF_Mesh)         :: ESMF_MeshCreateFromUnstruct
 ! !ARGUMENTS:
     character(len=*), intent(in)              :: filename
-    logical, intent(in)                       :: convert3D
     type(ESMF_FileFormat_Flag), optional, intent(in) :: filetype
     character(len=*), optional, intent(in)    :: meshname
     logical, intent(in), optional	      :: addUserArea
     logical, intent(in), optional	      :: addMask
     character(len=*), optional, intent(in)    :: varname
-    integer, intent(out), optional            :: rc
+   integer, intent(out), optional            :: rc
 !
 ! !DESCRIPTION:
 !   Create a mesh from a grid file defined in the ESMF Unstructured grid format.
@@ -1673,9 +1662,6 @@ end function ESMF_MeshCreateFromFile
 !   \begin{description}
 !   \item [filename]
 !         The name of the grid file
-!   \item[convert3D] 
-!         if {\tt .true.}, the node coordinates will be converted into 3D Cartisian, which
-!         is required for a global grid
 !   \item[{[addUserArea]}] 
 !         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
 !         only supported when the grid file is in the SCRIP or ESMF format. 
@@ -1882,16 +1868,11 @@ end function ESMF_MeshCreateFromFile
 
    ! Figure out dimensions 
     if (coordDim .eq. 2) then
-       if (convert3D) then
-          parametricDim=2
-          spatialDim=3
-       else
-          parametricDim=2
-          spatialDim=NodeDim
-       end if
+       parametricDim = 2
+       spatialDim = 2
     else if (coordDim .eq. 3) then
-       parametricDim=3
-       spatialDim=3
+       parametricDim = 3
+       spatialDim = 3
     else
        call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, & 
             msg="- only coordDim 2 or 3 is supported right now", & 
@@ -1900,7 +1881,13 @@ end function ESMF_MeshCreateFromFile
     endif
 
     ! create the mesh
-    Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, rc=localrc)
+    if (parametricDim == 2) then
+        Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, &
+	       coordSys=ESMF_COORDSYS_SPH_DEG,rc=localrc)
+    else
+        Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, &
+	       coordSys=ESMF_COORDSYS_CART,rc=localrc)
+    endif    
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1975,15 +1962,10 @@ end function ESMF_MeshCreateFromFile
     allocate (NodeOwners(localNodes))
     
     if (parametricDim .eq. 2) then
-       if (convert3D) then
-          allocate(NodeCoords1D(localNodes*3))
-       else
-          allocate (NodeCoords1D(localNodes*NodeDim))
-       endif
+       allocate (NodeCoords1D(localNodes*NodeDim))
     else ! If not parametricDim==2, assuming parmetricDim==3
        allocate(NodeCoords1D(localNodes*3))
     endif
-
     
     ! copy vertex information into nodes, NodeUsed(:) now contains either 0 (not for me) or
     ! the local node index.  The owner of the node is stored in NodeOwners1(:)
@@ -1994,26 +1976,9 @@ end function ESMF_MeshCreateFromFile
        do NodeNo = 1, NodeCnt
           if (NodeUsed(NodeNo) > 0) then
              NodeId(i) = NodeNo     
-             if (convert3D) then
-
-               call c_esmc_sphdeg_to_cart(nodeCoords(1,NodeNo), nodeCoords(2,NodeNo), & 
-                    NodeCoords1D((i-1)*3+1),NodeCoords1D((i-1)*3+2), NodeCoords1D((i-1)*3+3), &
-                    localrc)
-               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc)) return
-#if 0
-                coorX = nodeCoords(1,NodeNo)*deg2rad
-                coorY = (90.0-nodeCoords(2,NodeNo))*deg2rad
-                NodeCoords1D((i-1)*3+1) = COS(coorX)*SIN(coorY)             
-                NodeCoords1D((i-1)*3+2) = SIN(coorX)*SIN(coorY)             
-                NodeCoords1D((i-1)*3+3) = COS(coorY)
-                !   write (*,'(6F8.4)')nodeCoords(:,NodeNo), COS(coorX),SIN(coorX),COS(coorY),SIN(coorY)
-#endif
-             else 
-                do dim = 1, NodeDim
-                   NodeCoords1D ((i-1)*NodeDim+dim) = nodeCoords (dim, NodeNo)
-                end do
-             endif
+             do dim = 1, NodeDim
+                NodeCoords1D ((i-1)*NodeDim+dim) = nodeCoords (dim, NodeNo)
+             end do
              NodeOwners (i) = NodeOwners1(NodeNo)
              if (NodeOwners1(NodeNo) == PetNo) total = total+1
              i = i+1
@@ -2326,17 +2291,16 @@ end function ESMF_MeshCreateFromUnstruct
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromScrip(filename, convert3D, convertToDual, addUserArea, rc)
+    function ESMF_MeshCreateFromScrip(filename, convertToDual, addUserArea, rc)
 !
 !
 ! !RETURN VALUE:
     type(ESMF_Mesh)         :: ESMF_MeshCreateFromScrip
 ! !ARGUMENTS:
-    character(len=*), intent(in)              :: filename
-    logical, intent(in)                       :: convert3D
-    logical, intent(in), optional             :: convertToDual
-    logical, intent(in), optional             :: addUSerArea
-    integer, intent(out), optional            :: rc
+    character(len=*), intent(in)                   :: filename
+    logical, intent(in), optional                  :: convertToDual
+    logical, intent(in), optional                  :: addUSerArea
+    integer, intent(out), optional                 :: rc
 !
 ! !DESCRIPTION:
 !   Create a mesh from a grid file defined in SCRIP format or in ESMF Unstructured grid format.
@@ -2344,9 +2308,6 @@ end function ESMF_MeshCreateFromUnstruct
 !   \begin{description}
 !   \item [filename]
 !         The name of the grid file
-!   \item[convert3D] 
-!         if {\tt .true.}, the node coordinates will be converted into 3D Cartisian, which
-!         is required for a global grid
 !   \item[convertToDual] 
 !         if {\tt .true.}, the mesh will be converted to it's dual. If not specified,
 !         defaults to true. 
@@ -2359,7 +2320,7 @@ end function ESMF_MeshCreateFromUnstruct
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
+    integer                 :: localrc           ! local return code
     character(len=128)      :: cmd, esmffilename
     integer   	            :: PetNo, PetCnt 
     integer                 :: scrip_file_len, esmf_file_len
@@ -2416,7 +2377,7 @@ end function ESMF_MeshCreateFromUnstruct
     endif
     call ESMF_VMBarrier(vm)
     ESMF_MeshCreateFromScrip=ESMF_MeshCreateFromUnstruct(esmffilename,&
-	convert3D, addUserArea=addUserArea, rc=localrc)
+	addUserArea=addUserArea, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     if (PetNo == 0) then
