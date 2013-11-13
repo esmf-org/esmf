@@ -3113,3 +3113,74 @@ extern "C" void FTN_X(c_esmc_sphdeg_to_cart)(double *lon, double *lat,
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
+
+// This method sets the pole values so a 2D Mesh from a SCRIP grid can still be used in regrid with poles 
+extern "C" void FTN_X(c_esmc_meshsetpoles)(Mesh **meshpp, int *_pole_val, int *_min_pole_gid, int *_max_pole_gid,
+                                             int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshchecknodelist()"
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+      throw localrc;  // bail out with exception
+    }
+
+    // For convenience deref mesh 
+    Mesh *meshp = *meshpp;
+    
+    // For convenience deref numbers
+    int pole_val=*_pole_val;
+    int min_pole_gid=*_min_pole_gid;
+    int max_pole_gid=*_max_pole_gid;
+
+    // printf("pole_val=%d min_pole=%d max_pole=%d\n",pole_val,min_pole_gid,max_pole_gid);
+
+    // Loop through gids and change associated nodes to have the given pole value
+    for (int gid=min_pole_gid; gid<=max_pole_gid; gid++) {
+
+      //  Find the corresponding Mesh node
+      Mesh::MeshObjIDMap::iterator mi =  meshp->map_find(MeshObj::NODE, gid);
+
+      // If not in the local mesh, then loop to next
+      if (mi == meshp->map_end(MeshObj::NODE)) continue;
+   
+      // Get the element
+      MeshObj &node = *mi; 
+        
+      // Create new attr with the old type, new nodeset, and old context
+      const Context &old_ctxt = GetMeshObjContext(node);
+      Attr attr(MeshObj::NODE, pole_val, old_ctxt, 
+                old_ctxt.is_set(Attr::SHARED_ID),old_ctxt.is_set(Attr::OWNED_ID),
+                old_ctxt.is_set(Attr::ACTIVE_ID),old_ctxt.is_set(Attr::GENESIS_ID));  
+      meshp->update_obj(&node, attr);      
+
+    }
+  } catch(std::exception &x) {
+    // catch Mesh exception return code 
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                           "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+
+  if (rc!=NULL) *rc=ESMF_SUCCESS;
+}
