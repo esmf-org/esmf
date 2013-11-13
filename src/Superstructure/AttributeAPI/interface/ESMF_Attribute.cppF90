@@ -3113,7 +3113,6 @@ contains
 !           of multiple Attribute package instances of the same convention
 !           and purpose, within a nest.  If not specified, defaults to the
 !           first instance. (Not implemented yet)
->>>>>>> AttributeWork
 !     \item [{[itemCount]}]
 !           The number of items in a multi-valued Attribute
 !     \item [{[rc]}]
@@ -10335,7 +10334,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         j = j + lens(i) @\
       enddo @\
  @\
->>>>>>> AttributeWork
       if (present(convention).or.present(purpose)) then @\
         if (present(convention).and..not.present(purpose).or. & @\
             present(purpose).and..not.present(convention)) then @\
