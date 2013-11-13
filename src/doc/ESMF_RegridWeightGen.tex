@@ -793,8 +793,8 @@ dimensions:
 variables:
 // Mesh topology
 	int fvcom_mesh;
-		fvcom_mesh:standard_name = "mesh_topology" ;
-		fvcom_mesh:dimension = 2. ;
+		fvcom_mesh:cf_role = "mesh_topology" ;
+		fvcom_mesh:topology_dimension = 2. ;
 		fvcom_mesh:node_coordinates = "lon lat" ;
 		fvcom_mesh:face_node_connectivity = "nv" ;
 	int nv(nele, three) ;
