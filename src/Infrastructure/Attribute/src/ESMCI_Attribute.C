@@ -1316,30 +1316,25 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 // 
 // !ARGUMENTS:
       const string &name,                // in - Attribute name
-      const string &convention,          // in - Attribute convention
-      const string &purpose,             // in - Attribute purpose
-      const string &object,              // in - Attribute object type
-      const string &attPackInstanceName, // in - attPack name
-                                       // specifying which one of multiple packs
+      const Attribute *attpack,          // in - Attribute package
       ESMC_Logical *present) const {     // in/out - the present flag
 // 
 // !DESCRIPTION:
-//     Query an Attribute package for an {\tt Attribute} given its name, convention, 
-//     purpose, and object type.
+//     Query an Attribute package for an {\tt Attribute} given its name.
 //
 //EOPI
 
   unsigned int i;
-  Attribute *attr, *attpack;
+  Attribute *attr;
   
-  attr = NULL; attpack = NULL;
+  attr = NULL;
 
   // get the attpack
-  attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
   if (!attpack) {
     *present = ESMF_FALSE;
     return ESMF_SUCCESS;
   }
+
   // get the attr on the attpack
   attr = attpack->AttPackGetAttribute(name);
   if (!attr) *present = ESMF_FALSE;
@@ -1469,11 +1464,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 //    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-      const string &convention,              // in - convention
-      const string &purpose,                 // in - purpose
-      const string &object,                  // in - object type to look for
-      const string &attPackInstanceName) {   // in - attPack name
-                                       // specifying which one of multiple packs
+        ESMCI::Attribute *attpack) {   // in - attPack
 // 
 // !DESCRIPTION:
 //     Remove an {\tt Attribute} package
@@ -1482,16 +1473,15 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   int localrc;
   unsigned int i;
-  Attribute *attpack, *attrparent;
+  Attribute *attrparent;
   bool done = false;
   
-  attpack = NULL; attrparent = NULL;
+  attrparent = NULL;
 
   // Initialize local return code
   localrc = ESMC_RC_NOT_IMPL;
     
   // get the attpack
-  attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
   if(!attpack) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, 
       "Cannot find the Attribute package", ESMC_CONTEXT, &localrc);
@@ -1534,11 +1524,7 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 // 
 // !ARGUMENTS:
       const string &name,                    // in - name
-      const string &convention,              // in - convention
-      const string &purpose,                 // in - purpose
-      const string &object,                  // in - object type to look for
-      const string &attPackInstanceName) {   // in - attPack name
-                                       // specifying which one of multiple packs
+      ESMCI::Attribute *attpack) {   // in - attPack name
 // 
 // !DESCRIPTION:
 //     Remove an {\tt Attribute} from an {\tt Attribute} package
@@ -1547,16 +1533,15 @@ const char Attribute::GRIDS_PURP[]   = "grids";
 
   int localrc;
   unsigned int i;
-  Attribute *attr, *attpack, *attrparent;
+  Attribute *attr, *attrparent;
   bool done = false;
 
-  attr = NULL; attpack = NULL; attrparent = NULL;
+  attr = NULL; attrparent = NULL;
 
   // Initialize local return code
   localrc = ESMC_RC_NOT_IMPL;
   
   // get the attpack
-  attpack = AttPackGet(convention, purpose, object, attPackInstanceName);
   if(!attpack) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_FOUND, 
       "Cannot find the specified Attribute package", ESMC_CONTEXT, &localrc);
