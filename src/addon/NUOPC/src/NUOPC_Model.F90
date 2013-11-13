@@ -295,7 +295,7 @@ module NUOPC_Model
     if (newUpdatedCount > oldUpdatedCount) then
       ! there are more Fields now that have their "Updated" Attribute set "true"
       ! -> set "InitializeDataProgress" Attribute "true"
-     call ESMF_AttributeSet(gcomp, &
+      call ESMF_AttributeSet(gcomp, &
         name="InitializeDataProgress", value="true", &
         convention="NUOPC", purpose="General", &
         rc=rc)
