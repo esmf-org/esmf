@@ -279,7 +279,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer            :: ind
       integer, pointer   :: srcdims(:), dstdims(:)
       integer            :: srcrank, dstrank
-      logical            :: convert3D
       logical            :: isConserve, srcIsSphere, dstIsSphere
       logical            :: addCorners,convertToDual
       type(ESMF_MeshLoc) :: meshloc
@@ -895,8 +894,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
 	else
-           srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, convert3D=.true., &
-                       convertToDual=convertToDual, addUserArea=localUserAreaFlag, rc=localrc)
+           srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
+                       convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+		       rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
@@ -910,12 +910,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else
 	! if srcfile is not SCRIP, it is always unstructured
 	if (srcMissingValue) then
-	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, convert3D=.true., &
+	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, &
                     meshname = trim(srcMeshName), addMask=.true., &
                     addUserArea=localUserAreaFlag, &
 		    varname=trim(srcMissingvalueVar), rc=localrc)
 	else
-	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, convert3D=.true., &
+	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, &
                     addUserArea=localUserAreaFlag, &
                     meshname = trim(srcMeshName), rc=localrc)
            if (ESMF_LogFoundError(localrc, &
@@ -1011,7 +1011,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rcToReturn=rc)) return
 	else
-           dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, convert3D=.true., &
+           dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
                        convertToDual=convertToDual, addUserArea=localUserAreaFlag, rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1028,12 +1028,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else
 	! if dstfile is not SCRIP, it is always unstructured
 	if (dstMissingValue) then
- 	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, convert3D=.true., &
+ 	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
                     meshname = trim(dstMeshName), addMask=.true., &
                     addUserArea=localUserAreaFlag, &
 		    varname=trim(dstMissingvalueVar), rc=localrc)
 	else
-	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, convert3D=.true., &
+	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
                     addUserArea=localUserAreaFlag, &
                     meshname = trim(dstMeshName), rc=localrc)
         endif
@@ -1620,7 +1620,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
      maskvals(1) = 0
 
      !Read in the srcfile and create the corresponding ESMF_Mesh object
-     srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, convert3D=.true., &
+     srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
                        convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
 		       elementDistgrid=srcElementDistgrid, nodalDistgrid=srcNodalDistgrid, &
 		       rc=localrc)
@@ -1636,7 +1636,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
      !Read in the dstfile and create the corresponding ESMF object (either
      ! ESMF_Grid or ESMF_Mesh)
-     dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, convert3D=.true., &
+     dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
                        convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
 		       elementDistgrid=dstElementDistgrid, nodalDistgrid=dstNodalDistgrid, &
 		       rc=localrc)
