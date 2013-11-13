@@ -2606,6 +2606,8 @@ int VMK::commtest(commhandle **ch, int *completeFlag, status *status){
 //fprintf(stderr, "(%d)VMK::commtest: nhandles=%d\n", mypet, nhandles);
 //fprintf(stderr, "(%d)VMK::commtest: *ch=%p\n", mypet, *ch);
   int localrc=0;
+  if (status)
+    status->comm_type = VM_COMM_TYPE_MPIUNI;  // safe initialization
   if ((ch!=NULL) && ((*ch)!=NULL)){
     // wait for all non-blocking requests in commhandle to complete
     int localCompleteFlag = 0;
@@ -2688,6 +2690,8 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
 //fprintf(stderr, "(%d)VMK::commwait: nhandles=%d\n", mypet, nhandles);
 //fprintf(stderr, "(%d)VMK::commwait: *ch=%p\n", mypet, *ch);
   int localrc=0;
+  if (status)
+    status->comm_type = VM_COMM_TYPE_MPIUNI;  // safe initialization
   if ((ch!=NULL) && ((*ch)!=NULL)){
     // wait for all non-blocking requests in commhandle to complete
     if ((*ch)->type==0){
