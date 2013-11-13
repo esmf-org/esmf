@@ -89,8 +89,9 @@ module ESMF_AttributeMod
  ! Fortran class type to hold pointer to C++ object
   type ESMF_AttPack
   sequence
-    character(len=ESMF_MAXSTR)  :: attr_name
-    type(ESMF_DataValue)        :: attr_value
+  private
+    type(ESMF_Pointer) :: this
+    ESMF_INIT_DECLARE
   end type
 
 !------------------------------------------------------------------------------
@@ -851,8 +852,7 @@ contains
 !
 ! !DESCRIPTION:
 !     Add an ESMF standard Attribute package.  See Section~\ref{sec:AttPacks}
-!     for a description of Attribute packages and their conventions, purposes,
-!     and object types.
+!     for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -915,8 +915,7 @@ contains
 !     can be used later to distinguish among multiple nested Attribute
 !     packages of the same type in calls to {\tt ESMF\_AttributeGet()},
 !     {\tt ESMF\_AttributeSet()}, and {\tt ESMF\_AttributeRemove()}.
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -982,8 +981,7 @@ contains
 !
 ! !DESCRIPTION:
 !     Add a custom Attribute package to <object>.
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -1044,8 +1042,7 @@ contains
 !     Add a custom Attribute package, with one or more nested Attribute
 !     packages, to <object>.  Allows for building full multiple-child Attribute
 !     hierarchies (multi-child trees).
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -1114,8 +1111,7 @@ contains
 !     Add a custom Attribute package, with a single nested Attribute
 !     package, to <object>.  Allows for building single-child Attribute
 !     hierarchies (single-child trees).
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -1231,8 +1227,7 @@ contains
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt value} from the <object>, or from an Attribute
-!     package on the <object>, specified by {\tt convention} and {\tt purpose},
-!     and optionally {\tt attPackInstanceName}.  Internal information can also
+!     package on the <object>, specified by {\tt attpack}.  Internal information can also
 !     be retrieved from Grid objects by prepending 'ESMF:' to the name of the
 !     piece of information that is requested.  See
 !     Section~\ref{sec:InternalInfo} for more information
@@ -1240,7 +1235,7 @@ contains
 !     A {\tt defaultvalue} argument
 !     may be given if a return code is not desired when the Attribute is not
 !     found.  See Section~\ref{sec:AttPacks} for a description of Attribute
-!     packages and their conventions, purposes, and object types.
+!     packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -1317,8 +1312,7 @@ contains
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt value} from the <object>, or from an Attribute
-!     package on the <object>, specified by {\tt convention} and {\tt purpose},
-!     and optionally {\tt attPackInstanceName}.  Internal class information can
+!     package on the <object>, specified by {\tt attpack}.  Internal class information can
 !     be retrieved by prepending 'ESMF:' to the name of the
 !     piece of information that is requested.  See
 !     Section~\ref{sec:InternalInfo} for more information
@@ -1326,7 +1320,7 @@ contains
 !     A {\tt defaultvalue} argument
 !     may be given if a return code is not desired when the Attribute is not
 !     found.  See Section~\ref{sec:AttPacks} for a description of Attribute
-!     packages and their conventions, purposes, and object types.
+!     packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -1388,16 +1382,14 @@ contains
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt valueList} from the <object>, or from an
-!     Attribute package on the <object>, specified by {\tt convention} and
-!     {\tt purpose}, and optionally {\tt attPackInstanceName}.  Internal
+!     Attribute package on the <object>, specified by {\tt attpack}.  Internal
 !     information can also be retrieved from Grid objects by prepending 'ESMF:'
 !     to the name of the piece of information that is requested.  See
 !     Section~\ref{sec:InternalInfo} for more information
 !     on which pieces of Grid data can be retrieved through this interface.
 !     A {\tt defaultvalueList} list argument may be given if
 !     a return code is not desired when the Attribute is not found.
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -1477,16 +1469,14 @@ contains
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt valueList} from the <object>, or from an
-!     Attribute package on the <object>, specified by {\tt convention} and
-!     {\tt purpose}, and optionally {\tt attPackInstanceName}.  Internal class
+!     Attribute package on the <object>, specified by {\tt attpack}.  Internal class
 !     information can be retrieved by prepending 'ESMF:'
 !     to the name of the piece of information that is requested.  See
 !     Section~\ref{sec:InternalInfo} for more information
 !     on this capability.
 !     A {\tt defaultvalueList} list argument may be given if
 !     a return code is not desired when the Attribute is not found.
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -2655,11 +2645,11 @@ contains
 !     \end{description}
 !
 !     NOTE:  An entire Attribute package can be removed by specifying
-!            {\tt convention} and {\tt purpose} only, without {\tt name}.  By specifying
-!            {\tt convention}, {\tt purpose}, and {\tt name} an Attribute will be removed
+!            {\tt attpack} only, without {\tt name}.  By specifying
+!            {\tt attpack} an Attribute will be removed
 !            from the corresponding Attribute package, if it exists.  An
 !            Attribute can be removed directly from <object> by specifying
-!            {\tt name}, without {\tt convention} and {\tt purpose}.
+!            {\tt name}, without {\tt attpack}.
 !
 !
 !EOP
@@ -2745,10 +2735,8 @@ contains
 ! !DESCRIPTION:
 !     Attach an Attribute to <object>, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and {\tt value},
-!     and, if in an Attribute package, a {\tt convention} and {\tt purpose},
-!     and optionally an {\tt attPackInstanceName}.
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.
+!     and, if in an Attribute package, a {\tt attpack}.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -2810,10 +2798,9 @@ contains
 ! !DESCRIPTION:
 !     Attach an Attribute to <object>, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and {\tt value},
-!     and, if in an Attribute package, a {\tt convention} and {\tt purpose},
-!     and optionally an {\tt attPackInstanceName}.
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages
-!     and their conventions, purposes, and object types.  The Attribute can
+!     and, if in an Attribute package, a {\tt attpack}.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.  
+!     The Attribute can
 !     also be set to be a pointer to internal class information.  See Section
 !     \ref{sec:InternalInfo} for a description of this capability.
 !
@@ -2866,10 +2853,8 @@ contains
 !     Attach an Attribute to <object>, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and a
 !     {\tt valueList}, with an {\tt itemCount}, and, if in an Attribute
-!     package, a {\tt convention} and {\tt purpose}, and optionally an
-!     {\tt attPackInstanceName}.  See Section~\ref{sec:AttPacks} for a
-!     description of Attribute packages and their conventions, purposes,
-!     and object types.
+!     package, a {\tt attpack}.  See Section~\ref{sec:AttPacks} for a
+!     description of Attribute packages.
 !
 !     Supported values for <object> are:
 !     \begin{description}
@@ -3366,7 +3351,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
-      subroutine mclass##AttAddPackStd(mthis, convention, purpose, rc) @\
+      subroutine mclass##AttAddPackStd(mthis, convention, purpose, attpack, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
@@ -3420,7 +3405,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       call c_ESMC_AttPackCreateStandard(mthisfield, convention, & @\
         purpose, object, localrc) @\
- @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -3463,7 +3447,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character (len = *), dimension(:), intent(out) :: nestAttPackInstanceNameList @\
       integer, intent(in), optional :: nestCount @\
       integer, intent(out), optional :: nestAttPackInstanceNameCount @\
-      type(ESMF_AttPack), intent(inout), optional :: attpack @\
+        type(ESMF_AttPack), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc @\
  @\
 ! @\
@@ -3490,6 +3474,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description} @\
 !     \item [mthis] @\
 !      An ESMF object. @\
+!     \item [attpack] @\
+!      The Attribute package to be created. @\
 !     \item [convention] @\
 !      The convention of the new Attribute package. @\
 !     \item [purpose] @\
@@ -3534,7 +3520,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=(size(nestPurpose)*len(nestPurpose))) :: nestPurpString @\
       integer, dimension(size(nestAttPackInstanceNameList)) :: nestAPinstNameLens @\
       character(len=(size(nestAttPackInstanceNameList)*len(nestAttPackInstanceNameList))) :: nestAPinstNameString @\
-@\
+ @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
@@ -3690,7 +3676,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       integer :: localrc, i, localCount @\
       character(len=*), parameter :: object=#mthis @\
-@\
+ @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
@@ -3808,7 +3794,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, dimension(size(nestPurpose)) :: nestPurpLens @\
       character(len=(size(nestConvention)*len(nestConvention))) :: nestConvString @\
       character(len=(size(nestPurpose)*len(nestPurpose))) :: nestPurpString @\
-@\
+ @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
@@ -3961,7 +3947,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc @\
       character(len=len(nestConvention)), dimension(1) :: nestConvString @\
       character(len=len(nestPurpose)), dimension(1) :: nestPurpString @\
-@\
+ @\
       ! Initialize return code; assume failure until success is certain @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
@@ -3971,8 +3957,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       nestConvString(1) = nestConvention @\
       nestPurpString(1) = nestPurpose @\
  @\
-      call mclass##AttAddPackCstN(mthis, convention, purpose, & @\
-              attrList, count, nestConvString, nestPurpString, 1, localrc) @\
+      call mclass##AttAddPackCstN(mthis, & @\
+                                  convention, purpose, & @\
+                                  attrList, count, & @\
+                                  nestConvString, nestPurpString, & @\
+                                  nestCount=1, attpack=attpack, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
          ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
@@ -4112,7 +4101,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 @\
       integer :: localrc, i @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_Logical) :: lisPresent @\
       integer :: count @\
       !! TODO: this needs to be dynamically sized !!! @\
       character (len=ESMF_MAXSTR) :: modName @\
@@ -4120,7 +4109,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -4389,7 +4377,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       integer :: localrc, litemCount, i @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_Logical) :: lisPresent @\
       type(ESMF_TypeKind_Flag) :: localTk @\
       !! TODO: this needs to be dynamically sized !!! @\
       character (len=ESMF_MAXSTR) :: modName @\
@@ -4397,7 +4385,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -4733,17 +4720,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_INIT_CHECK_DEEP(ESMF_AttributeGetInit, attpack, rc) @\
  @\
       count = 1 @\
-@\
-      if (present(convention).or.present(purpose)) then @\
-        if (present(convention).and..not.present(purpose).or. & @\
-            present(purpose).and..not.present(convention)) then @\
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-            msg="both convention and purpose must be present or not", & @\
-            ESMF_CONTEXT, rcToReturn=rc) @\
-          return @\
-        endif @\
-        isAttpack = ESMF_TRUE @\
-      endif @\
  @\
       call c_ESMC_AttPackIsPresent(mthisfield, name, attpack, & @\
                        lisPresent, localrc) @\
@@ -4823,7 +4799,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           of multiple Attribute package instances of the same convention @\
 !           and purpose, within a nest.  If not specified, defaults to the @\
 !           first instance.  (Not implemented yet) @\
-     \item [{[isPresent]}] @\
+!     \item [{[isPresent]}] @\
 !           A logical flag to tell if this Attribute is present or not @\
 !     \item [{[rc]}]  @\
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -4967,7 +4943,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       integer :: localrc, litemCount, i @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_Logical) :: lisPresent @\
       type(ESMF_TypeKind_Flag) :: localTk @\
       !! TODO: this needs to be dynamically sized !!! @\
       character (len=ESMF_MAXSTR) :: modName @\
@@ -4975,7 +4951,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -5184,9 +5159,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
         if (lisPresent == ESMF_TRUE) then @\
-          call c_ESMC_AttPackGetValue(mthisfield, name, & @\
-            ESMF_TYPEKIND_LOGICAL, litemCount, valueList, & @\
-            convention, purpose, fobject, attPackInstanceName, localrc) @\
+          call c_ESMC_AttPackGetValue(mthisfield, name, attpack, & @\
+            ESMF_TYPEKIND_LOGICAL, litemCount, valueList, localrc) @\
         end if @\
       else @\
         call c_ESMC_AttributeIsPresent(mthisfield, name, lisPresent, localrc) @\
@@ -5299,7 +5273,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       integer :: localrc @\
       character(len=*), parameter :: fobject=#mthis @\
-      type(ESMF_Logical) :: lisPresent, isAttpack @\
+      type(ESMF_Logical) :: lisPresent @\
       integer, dimension(1) :: lens @\
       integer :: count @\
       !! TODO: this needs to be dynamically sized !!! @\
@@ -5308,7 +5282,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
       lisPresent = ESMF_FALSE @\
-      isAttpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -9147,7 +9120,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
-      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -9384,7 +9356,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
-      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -9484,7 +9455,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
-       !!!! TODO: this can go away once modName is dynamically sized !!! @\
+      !!!! TODO: this can go away once modName is dynamically sized !!! @\
       if (len(name) > ESMF_MAXSTR) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_NOT_VALID, & @\
           msg="len(name) cannot be larger than ESMF_MAXSTR for now", & @\
@@ -9498,8 +9469,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
-@\
-     count = 1 @\
  @\
       lens(1) = len_trim(value) @\
       count = 1 @\
@@ -9586,7 +9555,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
-      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -9771,7 +9739,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, attpackobj, localrc) @\
       else @\
-!        call c_ESMC_AttributeSetChar(mthisfield, name, value, localrc) @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, localrc) @\
       endif @\
@@ -9839,7 +9806,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
-      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
       tag_size = 6 ! ':Input:' is 7 characters long @\
  @\
@@ -10102,7 +10068,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call c_ESMC_AttPackSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, attpackobj, localrc) @\
       else @\
-!        call c_ESMC_AttributeSetChar(mthisfield, name, value, localrc) @\
         call c_ESMC_AttributeSetCharList(mthisfield, name, ESMF_TYPEKIND_CHARACTER, & @\
           litemCount, valueString, lens, localrc) @\
       endif @\
@@ -10165,12 +10130,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(len=*), parameter :: fobject=#mthis @\
       integer, dimension(size(valueList)) :: lens @\
       character(len=(size(valueList)*len(valueList))) :: valueString @\
-      type(ESMF_Logical) :: attpack @\
       character (len=ESMF_MAXSTR) :: modName @\
  @\
       ! Initialize @\
       localrc = ESMF_RC_NOT_IMPL @\
-      attpack = ESMF_FALSE @\
       if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
       ! check variables @\
@@ -10524,6 +10487,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  CplComp
 !-------------------------------------------------------------------------
 
+AttPackGetMacro(ESMF_CplComp, comp, comp%compp%base)
+
 AttAddPackStandardMacro(ESMF_CplComp, comp, comp%compp%base)
 AttAddPackStandardNMacro(ESMF_CplComp, comp, comp%compp%base)
 AttAddPackCustomMacro(ESMF_CplComp, comp, comp%compp%base)
@@ -10571,6 +10536,8 @@ AttWriteMacro(ESMF_CplComp, comp, comp%compp%base, comp, field)
 !  GridComp
 !-------------------------------------------------------------------------
 
+AttPackGetMacro(ESMF_GridComp, comp, comp%compp%base)
+
 AttAddPackStandardMacro(ESMF_GridComp, comp, comp%compp%base)
 AttAddPackStandardNMacro(ESMF_GridComp, comp, comp%compp%base)
 AttAddPackCustomMacro(ESMF_GridComp, comp, comp%compp%base)
@@ -10617,6 +10584,8 @@ AttWriteMacro(ESMF_GridComp, comp, comp%compp%base, comp, field)
 !  SciComp
 !-------------------------------------------------------------------------
 
+AttPackGetMacro(ESMF_SciComp, comp, comp%compp%base)
+
 AttAddPackStandardMacro(ESMF_SciComp, comp, comp%compp%base)
 AttAddPackStandardNMacro(ESMF_SciComp, comp, comp%compp%base)
 AttAddPackCustomMacro(ESMF_SciComp, comp, comp%compp%base)
@@ -10662,6 +10631,8 @@ AttWriteMacro(ESMF_SciComp, comp, comp%compp%base, comp, field)
 !-------------------------------------------------------------------------
 !  STATE
 !-------------------------------------------------------------------------
+
+AttPackGetMacro(ESMF_State, state, state%statep%base)
 
 AttAddPackStandardMacro(ESMF_State, state, state%statep%base)
 AttAddPackCustomMacro(ESMF_State, state, state%statep%base)
@@ -10712,6 +10683,8 @@ AttWriteMacro(ESMF_State, state, state%statep%base, state, field)
 !  FIELDBUNDLE
 !-------------------------------------------------------------------------
 
+AttPackGetMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
+
 AttAddPackCustomMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttAddPackCustomNMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttAddPackCustomN1Macro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
@@ -10747,6 +10720,8 @@ AttWriteMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base, fieldbundle,
 !  FIELD
 !-------------------------------------------------------------------------
 
+AttPackGetMacro(ESMF_Field, field, field%ftypep%base)
+
 AttAddPackStandardMacro(ESMF_Field, field, field%ftypep%base)
 AttAddPackCustomMacro(ESMF_Field, field, field%ftypep%base)
 AttAddPackCustomNMacro(ESMF_Field, field, field%ftypep%base)
@@ -10779,6 +10754,8 @@ AttWriteMacro(ESMF_Field, field, field%ftypep%base, field, field)
 !  ARRAYBUNDLE
 !-------------------------------------------------------------------------
 
+AttPackGetMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+
 AttAddPackCustomMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttAddPackCustomNMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttAddPackCustomN1Macro(ESMF_ArrayBundle, arraybundle, arraybundle)
@@ -10808,6 +10785,8 @@ AttWriteMacro(ESMF_ArrayBundle, arraybundle, arraybundle, arraybundle, array)
 !  ARRAY
 !-------------------------------------------------------------------------
 
+AttPackGetMacro(ESMF_Array, array, array)
+
 AttAddPackCustomMacro(ESMF_Array, array, array)
 AttAddPackCustomNMacro(ESMF_Array, array, array)
 AttAddPackCustomN1Macro(ESMF_Array, array, array)
@@ -10831,6 +10810,8 @@ AttWriteMacro(ESMF_Array, array, array, array, array)
 !-------------------------------------------------------------------------
 !  GRID
 !-------------------------------------------------------------------------
+
+AttPackGetMacro(ESMF_Grid, grid, grid)
 
 AttAddPackStandardMacro(ESMF_Grid, grid, grid)
 AttAddPackCustomMacro(ESMF_Grid, grid, grid)
@@ -10869,6 +10850,8 @@ AttWriteMacro(ESMF_Grid, grid, grid, grid, grid)
 !-------------------------------------------------------------------------
 !  DISTGRID
 !-------------------------------------------------------------------------
+
+AttPackGetMacro(ESMF_DistGrid, distgrid, distgrid)
 
 AttAddPackCustomMacro(ESMF_DistGrid, distgrid, distgrid)
 AttAddPackCustomNMacro(ESMF_DistGrid, distgrid, distgrid)
