@@ -46,6 +46,8 @@ program ESMF_AttributeCplCompUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
+      type(ESMF_AttPack)   :: attpack
+      
       type(ESMF_CplComp)     :: cplcomp, cfc, cplcompValue, cplcompHybrid
       type(ESMF_GridComp)    :: gfc
       type(ESMF_State)       :: sfc
@@ -108,6 +110,8 @@ program ESMF_AttributeCplCompUTest
 
       logical :: rc_logical
       character(ESMF_MAXSTR), dimension(1) :: exclusions
+
+	    type(ESMF_AttPack) :: handle
 
 #endif
 

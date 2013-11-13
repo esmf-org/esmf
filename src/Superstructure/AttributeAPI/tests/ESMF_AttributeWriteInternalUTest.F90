@@ -44,6 +44,7 @@ program ESMF_AttributeWriteIntrnalUTest
   character(ESMF_MAXSTR) :: name
   
   ! local variables
+  type(ESMF_AttPack)   :: attpack   
   type(ESMF_Grid)        :: grid
   integer                :: rc
   

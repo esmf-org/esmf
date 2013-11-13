@@ -95,6 +95,7 @@ module user_model1
     integer, intent(out) :: rc
 
     ! Local variables
+	type(ESMF_AttPack)          :: attpack
     type(ESMF_VM)               :: vm
     integer                     :: petCount, localPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,name5, &
@@ -364,6 +365,7 @@ module user_model1
     integer, intent(out) :: rc
 
     ! Local variables
+	type(ESMF_AttPack)          :: attpack, attpack2
     type(ESMF_VM)               :: vm
     integer                     :: petCount, myPet, k
     character(ESMF_MAXSTR)      :: name2,value2,conv,purp,purp2,name3
@@ -412,7 +414,8 @@ module user_model1
 !        call ESMF_AttributeWrite(field,conv,purp,rc=rc)
 !        call ESMF_AttributeWrite(field,conv,purp, &
 !                               attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-        call ESMF_AttributeSet(field, name2, value2, convention=conv, purpose=purp, rc=rc)
+        call ESMF_AttPackGet(field, conv, purp, attpack=attpack, rc=rc)
+        call ESMF_AttributeSet(field, name2, value2, attpack=attpack, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 #if 1
         call ESMF_AttributeAdd(field, convention=conv, purpose=purp2, attrList=attrList, &

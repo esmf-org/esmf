@@ -46,6 +46,8 @@ program ESMF_AttributeArrayUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
+      type(ESMF_AttPack)   :: attpack, nested_attpack
+      
       type(ESMF_Array)       :: array
       type(ESMF_ArraySpec)   :: arrayspec
       type(ESMF_DistGrid)    :: distgrid
@@ -1239,7 +1241,7 @@ program ESMF_AttributeArrayUTest
       !EX_UTest
       ! Add multiple Attributes to an Attribute package on an Array Test
       call ESMF_AttributeAdd(array, attrList=attpackListTNames, convention=conv, &
-        purpose=purp, rc=rc)
+        purpose=purp, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Adding multiple Attributes to a standard Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1535,7 +1537,7 @@ program ESMF_AttributeArrayUTest
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-     !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
       ! clean up
       call ESMF_ArrayDestroy(array, rc=rc)
       call ESMF_DistGridDestroy(distGrid, rc=rc)

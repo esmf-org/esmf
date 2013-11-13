@@ -90,6 +90,7 @@ module user_coupler
     integer, intent(out) :: rc
 
     ! Local variables
+	  type(ESMF_AttPack)        :: attpack
     type(ESMF_VM)          :: vm
     character(ESMF_MAXSTR) :: convCIM, purpComp, purpProp, purpPlatform
     character(ESMF_MAXSTR) :: convISO, purpRP, purpCitation
@@ -297,6 +298,9 @@ module user_coupler
 
 
     ! Platform description attributes
+    call ESMF_AttPackGet(comp, convCIM, purpPlatform, attpack=attpack, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     call ESMF_AttributeSet(comp, 'CompilerName', &
      'Pathscale', &
       convention=convCIM, purpose=purpPlatform, rc=rc)
@@ -369,6 +373,9 @@ module user_coupler
 
 
     ! Component Properties: custom attributes
+    call ESMF_AttPackGet(comp, convCIM, purpProp, attpack=attpack, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     call ESMF_AttributeSet(comp, 'SimulationType', &
      'branch', &
       convention=convCIM, purpose=purpProp, rc=rc)
@@ -392,6 +399,9 @@ module user_coupler
     ! for the Coupler Component in the ESMF\_AttributeAdd(comp, ...) call.
 
     ! Responsible party attributes (for Principal Investigator)
+    call ESMF_AttPackGet(comp, convISO, purpRP, attpack=attpack, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     call ESMF_AttributeSet(comp, 'Name', &
      'John Doe', &
       convention=convISO, purpose=purpRP, rc=rc)
@@ -430,6 +440,10 @@ module user_coupler
 
 
     ! Responsible party attributes (for Contact)
+    call ESMF_AttPackGet(comp, convISO, purpRP, &
+      attPackInstanceName=nestAttPackName(2), attpack=attpack, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     call ESMF_AttributeSet(comp, 'Name', &
      'Samuel Doe', &
       convention=convISO, purpose=purpRP, &
@@ -474,6 +488,10 @@ module user_coupler
 
 
     ! Responsible party attributes (for Funder)
+    call ESMF_AttPackGet(comp, convISO, purpRP, &
+      attPackInstanceName=nestAttPackName(3), attpack=attpack, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     call ESMF_AttributeSet(comp, 'Name', &
      'EarthSys Funding Office', &
       convention=convISO, purpose=purpRP, &
@@ -507,6 +525,9 @@ module user_coupler
     ! for the Coupler Component in the ESMF\_AttributeAdd(comp, ...) call.
 
     ! Citation attributes (1st Citation attribute package)
+    call ESMF_AttPackGet(comp, convISO, purpCitation, attpack=attpack, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     call ESMF_AttributeSet(comp, 'ShortTitle', &
      'Doe_2009', &
       convention=convISO, purpose=purpCitation, rc=rc)
@@ -558,6 +579,10 @@ module user_coupler
     !         nestAttPackName(x) is not needed (optional)
     !         when referring to the 1st nested attribute package
     !         of either a Responsible Party or a Citation.
+    call ESMF_AttPackGet(comp, convISO, purpCitation, &
+      attPackInstanceName=nestAttPackName(5), attpack=attpack, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     call ESMF_AttributeSet(comp, 'ShortTitle', &
      'Doe_2006', &
       convention=convISO, purpose=purpCitation, &

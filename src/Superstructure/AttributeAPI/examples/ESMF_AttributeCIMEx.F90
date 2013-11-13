@@ -51,6 +51,7 @@ program ESMF_AttributeCIMEx
 
       ! Local variables  
       integer                 :: rc, finalrc, petCount, localPet, result
+  	  type(ESMF_AttPack)      :: attpack
       type(ESMF_VM)           :: vm
       type(ESMF_Field)        :: ozone
       type(ESMF_State)        :: exportState
@@ -213,6 +214,8 @@ program ESMF_AttributeCIMEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
+      call ESMF_AttPackGet(cplcomp, convCIM, purpPlatform, attpack=attpack, rc=rc)
+
       call ESMF_AttributeSet(cplcomp, 'MachineName', 'HECToR', &
         convention=convCIM, purpose=purpPlatform, rc=rc)
 !EOC
@@ -337,7 +340,8 @@ program ESMF_AttributeCIMEx
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-
+      
+      call ESMF_AttPackGet(gridcomp, convCIM, purpPlatform, attpack=attpack, rc=rc)
 
       ! Platform description attributes
       call ESMF_AttributeSet(gridcomp, 'CompilerName', 'Pathscale', &
@@ -398,6 +402,7 @@ program ESMF_AttributeCIMEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
+      call ESMF_AttPackGet(gridcomp, convCIM, purpProp, attpack=attpack, rc=rc)
 
       ! Component Properties: custom attributes
       call ESMF_AttributeSet(gridcomp, 'SimulationType', 'branch', &
@@ -422,6 +427,8 @@ program ESMF_AttributeCIMEx
 !EOE
 
 !BOC 
+      call ESMF_AttPackGet(gridcomp, convISO, purpRP, attpack=attpack, rc=rc)
+
       ! Responsible party attributes (for Principal Investigator)
       call ESMF_AttributeSet(gridcomp, 'Name', 'John Doe', &
         convention=convISO, purpose=purpRP, rc=rc)
@@ -452,7 +459,9 @@ program ESMF_AttributeCIMEx
 !\end{sloppypar}
 !EOE
 
-!BOC 
+!BOC
+      call ESMF_AttPackGet(gridcomp, convISO, purpCitation, attpack=attpack, rc=rc)
+
       ! Citation attributes
       call ESMF_AttributeSet(gridcomp, 'ShortTitle', 'Doe_2009', &
         convention=convISO, purpose=purpCitation, rc=rc)
@@ -544,6 +553,8 @@ program ESMF_AttributeCIMEx
 !EOE
 
 !BOC
+      call ESMF_AttPackGet(ozone, convCIM, purpField, attpack=attpack, rc=rc)
+
       ! ozone CF-Extended Attributes
       call ESMF_AttributeSet(ozone, 'ShortName', 'Global_O3_mon', &
        convention=convCIM, purpose=purpField, rc=rc)

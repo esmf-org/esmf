@@ -134,6 +134,11 @@ class Attribute
     static const char COMP_PROP_PURP[];
     static const char GRIDS_PURP[];
 
+    // accessors for private member variables
+    inline const std::string getConvention() {return this->attrConvention;}
+    inline const std::string getPurpose() {return this->attrPurpose;}
+    inline const std::string getObject() {return this->attrObject;}
+
     // helper to set the Base address in attrBase
     void setBase(ESMC_Base *setBase){ attrBase = setBase; }
 
@@ -425,10 +430,14 @@ extern "C" {
 // TODO:  intel 11.0.083 compiler on Columbia errors out on ESMCI_Attribute_F.C
 //        with the following prototype:
 // error: more than one instance of overloaded function "c_esmc_attpackremove_" has "C" linkage
+<<<<<<< HEAD
   void FTN_X(c_esmc_attpackremove)(ESMC_Base **base,
+=======
+  void FTN_X(c_esmc_attpackget)(ESMC_Base **base, ESMCI::Attribute **attpack,
+>>>>>>> AttributeWork
                                   char *convention, char *purpose,
                                   char *object, char *attPackInstanceName,
-                                  int *rc,
+                                  ESMC_Logical *present, int *rc,
                                   ESMCI_FortranStrLenArg clen,
                                   ESMCI_FortranStrLenArg plen,
                                   ESMCI_FortranStrLenArg olen,
@@ -465,16 +474,12 @@ extern "C" {
                                   ESMCI_FortranStrLenArg olen,
                                   ESMCI_FortranStrLenArg alen);
   void FTN_X(c_esmc_attpackgetapinstnames)(ESMC_Base **base, 
-                                  char *convention, char *purpose, 
-                                  char *object, 
+                                  ESMCI::Attribute **attpack,
                                   char *attPackInstanceNameList,
                                   int *attPackInstanceNameLens,
                                   int *attPackInstanceNameSize,
                                   int *attPackInstanceNameCount,
                                   int *rc, 
-                                  ESMCI_FortranStrLenArg clen, 
-                                  ESMCI_FortranStrLenArg plen, 
-                                  ESMCI_FortranStrLenArg olen,
                                   ESMCI_FortranStrLenArg napinlen);
   void FTN_X(c_esmc_attpackispresent)(ESMC_Base **base, char *name,
                                   char *convention, char *purpose, 
