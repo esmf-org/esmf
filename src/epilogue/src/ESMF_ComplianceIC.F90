@@ -1536,11 +1536,22 @@ module ESMF_ComplianceICMod
     integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
 
 	  call ESMF_AttPackGet(field, attpack=attpack, &
-      convention=convention, purpose=purpose, rc=rc)
+      convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+    if (.not.isPresent) then      
+      ! attpack not present
+      call ESMF_LogWrite(trim(prefix)//" ==> Field level attpack: <"// &
+        "convention: "//trim(convention)// &
+        "purpose: "//trim(purpose)//"> is NOT present!", &
+        ESMF_LOGMSG_WARNING, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
     call ESMF_AttributeGet(field, name=attributeName, attpack=attpack, &
       typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
