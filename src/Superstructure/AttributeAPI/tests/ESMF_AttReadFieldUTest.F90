@@ -48,6 +48,7 @@ program ESMF_AttReadFieldUTest
 
       ! local variables
       type(ESMF_Field)       :: field
+      type(ESMF_AttPack)   :: attpack
       logical                :: xercesNotPresent
       integer                :: rc
 
@@ -109,6 +110,19 @@ print *, 'rc = ', rc
     !-------------------------------------------------------------------------
     !  Check read-in Attributes
     !-------------------------------------------------------------------------
+
+      conv = 'CF'
+      purp = 'General'
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Get CF General Attribute package from a Field Test
+      call ESMF_AttPackGet(field, attpack=attpack, &
+                             convention=conv, purpose=purp, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Get CF General Attribute package from a Field Test"
+      call ESMF_Test((rc==ESMF_SUCCESS &
+                      .or. xercesNotPresent), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest

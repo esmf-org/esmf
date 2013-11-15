@@ -113,6 +113,7 @@ module user_model2
 
     ! Local variables
     integer               :: localPet
+	type(ESMF_AttPack)    :: attpack
     type(ESMF_Field)      :: field
     type(ESMF_FieldBundle):: fieldbundle
     type(ESMF_Clock)      :: clockInternal
@@ -125,12 +126,13 @@ module user_model2
 
     print *, localPet, "User Comp2 Init starting"
 
-    call ESMF_AttributeAdd(comp, convention="CIM 1.5", &
-      purpose="ModelComp", rc=rc)
+    call ESMF_AttributeAdd(comp, "CIM 1.5", "ModelComp", &
+      attpack=attpack, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     
     call ESMF_AttributeSet(comp, name="ShortName", value="ABC", &
-      convention="CIM 1.5", purpose="ModelComp", &
-      rc=rc)
+      attpack=attpack, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
    
     field = ESMF_FieldEmptyCreate(name="myTestField", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

@@ -2328,6 +2328,9 @@ end function ESMF_MeshCreateFromUnstruct
     integer                 :: dualflag
     integer                 :: unit
     logical                 :: notavail
+    integer                 :: gridRank
+    integer,pointer         :: gridDims(:)
+    integer                 :: poleVal, minPoleGid, maxPoleGid
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -2393,6 +2396,34 @@ end function ESMF_MeshCreateFromUnstruct
        endif
     endif    
 
+   ! Add pole information, if created from a 2D grid file
+    call ESMF_ScripInq(filename, grid_rank=gridRank, grid_dims=gridDims, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (gridRank==2) then
+       poleVal=4
+       minPoleGid=1
+       maxPoleGid=gridDims(1)
+       call C_ESMC_MeshSetPoles(ESMF_MeshCreateFromScrip, &
+            poleVal, minPoleGid, maxPoleGid, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       poleVal=5
+       minPoleGid=gridDims(1)*gridDims(2)-gridDims(1)+1
+       maxPoleGid=gridDims(1)*gridDims(2)
+       call C_ESMC_MeshSetPoles(ESMF_MeshCreateFromScrip, &
+            poleVal, minPoleGid, maxPoleGid, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (associated(gridDims)) deallocate(gridDims)
+
+
+    ! Output success
     if (present(rc)) rc=ESMF_SUCCESS
     return
 end function ESMF_MeshCreateFromScrip

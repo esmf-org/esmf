@@ -66,6 +66,7 @@ implicit none
 
 
       integer                 :: rc, urc, finalrc, petCount, localPet, result
+  	  type(ESMF_AttPack)      :: attpack
       type(ESMF_VM)           :: vm
       type(ESMF_State)        :: c1exp, c2imp
       type(ESMF_GridComp)     :: gridcomp1
@@ -137,6 +138,7 @@ implicit none
 !EOC
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
+      endif
 
         c1exp = ESMF_StateCreate(name="Comp1 exportState", &
                                stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
@@ -147,7 +149,6 @@ implicit none
 !EOC      
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-      endif
  
 ! statecreates are in the if temporarily so that I can do there is not
 ! a random endif in the protex while investigating the uni failures in
@@ -182,14 +183,14 @@ implicit none
 !BOC
       convESMF = 'ESMF'
       purpGen = 'General'
-    call ESMF_AttributeAdd(gridcomp1, convention=convESMF, purpose=purpGen, &
-      rc=rc)
+      call ESMF_AttributeAdd(gridcomp1, &
+      	convention=convESMF, purpose=purpGen, attpack=attpack, &
+      	rc=rc)
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
-    call ESMF_AttributeSet(gridcomp1, 'Agency', 'NASA', &
-      convention=convESMF, purpose=purpGen, rc=rc)
+    call ESMF_AttributeSet(gridcomp1, 'Agency', 'NASA', attpack, rc=rc)
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -245,7 +246,7 @@ implicit none
 !BOC
 
       
-      call ESMF_AttributeLink(gridcomp1, c1exp, rc=rc) 
+    call ESMF_AttributeLink(gridcomp1, c1exp, rc=rc) 
 
 !EOC
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

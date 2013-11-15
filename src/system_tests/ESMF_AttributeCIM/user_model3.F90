@@ -95,6 +95,7 @@ module user_model3
     integer, intent(out) :: rc
 
     ! Local variables
+	  type(ESMF_AttPack)        :: attpack
     character(ESMF_MAXSTR)      :: convCIM, purpComp, purpSci, purpField
     character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
     character(ESMF_MAXSTR)      :: sciPropAtt(2)
@@ -160,6 +161,9 @@ module user_model3
     ! Responsible party attributes (for Contact)
     convISO = 'ISO 19115'
     purpRP = 'RespParty'
+    call ESMF_AttPackGet(comp, convISO, purpRP, attpack=attpack, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     call ESMF_AttributeSet(comp, 'Name', &
      'Jane Doe', &
       convention=convISO, purpose=purpRP, rc=rc)
@@ -188,6 +192,9 @@ module user_model3
     ! Citation attributes
     convISO = 'ISO 19115'
     purpCitation = 'Citation'
+    call ESMF_AttPackGet(comp, convISO, purpCitation, attpack=attpack, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
     call ESMF_AttributeSet(comp, 'ShortTitle', &
      'Doe_2006', &
       convention=convISO, purpose=purpCitation, rc=rc)

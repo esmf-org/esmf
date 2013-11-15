@@ -46,6 +46,8 @@ program ESMF_AttributeGridUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
+      type(ESMF_AttPack)   :: attpack
+      
       type(ESMF_Grid)       :: grid
       character(ESMF_MAXSTR) :: conv, purp, attrname, &
                                 attrnameOut, attrvalue

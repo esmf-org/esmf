@@ -46,6 +46,8 @@ program ESMF_AttributeSciCompUTest
       character(ESMF_MAXSTR) :: name
 
       ! local variables
+      type(ESMF_AttPack)   :: attpack
+      
       type(ESMF_CplComp)     :: cfg
       type(ESMF_SciComp)    :: scicomp, gfg, scicompValue, scicompHybrid
       type(ESMF_State)       :: sfg

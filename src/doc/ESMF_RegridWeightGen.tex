@@ -590,17 +590,19 @@ variables:
 
  In the ESMF format the netCDF variables have the following meanings. The {\tt nodeCoords} variable contains the coordinates for each node.
  {\tt nodeCoords} is a two-dimensional array of dimension {\tt (nodeCount,coordDim)}.
- For a 2D Grid, {\tt coordDim} is 2. {\tt nodeCoords(:,1)} contains the longitude coordinates and
+ For a 2D Grid, {\tt coordDim} is 2 and the grid is assumed to be spherical. {\tt nodeCoords(:,1)} contains the longitude coordinates and
  {\tt nodeCoords(:,2)} contains the latitude coordinates.  The same order applies to {\tt centerCoords}.
- {\tt elementConn} variable describes how the nodes are connected together to form each element. For each element (i.e. each iteration of the first
+ For a 3D Grid, {\tt coordDim} is 3 and the grid is assumed to be Cartesian. {\tt nodeCoords(:,1)} contains the x coordinates, {\tt nodeCoords(:,2)} contains the y coordinates, 
+ and {\tt nodeCoords(:,3)} contains the z coordinates.  The same order applies to {\tt centerCoords}.
+
+ The {\tt elementConn} variable describes how the nodes are connected together to form each element. For each element (i.e. each iteration of the first
  dimension of the variable), this variable contains a list of 1-based indices into the {\tt nodeCoords} variable pointing to the nodes which make up that
  element. For example, if {\tt elementConn(2,1..3)} contains (1,2,4), then that means that the second element consists of the nodes whose coordinates are
  described by {\tt nodeCoords(1)}, {\tt nodeCoords(2)}, and {\tt nodeCoords(4)}. The order of the indices describing the element is important.
  The proper order for elements available in an ESMF mesh can be found in Section~\ref{const:meshelemtype}. The file format does support 2D polygons with more
  corners than those in that section, but internally these are broken into triangles. For these polygons, the corners should
  be listed such that they are in counter-clockwise order around the element.  Because variables have to be rectangular, the second
- dimension of
- the {\tt elementConn} variable has to be the size of the largest number of nodes in any element (i.e. {\tt maxNodePElement}), the actual number of
+ dimension of the {\tt elementConn} variable has to be the size of the largest number of nodes in any element (i.e. {\tt maxNodePElement}), the actual number of
  nodes in an element is given by the {\tt numElementConn} variable. For a given dimension (i.e. {\tt coordDim}) the number of nodes in the element
  indicates the element shape, for example in 2D, if {\tt numElementConn} is 4 then the element is a quadrilateral. In 3D, if {\tt numElementConn} is 8
  then the element is a hexahedron.

@@ -1301,6 +1301,7 @@ module ESMF_ComplianceICMod
     character(*), intent(in)              :: purpose
     integer,      intent(out), optional   :: rc
     
+    type(ESMF_AttPack)                    :: attpack
     type(ESMF_TypeKind_Flag)              :: typekind
     integer                               :: itemCount, i
     logical                               :: isPresent
@@ -1308,8 +1309,24 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: iStr, vStr
     integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
 
-    call ESMF_AttributeGet(comp, name=attributeName, &
-      convention=convention, purpose=purpose, &
+  	call ESMF_AttPackGet(comp, attpack=attpack, &
+      convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (.not.isPresent) then      
+      ! attpack not present
+      call ESMF_LogWrite(trim(prefix)//" ==> Component level attpack: <"// &
+        "convention: "//trim(convention)// &
+        "purpose: "//trim(purpose)//"> is NOT present!", &
+        ESMF_LOGMSG_WARNING, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
+    call ESMF_AttributeGet(comp, name=attributeName, attpack=attpack, &
       typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -1510,6 +1527,7 @@ module ESMF_ComplianceICMod
     character(*), intent(in)              :: purpose
     integer,      intent(out), optional   :: rc
     
+    type(ESMF_AttPack)                    :: attpack
     type(ESMF_TypeKind_Flag)              :: typekind
     integer                               :: itemCount, i
     logical                               :: isPresent
@@ -1517,8 +1535,24 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: iStr, vStr
     integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
 
-    call ESMF_AttributeGet(field, name=attributeName, &
-      convention=convention, purpose=purpose, &
+	  call ESMF_AttPackGet(field, attpack=attpack, &
+      convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
+    if (ESMF_LogFoundError(rc, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (.not.isPresent) then      
+      ! attpack not present
+      call ESMF_LogWrite(trim(prefix)//" ==> Field level attpack: <"// &
+        "convention: "//trim(convention)// &
+        "purpose: "//trim(purpose)//"> is NOT present!", &
+        ESMF_LOGMSG_WARNING, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
+    call ESMF_AttributeGet(field, name=attributeName, attpack=attpack, &
       typekind=typekind, itemCount=itemCount, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &

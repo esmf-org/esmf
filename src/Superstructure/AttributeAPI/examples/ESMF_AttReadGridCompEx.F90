@@ -51,6 +51,7 @@ program ESMF_AttReadGridCompEx
 
       ! local variables
       type(ESMF_GridComp)    :: gridcomp
+      type(ESMF_AttPack)   :: attpack
       character(ESMF_MAXSTR) :: attrvalue
       type(ESMF_VM)          :: vm
       integer                :: rc, petCount, localPet

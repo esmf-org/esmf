@@ -49,6 +49,7 @@ program ESMF_SCompEx
       ! Local variables  
       integer                 :: rc, finalrc, petCount, localPet, result
       type(ESMF_VM)           :: vm
+	    type(ESMF_AttPack)      :: attpack
 
       type(ESMF_CplComp)      :: cplcomp
       type(ESMF_GridComp)     :: atmcomp, ocncomp
@@ -257,6 +258,8 @@ program ESMF_SCompEx
     call ESMF_AttributeAdd(dc_scicomp,  &
                            convention=convCIM, purpose=purpSci, &
                            attrList=dc_sciPropAtt, rc=rc)
+
+    call ESMF_AttPackGet(dc_scicomp, convCIM, purpSci, attpack=attpack, rc=rc)
 
     call ESMF_AttributeSet(dc_scicomp, 'TopBoundaryCondition', &
                            'radiation boundary condition', &

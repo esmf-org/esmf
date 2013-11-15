@@ -183,6 +183,7 @@ module ESMF_AttributeUpdateUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
+    type(ESMF_AttPack)        :: attpack   
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,value1,value2, &
@@ -304,6 +305,7 @@ module ESMF_AttributeUpdateUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
+    type(ESMF_AttPack)        :: attpack, attpack_nested  
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name2,value2,convESMF,purpGen,purp2,name3
@@ -338,8 +340,9 @@ module ESMF_AttributeUpdateUTestMod
 
     call ESMF_FieldBundleGet(fieldbundle, fieldname="field", field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_AttributeSet(field, name2, value2, convention=convESMF, &
-      purpose=purpGen, rc=status)
+    call ESMF_AttPackGet(field, convESMF, purpGen, attpack=attpack, rc=status)
+    if (rc/=ESMF_SUCCESS) return
+    call ESMF_AttributeSet(field, name2, value2, attpack=attpack, rc=status)
     if (rc/=ESMF_SUCCESS) return
     call ESMF_AttributeAdd(field, convention=convESMF, purpose=purp2, &
       attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen, rc=rc)
@@ -542,6 +545,7 @@ program ESMF_AttributeUpdateUTest
       type(ESMF_CplComp)      :: cplcomp
       character(ESMF_MAXSTR)  :: convESMF,purpGen
 
+	type(ESMF_AttPack)        :: attpack
     type(ESMF_Field)            :: field
     type(ESMF_FieldBundle)      :: fieldbundle
     type(ESMF_Grid)             :: grid
@@ -640,14 +644,19 @@ program ESMF_AttributeUpdateUTest
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !EX_UTest_Multi_Proc_Only
-    call ESMF_AttributeGet(field, name2, value=outVal, convention=convESMF, &
-      purpose=purpGen, rc=rc)
+	call ESMF_AttPackGet(field, convention=convESMF, purpose=purpGen, &
+        attpack=attpack, rc=rc)
+    call ESMF_AttributeGet(field, name2, value=outVal, attpack=attpack, rc=rc)
+    print *, "outVal = ", outVal 
+    print *, "value2 = ", value2
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated Attribute value from a Field test"
     call ESMF_Test((rc==ESMF_SUCCESS).and.(value2==outVal), &
                     name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest_Multi_Proc_Only
+	call ESMF_AttPackGet(field, convention=convESMF, purpose=purp2, &
+        attpack=attpack, rc=rc)
     call ESMF_AttributeGet(field, attrList(1), value=outVal, &
       convention=convESMF, purpose=purp2, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
