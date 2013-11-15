@@ -716,11 +716,23 @@ namespace ESMCI {
       output_mesh->RegisterField("mask", smask->GetMEFamily(),
                                  MeshObj::ELEMENT, smask->GetContext(), smask->dim());
     }
+
+    MEField<> *smask_val = src_mesh->GetField("node_mask_val");
+    if (smask_val != NULL) {
+      output_mesh->RegisterField("node_mask_val", smask_val->GetMEFamily(),
+                                 MeshObj::ELEMENT, smask_val->GetContext(), smask_val->dim());
+    }
        
     MEField<> *src_elem_mask = src_mesh->GetField("elem_mask");
     if (src_elem_mask != NULL) {
       output_mesh->RegisterField("elem_mask", src_elem_mask->GetMEFamily(),
                                 MeshObj::ELEMENT, src_elem_mask->GetContext(), src_elem_mask->dim());
+    }
+
+    MEField<> *src_elem_mask_val = src_mesh->GetField("elem_mask_val");
+    if (src_elem_mask_val != NULL) {
+      output_mesh->RegisterField("elem_mask_val", src_elem_mask_val->GetMEFamily(),
+                                MeshObj::ELEMENT, src_elem_mask_val->GetContext(), src_elem_mask_val->dim());
     }
     
     MEField<> *src_elem_area = src_mesh->GetField("elem_area");
@@ -941,7 +953,7 @@ namespace ESMCI {
   // Pack up and send fields from source to dest mesh using stod_comm
   void send_mesh_fields(Mesh *src_mesh, Mesh *dst_mesh, CommReg &stod_comm) {
     int num_snd=0;
-    MEField<> *snd[5],*rcv[5];
+    MEField<> *snd[7],*rcv[7];
 
     MEField<> *dc = src_mesh->GetCoordField();
     MEField<> *dc_r = dst_mesh->GetCoordField();
@@ -962,6 +974,16 @@ namespace ESMCI {
       num_snd++;            
     }
 
+    MEField<> *dnmv = src_mesh->GetField("node_mask_val");
+    if (dnmv != NULL) {
+      MEField<> *dnmv_r = dst_mesh->GetField("node_mask_val");
+
+      // load mask fields
+      snd[num_snd]=dnmv;
+      rcv[num_snd]=dnmv_r;
+      num_snd++;            
+    }
+
     // Do elem masks if necessary
     MEField<> *dem = src_mesh->GetField("elem_mask");
     if (dem != NULL) {
@@ -972,6 +994,18 @@ namespace ESMCI {
       rcv[num_snd]=dem_r;
       num_snd++;            
     }
+
+    // Do elem masks if necessary
+    MEField<> *demv = src_mesh->GetField("elem_mask_val");
+    if (dem != NULL) {
+      MEField<> *demv_r = dst_mesh->GetField("elem_mask_val");
+
+      // load mask fields
+      snd[num_snd]=demv;
+      rcv[num_snd]=demv_r;
+      num_snd++;            
+    }
+
 
     // Do elem area if necessary
     MEField<> *dea = src_mesh->GetField("elem_area");
