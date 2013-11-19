@@ -34,7 +34,6 @@ static const char *const version = "$Id$";
 extern "C" {
   void FTN_X(f_esmf_meshcreatefromfile)(ESMCI::Mesh **meshp, 
 					char *filename, int *fileTypeFlag, 
- 					int *convert3D, int *c3dpresent,
  					int *convertToDual, int *ctodpresent,
  					int *addUserArea, int *auapresent,
 					char *meshname, int *mnpresent,
@@ -67,7 +66,6 @@ Mesh::~Mesh() {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Mesh::createfromfile()"
 Mesh *Mesh::createfromfile(char *filename, int fileTypeFlag, 
-			   int *convert3D, 
 			   int *convertToDual,
 			   int *addUserArea,
 			   char *meshname,
@@ -80,8 +78,7 @@ Mesh *Mesh::createfromfile(char *filename, int fileTypeFlag,
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
   
     // handle the optional arguments
-    int c3dpresent, ctodpresent, auapresent, mnpresent, ampresent, vnpresent;
-    c3dpresent = convert3D != NULL;
+    int ctodpresent, auapresent, mnpresent, ampresent, vnpresent;
     ctodpresent = convertToDual != NULL;
     auapresent = addUserArea != NULL;
     mnpresent = strlen(meshname) > 0;
@@ -93,7 +90,6 @@ Mesh *Mesh::createfromfile(char *filename, int fileTypeFlag,
 
     FTN_X(f_esmf_meshcreatefromfile)(&mesh, 
 				     filename, &fileTypeFlag, 
-				     convert3D, &c3dpresent,
 				     convertToDual, &ctodpresent,
 				     addUserArea, &auapresent,
 				     meshname, &mnpresent,
