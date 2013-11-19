@@ -22,12 +22,11 @@ class Mesh(object):
                  spatial_dim=None,
                  filename=None,
                  filetype=None,
-                 convert3D=None,
                  convert_to_dual=None,
                  add_user_area=None,
                  meshname="",
                  add_mask=None,
-                 varname=None):
+                 varname=""):
         """
         Create an unstructured Mesh. This can be done manually in 3 
         steps: \n
@@ -51,7 +50,6 @@ class Mesh(object):
                         FileFormat.SCRIP \n
                         FileFormat.ESMFMESH \n
                         FileFormat.UGRID \n
-                convert3D: a boolean value to specify a 3D Mesh. \n
                 convert_to_dual: a boolean value to specify if the dual 
                                  Mesh should be calculated. \n
                 add_user_area: a boolean value to specify if an area 
@@ -99,7 +97,8 @@ class Mesh(object):
             self.spatial_dim = spatial_dim
         else:
             # call into ctypes layer
-            self.struct = ESMP_MeshCreateFromFile(filename, filetype, convert3D,
+            print "Calling ESMP_MeshCreateFromFile"
+            self.struct = ESMP_MeshCreateFromFile(filename, filetype,
                                                   convert_to_dual, 
                                                   add_user_area, meshname, 
                                                   add_mask, varname)
