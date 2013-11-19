@@ -185,22 +185,18 @@ def mesh_check(src_fname, dst_fname, regrid_method, options, max_err):
     if src_type == ESMF.FileFormat.UGRID:
         srcmesh = ESMF.Mesh(filename=src_fname,
                             filetype=src_type,
-                            meshname=src_meshname,
-                            convert3D=True)
+                            meshname=src_meshname)
     elif src_type == ESMF.FileFormat.SCRIP:
         srcmesh = ESMF.Mesh(filename=src_fname,
                             filetype=src_type,
-                            convert3D=True,
                             convert_to_dual=convert_to_dual)
     if dst_type == ESMF.FileFormat.UGRID:
         dstmesh = ESMF.Mesh(filename=dst_fname,
                             filetype=dst_type,
-                            meshname=dst_meshname,
-                            convert3D=True)
+                            meshname=dst_meshname)
     elif dst_type == ESMF.FileFormat.SCRIP:
         dstmesh = ESMF.Mesh(filename=dst_fname,
                             filetype=dst_type,
-                            convert3D=True,
                             convert_to_dual=convert_to_dual)
 #    if mymesh:
 #        print "mymesh = ", mymesh
