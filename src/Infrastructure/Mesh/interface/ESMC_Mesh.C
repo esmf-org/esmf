@@ -65,7 +65,6 @@ ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshCreateFromFile()"
 ESMC_Mesh ESMC_MeshCreateFromFile(char *filename, int fileTypeFlag, 
-				  int *convert3D, 
 				  int *convertToDual,
 				  int *addUserArea,
 				  char *meshname,
@@ -82,7 +81,10 @@ ESMC_Mesh ESMC_MeshCreateFromFile(char *filename, int fileTypeFlag,
   mesh.ptr = NULL;
 
   // Call into ESMCI method
-  mesh.ptr = (void *)MeshCXX::createFromFile(filename, fileTypeFlag, convert3D, convertToDual, addUserArea, meshname, addMask, varname, &localrc);
+  mesh.ptr = (void *)MeshCXX::createFromFile(filename, fileTypeFlag, 
+					     convertToDual, addUserArea, 
+					     meshname, addMask, varname, 
+					     &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return mesh; // bail out
 

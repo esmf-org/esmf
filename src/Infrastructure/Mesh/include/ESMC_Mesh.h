@@ -240,7 +240,6 @@ ESMC_Mesh ESMC_MeshCreate(
 ESMC_Mesh ESMC_MeshCreateFromFile(
 				  char *filename,     // in (required)
 				  int fileTypeFlag,   // in (required)
-				  int *convert3D,     // in (optional)
 				  int *convertToDual, // in (optional)
 				  int *addUserArea,   // in (optional)
 				  char *meshname,     // in (optional)
@@ -263,9 +262,6 @@ ESMC_Mesh ESMC_MeshCreateFromFile(
 //   \item[filetypeflag] 
 //         The file type of the grid file to be read, please see Section~\ref{const:mesh:cfileformat}
 //         for a list of valid options. 
-//   \item[{[convert3D]}] 
-//         if 1, the node coordinates will be converted into 3D Cartisian, which
-//         is required for a global grid. If not specified, defaults to 0.
 //   \item[{[convertToDual]}] 
 //         if 1, the mesh will be converted to its dual. If not specified,
 //         defaults to 1. Converting to dual is only supported with
