@@ -42,7 +42,7 @@ friend void LoadExMesh(MeshDB &mesh, const std::string &filename,int);
 friend void ReadMesh(Mesh&,const std::string&, bool,int);
 Mesh();
 ~Mesh();
-static Mesh *createfromfile(char *filename, int fileTypeFlag, int *convert3D, 
+static Mesh *createfromfile(char *filename, int fileTypeFlag,
 			    int *convertToDual, int *addUserArea, 
 			    char *meshname, int *addMask, char *varname, 
 			    int *rc);
