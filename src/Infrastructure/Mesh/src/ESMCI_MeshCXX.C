@@ -142,7 +142,6 @@ MeshCXX* MeshCXX::create( int pdim, int sdim, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MeshCXX::createFromFile()"
 MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag, 
-				 int *convert3D, 
 				 int *convertToDual,
 				 int *addUserArea,
 				 char *meshname,
@@ -162,7 +161,7 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
      }
 
     int localrc;
-    meshp = ESMCI::Mesh::createfromfile(filename, fileTypeFlag, convert3D, 
+    meshp = ESMCI::Mesh::createfromfile(filename, fileTypeFlag,
 					convertToDual, addUserArea, meshname, 
 					addMask, varname, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,

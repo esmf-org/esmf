@@ -26,7 +26,7 @@ namespace ESMCI {
     ~MeshCXX();
 
     static MeshCXX* create(int, int, int*);
-    static MeshCXX* createFromFile(char *, int, int *, int *, int *, 
+    static MeshCXX* createFromFile(char *, int, int *, int *, 
 				   char *, int *, char *, int *);
     double * getLocalCoords(int *, int *, int *);
     static int destroy(MeshCXX **);
