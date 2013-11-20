@@ -2719,10 +2719,14 @@ int DistGrid::print()const{
   printf("deCount = %d\n", deCount);
   if (vm==NULL){
     printf("Member on this PET appears to be a proxy member.\n");
+    printf("CurrentVM: localPet = %d\n", VM::getCurrent()->getLocalPet());
+    printf("CurrentVM: petCount = %d\n", VM::getCurrent()->getPetCount());
   }else{
     printf("Member on this PET appears to be an actual member.\n");
-    printf("localPet = %d\n", vm->getLocalPet());
-    printf("petCount = %d\n", vm->getPetCount());
+    printf("DistGrid-VM: localPet = %d, CurrentVM: localPet = %d\n", 
+      vm->getLocalPet(), VM::getCurrent()->getLocalPet());
+    printf("DistGrid-VM: petCount = %d, CurrentVM: petCount = %d\n", 
+      vm->getPetCount(), VM::getCurrent()->getPetCount());
   }
   printf("--- ESMCI::DistGrid::print end ---\n");
   
