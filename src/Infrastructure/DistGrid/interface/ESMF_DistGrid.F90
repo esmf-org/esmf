@@ -753,7 +753,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDGT()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from DistGrid
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object from DistGrid (multi-tile version)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -1557,7 +1557,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateRDT()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object on multiple tiles with regular decomposition
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with regular decomposition (multi-tile version)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
