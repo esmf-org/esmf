@@ -1267,19 +1267,17 @@ int VM::print() const{
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // return with errors for NULL pointer
-  if (this == NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      " - 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
-    return rc;
-  }
   // print info about the ESMCI::VM object
   printf("--- ESMCI::VM::print() start ---\n");
-  VMId *vmid = getVMId(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
-  VMIdPrint(vmid);
-  VMK::print();
+  if (this == NULL){
+    printf("VM object on this PET is NULL, probably a proxy member.\n");
+  }else{
+    VMId *vmid = getVMId(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+    VMIdPrint(vmid);
+    VMK::print();
+  }
   printf("--- ESMCI::VM::print() end ---\n");
 
   // return successfully
