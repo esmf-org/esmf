@@ -1695,6 +1695,7 @@ end function ESMF_MeshCreateFromFile
     integer, allocatable                :: NodeId(:)
     integer, allocatable                :: NodeUsed(:)
     real(ESMF_KIND_R8), allocatable     :: NodeCoords1D(:)
+    real(ESMF_KIND_R8), allocatable     :: NodeCoordsCart(:)
     real(ESMF_KIND_R8)                  :: coorX, coorY, deg2rad
     integer, allocatable                :: NodeOwners(:)
     integer, allocatable                :: NodeOwners1(:)
@@ -1744,7 +1745,9 @@ end function ESMF_MeshCreateFromFile
     logical				:: localAddMask
     real(ESMF_KIND_R8), pointer         :: varbuffer(:)
     real(ESMF_KIND_R8)                  :: missingvalue
-    
+    integer                             :: cartSpatialDim    ! sp. dim of grid when converted to cart
+
+
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1870,9 +1873,11 @@ end function ESMF_MeshCreateFromFile
     if (coordDim .eq. 2) then
        parametricDim = 2
        spatialDim = 2
+       cartSpatialDim=3  ! Assuming that this is spherical
     else if (coordDim .eq. 3) then
        parametricDim = 3
        spatialDim = 3
+       cartSpatialDim=3  
     else
        call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, & 
             msg="- only coordDim 2 or 3 is supported right now", & 
@@ -2085,6 +2090,29 @@ end function ESMF_MeshCreateFromFile
        allocate(polyIntBuf(maxNumPoly))
        allocate(triInd(3*(maxNumPoly-2)))
 
+       ! Parametric dim=2 and cartSpatialDim=3 
+       ! Means spherical, so calc. cart. coordinates
+       if (cartSpatialDim .eq. 3) then
+          allocate(NodeCoordsCart(cartSpatialDim*localNodes))
+
+          ti=0
+          tk=0
+          do i=1,localNodes
+             call c_esmc_sphdeg_to_cart(NodeCoords1D(ti+1), &
+                                        NodeCoords1D(ti+2),  &
+                                        NodeCoordsCart(tk+1), &
+                                        NodeCoordsCart(tk+2), &
+                                        NodeCoordsCart(tk+3),  &
+                                        localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return    
+
+             ti=ti+2
+             tk=tk+3
+          enddo
+       endif
+
+
        ! Loop through creating Mesh appropriate elements
        do j = 1, ElemCnt
           if (elmtNum(j)==3) then        
@@ -2120,7 +2148,7 @@ end function ESMF_MeshCreateFromFile
              endif
 
              ! Copy points into input list
-             if (spatialDim==2) then
+             if (cartSpatialDim==2) then
                 ti=0
                 do k=1,numPoly
                    lni=2*(NodeUsed(elementConn(k,j))-1) ! get the index of the node coords in the local list
@@ -2128,13 +2156,13 @@ end function ESMF_MeshCreateFromFile
                    polyCoords(ti+2)=NodeCoords1D(lni+2)
                    ti=ti+2
                 enddo
-             else if (spatialDim==3) then
+             else if (cartSpatialDim==3) then
                 ti=0
                 do k=1,numPoly
                    lni=3*(NodeUsed(elementConn(k,j))-1) ! get the index of the node coords in the local list
-                   polyCoords(ti+1)=NodeCoords1D(lni+1)
-                   polyCoords(ti+2)=NodeCoords1D(lni+2)
-                   polyCoords(ti+3)=NodeCoords1D(lni+3)
+                   polyCoords(ti+1)=NodeCoordsCart(lni+1)
+                   polyCoords(ti+2)=NodeCoordsCart(lni+2)
+                   polyCoords(ti+3)=NodeCoordsCart(lni+3)
                    ti=ti+3
                 enddo
              endif
@@ -2142,7 +2170,7 @@ end function ESMF_MeshCreateFromFile
              ! Checking for other spatialDims above, not here in a loop
 
              ! call triangulation routine
-             call c_ESMC_triangulate(parametricDim, spatialDim, &
+             call c_ESMC_triangulate(parametricDim, cartSpatialDim, &
                   numPoly, polyCoords, polyDblBuf, polyIntBuf, &
                   triInd, localrc)   
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2162,7 +2190,7 @@ end function ESMF_MeshCreateFromFile
                 
                 ! Calculate area of sub-triangle
   	        !if (localAddUserArea) then 
-                   if (spatialDim==2) then
+                   if (cartSpatialDim==2) then
 		     tk=0
 		     do i=1,3
                        lni=2*(ElemConn(ConnNo+i)-1) ! get the index of the node coords in the local list
@@ -2170,18 +2198,18 @@ end function ESMF_MeshCreateFromFile
                        polyCoords(tk+2)=NodeCoords1D(lni+2)
                        tk=tk+2
                      enddo
-	           else if (spatialDim==3) then
+	           else if (cartSpatialDim==3) then
                      tk=0
                      do i=1,3
                        lni=3*(ElemConn(ConnNo+i)-1) ! get the index of the node coords in the local list
-                       polyCoords(tk+1)=NodeCoords1D(lni+1)
-                       polyCoords(tk+2)=NodeCoords1D(lni+2)
-                       polyCoords(tk+3)=NodeCoords1D(lni+3)
+                       polyCoords(tk+1)=NodeCoordsCart(lni+1)
+                       polyCoords(tk+2)=NodeCoordsCart(lni+2)
+                       polyCoords(tk+3)=NodeCoordsCart(lni+3)
                        tk=tk+3
                      enddo
                    endif
                    nEdges = 3
-                   call c_ESMC_get_polygon_area(spatialDim, nEdges, polyCoords, area(k), localrc) 
+                   call c_ESMC_get_polygon_area(cartSpatialDim, nEdges, polyCoords, area(k), localrc) 
 	           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         	          ESMF_CONTEXT, rcToReturn=rc)) return
                 ! endif
@@ -2207,6 +2235,11 @@ end function ESMF_MeshCreateFromFile
               endif
           end if
        end do
+
+       ! deallocate cart nodes
+       if (cartSpatialDim .eq. 3) then
+          deallocate(NodeCoordsCart)
+       endif
 
        ! deallocate after triangulation
        deallocate(polyCoords)
