@@ -644,7 +644,7 @@ DistGrid *DistGrid::create(
   bool delayoutCreator = true; // default assume delayout will be created here
   if (delayout == ESMC_NULL_POINTER){
     // delayout was not provided -> create default DELayout with deCount DEs
-    delayout = DELayout::create(&deCount, NULL, NULL, NULL, vm, &localrc);
+    delayout = DELayout::create(&deCount, NULL, NULL, NULL, vm, false, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)){
       distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -1109,7 +1109,7 @@ DistGrid *DistGrid::create(
   bool delayoutCreator = true; // default assume delayout will be created here
   if (delayout == ESMC_NULL_POINTER){
     // delayout was not provided -> create default DELayout with deCount DEs
-    delayout = DELayout::create(&deCount, NULL, NULL, NULL, vm, &localrc);
+    delayout = DELayout::create(&deCount, NULL, NULL, NULL, vm, false, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)){
       distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -1454,7 +1454,7 @@ DistGrid *DistGrid::create(
   bool delayoutCreator = true; // default assume delayout will be created here
   if (delayout == ESMC_NULL_POINTER){
     // delayout was not provided -> create default DELayout with deCount DEs
-    delayout = DELayout::create(&deCount, NULL, NULL, NULL, vm, &localrc);
+    delayout = DELayout::create(&deCount, NULL, NULL, NULL, vm, false, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)){
       distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid

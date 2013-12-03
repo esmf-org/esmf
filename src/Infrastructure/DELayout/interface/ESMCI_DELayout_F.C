@@ -73,15 +73,28 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     ESMCI::VM *opt_vm;
+    bool proxyFlag;
     // deal with optional arguments
-    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
-    else opt_vm = *vm;
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER){
+      opt_vm = NULL;
+      proxyFlag = false;  // not a proxy if not present
+    }else{
+      opt_vm = *vm;
+      if (opt_vm == NULL)
+        proxyFlag = true; // this is a proxy member because present but NULL
+    }
+#if 1
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER)
+      printf("VM NOT PRESENT: opt_vm=%p, proxyFlag=%d\n", opt_vm, proxyFlag);
+    else
+      printf("VM is present: opt_vm=%p, proxyFlag=%d\n", opt_vm, proxyFlag);
+#endif
     // call into C++
     *ptr = ESMCI::DELayout::create(
       ESMC_NOT_PRESENT_FILTER(deCount), 
       *deGrouping, 
       ESMC_NOT_PRESENT_FILTER(pinFlag),
-      *petList, opt_vm, &localrc);
+      *petList, opt_vm, proxyFlag, &localrc);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc));
     // return successfully

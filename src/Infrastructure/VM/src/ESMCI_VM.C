@@ -730,7 +730,7 @@ void VM::shutdown(
           if (matchTable_Objects[i].size() > 0)
             std::cout << "Failure in ESMF Automatic Garbage Collection line: "
               << __LINE__ << std::endl;
-          // swap() trick with a temporary to free vector's memory
+            // swap() trick with a temporary to free vector's memory
             std::vector<ESMC_Base *>().swap(matchTable_Objects[i]);
         }catch(int localrc){
           // catch standard ESMF return code
@@ -907,16 +907,13 @@ VMId *VM::getVMId(
   // initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  esmf_pthread_t mytid = getLocalPthreadId();
   int i = matchTableIndex;
-  if (matchTable_tid[i] != mytid){
-    for (i=0; i<matchTableBound; i++)
-      if (matchTable_tid[i] == mytid) break;
-    if (i == matchTableBound){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        "- Could not determine VMId", ESMC_CONTEXT, rc);
-      return NULL;
-    }
+  for (i=0; i<matchTableBound; i++)
+    if (matchTable_vm[i] == this) break;
+  if (i == matchTableBound){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Could not determine VMId", ESMC_CONTEXT, rc);
+    return NULL;
   }
   // found a match
   
@@ -1487,6 +1484,7 @@ VMId *VM::getCurrentID(
 #else
   mytid = 0;
 #endif
+  
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
     for (i=0; i<matchTableBound; i++)
@@ -1757,6 +1755,36 @@ void VM::addFObject(
   void *fobjectElement = (void *)&(matchTable_FObjects[i][size].fobject);
   FTN_X(f_esmf_fortranudtpointercopy)(fobjectElement, (void *)fobject);
   matchTable_FObjects[i][size].objectID = objectID;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::printMatchTable()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::printMatchTable - Print the current match table
+//
+// !INTERFACE:
+void VM::printMatchTable(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//
+  void){
+//
+// !DESCRIPTION:
+//    Print the current match table.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  printf("--- ESMCI::VM::printMatchTable() start ---\n");
+  printf("matchTableBound = %d\n", matchTableBound);
+  for (int i=0; i<matchTableBound; i++)
+    printf("matchTable_tid[%d] = %d\n", i, matchTable_tid[i]);
+  printf("--- ESMCI::VM::printMatchTable() end ---\n");
 }
 //-----------------------------------------------------------------------------
 

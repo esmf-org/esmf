@@ -106,7 +106,7 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     
   public:
     // native constructor and destructor
-    DELayout(){}
+    DELayout(VM *vm=NULL):ESMC_Base(vm){} // use specified VM instead of default
     DELayout(int baseID):ESMC_Base(baseID){}// prevent baseID counter increment
     ~DELayout(){destruct();}
     
@@ -114,7 +114,7 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     // construct() and destruct()
     int construct(VM *vmArg=ESMC_NULL_POINTER, 
       ESMC_Pin_Flag *pinFlagArg=ESMC_NULL_POINTER, 
-      int *petMap=ESMC_NULL_POINTER, int petMapCount=0);
+      int *petMap=ESMC_NULL_POINTER, int petMapCount=0, bool proxyFlag=false);
     int destruct();
     
   public:
@@ -123,7 +123,8 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
       ESMC_Pin_Flag *pinFlag, VM *vm=NULL, int *rc=NULL);
     static DELayout *create(int *deCount=NULL,
       InterfaceInt *deGrouping=NULL, ESMC_Pin_Flag *pinFlag=NULL,
-      InterfaceInt *petList=NULL, VM *vm=NULL, int *rc=NULL);
+      InterfaceInt *petList=NULL, VM *vm=NULL, bool proxyFlag=false,
+      int *rc=NULL);
     static int destroy(ESMCI::DELayout **layout);
     // get() and set()
     VM *getVM()                       const {return vm;}

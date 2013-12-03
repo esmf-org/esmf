@@ -873,7 +873,7 @@ static const char *const version = "$Id$";
 // !IROUTINE:  ESMC_Base - native C++ constructor for ESMC_Base class
 //
 // !INTERFACE:
-      ESMC_Base::ESMC_Base(void) {
+      ESMC_Base::ESMC_Base(ESMCI::VM *vm) {
 //
 // !RETURN VALUE:
 //    none
@@ -887,8 +887,15 @@ static const char *const version = "$Id$";
 //EOPI
   int rc;
   
-  vmID = ESMCI::VM::getCurrentID(&rc);  // get vmID of current VM context
-//  ESMCI::VMIdPrint(vmID);
+  if (vm==NULL){
+    // no VM passed in -> get vmID of the current VM context
+    vmID = ESMCI::VM::getCurrentID(&rc);
+  }else{
+    // VM was passed in -> get vmID of the specified VM context
+    vmID = vm->getVMId(&rc);
+  }
+    
+  //ESMCI::VMIdPrint(vmID);
   vmIDCreator = false;  // vmID points into global table
   
   // set ID
