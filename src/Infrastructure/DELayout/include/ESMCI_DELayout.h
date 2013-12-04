@@ -120,7 +120,7 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
   public:
     // create() and destroy()
     static DELayout *create(int *petMap, int petMapCount,
-      ESMC_Pin_Flag *pinFlag, VM *vm=NULL, int *rc=NULL);
+      ESMC_Pin_Flag *pinFlag, VM *vm=NULL, bool proxyFlag=false, int *rc=NULL);
     static DELayout *create(int *deCount=NULL,
       InterfaceInt *deGrouping=NULL, ESMC_Pin_Flag *pinFlag=NULL,
       InterfaceInt *petList=NULL, VM *vm=NULL, bool proxyFlag=false,
