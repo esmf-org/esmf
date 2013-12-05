@@ -52,7 +52,7 @@ def main():
         correct = False
         try:
             correct = regrid_check(src_fname_full, dst_fname_full,
-                                 regrid_method, options, max_err)
+                                   regrid_method, options, max_err)
         except:
             print "Regridding ERROR:\n"
             traceback.print_exc(file=sys.stdout)
