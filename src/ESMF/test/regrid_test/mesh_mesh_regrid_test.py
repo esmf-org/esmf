@@ -517,8 +517,8 @@ def test_main():
     #manager = ESMF.Manager(logkind=ESMF.LogKind.SINGLE, debug=True)
 
     # inquire for rank and proc from ESMF Virtual Machine
-    localPet = ESMF.get_localPet()
-    petCount = ESMF.get_petCount()
+    localPet = ESMF.local_pet()
+    petCount = ESMF.pet_count()
 
     parallel = False
     if petCount > 1:

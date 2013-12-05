@@ -9,7 +9,7 @@ from ESMF.api.constants import *
 from ESMF.interface.cbindings import *
 from ESMF.util.decorators import initialize
 
-from ESMF.api.manager import *
+from ESMF.api.esmpymanager import *
 from ESMF.api.grid import *
 from ESMF.api.mesh import *
 from ESMF.api.field import *
@@ -20,7 +20,15 @@ class Regrid(object):
 
     # call RegridStore
     @initialize
-    def __init__(self, *args, **kwargs):
+    def __init__(self, srcfield, dstfield,
+                 src_mask_values=None,
+                 dst_mask_values=None,
+                 regrid_method=None,
+                 pole_method=None,
+                 regridPoleNPnts=None,
+                 unmapped_action=None,
+                 src_frac_field=None,
+                 dst_frac_field=None):
         """
         Create a handle to a Regridding operation between two Fields. \n
         Required Arguments: \n
@@ -75,23 +83,6 @@ class Regrid(object):
         # routehandle storage
         self.routehandle = 0
 
-        # args
-        try:
-            srcfield = args[0]
-            dstfield = args[1]
-        except:
-            raise RequiredArgs(Regrid.__init__.__doc__)
-
-        # kwargs
-        src_mask_values = kwargs.get('src_mask_values', None)
-        dst_mask_values = kwargs.get('dst_mask_values', None)
-        regrid_method = kwargs.get('regrid_method', None)
-        pole_method = kwargs.get('pole_method', None)
-        regridPoleNPnts = kwargs.get('regridPoleNPnts', None)
-        unmapped_action = kwargs.get('unmapped_action', None)
-        src_frac_field = kwargs.get('src_frac_field', None)
-        dst_frac_field = kwargs.get('dst_frac_field', None)
-
         # type checking
         local_src_mask_values = None
         if src_mask_values is not None:
@@ -134,7 +125,8 @@ class Regrid(object):
         self.dst_frac_field = dst_frac_field
 
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, srcfield, dstfield,
+                 zero_region=None):
         """
         Call a regridding operation from srcfield to dstfield. \n
         Required Arguments: \n
@@ -152,15 +144,6 @@ class Regrid(object):
         Returns: \n
             dstfield
         """
-        # args
-        try:
-            srcfield = args[0]
-            dstfield = args[1]
-        except:
-            raise RequiredArgs(Regrid.__call__.__doc__)
-
-        # kwargs values
-        zero_region = kwargs.get('zero_region', None)
 
         # call into the ctypes layer
         ESMP_FieldRegrid(srcfield, dstfield,

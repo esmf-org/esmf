@@ -10,14 +10,28 @@ from ESMF.api.constants import *
 from ESMF.interface.cbindings import *
 from ESMF.util.decorators import initialize
 
-from ESMF.api.manager import *
+from ESMF.api.esmpymanager import *
 
 #### Grid class #########################################################
 
 class Grid(object):
 
     @initialize
-    def __init__(self, *args, **kwargs):
+    def __init__(self, max_index,
+                 num_peri_dims=0,
+                 coord_sys=None,
+                 coord_typekind=None,
+                 staggerloc=None,
+                 fname=None,
+                 fileTypeFlag=None,
+                 regDecomp=np.array([1,1]),
+                 decompflag=None,
+                 isSphere=None,
+                 addCornerStagger=None,
+                 addUserArea=None,
+                 addMask=None,
+                 varname="",
+                 coordNames=""):
         """
         Create a logically rectangular Grid object and optionally 
         allocate space for coordinates at a specified stagger location. \n
@@ -58,28 +72,6 @@ class Grid(object):
             Grid \n
         """
         from operator import mul
-
-        # args
-        try:
-            max_index = args[0]
-        except:
-            raise RequiredArgs(Grid.__init__.__doc__)
-
-        # kwargs
-        num_peri_dims = kwargs.get('num_peri_dims', 0)
-        coord_sys = kwargs.get('coord_sys', None)
-        coord_typekind = kwargs.get('coord_typekind', None)
-        staggerloc = kwargs.get('staggerloc', None)
-        fname = kwargs.get('fname', None)
-        fileTypeFlag = kwargs.get('fileTypeFlag', None)
-        regDecomp = kwargs.get('regDecomp',np.array([1,1]))
-        decompflag = kwargs.get('decompflag', None)
-        isSphere = kwargs.get('isSphere', None)
-        addCornerStagger = kwargs.get('addCornerStagger', None)
-        addUserArea = kwargs.get('addUserArea', None)
-        addMask = kwargs.get('addMask', None)
-        varname = kwargs.get('varname', "")
-        coordNames = kwargs.get('coordNames', "")
 
         # ctypes stuff
         self.struct = None
@@ -264,7 +256,7 @@ class Grid(object):
                    self.area))
 
         return string
-    def add_coords(self, **kwargs):
+    def add_coords(self, staggerloc=None, coord_dim=None):
         """
         Add coordinates to a Grid at the specified
         stagger location. \n
@@ -293,9 +285,6 @@ class Grid(object):
         Returns: \n
             None \n
         """
-        # kwargs
-        staggerloc = kwargs.get('staggerloc', None)
-        coord_dim = kwargs.get('coord_dim', None)
    
         # handle the default case
         staggerlocs = 0
@@ -324,7 +313,7 @@ class Grid(object):
         if len(staggerlocs) == 1 and coord_dim is not None:
             return self.coords[staggerlocs[0]][coord_dim]
 
-    def add_item(self, *args, **kwargs):
+    def add_item(self, item, staggerloc=None):
         """
         Allocate space for a Grid item (mask or areas)
         at a specified stagger location. \n
@@ -352,14 +341,6 @@ class Grid(object):
         Returns: \n
             None \n
         """
-        # args
-        try:
-            item = args[0]
-        except:
-            raise RequiredArgs(Grid.add_item.__doc__)
-
-        # kwargs
-        staggerloc = kwargs.get('staggerloc', None)
 
         # handle the default case
         staggerlocs = 0
@@ -390,7 +371,7 @@ class Grid(object):
             else:
                 raise GridItemNotSupported
 
-    def get_coords(self, *args, **kwargs):
+    def get_coords(self, coord_dim, staggerloc=None):
         """
         Return a numpy array of coordinates at a specified stagger 
         location. \n
@@ -416,14 +397,6 @@ class Grid(object):
         Returns: \n
             None \n
         """
-        #args
-        try:
-            coord_dim = args[0]
-        except:
-            raise RequiredArgs(Grid.get_coords.__doc__)        
-        
-        # kwargs
-        staggerloc = kwargs.get('staggerloc', None)
 
         # handle the default case
         #TODO: return full coordinates, and by dimension as optional
@@ -437,7 +410,7 @@ class Grid(object):
         assert(self.coords_done[staggerloc][coord_dim])
         return self.coords[staggerloc][coord_dim]
 
-    def get_item(self, *args, **kwargs):
+    def get_item(self, item, staggerloc=None):
         """
         Return a numpy array for a Grid item at a specified stagger 
         location. \n
@@ -465,14 +438,6 @@ class Grid(object):
         Returns: \n
             None \n
         """
-        # args
-        try:
-            item = args[0]
-        except:
-            raise RequiredArgs(Grid.get_item.__doc__)
-
-        # kwargs
-        staggerloc = kwargs.get('staggerloc', None)
 
         # handle the default case
         if staggerloc == None:
@@ -505,7 +470,7 @@ class Grid(object):
         # use user coordinates to initialize underlying ESMF data
         # self.coords[staggerloc][:,:,coord_dim] = coord_data.copy()
 
-    def _write(self, *args, **kwargs):
+    def _write(self, filename, staggerloc=None):
         """
         Write a Grid to vtk formatted file at a specified stagger 
         location. \n
@@ -530,14 +495,6 @@ class Grid(object):
         Returns: \n
             None \n
         """
-        # args
-        try:
-            filename = args[0]
-        except:
-            raise RequiredArgs(Grid.write.__doc__)
-
-        # kwargs
-        staggerloc = kwargs.get('staggerloc', None)
 
         # handle the default case
         if staggerloc == None:

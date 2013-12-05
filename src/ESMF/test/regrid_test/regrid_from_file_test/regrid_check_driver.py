@@ -30,8 +30,8 @@ from run_regrid_from_file_dryrun import cache_data_files_for_test_cases
 def main():
     # Start up ESMF.
     esmp = ESMF.Manager(logkind=ESMF.LogKind.MULTI, debug=True)
-    petCount = esmp.petCount
-    
+    pet_count = ESMF.pet_count()
+
     # Read the test case parameters from the control file.
     test_cases = read_test_cases_from_control_file()
 
@@ -58,7 +58,7 @@ def main():
             traceback.print_exc(file=sys.stdout)
 
         skip = False
-        for i in range(petCount):
+        for i in range(pet_count):
             for line in open("PET"+str(i)+".ESMF_LogFile"):
                 if "ESMF_NETCDF not defined when lib was compiled" in line or \
                   "File format is not supported" in line:
@@ -72,7 +72,7 @@ def main():
                 print line
                 
         # clean the log files
-        for i in range(petCount):
+        for i in range(pet_count):
             os.system("echo ' ' > PET"+str(i)+".ESMF_LogFile")
             
         print '\n' + test_str + ' - FINISH\n'

@@ -1,7 +1,7 @@
 # $Id$
 
 """
-The Manager API
+The ESMPyManager API
 """
 
 #### IMPORT LIBRARIES #########################################################
@@ -29,16 +29,16 @@ def version_compare(a, b, separator = '.', ignorecase = True):
         return False
 
 @initialize
-def get_localPet():
+def local_pet():
     vm = ESMP_VMGetGlobal()
-    localPet, _ = ESMP_VMGet(vm)
-    return localPet
+    local_pet, _ = ESMP_VMGet(vm)
+    return local_pet
 
 @initialize
-def get_petCount():
+def pet_count():
     vm = ESMP_VMGetGlobal()
-    _, petCount = ESMP_VMGet(vm)
-    return petCount
+    _, pet_count = ESMP_VMGet(vm)
+    return pet_count
 
 #### Manager class #########################################################
 
@@ -48,7 +48,7 @@ class Manager(object):
     and __del__ are designed to called ESMP_Initialize and
     ESMP_Finalize once, and only once, in a Python session.
 
-    ESMF is initialized at Manager object creation,
+    ESMF is initialized at ESMPyManager object creation,
     __del__ is registered with atexit to ensure ESMF is always
     finalized prior to exiting Python.  If the object is copied,
     the copy will always be an alias to the original Manager object.
@@ -57,15 +57,11 @@ class Manager(object):
     # The singleton instance for this class
     __singleton = None
     
-    def __new__(cls, **kwargs):
+    def __new__(cls, logkind=LogKind.NONE, debug=False):
         '''
         Returns the singleton instance of this class,
         creating it if it does not already exist.
         '''
-
-        # kwargs
-        logkind = kwargs.get('logkind', LogKind.NONE)
-        debug = kwargs.get('debug', False)
 
         # If this is the first call, create the singleton object
         # and initialize its attributes.
@@ -76,13 +72,13 @@ class Manager(object):
         return cls.__singleton
 
 
-    def __init__(self, **kwargs):
+    def __init__(self, logkind=LogKind.NONE, debug=False):
         '''
         Calls ESMP_Initialize and registers __del__ with atexit
         when called the first time.  Subsequent calls only return
         whether or not ESMF is initialized.  Registering __del__ with
         atexit ensures the ESMP_Finalize will always be called
-        prior to exiting Python.  Calling __init__ explicitely
+        prior to exiting Python.  Calling __init__ explicitly
         results in a no-op. \n
         Required Arguments: \n
             None \n
@@ -100,10 +96,6 @@ class Manager(object):
             Manager \n
         '''
 
-        # kwargs
-        logkind = kwargs.get('logkind', LogKind.NONE)
-        debug = kwargs.get('debug', False)
-
         # Return no-op
         if self.__esmp_finalized:
             return
@@ -118,7 +110,7 @@ class Manager(object):
             #atexit.register(self.__del__)
             self.__esmp_initialized = True
             vm = ESMP_VMGetGlobal()
-            self.localPet, self.petCount = ESMP_VMGet(vm)
+            self.local_pet, self.pet_count = ESMP_VMGet(vm)
             ESMP_LogSet(debug)
         return
 
@@ -154,12 +146,12 @@ class Manager(object):
         """
         Return a string containing a printable representation of the object
         """
-        string = ("Manager:\n"
-                  "    localPet = %r\n"
-                  "    petCount = %r\n)" 
+        string = ("ESMPyManager:\n"
+                  "    local_pet = %r\n"
+                  "    pet_count = %r\n)" 
                   %
-                  (self.localPet,
-                   self.petCount))
+                  (self.local_pet,
+                   self.pet_count))
 
         return string
     

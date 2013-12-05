@@ -297,7 +297,6 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
     dstfield2 = create_field(dstgrid, 'dstfield_exact', regridmethod)
     dstFracField = create_field(dstgrid, 'dstFracField', regridmethod)
 
-    
     # initialize the Fields to an analytic function
     srcfield = build_analyticfield(srcfield, src_coords)
     dstfield2 = build_analyticfield(dstfield2, dst_coords)

@@ -868,12 +868,11 @@ _ESMF.ESMC_MeshCreateFromFile.restype = ESMP_Mesh
 _ESMF.ESMC_MeshCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
-                                          OptionalNamedConstant,
                                           ct.c_char_p,
                                           OptionalNamedConstant,
                                           ct.c_char_p]
 @deprecated
-def ESMP_MeshCreateFromFile(filename, fileTypeFlag, convert3D=None,
+def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
                             convertToDual=None, addUserArea=None,
                             meshname="", addMask=None, varname=""):
     """
@@ -887,7 +886,6 @@ def ESMP_MeshCreateFromFile(filename, fileTypeFlag, convert3D=None,
                 FileFormat.SCRIP\n
                 FileFormat.ESMFMESH\n
                 FileFormat.UGRID\n
-        bool (optional)    :: convert3D\n
         bool (optional)    :: convertToDual\n
         bool (optional)    :: addUserArea\n
         string (optional)  :: meshname\n
@@ -895,7 +893,8 @@ def ESMP_MeshCreateFromFile(filename, fileTypeFlag, convert3D=None,
         string (optional)  :: varname\n
         """
     lrc = ct.c_int(0)
-    mesh = _ESMF.ESMC_MeshCreateFromFile(filename, fileTypeFlag, convert3D,
+    print "Calling ESMC_MeshCreateFromFile"
+    mesh = _ESMF.ESMC_MeshCreateFromFile(filename, fileTypeFlag,
                                          convertToDual, addUserArea,
                                          meshname, addMask, varname,
                                          ct.byref(lrc))

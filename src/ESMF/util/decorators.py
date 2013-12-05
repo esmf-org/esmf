@@ -55,8 +55,8 @@ def initialize(func):
 
     @functools.wraps(func)
     def new_func(*args, **kwargs):
-        from ESMF.api import manager
+        from ESMF.api import esmpymanager
 
-        esmp = manager.Manager(logkind = LogKind.SINGLE, debug = False)
+        esmp = esmpymanager.Manager(logkind = LogKind.SINGLE, debug = False)
         return func(*args, **kwargs)
     return new_func
