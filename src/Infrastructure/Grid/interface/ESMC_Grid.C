@@ -144,7 +144,7 @@ ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag,
 
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
-  /*
+  
   int exLB[2]={-1,-1}, exUB[2]={-1,-1};
   double *gridXCoord;
   gridXCoord = (double *)ESMC_GridGetCoord(grid, 1, ESMC_STAGGERLOC_CENTER, exLB, exUB, &localrc);
@@ -163,7 +163,7 @@ ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag,
     printf ("%lf\n", gridYCoord[i]);
   }
   printf ("...]\n");
-  */
+  
   //printf ("End ESMC_Grid.C : ESMC_GridCreateFromFile()\n");
   return grid;
 }

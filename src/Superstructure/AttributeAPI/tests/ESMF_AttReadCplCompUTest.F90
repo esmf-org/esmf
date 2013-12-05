@@ -121,7 +121,7 @@ print *, 'rc = ', rc
       !------------------------------------------------------------------------
       !EX_UTest
       ! Get ESG General Attribute package from a CplComp Test
-      call ESMF_AttPackGet(cplcomp, attpack=attpack, &
+      call ESMF_AttributeGetAttPack(cplcomp, attpack=attpack, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Get ESG General Attribute package from a CplComp Test"

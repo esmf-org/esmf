@@ -109,11 +109,10 @@ module ESMF_AttributeMod
 !  Attribute methods
       public ESMF_AttributeGetInit
 
-      public ESMF_AttPackGet
-
       public ESMF_AttributeAdd
       public ESMF_AttributeCopy
       public ESMF_AttributeGet
+      public ESMF_AttributeGetAttPack
       public ESMF_AttributeLink
       public ESMF_AttributeLinkRemove
       public ESMF_AttributeSet
@@ -135,41 +134,6 @@ module ESMF_AttributeMod
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_AttPackGet  - Get an Attribute package
-!
-! !INTERFACE:
-    interface ESMF_AttPackGet
-
-! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_ArrayAttPackGet
-        module procedure ESMF_ArrayBundleAttPackGet
-        module procedure ESMF_CplCompAttPackGet
-        module procedure ESMF_GridCompAttPackGet
-        module procedure ESMF_SciCompAttPackGet
-        module procedure ESMF_DistGridAttPackGet
-        module procedure ESMF_FieldAttPackGet
-        module procedure ESMF_FieldBundleAttPackGet
-        module procedure ESMF_GridAttPackGet
-        module procedure ESMF_StateAttPackGet
-        module procedure ESMF_ArrayAttPackGetSL
-        module procedure ESMF_ArrayBundleAttPackGetSL
-        module procedure ESMF_CplCompAttPackGetSL
-        module procedure ESMF_GridCompAttPackGetSL
-        module procedure ESMF_SciCompAttPackGetSL
-        module procedure ESMF_DistGridAttPackGetSL
-        module procedure ESMF_FieldAttPackGetSL
-        module procedure ESMF_FieldBundleAttPackGetSL
-        module procedure ESMF_GridAttPackGetSL
-        module procedure ESMF_StateAttPackGetSL
-! !DESCRIPTION:
-!     This interface provides a single entry point for methods that retrieve
-!     a handle to and Attribute package.
-
-!EOPI
-    end interface
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -501,6 +465,45 @@ module ESMF_AttributeMod
 !
 !------------------------------------------------------------------------------
 !BOPI
+! !IROUTINE: ESMF_AttributeGet  - Get Attributes, Attribute packages, count,
+!              info, and type
+!
+! !INTERFACE:
+      interface ESMF_AttributeGetAttPack
+
+! !PRIVATE MEMBER FUNCTIONS:
+
+        module procedure ESMF_ArrayAttGetAttPack
+        module procedure ESMF_ArrayBundleAttGetAttPack
+        module procedure ESMF_CplCompAttGetAttPack
+        module procedure ESMF_GridCompAttGetAttPack
+        module procedure ESMF_SciCompAttGetAttPack
+        module procedure ESMF_DistGridAttGetAttPack
+        module procedure ESMF_FieldAttGetAttPack
+        module procedure ESMF_FieldBundleAttGetAttPack
+        module procedure ESMF_GridAttGetAttPack
+        module procedure ESMF_StateAttGetAttPack
+        module procedure ESMF_ArrayAttGetAttPackSL
+        module procedure ESMF_ArrayBundleAttGetAttPackSL
+        module procedure ESMF_CplCompAttGetAttPackSL
+        module procedure ESMF_GridCompAttGetAttPackSL
+        module procedure ESMF_SciCompAttGetAttPackSL
+        module procedure ESMF_DistGridAttGetAttPackSL
+        module procedure ESMF_FieldAttGetAttPackSL
+        module procedure ESMF_FieldBundleAttGetAttPackSL
+        module procedure ESMF_GridAttGetAttPackSL
+        module procedure ESMF_StateAttGetAttPackSL
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that retrieve
+!     AttPacks from Attribute bearing objects.
+
+!EOPI
+      end interface
+
+!
+!------------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE: ESMF_AttributeLink  - Link Attribute hierarchies
 !
 ! !INTERFACE:
@@ -807,127 +810,17 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttPackGet  - Get an ESMF Attribute package object using a specification list
-!
-! !INTERFACE:
-!     ! Private name; call using ESMF_AttPackGet()
-!     subroutine ESMF_AttPackGetSL(<object>, specList, keywordEnforcer,
-!       attpack, isPresent, rc)
-!
-! !ARGUMENTS:
-!     <object>, see below for supported values
-!     character (len = *),   intent(in)              :: specList(:)
-!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     type(ESMF_AttPack),    intent(inout), optional :: attpack
-!     logical,               intent(out),   optional :: isPresent
-!     integer,               intent(out),   optional :: rc
-!
-! !DESCRIPTION:
-!     Get an ESMF Attribute package object.  See Section~\ref{sec:AttPacks}
-!     for a description of Attribute packages.
-!
-!     Supported values for <object> are:
-!     \begin{description}
-!     \item type(ESMF\_Array),       intent(inout) :: array
-!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp),     intent(inout) :: comp
-!     \item type(ESMF\_GridComp),    intent(inout) :: comp
-!     \item type(ESMF\_SciComp),     intent(inout) :: comp
-!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
-!     \item type(ESMF\_Field),       intent(inout) :: field
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
-!     \item type(ESMF\_Grid),        intent(inout) :: grid
-!     \item type(ESMF\_State),       intent(inout) :: state
-!     \end{description}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [<object>]
-!           An {\tt ESMF} object
-!     \item [specList]
-!           A character list of values which identify the Attribute package, such as
-!           convention, purpose, and instancename.
-!     \item [{[attpack]}]
-!           A handle to the Attribute package
-!     \item [{[isPresent]}]
-!           A logical flag to tell if this Attribute package is present or not
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
-!     \end{description}
-!
-!
-!EOP
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AttPackGet  - Get an ESMF Attribute package object
-!
-! !INTERFACE:
-!     ! Private name; call using ESMF_AttPackGet()
-!     subroutine ESMF_AttPackGet(<object>, convention, purpose, keywordEnforcer
-!       attPackInstanceName, attpack, isPresent, rc)
-!
-! !ARGUMENTS:
-!     <object>, see below for supported values
-!     character (len = *), intent(in)              :: convention
-!     character (len = *), intent(in)              :: purpose
-!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!     character (len = *), intent(in),    optional :: attPackInstanceName
-!     type(ESMF_AttPack),  intent(inout), optional :: attpack
-!     logical,             intent(out),   optional :: isPresent
-!     integer,             intent(out),   optional :: rc
-!
-! !DESCRIPTION:
-!     Get an ESMF Attribute package object.  See Section~\ref{sec:AttPacks}
-!     for a description of Attribute packages.
-!
-!     Supported values for <object> are:
-!     \begin{description}
-!     \item type(ESMF\_Array),       intent(inout) :: array
-!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
-!     \item type(ESMF\_CplComp),     intent(inout) :: comp
-!     \item type(ESMF\_GridComp),    intent(inout) :: comp
-!     \item type(ESMF\_SciComp),     intent(inout) :: comp
-!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
-!     \item type(ESMF\_Field),       intent(inout) :: field
-!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
-!     \item type(ESMF\_Grid),        intent(inout) :: grid
-!     \item type(ESMF\_State),       intent(inout) :: state
-!     \end{description}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [<object>]
-!           An {\tt ESMF} object
-!     \item [convention]
-!           The convention of the Attribute package
-!     \item [purpose]
-!           The purpose of the Attribute package
-!     \item [{[attPackInstanceName]}]
-!           The name of an Attribute package instance, specifying which one
-!           of multiple Attribute package instances of the same convention
-!           and purpose, within a nest.  If not specified, defaults to the
-!           first instance.
-!     \item [{[attpack]}]
-!           A handle to the Attribute package
-!     \item [{[isPresent]}]
-!           A logical flag to tell if this Attribute package is present or not
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
-!     \end{description}
-!
-!
-!EOP
-!------------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: ESMF_AttributeAdd  - Add an ESMF standard Attribute package using a specification list
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
-!     subroutine ESMF_AttAddPackStdSL(<object>, specList, attpack, rc)
+!     subroutine ESMF_AttAddPackStdSL(<object>, specList, keywordEnforcer, &
+!       attpack, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *), intent(in)               :: specList(:)
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     type(ESMF_AttPack),  intent(inout), optional  :: attpack
 !     integer,             intent(out),   optional  :: rc
 !
@@ -968,12 +861,13 @@ contains
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeAdd()
 !     subroutine ESMF_AttAddPackCstSL(<object>, specList, &
-!       attrList, count, attpack, rc)
+!       attrList, keywordEnforcer, count, attpack, rc)
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
 !     character (len = *), intent(in)              :: specList(:)
 !     character (len = *), intent(in)              :: attrList(:)
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
 !     integer,             intent(in),    optional :: count
 !     type(ESMF_AttPack),  intent(inout), optional :: attpack
 !     integer,             intent(out),   optional :: rc
@@ -2372,6 +2266,118 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_AttributeGetAttPack  - Get an ESMF Attribute package object using a specification list
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGetAttPack()
+!     subroutine ESMF_AttGetAttPackSL(<object>, specList, keywordEnforcer,
+!       attpack, isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *),   intent(in)              :: specList(:)
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     type(ESMF_AttPack),    intent(inout), optional :: attpack
+!     logical,               intent(out),   optional :: isPresent
+!     integer,               intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+!     Get an ESMF Attribute package object.  See Section~\ref{sec:AttPacks}
+!     for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object
+!     \item [specList]
+!           A character list of values which identify the Attribute package, such as
+!           convention, purpose, and instancename.
+!     \item [{[attpack]}]
+!           A handle to the Attribute package
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute package is present or not
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AttributeGetAttPack  - Get an ESMF Attribute package object
+!
+! !INTERFACE:
+!     ! Private name; call using ESMF_AttributeGetAttPack()
+!     subroutine ESMF_AttGetAttPack(<object>, convention, purpose, keywordEnforcer
+!       attPackInstanceName, attpack, isPresent, rc)
+!
+! !ARGUMENTS:
+!     <object>, see below for supported values
+!     character (len = *), intent(in)              :: convention
+!     character (len = *), intent(in)              :: purpose
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!     character (len = *), intent(in),    optional :: attPackInstanceName
+!     type(ESMF_AttPack),  intent(inout), optional :: attpack
+!     logical,             intent(out),   optional :: isPresent
+!     integer,             intent(out),   optional :: rc
+!
+! !DESCRIPTION:
+!     Get an ESMF Attribute package object.  See Section~\ref{sec:AttPacks}
+!     for a description of Attribute packages.
+!
+!     Supported values for <object> are:
+!     \begin{description}
+!     \item type(ESMF\_Array),       intent(inout) :: array
+!     \item type(ESMF\_ArrayBundle), intent(inout) :: arraybundle
+!     \item type(ESMF\_CplComp),     intent(inout) :: comp
+!     \item type(ESMF\_GridComp),    intent(inout) :: comp
+!     \item type(ESMF\_SciComp),     intent(inout) :: comp
+!     \item type(ESMF\_DistGrid),    intent(inout) :: distgrid
+!     \item type(ESMF\_Field),       intent(inout) :: field
+!     \item type(ESMF\_FieldBundle), intent(inout) :: fieldbundle
+!     \item type(ESMF\_Grid),        intent(inout) :: grid
+!     \item type(ESMF\_State),       intent(inout) :: state
+!     \end{description}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [<object>]
+!           An {\tt ESMF} object
+!     \item [convention]
+!           The convention of the Attribute package
+!     \item [purpose]
+!           The purpose of the Attribute package
+!     \item [{[attPackInstanceName]}]
+!           The name of an Attribute package instance, specifying which one
+!           of multiple Attribute package instances of the same convention
+!           and purpose, within a nest.  If not specified, defaults to the
+!           first instance.
+!     \item [{[attpack]}]
+!           A handle to the Attribute package
+!     \item [{[isPresent]}]
+!           A logical flag to tell if this Attribute package is present or not
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors
+!     \end{description}
+!
+!
+!EOP
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_AttributeLink - Link a Component Attribute hierarchy to that of a Component or State
 !
 ! !INTERFACE:
@@ -3432,17 +3438,17 @@ contains
 !-------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define AttPackGetMacro(mclass, mthis, mthisfield) \
+#define AttGetAttPackMacro(mclass, mthis, mthisfield) \
 @\
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_AttPackGet" @\
+^define ESMF_METHOD "ESMF_AttGetAttPack" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttPackGet - Retrieve a handle to an Attribute package @\
+! !IROUTINE: ESMF_AttributeGetAttPack - Retrieve a handle to an Attribute package @\
 ! @\
 ! !INTERFACE: @\
-      ! Private name; call using ESMF_AttPackGet() @\
-      subroutine mclass##AttPackGet(mthis, & @\
+      ! Private name; call using ESMF_AttributeGetAttPack() @\
+      subroutine mclass##AttGetAttPack(mthis, & @\
         convention, purpose, keywordEnforcer, attPackInstanceName, & @\
         attpack, isPresent, rc) @\
  @\
@@ -3546,21 +3552,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
-      end subroutine mclass##AttPackGet @\
+      end subroutine mclass##AttGetAttPack @\
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define AttPackGetMacroSL(mclass, mthis, mthisfield) \
+#define AttGetAttPackMacroSL(mclass, mthis, mthisfield) \
 @\
 ^undef  ESMF_METHOD @\
-^define ESMF_METHOD "ESMF_AttPackGetSL" @\
+^define ESMF_METHOD "ESMF_AttGetAttPackSL" @\
  @\
 !BOPI @\
-! !IROUTINE: ESMF_AttPackGetSL - Retrieve a handle to an Attribute package @\
+! !IROUTINE: ESMF_AttributeGetAttPack - Retrieve a handle to an Attribute package @\
 ! @\
 ! !INTERFACE: @\
-      ! Private name; call using ESMF_AttPackGet() @\
-      subroutine mclass##AttPackGetSL(mthis, & @\
+      ! Private name; call using ESMF_AttributeGetAttPack() @\
+      subroutine mclass##AttGetAttPackSL(mthis, & @\
         specList, keywordEnforcer, & @\
         attpack, isPresent, rc) @\
  @\
@@ -3608,6 +3614,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables @\
       ESMF_INIT_CHECK_DEEP(mclass##GetInit,mthis,rc) @\
  @\
+      ! verify that the specList has some minimum requirements @\
+      if (size(specList) < 2) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & @\
+          msg="specList must contain at least two specifying pieces of information", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      elseif (size(specList) > 3) then @\
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & @\
+          msg="specList can only contain convention, purpose, and attpackinstance name for now", & @\
+          ESMF_CONTEXT, rcToReturn=rc) @\
+        return @\
+      endif @\
+ @\
       ! collapse the specList into a string to pass down to the C glue layer @\
       i = 1 @\
       j = 1 @\
@@ -3646,7 +3665,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
-      end subroutine mclass##AttPackGetSL @\
+      end subroutine mclass##AttGetAttPackSL @\
 
 !------------------------------------------------------------------------------
 
@@ -3665,7 +3684,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(mclass), intent(inout) :: mthis @\
       character (len = *), intent(in) :: convention @\
       character (len = *), intent(in) :: purpose @\
-        type(ESMF_AttPack), intent(inout), optional :: attpack @\
+      type(ESMF_AttPack), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
 ! @\
@@ -3737,9 +3756,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       if ( present(attpack) ) then @\
         ! retrieve the optional attribute package handle @\
-        call mclass##AttPackGetSL(mthis, & @\
-                                specList, & @\
-                                attpack=attpack, rc=localrc) @\
+        call mclass##AttGetAttPackSL(mthis, & @\
+                                     specList, & @\
+                                     attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
       end if @\
@@ -3759,11 +3778,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! @\
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
-      subroutine mclass##AttAddPackStdSL(mthis, specList, attpack, rc) @\
+      subroutine mclass##AttAddPackStdSL(mthis, specList, keywordEnforcer, & @\
+        attpack, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis @\
       character (len = *), dimension(:), intent(in) :: specList @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       type(ESMF_AttPack), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
  @\
@@ -3845,7 +3866,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! retrieve the optional attribute package handle @\
       if (present(attpack)) then @\
  @\
-        call mclass##AttPackGetSL(mthis, specList, attpack=attpack, rc=localrc) @\
+        call mclass##AttGetAttPackSL(mthis, specList, attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
       end if @\
@@ -4053,9 +4074,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         specList(2) = trim(purpose) @\
  @\
         ! retrieve the optional attribute package handle @\
-        call mclass##AttPackGetSL(mthis, & @\
-                                specList, & @\
-                                attpack=attpack, rc=localrc) @\
+        call mclass##AttGetAttPackSL(mthis, & @\
+                                     specList, & @\
+                                     attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
       end if @\
@@ -4172,9 +4193,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       if ( present(attpack) ) then @\
         ! retrieve the optional attribute package handle @\
-        call mclass##AttPackGetSL(mthis, & @\
-                                specList, & @\
-                                attpack=attpack, rc=localrc) @\
+        call mclass##AttGetAttPackSL(mthis, & @\
+                                     specList, & @\
+                                     attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
       end if @\
@@ -4194,12 +4215,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE: @\
       ! Private name; call using ESMF_AttributeAdd() @\
       subroutine mclass##AttAddPackCstSL(mthis, specList, attrList, & @\
-        count, attpack, rc) @\
+        keywordEnforcer, count, attpack, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(mclass), intent(inout) :: mthis   @\
       character (len = *), dimension(:), intent(in) :: specList @\
       character (len = *), dimension(:), intent(in) :: attrList @\
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       integer, intent(in), optional :: count @\
       type(ESMF_AttPack), intent(inout), optional :: attpack @\
       integer, intent(out), optional :: rc    @\
@@ -4302,7 +4324,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! retrieve the optional attribute package handle @\
       if (present(attpack)) then @\
  @\
-        call mclass##AttPackGetSL(mthis, specList, attpack=attpack, rc=localrc) @\
+        call mclass##AttGetAttPackSL(mthis, specList, attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
       end if @\
@@ -4479,9 +4501,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       if ( present(attpack) ) then @\
         ! retrieve the optional attribute package handle @\
-        call mclass##AttPackGetSL(mthis, & @\
-                                specList, & @\
-                                attpack=attpack, rc=localrc) @\
+        call mclass##AttGetAttPackSL(mthis, & @\
+                                     specList, & @\
+                                     attpack=attpack, rc=localrc) @\
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
           ESMF_CONTEXT, rcToReturn=rc)) return @\
       end if @\
@@ -4867,7 +4889,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -5171,7 +5193,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -5427,7 +5449,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -5735,7 +5757,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -6030,7 +6052,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -6304,7 +6326,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -6561,7 +6583,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -6816,7 +6838,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -7071,7 +7093,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -7330,7 +7352,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -7584,7 +7606,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -7858,7 +7880,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -8184,7 +8206,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (isAttpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpack, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -8442,7 +8464,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         APinstNameLens(i) = len(attPackInstanceNameList(i)) @\
       enddo @\
  @\
-      call mclass##AttPackGet(mthis, & @\
+      call mclass##AttGetAttPack(mthis, & @\
                               convention, purpose, & @\
                               attpack=attpack, rc=localrc) @\
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
@@ -8964,7 +8986,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE .and. .not.present(name)) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, &@\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -8973,7 +8995,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         call c_ESMC_AttPackRemove(mthisfield, attpackobj, localrc) @\
         ESMF_INIT_SET_DELETED(attpackobj) @\
       else if (attpack == ESMF_TRUE .and. present(name)) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, &@\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -9172,7 +9194,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, &@\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -9407,7 +9429,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -9607,7 +9629,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  @\
       localvalue = value @\
       if (attpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -9842,7 +9864,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -10041,7 +10063,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -10284,7 +10306,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -10611,7 +10633,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -10859,7 +10881,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif @\
  @\
       if (attpack == ESMF_TRUE) then @\
-        call mclass##AttPackGet(mthis, & @\
+        call mclass##AttGetAttPack(mthis, & @\
                                 convention, purpose, attpack=attpackobj, & @\
                                 attPackInstanceName=attPackInstanceName, & @\
                                 rc=localrc) @\
@@ -11037,8 +11059,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  CplComp
 !-------------------------------------------------------------------------
 
-AttPackGetMacro(ESMF_CplComp, comp, comp%compp%base)
-AttPackGetMacroSL(ESMF_CplComp, comp, comp%compp%base)
+AttGetAttPackMacro(ESMF_CplComp, comp, comp%compp%base)
+AttGetAttPackMacroSL(ESMF_CplComp, comp, comp%compp%base)
 
 AttAddPackStandardMacro(ESMF_CplComp, comp, comp%compp%base)
 AttAddPackStandardNMacro(ESMF_CplComp, comp, comp%compp%base)
@@ -11091,8 +11113,8 @@ AttWriteMacro(ESMF_CplComp, comp, comp%compp%base, comp, field)
 !  GridComp
 !-------------------------------------------------------------------------
 
-AttPackGetMacro(ESMF_GridComp, comp, comp%compp%base)
-AttPackGetMacroSL(ESMF_GridComp, comp, comp%compp%base)
+AttGetAttPackMacro(ESMF_GridComp, comp, comp%compp%base)
+AttGetAttPackMacroSL(ESMF_GridComp, comp, comp%compp%base)
 
 AttAddPackStandardMacro(ESMF_GridComp, comp, comp%compp%base)
 AttAddPackStandardNMacro(ESMF_GridComp, comp, comp%compp%base)
@@ -11145,8 +11167,8 @@ AttWriteMacro(ESMF_GridComp, comp, comp%compp%base, comp, field)
 !  SciComp
 !-------------------------------------------------------------------------
 
-AttPackGetMacro(ESMF_SciComp, comp, comp%compp%base)
-AttPackGetMacroSL(ESMF_SciComp, comp, comp%compp%base)
+AttGetAttPackMacro(ESMF_SciComp, comp, comp%compp%base)
+AttGetAttPackMacroSL(ESMF_SciComp, comp, comp%compp%base)
 
 AttAddPackStandardMacro(ESMF_SciComp, comp, comp%compp%base)
 AttAddPackStandardNMacro(ESMF_SciComp, comp, comp%compp%base)
@@ -11199,8 +11221,8 @@ AttWriteMacro(ESMF_SciComp, comp, comp%compp%base, comp, field)
 !  STATE
 !-------------------------------------------------------------------------
 
-AttPackGetMacro(ESMF_State, state, state%statep%base)
-AttPackGetMacroSL(ESMF_State, state, state%statep%base)
+AttGetAttPackMacro(ESMF_State, state, state%statep%base)
+AttGetAttPackMacroSL(ESMF_State, state, state%statep%base)
 
 AttAddPackStandardMacro(ESMF_State, state, state%statep%base)
 AttAddPackCustomMacro(ESMF_State, state, state%statep%base)
@@ -11254,8 +11276,8 @@ AttWriteMacro(ESMF_State, state, state%statep%base, state, field)
 !  FIELDBUNDLE
 !-------------------------------------------------------------------------
 
-AttPackGetMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
-AttPackGetMacroSL(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
+AttGetAttPackMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
+AttGetAttPackMacroSL(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 
 AttAddPackCustomMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
 AttAddPackCustomNMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base)
@@ -11293,8 +11315,8 @@ AttWriteMacro(ESMF_FieldBundle, fieldbundle, fieldbundle%this%base, fieldbundle,
 !  FIELD
 !-------------------------------------------------------------------------
 
-AttPackGetMacro(ESMF_Field, field, field%ftypep%base)
-AttPackGetMacroSL(ESMF_Field, field, field%ftypep%base)
+AttGetAttPackMacro(ESMF_Field, field, field%ftypep%base)
+AttGetAttPackMacroSL(ESMF_Field, field, field%ftypep%base)
 
 AttAddPackStandardMacro(ESMF_Field, field, field%ftypep%base)
 AttAddPackCustomMacro(ESMF_Field, field, field%ftypep%base)
@@ -11330,8 +11352,8 @@ AttWriteMacro(ESMF_Field, field, field%ftypep%base, field, field)
 !  ARRAYBUNDLE
 !-------------------------------------------------------------------------
 
-AttPackGetMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
-AttPackGetMacroSL(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttGetAttPackMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
+AttGetAttPackMacroSL(ESMF_ArrayBundle, arraybundle, arraybundle)
 
 AttAddPackCustomMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
 AttAddPackCustomNMacro(ESMF_ArrayBundle, arraybundle, arraybundle)
@@ -11363,8 +11385,8 @@ AttWriteMacro(ESMF_ArrayBundle, arraybundle, arraybundle, arraybundle, array)
 !  ARRAY
 !-------------------------------------------------------------------------
 
-AttPackGetMacro(ESMF_Array, array, array)
-AttPackGetMacroSL(ESMF_Array, array, array)
+AttGetAttPackMacro(ESMF_Array, array, array)
+AttGetAttPackMacroSL(ESMF_Array, array, array)
 
 AttAddPackCustomMacro(ESMF_Array, array, array)
 AttAddPackCustomNMacro(ESMF_Array, array, array)
@@ -11393,8 +11415,8 @@ AttWriteMacro(ESMF_Array, array, array, array, array)
 !  GRID
 !-------------------------------------------------------------------------
 
-AttPackGetMacro(ESMF_Grid, grid, grid)
-AttPackGetMacroSL(ESMF_Grid, grid, grid)
+AttGetAttPackMacro(ESMF_Grid, grid, grid)
+AttGetAttPackMacroSL(ESMF_Grid, grid, grid)
 
 AttAddPackStandardMacro(ESMF_Grid, grid, grid)
 AttAddPackCustomMacro(ESMF_Grid, grid, grid)
@@ -11436,8 +11458,8 @@ AttWriteMacro(ESMF_Grid, grid, grid, grid, grid)
 !  DISTGRID
 !-------------------------------------------------------------------------
 
-AttPackGetMacro(ESMF_DistGrid, distgrid, distgrid)
-AttPackGetMacroSL(ESMF_DistGrid, distgrid, distgrid)
+AttGetAttPackMacro(ESMF_DistGrid, distgrid, distgrid)
+AttGetAttPackMacroSL(ESMF_DistGrid, distgrid, distgrid)
 
 AttAddPackCustomMacro(ESMF_DistGrid, distgrid, distgrid)
 AttAddPackCustomNMacro(ESMF_DistGrid, distgrid, distgrid)

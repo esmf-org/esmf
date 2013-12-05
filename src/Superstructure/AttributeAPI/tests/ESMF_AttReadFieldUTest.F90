@@ -117,7 +117,7 @@ print *, 'rc = ', rc
       !------------------------------------------------------------------------
       !EX_UTest
       ! Get CF General Attribute package from a Field Test
-      call ESMF_AttPackGet(field, attpack=attpack, &
+      call ESMF_AttributeGetAttPack(field, attpack=attpack, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Get CF General Attribute package from a Field Test"

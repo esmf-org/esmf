@@ -232,7 +232,7 @@ module ESMF_AttributeUpdate2UTestMod
         convention=convCIM, purpose=purpComp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    call ESMF_AttPackGet(comp, convISO, purpRP, &
+    call ESMF_AttributeGetAttPack(comp, convISO, purpRP, &
       attPackInstanceName=nestAttPackName(1), attpack=attpack1, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
@@ -251,7 +251,7 @@ module ESMF_AttributeUpdate2UTestMod
         convention=convISO, purpose=purpRP, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
 
-    call ESMF_AttPackGet(comp, convISO, purpRP, &
+    call ESMF_AttributeGetAttPack(comp, convISO, purpRP, &
       attPackInstanceName=nestAttPackName(2), attpack=attpack2, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
@@ -339,9 +339,9 @@ module ESMF_AttributeUpdate2UTestMod
       attPackInstanceNameList=attPackInstNames, &
       attPackInstanceNameCount=attPackInstCount, rc=rc)
 
-    call ESMF_AttPackGet(comp, convISO, purpRP, attpack=attpack1, rc=rc)
+    call ESMF_AttributeGetAttPack(comp, convISO, purpRP, attpack=attpack1, rc=rc)
     if (rc/=ESMF_SUCCESS) return
-    call ESMF_AttPackGet(comp, convISO, purpRP, &
+    call ESMF_AttributeGetAttPack(comp, convISO, purpRP, &
       attPackInstanceName=attPackInstNames(2), attpack=attpack2, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
@@ -584,7 +584,7 @@ program ESMF_AttributeUpdate2UTest
     !print *, "attPackInstNames(2)=", attPackInstNames(2)
 
     !EX_UTest_Multi_Proc_Only
-    call ESMF_AttPackGet(gridcomp1, &
+    call ESMF_AttributeGetAttPack(gridcomp1, &
                        convention=convISO, purpose=purpRP, &
                        attPackInstanceName=attPackInstNames(2), &
                        attpack=attpack, rc=rc)
@@ -603,7 +603,7 @@ program ESMF_AttributeUpdate2UTest
                     name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest_Multi_Proc_Only
-    call ESMF_AttPackGet(gridcomp1, &
+    call ESMF_AttributeGetAttPack(gridcomp1, &
                        convention=convISO, purpose=purpRP, &
                        attPackInstanceName=attPackInstNames(1), &
                        attpack=attpack, rc=rc)
@@ -621,7 +621,7 @@ program ESMF_AttributeUpdate2UTest
                     name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest_Multi_Proc_Only
-    call ESMF_AttPackGet(gridcomp1, &
+    call ESMF_AttributeGetAttPack(gridcomp1, &
                        convention=convCIM, purpose=purpExt, &
                        attpack=attpack, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
@@ -651,7 +651,7 @@ program ESMF_AttributeUpdate2UTest
 #endif
 
     !EX_UTest_Multi_Proc_Only
-    call ESMF_AttPackGet(gridcomp1, &
+    call ESMF_AttributeGetAttPack(gridcomp1, &
                        convention=convISO, purpose=purpRP, &
                        attPackInstanceName=attPackInstNames(2), &
                        attpack=attpack, rc=rc)
@@ -670,7 +670,7 @@ program ESMF_AttributeUpdate2UTest
                     name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest_Multi_Proc_Only
-    call ESMF_AttPackGet(gridcomp1, &
+    call ESMF_AttributeGetAttPack(gridcomp1, &
                        convention=convISO, purpose=purpRP, &
                        attpack=attpack, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"

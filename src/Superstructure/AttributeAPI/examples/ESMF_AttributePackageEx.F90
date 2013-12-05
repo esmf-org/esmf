@@ -303,7 +303,7 @@ program ESMF_AttributePackageEx
       ! Custom Attributes
 
       ! retrieve Attribute package
-      call ESMF_AttPackGet(DPEDT, convCC, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(DPEDT, convCC, purpGen, attpack=attpack, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -322,7 +322,7 @@ program ESMF_AttributePackageEx
       ! ESMF Attributes
 
       ! retrieve Attribute package
-      call ESMF_AttPackGet(DPEDT, convESMF, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(DPEDT, convESMF, purpGen, attpack=attpack, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -352,7 +352,7 @@ program ESMF_AttributePackageEx
       value4 = 'Pa K s-1'
       ! Custom Attributes
       ! retrieve Attribute package
-      call ESMF_AttPackGet(DTDT, convCC, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(DTDT, convCC, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(DTDT, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
@@ -362,7 +362,7 @@ program ESMF_AttributePackageEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       ! ESMF Attributes
       ! retrieve Attribute package
-      call ESMF_AttPackGet(DTDT, convESMF, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(DTDT, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(DTDT, name2, value2, convention=convESMF, &
         purpose=purpGen, rc=rc)
@@ -381,7 +381,7 @@ program ESMF_AttributePackageEx
       value4 = 'm s-2'
       ! Custom Attributes
       ! retrieve Attribute package
-      call ESMF_AttPackGet(DUDT, convCC, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(DUDT, convCC, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(DUDT, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
@@ -391,7 +391,7 @@ program ESMF_AttributePackageEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       ! ESMF Attributes
       ! retrieve Attribute package
-      call ESMF_AttPackGet(DUDT, convESMF, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(DUDT, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(DUDT, name2, value2, convention=convESMF, &
         purpose=purpGen, rc=rc)
@@ -410,7 +410,7 @@ program ESMF_AttributePackageEx
       value4 = 'm s-2'
       ! Custom Attributes
       ! retrieve Attribute package
-      call ESMF_AttPackGet(DVDT, convCC, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(DVDT, convCC, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(DVDT, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
@@ -420,7 +420,7 @@ program ESMF_AttributePackageEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       ! ESMF Attributes
       ! retrieve Attribute package
-      call ESMF_AttPackGet(DVDT, convESMF, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(DVDT, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(DVDT, name2, value2, convention=convESMF, &
         purpose=purpGen, rc=rc)
@@ -439,7 +439,7 @@ program ESMF_AttributePackageEx
       value4 = 'm2 s-2'
       ! Custom Attributes
       ! retrieve Attribute package
-      call ESMF_AttPackGet(PHIS, convCC, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(PHIS, convCC, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(PHIS, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
@@ -449,7 +449,7 @@ program ESMF_AttributePackageEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       ! ESMF Attributes
       ! retrieve Attribute package
-      call ESMF_AttPackGet(PHIS, convESMF, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(PHIS, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(PHIS, name1, value1, &
         attpack=attpack, rc=rc)
@@ -471,7 +471,7 @@ program ESMF_AttributePackageEx
       value4 = 'unknown'
       ! Custom Attributes
       ! retrieve Attribute package
-      call ESMF_AttPackGet(QTR, convCC, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(QTR, convCC, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(QTR, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
@@ -481,7 +481,7 @@ program ESMF_AttributePackageEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       ! ESMF Attributes
       ! retrieve Attribute package
-      call ESMF_AttPackGet(QTR, convESMF, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(QTR, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(QTR, name1, value1, &
         attpack=attpack, rc=rc)
@@ -503,7 +503,7 @@ program ESMF_AttributePackageEx
       value4 = 'W m-2'
       ! Custom Attributes
       ! retrieve Attribute package
-      call ESMF_AttPackGet(CNV, convCC, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(CNV, convCC, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(CNV, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
@@ -513,7 +513,7 @@ program ESMF_AttributePackageEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       ! ESMF Attributes
       ! retrieve Attribute package
-      call ESMF_AttPackGet(CNV, convESMF, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(CNV, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(CNV, name1, value1, &
         attpack=attpack, rc=rc)
@@ -535,7 +535,7 @@ program ESMF_AttributePackageEx
       value4 = 'W m-2'
       ! Custom Attributes
       ! retrieve Attribute package
-      call ESMF_AttPackGet(CONVCPT, convCC, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(CONVCPT, convCC, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(CONVCPT, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
@@ -545,7 +545,7 @@ program ESMF_AttributePackageEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       ! ESMF Attributes
      ! retrieve Attribute package
-      call ESMF_AttPackGet(CONVCPT, convESMF, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(CONVCPT, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(CONVCPT, name1, value1, &
         attpack=attpack, rc=rc)
@@ -567,7 +567,7 @@ program ESMF_AttributePackageEx
       value4 = 'W m-2'
       ! Custom Attributes
       ! retrieve Attribute package
-      call ESMF_AttPackGet(CONVKE, convCC, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(CONVKE, convCC, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(CONVKE, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
@@ -577,7 +577,7 @@ program ESMF_AttributePackageEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       ! ESMF Attributes
       ! retrieve Attribute package
-      call ESMF_AttPackGet(CONVKE, convESMF, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(CONVKE, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(CONVKE, name1, value1, &
         attpack=attpack, rc=rc)
@@ -599,7 +599,7 @@ program ESMF_AttributePackageEx
       value4 = 'W m-2'
       ! Custom Attributes
       ! retrieve Attribute package
-      call ESMF_AttPackGet(CONVPHI, convCC, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(CONVPHI, convCC, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(CONVPHI, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)
@@ -608,7 +608,7 @@ program ESMF_AttributePackageEx
         convention=convCC, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       ! ESMF Attributes
-      call ESMF_AttPackGet(CONVPHI, convESMF, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(CONVPHI, convESMF, purpGen, attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(CONVPHI, name1, value1, &
         attpack=attpack, rc=rc)
@@ -633,7 +633,7 @@ program ESMF_AttributePackageEx
 
 !BOC
     ! retrieve Attribute package
-    call ESMF_AttPackGet(gridcomp, convESMF, purpGen, attpack=attpack, rc=rc)
+    call ESMF_AttributeGetAttPack(gridcomp, convESMF, purpGen, attpack=attpack, rc=rc)
 !EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC

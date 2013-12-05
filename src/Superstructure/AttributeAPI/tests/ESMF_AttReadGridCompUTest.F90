@@ -123,7 +123,7 @@ print *, 'rc = ', rc
       ! Get ESG General Attribute package from a GridComp Test
       attrname = 'ComponentShortName'
       attrvalue = 'GEOS'
-      call ESMF_AttPackGet(gridcomp, attpack=attpack, &
+      call ESMF_AttributeGetAttPack(gridcomp, attpack=attpack, &
                              convention=conv, purpose=purp, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Get ESG General Attribute package from a GridComp Test"

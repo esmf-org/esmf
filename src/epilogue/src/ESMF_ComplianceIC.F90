@@ -1309,7 +1309,7 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: iStr, vStr
     integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
 
-  	call ESMF_AttPackGet(comp, attpack=attpack, &
+  	call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
       convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &
@@ -1535,7 +1535,7 @@ module ESMF_ComplianceICMod
     character(ESMF_MAXSTR)                :: iStr, vStr
     integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
 
-	  call ESMF_AttPackGet(field, attpack=attpack, &
+	  call ESMF_AttributeGetAttPack(field, attpack=attpack, &
       convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rc, &
       line=__LINE__, &

@@ -596,7 +596,7 @@ module ESMF_AttributeUpdateMod
     call ESMF_FieldBundleGet(fieldbundle, fieldList=field, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
     do k = 1, 10
-        call ESMF_AttPackGet(field(k), convESMF, purpGen, attpack=attpackGen, rc=rc)
+        call ESMF_AttributeGetAttPack(field(k), convESMF, purpGen, attpack=attpackGen, rc=rc)
         if (rc .ne. ESMF_SUCCESS) return
         call ESMF_AttributeSet(field(k), name=name2, value=value2, &
           attpack=attpackGen, rc=status)

@@ -4,10 +4,32 @@ ALL:  build_unit_tests
 run:  run_unit_tests
 run_uni:  run_unit_tests_uni
 
+AUTOGEN =  	ESMF_AttPackABundleUTest.F90 \
+			ESMF_AttPackArrayUTest.F90 \
+			ESMF_AttPackCplCompUTest.F90 \
+			ESMF_AttPackDistGridUTest.F90 \
+			ESMF_AttPackFBundleUTest.F90 \
+			ESMF_AttPackFieldUTest.F90 \
+			ESMF_AttPackGridCompUTest.F90 \
+			ESMF_AttPackGridUTest.F90 \
+			ESMF_AttPackSciCompUTest.F90 \
+			ESMF_AttPackStateUTest.F90
+
+.PRECIOUS: %.F90
+
 LOCDIR	  = src/Superstructure/AttributeAPI/tests
 
 
-TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttPackPresenceUTest \
+TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttPackABundleUTest \
+		$(ESMF_TESTDIR)/ESMF_AttPackArrayUTest \
+		$(ESMF_TESTDIR)/ESMF_AttPackCplCompUTest \
+		$(ESMF_TESTDIR)/ESMF_AttPackDistGridUTest \
+		$(ESMF_TESTDIR)/ESMF_AttPackFBundleUTest \
+		$(ESMF_TESTDIR)/ESMF_AttPackFieldUTest \
+		$(ESMF_TESTDIR)/ESMF_AttPackGridCompUTest \
+		$(ESMF_TESTDIR)/ESMF_AttPackGridUTest \
+		$(ESMF_TESTDIR)/ESMF_AttPackSciCompUTest \
+		$(ESMF_TESTDIR)/ESMF_AttPackStateUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeArrayUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeABundleUTest \
 		$(ESMF_TESTDIR)/ESMF_AttributeCplCompUTest \
@@ -28,7 +50,16 @@ TESTS_BUILD = $(ESMF_TESTDIR)/ESMF_AttPackPresenceUTest \
 		$(ESMF_TESTDIR)/ESMF_AttReadGridCompUTest \
 		$(ESMF_TESTDIR)/ESMF_AttReadFieldUTest
 
-TESTS_RUN = RUN_ESMF_AttPackPresenceUTest \
+TESTS_RUN = RUN_ESMF_AttPackABundleUTest \
+		RUN_ESMF_AttPackArrayUTest \
+		RUN_ESMF_AttPackCplCompUTest \
+		RUN_ESMF_AttPackDistGridUTest \
+		RUN_ESMF_AttPackFBundleUTest \
+		RUN_ESMF_AttPackFieldUTest \
+		RUN_ESMF_AttPackGridCompUTest \
+		RUN_ESMF_AttPackGridUTest \
+		RUN_ESMF_AttPackSciCompUTest \
+		RUN_ESMF_AttPackStateUTest \
 		RUN_ESMF_AttributeArrayUTest \
 		RUN_ESMF_AttributeABundleUTest \
 		RUN_ESMF_AttributeCplCompUTest \
@@ -49,7 +80,16 @@ TESTS_RUN = RUN_ESMF_AttPackPresenceUTest \
 		RUN_ESMF_AttReadGridCompUTest \
 		RUN_ESMF_AttReadFieldUTest
 
-TESTS_RUN_UNI = RUN_ESMF_AttPackPresenceUTestUNI \
+TESTS_RUN_UNI = RUN_ESMF_AttPackArrayUTestUNI \
+		RUN_ESMF_ESMF_AttPackABundleUTestUNI \
+		RUN_ESMF_ESMF_AttPackCplCompUTestUNI \
+		RUN_ESMF_ESMF_AttPackDistGridUTestUNI \
+		RUN_ESMF_ESMF_AttPackFBundleUTestUNI \
+		RUN_ESMF_ESMF_AttPackFieldUTestUNI \
+		RUN_ESMF_ESMF_AttPackGridCompUTestUNI \
+		RUN_ESMF_ESMF_AttPackGridUTestUNI \
+		RUN_ESMF_ESMF_AttPackSciCompUTestUNI \
+		RUN_ESMF_ESMF_AttPackStateUTestUNI \
 		RUN_ESMF_AttributeGridGetUTestUNI \
 		RUN_ESMF_AttributeArrayUTestUNI \
 		RUN_ESMF_AttributeABundleUTestUNI \
@@ -74,7 +114,7 @@ include ${ESMF_DIR}/makefile
 DIRS        =
 
 CLEANDIRS   =
-CLEANFILES  = $(TESTS_BUILD)
+CLEANFILES  = $(TESTS_BUILD) $(AUTOGEN)
 CLOBBERDIRS =
 
 
@@ -82,13 +122,85 @@ CLOBBERDIRS =
 #  Attribute class
 #
 
-# --- AttPackPresence
+# --- AttPackArray
 
-RUN_ESMF_AttPackPresenceUTest:
-	$(MAKE) TNAME=AttPackPresence NP=4 ftest
+RUN_ESMF_AttPackArrayUTest:
+	$(MAKE) TNAME=AttPackArray NP=4 ftest
 
-RUN_ESMF_AttPackPresenceUTestUNI:
-	$(MAKE) TNAME=AttPackPresence NP=1 ftest
+RUN_ESMF_AttPackArrayUTestUNI:
+	$(MAKE) TNAME=AttPackArray NP=1 ftest
+
+# --- AttPackABundle
+
+RUN_ESMF_AttPackABundleUTest:
+	$(MAKE) TNAME=AttPackABundle NP=4 ftest
+
+RUN_ESMF_AttPackABundleUTestUNI:
+	$(MAKE) TNAME=AttPackABundle NP=1 ftest
+
+# --- AttPackCplComp
+
+RUN_ESMF_AttPackCplCompUTest:
+	$(MAKE) TNAME=AttPackCplComp NP=4 ftest
+
+RUN_ESMF_AttPackCplCompUTestUNI:
+	$(MAKE) TNAME=AttPackCplComp NP=1 ftest
+
+# --- AttPackDistGrid
+
+RUN_ESMF_AttPackDistGridUTest:
+	$(MAKE) TNAME=AttPackDistGrid NP=4 ftest
+
+RUN_ESMF_AttPackDistGridUTestUNI:
+	$(MAKE) TNAME=AttPackDistGrid NP=1 ftest
+
+# --- AttPackFBundle
+
+RUN_ESMF_AttPackFBundleUTest:
+	$(MAKE) TNAME=AttPackFBundle NP=4 ftest
+
+RUN_ESMF_AttPackFBundleUTestUNI:
+	$(MAKE) TNAME=AttPackFBundle NP=1 ftest
+
+# --- AttPackField
+
+RUN_ESMF_AttPackFieldUTest:
+	$(MAKE) TNAME=AttPackField NP=4 ftest
+
+RUN_ESMF_AttPackFieldUTestUNI:
+	$(MAKE) TNAME=AttPackField NP=1 ftest
+
+# --- AttPackGridComp
+
+RUN_ESMF_AttPackGridCompUTest:
+	$(MAKE) TNAME=AttPackGridComp NP=4 ftest
+
+RUN_ESMF_AttPackGridCompUTestUNI:
+	$(MAKE) TNAME=AttPackGridComp NP=1 ftest
+
+# --- AttPackGrid
+
+RUN_ESMF_AttPackGridUTest:
+	$(MAKE) TNAME=AttPackGrid NP=4 ftest
+
+RUN_ESMF_AttPackGridUTestUNI:
+	$(MAKE) TNAME=AttPackGrid NP=1 ftest
+
+# --- AttPackSciComp
+
+RUN_ESMF_AttPackSciCompUTest:
+	$(MAKE) TNAME=AttPackSciComp NP=4 ftest
+
+RUN_ESMF_AttPackSciCompUTestUNI:
+	$(MAKE) TNAME=AttPackSciComp NP=1 ftest
+
+# --- AttPackState
+
+RUN_ESMF_AttPackStateUTest:
+	$(MAKE) TNAME=AttPackState NP=4 ftest
+
+RUN_ESMF_AttPackStateUTestUNI:
+	$(MAKE) TNAME=AttPackState NP=1 ftest
 
 # --- Array
 

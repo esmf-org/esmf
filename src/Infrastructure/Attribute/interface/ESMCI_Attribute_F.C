@@ -150,8 +150,16 @@ extern "C" {
   }
 
   if (!present) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute present flag", ESMC_CONTEXT, &status);
+      if (rc) *rc = status;
+      return;
+  }
+
+  // until Attribute class is changed, must have convention, purpose, object minimum
+  if (*count < 3) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "specList must contain 3 or 4 values", ESMC_CONTEXT, &status);
       if (rc) *rc = status;
       return;
   }
@@ -180,6 +188,7 @@ extern "C" {
     string capname;
     cvalue.push_back(capname);
   }
+
   //TODO: make this more general, for now order is object, convention, purpose, instname
   *attpack = (**base).root.AttPackGet(cvalue[1], cvalue[2], cvalue[0], cvalue[3]);
   if (!(*attpack)) *present = ESMF_FALSE;
