@@ -376,33 +376,26 @@ class Attribute
 // fortran interface functions to attribute objects
 extern "C" {
   void FTN_X(c_esmc_attpackaddattribute)(ESMC_Base **base, char *name,
-                                  char *convention, char *purpose, 
-                                  char *object, int *rc,
-                                  ESMCI_FortranStrLenArg nlen, 
-                                  ESMCI_FortranStrLenArg clen,
-                                  ESMCI_FortranStrLenArg plen,
-                                  ESMCI_FortranStrLenArg olen);
+                                  int *count, char *specList, 
+                                  int *lens, int *rc,
+                                  ESMCI_FortranStrLenArg nlen,
+                                  ESMCI_FortranStrLenArg slen);
   void FTN_X(c_esmc_attpackcreatecustom)(ESMC_Base **base,
-                                  char *convention, char *purpose, 
-                                  char *object, int *rc, 
-                                  ESMCI_FortranStrLenArg clen, 
-                                  ESMCI_FortranStrLenArg plen,
-                                  ESMCI_FortranStrLenArg olen);
+                                  int *count, char *specList, 
+                                  int *lens, int *rc,
+                                  ESMCI_FortranStrLenArg slen);
   void FTN_X(c_esmc_attpackcreatestandard)(ESMC_Base **base,
-                                  char *convention, char *purpose, 
-                                  char *object, int *rc, 
-                                  ESMCI_FortranStrLenArg clen, 
-                                  ESMCI_FortranStrLenArg plen, 
-                                  ESMCI_FortranStrLenArg olen);
+                                  int *count, char *specList, 
+                                  int *lens, int *rc,
+                                  ESMCI_FortranStrLenArg slen);
   void FTN_X(c_esmc_attpacknest)(ESMC_Base **base,
-                                  char *convention, char *purpose, 
-                                  char *object, int *nestCount,
+                                  int *count, char *specList, 
+                                  int *lens,
+                                  int *nestCount,
                                   char *nestConvention, char *nestPurpose, 
                                   int *nestConvLens, int *nestPurpLens,
                                   int *rc, 
-                                  ESMCI_FortranStrLenArg clen, 
-                                  ESMCI_FortranStrLenArg plen, 
-                                  ESMCI_FortranStrLenArg olen, 
+                                  ESMCI_FortranStrLenArg slen, 
                                   ESMCI_FortranStrLenArg nclen, 
                                   ESMCI_FortranStrLenArg nplen);
   void FTN_X(c_esmc_attpackcreatestdnest)(ESMC_Base **base,
@@ -427,13 +420,9 @@ extern "C" {
 //        with the following prototype:
 // error: more than one instance of overloaded function "c_esmc_attpackremove_" has "C" linkage
   void FTN_X(c_esmc_attpackget)(ESMC_Base **base, ESMCI::Attribute **attpack,
-                                  char *convention, char *purpose,
-                                  char *object, char *attPackInstanceName,
+                                  int *count, char *specList, int *lens,
                                   ESMC_Logical *present, int *rc,
-                                  ESMCI_FortranStrLenArg clen,
-                                  ESMCI_FortranStrLenArg plen,
-                                  ESMCI_FortranStrLenArg olen,
-                                  ESMCI_FortranStrLenArg alen);
+                                  ESMCI_FortranStrLenArg slen);
   void FTN_X(c_esmc_attpackremove)(ESMC_Base **base,
                                   ESMCI::Attribute **attpack,
                                   int *rc);

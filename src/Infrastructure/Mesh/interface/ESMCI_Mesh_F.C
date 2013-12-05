@@ -2404,7 +2404,12 @@ extern "C" void FTN_X(c_esmc_meshturnoncellmask)(Mesh **meshpp, ESMCI::Interface
       Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
       for (; ei != ee; ++ei) {
         MeshObj &elem = *ei;
-        if (!GetAttr(elem).is_locally_owned()) continue;
+
+        // Don't just do local, because masking needs to be symmetrical 
+        // between local and not otherwise results change as the number
+        // of PETs changes
+        // if (!GetAttr(elem).is_locally_owned()) continue;
+
         // Set mask value to input array
         double *mv=elem_mask_val->data(elem);
         
@@ -2496,7 +2501,11 @@ extern "C" void FTN_X(c_esmc_meshturnoffcellmask)(Mesh **meshpp, int *rc) {
       Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
       for (; ei != ee; ++ei) {
         MeshObj &elem = *ei;
-        if (!GetAttr(elem).is_locally_owned()) continue;
+
+        // Don't just do local, because masking needs to be symmetrical 
+        // between local and not otherwise results change as the number
+        // of PETs changes
+        //if (!GetAttr(elem).is_locally_owned()) continue;
         
         // Get mask
         double *m=elem_mask->data(elem);
@@ -2589,7 +2598,12 @@ extern "C" void FTN_X(c_esmc_meshturnonnodemask)(Mesh **meshpp, ESMCI::Interface
       Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
       for (; ni != ne; ++ni) {
         MeshObj &node = *ni;
-        if (!GetAttr(node).is_locally_owned()) continue;
+
+        // Don't just do local, because masking needs to be symmetrical 
+        // between local and not otherwise results change as the number
+        // of PETs changes
+        //if (!GetAttr(node).is_locally_owned()) continue;
+
         // Set mask value to input array
         double *mv=node_mask_val->data(node);
         
@@ -2680,7 +2694,11 @@ extern "C" void FTN_X(c_esmc_meshturnoffnodemask)(Mesh **meshpp, int *rc) {
       Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
       for (; ni != ne; ++ni) {
         MeshObj &node = *ni;
-        if (!GetAttr(node).is_locally_owned()) continue;
+
+        // Don't just do local, because masking needs to be symmetrical 
+        // between local and not otherwise results change as the number
+        // of PETs changes
+        //if (!GetAttr(node).is_locally_owned()) continue;
         
         // Get mask
         double *m=node_mask->data(node);

@@ -87,6 +87,14 @@ extern "C" {
     }
   }
 */
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//  Attribute object methods
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  c_esmc_attpackget - get an attpack handle
@@ -103,23 +111,19 @@ extern "C" {
 // !ARGUMENTS:
       ESMC_Base **base,              // in/out - base object
       ESMCI::Attribute **attpack,    // in/out - attpack to return
-      char *convention,              // in - convention
-      char *purpose,                 // in - purpose
-      char *object,                  // in - object
-      char *attPackInstanceName,     // in - attpack instance name
+      int *count,                    // in - number of value(s)
+      char *specList,                // in - char string
+      int *lens,                     // in - lengths
       ESMC_Logical *present,         // out/out - present flag 
       int *rc,                       // in - return code
-      ESMCI_FortranStrLenArg clen,   // hidden/in - strlen count for convention
-      ESMCI_FortranStrLenArg plen,   // hidden/in - strlen count for purpose
-      ESMCI_FortranStrLenArg olen,   // hidden/in - strlen count for object
-      ESMCI_FortranStrLenArg alen) { // hidden/in - strlen count for attPackInstanceName
+      ESMCI_FortranStrLenArg slen) { // hidden/in - strlen count for specList
 // 
 // !DESCRIPTION:
 //     Retrieve an attribute package from any Attribute containing object.
 //
 //EOP
 
-  int status;
+  int status, j;
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -131,26 +135,16 @@ extern "C" {
     return;
   }
 
-  // simple sanity check before doing any more work
-  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
+  // allocate space for the array of char*'s and vector of strings
+  vector<string> cvalue;
+  //cvalue.reserve(*count);
+  // hardcode to 4 until we figure out how to deal with arbitrary number of specs
+  cvalue.reserve(4);
 
-  // simple sanity check before doing any more work
-  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
+  // check that valueList is allocated
+  if (!specList) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object", ESMC_CONTEXT, &status);
+                         "bad specList value", ESMC_CONTEXT, &status);
       if (rc) *rc = status;
       return;
   }
@@ -162,63 +156,39 @@ extern "C" {
       return;
   }
 
-  string cconv(convention, clen);
-  string cpurp(purpose, plen);
-  string cobj(object, olen);
-  cconv.resize(cconv.find_last_not_of(" ")+1);
-  cpurp.resize(cpurp.find_last_not_of(" ")+1);
-  cobj.resize(cobj.find_last_not_of(" ")+1);
+  // loop through valueList allocating space and copying values to cvalue
+  j = 0;
+  for (unsigned int i=0; i<(*count); i++) {
+    if (j > slen) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad count value", ESMC_CONTEXT, &status);
+      if (rc) *rc = status;
+      return;
 
-  if (cconv.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention conversion", ESMC_CONTEXT, &status);
-    if (rc) *rc = status;
-    return;
+    }
+
+    // copy and convert F90 string to null terminated one
+    string temp((&specList[j]), lens[i]);
+    temp.resize(temp.find_last_not_of(" ")+1);
+    cvalue.push_back(temp);
+    j = j + lens[i];
   }
 
-  if (cpurp.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose conversion", ESMC_CONTEXT, &status);
-    if (rc) *rc = status;
-    return;
+  // TODO: this is just a bandaid for the fact that the attpackinstance name
+  //       is not "required" and the C++ routine still requires 4 arguments
+  if (*count < 4) {
+    string capname;
+    cvalue.push_back(capname);
   }
-
-  if (cobj.empty()) {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object conversion", ESMC_CONTEXT, &status);
-    if (rc) *rc = status;
-    return;
-  }
-
-  // convert optional (char *) arg attPackInstanceName to string
-// TODO: is the following line safe for all F90 compilers when passing a 
-//       not-present char* attPackInstanceName ?  what is value of alen?
-//  string capname((char*)ESMC_NOT_PRESENT_FILTER(attPackInstanceName), alen);
-  string capname;
-  if (ESMC_NOT_PRESENT_FILTER(attPackInstanceName) != ESMC_NULL_POINTER &&
-                                                      alen > 0) {
-    capname.assign(attPackInstanceName, 0, alen);
-  }
-  
-  capname.resize(capname.find_last_not_of(" ")+1);
-
-  // get the Attribute package
-  *attpack = (**base).root.AttPackGet(cconv, cpurp, cobj, capname);
-  if (!(*attpack)) {
-    *present = ESMF_FALSE;
-  }
+  //TODO: make this more general, for now order is object, convention, purpose, instname
+  *attpack = (**base).root.AttPackGet(cvalue[1], cvalue[2], cvalue[0], cvalue[3]);
+  if (!(*attpack)) *present = ESMF_FALSE;
   else *present = ESMF_TRUE;
 
   if (rc) *rc = ESMF_SUCCESS;
   
 }  // end c_esmc_attpackget
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//  Attribute object methods
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  c_esmc_attpackaddattribute - add an attribute to an attpack
 //
@@ -232,16 +202,14 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_Base **base,          // in/out - base object
-      char *name,                // in - F90, non-null terminated string
-      char *convention,          // in - convention
-      char *purpose,             // in - purpose
-      char *object,              // in - object type
-      int *rc,                   // in - return code
-      ESMCI_FortranStrLenArg nlen,// hidden/in - strlen count for name
-      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
-      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
-      ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for object
+      ESMC_Base **base,              // in/out - base object
+      char *name,                    // in - F90, non-null terminated string
+      int *count,                    // in - number of value(s)
+      char *specList,                // in - char string
+      int *lens,                     // in - lengths
+      int *rc,                       // in - return code
+      ESMCI_FortranStrLenArg nlen,   // hidden/in - strlen count for name
+      ESMCI_FortranStrLenArg slen) { // hidden/in - strlen count for specList
 // 
 // !DESCRIPTION:
 //     Associate a convention, purpose, and object type with an attribute package
@@ -268,38 +236,8 @@ extern "C" {
       return;
   }
   
-  // simple sanity check before doing any more work
-  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-
   string cname(name, nlen);
-  string cconv(convention, clen);
-  string cpurp(purpose, plen);
-  string cobj(object, olen);
   cname.resize(cname.find_last_not_of(" ")+1);
-  cconv.resize(cconv.find_last_not_of(" ")+1);
-  cpurp.resize(cpurp.find_last_not_of(" ")+1);
-  cobj.resize(cobj.find_last_not_of(" ")+1);
 
   if (cname.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -308,29 +246,37 @@ extern "C" {
       return;
   }
   
-  if (cconv.empty()) {
+  // allocate space for the array of char*'s and vector of strings
+  vector<string> cspec;
+  cspec.reserve(*count);
+
+  // check that valueList is allocated
+  if (!specList) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention conversion", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  if (cpurp.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose conversion", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  if (cobj.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object conversion", ESMC_CONTEXT, &status);
+                         "bad specList", ESMC_CONTEXT, &status);
       if (rc) *rc = status;
       return;
   }
 
+  // loop through valueList allocating space and copying values to cvalue
+  int j = 0;
+  for (unsigned int i=0; i<(*count); i++) {
+    if (j > slen) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad specList", ESMC_CONTEXT, &status);
+      if (rc) *rc = status;
+      return;
+    }
+
+    // copy and convert F90 string to null terminated one
+    string temp((&specList[j]), lens[i]);
+    temp.resize(temp.find_last_not_of(" ")+1);
+    cspec.push_back(temp);
+    j = j + lens[i];
+  }
+
   // Set the attribute on the object.
-  status = (**base).root.AttPackAddAttribute(cname, cconv, cpurp, cobj);
+  status = (**base).root.AttPackAddAttribute(cname, cspec[1], cspec[2], cspec[0]);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -352,14 +298,12 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_Base **base,          // in/out - base object
-      char *convention,          // in - convention
-      char *purpose,             // in - purpose
-      char *object,              // in - object type
-      int *rc,                   // in - return code
-      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
-      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
-      ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for object
+      ESMC_Base **base,              // in/out - base object
+      int *count,                    // in - number of value(s)
+      char *specList,                // in - char string
+      int *lens,                     // in - lengths
+      int *rc,                       // in - return code
+      ESMCI_FortranStrLenArg slen) { // hidden/in - strlen count for specList
 // 
 // !DESCRIPTION:
 //     Associate a convention, purpose, and object type with an attribute package
@@ -378,60 +322,37 @@ extern "C" {
     return;
   }
 
-  // simple sanity check before doing any more work
-  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+  // allocate space for the array of char*'s and vector of strings
+  vector<string> cspec;
+  cspec.reserve(*count);
+
+  // check that valueList is allocated
+  if (!specList) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object", ESMC_CONTEXT, &status);
+                         "bad specList", ESMC_CONTEXT, &status);
       if (rc) *rc = status;
       return;
   }
 
-  string cconv(convention, clen);
-  string cpurp(purpose, plen);
-  string cobj(object, olen);
-  cconv.resize(cconv.find_last_not_of(" ")+1);
-  cpurp.resize(cpurp.find_last_not_of(" ")+1);
-  cobj.resize(cobj.find_last_not_of(" ")+1);
+  // loop through valueList allocating space and copying values to cvalue
+  int j = 0;
+  for (unsigned int i=0; i<(*count); i++) {
+    if (j > slen) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad specList", ESMC_CONTEXT, &status);
+      if (rc) *rc = status;
+      return;
+    }
 
-  if (cconv.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention conversion", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  if (cpurp.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose conversion", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  if (cobj.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object conversion", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
+    // copy and convert F90 string to null terminated one
+    string temp((&specList[j]), lens[i]);
+    temp.resize(temp.find_last_not_of(" ")+1);
+    cspec.push_back(temp);
+    j = j + lens[i];
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackCreateCustom(cconv, cpurp, cobj);
+  status = (**base).root.AttPackCreateCustom(cspec[1], cspec[2], cspec[0]);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -453,14 +374,12 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_Base **base,          // in/out - base object
-      char *convention,          // in - convention
-      char *purpose,             // in - purpose
-      char *object,              // in - object type
-      int *rc,                   // in - return code
-      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
-      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
-      ESMCI_FortranStrLenArg olen) { // hidden/in - strlen count for object
+      ESMC_Base **base,              // in/out - base object
+      int *count,                    // in - number of value(s)
+      char *specList,                // in - char string
+      int *lens,                     // in - lengths
+      int *rc,                       // in - return code
+      ESMCI_FortranStrLenArg slen) { // hidden/in - strlen count for specList
 // 
 // !DESCRIPTION:
 //     Associate a convention, purpose, and object type with an attribute package
@@ -479,60 +398,37 @@ extern "C" {
     return;
   }
 
-  // simple sanity check before doing any more work
-  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
+  // allocate space for the array of char*'s and vector of strings
+  vector<string> cspec;
+  cspec.reserve(*count);
+
+  // check that valueList is allocated
+  if (!specList) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object", ESMC_CONTEXT, &status);
+                         "bad specList", ESMC_CONTEXT, &status);
       if (rc) *rc = status;
       return;
   }
 
-  string cconv(convention, clen);
-  string cpurp(purpose, plen);
-  string cobj(object, olen);
-  cconv.resize(cconv.find_last_not_of(" ")+1);
-  cpurp.resize(cpurp.find_last_not_of(" ")+1);
-  cobj.resize(cobj.find_last_not_of(" ")+1);
+  // loop through valueList allocating space and copying values to cvalue
+  int j = 0;
+  for (unsigned int i=0; i<(*count); i++) {
+    if (j > slen) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                         "bad specList", ESMC_CONTEXT, &status);
+      if (rc) *rc = status;
+      return;
+    }
 
-  if (cconv.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention conversion", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  if (cpurp.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose conversion", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  if (cobj.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object conversion", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
+    // copy and convert F90 string to null terminated one
+    string temp((&specList[j]), lens[i]);
+    temp.resize(temp.find_last_not_of(" ")+1);
+    cspec.push_back(temp);
+    j = j + lens[i];
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackCreateStandard(cconv, cpurp, cobj);
+  status = (**base).root.AttPackCreateStandard(cspec[1], cspec[2], cspec[0]);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
 
@@ -554,20 +450,18 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_Base **base,          // in/out - base object
-      char *convention,          // in - convention
-      char *purpose,             // in - purpose
-      char *object,              // in - object type
-      int  *nestCount,           // in - number of nested attpacks (child nodes)
-      char *nestConvention,      // in - nest convention list
-      char *nestPurpose,         // in - nest purpose list
-      int  *nestConvLens,        // in - length of each nestConvention
-      int  *nestPurpLens,        // in - length of each nestPurpose
-      int  *rc,                  // in - return code
-      ESMCI_FortranStrLenArg clen,// hidden/in - strlen count for convention
-      ESMCI_FortranStrLenArg plen,// hidden/in - strlen count for purpose
-      ESMCI_FortranStrLenArg olen,// hidden/in - strlen count for object
-      ESMCI_FortranStrLenArg nclen,// hidden/in - strlen count for nestConvention
+      ESMC_Base **base,               // in/out - base object
+      int *count,                     // in - number of value(s)
+      char *specList,                 // in - char string
+      int *lens,                      // in - lengths
+      int  *nestCount,                // in - number of nested attpacks (child nodes)
+      char *nestConvention,           // in - nest convention list
+      char *nestPurpose,              // in - nest purpose list
+      int  *nestConvLens,             // in - length of each nestConvention
+      int  *nestPurpLens,             // in - length of each nestPurpose
+      int  *rc,                       // in - return code
+      ESMCI_FortranStrLenArg slen,    // hidden/in - strlen count for specList
+      ESMCI_FortranStrLenArg nclen,   // hidden/in - strlen count for nestConvention
       ESMCI_FortranStrLenArg nplen) { // hidden/in - strlen count for nestPurpose
 // 
 // !DESCRIPTION:
@@ -585,30 +479,6 @@ extern "C" {
                          "bad base", ESMC_CONTEXT, &status);
     if (rc) *rc = status;    
     return;
-  }
-
-  // simple sanity check before doing any more work
-  if ((!convention) || (clen <= 0) || (convention[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if ((!purpose) || (plen <= 0) || (purpose[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
-  }
-  
-  // simple sanity check before doing any more work
-  if ((!object) || (olen <= 0) || (object[0] == '\0')) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
   }
 
   // simple sanity check before doing any more work
@@ -651,32 +521,33 @@ extern "C" {
       return;
   }
 
-  string cconv(convention, clen);
-  string cpurp(purpose, plen);
-  string cobj(object, olen);
-  cconv.resize(cconv.find_last_not_of(" ")+1);
-  cpurp.resize(cpurp.find_last_not_of(" ")+1);
-  cobj.resize(cobj.find_last_not_of(" ")+1);
+  // allocate space for the array of char*'s and vector of strings
+  vector<string> cspec;
+  cspec.reserve(*count);
 
-  if (cconv.empty()) {
+  // check that valueList is allocated
+  if (!specList) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute convention conversion", ESMC_CONTEXT, &status);
+                         "bad specList", ESMC_CONTEXT, &status);
       if (rc) *rc = status;
       return;
   }
-  
-  if (cpurp.empty()) {
+
+  // loop through valueList allocating space and copying values to cvalue
+  j = 0;
+  for (unsigned int i=0; i<(*count); i++) {
+    if (j > slen) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute purpose conversion", ESMC_CONTEXT, &status);
+                         "bad specList", ESMC_CONTEXT, &status);
       if (rc) *rc = status;
       return;
-  }
-  
-  if (cobj.empty()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                         "bad attribute object conversion", ESMC_CONTEXT, &status);
-      if (rc) *rc = status;
-      return;
+    }
+
+    // copy and convert F90 string to null terminated one
+    string temp((&specList[j]), lens[i]);
+    temp.resize(temp.find_last_not_of(" ")+1);
+    cspec.push_back(temp);
+    j = j + lens[i];
   }
 
   // allocate space for vector of strings
@@ -714,7 +585,7 @@ extern "C" {
   }
 
   // Set the attribute on the object.
-  status = (**base).root.AttPackNest(cconv, cpurp, cobj,
+  status = (**base).root.AttPackNest(cspec[1], cspec[2], cspec[0],
                                      *nestCount, cnconv, cnpurp);
   ESMC_LogDefault.MsgFoundError(status, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));

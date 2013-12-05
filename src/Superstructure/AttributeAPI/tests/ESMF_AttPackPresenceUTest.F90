@@ -149,15 +149,15 @@ program ESMF_AttPackPresenceUTest
     !  Attribute package - custom
     !-------------------------------------------------------------------------
       conv = "customconvention"
-      purp = "custompurpose"
+      purp = "custompurpose   "
       attpackList(1) = "Custom1"
       attpackList(2) = "Custom2"
       attpackList(3) = "Custom3"
       
       !EX_UTest
       ! Create a custom Attribute package on an ArrayBundle Test
-      call ESMF_AttributeAdd(arraybundle, convention=conv, &
-        purpose=purp, attrList=attpackList, rc=rc)
+      call ESMF_AttributeAdd(arraybundle, (/conv, purp/), &
+        attpackList, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -170,7 +170,7 @@ program ESMF_AttPackPresenceUTest
       !EX_UTest
       ! Get an ESMF_I4 Attribute from an ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name="NotHere", value=outI4, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_RC_ATTR_NOTSET"
       write(name, *) "Getting a nonexistent Attribute from an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), &
@@ -183,7 +183,7 @@ program ESMF_AttPackPresenceUTest
       !EX_UTest
       ! Set an Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name=attrname, value=attrvalue, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting an Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -194,7 +194,7 @@ program ESMF_AttPackPresenceUTest
       !EX_UTest
       ! Set a char list Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeSet(arraybundle, name=attrname, &
-        valueList=attpackList, convention=conv, purpose=purp, rc=rc)
+        valueList=attpackList, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Setting a char list Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -203,7 +203,7 @@ program ESMF_AttPackPresenceUTest
       !EX_UTest
       ! Get a char list Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name=attrname, &
-        valueList=attpackListOut3, convention=conv, purpose=purp, rc=rc)
+        valueList=attpackListOut3, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a char list Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackList == attpackListOut3), &
@@ -212,7 +212,7 @@ program ESMF_AttPackPresenceUTest
 
       !EX_UTest
       ! Remove an Attribute in an Attribute package on an ArrayBundle Test
-      call ESMF_AttributeRemove(arraybundle, name=attrname, convention=conv, purpose=purp, rc=rc)
+      call ESMF_AttributeRemove(arraybundle, name=attrname, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Removeing an Attribute in an Attribute package on an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -225,7 +225,7 @@ program ESMF_AttPackPresenceUTest
       ! Get a char list default Attribute in an Attribute package on an ArrayBundle Test
       call ESMF_AttributeGet(arraybundle, name=attrname, &
         valueList=attpackListOut2, defaultvalueList=attpackDfltList, &
-        convention=conv, purpose=purp, rc=rc)
+        attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting a default Attribute character list in an Attribute package on an ArrayBundle test"
       call ESMF_Test((rc==ESMF_SUCCESS) .and. all (attpackListOut2 == attpackDfltList), &
@@ -234,7 +234,7 @@ program ESMF_AttPackPresenceUTest
 
       !EX_UTest
       ! Remove the entire Attribute package from an ArrayBundle Test
-      call ESMF_AttributeRemove(arraybundle, convention=conv, purpose=purp, rc=rc)
+      call ESMF_AttributeRemove(arraybundle, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Removing the entire Attribute package from an ArrayBundle Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -243,7 +243,7 @@ program ESMF_AttPackPresenceUTest
       !EX_UTest
       ! Get ispresent from Attribute from an Array Test
       call ESMF_AttributeGet(arraybundle, name="NotHere", value=outI4, &
-        convention=conv, purpose=purp, isPresent=isPresent, rc=rc)
+        attpack=attpack, isPresent=isPresent, rc=rc)
       write(failMsg, *) "Did not return isPresent=False"
       write(name, *) "Getting an Attribute from a non-existent Attpack"
       call ESMF_Test((rc==ESMF_SUCCESS .and. isPresent.eqv..false.), &
@@ -255,15 +255,15 @@ program ESMF_AttPackPresenceUTest
     !  Attribute package - custom
     !-------------------------------------------------------------------------
       conv = "customconvention2"
-      purp = "custompurpose2"
+      purp = "custompurpose2   "
       attpackList(1) = "Custom1"
       attpackList(2) = "Custom2"
       attpackList(3) = "Custom3"
       
       !EX_UTest
       ! Create a custom Attribute package on an Array Test
-      call ESMF_AttributeAdd(arraybundle, attrList=attpackList, convention=conv, &
-        purpose=purp, attpack=attpack, rc=rc)
+      call ESMF_AttributeAdd(arraybundle, (/conv, purp/), &
+        attpackList, attpack=attpack, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a custom Attribute package on an Array Test"
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -342,7 +342,7 @@ program ESMF_AttPackPresenceUTest
       !EX_UTest
       isPresent = .false.
       ! Test for the presence of an AttPack object on an ArrayBundle
-      call ESMF_AttPackGet(arraybundle, convention=conv, purpose=purp, &
+      call ESMF_AttPackGet(arraybundle, (/conv, purp/), &
         isPresent=isPresent, rc=rc)     
       write(failMsg, *) "Did not return isPresent=True"
       write(name, *) "Test for the presence of an AttPack object on an ArrayBundle"
