@@ -474,6 +474,21 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
+    if (associated (items_recv)) then
+      do, i=0,npets-1
+        if (associated (items_recv(i)%cptr)) then
+          deallocate (items_recv(i)%cptr, stat=memstat)
+          if (ESMF_LogFoundDeallocError (memstat, ESMF_ERR_PASSTHRU,  &
+              ESMF_CONTEXT,  &
+              rcToReturn=rc)) return
+        end if
+      end do
+      deallocate (items_recv, stat=memstat)
+      if (ESMF_LogFoundDeallocError (memstat, ESMF_ERR_PASSTHRU,  &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+    end if
+
     if (associated (ids_send)) then
       deallocate (ids_send, itemtypes_send, vmids_send, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
@@ -1420,14 +1435,14 @@ contains
 
     if (debug) then
       do, i=0, npets-1
-	if (i == mypet) then
-	  write (6,*) ESMF_METHOD, ': pet', mypet, ': counts_buf_send =', counts_buf_send
-	  write (6,*) ESMF_METHOD, ': pet', mypet, ': displs_buf_send =', displs_buf_send
-	  write (6,*) ESMF_METHOD, ': pet', mypet, ': counts_buf_recv =', counts_buf_recv
-	  write (6,*) ESMF_METHOD, ': pet', mypet, ': displs_buf_recv =', displs_buf_recv
-	  call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
-	end if
-	call ESMF_VMBarrier (vm)
+        if (i == mypet) then
+          write (6,*) ESMF_METHOD, ': pet', mypet, ': counts_buf_send =', counts_buf_send
+          write (6,*) ESMF_METHOD, ': pet', mypet, ': displs_buf_send =', displs_buf_send
+          write (6,*) ESMF_METHOD, ': pet', mypet, ': counts_buf_recv =', counts_buf_recv
+          write (6,*) ESMF_METHOD, ': pet', mypet, ': displs_buf_recv =', displs_buf_recv
+          call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
+        end if
+        call ESMF_VMBarrier (vm)
       end do
     end if
 
@@ -2228,7 +2243,7 @@ contains
 
     integer :: buffer_offset
     integer :: needs_count
-    integer :: item, nitems, nitems_needed
+    integer :: item, nitems
     integer :: lbufsize
     integer :: pass
 
@@ -2342,10 +2357,10 @@ contains
         select case (stateitem%otype%ot)
 
           case (ESMF_STATEITEM_FIELDBUNDLE%ot)
-	    if (debug) then
+            if (debug) then
               print *, '    PET', mypet,  &
-        	  ': serializing FieldBundle, pass =', pass, ', offset =', buffer_offset
-	    end if
+                  ': serializing FieldBundle, pass =', pass, ', offset =', buffer_offset
+            end if
             call ESMF_FieldBundleSerialize(stateitem%datap%fbp,  &
                 obj_buffer, lbufsize, buffer_offset,  &
                 attreconflag=attreconflag, inquireflag=inqflag,  &
@@ -2355,10 +2370,10 @@ contains
                 rcToReturn=rc)) return
 
           case (ESMF_STATEITEM_FIELD%ot)
-	   if (debug) then
-             print *, '    PET', mypet,  &
-        	 ': serializing Field, pass =', pass, ', offset =', buffer_offset
-	   end if
+            if (debug) then
+              print *, '    PET', mypet,  &
+                  ': serializing Field, pass =', pass, ', offset =', buffer_offset
+            end if
             call ESMF_FieldSerialize(stateitem%datap%fp,  &
                 obj_buffer, lbufsize, buffer_offset,  &
                 attreconflag=attreconflag, inquireflag=inqflag,  &
@@ -2368,10 +2383,10 @@ contains
                 rcToReturn=rc)) return
 
           case (ESMF_STATEITEM_ARRAY%ot)
-	    if (debug) then
+            if (debug) then
               print *, '    PET', mypet,  &
-        	  ': serialized Array, pass =', pass, ', offset =', buffer_offset
-	    end if
+                  ': serialized Array, pass =', pass, ', offset =', buffer_offset
+            end if
             call c_ESMC_ArraySerialize(stateitem%datap%ap,  &
                 obj_buffer, lbufsize, buffer_offset,  &
                 attreconflag, inqflag,  &
@@ -2381,10 +2396,10 @@ contains
                 rcToReturn=rc)) return
 
           case (ESMF_STATEITEM_ARRAYBUNDLE%ot)
-	    if (debug) then
+            if (debug) then
               print *, '    PET', mypet,  &
-        	  ': serializing ArrayBundle, pass =', pass, ', offset =', buffer_offset
-	    end if
+                  ': serializing ArrayBundle, pass =', pass, ', offset =', buffer_offset
+            end if
             call c_ESMC_ArrayBundleSerialize(stateitem%datap%abp,  &
                 obj_buffer, lbufsize, buffer_offset,  &
                 attreconflag, inqflag,  &
@@ -2394,10 +2409,10 @@ contains
                 rcToReturn=rc)) return
 
           case (ESMF_STATEITEM_STATE%ot)
-	    if (debug) then
+            if (debug) then
               print *, '    PET', mypet,  &
-        	  ': serializing subState, pass =', pass, ', offset =', buffer_offset
-	    end if
+                  ': serializing subState, pass =', pass, ', offset =', buffer_offset
+            end if
             wrapper%statep => stateitem%datap%spp
             ESMF_INIT_SET_CREATED(wrapper)
             call ESMF_StateSerialize(wrapper,  &
@@ -2409,17 +2424,17 @@ contains
                 rcToReturn=rc)) return
 
           case (ESMF_STATEITEM_ROUTEHANDLE%ot)
-	    if (debug) then
+            if (debug) then
               print *, '    PET', mypet,  &
-        	  ': ignoring RouteHandle, pass =', pass
-	    end if
+                  ': ignoring RouteHandle, pass =', pass
+            end if
           ! Do nothing for RouteHandles.  There is no need to reconcile them.
 
 
           case (ESMF_STATEITEM_UNKNOWN%ot)
-	    if (debug) then
+            if (debug) then
               print *, ESMF_METHOD, ': serializing unknown: ', trim (stateitem%namep)
-	    end if
+            end if
             call c_ESMC_StringSerialize(stateitem%namep,  &
                 obj_buffer, lbufsize, buffer_offset,  &
                 inqflag,  &
@@ -2430,10 +2445,10 @@ contains
 
           case default
             localrc = ESMF_RC_INTNRL_INCONS
-	    if (debug) then
+            if (debug) then
               print *, '    PET', mypet,  &
-        	  ': serialization error in default case.  Returning ESMF_RC_INTNRL_INCONS'
-	    end if
+                  ': serialization error in default case.  Returning ESMF_RC_INTNRL_INCONS'
+            end if
 
         end select
 
@@ -2445,10 +2460,10 @@ contains
         buffer_offset = ((buffer_offset+7)/8)*8
 #endif
 
-	if (debug) then
+        if (debug) then
           print *, '    PET', mypet,  &
               ': item serialized, pass =', pass, ', new offset =', buffer_offset
-	end if
+        end if
 
       end do pass_loop
 
@@ -2577,7 +2592,7 @@ contains
 !
 !EOPI
       integer :: localrc, i
-      integer :: memstat
+!       integer :: memstat
       type(ESMF_StateClass),    pointer :: stypep
       type(ESMF_StateItemWrap), pointer :: itemList(:)
       character(len=ESMF_MAXSTR) :: thisname
