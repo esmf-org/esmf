@@ -51,7 +51,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     ESMCI::VM *opt_vm;
-    bool proxyFlag;
+    int proxyFlag;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER){
       opt_vm = NULL;
@@ -86,7 +86,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     ESMCI::VM *opt_vm;
-    bool proxyFlag;
+    int proxyFlag;
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER){
       opt_vm = NULL;

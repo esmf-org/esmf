@@ -72,7 +72,7 @@ DELayout *DELayout::create(
   int petMapCount,          // (in) number of element in petMap
   ESMC_Pin_Flag *pinFlag,   // (in) type of resources DEs are pinned to
   VM *vm,                   // (in) VM context
-  bool proxyFlag,           // (in) indicate proxy member on this PET
+  int proxyFlag,            // (in) indicate proxy member on this PET
   int *rc){                 // (out) return code
 //
 // !DESCRIPTION:
@@ -87,9 +87,9 @@ DELayout *DELayout::create(
   DELayout *delayout;
   try{
     if (proxyFlag)
-      delayout = new DELayout(-1); // prevent baseID counter increment
+      delayout = new DELayout(-1);  // prevent baseID counter increment
     else
-      delayout = new DELayout(vm);
+      delayout = new DELayout(vm);  // specific VM, or default if vm==NULL
     localrc = delayout->construct(vm, pinFlag, petMap, petMapCount, proxyFlag);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)){
@@ -127,7 +127,7 @@ DELayout *DELayout::create(
   ESMC_Pin_Flag *pinFlag,   // (in) type of resources DEs are pinned to
   InterfaceInt *petListArg, // (in) list of PETs to be used in delayout
   VM *vm,                   // (in) VM context
-  bool proxyFlag,           // (in) indicate proxy member on this PET
+  int proxyFlag,            // (in) indicate proxy member on this PET
   int *rc){                 // (out) return code
 //
 // !DESCRIPTION:
@@ -465,7 +465,7 @@ int DELayout::construct(
   ESMC_Pin_Flag *pinFlagArg,    // (in) type of resources DEs are pinned to
   int *petMap,                  // (in) pointer to petMap list
   int petMapCount,              // (in) number of element in petMap
-  bool proxyFlag                // (in) indicate proxy member on this PET
+  int proxyFlag                 // (in) indicate proxy member on this PET
   ){             
 //
 // !DESCRIPTION:
