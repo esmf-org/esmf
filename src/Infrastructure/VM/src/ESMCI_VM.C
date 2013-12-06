@@ -1225,7 +1225,7 @@ int VM::bcastVMId(
       vmID[key]->vmKey[i] = local_vmkeys[i + key*vmKeyWidth];
     }
   }
-  delete local_vmkeys;
+  delete[] local_vmkeys;
 
   // broadcast localIDs
   int *local_ids = new int[count];
@@ -1236,7 +1236,7 @@ int VM::bcastVMId(
   for (int i=0; i<count; i++) {
     vmID[i]->localID = local_ids[i];
   }
-  delete local_ids;
+  delete[] local_ids;
 
   // return successfully
   rc = ESMF_SUCCESS;
