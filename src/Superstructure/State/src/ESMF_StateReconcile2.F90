@@ -259,7 +259,7 @@ contains
 
     logical, pointer :: recvd_needs_matrix(:,:)
 
-    type(ESMF_CharPtr), pointer :: items_recv(:)
+    type(ESMF_CharPtr), allocatable :: items_recv(:)
 
     integer :: i
 
@@ -412,7 +412,10 @@ contains
           ': *** Step 6 - Exchange serialized objects')
     end if
 
-    items_recv => null ()
+    allocate (items_recv(0:npets-1), stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
     call ESMF_ReconcileExchgItems (vm,  &
         id_info=id_info,  &
         recv_items=items_recv,  &
@@ -425,7 +428,7 @@ contains
 
 
     ! 7.) Deserialize received objects and create proxies (recurse on
-    !     nested States as needed
+    !     nested States as needed)
 
     if (trace) then
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
@@ -474,20 +477,14 @@ contains
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
 
-    if (associated (items_recv)) then
-      do, i=0,npets-1
-        if (associated (items_recv(i)%cptr)) then
-          deallocate (items_recv(i)%cptr, stat=memstat)
-          if (ESMF_LogFoundDeallocError (memstat, ESMF_ERR_PASSTHRU,  &
-              ESMF_CONTEXT,  &
-              rcToReturn=rc)) return
-        end if
-      end do
-      deallocate (items_recv, stat=memstat)
-      if (ESMF_LogFoundDeallocError (memstat, ESMF_ERR_PASSTHRU,  &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
-    end if
+    do, i=0,npets-1
+      if (associated (items_recv(i)%cptr)) then
+        deallocate (items_recv(i)%cptr, stat=memstat)
+        if (ESMF_LogFoundDeallocError (memstat, ESMF_ERR_PASSTHRU,  &
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) return
+      end if
+    end do
 
     if (associated (ids_send)) then
       deallocate (ids_send, itemtypes_send, vmids_send, stat=memstat)
@@ -504,7 +501,8 @@ contains
             rcToReturn=rc)) return
       end if
       if (associated (id_info(i)%id)) then
-        deallocate (id_info(i)%id, id_info(i)%vmid, stat=memstat)
+        deallocate (id_info(i)%id, id_info(i)%vmid, id_info(i)%needed,  &
+            stat=memstat)
         if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
             rcToReturn=rc)) return
@@ -522,6 +520,11 @@ contains
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
     end if
+
+    deallocate (nitems_buf, stat=memstat)
+    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
 
     call ESMF_ReconcileZappedProxies (state, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1571,7 +1574,7 @@ contains
 ! !ARGUMENTS:
     type(ESMF_VM),              intent(in)  :: vm
     type(ESMF_ReconcileIDInfo), intent(in)  :: id_info(0:)
-    type(ESMF_CharPtr),         pointer     :: recv_items(:) ! intent(out)
+    type(ESMF_CharPtr),         intent(out) :: recv_items(0:)
     integer,                    intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -1615,6 +1618,13 @@ contains
     if (size (id_info) /= npets) then
       if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, &
           msg="size (id_info) /= npets", &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
+    end if
+
+    if (size (recv_items) /= npets) then
+      if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, &
+          msg="size (recv_items) /= npets", &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
     end if
@@ -1707,11 +1717,6 @@ contains
         rcToReturn=rc)) return
 
     ! Copy recv buffers into recv_items
-
-    allocate (recv_items(0:npets-1), stat=memstat)
-    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
 
     do, i=0, npets-1
       itemcount = counts_recv(i)
@@ -2592,7 +2597,6 @@ contains
 !
 !EOPI
       integer :: localrc, i
-!       integer :: memstat
       type(ESMF_StateClass),    pointer :: stypep
       type(ESMF_StateItemWrap), pointer :: itemList(:)
       character(len=ESMF_MAXSTR) :: thisname
@@ -2624,10 +2628,6 @@ contains
                 ESMF_CONTEXT, rcToReturn=rc)) return
           end if
         end do
-!        deallocate(itemList, stat=memstat)
-!        if (ESMF_LogFoundDeallocError(memstat, &
-!            ESMF_ERR_PASSTHRU, &
-!            ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       stypep%zapList => itemList ! hang on for ESMF_ReconcileZappedProxies()
@@ -2719,8 +2719,8 @@ contains
       end do
       deallocate(itemList, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     if (present(rc)) rc = ESMF_SUCCESS
