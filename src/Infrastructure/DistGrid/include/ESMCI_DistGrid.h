@@ -120,7 +120,8 @@ namespace ESMCI {
     // create() and destroy()
     static DistGrid *create(DistGrid *dg,
       InterfaceInt *firstExtra, InterfaceInt *lastExtra, 
-      ESMC_IndexFlag *indexflag, InterfaceInt *connectionList, int *rc=NULL);
+      ESMC_IndexFlag *indexflag, InterfaceInt *connectionList, 
+      VM *vm=NULL, int *rc=NULL);
     static DistGrid *create(InterfaceInt *minIndex,
       InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
       Decomp_Flag *decompflag, int decompflagCount,
