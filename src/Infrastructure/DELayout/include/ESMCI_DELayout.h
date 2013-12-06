@@ -114,17 +114,16 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     // construct() and destruct()
     int construct(VM *vmArg=ESMC_NULL_POINTER, 
       ESMC_Pin_Flag *pinFlagArg=ESMC_NULL_POINTER, 
-      int *petMap=ESMC_NULL_POINTER, int petMapCount=0, int proxyFlag=false);
+      int *petMap=ESMC_NULL_POINTER, int petMapCount=0);
     int destruct();
     
   public:
     // create() and destroy()
     static DELayout *create(int *petMap, int petMapCount,
-      ESMC_Pin_Flag *pinFlag, VM *vm=NULL, int proxyFlag=false, int *rc=NULL);
+      ESMC_Pin_Flag *pinFlag, VM *vm=NULL, int *rc=NULL);
     static DELayout *create(int *deCount=NULL,
       InterfaceInt *deGrouping=NULL, ESMC_Pin_Flag *pinFlag=NULL,
-      InterfaceInt *petList=NULL, VM *vm=NULL, int proxyFlag=false,
-      int *rc=NULL);
+      InterfaceInt *petList=NULL, VM *vm=NULL, int *rc=NULL);
     static int destroy(ESMCI::DELayout **layout);
     // get() and set()
     VM *getVM()                       const {return vm;}

@@ -51,28 +51,29 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     ESMCI::VM *opt_vm;
-    int proxyFlag;
+    bool actualFlag = true;
     // deal with optional arguments
-    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER){
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER)
       opt_vm = NULL;
-      proxyFlag = false;  // not a proxy if not present
-    }else{
+    else{
       opt_vm = *vm;
       if (opt_vm == NULL)
-        proxyFlag = true; // this is a proxy member because present but NULL
+        actualFlag = false; // not an actual member because VM present but NULL
     }
 #if 1
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER)
-      printf("VM NOT PRESENT: opt_vm=%p, proxyFlag=%d\n", opt_vm, proxyFlag);
+      printf("VM NOT PRESENT: opt_vm=%p, actualFlag=%d\n", opt_vm, actualFlag);
     else
-      printf("VM is present: opt_vm=%p, proxyFlag=%d\n", opt_vm, proxyFlag);
+      printf("VM is present: opt_vm=%p, actualFlag=%d\n", opt_vm, actualFlag);
 #endif
-    // call into C++
-    *ptr = ESMCI::DELayout::create(petMap, *petMapCount,
-      ESMC_NOT_PRESENT_FILTER(pinFlag), 
-      opt_vm, proxyFlag, &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+    if (actualFlag){
+      // on PETs with actual members call into C++
+      *ptr = ESMCI::DELayout::create(petMap, *petMapCount,
+        ESMC_NOT_PRESENT_FILTER(pinFlag), 
+        opt_vm, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
+    }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -86,30 +87,31 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     ESMCI::VM *opt_vm;
-    int proxyFlag;
+    bool actualFlag = true;
     // deal with optional arguments
-    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER){
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER)
       opt_vm = NULL;
-      proxyFlag = false;  // not a proxy if not present
-    }else{
+    else{
       opt_vm = *vm;
       if (opt_vm == NULL)
-        proxyFlag = true; // this is a proxy member because present but NULL
+        actualFlag = false; // not an actual member because VM present but NULL
     }
 #if 1
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER)
-      printf("VM NOT PRESENT: opt_vm=%p, proxyFlag=%d\n", opt_vm, proxyFlag);
+      printf("VM NOT PRESENT: opt_vm=%p, actualFlag=%d\n", opt_vm, actualFlag);
     else
-      printf("VM is present: opt_vm=%p, proxyFlag=%d\n", opt_vm, proxyFlag);
+      printf("VM is present: opt_vm=%p, actualFlag=%d\n", opt_vm, actualFlag);
 #endif
-    // call into C++
-    *ptr = ESMCI::DELayout::create(
-      ESMC_NOT_PRESENT_FILTER(deCount), 
-      *deGrouping, 
-      ESMC_NOT_PRESENT_FILTER(pinFlag),
-      *petList, opt_vm, proxyFlag, &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+    if (actualFlag){
+      // on PETs with actual members call into C++
+      *ptr = ESMCI::DELayout::create(
+        ESMC_NOT_PRESENT_FILTER(deCount), 
+        *deGrouping,
+        ESMC_NOT_PRESENT_FILTER(pinFlag),
+        *petList, opt_vm, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
+    }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -126,8 +128,8 @@ extern "C" {
     // call into C++
     *ptr = ESMCI::DELayout::create(**vm, deCountList, *deCountListCount,
       petList, *petListCount, &cyclic, &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -138,9 +140,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
-    ESMC_LogDefault.MsgFoundError(ESMCI::DELayout::destroy(ptr),
+    if (ESMC_LogDefault.MsgFoundError(ESMCI::DELayout::destroy(ptr),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+      ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -164,13 +166,13 @@ extern "C" {
       if ((*petMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- petMap array must be of rank 1", ESMC_CONTEXT, rc);
-        return;
+        return; // bail out
       }
       if ((*petMap)->extent[0] < (*ptr)->getDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of petMap array must be of size 'deCount'",
           ESMC_CONTEXT, rc);
-        return;
+        return; // bail out
       }
       // fill in values
       for (int i=0; i<(*ptr)->getDeCount(); i++)
@@ -181,13 +183,13 @@ extern "C" {
       if ((*vasMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- vasMap array must be of rank 1", ESMC_CONTEXT, rc);
-        return;
+        return; // bail out
       }
       if ((*vasMap)->extent[0] < (*ptr)->getDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of vasMap array must be of size 'deCount'", ESMC_CONTEXT,
           rc);
-        return;
+        return; // bail out
       }
       // fill in values
       for (int i=0; i<(*ptr)->getDeCount(); i++)
@@ -204,13 +206,13 @@ extern "C" {
       if ((*localDeToDeMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- localDeToDeMap array must be of rank 1", ESMC_CONTEXT, rc);
-        return;
+        return; // bail out
       }
       if ((*localDeToDeMap)->extent[0] < (*ptr)->getLocalDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of localDeToDeMap array must be of size 'localDeCount'",
           ESMC_CONTEXT, rc);
-        return;
+        return; // bail out
       }
       // fill in values
       memcpy((*localDeToDeMap)->array, (*ptr)->getLocalDeToDeMap(),
@@ -223,13 +225,13 @@ extern "C" {
       if ((*vasLocalDeToDeMap)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- vasLocalDeToDeMap array must be of rank 1", ESMC_CONTEXT, rc);
-        return;
+        return; // bail out
       }
       if ((*vasLocalDeToDeMap)->extent[0] < (*ptr)->getVasLocalDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "- 1st dim of vasLocalDeToDeMap array must be of size "
           "'vasLocalDeCount'", ESMC_CONTEXT, rc);
-        return;
+        return; // bail out
       }
       // fill in values
       memcpy((*vasLocalDeToDeMap)->array, (*ptr)->getVasLocalDeToDeMap(),
@@ -247,12 +249,12 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.MsgFoundError((*ptr)->getDEMatchDE(
+    if (ESMC_LogDefault.MsgFoundError((*ptr)->getDEMatchDE(
       *DEid, **ptrMatch, 
       ESMC_NOT_PRESENT_FILTER(deMatchCount),
       deMatchList, *len_deMatchList),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+      ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -265,12 +267,12 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.MsgFoundError((*ptr)->getDEMatchPET(
+    if (ESMC_LogDefault.MsgFoundError((*ptr)->getDEMatchPET(
       *DEid, **ptrMatch, 
       ESMC_NOT_PRESENT_FILTER(petMatchCount),
       petMatchList, *len_petMatchList),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+      ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -285,7 +287,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
-    ESMC_LogDefault.MsgFoundError((*ptr)->getDeprecated(
+    if (ESMC_LogDefault.MsgFoundError((*ptr)->getDeprecated(
       ESMC_NOT_PRESENT_FILTER(deCount), 
       ESMC_NOT_PRESENT_FILTER(dimCount), 
       ESMC_NOT_PRESENT_FILTER(localDeCount),
@@ -295,7 +297,7 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(logRectFlag),
       deCountPerDim, *len_deCountPerDim),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+      ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -308,12 +310,12 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.MsgFoundError((*ptr)->getDELocalInfo(
+    if (ESMC_LogDefault.MsgFoundError((*ptr)->getDELocalInfo(
       *DEid, DEcoord, *len_coord, DEcde, *len_cde, DEcw, *len_cw,
       ESMC_NOT_PRESENT_FILTER(nDEc),
       ESMC_NOT_PRESENT_FILTER(pid)), 
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+      ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -324,9 +326,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.MsgFoundError((*ptr)->print(),
+    if (ESMC_LogDefault.MsgFoundError((*ptr)->print(),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+      ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     // Flush before crossing language interface to ensure correct output order
     fflush(stdout);
     // return successfully
@@ -339,9 +341,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.MsgFoundError((*ptr)->validate(),
+    if (ESMC_LogDefault.MsgFoundError((*ptr)->validate(),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+      ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -357,8 +359,8 @@ extern "C" {
     *reply = (*ptr)->serviceOffer(*de, &localrc);
 //TODO: enable LogErr once it is thread-safe
     *rc=localrc;  
-//    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-//      ESMC_NOT_PRESENT_FILTER(rc));
+//    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+//      ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -370,9 +372,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // call into C++
-    ESMC_LogDefault.MsgFoundError((*ptr)->serviceComplete(*de),
+    if (ESMC_LogDefault.MsgFoundError((*ptr)->serviceComplete(*de),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+      ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -385,10 +387,10 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.MsgFoundError(
+    if (ESMC_LogDefault.MsgFoundError(
       (*delayout)->serialize(buf, length, offset,*inquireflag),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+      ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -406,9 +408,9 @@ extern "C" {
       localrc = ESMC_RC_INTNRL_BAD;
     else
       localrc = ESMF_SUCCESS;
-    ESMC_LogDefault.MsgFoundError(localrc,
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+      ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }

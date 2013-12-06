@@ -72,7 +72,6 @@ DELayout *DELayout::create(
   int petMapCount,          // (in) number of element in petMap
   ESMC_Pin_Flag *pinFlag,   // (in) type of resources DEs are pinned to
   VM *vm,                   // (in) VM context
-  int proxyFlag,            // (in) indicate proxy member on this PET
   int *rc){                 // (out) return code
 //
 // !DESCRIPTION:
@@ -86,11 +85,8 @@ DELayout *DELayout::create(
   // allocate the new DELayout object and construct the inside
   DELayout *delayout;
   try{
-    if (proxyFlag)
-      delayout = new DELayout(-1);  // prevent baseID counter increment
-    else
-      delayout = new DELayout(vm);  // specific VM, or default if vm==NULL
-    localrc = delayout->construct(vm, pinFlag, petMap, petMapCount, proxyFlag);
+    delayout = new DELayout(vm);  // specific VM, or default if vm==NULL
+    localrc = delayout->construct(vm, pinFlag, petMap, petMapCount);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)){
       delayout->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -127,7 +123,6 @@ DELayout *DELayout::create(
   ESMC_Pin_Flag *pinFlag,   // (in) type of resources DEs are pinned to
   InterfaceInt *petListArg, // (in) list of PETs to be used in delayout
   VM *vm,                   // (in) VM context
-  int proxyFlag,            // (in) indicate proxy member on this PET
   int *rc){                 // (out) return code
 //
 // !DESCRIPTION:
@@ -146,100 +141,92 @@ DELayout *DELayout::create(
   int petMapCount;
   bool petMapDeleteFlag = false; // reset
   
-  if (proxyFlag){
-    // a proxy member must be created on this PET
-    petMap = NULL;
+  // by default use the currentVM for vm
+  if (vm == ESMC_NULL_POINTER){
+    vm = VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return ESMC_NULL_POINTER;
+  }
+
+  // query the VM for localPet and petCount
+  int localPet = vm->getMypet();
+  int petCount = vm->getNpets();    
+  
+  // check deCount input
+  int deCount = petCount; // number of DEs, default
+  int deCountFlag = 0;    // reset
+  if (deCountArg != ESMC_NULL_POINTER){
+    deCountFlag = 1;      // set
+    deCount = *deCountArg;
+  }
+  
+  // check deGrouping input
+  int deGroupingFlag = 0; // reset
+  int deGroupingCount = 0;
+  if (deGrouping != ESMC_NULL_POINTER && deGrouping->extent[0] > 0){
+    deGroupingCount = deGrouping->extent[0];
+    deGroupingFlag = 1;   // set
+    if (deGroupingCount != deCount){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+        "- Size of deGrouping does not match deCount", ESMC_CONTEXT, rc);
+      return ESMC_NULL_POINTER;
+    }
+  }
+  
+  // check petList input
+  int petListDeleteFlag = 0;  // reset
+  int petListFlag = 0;        // reset
+  int petListCount = 0;
+  int *petList;
+  if (petListArg != ESMC_NULL_POINTER && petListArg->extent[0] > 0){
+    petListCount=petListArg->extent[0];
+    petListFlag = 1;        // set
+    petList = petListArg->array;
+  }else{
+    petListDeleteFlag = 1;  // set
+    petListCount = petCount;
+    petList = new int[petListCount];
+    for (int i=0; i<petListCount; i++)
+      petList[i] = i;
+  }
+  
+  // construct petMap according to input
+  if (!(deCountFlag | deGroupingFlag | petListFlag)){
+    // the trivial case: default DELayout
+    petMap = ESMC_NULL_POINTER;
     petMapCount = 0;
   }else{
-    // an actual member needs to be created on this PET
-    
-    // by default use the currentVM for vm
-    if (vm == ESMC_NULL_POINTER){
-      vm = VM::getCurrent(&localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-        rc)) return ESMC_NULL_POINTER;
-    }
-
-    // query the VM for localPet and petCount
-    int localPet = vm->getMypet();
-    int petCount = vm->getNpets();    
-  
-    // check deCount input
-    int deCount = petCount; // number of DEs, default
-    int deCountFlag = 0;    // reset
-    if (deCountArg != ESMC_NULL_POINTER){
-      deCountFlag = 1;      // set
-      deCount = *deCountArg;
-    }
-  
-    // check deGrouping input
-    int deGroupingFlag = 0; // reset
-    int deGroupingCount = 0;
-    if (deGrouping != ESMC_NULL_POINTER && deGrouping->extent[0] > 0){
-      deGroupingCount = deGrouping->extent[0];
-      deGroupingFlag = 1;   // set
-      if (deGroupingCount != deCount){
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- Size of deGrouping does not match deCount", ESMC_CONTEXT, rc);
-        return ESMC_NULL_POINTER;
+    // need a real petMap
+    petMapDeleteFlag = true; // set
+    petMapCount = deCount;
+    petMap = new int[petMapCount];
+    if (!deGroupingFlag){
+      // by default run cyclic through petList until all DEs are mapped
+      for (int i=0, j=0; i<deCount; i++, j++){
+        if (j==petListCount) j=0; // enforce cyclic j index
+        petMap[i] = petList[j];
+      }
+    }else{
+      // first reset petMap in a way that will allow to detect errors in Stride
+      for (int i=0; i<deCount; i++)
+        petMap[i] = -1; // initialize
+      // run cyclic through petList and fill petMap according to deGrouping
+      int j=0;  // reset
+      for (int i=0; i<deCount; i++){
+        if (j==petListCount) j=0; // enforce cyclic j index
+        if (petMap[i] == -1){
+          // this petMap entry has not been filled yet
+          petMap[i] = petList[j];
+          // find all DEs in this deGroup and fill with same PET
+          int deGroup = deGrouping->array[i];
+          if (deGroup != -1)
+            for (int k=i+1; k<deCount; k++)
+              if (deGrouping->array[k] == deGroup)
+               petMap[k] = petList[j];
+          ++j;
+        }
       }
     }
-  
-    // check petList input
-    int petListDeleteFlag = 0;  // reset
-    int petListFlag = 0;        // reset
-    int petListCount = 0;
-    int *petList;
-    if (petListArg != ESMC_NULL_POINTER && petListArg->extent[0] > 0){
-      petListCount=petListArg->extent[0];
-      petListFlag = 1;        // set
-      petList = petListArg->array;
-    }else{
-      petListDeleteFlag = 1;  // set
-      petListCount = petCount;
-      petList = new int[petListCount];
-      for (int i=0; i<petListCount; i++)
-        petList[i] = i;
-    }
-  
-    // construct petMap according to input
-    if (!(deCountFlag | deGroupingFlag | petListFlag)){
-      // the trivial case: default DELayout
-      petMap = ESMC_NULL_POINTER;
-      petMapCount = 0;
-    }else{
-      // need a real petMap
-      petMapDeleteFlag = true; // set
-      petMapCount = deCount;
-      petMap = new int[petMapCount];
-      if (!deGroupingFlag){
-        // by default run cyclic through petList until all DEs are mapped
-        for (int i=0, j=0; i<deCount; i++, j++){
-          if (j==petListCount) j=0; // enforce cyclic j index
-          petMap[i] = petList[j];
-        }
-      }else{
-        // first reset petMap in a way that will allow to detect errors in Stride
-        for (int i=0; i<deCount; i++)
-          petMap[i] = -1; // initialize
-        // run cyclic through petList and fill petMap according to deGrouping
-        int j=0;  // reset
-        for (int i=0; i<deCount; i++){
-          if (j==petListCount) j=0; // enforce cyclic j index
-          if (petMap[i] == -1){
-            // this petMap entry has not been filled yet
-            petMap[i] = petList[j];
-            // find all DEs in this deGroup and fill with same PET
-            int deGroup = deGrouping->array[i];
-            if (deGroup != -1)
-              for (int k=i+1; k<deCount; k++)
-                if (deGrouping->array[k] == deGroup)
-                 petMap[k] = petList[j];
-           ++j;
-         }
-       }
-     }
-   }
   
     // start cleanup
     if (petListDeleteFlag) delete [] petList;
@@ -255,11 +242,8 @@ DELayout *DELayout::create(
   // allocate the new DELayout object and construct the inside
   DELayout *delayout;
   try{
-    if (proxyFlag)
-      delayout = new DELayout(-1); // prevent baseID counter increment
-    else
-      delayout = new DELayout(vm);
-    localrc = delayout->construct(vm, pinFlag, petMap, petMapCount, proxyFlag);
+    delayout = new DELayout(vm);  // specific VM, or default if vm==NULL
+    localrc = delayout->construct(vm, pinFlag, petMap, petMapCount);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)){
       if (petMapDeleteFlag) delete [] petMap;
@@ -464,8 +448,7 @@ int DELayout::construct(
   VM *vmArg,                    // (in) VM context
   ESMC_Pin_Flag *pinFlagArg,    // (in) type of resources DEs are pinned to
   int *petMap,                  // (in) pointer to petMap list
-  int petMapCount,              // (in) number of element in petMap
-  int proxyFlag                 // (in) indicate proxy member on this PET
+  int petMapCount               // (in) number of element in petMap
   ){             
 //
 // !DESCRIPTION:
@@ -482,28 +465,6 @@ int DELayout::construct(
     pinFlag = ESMF_PIN_DE_TO_PET;
   else
     pinFlag = *pinFlagArg;
-  
-  if (proxyFlag){
-    //TODO: actually make a proxy member on this PET
-    // for now just set vm member and return successfully
-    vm = NULL;
-    deCount = 0;  // this is less info for a reconciled proxy
-    oldstyle = 0; // this is less info for a reconciled proxy
-    oneToOneFlag = ESMF_TRUE; // this is less info for a reconciled proxy
-    localDeCount = 0;
-    localDeToDeMap = new int[localDeCount];
-    deList = new int[deCount];
-    for (int i=0; i<deCount; i++)
-      deList[i] = -1;                         // indicate not a local DE
-    vasLocalDeCount = 0;  // proxy objects don't have local DEs
-    vasLocalDeToDeMap = new int[vasLocalDeCount];
-    localServiceOfferCount = new int[vasLocalDeCount];
-    serviceMutexFlag = new int[vasLocalDeCount];
-    serviceMutex = new VMK::ipmutex*[vasLocalDeCount];
-    serviceOfferMutex = new VMK::ipmutex*[vasLocalDeCount];
-    rc = ESMF_SUCCESS;
-    return rc;
-  }
   
   // by default use the currentVM for vm
   if (vmArg == ESMC_NULL_POINTER){
@@ -1640,7 +1601,7 @@ DELayout *DELayout::deserialize(
   a->oldstyle = *ip++;
 
   if (a->oldstyle){
-    // ndim must be known before this loop.
+    // ndim must be known before the loop below
     a->ndim = *ip++;
   }
   if (!a->oldstyle){

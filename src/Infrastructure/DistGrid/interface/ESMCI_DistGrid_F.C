@@ -78,17 +78,32 @@ extern "C" {
     // deal with optional arguments
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
       opt_delayout = NULL;
-    else opt_delayout = *delayout;
-    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
-    else opt_vm = *vm;
-    // call into C++
-    *ptr = ESMCI::DistGrid::create(*minIndex, *maxIndex, *regDecomp,
-      decompflag, *decompflagCount, *regDecompFirstExtra, *regDecompLastExtra,
-      *deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
-      *connectionList, opt_delayout, opt_vm,
-      &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+    else
+      opt_delayout = *delayout;
+    bool actualFlag = true;
+    // deal with optional arguments
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER)
+      opt_vm = NULL;
+    else{
+      opt_vm = *vm;
+      if (opt_vm == NULL)
+        actualFlag = false; // not an actual member because VM present but NULL
+    }
+#if 1
+    printf("c_esmc_distgridcreaterd(): opt_delayout=%p, opt_vm=%p, "
+      "actualFlag=%d\n", opt_delayout, opt_vm, actualFlag);
+#endif
+    if (actualFlag){
+      // on PETs with actual members call into C++
+      *ptr = ESMCI::DistGrid::create(*minIndex, *maxIndex, *regDecomp,
+        decompflag, *decompflagCount, *regDecompFirstExtra, *regDecompLastExtra,
+        *deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
+        *connectionList, opt_delayout, opt_vm, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
   void FTN_X(c_esmc_distgridcreatedb)(ESMCI::DistGrid **ptr, 

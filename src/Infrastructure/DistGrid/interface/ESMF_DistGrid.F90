@@ -951,13 +951,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          See section \ref{api:DistGridConnectionSet} for the associated Set()
 !          method.
 !     \item[{[delayout]}]
-!          Optional {\tt ESMF\_DELayout} object to be used. By default a new
-!          DELayout object will be created with the correct number of DEs. If
-!          a DELayout object is specified its number of DEs must match the 
-!          number indicated by {\tt regDecomp}.
+!          {\tt ESMF\_DELayout} object to be used. If a DELayout object is
+!          specified its {\tt deCount} must match the number indicated by 
+!          {\tt regDecomp}. By default a new DELayout object will be created 
+!          with the correct number of DEs.
 !     \item[{[vm]}]
-!          Optional {\tt ESMF\_VM} object of the current context. Providing the
-!          VM of the current context will lower the method's overhead.
+!          If present, the DistGrid object (and the DELayout object if not 
+!          specified) are created on the provided {\tt ESMF\_VM} object. The 
+!          default is to use the VM of the current context. 
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
