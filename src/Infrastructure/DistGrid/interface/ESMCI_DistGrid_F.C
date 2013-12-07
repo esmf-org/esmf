@@ -46,17 +46,35 @@ extern "C" {
   void FTN_X(c_esmc_distgridcreatedg)(ESMCI::DistGrid **ptr, 
     ESMCI::DistGrid **dg, ESMCI::InterfaceInt **firstExtra,
     ESMCI::InterfaceInt **lastExtra, ESMC_IndexFlag *indexflag,
-    ESMCI::InterfaceInt **connectionList, int *rc){
+    ESMCI::InterfaceInt **connectionList, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreatedg()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    // call into C++
-    *ptr = ESMCI::DistGrid::create(*dg, *firstExtra, *lastExtra,
-      ESMC_NOT_PRESENT_FILTER(indexflag), *connectionList, &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+    // deal with optional arguments
+    ESMCI::VM *opt_vm;
+    bool actualFlag = true;
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER)
+      opt_vm = NULL;
+    else{
+      opt_vm = *vm;
+      if (opt_vm == NULL)
+        actualFlag = false; // not an actual member because VM present but NULL
+    }
+#if 1
+    printf("c_esmc_distgridcreatedg(): opt_vm=%p, actualFlag=%d\n", 
+      opt_vm, actualFlag);
+#endif
+    if (actualFlag){
+      // on PETs with actual members call into C++
+      *ptr = ESMCI::DistGrid::create(*dg, *firstExtra, *lastExtra,
+        ESMC_NOT_PRESENT_FILTER(indexflag), *connectionList, opt_vm, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
   void FTN_X(c_esmc_distgridcreaterd)(ESMCI::DistGrid **ptr, 
@@ -73,22 +91,36 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    ESMCI::DELayout *opt_delayout;
-    ESMCI::VM *opt_vm;
     // deal with optional arguments
+    ESMCI::DELayout *opt_delayout;
     if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER) 
       opt_delayout = NULL;
-    else opt_delayout = *delayout;
-    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
-    else opt_vm = *vm;
-    // call into C++
-    *ptr = ESMCI::DistGrid::create(*minIndex, *maxIndex, *regDecomp,
-      decompflag, *decompflagCount, *regDecompFirstExtra, *regDecompLastExtra,
-      *deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
-      *connectionList, opt_delayout, opt_vm,
-      &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+    else
+      opt_delayout = *delayout;
+    ESMCI::VM *opt_vm;
+    bool actualFlag = true;
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER)
+      opt_vm = NULL;
+    else{
+      opt_vm = *vm;
+      if (opt_vm == NULL)
+        actualFlag = false; // not an actual member because VM present but NULL
+    }
+#if 1
+    printf("c_esmc_distgridcreaterd(): opt_delayout=%p, opt_vm=%p, "
+      "actualFlag=%d\n", opt_delayout, opt_vm, actualFlag);
+#endif
+    if (actualFlag){
+      // on PETs with actual members call into C++
+      *ptr = ESMCI::DistGrid::create(*minIndex, *maxIndex, *regDecomp,
+        decompflag, *decompflagCount, *regDecompFirstExtra, *regDecompLastExtra,
+        *deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
+        *connectionList, opt_delayout, opt_vm, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
   void FTN_X(c_esmc_distgridcreatedb)(ESMCI::DistGrid **ptr, 

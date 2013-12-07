@@ -85,7 +85,7 @@ DELayout *DELayout::create(
   // allocate the new DELayout object and construct the inside
   DELayout *delayout;
   try{
-    delayout = new DELayout;
+    delayout = new DELayout(vm);  // specific VM, or default if vm==NULL
     localrc = delayout->construct(vm, pinFlag, petMap, petMapCount);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)){
@@ -118,12 +118,12 @@ DELayout *DELayout::create(
 //
 // !ARGUMENTS:
 //
-  int *deCountArg,              // (in) number of DEs
-  InterfaceInt *deGrouping,     // (in) deGrouping vector
-  ESMC_Pin_Flag *pinFlag,       // (in) type of resources DEs are pinned to
-  InterfaceInt *petListArg,     // (in) list of PETs to be used in delayout
-  VM *vm,                       // (in) VM context
-  int *rc){                     // (out) return code
+  int *deCountArg,          // (in) number of DEs
+  InterfaceInt *deGrouping, // (in) deGrouping vector
+  ESMC_Pin_Flag *pinFlag,   // (in) type of resources DEs are pinned to
+  InterfaceInt *petListArg, // (in) list of PETs to be used in delayout
+  VM *vm,                   // (in) VM context
+  int *rc){                 // (out) return code
 //
 // !DESCRIPTION:
 //
@@ -139,6 +139,7 @@ DELayout *DELayout::create(
   // provided input and then call DELayoutConstruct() with this petMap.
   int *petMap;
   int petMapCount;
+  bool petMapDeleteFlag = false; // reset
   
   // by default use the currentVM for vm
   if (vm == ESMC_NULL_POINTER){
@@ -190,14 +191,13 @@ DELayout *DELayout::create(
   }
   
   // construct petMap according to input
-  int petMapDeleteFlag = 0; // reset
   if (!(deCountFlag | deGroupingFlag | petListFlag)){
     // the trivial case: default DELayout
     petMap = ESMC_NULL_POINTER;
     petMapCount = 0;
   }else{
     // need a real petMap
-    petMapDeleteFlag = 1; // set
+    petMapDeleteFlag = true; // set
     petMapCount = deCount;
     petMap = new int[petMapCount];
     if (!deGroupingFlag){
@@ -222,27 +222,27 @@ DELayout *DELayout::create(
           if (deGroup != -1)
             for (int k=i+1; k<deCount; k++)
               if (deGrouping->array[k] == deGroup)
-                petMap[k] = petList[j];
+               petMap[k] = petList[j];
           ++j;
         }
       }
     }
-  }
   
-  // start cleanup
-  if (petListDeleteFlag) delete [] petList;
+    // start cleanup
+    if (petListDeleteFlag) delete [] petList;
 #if 0  
-  if (deStrideBlockDeleteFlag){
-    for (int i=0; i<deStrideBlockCount; i++)
-      delete [] deStrideBlock[i];
-    delete [] deStrideBlock;
-  }
+    if (deStrideBlockDeleteFlag){
+      for (int i=0; i<deStrideBlockCount; i++)
+        delete [] deStrideBlock[i];
+      delete [] deStrideBlock;
+    }
 #endif
+  }
   
   // allocate the new DELayout object and construct the inside
   DELayout *delayout;
   try{
-    delayout = new DELayout;
+    delayout = new DELayout(vm);  // specific VM, or default if vm==NULL
     localrc = delayout->construct(vm, pinFlag, petMap, petMapCount);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)){
@@ -448,7 +448,8 @@ int DELayout::construct(
   VM *vmArg,                    // (in) VM context
   ESMC_Pin_Flag *pinFlagArg,    // (in) type of resources DEs are pinned to
   int *petMap,                  // (in) pointer to petMap list
-  int petMapCount){             // (in) number of element in petMap
+  int petMapCount               // (in) number of element in petMap
+  ){             
 //
 // !DESCRIPTION:
 //    Construct the internal information structure of an ESMC\_DELayout object.
@@ -458,7 +459,13 @@ int DELayout::construct(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-
+  
+  // by default pin DEs to PETs
+  if (pinFlagArg == ESMC_NULL_POINTER)
+    pinFlag = ESMF_PIN_DE_TO_PET;
+  else
+    pinFlag = *pinFlagArg;
+  
   // by default use the currentVM for vm
   if (vmArg == ESMC_NULL_POINTER){
     vmArg = VM::getCurrent(&localrc);
@@ -471,16 +478,10 @@ int DELayout::construct(
   int localPet = vmArg->getLocalPet();
   int localVas = vmArg->getVas(localPet);
   
-  // by default pin DEs to PETs
-  if (pinFlagArg == ESMC_NULL_POINTER)
-    pinFlag = ESMF_PIN_DE_TO_PET;
-  else
-    pinFlag = *pinFlagArg;
-  
   // by default use a sequential 1-to-1 petMap
-  int petMapDeleteFlag = 0; // reset
+  bool petMapDeleteFlag = false; // reset
   if (petMap == ESMC_NULL_POINTER || petMapCount == 0){
-    petMapDeleteFlag = 1; // set
+    petMapDeleteFlag = true; // set
     petMapCount = petCount;
     petMap = new int[petMapCount];
     for (int i=0; i<petMapCount; i++)
@@ -1600,7 +1601,7 @@ DELayout *DELayout::deserialize(
   a->oldstyle = *ip++;
 
   if (a->oldstyle){
-    // ndim must be known before this loop.
+    // ndim must be known before the loop below
     a->ndim = *ip++;
   }
   if (!a->oldstyle){

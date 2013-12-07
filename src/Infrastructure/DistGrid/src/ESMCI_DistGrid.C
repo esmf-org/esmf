@@ -71,6 +71,7 @@ DistGrid *DistGrid::create(
   InterfaceInt *lastExtra,                // (in)
   ESMC_IndexFlag *indexflag,              // (in)
   InterfaceInt *connectionList,           // (in)
+  VM *vm,                                 // (in)
   int *rc                                 // (out) return code
   ){
 //
@@ -93,8 +94,14 @@ DistGrid *DistGrid::create(
   
   DistGrid *distgrid = NULL;  // initialize
   try{
+    
+  DELayout *delayout = NULL;
+  if (!vm || (vm==VM::getCurrent())){
+    // only use DELayout of incoming DistGrid if not creating for another VM
+    delayout = dg->delayout;
+  }
   
-  if (firstExtra || lastExtra || indexflag || connectionList){
+  if (firstExtra || lastExtra || indexflag || connectionList || vm){
     // creating a new DistGrid from the existing one considering additional info
     // prepare for internal InterfaceInt usage
     int dimInterfaceInt;
@@ -314,7 +321,7 @@ DistGrid *DistGrid::create(
           decompflagCount = dg->dimCount;
         distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, decompflag,
           decompflagCount, firstExtra, lastExtra, NULL,
-          indexflagOpt, connectionList, dg->delayout, dg->vm, &localrc);
+          indexflagOpt, connectionList, delayout, vm, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }else{
@@ -327,7 +334,7 @@ DistGrid *DistGrid::create(
         }
         distgrid = DistGrid::create(minIndex, maxIndex, regDecomp, decompflag,
           decompflagCount1, decompflagCount2, firstExtra, lastExtra, NULL,
-          indexflagOpt, connectionList, dg->delayout, dg->vm, &localrc);
+          indexflagOpt, connectionList, delayout, vm, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }
@@ -374,7 +381,7 @@ DistGrid *DistGrid::create(
         }
         // create DistGrid
         distgrid = DistGrid::create(minIndex, maxIndex, deBlockList,
-          NULL, indexflagOpt, connectionList, dg->delayout, dg->vm, &localrc);
+          NULL, indexflagOpt, connectionList, delayout, vm, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
         delete deBlockList;
@@ -398,7 +405,7 @@ DistGrid *DistGrid::create(
     }
   }else{
     // simple deep copy of the incoming DistGrid
-    distgrid = new DistGrid();
+    distgrid = new DistGrid(vm);  // specific VM, or default if vm==NULL
     int dimCount = distgrid->dimCount = dg->dimCount;
     int tileCount = distgrid->tileCount = dg->tileCount;
     int deCount = dg->delayout->getDeCount();
@@ -502,11 +509,13 @@ DistGrid *DistGrid::create(
     distgrid->localDeCountAux = dg->localDeCountAux;
   }
   
-  // reset the delayoutCreator flag in the src DistGrid, because the newly
-  // created DistGrid will now point to the same DELayout by reference
-  // -> leave it up to ESMF automatic garbage collection to clean up the
-  // DELayout when it is time
-  dg->delayoutCreator = false;  // drop ownership of the referenced DELayout
+  if (delayout){
+    // reset the delayoutCreator flag in the src DistGrid, because the newly
+    // created DistGrid will now point to the same DELayout by reference
+    // -> leave it up to ESMF automatic garbage collection to clean up the
+    // DELayout when it is time
+    dg->delayoutCreator = false;  // drop ownership of the referenced DELayout
+  }
   
   }catch(int localrc){
     // catch standard ESMF return code
@@ -570,13 +579,13 @@ DistGrid *DistGrid::create(
   // allocate the new DistGrid object
   DistGrid *distgrid;
   try{
-    distgrid = new DistGrid;
+    distgrid = new DistGrid(vm);  // specific VM, or default if vm==NULL
   }catch(...){
      // allocation error
      ESMC_LogDefault.MsgAllocError("for new ESMCI::DistGrid.", ESMC_CONTEXT,rc);
      return ESMC_NULL_POINTER;
   }
-
+  
   // check the input and get the information together to call construct()
   if (minIndex == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -945,6 +954,7 @@ DistGrid *DistGrid::create(
   int *tileListPDe = new int[deCount];
   for (int i=0; i<deCount; i++)
     tileListPDe[i] = 1;
+
   
   // call into construct()
   localrc = distgrid->construct(dimCount, 1, tileListPDe,
@@ -986,7 +996,7 @@ DistGrid *DistGrid::create(
     delete regDecompLastExtra;
   }
   delete [] tileListPDe;
-    
+  
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return distgrid;
@@ -1030,7 +1040,7 @@ DistGrid *DistGrid::create(
   // allocate the new DistGrid object
   DistGrid *distgrid;
   try{
-    distgrid = new DistGrid;
+    distgrid = new DistGrid(vm);  // specific VM, or default if vm==NULL
   }catch(...){
      // allocation error
      ESMC_LogDefault.MsgAllocError("for new ESMCI::DistGrid.", ESMC_CONTEXT,rc);
@@ -1356,7 +1366,7 @@ DistGrid *DistGrid::create(
   // allocate the new DistGrid object
   DistGrid *distgrid;
   try{
-    distgrid = new DistGrid;
+    distgrid = new DistGrid(vm);  // specific VM, or default if vm==NULL
   }catch(...){
      // allocation error
      ESMC_LogDefault.MsgAllocError("for new ESMCI::DistGrid.", ESMC_CONTEXT,rc);
@@ -2717,8 +2727,17 @@ int DistGrid::print()const{
   printf("connectionCount = %d\n", connectionCount);
   printf("~ lower class' values ~\n");
   printf("deCount = %d\n", deCount);
-  printf("localPet = %d\n", vm->getLocalPet());
-  printf("petCount = %d\n", vm->getPetCount());
+  if (vm==NULL){
+    printf("Member on this PET appears to be a proxy member.\n");
+    printf("CurrentVM: localPet = %d\n", VM::getCurrent()->getLocalPet());
+    printf("CurrentVM: petCount = %d\n", VM::getCurrent()->getPetCount());
+  }else{
+    printf("Member on this PET appears to be an actual member.\n");
+    printf("DistGrid-VM: localPet = %d, CurrentVM: localPet = %d\n", 
+      vm->getLocalPet(), VM::getCurrent()->getLocalPet());
+    printf("DistGrid-VM: petCount = %d, CurrentVM: petCount = %d\n", 
+      vm->getPetCount(), VM::getCurrent()->getPetCount());
+  }
   printf("--- ESMCI::DistGrid::print end ---\n");
   
 #if 0

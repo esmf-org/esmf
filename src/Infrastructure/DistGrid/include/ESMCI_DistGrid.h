@@ -58,14 +58,14 @@ namespace ESMCI {
 
    private:
     int dimCount;                 // rank of DistGrid
-    int tileCount;               // number of tiles in DistGrid
-    int *minIndexPDimPTile;      // lower corner indices [dimCount*tileCount]
-    int *maxIndexPDimPTile;      // upper corner indices [dimCount*tileCount]
-    int *elementCountPTile;      // number of elements [tileCount]
+    int tileCount;                // number of tiles in DistGrid
+    int *minIndexPDimPTile;       // lower corner indices [dimCount*tileCount]
+    int *maxIndexPDimPTile;       // upper corner indices [dimCount*tileCount]
+    int *elementCountPTile;       // number of elements [tileCount]
     int *minIndexPDimPDe;         // lower corner indices [dimCount*deCount]
     int *maxIndexPDimPDe;         // upper corner indices [dimCount*deCount]
     int *elementCountPDe;         // number of elements [deCount]
-    int *tileListPDe;            // tile indices [deCount]
+    int *tileListPDe;             // tile indices [deCount]
     int *contigFlagPDimPDe;       // flag contiguous indices [dimCount*deCount]
     int *indexCountPDimPDe;       // number of indices [dimCount*deCount]
     int **indexListPDimPLocalDe;  // local DEs' indices [dimCount*localDeCount]
@@ -97,7 +97,7 @@ namespace ESMCI {
         
    public:
     // native constructor and destructor
-    DistGrid(){
+    DistGrid(VM *vm=NULL):ESMC_Base(vm){ // allow specific VM instead default
       decompflag = NULL;
       indexflag = NULL;
     }
@@ -120,7 +120,8 @@ namespace ESMCI {
     // create() and destroy()
     static DistGrid *create(DistGrid *dg,
       InterfaceInt *firstExtra, InterfaceInt *lastExtra, 
-      ESMC_IndexFlag *indexflag, InterfaceInt *connectionList, int *rc=NULL);
+      ESMC_IndexFlag *indexflag, InterfaceInt *connectionList, 
+      VM *vm=NULL, int *rc=NULL);
     static DistGrid *create(InterfaceInt *minIndex,
       InterfaceInt *maxIndex, InterfaceInt *regDecomp, 
       Decomp_Flag *decompflag, int decompflagCount,

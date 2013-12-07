@@ -476,8 +476,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          the provided VM context. The default is to include all the PETs of
 !          the VM.
 !     \item[{[vm]}]
-!          Optional {\tt ESMF\_VM} object of the current context. Providing the
-!          VM of the current context will lower the method's overhead.
+!          If present, the DELayout object is created on the specified 
+!          {\tt ESMF\_VM} object. The default is to create on the VM of the 
+!          current context.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -584,8 +585,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          also possible to pin DEs to VASs. See section 
 !          \ref{const:pin_flag} for a list of valid pinning options.
 !     \item[{[vm]}]
-!          Optional {\tt ESMF\_VM} object. The VM of the current context is the
-!          typical and default value.
+!          If present, the DELayout object is created on the specified 
+!          {\tt ESMF\_VM} object. The default is to create on the VM of the 
+!          current context.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

@@ -121,7 +121,7 @@ class ESMC_Base
     virtual int ESMC_Print(int level, const char *options=0) const;
 
     // constructors/destructor
-    ESMC_Base(void);    // default constructor
+    ESMC_Base(ESMCI::VM *vm=NULL);  // default constructor
     ESMC_Base(int id);  // explicit id, don't modify Base id counting
     ESMC_Base(char *superclass, char *name, int nattrs);
     virtual ~ESMC_Base(void);

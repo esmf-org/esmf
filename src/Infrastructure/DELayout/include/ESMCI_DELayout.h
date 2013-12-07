@@ -106,7 +106,7 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     
   public:
     // native constructor and destructor
-    DELayout(){}
+    DELayout(VM *vm=NULL):ESMC_Base(vm){} // allow specific VM instead default
     DELayout(int baseID):ESMC_Base(baseID){}// prevent baseID counter increment
     ~DELayout(){destruct();}
     
