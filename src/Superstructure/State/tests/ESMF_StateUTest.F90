@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 
 !     ! Local variables
-      integer :: rc, num, number,localrc
+      integer :: rc, localrc
       type(ESMF_VM) :: vm
       logical :: correct
       character(ESMF_MAXSTR) :: statename, bundlename, bname
@@ -48,7 +48,6 @@
       type(ESMF_FieldBundle) :: bundle1, bundle2(1), bundle3, bundle5, bundleGDP
       type(ESMF_State) :: state1, state2, state3, state4,stateGDP
       type(ESMF_StateItem_Flag) :: stateItemType
-      real, dimension(:,:), pointer :: f90ptr1
       real(ESMF_KIND_R8), pointer :: ptrGDP1(:,:),ptrGDP2(:,:)
       
       type(ESMF_ArraySpec)  :: arrayspec
@@ -64,12 +63,12 @@
       type(ESMF_Field)       :: fields(5)
       type(ESMF_FieldBundle) :: fbundle
 
-      type(ESMF_Array)       :: array10, array11, array12
+      type(ESMF_Array)       :: array10, array11
       type(ESMF_Array)       :: array1x
       type(ESMF_ArrayBundle) :: abund10, abund11
       type(ESMF_ArrayBundle) :: abund1x
       type(ESMF_Array)       :: alist10(1), alist11(1)
-      type(ESMF_Field)       :: field10, field11, field12
+      type(ESMF_Field)       :: field10, field11
       type(ESMF_Field)       :: field1x
       type(ESMF_Field)       :: fieldrnd(30)
       type(ESMF_FieldBundle) :: fbundle12
@@ -77,7 +76,6 @@
       type(ESMF_RouteHandle) :: routehandle11, routehandle12
       type(ESMF_RouteHandle) :: routehandle1x
       type(ESMF_State)       :: state10, state11, state12, state_attr
-      type(ESMF_State)       :: state1x
       type(ESMF_State)       :: state20, state30
       type(ESMF_State)       :: staternd
 
