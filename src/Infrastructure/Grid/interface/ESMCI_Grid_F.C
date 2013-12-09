@@ -92,6 +92,7 @@ extern "C" {
 					  ESMC_IndexFlag *indexflag,
                                           int *destroyDistgridArg, 
                                           int *destroyDELayoutArg, 
+                                          ESMCI::VM **vm, 
 					  int *rc,
                                           ESMCI_FortranStrLenArg name_l){
     int localrc;
@@ -120,15 +121,32 @@ extern "C" {
     }
 
 
-    // call into C++
-    *ptr = ESMCI::Grid::create(*nameLen, ESMC_NOT_PRESENT_FILTER(name),
+    // deal with optional arguments
+    ESMCI::VM *opt_vm;
+    bool actualFlag = true;
+    if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER)
+      opt_vm = NULL;
+    else{
+      opt_vm = *vm;
+      if (opt_vm == NULL)
+        actualFlag = false; // not an actual member because VM present but NULL
+    }
+#if 1
+    printf("c_esmc_gridcreatefromdistgrid(): opt_vm=%p, actualFlag=%d\n", 
+      opt_vm, actualFlag);
+#endif
+    if (actualFlag){
+      // on PETs with actual members call into C++
+      *ptr = ESMCI::Grid::create(*nameLen, ESMC_NOT_PRESENT_FILTER(name),
                                ESMC_NOT_PRESENT_FILTER(coordTypeKind), *distgrid,
                                *gridEdgeLWidthArg, *gridEdgeUWidthArg, *gridAlignArg, *distgridToGridMapArg,
                                 ESMC_NOT_PRESENT_FILTER(coordSys), *coordDimCountArg, *coordDimMapArg,
                                *gridMemLBoundArg, ESMC_NOT_PRESENT_FILTER(indexflag), 
-                               destroyDistgridPtr, destroyDELayoutPtr, &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+                               destroyDistgridPtr, destroyDELayoutPtr, &localrc,
+                               opt_vm);
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc));
+    }
 }
 
   ///////////////////////////////////////////////////////////////////////////////////

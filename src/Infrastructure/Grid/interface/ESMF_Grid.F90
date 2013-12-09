@@ -4232,24 +4232,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         distgridToGridMap, &
         coordSys, coordTypeKind, coordDimCount, coordDimMap, &
         gridEdgeLWidth, gridEdgeUWidth, gridAlign, &
-        gridMemLBound, indexflag, name, rc)
+        gridMemLBound, indexflag, name, vm, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmDistGrid
 !
 ! !ARGUMENTS:
-       type(ESMF_DistGrid),     intent(in)           :: distgrid
-       integer,                 intent(in), optional :: distgridToGridMap(:)
-       type(ESMF_CoordSys_Flag),intent(in), optional :: coordSys
-       type(ESMF_TypeKind_Flag),intent(in), optional :: coordTypeKind
-       integer,                 intent(in), optional :: coordDimCount(:)
-       integer,                 intent(in), optional :: coordDimMap(:,:)
-       integer,                 intent(in), optional :: gridEdgeLWidth(:)
-       integer,                 intent(in), optional :: gridEdgeUWidth(:)
-       integer,                 intent(in), optional :: gridAlign(:)
-       integer,                 intent(in), optional :: gridMemLBound(:)
-       type(ESMF_Index_Flag),   intent(in), optional :: indexflag
-       character (len=*),       intent(in), optional :: name
+       type(ESMF_DistGrid),     intent(in)            :: distgrid
+       integer,                 intent(in),  optional :: distgridToGridMap(:)
+       type(ESMF_CoordSys_Flag),intent(in),  optional :: coordSys
+       type(ESMF_TypeKind_Flag),intent(in),  optional :: coordTypeKind
+       integer,                 intent(in),  optional :: coordDimCount(:)
+       integer,                 intent(in),  optional :: coordDimMap(:,:)
+       integer,                 intent(in),  optional :: gridEdgeLWidth(:)
+       integer,                 intent(in),  optional :: gridEdgeUWidth(:)
+       integer,                 intent(in),  optional :: gridAlign(:)
+       integer,                 intent(in),  optional :: gridMemLBound(:)
+       type(ESMF_Index_Flag),   intent(in),  optional :: indexflag
+       character (len=*),       intent(in),  optional :: name
+       type(ESMF_VM),           intent(in),  optional :: vm
        integer,                 intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -4324,6 +4325,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      defaults to ESMF\_INDEX\_DELOCAL.
 ! \item[{[name]}]
 !     {\tt ESMF\_Grid} name.
+! \item[{[vm]}]
+!     If present, the Grid object is created on the specified 
+!     {\tt ESMF\_VM} object. The default is to create on the VM of the 
+!     current context.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -4343,7 +4348,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, allocatable :: collocation(:)
     logical  :: arbSeqIndexFlag
     integer :: i, deCount, distDimCount, arbDim
-    type(ESMF_DELayout) :: delayout
+    type(ESMF_DELayout)     :: delayout
+    type(ESMF_Pointer)      :: vmThis
+    logical                 :: actualFlag
 
     character(ESMF_MAXSTR), dimension(2) :: callbacktest
     integer, dimension(2) :: callbacktest_lens
@@ -4362,26 +4369,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        nameLen=len_trim(name)
     endif
 
-    !! Check if the DistGrid is an arbitrary distgrid
-    arbDim = -1
-    call ESMF_DistGridGet(distgrid, delayout=delayout, dimCount=distDimCount, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ! Must make sure the local PET is associated with an actual member
+    actualFlag = .true.
+    if (present(vm)) then
+      call ESMF_VMGetThis(vm, vmThis)
+      if (vmThis == ESMF_NULL_POINTER) then
+        actualFlag = .false.  ! local PET is not for an actual member of Array
+      endif
+    endif
+    
+    arbDim = -1   ! initialize
+    if (actualFlag) then
+      ! Safe to access distgrid on local PET to get rank from input information
+      !! Check if the DistGrid is an arbitrary distgrid
+      call ESMF_DistGridGet(distgrid, delayout=delayout, dimCount=distDimCount, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_DELayoutGet(delayout, localDeCount=deCount, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      call ESMF_DELayoutGet(delayout, localDeCount=deCount, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    if (deCount > 0) then
-      allocate(collocation(distDimCount))  ! dimCount
-      call ESMF_DistGridGet(distgrid,   &
-           collocation=collocation, rc=localrc)
-      do i=1,distDimCount
+      if (deCount > 0) then
+        allocate(collocation(distDimCount))  ! dimCount
+        call ESMF_DistGridGet(distgrid, collocation=collocation, rc=localrc)
+        do i=1,distDimCount
           call ESMF_DistGridGet(distgrid, localDe=0, collocation=collocation(i), &
-              arbSeqIndexFlag=arbSeqIndexFlag, rc=localrc)
+            arbSeqIndexFlag=arbSeqIndexFlag, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
           if (arbSeqIndexFlag) arbDim = i
-      enddo
-      deallocate(collocation)
+        enddo
+        deallocate(collocation)
+      endif
     endif
 
     if (arbDim /= -1) then
@@ -4436,7 +4454,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       coordTypeKind, distgrid, distgridToGridMapArg, coordsys, &
       coordDimCountArg, coordDimMapArg, &
       gridEdgeLWidthArg, gridEdgeUWidthArg, gridAlignArg, gridMemLBoundArg,&
-      indexflag, intDestroyDistGrid, intDestroyDELayout, localrc)
+      indexflag, intDestroyDistGrid, intDestroyDELayout, vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

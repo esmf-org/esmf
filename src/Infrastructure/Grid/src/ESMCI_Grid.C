@@ -1326,7 +1326,8 @@ Grid *Grid::create(
   ESMC_IndexFlag *indexflagArg,             // (in) optional
   bool *destroyDistgridArg,
   bool *destroyDELayoutArg,
-  int *rcArg                                // (out) return code optional
+  int *rcArg,                                // (out) return code optional
+  VM *vm                                     // (in)
   ){
 //
 // !DESCRIPTION:
@@ -1346,7 +1347,7 @@ Grid *Grid::create(
   // allocate the grid object
   Grid *grid=ESMC_NULL_POINTER;
   try{
-    grid = new Grid();
+    grid = new Grid(vm);  // specific VM, or default if vm==NULL
   }catch(...){
      // allocation error
      ESMC_LogDefault.MsgAllocError("for new ESMC_Grid.", ESMC_CONTEXT, rcArg);
@@ -3956,7 +3957,7 @@ Grid::Grid(
 //
 // !ARGUMENTS:
 //  none
-  ){
+  VM *vm):ESMC_Base(vm){  // allow specific VM instead default
 //
 // !DESCRIPTION:
 //    Because of the possible use of incremental create this just
