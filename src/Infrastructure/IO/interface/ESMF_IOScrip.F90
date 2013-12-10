@@ -55,7 +55,8 @@
   public ESMF_ScripInqUnits
   public ESMF_ScripGetVar
   public ESMF_OutputScripWeightFile
-  public ESMF_GetMeshFromFile
+  public ESMF_EsmfGetNode
+  public ESMF_EsmfGetElement
   public ESMF_OutputScripVarFile
   public ESMF_EsmfInq
 
@@ -2462,7 +2463,8 @@ end subroutine ESMF_OutputScripVarFile
 !
 ! !INTERFACE:
 subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
-	      		maxNodePElement, coordDim, haveMask, rc)    
+	      		maxNodePElement, coordDim, &
+			haveNodeMask, haveElmtMask, rc)    
 
 ! !ARGUMENTS:
 
@@ -2471,7 +2473,8 @@ subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
     integer, intent(out), optional :: elementCount
     integer, intent(out), optional :: maxNodePElement
     integer, intent(out), optional :: coordDim
-    logical, intent(out), optional :: haveMask
+    logical, intent(out), optional :: haveNodeMask
+    logical, intent(out), optional :: haveElmtMask
     integer, intent(out), optional :: rc
 
     integer:: localrc, ncStatus
@@ -2551,13 +2554,23 @@ subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
         rc)) return
     end if
 
-    ! get number of elements
-    if (present(haveMask)) then
+    ! check if elementMask exit
+    if (present(haveElmtMask)) then
       ncStatus = nf90_inq_varid (ncid, "elementMask", VarId)
       if (ncStatus == nf90_noerror) then
-           haveMask = .true.
+           haveElmtMask = .true.
       else
-	   haveMask = .false.
+	   haveElmtMask = .false.
+      end if
+    end if
+
+    ! check if nodeMask exit
+    if (present(haveNodeMask)) then
+      ncStatus = nf90_inq_varid (ncid, "nodeMask", VarId)
+      if (ncStatus == nf90_noerror) then
+           haveNodeMask = .true.
+      else
+	   haveNodeMask = .false.
       end if
     end if
 
@@ -2667,18 +2680,13 @@ subroutine ESMF_EsmfInqUnits(filename, units, rc)
 end subroutine ESMF_EsmfInqUnits
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GetMeshFromFile"
-subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
-				 elmtNums, startElmt, elementMask, &
-				 elementArea, convertToDeg, rc)
+#define ESMF_METHOD "ESMF_EsmfGetNode"
+subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
+			    convertToDeg, rc)
 
     character(len=*), intent(in)   :: filename
     real(ESMF_KIND_R8), pointer    :: nodeCoords (:,:)
-    integer(ESMF_KIND_I4), pointer :: elementConn (:,:)
-    integer(ESMF_KIND_I4), pointer :: elmtNums (:)
-    integer,           intent(out) :: startElmt
-    integer(ESMF_KIND_I4), pointer, optional :: elementMask (:)
-    real(ESMF_KIND_R8), pointer, optional :: elementArea (:)
+    integer(ESMF_KIND_I4), pointer, optional :: nodeMask (:)
     logical, intent(in), optional  :: convertToDeg
     integer, intent(out), optional :: rc
 
@@ -2797,6 +2805,81 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
           endif
        endif
     endif
+    
+    ! get nodeMask
+    if (present(nodeMask)) then
+       allocate(nodeMask(nodeCnt))
+       ncStatus = nf90_inq_varid (ncid, "nodeMask", VarNo)
+       errmsg = "Variable nodeMask in "//trim(filename)
+       if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+
+       ncStatus = nf90_get_var (ncid, VarNo, nodeMask, start=(/1/), count=(/nodeCnt/))
+       if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+    endif
+
+    ncStatus = nf90_close (ncid=ncid)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, trim(filename), &
+      rc)) return
+#else
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+    return
+#endif
+
+end subroutine ESMF_EsmfGetNode
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_EsmfGetElement"
+subroutine ESMF_EsmfGetElement (filename, elementConn, &
+				 elmtNums, startElmt, elementMask, &
+				 elementArea, rc)
+
+    character(len=*), intent(in)   :: filename
+    integer(ESMF_KIND_I4), pointer :: elementConn (:,:)
+    integer(ESMF_KIND_I4), pointer :: elmtNums (:)
+    integer,           intent(out) :: startElmt
+    integer(ESMF_KIND_I4), pointer, optional :: elementMask (:)
+    real(ESMF_KIND_R8), pointer, optional :: elementArea (:)
+    integer, intent(out), optional :: rc
+
+    type(ESMF_VM) :: vm
+    integer :: PetNo, PetCnt
+
+    integer :: ncid
+    integer :: ncStatus
+    integer :: RecCnt (2)
+
+    integer :: DimId
+    integer :: nodeCnt, ElmtCount, MaxNodePerElmt, NodeDim
+    integer :: localCount, remain
+
+    integer :: VarNo
+    character(len=256)::errmsg
+    character(len=80) :: units
+    integer :: len
+
+#ifdef ESMF_NETCDF
+
+    call ESMF_VMGetCurrent(vm, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+    ! set up local pet info
+    call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=rc)
+    if (rc /= ESMF_SUCCESS) return
+
+    ncStatus = nf90_open (path=trim(filename), mode=nf90_nowrite, ncid=ncid)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD,  &
+      ESMF_SRCLINE, trim(filename), &
+      rc)) return
 
     ! get number of elmts
     ncStatus = nf90_inq_dimid (ncid, "elementCount", DimId)
@@ -2878,6 +2961,7 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
           ESMF_METHOD,  &
           ESMF_SRCLINE, errmsg, &
           rc)) return
+
     end if
 
     if (present(elementArea)) then
@@ -2909,7 +2993,7 @@ subroutine ESMF_GetMeshFromFile (filename, nodeCoords, elementConn, &
     return
 #endif
 
-end subroutine ESMF_GetMeshFromFile
+end subroutine ESMF_EsmfGetElement
 
 
 !
