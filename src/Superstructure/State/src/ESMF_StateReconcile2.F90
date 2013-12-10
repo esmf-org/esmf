@@ -326,14 +326,13 @@ contains
           ': *** Step 2 - Exchange Ids/VMIds')
     end if
 
-    allocate (id_info(0:npets-1),  &
-        stat=memstat)
+    allocate (id_info(0:npets-1), stat=memstat)
     if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
     call ESMF_ReconcileExchgIDInfo (vm,  &
         nitems_buf=nitems_buf,  &
-          id=  ids_send,  &
+        id=ids_send,  &
         vmid=vmids_send,  &
         id_info=id_info, &
         rc=localrc)
@@ -492,6 +491,10 @@ contains
     end do
 
     if (associated (ids_send)) then
+      call ESMF_VMIdDestroy (vmids_send, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT,  &
+          rcToReturn=rc)) return
       deallocate (ids_send, itemtypes_send, vmids_send, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
