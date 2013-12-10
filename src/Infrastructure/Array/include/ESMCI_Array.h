@@ -166,7 +166,7 @@ namespace ESMCI {
     
    public:
     // native constructor and destructor
-    Array(){
+    Array(VM *vm=NULL):ESMC_Base(vm){ // allow specific VM instead default
       typekind = ESMF_NOKIND;
       rank = 0;
       indexflag = ESMF_INDEX_DELOCAL;
@@ -231,7 +231,8 @@ namespace ESMCI {
       int *totalLBound, int *totalUBound, int tensorCount,
       int tensorElementCount, int *undistLBoundArray, int *undistUBoundArray,
       int *distgridToArrayMapArray, int *arrayToDistGridMapArray,
-      int *distgridToPackedArrayMapArray, ESMC_IndexFlag indexflagArg, int *rc);
+      int *distgridToPackedArrayMapArray, ESMC_IndexFlag indexflagArg, int *rc,
+      VM *vm=NULL); // allow specific VM instead default
    public:
     ~Array(){destruct(false);}
    private:
@@ -258,7 +259,7 @@ namespace ESMCI {
       InterfaceInt *computationalUWidthArg, InterfaceInt *totalLWidthArg,
       InterfaceInt *totalUWidthArg, ESMC_IndexFlag *indexflag,
       InterfaceInt *distLBoundArg, InterfaceInt *undistLBoundArg,
-      InterfaceInt *undistUBoundArg, int *rc);
+      InterfaceInt *undistUBoundArg, int *rc, VM *vm=NULL);
     static Array *create(Array *array, int *rc=NULL);
     static int destroy(Array **array);
     // data copy()

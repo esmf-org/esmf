@@ -1262,6 +1262,20 @@
       write(name, *) "VMId key_value Test"
       call ESMF_Test(key_value == achar (123), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Destroy #1 failed"
+      write(name, *) "VMId destroy #1 Test"
+      call ESMF_VMIdDestroy (vmid1, rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Destroy #2 failed"
+      write(name, *) "VMId destroy #2 Test"
+      call ESMF_VMIdDestroy (vmid2, rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
       call ESMF_TestEnd(ESMF_SRCLINE)
 

@@ -1585,7 +1585,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
   function ESMF_ArrayCreateAllocate(distgrid, typekind, keywordEnforcer, indexflag, &
     distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
-    undistLBound, undistUBound, name, rc)
+    undistLBound, undistUBound, name, vm, rc)
 !     
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateAllocate
@@ -1605,12 +1605,17 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
        integer,               intent(in),   optional  :: undistLBound(:)
        integer,               intent(in),   optional  :: undistUBound(:)
        character (len=*),     intent(in),   optional  :: name
+       type(ESMF_VM),         intent(in),   optional  :: vm
        integer,               intent(out),  optional  :: rc
-!
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.3.0r] Added argument {\tt vm} to support object creation on a
+!               different VM than that of the current context.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1695,6 +1700,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      Upper bounds for the array dimensions that are not distributed.
 ! \item[{[name]}]
 !      Name of the Array object.
+! \item[{[vm]}]
+!      If present, the Array object is created on the specified 
+!      {\tt ESMF\_VM} object. The default is to create on the VM of the 
+!      current context.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -1704,6 +1713,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     integer                 :: localrc    ! local return code
     integer                 :: rank, dimCount, i
     type(ESMF_ArraySpec)    :: arrayspec
+    type(ESMF_Pointer)      :: vmThis
+    logical                 :: actualFlag
     
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -1712,12 +1723,25 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
     ! Check init status of arguments used directly
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
     
-    ! Determine rank from input information
-    call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! Must make sure the local PET is associated with an actual member
+    actualFlag = .true.
+    if (present(vm)) then
+      call ESMF_VMGetThis(vm, vmThis)
+      if (vmThis == ESMF_NULL_POINTER) then
+        actualFlag = .false.  ! local PET is not for an actual member of Array
+      endif
+    endif
+    
+    if (actualFlag) then
+      ! Safe to access distgrid on local PET to get rank from input information
+      call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
       
-    rank = dimCount ! default value
+      rank = dimCount ! default value
+    else
+      rank = 1  ! bogus but valid default value
+    endif
     
     if (present(distgridToArrayMap)) then
       rank = 0 ! reset
@@ -1746,7 +1770,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
       computationalUWidth=computationalUWidth, &
       totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
       undistLBound=undistLBound, undistUBound=undistUBound, &
-      name=name, rc=localrc)
+      name=name, vm=vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
@@ -1904,7 +1928,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
   function ESMF_ArrayCreateAllocateAS(distgrid, arrayspec, keywordEnforcer, indexflag, &
     distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
-    undistLBound, undistUBound, name, rc)
+    undistLBound, undistUBound, name, vm, rc)
 !     
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateAllocateAS
@@ -1913,7 +1937,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
        type(ESMF_DistGrid),   intent(in)              :: distgrid
        type(ESMF_ArraySpec),  intent(in)              :: arrayspec
        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_Index_Flag),  intent(in),   optional  :: indexflag
+       type(ESMF_Index_Flag), intent(in),   optional  :: indexflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: computationalEdgeLWidth(:)
        integer,               intent(in),   optional  :: computationalEdgeUWidth(:)
@@ -1924,11 +1948,17 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
        integer,               intent(in),   optional  :: undistLBound(:)
        integer,               intent(in),   optional  :: undistUBound(:)
        character (len=*),     intent(in),   optional  :: name
+       type(ESMF_VM),         intent(in),   optional  :: vm
        integer,               intent(out),  optional  :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.3.0r] Added argument {\tt vm} to support object creation on a
+!               different VM than that of the current context.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2013,6 +2043,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !      Upper bounds for the array dimensions that are not distributed.
 ! \item[{[name]}]
 !      Name of the Array object.
+! \item[{[vm]}]
+!      If present, the Array object is created on the specified 
+!      {\tt ESMF\_VM} object. The default is to create on the VM of the 
+!      current context.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -2096,7 +2130,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
         totalUWidthArg, indexflag, &
-        undistLBoundArg, undistUBoundArg, name, len_name, localrc)
+        undistLBoundArg, undistUBoundArg, name, len_name, vm, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     else
@@ -2106,7 +2140,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
         computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
         totalUWidthArg, indexflag, &
-        undistLBoundArg, undistUBoundArg, "", len_name, localrc)
+        undistLBoundArg, undistUBoundArg, "", len_name, vm, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -2552,7 +2586,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_ArraySetThis()"
 !BOPI
-! !IROUTINE: ESMF_ArraySetThis - Set C++ pointer in VM
+! !IROUTINE: ESMF_ArraySetThis - Set C++ pointer in Array
 
 ! !INTERFACE:
   subroutine ESMF_ArraySetThis(array, this, rc)
@@ -2564,7 +2598,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAssmdShape)
 !         
 !
 ! !DESCRIPTION:
-!     Set C++ pointer in VM.
+!     Set C++ pointer in Array.
 !
 !     The arguments are:
 !     \begin{description}

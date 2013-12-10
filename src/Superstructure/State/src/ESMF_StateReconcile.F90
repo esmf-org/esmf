@@ -215,8 +215,8 @@
     ! re-reconciling, any removed items will not get re-proxied.
     call ESMF_StateZapProxies(state, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-	ESMF_ERR_PASSTHRU, &
-	ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! This turns off the fast option on Regrid; it is working now for
     !  exclusive components, but if there is any reason we should turn
@@ -268,8 +268,8 @@
 
     call ESMF_ReconcileZappedProxies(state, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
-	ESMF_ERR_PASSTHRU, &
-	ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Only clear the reconcileneeded flag at this State level.
     ! Otherwise, there would be a problem with nested States that
@@ -906,7 +906,7 @@ petloop:  &
                call ESMF_VMBcastVMId(vm, si%vmidsend, count=myOrigCount, &
                    rootPet=j, rc=localrc)
            else
-	       allocate(si%vmidrecv(si%theircount), stat=memstat)
+               allocate(si%vmidrecv(si%theircount), stat=memstat)
                if (ESMF_LogFoundAllocError(memstat, &
                               msg="Allocating buffer for local VM ID list", &
                               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -921,7 +921,7 @@ petloop:  &
            ! Broadcast serialized object buffers
            if (i_send) then
                call ESMF_VMBroadcast (vm, si%blindsend, bsbufsize*myOrigCount, rootPet=j, rc=localrc)
-	   else
+           else
                allocate(si%blindrecv(bsbufsize, si%theircount), stat=memstat)
                if (ESMF_LogFoundAllocError(memstat, &
                               msg="Allocating buffer for local buf list", &
@@ -1318,29 +1318,29 @@ itemloop:  do k=attreconstart, si%theircount
 
       itemList => null ()
       call ESMF_ContainerGet(container=stypep%stateContainer, itemList=itemList, &
-	  rc=localrc)
+          rc=localrc)
       if (ESMF_LogFoundError(localrc, &
-	  ESMF_ERR_PASSTHRU, &
-	  ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (associated(itemList)) then
-	do i=1, size(itemList)
-	  if (itemList(i)%si%proxyFlag) then
-	    call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
-	    if (ESMF_LogFoundError(localrc, &
-	        ESMF_ERR_PASSTHRU, &
-	        ESMF_CONTEXT, rcToReturn=rc)) return
+        do i=1, size(itemList)
+          if (itemList(i)%si%proxyFlag) then
+            call ESMF_StateItemGet(itemList(i)%si, name=thisname, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
 
             call ESMF_StateRemove (state, itemName=thisname, rc=localrc)
-	    if (ESMF_LogFoundError(localrc, &
-	        ESMF_ERR_PASSTHRU, &
-	        ESMF_CONTEXT, rcToReturn=rc)) return
-	  end if
-	end do
-!	deallocate(itemList, stat=memstat)
-!	if (ESMF_LogFoundDeallocError(memstat, &
-!	    ESMF_ERR_PASSTHRU, &
-!	    ESMF_CONTEXT, rcToReturn=rc)) return
+            if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+          end if
+        end do
+!        deallocate(itemList, stat=memstat)
+!        if (ESMF_LogFoundDeallocError(memstat, &
+!            ESMF_ERR_PASSTHRU, &
+!            ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
       stypep%zapList => itemList ! hang on for ESMF_ReconcileZappedProxies()

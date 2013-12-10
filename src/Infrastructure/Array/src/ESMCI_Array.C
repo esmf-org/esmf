@@ -92,8 +92,9 @@ Array::Array(
   int *arrayToDistGridMapArray,           // (in)
   int *distgridToPackedArrayMapArray,     // (in)
   ESMC_IndexFlag indexflagArg,            // (in)
-  int *rc                                 // (out)
-  ){
+  int *rc,                                // (out)
+  VM *vm                                  // (in)
+  ):ESMC_Base(vm){    // allow specific VM instead default
 //
 // !DESCRIPTION:
 //    Construct the internal information structure of an ESMCI::Array object.
@@ -1123,7 +1124,8 @@ Array *Array::create(
   InterfaceInt *distLBoundArg,                // (in)
   InterfaceInt *undistLBoundArg,              // (in)
   InterfaceInt *undistUBoundArg,              // (in)
-  int *rc                                     // (out) return code
+  int *rc,                                    // (out) return code
+  VM *vm                                      // (in)
   ){
 //
 // !DESCRIPTION:
@@ -1619,7 +1621,7 @@ Array *Array::create(
       computationalUBound, totalLBound, totalUBound, tensorCount,
       tensorElementCount, undistLBoundArray, undistUBoundArray, 
       distgridToArrayMapArray, arrayToDistGridMapArray,
-      distgridToPackedArrayMap, indexflag, &localrc);
+      distgridToPackedArrayMap, indexflag, &localrc, vm);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)){
       array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid

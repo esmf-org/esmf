@@ -173,7 +173,7 @@
         type(ESMF_ValidFlag) :: valid
         type(ESMF_ReqForRestartFlag) :: reqrestart
 #endif
-        ! VMId is currently needed for FieldBundles and their indirect Fields. 	 
+        ! VMId is currently needed for FieldBundles and their indirect Fields.          
         type(ESMF_VMId)      :: FldBundleVMId
         logical :: proxyFlag
         integer :: indirect_index
@@ -576,18 +576,18 @@ contains
 
       end select
       if (ESMF_LogFoundError(localrc, &
-	 ESMF_ERR_PASSTHRU, &
-	 ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_UtilIOUnitFlush (localunit, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
-	 ESMF_ERR_PASSTHRU, &
-	 ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
       call c_esmc_vmidprint (vmid, localrc)
       if (ESMF_LogFoundError(localrc, &
-	 ESMF_ERR_PASSTHRU, &
-	 ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
     end if
 

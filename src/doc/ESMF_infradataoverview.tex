@@ -590,22 +590,26 @@ problems with periodicity and with the pole singularity. This library
 
 The ESMF regrid weight calculation functionality has been designed to enable it to support a wide range
 of grid and interpolation types without needing to support each individual combination of source grid type,
-destination grid type, and interpolation method. To avoid the combinatorial growth of the number of pairs
+destination grid type, and interpolation method. To avoid the quadratic growth of the number of pairs
 of grid types, all grids are converted to a common internal format and the regrid weight calculation
 is performed on that format. This vastly reduces the variety of grids that need to be supported in 
 the weight calculations for each interpolation method. It also has the added benefit of making it
 straightforward to add new grid types and to allow them to work with all the existing grid types.
 To hook into the exisiting weight calculation code, the new type just needs to be converted to the
-internal format. The internal grid format used by the ESMF regrid weight calculation is a finite element
+internal format. 
+
+The internal grid format used by the ESMF regrid weight calculation is a finite element
 unstructured mesh. This was chosen because it was the most general format and all the others could be 
-converted to it. The finite element unstructured mesh is based on the SIERRA~\cite{Sierra} package 
+converted to it. The finite element unstructured mesh is similar to the SIERRA~\cite{Sierra} package 
 developed at Sandia National Laboratory. It also contains a version of the Zoltan~\cite{Zoltan} library 
-for calculating mesh partitions. The internal finite element mesh contains a range of functionality that 
-ESMF uses for weight calculation. It can create a mesh of triangles, quadrilaterals, hexahedrons and 
+for calculating mesh partitions. 
+
+The internal finite element mesh contains a range of functionality that 
+ESMF uses for weight calculation. It can create a mesh of triangles and quadrilaterals, or a mesh of hexahedrons and  
 tetrahedrons. It holds information about the neighbor relations between these elements as well the
 vertices and edges that make them up. It allows the storage of field data (e.g. coordinates) on 
-vertices and other parts of the mesh. It also contains a range of other useful functionality,
-for example the capability to redistribute a mesh to a new distribution, halo communication, etc. 
+vertices and other parts of the mesh. It also contains other useful functionality,
+for example the capability to redistribute a mesh to a new distribution and the ability to perform halo communications. 
 
 \subsection{File-based Regrid API}~\label{sec:filebasedregrid}
 \input{../Superstructure/PreESMFMod/doc/ESMF_RegridWeightGen_fapi}

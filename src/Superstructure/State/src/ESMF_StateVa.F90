@@ -221,7 +221,7 @@
             if (local1rc /= ESMF_SUCCESS) then
               rc = ESMF_RC_OBJ_BAD
               if (ESMF_LogFoundError(local1rc, ESMF_ERR_PASSTHRU, &
-        	  ESMF_CONTEXT, rcToReturn=rc)) exit
+                  ESMF_CONTEXT, rcToReturn=rc)) exit
             end if
 
           end do
