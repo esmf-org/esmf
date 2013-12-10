@@ -1698,6 +1698,7 @@ end function ESMF_MeshCreateFromFile
     real(ESMF_KIND_R8)                  :: coorX, coorY, deg2rad
     integer, allocatable                :: NodeOwners(:)
     integer, allocatable                :: NodeOwners1(:)
+    integer, pointer                    :: glbNodeMask(:), NodeMask(:)
 
     integer                             :: ElemNo, TotalElements, startElemNo
     integer                             :: ElemCnt,i,j,k,dim, nedges
@@ -1738,6 +1739,7 @@ end function ESMF_MeshCreateFromFile
     type(ESMF_FileFormat_Flag)          :: filetypelocal
     integer                             :: coordDim
     logical                             :: convertToDeg
+    logical                             :: haveNodeMask, haveElmtMask
     logical                             :: haveUserMask
     logical                             :: haveMask
     logical 				:: localAddUserArea
@@ -1789,7 +1791,8 @@ end function ESMF_MeshCreateFromFile
  
     if (filetypelocal == ESMF_FILEFORMAT_ESMFMESH) then
        ! Get coordDim
-       call ESMF_EsmfInq(filename,coordDim=coordDim, haveMask=haveUserMask, rc=localrc)
+       call ESMF_EsmfInq(filename,coordDim=coordDim, haveNodeMask=haveNodeMask, &
+       	    haveElmtMask=haveElmtMask, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1800,25 +1803,32 @@ end function ESMF_MeshCreateFromFile
           convertToDeg = .false.
        endif
 
-       ! Get information from file
-       if (haveUserMask) then
+       ! Get information from file     
+       if (haveNodeMask) then
+           call ESMF_EsmfGetNode(filename, nodeCoords, nodeMask=glbNodeMask,&
+	   		      convertToDeg=convertToDeg, rc=localrc)
+       else
+           call ESMF_EsmfGetNode(filename, nodeCoords, &
+	   		      convertToDeg=convertToDeg, rc=localrc)
+       endif			      			       
+       if (haveElmtMask) then
 	if (localAddUserArea) then
-           call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, &
+           call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, elementArea=elementArea, &
-	 			 convertToDeg=convertToDeg, rc=localrc)
+	 			 rc=localrc)
 	else
-           call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, &
+           call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, &
-	 			 convertToDeg=convertToDeg, rc=localrc)
+	 			 rc=localrc)
 	endif
        else
 	if (localAddUserArea) then
-           call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, &
+           call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementArea=elementArea, &
-				 convertToDeg=convertToDeg, rc=localrc)
+				 rc=localrc)
 	else
-           call ESMF_GetMeshFromFile(filename, nodeCoords, elementConn, elmtNum, &
-                                 startElmt, convertToDeg=convertToDeg, rc=localrc)
+           call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
+                                 startElmt, rc=localrc)
 	endif
        endif
 
@@ -1998,11 +2008,26 @@ end function ESMF_MeshCreateFromFile
        end do
     endif
 
-    ! Add nodes
-    call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
+    if (.not. haveNodeMask) then
+       ! Add nodes
+       call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
                             NodeCoords=NodeCoords1D, &
                             NodeOwners=NodeOwners, &
                             rc=localrc)
+    else
+       allocate(NodeMask(localNodes))
+       do i=1,localNodes
+         NodeMask(i)=glbNodeMask(NodeId(i))
+       enddo
+       call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
+                            NodeCoords=NodeCoords1D, &
+                            NodeOwners=NodeOwners, &
+			    NodeMask = NodeMask, &
+                            rc=localrc)
+       deallocate(NodeMask)
+       deallocate(glbNodeMask)		    
+    endif 
+    
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2245,7 +2270,6 @@ end function ESMF_MeshCreateFromFile
     end if
 
     ! Add elements
-    ! print *, PetNo, ' before MeshAddElments()'
     if (haveMask .and. localAddUserArea) then
 	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
 			elementMask=ElemMask, elementArea=ElemArea, rc=localrc)
@@ -2258,7 +2282,6 @@ end function ESMF_MeshCreateFromFile
     else
 	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, rc=localrc)
     end if
-    ! print *, PetNo, ' after MeshAddElments()'
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2389,13 +2412,14 @@ end function ESMF_MeshCreateFromUnstruct
 !      write(cmd, '("/bin/rm ",A)') trim(esmffilename)
 !      call system(cmd)
 !      First find an available unit numer
+
        call ESMF_UtilIOUnitGet(unit, rc=rc)
        if (rc==ESMF_SUCCESS) then
   	  open(unit, FILE=esmffilename,status='unknown')
           close(unit, STATUS='delete')
        endif
     endif    
-
+   
    ! Add pole information, if created from a 2D grid file
     call ESMF_ScripInq(filename, grid_rank=gridRank, grid_dims=gridDims, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -2421,7 +2445,6 @@ end function ESMF_MeshCreateFromUnstruct
     endif
 
     if (associated(gridDims)) deallocate(gridDims)
-
 
     ! Output success
     if (present(rc)) rc=ESMF_SUCCESS
