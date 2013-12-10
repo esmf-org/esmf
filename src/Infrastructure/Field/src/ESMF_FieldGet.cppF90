@@ -30,6 +30,7 @@ module ESMF_FieldGetMod
 ! !USES:
   use ESMF_UtilTypesMod
   use ESMF_BaseMod
+  use ESMF_VMMod
   use ESMF_LogErrMod
   use ESMF_ArraySpecMod
   use ESMF_LocalArrayMod
@@ -111,7 +112,7 @@ contains
     status, geomtype, grid, mesh, locstream, xgrid, array, &
     typekind, dimCount, rank, staggerloc, meshloc, xgridside, &
     gridindex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    totalLWidth, totalUWidth, localDeCount, name, rc) 
+    totalLWidth, totalUWidth, localDeCount, name, vm, rc) 
 !
 ! !ARGUMENTS:
     type(ESMF_Field),           intent(in)            :: field    
@@ -138,11 +139,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                    intent(out), optional :: totalUWidth(:,:)
     integer,                    intent(out), optional :: localDeCount
     character(len=*),           intent(out), optional :: name
-    integer,                    intent(out), optional :: rc     
+    type(ESMF_VM),              intent(out), optional :: vm
+    integer,                    intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersionExceptions{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[6.3.0r] Added argument {\tt vm} in order to offer information about the
+!               VM on which the Field was created.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -270,6 +277,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       the DELayout associated with the Field object.
 ! \item [{[name]}]
 !       Name of queried item.
+! \item [{[vm]}]
+!       The VM on which the Field object was created.
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -537,6 +546,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (present(name)) then
         call ESMF_GetName(ftype%base, name, localrc)
+        if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    if (present(vm)) then
+        call ESMF_GetVM(ftype%base, vm, localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
