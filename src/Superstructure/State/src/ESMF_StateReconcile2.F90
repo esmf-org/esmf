@@ -255,7 +255,7 @@ contains
     integer,         pointer :: ids_send(:), itemtypes_send(:)
     type(ESMF_VMId), pointer :: vmids_send(:)
 
-    type(ESMF_ReconcileIDInfo), pointer :: id_info(:)
+    type(ESMF_ReconcileIDInfo), allocatable :: id_info(:)
 
     logical, pointer :: recvd_needs_matrix(:,:)
 
@@ -325,7 +325,12 @@ contains
       call ESMF_ReconcileDebugPrint (ESMF_METHOD //  &
           ': *** Step 2 - Exchange Ids/VMIds')
     end if
-    id_info => null ()
+
+    allocate (id_info(0:npets-1),  &
+        stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT,  &
+        rcToReturn=rc)) return
     call ESMF_ReconcileExchgIDInfo (vm,  &
         nitems_buf=nitems_buf,  &
           id=  ids_send,  &
@@ -443,7 +448,7 @@ contains
       end if
       if (associated (items_recv(i)%cptr)) then
         if (debug) then
-          print *, '    item_buffer(', lbound (items_recv(i)%cptr),  &
+          print *, '    items_recv(', lbound (items_recv(i)%cptr),  &
               ':', ubound (items_recv(i)%cptr), ')'
         end if
         call ESMF_ReconcileDeserialize (state, vm,  &
@@ -502,6 +507,13 @@ contains
       end if
       if (associated (id_info(i)%id)) then
         deallocate (id_info(i)%id, id_info(i)%vmid, id_info(i)%needed,  &
+            stat=memstat)
+        if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT,  &
+            rcToReturn=rc)) return
+      end if
+      if (associated (id_info(i)%item_buffer)) then
+        deallocate (id_info(i)%item_buffer,  &
             stat=memstat)
         if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT,  &
@@ -1321,7 +1333,7 @@ contains
     integer,                intent(in)  :: nitems_buf(0:)
     integer,                intent(in)  :: id(0:)
     type(ESMF_VMId),        intent(in)  :: vmid(0:)
-    type(ESMF_ReconcileIDInfo), pointer :: id_info(:) ! intent(out)
+    type(ESMF_ReconcileIDInfo), intent(inout) :: id_info(0:)
     integer,                intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -1379,7 +1391,7 @@ contains
           rcToReturn=rc)) return
     end if
 
-    if (associated (id_info)) then
+    if (size (id_info) /= npets) then
       if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, ESMF_ERR_PASSTHRU,  &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
@@ -1393,12 +1405,6 @@ contains
 
     ! Broadcast each Id to all the other PETs.  Since the number of items per
     ! PET can vary, use AllToAllV.
-
-    allocate (id_info(0:npets-1),  &
-        stat=memstat)
-    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT,  &
-        rcToReturn=rc)) return
 
     do, i=0, npets-1
       allocate (  &
@@ -2207,7 +2213,7 @@ contains
     type (ESMF_StateItemWrap),  intent(in)  :: siwrap(:)
     logical,                    intent(in)  :: needs_list(:,0:)
     type(ESMF_AttReconcileFlag),intent(in)  :: attreconflag
-    type(ESMF_ReconcileIDInfo), pointer     :: id_info(:) ! intent(inout)
+    type(ESMF_ReconcileIDInfo), intent(inout) :: id_info(0:)
     integer,                    intent(out) :: rc
 !
 ! !DESCRIPTION:
@@ -2509,11 +2515,12 @@ contains
             ': computed buffer_offset =', buffer_offset, ', for PET', pet
       end if
 
-      allocate (obj_buffer(0:buffer_offset-1),  &
+      allocate (id_info(pet)%item_buffer(0:buffer_offset-1),  &
           stat=memstat)
       if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
+      obj_buffer => id_info(pet)%item_buffer
 
       obj_buffer(0:ESMF_SIZEOF_DEFINT-1) = transfer (  &
           source=needs_count,  &
@@ -2537,13 +2544,6 @@ contains
             pet_needs(item)%obj_buffer(:lbufsize-1)
         buffer_offset = buffer_offset + lbufsize
       end do ! items
-
-      if (debug) then
-        print *, '    PET', mypet,  &
-            ': associating item_buffer for pet', pet
-      end if
-      id_info(pet)%item_buffer => obj_buffer
-      obj_buffer => null ()
 
     end do ! pets
 
@@ -2717,7 +2717,7 @@ contains
           enddo
         end if
       end do
-      deallocate(itemList, stat=memstat)
+      deallocate(itemList, zaplist, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
