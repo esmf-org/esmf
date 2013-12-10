@@ -490,12 +490,19 @@ contains
       end if
     end do
 
-    if (associated (ids_send)) then
-      call ESMF_VMIdDestroy (vmids_send, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    if (associated (vmids_send)) then
+!      call ESMF_VMIdDestroy (vmids_send(1:), rc=localrc)
+!      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+!          ESMF_CONTEXT,  &
+!          rcToReturn=rc)) return
+      deallocate (vmids_send, stat=memstat)
+      if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
-      deallocate (ids_send, itemtypes_send, vmids_send, stat=memstat)
+    end if
+
+    if (associated (ids_send)) then
+      deallocate (ids_send, itemtypes_send, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
@@ -1921,8 +1928,8 @@ contains
     type (ESMF_State), intent(in)  :: state
     type(ESMF_StateItemWrap), pointer :: siwrap(:)! intent(in)
     integer,           pointer     :: itemtype(:) ! intent(out)
-    integer,           pointer     :: id(:)          ! intent(out)
-    type(ESMF_VMId),   pointer     :: vmid(:)          ! intent(out)
+    integer,           pointer     :: id(:)       ! intent(out)
+    type(ESMF_VMId),   pointer     :: vmid(:)     ! intent(out)
     integer,           intent(out) :: rc
 !
 ! !DESCRIPTION:
