@@ -400,7 +400,8 @@ template <class TYPE>
 	       ESMC_IndexFlag *indexflag,                  // (in)
 	       bool *destroyDistgrid,
 	       bool *destroyDELayout,
-	       int *rc                                     // (out) return code
+	       int *rc,                                     // (out) return code
+               VM *vm=NULL                          // (in)
 	       );
 
  // create an arbitrarily distributed grid
@@ -434,8 +435,8 @@ template <class TYPE>
   static int destroy(Grid **grid);
 
   // Grid Construct (grid NOT usable after construction)
-  Grid();
-  Grid(int baseID); // prevent baseID counter increment
+  Grid(VM *vm=NULL);  // allow specific VM instead default
+  Grid(int baseID);   // prevent baseID counter increment
 
   // Grid Destruct
  private:

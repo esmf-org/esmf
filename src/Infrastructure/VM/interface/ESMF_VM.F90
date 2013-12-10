@@ -35,7 +35,6 @@ module ESMF_VMMod
 ! !USES:
   use ESMF_UtilTypesMod     ! ESMF utility types
   use ESMF_InitMacrosMod    ! ESMF initializer macros
-  use ESMF_BaseMod          ! ESMF base class
   use ESMF_LogErrMod        ! ESMF error handling
   use ESMF_IOUtilMod        ! ESMF I/O utility layer
       
@@ -729,7 +728,7 @@ contains
     ! to distinguish equality based on uninitialized type (uncreated,
     ! deleted).
 
-    ! TODO: Consider moving this logic to C++: use Base class? status?
+    ! TODO: Consider moving this logic to C++: using Base class? status?
     !       Or replicate logic for C interface also.
 
     ! check inputs

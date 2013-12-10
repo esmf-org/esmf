@@ -45,6 +45,7 @@ class ESMC_Base
     int             ID;           // unique ID for any object in this VM context
     ESMCI::VMId     *vmID;        // unique vmID for any VM in the system
     bool            vmIDCreator;  // responsible for deleting vmID allocation
+    ESMCI::VM       *vm;          // VM on which this Base was created
     int             refCount;     // number of references to this instance
     ESMC_Status     baseStatus;   // status of the Base part of the object
     ESMC_Status     status;       // overall status of the derived class object
@@ -75,6 +76,9 @@ class ESMC_Base
     void ESMC_BaseSetVMId(ESMCI::VMId *vmID);
     ESMCI::VMId *ESMC_BaseGetVMId(void) const;
     
+    // accessors to object's vm
+    ESMCI::VM *ESMC_BaseGetVM(void) const;
+
     // accessors to reference count
     void ESMC_BaseSetRefCount(int count);
     int  ESMC_BaseGetRefCount(void) const;

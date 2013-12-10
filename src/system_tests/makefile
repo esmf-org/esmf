@@ -39,6 +39,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldRegridMeshToMesh \
             ESMF_FieldLSSMM \
             ESMF_FieldMeshSMM \
+            ESMF_ShareGrid \
 	    ESMF_SequentialEnsemble \
 	    ESMF_ConcurrentEnsemble \
 	    ESMF_ArrayRedistOpenMP \
