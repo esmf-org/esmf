@@ -799,7 +799,6 @@ contains
         needs_list_1%offerers = .false.
         needs_list_1%position = 0
         needs_list_1%id = id_1
-        call ESMF_VMIdCreate (needs_list_1%vmid)
         needs_list_1%vmid = vmid_1
 
         needs_list_1%offerers(pet_1) = .true.
