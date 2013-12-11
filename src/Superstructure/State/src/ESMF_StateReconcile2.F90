@@ -840,7 +840,6 @@ contains
       needslist_p%offerers = .false.
       needslist_p%position = 0
       needslist_p%id = id_1
-      call ESMF_VMIdCreate (needslist_p%vmid)
       needslist_p%vmid = vmid_1
 
       needslist_p%offerers(pet_1) = .true.
