@@ -490,19 +490,8 @@ contains
       end if
     end do
 
-    if (associated (vmids_send)) then
-!      call ESMF_VMIdDestroy (vmids_send(1:), rc=localrc)
-!      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!          ESMF_CONTEXT,  &
-!          rcToReturn=rc)) return
-      deallocate (vmids_send, stat=memstat)
-      if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT,  &
-          rcToReturn=rc)) return
-    end if
-
     if (associated (ids_send)) then
-      deallocate (ids_send, itemtypes_send, stat=memstat)
+      deallocate (ids_send, itemtypes_send, vmids_send, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
@@ -1992,11 +1981,6 @@ contains
     if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT,  &
         rcToReturn=rc)) return
-
-    call ESMF_VMIdCreate (vmid, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-       ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
 
 ! Element 0s are for the State itself
 
