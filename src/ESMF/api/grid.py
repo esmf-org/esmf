@@ -24,8 +24,6 @@ class Grid(object):
                  staggerloc=None,
                  fname=None,
                  fileTypeFlag=None,
-                 regDecomp=np.array([1,1]),
-                 decompflag=None,
                  isSphere=None,
                  addCornerStagger=None,
                  addUserArea=None,
@@ -115,8 +113,7 @@ class Grid(object):
         self.struct = None
         if fname:
             #print 'Creating grid from ', fname
-            self.struct = ESMP_GridCreateFromFile(fname, fileTypeFlag, regDecomp,
-                                                  decompflag=decompflag,
+            self.struct = ESMP_GridCreateFromFile(fname, fileTypeFlag,
                                                   isSphere=isSphere,
                                                   addCornerStagger=addCornerStagger,
                                                   addUserArea=addUserArea,
@@ -687,11 +684,10 @@ class Grid(object):
         if self.rank == 3:
             gridptrZ = self.get_grid_coords_from_esmc(z, stagger)
 
-        # create a numpy array for the esmf coordinate
-        esmf_coords = 999*np.zeros(shape=(size,self.rank))
+        # print the coordinates
+        print gridptrX
+        print gridptrY
+        if self.rank == 3:
+            print gridptrZ
 
-        esmf_coords[:,x] = gridptrX
-        esmf_coords[:,y] = gridptrY
-        esmf_coords[:,z] = gridptrZ
-
-        print esmf_coords
+            
