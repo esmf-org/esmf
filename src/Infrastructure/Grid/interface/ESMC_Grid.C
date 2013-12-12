@@ -117,13 +117,13 @@ ESMC_Grid ESMC_GridCreate1PeriDim(ESMC_InterfaceInt maxIndex,
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_GridCreateFromFile()"
-ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag, int *regDecomp, 
-				  int *decompflag, int *isSphere, int *addCornerStagger,
+ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag, 
+				  int *isSphere, int *addCornerStagger,
 				  int *addUserArea, int *addMask, char *varname,
 				  char *coordNames, int *rc) {
 
-  //printf ("Start ESMC_Grid.C : ESMC_GridCreateFromFile(%s,%d,[%d,%d])\n", 
-  //  	    filename, fileTypeFlag, regDecomp[0], regDecomp[1]);
+  //printf ("Start ESMC_Grid.C : ESMC_GridCreateFromFile(%s,%d)\n", 
+  //  	    filename, fileTypeFlag);
 
   int localrc = ESMC_RC_NOT_IMPL;
   if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
@@ -133,8 +133,6 @@ ESMC_Grid ESMC_GridCreateFromFile(char *filename, int fileTypeFlag, int *regDeco
   grid.ptr = NULL;
 
   grid.ptr = reinterpret_cast<void *>(ESMCI::Grid::createfromfile(filename, fileTypeFlag,
-								  regDecomp, 
-								  decompflag,
 								  isSphere, 
 								  addCornerStagger,
 								  addUserArea, 
