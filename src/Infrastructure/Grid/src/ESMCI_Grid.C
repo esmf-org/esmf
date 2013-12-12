@@ -76,8 +76,6 @@ void FTN_X(f_esmf_gridcreate1peridim)(ESMCI::Grid **grid,
     int *rc);
 
 void FTN_X(f_esmf_gridcreatefromfile)(ESMCI::Grid **grid, char *filename, int *fileTypeFlag, 
-				      int *rank, int *regDecomp, 
-				      int *decompflag, int *dfpresent,
 				      int *isSphere, int *ispresent,
 				      int *addCornerStagger, int *acspresent,
 				      int *addUserArea, int *auapresent,
@@ -318,8 +316,6 @@ int setDefaultsLUA(int dimCount,
 // !ARGUMENTS:
     char *filename,
     int fileTypeFlag,
-    int *regDecomp,
-    int *decompflag,
     int *isSphere,
     int *addCornerStagger,
     int *addUserArea,
@@ -345,8 +341,7 @@ int setDefaultsLUA(int dimCount,
 
 
     // handle the optional arguments
-    int dfpresent, ispresent, acspresent, auapresent, ampresent, vnpresent, cnpresent;
-    dfpresent = decompflag != NULL;
+    int ispresent, acspresent, auapresent, ampresent, vnpresent, cnpresent;
     ispresent = isSphere != NULL;
     acspresent = addCornerStagger != NULL;
     auapresent = addUserArea != NULL;
@@ -354,13 +349,9 @@ int setDefaultsLUA(int dimCount,
     vnpresent = strlen(varname) > 0;
     cnpresent = strlen(coordNames) > 0;
 
-    // Determine number of dimensions
-    int rank = sizeof(regDecomp) / sizeof(int);
-
     // allocate the grid object
     Grid *grid;
-    FTN_X(f_esmf_gridcreatefromfile)(&grid, filename, &fileTypeFlag, &rank, regDecomp, 
-				     decompflag, &dfpresent, 
+    FTN_X(f_esmf_gridcreatefromfile)(&grid, filename, &fileTypeFlag,
 				     isSphere, &ispresent, 
 				     addCornerStagger, &acspresent, addUserArea, &auapresent,
 				     addMask, &ampresent, varname, &vnpresent, 
