@@ -59,7 +59,6 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_
         grid = ESMF.Mesh(filename=filename,
                          filetype=filetype,
                          meshname=meshname,
-                         convert3D=True,
                          convert_to_dual=convert_to_dual)
         is_mesh = True
     else:
@@ -80,6 +79,8 @@ def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh):
         print "Getting coords from Grid"
         lons = grid_or_mesh.get_grid_coords_from_esmc(0, ESMF.StaggerLoc.CENTER)
         lats = grid_or_mesh.get_grid_coords_from_esmc(1, ESMF.StaggerLoc.CENTER)
+        print 'get_grid_coords_from_esmc returned lons = ', lons
+        print 'get_grid_coords_from_esmc returned lats = ', lats
         lats_flat = lats.ravel()
         lons_flat = lons.ravel()
         coords = np.array([[lons_flat[i],lats_flat[i]] for i in range(len(lats_flat))])
@@ -113,6 +114,7 @@ def build_analyticfield_const(field):
 
 def build_analyticfield(field, coords):
     coords = np.reshape(coords, field.shape+(coords.shape[-1],), order='F')
+    print 'coords=',coords[0:20]
     field.data[...] = 2.0 + np.cos(coords[...,1])**2 * np.cos(2.0*coords[...,0])
     print 'shape field data = ',field.data.shape
     print 'field.data = ',field.data
@@ -134,7 +136,7 @@ def run_regridding(srcfield, dstfield, regridmethod, unmappedaction,
                                 dst_frac_field=dstFracField,
                                 pole_method=polemethod,
                                 regridPoleNPnts=regridPoleNPnts)
-    dstfield = regridSrc2Dst(srcfield, dstfield, zero_region=ESMF.Region.SELECT)
+    dstfield = regridSrc2Dst(srcfield, dstfield, zero_region=ESMF.Region.TOTAL)
 
     return dstfield
 
@@ -287,9 +289,15 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
 
     # Get node coordinates
     src_coords = get_coords_from_grid_or_mesh(srcgrid, src_is_mesh)
+    print 'src_coords.shape=',src_coords.shape
+    print 'src_coords = ',src_coords
+    src_coords = np.radians(src_coords)
     #for i in range(len(src_coords)):
     #    print src_coords[i]
     dst_coords = get_coords_from_grid_or_mesh(dstgrid, dst_is_mesh)
+    print 'dst_coords = ',dst_coords
+    dst_coords = np.radians(dst_coords)
+    print 'dst_coords.shape=',dst_coords.shape
 
     # create Field objects on the Grids
     srcfield = create_field(srcgrid, 'srcfield', regridmethod)
