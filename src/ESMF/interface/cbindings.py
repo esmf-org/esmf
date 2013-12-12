@@ -373,8 +373,6 @@ def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
 
 _ESMF.ESMC_GridCreateFromFile.restype = ESMP_GridStruct
 _ESMF.ESMC_GridCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
-                                          np.ctypeslib.ndpointer(dtype=np.int32),
-                                          OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
                                           OptionalNamedConstant,
@@ -383,7 +381,7 @@ _ESMF.ESMC_GridCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
                                           ct.c_char_p,
                                           ct.POINTER(ct.c_int)]
 # TO DO: coordNames needs to be a List of Strings, not a String.
-def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp, decompflag=None,
+def ESMP_GridCreateFromFile(filename, fileTypeFlag,
                             isSphere=None, addCornerStagger=None, addUserArea=None,
                             addMask=None, varname="", coordNames=""):
     """
@@ -396,14 +394,6 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp, decompflag=None,
             Argument Values:\n
                 SCRIP\n
                 GRIDSPEC\n
-        Numpy.array(dtype=int32)            :: regDecomp\n
-        DecompFlag (optional)               :: decompflag\n
-            Argument Values:\n
-                DEFAULT\n
-                BALANCED\n
-                RESTFIRST\n
-                RESTLAST\n
-                CYCLIC\n
         Boolean (optional)                  :: isSphere\n
         Boolean (optional)                  :: addCornerStagger\n
         Boolean (optional)                  :: addUserArea\n
@@ -412,9 +402,8 @@ def ESMP_GridCreateFromFile(filename, fileTypeFlag, regDecomp, decompflag=None,
         List of Strings (optional)          :: coordNames\n
     """
     lrc = ct.c_int(0)
-    regDecompD = np.array(regDecomp, dtype=np.int32)
-    gridstruct = _ESMF.ESMC_GridCreateFromFile(filename, fileTypeFlag, regDecompD, 
-                                               decompflag, isSphere, addCornerStagger,
+    gridstruct = _ESMF.ESMC_GridCreateFromFile(filename, fileTypeFlag,
+                                               isSphere, addCornerStagger,
                                                addUserArea, addMask, varname, coordNames,
                                                ct.byref(lrc))
     rc = lrc.value
@@ -1459,13 +1448,12 @@ _ESMF.ESMC_ScripInqDims.argtypes = [ct.c_char_p,
 def ESMP_ScripInqDims(filename):
     """
     Preconditions: ESMP has been initialized.\n
-    Postconditions:  The grid rank of the specified SCRIP NetCDF file or an error code
+    Postconditions:  The grid dimensions of the specified SCRIP NetCDF file or an error code
                      has been returned.\n
     Arguments:\n
         String :: filename\n
     """
     grid_rank = ESMP_ScripInqRank(filename)
-    print "got grid_rank=",grid_rank
     dims = np.array(np.zeros(grid_rank),dtype=np.int32)
     status = _ESMF.ESMC_ScripInqDims(filename, dims)
     return dims
