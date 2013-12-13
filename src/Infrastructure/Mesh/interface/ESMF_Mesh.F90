@@ -1857,6 +1857,7 @@ end function ESMF_MeshCreateFromFile
        ! Chenk if the grid is 3D or 2D
        coordDim = ubound(nodeCoords,1)
        nodeCnt = ubound(nodeCoords,2)
+
        if (coordDim == 2 .and. localAddMask == ESMF_MESHLOC_ELEMENT) then
 	  !Get the variable and the missing value attribute from file
 	  ! Total number of local elements
@@ -1897,6 +1898,8 @@ end function ESMF_MeshCreateFromFile
                              ESMF_CONTEXT, rcToReturn=rc) 
        return
     endif
+
+    nodeCnt = ubound(nodeCoords,2)
 
    ! Figure out dimensions 
     if (coordDim .eq. 2) then
@@ -2063,7 +2066,6 @@ end function ESMF_MeshCreateFromFile
     call ESMF_VMAllGather(vm, sndBuf, localElmTable, 1, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-
     
     ! Find out the start element ID
     myStartElmt=0
@@ -2101,7 +2103,6 @@ end function ESMF_MeshCreateFromFile
        existSplitElems=.false.
     endif
 
-
     ! Set split element info
     if (existSplitElems) then    
        Mesh%hasSplitElem=.true.
@@ -2118,7 +2119,6 @@ end function ESMF_MeshCreateFromFile
        haveMask=.true.
        ElemMask(:)=1  ! default to nothing masked out
     endif    
-
 
     ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
     ! element IDs will be from startElmt to startElmt+ElemCnt-1
@@ -2155,7 +2155,6 @@ end function ESMF_MeshCreateFromFile
              tk=tk+3
           enddo
        endif
-
 
        ! Loop through creating Mesh appropriate elements
        do j = 1, ElemCnt
@@ -2315,12 +2314,10 @@ end function ESMF_MeshCreateFromFile
        end do
     endif
 
-
     if (ElemNo /= TotalElements+1) then
 	write (ESMF_UtilIOStdout,*)  &
             PetNo, ' TotalElements does not match ',ElemNo-1, TotalElements
     end if
-
     ! Add elements
     if (haveMask .and. localAddUserArea) then
 	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
