@@ -5814,16 +5814,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set coordinate tables 
     ! Longitude
-    ! Add coordinates only if localDeCount>0
+    ! Add coordinates
     call ESMF_GridGet(grid, localDECount=DECount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+    if (localAddCornerStagger) then 
+        call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    call ESMF_GridAddItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+    	 	itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       	        ESMF_CONTEXT, rcToReturn=rc)) return
+    if (localAddUserArea) then
+        call ESMF_GridAddItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
+	    itemflag=ESMF_GRIDITEM_AREA, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif	  
     if (DECount > 0) then
       ! if the grid size is small enough, read the data in from PET0 and scatter the data to other PEs
       ! Otherwise, read in the data from the first PE in each row in deDecomp
-      call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
       call ESMF_GridGetCoord(grid, coordDim=1, staggerloc=ESMF_STAGGERLOC_CENTER,  &
 	farrayPtr = fptrLon, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5839,10 +5854,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Mask
-      call ESMF_GridAddItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-	itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
       call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER,  &
 	itemflag=ESMF_GRIDITEM_MASK, farrayPtr = fptrMask, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -5850,10 +5861,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Put Corners into coordinates
       if (localAddCornerStagger) then 
-          call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-
           ! Longitude
           call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
   	       farrayptr = fptrCLon, rc=localrc)
@@ -5871,10 +5878,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       if (localAddUserArea) then
-          call ESMF_GridAddItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-	     itemflag=ESMF_GRIDITEM_AREA, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-             ESMF_CONTEXT, rcToReturn=rc)) return
           call ESMF_GridGetItem(grid, staggerloc=ESMF_STAGGERLOC_CENTER,  &
 	     itemflag=ESMF_GRIDITEM_AREA, farrayptr = fptrArea, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
