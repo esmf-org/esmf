@@ -27,7 +27,7 @@ two grid files and outputs weights for interpolation
 between the two grids. The input and output files are all in NetCDF format. The grid files can be defined in four
 different formats:  the SCRIP format~\ref{sec:fileformat:scrip} as is used as an input to SCRIP~\cite{ref:SCRIP}, the GRIDSPEC Tile grid file~\ref{sec:fileformat:gridspec} following the
 \htmladdnormallink{CF metadata conventions}{http://cf-pcmdi.llnl.gov},
-the ESMF unstructured grid format~\ref{sec:fileformat:esmf} or the proposed CF unstructured grid data model (UGRID)~\ref{sec:fileformat:ugrid}
+the ESMF unstructured grid format~\ref{sec:fileformat:esmf} or the proposed CF unstructured grid data model (UGRID) ~\ref{sec:fileformat:ugrid}
 in the current ESMF release.  GRIDSPEC is a proposed CF extension for the annotation of complex Earth system grids.  In the current ESMF release, we only support a single tile grid file for rectangular lat/lon grid.  For UGRID, we support the 2D flexible mesh topology with mixed triangles and quadrilaterals and fully 3D unstructured mesh topology with hexahedrons and tetrahedrons.
 
 The weight file is the same format~\ref{sec:weightfileformat} as is
@@ -359,14 +359,14 @@ where
 			all the topology information stored in its attributes.
 
     --src_missingvalue - an optional argument that defines the variable name 
-                         in the source grid file if the file type is GRIDSPEC.
+                         in the source grid file if the file type is GRIDSPEC or UGRID.
                          The regridder will generate a mask using the missing
 			 values of the data variable.  The missing value is defined
 			 using an attribute called "_FillValue" or "missing_value"
 
     --dst_missingvalue - an optional argument that defines the variable name
 			 in the destination grid file if the file type is
-			 GRIDSPEC.  The regridder will generate a mask using
+			 GRIDSPEC or UGRID.  The regridder will generate a mask using
 			 the missing values of the data variable.  The missing
 			 value is defined using an attribute called "_FillValue"
 			 or "missing_value"
@@ -743,9 +743,9 @@ variables:
 
 \subsection{CF Convention UGRID File Format}\label{sec:fileformat:ugrid}
 
-ESMF\_RegridWeightGen supports NetCDF files that follow the CF UGRID convention for unstructured grids.
+ESMF\_RegridWeightGen supports NetCDF files that follow the UGRID conventions for unstructured grids.
 
-The UGRID file format is a proposed extension to the CF metadata conventions for the unstructured grid data model. The latest proposal can be found at \htmladdnormallink{http://bit.ly/ugrid\_cf}{http://bit.ly/ugrid\_cf}.  The proposal is still evolving, the Mesh creation API and ESMF\_RegridWeightGen in the current ESMF release is based on the version updated on 02/28/2013.
+The UGRID file format is a proposed extension to the CF metadata conventions for the unstructured grid data model. The latest proposal can be found at \htmladdnormallink{https://github.com/ugrid\_conventions/ugrid-conventions}{https://github.com/ugrid\_conventions/ugrid-conventions}.  The proposal is still evolving, the Mesh creation API and ESMF\_RegridWeightGen in the current ESMF release is based on UGRID Version 0.9.0 published on October 29, 2013.
 
 In the UGRID proposal, a 1D, 2D, or 3D mesh topology can be defined for an unstructured grid.  Currently, ESMF
 supports two types of meshes: (1) the 2D flexible mesh topology where each cell (a.k.a. "face" as defined in the UGRID document) in the mesh is either a triangle or a quadrilateral, and (2) the fully 3D unstructured mesh topology where each cell (a.k.a. "volume" as defined in the UGRID document) in the mesh
@@ -779,8 +779,7 @@ The coordinate variables follows the CF metadata convention for coordinates.  Th
 
 The UGRID files may also contain data variables.  The data may be located at the nodes or at the faces.  Two additional attributes are introduced in the UGRID extension for the data variables:  {\tt location} and {\tt mesh}.  The {\tt location}
 attribute defines where the data is located, it can be either {\tt face} or {\tt node}.  The {\tt mesh} attribute defines which mesh topology this variable belongs to since multiple mesh topologies may be defined in one
-file.  ESMF\_RegridWeightGen uses the data variable on the face to derive the masks for the mesh cells
-in the same way as for a GRIDSPEC file.  Currently, ESMF only supports mask on the cells, not on the nodes.
+file.  The {\tt coordinates} attribute defined in the CF conventions can also be used to associate the variables to their locations.  ESMF checks both {\tt location} and {\tt coordinates} attributes to determine where the data variable is defined upon. If both attributes are present, {\location} attribute takes the precedence.  ESMF\_RegridWeightGen uses the data variable on the face to derive the element masks for the mesh cell and variable on the node to derive the node masks for the mesh. 
 
 When creating a ESMF Mesh from a UGRID file, user has to provide the mesh topology mesh variable name to {\tt ESMF\_MeshCreate()}.
 
