@@ -305,13 +305,13 @@ program ESMF_RegridWeightGenApp
 	      print *, '       UGRID or GRIDSPEC format.'
               print *, "Use the --help argument to see an explanation of usage."
 	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
-           else if (srcFileType == ESMF_FILEFORMAT_UGRID .and. (method .ne. 'conserve')) then
-              write(*,*)
-	      print *, 'ERROR: --mask is supported on the mesh elment in a unstructured grid, so'
-	      print *, '       it only works with the conservative regridding if the src grid is'
-              print *, '       a UGRID'
-              print *, "Use the --help argument to see an explanation of usage."
-	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!           else if (srcFileType == ESMF_FILEFORMAT_UGRID .and. (method .ne. 'conserve')) then
+!              write(*,*)
+!	      print *, 'ERROR: --mask is supported on the mesh elment in a unstructured grid, so'
+!	      print *, '       it only works with the conservative regridding if the src grid is'
+!             print *, '       a UGRID'
+!              print *, "Use the --help argument to see an explanation of usage."
+!	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
            endif
 	 endif
 
@@ -334,13 +334,13 @@ program ESMF_RegridWeightGenApp
 	      print *, '       UGRID or GRIDSPEC format.'
               print *, "Use the --help argument to see an explanation of usage."
 	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
-           else if (dstFileType == ESMF_FILEFORMAT_UGRID .and. (method .ne. 'conserve')) then
-              write(*,*)
-	      print *, 'ERROR: -- mask is only supported on the mesh elements, so it only'
-	      print *, '       with the conservative regridding when the dst grid is'
-              print *, '       a UGRID'
-              print *, "Use the --help argument to see an explanation of usage."
-	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!           else if (dstFileType == ESMF_FILEFORMAT_UGRID .and. (method .ne. 'conserve')) then
+!              write(*,*)
+!	      print *, 'ERROR: -- mask is only supported on the mesh elements, so it only'
+!	      print *, '       with the conservative regridding when the dst grid is'
+!             print *, '       a UGRID'
+!              print *, "Use the --help argument to see an explanation of usage."
+!	      call ESMF_Finalize(endflag=ESMF_END_ABORT)
            endif
 	 endif
 
@@ -766,15 +766,11 @@ subroutine PrintUsage()
      print *, "--src_missingvalue  - an optional argument used when the src file type is GRIDSPEC"
      print *, "             or UGRID. It defines the variable name whose 'missing_value' or"
      print *, "             '_FillValue' attribute will be used to construct the mask for the source"
-     print *, "             grid.  If the grid is a UGRID, the variable has to be defined on the"
-     print *, "             element ('face') because ESMF only support masking on the element"
-     print *, "             Without this argument,a GRIDSPEC file or a UGRID file is not masked."
+     print *, "             grid. Without this argument,a GRIDSPEC file or a UGRID file is not masked."
      print *, "--dst_missingvalue  - an optional argument used when the destination file type is"
      print *, "             GRIDSPEC or UGRID. It defines the variable name whose 'missing_value' or"
-     print *, "             '_FillValue' attribute will be used to construct the mask for the source"
-     print *, "             grid.  If the grid is a UGRID, the variable has to be defined on the"
-     print *, "             element ('face') because ESMF only support masking on the element"
-     print *, "             Without this argument,a GRIDSPEC file or a UGRID file is not masked."
+     print *, "             '_FillValue' attribute will be used to construct the mask for the destination"
+     print *, "             grid. Without this argument,a GRIDSPEC file or a UGRID file is not masked."
      print *, "--src_coordinates  - an optional argument used when the source grid type is GRIDSPEC."
      print *, "             It defines the longitude and latitude variable names separated by comma,"
      print *, "             in case there are multiple coordinate variables defined in the file"
