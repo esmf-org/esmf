@@ -229,7 +229,6 @@ DELayout *DELayout::create(
     }
   
     // start cleanup
-    if (petListDeleteFlag) delete [] petList;
 #if 0  
     if (deStrideBlockDeleteFlag){
       for (int i=0; i<deStrideBlockCount; i++)
@@ -260,6 +259,7 @@ DELayout *DELayout::create(
   
   // final cleanup
   if (petMapDeleteFlag) delete [] petMap;
+  if (petListDeleteFlag) delete [] petList;
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
