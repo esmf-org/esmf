@@ -469,6 +469,7 @@ program ESMF_DELayoutUTest
   call ESMF_DELayoutSerialize (delayout, buffer, buff_len, offset,  &
       inquireflag, rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate (buffer)
   !-----------------------------------------------------------------------------
 
 #endif

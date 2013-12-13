@@ -788,15 +788,17 @@ int VM::enter(
   if(vmp->nothreadflag){
     // take care of book keeping for ESMF...
     matchTableIndex_old = matchTableIndex;
-    int i;
-    for (i=0; i<matchTableBound; i++)
-      if (matchTable_vm[i]==vmp->myvms[0]) break;
-    if(i < matchTableBound){
-      // found matching entry in the matchTable
-      matchTableIndex = i;
-    }else{
-      // TODO: this branch needs to be treated as an error because
-      //       the matchTable must be corrupted if no match can be found!
+    if (vmp->nspawn > 0){
+      int i;
+      for (i=0; i<matchTableBound; i++)
+        if (matchTable_vm[i]==vmp->myvms[0]) break;
+      if(i < matchTableBound){
+        // found matching entry in the matchTable
+        matchTableIndex = i;
+      }else{
+        // TODO: this branch needs to be treated as an error because
+        //       the matchTable must be corrupted if no match can be found!
+      }
     }
   }
 
