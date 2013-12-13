@@ -124,7 +124,8 @@ module ESMF_MeshMod
 
   type(ESMF_MeshLoc), parameter :: &
         ESMF_MESHLOC_NODE = ESMF_MeshLoc(1), &
-        ESMF_MESHLOC_ELEMENT = ESMF_MeshLoc(2)
+        ESMF_MESHLOC_ELEMENT = ESMF_MeshLoc(2), &
+	ESMF_MESHLOC_NONE = ESMF_MeshLoc(3)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_Mesh
@@ -1455,7 +1456,7 @@ end function ESMF_MeshCreateFromMeshes
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromFile(filename, fileTypeFlag, &
-                 convertToDual, addUserArea, meshname, addMask, varname, &
+                 convertToDual, addUserArea, meshname, maskFlag, varname, &
 		 elementDistGrid, nodalDistGrid, rc)
 !
 !
@@ -1467,7 +1468,7 @@ end function ESMF_MeshCreateFromMeshes
     logical,                    intent(in),  optional :: convertToDual
     logical,                    intent(in),  optional :: addUserArea
     character(len=*),           intent(in),  optional :: meshname
-    logical,                    intent(in),  optional :: addMask
+    type(ESMF_MeshLoc),         intent(in),  optional :: maskFlag
     character(len=*),           intent(in),  optional :: varname
     type(ESMF_DistGrid),        intent(in),  optional :: elementDistgrid
     type(ESMF_DistGrid),        intent(in),  optional :: nodalDistgrid
@@ -1496,12 +1497,17 @@ end function ESMF_MeshCreateFromMeshes
 !   \item[{[meshname]}]
 !         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
 !         is {\tt ESMF\_FILEFORMAT\_UGRID}.  If not specified, defaults to empty string.
-!   \item[{[addMask]}]
-!         If {\tt .true.}, generate the mask using the missing\_value attribute defined in 'varname'
+!   \item[{[maskFlag]}]
+!         If maskFlag is present, generate the mask using the missing\_value attribute defined in 'varname'
 !         This flag is only supported when the grid file is in the UGRID format.
-!         If not specified, defaults to {\tt .false.}.  
+!         The value could be either {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}.  If the value is
+!         {\tt ESMF\_MESHLOC\_NODE}, the node mask will be generated and the variable has to be 
+!         defined on the "node" (specified by its {\tt location} attribute).  If the value is 
+!         {\tt ESMF\_MESHLOC\_ELEMENT}, the element mask will be generated and the variable has to be 
+!         defined on the "face" of the mesh.  If the variable is not defined on the right location,
+!         no mask will be generated.  If not specified, no mask will be generated.
 !   \item[{[varname]}]
-!         If addMask is {\tt .true.}, provide a variable name stored in the UGRID file and
+!         If maskFlag is present, provide a variable name stored in the UGRID file and
 !         the mask will be generated using the missing value of the data value of
 !         this variable.  The first two dimensions of the variable has to be the
 !         the longitude and the latitude dimension and the mask is derived from the
@@ -1537,15 +1543,11 @@ end function ESMF_MeshCreateFromMeshes
 	localAddUserArea = .false.
     endif
 
-    if (present(addMask)) then
-	if (addMask) then
-	  if (.not. present(varname)) then
-	     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-		  msg="- need varname argument to create mask", &
-		  ESMF_CONTEXT, rcToReturn=rc)
-             return
-          end if
-        endif
+    if (present(maskFlag) .and. .not. present(varname)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+	  msg="- need varname argument to create mask", &
+	  ESMF_CONTEXT, rcToReturn=rc)
+          return
     endif
 
     if (filetypeflag == ESMF_FILEFORMAT_SCRIP) then
@@ -1570,10 +1572,10 @@ end function ESMF_MeshCreateFromMeshes
                 ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
-	if (present(addMask)) then
+	if (present(maskFlag)) then
            myMesh = ESMF_MeshCreateFromUnstruct(filename, &
 	     filetype=filetypeflag, meshname = meshname, &
-	     addMask=addMask, varname=varname, &
+	     maskFlag=maskFlag, varname=varname, &
 	     rc=localrc)
 	else
            myMesh = ESMF_MeshCreateFromUnstruct(filename, &
@@ -1642,7 +1644,7 @@ end function ESMF_MeshCreateFromFile
 ! !INTERFACE:
 ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromUnstruct(filename, filetype, meshname, &
-			addUserArea, addMask, varname, rc)
+			addUserArea, maskFlag, varname, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1652,7 +1654,7 @@ end function ESMF_MeshCreateFromFile
     type(ESMF_FileFormat_Flag), optional, intent(in) :: filetype
     character(len=*), optional, intent(in)    :: meshname
     logical, intent(in), optional	      :: addUserArea
-    logical, intent(in), optional	      :: addMask
+    type(ESMF_MeshLoc), intent(in), optional  :: maskFlag
     character(len=*), optional, intent(in)    :: varname
    integer, intent(out), optional            :: rc
 !
@@ -1670,10 +1672,12 @@ end function ESMF_MeshCreateFromFile
 !   \item[{[meshname]}]
 !         The dummy variable for the mesh metadata in the UGRID file if the {\tt filetypeflag}
 !         is {\tt ESMF\_FILEFORMAT\_UGRID}
-!   \item[{[addMask]}]
-!      If {\tt .true.}, generate the mask using the missing\_value attribute defined in 'varname'
+!   \item[{[maskFlag]}]
+!      If present, generate the mask using the missing\_value attribute defined in 'varname' on
+!      the location defined by the flag, the accepted values are {\tt ESMF\_MESHLOC\_NODE} or 
+!      {\tt ESMF\_MESHLOC\_ELEMENT}
 !   \item[{[varname]}]
-!      If addMask is true, provide a variable name stored in the grid file and
+!      If maskFlag is present, provide a variable name stored in the grid file and
 !      the mask will be generated using the missing value of the data value of
 !      this variable.  The first two dimensions of the variable has to be the
 !      the longitude and the latitude dimension and the mask is derived from the
@@ -1691,12 +1695,12 @@ end function ESMF_MeshCreateFromFile
     integer(ESMF_KIND_I4),pointer       :: elmtNum(:)
     integer                             :: startElmt
     integer                             :: NodeNo
-    integer                             :: NodeCnt, NodeDim, total
+    integer                             :: NodeCnt, total
     integer, allocatable                :: NodeId(:)
     integer, allocatable                :: NodeUsed(:)
     real(ESMF_KIND_R8), allocatable     :: NodeCoords1D(:)
     real(ESMF_KIND_R8), allocatable     :: NodeCoordsCart(:)
-    real(ESMF_KIND_R8)                  :: coorX, coorY, deg2rad
+    real(ESMF_KIND_R8)                  :: coorX, coorY
     integer, allocatable                :: NodeOwners(:)
     integer, allocatable                :: NodeOwners1(:)
     integer, pointer                    :: glbNodeMask(:), NodeMask(:)
@@ -1741,10 +1745,9 @@ end function ESMF_MeshCreateFromFile
     integer                             :: coordDim
     logical                             :: convertToDeg
     logical                             :: haveNodeMask, haveElmtMask
-    logical                             :: haveUserMask
     logical                             :: haveMask
     logical 				:: localAddUserArea
-    logical				:: localAddMask
+    type(ESMF_MeshLoc)			:: localAddMask
     real(ESMF_KIND_R8), pointer         :: varbuffer(:)
     real(ESMF_KIND_R8)                  :: missingvalue
     integer                             :: cartSpatialDim    ! sp. dim of grid when converted to cart
@@ -1760,10 +1763,10 @@ end function ESMF_MeshCreateFromFile
 	localAddUserArea = .false.
     endif
 
-    if (present(addMask)) then
-	localAddMask = addMask
+    if (present(maskFlag)) then
+	localAddMask = maskFlag
     else
-	localAddMask = .false.
+	localAddMask = ESMF_MESHLOC_NONE
     endif
 
     ! Read the mesh definition from the file
@@ -1838,8 +1841,13 @@ end function ESMF_MeshCreateFromFile
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (filetypelocal == ESMF_FILEFORMAT_UGRID) then
-       haveNodeMask = .false.       
-       haveElmtMask = .false.       
+       haveElmtMask = .false.
+       haveNodeMask = .false.
+       if (localAddMask == ESMF_MESHLOC_ELEMENT) then
+          haveElmtMask = .true.
+       elseif (localAddMask == ESMF_MESHLOC_NODE) then
+          haveNodeMask = .true.
+       endif
        ! Get information from file
        call ESMF_GetMeshFromUGridFile(filename, meshname, nodeCoords, elementConn, &
                                    elmtNum, startElmt, convertToDeg=.true., rc=localrc)
@@ -1847,16 +1855,16 @@ end function ESMF_MeshCreateFromFile
                    ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Chenk if the grid is 3D or 2D
-       coordDim = size(nodeCoords,1)
-
-       if (coordDim == 2 .and. localAddMask) then
+       coordDim = ubound(nodeCoords,1)
+       nodeCnt = ubound(nodeCoords,2)
+       if (coordDim == 2 .and. localAddMask == ESMF_MESHLOC_ELEMENT) then
 	  !Get the variable and the missing value attribute from file
 	  ! Total number of local elements
           ElemCnt = ubound (elementConn, 2)
           allocate(varbuffer(ElemCnt))
 	  call ESMF_UGridGetVarByName(filename, varname, varbuffer, startind=startElmt, &
 		count=ElemCnt, location="face", &
-		missingvalue=missingvalue, rc=rc)
+		missingvalue=missingvalue, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
 	  ! Create local mask 
@@ -1865,7 +1873,22 @@ end function ESMF_MeshCreateFromFile
 	  do i=1,ElemCnt
 	    if (varbuffer(i) == missingvalue) elementMask(i)=0
           enddo
-          haveElmtMask = .true.
+	  deallocate(varbuffer)
+       elseif (coordDim == 2 .and. localAddMask == ESMF_MESHLOC_NODE) then
+	  !Get the variable and the missing value attribute from file
+	  ! Total number of total nodes
+          allocate(varbuffer(nodeCnt))
+	  call ESMF_UGridGetVarByName(filename, varname, varbuffer, &
+		location="node", &
+		missingvalue=missingvalue, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+	  ! Create local mask 
+	  allocate(glbNodeMask(nodeCnt))
+	  glbNodeMask(:)=1
+	  do i=1,nodeCnt
+	    if (varbuffer(i) == missingvalue) glbNodeMask(i)=0
+          enddo
 	  deallocate(varbuffer)
        endif 
     else
@@ -1874,11 +1897,6 @@ end function ESMF_MeshCreateFromFile
                              ESMF_CONTEXT, rcToReturn=rc) 
        return
     endif
-
-    ! Total number of nodes for the global mesh
-    NodeCnt = ubound (nodeCoords, 2)
-    NodeDim  = ubound (nodeCoords, 1)
-    deg2rad = 3.141592653589793238/180;
 
    ! Figure out dimensions 
     if (coordDim .eq. 2) then
@@ -1978,7 +1996,7 @@ end function ESMF_MeshCreateFromFile
     allocate (NodeOwners(localNodes))
     
     if (parametricDim .eq. 2) then
-       allocate (NodeCoords1D(localNodes*NodeDim))
+       allocate (NodeCoords1D(localNodes*coordDim))
     else ! If not parametricDim==2, assuming parmetricDim==3
        allocate(NodeCoords1D(localNodes*3))
     endif
@@ -1992,8 +2010,8 @@ end function ESMF_MeshCreateFromFile
        do NodeNo = 1, NodeCnt
           if (NodeUsed(NodeNo) > 0) then
              NodeId(i) = NodeNo     
-             do dim = 1, NodeDim
-                NodeCoords1D ((i-1)*NodeDim+dim) = nodeCoords (dim, NodeNo)
+             do dim = 1, coordDim
+                NodeCoords1D ((i-1)*coordDim+dim) = nodeCoords (dim, NodeNo)
              end do
              NodeOwners (i) = NodeOwners1(NodeNo)
              if (NodeOwners1(NodeNo) == PetNo) total = total+1
