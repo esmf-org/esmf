@@ -779,7 +779,7 @@ The coordinate variables follows the CF metadata convention for coordinates.  Th
 
 The UGRID files may also contain data variables.  The data may be located at the nodes or at the faces.  Two additional attributes are introduced in the UGRID extension for the data variables:  {\tt location} and {\tt mesh}.  The {\tt location}
 attribute defines where the data is located, it can be either {\tt face} or {\tt node}.  The {\tt mesh} attribute defines which mesh topology this variable belongs to since multiple mesh topologies may be defined in one
-file.  The {\tt coordinates} attribute defined in the CF conventions can also be used to associate the variables to their locations.  ESMF checks both {\tt location} and {\tt coordinates} attributes to determine where the data variable is defined upon. If both attributes are present, {\location} attribute takes the precedence.  ESMF\_RegridWeightGen uses the data variable on the face to derive the element masks for the mesh cell and variable on the node to derive the node masks for the mesh. 
+file.  The {\tt coordinates} attribute defined in the CF conventions can also be used to associate the variables to their locations.  ESMF checks both {\tt location} and {\tt coordinates} attributes to determine where the data variable is defined upon. If both attributes are present, {\tt location} attribute takes the precedence.  ESMF\_RegridWeightGen uses the data variable on the face to derive the element masks for the mesh cell and variable on the node to derive the node masks for the mesh. 
 
 When creating a ESMF Mesh from a UGRID file, user has to provide the mesh topology mesh variable name to {\tt ESMF\_MeshCreate()}.
 
