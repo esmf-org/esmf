@@ -505,6 +505,7 @@ subroutine ESMF_UGridInqVarLoc (ncid, VarId, varname,location, rc)
     integer   :: len,len1
     integer, parameter :: nf90_noerror=0
 
+#ifdef ESMF_NETCDF
     ncStatus = nf90_get_att(ncid, VarId, "location", locationStr)
     if (ncStatus /= nf90_noerror) then
       ! location attribute does not exist, check coordinates attribute
@@ -588,6 +589,11 @@ subroutine ESMF_UGridInqVarLoc (ncid, VarId, varname,location, rc)
        endif
      endif
      rc = ESMF_SUCCESS
+#else
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+#endif
      return
 end subroutine ESMF_UGridInqVarLoc
 
