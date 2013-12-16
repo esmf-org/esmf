@@ -1868,7 +1868,7 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
 #endif
   }
   // now free up the MPI communicator that was associated with the VMK
-  if (sarg[0].mpi_c_freeflag)
+  if (sarg[0].mpi_c_freeflag && (sarg[0].mpi_c != MPI_COMM_NULL))
     MPI_Comm_free(&(sarg[0].mpi_c));
   // done holding info in SpawnArg array -> delete now
   delete [] sarg;
