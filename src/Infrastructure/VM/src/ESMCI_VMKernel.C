@@ -96,7 +96,6 @@ typedef DWORD pid_t;
 namespace ESMCI {
 
 // Definition of class static data members
-MPI_Group VMK::default_mpi_g;
 MPI_Comm VMK::default_mpi_c;
 int VMK::mpi_thread_level;
 int VMK::ncores;
@@ -333,6 +332,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
   // no threading in default global VM
   nothreadsflag = 1;
   // set up private Group and Comm objects across "mpiCommunicator"
+  MPI_Group mpi_g;
   MPI_Comm_group(mpiCommunicator, &mpi_g);
   MPI_Comm_create(mpiCommunicator, mpi_g, &mpi_c);
   MPI_Group_free(&mpi_g);
@@ -538,7 +538,6 @@ struct SpawnArg{
   int *tid;
   int *ncpet;
   int **cid;
-  MPI_Group mpi_g;
   MPI_Comm mpi_c;
   int nothreadsflag;
   // shared memory variables
@@ -585,7 +584,6 @@ void VMK::construct(void *ssarg){
     for (int k=0; k<ncpet[i]; k++)
       cid[i][k] = sarg->cid[i][k];
   }
-  mpi_g = sarg->mpi_g;
   mpi_c = sarg->mpi_c;
   pth_mutex2 = sarg->pth_mutex2;
   pth_mutex = sarg->pth_mutex;
@@ -1411,21 +1409,13 @@ void *VMK::startup(class VMKPlan *vmp,
     }
   }
   
-  // next, create MPI group
-  // since this is a local MPI operation each pet can call this here...
-  MPI_Group new_mpi_g;
-  
-  // the new group will be derived from the mpi_g_part group so there is an
+  // the new MPI group will be derived from the mpi_g_part group so there is an
   // additional level of indirection here
   int *grouplist = new int[num_diff_pids];
   for (int i=0; i<num_diff_pids; i++){
     grouplist[i] = vmp->lpid_mpi_g_part_map[lpid_list[0][i]];
   }
   
-#if (VERBOSITY > 9)
-  printf("successfully derived new_mpi_g\n");
-#endif
-
   // setting up MPI communicators is a collective MPI communication call
   // thus it requires that exactly one pet of each process running in the 
   // current VMK makes that call, even if this process will not participate
