@@ -5,7 +5,8 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include "ESMCI_WebServPassThruSvr.h"
+//#include "ESMCI_WebServPassThruSvr.h"
+#include "ESMCI_WebServProcCtrl.h"
 
 
 static char*   monthStr[] =
@@ -81,26 +82,37 @@ int main(int    argc,
 
 	if (argc < 4)
 	{
-		printf("Usage: ESMF_WebServController <portNum> <runDir> <svrPort>\n");
+      printf("Usage: ESMF_WebServController <procCtrlPort> <registrarHost> <registrarPort>\n");
 		return 1;
 	}
 
-	int	portNum = atoi(argv[1]);
-	char	runDir[512];
-	int	svrPort = atoi(argv[3]);
-	char	host[512] = { "" };
+   int      procCtrlPort = atoi(argv[1]);
+   char     registrarHost[256];
+   strcpy(registrarHost, argv[2]);
+   int      registrarPort = atoi(argv[3]);
 
-	strcpy(runDir, argv[2]);
-	gethostname(host, sizeof(host) - 1);
+   string   compSvrHost = "localhost";
+   int      compSvrStartPort = 27060;
+   int      portPoolSize = 5;
+   string   compSvrScriptDir = "/nics/c/home/ksaint/Scripts";
+   string   compSvrScriptName = "runjob.sh";
 
-	ESMCI::ESMCI_WebServPassThruSvr		server(portNum, runDir, svrPort);
+
+   ESMCI::ESMCI_WebServProcCtrl
+      server(procCtrlPort,
+             registrarHost, registrarPort,
+             compSvrHost,
+             compSvrStartPort, portPoolSize,
+             compSvrScriptDir, compSvrScriptName,
+             ESMCI::ESMCI_WebServProcCtrl::ESMC_JOBMGRTYPE_FORK);
 
    printf("\n");
    printf("ESMF_WebServController\n");
    printf("-----------------------------------------------------\n");
    printf(" date:  %s\n", getDateAndTime());
-   printf(" host:  %s\n", host);
-   printf(" port:  %d\n", server.getPort());
+   printf(" Registrar:\n");
+   printf("    host:  %s\n", registrarHost);
+   printf("    port:  %d\n", registrarPort);
    printf("-----------------------------------------------------\n");
    printf("\n");
 
