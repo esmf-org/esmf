@@ -550,8 +550,9 @@ contains
 !EOPI @\
 !------------------------------------------------------------------------------ @\
       type(mtype) :: temp_list(1) @\
-      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2 @\
+      character(ESMF_MAXSTR) :: lvalue1, lvalue2 @\
 ^if !defined (noattributesversion) @\
+      character(ESMF_MAXSTR) :: lobject, lname @\
       type(ESMF_Logical) :: linkChange @\
 ^endif @\
       integer :: localrc @\
@@ -698,9 +699,10 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 !------------------------------------------------------------------------------ @\
       integer :: localrc, i @\
       integer :: localcount @\
-      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2 @\
       logical :: localrelaxed @\
+      character(ESMF_MAXSTR) :: lvalue1, lvalue2 @\
 ^if !defined (noattributesversion) @\
+      character(ESMF_MAXSTR) :: lobject, lname @\
       type(ESMF_Logical) :: linkChange @\
 ^endif @\
  @\
@@ -851,8 +853,9 @@ StateAddListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%stat
 !------------------------------------------------------------------------------ @\
       integer :: localrc, i @\
       integer :: localcount @\
-      character(ESMF_MAXSTR) :: lobject, lname, lvalue1, lvalue2 @\
+      character(ESMF_MAXSTR) :: lvalue1, lvalue2 @\
 ^if !defined (noattributesversion) @\
+      character(ESMF_MAXSTR) :: lobject, lname @\
       type(ESMF_Logical) :: linkChange @\
 ^endif @\
  @\
@@ -1767,7 +1770,12 @@ StateGetMacro(ESMF_State,State,nestedState,spp)
         if (nextitem1%otype == ESMF_STATEITEM_STATE) then
           is_rec_needed =  &
               is_rec_needed_worker (nextitem1%datap%spp)
-          if (is_rec_needed) return
+          if (is_rec_needed) then
+            deallocate (siwrap, stat=memstat1)
+            if (ESMF_LogFoundDeallocError(memstat1, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            return
+          end if
         end if
       end do
 

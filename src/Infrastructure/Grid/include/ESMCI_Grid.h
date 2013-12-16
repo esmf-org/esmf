@@ -251,8 +251,7 @@ template <class TYPE>
                               ESMC_TypeKind_Flag *coordTypeKind, 
                               ESMC_PoleKind_Flag *poleKind, 
                               int *rc);
-  static Grid* createfromfile(char *filename, int fileTypeFlag, int *regDecomp,
-			      int *decompflag, int *isSphere, int *addCornerStagger,
+  static Grid* createfromfile(char *filename, int fileTypeFlag, int *isSphere, int *addCornerStagger,
 			      int *addUserArea, int *addMask, char *varname,
 			      char *coordNames, int *rc);
 
@@ -400,7 +399,8 @@ template <class TYPE>
 	       ESMC_IndexFlag *indexflag,                  // (in)
 	       bool *destroyDistgrid,
 	       bool *destroyDELayout,
-	       int *rc                                     // (out) return code
+	       int *rc,                                     // (out) return code
+               VM *vm=NULL                          // (in)
 	       );
 
  // create an arbitrarily distributed grid
@@ -434,8 +434,8 @@ template <class TYPE>
   static int destroy(Grid **grid);
 
   // Grid Construct (grid NOT usable after construction)
-  Grid();
-  Grid(int baseID); // prevent baseID counter increment
+  Grid(VM *vm=NULL);  // allow specific VM instead default
+  Grid(int baseID);   // prevent baseID counter increment
 
   // Grid Destruct
  private:

@@ -3889,8 +3889,8 @@ DistGrid *DistGrid::deserialize(
   a->arbSeqIndexListPCollPLocalDe = new int**[a->diffCollocationCount];
   a->elementCountPCollPLocalDe = new int*[a->diffCollocationCount];
   for (int i=0; i<a->diffCollocationCount; i++){
-    a->arbSeqIndexListPCollPLocalDe[i] = new int*[0];
-    a->elementCountPCollPLocalDe[i] = new int[0];
+    a->arbSeqIndexListPCollPLocalDe[i] = new int*[1];
+    a->elementCountPCollPLocalDe[i] = new int[1];
     a->arbSeqIndexListPCollPLocalDe[i][0] = NULL;
     a->elementCountPCollPLocalDe[i][0] = 0;
   }

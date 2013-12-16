@@ -34,7 +34,7 @@
                                         convertToDual, ctodpresent, &
                                         addUserArea, auapresent, &
                                         meshname, mnpresent, &
-                                        addMask, ampresent, &
+                                        maskFlag, ampresent, &
                                         varname, vnpresent, &
                                         rc)
    use ESMF_UtilTypesMod
@@ -53,7 +53,7 @@
    logical                        :: convertToDual
    logical                        :: addUserArea
    character(len=*)               :: meshname
-   logical                        :: addMask
+   type(ESMF_MeshLoc)             :: maskFlag
    character(len=*)               :: varname
    integer, intent(out)           :: rc
 
@@ -143,7 +143,7 @@
    elseif (filetypeflag == ESMF_FILEFORMAT_UGRID) then
        if (mnpresent == 1 .and. ampresent == 1 .and. vnpresent == 1) then
        	  mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
-	       	                 meshname=meshname, addMask=addMask, &
+	       	                 meshname=meshname, maskFlag=maskFlag, &
 				 varname=varname, rc=rc)
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -154,7 +154,7 @@
               ESMF_CONTEXT, rcToReturn=rc)) return
        elseif (mnpresent == 1 .and. ampresent == 1 .and. vnpresent == 1) then
        	  mesh = ESMF_MeshCreate(filename, fileTypeFlag, &
-	       	                 meshname=meshname, addMask=addMask, &
+	       	                 meshname=meshname, maskFlag=maskFlag, &
 				 varname=varname, rc=rc)
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return

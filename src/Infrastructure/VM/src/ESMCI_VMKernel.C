@@ -729,9 +729,6 @@ void VMK::destruct(){
 #if (VERBOSITY > 9)
     printf("mypet is the last one to wrap up for this pid..MPI & shared mem\n");
 #endif
-    //  - free MPI Group and Comm
-    MPI_Comm_free(&mpi_c);
-    MPI_Group_free(&mpi_g);  // this might have to be called from higher up...
     //  - free the shared memory variables
 #ifndef ESMF_NO_PTHREADS
     pthread_mutex_destroy(pth_mutex2);
@@ -759,77 +756,41 @@ void VMK::destruct(){
     pthread_mutex_destroy(ipSetupMutex);
 #endif
     delete ipSetupMutex;
-    for (int i=0; i<npets; i++){
-      if(sendChannel[i].comm_type==VM_COMM_TYPE_SHMHACK
-        ||sendChannel[i].comm_type==VM_COMM_TYPE_PTHREAD
-        ||sendChannel[i].comm_type==VM_COMM_TYPE_MPIUNI){
-        // intra-process shared memory structure to be deleted
-        shared_mp *shmp=sendChannel[i].shmp;
+  }
+  // only the sendChannels of all PETs free -> this also deletes recvChannels
+  for (int i=0; i<npets; i++){
+    if(sendChannel[i].comm_type==VM_COMM_TYPE_SHMHACK
+      ||sendChannel[i].comm_type==VM_COMM_TYPE_PTHREAD
+      ||sendChannel[i].comm_type==VM_COMM_TYPE_MPIUNI){
+      // intra-process shared memory structure to be deleted
+      shared_mp *shmp=sendChannel[i].shmp;
 #ifndef ESMF_NO_PTHREADS
-        if(sendChannel[i].comm_type==VM_COMM_TYPE_PTHREAD){
-          pthread_mutex_destroy(&(shmp->mutex1));
-          pthread_cond_destroy(&(shmp->cond1));
-          pthread_mutex_destroy(&(shmp->mutex2));
-          pthread_cond_destroy(&(shmp->cond2));
-        }
+      if(sendChannel[i].comm_type==VM_COMM_TYPE_PTHREAD){
+        pthread_mutex_destroy(&(shmp->mutex1));
+        pthread_cond_destroy(&(shmp->cond1));
+        pthread_mutex_destroy(&(shmp->mutex2));
+        pthread_cond_destroy(&(shmp->cond2));
+      }
 #endif
 #if (VERBOSITY > 9)
-        printf("deleting shmp=%p for sendChannel[%d], mypet=%d\n", 
-          shmp, i, mypet);
+      printf("deleting shmp=%p for sendChannel[%d], mypet=%d\n", 
+        shmp, i, mypet);
 #endif
-        delete shmp;
-      }else if (sendChannel[i].comm_type==VM_COMM_TYPE_POSIXIPC){
+      delete shmp;
+    }else if (sendChannel[i].comm_type==VM_COMM_TYPE_POSIXIPC){
 #ifdef ESMF_NO_POSIXIPC
 #else
-        pipc_mp *pipcmp=sendChannel[i].pipcmp;
-        char shm_name[80];
-        strcpy(shm_name, pipcmp->shm_name);
-        munmap((void *)pipcmp, sizeof(pipc_mp));
-        shm_unlink(shm_name);
+      pipc_mp *pipcmp=sendChannel[i].pipcmp;
+      char shm_name[80];
+      strcpy(shm_name, pipcmp->shm_name);
+      munmap((void *)pipcmp, sizeof(pipc_mp));
+      shm_unlink(shm_name);
 #if (VERBOSITY > 9)
-        printf("deleting pipcmp=%p (%s) for sendChannel[%d], mypet=%d\n", 
-          pipcmp, shm_name, i, mypet);
+      printf("deleting pipcmp=%p (%s) for sendChannel[%d], mypet=%d\n", 
+        pipcmp, shm_name, i, mypet);
 #endif
 #endif
-      }
-      if (i != mypet){
-        // diagonal element is handled by sendChannel
-        if(recvChannel[i].comm_type==VM_COMM_TYPE_SHMHACK
-          ||recvChannel[i].comm_type==VM_COMM_TYPE_PTHREAD
-          ||recvChannel[i].comm_type==VM_COMM_TYPE_MPIUNI){
-          // intra-process shared memory structure to be deleted
-          shared_mp *shmp=recvChannel[i].shmp;
-#ifndef ESMF_NO_PTHREADS
-          if(recvChannel[i].comm_type==VM_COMM_TYPE_PTHREAD){
-            pthread_mutex_destroy(&(shmp->mutex1));
-            pthread_cond_destroy(&(shmp->cond1));
-            pthread_mutex_destroy(&(shmp->mutex2));
-            pthread_cond_destroy(&(shmp->cond2));
-          }
-#endif
-#if (VERBOSITY > 9)
-          printf("deleting shmp=%p for recvChannel[%d], mypet=%d\n", 
-            shmp, i, mypet);
-#endif
-          delete shmp;
-        }else if (recvChannel[i].comm_type==VM_COMM_TYPE_POSIXIPC){
-#ifdef ESMF_NO_POSIXIPC
-#else
-          pipc_mp *pipcmp=recvChannel[i].pipcmp;
-          char shm_name[80];
-          strcpy(shm_name, pipcmp->shm_name);
-          munmap((void *)pipcmp, sizeof(pipc_mp));
-          shm_unlink(shm_name);
-#if (VERBOSITY > 9)
-          printf("deleting pipcmp=%p (%s) for recvChannel[%d], mypet=%d\n", 
-            pipcmp, shm_name, i, mypet);
-#endif
-#endif
-        }
-      }
     }
-    delete [] sendChannel;
-    delete [] recvChannel;
   }
   delete [] lpid;
   delete [] pid;
@@ -1515,7 +1476,11 @@ void *VMK::startup(class VMKPlan *vmp,
   // now:
   //    new_mpi_g is the valid MPI_Group for the new VMK
   //    new_mpi_c is the valid MPI_Comm for the new VMK
-  //
+
+  // keep new_mpi_g and new_mpi_c in the sarg[0] for all PETs
+  sarg[0].mpi_g = new_mpi_g;
+  sarg[0].mpi_c = new_mpi_c;
+
   // Next, setting up intra-process shared memory connection between
   // qualifying pets of the new VMK. Only one of the current pets that
   // spawn for a certain lpid must allocate memory for the shared variables 
@@ -1564,6 +1529,7 @@ void *VMK::startup(class VMKPlan *vmp,
           if (new_pid[pet1]==pid[mypet]){
             int pet2Index = 0;  // reset
             for (int pet2=0; pet2<new_npets; pet2++){
+              new_commarray[pet1Index][pet2Index].shmp = NULL; // detectable
               if (new_pid[pet2]==pid[mypet]){
 #ifdef ESMF_MPIUNI
                 // pet1==pet2==mypet==0
@@ -1892,6 +1858,8 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
     }
     delete [] sarg[i].cid;
     delete [] sarg[i].contributors;
+    delete [] sarg[i].sendChannel;
+    delete [] sarg[i].recvChannel;
   }
   // need to block pets that did not spawn but contributed in the VMKPlan
   if (vmp->spawnflag[mypet]==0 && vmp->contribute[mypet]>-1){
@@ -1907,6 +1875,9 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
       getpid(), pthread_self());
 #endif
   }
+  // now free up the MPI group and communicator that was associated with the VMK
+//  MPI_Comm_free(&(sarg[0].mpi_c));
+//  MPI_Group_free(&(sarg[0].mpi_g));
   // done holding info in SpawnArg array -> delete now
   delete [] sarg;
   // done blocking...

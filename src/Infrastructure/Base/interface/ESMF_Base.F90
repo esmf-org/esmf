@@ -51,6 +51,7 @@ module ESMF_BaseMod
   use ESMF_InitMacrosMod    ! ESMF initializer macros
   use ESMF_IOUtilMod        ! ESMF I/O utilities
   use ESMF_LogErrMod        ! ESMF error handling
+  use ESMF_VMMod            ! ESMF VM
 
   implicit none
 
@@ -118,6 +119,7 @@ module ESMF_BaseMod
 !  Misc methods - work on Base object but apply to any type
       public ESMF_SetName
       public ESMF_GetName
+      public ESMF_GetVM
 
 !
 
@@ -370,6 +372,47 @@ module ESMF_BaseMod
       if (present(rc)) rc = status
 
   end subroutine ESMF_GetName
+
+
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GetVM"
+!BOPI
+! !IROUTINE:  ESMF_GetVM - get the VM of this object
+!
+! !INTERFACE:
+  subroutine ESMF_GetVM(base, vm, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base), intent(in)             :: base
+      type(ESMF_VM),   intent(out)            :: vm
+      integer,         intent(out), optional  :: rc
+
+!
+! !DESCRIPTION:
+!     Return the vm of any type in the system.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[base]
+!       Any ESMF type.
+!     \item[vm]
+!       The vm on which the Base object was created.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+      integer :: status
+
+      ! Initialize return code; assume routine not implemented
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL
+      status = ESMF_RC_NOT_IMPL
+
+      call c_ESMC_GetVM(base , vm, status)
+      if (present(rc)) rc = status
+
+  end subroutine ESMF_GetVM
 
 
 !-------------------------------------------------------------------------

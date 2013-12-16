@@ -85,7 +85,7 @@ contains
 #define ESMF_METHOD "ESMF_RegridWeightGenFile"
 
 !BOP
-! !IROUTINE: ESMF_RegridWeightGenFile - Generate regrid weight file from grid files
+! !IROUTINE: ESMF_RegridWeightGen - Generate regrid weight file from grid files
 ! \label{api:esmf_regridweightgenfile}
 ! !INTERFACE:
   ! Private name; call using ESMF_RegridWeightGen()
@@ -437,13 +437,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
       endif
 
-      if (srcMissingValue .and. localSrcFileType == ESMF_FILEFORMAT_UGRID .and. &
-          localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	    msg = " missingvalue is only supported on the mesh elements", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-      endif
+!      if (srcMissingValue .and. localSrcFileType == ESMF_FILEFORMAT_UGRID .and. &
+!          localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
+!          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+!	    msg = " missingvalue is only supported on the mesh elements", &
+!            ESMF_CONTEXT, rcToReturn=rc)
+!          return
+!      endif
 
       if (dstMissingValue .and. (localDstFileType == ESMF_FILEFORMAT_SCRIP .or. &
           localDstFileType == ESMF_FILEFORMAT_ESMFMESH)) then
@@ -453,13 +453,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
       endif
 
-      if (dstMissingValue .and. localDstFileType == ESMF_FILEFORMAT_UGRID .and. &
-          localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	    msg = " missingvalue is only supported on the mesh elements", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-      endif
+!      if (dstMissingValue .and. localDstFileType == ESMF_FILEFORMAT_UGRID .and. &
+!          localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) then
+!          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+!	    msg = " missingvalue is only supported on the mesh elements", &
+!           ESMF_CONTEXT, rcToReturn=rc)
+!          return
+!      endif
 
       if (present(unmappedaction)) then
         localUnmappedaction = unmappedaction
@@ -911,7 +911,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	! if srcfile is not SCRIP, it is always unstructured
 	if (srcMissingValue) then
 	   srcMesh = ESMF_MeshCreate(srcfile, localSrcFileType, &
-                    meshname = trim(srcMeshName), addMask=.true., &
+                    meshname = trim(srcMeshName), maskFlag =meshloc, &
                     addUserArea=localUserAreaFlag, &
 		    varname=trim(srcMissingvalueVar), rc=localrc)
 	else
@@ -1029,7 +1029,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	! if dstfile is not SCRIP, it is always unstructured
 	if (dstMissingValue) then
  	   dstMesh = ESMF_MeshCreate(dstfile, localDstFileType, &
-                    meshname = trim(dstMeshName), addMask=.true., &
+                    meshname = trim(dstMeshName), maskFlag=meshloc, &
                     addUserArea=localUserAreaFlag, &
 		    varname=trim(dstMissingvalueVar), rc=localrc)
 	else
@@ -1392,7 +1392,7 @@ end subroutine ESMF_RegridWeightGenFile
 #define ESMF_METHOD "ESMF_RegridWeightGenDG"
 
 !BOP
-! !IROUTINE: ESMF_RegridWeightGenDG - Generate regrid routeHandle and an optional weight file from grid files with user-specified distribution
+! !IROUTINE: ESMF_RegridWeightGen - Generate regrid routeHandle and an optional weight file from grid files with user-specified distribution
 ! \label{api:esmf_regridweightgenDG}
 ! !INTERFACE:
   ! Private name; call using ESMF_RegridWeightGen()
@@ -1407,9 +1407,9 @@ end subroutine ESMF_RegridWeightGenFile
   character(len=*),             intent(in)            :: srcFile
   character(len=*),             intent(in)            :: dstFile
   type(ESMF_RouteHandle),       intent(out)           :: regridRouteHandle
-  type(ESMF_DistGrid),          intent(in)            :: srcElementDistgrid
-  type(ESMF_DistGrid),          intent(in)            :: dstElementDistgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+  type(ESMF_DistGrid),          intent(in),  optional :: srcElementDistgrid
+  type(ESMF_DistGrid),          intent(in),  optional :: dstElementDistgrid
   character(len=*),             intent(in),  optional :: weightFile
   type(ESMF_DistGrid),          intent(in),  optional :: srcNodalDistgrid
   type(ESMF_DistGrid),          intent(in),  optional :: dstNodalDistgrid
@@ -1620,10 +1620,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
      maskvals(1) = 0
 
      !Read in the srcfile and create the corresponding ESMF_Mesh object
-     srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
+     if (present(srcElementDistgrid) .and. present(srcNodalDistgrid)) then
+        srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
                        convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
 		       elementDistgrid=srcElementDistgrid, nodalDistgrid=srcNodalDistgrid, &
 		       rc=localrc)
+     elseif (present(srcElementDistgrid)) then
+        srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
+                       convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+                      elementDistgrid=srcElementDistgrid, &
+                      rc=localrc)
+     else                     
+        srcMesh = ESMF_MeshCreate(srcfile, ESMF_FILEFORMAT_SCRIP, &
+                       convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+                      rc=localrc)
+     endif                  
      if (ESMF_LogFoundError(localrc, &
                        ESMF_ERR_PASSTHRU, &
                        ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1636,10 +1647,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
      !Read in the dstfile and create the corresponding ESMF object (either
      ! ESMF_Grid or ESMF_Mesh)
-     dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
+     if (present(dstElementDistgrid) .and. present(dstNodalDistgrid)) then
+         dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
+                        convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+                       elementDistgrid=dstElementDistgrid, nodalDistgrid=dstNodalDistgrid, &
+                       rc=localrc)
+     elseif (present(dstElementDistgrid)) then
+         dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
+                      convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
+                      elementDistgrid=dstElementDistgrid, &
+                      rc=localrc)
+     else
+         dstMesh = ESMF_MeshCreate(dstfile, ESMF_FILEFORMAT_SCRIP, &
                        convertToDual=convertToDual, addUserArea=localUserAreaFlag, &
-		       elementDistgrid=dstElementDistgrid, nodalDistgrid=dstNodalDistgrid, &
-		       rc=localrc)
+                      rc=localrc)
+     endif                           
      if (ESMF_LogFoundError(localrc, &
                        ESMF_ERR_PASSTHRU, &
                        ESMF_CONTEXT, rcToReturn=rc)) return

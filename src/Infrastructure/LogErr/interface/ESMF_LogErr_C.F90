@@ -26,8 +26,6 @@
 !==============================================================================
 
   subroutine f_esmf_logwrite0(msg,logmsgList,rc)
-    use ESMF_UtilTypesMod    ! ESMF base class
-    use ESMF_BaseMod         ! ESMF base class
     use ESMF_LogErrMod
     
     implicit none
@@ -44,8 +42,6 @@
   end subroutine f_esmf_logwrite0
 
   subroutine f_esmf_logwrite1(msg,logmsgList,line,file,method,rc)
-    use ESMF_UtilTypesMod    ! ESMF base class
-    use ESMF_BaseMod         ! ESMF base class
     use ESMF_LogErrMod
     
     implicit none
@@ -66,8 +62,6 @@
   end subroutine f_esmf_logwrite1
 
   subroutine f_esmf_logset(flush, rc)
-    use ESMF_UtilTypesMod    ! ESMF base class
-    use ESMF_BaseMod         ! ESMF base class
     use ESMF_LogErrMod
     
     implicit none

@@ -72,8 +72,8 @@ int init_bucket(int num_cells) {
 void print_bucket(int bid) {
   FIELD *curr;
   if (bucket[bid]) {
-    curr = bucket[bid];
     printf("Bucket %d:\n", bid);
+    curr = bucket[bid];
     while (curr) {
       printf("%f %f %d %d\n", curr->lon, curr->lat, curr->rank, curr->count);
       curr=curr->next;
@@ -835,7 +835,7 @@ void FTN_X(c_convertscrip)(
     
     status=nc_enddef(ncid2);
     if (handle_error(status)) return; // bail out;
-    
+
     nc_put_var_double(ncid2, vertexid, nodelatlon); 
     if (handle_error(status)) return; // bail out;
     nc_put_var_int(ncid2, cellid, cells);
@@ -1076,7 +1076,15 @@ void FTN_X(c_convertscrip)(
   strbuf = "Number of nodes per element";
   status = nc_put_att_text(ncid2, edgeid, "long_name", strlen(strbuf), strbuf);
   if (handle_error(status)) return; // bail out;
+
+  // defind node mask
   dims[0]=vertdimid;
+  if (!nomask) {
+    status = nc_def_var(ncid2, "nodeMask", NC_INT, 1, dims, &cmid);
+    if (handle_error(status)) return; // bail out;
+    // status = nc_copy_att(ncid1, maskid, "_FillValue", ncid2, cmid);
+    // if (handle_error(status)) return; // bail out;
+  }
  
   // Global Attribute
   strbuf = "unstructured";
@@ -1097,6 +1105,14 @@ void FTN_X(c_convertscrip)(
   if (handle_error(status)) return; // bail out;
 
   nc_enddef(ncid2);
+  if (!nomask) {
+    inbuf2=(int*)malloc(sizeof(int)*gsdim);
+    status = nc_get_var_int(ncid1, maskid, inbuf2);
+    if (handle_error(status)) return; // bail out;
+    status = nc_put_var_int(ncid2, cmid, inbuf2);
+    if (handle_error(status)) return; // bail out;
+    free(inbuf2);
+  }
   nc_put_var_double(ncid2, vertexid, inbuf1); 
   if (handle_error(status)) return; // bail out;
   nc_put_var_int(ncid2, cellid, dualcells);

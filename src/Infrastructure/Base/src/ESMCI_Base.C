@@ -236,6 +236,30 @@ static const char *const version = "$Id$";
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_BaseGetVM"
+//BOPI
+// !IROUTINE:  ESMC_BaseGetVM - Get Base class VM
+//  
+// !INTERFACE:
+      ESMCI::VM *ESMC_Base::ESMC_BaseGetVM(
+// 
+// !ARGUMENTS:
+      void) const {
+//  
+// !RETURN VALUE:
+//    Unique VM of the context in which this base object was created
+//  
+// !DESCRIPTION:
+//    Returns the object's VM.
+//  
+//EOPI
+
+  return vm;
+
+} // end ESMC_BaseGetVM
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_BaseGetName"
 //BOPI
 // !IROUTINE:  ESMC_BaseGetName - Get Base object name
@@ -873,7 +897,7 @@ static const char *const version = "$Id$";
 // !IROUTINE:  ESMC_Base - native C++ constructor for ESMC_Base class
 //
 // !INTERFACE:
-      ESMC_Base::ESMC_Base(ESMCI::VM *vm) {
+      ESMC_Base::ESMC_Base(ESMCI::VM *vmArg) {
 //
 // !RETURN VALUE:
 //    none
@@ -887,12 +911,14 @@ static const char *const version = "$Id$";
 //EOPI
   int rc;
   
-  if (vm==NULL){
+  if (vmArg==NULL){
     // no VM passed in -> get vmID of the current VM context
     vmID = ESMCI::VM::getCurrentID(&rc);
+    vm = ESMCI::VM::getCurrent(&rc);
   }else{
     // VM was passed in -> get vmID of the specified VM context
-    vmID = vm->getVMId(&rc);
+    vmID = vmArg->getVMId(&rc);
+    vm = vmArg;
   }
     
   //ESMCI::VMIdPrint(vmID);
@@ -934,12 +960,17 @@ static const char *const version = "$Id$";
 //    none
 //
 // !DESCRIPTION:
-//   default initialization 
+//   Initialization with a specified id. If id==-1 then this is a proxy member.
 //
 //EOPI
   int rc;
   
   vmID = ESMCI::VM::getCurrentID(&rc);  // get vmID of current VM context
+  if (id==-1){
+    // proxy members hold NULL for the vm
+    vm = NULL;
+  }else
+    vm = ESMCI::VM::getCurrent(&rc);
 //  ESMCI::VMIdPrint(vmID);
   vmIDCreator = false;  // vmID points into global table
   
@@ -986,6 +1017,7 @@ static const char *const version = "$Id$";
   int rc;
   
   vmID = ESMCI::VM::getCurrentID(&rc);  // get vmID of current VM context
+  vm = ESMCI::VM::getCurrent(&rc);
 //  ESMCI::VMIdPrint(vmID);
   vmIDCreator = false;  // vmID points into global table
   

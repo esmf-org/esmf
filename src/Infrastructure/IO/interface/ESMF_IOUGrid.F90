@@ -486,6 +486,117 @@ subroutine ESMF_UGridGetVar (filename, meshname, &
 
     return
     end subroutine ESMF_UGridGetVar
+
+!---------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UGridInqVarLoc"
+subroutine ESMF_UGridInqVarLoc (ncid, VarId, varname,location, rc)
+
+    integer, intent(in) :: ncid
+    integer, intent(in) :: VarId
+    character(len=*), intent(in) :: varname
+    integer, intent(out) :: location ! 1 for node, 2 for face
+    integer                        :: rc
+
+    integer   :: meshId
+    integer   :: ncStatus
+    character(len=256) :: errmsg
+    character(len=80) :: attstr, attstr1, locationStr
+    integer   :: len,len1
+    integer, parameter :: nf90_noerror=0
+
+#ifdef ESMF_NETCDF
+    ncStatus = nf90_get_att(ncid, VarId, "location", locationStr)
+    if (ncStatus /= nf90_noerror) then
+      ! location attribute does not exist, check coordinates attribute
+      ! check if the coordinate attribute exist or not
+      ncStatus = nf90_inquire_attribute(ncid, VarId, "coordinates", len=len)
+      errmsg ="No location or coordinates attributes defined for "//varname
+      if (CDFCheckError (ncStatus, &
+          		 ESMF_METHOD,  &
+			 ESMF_SRCLINE, errmsg, &
+			 rc)) return
+      ncStatus = nf90_get_att(ncid, VarId, "coordinates", attstr)
+      if (CDFCheckError (ncStatus, &
+       	  		 ESMF_METHOD,  &
+			 ESMF_SRCLINE, errmsg, &
+			 rc)) return
+      ! check if it matches with the node_coordinates or face_coordinates defined
+      ! on the topology variable
+      ncStatus = nf90_inquire_attribute(ncid, VarId, "mesh", len=len1)
+      errmsg ="No mesh attribute defined for "//varname
+      if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+      ncStatus = nf90_get_att(ncid, VarId, "mesh", attstr1)
+      if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+      ncStatus = nf90_inq_varid (ncid, attstr1(1:len1), meshId)
+      errmsg = "Dummy Variable "//attstr1(1:len1)//" does not exist"
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD,  &
+        ESMF_SRCLINE, errmsg, &
+        rc)) return
+      errmsg = "Attribute node_coordinates in variable "//attstr1(1:len1)
+      ncStatus = nf90_inquire_attribute(ncid, meshId, "node_coordinates", len=len1)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD,  &
+        ESMF_SRCLINE, errmsg, &
+        rc)) return
+      ncStatus = nf90_get_att (ncid, meshId, "node_coordinates", attstr1)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD,  &
+        ESMF_SRCLINE, errmsg, &
+        rc)) return
+      if (attstr1(1:len1) .eq. attstr(1:len)) then
+        location = 1
+      else
+        ! check if the coordinates match with face_coordinates
+        ncStatus = nf90_inquire_attribute(ncid, meshId, "face_coordinates", len=len1)
+        errmsg = "Attribute face_coordinates"
+        if (CDFCheckError (ncStatus, &
+           ESMF_METHOD,  &
+           ESMF_SRCLINE, errmsg, &
+           rc)) return
+        ncStatus = nf90_get_att (ncid, meshId, "face_coordinates", attstr1)
+        if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+        if (attstr1(1:len1) .eq. attstr(1:len)) then
+          location = 2
+        else
+	  errmsg = "- coordinates attribute does not match with face or node coordinates"
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
+                 msg=errmsg, ESMF_CONTEXT, rcToReturn=rc) 
+          return
+       	endif
+      endif		 
+     else
+       ncStatus = nf90_inquire_attribute(ncid, VarId, "location", len=len)
+        if (locationStr(1:len) .eq. 'node') then
+          location = 1
+       elseif (locationStr(1:len) .eq. 'face') then
+          location = 2
+       else
+	  errmsg = "- location attribute is not recognizable: "//locationStr(1:len)
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
+                 msg=errmsg, ESMF_CONTEXT, rcToReturn=rc) 
+          return
+       endif
+     endif
+     rc = ESMF_SUCCESS
+#else
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+#endif
+     return
+end subroutine ESMF_UGridInqVarLoc
+
 !---------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_UGridGetVarByName"
@@ -502,11 +613,12 @@ subroutine ESMF_UGridGetVarByName (filename, varname, varbuffer, &
     integer                       :: rc
 
     integer   :: ncid, VarId
-    integer   :: ncStatus
+    integer   :: ncStatus, localrc
     character(len=256) :: errmsg
     character(len=80) :: attstr
     integer   :: ndims, dimids(3), dimsize, length
     integer, pointer   :: starts(:), counts(:)
+    integer :: locflag
     integer, parameter :: nf90_noerror=0
 
 #ifdef ESMF_NETCDF
@@ -536,14 +648,12 @@ subroutine ESMF_UGridGetVarByName (filename, varname, varbuffer, &
     ! if location is given, check if the location attribute of the variable match with the
     ! input value
     if (present(location)) then
-	ncStatus = nf90_get_att(ncid, VarId, "location", attstr)
-        if (CDFCheckError (ncStatus, &
-           ESMF_METHOD,  &
-           ESMF_SRCLINE, errmsg, &
-           rc)) return
-	length =len(location)
-        if (attstr(1:length) .ne. location) then
-	  errmsg = "- location attribute does not match with input location "//location
+        call ESMF_UGridInqVarLoc(ncid, VarId, varname, locflag, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+			ESMF_CONTEXT, rcToReturn=rc)) return
+        if (((location .eq. 'node') .and. (locflag /= 1)) .or. &
+	   ((location .eq. 'face') .and. (locflag /= 2))) then
+	  errmsg = "- variable "//varname//" is not defined on location "//location
           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & 
                  msg=errmsg, ESMF_CONTEXT, rcToReturn=rc) 
           return
@@ -998,6 +1108,7 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     real(ESMF_KIND_R8) :: coord(3)
     integer, parameter :: nf90_noerror = 0
     real(ESMF_KIND_R8), allocatable:: nodeCoord1D(:)
+    integer            :: localrc
 
 #ifdef ESMF_NETCDF
 
@@ -1092,9 +1203,8 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
           return
         endif
         ! if units is "degrees", convert it to radians
-        if (units(1:7) .eq. "degrees") then
-            deg2rad = 3.141592653589793238/180.0
-            nodeCoords(i,:) = nodeCoords(i,:)*deg2rad
+        if (units(1:7) .eq. "radians") then
+            nodeCoords(i,:) = nodeCoords(i,:)*ESMF_COORDSYS_RAD2DEG
         endif
       else	   
         ! normalize the height using the earth radius
@@ -1113,11 +1223,16 @@ subroutine ESMF_GetMesh3DFromUGrid (filename, ncid, meshid, nodeCoords, elmtConn
     enddo
 
     ! Convert the coordinates into Cartesian 3D
+    
     do i=1,nodeCount
-      coord(1)=nodeCoords(3,i)*cos(nodeCoords(1,i))*cos(nodeCoords(2,i))
-      coord(2)=nodeCoords(3,i)*sin(nodeCoords(1,i))*cos(nodeCoords(2,i))
-      coord(3)=nodeCoords(3,i)*sin(nodeCoords(2,i))
-      nodeCoords(:,i)=coord(:)
+      call c_esmc_sphdeg_to_cart(nodeCoords(1,i), nodeCoords(2,i), & 
+                  coord(1), coord(2), coord(3), &
+                  localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+      nodeCoords(1,i)=nodeCoords(3,i)*coord(1)
+      nodeCoords(2,i)=nodeCoords(3,i)*coord(2)
+      nodeCoords(3,i)=nodeCoords(3,i)*coord(3)
     enddo
 
     ! Get element connectivity, if it does not exist, bail out
@@ -1244,7 +1359,8 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
 
 #ifdef ESMF_NETCDF
     if ( ncStatus .ne. nf90_noerror) then
-        call ESMF_LogWrite (msg="netCDF Status Return Error", logmsgFlag=ESMF_LOGMSG_ERROR, &
+        call ESMF_LogWrite (msg=trim(errmsg)//':'//trim(nf90_strerror(ncStatus)), &
+	    logmsgFlag=ESMF_LOGMSG_ERROR, &
             line=lineNo, file=fileName, method=module)
         print '("NetCDF Error: ", A, " : ", A)', &
 	trim(errmsg),trim(nf90_strerror(ncStatus))

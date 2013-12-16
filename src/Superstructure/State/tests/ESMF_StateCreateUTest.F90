@@ -59,7 +59,7 @@ end module
     character(1000) :: testName
     !type(ESMF_Field) :: field1, field2
     type(ESMF_State) :: state1, stateAlias
-	logical:: stateBool
+    logical:: stateBool
 
 
     ! individual test failure messages
@@ -824,8 +824,8 @@ end module
               print *, 'ESMF_STATEITEM_UNKNOWN:     ', trim (names(i))
             case (ESMF_STATEITEM_NOTFOUND%ot)   
               print *, 'ESMF_STATEITEM_NOTFOUND:    ', trim (names(i))
-	    case default
-	      print *, '(unknown type):             ', trim (names(i))
+            case default
+              print *, '(unknown type):             ', trim (names(i))
             end select
           end do
 

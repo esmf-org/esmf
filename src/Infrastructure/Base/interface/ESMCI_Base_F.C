@@ -379,6 +379,44 @@ extern "C" {
 
 //-----------------------------------------------------------------------------
 //BOPI
+// !IROUTINE:  c_ESMC_GetVM - return the object's VM to the caller
+//
+// !INTERFACE:
+      void FTN_X(c_esmc_getvm)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_getvm()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in - base object
+      ESMCI::VM **vm,           // out - Fortran, ESMF_VM
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     return the object's VM to a Fortran caller.
+//
+//EOPI
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+  if (!base) {
+    printf("in c_ESMC_GetVM, base is bad, returning failure\n");
+    if (rc) *rc = ESMF_FAILURE;
+    return;
+  }
+
+  *vm = (*base)->ESMC_BaseGetVM();
+  if (rc) *rc = ESMF_SUCCESS;
+
+  return;
+
+}  // end c_ESMC_GetVM
+
+//-----------------------------------------------------------------------------
+//BOPI
 // !IROUTINE:  c_ESMC_SetName - set the object name from an F90 caller
 //
 // !INTERFACE:

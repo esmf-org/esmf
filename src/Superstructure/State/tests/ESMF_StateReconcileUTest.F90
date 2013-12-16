@@ -832,7 +832,7 @@ program ESMF_StateReconcileUTest
     !-------------------------------------------------------------------------
     !NEX_UTest_Multi_Proc_Only
     call ESMF_StateGet (state2, itemName=array1name,  &
-    	array=array1_alternate, rc=rc)
+        array=array1_alternate, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "PET", localpet, ": Calling StateGet to access proxies"
     call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -1011,15 +1011,15 @@ program ESMF_StateReconcileUTest
     rc = ESMF_SUCCESS
     if (localPet == 0) then
       do, i=1, size (field_attr)
-	write (fieldname, '(a,i4)') 'PET 0 Field', i
-	field_attr(i) = ESMF_FieldEmptyCreate (name=fieldname, rc=rc)
-	if (rc /= ESMF_SUCCESS) go to 50
+        write (fieldname, '(a,i4)') 'PET 0 Field', i
+        field_attr(i) = ESMF_FieldEmptyCreate (name=fieldname, rc=rc)
+        if (rc /= ESMF_SUCCESS) go to 50
 
-	call ESMF_AttributeSet (field_attr(i),  &
+        call ESMF_AttributeSet (field_attr(i),  &
             name=trim (fieldname) // ' attribute',  &
             valueList=(/ i /),  &
             rc=rc)
-	if (rc /= ESMF_SUCCESS) go to 50
+        if (rc /= ESMF_SUCCESS) go to 50
       end do
 
       call ESMF_StateAdd (state_attr, field_attr, rc=rc)
@@ -1041,7 +1041,7 @@ program ESMF_StateReconcileUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Accessing reconciled Fields test"
     do, i=1, size (field_attr_new)
-	write (fieldname, '(a,i4)') 'PET 0 Field', i
+      write (fieldname, '(a,i4)') 'PET 0 Field', i
       call ESMF_StateGet (state_attr,  &
           itemName=fieldname, field=field_attr_new(i),  &
           rc=rc)
@@ -1054,7 +1054,7 @@ program ESMF_StateReconcileUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Accessing reconciled Field Attributes test"
     do, i=1, size (field_attr_new)
-	write (fieldname, '(a,i4)') 'PET 0 Field', i
+      write (fieldname, '(a,i4)') 'PET 0 Field', i
       call ESMF_AttributeGet (field_attr_new(i),  &
           name=trim (fieldname) // ' attribute',  &
           value=attr_val(1),  &
