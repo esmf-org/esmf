@@ -335,8 +335,8 @@ void VMK::init(MPI_Comm mpiCommunicator){
   // set up private Group and Comm objects across "mpiCommunicator"
   MPI_Comm_group(mpiCommunicator, &mpi_g);
   MPI_Comm_create(mpiCommunicator, mpi_g, &mpi_c);
-  // ... and copy them into the class static default variables...
-  default_mpi_g = mpi_g;
+  MPI_Group_free(&mpi_g);
+  // ... and copy the Comm object into the class static default variable...
   default_mpi_c = mpi_c;
   // initialize the shared memory variables
   pth_finish_count = NULL;
@@ -504,7 +504,6 @@ void VMK::finalize(int finalizeMpi){
   MPI_Finalized(&finalized);
   if (!finalized){
     MPI_Comm_free(&mpi_c);
-    MPI_Group_free(&mpi_g);
     if (finalizeMpi)
       MPI_Finalize();
   }
@@ -1449,8 +1448,13 @@ void *VMK::startup(class VMKPlan *vmp,
         // I am this pet
         if (foundfirstpet == i){
           // I am the first under this lpid and must create communicator
-          MPI_Group_incl(vmp->mpi_g_part, num_diff_pids, grouplist, &new_mpi_g);
+          MPI_Group mpi_g_part;
+          MPI_Comm_group(vmp->mpi_c_part, &mpi_g_part);     // plan's group
+          MPI_Group new_mpi_g;
+          MPI_Group_incl(mpi_g_part, num_diff_pids, grouplist, &new_mpi_g);
           MPI_Comm_create(vmp->mpi_c_part, new_mpi_g, &new_mpi_c);
+          MPI_Group_free(&new_mpi_g);
+          MPI_Group_free(&mpi_g_part);
         }else{
           // I am not the first under this lpid and must receive 
 #if (VERBOSITY > 9)
@@ -1474,11 +1478,9 @@ void *VMK::startup(class VMKPlan *vmp,
 #endif
 
   // now:
-  //    new_mpi_g is the valid MPI_Group for the new VMK
   //    new_mpi_c is the valid MPI_Comm for the new VMK
 
-  // keep new_mpi_g and new_mpi_c in the sarg[0] for all PETs
-  sarg[0].mpi_g = new_mpi_g;
+  // keep new_mpi_c in the sarg[0] for all PETs
   sarg[0].mpi_c = new_mpi_c;
 
   // Next, setting up intra-process shared memory connection between
@@ -1663,7 +1665,6 @@ void *VMK::startup(class VMKPlan *vmp,
       for (int k=0; k<new_ncontributors[j]; k++)
         sarg[i].contributors[j][k] = new_contributors[j][k];
     }
-    sarg[i].mpi_g = new_mpi_g;
     sarg[i].mpi_c = new_mpi_c;
     sarg[i].pth_mutex2 = new_pth_mutex2;
     sarg[i].pth_mutex = new_pth_mutex;
@@ -1877,7 +1878,6 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
   }
   // now free up the MPI group and communicator that was associated with the VMK
 //  MPI_Comm_free(&(sarg[0].mpi_c));
-//  MPI_Group_free(&(sarg[0].mpi_g));
   // done holding info in SpawnArg array -> delete now
   delete [] sarg;
   // done blocking...
@@ -1893,8 +1893,6 @@ void VMK::print()const{
          "  pth_finish_count =\t %p\n",
     pth_mutex, pth_finish_count);
   int size, rank;
-  MPI_Group_size(mpi_g, &size);
-  printf("MPI_Group_size: %d\n", size);
   MPI_Comm_size(mpi_c, &size);
   printf("MPI_Comm_size: %d\n", size);
   MPI_Comm_rank(mpi_c, &rank);
@@ -1999,7 +1997,6 @@ VMKPlan::VMKPlan(){
   // invalidate members that deal with communicator of participating PETs
   lpid_mpi_g_part_map = NULL;
   commfreeflag = 0;
-  groupfreeflag = 0;
 }
 
 
@@ -2013,10 +2010,6 @@ VMKPlan::~VMKPlan(){
   if (commfreeflag){
     MPI_Comm_free(&mpi_c_part);
     commfreeflag = 0;
-  }
-  if (groupfreeflag){
-    MPI_Group_free(&mpi_g_part);
-    groupfreeflag = 0;
   }
 }
 
@@ -2067,20 +2060,22 @@ void VMKPlan::vmkplan_mpi_c_part(VMK &vm){
     }
   }
   
-  // all parent PETs create the new group of participating PETs
-  groupfreeflag = 1;
-  MPI_Group_incl(vm.mpi_g, n, grouplist, &mpi_g_part);
- 
   // all master PETs of the current vm must create the communicator
   int mypet = vm.getMypet();
   if (vm.getTid(mypet) == 0){
     // master PET in this VAS
+    MPI_Group mpi_g;
+    MPI_Comm_group(vm.mpi_c, &mpi_g);                 // parent's goup
+    MPI_Group mpi_g_part;
+    MPI_Group_incl(mpi_g, n, grouplist, &mpi_g_part); // child's group
     MPI_Comm_create(vm.mpi_c, mpi_g_part, &mpi_c_part);
     commfreeflag = 1;   // this PET is responsible for freeing the communicator
+    MPI_Group_free(&mpi_g);
+    MPI_Group_free(&mpi_g_part);
   }else{
     commfreeflag = 0;   // this PET is _not_ responsible for freeing the commu.
   }
-  
+
   // reset those commfreeflags for PETs outside the group of participants
   int j;
   for (j=0; j<n; j++)
