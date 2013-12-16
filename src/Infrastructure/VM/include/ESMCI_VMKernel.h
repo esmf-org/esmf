@@ -186,8 +186,7 @@ class VMK{
     // general information about this VMK
     int mpionly;    // 0: there is multi-threading, 1: MPI-only
     int nothreadsflag; // 0-threaded VM, 1-non-threaded VM
-    // MPI communication handles for MPI processes associated with this VMK
-    MPI_Group mpi_g;
+    // MPI Communicator handle
     MPI_Comm mpi_c;
     // Shared mutex and thread_finish variables. These are pointers that will be
     // pointing to shared memory variables between different thread-instances of
@@ -216,9 +215,8 @@ class VMK{
   public:
     // Declaration of static data members - Definitions are in the header of
     // source file ESMF_VMKernel.C
-    // static MPI info, Group and Comm of the default VMK
+    // static MPI Comm of the default VMK
     // and the thread level that the MPI implementation supports.
-    static MPI_Group default_mpi_g;
     static MPI_Comm default_mpi_c;
     static int mpi_thread_level;
     // Static data members that hold command line arguments
@@ -425,11 +423,9 @@ class VMKPlan{
     int pref_inter_ssi;         // defualt: PREF_INTER_SSI_MPI1
     // MPI communicator for the participating PET group of parent VM
     int *lpid_mpi_g_part_map;
-    MPI_Group mpi_g_part;
     MPI_Comm mpi_c_part;
     int commfreeflag;   // flag to indicate which PETs must free MPIcommunicator
-    int groupfreeflag;  // flag to indicate which PETs must free MPIgroup
-        
+    
   public:
     VMKPlan();
       // native constructor (sets communication preferences to defaults)
