@@ -539,6 +539,7 @@ struct SpawnArg{
   int *ncpet;
   int **cid;
   MPI_Comm mpi_c;
+  int mpi_c_freeflag;
   int nothreadsflag;
   // shared memory variables
   esmf_pthread_mutex_t *pth_mutex2;
@@ -1445,12 +1446,16 @@ void *VMK::startup(class VMKPlan *vmp,
           MPI_Comm_create(vmp->mpi_c_part, new_mpi_g, &new_mpi_c);
           MPI_Group_free(&new_mpi_g);
           MPI_Group_free(&mpi_g_part);
+          // store the communicator on this PET with info to free
+          sarg[0].mpi_c = new_mpi_c;
+          sarg[0].mpi_c_freeflag = 1; // responsible to free the communicator
         }else{
           // I am not the first under this lpid and must receive 
 #if (VERBOSITY > 9)
           printf("mypet %d recvs new_mpi_c from %d\n", mypet, foundfirstpet);
 #endif
           recv(&new_mpi_c, sizeof(MPI_Comm), foundfirstpet);
+          sarg[0].mpi_c_freeflag = 0; // not responsible to free the communicat.
         }
       }else if (mypet == foundfirstpet){
         // I am the master and must send the communicator
@@ -1469,10 +1474,6 @@ void *VMK::startup(class VMKPlan *vmp,
 
   // now:
   //    new_mpi_c is the valid MPI_Comm for the new VMK
-
-  // keep new_mpi_c in the sarg[0] for all PETs
-  sarg[0].mpi_c = new_mpi_c;
-
   // Next, setting up intra-process shared memory connection between
   // qualifying pets of the new VMK. Only one of the current pets that
   // spawn for a certain lpid must allocate memory for the shared variables 
@@ -1866,8 +1867,9 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
       getpid(), pthread_self());
 #endif
   }
-  // now free up the MPI group and communicator that was associated with the VMK
-//  MPI_Comm_free(&(sarg[0].mpi_c));
+  // now free up the MPI communicator that was associated with the VMK
+  if (sarg[0].mpi_c_freeflag)
+    MPI_Comm_free(&(sarg[0].mpi_c));
   // done holding info in SpawnArg array -> delete now
   delete [] sarg;
   // done blocking...
