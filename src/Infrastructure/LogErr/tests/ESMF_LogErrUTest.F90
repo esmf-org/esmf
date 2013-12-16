@@ -703,49 +703,49 @@ if (time_diff < zero) stop 1
       ! Write a log file with message filtering
       write (failMsg, *) 'Could not write a log file with filtering'
       write (name, *) ' Creating a log file with message filtering'
-      do, i=1,1
+      ESMF_BLOCK(msg_filter_test)
         ! Make sure we start with a clean log
         call ESMF_UtilIOUnitGet (unit=log8unit, rc=rc)
-        if (rc /= ESMF_SUCCESS) exit
+        if (rc /= ESMF_SUCCESS) exit msg_filter_test
 
         open (log8unit, file=trim (my_pet_char) // '.logAllow',  &
             status='unknown', iostat=rc)
         if (rc /= 0) then
             rc = ESMF_FAILURE
-            exit
+            exit msg_filter_test
         end if
 
         close (log8unit, status='delete', iostat=rc)
         if (rc /= 0) then
             rc = ESMF_FAILURE
-            exit
+            exit msg_filter_test
         end if
 
         ! Write some messages
         call ESMF_LogOpen (log8, filename='logAllow', rc=rc)
-        if (rc /= ESMF_SUCCESS) exit
+        if (rc /= ESMF_SUCCESS) exit msg_filter_test
 
         call ESMF_LogSet (log=log8,  &
             logmsgList=(/ ESMF_LOGMSG_INFO /),  &
             rc=rc)
-        if (rc /= ESMF_SUCCESS) exit
+        if (rc /= ESMF_SUCCESS) exit msg_filter_test
 
         call ESMF_LogWrite (log=log8,  &
             logmsgFlag=ESMF_LOGMSG_INFO, msg='should be in log', rc=rc)
-        if (rc /= ESMF_SUCCESS) exit
+        if (rc /= ESMF_SUCCESS) exit msg_filter_test
 
         call ESMF_LogWrite (log=log8,  &
             logmsgFlag=ESMF_LOGMSG_WARNING, msg='should NOT be in log', rc=rc)
-        if (rc /= ESMF_SUCCESS) exit
+        if (rc /= ESMF_SUCCESS) exit msg_filter_test
 
         call ESMF_LogWrite (log=log8,  &
             logmsgFlag=ESMF_LOGMSG_ERROR, msg='should NOT be in log', rc=rc)
-        if (rc /= ESMF_SUCCESS) exit
+        if (rc /= ESMF_SUCCESS) exit msg_filter_test
 
         call ESMF_LogClose (log8, rc=rc)
-        if (rc /= ESMF_SUCCESS) exit
+        if (rc /= ESMF_SUCCESS) exit msg_filter_test
 
-      end do
+      ESMF_ENDBLOCK(msg_filter_test)
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -995,6 +995,8 @@ if (time_diff < zero) stop 1
       write(name, *) " LogGet with logmsgAbort cleared size Test"
       rc = merge (ESMF_SUCCESS, ESMF_FAILURE, size (logabort_flags) == 0)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      if (associated (logabort_flags)) deallocate (logabort_flags)
 
       !------------------------------------------------------------------------
       !EX_UTest
