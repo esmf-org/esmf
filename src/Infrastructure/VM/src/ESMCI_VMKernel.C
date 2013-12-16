@@ -1529,8 +1529,8 @@ void *VMK::startup(class VMKPlan *vmp,
           if (new_pid[pet1]==pid[mypet]){
             int pet2Index = 0;  // reset
             for (int pet2=0; pet2<new_npets; pet2++){
-              new_commarray[pet1Index][pet2Index].shmp = NULL; // detectable
               if (new_pid[pet2]==pid[mypet]){
+                new_commarray[pet1Index][pet2Index].shmp = NULL; // detectable
 #ifdef ESMF_MPIUNI
                 // pet1==pet2==mypet==0
                 // -> allocate shared_mp structure for such PETs
