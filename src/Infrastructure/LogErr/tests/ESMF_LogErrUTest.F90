@@ -549,10 +549,10 @@
       call random_seed(put=rndseed(1:k))
       deallocate(rndseed)
       do i=1, 5
-      	call random_number(r1)
-      	ran_num = int(26.0*r1) + 65
-      	random_char  = achar(ran_num)
-	random_chars(i:i) = random_char
+        call random_number(r1)
+        ran_num = int(26.0*r1) + 65
+        random_char  = achar(ran_num)
+        random_chars(i:i) = random_char
       end do
       print *, "Random string is ", random_chars
 
@@ -722,28 +722,28 @@ if (time_diff < zero) stop 1
         end if
 
         ! Write some messages
-	call ESMF_LogOpen (log8, filename='logAllow', rc=rc)
-	if (rc /= ESMF_SUCCESS) exit
+        call ESMF_LogOpen (log8, filename='logAllow', rc=rc)
+        if (rc /= ESMF_SUCCESS) exit
 
-	call ESMF_LogSet (log=log8,  &
+        call ESMF_LogSet (log=log8,  &
             logmsgList=(/ ESMF_LOGMSG_INFO /),  &
             rc=rc)
-	if (rc /= ESMF_SUCCESS) exit
+        if (rc /= ESMF_SUCCESS) exit
 
-	call ESMF_LogWrite (log=log8,  &
+        call ESMF_LogWrite (log=log8,  &
             logmsgFlag=ESMF_LOGMSG_INFO, msg='should be in log', rc=rc)
-	if (rc /= ESMF_SUCCESS) exit
+        if (rc /= ESMF_SUCCESS) exit
 
-	call ESMF_LogWrite (log=log8,  &
+        call ESMF_LogWrite (log=log8,  &
             logmsgFlag=ESMF_LOGMSG_WARNING, msg='should NOT be in log', rc=rc)
-	if (rc /= ESMF_SUCCESS) exit
+        if (rc /= ESMF_SUCCESS) exit
 
-	call ESMF_LogWrite (log=log8,  &
+        call ESMF_LogWrite (log=log8,  &
             logmsgFlag=ESMF_LOGMSG_ERROR, msg='should NOT be in log', rc=rc)
-	if (rc /= ESMF_SUCCESS) exit
+        if (rc /= ESMF_SUCCESS) exit
 
-	call ESMF_LogClose (log8, rc=rc)
-	if (rc /= ESMF_SUCCESS) exit
+        call ESMF_LogClose (log8, rc=rc)
+        if (rc /= ESMF_SUCCESS) exit
 
       end do
       call ESMF_Test (rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
