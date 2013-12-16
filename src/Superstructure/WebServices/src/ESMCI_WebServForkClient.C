@@ -123,8 +123,9 @@ string  ESMCI_WebServForkClient::submitJob(
 //
 // !ARGUMENTS:
 //
-  int  clientId,
-  int  portNum
+  int     clientId,
+  string  registrarHost,
+  int     portNum
   )
 //
 // !DESCRIPTION:
@@ -136,6 +137,7 @@ string  ESMCI_WebServForkClient::submitJob(
 #if !defined (ESMF_OS_MinGW)
 printf("ESMCI_WebServForkClient::submitJob()\n");
 printf("Client ID: %d\n", clientId);
+printf("RegistrarHost: %s\n", registrarHost.c_str());
 printf("Port Num: %d\n", portNum);
 	int	pid = fork();
 
@@ -163,6 +165,7 @@ printf("Client ID: %s\n", clientIdStr);
              theScriptName.c_str(), 
              portNumStr, 
              clientIdStr, 
+             registrarHost.c_str(),
              NULL);
 	}
 

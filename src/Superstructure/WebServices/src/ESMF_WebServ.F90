@@ -581,13 +581,14 @@ contains
 ! !IROUTINE: ESMF_WebServRegisterSvc 
 !
 ! !INTERFACE:
-  subroutine ESMF_WebServRegisterSvc(comp, portNum, clientId, rc)
+  subroutine ESMF_WebServRegisterSvc(comp, portNum, clientId, registrarHost, rc)
 
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)        :: comp
     integer                    :: portNum
     character(len=ESMF_MAXSTR) :: clientId
+    character(len=ESMF_MAXSTR) :: registrarHost
     integer, intent(out)       :: rc
 !
 !
@@ -623,8 +624,8 @@ contains
     compDesc = ""
 !    hostName = "localhost"
 
-    call c_ESMC_RegisterComponent(compName, compDesc, clientId, portNum, &
-                                  localrc)
+    call c_ESMC_RegisterComponent(compName, compDesc, clientId, &
+                                  registrarHost, portNum, localrc)
 
     rc = localrc
 
@@ -639,13 +640,15 @@ contains
 ! !IROUTINE: ESMF_WebServCplCompRegisterSvc 
 !
 ! !INTERFACE:
-  subroutine ESMF_WebServCplCompRegisterSvc(comp, portNum, clientId, rc)
+  subroutine ESMF_WebServCplCompRegisterSvc(comp, portNum, clientId, registrarHost, rc)
+
 
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)         :: comp
     integer                    :: portNum
     character(len=ESMF_MAXSTR) :: clientId
+    character(len=ESMF_MAXSTR) :: registrarHost
     integer, intent(out)       :: rc
 !
 !
@@ -681,8 +684,8 @@ contains
     compDesc = ""
 !    hostName = "localhost"
 
-    call c_ESMC_RegisterComponent(compName, compDesc, clientId, portNum, &
-                                  localrc)
+    call c_ESMC_RegisterComponent(compName, compDesc, clientId, &
+                                  registrarHost, portNum, localrc)
 
     rc = localrc
 
@@ -697,11 +700,12 @@ contains
 ! !IROUTINE: ESMF_WebServUnregisterSvc 
 !
 ! !INTERFACE:
-  subroutine ESMF_WebServUnregisterSvc(clientId, rc)
+  subroutine ESMF_WebServUnregisterSvc(clientId, registrarHost, rc)
 
 !
 ! !ARGUMENTS:
     character(len=ESMF_MAXSTR) :: clientId
+    character(len=ESMF_MAXSTR) :: registrarHost
     integer, intent(out)       :: rc
 !
 !
@@ -726,7 +730,7 @@ contains
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
 
-    call c_ESMC_UnregisterComponent(clientId, localrc)
+    call c_ESMC_UnregisterComponent(clientId, registrarHost, localrc)
 
     rc = localrc
 
@@ -742,19 +746,21 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_WebServSvcLoop(clientId, comp, portNum, importState, &
-                                 exportState, clock, syncflag, phase, rc)
+                                 exportState, clock, syncflag, phase, &
+                                 registrarHost, rc)
 
 !
 ! !ARGUMENTS:
-    character(len=ESMF_MAXSTR)                       :: clientId
-    type(ESMF_GridComp)                              :: comp
-    integer                                          :: portNum
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
-    type(ESMF_Sync_Flag),    intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: rc
+    character(len=ESMF_MAXSTR)                          :: clientId
+    type(ESMF_GridComp)                                 :: comp
+    integer                                             :: portNum
+    type(ESMF_State),           intent(inout), optional :: importState
+    type(ESMF_State),           intent(inout), optional :: exportState
+    type(ESMF_Clock),           intent(inout), optional :: clock
+    type(ESMF_Sync_Flag),       intent(in),    optional :: syncflag
+    integer,                    intent(in),    optional :: phase
+    character(len=ESMF_MAXSTR), intent(in),    optional :: registrarHost
+    integer,                    intent(out),   optional :: rc
 !
 !
 ! !DESCRIPTION:
@@ -781,7 +787,8 @@ contains
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
 
-    call c_ESMC_ComponentSvcLoop(clientId, comp, importState, exportState, &
+    call c_ESMC_ComponentSvcLoop(clientId, registrarHost, &
+                                 comp, importState, exportState, &
                                  clock, syncflag, phase, portNum, localrc)
 
     rc = localrc
@@ -798,19 +805,21 @@ contains
 !
 ! !INTERFACE:
   subroutine ESMF_WebServCplCompSvcLoop(clientId, comp, portNum, importState, &
-                                        exportState, clock, syncflag, phase, rc)
+                                        exportState, clock, syncflag, phase, &
+                                        registrarHost, rc)
 
 !
 ! !ARGUMENTS:
-    character(len=ESMF_MAXSTR)                       :: clientId
-    type(ESMF_CplComp)                               :: comp
-    integer                                          :: portNum
-    type(ESMF_State),        intent(inout), optional :: importState
-    type(ESMF_State),        intent(inout), optional :: exportState
-    type(ESMF_Clock),        intent(inout), optional :: clock
-    type(ESMF_Sync_Flag),    intent(in),    optional :: syncflag
-    integer,                 intent(in),    optional :: phase
-    integer,                 intent(out),   optional :: rc
+    character(len=ESMF_MAXSTR)                          :: clientId
+    type(ESMF_CplComp)                                  :: comp
+    integer                                             :: portNum
+    type(ESMF_State),           intent(inout), optional :: importState
+    type(ESMF_State),           intent(inout), optional :: exportState
+    type(ESMF_Clock),           intent(inout), optional :: clock
+    type(ESMF_Sync_Flag),       intent(in),    optional :: syncflag
+    integer,                    intent(in),    optional :: phase
+    character(len=ESMF_MAXSTR), intent(in),    optional :: registrarHost
+    integer,                    intent(out),   optional :: rc
 !
 !
 ! !DESCRIPTION:
@@ -837,7 +846,8 @@ contains
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
 
-    call c_ESMC_CplComponentSvcLoop(clientId, comp, importState, exportState, &
+    call c_ESMC_CplComponentSvcLoop(clientId, registrarHost, &
+                                    comp, importState, exportState, &
                                     clock, syncflag, phase, portNum, localrc)
 
     rc = localrc
@@ -896,13 +906,14 @@ contains
 ! !IROUTINE: ESMF_WebServicesLoop 
 !
 ! !INTERFACE:
-  subroutine ESMF_WebServicesLoop(comp, portNum, clientId, rc)
+  subroutine ESMF_WebServicesLoop(comp, portNum, clientId, registrarHost, rc)
 
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp)                                 :: comp
     integer,                    intent(inout), optional :: portNum
     character(len=ESMF_MAXSTR), intent(in),    optional :: clientId
+    character(len=ESMF_MAXSTR), intent(in),    optional :: registrarHost
     integer,                    intent(out),   optional :: rc
 !
 !
@@ -945,6 +956,7 @@ contains
     type(ESMF_Sync_Flag)       :: syncflag
     integer                    :: phase
     character(len=ESMF_MAXSTR) :: clientIdVal
+    character(len=ESMF_MAXSTR) :: registrarHostVal
 
 
     ! Initialize return code
@@ -955,6 +967,12 @@ contains
       clientIdVal = clientId
     else
       clientIdVal = ""
+    end if
+
+    if (present(registrarHost)) then
+      registrarHostVal = registrarHost
+    else
+      registrarHostVal = ""
     end if
 
     call ESMF_VMGetGlobal(vm=vm, rc=localrc)
@@ -1003,7 +1021,8 @@ contains
        endif
 
        call ESMF_WebServRegisterSvc(comp, portNum=portNum, &
-             clientId=clientIdVal, rc=registrarrc)
+             clientId=clientIdVal, registrarHost=registrarHostVal, &
+             rc=registrarrc)
        if (ESMF_LogFoundError(registrarrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, &
@@ -1015,7 +1034,8 @@ contains
        call ESMF_WebServSvcLoop( &
              clientId=clientIdVal, comp=comp, portNum=portNum, &
              importState=importState, exportState=exportState, clock=clock, &
-             syncflag=syncflag, phase=phase, rc=localrc)
+             syncflag=syncflag, phase=phase, registrarHost=registrarHostVal, &
+             rc=localrc)
        if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, &
@@ -1027,7 +1047,8 @@ contains
              importState=importState, exportState=exportState, &
              clock=clock, phase=phase, procType="E", rc=localrc)
 
-       call ESMF_WebServUnregisterSvc(clientId=clientIdVal, rc=registrarrc)
+       call ESMF_WebServUnregisterSvc(clientId=clientIdVal, &
+             registrarHost=registrarHostVal, rc=registrarrc)
        if (ESMF_LogFoundError(registrarrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, &
@@ -1059,13 +1080,15 @@ contains
 ! !IROUTINE: ESMF_WebServicesCplCompLoop 
 !
 ! !INTERFACE:
-  subroutine ESMF_WebServicesCplCompLoop(comp, portNum, clientId, rc)
+  subroutine ESMF_WebServicesCplCompLoop(comp, portNum, clientId, registrarHost, rc)
+
 
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp)                                  :: comp
     integer,                    intent(inout), optional :: portNum
     character(len=ESMF_MAXSTR), intent(in),    optional :: clientId
+    character(len=ESMF_MAXSTR), intent(in),    optional :: registrarHost
     integer,                    intent(out),   optional :: rc
 !
 !
@@ -1108,6 +1131,7 @@ contains
     type(ESMF_Sync_Flag)       :: syncflag
     integer                    :: phase
     character(len=ESMF_MAXSTR) :: clientIdVal
+    character(len=ESMF_MAXSTR) :: registrarHostVal
 
 
     ! Initialize return code
@@ -1118,6 +1142,12 @@ contains
       clientIdVal = clientId
     else
       clientIdVal = ""
+    end if
+
+    if (present(registrarHost)) then
+      registrarHostVal = registrarHost
+    else
+      registrarHostVal = ""
     end if
 
     call ESMF_VMGetGlobal(vm=vm, rc=localrc)
@@ -1166,7 +1196,8 @@ contains
        endif
 
        call ESMF_WebServCplCompRegisterSvc(comp, portNum=portNum, &
-             clientId=clientIdVal, rc=registrarrc)
+             clientId=clientIdVal, registrarHost=registrarHostVal, &
+             rc=registrarrc)
        if (ESMF_LogFoundError(registrarrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, &
@@ -1178,7 +1209,8 @@ contains
        call ESMF_WebServCplCompSvcLoop( &
              clientId=clientIdVal, comp=comp, portNum=portNum, &
              importState=importState, exportState=exportState, clock=clock, &
-             syncflag=syncflag, phase=phase, rc=localrc)
+             syncflag=syncflag, phase=phase, registrarHost=registrarHostVal, &
+             rc=localrc)
        if (ESMF_LogFoundError(localrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, &
@@ -1190,7 +1222,8 @@ contains
              importState=importState, exportState=exportState, &
              clock=clock, phase=phase, procType="E", rc=localrc)
 
-       call ESMF_WebServUnregisterSvc(clientId=clientIdVal, rc=registrarrc)
+       call ESMF_WebServUnregisterSvc(clientId=clientIdVal, &
+             registrarHost=registrarHostVal, rc=registrarrc)
        if (ESMF_LogFoundError(registrarrc, &
              ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, &
@@ -1250,7 +1283,7 @@ contains
     rc = ESMF_SUCCESS
     localrc = ESMF_SUCCESS
 
-    call c_ESMC_AddOutputFilename(trim (filename), localrc)
+    call c_ESMC_AddOutputFilename(trim(filename), localrc)
 
     rc = localrc
 

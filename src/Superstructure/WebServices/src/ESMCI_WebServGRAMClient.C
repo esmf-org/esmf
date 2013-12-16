@@ -136,8 +136,9 @@ string  ESMCI_WebServGRAMClient::submitJob(
 //
 // !ARGUMENTS:
 //
-  int  portNum,
-  int  clientId
+  int     portNum,
+  string  registrarHost,
+  int     clientId
   )
 //
 // !DESCRIPTION:

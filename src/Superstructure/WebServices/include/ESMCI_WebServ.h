@@ -44,49 +44,61 @@
 extern "C"
 {
 	// service loop from ESMCI_WebServComponentSvr class
-	void FTN_X(c_esmc_componentsvcloop)(char*                   clientId,
-	                                    ESMCI::GridComp*        comp,
-                                       ESMCI::State*           importState,
-                                       ESMCI::State*           exportState,
-                                       ESMCI::Clock*           clock,
-                                       ESMC_BlockingFlag*      blockingFlag,
-                                       int*        		       phase,
-                                       int*        		       portNum,
-                                       int*        		       rc,
-                                       ESMCI_FortranStrLenArg  clientIdLen);
+   void  FTN_X(c_esmc_componentsvcloop)(
+                  char*                   clientId,
+                  char*                   registrarHost,
+                  ESMCI::GridComp*        comp,
+                  ESMCI::State*           importState,
+                  ESMCI::State*           exportState,
+                  ESMCI::Clock*           clock,
+                  ESMC_BlockingFlag*      blockingFlag,
+                  int*                    phase,
+                  int*                    portNum,
+                  int*                    rc,
+                  ESMCI_FortranStrLenArg  clientIdLen,
+                  ESMCI_FortranStrLenArg  registrarHostLen);
 
 	// service loop from ESMCI_WebServComponentSvr class
-	void FTN_X(c_esmc_cplcomponentsvcloop)(char*                   clientId,
-	                                       ESMCI::CplComp*         comp,
-                                          ESMCI::State*           importState,
-                                          ESMCI::State*           exportState,
-                                          ESMCI::Clock*           clock,
-                                          ESMC_BlockingFlag*      blockingFlag,
-                                          int*        		      phase,
-                                          int*        		      portNum,
-                                          int*        		      rc,
-                                          ESMCI_FortranStrLenArg  clientIdLen);
+   void  FTN_X(c_esmc_cplcomponentsvcloop)(
+                  char*                   clientId,
+                  char*                   registrarHost,
+                  ESMCI::CplComp*         comp,
+                  ESMCI::State*           importState,
+                  ESMCI::State*           exportState,
+                  ESMCI::Clock*           clock,
+                  ESMC_BlockingFlag*      blockingFlag,
+                  int*                    phase,
+                  int*                    portNum,
+                  int*                    rc,
+                  ESMCI_FortranStrLenArg  clientIdLen,
+                  ESMCI_FortranStrLenArg  registrarHostLen);
 
 	// registration methods from ESMCI_WebServRegistrarClient class
-	void  FTN_X(c_esmc_registercomponent)(char*                   compName,
-                                       char*                   compDesc, 
-                                       char*                   clientId, 
-                                       int*                    portNum,
-                                       int*                    rc,
-                                       ESMCI_FortranStrLenArg  compNameLen,
-                                       ESMCI_FortranStrLenArg  compDescLen,
-                                       ESMCI_FortranStrLenArg  clientIdLen);
+   void  FTN_X(c_esmc_registercomponent)(
+                  char*                   compName,
+                  char*                   compDesc,
+                  char*                   clientId,
+                  char*                   registrarHost,
+                  int*                    portNum,
+                  int*                    rc,
+                  ESMCI_FortranStrLenArg  compNameLen,
+                  ESMCI_FortranStrLenArg  compDescLen,
+                  ESMCI_FortranStrLenArg  clientIdLen,
+                  ESMCI_FortranStrLenArg  registrarHostLen);
 
-	void  FTN_X(c_esmc_unregistercomponent)(char*                   clientId,
-                                         int*                    rc,
-                                         ESMCI_FortranStrLenArg  clientIdLen);
+   void  FTN_X(c_esmc_unregistercomponent)(
+                  char*                   clientId,
+                  char*                   registrarHost,
+                  int*                    rc,
+                  ESMCI_FortranStrLenArg  clientIdLen,
+                  ESMCI_FortranStrLenArg  registrarHostLen);
 
 	void  FTN_X(c_esmc_getportnum)(int*  portNum,
-                                int*  rc);
+                                  int*  rc);
 
 	void  FTN_X(c_esmc_addoutputfilename)(char*                   filename,
-                                       int*                    rc,
-                                       ESMCI_FortranStrLenArg  filenameLen);
+                                         int*                    rc,
+                                         ESMCI_FortranStrLenArg  filenameLen);
 
 /*
 	void  FTN(c_esmc_addoutputdata)(double*                 timestamp,

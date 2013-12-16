@@ -482,7 +482,9 @@ printf("*** Port Num: %d\n", theCompSvrStartPort);
 	//***
 printf("Client ID: %d\n", clientId);
 printf("Port Num: %d\n", theCompSvrStartPort);
-	string	jobId = theCompSvrMgr->submitJob(clientId, theCompSvrStartPort);
+	string	jobId = theCompSvrMgr->submitJob(clientId, 
+                                             theRegistrarHost, 
+                                             theCompSvrStartPort);
 	newClient->setJobId(jobId);
 printf("Job ID: %s\n", jobId.c_str());
 
@@ -921,21 +923,62 @@ int  ESMCI_WebServProcCtrl::processRun(
 
 	clientInfo = iter->second;
 	//clientInfo->print();
-	status = clientInfo->status();
+
+   //***
+   // Get the component server information from the Registrar.
+   //***
+   char  clientIdStr[64];
+   sprintf(clientIdStr, "%d", clientInfo->clientId());
+
+   ESMCI_WebServRegistrarClient  registrar(theRegistrarHost.c_str(),
+                                           theRegistrarPort);
+   ESMCI_WebServCompSvrInfo      compSvrInfo;
+
+   if ((status = registrar.getComponent(clientIdStr, &compSvrInfo)) ==
+         ESMF_FAILURE)
+   {
+      //***
+      // Error communicating with Registrar... send back error
+      //***
+      status = NET_ESMF_STAT_ERROR;
+      unsigned int   netStatus = htonl(status);
+
+      if (theSocket.write(4, &netStatus) != 4)
+      {
+         ESMC_LogDefault.MsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write error status to socket.",
+            ESMC_CONTEXT, &localrc);
+
+         return localrc;
+      }
+
+      //***
+      // Then log and return
+      //***
+      ESMC_LogDefault.MsgFoundError(
+         ESMC_RC_NOT_VALID,
+         "Error while while getting component svc info from Registrar.",
+         ESMC_CONTEXT, &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+   compSvrInfo.print();
+   status = compSvrInfo.status();
+
+	clientInfo->setStatus(status);
 
 	//***
 	// Call the component run (must have completed the initialize phase before
 	// the run could be called)
 	//***
-	ESMCI_WebServCompSvrClient	client(clientInfo->serverHost().c_str(), 
-                                     clientInfo->serverPort(), 
-                                     clientInfo->clientId());
-
-	status = client.state();
-	clientInfo->setStatus(status);
-
 	if (status == NET_ESMF_STAT_INIT_DONE)
 	{
+	   ESMCI_WebServCompSvrClient	client(compSvrInfo.physHostName().c_str(), 
+                                        compSvrInfo.portNum(), 
+                                        compSvrInfo.clientId());
+
 		status = client.run();
 		//clientInfo->setStatus(NET_ESMF_STAT_RUNNING);
 		clientInfo->setStatus(status);
@@ -1068,24 +1111,64 @@ int  ESMCI_WebServProcCtrl::processTimestep(
 
 	clientInfo = iter->second;
 	//clientInfo->print();
-	status = clientInfo->status();
+
+   //***
+   // Get the component server information from the Registrar.
+   //***
+   char  clientIdStr[64];
+   sprintf(clientIdStr, "%d", clientInfo->clientId());
+
+   ESMCI_WebServRegistrarClient  registrar(theRegistrarHost.c_str(),
+                                           theRegistrarPort);
+   ESMCI_WebServCompSvrInfo      compSvrInfo;
+
+   if ((status = registrar.getComponent(clientIdStr, &compSvrInfo)) ==
+         ESMF_FAILURE)
+   {
+      //***
+      // Error communicating with Registrar... send back error
+      //***
+      status = NET_ESMF_STAT_ERROR;
+      unsigned int   netStatus = htonl(status);
+
+      if (theSocket.write(4, &netStatus) != 4)
+      {
+         ESMC_LogDefault.MsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write error status to socket.",
+            ESMC_CONTEXT, &localrc);
+
+         return localrc;
+      }
+
+      //***
+      // Then log and return
+      //***
+      ESMC_LogDefault.MsgFoundError(
+         ESMC_RC_NOT_VALID,
+         "Error while while getting component svc info from Registrar.",
+         ESMC_CONTEXT, &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+   compSvrInfo.print();
+   status = compSvrInfo.status();
+
+   clientInfo->setStatus(status);
 
 	//***
 	// Call the component run (must have completed the initialize phase before
 	// the run could be called)
 	//***
-	ESMCI_WebServCompSvrClient	client(clientInfo->serverHost().c_str(), 
-                                     clientInfo->serverPort(), 
-                                     clientInfo->clientId());
-
-	status = client.state();
-	clientInfo->setStatus(status);
-
 	if ((status == NET_ESMF_STAT_INIT_DONE)  ||
 	    (status == NET_ESMF_STAT_TIMESTEP_DONE))
 	{
+	   ESMCI_WebServCompSvrClient	client(compSvrInfo.physHostName().c_str(), 
+                                        compSvrInfo.portNum(), 
+                                        compSvrInfo.clientId());
+
 		status = client.timestep(numTimesteps);
-		//clientInfo->setStatus(NET_ESMF_STAT_RUNNING);
 		clientInfo->setStatus(status);
 	}
 	else
@@ -1197,7 +1280,51 @@ int  ESMCI_WebServProcCtrl::processFinal(
 
 	clientInfo = iter->second;
 	//clientInfo->print();
-	status = clientInfo->status();
+
+   //***
+   // Get the component server information from the Registrar.
+   //***
+   char  clientIdStr[64];
+   sprintf(clientIdStr, "%d", clientInfo->clientId());
+
+   ESMCI_WebServRegistrarClient  registrar(theRegistrarHost.c_str(),
+                                           theRegistrarPort);
+   ESMCI_WebServCompSvrInfo      compSvrInfo;
+
+   if ((status = registrar.getComponent(clientIdStr, &compSvrInfo)) ==
+         ESMF_FAILURE)
+   {
+      //***
+      // Error communicating with Registrar... send back error
+      //***
+      status = NET_ESMF_STAT_ERROR;
+      unsigned int   netStatus = htonl(status);
+
+      if (theSocket.write(4, &netStatus) != 4)
+      {
+         ESMC_LogDefault.MsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write error status to socket.",
+            ESMC_CONTEXT, &localrc);
+
+         return localrc;
+      }
+
+      //***
+      // Then log and return
+      //***
+      ESMC_LogDefault.MsgFoundError(
+         ESMC_RC_NOT_VALID,
+         "Error while while getting component svc info from Registrar.",
+         ESMC_CONTEXT, &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+   compSvrInfo.print();
+   status = compSvrInfo.status();
+
+   clientInfo->setStatus(status);
 
 	//***
 	// Call the component finalize (must have completed at least the initalize
@@ -1205,19 +1332,15 @@ int  ESMCI_WebServProcCtrl::processFinal(
    // (KDS: assuming you can call finalize after calling just initialize, but
    //       not sure if that is true.)
 	//***
-	ESMCI_WebServCompSvrClient	client(clientInfo->serverHost().c_str(), 
-                                     clientInfo->serverPort(), 
-                                     clientInfo->clientId());
-
-	status = client.state();
-	clientInfo->setStatus(status);
-
 	if ((status == NET_ESMF_STAT_RUN_DONE)  ||
 	    (status == NET_ESMF_STAT_TIMESTEP_DONE)  ||
 	    (status == NET_ESMF_STAT_INIT_DONE))
 	{
+	   ESMCI_WebServCompSvrClient	client(compSvrInfo.physHostName().c_str(), 
+                                        compSvrInfo.portNum(), 
+                                        compSvrInfo.clientId());
+
 		status = client.final();
-		//clientInfo->setStatus(NET_ESMF_STAT_FINALIZING);
 		clientInfo->setStatus(status);
 	}
 	else
@@ -1331,12 +1454,58 @@ int  ESMCI_WebServProcCtrl::processGetDataDesc(
 	clientInfo = iter->second;
 	//clientInfo->print();
 
+   //***
+   // Get the component server information from the Registrar.
+   //***
+   char  clientIdStr[64];
+   sprintf(clientIdStr, "%d", clientInfo->clientId());
+
+   ESMCI_WebServRegistrarClient  registrar(theRegistrarHost.c_str(),
+                                           theRegistrarPort);
+   ESMCI_WebServCompSvrInfo      compSvrInfo;
+
+   if ((status = registrar.getComponent(clientIdStr, &compSvrInfo)) ==
+         ESMF_FAILURE)
+   {
+      //***
+      // Error communicating with Registrar... send back error
+      //***
+      status = NET_ESMF_STAT_ERROR;
+      unsigned int   netStatus = htonl(status);
+
+      if (theSocket.write(4, &netStatus) != 4)
+      {
+         ESMC_LogDefault.MsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write error status to socket.",
+            ESMC_CONTEXT, &localrc);
+
+         return localrc;
+      }
+
+      //***
+      // Then log and return
+      //***
+      ESMC_LogDefault.MsgFoundError(
+         ESMC_RC_NOT_VALID,
+         "Error while while getting component svc info from Registrar.",
+         ESMC_CONTEXT, &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+   compSvrInfo.print();
+   status = compSvrInfo.status();
+
+   clientInfo->setStatus(status);
+
+
 	//***
 	// Get the data description from the server
 	//***
-	ESMCI_WebServCompSvrClient	client(clientInfo->serverHost().c_str(), 
-                                     clientInfo->serverPort(), 
-                                     clientInfo->clientId());
+	ESMCI_WebServCompSvrClient	client(compSvrInfo.physHostName().c_str(), 
+                                     compSvrInfo.portNum(), 
+                                     compSvrInfo.clientId());
 
 	ESMCI_WebServDataDesc*	dataDesc = client.dataDesc();
 
@@ -1594,12 +1763,57 @@ printf("After: %g\n", *timeValue);
 	clientInfo = iter->second;
 	//clientInfo->print();
 
+   //***
+   // Get the component server information from the Registrar.
+   //***
+   char  clientIdStr[64];
+   sprintf(clientIdStr, "%d", clientInfo->clientId());
+
+   ESMCI_WebServRegistrarClient  registrar(theRegistrarHost.c_str(),
+                                           theRegistrarPort);
+   ESMCI_WebServCompSvrInfo      compSvrInfo;
+
+   if ((status = registrar.getComponent(clientIdStr, &compSvrInfo)) ==
+         ESMF_FAILURE)
+   {
+      //***
+      // Error communicating with Registrar... send back error
+      //***
+      status = NET_ESMF_STAT_ERROR;
+      unsigned int   netStatus = htonl(status);
+
+      if (theSocket.write(4, &netStatus) != 4)
+      {
+         ESMC_LogDefault.MsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write error status to socket.",
+            ESMC_CONTEXT, &localrc);
+
+         return localrc;
+      }
+
+      //***
+      // Then log and return
+      //***
+      ESMC_LogDefault.MsgFoundError(
+         ESMC_RC_NOT_VALID,
+         "Error while while getting component svc info from Registrar.",
+         ESMC_CONTEXT, &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+   compSvrInfo.print();
+   status = compSvrInfo.status();
+
+   clientInfo->setStatus(status);
+
 	//***
 	// Get the data from the server
 	//***
-	ESMCI_WebServCompSvrClient	client(clientInfo->serverHost().c_str(), 
-                                     clientInfo->serverPort(), 
-                                     clientInfo->clientId());
+	ESMCI_WebServCompSvrClient	client(compSvrInfo.physHostName().c_str(), 
+                                     compSvrInfo.portNum(), 
+                                     compSvrInfo.clientId());
 
    int      numVars = 0;
    int      numLats = 0;
@@ -1824,9 +2038,54 @@ int  ESMCI_WebServProcCtrl::processEnd(
 	//clientInfo->print();
 	status = clientInfo->status();
 
-	ESMCI_WebServCompSvrClient	client(clientInfo->serverHost().c_str(), 
-                                     clientInfo->serverPort(), 
-                                     clientInfo->clientId());
+   //***
+   // Get the component server information from the Registrar.
+   //***
+   char  clientIdStr[64];
+   sprintf(clientIdStr, "%d", clientInfo->clientId());
+
+   ESMCI_WebServRegistrarClient  registrar(theRegistrarHost.c_str(),
+                                           theRegistrarPort);
+   ESMCI_WebServCompSvrInfo      compSvrInfo;
+
+   if ((status = registrar.getComponent(clientIdStr, &compSvrInfo)) ==
+         ESMF_FAILURE)
+   {
+      //***
+      // Error communicating with Registrar... send back error
+      //***
+      status = NET_ESMF_STAT_ERROR;
+      unsigned int   netStatus = htonl(status);
+
+      if (theSocket.write(4, &netStatus) != 4)
+      {
+         ESMC_LogDefault.MsgFoundError(
+            ESMC_RC_FILE_WRITE,
+            "Unable to write error status to socket.",
+            ESMC_CONTEXT, &localrc);
+
+         return localrc;
+      }
+
+      //***
+      // Then log and return
+      //***
+      ESMC_LogDefault.MsgFoundError(
+         ESMC_RC_NOT_VALID,
+         "Error while while getting component svc info from Registrar.",
+         ESMC_CONTEXT, &localrc);
+
+      return ESMF_FAILURE;
+   }
+
+   compSvrInfo.print();
+   status = compSvrInfo.status();
+
+   clientInfo->setStatus(status);
+
+	ESMCI_WebServCompSvrClient	client(compSvrInfo.physHostName().c_str(), 
+                                     compSvrInfo.portNum(), 
+                                     compSvrInfo.clientId());
 
 	status = client.end();
 	clientInfo->setStatus(status);
@@ -1836,6 +2095,11 @@ int  ESMCI_WebServProcCtrl::processEnd(
 	//***
 	theClients.erase(clientId);
 	delete clientInfo;
+
+   //***
+   // Kill the server
+   //**
+   client.killServer();
 
 	//***
 	// Send the current state back to the client (use the return code from

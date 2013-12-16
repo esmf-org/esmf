@@ -61,8 +61,10 @@ namespace ESMCI
   public:
 
      // constructor and destructor
-	  ESMCI_WebServComponentSvr(int  port, 
-                               int  clientId);
+	  ESMCI_WebServComponentSvr(int     port, 
+                               int     clientId,
+                               string  registrarHost);
+
 	  ~ESMCI_WebServComponentSvr();
 
      // port number access methods
@@ -143,6 +145,7 @@ namespace ESMCI
 	  ESMC_BlockingFlag		theBlockingFlag;	// component blocking flag
      ESMC_WebServCompType	theCompType;
 
+     string theRegistrarHost;    // the host on which the registrar is running
      int		theCurrentClientId;	// the id of the client currently accessing
                                  // the component service
 	  int		theCurrentStatus;		// the current status of the service

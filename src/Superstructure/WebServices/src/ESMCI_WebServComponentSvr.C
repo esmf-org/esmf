@@ -135,8 +135,9 @@ ESMCI_WebServComponentSvr::ESMCI_WebServComponentSvr(
 //
   int  port,       // (in) the port number on which to setup the socket service
                    // to listen for requests
-  int  clientId    // (in) the id of the client for whom this service is
+  int  clientId,   // (in) the id of the client for whom this service is
                    // being run
+  string  registrarHost  // (in) name of host one which registrar is running
   )
 //
 // !DESCRIPTION:
@@ -175,6 +176,8 @@ ESMCI_WebServComponentSvr::ESMCI_WebServComponentSvr(
 	setPort(port);
    theCurrentClientId = clientId;
 printf("Setting CurrentClientId: %d\n", clientId);
+   theRegistrarHost = registrarHost;
+printf("Setting RegistrarHost: %s\n", registrarHost.c_str());
 
 	setStatus(NET_ESMF_STAT_READY);
 
@@ -732,7 +735,9 @@ void  ESMCI_WebServComponentSvr::setStatus(
 	}
 #endif
 
-   ESMCI::ESMCI_WebServRegistrarClient registrar("localhost", REGISTRAR_PORT);
+//   ESMCI::ESMCI_WebServRegistrarClient registrar("localhost", REGISTRAR_PORT);
+   ESMCI::ESMCI_WebServRegistrarClient registrar(theRegistrarHost.c_str(),
+                                                 REGISTRAR_PORT);
 
 	char	idStr[64];
 	sprintf(idStr, "%d", theCurrentClientId);
@@ -2345,12 +2350,25 @@ void  ESMCI_WebServComponentSvr::runFinal(
 	// Make the call to the initialization routine
 	//***
 	int	rc = 0;
-   FTN_X(f_esmf_processfinal)(theGridComp,
-                            theImportState, 
-                            theExportState, 
-                            theClock, 
-                            thePhase, 
-                            &rc);
+
+   if (theCompType == ESMC_WEBSERVCOMPTYPE_GRID)
+   {
+      FTN_X(f_esmf_processfinal)(theGridComp,
+                                 theImportState, 
+                                 theExportState, 
+                                 theClock, 
+                                 thePhase, 
+                                 &rc);
+   }
+   else
+   {
+      FTN_X(f_esmf_cplcompprocessfinal)(theCplComp,
+                                        theImportState,
+                                        theExportState,
+                                        theClock,
+                                        thePhase,
+                                        &rc);
+   }
 
 	//***
 	// Update the status when completed

@@ -53,8 +53,9 @@ namespace ESMCI
                              string  scriptName);
 	  ~ESMCI_WebServGRAMClient();
 
-     string  submitJob(int  portNum,
-                       int  clientId);
+     string  submitJob(int     portNum,
+                       string  registrarHost,
+                       int     clientId);
      int     cancelJob(string  jobId);
      int     jobStatus(string  jobId);
 

@@ -130,7 +130,7 @@ int main(int    argc,
    strcpy(name, "Call Submit Job");
    strcpy(failMsg, "Returned ESMF_FAILURE");
 
-   string	jobId = client->submitJob(clientId, portNum);
+   string	jobId = client->submitJob(clientId, "localhost", portNum);
    printf(" Job ID: %s\n", jobId.c_str());
 
    ESMC_Test((!jobId.empty()), name, failMsg, &result, __FILE__, __LINE__, 0);

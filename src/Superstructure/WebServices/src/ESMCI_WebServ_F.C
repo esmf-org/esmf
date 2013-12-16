@@ -73,6 +73,7 @@ void FTN_X(c_esmc_componentsvcloop)(
 // !ARGUMENTS:
 //
   char*                   clientId, 		// (in) the client identifier
+  char*                   registrarHost,
   ESMCI::GridComp*        comp,				// (in) the grid component
   ESMCI::State*           importState,		// (in) the component import state
   ESMCI::State*           exportState,		// (in) the component export state
@@ -81,7 +82,8 @@ void FTN_X(c_esmc_componentsvcloop)(
   int*                    phase,         	// (in) the phase
   int*                    portNum,			// (in) the service port number
   int*                    rc,			      // (in) the return code
-  ESMCI_FortranStrLenArg  clientIdLen		// (in) the length of the client id
+  ESMCI_FortranStrLenArg  clientIdLen,		// (in) the length of the client id
+  ESMCI_FortranStrLenArg  registrarHostLen
   )
 //
 // !DESCRIPTION:
@@ -93,14 +95,27 @@ void FTN_X(c_esmc_componentsvcloop)(
 {
 	printf("Port Number: %d\n", *portNum);
 	printf("Client ID: %d\n", atoi(clientId));
+   printf("Registrar Host: %s\n", registrarHost);
 	int	localrc = 0;
+
+   char  registrarHostStr[ESMF_MAXSTR];
+   strncpy(registrarHostStr, registrarHost, registrarHostLen);
+   registrarHostStr[registrarHostLen] = '\0';
+   string   registrarHostString(registrarHostStr);
+   size_t   found = registrarHostString.find_last_not_of(' ');
+   if (found != string::npos)
+      registrarHostString.erase(found + 1);
+   else
+      registrarHostString.clear();
 
    //***
    // This loop should not return until either an "exit" message has been
    // received or an error has occurred.
    //***
 	theComponentServer = 
-		new ESMCI::ESMCI_WebServComponentSvr(*portNum, atoi(clientId));
+      new ESMCI::ESMCI_WebServComponentSvr(*portNum,
+                                           atoi(clientId),
+                                           registrarHostString);
 
 	if (theComponentServer->requestLoop(comp, 
                                        importState, 
@@ -136,6 +151,7 @@ void FTN_X(c_esmc_cplcomponentsvcloop)(
 // !ARGUMENTS:
 //
   char*                   clientId, 		// (in) the client identifier
+  char*                   registrarHost,
   ESMCI::CplComp*         comp,				// (in) the grid component
   ESMCI::State*           importState,		// (in) the component import state
   ESMCI::State*           exportState,		// (in) the component export state
@@ -144,7 +160,8 @@ void FTN_X(c_esmc_cplcomponentsvcloop)(
   int*                    phase,         	// (in) the phase
   int*                    portNum,			// (in) the service port number
   int*                    rc,			      // (in) the return code
-  ESMCI_FortranStrLenArg  clientIdLen		// (in) the length of the client id
+  ESMCI_FortranStrLenArg  clientIdLen,		// (in) the length of the client id
+  ESMCI_FortranStrLenArg  registrarHostLen
   )
 //
 // !DESCRIPTION:
@@ -156,14 +173,28 @@ void FTN_X(c_esmc_cplcomponentsvcloop)(
 {
 	printf("Port Number: %d\n", *portNum);
 	printf("Client ID: %d\n", atoi(clientId));
+   printf("Registrar Host: %s\n", registrarHost);
 	int	localrc = 0;
+
+   char  registrarHostStr[ESMF_MAXSTR];
+   strncpy(registrarHostStr, registrarHost, registrarHostLen);
+   registrarHostStr[registrarHostLen] = '\0';
+   string   registrarHostString(registrarHostStr);
+   size_t   found = registrarHostString.find_last_not_of(' ');
+   if (found != string::npos)
+      registrarHostString.erase(found + 1);
+   else
+      registrarHostString.clear();
 
    //***
    // This loop should not return until either an "exit" message has been
    // received or an error has occurred.
    //***
 //	ESMCI::ESMCI_WebServComponentSvr	server(*portNum);
-	theComponentServer = new ESMCI::ESMCI_WebServComponentSvr(*portNum, atoi(clientId));
+	theComponentServer = 
+      new ESMCI::ESMCI_WebServComponentSvr(*portNum,
+                                           atoi(clientId),
+                                           registrarHostString);
 
 printf("Component Server Request Loop\n");
 	if (theComponentServer->cplCompRequestLoop(comp, 
@@ -202,11 +233,13 @@ void FTN_X(c_esmc_registercomponent)(
   char*                   compName,		// (in) the grid component name
   char*                   compDesc,		// (in) the grid component description
   char*                   clientId, 	// (in) the client identifier
+  char*                   registrarHost,
   int*                    portNum,     // (in) the service port number
   int*                    rc,          // (in) the return code
   ESMCI_FortranStrLenArg  compNameLen,	// (in) the length of the component name
   ESMCI_FortranStrLenArg  compDescLen,	// (in) the length of the comp desc
-  ESMCI_FortranStrLenArg  clientIdLen	// (in) the length of the client id
+  ESMCI_FortranStrLenArg  clientIdLen,	// (in) the length of the client id
+  ESMCI_FortranStrLenArg  registrarHostLen
   )
 //
 // !DESCRIPTION:
@@ -221,6 +254,7 @@ void FTN_X(c_esmc_registercomponent)(
 	char	nameStr[ESMF_MAXSTR];
 	char	descStr[ESMF_MAXSTR];
 	char	clientIdStr[ESMF_MAXSTR];
+   char  registrarHostStr[ESMF_MAXSTR];
 	char	portStr[ESMF_MAXSTR];
 	char	hostStr[ESMF_MAXSTR];
 
@@ -253,6 +287,15 @@ void FTN_X(c_esmc_registercomponent)(
 
 	theClientId = clientIdString;
 
+   strncpy(registrarHostStr, registrarHost, registrarHostLen);
+   registrarHostStr[registrarHostLen] = '\0';
+   string   registrarHostString(registrarHostStr);
+   found = registrarHostString.find_last_not_of(' ');
+   if (found != string::npos)
+      registrarHostString.erase(found + 1);
+   else
+      registrarHostString.clear();
+
 	sprintf(portStr, "%d", *portNum);
 	gethostname(hostStr, ESMF_MAXSTR);
 
@@ -260,9 +303,12 @@ void FTN_X(c_esmc_registercomponent)(
 	printf("Desc: %s\n", descString.c_str());
 	printf("Port: %s\n", portStr);
 	printf("Client ID: %s\n", clientIdString.c_str());
+   printf("RegistrarHost: %s\n", registrarHostString.c_str());
 	printf("Host: %s\n", hostStr);
 
-	ESMCI::ESMCI_WebServRegistrarClient	client("localhost", REGISTRAR_PORT);
+//	ESMCI::ESMCI_WebServRegistrarClient	client("localhost", REGISTRAR_PORT);
+   ESMCI::ESMCI_WebServRegistrarClient client(registrarHostString.c_str(),
+                                              REGISTRAR_PORT);
 
 	if (client.compStarted(clientIdString.c_str(), 
                           nameString.c_str(), 
@@ -298,8 +344,10 @@ void FTN_X(c_esmc_unregistercomponent)(
 // !ARGUMENTS:
 //
   char*                   clientId,		// (in) the client identifier
+  char*                   registrarHost,
   int*                    rc,          // (in) the return code
-  ESMCI_FortranStrLenArg  clientIdLen	// (in) the length of the clientId
+  ESMCI_FortranStrLenArg  clientIdLen,	// (in) the length of the clientId
+  ESMCI_FortranStrLenArg  registrarHostLen
   )
 //
 // !DESCRIPTION:
@@ -313,6 +361,7 @@ void FTN_X(c_esmc_unregistercomponent)(
 
 	int	localrc = 0;
 	char	clientIdStr[ESMF_MAXSTR];
+   char  registrarHostStr[ESMF_MAXSTR];
 
 	strncpy(clientIdStr, clientId, clientIdLen);
 	clientIdStr[clientIdLen] = '\0';
@@ -325,7 +374,20 @@ void FTN_X(c_esmc_unregistercomponent)(
 
 	printf("Client ID: %s\n", clientIdStr);
 
-	ESMCI::ESMCI_WebServRegistrarClient	client("localhost", REGISTRAR_PORT);
+   strncpy(registrarHostStr, registrarHost, registrarHostLen);
+   registrarHostStr[registrarHostLen] = '\0';
+   string   registrarHostString(registrarHostStr);
+   found = registrarHostString.find_last_not_of(' ');
+   if (found != string::npos)
+      registrarHostString.erase(found + 1);
+   else
+      registrarHostString.clear();
+
+   printf("Registrar Host: %s\n", registrarHostString.c_str());
+
+//	ESMCI::ESMCI_WebServRegistrarClient	client("localhost", REGISTRAR_PORT);
+   ESMCI::ESMCI_WebServRegistrarClient client(registrarHostString.c_str(),
+                                              REGISTRAR_PORT);
 
 	char	response[1024];
 	if (client.setStatus(clientIdString.c_str(), 
@@ -399,11 +461,12 @@ void FTN_X(c_esmc_addoutputfilename)(
 //-----------------------------------------------------------------------------
 {
 	int	localrc = 0;
-	string	filenameStr = string (filename, ESMC_F90lentrim (filename, filenameLen));
+   char  filenameStr[ESMF_MAXSTR];
 
    // TODO: everything
    if (theComponentServer != NULL)
 	{
+      strncpy(filenameStr, filename, filenameLen);
 		theComponentServer->addOutputFilename(filenameStr);
 	}
 

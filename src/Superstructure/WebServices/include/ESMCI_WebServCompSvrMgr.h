@@ -53,8 +53,9 @@ namespace ESMCI
                              string  scriptName);
 	  ~ESMCI_WebServCompSvrMgr();
 
-     virtual string  submitJob(int  portNum, 
-                               int  clientId) = 0;
+     virtual string  submitJob(int     portNum,
+                               string  registrarHost,
+                               int     clientId) = 0;
      virtual int     cancelJob(string  jobId) = 0;
      virtual int     jobStatus(string  jobId) = 0;
 
