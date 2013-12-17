@@ -550,8 +550,8 @@ contains
 !EOPI @\
 !------------------------------------------------------------------------------ @\
       type(mtype) :: temp_list(1) @\
-      character(ESMF_MAXSTR) :: lvalue1, lvalue2 @\
 ^if !defined (noattributesversion) @\
+      character(ESMF_MAXSTR) :: lvalue1, lvalue2 @\
       character(ESMF_MAXSTR) :: lobject, lname @\
       type(ESMF_Logical) :: linkChange @\
 ^endif @\
@@ -700,8 +700,8 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
       integer :: localrc, i @\
       integer :: localcount @\
       logical :: localrelaxed @\
-      character(ESMF_MAXSTR) :: lvalue1, lvalue2 @\
 ^if !defined (noattributesversion) @\
+      character(ESMF_MAXSTR) :: lvalue1, lvalue2 @\
       character(ESMF_MAXSTR) :: lobject, lname @\
       type(ESMF_Logical) :: linkChange @\
 ^endif @\
@@ -853,8 +853,8 @@ StateAddListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%stat
 !------------------------------------------------------------------------------ @\
       integer :: localrc, i @\
       integer :: localcount @\
-      character(ESMF_MAXSTR) :: lvalue1, lvalue2 @\
 ^if !defined (noattributesversion) @\
+      character(ESMF_MAXSTR) :: lvalue1, lvalue2 @\
       character(ESMF_MAXSTR) :: lobject, lname @\
       type(ESMF_Logical) :: linkChange @\
 ^endif @\
@@ -1392,6 +1392,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
           type(ESMF_StateItemWrap), pointer :: siwrap(:)
           type(ESMF_StateItem), pointer :: sip
           integer :: sipcount
+          integer :: memstat1
 
           siwrap => null ()
 	  call ESMF_ContainerGet (sp%stateContainer,  &
@@ -1415,8 +1416,8 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
               ilpos = ilpos + 1
             else
               if (sip%namep == itemSearch) then
-              itemtypeList(ilpos) = sip%otype
-              ilpos = ilpos + 1
+                itemtypeList(ilpos) = sip%otype
+                ilpos = ilpos + 1
               end if
             end if
 
@@ -1425,6 +1426,9 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
               call itemTypeWorker (sip%datap%spp)
             end if
           end do
+
+          if (associated (siwrap)) &
+            deallocate (siwrap, stat=memstat1)
 
         end subroutine itemTypeWorker
 
