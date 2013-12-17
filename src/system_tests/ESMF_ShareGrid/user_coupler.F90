@@ -94,7 +94,7 @@ module user_coupler
 
 !-------------------------------------------------------------------------
   
-  ! In phase 1 Initialize CplComp reconciles the objects that are contained
+  ! In phase 1 Initialize, CplComp reconciles the objects that are contained
   ! in the importState (from Comp1) and the exportState (from Comp2). From the
   ! source side (Comp1) CplComp accesses the index space information of the
   ! Grid that is being shared, i.e. the DistGrid. On the destination side
@@ -174,7 +174,7 @@ module user_coupler
 
 !-------------------------------------------------------------------------
   
-  ! In phase 2 Initialize CplComp the importState and exportState need to be
+  ! In phase 2 Initialize, CplComp the importState and exportState need to be
   ! re-reconciled because information may likely have changed (e.g. the 
   ! DistGrid information provided in the Field from Comp2).
   !
@@ -236,7 +236,7 @@ module user_coupler
 
 !-------------------------------------------------------------------------
   
-  ! In phase 3 Initialize CplComp stores a Redist operation for
+  ! In phase 3 Initialize, CplComp stores a Redist operation for
   ! srcField --to--> dstField remapping. A Redist works because the Fields
   ! on both sides are defined on the same Grid (just distributed differently).
   ! In order to test that also the Grid coordinates were shared (and 

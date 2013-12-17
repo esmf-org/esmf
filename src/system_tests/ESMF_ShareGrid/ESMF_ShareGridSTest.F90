@@ -14,10 +14,13 @@
 !   The first Gridded Component runs on 4 PETs and defines a 2D source Grid
 !   with 100x150 index space that is added to the component's exportState. The
 !   second Gridded Component only runs on 2 PETs and defines an empty Field 
-!   that it adds to its importState.
+!   that is added to its importState.
 !
 !   The Coupler Component runs on all 6 PETs and shares the Grid from
 !   Component 1 with Component 2.
+!
+!   Redist and Regrid operations are performed between the two Gridded
+!   Components to test correct behavior of the shared Mesh information.
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}
