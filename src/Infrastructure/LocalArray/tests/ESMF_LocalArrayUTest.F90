@@ -82,6 +82,8 @@
     call ESMF_LocalArrayDestroy(array1, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+    deallocate(intptr)
+
     !------------------------------------------------------------------------------
      
     !--------------------------------------------------------------------------
