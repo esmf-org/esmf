@@ -92,7 +92,7 @@ module user_model2
 
 !--------------------------------------------------------------------------------
  
-  ! In phase 1 Initialize Comp2 creates an empty Field without any Grid 
+  ! In phase 1 Initialize, Comp2 creates an empty Field without any Grid 
   ! information. The Field is added to the importState.
     
   subroutine user_initP1(comp, importState, exportState, clock, rc)
@@ -121,7 +121,7 @@ module user_model2
 
 !--------------------------------------------------------------------------------
  
-  ! In phase 2 Initialize Comp2 the incoming Field now contains Grid information
+  ! In phase 2 Initialize, Comp2 the incoming Field now contains Grid information
   ! that has been shared by Comp1 through the CplComp. The Grid contains
   ! index space information, i.e. DistGrid, which will be printed here.
   !
@@ -182,7 +182,7 @@ module user_model2
 
 !--------------------------------------------------------------------------------
  
-  ! In phase 3 Initialize Comp2 finishes the creation of the Field on the 
+  ! In phase 3 Initialize, Comp2 finishes the creation of the Field on the 
   ! shared Grid. The incoming Field already holds the complete shared Grid,
   ! with correctly distributed coordinate arrays. All that is left to do here
   ! is to call FieldEmptyComplete.
