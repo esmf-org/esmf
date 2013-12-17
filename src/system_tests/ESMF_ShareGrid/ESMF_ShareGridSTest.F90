@@ -9,7 +9,7 @@
 ! !DESCRIPTION:
 ! System test ShareGrid.
 !
-!   Two Gridded Components and one Coupler Component, one-way coupling.
+!   Two Gridded Components and one Coupler Component.
 !
 !   The first Gridded Component runs on 4 PETs and defines a 2D source Grid
 !   with 100x150 index space that is added to the component's exportState. The
