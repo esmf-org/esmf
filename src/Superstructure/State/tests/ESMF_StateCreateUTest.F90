@@ -83,9 +83,8 @@ end module
 #ifdef ESMF_TESTEXHAUSTIVE
     character(ESMF_MAXSTR) :: bname
     type(ESMF_State) :: state2, state3, state4, state5
-    type(ESMF_State) :: state6
     type(ESMF_FieldBundle) :: bundle1, bundle2, bundle3, qbundle
-    type(ESMF_FieldBundle) :: bundle4, bundle5, bundle6, bundle7
+    type(ESMF_FieldBundle) :: bundle5, bundle6, bundle7
     type(ESMF_VM) :: vm
     logical :: isNeeded
 
@@ -292,11 +291,11 @@ end module
   call ESMF_ContainerPrint(container, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
-  nullify(siwOut)
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Container Get item Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
+  siwOut => null ()
   call ESMF_ContainerGet(container, itemList=siwOut, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -309,17 +308,19 @@ end module
   write(failMsg, *) "Did not verify"
   call ESMF_Test((trim(siwOut(1)%si%namep)==trim(si%namep)), name, failMsg, result, ESMF_SRCLINE)
 
-  !------------------------------------------------------------------------
-  nullify(siw%si)
+  deallocate (siwOut)
   
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Container Get item Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
+  siw%si => null ()
   call ESMF_ContainerGet(container, itemName="testField1", item=siw, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
   print *, "string in siw%si: ", siw%si%namep
+
+  call ESMF_FieldDestroy (siw%si%datap%fp)
 
   !------------------------------------------------------------------------
   !NEX_UTest
