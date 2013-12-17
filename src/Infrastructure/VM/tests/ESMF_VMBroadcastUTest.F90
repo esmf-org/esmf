@@ -392,10 +392,21 @@
       write(name, *) "Releasing VMId array Test"
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       call ESMF_VMIdDestroy (local_vmids, rc=rc)
-      call ESMF_Test(all_verify, name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       deallocate (local_vmids)
 
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Release VMId resources
+      write(name, *) "Releasing VMId solution array Test"
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      call ESMF_VMIdDestroy (vmids_soln, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      deallocate (vmids_soln)
+
+      !------------------------------------------------------------------------
       call ESMF_TestEnd(ESMF_SRCLINE)
 
       end program ESMF_VMBroadcastUTest
