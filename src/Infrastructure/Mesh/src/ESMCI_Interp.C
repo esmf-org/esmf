@@ -1879,7 +1879,7 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
     if (fpairs[fpair_num].idata == INTERP_STD)
       mat_point_serial_transfer(*sFR, *dfR, sres, iw);
     else if (fpairs[fpair_num].idata == INTERP_PATCH)
-      mat_patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), *sFR, *dfR, sres, srcmesh, iw);
+      mat_patch_serial_transfer(*grend.GetSrcRend().GetCoordField(), *sFR, *dfR, sres, grend.GetSrcRend(), iw);
     
     // Retrieve the interpolated data
     CommRel &dst_node_rel = grend.GetDstComm().GetCommRel(MeshObj::NODE);
