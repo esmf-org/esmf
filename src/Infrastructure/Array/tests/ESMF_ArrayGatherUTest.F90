@@ -221,7 +221,7 @@ contains
         if(localPet .eq. 0) then
           allocate(farrayDst(16))  ! rootPet
         else
-          allocate(farrayDst(0))
+          allocate(farrayDst(1))
         end if
         call ESMF_ArrayGather(array, farrayDst, rootPet=0, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -252,7 +252,7 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         
-        if(localPet .eq. 0) deallocate(farrayDst)
+        deallocate(farrayDst)
 
         rc = ESMF_SUCCESS
     end subroutine test_gather_1d
@@ -321,7 +321,7 @@ contains
         if(localPet .eq. 0) then
           allocate(farrayDst(10,20))  ! rootPet
         else
-          allocate(farrayDst(0,0))
+          allocate(farrayDst(1,1))
         end if
         call ESMF_ArrayGather(array, farrayDst, rootPet=0, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -377,7 +377,7 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         
-        if(localPet .eq. 0) deallocate(farrayDst)
+        deallocate(farrayDst)
         rc = ESMF_SUCCESS
     end subroutine test_gather_2d
 
@@ -449,7 +449,7 @@ contains
         if(localPet .eq. 0) then
           allocate(farrayDst(10,20,5))  ! rootPet
         else
-          allocate(farrayDst(0,0,0))  ! rootPet
+          allocate(farrayDst(1,1,1))  ! rootPet
         end if
         call ESMF_ArrayGather(array, farrayDst, rootPet=0, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -510,7 +510,7 @@ contains
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         
-        if(localPet .eq. 0) deallocate(farrayDst)
+        deallocate(farrayDst)
         rc = ESMF_SUCCESS
     end subroutine test_gather_3d
 
