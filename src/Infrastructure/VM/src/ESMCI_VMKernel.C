@@ -1426,6 +1426,7 @@ void *VMK::startup(class VMKPlan *vmp,
   int foundfirstflag=0;
   int foundfirstpet;
   int mylpid = lpid[mypet];
+  sarg[0].mpi_c_freeflag = 0; // invalidate on all PETs
   for (int ii=0; ii<vmp->nplist; ii++){
     int i = vmp->petlist[ii];     // indirection to preserve petlist order
     if (mylpid == lpid[i]){
@@ -1469,7 +1470,7 @@ void *VMK::startup(class VMKPlan *vmp,
   delete [] grouplist;
   
 #if (VERBOSITY > 9)
-  printf("now valid new_mpi_g and new_mpi_c exist\n");
+  printf("now valid new_mpi_c exists\n");
 #endif
 
   // now:
