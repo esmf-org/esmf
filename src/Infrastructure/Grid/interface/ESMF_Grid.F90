@@ -3023,7 +3023,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           enddo
        
           
-          ! Pull item Arrays out of old grid  for each staggerloc added above
+          ! Pull item Arrays out of new grid  for each staggerloc added above
           do j = 1, nStaggers
              call ESMF_GridGetItem(newGrid, staggerloc=srcStaggers(j), &
                   itemflag=gridItem, array=dstA(j), rc=localrc)   
