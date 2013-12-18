@@ -596,7 +596,7 @@ void PIO_Handler::arrayRead(
   int * arrDims;                          // Array shape
   int narrDims;                           // Array rank
   pio_io_desc_t iodesc;                   // PIO IO descriptor
-  pio_var_desc_t vardesc;                 // PIO variable descriptor
+  pio_var_desc_t vardesc = NULL;          // PIO variable descriptor
   int basepiotype;                        // PIO version of Array data type
   void *baseAddress;                      // The address of the Array IO data
   int localDE;                            // DE to use for IO
@@ -777,7 +777,7 @@ void PIO_Handler::arrayWrite(
   int * arrDims;                          // Array shape
   int narrDims;                           // Array rank
   pio_io_desc_t iodesc;                   // PIO IO descriptor
-  pio_var_desc_t vardesc;                 // PIO variable descriptor
+  pio_var_desc_t vardesc = NULL;          // PIO variable descriptor
   int basepiotype;                        // PIO version of Array data type
   void *baseAddress;                      // The address of the Array IO data
   int localDE;                            // DE to use for IO
@@ -1636,11 +1636,11 @@ PIO_IODescHandler::~PIO_IODescHandler (
   pio_cpp_freedecomp_ios(&ios, io_descriptor);
   io_descriptor = (pio_io_desc_t)NULL;
   if (dims != (int *)NULL) {
-    delete dims;
+    delete[] dims;
     dims = (int *)NULL;
   }
   if (arrayShape != (int *)NULL) {
-    delete arrayShape;
+    delete[] arrayShape;
     arrayShape = (int *)NULL;
   }
   array_p = (Array *)NULL;
