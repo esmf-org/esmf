@@ -1144,7 +1144,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_FieldRegrid()} to interpolate between the {\tt ESMF\_Field}s. Informaton such as
 !       index mapping and weights are obtained from the XGrid by matching the Field Grids or Meshes in the XGrid. 
 !       It's erroneous to have matching Grid or Mesh objects in the {\tt srcField} and {\tt dstField}. 
-!       They must be different in either tological or geometric characteristics. For {\tt ESMF\_Field}s 
+!       They must be different in either topological or geometric characteristics. For {\tt ESMF\_Field}s 
 !       built on identical {\tt ESMF\_Grid} or {\tt ESMF\_Mesh} on
 !       different VM, user can use {\tt ESMF\_FieldRedistStore()} and {\tt ESMF\_FieldRedist()} 
 !       methods to communicate data across different VM.
@@ -1354,17 +1354,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 if(ESMF_GridMatch(dstGrid, gridA(i)%gbcp%grid)>=ESMF_GRIDMATCH_EXACT) then
                     dstIdx = i
                     dstSide = ESMF_XGRIDSIDE_A
+                    !localmatchA = 0
                     found = .true.
                     exit
                 endif
             enddo 
             do i = 1, ngrid_b
                 if(ESMF_GridMatch(dstGrid, gridB(i)%gbcp%grid)>=ESMF_GRIDMATCH_EXACT) then
+                    !localmatchB = 0
                     if(found) then
                         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
                            msg="- duplication of Grid found in XGrid", &
                            ESMF_CONTEXT, rcToReturn=rc) 
                         return
+                        !Do a global sum of match result
+                        !call ESMF_VMGetCurrent(vm, rc=localrc)
+                        !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                        !  ESMF_CONTEXT, rcToReturn=rc)) return
+                        !call ESMF_VMAllReduce(vm, (/localmatchA, localmatchB/), (/summatchA, summatchB/), &
+                        !  2, ESMF_SUM, rc=localrc)
+                        !if(summatchA == 0) 
                     endif
                     dstIdx = i
                     dstSide = ESMF_XGRIDSIDE_B
@@ -1372,6 +1381,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     exit
                 endif
             enddo 
+
+            !if(localmatchA == 0 && localmatchB == 0) then
 
             if(.not. found) then
                 call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 

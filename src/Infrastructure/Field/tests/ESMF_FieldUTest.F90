@@ -807,8 +807,8 @@
       !EX_UTest_Multi_Proc_Only 
       call ESMF_FieldEmptySet(f7, grid=grid, rc=rc)
       write(failMsg, *) ""
-      write(name, *) "Cannot set a grid in a gridset Field"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Can set a grid in a gridset Field"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only 
       call ESMF_FieldEmptyComplete(f7, typekind=ESMF_TYPEKIND_R8, rc=rc)

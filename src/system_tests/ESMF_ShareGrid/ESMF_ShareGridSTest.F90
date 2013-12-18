@@ -9,15 +9,18 @@
 ! !DESCRIPTION:
 ! System test ShareGrid.
 !
-!   Two Gridded Components and one Coupler Component, one-way coupling.
+!   Two Gridded Components and one Coupler Component.
 !
 !   The first Gridded Component runs on 4 PETs and defines a 2D source Grid
 !   with 100x150 index space that is added to the component's exportState. The
-!   second Gridded Component only runs on 2 PEts and defines an empty Field 
-!   that it adds to its importState.
+!   second Gridded Component only runs on 2 PETs and defines an empty Field 
+!   that is added to its importState.
 !
 !   The Coupler Component runs on all 6 PETs and shares the Grid from
-!   Component 1 with the Component 2.
+!   Component 1 with Component 2.
+!
+!   Redist and Regrid operations are performed between the two Gridded
+!   Components to test correct behavior of the shared Mesh information.
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}
@@ -273,6 +276,17 @@ program ESMF_ShareGridSTest
   call ESMF_CplCompInitialize(cpl, importState=c1exp, exportState=c2imp, &
     phase=2, userRc=userrc, rc=localrc)
   print *, "Coupler Initialize phase=2 finished, rc =", localrc, userrc
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) &
+    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+
+  ! Comp1 Initialize phase=3
+  call ESMF_GridCompInitialize(comp1, exportState=c1exp, phase=3, &
+    userRc=userrc, rc=localrc)
+  print *, "Comp 1 Initialize phase=3 finished, rc =", localrc, userrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
