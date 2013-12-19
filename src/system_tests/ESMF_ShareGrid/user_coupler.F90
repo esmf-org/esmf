@@ -94,7 +94,7 @@ module user_coupler
 
 !-------------------------------------------------------------------------
   
-  ! In phase 1 Initialize CplComp reconciles the objects that are contained
+  ! In phase 1 Initialize, CplComp reconciles the objects that are contained
   ! in the importState (from Comp1) and the exportState (from Comp2). From the
   ! source side (Comp1) CplComp accesses the index space information of the
   ! Grid that is being shared, i.e. the DistGrid. On the destination side
@@ -148,14 +148,23 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Create the dstDistGrid from the srcDistGrid, but on dstVM
+    ! The dstVM is important in order to specify which is the correct context
+    ! of the dstDistGrid. The created dstDistGrid is only fully functional on 
+    ! the PETs that are part of dstVM, other PETs must first generate proxies
+    ! via a StateReconcile. Before reconciliation care must be given to which
+    ! calls the dstDistGrid is passed (generally they must also take the dstVM).
     dstDistGrid = ESMF_DistGridCreate(srcDistGrid, vm=dstVM, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Create the dstGrid on the dstDistGrid on dstVM that contains shared info
+    ! Create the dstGrid on the dstDistGrid limited to PETs in dstVM
+    ! The dstGrid is used as a vehicle to hand the dstDistGrid to the Comp2.
+    ! It must be created on the dstVM because only there the dstDistGrid
+    ! currently exists.
     dstGrid = ESMF_GridCreate(dstDistGrid, vm=dstVM, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Set the new dstGrid in the dstField
+    ! The dstGrid with dstDistGrid is handed to Comp2 inside the dstField.
     call ESMF_FieldEmptySet(dstField, grid=dstGrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -165,7 +174,7 @@ module user_coupler
 
 !-------------------------------------------------------------------------
   
-  ! In phase 2 Initialize CplComp the importState and exportState need to be
+  ! In phase 2 Initialize, CplComp the importState and exportState need to be
   ! re-reconciled because information may likely have changed (e.g. the 
   ! DistGrid information provided in the Field from Comp2).
   !
@@ -183,7 +192,7 @@ module user_coupler
     ! Local variables
     type(ESMF_Field)    :: srcField, dstField
     type(ESMF_Grid)     :: srcGrid, dstGrid
-    type(ESMF_VM)       :: dstVM
+    type(ESMF_DistGrid) :: dstDistGrid
 
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -202,18 +211,24 @@ module user_coupler
     call ESMF_FieldGet(srcField, grid=srcGrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    ! Access destination Field, Grid, and VM
+    ! Access destination Field, Grid, and DistGrid
     call ESMF_StateGet(exportState, "dstField", dstField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_FieldGet(dstField, grid=dstGrid, vm=dstVM, rc=rc)
+    call ESMF_FieldGet(dstField, grid=dstGrid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridGet(dstGrid, distgrid=dstDistGrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    ! TODO: Here we would want to call something like a GridCreateFromGrid(),
-    ! TODO: that considers the dstVM. All of the information, including 
-    ! TODO: redistributed physical coordinate information that is available
-    ! TODO: on srcGrid should be transferred to the dstGrid. This new dstGrid
-    ! TODO: then would be set in the dstField, and thus all srcGrid info is
-    ! TODO: made available to Comp2 on its distribution.
+    ! Create a new dstGrid from srcGrid, considering dstDistGrid
+    ! Now that dstDistGrid is reconciled, it can be used without the need
+    ! for passing in the dstVM argument. The resulting dstGrid will function
+    ! correctly in the CplComp context, as well as the Comp2 context.
+    dstGrid = ESMF_GridCreate(srcGrid, dstDistGrid,rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    ! Set the new dstGrid in the dstField to make it available to Comp2
+    call ESMF_FieldEmptySet(dstField, grid=dstGrid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
         
     print *, "User Coupler Init phase=2 returning"
    
@@ -221,10 +236,12 @@ module user_coupler
 
 !-------------------------------------------------------------------------
   
-  ! In phase 3 Initialize CplComp simply stores a Redist operation between
-  ! srcField and dstField. Redist will do, i.e. no Regrid required, because
-  ! the Fields on both sides are on the same shared Grid, just that it is
-  ! potentially decomposed, and likely distributed differently.
+  ! In phase 3 Initialize, CplComp stores a Redist operation for
+  ! srcField --to--> dstField remapping. A Redist works because the Fields
+  ! on both sides are defined on the same Grid (just distributed differently).
+  ! In order to test that also the Grid coordinates were shared (and 
+  ! redistributed) correctly, a Regrid operation is precomputed for 
+  ! dstField --to--> finalField remapping, i.e. from Comp2 back to Comp1.
   
   subroutine user_initP3(comp, importState, exportState, clock, rc)
     type(ESMF_CplComp)    :: comp
@@ -233,7 +250,7 @@ module user_coupler
     integer, intent(out)  :: rc
 
     ! Local variables
-    type(ESMF_Field)        :: srcField, dstField
+    type(ESMF_Field)        :: srcField, dstField, finalField
     type(ESMF_RouteHandle)  :: rh
 
     ! Initialize return code
@@ -247,18 +264,26 @@ module user_coupler
     call ESMF_StateReconcile(exportState, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
-    ! Access source and destination Fields
+    ! Access source, final, and destination Fields
     call ESMF_StateGet(importState, "srcField", srcField, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateGet(importState, "finalField", finalField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateGet(exportState, "dstField", dstField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    ! Precompute the Redist operation
+    ! Precompute the Redist operation, give it a name and keep it in importState
     call ESMF_FieldRedistStore(srcField, dstField, routehandle=rh, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    
-    ! Keep the Redist RouteHandle in the importState
-    call ESMF_RouteHandleSet(rh, name="RH", rc=rc)
+    call ESMF_RouteHandleSet(rh, name="Redist", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateAdd(importState, (/rh/), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+        
+    ! Precompute the Regrid operation, give it a name and keep it in importState
+    call ESMF_FieldRegridStore(dstField, finalField, routehandle=rh, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_RouteHandleSet(rh, name="Regrid", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateAdd(importState, (/rh/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -278,7 +303,7 @@ module user_coupler
     integer, intent(out)  :: rc
 
     ! Local variables
-    type(ESMF_Field)        :: srcField, dstField
+    type(ESMF_Field)        :: srcField, dstField, finalField
     type(ESMF_RouteHandle)  :: rh
 
     ! Initialize return code
@@ -286,18 +311,28 @@ module user_coupler
 
     print *, "User Coupler Run starting"
   
-    ! Access source and destination Fields
+    ! Access source, final, and destination Fields
     call ESMF_StateGet(importState, "srcField", srcField, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateGet(importState, "finalField", finalField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateGet(exportState, "dstField", dstField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-
-    ! Access the RouteHandle that was kept in the importState
-    call ESMF_StateGet(importState, "RH", rh, rc=rc)
+    
+    ! Access the Redist RouteHandle that was kept in the importState
+    call ESMF_StateGet(importState, "Redist", rh, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    ! Execute the Redist operation
+    ! Execute the Redist operation: srcField -> dstField
     call ESMF_FieldRedist(srcField, dstField, routehandle=rh, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    ! Access the Regrid RouteHandle that was kept in the importState
+    call ESMF_StateGet(importState, "Regrid", rh, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    ! Execute the Redist operation: dstField -> finalField
+    call ESMF_FieldRedist(dstField, finalField, routehandle=rh, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     print *, "User Coupler Run returning"
