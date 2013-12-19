@@ -43,7 +43,7 @@ def nc_is_mesh(filename, filetype):
     is_mesh = False
     if filetype == ESMF.FileFormat.UGRID:
         is_mesh = True
-    if filetype == ESMF.FileFormat.SCRIP:
+    elif filetype == ESMF.FileFormat.SCRIP:
         grid_rank = ESMF.ESMP_ScripInqRank(filename)
         print "%s rank is %d" % (filename, grid_rank)
         if grid_rank == 1:
@@ -56,7 +56,7 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_
     is_mesh = False
     if nc_is_mesh(filename, filetype):
         print "Creating ESMF.Mesh object"
-        grid = ESMF.Mesh(filename=filename,
+        grid_or_mesh = ESMF.Mesh(filename=filename,
                          filetype=filetype,
                          meshname=meshname,
                          convert_to_dual=convert_to_dual)
@@ -65,9 +65,9 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_
         print "Creating ESMF.Grid object"
         grid_dims = ESMF.ESMP_ScripInqDims(filename)
         print filename + " dims are ", grid_dims
-        grid = ESMF.Grid(grid_dims, fname=filename, fileTypeFlag=filetype,
+        grid_or_mesh = ESMF.Grid(grid_dims, fname=filename, fileTypeFlag=filetype,
                          staggerloc=ESMF.StaggerLoc.CENTER, isSphere=isSphere)
-    return grid, is_mesh
+    return grid_or_mesh, is_mesh
 
 def get_coords_from_grid_or_mesh(grid_or_mesh, is_mesh):
     if is_mesh:
@@ -316,7 +316,6 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
     # compare results and output PASS or FAIL
     correct = compare_fields(dstfield, dstfield2, regridmethod, dstFracField,
                              max_err, parallel)
-    correct = True
     return correct
 
 # def grid_check(src_fname, options):
@@ -342,18 +341,28 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
 if __name__ == '__main__':
     #src_fname = "FVCOM_grid2d.nc"
     #dst_fname = "selfe_grid2d.nc"
+    #regrid_method = "bilinear"
+    #options = "-t UGRID --src_meshname fvcom_mesh --dst_meshname selfe_mesh -i"
+    #max_err = 0.06
+    #src_fname = "FVCOM_grid2d.nc"
+    #dst_fname = "selfe_grid2d.nc"
     #regrid_method = "conserve"
     #options = "-i --src_type UGRID --dst_type UGRID --src_meshname fvcom_mesh --dst_meshname selfe_mesh"
     #max_err = 0.06
-    src_fname = "ll2.5deg_grid.nc"
-    dst_fname = "T42_grid.nc"
-    regrid_method = "bilinear"
-    options = "-p none -i"
-    max_err = 10E-04
+    #src_fname = "ll2.5deg_grid.nc"
+    #dst_fname = "T42_grid.nc"
+    #regrid_method = "bilinear"
+    #options = "-p none -i"
+    #max_err = 10E-04
     #src_fname = "T42_grid.nc"
     #dst_fname = "ar9v4_100920.nc"
     #regrid_method = "patch"
     #options = "--dst_regional"
     #max_err = 10E-04
+    src_fname = "ne60np4_pentagons_100408.nc"
+    dst_fname = "ne30np4-t2.nc"
+    regrid_method = "bilinear"
+    options = "-i"
+    max_err = 10E-04
     sys.exit(regrid_check(src_fname, dst_fname, regrid_method, options, max_err))
 
