@@ -10,17 +10,17 @@ the regridding.
 
 import sys
 import os
-import urllib
 import traceback
 from regrid_from_file_consts import DATA_SUBDIR, DATA_URL_ROOT
 from read_test_cases_from_control_file import read_test_cases_from_control_file
 
 # If fname doesn't exist, retrieve it from the remote server via http.
 def cache_data_file(fname):
+    from urllib import urlretrieve
     if not os.path.exists(fname):
         url = os.path.join(DATA_URL_ROOT, os.path.basename(fname))
         print 'Retrieving ' + url + '...\n'
-        urllib.urlretrieve(url, fname)
+        urlretrieve(url, fname)
 
 def cache_data_files_for_test_cases(test_cases):
     # Read test cases from the control file.
