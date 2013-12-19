@@ -1636,7 +1636,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     call ESMF_ContainerGet(fieldbundle%this%container, &
-      itemList=l_fieldList, rc=localrc)
+      itemorderflag=ESMF_ITEMORDER_ADDORDER, itemList=l_fieldList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
