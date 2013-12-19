@@ -282,13 +282,20 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
   double * MeshCXX::getLocalCoords(int *num_nodes, int *num_dims, int *rc) {
     Mesh &mesh = *meshPointer;
 
-    // Get some info
-    int sdim=mesh.spatial_dim();
+    int sdim;
+
+    // Get coords pointer and spatial dimension depending on existence
+    // of original coordinates field.
+    MEField<> *coords = mesh.GetField("orig_coordinates");
+    if (coords) {
+      sdim = 2;
+    } else {
+      coords = mesh.GetCoordField();
+      sdim=mesh.spatial_dim();
+    }
     *num_nodes = mesh.num_nodes();
     *num_dims = sdim;
 
-    MEField<> *coords = mesh.GetCoordField();
-    
     // Make a map between data index and associated node pointer
     std::vector<std::pair<int,MeshObj *> > index_to_node;
     index_to_node.reserve(*num_nodes);
