@@ -75,6 +75,9 @@ module user_model1
     call ESMF_GridCompSetEntryPoint(comp, methodflag=ESMF_METHOD_INITIALIZE, &
       userRoutine=user_initP2, phase=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridCompSetEntryPoint(comp, methodflag=ESMF_METHOD_INITIALIZE, &
+      userRoutine=user_initP3, phase=3, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_GridCompSetEntryPoint(comp, methodflag=ESMF_METHOD_RUN, &
       userRoutine=user_run, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -89,7 +92,7 @@ module user_model1
 
 !-------------------------------------------------------------------------
 
-  ! In phase 1 Initialize Comp1 creates an empty Field with a Grid. The Grid
+  ! In phase 1 Initialize, Comp1 creates an empty Field with a Grid. The Grid
   ! at this point only contains index space information, i.e. DistGrid, and
   ! no physical space coordinates.
     
@@ -116,15 +119,19 @@ module user_model1
     call ESMF_VMGet(vm, petCount=petCount, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    ! Create the source Field on a Grid and add it to the export State
+    ! Create the source Grid
     grid = ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=(/100,150/), &
       regDecomp=(/petCount,1/), indexflag=ESMF_INDEX_GLOBAL, &
       coordSys=ESMF_COORDSYS_SPH_DEG, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    ! Create an empty Field on the Grid
     field = ESMF_FieldEmptyCreate(name="srcField", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_FieldEmptySet(field, grid=grid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    ! Add the Field to the exportState
     call ESMF_StateAdd(exportState, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
@@ -134,7 +141,7 @@ module user_model1
 
 !-------------------------------------------------------------------------
  
-  ! In phase 2 Initialize Comp1 finishes creating the Field that was started
+  ! In phase 2 Initialize, Comp1 finishes creating the Field that was started
   ! under phase 1 Initialize. This means that memory is allocated for the data.
   ! Furthermore physical coordinates are added to the Grid.
 
@@ -185,6 +192,46 @@ module user_model1
 
 !-------------------------------------------------------------------------
  
+  ! In phase 3 Initialize, Comp1 creates another Field on the same Grid
+  ! that was shared with Comp2. This Field will be used for testing the 
+  ! correct re-mapping between Comp1 -> Comp2 -> Comp1.
+
+  subroutine user_initP3(comp, importState, exportState, clock, rc)
+    type(ESMF_GridComp)   :: comp
+    type(ESMF_State)      :: importState, exportState
+    type(ESMF_Clock)      :: clock
+    integer, intent(out)  :: rc
+
+    ! Local variables
+    type(ESMF_Grid)                   :: grid
+    type(ESMF_Field)                  :: field, finalField
+    
+    ! Initialize return code
+    rc = ESMF_SUCCESS
+
+    print *, "User Comp1 Init phase=3 starting"
+
+    ! Access the already created Field and its Grid in the exportState
+    call ESMF_StateGet(exportState, "srcField", field=field, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_FieldGet(field, grid=grid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    
+    ! Create the finalField on the same Grid with allocate memory
+    finalField = ESMF_FieldCreate(grid, typekind=ESMF_TYPEKIND_R8, &
+      name="finalField", rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    ! Add the Field to the exportState
+    call ESMF_StateAdd(exportState, (/finalField/), rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    print *, "User Comp1 Init phase=3 returning"
+
+  end subroutine user_initP3
+
+!-------------------------------------------------------------------------
+ 
   ! Fill data into the exported Field.
   
   subroutine user_run(comp, importState, exportState, clock, rc)
@@ -195,10 +242,10 @@ module user_model1
 
     ! Local variables
     type(ESMF_Field)                  :: field
+    type(ESMF_Grid)                   :: grid
     integer                           :: i, j
     real(kind=ESMF_KIND_R8),  pointer :: dataPtr(:,:)
-    integer                           :: localPet
-    
+    real(kind=ESMF_KIND_R8),  pointer :: lonPtr(:,:), latPtr(:,:)
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -209,8 +256,12 @@ module user_model1
     call ESMF_StateGet(exportState, "srcField", field=field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
-    ! Get localPet to have something to fill in
-    call ESMF_GridCompGet(comp, localPet=localPet, rc=rc)
+    ! Get the Grid coordinate arrays
+    call ESMF_FieldGet(field, grid=grid, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridGetCoord(grid, coordDim=1, farrayPtr=lonPtr, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridGetCoord(grid, coordDim=2, farrayPtr=latPtr, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Fill in data into Field
@@ -218,9 +269,23 @@ module user_model1
     if (rc/=ESMF_SUCCESS) return ! bail out
     do j=lbound(dataPtr,2),ubound(dataPtr,2)
     do i=lbound(dataPtr,1),ubound(dataPtr,1)
-      dataPtr(i,j) = real(localPet)
+      dataPtr(i,j) = sin(3.1416*lonPtr(i,j)/180.) * cos(3.1416*latPtr(i,j)/180.)
     enddo
     enddo
+      
+#if 0
+    ! -> Works, but using PIO leads to SEGV during Finalize on some platforms
+    ! Write the Field to file
+    if (ESMF_IO_PIO_PRESENT .and. &
+      (ESMF_IO_NETCDF_PRESENT .or. ESMF_IO_PNETCDF_PRESENT)) then
+      call ESMF_FieldWrite(field, file="srcField.nc", &
+        status=ESMF_FILESTATUS_REPLACE, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    endif
+#endif
 
     print *, "User Comp1 Run returning"
 
@@ -235,11 +300,49 @@ module user_model1
     integer, intent(out)  :: rc
 
     ! Local variables
+    type(ESMF_Field)                  :: field, finalField
+    integer                           :: i, j
+    real(kind=ESMF_KIND_R8),  pointer :: dataPtr(:,:), finalDataPtr(:,:)
     
     ! Initialize return code
     rc = ESMF_SUCCESS
 
     print *, "User Comp1 Final starting"
+
+    ! Access the Fields in the exportState
+    call ESMF_StateGet(exportState, "srcField", field=field, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_StateGet(exportState, "finalField", field=finalField, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+#if 0
+    ! -> Works, but using PIO leads to SEGV during Finalize on some platforms
+    ! Write the Field to file
+    if (ESMF_IO_PIO_PRESENT .and. &
+      (ESMF_IO_NETCDF_PRESENT .or. ESMF_IO_PNETCDF_PRESENT)) then
+      call ESMF_FieldWrite(finalField, file="finalField.nc", &
+        status=ESMF_FILESTATUS_REPLACE, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=__FILE__)) &
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    endif
+#endif
+
+    ! Access the data in the Fields
+    call ESMF_FieldGet(field, farrayPtr=dataPtr, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_FieldGet(finalField, farrayPtr=finalDataPtr, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
+
+    do j=lbound(dataPtr,2),ubound(dataPtr,2)
+    do i=lbound(dataPtr,1),ubound(dataPtr,1)
+      if (abs(dataPtr(i,j)-finalDataPtr(i,j)) > 1.E-15) then
+        print *, "error at (",i,",",j,"): ", abs(dataPtr(i,j)-finalDataPtr(i,j))
+        rc = ESMF_RC_VAL_WRONG
+      endif
+    enddo
+    enddo
 
     print *, "User Comp1 Final returning"
 

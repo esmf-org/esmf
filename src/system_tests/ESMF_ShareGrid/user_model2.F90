@@ -92,7 +92,7 @@ module user_model2
 
 !--------------------------------------------------------------------------------
  
-  ! In phase 1 Initialize Comp2 creates an empty Field without any Grid 
+  ! In phase 1 Initialize, Comp2 creates an empty Field without any Grid 
   ! information. The Field is added to the importState.
     
   subroutine user_initP1(comp, importState, exportState, clock, rc)
@@ -121,7 +121,7 @@ module user_model2
 
 !--------------------------------------------------------------------------------
  
-  ! In phase 2 Initialize Comp2 the incoming Field now contains Grid information
+  ! In phase 2 Initialize, Comp2 the incoming Field now contains Grid information
   ! that has been shared by Comp1 through the CplComp. The Grid contains
   ! index space information, i.e. DistGrid, which will be printed here.
   !
@@ -174,8 +174,7 @@ module user_model2
     
     ! TODO: If there were changes made to the DistGrid, then the Grid will need
     ! TODO: to be re-created on the changed DistGrid, and swapped out in the 
-    ! TODO: Field. For this, Fields created with FieldEmptyCreate that have not
-    ! TODO: been completed must support calling FieldEmptySet multiple times.
+    ! TODO: Field.
    
     print *, "User Comp2 Init phase=2 returning"
 
@@ -183,9 +182,10 @@ module user_model2
 
 !--------------------------------------------------------------------------------
  
-  ! In phase 3 Initialize Comp2 finishes the creation of the Field in the 
+  ! In phase 3 Initialize, Comp2 finishes the creation of the Field on the 
   ! shared Grid. The incoming Field already holds the complete shared Grid,
-  ! and all that is left to do is to call FieldEmptyComplete.
+  ! with correctly distributed coordinate arrays. All that is left to do here
+  ! is to call FieldEmptyComplete.
     
   subroutine user_initP3(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp)   :: comp
@@ -195,7 +195,7 @@ module user_model2
 
     ! Local variables
     type(ESMF_Field)      :: field
-    
+
     ! Initialize return code
     rc = ESMF_SUCCESS
 
