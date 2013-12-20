@@ -72,7 +72,8 @@ program ESMF_ContainerUTest
   character(ESMF_MAXSTR)          :: iString
   character(ESMF_MAXSTR)          :: fieldName
   integer, parameter              :: fieldCount = 5
-  integer                         :: i, k, fieldCountOut
+  integer                         :: fieldCountOut
+  integer                         :: i
   integer                         :: garbageCount, itemCount
   logical                         :: isPresent, loopResult
   type(TestType)                  :: tt
@@ -390,12 +391,13 @@ program ESMF_ContainerUTest
     enddo
   endif
   call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate (fieldListOut)
   
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Container Get fieldList w/ ESMF_ITEMORDER_ABC Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  nullify(fieldListOut)
   call ESMF_ContainerGet(container, itemList=fieldListOut, &
     itemorderflag=ESMF_ITEMORDER_ABC, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -428,12 +430,13 @@ program ESMF_ContainerUTest
     enddo
   endif
   call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate (fieldListOut)
   
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Container Get fieldList w/ ESMF_ITEMORDER_ADDORDER Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  nullify(fieldListOut)
   call ESMF_ContainerGet(container, itemList=fieldListOut, &
     itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -669,11 +672,12 @@ program ESMF_ContainerUTest
   endif
   call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
 
+  deallocate (fieldListOut)
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Container Get fieldList for itemName w/ ESMF_ITEMORDER_ABC Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  nullify(fieldListOut)
   call ESMF_ContainerGet(container, itemName="testField1", &
     itemorderflag=ESMF_ITEMORDER_ABC, itemList=fieldListOut, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -707,11 +711,12 @@ program ESMF_ContainerUTest
   endif
   call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
 
+  deallocate (fieldListOut)
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Container Get fieldList for itemName w/ ESMF_ITEMORDER_ADDORDER Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  nullify(fieldListOut)
   call ESMF_ContainerGet(container, itemName="testField1", &
     itemorderflag=ESMF_ITEMORDER_ADDORDER, itemList=fieldListOut, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -760,12 +765,13 @@ program ESMF_ContainerUTest
   call ESMF_ContainerGet(container, itemCount=fieldCountOut, rc=rc)
   if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_Test(fieldCountOut==2, name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate (fieldListOut)
   
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Container Get fieldList Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  nullify(fieldListOut)
   call ESMF_ContainerGet(container, itemList=fieldListOut, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
@@ -799,12 +805,12 @@ program ESMF_ContainerUTest
     endif
   endif
   call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
+  deallocate (fieldListOut)
   
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Container Get fieldList w/ ESMF_ITEMORDER_ABC Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  nullify(fieldListOut)
   call ESMF_ContainerGet(container, itemList=fieldListOut, &
     itemorderflag=ESMF_ITEMORDER_ABC, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -839,12 +845,13 @@ program ESMF_ContainerUTest
     endif
   endif
   call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate (fieldListOut)
   
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Container Get fieldList w/ ESMF_ITEMORDER_ADDORDER Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  nullify(fieldListOut)
   call ESMF_ContainerGet(container, itemList=fieldListOut, &
     itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -879,6 +886,8 @@ program ESMF_ContainerUTest
     endif
   endif
   call ESMF_Test(loopResult, name, failMsg, result, ESMF_SRCLINE)
+
+  deallocate (fieldListOut)
 
   !------------------------------------------------------------------------
   !NEX_UTest
