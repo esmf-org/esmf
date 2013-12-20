@@ -1163,14 +1163,15 @@ num_elems, &
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
-    function ESMF_MeshCreateFromDG(distgrid, parametricDim, spatialDim, &
-                                   coordSys, rc)
+    function ESMF_MeshCreateFromDG(distgrid, nodalDistgrid, parametricDim, &
+      spatialDim, coordSys, rc)
 !
 !
 ! !RETURN VALUE:
     type(ESMF_Mesh)         :: ESMF_MeshCreateFromDG
 ! !ARGUMENTS:
     type(ESMF_DistGrid),        intent(in)            :: distgrid
+    type(ESMF_DistGrid),        intent(in), optional  :: nodalDistgrid
     integer,                    intent(in), optional  :: parametricDim
     integer,                    intent(in), optional  :: spatialDim
     type(ESMF_CoordSys_Flag),   intent(in), optional  :: coordSys
@@ -1184,6 +1185,8 @@ num_elems, &
 !   \begin{description}
 !   \item [distgrid]
 !         The elemental distgrid.
+!   \item [{[distgrid]}]
+!         The nodal distgrid.
 !   \item [{[parametricDim]}]
 !         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
 !         have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
@@ -1224,8 +1227,11 @@ num_elems, &
 
     ESMF_MeshCreateFromDG%isFullyCreated=.true.
     ESMF_MeshCreateFromDG%element_distgrid = distgrid
+    if (present(nodalDistgrid)) then
+      ESMF_MeshCreateFromDG%nodal_distgrid = nodalDistgrid
+    endif
 
-
+    ESMF_MeshCreateFromDG%isCMeshFreed = .true. ! helps problems in reconcile
 
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromDG)
 
@@ -2628,6 +2634,8 @@ end function ESMF_MeshCreateFromScrip
     integer :: localrc
     integer :: numNodeIds, numElemIds
     integer, allocatable :: nodeIds(:), elemIds(:)
+    type(ESMF_DELayout) :: delayout
+    integer             :: localDeCount
 
     ! Init localrc
     localrc = ESMF_SUCCESS
@@ -2752,10 +2760,20 @@ end function ESMF_MeshCreateFromScrip
        if (present(elementDistgrid)) then
 
           ! Get number of element Ids
-          call ESMF_DistGridGet(elementDistgrid,localDe=0, &
-               elementCount=numElemIds, rc=localrc)
+          call ESMF_DistGridGet(elementDistgrid, delayout=delayout, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+          numElemIds = 0  ! initialize
+          if (localDeCount > 0) then
+            !TODO: this assumes 1 DE/PET and should be generalized
+            call ESMF_DistGridGet(elementDistgrid,localDe=0, &
+                 elementCount=numElemIds, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
 
           ! First fill in elem information not requiring redist
           ESMF_MeshCreateRedist%element_distgrid=elementDistgrid
@@ -2776,10 +2794,14 @@ end function ESMF_MeshCreateFromScrip
           allocate(elemIds(numElemIds))
 
           ! Get element Ids
-          call ESMF_DistGridGet(elementDistgrid,localDe=0, &
-               seqIndexList=elemIds, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
+          elemIds = 0  ! initialize
+          if (localDeCount > 0) then
+            !TODO: this assumes 1 DE/PET and should be generalized
+            call ESMF_DistGridGet(elementDistgrid,localDe=0, &
+                 seqIndexList=elemIds, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
 
           ! Call into C
           call C_ESMC_MeshCreateRedistElems(mesh,                  &
