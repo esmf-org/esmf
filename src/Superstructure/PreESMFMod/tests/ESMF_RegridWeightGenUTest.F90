@@ -131,6 +131,13 @@ program ESMF_RegridWeightGenUTest
        srcFileType = srcFileType, dstFileType = dstFileType, &
        verboseFlag = .true., rc=rc)
 
+#ifdef ESMF_NETCDF
+  call ESMF_Test(((rc.eq.ESMF_SUCCESS)), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+#endif
+
   !----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "RegridWeightGen bilinear with route handle"
