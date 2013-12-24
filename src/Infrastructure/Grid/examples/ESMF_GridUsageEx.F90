@@ -1266,6 +1266,32 @@ endif
    call ESMF_GridDestroy(grid2D, rc=rc)
    if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOE
+!  Where T42\_grid.nc is a 2D global grid of size (128x64) and the resulting Grid is distributed
+!  by partitioning the rows evenly over all the PETs.
+!
+!  ESMF also support the creation of a 2D Grid from the SCRIP format Grid file using a user specified
+!  ESMF\_DistGrid.  The following example code demostrates the creation of an Grid object using a pre-defined
+!  DistGrid.  The resulting Grid is the same as the one created above:
+!EOE
+
+!BOC
+   distgrid = ESMF_DistGridCreate((/1,1/), (/128,64/), &
+   	      regDecomp=(/PetCount,1/), rc=rc)
+   grid2D = ESMF_GridCreate(filename="data/T42_grid.nc",  &
+              fileFormat=ESMF_FILEFORMAT_SCRIP,  &
+              distGrid=distgrid, addCornerStagger=.true., rc=rc)
+!EOC
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+   !-------------------------------------------------------------------
+   ! Clean up to prepare for the next example.
+   !-------------------------------------------------------------------
+   call ESMF_GridDestroy(grid2D, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+   call ESMF_DistGridDestroy(distgrid, rc=rc)
+   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
 #endif
 #if 1
 !BOE
