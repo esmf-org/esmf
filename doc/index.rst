@@ -365,6 +365,12 @@ Create a Grid
     .. literalinclude:: ../src/ESMF/test/regrid_test/field_regridding_test.py
         :pyobject: create_grid
 
+-----------------------
+Create a Grid From File
+-----------------------
+
+    .. literalinclude:: ../src/ESMF/test/regrid_test/regrid_from_file_test/regrid_check.py
+        :pyobject: mesh_check
 
 --------------
 Create a Field

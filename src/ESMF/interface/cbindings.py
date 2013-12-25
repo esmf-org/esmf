@@ -516,7 +516,7 @@ def ESMP_GridAddItem(grid, item,
         raise ValueError('ESMC_GridAddItem() failed with rc = '+str(rc)+'.    '+
                         constants.errmsg)
 
-_ESMF.ESMC_GridGetCoord.restype = ct.POINTER(ct.c_void_p)
+_ESMF.ESMC_GridGetCoord.restype = ct.c_void_p
 _ESMF.ESMC_GridGetCoord.argtypes = [ct.c_void_p, ct.c_int, ct.c_uint,
                                     np.ctypeslib.ndpointer(dtype=np.int32),
                                     np.ctypeslib.ndpointer(dtype=np.int32),
