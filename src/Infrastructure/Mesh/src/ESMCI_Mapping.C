@@ -28,6 +28,9 @@ static const char *const version = "$Id$";
 
 namespace ESMCI {
 
+  // Type used to specify method used to do spherical (3,2) mapping
+  // eventually could be broadened to specify other types
+  MAP_TYPE sph_map_type=MAP_TYPE_CART_APPROX;
 
 template<class SFUNC_TYPE,typename MPTRAITS, int SPATIAL_DIM, int PARAMETRIC_DIM>
 POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::classInstance = NULL;
@@ -73,18 +76,18 @@ POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1> *POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1>::in
 
 template<class SFUNC_TYPE,typename MPTRAITS>
 bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,1>::is_in_cell(const double *mdata,
-                             const double *point,
-                             double *pcoord,
-                             double *dist) const
+                                                       const double *point,
+                                                       double *pcoord,
+                                                       double *dist) const
 {
   Throw() << "is_in_cell not implemented for 3,1";
 }
 
 template<class SFUNC_TYPE,typename MPTRAITS>
 bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1>::is_in_cell(const double *mdata,
-                             const double *point,
-                             double *pcoord,
-                             double *dist) const
+                                                       const double *point,
+                                                       double *pcoord,
+                                                       double *dist) const
 {
   Throw() << "is_in_cell not implemented for 2,1";
 }
@@ -93,9 +96,9 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,2,1>::is_in_cell(const double *mdata,
 
 template<class SFUNC_TYPE,typename MPTRAITS>
 bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
-                             const double *point,
-                             double *pcoord,
-                             double *dist) const
+                                                       const double *point,
+                                                       double *pcoord,
+                                                       double *dist) const
 {
 
   // The maximum number of points we expect to see in a polygon in here, plus a bit extra
@@ -128,66 +131,139 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
   // Get rid of degenerate edges
   remove_0len_edges3D(&num_pnts, pnts);
 
-  // Get the parameters particular to what it looks like
-  if (num_pnts==4) {
-    double center[3]={0.0,0.0,0.0}; // center of sphere
-    double p[2]; 
-    double t;
-    
-    // Intersect quad with line from point to center of sphere
-    if (!intersect_quad_with_line(pnts, point, center, p, &t)) {
-      if (dist) *dist = std::numeric_limits<double>::max();
-      pcoord[0]=0.0; pcoord[1]=0.0;
-      Throw() << "Can't map point to quadrilateral cell \n";
-      return false;
-    }
-    
-    // Transform quad parametric coords from [0,1] to [-1,1] for consistancy
-    pcoord[0]=2*p[0]-1.0;
-    pcoord[1]=2*p[1]-1.0;
-    
-    // do is in
-    double sdist;
-    bool in_quad = quad_shape_func::is_in(pcoord, &sdist);
-    
-    // Distance to quad
-    if (dist) *dist=sdist;
-    
-    return in_quad;
-  } else if (num_pnts==3) {
-    double center[3]={0.0,0.0,0.0}; // center of sphere
-    double p[2]; 
-    double t;
+  // Map point depending on map type and shape
+  if (sph_map_type==MAP_TYPE_CART_APPROX) {
 
-    // Intersect tri with line from point to center of sphere
-    if (!intersect_tri_with_line(pnts, point, center, p, &t)) {
-      if (dist) *dist = std::numeric_limits<double>::max();
-      Throw() << "Can't map point to triangle cell \n";
-      pcoord[0]=0.0; pcoord[1]=0.0;
-      return false;
-    }
+    //printf("CART \n");
 
-    // Don't need to transform tri parametric coords because tri shape func seems to use [0,1], but
-    // put into pcoord 
-    pcoord[0]=p[0];
-    pcoord[1]=p[1];
 
-    // do is in
-    double sdist;
-    bool in_tri = tri_shape_func::is_in(pcoord, &sdist);
+    // Get the parameters particular to what it looks like
+     if (num_pnts==3) {
+      double center[3]={0.0,0.0,0.0}; // center of sphere
+      double p[2];
+      double t;
+      
+      // Intersect tri with line from point to center of sphere
+      if (!intersect_tri_with_line(pnts, point, center, p, &t)) {
+        if (dist) *dist = std::numeric_limits<double>::max();
+        pcoord[0]=0.0; pcoord[1]=0.0;
+        return false;
+      }
+      
+      // Don't need to transform tri parametric coords because tri shape func seems to use [0,1], but
+      // put into pcoord 
+      pcoord[0]=p[0];
+      pcoord[1]=p[1];
+      
+      // do is in
+      double sdist;
+      bool in_tri = tri_shape_func::is_in(pcoord, &sdist);
+      
+      // Distance to tri
+      if (dist) *dist=2.0*sdist;
+    
+      return in_tri;
+    } else if (num_pnts==4) {
+      double center[3]={0.0,0.0,0.0}; // center of sphere
+      double p[2];
+      double t;
+      
+      if (!intersect_quad_with_line(pnts, point, center, p, &t)) {
+        if (dist) *dist = std::numeric_limits<double>::max();
+        pcoord[0]=0.0; pcoord[1]=0.0;
+        return false;
+      }
 
-    // Distance to tri
-    if (dist) *dist=2.0*sdist;
+      // Transform quad parametric coords from [0,1] to [-1,1] for consistancy
+      pcoord[0]=2*p[0]-1.0;
+      pcoord[1]=2*p[1]-1.0;    
 
-    return in_tri;
+      // do is in
+      double sdist;
+      bool in_quad = quad_shape_func::is_in(pcoord, &sdist);
+    
+      // Distance to quad
+      if (dist) *dist=sdist;
+      return in_quad;
+
+    } else {
+       // This is a degenerate cell so we can't map to it. 
+       // Could throw an error here, but for flexiblity allow
+       // these degenerate cells for now, but simply don't map to them.
+       if (dist) *dist = std::numeric_limits<double>::max();
+       pcoord[0]=0.0; pcoord[1]=0.0;
+       return false;
+     }
+  } else if (sph_map_type==MAP_TYPE_GREAT_CIRCLE) {
+      double p1,p2; 
+      
+      //printf("G. CIRCLE \n");
+
+      // Map triangles 
+      if (num_pnts==3) {
+        if (calc_gc_parameters_tri(point, 
+                                   pnts+6, pnts, pnts+3,
+                                   &p1, &p2)) {
+          if (dist) *dist = std::numeric_limits<double>::max();
+          pcoord[0]=0.0; pcoord[1]=0.0;
+          return false;
+        }
+
+        // Don't need to transform tri parametric coords because tri shape func seems to use [0,1], but
+        // put into pcoord 
+        pcoord[0]=p1;
+        pcoord[1]=p2;
+
+        // do is in
+        double sdist;
+        bool in_tri = tri_shape_func::is_in(pcoord, &sdist);
+        
+        // Distance to tri
+        if (dist) *dist=2.0*sdist;
+    
+        return in_tri;
+
+      } else if (num_pnts==4) { // Map quads
+        double p1,p2; 
+        
+        // Intersect quad with line from point to center of sphere
+        if (calc_gc_parameters_quad(point, 
+                                    pnts+9, pnts, pnts+3, pnts+6, 
+                                    &p1, &p2)) {
+          if (dist) *dist = std::numeric_limits<double>::max();
+          pcoord[0]=0.0; pcoord[1]=0.0;
+          return false;
+        }
+        
+        // Transform quad parametric coords from [0,1] to [-1,1] for consistancy
+        pcoord[0]=2*p1-1.0;
+        pcoord[1]=2*p2-1.0;
+
+        // do is in
+        double sdist;
+        bool in_quad = quad_shape_func::is_in(pcoord, &sdist);
+        
+        // Distance to quad
+        if (dist) *dist=sdist;
+        return in_quad;
+
+      }  else {
+        // This is a degenerate cell so we can't map to it. 
+        // Could throw an error here, but for flexiblity allow
+        // these degenerate cells for now, but simply don't map to them.
+        if (dist) *dist = std::numeric_limits<double>::max();
+        pcoord[0]=0.0; pcoord[1]=0.0;
+        return false;
+      }
   } else {
-    // This is a degenerate cell so we can't map to it. 
-    // Could throw an error here, but for flexiblity allow
-    // these degenerate cells for now, but simply don't map to them. 
-    return false;
+    Throw() << "Unrecognized spherical map type. \n";
   }
 
-
+  // Shouldn't be able to get here, but just in case...
+  if (dist) *dist = std::numeric_limits<double>::max();
+  pcoord[0]=0.0; pcoord[1]=0.0;
+  return false;
+ 
 #undef PM_MAX_PNTS_IN_POLY
 }
 
@@ -197,9 +273,9 @@ bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
 
 template<class SFUNC_TYPE,typename MPTRAITS>
 bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,3,2>::is_in_cell(const double *mdata,
-                             const double *point,
-                             double *pcoord,
-                             double *dist) const
+                                                       const double *point,
+                                                       double *pcoord,
+                                                       double *dist) const
 {
 
 
@@ -329,9 +405,9 @@ std::cout << std::endl;
 
 template<class SFUNC_TYPE,typename MPTRAITS,int SPATIAL_DIM, int PARAMETRIC_DIM>
 bool POLY_Mapping<SFUNC_TYPE,MPTRAITS,SPATIAL_DIM,PARAMETRIC_DIM>::is_in_cell(const double *mdata,
-                             const double *point,
-                             double *pcoord,
-                             double *dist) const
+                                                                              const double *point,
+                                                                              double *pcoord,
+                                                                              double *dist) const
 {
   // Newton's method
   const double ctol = 1e-10;

@@ -348,7 +348,7 @@ double great_circle_area(int n, double *pnts) {
 
 
   // Not really a math routine, but useful as a starting point for math routines
-  void get_elem_coords(const MeshObj *elem, MEField<>  *cfield, int sdim, int max_num_nodes, int *num_nodes, double *coords) {
+  void get_elem_coords(const MeshObj *elem, const MEField<>  *cfield, int sdim, int max_num_nodes, int *num_nodes, double *coords) {
 
       // Get number of nodes in element
       const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
@@ -1090,6 +1090,545 @@ void convert_cart_to_sph_deg(double x, double y, double z,
   *lat=90.0-(lat_r*RAD2DEG);
 }
 
+
+// Assumes pnt1, pnt2, pnt3 are of size 3
+void calc_plane_equation(double *pnt1, double *pnt2, double *pnt3, double *a, double *b, double *c, double *d) {
+#define CROSS_PRODUCT3D(out,a,b) out[0]=a[1]*b[2]-a[2]*b[1]; out[1]=a[2]*b[0]-a[0]*b[2]; out[2]=a[0]*b[1]-a[1]*b[0];
+
+  // vector from pnt2 to pnt1
+  double vec21[3];
+  vec21[0]=pnt1[0]-pnt2[0];
+  vec21[1]=pnt1[1]-pnt2[1];
+  vec21[2]=pnt1[2]-pnt2[2];
+
+  // vector from pnt2 to pnt3
+  double vec23[3];
+  vec23[0]=pnt3[0]-pnt2[0];
+  vec23[1]=pnt3[1]-pnt2[1];
+  vec23[2]=pnt3[2]-pnt2[2];
+
+
+  // Calc outward (from sphere) normal to plane
+  double normal[3];
+  CROSS_PRODUCT3D(normal,vec23,vec21);
+  
+  // check if 0.0
+  if ((normal[0] == 0.0) && 
+      (normal[1] == 0.0) && 
+      (normal[2] == 0.0)) {
+    Throw() << " Points are collinear, so can't compute normal";
+  }
+
+  // get plane equation from normal
+  *a=normal[0];
+  *b=normal[1];
+  *c=normal[2];
+  *d=-normal[0]*pnt2[0]-normal[1]*pnt2[1]-normal[2]*pnt2[2];
+
+#undef CROSS_PRODUCT3D
+}
+
+// Assumes all variables are of size 3
+// returns 0 for success, 1 otherwise
+void calc_sph_mmbox(double *pnt1, double *pnt2, double *pnt3, double *min, double *max) {
+  double a,b,c,d;
+
+  // Get plane equation
+  calc_plane_equation(pnt1, pnt2, pnt3, &a, &b, &c, &d); 
+
+  // Calc. distance from plane to sphere
+  double dist_p_to_sph;
+  dist_p_to_sph=1.0-(std::abs(d)/std::sqrt(a*a+b*b+c*c));
+ 
+  // Calculate normal to plane with length dist_p_to_sph
+  double p_norm_len=std::sqrt(a*a+b*b+c*c);
+  double p_normal[3];
+  p_normal[0]=dist_p_to_sph*(a/p_norm_len);
+  p_normal[1]=dist_p_to_sph*(b/p_norm_len);
+  p_normal[2]=dist_p_to_sph*(c/p_norm_len);
+
+
+  // compute other set of points to enclose sphere section
+  double pnt1_pls_vec[3];
+  double pnt2_pls_vec[3];
+  double pnt3_pls_vec[3];
+
+  MU_ADD_VEC3D(pnt1_pls_vec,pnt1,p_normal);
+  MU_ADD_VEC3D(pnt2_pls_vec,pnt2,p_normal);
+  MU_ADD_VEC3D(pnt3_pls_vec,pnt3,p_normal);
+ 
+  // Compute min-max box
+  //// set to pnt1
+  min[0]=pnt1[0]; min[1]=pnt1[1]; min[2]=pnt1[2];
+  max[0]=pnt1[0]; max[1]=pnt1[1]; max[2]=pnt1[2];
+
+  //// modify by pnt2
+  MU_SET_MIN_VEC3D(min,pnt2);
+  MU_SET_MAX_VEC3D(max,pnt2);
+
+  //// modify by pnt3
+  MU_SET_MIN_VEC3D(min,pnt3);
+  MU_SET_MAX_VEC3D(max,pnt3);
+
+  //// modify by pnt1_pls_vec
+  MU_SET_MIN_VEC3D(min,pnt1_pls_vec);
+  MU_SET_MAX_VEC3D(max,pnt1_pls_vec);
+
+  //// modify by pnt2_pls_vec
+  MU_SET_MIN_VEC3D(min,pnt2_pls_vec);
+  MU_SET_MAX_VEC3D(max,pnt2_pls_vec);
+
+  //// modify by pnt3_pls_vec
+  MU_SET_MIN_VEC3D(min,pnt3_pls_vec);
+  MU_SET_MAX_VEC3D(max,pnt3_pls_vec);
+
+}
+
+#if 0
+  // Compute the angle (in radians) around normal between two 3D vectors a and b 
+  // CURRENTLY ONLY WORKS FOR -pi/2 to pi/2
+  // Returns 0 if successful, 1 otherwise
+  int angle_between_VEC3D(double *a, double *b, double*normal, double *_angle) {
+
+    // Compute cross product
+    double cross_ab[3];
+    MU_CROSS_PRODUCT_VEC3D(cross_ab,a,b);
+
+    // Compute vector lengths
+    double cross_ab_len=MU_LEN_VEC3D(cross_ab);
+    double a_len=MU_LEN_VEC3D(a);
+    double b_len=MU_LEN_VEC3D(b);
+    
+    // adjust to be negative if going in other direction
+    if (MU_DOT_VEC3D(cross_ab,normal)<0.0) cross_ab_len=-cross_ab_len;
+    
+    // Error Check bottom
+    if ((a_len==0.0) || (b_len==0.0)) return 1;
+   
+    // Compute sin value
+  double sin_ab=cross_ab_len/(a_len*b_len);
+    
+   // Clamp if out of range
+   if (sin_ab<-1.0) sin_ab=-1.0;
+   else if (sin_ab>1.0) sin_ab=1.0;
+
+   // Compute angle 
+   *_angle_=std::asin(sin_ab);
+   
+   // Return success
+   return 0;
+  }
+#endif
+
+// Inputs: q1, q2, q3, q4 are 3D cartesian points located on 
+// a sphere (in counter-clockwise order) making up two planes (with the sphere center (0,0,0)).
+// Each of these should be of size 3 doubles.
+// Outputs: p - position between plane formed by q1 and q2 and  plane formed by q3 to q4
+int calc_gc_parameter_2planes(const double *pnt, double *q1, double *q2, double *q3, double *q4, 
+                              double *p) {
+
+  // Compute normal to plane through q1 q2 and center (origin)
+  double normal_12[3];
+  MU_CROSS_PRODUCT_VEC3D(normal_12,q1,q2);
+
+  // Compute normal to plane through q3 q4 and center (origin)
+  double normal_34[3];
+  MU_CROSS_PRODUCT_VEC3D(normal_34,q3,q4);
+
+  // Compute normal to normals
+  // (This is a vector parallel to both planes)
+  double parallel[3];
+  MU_CROSS_PRODUCT_VEC3D(parallel,normal_12,normal_34);
+
+  // Compute vector lengths
+  double parallel_len=MU_LEN_VEC3D(parallel);
+  double normal_12_len=MU_LEN_VEC3D(normal_12);
+  double normal_34_len=MU_LEN_VEC3D(normal_34);
+
+  // Error Check bottom
+  if ((normal_12_len==0.0) || (normal_34_len==0.0)) return 1;
+
+  // compute sin
+  double sin_1234=parallel_len/(normal_12_len*normal_34_len);
+
+   // Clamp if out of range
+   if (sin_1234<-1.0) sin_1234=-1.0;
+   else if (sin_1234>1.0) sin_1234=1.0;
+
+  // Compute the angle between the planes
+  double angle_1234=std::asin(sin_1234);
+  
+  // parallelx(pntxparallel)  = a pnt projected to the plane perp. to parallel
+  double tmp[3];
+  MU_CROSS_PRODUCT_VEC3D(tmp,pnt,parallel);
+  double pnt_in_plane[3];
+  MU_CROSS_PRODUCT_VEC3D(pnt_in_plane,parallel,tmp);
+    
+
+  // parallelx(pntxparallel)  = a pnt projected to the plane perp. to parallel
+  MU_CROSS_PRODUCT_VEC3D(tmp,q1,parallel);
+  double q1_in_plane[3];
+  MU_CROSS_PRODUCT_VEC3D(q1_in_plane,parallel,tmp);
+
+
+  // Angle from plane 12 to pnt
+  double cross_1_to_pnt[3];
+  MU_CROSS_PRODUCT_VEC3D(cross_1_to_pnt,pnt_in_plane,q1_in_plane);
+
+  // Compute vector lengths
+  double cross_1_to_pnt_len=MU_LEN_VEC3D(cross_1_to_pnt);
+  double pnt_in_plane_len=MU_LEN_VEC3D(pnt_in_plane);
+  double q1_in_plane_len=MU_LEN_VEC3D(q1_in_plane);
+
+  // adjust to be negative if going in other direction
+  if (MU_DOT_VEC3D(cross_1_to_pnt,parallel)<0.0) cross_1_to_pnt_len=-cross_1_to_pnt_len;
+
+  // Error Check
+  if ((q1_in_plane_len==0.0) || (pnt_in_plane_len==0.0)) return 1;
+
+  // compute sin
+  double sin_12pnt=cross_1_to_pnt_len/(q1_in_plane_len*pnt_in_plane_len);
+
+   // Clamp if out of range
+   if (sin_12pnt<-1.0) sin_12pnt=-1.0;
+   else if (sin_12pnt>1.0) sin_12pnt=1.0;
+
+   // Compute cosine
+   double dot_12pnt=MU_DOT_VEC3D(pnt_in_plane,q1_in_plane);
+   
+   double cos_12pnt=dot_12pnt/(q1_in_plane_len*pnt_in_plane_len);
+
+   // Clamp if out of range
+   if (cos_12pnt<-1.0) cos_12pnt=-1.0;
+   else if (cos_12pnt>1.0) cos_12pnt=1.0;
+   
+   
+   // Compute angle
+   double angle_12pnt=std::atan2(sin_12pnt,cos_12pnt);
+
+
+  // Compute angle
+  //double angle_12pnt=std::asin(sin_12pnt);
+
+#if 0
+  if (mathutil_debug) {
+
+    printf("cross_1_len=%f q1_len=%f pnt_len=%f q1*pnt=%f\n",cross_1_to_pnt_len,q1_in_plane_len,pnt_in_plane_len,q1_in_plane_len*pnt_in_plane_len);
+
+    printf("angle_12pnt=%30.27f\n",angle_12pnt);
+
+    printf("angle_1234=%30.27f\n",angle_1234);
+  }
+#endif
+
+  // Error check output
+  if (angle_1234==0.0) return 1;
+
+  // Output P
+  *p=angle_12pnt/angle_1234;
+
+  // return success
+  return 0;
+} 
+
+
+// Inputs: pnt - is the point to determine the location of
+// q1, q2, q3, q4 are 3D cartesian points located on 
+// a sphere (in counter-clockwise order) making up the quad. Each of these should be of size 3 doubles.
+// Outputs: p1 - position in q1 to q2 / q3 to q4 direction
+//          p2 - position in q1 to q4 / q2 to q3 direction
+int calc_gc_parameters_quad(const double *pnt, double *q1, double *q2, double *q3, double *q4, 
+                            double *p1, double *p2) {
+
+
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+  if (mathutil_debug) {
+    double lon,lat,r;
+
+    printf("GC QUAD: \n");
+
+    // Pnt
+    convert_cart_to_sph_deg(pnt[0], pnt[1], pnt[2],
+                        &lon, &lat, &r);
+    printf("   pnt=%f %f\n",lon,lat);
+
+
+    // q1
+    convert_cart_to_sph_deg(q1[0], q1[1], q1[2],
+                        &lon, &lat, &r);
+    printf("   q1=%f %f\n",lon,lat);
+
+    // q2
+    convert_cart_to_sph_deg(q2[0], q2[1], q2[2],
+                        &lon, &lat, &r);
+    printf("   q2=%f %f\n",lon,lat);
+
+    // q3
+    convert_cart_to_sph_deg(q3[0], q3[1], q3[2],
+                        &lon, &lat, &r);
+    printf("   q3=%f %f\n",lon,lat);
+
+    // q4
+    convert_cart_to_sph_deg(q4[0], q4[1], q4[2],
+                        &lon, &lat, &r);
+    printf("   q4=%f %f\n",lon,lat);
+  }
+#endif
+
+
+  // Calc parameter p1
+  if (calc_gc_parameter_2planes(pnt, q1, q2, q3, q4, p1)) return 1;
+
+  // Calc parameter p2
+  if (calc_gc_parameter_2planes(pnt, q2, q3, q4, q1, p2)) return 1;
+
+
+  // return success
+  return 0;
+} 
+
+
+#if 0
+
+// Inputs: t1, t2 are 3D cartesian points located on 
+// a sphere making up a plane (with the sphere center(0,0,0)). Each of these should be of size 3 doubles.
+// Outputs: p - position parallel to the plane formed by t1 and t2 (and the sphere center).
+int calc_gc_parameter_1plane(const double *pnt, double *t1, double *t2, double *p) {
+
+  // Normal to plane of t1 and t2
+  double normal[3];
+  MU_CROSS_PRODUCT_VEC3D(normal,t1,t2);
+
+  // Compute lengths of vectors
+  double normal_len=MU_LEN_VEC3D(normal);
+  double t1_len=MU_LEN_VEC3D(t1);
+  double t2_len=MU_LEN_VEC3D(t2);
+
+  // Error Check
+  if ((t1_len==0.0) || (t2_len==0.0)) return 1;
+
+  // Compute angle between t1 and t2
+  double angle_12=std::asin(normal_len/(t1_len*t2_len));
+
+  // Project pnt to plane defined by normal
+  // (normalx(pntxnormal))  = pnt projected to the plane perp. to normal
+  double tmp[3];
+  MU_CROSS_PRODUCT_VEC3D(tmp,pnt,normal);
+  double pnt_in_plane[3];
+  MU_CROSS_PRODUCT_VEC3D(pnt_in_plane,normal,tmp);
+
+  // Compute angle from t1 to pnt_in_plane
+  double cross_1pnt[3];
+  MU_CROSS_PRODUCT_VEC3D(cross_1pnt,t1,pnt_in_plane);
+
+   // Compute lengths of vectors
+  double cross_1pnt_len=MU_LEN_VEC3D(cross_1pnt);
+  double pnt_in_plane_len=MU_LEN_VEC3D(pnt_in_plane);
+
+  // adjust to be negative if going in other direction
+  if (MU_DOT_VEC3D(cross_1pnt,normal)<0.0) cross_1pnt_len=-cross_1pnt_len;
+
+  // Error Check
+  if ((t1_len==0.0) || (pnt_in_plane_len==0.0)) return 1;
+
+  // Compute angle between t1 and pnt
+  double angle_1pnt=std::asin(cross_1pnt_len/(t1_len*pnt_in_plane_len));
+
+  // Error check output
+  if (angle_12==0.0) return 1;
+  
+  // Calc. output
+  *p=angle_1pnt/angle_12;
+
+  // return success
+  return 0;
+} 
+
+
+// Inputs: pnt - is the point to determine the location of
+// t1, t2, t3 are 3D cartesian points located on 
+// a sphere (in counter-clockwise order) making up the tri. Each of these should be of size 3 doubles.
+// Outputs: p1 - position in t1 to t2 direction
+//          p2 - position in t2 to t3 direction
+int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3,
+                            double *p1, double *p2) {
+
+  // Calc parameter p1
+  if (calc_gc_parameter_1plane(pnt, t1, t2, p1)) return 1;
+
+  // Calc parameter p2
+  if (calc_gc_parameter_1plane(pnt, t2, t3, p2)) return 1;
+
+
+  // return success
+  return 0;
+} 
+#endif
+
+
+
+
+
+
+// Inputs: t1, t2 are 3D cartesian points located on 
+// a sphere making up a plane (with the sphere center(0,0,0)). t3 is a point in front of this plane.
+//  Each of these should be of size 3 doubles.
+// Outputs: p - position between plane formed by t1 and t2 (and the sphere center) and point t3
+int calc_gc_parameter_1plane(const double *pnt, double *t1, double *t2, double *t3, double *p) {
+
+  // Normal to plane of t1 and t2
+  double normal_12[3];
+  MU_CROSS_PRODUCT_VEC3D(normal_12,t1,t2);
+
+  // Plane normal
+  double pl_normal[3];
+  MU_CROSS_PRODUCT_VEC3D(pl_normal,normal_12,t3);
+
+
+  // Vector in t1-t2 plane in plane defined by pl_normal
+  // STOPPED HERE
+  double tmp[3];
+  MU_CROSS_PRODUCT_VEC3D(tmp,t1,pl_normal);
+  double t1_in_plane[3];
+  MU_CROSS_PRODUCT_VEC3D(t1_in_plane,pl_normal,tmp);
+  
+  // t3 is already within plane defined by pl_normal
+  
+  // Compute angle between t1-t2 plane and t3
+  double cross_123[3];
+  MU_CROSS_PRODUCT_VEC3D(cross_123,t1_in_plane,t3);
+  double cross_123_len=MU_LEN_VEC3D(cross_123);
+  double t1_in_plane_len=MU_LEN_VEC3D(t1_in_plane);
+  double t3_len=MU_LEN_VEC3D(t3);
+
+  // Error Check
+  if ((t1_in_plane_len==0.0) || (t3_len==0.0)) return 1;
+
+  // Sin
+  double sin_angle_123=cross_123_len/(t1_in_plane_len*t3_len);
+
+  // Clamp to range
+  if (sin_angle_123>1.0) sin_angle_123=1.0;
+  else   if (sin_angle_123<-1.0) sin_angle_123=-1.0;
+
+  // Compute angle between t1-t2 plane and t3
+ double angle_123=std::asin(sin_angle_123);
+
+ //  printf("angle_123=%f\n",angle_123);
+
+
+  // Project pnt to plane defined by normal
+  // (normalx(pntxnormal))  = pnt projected to the plane perp. to normal
+  MU_CROSS_PRODUCT_VEC3D(tmp,pnt,pl_normal);
+  double pnt_in_plane[3];
+  MU_CROSS_PRODUCT_VEC3D(pnt_in_plane,pl_normal,tmp);
+
+  // Compute angle between projected pnt and t1-t2 plane 
+  double cross_1pnt[3];
+  MU_CROSS_PRODUCT_VEC3D(cross_1pnt,t1_in_plane,pnt_in_plane);
+
+   // Compute lengths of vectors
+  double cross_1pnt_len=MU_LEN_VEC3D(cross_1pnt);
+  double pnt_in_plane_len=MU_LEN_VEC3D(pnt_in_plane);
+
+  // adjust to be negative if going in other direction
+  if (MU_DOT_VEC3D(cross_1pnt,pl_normal)>0.0) cross_1pnt_len=-cross_1pnt_len;
+
+  // Error Check
+  if ((t1_in_plane_len==0.0) || (pnt_in_plane_len==0.0)) return 1;
+
+  // Sin
+  double sin_angle_1pnt=cross_1pnt_len/(t1_in_plane_len*pnt_in_plane_len);
+
+  // Clamp to range
+  if (sin_angle_1pnt>1.0) sin_angle_1pnt=1.0;
+  else   if (sin_angle_1pnt<-1.0) sin_angle_1pnt=-1.0;
+
+  // Compute angle between t1 and pnt
+  double angle_1pnt=std::asin(sin_angle_1pnt);
+
+  //  printf("angle_1pnt=%f\n",angle_1pnt);
+
+
+  // Error check output
+  if (angle_123==0.0) return 1;
+  
+  // Calc. output
+  *p=angle_1pnt/angle_123;
+
+  // return success
+  return 0;
+} 
+
+
+// Inputs: pnt - is the point to determine the location of
+// t1, t2, t3 are 3D cartesian points located on 
+// a sphere (in counter-clockwise order) making up the tri. Each of these should be of size 3 doubles.
+// Outputs: p1 - position in t1 to t2 direction
+//          p2 - position in t2 to t3 direction
+int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3,
+                            double *p1, double *p2) {
+
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+  if (mathutil_debug) {
+    double lon,lat,r;
+
+    printf("GC TRI: \n");
+
+    // Pnt
+    convert_cart_to_sph_deg(pnt[0], pnt[1], pnt[2],
+                        &lon, &lat, &r);
+    printf("   pnt=%f %f\n",lon,lat);
+
+
+    // t1
+    convert_cart_to_sph_deg(t1[0], t1[1], t1[2],
+                        &lon, &lat, &r);
+    printf("   t1=%f %f\n",lon,lat);
+
+    // t2
+    convert_cart_to_sph_deg(t2[0], t2[1], t2[2],
+                        &lon, &lat, &r);
+    printf("   t2=%f %f\n",lon,lat);
+
+    // t3
+    convert_cart_to_sph_deg(t3[0], t3[1], t3[2],
+                        &lon, &lat, &r);
+    printf("   t3=%f %f\n",lon,lat);
+
+  }
+#endif
+
+
+#if 0
+  // Calc parameter p1
+  if (calc_gc_parameter_1plane(pnt, t1, t2, t3, p1)) return 1;
+
+  // Calc parameter p2
+  if (calc_gc_parameter_1plane(pnt, t2, t3, t1, p2)) return 1;
+
+#else
+  double tmp_p1, tmp_p2, tmp_p3;
+
+  // Calc parameter p1
+  if (calc_gc_parameter_1plane(pnt, t1, t2, t3, &tmp_p1)) return 1;
+
+  // Calc parameter p2
+  if (calc_gc_parameter_1plane(pnt, t2, t3, t1, &tmp_p2)) return 1;
+
+  // Calc parameter p2
+  if (calc_gc_parameter_1plane(pnt, t3, t1, t2, &tmp_p3)) return 1;
+
+  *p1=tmp_p1/(tmp_p1+tmp_p2+tmp_p3);
+
+  *p2=tmp_p2/(tmp_p1+tmp_p2+tmp_p3);
+#endif
+
+
+
+  // return success
+  return 0;
+} 
 
 
 } // namespace

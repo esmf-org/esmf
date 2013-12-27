@@ -21,6 +21,12 @@
 
 namespace ESMCI {
 
+
+  // Type used to specify method used to do spherical (3,2) mapping
+  // eventually could be broadened to specify other types
+  enum MAP_TYPE {MAP_TYPE_CART_APPROX=0, MAP_TYPE_GREAT_CIRCLE};
+  extern MAP_TYPE sph_map_type;
+
 /**
  * Mapping subsystem.  Provides the mapping from a parametric element
  * space to physical coordinates.  Provides jacobian based utilities.

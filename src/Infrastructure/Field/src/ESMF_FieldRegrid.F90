@@ -319,6 +319,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     srcMaskValues, dstMaskValues, &
                     regridmethod, &
                     polemethod, regridPoleNPnts, & 
+                    lineType, &
                     unmappedaction, ignoreDegenerate, &
                     srcTermProcessing, & 
                     pipeLineDepth, &
@@ -336,6 +337,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_RegridMethod_Flag),intent(in),   optional :: regridmethod
       type(ESMF_PoleMethod_Flag),  intent(in),   optional :: polemethod
       integer,                     intent(in),   optional :: regridPoleNPnts
+      type(ESMF_LineType_Flag),    intent(in),   optional :: lineType
       type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
       logical,                     intent(in),   optional :: ignoreDegenerate
       integer,                     intent(inout),optional :: srcTermProcessing
@@ -427,6 +429,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           This parameter indicates how many points should be averaged
 !           over. Must be specified if {\tt polemethod} is 
 !           {\tt ESMF\_POLEMETHOD\_NPNTAVG}.
+!     \item [{[lineType]}]
+!           This argument controls the path of the line which connects two points on a sphere surface. This in
+!           turn controls the path along which distances are calculated and the shape of the edges that make
+!           up a cell. Figure~\ref{line_type_support} shows which line types are supported for each regrid method 
+!           as well as the default for each method. 
 !     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Options are 
@@ -575,6 +582,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer(ESMF_KIND_I4),       pointer :: tmp_indices(:,:)
         real(ESMF_KIND_R8),          pointer :: tmp_weights(:)
         logical :: localIgnoreDegenerate
+        type(ESMF_LineType_Flag):: localLineType
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -637,6 +645,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            lregridmethod=regridmethod
         else     
            lregridmethod=ESMF_REGRIDMETHOD_BILINEAR
+        endif
+
+        ! TODO: If lineType is present then do error checking here
+
+        ! Handle optional lineType argument
+        if (present(lineType)) then
+           localLineType=lineType
+        else     
+           localLineType=ESMF_LINETYPE_CART
         endif
 
 
@@ -920,6 +937,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              present(indices) .or. present(factorIndexList)) then
            call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
                 lregridmethod, &
+                localLineType, &
                 localpolemethod, localRegridPoleNPnts, &
                 lregridScheme, &
                 unmappedaction, &
@@ -944,6 +962,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         else
            call ESMF_RegridStore(srcMesh, srcArray, dstMesh, dstArray, &
                 lregridmethod, &
+                localLineType, &
                 localpolemethod, localRegridPoleNPnts, &
                 lregridScheme, &
                 unmappedaction, &

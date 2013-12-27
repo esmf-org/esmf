@@ -145,6 +145,7 @@ end function my_xor
       subroutine ESMF_RegridStore(srcMesh, srcArray, &
                  dstMesh, dstArray, &
                  regridmethod, &
+                 lineType, &
                  polemethod, regridPoleNPnts, &
                  regridScheme, &
                  unmappedaction, &
@@ -162,6 +163,7 @@ end function my_xor
       type(ESMF_Mesh), intent(inout)         :: dstMesh
       type(ESMF_Array), intent(inout)        :: dstArray
       type(ESMF_RegridMethod_Flag), intent(in)    :: regridmethod
+      type(ESMF_LineType_Flag), intent(in)    :: lineType
       type(ESMF_PoleMethod_Flag), intent(in)      :: polemethod
       integer, intent(in)                    :: regridPoleNPnts
       integer, intent(in)                    :: regridScheme
@@ -299,6 +301,7 @@ end function my_xor
        call c_ESMC_regrid_create(vm, srcMesh%this, srcArray, &
                    dstMesh%this, dstArray, &
                    regridmethod,  &
+                   lineType, &
                    polemethod, regridPoleNPnts, &    
                    regridScheme, localunmappedaction%unmappedaction, &
                    localIgnoreDegenerate, &

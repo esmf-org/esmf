@@ -18,6 +18,7 @@
 #include <Mesh/include/ESMCI_Migrator.h>
 #include <Mesh/include/ESMCI_SparseMsg.h>
 #include <Mesh/include/ESMCI_WMat.h>
+#include <Mesh/include/ESMCI_Mapping.h>
 #include <Mesh/src/Zoltan/zoltan.h>
 
 #include <vector>
@@ -146,7 +147,8 @@ public:
    * Build the interpolation object.  The MEFields must be compatible in the
    * sense that they are all element based, or node based, etc...
    */
-  Interp(Mesh &src, Mesh &dest, Mesh *midmesh, bool freeze_dst_, const std::vector<FieldPair> &Fields, int unmappedaction=ESMCI_UNMAPPEDACTION_ERROR);
+  Interp(Mesh &src, Mesh &dest, Mesh *midmesh, bool freeze_dst_, const std::vector<FieldPair> &Fields,
+         MAP_TYPE mtype=MAP_TYPE_CART_APPROX, int unmappedaction=ESMCI_UNMAPPEDACTION_ERROR);
   
   ~Interp();
   

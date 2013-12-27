@@ -11,6 +11,7 @@
 //==============================================================================
 
 #include <Mesh/include/ESMCI_MeshRegrid.h>
+#include <Mesh/include/ESMCI_MeshRead.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -112,9 +113,10 @@ int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
 
 // Meshes are already committed
 int online_regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
-                  int *regridConserve, int *regridMethod,
+                  int *regridConserve, int *regridMethod, 
                   int *regridPoleType, int *regridPoleNPnts, 
-                  int *regridScheme, int *unmappedaction) {
+                  int *regridScheme, 
+                  int *map_type, int *unmappedaction) {
 
     // Conservative regridding
     switch (*regridConserve) {
@@ -137,7 +139,7 @@ int online_regrid(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
     case (ESMC_REGRID_CONSERVE_OFF): {
 
       if (!regrid(srcmesh, dstmesh, 0, wts, regridMethod, regridScheme, 
-                regridPoleType, regridPoleNPnts, unmappedaction))
+                  regridPoleType, regridPoleNPnts, map_type, unmappedaction))
         Throw() << "Regridding error" << std::endl;
 
       // Remove non-locally owned weights (assuming destination mesh decomposition)
@@ -235,8 +237,9 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       dstmesh.Commit();
       dstmeshcpy.Commit();
 
+      int map_type=0;
       if (!regrid(srcmesh, dstmesh, 0, wts, regridMethod, &regridScheme,
-                  regridPoleType, regridPoleNPnts, &unmappedaction))
+                  regridPoleType, regridPoleNPnts, &map_type,  &unmappedaction))
         Throw() << "Regridding error" << std::endl;
 
       // the mask
@@ -279,7 +282,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
 int regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, IWeights &wts,
            int *regridMethod, int *regridScheme, 
            int *regridPoleType, int *regridPoleNPnts, 
-           int *unmappedaction) {
+           int *map_type, int *unmappedaction) {
 
    // See if it could have a pole
   bool maybe_pole=false;
@@ -289,6 +292,12 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, IWeights &wts,
         (*regridMethod != ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST) &&
         (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC)) maybe_pole=true; 
   
+    // Output Mesh without poles for Debugging
+#ifdef ESMF_REGRID_DEBUG_WRITE_MESH_WO_POLE
+    WriteMesh(srcmesh, "src_rgd_mesh_wo_p");
+    // No pole is added to dst mesh
+#endif
+
 
     // Pole constraints
     IWeights pole_constraints, stw;
@@ -305,6 +314,13 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, IWeights &wts,
           MeshAddPoleTeeth(srcmesh, i, constraint_id, pole_constraints);
       }
     }
+
+    // Output Mesh for Debugging
+#ifdef ESMF_REGRID_DEBUG_WRITE_MESH
+    WriteMesh(srcmesh, "src_rgd_mesh");
+    WriteMesh(dstmesh, "dst_rgd_mesh");
+#endif
+
 
     // Get coordinate fields
     MEField<> &scoord = *srcmesh.GetCoordField();
@@ -347,9 +363,14 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, IWeights &wts,
     else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC)
       fpairs.push_back(Interp::FieldPair(&scoord, &dcoord, Interp::INTERP_NEAREST_DST_TO_SRC));
 
+    // Convert to map type
+    MAP_TYPE mtype;
+    if (*map_type==0) mtype=MAP_TYPE_CART_APPROX;
+    else if (*map_type==1) mtype=MAP_TYPE_GREAT_CIRCLE;
+    else Throw() << "Unrecognized map type";
 
      // Build the rendezvous grids
-     Interp interp(srcmesh, dstmesh, midmesh, false, fpairs, *unmappedaction);
+    Interp interp(srcmesh, dstmesh, midmesh, false, fpairs, mtype, *unmappedaction);
     
      // Create the weight matrix
      interp(0, wts);
@@ -488,7 +509,7 @@ int regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, IWeights &wts,
       fpairs.push_back(Interp::FieldPair(&dcoord, &scoord, Interp::INTERP_PATCH));
 
     // Build the rendezvous grids
-    Interp interp(dstmesh, srcmesh, 0, false, fpairs, *unmappedaction);
+    Interp interp(dstmesh, srcmesh, 0, false, fpairs, MAP_TYPE_CART_APPROX, *unmappedaction);
 
     // Generate the backwards interpolation matrix
     interp(0, stw);

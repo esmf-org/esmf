@@ -523,6 +523,40 @@ problems with periodicity and with the pole singularity. This library
  ({\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}) and with the nearest neighbor interpolation options ({\tt regridmethod=ESMF\_REGRIDMETHOD\_NEAREST\_STOD} and {\tt regridmethod=ESMF\_REGRIDMETHOD\_NEAREST\_DTOS}).
 
 
+\begin{table}[ht]
+\centering
+\vspace{0.2cm}
+\begin{tabular}{| l | c | c |}
+\hline
+Regrid Method & \multicolumn{2}{|c|}{Line Type} \\ 
+     &  Cartesian & Great Circle \\ 
+\hline
+ ESMF\_REGRIDMETHOD\_BILINEAR & Y* & Y \\
+\hline
+ ESMF\_REGRIDMETHOD\_PATCH & Y* & Y \\
+\hline
+ ESMF\_REGRIDMETHOD\_NEAREST\_STOD & Y* & N \\
+\hline
+ ESMF\_REGRIDMETHOD\_NEAREST\_DTOS & Y* & N \\
+\hline
+ ESMF\_REGRIDMETHOD\_CONSERVE & N/A & Y* \\
+\hline
+\end{tabular}
+\label{line_type_support}
+\caption{Line Type Support by Regrid Method (* indicates the default)}
+\end{table}
+
+
+ Another variation in the regridding supported with spherical grids is {\bf line type}. This is controlled in the
+regridding by the {\tt lineType} argument. This argument allows the user to select the path of the line which connects
+two points on a sphere surface. This in turn controls the path along which distances are calculated and the shape of 
+the edges that make up a cell. Both of these quantities can influence how interpolation weights are calculated, for example in
+bilinear interpolation the distances are used to calculate the weights and the cell edges are used to determine to which source 
+cell a destination point should be mapped. ESMF currently supports two line types: Cartesian and great circle.
+Figure~\ref{line_type_support} shows which line types are supported for each regrid method as well as the defaults (indicated by *). 
+
+
+
 \subsubsection{Troubleshooting guide}
 
  The below is a list of problems users commonly encounter with regridding and potential solutions. 

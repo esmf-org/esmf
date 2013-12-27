@@ -108,8 +108,10 @@ BBox::BBox(const MEField<> &coords, const MeshObj &obj, double normexp) :
       if (dist > diam) diam = dist;
     }
     
-    normexp *= diam;
+    // BOB   normexp *= diam;
     
+    normexp=2.0*diam;
+
     for (UInt n = 0; n < npe; n++) {
       for (UInt j = 0; j < dim; j++) {
         double lm;

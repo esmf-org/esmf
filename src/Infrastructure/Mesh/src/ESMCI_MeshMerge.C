@@ -118,7 +118,7 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
     // Build the rendezvous meshes and compute search result
     std::vector<Interp::FieldPair> fpairs;
     fpairs.push_back(Interp::FieldPair(&dcoord, &scoord, Interp::INTERP_CONSERVE));
-    interp = new Interp(dstmesh, srcmesh, 0, true, fpairs, unmappedaction);
+    interp = new Interp(dstmesh, srcmesh, 0, true, fpairs, MAP_TYPE_CART_APPROX, unmappedaction);
 
     // Get the rendevous meshes, the meaning of dst/src is flipped in interp
     mesh_dst = &(interp->get_grend().GetSrcRend());
@@ -306,7 +306,7 @@ void MeshCreateDiff(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp, double threshol
     // Build the rendezvous meshes and compute search result
     std::vector<Interp::FieldPair> fpairs;
     fpairs.push_back(Interp::FieldPair(&dcoord, &scoord, Interp::INTERP_CONSERVE));
-    interp = new Interp(dstmesh, srcmesh, 0, true, fpairs, unmappedaction);
+    interp = new Interp(dstmesh, srcmesh, 0, true, fpairs, MAP_TYPE_CART_APPROX, unmappedaction);
 
     // Get the rendevous meshes, the meaning of dst/src is flipped in interp
     mesh_dst = &(interp->get_grend().GetSrcRend());

@@ -640,6 +640,20 @@
            ESMF_REGRIDMETHOD_NEAREST_STOD  = ESMF_RegridMethod_Flag(3), &
            ESMF_REGRIDMETHOD_NEAREST_DTOS  = ESMF_RegridMethod_Flag(4)
 
+
+
+!------------------------------------------------------------------------------
+      type ESMF_LineType_Flag
+      sequence
+!  private
+         integer :: linetype
+      end type
+
+
+      type(ESMF_lineType_Flag), parameter :: &
+           ESMF_LINETYPE_CART         = ESMF_LineType_Flag(0), &
+           ESMF_LINETYPE_GREAT_CIRCLE = ESMF_LineType_Flag(1)
+
 !------------------------------------------------------------------------------
 
       type ESMF_PoleMethod_Flag
@@ -851,6 +865,9 @@
                                    ESMF_REGRIDMETHOD_CONSERVE, &
                                    ESMF_REGRIDMETHOD_NEAREST_STOD, &
                                    ESMF_REGRIDMETHOD_NEAREST_DTOS
+
+       public ESMF_LineType_Flag,   ESMF_LINETYPE_CART, &
+                                   ESMF_LINETYPE_GREAT_CIRCLE
 
        public ESMF_PoleMethod_Flag,  ESMF_POLEMETHOD_NONE, &
                                 ESMF_POLEMETHOD_ALLAVG, &

@@ -17,6 +17,7 @@
 #include <Mesh/include/ESMCI_OTree.h>
 #include <Mesh/include/ESMCI_MeshTypes.h>
 #include <Mesh/include/ESMCI_MeshObj.h>
+#include <Mesh/include/ESMCI_Mapping.h>
 #include <Mesh/include/ESMCI_SearchFlags.h>
 
 #include <vector>
@@ -61,8 +62,8 @@ typedef std::vector<Search_result*> SearchResult;
   void OctSearchElems(const Mesh &meshA, int unmappedactionA, const Mesh &meshB, int unmappedactionB, 
                       double stol, SearchResult &result);
 
-void OctSearch(const Mesh &src, const Mesh &dest, UInt dst_obj_type, int unmappedaction, SearchResult &result,
-            double stol = 1e-8, std::vector<const MeshObj*> *to_investigate = NULL, OTree *box = NULL);
+  void OctSearch(const Mesh &src, const Mesh &dest, MAP_TYPE mtype, UInt dst_obj_type, int unmappedaction, SearchResult &result, double stol, 
+                 std::vector<const MeshObj*> *to_investigate=NULL,OTree *box_in=NULL);
 
 
 void SearchNearestSrcToDst(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);

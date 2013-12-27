@@ -63,8 +63,8 @@ namespace ESMCI {
 
 
 // prototypes from below
-bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts);
-bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts);
+bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id);
+bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id);
 void cnsrv_check_for_mesh_errors(Mesh &mesh, bool ignore_degenerate, bool *concave, bool *clockwise, bool *degenerate);
 void get_mesh_node_ids_not_in_wmat(Mesh &mesh, WMat &wts, std::vector<int> *missing_ids);
 void get_mesh_elem_ids_not_in_wmat(Mesh &mesh, WMat &wts, std::vector<int> *missing_ids);
@@ -80,16 +80,18 @@ extern "C" void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
 
 
 extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
-                   Mesh **meshsrcpp, ESMCI::Array **arraysrcpp,
-                   Mesh **meshdstpp, ESMCI::Array **arraydstpp,
-		   int *regridMethod, 
-                   int *regridPoleType, int *regridPoleNPnts,  
-                   int *regridScheme, int *unmappedaction, int *_ignoreDegenerate,
-                   int *srcTermProcessing, int *pipelineDepth, 
-                   ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
-                   int *nentries, ESMCI::TempWeights **tweights,
-                   int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
-                   int*rc) {
+                                            Mesh **meshsrcpp, ESMCI::Array **arraysrcpp,
+                                            Mesh **meshdstpp, ESMCI::Array **arraydstpp,
+                                            int *regridMethod, 
+                                            int *map_type,
+                                            int *regridPoleType, int *regridPoleNPnts,  
+                                            int *regridScheme, 
+                                            int *unmappedaction, int *_ignoreDegenerate,
+                                            int *srcTermProcessing, int *pipelineDepth, 
+                                            ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
+                                            int *nentries, ESMCI::TempWeights **tweights,
+                                            int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
+                                            int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()" 
   Trace __trace(" FTN_X(regrid_test)(ESMCI::VM **vmpp, ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
@@ -195,15 +197,15 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
 
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
-      if(!online_regrid(srcmesh, dstmesh, wts, &regridConserve, regridMethod,
+      if(!online_regrid(srcmesh, dstmesh, wts, &regridConserve, regridMethod, 
                         regridPoleType, regridPoleNPnts, 
-                        regridScheme, &temp_unmappedaction))
+                        regridScheme, map_type, &temp_unmappedaction))
         Throw() << "Online regridding error" << std::endl;
     } else {
       int tempRegridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
-      if(!online_regrid(dstmesh, srcmesh, wts, &regridConserve, &tempRegridMethod,
+      if(!online_regrid(dstmesh, srcmesh, wts, &regridConserve, &tempRegridMethod, 
                         regridPoleType, regridPoleNPnts, 
-                        regridScheme, &temp_unmappedaction))
+                        regridScheme, map_type, &temp_unmappedaction))
         Throw() << "Online regridding error" << std::endl;
     }
 
@@ -228,11 +230,14 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
     // gathered onto the same proc.
     if (*unmappedaction==ESMCI_UNMAPPEDACTION_ERROR) {
       if (*regridMethod==ESMC_REGRID_METHOD_CONSERVE) {
-        if (!all_mesh_elem_ids_in_wmat(dstmesh, wts)) {
+        int missing_id;
+        if (!all_mesh_elem_ids_in_wmat(dstmesh, wts, &missing_id)) {
           int localrc;
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-            "- There exist destination cells which don't overlap with any "
-            "source cell", ESMC_CONTEXT, &localrc)) throw localrc;
+          char msg[1024];
+          sprintf(msg,"- There exist destination cells (e.g. id=%d) which don't overlap with any "
+            "source cell",missing_id);
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg, 
+             ESMC_CONTEXT, &localrc)) throw localrc;
         }
       } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) { 
         // CURRENTLY DOESN'T WORK!!!
@@ -245,11 +250,14 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
         }
 #endif
       } else { // bilinear, patch, ...
-        if (!all_mesh_node_ids_in_wmat(dstmesh, wts)) {
+        int missing_id;
+        if (!all_mesh_node_ids_in_wmat(dstmesh, wts,&missing_id)) {
           int localrc;
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-            "- There exist destination points which can't be mapped to any "
-            "source cell", ESMC_CONTEXT, &localrc)) throw localrc;
+          char msg[1024];
+          sprintf(msg,"- There exist destination points (e.g. id=%d) which can't be mapped to any "
+            "source cell",missing_id);
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg, 
+             ESMC_CONTEXT, &localrc)) throw localrc;
         }
       }
     }
@@ -285,8 +293,20 @@ extern "C" void FTN_X(c_esmc_regrid_create)(ESMCI::VM **vmpp,
           iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
           factors[i] = wc.value;
           
-          // printf("d_id=%d  s_id=%d w=%f \n",w.id,wc.id,wc.value);
-          
+#ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL
+          printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
+#endif          
+#ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_SID
+          if (wc.id==ESMF_REGRID_DEBUG_OUTPUT_WTS_SID) {
+             printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
+          }
+#endif
+#ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_DID
+          if (w.id==ESMF_REGRID_DEBUG_OUTPUT_WTS_DID) {
+             printf("d_id=%d  s_id=%d w=%20.17E \n",w.id,wc.id,wc.value);
+          }
+#endif
+
           i++;
         } // for j
       } // for wi
@@ -704,7 +724,7 @@ void get_mesh_elem_ids_not_in_wmat(Mesh &mesh, WMat &wts, std::vector<int> *miss
 }
 
  
-bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
+bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id) {
 
   // Get mask Field
   MEField<> *mptr = mesh.GetField("mask");
@@ -742,16 +762,21 @@ bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
     // If we're at the end of the weights then exit saying we don't have 
     // all of them
     if (wi==we) { 
-      // printf("1: missing node_id=%d \n",node_id);
+      *missing_id=node_id;
+      char msg[1024];
+      sprintf(msg,"Destination id=%d NOT found in weight matrix.",node_id);
+      ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
       return false;
     }
 
     // If we're not equal to the node id then we must have passed it
     if (wi->first.id != node_id) { 
-      //      printf("2: missing node_id=%d \n",node_id);
+      *missing_id=node_id;
+      char msg[1024];
+      sprintf(msg,"Destination id=%d NOT found in weight matrix.",node_id);
+      ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
       return false;
     }
-
   }
 
   // Still here, so must have found them all
@@ -759,10 +784,7 @@ bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts) {
 
 }
 
-
-
-bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts) {
-
+bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id) {
 
   // Get mask Field
   MEField<> *mptr = mesh.GetField("elem_mask");
@@ -799,11 +821,22 @@ bool all_mesh_elem_ids_in_wmat(Mesh &mesh, WMat &wts) {
 
     // If we're at the end of the weights then exit saying we don't have 
     // all of them
-    if (wi==we) return false;
+    if (wi==we) {
+      *missing_id=elem_id;
+      char msg[1024];
+      sprintf(msg,"Destination id=%d NOT found in weight matrix.",elem_id);
+      ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+      return false;
+    }
 
     // If we're not equal to the elem id then we must have passed it
-    if (wi->first.id != elem_id) return false;
-
+    if (wi->first.id != elem_id) {
+      *missing_id=elem_id;
+      char msg[1024];
+      sprintf(msg,"Destination id=%d NOT found in weight matrix.",elem_id);
+      ESMC_LogDefault.Write(msg,ESMC_LOGMSG_ERROR);
+      return false;
+    }
   }
 
   // Still here, so must have found them all
