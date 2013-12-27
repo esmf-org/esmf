@@ -172,7 +172,7 @@ program ESMF_DistGridEx
 !EOE
 !BOC
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/5,5/), &
-    regDecomp=(/2,3/), decompflag=(/ESMF_DECOMP_DEFAULT, &
+    regDecomp=(/2,3/), decompflag=(/ESMF_DECOMP_BALANCED, &
     ESMF_DECOMP_RESTLAST/), rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

@@ -689,7 +689,7 @@ DistGrid *DistGrid::create(
     decompflagCount = dimCount;
     decompflag = new Decomp_Flag[dimCount];
     for (int i=0; i<dimCount; i++)
-      decompflag[i] = DECOMP_DEFAULT;
+      decompflag[i] = DECOMP_BALANCED;
   }
   if (decompflagCount != dimCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
@@ -798,7 +798,6 @@ DistGrid *DistGrid::create(
     const int chunkRest = dimLength%regDecomp->array[i];    // left over points
     int de, decompChunk, extentIndex;
     switch (decompflag[i]){
-      case DECOMP_DEFAULT:
       case DECOMP_BALANCED:
         for (int j=0; j<deCount; j++){
           de = deLabelList->array[j];
@@ -1502,7 +1501,7 @@ DistGrid *DistGrid::create(
     decompflagCount2 = tileCount;
     decompflag = new Decomp_Flag[dimCount*tileCount];
     for (int i=0; i<dimCount*tileCount; i++)
-      decompflag[i] = DECOMP_DEFAULT;
+      decompflag[i] = DECOMP_BALANCED;
   }
   if (decompflagCount1 != dimCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
@@ -1647,7 +1646,6 @@ DistGrid *DistGrid::create(
       const int chunkRest = dimLength%regDecomp->array[i];   // left over points
       int de, decompChunk, extentIndex;
       switch (decompflag[i]){
-        case DECOMP_DEFAULT:
         case DECOMP_BALANCED:
           for (int jj=0; jj<deCountPTile[tile]; jj++){
             int j = deTileStart + jj;

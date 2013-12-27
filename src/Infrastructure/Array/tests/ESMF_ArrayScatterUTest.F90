@@ -613,7 +613,7 @@ print *, min_R4, min_R8
   call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   distgrid = ESMF_DistGridCreate(minIndex=(/0,1/), maxIndex=(/14,23/), &
-    regDecomp=(/2,2/), decompflag=(/ESMF_DECOMP_DEFAULT,ESMF_DECOMP_CYCLIC/),&
+    regDecomp=(/2,2/), decompflag=(/ESMF_DECOMP_BALANCED,ESMF_DECOMP_CYCLIC/),&
     rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
