@@ -81,15 +81,15 @@ TESTS_RUN = RUN_ESMF_AttPackABundleUTest \
 		RUN_ESMF_AttReadFieldUTest
 
 TESTS_RUN_UNI = RUN_ESMF_AttPackArrayUTestUNI \
-		RUN_ESMF_ESMF_AttPackABundleUTestUNI \
-		RUN_ESMF_ESMF_AttPackCplCompUTestUNI \
-		RUN_ESMF_ESMF_AttPackDistGridUTestUNI \
-		RUN_ESMF_ESMF_AttPackFBundleUTestUNI \
-		RUN_ESMF_ESMF_AttPackFieldUTestUNI \
-		RUN_ESMF_ESMF_AttPackGridCompUTestUNI \
-		RUN_ESMF_ESMF_AttPackGridUTestUNI \
-		RUN_ESMF_ESMF_AttPackSciCompUTestUNI \
-		RUN_ESMF_ESMF_AttPackStateUTestUNI \
+		RUN_ESMF_AttPackABundleUTestUNI \
+		RUN_ESMF_AttPackCplCompUTestUNI \
+		RUN_ESMF_AttPackDistGridUTestUNI \
+		RUN_ESMF_AttPackFBundleUTestUNI \
+		RUN_ESMF_AttPackFieldUTestUNI \
+		RUN_ESMF_AttPackGridCompUTestUNI \
+		RUN_ESMF_AttPackGridUTestUNI \
+		RUN_ESMF_AttPackSciCompUTestUNI \
+		RUN_ESMF_AttPackStateUTestUNI \
 		RUN_ESMF_AttributeGridGetUTestUNI \
 		RUN_ESMF_AttributeArrayUTestUNI \
 		RUN_ESMF_AttributeABundleUTestUNI \
