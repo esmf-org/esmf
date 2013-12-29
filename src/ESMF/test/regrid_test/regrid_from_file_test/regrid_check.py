@@ -154,7 +154,7 @@ def compare_fields(field1, field2, regridmethod, dstFracField, max_err,
         raise NameError('compare_fields: Fields must be the same size!')
 
     # initialize to True, and check for False point values
-    correct = True
+    correct = False
     totalErr = 0.0
     print 'comparing fields'
     print 'field1 = ',field1
@@ -167,19 +167,19 @@ def compare_fields(field1, field2, regridmethod, dstFracField, max_err,
     field2data = np.ravel(field2.data)
     dstFracFieldData = np.ravel(dstFracField.data)
     for i in range(field1.size):
-        print "i=",i
-        print "field1 %f, field2 %f" % (field1data[i], field2data[i])
-        print "dstFracField %f" % dstFracFieldData[i]
+        #print "i=",i
+        #print "field1 %f, field2 %f" % (field1data[i], field2data[i])
+        #print "dstFracField %f" % dstFracFieldData[i]
         if (regridmethod != ESMF.RegridMethod.CONSERVE or
             dstFracFieldData[i] >= 0.999):
             err = abs(field1data[i] - field2data[i])/abs(field2data[i])
-            if err > max_err:
-                correct = False
-                print "ACCURACY ERROR - "+str(err)
             totalErr += err
         #else:
             #print "Partial dest fraction -- skipping"
 
+    relErr = totalErr/field2.size
+    if (relErr < max_err):
+        correct = True
 
     # this is for parallel
     if parallel:
@@ -189,24 +189,21 @@ def compare_fields(field1, field2, regridmethod, dstFracField, max_err,
         comm = MPI.COMM_WORLD
         rank = comm.Get_rank()
 
-        total_error_global = comm.reduce(totalErr, op=MPI.SUM)
+        rel_error_global = comm.reduce(relErr, op=MPI.SUM)
 
         if rank == 0:
-            itrp = False
-            if (total_error_global < 20E-2):
-                itrp = True
 
-            if (itrp and correct):
-                print " - PASS - Total error = "+str(total_error_global)
+            if correct:
+                print " - PASS - Total error = "+str(rel_error_global)
             else:
-                print " - FAIL - Total error = "+str(total_error_global)
+                print " - FAIL - Total error = "+str(rel_error_global)
 
     # this is for serial
     else:
         if correct:
-            print " - PASS - Total Error = "+str(totalErr)
+            print " - PASS - Total Error = "+str(relErr)
         else:
-            print " - FAIL - Total Error = "+str(totalErr)
+            print " - FAIL - Total Error = "+str(relErr)
 
     return correct
 
