@@ -321,7 +321,7 @@ def ESMP_GridCreate1PeriDim(maxIndex, coordSys=None, coordTypeKind=None):
                         constants.errmsg)
 
     # create the ESMP Grid object from ctypes pointer
-    return copy(gridstruct)
+    return gridstruct
 
 _ESMF.ESMC_GridCreateNoPeriDim.restype = ESMP_GridStruct
 _ESMF.ESMC_GridCreateNoPeriDim.argtypes = [ct.c_void_p,
@@ -369,7 +369,7 @@ def ESMP_GridCreateNoPeriDim(maxIndex, coordSys=None, coordTypeKind=None):
                         '.    '+constants.errmsg)
 
     # create the ESMP Grid object from ctypes pointer
-    return copy(gridstruct)
+    return gridstruct
 
 _ESMF.ESMC_GridCreateFromFile.restype = ESMP_GridStruct
 _ESMF.ESMC_GridCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
@@ -851,7 +851,7 @@ def ESMP_MeshCreate(parametricDim, spatialDim):
                         constants.errmsg)
 
     # handle the ctypes structure
-    return copy(mesh)
+    return mesh
 
 _ESMF.ESMC_MeshCreateFromFile.restype = ESMP_Mesh
 _ESMF.ESMC_MeshCreateFromFile.argtypes = [ct.c_char_p, ct.c_int,
@@ -893,7 +893,7 @@ def ESMP_MeshCreateFromFile(filename, fileTypeFlag,
                         '.    '+constants.errmsg)
 
     # copy to the mesh struct
-    return copy(mesh)
+    return mesh
 
 _ESMF.ESMC_MeshDestroy.restype = ct.c_int
 _ESMF.ESMC_MeshDestroy.argtypes = [ct.c_void_p]
