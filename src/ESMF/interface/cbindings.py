@@ -516,7 +516,7 @@ def ESMP_GridAddItem(grid, item,
         raise ValueError('ESMC_GridAddItem() failed with rc = '+str(rc)+'.    '+
                         constants.errmsg)
 
-_ESMF.ESMC_GridGetCoord.restype = ct.c_void_p
+_ESMF.ESMC_GridGetCoord.restype = ct.POINTER(ct.c_void_p)
 _ESMF.ESMC_GridGetCoord.argtypes = [ct.c_void_p, ct.c_int, ct.c_uint,
                                     np.ctypeslib.ndpointer(dtype=np.int32),
                                     np.ctypeslib.ndpointer(dtype=np.int32),
@@ -609,57 +609,6 @@ def ESMP_GridGetCoordBounds(grid, staggerloc=constants.StaggerLoc.CENTER):
     rc = _ESMF.ESMC_GridGetCoordBounds(grid.struct.ptr, staggerloc,
                                        exclusiveLBound, exclusiveUBound,
                                        ct.byref(lrc))
-
-    # adjust bounds to be 0 based
-    exclusiveLBound = exclusiveLBound - 1
-
-    rc = lrc.value
-    if rc != constants.ESMP_SUCCESS:
-        raise ValueError('ESMC_GridGetCoord() failed with rc = '+str(rc)+'.    '+
-                        constants.errmsg)
-
-    return exclusiveLBound, exclusiveUBound
-
-_ESMF.ESMC_GridGetCoord.restype = ct.POINTER(ct.c_void_p)
-_ESMF.ESMC_GridGetCoord.argtypes = [ct.c_void_p, ct.c_int, ct.c_uint,
-                                    np.ctypeslib.ndpointer(dtype=np.int32),
-                                    np.ctypeslib.ndpointer(dtype=np.int32),
-                                    ct.POINTER(ct.c_int)]
-@deprecated
-def ESMP_GridGetCoord(grid, staggerloc=constants.StaggerLoc.CENTER):
-    """
-    Preconditions: An ESMP_Grid has been created and coordinates have 
-                   been added via ESMP_GridAddCoord().\n
-    Postconditions: Two numpy arrays containing the grid coordinate 
-                    bounds have been returned in a tuple.\n
-    Arguments:\n
-        :RETURN: Numpy.array  :: exclusiveLBound\n
-        :RETURN: Numpy.array  :: exclusiveUBound\n
-        ESMP_Grid             :: grid\n
-        StaggerLoc (optional) :: staggerloc\n
-            Argument Values:\n
-                2D: \n
-                    (default) StaggerLoc.CENTER\n
-                    StaggerLoc.EDGE1\n
-                    StaggerLoc.EDGE2\n
-                    StaggerLoc.CORNER\n
-                3D: \n
-                    (default) StaggerLoc.CENTER_VCENTER\n
-                    StaggerLoc.EDGE1_VCENTER\n
-                    StaggerLoc.EDGE2_VCENTER\n
-                    StaggerLoc.CORNER_VCENTER\n
-                    StaggerLoc.CENTER_VFACE\n
-                    StaggerLoc.EDGE1_VFACE\n
-                    StaggerLoc.EDGE2_VFACE\n
-    """
-    lrc = ct.c_int(0)
-    coordDim = ct.c_int(1)
-    exclusiveLBound = np.array(np.zeros(grid.rank),dtype=np.int32)
-    exclusiveUBound = np.array(np.zeros(grid.rank),dtype=np.int32)
-    gridCoordPtr = _ESMF.ESMC_GridGetCoord(grid.struct.ptr, coordDim, 
-                                           staggerloc,
-                                           exclusiveLBound, exclusiveUBound,
-                                           ct.byref(lrc))
 
     # adjust bounds to be 0 based
     exclusiveLBound = exclusiveLBound - 1

@@ -730,12 +730,10 @@ class Grid(object):
 
         # these appear to both return bounds information only
         lb, ub = ESMP_GridGetCoordBounds(self, staggerloc=stagger)
-        lb2, ub2 = ESMP_GridGetCoord(self, staggerloc=stagger)
         
         print "Bounds:"
         print "  ESMPy.Grid:    ", size
         print "  ESMPy.ctypes1: ", lb, ub
-        print "  ESMPy.ctypes2: ", lb2, ub2
         
 
         print "Coordinates:"

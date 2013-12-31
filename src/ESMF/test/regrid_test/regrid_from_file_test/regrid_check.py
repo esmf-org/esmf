@@ -322,7 +322,7 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
 #     src_type = file_type_map[src_type_str]
 #     srcgrid = ESMF.Grid(np.array([360,300]),fname=src_fname, fileTypeFlag=src_type,
 #                         staggerloc=ESMF.StaggerLoc.CENTER)
-#     exLB, exUB = ESMF.ESMP_GridGetCoord(srcgrid, ESMF.StaggerLoc.CENTER)
+#     exLB, exUB = ESMF.ESMP_GridGetCoordBounds(srcgrid, ESMF.StaggerLoc.CENTER)
 #     print 'regrid_check.py: exLB =',exLB
 #     print 'regrid_check.py: exUB =',exUB
 #     [x,y] = [0,1]
