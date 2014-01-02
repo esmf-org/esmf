@@ -432,8 +432,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[lineType]}]
 !           This argument controls the path of the line which connects two points on a sphere surface. This in
 !           turn controls the path along which distances are calculated and the shape of the edges that make
-!           up a cell. Figure~\ref{line_type_support} shows which line types are supported for each regrid method 
-!           as well as the default for each method. 
+!           up a cell. Both of these quantities can influence how interpolation weights are calculated. 
+!           As would be expected, this argument is only applicable when {\tt srcField} and {\tt dstField} are
+!           built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a 
+!           list of valid options for this argument. If not specified, the default depends on the 
+!           regrid method. Section~\ref{opt:lineType} has the defaults by line type. Figure~\ref{line_type_support} shows
+!           which line types are supported for each regrid method as well as showing the default line type by regrid method.  
 !     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Options are 

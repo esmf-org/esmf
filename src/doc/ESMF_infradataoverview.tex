@@ -529,7 +529,7 @@ problems with periodicity and with the pole singularity. This library
 \begin{tabular}{| l | c | c |}
 \hline
 Regrid Method & \multicolumn{2}{|c|}{Line Type} \\ 
-     &  Cartesian & Great Circle \\ 
+     &  ESMF\_LINETYPE\_CART & ESMF\_LINETYPE\_GREAT\_CIRCLE \\ 
 \hline
  ESMF\_REGRIDMETHOD\_BILINEAR & Y* & Y \\
 \hline
@@ -548,14 +548,22 @@ Regrid Method & \multicolumn{2}{|c|}{Line Type} \\
 
 
  Another variation in the regridding supported with spherical grids is {\bf line type}. This is controlled in the
-regridding by the {\tt lineType} argument. This argument allows the user to select the path of the line which connects
+{\tt ESMF\_FieldRegridStore()} method by the {\tt lineType} argument. This argument allows the user to select the path of the line which connects
 two points on a sphere surface. This in turn controls the path along which distances are calculated and the shape of 
 the edges that make up a cell. Both of these quantities can influence how interpolation weights are calculated, for example in
 bilinear interpolation the distances are used to calculate the weights and the cell edges are used to determine to which source 
-cell a destination point should be mapped. ESMF currently supports two line types: Cartesian and great circle.
+cell a destination point should be mapped. 
+
+ESMF currently supports two line types: ESMF\_LINETYPE\_CART and ESMF\_LINETYPE\_GREAT\_CIRCLE. The ESMF\_LINETYPE\_CART option 
+specifies that the line between two points follows a straight path through the 3D Cartesian space in which the sphere is embedded.
+Distances are measured along 
+this 3D Cartesian line. Under this option cells are approximated by planes in 3D space, and their boundaries are 3D Cartesian lines
+between their corner points.  The ESMF\_LINETYPE\_GREAT\_CIRCLE option specifies that the line between two points follows
+a great circle path along the sphere surface. (A great circle is the shortest path between two points on a sphere.) 
+Distances are measured along the great circle path. Under this option cells are on the sphere surface, and their boundaries 
+are great circle paths between their corner points. 
+
 Figure~\ref{line_type_support} shows which line types are supported for each regrid method as well as the defaults (indicated by *). 
-
-
 
 \subsubsection{Troubleshooting guide}
 
