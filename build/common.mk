@@ -596,6 +596,7 @@ ESMF_TESTSCRIPTS    = $(ESMF_DIR)/scripts/test_scripts
 DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
 DO_ST_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) 
+DO_ST_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_st_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) 
 DO_CK_SUM_RESULTS   = $(ESMF_TESTSCRIPTS)/do_ck_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) 
 DO_UTC_RESULTS	    = $(ESMF_UTCSCRIPTS)/do_utc_results.pl -h $(ESMF_UTCSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) -e $(ESMF_MAX_PROCS)
@@ -2026,6 +2027,7 @@ MPMDCLEANUP:
 #
 dust_system_tests:
 	$(ESMF_RM) $(ESMF_TESTDIR)/system_tests_results
+	$(ESMF_RM) $(ESMF_TESTDIR)/system_tests_ml_results
 	$(ESMF_RM) $(ESMF_TESTDIR)/*STest.Log
 	$(ESMF_RM) $(ESMF_TESTDIR)/*STest.stdout
 	$(ESMF_RM) $(ESMF_TESTDIR)/*.rc
@@ -2156,6 +2158,7 @@ stest:
 clean_system_tests:
 	$(ESMF_RM) $(ESMF_TESTDIR)/*STest*  $(SYS_TESTS_CONFIG)
 	$(ESMF_RM) $(ESMF_TESTDIR)/system_tests_results
+	$(ESMF_RM) $(ESMF_TESTDIR)/system_tests_ml_results
 	$(MAKE) ACTION=tree_cleanfiles tree
 
 #
@@ -2163,6 +2166,14 @@ clean_system_tests:
 #
 check_system_tests: 
 	@$(DO_ST_RESULTS)
+
+
+#
+# run the system tests memory leak report.
+#
+check_system_ml_tests:
+	@$(DO_ST_ML_RESULTS)
+
 
 
 #-------------------------------------------------------------------------------
