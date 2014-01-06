@@ -177,10 +177,15 @@ int main(void){
   strcpy(name, "MeshGetCoord");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   double *coords;
+  coords = (double *)malloc(num_node_owned_out*3*sizeof(double));
   int num_nodes, num_dims;
-  coords = ESMC_MeshGetCoord(mesh, &num_nodes, &num_dims, &rc);
+  ESMC_MeshGetCoord(mesh, coords, &num_nodes, &num_dims, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+  printf("Found num_nodes=%d, num_dims=%d\n", num_nodes, num_dims);
+  for (int i=0; i< num_nodes; i++) {
+    printf("%.1lf %.1lf\n", coords[i*2], coords[i*2+1]);
+  }
 
   //----------------------------------------------------------------------------
   //NEX_UTest
