@@ -45,7 +45,7 @@ program ESMF_RegridWeightGenApp
   character(len=64) :: srcCoordNames(2), dstCoordNames(2)
   character(len=256) :: argStr
   logical            :: terminateProg
-  !real(ESMF_KIND_R8) :: starttime, endtime
+  real(ESMF_KIND_R8) :: starttime, endtime
   
   terminateProg = .false.
   !------------------------------------------------------------------------
