@@ -97,12 +97,11 @@ ESMC_Mesh ESMC_MeshCreateFromFile(char *filename, int fileTypeFlag,
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshGetCoord()"
-double * ESMC_MeshGetCoord(ESMC_Mesh mesh_in, int *num_nodes, int *num_dims, int *rc){
+void ESMC_MeshGetCoord(ESMC_Mesh mesh_in, 
+		       double *nodeCoord, int *num_nodes, int *num_dims, int *rc){
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh_in.ptr);
-  double *nodeCoord;
-  nodeCoord = mep->getLocalCoords(num_nodes, num_dims, rc);
-  return nodeCoord;
+  mep->getLocalCoords(nodeCoord, num_nodes, num_dims, rc);
 }
 //-----------------------------------------------------------------------------
 
