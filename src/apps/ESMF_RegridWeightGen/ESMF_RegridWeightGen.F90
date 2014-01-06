@@ -45,7 +45,7 @@ program ESMF_RegridWeightGenApp
   character(len=64) :: srcCoordNames(2), dstCoordNames(2)
   character(len=256) :: argStr
   logical            :: terminateProg
-  real(ESMF_KIND_R8) :: starttime, endtime
+  !real(ESMF_KIND_R8) :: starttime, endtime
   
   terminateProg = .false.
   !------------------------------------------------------------------------
@@ -668,7 +668,7 @@ program ESMF_RegridWeightGenApp
   ! Output success
   if (PetNo==0) then
     write(*,*) "Completed weight generation successfully."
-    write(*,*) "Completed weight generation in ", (endtime-starttime)*1000, "msecs"
+    !write(*,*) "Completed weight generation in ", (endtime-starttime)*1000, "msecs"
     write(*,*) 
   endif
 
