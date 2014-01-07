@@ -279,7 +279,7 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MeshCXX::getLocalCoords()"
-  double * MeshCXX::getLocalCoords(int *num_nodes, int *num_dims, int *rc) {
+  void MeshCXX::getLocalCoords(double *nodeCoord, int *num_nodes, int *num_dims, int *rc) {
     Mesh &mesh = *meshPointer;
 
     int sdim;
@@ -314,14 +314,6 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
     // Sort by data index
     std::sort(index_to_node.begin(), index_to_node.end());
   
-    double *nodeCoord;
-  
-    nodeCoord = (double *) malloc (*num_nodes * sdim * sizeof(double));
-    if (nodeCoord == NULL) {
-      fprintf (stderr, "Could not allocate memory for nodeCoord\n");
-      exit(1);
-    }
-
     // Load coords in order of index
     int nodeCoordPos=0;
     for (UInt i = 0; i < index_to_node.size(); ++i) {
@@ -337,8 +329,6 @@ MeshCXX* MeshCXX::createFromFile(char *filename, int fileTypeFlag,
 
     // Set return code 
     if (rc!=NULL) *rc = ESMF_SUCCESS;
-
-    return nodeCoord;
 }
 
 // TODO: most of this routine is duplicated in ESMCI_Mesh_F.C - should be merged  
