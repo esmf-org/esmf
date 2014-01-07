@@ -80,6 +80,14 @@ module ESMF_VMMod
   end type
 
 !------------------------------------------------------------------------------
+! ! Interface blocks
+
+  interface ESMF_VMIdPrint
+    module procedure ESMF_VMIdPrint_s
+    module procedure ESMF_VMIdPrint_v
+  end interface
+
+!------------------------------------------------------------------------------
 
   ! Module parameters
   integer, parameter:: ESMF_PREF_INTRA_PROCESS_SHMHACK  = 0 !default
@@ -8129,7 +8137,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     do, i=1, size (source)
       call c_ESMC_VMIdCopy(dest(i), source(i), localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-	ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_CONTEXT, rcToReturn=rc)) return
     end do
 
     ! return successfully
@@ -8141,12 +8149,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! -------------------------- ESMF-internal method -----------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMIdPrint()"
+#define ESMF_METHOD "ESMF_VMIdPrint_s()"
 !BOPI
 ! !IROUTINE: ESMF_VMIdPrint - Print an ESMF_VMId object
 
 ! !INTERFACE:
-  subroutine ESMF_VMIdPrint(vmId, rc)
+  subroutine ESMF_VMIdPrint_s(vmId, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMId),   intent(in)            :: vmId
@@ -8184,7 +8192,60 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_VMIdPrint
+  end subroutine ESMF_VMIdPrint_s
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMIdPrint_v()"
+!BOPI
+! !IROUTINE: ESMF_VMIdPrint - Print an ESMF_VMId object
+
+! !INTERFACE:
+  subroutine ESMF_VMIdPrint_v(vmId, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMId),   intent(in)            :: vmId(:)
+    integer,           intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!   Print an ESMF_VMId object.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmId] 
+!        ESMF_VMId object
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: i
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    print *, 'ESMF_VMIdPrint: Fortran this pointer addresses:'
+    print '(i0,a,z16)', (i, ': z', vmId(i)%this, i=1, size (vmId))
+
+    ! Flush before crossing language interface to ensure correct output order
+    call ESMF_UtilIOUnitFlush (ESMF_UtilIOstdout, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Call into the C++ interface
+    call c_ESMC_VMIdPrint(vmId, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_VMIdPrint_v
 !------------------------------------------------------------------------------
 
 

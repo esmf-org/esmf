@@ -668,7 +668,7 @@ program ESMF_RegridWeightGenApp
   ! Output success
   if (PetNo==0) then
     write(*,*) "Completed weight generation successfully."
-    write(*,*) "Completed weight generation in ", (endtime-starttime)*1000, "msecs"
+    !write(*,*) "Completed weight generation in ", (endtime-starttime)*1000, "msecs"
     write(*,*) 
   endif
 
