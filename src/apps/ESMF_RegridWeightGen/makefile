@@ -1,9 +1,8 @@
 # $Id$ 
 
-ALL: tree_build_apps
+ALL: tree_build_apps 
 
-LOCDIR	  = src/apps/RegridWeightGen
-
+LOCDIR	  = src/apps/ESMF_RegridWeightGen
 
 APPS_BUILD    = $(ESMF_APPSDIR)/ESMF_RegridWeightGen
 

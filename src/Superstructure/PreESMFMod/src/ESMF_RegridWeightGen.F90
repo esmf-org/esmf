@@ -637,14 +637,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   	   commandbuf(5) = dstdims(1)
 	   commandbuf(6) = dstdims(2)   
         endif
-        call ESMF_VMBroadcast(vm, commandbuf, 6, 0, rc=rc)
+        call ESMF_VMBroadcast(vm, commandbuf, 6, 0, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rcToReturn=rc)) return
       else
         ! Not the Root PET
         allocate(srcdims(2),dstdims(2))
-        call ESMF_VMBroadcast(vm, commandbuf, 6, 0, rc=rc)
+        call ESMF_VMBroadcast(vm, commandbuf, 6, 0, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
                                ESMF_ERR_PASSTHRU, &
                                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1397,7 +1397,7 @@ end subroutine ESMF_RegridWeightGenFile
 ! !INTERFACE:
   ! Private name; call using ESMF_RegridWeightGen()
    subroutine ESMF_RegridWeightGenDG(srcFile, dstFile, regridRouteHandle, &
-    srcElementDistgrid, dstElementDistgrid, keywordEnforcer, &
+    keywordEnforcer, srcElementDistgrid, dstElementDistgrid, &
     srcNodalDistgrid, dstNodalDistgrid, &
     weightFile, regridmethod, unmappedaction, useUserAreaFlag, &
     largefileFlag, netcdf4fileFlag, verboseFlag, rc)
@@ -1427,15 +1427,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{itemize}
 ! \item The input grids are always represented as {\tt ESMF\_Mesh} whether they are logically rectangular or unstructure.
 ! \item The input grids will be decomposed using user-specfied distribution instead of a fixed decomposition in the 
-! other subroutine.
+! other subroutine if {\tt srcElementDistgrid} and {\tt dstElementDistgrid} are specified.
 ! \item The soruce and destination grid files have to be in the SCRIP grid file format. 
-! \item This subroutine has three additional required arguments: {\tt regridRouteHandle}, {\tt srcElementDistgrid},
-! {\tt dstElementDistgrid}.  {\tt srcElementDistgrid} and {\tt dstElementDistgrid} are of type {\tt ESMF\_DistGrid},
-! they are used to define the distribution of the source and destination grid elements. The output {\tt regridRouteHandle} 
-! allows user to regrid the field values later in the application.
+! \item This subroutine has one additional required argument {\tt regridRouteHandle} and four additional optional
+! arguments: {\tt srcElementDistgrid}, {\tt dstElementDistgrid}, {\tt srcNodelDistgrid} and {\tt dstNodalDistgrid}.
+! These four arguments are of type {\tt ESMF\_DistGrid}, they are used to define the distribution of the source
+! and destination grid elements and nodes. The output {\tt regridRouteHandle} allows user to regrid the field
+! values later in the application.
 ! \item The {\tt weightFile} argument is optional. When it is given, a weightfile will be generated as well.
-! \item The subroutine also takes user-specified nodals distribution {\tt srcNodelDistgrid} and {\tt dstNodalDistgrid} as 
-! optional input arguments.
 ! \end{itemize}
 ! \smallskip
 ! 
@@ -1448,9 +1447,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [regridRouteHandle]
 !     The regrid RouteHandle returned by {\tt ESMF\_FieldRegridStore()}
 !   \item [srcElementDistgrid]
-!     A distGrid that specifies the distribution of the source grid's elements
+!     A optional distGrid that specifies the distribution of the source grid's elements. If not 
+!     specified, a system-defined block decomposition is used.
 !   \item [dstElementDistgrid]
-!     A distGrid taht specifies the distribution of the destination grid's elements
+!     A optional distGrid taht specifies the distribution of the destination grid's elements. If
+!     not specified, a system-defined block decomposition is used.
 !   \item [weightFile]
 !     The interpolation weight file name. If present, an output weight file will be generated.
 !   \item [srcNodalDistgrid]
@@ -2014,7 +2015,7 @@ subroutine computeRedistAreaMesh(mesh, vm, petNo, petCnt, area, rc)
 
   ! The element disgrid is for the split elements, thus the following code
   ! doesn't work with split element
-  call ESMF_MeshGet(mesh, elementDistgrid=distgrid, rc=rc)
+  call ESMF_MeshGet(mesh, elementDistgrid=distgrid, rc=localrc)
   if (ESMF_LogFoundError(localrc, &
                          ESMF_ERR_PASSTHRU, &
                          ESMF_CONTEXT, rcToReturn=rc)) return
