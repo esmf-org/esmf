@@ -884,8 +884,10 @@ def ESMP_MeshFreeMemory(mesh):
         raise ValueError('ESMC_MeshFreeMemory() failed with rc = '+str(rc)+
                         '.    '+constants.errmsg)
 
-_ESMF.ESMC_MeshGetCoord.restype = ct.POINTER(ct.c_double)
-_ESMF.ESMC_MeshGetCoord.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int), 
+_ESMF.ESMC_MeshGetCoord.restype = None
+_ESMF.ESMC_MeshGetCoord.argtypes = [ct.c_void_p, 
+                                    np.ctypeslib.ndpointer(dtype=np.float64),
+                                    ct.POINTER(ct.c_int), 
                                     ct.POINTER(ct.c_int), ct.POINTER(ct.c_int)]
 @deprecated
 def ESMP_MeshGetCoordPtr(mesh):
@@ -893,25 +895,29 @@ def ESMP_MeshGetCoordPtr(mesh):
     Preconditions: An ESMP_Mesh has been created with coordinates 
                    specified.\n
     Postconditions: An array containing Mesh coordinate data has been
-                    returned into 'meshCoordPtr' and number of nodes in
-                    'num_nodes'.\n
+                    returned into 'nodeCoords', number of nodes in
+                    'num_nodes', and number of dimensions in 'num_dims'.\n
     Arguments:\n
-        :RETURN: list of doubles :: meshCoordPtr\n
+        :RETURN: Numpy.array(dtype=float64) :: nodeCoords\n
         :RETURN: int             :: num_nodes\n
+        :RETURN: int             :: num_dims\n
         ESMP_Mesh                :: mesh\n
     """
     lrc = ct.c_int(0)
     lnum_nodes = ct.c_int(0)
     lnum_dims = ct.c_int(0)
-    meshCoordPtr = _ESMF.ESMC_MeshGetCoord(mesh.struct.ptr, ct.byref(lnum_nodes), 
-                                           ct.byref(lnum_dims), ct.byref(lrc))
+    num_nodes = ESMP_MeshGetLocalNodeCount(mesh)
+    nodeCoords = np.array(np.zeros(num_nodes*3),dtype=np.float64)
+    _ESMF.ESMC_MeshGetCoord(mesh.struct.ptr, nodeCoords,
+                            ct.byref(lnum_nodes), 
+                            ct.byref(lnum_dims), ct.byref(lrc))
     num_nodes = lnum_nodes.value
     num_dims = lnum_dims.value
     rc = lrc.value
     if rc != constants.ESMP_SUCCESS:
         raise ValueError('ESMC_MeshGetCoord() failed with rc = '+str(rc)+'.    '+
                         constants.errmsg)
-    return meshCoordPtr, num_nodes, num_dims
+    return nodeCoords, num_nodes, num_dims
 
 _ESMF.ESMC_MeshGetLocalElementCount.restype = ct.c_int
 _ESMF.ESMC_MeshGetLocalElementCount.argtypes = [ct.c_void_p, 
