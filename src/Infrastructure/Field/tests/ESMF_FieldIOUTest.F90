@@ -41,10 +41,10 @@ program ESMF_FieldIOUTest
   type(ESMF_ArraySpec):: arrayspec
   type(ESMF_Field) :: field_w, field_r, field_t, field_s, field_tr, field_sr, field
   type(ESMF_Field) :: field_w_nohalo
-  real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_w, Farray_r
-  real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_tw, Farray_tr
-  real(ESMF_KIND_R8), pointer, dimension(:,:) ::  Farray_sw, Farray_sr
-  real(ESMF_KIND_R4), pointer, dimension(:,:) ::  fptr => null ()
+  real(ESMF_KIND_R8), pointer :: Farray_w(:,:) => null (), Farray_r(:,:) => null ()
+  real(ESMF_KIND_R8), pointer :: Farray_tw(:,:) => null (), Farray_tr(:,:) => null ()
+  real(ESMF_KIND_R8), pointer :: Farray_sw(:,:) => null (), Farray_sr(:,:) => null ()
+  real(ESMF_KIND_R4), pointer :: fptr(:,:) => null ()
   ! Note: 
   ! field_w---Farray_w; field_r---Farray_r; 
   ! field_t---Farray_tw; field_tr---Farray_tr 
@@ -558,9 +558,9 @@ program ESMF_FieldIOUTest
     statusFlag = ESMF_FILESTATUS_REPLACE
     do k = 1, 5
       do i = tlb(1), tub(1)
-	do j = tlb(2), tub(2)
+        do j = tlb(2), tub(2)
           fptr(i,j) = ((i-1)*(tub(2)-tlb(2))+j)*(10**(k-1))
-	enddo
+        enddo
       enddo
 
       call ESMF_FieldWrite(field, file='halof.nc', timeslice=k,   &
@@ -614,6 +614,9 @@ program ESMF_FieldIOUTest
 !-------------------------------------------------------------------------------
 
 10 continue
+
+  if (associated (Farray_sw)) deallocate (Farray_sw)
+  if (associated (Farray_tr)) deallocate (Farray_tr)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
