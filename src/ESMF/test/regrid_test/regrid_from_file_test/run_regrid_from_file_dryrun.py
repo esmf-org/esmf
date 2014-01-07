@@ -23,9 +23,6 @@ def cache_data_file(fname):
         urlretrieve(url, fname)
 
 def cache_data_files_for_test_cases(test_cases):
-    # Read test cases from the control file.
-    test_cases = read_test_cases_from_control_file()
-    
     # Create data subdirectory if it doesn't exist.
     if not os.path.exists(DATA_SUBDIR):
         os.mkdir(DATA_SUBDIR)
