@@ -366,6 +366,8 @@ int FindPnts(const Mesh &mesh, int unmappedaction, int dim_pnts, int num_pnts, d
 #endif
   }
 
+  // Now that we're not using it anymore get rid of SpaceDir
+  delete spacedir;
 
   // Get the number of processors used below
   int num_procs=Par::Size();
