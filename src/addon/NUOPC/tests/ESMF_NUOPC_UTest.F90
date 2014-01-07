@@ -339,6 +339,16 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "NUOPC_GridCompSetServices() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  ! Not specifying the sharedObj argument results in look-up in the executable
+  ! itself.... and there is a SetServices() routine outside the program below.
+  call NUOPC_GridCompSetServices(gridComp, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "NUOPC_GridCreateSimpleXY() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   grid = NUOPC_GridCreateSimpleXY( &
@@ -361,6 +371,16 @@ program ESMF_NUOPC_UTest
   write(name, *) "NUOPC_StateAdvertiseField() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_StateAdvertiseField(stateA, "sea_surface_temperature", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_StateAdvertiseFields() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_StateAdvertiseFields(stateA, &
+    (/"air_pressure_at_sea_level", &
+      "precipitation_flux       "/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -461,6 +481,22 @@ program ESMF_NUOPC_UTest
  
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "NUOPC_RunElementAddComp() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_RunElementAddComp(runSeq(1), i=2, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+ 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_RunElementAddLink() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_RunElementAddLink(runSeq(1), slot=1, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+ 
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "NUOPC_RunElementPrint() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_RunElementPrint(runSeq(1)%first, rc=rc)
@@ -523,3 +559,14 @@ program ESMF_NUOPC_UTest
   !------------------------------------------------------------------------
 
 end program ESMF_NUOPC_UTest
+
+
+! -- A SetServices() routine must be present for the NUOPC_GridCompSetService()
+! -- unit test above.
+subroutine SetServices(gcomp, rc)
+  use ESMF
+  implicit none
+  type(ESMF_GridComp) :: gcomp
+  integer             :: rc
+  rc = ESMF_SUCCESS
+end subroutine
