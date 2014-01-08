@@ -62,7 +62,7 @@ int init_bucket(int num_cells, double minlat, double maxlat, int startindex) {
   totalbuckets = total+1;
   //interval = factor;
   interval = totalbuckets/(maxlat-minlat);
-  printf("total number of buckets: %d at interval %lf degrees\n", totalbuckets, interval);
+  //printf("total number of buckets: %d at interval %lf degrees\n", totalbuckets, interval);
   bucket = (FIELD**)malloc(sizeof(FIELD*)*totalbuckets);
   for (i=0; i<totalbuckets; i++) {
     bucket[i]=NULL;
@@ -618,8 +618,6 @@ int main(int argc, char** argv)
   MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
   MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
 
-  //  printf("PET %d: Scrip2Unstruct %s %s\n", myrank, argv[1], argv[2]);
-
 #ifdef ESMF_NETCDF
   if (argc < 4) {
     if (myrank == 0) {
@@ -648,7 +646,6 @@ int main(int argc, char** argv)
   }
   
   dualflag = atoi(argv[3]);
-  // printf("dualflag %d\n", dualflag);
   // Open intput SCRIP file
   status = nc_open(c_infile, NC_NOWRITE, &ncid1);  
   if (status != NC_NOERR) handle_error(status);
@@ -783,7 +780,7 @@ int main(int argc, char** argv)
 #endif
   //  startind = gsdim*gcdim*myrank;
   startind = 0;
-  printf("myrank %d latitude range: %lf, %lf, %d\n", myrank, startlat, endlat, startind);
+  // printf("myrank %d latitude range: %lf, %lf, %d\n", myrank, startlat, endlat, startind);
   // doing a bucket sort, create totalbuckets buckets,one for each latitude degree
   // each bucket is a sorted linked list by longitude
   init_bucket(gsdim/nprocs, startlat, endlat,startind);
@@ -802,7 +799,7 @@ int main(int argc, char** argv)
   }
   totalnodes = nextrank-startind-1;
 
-  fprintf(stdout, "Total number of nodes: %d\n", totalnodes);
+  //fprintf(stdout, "Total number of nodes: %d\n", totalnodes);
   free(cornerlats);
   free(cornerlons);
 
@@ -822,7 +819,7 @@ int main(int argc, char** argv)
     }
   }
 
-  printf("PET %d: Finish creating node table\n",myrank);
+  //printf("PET %d: Finish creating node table\n",myrank);
   MPI_Barrier(MPI_COMM_WORLD);
 
   // broadcast totalnodes to all PETs, adjust the node index in cells[]
@@ -841,10 +838,12 @@ int main(int argc, char** argv)
   for (i=0; i<nprocs; i++) {
     alltotal += globalnodes[i];
   }
-  printf("PET %d: Total number of nodes: %d local nodes: %d starting at %d\n", myrank, alltotal, totalnodes,mystart );
+  //printf("PET %d: Total number of nodes: %d local nodes: %d starting at %d\n", myrank, alltotal, totalnodes,mystart );
   // consolidate cell table, each PET gets gsdim/nprocs cells
   // do global reduce for all the processors
+#ifndef ESMF_MPIUNI
   MPI_Allreduce(MPI_IN_PLACE, cells, gsdim*gcdim, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+#endif
   mypart = (int)(gsdim/nprocs);
   left = gsdim%nprocs;
   mystartelement = mypart*myrank;
@@ -929,11 +928,11 @@ int main(int argc, char** argv)
   }
 
   // find the max of maxconnection using MPI_AllReduce
+#ifndef ESMF_MPIUNI
   MPI_Allreduce(MPI_IN_PLACE, &maxconnection, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
-
+#endif
   // global max to find the maxconnection
-  printf("Maximal connection per vertex is %d\n", maxconnection);
-  printf("%d: Total number of nodes: %d, local number of elements: %d %d\n", myrank, totalnodes, mypart, mystartelement);
+  //printf("Maximal connection per vertex is %d\n", maxconnection);
 
   // create output file at PET=0
   if (dualflag == 0) {
@@ -954,7 +953,7 @@ int main(int argc, char** argv)
       if (myrank == i) {
 	status=nc_open(c_outfile, NC_WRITE, &ncid2);
 	if (status != NC_NOERR) handle_error(status);
-        printf("%d: write nodeCoords from %d of total %d count\n", myrank, mystart, totalnodes);
+        //printf("%d: write nodeCoords from %d of total %d count\n", myrank, mystart, totalnodes);
 	if (doesmf) {
 	  start2[0]=mystart;
 	  start2[1]=0;
@@ -985,7 +984,7 @@ int main(int argc, char** argv)
         start2[1]=0;
         count2[0]=mypart;
         count2[1]=gcdim;
-        printf("%d: write elementConn from %d of total %d count\n", myrank, mystartelement, mypart);
+        //printf("%d: write elementConn from %d of total %d count\n", myrank, mystartelement, mypart);
         status = nc_inq_varid(ncid2, "elementConn" ,&cellid);
 	status = nc_put_vara_int(ncid2, cellid, start2, count2, mycells);
 	if (status != NC_NOERR) handle_error(status);
@@ -1214,7 +1213,7 @@ int main(int argc, char** argv)
   }
 
   goodnodes = i1;
-  printf("Total nodes: %d, total non-degenerated nodes: %d\n", totalnodes, goodnodes);
+  //printf("Total nodes: %d, total non-degenerated nodes: %d\n", totalnodes, goodnodes);
   // broadcast goodnodes to get total number of good nodes and revise mystart and alltotal
   globalnodes = (int*)malloc(sizeof(int)*nprocs);
   MPI_Allgather(&goodnodes, 1, MPI_INT, globalnodes, 1, MPI_INT, MPI_COMM_WORLD);
@@ -1296,7 +1295,7 @@ int main(int argc, char** argv)
 	start2[1]=0;
 	count2[0]=totalnodes;
 	count2[1]=2;
-	printf("%d: write centerCoords from %d of total %d count\n", myrank, mystart, totalnodes);
+	//printf("%d: write centerCoords from %d of total %d count\n", myrank, mystart, totalnodes);
 	status = nc_inq_varid(ncid2, "centerCoords" ,&vertexid);
 	if (status != NC_NOERR) handle_error(status);
 	status = nc_put_vara_double(ncid2, vertexid, start2, count2, nodelatlon); 
@@ -1337,7 +1336,7 @@ int main(int argc, char** argv)
       start2[1]=0;
       count2[0]=totalnodes;
       count2[1]=maxconnection;
-      printf("%d: write elementConn from %d of total %d count\n", myrank, mystart, totalnodes);
+      //printf("%d: write elementConn from %d of total %d count\n", myrank, mystart, totalnodes);
       status = nc_inq_varid(ncid2, "elementConn" ,&cellid);
       status = nc_put_vara_int(ncid2, cellid, start2, count2, dualcells);
       if (status != NC_NOERR) handle_error(status);
@@ -1360,7 +1359,7 @@ int main(int argc, char** argv)
   nc_close(ncid1);
   }   
   rc = 0;
-  
+  printf("Done converting %s\n", c_infile);
   MPI_Finalize();
 #else
   if (myrank==0) {
