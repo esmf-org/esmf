@@ -642,16 +642,23 @@ internal format.
 
 The internal grid format used by the ESMF regrid weight calculation is a finite element
 unstructured mesh. This was chosen because it was the most general format and all the others could be 
-converted to it. The finite element unstructured mesh is similar to the SIERRA~\cite{Sierra} package 
-developed at Sandia National Laboratory. It also contains a version of the Zoltan~\cite{Zoltan} library 
-for calculating mesh partitions. 
+converted to it. The ESMF finite element unstructured mesh (ESMF FEM) is similar in some respects to the SIERRA~\cite{Sierra} package 
+developed at Sandia National Laboratory. The ESMF code relies on some of the same underlying toolkits (e.g. Zoltan~\cite{Zoltan} library 
+for calculating mesh partitions) and adds a layer on top that allows the calculation of regrid weights and some mesh operations 
+(e.g. mesh redistribution) that ESMF needs. The ESMF FEM has similar notions to SIERRA about the basic structure of the
+mesh entities, fields, iteration and a similar notion of parallel distribution. 
 
-The internal finite element mesh contains a range of functionality that 
-ESMF uses for weight calculation. It can create a mesh of triangles and quadrilaterals, or a mesh of hexahedrons and  
-tetrahedrons. It holds information about the neighbor relations between these elements as well the
-vertices and edges that make them up. It allows the storage of field data (e.g. coordinates) on 
-vertices and other parts of the mesh. It also contains other useful functionality,
-for example the capability to redistribute a mesh to a new distribution and the ability to perform halo communications. 
+Currently we use the ESMF FEM internal mesh to hold the structure of our Mesh class and 
+in our regrid weight calculation. The parts of the internal FEM code that are used/tested by ESMF are the following:
+\begin{itemize}
+\item The creation of a mesh composed of triangles and quadrilaterals or hexahedrons and tetrahedrons.
+\item The object relations data base to store the connections between objects (e.g. which element contains which nodes).
+\item The fields to hold data (e.g. coordinates). (We currently only build fields on nodes and elements (2D and 3D).
+\item Iteration to move through mesh entities.
+\item The parallel code to maintain information about the distribution of the mesh across processors and to communicate data between parts of the mesh on different processors (i.e. halos).
+\end{itemize}
+
+
 
 \subsection{File-based Regrid API}~\label{sec:filebasedregrid}
 \input{../Superstructure/PreESMFMod/doc/ESMF_RegridWeightGen_fapi}
