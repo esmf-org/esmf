@@ -16,11 +16,25 @@ from read_test_cases_from_control_file import read_test_cases_from_control_file
 
 # If fname doesn't exist, retrieve it from the remote server via http.
 def cache_data_file(fname):
-    from urllib import urlretrieve
+    from urllib2 import urlopen, URLError
+    from shutil import copyfileobj
+    status_ok = True
     if not os.path.exists(fname):
         url = os.path.join(DATA_URL_ROOT, os.path.basename(fname))
         print 'Retrieving ' + url + '...\n'
-        urlretrieve(url, fname)
+        try: 
+            req = urlopen(url)
+        except URLError:
+            print 'Error opening %s' % url
+            status_ok = False
+        else:
+            try:
+                with open(fname, 'wb') as fp:
+                    copyfileobj(req, fp)
+            except Exception:
+                print 'Error writing to %s' % fname
+                status_ok = False
+    return status_ok
 
 def cache_data_files_for_test_cases(test_cases):
     # Create data subdirectory if it doesn't exist.
@@ -37,13 +51,9 @@ def cache_data_files_for_test_cases(test_cases):
 
         # run the data file retrieval and regridding through try/except
         correct = False
-        try:
-            cache_data_file (src_fname_full)
-            cache_data_file (dst_fname_full)
-        except:
-            print "urlretrieve ERROR:\n"
-            traceback.print_exc(file=sys.stdout)
-            status_ok = False
+        status_ok = cache_data_file(src_fname_full) and cache_data_file(dst_fname_full)
+        if not status_ok:
+            break
     return status_ok
 
 # Main program:  Retrieve data files from a remote server if they do not exist 
