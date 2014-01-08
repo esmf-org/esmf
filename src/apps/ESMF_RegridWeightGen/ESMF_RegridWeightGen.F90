@@ -681,9 +681,7 @@ program ESMF_RegridWeightGenApp
 
   ! error checking
   if (check) then
-    rc = getcwd(cwd)
-    if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
-    call ESMF_RegridWeightGenCheck(trim(cwd)//"/"//trim(wgtfile), rc=rc)
+    call ESMF_RegridWeightGenCheck(wgtfile, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
   endif
 
