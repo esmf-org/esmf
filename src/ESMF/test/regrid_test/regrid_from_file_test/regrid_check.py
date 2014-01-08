@@ -24,20 +24,7 @@ try:
 except:
     raise ImportError('The ESMF library cannot be found!')
 
-regrid_method_map = {"bilinear" : ESMF.RegridMethod.BILINEAR,
-                     "patch" : ESMF.RegridMethod.PATCH,
-                     "conserve" : ESMF.RegridMethod.CONSERVE,
-                     "neareststod" : ESMF.RegridMethod.NEAREST_STOD,
-                     "nearestdtos" : ESMF.RegridMethod.NEAREST_DTOS}
-file_type_map = {"VTK" : ESMF.FileFormat.VTK,
-                 "SCRIP" : ESMF.FileFormat.SCRIP,
-                 "ESMFMESH" : ESMF.FileFormat.ESMFMESH,
-                 "ESMFGRID" : ESMF.FileFormat.ESMFGRID,
-                 "UGRID" : ESMF.FileFormat.UGRID,
-                 "GRIDSPEC" : ESMF.FileFormat.GRIDSPEC}
-pole_method_map = {"none" : ESMF.PoleMethod.NONE,
-                   "all" : ESMF.PoleMethod.ALLAVG,
-                   "teeth" : ESMF.PoleMethod.TEETH}
+from regrid_from_file_consts import regrid_method_map, file_type_map, pole_method_map
 
 def nc_is_mesh(filename, filetype):
     is_mesh = False
