@@ -424,17 +424,20 @@ int main(void){
   //----------------------------------------------------------------------------
 
 #endif
-#ifdef ESMF_NETCDF
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Create grid object from SCRIP file
   strcpy(name, "GridCreateFromFile_SCRIP");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
   grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", ESMC_FILEFORMAT_SCRIP,
 					   NULL, NULL, NULL, NULL, "", "", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   rc = ESMC_GridDestroy(&grid_from_file);
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
   //----------------------------------------------------------------------------

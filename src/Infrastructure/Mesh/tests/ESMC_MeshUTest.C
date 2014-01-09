@@ -215,28 +215,35 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-#ifdef ESMF_NETCDF
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Create mesh object from SCRIP file
   strcpy(name, "MeshCreateFromFile_SCRIP");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
   mesh = ESMC_MeshCreateFromFile("data/ne4np4-pentagons.nc", ESMC_FILEFORMAT_SCRIP,
 				 NULL, NULL, "", NULL, "", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   rc = ESMC_MeshDestroy(&mesh);
-
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Create mesh object from ESMFMESH file
   strcpy(name, "MeshCreateFromFile_ESMFMESH");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+#ifdef ESMF_NETCDF
   mesh = ESMC_MeshCreateFromFile("data/ne4np4-esmf.nc", ESMC_FILEFORMAT_ESMFMESH,
 				 NULL, NULL, "", NULL, "", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   rc = ESMC_MeshDestroy(&mesh);
+#else
+  // No NetCDF, so just PASS this test.
+  ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
   //----------------------------------------------------------------------------
