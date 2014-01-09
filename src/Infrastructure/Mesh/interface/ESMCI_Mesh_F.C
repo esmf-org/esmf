@@ -1333,8 +1333,36 @@ extern "C" void FTN_X(c_esmc_meshserialize)(Mesh **meshpp,
 
     mesh.GetImprints(&numSets, &nvalSetSizes, &nvalSetVals, &nvalSetObjSizes, &nvalSetObjVals);
 
+    // Record which Fields are present
+#define ESMF_RECONCILE_MESH_NUM_FIELDS 8
+    int fields_present[ESMF_RECONCILE_MESH_NUM_FIELDS];
+    
+    // zero out fields present list
+    for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
+      fields_present[i]=0;
+    }
+    
+    // Record list
+    if (mesh.GetCoordField() != NULL) fields_present[0]=1;
+    if (mesh.GetField("mask") != NULL) fields_present[1]=1;
+    if (mesh.GetField("node_mask_val") != NULL) fields_present[2]=1;       
+    if (mesh.GetField("elem_mask") != NULL) fields_present[3]=1;       
+    if (mesh.GetField("elem_mask_val") != NULL) fields_present[4]=1;       
+    if (mesh.GetField("elem_area") != NULL) fields_present[5]=1;       
+    if (mesh.GetField("elem_frac2") != NULL) fields_present[6]=1;       
+    if (mesh.GetField("elem_frac") != NULL) fields_present[7]=1;       
+
+    // DEBUG OUTPUT
+    // for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
+    //  printf("%d# S: %d fields_present=%d\n",Par::Rank(),i,fields_present[i]);
+    //}
+
+
     // Calc Size
-    int size = 3*sizeof(int)+2*numSets*sizeof(UInt);
+    int size = 3*sizeof(int)+
+               ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+
+               2*numSets*sizeof(UInt);
+
 
     if (nvalSetSizes != NULL)
       for (int i=0; i<numSets; i++) {
@@ -1355,13 +1383,19 @@ extern "C" void FTN_X(c_esmc_meshserialize)(Mesh **meshpp,
       }
     }
 
+
     // Save integers
     ip= (int *)(buffer + *offset);
     if (*inquireflag != ESMF_INQUIREONLY) {
       *ip++ = mesh.spatial_dim();
       *ip++ = mesh.parametric_dim();
       *ip++ = numSets;
+
+      for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
+        *ip++=fields_present[i];
+      }      
     }
+
 
     // Save UInt data
     uip=(UInt *)ip;
@@ -1469,7 +1503,14 @@ extern "C" void FTN_X(c_esmc_meshdeserialize)(Mesh **meshpp,
     std::vector<UInt> nvalSetObjSizes; 
     std::vector<UInt> nvalSetObjVals;
 
-    numSets=*ip++;
+    numSets=*ip++; 
+
+    // Decode which Fields are present
+    int fields_present[ESMF_RECONCILE_MESH_NUM_FIELDS]; // ESMF_RECONCILE_MESH_NUM_FIELDS DEFINED ABOVE
+    
+    for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
+      fields_present[i]=*ip++;
+    }      
 
     // convert pointer
     uip=(UInt *)ip;
@@ -1505,7 +1546,7 @@ extern "C" void FTN_X(c_esmc_meshdeserialize)(Mesh **meshpp,
       }
 
     // Adjust offset
-    *offset += 3*sizeof(int)+
+      *offset += 3*sizeof(int)+ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+    
       nvalSetSizes.size()*sizeof(UInt)+nvalSetVals.size()*sizeof(UInt)+
       nvalSetObjSizes.size()*sizeof(UInt)+nvalSetObjVals.size()*sizeof(UInt);
 
@@ -1517,10 +1558,25 @@ extern "C" void FTN_X(c_esmc_meshdeserialize)(Mesh **meshpp,
     meshp->set_spatial_dimension(spatial_dim);
     meshp->set_parametric_dimension(parametric_dim);
     
-    
-    // Register the nodal coordinate field.
-    meshp->RegisterNodalField(*meshp, "coordinates", spatial_dim);
-    
+
+    // Register fields
+    Context ctxt; ctxt.flip(); // Needed below for element registration
+    if (fields_present[0]) meshp->RegisterNodalField(*meshp, "coordinates", spatial_dim);
+    if (fields_present[1]) meshp->RegisterNodalField(*meshp, "mask", 1);
+    if (fields_present[2]) meshp->RegisterNodalField(*meshp, "node_mask_val", 1);
+    if (fields_present[3]) meshp->RegisterField("elem_mask",MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    if (fields_present[4]) meshp->RegisterField("elem_mask_val", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    if (fields_present[5]) meshp->RegisterField("elem_area", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    if (fields_present[6]) meshp->RegisterField("elem_frac2", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    if (fields_present[7]) meshp->RegisterField("elem_frac", MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+
+    // DEBUG OUTPUT
+    // for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
+    //  printf("%d# D: %d fields_present=%d\n",Par::Rank(),i,fields_present[i]);
+    //}
+#undef ESMF_RECONCILE_MESH_NUM_FIELDS    
+
+
     // Setup the Mesh
     //    meshp->build_sym_comm_rel(MeshObj::NODE);
     meshp->ProxyCommit(numSets,
