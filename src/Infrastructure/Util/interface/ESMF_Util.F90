@@ -82,6 +82,7 @@
 !  File system directory methods
       public :: ESMF_UtilIOMkDir
       public :: ESMF_UtilIORmDir
+      public :: ESMF_UtilIOGetCWD
 
 !  Misc methods
       public :: ESMF_Array2String
@@ -620,6 +621,48 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
   end subroutine ESMF_UtilIORmDir
+
+!-------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilIOGetCWD"
+!BOP
+! !IROUTINE: ESMF_UtilIOGetCWD - Get the current directory
+!
+! !INTERFACE:
+  subroutine ESMF_UtilIOGetCWD (pathName, keywordEnforcer, rc)
+!
+! !PARAMETERS:
+    character(*), intent(in)            :: pathName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,      intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Call the system-dependent routine to get the current directory from the file
+!   system.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[pathName]
+!       Name of the directory to be retrieved.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+
+    integer :: localrc
+
+    if (present(rc)) rc = ESMF_FAILURE
+
+    call c_esmc_getcwd (pathname, localrc)
+    if (ESMF_LogFoundError (localrc, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc))  &
+      return
+
+    if (present (rc)) then
+      rc = localrc
+    end if
+
+  end subroutine ESMF_UtilIOGetCWD
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD

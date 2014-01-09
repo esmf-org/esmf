@@ -271,9 +271,9 @@ extern "C" {
           *rc = ESMF_SUCCESS;
         else
           *rc = ESMF_RC_NOT_FOUND;
-	break;
+  break;
       default:
-	*rc = ESMF_FAILURE;
+  *rc = ESMF_FAILURE;
     }
 #else
   if (RemoveDirectory (path.c_str())) {
@@ -290,6 +290,43 @@ extern "C" {
         *rc = ESMF_FAILURE;
     }
   }
+#endif
+
+}
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  c_ESMC_GetCWD - Get the current directory from the file system
+//
+// !INTERFACE:
+      void FTN_X(c_esmc_getcwd)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+//
+// !ARGUMENTS:
+      char *pathname,           // in - path name
+      int *rc,                  // out - return code
+      ESMCI_FortranStrLenArg pathname_l) { // in, hidden - pathname length
+//
+// !DESCRIPTION:
+//     Gets the current directory in the file system.
+//
+//EOPI
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_ESMC_UtilGetCWD"
+
+#if !defined (ESMF_OS_MinGW)
+  if (getcwd (pathname, pathname_l) != NULL)
+    *rc = ESMF_SUCCESS;
+  else
+    *rc = ESMF_FAILURE;
+#else
+  int winrt = GetCurrentDirectory (pathname_l, pathname)
+  if (winrt == 0 || winrt > pathname_l)
+    *rc = ESMF_FAILURE;
+  else
+    *rc = ESMF_SUCCESS;
 #endif
 
 }
