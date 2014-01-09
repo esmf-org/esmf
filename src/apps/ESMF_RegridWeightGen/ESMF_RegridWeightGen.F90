@@ -677,6 +677,8 @@ program ESMF_RegridWeightGenApp
     write(*,*) "Completed weight generation successfully."
     !write(*,*) "Completed weight generation in ", (endtime-starttime)*1000, "msecs"
     write(*,*) 
+    write(*,*) "Start of check routine"
+    write(*,*) 
   endif
 
   ! error checking

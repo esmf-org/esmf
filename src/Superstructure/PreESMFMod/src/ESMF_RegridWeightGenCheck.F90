@@ -258,8 +258,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
-    dstArray = ESMF_ArrayCreate(farray=FdstArray, distgrid=dst_distgrid, &
-                 indexflag=ESMF_INDEX_DELOCAL, rc=status)
+    dstArray = ESMF_ArrayCreate(arrayspec=dst_arrayspec, distgrid=dst_distgrid, rc=status)
     if (ESMF_LogFoundError(status, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
@@ -312,8 +311,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #if 1
     ! Field and Grid way of doing things
     ! store the factorList and factorIndex list into a routehandle for SMM
-    call ESMF_FieldSMMStore(srcField=srcField, dstField=dstField, routehandle=routehandle, &
-      factorList=factorList, factorIndexList=factorIndexList, rc=status)
+    if (localPet == 0) then
+      call ESMF_FieldSMMStore(srcField=srcField, dstField=dstField, routehandle=routehandle, &
+        factorList=factorList, factorIndexList=factorIndexList, rc=status)
+    else
+      call ESMF_FieldSMMStore(srcField=srcField, dstField=dstField, routehandle=routehandle, &
+        rc=status)
+    endif      
     if (ESMF_LogFoundError(status, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
@@ -331,8 +335,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #if 0
     ! Array way of doing things
     ! store the factorList and factorIndex list into a routehandle for SMM
-    call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray,     routehandle=routehandle, &
-      factorList=factorList, factorIndexList=factorIndexList, rc=status)
+    if (localPet == 0) then
+      call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, routehandle=routehandle, &
+        factorList=factorList, factorIndexList=factorIndexList, rc=status)
+    else
+      call ESMF_ArraySMMStore(srcArray=srcArray, dstArray=dstArray, routehandle=routehandle, &
+        rc=status)
+    endif      
     if (ESMF_LogFoundError(status, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
