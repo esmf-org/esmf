@@ -216,6 +216,28 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create mesh object from SCRIP file
+  strcpy(name, "MeshCreateFromFile_SCRIP");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  mesh = ESMC_MeshCreateFromFile("data/ne4np4-pentagons.nc", ESMC_FILEFORMAT_SCRIP,
+				 NULL, NULL, "", NULL, "", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  rc = ESMC_MeshDestroy(&mesh);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create mesh object from ESMFMESH file
+  strcpy(name, "MeshCreateFromFile_ESMFMESH");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  mesh = ESMC_MeshCreateFromFile("data/ne4np4-esmf.nc", ESMC_FILEFORMAT_ESMFMESH,
+				 NULL, NULL, "", NULL, "", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  rc = ESMC_MeshDestroy(&mesh);
+
+  //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
