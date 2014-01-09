@@ -38,7 +38,7 @@ int main(void){
   int rc;
   bool correct;
 
-  ESMC_Grid grid_np, grid_1p, grid_tripole;
+  ESMC_Grid grid_np, grid_1p, grid_tripole, grid_from_file;
   ESMC_VM vm;
 
   int dimcount = 2;
@@ -422,6 +422,19 @@ int main(void){
   rc = ESMC_GridDestroy(&grid_1p);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
+
+#endif
+#ifdef ESMF_NETCDF
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  // Create grid object from SCRIP file
+  strcpy(name, "GridCreateFromFile_SCRIP");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  grid_from_file = ESMC_GridCreateFromFile("data/T42_grid.nc", ESMC_FILEFORMAT_SCRIP,
+					   NULL, NULL, NULL, NULL, "", "", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  rc = ESMC_GridDestroy(&grid_from_file);
 #endif
 
   //----------------------------------------------------------------------------
