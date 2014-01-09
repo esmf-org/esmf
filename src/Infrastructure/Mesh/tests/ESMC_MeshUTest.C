@@ -215,6 +215,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+#ifdef ESMF_NETCDF
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Create mesh object from SCRIP file
@@ -236,6 +237,7 @@ int main(void){
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   rc = ESMC_MeshDestroy(&mesh);
+#endif
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
