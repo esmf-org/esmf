@@ -34,7 +34,7 @@ program ESMF_RegridWeightGenApp
   type(ESMF_RegridMethod_Flag) :: methodflag
   character(len=256) :: commandbuf1(3)
   character(len=64)  :: commandbuf3(8)
-  integer            :: commandbuf2(14)
+  integer            :: commandbuf2(15)
   integer            :: ind, pos
   logical            :: largeFileFlag
   logical            :: netcdf4FileFlag
@@ -48,7 +48,7 @@ program ESMF_RegridWeightGenApp
   character(len=256) :: argStr
   logical            :: terminateProg
   !real(ESMF_KIND_R8) :: starttime, endtime
-  logical            :: check
+  logical            :: checkFlag
   
   terminateProg = .false.
   !------------------------------------------------------------------------
@@ -483,9 +483,9 @@ program ESMF_RegridWeightGenApp
       endif
     endif
 
-    check = .false.
+    checkFlag = .false.
     call ESMF_UtilGetArgIndex('--check', argindex=ind, rc=rc)
-    if (ind /= -1) check = .true.   
+    if (ind /= -1) checkFlag = .true.   
 
 1110 continue 
     commandbuf2(:)=0
@@ -511,9 +511,10 @@ program ESMF_RegridWeightGenApp
       if (useDstCoordVar) commandbuf2(12) = 1
       if (largeFileFlag) commandbuf2(13) = 1
       if (netcdf4FileFlag) commandbuf2(14) = 1
+      if (checkFlag) commandbuf2(15) = 1 
     endif 
 
-    call ESMF_VMBroadcast(vm, commandbuf2, 14, 0, rc=rc)
+    call ESMF_VMBroadcast(vm, commandbuf2, 15, 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
     if (terminateProg) then
@@ -539,7 +540,7 @@ program ESMF_RegridWeightGenApp
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
   else
-    call ESMF_VMBroadcast(vm, commandbuf2, 14, 0, rc=rc)
+    call ESMF_VMBroadcast(vm, commandbuf2, 15, 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
     if (commandbuf2(1) == -9999) then
@@ -622,7 +623,11 @@ program ESMF_RegridWeightGenApp
     else
       netcdf4FileFlag = .false.
     endif
-
+    if (commandbuf2(15)==1) then
+      checkFlag = .true.
+    else
+      checkFlag = .false.
+    endif
     call ESMF_VMBroadcast(vm, commandbuf1, 256*3, 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
     call ESMF_VMBroadcast(vm, commandbuf3, 80*8, 0, rc=rc)
@@ -679,11 +684,11 @@ program ESMF_RegridWeightGenApp
     write(*,*) 
   endif
 
-  write(*,*) "Start of check routine"
-  write(*,*) 
+!  write(*,*) "Start of check routine"
+!  write(*,*) 
 
   ! error checking
-  if (check) then
+  if (checkFlag) then
     call ESMF_RegridWeightGenCheck(wgtfile, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
   endif
