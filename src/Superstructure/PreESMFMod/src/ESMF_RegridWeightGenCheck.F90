@@ -26,7 +26,9 @@ module ESMF_RegridWeightGenCheckMod
 
 !------------------------------------------------------------------------------
 ! !USES:
+#ifdef ESMF_NETCDF
   use netcdf
+#endif
   use ESMF_UtilTypesMod
   use ESMF_LogErrMod
   use ESMF_VMMod
@@ -72,7 +74,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RegridWeightGenCheck"
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridWeightGenCheck - Check regridding weights
 ! !INTERFACE:
   subroutine ESMF_RegridWeightGenCheck(weightFile, keywordEnforcer, rc)
@@ -92,7 +94,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
-!EOP
+!EOPI
     !--------------------------------------------------------------------------
     ! DECLARATIONS
     !--------------------------------------------------------------------------
@@ -142,6 +144,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! EXECUTION
     !--------------------------------------------------------------------------
 
+#ifdef ESMF_NETCDF
     ! set log to flush after every message
     call ESMF_LogSet(flush=.true., rc=status)
     if (ESMF_LogFoundError(status, &
@@ -489,6 +492,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
 
+#else
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+      msg="- ESMF_NETCDF not defined when lib was compiled", & 
+      ESMF_CONTEXT, rcToReturn=rc) 
+    return
+#endif
+
   end subroutine ESMF_RegridWeightGenCheck
 
   !****************************************************************************
@@ -509,6 +519,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     character(ESMF_MAXPATHLEN) :: msg
 
+#ifdef ESMF_NETCDF
     !-----------------------------------------------------------------
     ! open netcdf file
     !-----------------------------------------------------------------
@@ -596,6 +607,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(present(rc)) rc = ESMF_SUCCESS
 
+#else
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+      msg="- ESMF_NETCDF not defined when lib was compiled", & 
+      ESMF_CONTEXT, rcToReturn=rc) 
+    return
+#endif
+
   end subroutine NCFileInquire
 
   !****************************************************************************
@@ -633,6 +651,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(ESMF_MAXPATHLEN) :: msg
 
     real(ESMF_KIND_R8), parameter :: d2r = 3.141592653589793238/180
+
+#ifdef ESMF_NETCDF
 
     !-----------------------------------------------------------------
     ! open netcdf file
@@ -964,6 +984,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(present(rc)) rc = ESMF_SUCCESS
 
+#else
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+      msg="- ESMF_NETCDF not defined when lib was compiled", & 
+      ESMF_CONTEXT, rcToReturn=rc) 
+    return
+#endif
+
   end subroutine GridReadCoords
 
   !----------------------------------------------------------------------------
@@ -992,6 +1019,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, allocatable  :: address(:), localSize(:), localOffset(:)
     type(ESMF_VM)         :: vm
     integer               :: i, localpet, npet, nlinksPPet, FlocalPet
+
+#ifdef ESMF_NETCDF
 
     ! get lpe number
     call ESMF_VMGetCurrent(vm, rc=rc)
@@ -1158,8 +1187,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=__FILE__, rcToReturn=rc)
       return
     endif
-
     if(present(rc)) rc = ESMF_SUCCESS
+
+#else
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
+      msg="- ESMF_NETCDF not defined when lib was compiled", & 
+      ESMF_CONTEXT, rcToReturn=rc) 
+    return
+#endif
 
   end subroutine ESMF_FieldRegridReadSCRIPFileP
 
