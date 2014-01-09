@@ -594,7 +594,9 @@ EXAMPLES_CONFIG     = $(ESMF_EXDIR)/examples.config
 TEST_HARNESS_LIST   = $(ESMF_TESTDIR)/test_harness.list
 ESMF_TESTSCRIPTS    = $(ESMF_DIR)/scripts/test_scripts
 DO_UT_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
+DO_UT_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ut_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_EX_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
+DO_EX_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_ex_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
 DO_ST_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT) 
 DO_ST_ML_RESULTS    = $(ESMF_TESTSCRIPTS)/do_st_ml_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
 DO_SUM_RESULTS	    = $(ESMF_TESTSCRIPTS)/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT) 
@@ -2171,7 +2173,7 @@ check_system_tests:
 #
 # run the system tests memory leak report.
 #
-check_system_ml_tests:
+check_system_tests_ml:
 	@$(DO_ST_ML_RESULTS)
 
 
@@ -2593,6 +2595,13 @@ check_unit_tests:
 	@$(DO_UT_RESULTS)
 
 #
+# report statistics on memoey leak tests
+#
+check_unit_tests_ml:
+	@$(DO_UT_ML_RESULTS)
+
+
+#
 # internal targets used to actually run the fortran and c++ unit tests
 #
 #  the call in the local makefiles is something like:
@@ -2914,6 +2923,13 @@ clean_examples:
 #
 check_examples:
 	@$(DO_EX_RESULTS)
+
+
+#
+# report memory leak statistics on examples
+#
+check_examples_ml:
+	@$(DO_EX_ML_RESULTS)
 
 
 #-------------------------------------------------------------------------------
