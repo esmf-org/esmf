@@ -74,6 +74,7 @@ RUN_ESMF_GridArbitraryUTestUNI:
 
 # --- ESMC_Grid Tests
 RUN_ESMC_GridUTest:
+	cp -r data $(ESMF_TESTDIR)
 	$(MAKE) TNAME=Grid NP=4 ctest
 RUN_ESMC_GridUTestUNI:
 	$(MAKE) TNAME=Grid NP=1 ctest
