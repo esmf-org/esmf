@@ -1575,10 +1575,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Print the regrid options
     if (localVerboseFlag .and. PetNo == 0) then
-  	  print *, "Starting weight generation with these inputs: "
-	    print *, "  Source File: ", trim(srcfile)
-	    print *, "  Destination File: ", trim(dstfile)
-  	  print *, "  Weight File: ", trim(weightFile)
+      print *, "Starting weight generation with these inputs: "
+      print *, "  Source File: ", trim(srcfile)
+      print *, "  Destination File: ", trim(dstfile)
+      if (present(weightFile)) then
+        print *, "  Weight File: ", trim(weightFile)
+      endif
       if (localRegridMethod == ESMF_REGRIDMETHOD_BILINEAR) then
         print *, "  Regrid Method: bilinear"
       elseif (localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE) then

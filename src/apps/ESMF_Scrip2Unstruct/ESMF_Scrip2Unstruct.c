@@ -333,6 +333,9 @@ int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, s
 #ifdef ESMF_NETCDF
   // create the output ESMF netcdf file
   status = nc_create(filename, NC_CLOBBER|NC_NETCDF4, &ncid2);
+  if (status == NC_ENOTNC) {
+    status = nc_create(filename, NC_CLOBBER, &ncid2);
+  } 
   if (status != NC_NOERR) handle_error(status);
   
   // define the dimensions
@@ -444,6 +447,9 @@ int create_ugrid(char* filename, char* infilename, int dualflag, size_t nnodes, 
 
 #ifdef ESMF_NETCDF
   status = nc_create(filename, NC_CLOBBER|NC_NETCDF4, &ncid2);
+  if (status == NC_ENOTNC) {
+    status = nc_create(filename, NC_CLOBBER, &ncid2);
+  } 
   if (status != NC_NOERR) handle_error(status);
   status = nc_def_dim(ncid2, "nodeCount", nnodes, &vertdimid);
   if (status != NC_NOERR) handle_error(status);
