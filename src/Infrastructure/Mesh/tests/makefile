@@ -71,6 +71,7 @@ RUN_ESMC_MeshVTKUTest:
 	$(MAKE) TNAME=MeshVTK NP=6 ctest
 
 RUN_ESMC_MeshUTest:
+	cp -r data $(ESMF_TESTDIR)
 	$(MAKE) TNAME=Mesh NP=1 ctest
 
 RUN_ESMC_MeshUTestUNI:
