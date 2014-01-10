@@ -594,7 +594,6 @@
     call ESMF_UtilIOGetCWD (pathname, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
-
 #endif
 
       ! This calls finalize before returning, so it must be the last

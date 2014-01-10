@@ -328,6 +328,9 @@ extern "C" {
   else
     *rc = ESMF_SUCCESS;
 #endif
+  if (strlen(pathname) < pathname_l)
+    for (int i = strlen(pathname); i < pathname_l; ++i)
+      pathname[i] = ' ';
 
 }
 
