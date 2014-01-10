@@ -595,7 +595,8 @@
                                 routehandle, &
 				regridmethod, rmpresent, &
 				polemethod, pmpresent, &
-				regridPoleNPnts, rpnppresent, &
+				regridPoleNPnts, &
+                                rpnppresent, &
                                 unmappedaction, uapresent, &
                                 srcFracField, sffpresent, &
                                 dstFracField, dffpresent, rc)
@@ -611,17 +612,17 @@
 
       type(ESMF_Field)                       :: srcField
       type(ESMF_Field)                       :: dstField
-      integer, intent(in)                    :: len1, len2
-      integer, intent(in)                    :: smvpresent, dmvpresent
+      integer                    :: len1, len2
+      integer                    :: smvpresent, dmvpresent
       integer, intent(in)                    :: sffpresent, dffpresent
       integer                                :: srcMaskValues(1:len1), &
                                                 dstMaskValues(1:len2)
       type(ESMF_RouteHandle)                 :: routehandle
-      integer, intent(in)                    :: rmpresent, uapresent
+      integer                    :: rmpresent, uapresent
       type(ESMF_RegridMethod_Flag)           :: regridmethod
-      type(ESMF_PoleMethod_Flag), intent(in) :: polemethod
-      integer, intent(in)                    :: pmpresent, rpnppresent
-      integer, intent(in)                    :: regridPoleNPnts
+      type(ESMF_PoleMethod_Flag) :: polemethod
+      integer                    :: pmpresent, rpnppresent
+      integer                   :: regridPoleNPnts
       
       type(ESMF_UnmappedAction_Flag) :: unmappedaction
       type(ESMF_Field)               :: srcFracField

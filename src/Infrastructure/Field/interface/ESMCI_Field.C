@@ -96,9 +96,6 @@ void FTN_X(f_esmf_fielddestroy)(ESMCI::Field *fieldp, int *rc);
 void FTN_X(f_esmf_fieldgetmesh)(ESMCI::Field *fieldp, void *mesh_pointer,
   int *rc);
 
-void FTN_X(f_esmf_fieldgetmesh)(ESMCI::Field *fieldp, void *mesh_pointer,
-  int *rc);
-
 void FTN_X(f_esmf_fieldgetarray)(ESMCI::Field *fieldp, void *array_pointer,
   int *rc);
 
@@ -953,25 +950,34 @@ namespace ESMCI {
       dff_created = true;
     }
 
-    if (regridMethod != NULL)
+    ESMC_RegridMethod_Flag rm_loc = ESMC_REGRIDMETHOD_BILINEAR;
+    if (regridMethod != NULL){
+      rm_loc = *regridMethod;
       rm_present = 1;
+    }
 
     if (unmappedAction != NULL)
       ua_present = 1;
 
-    if (polemethod != NULL)
+    ESMC_PoleMethod_Flag pm_loc = ESMF_POLEMETHOD_NONE;
+    if (polemethod != NULL){
+      pm_loc = *polemethod;
       pm_present = 1;
+    }
 
-    if (regridPoleNPnts != NULL)
+    int rpnp_loc = -1;  // initialize with something obvious
+    if (regridPoleNPnts != NULL){
+      rpnp_loc = *regridPoleNPnts;
       rpnp_present = 1;
+    }
 
     FTN_X(f_esmf_regridstore)(fieldpsrc, fieldpdst, 
                               smv->array, &smv->extent[0], &smv_present,
                               dmv->array, &dmv->extent[0], &dmv_present,
                               routehandlep,
-                              regridMethod, &rm_present,
-			      polemethod, &pm_present,
-			      regridPoleNPnts, &rpnp_present,
+                              &rm_loc, &rm_present,
+			      &pm_loc, &pm_present,
+			      &rpnp_loc, &rpnp_present,
                               unmappedAction, &ua_present,
                               srcFracField, &sff_present,
                               dstFracField, &dff_present, &localrc);
