@@ -1576,11 +1576,19 @@ endif
     if (userRoutineFound) return ! bail out successfully
 
     ! getting down to here means that none of the attempts were successful
-    call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-      msg="Could not find a matching SetServices routine in "//trim(sharedObj),&
-      line=__LINE__, &
-      file=FILENAME, &
-      rcToReturn=rc)
+    if (present(sharedObj)) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Could not find a matching SetServices routine in "//trim(sharedObj),&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+    else
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Could not find a matching SetServices routine in the executable.", &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+    endif
       
   end subroutine
   !-----------------------------------------------------------------------------
