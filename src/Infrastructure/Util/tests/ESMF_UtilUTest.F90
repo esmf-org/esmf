@@ -582,6 +582,18 @@
     call ESMF_UtilIORmDir (pathname, relaxedFlag=.true., rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
+! Get the current directory
+!===========================================
+
+    write (pathname,'(a,i3.3)') 'ESMF_rocks_', localPet
+
+    !EX_UTest
+    ! Test getting the current directory
+    write (name, *) "Testing getting the current directory"
+    write (failMsg, *) "did not return ESMF_SUCCESS"
+    call ESMF_UtilIOGetCWD (pathname, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
 
 #endif
 

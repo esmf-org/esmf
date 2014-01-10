@@ -1,4 +1,3 @@
-#define AS_IT_SHOULD_BE_not
 ! $Id$
 !
 !-------------------------------------------------------------------------
@@ -91,7 +90,6 @@ program ESMF_ShareMeshSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-#ifdef AS_IT_SHOULD_BE
    ! Check for correct number of PETs
   if ( petCount < 6 ) then
      call ESMF_LogSetError(ESMF_RC_ARG_BAD,&
@@ -99,16 +97,11 @@ program ESMF_ShareMeshSTest
          ESMF_CONTEXT, rcToReturn=rc)
      call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
    endif
-#endif
 
   ! Create the 2 model components and coupler
   cname1 = "user model 1"
   ! use petList to define comp1 on PET 0,1,2,3
-#ifdef AS_IT_SHOULD_BE
   comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0,1,2,3/), rc=localrc)
-#else
-  comp1 = ESMF_GridCompCreate(name=cname1, rc=localrc)
-#endif
   print *, "Created component ", trim(cname1), "rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -116,11 +109,7 @@ program ESMF_ShareMeshSTest
 
   cname2 = "user model 2"
   ! use petList to define comp2 on PET 4,5
-#ifdef AS_IT_SHOULD_BE
   comp2 = ESMF_GridCompCreate(name=cname2, petList=(/4,5/), rc=localrc)
-#else
-  comp2 = ESMF_GridCompCreate(name=cname2, rc=localrc)
-#endif
   print *, "Created component ", trim(cname2), "rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &

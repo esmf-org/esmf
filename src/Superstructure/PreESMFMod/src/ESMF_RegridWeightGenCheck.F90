@@ -394,7 +394,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! if frac is below .999, then a significant portion of this cell is
         ! missing from the weight calculation and error is misleading here
         ! also don't look in unitialized cells, for the regional to global cases
-        if (dst_mask(i) /= 0 .and. dst_frac(i) > .999 \
+        if (dst_mask(i) /= 0 .and. dst_frac(i) > .999 &
             .and. FdstArray(i) /= UNINITVAL) then
 
           ! compute the raw pointwise error
