@@ -63,14 +63,13 @@ program ESMF_PIOUTest
   integer :: pioerr
 
   character(32) :: fname
-  integer(4) :: pio_dims(1)
+  integer :: pio_dims(1)
   integer, parameter :: dim_x=10
   integer :: dimid_x
   real(ESMF_KIND_R8), dimension(dim_x) :: test_data, read_data
 
 #if defined (ESMF_PIO)
   integer (kind=pio_offset) :: compdof(dim_x) ! global degrees of freedom for computational decomposition
-  integer (kind=pio_offset) :: iodof(1)   ! global degrees of freedom for io decomposition 
 #endif
 
   integer :: i
