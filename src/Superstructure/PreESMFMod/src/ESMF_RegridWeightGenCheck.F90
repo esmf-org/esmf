@@ -123,7 +123,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     real(ESMF_KIND_R8), allocatable :: FsrcArray(:)
     real(ESMF_KIND_R8), allocatable :: FdstArray(:), FdstArrayX(:)
-    real(ESMF_KIND_R8), pointer :: FdstArrayPtr(:)
+    real(ESMF_KIND_R8), pointer :: FdstArrayPtr(:), farrayPtr(:)
 
     type(ESMF_DistGrid) :: src_distgrid, dst_distgrid
     type(ESMF_ArraySpec):: src_arrayspec, dst_arrayspec
@@ -263,6 +263,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
+    ! initialize the array..
+    call ESMF_ArrayGet(dstArray, farrayPtr=farrayPtr, rc=rc)
+    farrayPtr = UNINITVAL
 
     ! Scatter the ESMF Arrays
     call ESMF_ArrayScatter(srcArray, farray=FsrcArray, rootPet=0, rc=status)
@@ -488,6 +491,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       deallocate(src_area)
       deallocate(src_frac)
       deallocate(dst_area)
+      deallocate(dst_frac)
       deallocate(FsrcArray)
       deallocate(FdstArray)
       deallocate(FdstArrayX)
