@@ -578,10 +578,10 @@ program ESMF_PIOUTest
       iodesc  = pio_iodesc1,  &
       array   = test_data,  &
       iostat  = pioerr)
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, pioerr == 0)
 #else
   rc = ESMF_SUCCESS
 #endif
-  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, pioerr == 0)
   write(failMsg, *) "PIO write failure"
   write(name, *) "Write data to PIO file"
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

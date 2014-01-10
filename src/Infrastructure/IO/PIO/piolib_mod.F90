@@ -2198,6 +2198,7 @@ contains
         call mpi_comm_free(iosystem%io_comm,ierr)
         !print *,'IAM: ',iosystem%comp_rank, ' finalize (2) error = ', ierr
      endif
+     if (associated (iosystem%ioranks)) deallocate (iosystem%ioranks)
 #endif
      ierr = 0
 
