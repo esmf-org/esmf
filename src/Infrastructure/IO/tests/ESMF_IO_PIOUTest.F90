@@ -62,11 +62,11 @@ program ESMF_PIOUTest
   integer :: iotype
   integer :: pioerr
 
-  character(*), parameter :: fname = 'pio_file1f.dat'
+  character(32) :: fname
   integer(4) :: pio_dims(1)
   integer, parameter :: dim_x=10
   integer :: dimid_x
-  real(8), dimension(dim_x) :: test_data, read_data
+  real(ESMF_KIND_R8), dimension(dim_x) :: test_data, read_data
 
 #if defined (ESMF_PIO)
   integer (kind=pio_offset) :: compdof(dim_x) ! global degrees of freedom for computational decomposition
@@ -184,6 +184,7 @@ program ESMF_PIOUTest
 #if defined (ESMF_PIO)
   iotype = PIO_iotype_netcdf
 #endif
+  fname = 'pio_file1f_netcdf.dat'
 
 !------------------------------------------------------------------------
   !NEX_UTest
@@ -194,7 +195,7 @@ program ESMF_PIOUTest
       iosystem = pio_ios,  &
       file     = pio_file1,  &
       iotype   = iotype,  &
-      fname    = fname//'_netcdf')
+      fname    = fname)
   rc = merge (ESMF_SUCCESS, ESMF_FAILURE, pioerr == 0)
 #else
   rc = ESMF_SUCCESS
@@ -341,7 +342,7 @@ program ESMF_PIOUTest
       iosystem = pio_ios,  &
       file     = pio_file1,  &
       iotype   = iotype,  &
-      fname    = fname//'_netcdf',  &
+      fname    = fname,  &
       mode     = 0)
   rc = merge (ESMF_SUCCESS, ESMF_FAILURE, pioerr == 0)
 #else
@@ -453,6 +454,7 @@ program ESMF_PIOUTest
 #if defined (ESMF_PIO)
   iotype = PIO_iotype_pnetcdf
 #endif
+  fname = 'pio_file1f_pnetcdf.dat'
 
 !------------------------------------------------------------------------
   !NEX_UTest
@@ -463,7 +465,7 @@ program ESMF_PIOUTest
       iosystem = pio_ios,  &
       file     = pio_file1,  &
       iotype   = iotype,  &
-      fname    = fname//'_pnetcdf')
+      fname    = fname)
   rc = merge (ESMF_SUCCESS, ESMF_FAILURE, pioerr == 0)
 #else
   rc = ESMF_SUCCESS
@@ -610,7 +612,7 @@ program ESMF_PIOUTest
       iosystem = pio_ios,  &
       file     = pio_file1,  &
       iotype   = iotype,  &
-      fname    = fname//'_pnetcdf',  &
+      fname    = fname,  &
       mode     = 0)
   rc = merge (ESMF_SUCCESS, ESMF_FAILURE, pioerr == 0)
 #else
