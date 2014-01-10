@@ -30,8 +30,5 @@ CLEANFILES  = $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 
-RUN_ShareMeshAsItShouldBe:
-	$(MAKE) TNAME=ShareMesh NP=6 stest
-
 RUN_ShareMesh:
-	$(MAKE) TNAME=ShareMesh NP=4 stest
+	$(MAKE) TNAME=ShareMesh NP=6 stest

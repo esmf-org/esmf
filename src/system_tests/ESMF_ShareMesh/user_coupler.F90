@@ -266,7 +266,6 @@ module user_coupler
     ! Now that dstDistGrid is reconciled, it can be used without the need
     ! for passing in the dstVM argument. The resulting dstMesh will function
     ! correctly in the CplComp context, as well as the Comp2 context.
-!!TODO: This call fails when either srcMesh or dstDistGrid contains proxies!!!
     dstMesh = ESMF_MeshCreate(srcMesh, elementDistgrid=dstDistGrid, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
