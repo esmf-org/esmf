@@ -316,7 +316,7 @@ int main(void){
   strcpy(name, "Free PIO NETCDF decomposition");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-//  pio_cpp_freedecomp_ios (&pio_file1, iodesc1);
+  pio_cpp_freedecomp_ios (&iosys_handle, &iodesc1);
   rc = ESMF_SUCCESS;
 #else
   rc = ESMF_SUCCESS;
@@ -543,7 +543,7 @@ int main(void){
   strcpy(name, "Free PIO PNETCDF decomposition");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_PNETCDF)
-//  pio_cpp_freedecomp_ios (&pio_file1, iodesc1);
+  pio_cpp_freedecomp_ios (&iosys_handle, iodesc1);
   rc = ESMF_SUCCESS;
 #else
   rc = ESMF_SUCCESS;
