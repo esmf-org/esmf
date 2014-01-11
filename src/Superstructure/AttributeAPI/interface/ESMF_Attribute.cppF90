@@ -867,7 +867,7 @@ contains
 !     <object>, see below for supported values
 !     character (len = *), intent(in)              :: specList(:)
 !     character (len = *), intent(in)              :: attrList(:)
-!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+!type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     integer,             intent(in),    optional :: count
 !     type(ESMF_AttPack),  intent(inout), optional :: attpack
 !     integer,             intent(out),   optional :: rc
