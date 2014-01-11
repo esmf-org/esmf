@@ -299,7 +299,7 @@ use File::Find;
                 # Write test results to be read by regression tests scripts.
                 $results_file="$EX_DIR/examples_ml_results";
                 open(MYHANDLE, ">$results_file");
-                print MYHANDLE "PASS $leak_count FAIL $no_leak_count \n";
+                print MYHANDLE "PASS $no_leak_count FAIL $leak_count \n";
 			
 	}
 }
