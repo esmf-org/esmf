@@ -56,6 +56,7 @@ int main(void){
   pio_io_desc_t iodesc1[PIO_SIZE_IO_DESC];
   pio_var_desc_t pio_vardesc1[PIO_SIZE_VAR_DESC];
   pio_dof_t compdof[DIM_X];
+  int amode_in;
 #endif
 
   //----------------------------------------------------------------------------
@@ -125,7 +126,7 @@ int main(void){
   strcpy(name, "Create PIO NETCDF file");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined (ESMF_PIO) && defined (ESMF_NETCDF)
-  int amode_in=PIO_CLOBBER;
+  amode_in=PIO_CLOBBER;
   pioerr = pio_cpp_createfile(&iosys_handle, &pio_file1, iotype,
            fname.c_str(), amode_in);
   rc = (pioerr == 0) ? ESMF_SUCCESS : ESMF_FAILURE;
