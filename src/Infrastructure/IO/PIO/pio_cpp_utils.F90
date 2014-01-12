@@ -204,7 +204,7 @@ subroutine get_pio_iosys_handle(iosystem_handle, iosystem)
   type(iosystem_desc_t), pointer :: iosystem
 
   ! local
-  logical :: found_handle = .false.
+  logical :: found_handle
   type(PIO_C_HANDLE_NODE), pointer :: pio_handle_node
   integer :: num_handles
   integer :: handle0
@@ -212,6 +212,7 @@ subroutine get_pio_iosys_handle(iosystem_handle, iosystem)
   continue
   ! Search for a structure with the correct handle number
   pio_handle_node => PIO_Intracom_handles
+  found_handle = .false.
   do while (associated(pio_handle_node))
     num_handles = size(pio_handle_node%PIO_descriptors, 1)
     handle0 = pio_handle_node%c_handle_start
@@ -243,7 +244,7 @@ subroutine delete_pio_iosys_handle(iosystem_handle)
 
   !  dummy arguments
   integer, intent(in) :: iosystem_handle
-  logical :: found_handle = .false.
+  logical :: found_handle
 
   ! local
   type(PIO_C_HANDLE_NODE), pointer :: pio_handle_node
@@ -255,6 +256,7 @@ subroutine delete_pio_iosys_handle(iosystem_handle)
   nullify(prev_handle_node)
   ! Search for a structure with the correct handle number
   pio_handle_node => PIO_Intracom_handles
+  found_handle = .false.
   do while (associated(pio_handle_node))
     num_handles = size(pio_handle_node%PIO_descriptors, 1)
     handle0 = pio_handle_node%c_handle_start
