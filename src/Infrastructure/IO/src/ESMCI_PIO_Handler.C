@@ -621,7 +621,7 @@ void PIO_Handler::arrayRead(
     ESMC_LogDefault.Write("file not open", ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
   }
   if (statusOK) {
-    vardesc = (pio_var_desc_t)malloc(PIO_SIZE_VAR_DESC);
+    vardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
     if ((pio_var_desc_t)NULL == vardesc) {
       ESMC_LogDefault.Write(" failed to allocate pio variable desc",
                             ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
@@ -806,7 +806,7 @@ void PIO_Handler::arrayWrite(
     ESMC_LogDefault.Write("file not open", ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
   }
   if (statusOK) {
-    vardesc = (pio_var_desc_t)malloc(PIO_SIZE_VAR_DESC);
+    vardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
     if ((pio_var_desc_t)NULL == vardesc) {
       ESMC_LogDefault.Write(" failed to allocate pio variable desc",
                             ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
@@ -1186,7 +1186,7 @@ void PIO_Handler::open(
 
   // Allocate a file descriptor
   try {
-    pioFileDesc = (pio_file_desc_t)malloc(PIO_SIZE_FILE_DESC);
+    pioFileDesc = (pio_file_desc_t)calloc(PIO_SIZE_FILE_DESC, 1);
     PRINTMSG(" allocated pio file desc, addr = " << (void *)pioFileDesc);
     if ((pio_file_desc_t)NULL == pioFileDesc) {
       ESMC_LogDefault.AllocError(ESMC_CONTEXT, rc);
@@ -1772,7 +1772,7 @@ int PIO_IODescHandler::constructPioDecomp(
       ESMC_LogDefault.AllocError(ESMC_CONTEXT, &localrc);
       return ESMF_RC_MEM_ALLOCATE;
     }
-    handle->io_descriptor = (pio_io_desc_t)malloc(PIO_SIZE_IO_DESC);
+    handle->io_descriptor = (pio_io_desc_t)calloc(PIO_SIZE_IO_DESC, 1);
     if ((pio_io_desc_t)NULL == handle->io_descriptor) {
       // Free the DofList!
       free(pioDofList);
