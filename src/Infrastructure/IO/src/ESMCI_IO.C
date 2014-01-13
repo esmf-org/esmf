@@ -701,6 +701,7 @@ int IO::addArray(
     localrc = ESMC_RC_PTR_NULL;
     ESMC_LogDefault.Write("Array argument cannot be NULL",
                           ESMC_LOGMSG_ERROR, ESMC_CONTEXT);
+    return localrc;
   } else {
     if ((NULL != variableName) &&
         (strlen(variableName) > ESMF_MAXSTR)) {
