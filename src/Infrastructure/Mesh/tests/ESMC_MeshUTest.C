@@ -186,6 +186,7 @@ int main(void){
   for (int i=0; i< num_nodes; i++) {
     printf("%.1lf %.1lf\n", coords[i*2], coords[i*2+1]);
   }
+  free(coords);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
