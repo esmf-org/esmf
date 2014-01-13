@@ -615,9 +615,6 @@ program ESMF_FieldIOUTest
 
 10 continue
 
-  if (associated (Farray_sw)) deallocate (Farray_sw)
-  if (associated (Farray_tr)) deallocate (Farray_tr)
-
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
   !-----------------------------------------------------------------------------
