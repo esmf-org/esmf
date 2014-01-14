@@ -135,6 +135,7 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! set IPDv00 as the default
     initPhases(1) = "IPDv00p1=1"
     initPhases(2) = "IPDv00p2=2"
     initPhases(3) = "IPDv00p3=3"
