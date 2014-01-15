@@ -961,7 +961,7 @@ namespace ESMCI {
       ua_loc = *unmappedAction;
       ua_present = 1;
 
-    ESMC_PoleMethod_Flag pm_loc = ESMF_POLEMETHOD_NONE;
+    ESMC_PoleMethod_Flag pm_loc = ESMC_POLEMETHOD_NONE;
     if (polemethod != NULL){
       pm_loc = *polemethod;
       pm_present = 1;
