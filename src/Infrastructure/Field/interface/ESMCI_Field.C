@@ -957,9 +957,10 @@ namespace ESMCI {
     }
 
     ESMC_UnmappedAction_Flag ua_loc = ESMC_UNMAPPEDACTION_ERROR;
-    if (unmappedAction != NULL)
+    if (unmappedAction != NULL){
       ua_loc = *unmappedAction;
       ua_present = 1;
+    }
 
     ESMC_PoleMethod_Flag pm_loc = ESMC_POLEMETHOD_NONE;
     if (polemethod != NULL){
