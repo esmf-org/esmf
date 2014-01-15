@@ -156,10 +156,18 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   int num_node_owned_out;
   rc = ESMC_MeshGetOwnedNodeCount(mesh, &num_node_owned_out);
-  ESMC_Test((rc==ESMF_SUCCESS) && num_node==num_node_owned_out,
+  ESMC_Test((rc==ESMF_SUCCESS),
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   printf("num_node = %d\nnum_node_owned_out=%d\n", num_node, num_node_owned_out);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "MeshGetOwnedNodeCount_OutputCorrect");
+  strcpy(failMsg, "Returned wrong owned node count");
+  ESMC_Test((num_node==num_node_owned_out), 
+	    name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
   //NEX_UTest
