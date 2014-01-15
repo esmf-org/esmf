@@ -370,6 +370,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              execution. The argument {\tt unmappedDstList} allows the user to 
 !              get a list of the destination items which the regridding couldn't 
 !              map to a source. 
+! \item[6.3.0r] Added argument {\tt lineType}. This argument allows the user to 
+!               control the path of the line between two points on a sphere surface. 
+!               This allows the user to use their preferred line path for the calculation
+!               of distances and the shape of cells during regrid weight calculation on 
+!               a sphere.
 ! \end{description}
 ! \end{itemize}
 !

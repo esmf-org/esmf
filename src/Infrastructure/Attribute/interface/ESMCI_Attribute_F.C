@@ -2198,11 +2198,8 @@ extern "C" {
   int status;
   ESMCI::Attribute *attr;
 
-printf("00000000000000\n");
-
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
-printf("11111111111111111\n");
 
   if (!base) {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -2210,7 +2207,6 @@ printf("11111111111111111\n");
     if (rc) *rc = status;    
     return;
   }
-printf("2222222222222222\n");
 
   if (!tk) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,

@@ -104,7 +104,6 @@ program ESMF_FieldIOUTest
 !  allocate(Farray_w(5,10))  ! it is done automatically with halo
 !  allocate(Farray_tw(5,10)) ! it is done automatically with halo
   allocate(Farray_sw(5,10))  ! do it by hand for without halo case
-  allocate(Farray_tr(5,10))
 
   allocate(exclusiveLBound(2))         ! dimCount=2
   allocate(exclusiveUBound(2))         ! dimCount=2
@@ -603,6 +602,8 @@ program ESMF_FieldIOUTest
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(field_t, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_FieldDestroy(field_tr, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(field_w_nohalo, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(field_w, rc=rc)
@@ -614,9 +615,6 @@ program ESMF_FieldIOUTest
 !-------------------------------------------------------------------------------
 
 10 continue
-
-  if (associated (Farray_sw)) deallocate (Farray_sw)
-  if (associated (Farray_tr)) deallocate (Farray_tr)
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally

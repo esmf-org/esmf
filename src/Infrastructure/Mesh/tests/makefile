@@ -72,7 +72,7 @@ RUN_ESMC_MeshVTKUTest:
 
 RUN_ESMC_MeshUTest:
 	cp -r data $(ESMF_TESTDIR)
-	$(MAKE) TNAME=Mesh NP=4 ctest
+	$(MAKE) TNAME=Mesh NP=1 ctest
 
 RUN_ESMC_MeshUTestUNI:
 	cp -r data $(ESMF_TESTDIR)
