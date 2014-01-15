@@ -360,7 +360,8 @@
 ! Create an XGrid based on the user supplied regridding parameters:
 !EOE
 !BOC
-    xgrid = ESMF_XGridCreateFromSparseMat(sideAGrid=sideA, sideBGrid=sideB, area=xgrid_area, &
+    xgrid = ESMF_XGridCreateFromSparseMat(sideAGrid=sideA, &
+	sideBGrid=sideB, area=xgrid_area, &
         centroid=centroid, sparseMatA2X=sparseMatA2X, &
         sparseMatX2B=sparseMatX2B, rc=localrc)
 !EOC
