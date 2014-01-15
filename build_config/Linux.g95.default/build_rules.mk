@@ -225,6 +225,13 @@ ESMF_F90LINKLIBS += -lrt -lstdc++ -ldl
 ESMF_CXXLINKLIBS += -lrt $(shell $(ESMF_F90COMPILER) -print-file-name=libf95.a) -ldl
 
 ############################################################
+# Linker option that ensures that the specified libraries are 
+# used to also resolve symbols needed by other libraries.
+#
+ESMF_F90LINKOPTS          += -Wl,--no-as-needed
+ESMF_CXXLINKOPTS          += -Wl,--no-as-needed
+
+############################################################
 # Shared library options
 #
 ESMF_SL_LIBOPTS  += -shared

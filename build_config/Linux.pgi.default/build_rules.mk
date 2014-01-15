@@ -232,6 +232,13 @@ ESMF_CXXLINKLIBS += -pgf90libs -ldl
 endif
 
 ############################################################
+# Linker option that ensures that the specified libraries are 
+# used to also resolve symbols needed by other libraries.
+#
+ESMF_F90LINKOPTS          += -Wl,--no-as-needed
+ESMF_CXXLINKOPTS          += -Wl,--no-as-needed
+
+############################################################
 # Shared library options
 #
 ESMF_SL_LIBOPTS  += -shared
@@ -245,8 +252,3 @@ ESMF_SO_F90LINKOPTSEXE  = -Wl,-export-dynamic
 ESMF_SO_CXXCOMPILEOPTS  = -fpic
 ESMF_SO_CXXLINKOPTS     = -shared
 ESMF_SO_CXXLINKOPTSEXE  = -Wl,-export-dynamic
-
-############################################################
-# 3rd party code dependency: PIO
-#
-#TODO: activate this once PIO support is stable: ESMF_PIODEFAULT = internal

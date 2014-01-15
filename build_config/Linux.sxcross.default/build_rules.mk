@@ -102,6 +102,13 @@ ESMF_F90LINKLIBS += -lC++_eh -lcpp
 ESMF_CXXLINKLIBS += -lf90sxe -lm90sxe -li90sx -lC++_eh -lm
 
 ############################################################
+# Linker option that ensures that the specified libraries are 
+# used to also resolve symbols needed by other libraries.
+#
+ESMF_F90LINKOPTS          += -Wl,--no-as-needed
+ESMF_CXXLINKOPTS          += -Wl,--no-as-needed
+
+############################################################
 # Blank out shared library options
 #
 ESMF_SL_LIBS_TO_MAKE  =
