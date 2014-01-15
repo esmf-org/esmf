@@ -1590,7 +1590,6 @@ end subroutine ESMF_LogInitialize
     ! open the file, with retries
     do i=1, ESMF_LOG_MAXTRYOPEN
 #if !defined (ESMF_OS_MinGW)
-print *, ESMF_METHOD, ': Opening log file: ', trim (alog%nameLogErrFile)
         OPEN(UNIT=alog%unitNumber,File=alog%nameLogErrFile,& 
              POSITION="APPEND", ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=iostat)
 #else
