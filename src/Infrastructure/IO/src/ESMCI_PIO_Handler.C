@@ -1634,6 +1634,7 @@ PIO_IODescHandler::~PIO_IODescHandler (
 //EOPI
 //-----------------------------------------------------------------------------
   pio_cpp_freedecomp_ios(&ios, io_descriptor);
+  free(io_descriptor);
   io_descriptor = (pio_io_desc_t)NULL;
   if (dims != (int *)NULL) {
     delete[] dims;
