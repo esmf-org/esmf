@@ -313,7 +313,7 @@ int ESMC_GridGetCoordBounds(ESMC_Grid grid,
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
-  return *rc;
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
