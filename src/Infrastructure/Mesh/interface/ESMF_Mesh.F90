@@ -2550,7 +2550,6 @@ end function ESMF_MeshCreateFromUnstruct
 !------------------------------------------------------------------------------
 #endif
 
-#if 1
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateFromUnstruct()"
@@ -3280,7 +3279,6 @@ end function ESMF_MeshCreateFromUnstruct
     return
 end function ESMF_MeshCreateFromUnstruct
 !------------------------------------------------------------------------------
-#endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
