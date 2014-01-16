@@ -60,7 +60,7 @@ extern "C" {
       if (opt_vm == NULL)
         actualFlag = false; // not an actual member because VM present but NULL
     }
-#if 1
+#if 0
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER)
       printf("VM NOT PRESENT: opt_vm=%p, actualFlag=%d\n", opt_vm, actualFlag);
     else
@@ -96,7 +96,7 @@ extern "C" {
       if (opt_vm == NULL)
         actualFlag = false; // not an actual member because VM present but NULL
     }
-#if 1
+#if 0
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER)
       printf("VM NOT PRESENT: opt_vm=%p, actualFlag=%d\n", opt_vm, actualFlag);
     else
