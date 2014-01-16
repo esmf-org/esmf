@@ -112,8 +112,8 @@ module ESMF_MeshMod
 !!!!
 
   integer, parameter :: &
-        ESMF_MESHELEMTYPE_TRI    = 5,  &  ! Triangle
-        ESMF_MESHELEMTYPE_QUAD   = 9,  &  ! Quadralateral
+        ESMF_MESHELEMTYPE_TRI    = 3,  &  ! Triangle
+        ESMF_MESHELEMTYPE_QUAD   = 4,  &  ! Quadralateral
         ESMF_MESHELEMTYPE_TETRA  = 10, &  ! Tetrahedron
         ESMF_MESHELEMTYPE_HEX    = 12     ! Hexahedron
 
