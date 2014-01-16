@@ -225,7 +225,7 @@ module NUOPC_Connector
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: consumerConnection
     character(ESMF_MAXSTR)          :: name
-    character(ESMF_MAXSTR)          :: iSyncOffer, eSyncOffer
+    character(ESMF_MAXSTR)          :: iTransferOffer, eTransferOffer
 
     rc = ESMF_SUCCESS
 
@@ -351,101 +351,101 @@ module NUOPC_Connector
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
-        ! coordinate the synchronization of geomobjects between components
-        call NUOPC_FieldAttributeGet(iField, name="SyncOfferGeomObject", &
-          value=iSyncOffer, rc=rc)
+        ! coordinate the transfer of geomobjects between components
+        call NUOPC_FieldAttributeGet(iField, name="TransferOfferGeomObject", &
+          value=iTransferOffer, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call NUOPC_FieldAttributeGet(eField, name="SyncOfferGeomObject", &
-          value=eSyncOffer, rc=rc)
+        call NUOPC_FieldAttributeGet(eField, name="TransferOfferGeomObject", &
+          value=eTransferOffer, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        if (trim(iSyncOffer)=="will provide") then
-          if (trim(eSyncOffer)=="will provide") then
+        if (trim(iTransferOffer)=="will provide") then
+          if (trim(eTransferOffer)=="will provide") then
             ! -> both sides must provide
             call NUOPC_FieldAttributeSet(iField, &
-              name="SyncActionGeomObject", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_FieldAttributeSet(eField, &
-              name="SyncActionGeomObject", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          elseif (trim(eSyncOffer)=="can provide") then
+          elseif (trim(eTransferOffer)=="can provide") then
             ! -> import side must provide, export side must accept
             call NUOPC_FieldAttributeSet(iField, &
-              name="SyncActionGeomObject", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_FieldAttributeSet(eField, &
-              name="SyncActionGeomObject", value="accept", rc=rc)
+              name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          else  ! eSyncOffer=="cannot provide"
+          else  ! eTransferOffer=="cannot provide"
             ! -> import side must provide, export side must accept
             call NUOPC_FieldAttributeSet(iField, &
-              name="SyncActionGeomObject", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_FieldAttributeSet(eField, &
-              name="SyncActionGeomObject", value="accept", rc=rc)
+              name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
-        elseif (trim(iSyncOffer)=="can provide") then
-          if (trim(eSyncOffer)=="will provide") then
+        elseif (trim(iTransferOffer)=="can provide") then
+          if (trim(eTransferOffer)=="will provide") then
             ! -> import side must accept, export side must provide
             call NUOPC_FieldAttributeSet(iField, &
-              name="SyncActionGeomObject", value="accept", rc=rc)
+              name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_FieldAttributeSet(eField, &
-              name="SyncActionGeomObject", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          elseif (trim(eSyncOffer)=="can provide") then
+          elseif (trim(eTransferOffer)=="can provide") then
             ! -> import side must provide, export side must accept
             call NUOPC_FieldAttributeSet(iField, &
-              name="SyncActionGeomObject", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_FieldAttributeSet(eField, &
-              name="SyncActionGeomObject", value="accept", rc=rc)
+              name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          else  ! eSyncOffer=="cannot provide"
+          else  ! eTransferOffer=="cannot provide"
             ! -> import side must provide, export side must accept
             call NUOPC_FieldAttributeSet(iField, &
-              name="SyncActionGeomObject", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_FieldAttributeSet(eField, &
-              name="SyncActionGeomObject", value="accept", rc=rc)
+              name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
-        else  ! iSyncOffer=="cannot provide"
-          if (trim(eSyncOffer)=="will provide") then
+        else  ! iTransferOffer=="cannot provide"
+          if (trim(eTransferOffer)=="will provide") then
             ! -> import side must accept, export side must provide
             call NUOPC_FieldAttributeSet(iField, &
-              name="SyncActionGeomObject", value="accept", rc=rc)
+              name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_FieldAttributeSet(eField, &
-              name="SyncActionGeomObject", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          elseif (trim(eSyncOffer)=="can provide") then
+          elseif (trim(eTransferOffer)=="can provide") then
             ! -> import side must accept, export side must provide
             call NUOPC_FieldAttributeSet(iField, &
-              name="SyncActionGeomObject", value="accept", rc=rc)
+              name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_FieldAttributeSet(eField, &
-              name="SyncActionGeomObject", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          else  ! eSyncOffer=="cannot provide"
+          else  ! eTransferOffer=="cannot provide"
             ! -> neither side is able to provide -> error
             call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
               msg="Neither side (import/export) able to provide geom object.", &
@@ -505,7 +505,7 @@ module NUOPC_Connector
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: consumerConnection
     character(ESMF_MAXSTR)          :: name, valueString
-    character(ESMF_MAXSTR)          :: iSyncAction, eSyncAction
+    character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     logical                         :: verbose
 
     rc = ESMF_SUCCESS
@@ -628,22 +628,22 @@ module NUOPC_Connector
         iField=importFieldList(iMatch)
         eField=exportFieldList(eMatch)
         
-        ! check if SyncAction of one side is "accept"
-        call NUOPC_FieldAttributeGet(iField, name="SyncActionGeomObject", &
-          value=iSyncAction, rc=rc)
+        ! check if TransferAction of one side is "accept"
+        call NUOPC_FieldAttributeGet(iField, name="TransferActionGeomObject", &
+          value=iTransferAction, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call NUOPC_FieldAttributeGet(eField, name="SyncActionGeomObject", &
-          value=eSyncAction, rc=rc)
+        call NUOPC_FieldAttributeGet(eField, name="TransferActionGeomObject", &
+          value=eTransferAction, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           
-        if ((trim(iSyncAction)=="provide") &
-          .and.(trim(eSyncAction)=="accept")) then
+        if ((trim(iTransferAction)=="provide") &
+          .and.(trim(eTransferAction)=="accept")) then
           providerField = iField
           acceptorField = eField
-        elseif ((trim(eSyncAction)=="provide") &
-          .and.(trim(iSyncAction)=="accept")) then
+        elseif ((trim(eTransferAction)=="provide") &
+          .and.(trim(iTransferAction)=="accept")) then
           providerField = eField
           acceptorField = iField
         else  ! not a situation that needs handling here
@@ -756,7 +756,7 @@ module NUOPC_Connector
     logical                         :: existflag
     character(ESMF_MAXSTR)          :: consumerConnection
     character(ESMF_MAXSTR)          :: name, valueString
-    character(ESMF_MAXSTR)          :: iSyncAction, eSyncAction
+    character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     logical                         :: verbose
 
     rc = ESMF_SUCCESS
@@ -879,22 +879,22 @@ module NUOPC_Connector
         iField=importFieldList(iMatch)
         eField=exportFieldList(eMatch)
 
-        ! check if SyncAction of one side is "accept"
-        call NUOPC_FieldAttributeGet(iField, name="SyncActionGeomObject", &
-          value=iSyncAction, rc=rc)
+        ! check if TransferAction of one side is "accept"
+        call NUOPC_FieldAttributeGet(iField, name="TransferActionGeomObject", &
+          value=iTransferAction, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call NUOPC_FieldAttributeGet(eField, name="SyncActionGeomObject", &
-          value=eSyncAction, rc=rc)
+        call NUOPC_FieldAttributeGet(eField, name="TransferActionGeomObject", &
+          value=eTransferAction, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           
-        if ((trim(iSyncAction)=="provide") &
-          .and.(trim(eSyncAction)=="accept")) then
+        if ((trim(iTransferAction)=="provide") &
+          .and.(trim(eTransferAction)=="accept")) then
           providerField = iField
           acceptorField = eField
-        elseif ((trim(eSyncAction)=="provide") &
-          .and.(trim(iSyncAction)=="accept")) then
+        elseif ((trim(eTransferAction)=="provide") &
+          .and.(trim(iTransferAction)=="accept")) then
           providerField = eField
           acceptorField = iField
         else  ! not a situation that needs handling here
