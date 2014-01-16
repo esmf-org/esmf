@@ -2284,10 +2284,10 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *
           double *area=area_field->data(elem);
       
           // Get original id
-          int orig_id=mesh.split_to_orig_id.at(eid);
+          int orig_id=mesh.split_to_orig_id[eid];
 
           // Get index
-          int index=id_to_index.at(orig_id);
+          int index=id_to_index[orig_id];
 
           // Add area to what's already there
           elem_areas[index] += *area;
@@ -2404,10 +2404,10 @@ extern "C" void FTN_X(c_esmc_meshgetarea)(Mesh **meshpp, int *num_elem, double *
         }
 
         // Get original id
-        int orig_id=mesh.split_to_orig_id.at(eid);
+        int orig_id=mesh.split_to_orig_id[eid];
         
         // Get index
-        int index=id_to_index.at(orig_id);
+        int index=id_to_index[orig_id];
         
         // Add area to what's already there
         elem_areas[index] += area;
@@ -2747,7 +2747,7 @@ extern "C" void FTN_X(c_esmc_meshgetfrac)(Mesh **meshpp, int *_num_elem, double 
         
         // Not part of something larger, so just stick in array
         if (mi == mesh.split_id_to_frac.end()) {
-          int index=id_to_index.at(eid);
+          int index=id_to_index[eid];
           elem_fracs[index] = frac;
         } 
         
@@ -2765,7 +2765,7 @@ extern "C" void FTN_X(c_esmc_meshgetfrac)(Mesh **meshpp, int *_num_elem, double 
         }
         
         // Get index
-        int index=id_to_index.at(orig_id);
+        int index=id_to_index[orig_id];
         
         // Add modified frac to what's already there
         elem_fracs[index] += frac;
