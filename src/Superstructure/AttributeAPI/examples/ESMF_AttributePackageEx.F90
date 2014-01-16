@@ -303,7 +303,8 @@ program ESMF_AttributePackageEx
       ! Custom Attributes
 
       ! retrieve Attribute package
-      call ESMF_AttributeGetAttPack(DPEDT, convCC, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(DPEDT, convCC, purpGen, &
+        attpack=attpack, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -322,7 +323,8 @@ program ESMF_AttributePackageEx
       ! ESMF Attributes
 
       ! retrieve Attribute package
-      call ESMF_AttributeGetAttPack(DPEDT, convESMF, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(DPEDT, convESMF, purpGen, &
+        attpack=attpack, rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -352,7 +354,8 @@ program ESMF_AttributePackageEx
       value4 = 'Pa K s-1'
       ! Custom Attributes
       ! retrieve Attribute package
-      call ESMF_AttributeGetAttPack(DTDT, convCC, purpGen, attpack=attpack, rc=rc)
+      call ESMF_AttributeGetAttPack(DTDT, convCC, purpGen, &
+         attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(DTDT, name='Coordinates', value='latlon', &
         convention=convCC, purpose=purpGen, rc=rc)

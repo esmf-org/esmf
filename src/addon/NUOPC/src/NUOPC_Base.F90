@@ -614,9 +614,9 @@ module NUOPC_Base
     attrList(3) = "ProducerConnection"! values: "open", "targeted", "connected"
     attrList(4) = "ConsumerConnection"! values: "open", "targeted", "connected"
     attrList(5) = "Updated" ! values: "true" or "false"
-    attrList(6) = "SyncOfferGeomObject" ! values: 
-                                !"cannot provide", "can provide", "will provide"
-    attrList(7) = "SyncActionGeomObject" ! values: "provide", "accept"
+    attrList(6) = "TransferOfferGeomObject" ! values: "cannot provide",
+                                            !   "can provide", "will provide"
+    attrList(7) = "TransferActionGeomObject" ! values: "provide", "accept"
     
     ! add Attribute packages
     call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=rc)
@@ -768,17 +768,17 @@ module NUOPC_Base
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 
-    ! set SyncOfferGeomObject
+    ! set TransferOfferGeomObject
     call ESMF_AttributeSet(field, &
-      name="SyncOfferGeomObject", value="will provide", &
+      name="TransferOfferGeomObject", value="will provide", &
       convention="NUOPC", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 
-    ! set SyncActionGeomObject
+    ! set TransferActionGeomObject
     call ESMF_AttributeSet(field, &
-      name="SyncActionGeomObject", value="provide", &
+      name="TransferActionGeomObject", value="provide", &
       convention="NUOPC", purpose="General", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1717,7 +1717,7 @@ endif
 ! !IROUTINE: NUOPC_StateAdvertiseField - Advertise a Field in a State
 ! !INTERFACE:
   subroutine NUOPC_StateAdvertiseField(state, StandardName, Units, &
-    LongName, ShortName, name, SyncOfferGeomObject, rc)
+    LongName, ShortName, name, TransferOfferGeomObject, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
     character(*),     intent(in)            :: StandardName
@@ -1725,7 +1725,7 @@ endif
     character(*),     intent(in),  optional :: LongName
     character(*),     intent(in),  optional :: ShortName
     character(*),     intent(in),  optional :: name
-    character(*),     intent(in),  optional :: SyncOfferGeomObject
+    character(*),     intent(in),  optional :: TransferOfferGeomObject
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Advertises a Field in a State. This call checks the provided
@@ -1759,8 +1759,8 @@ endif
 !     The actual name of the advertised Field by which it is accessed in the
 !     State object. NUOPC does not restrict the value of this variable.
 !     If omitted, the default is to use the value of the ShortName.
-!   \item[{[SyncOfferGeomObject]}]
-!     The synchronization offer for the geom object (Grid, Mesh, LocStream, 
+!   \item[{[TransferOfferGeomObject]}]
+!     The transfer offer for the geom object (Grid, Mesh, LocStream, 
 !     XGrid) associated with the advertised Field. NUOPC controls the vocabulary
 !     of this attribute: "will provide", "can provide", "cannot provide".
 !     If omitted, the default is "will provide".
@@ -1811,23 +1811,23 @@ endif
         file=FILENAME)) &
         return  ! bail out
     endif
-    if (present(SyncOfferGeomObject)) then
-      if (trim(SyncOfferGeomObject)=="will provide") then
-        call NUOPC_FieldAttributeSet(field, name="SyncOfferGeomObject", &
+    if (present(TransferOfferGeomObject)) then
+      if (trim(TransferOfferGeomObject)=="will provide") then
+        call NUOPC_FieldAttributeSet(field, name="TransferOfferGeomObject", &
           value="will provide", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
-      elseif (trim(SyncOfferGeomObject)=="can provide") then
-        call NUOPC_FieldAttributeSet(field, name="SyncOfferGeomObject", &
+      elseif (trim(TransferOfferGeomObject)=="can provide") then
+        call NUOPC_FieldAttributeSet(field, name="TransferOfferGeomObject", &
           value="can provide", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
-      elseif (trim(SyncOfferGeomObject)=="cannot provide") then
-        call NUOPC_FieldAttributeSet(field, name="SyncOfferGeomObject", &
+      elseif (trim(TransferOfferGeomObject)=="cannot provide") then
+        call NUOPC_FieldAttributeSet(field, name="TransferOfferGeomObject", &
           value="cannot provide", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
@@ -1835,7 +1835,7 @@ endif
           return  ! bail out
       else
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="must provoide a valid string for SyncOfferGeomObject", &
+          msg="must provoide a valid string for TransferOfferGeomObject", &
           line=__LINE__, &
           file=FILENAME, &
           rcToReturn=rc)

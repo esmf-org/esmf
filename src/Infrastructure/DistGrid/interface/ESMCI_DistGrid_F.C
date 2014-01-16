@@ -62,7 +62,7 @@ extern "C" {
       if (opt_vm == NULL)
         actualFlag = false; // not an actual member because VM present but NULL
     }
-#if 1
+#if 0
     printf("c_esmc_distgridcreatedg(): opt_vm=%p, actualFlag=%d\n", 
       opt_vm, actualFlag);
 #endif
@@ -106,7 +106,7 @@ extern "C" {
       if (opt_vm == NULL)
         actualFlag = false; // not an actual member because VM present but NULL
     }
-#if 1
+#if 0
     printf("c_esmc_distgridcreaterd(): opt_delayout=%p, opt_vm=%p, "
       "actualFlag=%d\n", opt_delayout, opt_vm, actualFlag);
 #endif

@@ -37,6 +37,6 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 CLEANDIRS   = DELayout_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) $(CLEAN_TEXFILES) \
-              DELayout_refdoc.tex $(PDFFILES)
+              DELayout_refdoc.tex DELayout_crefdoc.tex $(PDFFILES)
 CLOBBERDIRS =
 

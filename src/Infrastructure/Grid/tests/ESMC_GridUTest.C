@@ -46,6 +46,8 @@ int main(void){
   ESMC_InterfaceInt i_maxIndex;
   int p;
   bool pass;
+  int elbnd[dimcount],eubnd[dimcount];
+
 
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
@@ -95,6 +97,18 @@ int main(void){
   strcpy(name, "GridAddCoord");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   rc = ESMC_GridAddCoord(grid_np, ESMC_STAGGERLOC_CORNER);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+
+  //----------------------------------------------------------------------------
+  //EX_UTest
+  strcpy(name, "GridGetCoordBounds");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc=ESMC_GridGetCoordBounds(grid_np, 
+                             ESMC_STAGGERLOC_CORNER, 
+                             elbnd,
+                             eubnd,NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

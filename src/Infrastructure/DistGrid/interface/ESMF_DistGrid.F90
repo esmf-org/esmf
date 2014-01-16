@@ -910,8 +910,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                target, intent(in),  optional :: regDecomp(:)
     type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflag(:)
-    integer,                target, intent(in),  optional :: regDecompFirstExtra(:)
-    integer,                target, intent(in),  optional :: regDecompLastExtra(:)
+    integer,       target, intent(in),  optional :: regDecompFirstExtra(:)
+    integer,       target, intent(in),  optional :: regDecompLastExtra(:)
     integer,                target, intent(in),  optional :: deLabelList(:)
     type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection),  intent(in),  optional :: connectionList(:)
@@ -1594,8 +1594,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                        intent(in),  optional :: regDecompPTile(:,:)
     type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflagPTile(:,:)
-    integer,                target, intent(in),  optional :: regDecompFirstExtraPTile(:,:)
-    integer,                target, intent(in),  optional :: regDecompLastExtraPTile(:,:)
+    integer,               target, intent(in),  optional :: regDecompFirstExtraPTile(:,:)
+    integer,               target, intent(in),  optional :: regDecompLastExtraPTile(:,:)
     integer,                        intent(in),  optional :: deLabelList(:)
     type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection),  intent(in),  optional :: connectionList(:)

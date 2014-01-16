@@ -956,10 +956,13 @@ namespace ESMCI {
       rm_present = 1;
     }
 
-    if (unmappedAction != NULL)
+    ESMC_UnmappedAction_Flag ua_loc = ESMC_UNMAPPEDACTION_ERROR;
+    if (unmappedAction != NULL){
+      ua_loc = *unmappedAction;
       ua_present = 1;
+    }
 
-    ESMC_PoleMethod_Flag pm_loc = ESMF_POLEMETHOD_NONE;
+    ESMC_PoleMethod_Flag pm_loc = ESMC_POLEMETHOD_NONE;
     if (polemethod != NULL){
       pm_loc = *polemethod;
       pm_present = 1;
@@ -978,7 +981,7 @@ namespace ESMCI {
                               &rm_loc, &rm_present,
 			      &pm_loc, &pm_present,
 			      &rpnp_loc, &rpnp_present,
-                              unmappedAction, &ua_present,
+                              &ua_loc, &ua_present,
                               srcFracField, &sff_present,
                               dstFracField, &dff_present, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,

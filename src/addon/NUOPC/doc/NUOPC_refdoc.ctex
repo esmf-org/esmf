@@ -127,6 +127,13 @@
 \input{../addon/NUOPC/doc/NUOPC_DataDepInit}
 #endif
 
+\subsubsection{Transfer of Grid/Mesh Objects between Components}
+#ifdef STANDALONE
+\input{NUOPC_TransferGeom}
+#elif defined(CONSTITUENT)
+\input{../addon/NUOPC/doc/NUOPC_TransferGeom}
+#endif
+
 \newpage
 
 \section{API}

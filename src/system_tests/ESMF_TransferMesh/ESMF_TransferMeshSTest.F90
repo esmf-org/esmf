@@ -7,26 +7,26 @@
 !-------------------------------------------------------------------------
 !
 ! !DESCRIPTION:
-! System test ShareGrid.
+! System test TransferMesh.
 !
 !   Two Gridded Components and one Coupler Component.
 !
-!   The first Gridded Component runs on 4 PETs and defines a 2D source Grid
-!   with 100x150 index space that is added to the component's exportState. The
-!   second Gridded Component only runs on 2 PETs and defines an empty Field 
-!   that is added to its importState.
+!   The first Gridded Component runs on 4 PETs and defines a source Mesh with
+!   a 16 element index. This Mesh is used to build a source Field, and added
+!   to the component's exportState. The second Gridded Component only runs on 2
+!   PETs and defines an empty Field that is added to its importState.
 !
-!   The Coupler Component runs on all 6 PETs and shares the Grid from
+!   The Coupler Component runs on all 6 PETs and transfers the Mesh from
 !   Component 1 with Component 2.
 !
 !   Redist and Regrid operations are performed between the two Gridded
-!   Components to test correct behavior of the shared Mesh information.
+!   Components to test correct behavior of the transferred Mesh.
 !
 !-------------------------------------------------------------------------
 !\begin{verbatim}
 
-program ESMF_ShareGridSTest
-#define ESMF_METHOD "program ESMF_ShareGridSTest"
+program ESMF_TransferMeshSTest
+#define ESMF_METHOD "program ESMF_TransferMeshSTest"
 
 #include "ESMF.h"
 
@@ -60,7 +60,7 @@ program ESMF_ShareGridSTest
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  write(testname, *) "System Test ESMF_ShareGridSTest"
+  write(testname, *) "System Test ESMF_TransferMeshSTest"
   write(failMsg, *) "System Test failure"
 
 !-------------------------------------------------------------------------
@@ -78,7 +78,7 @@ program ESMF_ShareGridSTest
 !
   ! Initialize framework and get back default global VM
   call ESMF_Initialize(vm=vm, &
-    defaultlogfilename="ShareGridSTest.Log", &
+    defaultlogfilename="TransferMeshSTest.Log", &
     logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -446,6 +446,6 @@ program ESMF_ShareGridSTest
 
   call ESMF_Finalize()
 
-end program ESMF_ShareGridSTest
+end program ESMF_TransferMeshSTest
 
 !\end{verbatim}

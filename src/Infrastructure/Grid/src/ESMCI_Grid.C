@@ -342,19 +342,35 @@ int setDefaultsLUA(int dimCount,
 
     // handle the optional arguments
     int ispresent, acspresent, auapresent, ampresent, vnpresent, cnpresent;
-    ispresent = isSphere != NULL;
-    acspresent = addCornerStagger != NULL;
-    auapresent = addUserArea != NULL;
-    ampresent = addMask != NULL;
+    int is_loc = 1;
+    if (isSphere != NULL) {
+      is_loc = *isSphere;
+      ispresent = 1;
+    }
+    int acs_loc = 0;
+    if (addCornerStagger != NULL) {
+      acs_loc = *addCornerStagger;
+      acspresent = 1;
+    }
+    int aua_loc = 0;
+    if (addUserArea != NULL) {
+      aua_loc = *addUserArea;
+      auapresent = 1;
+    }
+    int am_loc = 0;
+    if (addMask != NULL) {
+      am_loc = *addMask;
+      ampresent = 1;
+    }
     vnpresent = strlen(varname) > 0;
     cnpresent = strlen(coordNames) > 0;
 
     // allocate the grid object
     Grid *grid;
     FTN_X(f_esmf_gridcreatefromfile)(&grid, filename, &fileTypeFlag,
-				     isSphere, &ispresent, 
-				     addCornerStagger, &acspresent, addUserArea, &auapresent,
-				     addMask, &ampresent, varname, &vnpresent, 
+				     &is_loc, &ispresent, 
+				     &acs_loc, &acspresent, &aua_loc, &auapresent,
+				     &am_loc, &ampresent, varname, &vnpresent, 
 				     coordNames, &cnpresent, &localrc,
 				     strlen(filename), strlen(varname), strlen(coordNames));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,

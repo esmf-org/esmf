@@ -194,6 +194,13 @@ ESMF_F90LINKLIBS += -lU77 -lrt -lstdc++ -ldl
 ESMF_CXXLINKLIBS += -lU77 -lrt -ldl $(shell $(ESMF_DIR)/scripts/libs.absoft $(ESMF_F90COMPILER) $(ESMF_F90COMPILEOPTS))
 
 ############################################################
+# Linker option that ensures that the specified libraries are 
+# used to also resolve symbols needed by other libraries.
+#
+ESMF_F90LINKOPTS          += -Wl,--no-as-needed
+ESMF_CXXLINKOPTS          += -Wl,--no-as-needed
+
+############################################################
 # Shared library options
 #
 ESMF_SL_LIBOPTS  += -shared
