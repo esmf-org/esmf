@@ -341,7 +341,8 @@ int setDefaultsLUA(int dimCount,
 
 
     // handle the optional arguments
-    int ispresent, acspresent, auapresent, ampresent, vnpresent, cnpresent;
+    int ispresent=0, acspresent=0, auapresent=0;
+    int ampresent=0, vnpresent=0, cnpresent=0;
     int is_loc = 1;
     if (isSphere != NULL) {
       is_loc = *isSphere;
