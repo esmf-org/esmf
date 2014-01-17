@@ -11,6 +11,8 @@ TEST_REGRID_DIR = 'src/ESMF/test/regrid_test/regrid_from_file_test/'
 CONTROL_FNAME = 'regrid_test_data.txt'
 DATA_SUBDIR = os.path.join(TEST_REGRID_DIR,'data/')
 DATA_URL_ROOT = 'http://www.earthsystemmodeling.org/download/data'
+UNINITVAL = 422397696.
+EPSILON = 1E-30
 #
 regrid_method_map = {"bilinear" : ESMF.RegridMethod.BILINEAR,
                      "patch" : ESMF.RegridMethod.PATCH,
