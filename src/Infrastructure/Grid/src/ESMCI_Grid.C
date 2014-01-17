@@ -332,8 +332,8 @@ int setDefaultsLUA(int dimCount,
 //
 //EOP
 
-    //printf ("Start ESMCI_Grid.C : createfromfile(%s,%d,[%d,%d])\n", 
-    //        filename, fileTypeFlag, regDecomp[0], regDecomp[1]);
+    //printf ("Start ESMCI_Grid.C : createfromfile(%s,%d)\n", 
+    //        filename, fileTypeFlag);
 
     // Initialize return code. Assume routine not implemented
     int localrc = ESMC_RC_NOT_IMPL;
@@ -366,9 +366,10 @@ int setDefaultsLUA(int dimCount,
     vnpresent = strlen(varname) > 0;
 
     char *cn_loc[2];
+    int cn_len = 80;
+    cn_loc[0] = (char *) malloc(cn_len);
+    cn_loc[1] = (char *) malloc(cn_len);
     if (strlen(coordNames) > 0) {
-      cn_loc[0] = (char *) malloc(80);
-      cn_loc[1] = (char *) malloc(80);
       sscanf (coordNames, "%s %s", cn_loc[0], cn_loc[1]);
       cnpresent = 1;
     }
@@ -380,7 +381,9 @@ int setDefaultsLUA(int dimCount,
 				     &acs_loc, &acspresent, &aua_loc, &auapresent,
 				     &am_loc, &ampresent, varname, &vnpresent, 
 				     cn_loc, &cnpresent, &localrc,
-				     strlen(filename), strlen(varname), strlen(coordNames));
+				     strlen(filename), strlen(varname), cn_len);
+    free(cn_loc[0]);
+    free(cn_loc[1]);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return grid;
 
