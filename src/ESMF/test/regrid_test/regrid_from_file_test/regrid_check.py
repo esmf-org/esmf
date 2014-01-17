@@ -24,7 +24,7 @@ try:
 except:
     raise ImportError('The ESMF library cannot be found!')
 
-from regrid_from_file_consts import regrid_method_map, file_type_map, pole_method_map
+from regrid_from_file_consts import regrid_method_map, file_type_map, pole_method_map, UNINITVAL, EPSILON
 
 def nc_is_mesh(filename, filetype):
     is_mesh = False
@@ -51,7 +51,7 @@ def create_grid_or_mesh_from_file(filename, filetype, meshname=None, convert_to_
     else:
         print "Creating ESMF.Grid object"
         grid_dims = ESMF.ESMP_ScripInqDims(filename)
-        print filename + " dims are ", grid_dims
+        print filename + " dims are ", grid_dims, "isSphere=", isSphere
         grid_or_mesh = ESMF.Grid(grid_dims, fname=filename, fileTypeFlag=filetype,
                          staggerloc=ESMF.StaggerLoc.CENTER, isSphere=isSphere)
     return grid_or_mesh, is_mesh
@@ -117,17 +117,20 @@ def run_regridding(srcfield, dstfield, regridmethod, unmappedaction,
     # call the regridding functions
     print 'polemethod = ',polemethod
     print 'regridPoleNPnts = ',regridPoleNPnts
+    dstfield.data[...] = UNINITVAL
     regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
                                 regrid_method=regridmethod,
                                 unmapped_action=unmappedaction,
                                 dst_frac_field=dstFracField,
                                 pole_method=polemethod,
                                 regridPoleNPnts=regridPoleNPnts)
-    dstfield = regridSrc2Dst(srcfield, dstfield, zero_region=ESMF.Region.TOTAL)
+    dstfield = regridSrc2Dst(srcfield, dstfield, zero_region=ESMF.Region.SELECT)
+    print 'unmappedaction = ',unmappedaction
+    print 'dstfield=',dstfield
 
     return dstfield
 
-def compare_fields(field1, field2, regridmethod, dstFracField, max_err,
+def compare_fields(field1, field2, regridmethod, dstFracField, dst_mask, max_err,
                    parallel=False):
     '''
     PRECONDITIONS: Two Fields have been created and a comparison of the
@@ -150,15 +153,22 @@ def compare_fields(field1, field2, regridmethod, dstFracField, max_err,
     print 'field1.size=',field1.size
     print 'dstFracField.shape=',dstFracField.shape
     print 'dstFracField.size=',dstFracField.size
+    print 'dst_mask.shape=',dst_mask.shape
+    print 'dst_mask.size=',dst_mask.size
     field1data = np.ravel(field1.data)
     field2data = np.ravel(field2.data)
     dstFracFieldData = np.ravel(dstFracField.data)
+    dst_mask_flat = np.ravel(dst_mask)
     for i in range(field1.size):
         #print "i=",i
         #print "field1 %f, field2 %f" % (field1data[i], field2data[i])
         #print "dstFracField %f" % dstFracFieldData[i]
-        if (regridmethod != ESMF.RegridMethod.CONSERVE or
-            dstFracFieldData[i] >= 0.999):
+        #print "dst_mask %d" % dst_mask_flat[i]
+        if ((field1data[i] != UNINITVAL) and 
+            (abs(field2data[i]) > EPSILON) and
+            (dst_mask_flat[i] == 1) and 
+            (regridmethod != ESMF.RegridMethod.CONSERVE or
+            dstFracFieldData[i] >= 0.999)):
             err = abs(field1data[i] - field2data[i])/abs(field2data[i])
             totalErr += err
         #else:
@@ -283,6 +293,16 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
     dst_coords = np.radians(dst_coords)
     print 'dst_coords.shape=',dst_coords.shape
 
+    # get the destination mask
+    if dst_is_mesh:
+        dst_mask = 1
+    else:
+        #dst_mask = dstgrid.get_grid_mask_from_esmc(ESMF.StaggerLoc.CENTER)
+        dstgrid.link_item_buffer(ESMF.GridItem.MASK, ESMF.StaggerLoc.CENTER)
+        dst_mask = dstgrid.get_item(ESMF.GridItem.MASK, staggerloc=ESMF.StaggerLoc.CENTER)
+    print 'dst_mask.shape = ',dst_mask.shape
+    print 'dst_mask = ', dst_mask
+
     # create Field objects on the Grids
     srcfield = create_field(srcgrid, 'srcfield', regridmethod)
     dstfield = create_field(dstgrid, 'dstfield', regridmethod)
@@ -294,11 +314,11 @@ def regrid_check(src_fname, dst_fname, regrid_method, options, max_err):
     dstfield2 = build_analyticfield(dstfield2, dst_coords)
 
     # run the ESMF regridding
-    dstfield = run_regridding(srcfield, dstfield, regridmethod, unmappedaction, dstFracField, 
+    dstfield = run_regridding(srcfield, dstfield, regridmethod, unmappedaction, dstFracField,
                               polemethod=pole_method, regridPoleNPnts=pole_method_npntavg)
 
     # compare results and output PASS or FAIL
-    correct = compare_fields(dstfield, dstfield2, regridmethod, dstFracField,
+    correct = compare_fields(dstfield, dstfield2, regridmethod, dstFracField, dst_mask,
                              max_err, parallel)
     return correct
 
@@ -333,20 +353,32 @@ if __name__ == '__main__':
     #regrid_method = "conserve"
     #options = "-i --src_type UGRID --dst_type UGRID --src_meshname fvcom_mesh --dst_meshname selfe_mesh"
     #max_err = 0.06
-    #src_fname = "ll2.5deg_grid.nc"
-    #dst_fname = "T42_grid.nc"
-    #regrid_method = "bilinear"
-    #options = "-p none -i"
-    #max_err = 10E-04
+    src_fname = "T42_grid.nc"
+    dst_fname = "ll2.5deg_grid.nc"
+    regrid_method = "bilinear"
+    #regrid_method = "conserve"
+    options = "-p none -i"
+    #options = "-p 4"
+    max_err = 10E-03
     #src_fname = "T42_grid.nc"
     #dst_fname = "ar9v4_100920.nc"
     #regrid_method = "patch"
     #options = "--dst_regional"
     #max_err = 10E-04
-    src_fname = "ne60np4_pentagons_100408.nc"
-    dst_fname = "ne30np4-t2.nc"
-    regrid_method = "bilinear"
-    options = "-i"
-    max_err = 10E-04
+    #src_fname = "ne60np4_pentagons_100408.nc"
+    #dst_fname = "ne30np4-t2.nc"
+    #regrid_method = "bilinear"
+    #options = "-i"
+    #max_err = 10E-04
+    #src_fname = "wr50a_090614.nc"
+    #dst_fname = "ar9v4_100920.nc"
+    #regrid_method = "bilinear"
+    #options = "-r -i"
+    #max_err = 10E-06
+    #src_fname = "T42_grid.nc"
+    #dst_fname = "wr50a_090614.nc"
+    #regrid_method = "bilinear"
+    #options = "--dst_regional"
+    #max_err = 10E-04
     sys.exit(regrid_check(src_fname, dst_fname, regrid_method, options, max_err))
 
