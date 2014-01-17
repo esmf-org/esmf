@@ -2872,7 +2872,6 @@ end function ESMF_MeshCreateFromUnstruct
 
     ! Set the coorsponding NodeUsed(:) value to my PetNo if it is used by the local element 
     ! Also calculate the total number of mesh elements based on elmtNum
-    ! if elmtNum == 3 or 4, no change, if elmtNum > 4, break it into elmtNum-2 triangles
     totalElements = ElemCnt
     totalConnects = 0
     maxNumPoly=0
@@ -2881,12 +2880,8 @@ end function ESMF_MeshCreateFromUnstruct
           do i=1,elmtNum(ElemNo)	
              NodeUsed(elementConn(i,ElemNo))=PetNo
           enddo
-          if (elmtNum(ElemNo) > 4) TotalElements = TotalElements + (elmtNum(ElemNo)-3)
-          if (elmtNum(ElemNo) <= 4) then
-             TotalConnects = TotalConnects+elmtNum(ElemNo)
-          else
-             TotalConnects = TotalConnects+3*(elmtNum(ElemNo)-2)
-          end if
+          TotalConnects = TotalConnects+elmtNum(ElemNo)
+
           if (elmtNum(ElemNo) > maxNumPoly) then
              maxNumPoly=elmtNum(ElemNo)
           endif
@@ -3013,6 +3008,7 @@ end function ESMF_MeshCreateFromUnstruct
        haveMask=.true.
     endif
 
+#if 0
     ! figure out if there are split elements globally
     !! Fake logical allreduce .or. with MAX
     if (totalElements .gt. ElemCnt) then
@@ -3028,6 +3024,9 @@ end function ESMF_MeshCreateFromUnstruct
     else 
        existSplitElems=.false.
     endif
+#endif
+    ! Don't use split elements on this level anymore 
+    existSplitElems=.false.
 
     ! Set split element info
     if (existSplitElems) then    
@@ -3046,6 +3045,7 @@ end function ESMF_MeshCreateFromUnstruct
        ElemMask(:)=1  ! default to nothing masked out
     endif    
 
+ ! XMRKX
     ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
     ! element IDs will be from startElmt to startElmt+ElemCnt-1
     ! The ElemConn() contains the four corner node IDs for each element and it is organized
@@ -3053,35 +3053,6 @@ end function ESMF_MeshCreateFromUnstruct
     ElemNo = 1
     ConnNo = 0
     if (parametricDim .eq. 2) then
-       ! Allocate variables for triangulation
-       allocate(polyCoords(3*maxNumPoly))
-       allocate(polyDblBuf(3*maxNumPoly))
-       allocate(area(maxNumPoly))
-       allocate(polyIntBuf(maxNumPoly))
-       allocate(triInd(3*(maxNumPoly-2)))
-
-       ! Parametric dim=2 and cartSpatialDim=3 
-       ! Means spherical, so calc. cart. coordinates
-       if (cartSpatialDim .eq. 3) then
-          allocate(NodeCoordsCart(cartSpatialDim*localNodes))
-
-          ti=0
-          tk=0
-          do i=1,localNodes
-             call c_esmc_sphdeg_to_cart(NodeCoords1D(ti+1), &
-                                        NodeCoords1D(ti+2),  &
-                                        NodeCoordsCart(tk+1), &
-                                        NodeCoordsCart(tk+2), &
-                                        NodeCoordsCart(tk+3),  &
-                                        localrc)
-             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return    
-
-             ti=ti+2
-             tk=tk+3
-          enddo
-       endif
-
        ! Loop through creating Mesh appropriate elements
        do j = 1, ElemCnt
           if (elmtNum(j)==3) then        
@@ -3107,115 +3078,18 @@ end function ESMF_MeshCreateFromUnstruct
              ElemNo=ElemNo+1
              ConnNo=ConnNo+4
           else
-             ! number of points in poly to triangulate
-             numPoly=elmtNum(j)
-             if (numPoly > maxNumPoly) then
-                call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-                     msg="- File contains polygons with more sides than triangulation is supported for", &
-                     ESMF_CONTEXT, rcToReturn=rc)
-                return
-             endif
-
-             ! Copy points into input list
-             if (cartSpatialDim==2) then
-                ti=0
-                do k=1,numPoly
-                   lni=2*(NodeUsed(elementConn(k,j))-1) ! get the index of the node coords in the local list
-                   polyCoords(ti+1)=NodeCoords1D(lni+1)
-                   polyCoords(ti+2)=NodeCoords1D(lni+2)
-                   ti=ti+2
-                enddo
-             else if (cartSpatialDim==3) then
-                ti=0
-                do k=1,numPoly
-                   lni=3*(NodeUsed(elementConn(k,j))-1) ! get the index of the node coords in the local list
-                   polyCoords(ti+1)=NodeCoordsCart(lni+1)
-                   polyCoords(ti+2)=NodeCoordsCart(lni+2)
-                   polyCoords(ti+3)=NodeCoordsCart(lni+3)
-                   ti=ti+3
-                enddo
-             endif
-
-             ! Checking for other spatialDims above, not here in a loop
-
-             ! call triangulation routine
-             call c_ESMC_triangulate(parametricDim, cartSpatialDim, &
-                  numPoly, polyCoords, polyDblBuf, polyIntBuf, &
-                  triInd, localrc)   
-             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-
-             ! translate triangulation out of output list
-             ti=0
-	     startElemNo = ElemNo
-             do k=1,numPoly-2
-                ElemId(ElemNo)=myStartElmt+ElemNo
-                ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
-                ElemConn (ConnNo+1) = NodeUsed(elementConn(triInd(ti+1)+1,j))
-                ElemConn (ConnNo+2) = NodeUsed(elementConn(triInd(ti+2)+1,j))
-                ElemConn (ConnNo+3) = NodeUsed(elementConn(triInd(ti+3)+1,j))
-                if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
- 	        if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
-                
-                ! Calculate area of sub-triangle
-  	        !if (localAddUserArea) then 
-                   if (cartSpatialDim==2) then
-		     tk=0
-		     do i=1,3
-                       lni=2*(ElemConn(ConnNo+i)-1) ! get the index of the node coords in the local list
-      	               polyCoords(tk+1)=NodeCoords1D(lni+1)
-                       polyCoords(tk+2)=NodeCoords1D(lni+2)
-                       tk=tk+2
-                     enddo
-	           else if (cartSpatialDim==3) then
-                     tk=0
-                     do i=1,3
-                       lni=3*(ElemConn(ConnNo+i)-1) ! get the index of the node coords in the local list
-                       polyCoords(tk+1)=NodeCoordsCart(lni+1)
-                       polyCoords(tk+2)=NodeCoordsCart(lni+2)
-                       polyCoords(tk+3)=NodeCoordsCart(lni+3)
-                       tk=tk+3
-                     enddo
-                   endif
-                   nEdges = 3
-                   call c_ESMC_get_polygon_area(cartSpatialDim, nEdges, polyCoords, area(k), localrc) 
-	           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        	          ESMF_CONTEXT, rcToReturn=rc)) return
-                ! endif
-
-                ! If the area of the subtriangle is 0.0 mask it out
-                if (area(k)==0.0) then
-                   ElemMask(ElemNo)=0
-                endif
-
-                ElemNo=ElemNo+1
-                ConnNo=ConnNo+3
-                ti=ti+3
-             enddo
-             !!! set the area for each splitted triangle
-	     if (localAddUserArea) then
-	        totalarea = 0
-		do k=1,numPoly-2
-	          totalarea = totalarea + area(k)
-                enddo
-                do k=1, numPoly-2
-                  elemArea(startElemNo+k) = elementArea(j)*(area(k)/totalarea)
-                enddo
-              endif
-          end if
-       end do
-
-       ! deallocate cart nodes
-       if (cartSpatialDim .eq. 3) then
-          deallocate(NodeCoordsCart)
-       endif
-
-       ! deallocate after triangulation
-       deallocate(polyCoords)
-       deallocate(polyDblBuf)
-       deallocate(area)
-       deallocate(polyIntBuf)
-       deallocate(triInd)
+             ElemId(ElemNo) = myStartElmt+ElemNo
+             ElemType (ElemNo) = elmtNum(j)
+             do i=1,elmtNum(j)
+                ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
+             end do
+             if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
+	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
+	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
+             ElemNo=ElemNo+1
+             ConnNo=ConnNo+elmtNum(j)
+          endif
+       enddo
     else ! If not parametricDim==2, assuming parmetricDim==3
        do j = 1, ElemCnt
           if (elmtNum(j)==4) then        
