@@ -747,11 +747,16 @@ void FTN_X(c_convertscrip)(
 
   if (*dualflag == 0) {
     // create the output netcdf file
+#ifdef NC_NETCDF4
     status = nc_create(c_outfile, NC_CLOBBER|NC_NETCDF4, &ncid2);
     if (status == NC_ENOTNC) {
       status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
     } 
     if (handle_error(status)) return; // bail out;
+#else
+    status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
+    if (handle_error(status)) return; // bail out;
+#endif
 
     // define the dimensions
     status = nc_def_dim(ncid2, "nodeCount", totalnodes, &vertdimid);
@@ -1037,11 +1042,16 @@ void FTN_X(c_convertscrip)(
   // now write out the dual mesh in a netcdf file
   // create the output netcdf file
 
+#ifdef NC_NETCDF4
   status = nc_create(c_outfile, NC_CLOBBER|NC_NETCDF4, &ncid2);
   if (status == NC_ENOTNC) {
     status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
   }
   if (handle_error(status)) return; // bail out;
+#else
+  status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
+  if (handle_error(status)) return; // bail out;
+#endif
 
   // define the dimensions
   status = nc_def_dim(ncid2, "nodeCount", gsdim, &vertdimid);
