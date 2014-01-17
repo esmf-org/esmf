@@ -189,7 +189,7 @@
     integer                                :: ampresent
     character(len=*)                       :: varname
     integer                                :: vnpresent
-    character(len=*)                       :: coordNames(:)
+    character(len=*)                       :: coordNames(2)
     integer                                :: cnpresent
     integer, intent(out)                   :: rc
   
@@ -205,7 +205,6 @@
     integer :: regDecomp(2)
     
     !print '("Start ESMF_Grid_C.F90 : f_esmf_gridcreatefromfile(",A,", ",I1,"])")', filename, fileTypeFlag
-    !call flush()
 
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
