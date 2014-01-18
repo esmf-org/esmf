@@ -1064,7 +1064,7 @@ int main(int argc, char** argv)
 	  } else {
 	    status = nc_inq_varid(ncid2, "face_y", &varid);
 	    if (status != NC_NOERR) handle_error(status);
-	    status = nc_put_var(ncid2, varid, inbuf);
+	    status = nc_put_var_double(ncid2, varid, inbuf);
 	    if (status != NC_NOERR) handle_error(status);
 	  }
 
@@ -1083,7 +1083,7 @@ int main(int argc, char** argv)
 	  } else {
 	    status = nc_inq_varid(ncid2, "face_x", &varid);
 	    if (status != NC_NOERR) handle_error(status);
-	    status = nc_put_var(ncid2, varid, inbuf);
+	    status = nc_put_var_double(ncid2, varid, inbuf);
 	    if (status != NC_NOERR) handle_error(status);
 	  }
 	  if (doesmf) {
