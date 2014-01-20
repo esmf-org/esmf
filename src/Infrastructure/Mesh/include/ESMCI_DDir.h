@@ -84,8 +84,16 @@ bool operator<(const dentry &rhs) const {
   return origin_lid < rhs.origin_lid; // (not sure why a mesh would have several copies)
 }
 
+#if 0
 bool operator==(const dentry &rhs) const {
-  return (gid == rhs.gid &&
+  return (gid == rhs.gid && 
+          origin_proc == rhs.origin_proc);
+}
+#endif
+
+
+bool operator==(const dentry &rhs) const {
+  return (gid == rhs.gid && origin_lid == rhs.origin_lid &&
           origin_proc == rhs.origin_proc);
 }
 

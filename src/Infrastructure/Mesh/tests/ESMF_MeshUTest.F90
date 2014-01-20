@@ -1215,7 +1215,6 @@ endif
      endif
   endif
 
- ! XMRKX
 
   ! Create node Distgrid
   nodedistgrid=ESMF_DistGridCreate(nodeIds, rc=localrc)
@@ -1311,7 +1310,6 @@ endif
      endif
   endif
 
- ! XMRKX
 
   ! Create element Distgrid
   elemdistgrid=ESMF_DistGridCreate(elemIds, rc=localrc)
@@ -1460,8 +1458,7 @@ endif
   call createTestMeshPH(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_MeshWrite(mesh, filename="meshPH", rc=rc)
-
+  !  call ESMF_MeshWrite(mesh, filename="meshPH", rc=rc)
 
   ! Get rid of Meshs
   call ESMF_MeshDestroy(mesh, rc=localrc)
@@ -1470,6 +1467,85 @@ endif
 
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+
+
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Mesh Create and then Redist with a pentagon and hexagon element"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Test mesh
+  call createTestMeshPH(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_MeshWrite(mesh, filename="meshPH", rc=rc)
+
+  ! Setup lists
+  if (petCount .eq. 1) then  
+      allocate(elemIds(5))
+      elemIds=(/1,2,3,4,5/) 
+
+  else if (petCount .eq. 4) then  
+     if (localPet .eq. 0) then
+        allocate(elemIds(1))
+        elemIds(1)=4
+
+     else if (localPet .eq. 1) then
+        allocate(elemIds(2))
+        elemIds=(/3,5/)
+        
+     else if (localPet .eq. 2) then
+        allocate(elemIds(1))
+        elemIds(1)=2
+        
+     else if (localPet .eq. 3) then
+        allocate(elemIds(1))
+        elemIds(1)=1
+        
+     endif
+  endif
+
+ ! XMRKX
+
+  ! Create element Distgrid
+  elemdistgrid=ESMF_DistGridCreate(elemIds, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Create redisted mesh
+  mesh2=ESMF_MeshCreate(mesh, elementdistgrid=elemdistgrid, rc=localrc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+!  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Make sure elems in elemIds are the same as local elems in mesh2
+   sizeOfList=size(elemIds)
+   call c_esmc_meshcheckelemlist(mesh2%this, sizeOfList, elemIds, &
+                                 localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Deallocate
+  deallocate(elemIds)
+
+
+  ! Get rid of Meshs
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_MeshDestroy(mesh2, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get rid of distgrid
+  call ESMF_DistgridDestroy(elemdistgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
 
   !------------------------------------------------------------------------

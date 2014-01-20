@@ -2784,6 +2784,10 @@ subroutine compactMatrix(inFactorList, inFactorIndexList, &
        return
     endif
 
+   write(*,*) "COMPACTING MATRIX"
+
+
+
    ! Put source indices for each run of destination
    ! indices in sorted order to allow weights with 
    ! the same indices to be merged below. Note
