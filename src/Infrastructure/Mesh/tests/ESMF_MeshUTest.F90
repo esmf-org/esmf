@@ -760,6 +760,7 @@ program ESMF_MeshUTest
 
   ! Create Test mesh
   call createTestMesh1(mesh, rc=localrc)
+!  call createTestMeshPH(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   !! Write mesh for debugging

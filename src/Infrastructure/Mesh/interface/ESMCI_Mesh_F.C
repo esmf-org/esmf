@@ -1772,7 +1772,7 @@ extern "C" void FTN_X(c_esmc_meshserialize)(Mesh **meshpp,
 
 
     // Calc Size
-    int size = 3*sizeof(int)+
+    int size = 5*sizeof(int)+
                ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+
                2*numSets*sizeof(UInt);
 
@@ -1807,6 +1807,10 @@ extern "C" void FTN_X(c_esmc_meshserialize)(Mesh **meshpp,
       for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
         *ip++=fields_present[i];
       }      
+
+      if (mesh.is_split) *ip++ = 1;
+      else *ip++ = 0;
+      *ip++ = mesh.max_non_split_id;
     }
 
 
@@ -1925,6 +1929,11 @@ extern "C" void FTN_X(c_esmc_meshdeserialize)(Mesh **meshpp,
       fields_present[i]=*ip++;
     }      
 
+    // Stuff for split meshes
+    int is_split=*ip++;
+    int max_non_split_id=*ip++; 
+
+
     // convert pointer
     uip=(UInt *)ip;
 
@@ -1959,7 +1968,7 @@ extern "C" void FTN_X(c_esmc_meshdeserialize)(Mesh **meshpp,
       }
 
     // Adjust offset
-      *offset += 3*sizeof(int)+ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+    
+      *offset += 5*sizeof(int)+ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+    
       nvalSetSizes.size()*sizeof(UInt)+nvalSetVals.size()*sizeof(UInt)+
       nvalSetObjSizes.size()*sizeof(UInt)+nvalSetObjVals.size()*sizeof(UInt);
 
@@ -1970,6 +1979,14 @@ extern "C" void FTN_X(c_esmc_meshdeserialize)(Mesh **meshpp,
     // Set dimensions
     meshp->set_spatial_dimension(spatial_dim);
     meshp->set_parametric_dimension(parametric_dim);
+
+    // Stuff for split meshes
+    if (is_split==1) meshp->is_split=true;
+    else  meshp->is_split=false;
+
+    meshp->max_non_split_id=max_non_split_id; 
+
+    //  printf(" is_split=%d mnsi=%d\n",meshp->is_split,meshp->max_non_split_id);
     
 
     // Register fields
@@ -3736,10 +3753,6 @@ extern "C" void FTN_X(c_esmc_meshcreateredistelems)(Mesh **src_meshpp, int *num_
     }
 #endif
     /* XMRKX */
-
-    // TODO: Add all of this to node & elem redist above
-    //       Also remember to put in serialize/deserialize
-
 
       // Free split gids
       if (elem_gids_ws !=NULL) delete [] elem_gids_ws;
