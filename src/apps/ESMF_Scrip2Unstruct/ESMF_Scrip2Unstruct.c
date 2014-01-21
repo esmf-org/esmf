@@ -333,7 +333,8 @@ int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, s
   time_t tloc;
   int dims[2];
   int status, fillvalue;
-  char* strbuf;
+  const char* strbuf;
+  char * strbuf1;
 
 #ifdef ESMF_NETCDF
   // create the output ESMF netcdf file
@@ -363,14 +364,14 @@ int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, s
   dims[1]=vdimid;
   status = nc_def_var(ncid2,"nodeCoords", NC_DOUBLE, 2, dims, &vertexid);
   if (status != NC_NOERR) handle_error(status);
-  strbuf = (char*)"degrees";
+  strbuf = "degrees";
   status = nc_put_att_text(ncid2, vertexid, "units", strlen(strbuf)+1, strbuf);
   if (status != NC_NOERR) handle_error(status);
   dims[0]=celldimid;
   dims[1]=vpcdimid;
   status = nc_def_var(ncid2,"elementConn", NC_INT, 2, dims, &cellid);
   if (status != NC_NOERR) handle_error(status);
-  strbuf = (char*)"Node indices that define the element connectivity";
+  strbuf = "Node indices that define the element connectivity";
   status = nc_put_att_text(ncid2, cellid, "long_name", strlen(strbuf)+1, strbuf);
   if (status != NC_NOERR) handle_error(status);
   fillvalue = -1;
@@ -378,7 +379,7 @@ int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, s
   if (status != NC_NOERR) handle_error(status);
   status = nc_def_var(ncid2,"numElementConn", NC_BYTE, 1, dims, &edgeid);
   if (status != NC_NOERR) handle_error(status);
-  strbuf = (char*)"Number of nodes per element";
+  strbuf = "Number of nodes per element";
   status = nc_put_att_text(ncid2, edgeid, "long_name", strlen(strbuf)+1, strbuf);
   if (status != NC_NOERR) handle_error(status);
   if (!nocenter) {
@@ -386,7 +387,7 @@ int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, s
     dims[1]=vdimid;
     status = nc_def_var(ncid2, "centerCoords", NC_DOUBLE, 2, dims, &ccoordid);
     if (status != NC_NOERR) handle_error(status);
-    strbuf = (char*)"degrees";
+    strbuf = "degrees";
     status = nc_put_att_text(ncid2, ccoordid, "units", strlen(strbuf)+1, strbuf);
     if (status != NC_NOERR) handle_error(status);
   }
@@ -422,20 +423,20 @@ int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, s
   
   // Global Attribute
   if (dualflag == 1) 
-    strbuf = (char*)"unstructured dual mesh";
+    strbuf = "unstructured dual mesh";
   else
-    strbuf = (char*)"unstructured mesh";
+    strbuf = "unstructured mesh";
   status = nc_put_att_text(ncid2, NC_GLOBAL, "gridType", strlen(strbuf), strbuf);
   if (status != NC_NOERR) handle_error(status);
-  strbuf = (char*)"0.9";
+  strbuf = "0.9";
   status = nc_put_att_text(ncid2, NC_GLOBAL, "version", strlen(strbuf), strbuf);
   if (status != NC_NOERR) handle_error(status);
   status = nc_put_att_text(ncid2, NC_GLOBAL, "inputFile", strlen(infilename), infilename);
   if (status != NC_NOERR) handle_error(status);
   time(&tloc);
-  strbuf = ctime(&tloc);
-  strbuf[strlen(strbuf)-1] = '\0';
-  status = nc_put_att_text(ncid2, NC_GLOBAL, "timeGenerated", strlen(strbuf), strbuf);
+  strbuf1 = ctime(&tloc);
+  strbuf1[strlen(strbuf)-1] = '\0';
+  status = nc_put_att_text(ncid2, NC_GLOBAL, "timeGenerated", strlen(strbuf1), strbuf1);
   if (status != NC_NOERR) handle_error(status);
   
   status=nc_close(ncid2);
@@ -453,7 +454,8 @@ int create_ugrid(char* filename, char* infilename, int dualflag, size_t nnodes, 
   int dims[2];
   time_t tloc;
   int status, var;
-  char *strbuf;
+  const char *strbuf;
+  char *strbuf1;
 
 #ifdef ESMF_NETCDF
 #ifdef NC_NETCDF4
@@ -479,20 +481,20 @@ int create_ugrid(char* filename, char* infilename, int dualflag, size_t nnodes, 
   if (status != NC_NOERR) handle_error(status);
 	
   // add attribute
-  strbuf = (char*)"node longitude";
+  strbuf = "node longitude";
   status = nc_put_att_text(ncid2, varid, "standard_name", strlen(strbuf)+1, strbuf);
   if (status != NC_NOERR) handle_error(status);
-  strbuf = (char*) "degrees_east";
+  strbuf =  "degrees_east";
   status = nc_put_att_text(ncid2, varid, "units", strlen(strbuf)+1, strbuf);
   if (status != NC_NOERR) handle_error(status);
   status = nc_def_var(ncid2, "node_y", NC_DOUBLE, 1, &vertdimid, &var);
   if (status != NC_NOERR) handle_error(status);
   
   // add attribute
-  strbuf = (char*)"node latitude";
+  strbuf = "node latitude";
   status = nc_put_att_text(ncid2, var, "standard_name", strlen(strbuf)+1, strbuf);
   if (status != NC_NOERR) handle_error(status);
-  strbuf = (char*) "degrees_north";
+  strbuf =  "degrees_north";
   status = nc_put_att_text(ncid2, var, "units", strlen(strbuf)+1, strbuf);
   if (status != NC_NOERR) handle_error(status);
   
@@ -502,10 +504,10 @@ int create_ugrid(char* filename, char* infilename, int dualflag, size_t nnodes, 
     if (status != NC_NOERR) handle_error(status);
   
     // add attribute
-    strbuf = (char*)"center longitude";
+    strbuf = "center longitude";
     status = nc_put_att_text(ncid2, varid, "standard_name", strlen(strbuf)+1, strbuf);
     if (status != NC_NOERR) handle_error(status);
-    strbuf = (char*)"degrees_east";
+    strbuf = "degrees_east";
     status = nc_put_att_text(ncid2, varid, "units", strlen(strbuf)+1, strbuf);
     if (status != NC_NOERR) handle_error(status);
     
@@ -513,10 +515,10 @@ int create_ugrid(char* filename, char* infilename, int dualflag, size_t nnodes, 
     if (status != NC_NOERR) handle_error(status);
   
     // add attribute
-    strbuf = (char*)"center latitude";
+    strbuf = "center latitude";
     status = nc_put_att_text(ncid2, varid, "standard_name", strlen(strbuf)+1, strbuf);
     if (status != NC_NOERR) handle_error(status);
-    strbuf = (char*)"degrees_north";
+    strbuf = "degrees_north";
     status = nc_put_att_text(ncid2, varid, "units", strlen(strbuf)+1, strbuf);
     if (status != NC_NOERR) handle_error(status);
   }
@@ -529,7 +531,7 @@ int create_ugrid(char* filename, char* infilename, int dualflag, size_t nnodes, 
   if (status != NC_NOERR) handle_error(status);
   
   // add attribute
-  strbuf = (char*)"face_node_connectivity";
+  strbuf = "face_node_connectivity";
   status = nc_put_att_text(ncid2, varid, "standard_name", strlen(strbuf), strbuf);
   if (status != NC_NOERR) handle_error(status);
   var = 1;
@@ -544,7 +546,7 @@ int create_ugrid(char* filename, char* infilename, int dualflag, size_t nnodes, 
   if (status != NC_NOERR) handle_error(status);
   
   // add attributes
-  strbuf = (char*)"mesh_topology";
+  strbuf = "mesh_topology";
   status = nc_put_att_text(ncid2, varid, "standard_name", strlen(strbuf), strbuf);
   if (status != NC_NOERR) handle_error(status);
   status = nc_put_att_text(ncid2, varid, "cf_role", strlen(strbuf), strbuf);
@@ -553,39 +555,39 @@ int create_ugrid(char* filename, char* infilename, int dualflag, size_t nnodes, 
   status = nc_put_att_int(ncid2, varid, "dimension", NC_INT, 1, &var);
   if (status != NC_NOERR) handle_error(status);
   if (nocenter) 
-    strbuf = (char*)"node";
+    strbuf = "node";
   else
-    strbuf = (char*)"face node";
+    strbuf = "face node";
   status = nc_put_att_text(ncid2, varid, "locations", strlen(strbuf), strbuf);
   if (status != NC_NOERR) handle_error(status);
-  strbuf = (char*)"node_x node_y";
+  strbuf = "node_x node_y";
   status = nc_put_att_text(ncid2, varid, "node_coordinates", strlen(strbuf), strbuf);
   if (status != NC_NOERR) handle_error(status);
   if (!nocenter) {
-    strbuf = (char*)"face_x face_y";
+    strbuf = "face_x face_y";
     status = nc_put_att_text(ncid2, varid, "face_coordinates", strlen(strbuf), strbuf);
     if (status != NC_NOERR) handle_error(status);
   }
-  strbuf = (char*)"elementConn";
+  strbuf = "elementConn";
   status = nc_put_att_text(ncid2, varid, "face_node_connectivity", strlen(strbuf), strbuf);
   if (status != NC_NOERR) handle_error(status);
 
   // Global Attribute
   if (dualflag == 1) 
-    strbuf = (char*)"unstructured dual mesh";
+    strbuf = "unstructured dual mesh";
   else
-    strbuf = (char*)"unstructured mesh";
+    strbuf = "unstructured mesh";
   status = nc_put_att_text(ncid2, NC_GLOBAL, "gridType", strlen(strbuf), strbuf);
   if (status != NC_NOERR) handle_error(status);
-  strbuf = (char*)"0.9";
+  strbuf = "0.9";
   status = nc_put_att_text(ncid2, NC_GLOBAL, "version", strlen(strbuf), strbuf);
   if (status != NC_NOERR) handle_error(status);
   status = nc_put_att_text(ncid2, NC_GLOBAL, "inputFile", strlen(infilename), infilename);
   if (status != NC_NOERR) handle_error(status);
   time(&tloc);
-  strbuf = ctime(&tloc);
-  strbuf[strlen(strbuf)-1] = '\0';
-  status = nc_put_att_text(ncid2, NC_GLOBAL, "timeGenerated", strlen(strbuf), strbuf);
+  strbuf1 = ctime(&tloc);
+  strbuf1[strlen(strbuf)-1] = '\0';
+  status = nc_put_att_text(ncid2, NC_GLOBAL, "timeGenerated", strlen(strbuf1), strbuf1);
   if (status != NC_NOERR) handle_error(status);
   
   status=nc_close(ncid2);
