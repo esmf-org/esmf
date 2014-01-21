@@ -2784,9 +2784,10 @@ subroutine compactMatrix(inFactorList, inFactorIndexList, &
        return
     endif
 
+   ! Sort the dstInd first
+   call QSort(inListCount, inFactorIndexList, InFactorList)
+
    write(*,*) "COMPACTING MATRIX"
-
-
 
    ! Put source indices for each run of destination
    ! indices in sorted order to allow weights with 
@@ -2931,6 +2932,60 @@ subroutine hsort_array(ia,ra)
    goto 10
  end subroutine hsort_array
 
+
+recursive subroutine QSort(nA, A, B)
+ 
+! DUMMY ARGUMENTS
+integer, intent(in) :: nA
+integer(ESMF_KIND_I4), intent(inout) :: A(:,:)
+real(ESMF_KIND_R8), intent(inout) :: B(:)
+ 
+! LOCAL VARIABLES
+integer :: left, right
+real(ESMF_KIND_R8) :: random, tempR
+real(ESMF_KIND_I4) :: tempI(2), pivot
+integer :: marker
+ 
+    if (nA > 1) then
+ 
+        call random_number(random)
+	! random pivor (not best performance, but avoids worst-case)
+        pivot = A(2,int(random*real(nA-1))+1)
+        left = 0
+        right = nA + 1
+ 
+        do while (left < right)
+            right = right - 1
+            do while (A(2,right) > pivot)
+                right = right - 1
+            end do
+            left = left + 1
+            do while (A(2,left) < pivot)
+                left = left + 1
+            end do
+            if (left < right) then
+                tempI = A(:,left)
+                A(:,left) = A(:,right)
+                A(:,right) = tempI
+		tempR = B(left)
+		B(left)=B(right)
+		B(right)=tempR                
+            end if
+        end do
+ 
+        if (left == right) then
+            marker = left + 1
+        else
+            marker = left
+        end if
+ 
+        call QSort(marker-1,A(:,:marker-1),B(:marker-1))
+        call QSort(nA-marker+1,A(:,marker:),B(marker:))
+ 
+    end if
+ 
+end subroutine QSort
+ 
 !------------------------------------------------------------------------------
 
 end module ESMF_RegridWeightGenMod
