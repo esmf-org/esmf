@@ -213,16 +213,20 @@ namespace ESMCI {
     } else
       ugub = new ESMCI::InterfaceInt();
 
-    int slen = strlen(name);
-    char * fName = new char[slen];
-    localrc = ESMC_CtoF90string(name, fName, slen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc)) {
-      if (gtfm_created) if (gtfm_created) delete gtfm;
-      if (uglb_created) if (uglb_created) delete uglb;
-      if (ugub_created) if (ugub_created) delete ugub;
-      delete[] fName;
-      return ESMC_NULL_POINTER;
+    char * fName = NULL;
+    int slen = 0;
+    if(name != NULL){
+      slen = strlen(name);
+      fName = new char[slen];
+      localrc = ESMC_CtoF90string(name, fName, slen);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc)) {
+        if (gtfm_created) if (gtfm_created) delete gtfm;
+        if (uglb_created) if (uglb_created) delete uglb;
+        if (ugub_created) if (ugub_created) delete ugub;
+        delete[] fName;
+        return ESMC_NULL_POINTER;
+      }
     }
 
     // prepare the field pointer
@@ -253,14 +257,14 @@ namespace ESMCI {
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
       if (ugub_created) delete ugub;
-      delete[] fName;
+      if(fName) delete[] fName;
       return ESMC_NULL_POINTER;
     }
   
     if (gtfm_created) delete gtfm;
     if (uglb_created) delete uglb;
     if (ugub_created) delete ugub;
-    delete[] fName;
+    if(fName) delete[] fName;
   
     if (rc) *rc = localrc;
   
@@ -344,16 +348,20 @@ namespace ESMCI {
     } else
       ugub = new ESMCI::InterfaceInt();
 
-    int slen = strlen(name);
-    char * fName = new char[slen];
-    localrc = ESMC_CtoF90string(name, fName, slen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc)) {
-      if (gtfm_created) delete gtfm;
-      if (uglb_created) delete uglb;
-      if (ugub_created) delete ugub;
-      delete[] fName;
-      return ESMC_NULL_POINTER;
+    char * fName = NULL;
+    int slen = 0;
+    if(name != NULL){
+      slen = strlen(name);
+      fName = new char[slen];
+      localrc = ESMC_CtoF90string(name, fName, slen);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc)) {
+        if (gtfm_created) delete gtfm;
+        if (uglb_created) delete uglb;
+        if (ugub_created) delete ugub;
+        delete[] fName;
+        return ESMC_NULL_POINTER;
+      }
     }
 
     // prepare the Field pointer
@@ -366,7 +374,7 @@ namespace ESMCI {
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
       if (ugub_created) delete ugub;
-      delete[] fName;
+      if(fName) delete[] fName;
       return ESMC_NULL_POINTER;
     }
   
@@ -384,14 +392,14 @@ namespace ESMCI {
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
       if (ugub_created) delete ugub;
-      delete[] fName;
+      if(fName) delete[] fName;
       return ESMC_NULL_POINTER;
     }
   
+    if(fName) delete[] fName;
     if (gtfm_created) delete gtfm;
     if (uglb_created) delete uglb;
     if (ugub_created) delete ugub;
-    delete[] fName;
   
     if (rc) *rc = localrc;
   
@@ -474,16 +482,20 @@ namespace ESMCI {
     } else
       ugub = new ESMCI::InterfaceInt();
 
-    int slen = strlen(name);
-    char * fName = new char[slen];
-    localrc = ESMC_CtoF90string(name, fName, slen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc)) {
-      delete[] fName;
-      if (gtfm_created) delete gtfm;
-      if (uglb_created) delete uglb;
-      if (ugub_created) delete ugub;
-      return ESMC_NULL_POINTER;
+    char * fName = NULL;
+    int slen = 0;
+    if(name != NULL){
+      slen = strlen(name);
+      fName = new char[slen];
+      localrc = ESMC_CtoF90string(name, fName, slen);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc)) {
+        if (gtfm_created) delete gtfm;
+        if (uglb_created) delete uglb;
+        if (ugub_created) delete ugub;
+        delete[] fName;
+        return ESMC_NULL_POINTER;
+      }
     }
 
     ESMCI::Field * field = NULL;
@@ -492,7 +504,7 @@ namespace ESMCI {
     }catch(...){
       // allocation error
       ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", ESMC_CONTEXT, rc);
-      delete[] fName;
+      if(fName) delete[] fName;
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
       if (ugub_created) delete ugub;
@@ -506,17 +518,17 @@ namespace ESMCI {
       fName, &localrc, slen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) {
-      delete[] fName;
+      if(fName) delete[] fName;
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
       if (ugub_created) delete ugub;
       return ESMC_NULL_POINTER;
     }
   
+    if(fName) delete[] fName;
     if (gtfm_created) delete gtfm;
     if (uglb_created) delete uglb;
     if (ugub_created) delete ugub;
-    delete[] fName;
   
     if (rc) *rc = localrc;
   
@@ -600,16 +612,20 @@ namespace ESMCI {
     } else
       ugub = new ESMCI::InterfaceInt();
 
-    int slen = strlen(name);
-    char * fName = new char[slen];
-    localrc = ESMC_CtoF90string(name, fName, slen);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc)) {
-      delete[] fName;
-      if (gtfm_created) delete gtfm;
-      if (uglb_created) delete uglb;
-      if (ugub_created) delete ugub;
-      return ESMC_NULL_POINTER;
+    char * fName = NULL;
+    int slen = 0;
+    if(name != NULL){
+      slen = strlen(name);
+      fName = new char[slen];
+      localrc = ESMC_CtoF90string(name, fName, slen);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc)) {
+        if (gtfm_created) delete gtfm;
+        if (uglb_created) delete uglb;
+        if (ugub_created) delete ugub;
+        delete[] fName;
+        return ESMC_NULL_POINTER;
+      }
     }
 
     ESMCI::Field * field = NULL;
@@ -618,7 +634,7 @@ namespace ESMCI {
     }catch(...){
       // allocation error
       ESMC_LogDefault.MsgAllocError("for new ESMCI::Field.", ESMC_CONTEXT, rc);
-      delete[] fName;
+      if(fName) delete[] fName;
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
       if (ugub_created) delete ugub;
@@ -632,14 +648,14 @@ namespace ESMCI {
       fName, &localrc, slen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) {
-      delete[] fName;
+      if(fName) delete[] fName;
       if (gtfm_created) delete gtfm;
       if (uglb_created) delete uglb;
       if (ugub_created) delete ugub;
       return ESMC_NULL_POINTER;
     }
   
-    delete[] fName;
+    if(fName) delete[] fName;
     if (gtfm_created) delete gtfm;
     if (uglb_created) delete uglb;
     if (ugub_created) delete ugub;
