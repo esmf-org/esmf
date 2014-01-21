@@ -333,6 +333,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
       rcToReturn=rc)) return
+    call ESMF_FieldRegridRelease(routehandle, rc=status)
+    if (ESMF_LogFoundError(status, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, &
+      rcToReturn=rc)) return
 #endif
 
 #if 0
@@ -354,6 +359,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! compute a SMM from srcArray to dstArray
     call ESMF_ArraySMM(srcArray, dstArray, routehandle, &
       zeroregion=ESMF_REGION_SELECT, rc=status)
+    if (ESMF_LogFoundError(status, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, &
+      rcToReturn=rc)) return
+    call ESMF_ArraySMMRelease(routehandle, rc=status)
     if (ESMF_LogFoundError(status, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
@@ -500,6 +510,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! destroy and deallocate
     call ESMF_ArrayDestroy(srcArray, rc=status)
     call ESMF_ArrayDestroy(dstArray, rc=status)
+    call ESMF_GridDestroy(srcGrid, rc=status)
+    call ESMF_GridDestroy(dstGrid, rc=status)
+    call ESMF_FieldDestroy(srcField, rc=status)
+    call ESMF_FieldDestroy(dstField, rc=status)
     if (ESMF_LogFoundError(status, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
